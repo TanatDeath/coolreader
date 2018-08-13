@@ -2591,7 +2591,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 				break;
 			case DCMD_SHOW_USER_DIC:
-				UserDicDlg dlg = new UserDicDlg(((CoolReader)mActivity));
+				UserDicDlg dlg = new UserDicDlg(((CoolReader)mActivity),0);
 				dlg.show();
 				break;
 			case DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC:
@@ -2601,6 +2601,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						showNewBookmarkDialog(lastSelection, Bookmark.TYPE_USER_DIC);
 					}
 				}
+				break;
+			case DCMD_SHOW_CITATIONS:
+				UserDicDlg dlg2 = new UserDicDlg(((CoolReader)mActivity),1);
+				dlg2.show();
 				break;
 		}
 	}
