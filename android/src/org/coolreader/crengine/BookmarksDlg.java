@@ -218,6 +218,7 @@ public class BookmarksDlg  extends BaseDialog {
 				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 						int position, long arg3) {
 					selectedItem = position;
+					selectedItemLong = position;
 					openContextMenu(BookmarkList.this);
 					return true;
 				}
@@ -325,7 +326,7 @@ public class BookmarksDlg  extends BaseDialog {
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		
+		selectedItem = selectedItemLong;
 		int shortcut = selectedItem; //mList.getSelectedItemPosition();
 		Bookmark bm = mList.getSelectedBookmark();
 		if ( mList.isShortcutMode() ) {
@@ -395,6 +396,7 @@ public class BookmarksDlg  extends BaseDialog {
 	}
 	
 	private int selectedItem;
+	private int selectedItemLong;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
