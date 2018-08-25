@@ -90,6 +90,7 @@ my %ic_actions_list=(
         'icons8_ok.svg' => 'icons8_ok.png',
         'icons8_cancel.svg' => 'icons8_cancel.png',
         'icons8_book_link.svg' => 'icons8_book_link.png',
+        'icons8_book_edit.svg' => 'icons8_book_edit.png',
         'icons8_micro_sd_2.svg' => 'icons8_micro_sd_2.png',
         'icons8_favorite_folder_2.svg' => 'icons8_favorite_folder_2.png',
         'icons8_google_drive_2_plus.svg' => 'icons8_google_drive_2_plus.png',

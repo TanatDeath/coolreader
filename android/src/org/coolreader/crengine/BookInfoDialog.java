@@ -7,6 +7,8 @@ import java.util.Map;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -102,6 +104,16 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 		Button btnShortcut = (Button) view.findViewById(R.id.btn_shortcut);
+
+		int colorGray;
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+		colorGray = a.getColor(0, Color.GRAY);
+		colorGrayC = a.getColor(1, Color.GRAY);
+		btnInfo.setBackgroundColor(colorGrayC);
+		btnShortcut.setBackgroundColor(colorGrayC);
+
 		btnShortcut.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				CoolReader cr = (CoolReader)mCoolReader;
