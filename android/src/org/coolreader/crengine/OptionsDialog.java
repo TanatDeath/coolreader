@@ -225,26 +225,40 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_COPY, 
 			ReaderView.SELECTION_ACTION_DICTIONARY,
 			ReaderView.SELECTION_ACTION_BOOKMARK,
-			ReaderView.SELECTION_ACTION_FIND
-		};
+			ReaderView.SELECTION_ACTION_FIND,
+			ReaderView.SELECTION_ACTION_DICTIONARY_1,
+			ReaderView.SELECTION_ACTION_DICTIONARY_2,
+			ReaderView.SELECTION_ACTION_SEARCH_WEB
+	};
 	int[] mSelectionActionTitles = new int[] {
 			R.string.options_selection_action_toolbar, 
 			R.string.options_selection_action_copy, 
 			R.string.options_selection_action_dictionary, 
 			R.string.options_selection_action_bookmark, 
-			R.string.mi_search, 
+			R.string.mi_search,
+			R.string.options_selection_action_dictionary_1,
+			R.string.options_selection_action_dictionary_2,
+			R.string.mi_search_web,
 		};
 	int[] mMultiSelectionAction = new int[] {
 			ReaderView.SELECTION_ACTION_TOOLBAR,
 			ReaderView.SELECTION_ACTION_COPY, 
 			ReaderView.SELECTION_ACTION_DICTIONARY,
-			ReaderView.SELECTION_ACTION_BOOKMARK
+			ReaderView.SELECTION_ACTION_BOOKMARK,
+			ReaderView.SELECTION_ACTION_FIND,
+			ReaderView.SELECTION_ACTION_DICTIONARY_1,
+			ReaderView.SELECTION_ACTION_DICTIONARY_2,
+			ReaderView.SELECTION_ACTION_SEARCH_WEB
 		};
 	int[] mMultiSelectionActionTitles = new int[] {
 			R.string.options_selection_action_toolbar, 
 			R.string.options_selection_action_copy, 
 			R.string.options_selection_action_dictionary, 
-			R.string.options_selection_action_bookmark, 
+			R.string.options_selection_action_bookmark,
+			R.string.mi_search,
+			R.string.options_selection_action_dictionary_1,
+			R.string.options_selection_action_dictionary_2,
+			R.string.mi_search_web,
 		};
 	int[] mAntialias = new int[] {
 			0, 1, 2
@@ -2526,6 +2540,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
             setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
 		mOptionsControls.add(new ListOption(this, getString(R.string.options_multi_selection_action), PROP_APP_MULTI_SELECTION_ACTION).add(mMultiSelectionAction, mMultiSelectionActionTitles).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_document_selection2, R.drawable.icons8_document_selection2));
+		mOptionsControls.add(new ListOption(this, getString(R.string.options_selection_action_long), PROP_APP_SELECTION_ACTION_LONG).add(mSelectionAction, mSelectionActionTitles).setDefaultValue("0").
+				setIconIdByAttr(R.attr.attr_icons8_document_selection1_long, R.drawable.icons8_document_selection1_long));
 		mOptionsControls.add(new BoolOption(this, getString(R.string.options_selection_keep_selection_after_dictionary), PROP_APP_SELECTION_PERSIST).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_document_selection_lock, R.drawable.icons8_document_selection_lock));
 		

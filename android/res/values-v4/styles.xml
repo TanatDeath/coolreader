@@ -319,6 +319,7 @@
         <item name="attr_icons8_google_translate_user">@drawable/icons8_google_translate_user</item>
         <item name="attr_icons8_open_book">@drawable/icons8_openbook</item>
         <item name="attr_icons8_document_selection1">@drawable/icons8_document_selection1</item>
+        <item name="attr_icons8_document_selection1_long">@drawable/icons8_document_selection1_long</item>
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
@@ -450,6 +451,7 @@
         <item name="attr_icons8_google_translate_user">@drawable/icons8_google_translate_user</item>
         <item name="attr_icons8_open_book">@drawable/icons8_openbook</item>
         <item name="attr_icons8_document_selection1">@drawable/icons8_document_selection1</item>
+        <item name="attr_icons8_document_selection1_long">@drawable/icons8_document_selection1_long</item>
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
@@ -584,6 +586,7 @@
         <item name="attr_icons8_google_translate_user">@drawable/icons8_google_translate_user</item>
         <item name="attr_icons8_open_book">@drawable/icons8_openbook</item>
         <item name="attr_icons8_document_selection1">@drawable/icons8_document_selection1</item>
+        <item name="attr_icons8_document_selection1_long">@drawable/icons8_document_selection1_long</item>
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
@@ -718,6 +721,7 @@
         <item name="attr_icons8_google_translate_user">@drawable/icons8_google_translate_user</item>
         <item name="attr_icons8_open_book">@drawable/icons8_openbook</item>
         <item name="attr_icons8_document_selection1">@drawable/icons8_document_selection1</item>
+        <item name="attr_icons8_document_selection1_long">@drawable/icons8_document_selection1_long</item>
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>

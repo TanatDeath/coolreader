@@ -60,9 +60,9 @@ public class Dictionaries {
 		currentDictionary2 = defaultDictionary();
 	}
 	
-	DictInfo currentDictionary;
-	DictInfo currentDictionary2;
-	DictInfo currentDictionary3;
+	public DictInfo currentDictionary;
+	public DictInfo currentDictionary2;
+	public DictInfo currentDictionary3;
 
 	public static class DictInfo {
 		public final String id; 

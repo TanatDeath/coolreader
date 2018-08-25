@@ -182,6 +182,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnUserDic = (ImageButton)view.findViewById(R.id.rb_user_dic);
 		btnInternalLink = (ImageButton)view.findViewById(R.id.rb_internal_link);
 		btnCitation = (ImageButton)view.findViewById(R.id.rb_citation);
+		ImageButton btnFake = (ImageButton)view.findViewById(R.id.btn_fake);
 		rb_descr = (TextView)view.findViewById(R.id.lbl_rb_descr);
 		tr_descr = (TableRow)view.findViewById(R.id.tr_rb_descr);
 		final TextView posLabel = (TextView)view.findViewById(R.id.lbl_position);
@@ -349,7 +350,7 @@ public class BookmarkEditDialog extends BaseDialog {
 			posEdit.setKeyListener(keyList);
 		}
 		setView( view );
-		btnUserDic.requestFocus();
+		btnFake.requestFocus();
 	}
 
 	@Override

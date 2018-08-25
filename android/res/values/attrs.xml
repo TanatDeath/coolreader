@@ -84,6 +84,7 @@
     <attr name="attr_icons8_google_translate_user" format="reference" />
     <attr name="attr_icons8_open_book" format="reference" />
     <attr name="attr_icons8_document_selection1" format="reference" />
+    <attr name="attr_icons8_document_selection1_long" format="reference" />
     <attr name="attr_icons8_document_selection2" format="reference" />
     <attr name="attr_icons8_document_selection_lock" format="reference" />
     <attr name="attr_icons8_sun" format="reference" />

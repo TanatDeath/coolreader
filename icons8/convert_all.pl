@@ -155,6 +155,7 @@ my %ic_actions_list=(
         'icons8_document_hang_punct.svg' => 'icons8_document_hang_punct.png',
         'icons8_document_hyp_dic.svg' => 'icons8_document_hyp_dic.png',
         'icons8_document_selection1.svg' => 'icons8_document_selection1.png',
+        'icons8_document_selection1_long.svg' => 'icons8_document_selection1_long.png',
         'icons8_document_selection2.svg' => 'icons8_document_selection2.png',
         'icons8_document_selection_lock.svg' => 'icons8_document_selection_lock.png',
         'icons8_double_tap.svg' => 'icons8_double_tap.png',

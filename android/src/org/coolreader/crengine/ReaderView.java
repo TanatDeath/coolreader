@@ -14,13 +14,16 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.coolreader.CoolReader;
+import org.coolreader.Dictionaries;
 import org.coolreader.R;
 import org.coolreader.crengine.Engine.HyphDict;
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
 
+import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -344,6 +347,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private final Engine mEngine;
 
 	public Selection lastSelection;
+	public long lastDuration;
 	private Bookmark hyplinkBookmark;
 
 	private BookInfo mBookInfo;
@@ -599,6 +603,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private int mSelectionAction = SELECTION_ACTION_TOOLBAR;
+	private int mSelectionActionLong = SELECTION_ACTION_TOOLBAR;
 	private int mMultiSelectionAction = SELECTION_ACTION_TOOLBAR;
 	private void onSelectionComplete( Selection sel ) {
 
@@ -609,8 +614,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mActivity.skipFindInDic = false;
 		lastSelection = sel;
 		int iSelectionAction;
-		iSelectionAction = isMultiSelection(sel) ? mMultiSelectionAction : mSelectionAction;
-
+		int iSelectionAction1 = (lastDuration > DOUBLE_CLICK_INTERVAL) ? mSelectionActionLong : mSelectionAction;
+		iSelectionAction = isMultiSelection(sel) ? mMultiSelectionAction : iSelectionAction1;
 		switch ( iSelectionAction ) {
 			case SELECTION_ACTION_TOOLBAR:
 				SelectionToolbarDlg.showDialog(mActivity, ReaderView.this, sel);
@@ -634,6 +639,38 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
 					clearSelection();
 				break;
+			case SELECTION_ACTION_DICTIONARY_1:
+				getActivity().mDictionaries.setAdHocDict(getActivity().mDictionaries.currentDictionary);
+				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
+					if (!bSkipDic)
+						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text));
+				} else {
+					if (
+							((!isMultiSelection(sel))&&(!bSkipDic))
+									||
+									(isMultiSelection(sel))
+							)
+						mActivity.findInDictionary(sel.text);
+				}
+				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
+					clearSelection();
+				break;
+			case SELECTION_ACTION_DICTIONARY_2:
+				getActivity().mDictionaries.setAdHocDict(getActivity().mDictionaries.currentDictionary2);
+				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
+					if (!bSkipDic)
+						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text));
+				} else {
+					if (
+							((!isMultiSelection(sel))&&(!bSkipDic))
+									||
+									(isMultiSelection(sel))
+							)
+						mActivity.findInDictionary(sel.text);
+				}
+				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
+					clearSelection();
+				break;
 			case SELECTION_ACTION_BOOKMARK:
 				clearSelection();
 				showNewBookmarkDialog( sel, Bookmark.TYPE_COMMENT );
@@ -641,6 +678,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case SELECTION_ACTION_FIND:
 				clearSelection();
 				showSearchDialog(sel.text);
+				break;
+			case SELECTION_ACTION_SEARCH_WEB:
+				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+				emailIntent.putExtra(SearchManager.QUERY, sel.text.trim());
+				getActivity().startActivity(emailIntent);
 				break;
 			default:
 				clearSelection();
@@ -1255,6 +1297,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 			if (event.getAction() == MotionEvent.ACTION_UP) {
 				long duration = Utils.timeInterval(firstDown);
+				lastDuration = duration;
 				switch (state) {
 					case STATE_DOWN_1:
 						if ( hiliteTapZoneOnTap ) {
@@ -2907,6 +2950,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			try {
 				int n = Integer.valueOf(value);
 				mMultiSelectionAction = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		} else if ( PROP_APP_SELECTION_ACTION_LONG.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mSelectionActionLong = n;
 			} catch ( Exception e ) {
 				// ignore
 			}

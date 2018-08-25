@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Cool Reader</string>
     <string name="mi_search">Найти</string>
+    <string name="mi_search_web">Найти в интернете</string>
     <string name="mi_exit">Закрыть</string>
     <string name="mi_goto">Перейти</string>
     <string name="mi_bookmarks">Закладки</string>
@@ -182,8 +183,11 @@
     <string name="action_toggle_document_styles">Включить/выключить стили документа</string>
     <string name="options_selection_action_toolbar">Панель инструментов</string>
     <string name="options_selection_action">Действие для выделения</string>
+    <string name="options_selection_action_long">Действие для выделения (длинный тап)</string>
     <string name="options_selection_action_bookmark">Добавить закладку</string>
     <string name="options_selection_action_dictionary">Найти в словаре</string>
+    <string name="options_selection_action_dictionary_1">Найти в словаре 1</string>
+    <string name="options_selection_action_dictionary_2">Найти в словаре 2</string>
     <string name="options_selection_action_copy">Копировать</string>
     <string name="options_app_browser_hide_empty_dirs">Прятать директории без книг</string>
     <string name="dlg_about">О программе</string>

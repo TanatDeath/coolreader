@@ -285,6 +285,7 @@ public class UserDicDlg extends BaseDialog {
 		btnAll = (RadioButton)frame.findViewById(R.id.rb_userdic_all);
 		btnUserDic = (ImageButton)frame.findViewById(R.id.rb_user_dic);
 		btnCitation = (ImageButton)frame.findViewById(R.id.rb_citation);
+		ImageButton btnFake = (ImageButton)frame.findViewById(R.id.btn_fake);
 		rb_descr = (TextView)frame.findViewById(R.id.lbl_rb_descr);
 		tr_descr = (TableRow)frame.findViewById(R.id.tr_rb_descr);
 		if (openPage==0) setChecked(btnUserDic);
@@ -294,7 +295,7 @@ public class UserDicDlg extends BaseDialog {
 		searchButton = (ImageButton) frame.findViewById(R.id.btn_search);
 		selEdit = (EditText) frame.findViewById(R.id.search_text);
 		selEdit.clearFocus();
-		searchButton.requestFocus();
+		btnFake.requestFocus();
 		setFlingHandlers(mList, null, null);
 
 		searchButton.setOnClickListener(new View.OnClickListener() {

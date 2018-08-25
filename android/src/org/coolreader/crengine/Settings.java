@@ -121,6 +121,7 @@ public interface Settings {
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
     public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
+    public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
     public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
     public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
     public static final String PROP_SAVE_POS_TO_GD_TIMEOUT = "app.autosave.reading.pos.timeout";
@@ -166,6 +167,9 @@ public interface Settings {
     public static final int SELECTION_ACTION_DICTIONARY = 2;
     public static final int SELECTION_ACTION_BOOKMARK = 3;
     public static final int SELECTION_ACTION_FIND = 4;
+    public static final int SELECTION_ACTION_DICTIONARY_1 = 5;
+    public static final int SELECTION_ACTION_DICTIONARY_2 = 6;
+    public static final int SELECTION_ACTION_SEARCH_WEB = 7;
     
     // available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     public static final int TAP_ACTION_TYPE_LONGPRESS = 0;
@@ -299,6 +303,8 @@ public interface Settings {
         PROP_APP_DICT_LONGTAP_CHANGE,
         PROP_SAVE_POS_TO_GD_TIMEOUT,
 	    PROP_APP_SELECTION_ACTION,
+        PROP_APP_SELECTION_ACTION_LONG,
+        PROP_APP_MULTI_SELECTION_ACTION,
 	    PROP_APP_SELECTION_PERSIST,
 	    PROP_APP_HIGHLIGHT_BOOKMARKS + "*",
 	    PROP_HIGHLIGHT_SELECTION_COLOR + "*",
