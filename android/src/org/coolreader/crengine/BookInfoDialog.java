@@ -113,6 +113,8 @@ public class BookInfoDialog extends BaseDialog {
 		colorGrayC = a.getColor(1, Color.GRAY);
 		btnInfo.setBackgroundColor(colorGrayC);
 		btnShortcut.setBackgroundColor(colorGrayC);
+		btnInfo.setTextColor(colorGray);
+		btnShortcut.setTextColor(colorGray);
 
 		btnShortcut.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
