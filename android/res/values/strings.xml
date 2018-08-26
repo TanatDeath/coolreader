@@ -3,6 +3,8 @@
     <string name="app_name">Cool Reader</string>
     <string name="mi_search">Search</string>
     <string name="mi_search_web">Search on web</string>
+    <string name="mi_citation">Save citation</string>
+    <string name="mi_user_dic">Save to user dictionary</string>
     <string name="mi_exit">Exit</string>
     <string name="mi_goto">Go to</string>
     <string name="mi_bookmarks">Bookmarks</string>

@@ -228,7 +228,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_FIND,
 			ReaderView.SELECTION_ACTION_DICTIONARY_1,
 			ReaderView.SELECTION_ACTION_DICTIONARY_2,
-			ReaderView.SELECTION_ACTION_SEARCH_WEB
+			ReaderView.SELECTION_ACTION_SEARCH_WEB,
+			ReaderView.SELECTION_ACTION_SEND_TO,
+			ReaderView.SELECTION_ACTION_USER_DIC,
+			ReaderView.SELECTION_ACTION_CITATION
 	};
 	int[] mSelectionActionTitles = new int[] {
 			R.string.options_selection_action_toolbar, 
@@ -239,6 +242,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_selection_action_dictionary_1,
 			R.string.options_selection_action_dictionary_2,
 			R.string.mi_search_web,
+			R.string.options_selection_action_mail,
+			R.string.mi_user_dic,
+			R.string.mi_citation,
 		};
 	int[] mMultiSelectionAction = new int[] {
 			ReaderView.SELECTION_ACTION_TOOLBAR,
@@ -248,7 +254,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_FIND,
 			ReaderView.SELECTION_ACTION_DICTIONARY_1,
 			ReaderView.SELECTION_ACTION_DICTIONARY_2,
-			ReaderView.SELECTION_ACTION_SEARCH_WEB
+			ReaderView.SELECTION_ACTION_SEARCH_WEB,
+			ReaderView.SELECTION_ACTION_SEND_TO,
+			ReaderView.SELECTION_ACTION_USER_DIC,
+			ReaderView.SELECTION_ACTION_CITATION
 		};
 	int[] mMultiSelectionActionTitles = new int[] {
 			R.string.options_selection_action_toolbar, 
@@ -259,6 +268,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_selection_action_dictionary_1,
 			R.string.options_selection_action_dictionary_2,
 			R.string.mi_search_web,
+			R.string.options_selection_action_mail,
+			R.string.mi_user_dic,
+			R.string.mi_citation,
 		};
 	int[] mAntialias = new int[] {
 			0, 1, 2

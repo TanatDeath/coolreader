@@ -170,7 +170,10 @@ public interface Settings {
     public static final int SELECTION_ACTION_DICTIONARY_1 = 5;
     public static final int SELECTION_ACTION_DICTIONARY_2 = 6;
     public static final int SELECTION_ACTION_SEARCH_WEB = 7;
-    
+    public static final int SELECTION_ACTION_SEND_TO = 8;
+    public static final int SELECTION_ACTION_USER_DIC = 9;
+    public static final int SELECTION_ACTION_CITATION = 10;
+
     // available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     public static final int TAP_ACTION_TYPE_LONGPRESS = 0;
     public static final int TAP_ACTION_TYPE_DOUBLE = 1;

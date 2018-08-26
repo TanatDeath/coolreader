@@ -682,7 +682,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case SELECTION_ACTION_SEARCH_WEB:
 				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
 				emailIntent.putExtra(SearchManager.QUERY, sel.text.trim());
-				getActivity().startActivity(emailIntent);
+				mActivity.startActivity(emailIntent);
+				break;
+			case SELECTION_ACTION_SEND_TO:
+				sendQuotationInEmail(sel);
+				break;
+			case SELECTION_ACTION_USER_DIC:
+				showNewBookmarkDialog(sel, Bookmark.TYPE_USER_DIC);
+				break;
+			case SELECTION_ACTION_CITATION:
+				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION);
 				break;
 			default:
 				clearSelection();

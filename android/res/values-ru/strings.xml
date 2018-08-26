@@ -3,6 +3,8 @@
     <string name="app_name">Cool Reader</string>
     <string name="mi_search">Найти</string>
     <string name="mi_search_web">Найти в интернете</string>
+    <string name="mi_citation">Сохранить цитату</string>
+    <string name="mi_user_dic">Сохранить в пользовательский словарь</string>
     <string name="mi_exit">Закрыть</string>
     <string name="mi_goto">Перейти</string>
     <string name="mi_bookmarks">Закладки</string>
