@@ -1721,7 +1721,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				boolean installed = mActivity.isPackageInstalled(dict.packageName);
 				String sAdd = mActivity.getString(R.string.options_app_dictionary_not_installed);
 				if ((dict.internal==1) && (dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
-					installed = mActivity.isPackageInstalled("mobi.goldendict.android");
+					installed = mActivity.isPackageInstalled("mobi.goldendict.android")||
+							mActivity.isPackageInstalled("mobi.goldendict.androie"); // changed package name - 4pda version 2.0.1b7
 					add(dict.id, (installed ? "GoldenDict" : dict.name + " " + sAdd));
 				} else {
 					add(dict.id, dict.name + (installed ? "" : " " + sAdd));

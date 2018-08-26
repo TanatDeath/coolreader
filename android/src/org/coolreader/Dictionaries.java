@@ -145,7 +145,10 @@ public class Dictionaries {
 			for (DictInfo dict : dicts) {
 				dict.setInstalled(act.isPackageInstalled(dict.packageName));
 				if ((dict.internal == 1) && (dict.packageName.equals("com.socialnmobile.colordict")) && (!dict.isInstalled())) {
-					dict.setInstalled(act.isPackageInstalled("mobi.goldendict.android"));
+					dict.setInstalled(
+							act.isPackageInstalled("mobi.goldendict.android")||
+							act.isPackageInstalled("mobi.goldendict.androie") // changed package name - 4pda version 2.0.1b7
+					);
 				}
 			}
 		}
