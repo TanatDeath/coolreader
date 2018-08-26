@@ -492,6 +492,23 @@
     <string name="options_view_toolbar_appear_75_gray">Размер 75%, серые значки</string>
     <string name="options_view_toolbar_appear_50">Размер 50%</string>
     <string name="options_view_toolbar_appear_50_gray">Размер 50%, серые значки</string>
+    <string name="dlg_button_back">Назад</string>
+    <string name="dlg_about_donation_iron">$0.3: Cool Reader пожертвование - железо</string>
+    <string name="dlg_about_donation_vip">$100: Cool Reader пожертвование - VIP</string>
+    <string name="tb_button_find_prev">Найти предыдущий</string>
+    <string name="tb_button_find_close">Закрыть поиск</string>
+    <string name="tb_button_find_next">Найти следующий</string>
+    <string name="options_selection_action_mail">Поделиться</string>
+    <string name="tts_play">Включить / Пауза</string>
+    <string name="tts_back">Назад</string>
+    <string name="tts_forward">Вперед</string>
+    <string name="tts_stop">Стоп</string>
+    <string name="tts_volume">Громкость</string>
+    <string name="tts_rate">Частота</string>
+    <string name="dlg_button_open_book">Открыть книгу</string>
+    <string name="dlg_button_open_folder">Открыть папку</string>
+    <string name="dlg_button_recent_delete">Убрать из списка недавних книг</string>
+    <string name="dlg_button_book_delete">Удалить книгу</string>
     <string name="online_store_login">Вход</string>
     <string name="online_store_username">Имя пользователя:</string>
     <string name="online_store_password">Пароль:</string>
@@ -634,5 +651,10 @@
     <string name="skipped_res">Не перерисовывать книгу на разрешениях</string>
     <string name="search_pages">страницы...</string>
     <string name="btn_shortcut">Создать ярлык книги</string>
+    <string name="tab_options_css">CSS</string>
+    <string name="dlg_about_copyright">© Вадим Лопатин, 1998–2018</string>
+    <string name="dlg_about_contributors_">и участники…</string>
+    <string name="online_store_plugin_name_litres">ЛитРес</string>
+    <string name="online_store_plugin_description_litres">книжный онлайн магазин</string>
 </resources>
 
