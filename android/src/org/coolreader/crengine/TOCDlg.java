@@ -124,12 +124,21 @@ public class TOCDlg extends BaseDialog {
 					buf.append("  ");
 				if ( item.getChildCount()>0 ) {
 					if ( item.getExpanded() ) {
-						expandImageView.setImageResource(R.drawable.cr3_toc_item_expanded);
+						expandImageView.setImageResource(
+								Utils.resolveResourceIdByAttr(activity, R.attr.attr_cr3_toc_item_expanded, R.drawable.cr3_toc_item_expanded)
+								//R.drawable.cr3_toc_item_expanded
+						);
 					} else {
-						expandImageView.setImageResource(R.drawable.cr3_toc_item_collapsed);
+						expandImageView.setImageResource(
+								Utils.resolveResourceIdByAttr(activity, R.attr.attr_cr3_toc_item_collapsed, R.drawable.cr3_toc_item_collapsed)
+								//R.drawable.cr3_toc_item_collapsed
+						);
 					}
 				} else {
-					expandImageView.setImageResource(R.drawable.cr3_toc_item_normal);
+					expandImageView.setImageResource(
+							Utils.resolveResourceIdByAttr(activity, R.attr.attr_cr3_toc_item_normal, R.drawable.cr3_toc_item_normal)
+							//R.drawable.cr3_toc_item_normal
+					);
 				}
 				marginTextView.setText(buf.toString());
 				titleTextView.setText(item.getName());

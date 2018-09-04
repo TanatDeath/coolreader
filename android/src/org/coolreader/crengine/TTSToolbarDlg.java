@@ -166,10 +166,16 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	
 	private void toggleStartStop() {
 		if ( isSpeaking ) {
-			playPauseButton.setImageResource(R.drawable.ic_media_play);
+			playPauseButton.setImageResource(
+					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
+					//R.drawable.ic_media_play
+			);
 			stop();
 		} else {
-			playPauseButton.setImageResource(R.drawable.ic_media_pause);
+			playPauseButton.setImageResource(
+					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
+					//R.drawable.ic_media_pause
+			);
 			start();
 		}
 	}
@@ -191,7 +197,10 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.tts_toolbar, null));
 		playPauseButton = (ImageButton)panel.findViewById(R.id.tts_play_pause);
-		playPauseButton.setImageResource(R.drawable.ic_media_play);
+		playPauseButton.setImageResource(
+				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
+				//R.drawable.ic_media_play
+		);
 		//panel.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		

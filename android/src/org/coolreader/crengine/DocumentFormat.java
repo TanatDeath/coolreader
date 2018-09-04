@@ -1,5 +1,7 @@
 package org.coolreader.crengine;
 
+import android.content.Context;
+
 import org.coolreader.R;
 
 public enum DocumentFormat {
@@ -67,6 +69,29 @@ public enum DocumentFormat {
 	
 	public int getIconResourceId()
 	{
+		return iconResourceId;
+	}
+
+	public int getIconResourceIdThemed(Context ctx)
+	{
+		if (iconResourceId==R.drawable.icons8_file)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_file, R.drawable.icons8_file);
+		if (iconResourceId==R.drawable.icons8_fb2)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_fb2, R.drawable.icons8_fb2);
+		if (iconResourceId==R.drawable.icons8_txt_2)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_txt_2, R.drawable.icons8_txt_2);
+		if (iconResourceId==R.drawable.icons8_doc)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_doc, R.drawable.icons8_doc);
+		if (iconResourceId==R.drawable.icons8_epub_1)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_epub_1, R.drawable.icons8_epub_1);
+		if (iconResourceId==R.drawable.icons8_html_filetype_2)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_html_filetype_2, R.drawable.icons8_html_filetype_2);
+		if (iconResourceId==R.drawable.icons8_mobi)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_mobi, R.drawable.icons8_mobi);
+		if (iconResourceId==R.drawable.icons8_docx)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_docx, R.drawable.icons8_docx);
+		if (iconResourceId==R.drawable.icons8_odt)
+			return Utils.resolveResourceIdByAttr(ctx, R.attr.attr_icons8_odt, R.drawable.icons8_odt);
 		return iconResourceId;
 	}
 	

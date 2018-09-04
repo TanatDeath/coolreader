@@ -1,14 +1,18 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -38,6 +42,10 @@ public class ToastView {
     private static AtomicBoolean showing = new AtomicBoolean(false);
     private static Handler mHandler = new Handler();
     private static PopupWindow window = null;
+    private static int colorGray;
+    private static int colorGrayC;
+    private static int colorIcon;
+    private static BaseActivity mActivity;
 
     private static Runnable handleDismiss = new Runnable() {
         @Override
@@ -50,8 +58,16 @@ public class ToastView {
     };
 
     static int fontSize = 24;
-    public static void showToast(View anchor, String msg, int duration, int textSize) {
-    	mReaderView = anchor;
+    public static void showToast(BaseActivity act, View anchor, String msg, int duration, int textSize) {
+        TypedArray a = act.getTheme().obtainStyledAttributes(new int[]
+                {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+        colorGray = a.getColor(0, Color.GRAY);
+        colorGrayC = a.getColor(1, Color.GRAY);
+        colorIcon = a.getColor(2, Color.GRAY);
+        a.recycle();
+
+        mReaderView = anchor;
+        mActivity = act;
     	fontSize = textSize;
         try {
             queue.put(new Toast(anchor, msg, duration));
@@ -85,11 +101,34 @@ public class ToastView {
         ll.addView(tv);*/
         LayoutInflater inflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         window.setContentView(inflater.inflate(R.layout.custom_toast, null, true));
+        LinearLayout toast_ll = (LinearLayout) window.getContentView().findViewById(R.id.toast_ll);
+        toast_ll.setBackgroundColor(colorGrayC);
         TextView tv = (TextView) window.getContentView().findViewById(R.id.toast);
         tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-        tv.setText(t.msg);
+        String msg = t.msg;
+        if (msg.startsWith("*")) {
+            msg=msg.substring(1);
+            final String msg1 = msg;
+            if (mActivity != null)
+                if (mActivity instanceof CoolReader) {
+                    tv.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            DictsDlg dlg = new DictsDlg((CoolReader) mActivity, ((CoolReader) mActivity).getReaderView(), msg1);
+                            dlg.show();
+                        }
+                    });
+                }
+        }
+        tv.setText(msg);
+
+        tv.setTextColor(colorIcon);
         tv.setGravity(Gravity.CENTER);
-        window.showAtLocation(t.anchor, Gravity.NO_GRAVITY, 0, 0);
+
+        int [] location = new int[2];
+        t.anchor.getLocationOnScreen(location);
+        int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
+        window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+       // window.showAtLocation(t.anchor, Gravity.NO_GRAVITY, 0, 0);
         mHandler.postDelayed(handleDismiss, t.duration == 0 ? 2000 : 3000);
     }
 }

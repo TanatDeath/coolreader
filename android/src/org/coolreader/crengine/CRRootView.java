@@ -198,7 +198,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			cover.setMaxHeight(coverHeight);
 			cover.setMaxWidth(coverWidth);
 			if (item.isRecentDir()) {
-				cover.setImageResource(R.drawable.cr3_button_next);
+				cover.setImageResource(
+						Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_next_drawable, R.drawable.cr3_button_next)
+						//R.drawable.cr3_button_next
+				);
 				if (label != null) {
 					label.setText("More...");
 				}

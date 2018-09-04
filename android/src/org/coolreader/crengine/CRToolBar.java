@@ -41,6 +41,7 @@ public class CRToolBar extends ViewGroup {
 	private ArrayList<ReaderAction> actionsMore = new ArrayList<ReaderAction>();
 	private ArrayList<ReaderAction> iconActions = new ArrayList<ReaderAction>();
 	private boolean showLabels;
+	private boolean ignoreInv;
 	private int buttonHeight;
 	private int buttonWidth;
 	private int itemHeight; // multiline mode, line height 
@@ -62,6 +63,7 @@ public class CRToolBar extends ViewGroup {
 	private int optionAppearance = 0;
 	private float toolbarScale = 1.0f;
 	private boolean grayIcons = false;
+	private boolean invIcons = false;
 
 	private void setPopup(PopupWindow popup, int popupLocation) {
 		this.popup = popup;
@@ -172,7 +174,7 @@ public class CRToolBar extends ViewGroup {
 	}
 	
 	public CRToolBar(BaseActivity context, ArrayList<ReaderAction> actions, boolean multiline, boolean useActionsMore,
-					 boolean ignoreSett) {
+					 boolean ignoreSett, boolean ignoreInv) {
 		super(context);
 		this.activity = context;
 		//this.actions = actions;
@@ -183,6 +185,7 @@ public class CRToolBar extends ViewGroup {
 		this.preferredItemHeight = activity.getPreferredItemHeight(); //context.getPreferredItemHeight();
 		this.inflater = LayoutInflater.from(activity);
 		this.windowDividerHeight = multiline ? 8 : 0;
+		this.ignoreInv = ignoreInv;
 		context.getWindow().getAttributes();
 		if (context.isSmartphone()) {
 			BUTTON_SPACING = 3;
@@ -202,32 +205,44 @@ public class CRToolBar extends ViewGroup {
 			optionAppearance = Integer.valueOf(((CoolReader)activity).getToolbarAppearance());
 			toolbarScale = 1.0f;
 			grayIcons = false;
+			invIcons = false;
 			switch (optionAppearance) {
 				case Settings.VIEWER_TOOLBAR_100:           // 0
 					toolbarScale = 1.0f;
-					grayIcons = false;
 					break;
 				case Settings.VIEWER_TOOLBAR_100_gray:      // 1
 					toolbarScale = 1.0f;
-					grayIcons = false;
+					grayIcons = true;
 					break;
-				case Settings.VIEWER_TOOLBAR_75:            // 2
+				case Settings.VIEWER_TOOLBAR_100_inv:      // 2
+					toolbarScale = 1.0f;
+					invIcons = true;
+					break;
+				case Settings.VIEWER_TOOLBAR_75:            // 3
 					toolbarScale = 0.75f;
-					grayIcons = false;
 					break;
-				case Settings.VIEWER_TOOLBAR_75_gray:       // 3
+				case Settings.VIEWER_TOOLBAR_75_gray:       // 4
 					toolbarScale = 0.75f;
 					grayIcons = true;
 					break;
-				case Settings.VIEWER_TOOLBAR_50:            // 4
-					toolbarScale = 0.5f;
-					grayIcons = false;
+				case Settings.VIEWER_TOOLBAR_75_inv:       // 5
+					toolbarScale = 0.75f;
+					invIcons = true;
 					break;
-				case Settings.VIEWER_TOOLBAR_50_gray:       // 5
+				case Settings.VIEWER_TOOLBAR_50:            // 6
+					toolbarScale = 0.5f;
+					break;
+				case Settings.VIEWER_TOOLBAR_50_gray:       // 7
 					toolbarScale = 0.5f;
 					grayIcons = true;
+					break;
+				case Settings.VIEWER_TOOLBAR_50_inv:       // 8
+					toolbarScale = 0.5f;
+					invIcons = true;
 					break;
 			}
+			grayIcons = false; // there is no sense in grayIcons since new icons
+			if (this.ignoreInv) invIcons = false;
 		}
 		int sz = (int)((float)preferredItemHeight * toolbarScale); //(activity.isSmartphone() ? preferredItemHeight * 6 / 10 - BUTTON_SPACING : preferredItemHeight);
 		buttonWidth = buttonHeight = sz - BUTTON_SPACING;
@@ -315,7 +330,7 @@ public class CRToolBar extends ViewGroup {
 				onOverflowHandler.onOverflowActions(itemsOverflow);
 			else {
 				if (!isMultiline && visibleNonButtonCount == 0) {
-					showPopup(activity, activity.getContentView(), actions, onActionHandler, onOverflowHandler, actions.size(), Settings.VIEWER_TOOLBAR_TOP);
+					showPopup(activity, activity.getContentView(), actionsMore, onActionHandler, onOverflowHandler, actionsMore.size(), Settings.VIEWER_TOOLBAR_TOP);
 				} else {
 					if (allActionsHaveIcon(itemsOverflow)) {
 						if (popup != null)
@@ -342,6 +357,24 @@ public class CRToolBar extends ViewGroup {
 	private void onButtonClick(ReaderAction item) {
 		if (onActionHandler != null)
 			onActionHandler.onActionSelected(item);
+	}
+
+	private Bitmap InverseBitmap(Bitmap src){
+		Bitmap dest = Bitmap.createBitmap(
+				src.getWidth(), src.getHeight(), src.getConfig());
+
+		for(int i = 0; i < src.getWidth(); i++){
+			for(int j = 0; j < src.getHeight(); j++){
+
+				dest.setPixel(i, j, Color.argb(
+						Color.alpha(src.getPixel(i, j)),
+						255 - Color.red(src.getPixel(i, j)),
+						255 - Color.green(src.getPixel(i, j)),
+						255 - Color.blue(src.getPixel(i, j))));
+			}
+		}
+
+		return dest;
 	}
 
 	private void setButtonImageResource(final ReaderAction item, ImageButton ib, int resId) {
@@ -422,9 +455,12 @@ public class CRToolBar extends ViewGroup {
 				paint.setColorFilter(f);
 				c.drawBitmap(bitmap, 0, 0, paint);
 				ib.setImageBitmap(bmpGrayscale);
-			} else {
-				ib.setImageBitmap(bitmap);
-			}
+			} else if (this.invIcons) {
+				ib.setImageBitmap(InverseBitmap(bitmap));
+			} else
+				{
+					ib.setImageBitmap(bitmap);
+				}
 		}
 	}
 	
@@ -742,7 +778,7 @@ public class CRToolBar extends ViewGroup {
 
 	public static PopupWindow showPopup(BaseActivity context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocation) {
 		final ScrollView scroll = new ScrollView(context);
-		final CRToolBar tb = new CRToolBar(context, actions, true, true, true);
+		final CRToolBar tb = new CRToolBar(context, actions, true, true, true, false);
 		tb.setMaxLines(maxLines);
 		tb.setOnActionHandler(onActionHandler);
 		tb.setVertical(false);

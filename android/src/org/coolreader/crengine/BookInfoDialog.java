@@ -107,14 +107,16 @@ public class BookInfoDialog extends BaseDialog {
 
 		int colorGray;
 		int colorGrayC;
+		int colorIcon;
 		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
+		colorIcon = a.getColor(2, Color.GRAY);
 		btnInfo.setBackgroundColor(colorGrayC);
 		btnShortcut.setBackgroundColor(colorGrayC);
-		btnInfo.setTextColor(colorGray);
-		btnShortcut.setTextColor(colorGray);
+		btnInfo.setTextColor(colorIcon);
+		btnShortcut.setTextColor(colorIcon);
 
 		btnShortcut.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {

@@ -100,8 +100,8 @@
       
                 <!-- ImageButton
                     android:id="@+id/btn_settings"
-                    android:src="@drawable/cr3_viewer_settings"
-                    android:background="@drawable/cr3_toolbar_button_background"
+                    android:src="?attr/cr3_viewer_settings_drawable"
+                    android:background="?attr/cr3_toolbar_button_background_drawable"
                     android:layout_gravity="top|right"
                     android:layout_width="?android:attr/listPreferredItemHeight"
                     android:layout_height="?android:attr/listPreferredItemHeight"

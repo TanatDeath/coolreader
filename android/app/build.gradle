@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "org.coolreader"
-        minSdkVersion 16
+        minSdkVersion 14
         targetSdkVersion 26
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
@@ -157,5 +157,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
     implementation 'com.google.android.gms:play-services-identity:15.0.1'
     implementation 'com.google.code.gson:gson:2.8.2'
-    implementation 'com.github.johnpersano:supertoasts:2.0'
+    //implementation 'com.github.johnpersano:supertoasts:2.0'
 }

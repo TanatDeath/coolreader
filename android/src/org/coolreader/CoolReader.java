@@ -48,6 +48,7 @@ import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.TTS;
 import org.coolreader.crengine.TTS.OnTTSCreatedListener;
 import org.coolreader.crengine.UserDicEntry;
+import org.coolreader.crengine.Utils;
 import org.coolreader.db.CRDBService;
 import org.coolreader.donations.CRDonationService;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
@@ -947,7 +948,7 @@ public class CoolReader extends BaseActivity
 			        		ReaderAction.SCAN_DIRECTORY_RECURSIVE,
 							ReaderAction.FILE_BROWSER_SORT_ORDER,
 							ReaderAction.EXIT
-			        		), false, false, true);
+			        		), false, false, true, true);
 			        mBrowserToolBar.setBackgroundResource(R.drawable.ui_status_background_browser_dark);
 			        mBrowserToolBar.setOnActionHandler(new OnActionHandler() {
 						@Override
@@ -1830,10 +1831,16 @@ public class CoolReader extends BaseActivity
 		addIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, item.title);
 
 		addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-					Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.drawable.cr3_browser_book_hc));
+					Intent.ShortcutIconResource.fromContext(getApplicationContext(),
+							Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+					//		R.drawable.cr3_browser_book_hc
+					));
 
 		if (DeviceInfo.getSDKLevel() >= 26) {
-			Icon icon = Icon.createWithResource(getApplicationContext(), R.drawable.cr3_browser_book_hc);
+			Icon icon = Icon.createWithResource(getApplicationContext(),
+					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+					//R.drawable.cr3_browser_book_hc
+			);
 			return addShortCut(this, shortcutIntent, icon, item.title);
 		} else {
 			addIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
@@ -1856,7 +1863,10 @@ public class CoolReader extends BaseActivity
 				ShortcutInfo shortcut1 = new ShortcutInfo.Builder(this, "id_recent")
 						.setShortLabel(this.getString(R.string.mi_book_recent_books))
 						.setLongLabel(this.getString(R.string.mi_book_recent_books))
-						.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.cr3_browser_book_hc))
+						.setIcon(Icon.createWithResource(getApplicationContext(),
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+								//R.drawable.cr3_browser_book_hc
+						))
 						.setIntent(intent)
 						.build();
 
@@ -1868,7 +1878,10 @@ public class CoolReader extends BaseActivity
 				ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, "id_reading")
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_reading))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_reading))
-						.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.cr3_browser_book_hc))
+						.setIcon(Icon.createWithResource(getApplicationContext(),
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+								//R.drawable.cr3_browser_book_hc
+						))
 						.setIntent(intent)
 						.build();
 
@@ -1880,7 +1893,10 @@ public class CoolReader extends BaseActivity
 				ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, "id_to_read")
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_to_read))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_to_read))
-						.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.cr3_browser_book_hc))
+						.setIcon(Icon.createWithResource(getApplicationContext(),
+								//R.drawable.cr3_browser_book_hc
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+						))
 						.setIntent(intent)
 						.build();
 
@@ -1892,7 +1908,10 @@ public class CoolReader extends BaseActivity
 				ShortcutInfo shortcut4 = new ShortcutInfo.Builder(this, "id_finished")
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_finished))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_finished))
-						.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.cr3_browser_book_hc))
+						.setIcon(Icon.createWithResource(getApplicationContext(),
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+						//		R.drawable.cr3_browser_book_hc
+						))
 						.setIntent(intent)
 						.build();
 
@@ -1904,7 +1923,10 @@ public class CoolReader extends BaseActivity
 				ShortcutInfo shortcut5 = new ShortcutInfo.Builder(this, "id_search")
 						.setShortLabel(this.getString(R.string.dlg_book_search))
 						.setLongLabel(this.getString(R.string.dlg_book_search))
-						.setIcon(Icon.createWithResource(getApplicationContext(), R.drawable.cr3_browser_find_hc))
+						.setIcon(Icon.createWithResource(getApplicationContext(),
+								//R.drawable.cr3_browser_find_hc
+								Utils.resolveResourceIdByAttr(this, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search)
+						))
 						.setIntent(intent)
 						.build();
 

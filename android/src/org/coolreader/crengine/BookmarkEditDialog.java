@@ -119,10 +119,13 @@ public class BookmarkEditDialog extends BaseDialog {
 		}
 		int colorGray;
 		int colorGrayC;
+		int colorIcon;
 		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
+		colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
 		rb_descr.setBackgroundColor(colorGrayC);
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnComment.setBackgroundColor(colorGrayC);
@@ -130,8 +133,8 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnUserDic.setBackgroundColor(colorGrayC);
 		btnInternalLink.setBackgroundColor(colorGrayC);
 		btnCitation.setBackgroundColor(colorGrayC);
-		lblSetComment.setTextColor(colorGray);
-		lblBookmarkLink.setTextColor(colorGray);
+		lblSetComment.setTextColor(colorIcon);
+		lblBookmarkLink.setTextColor(colorIcon);
 		btn.setBackgroundColor(colorGray);
 	}
 
@@ -167,7 +170,9 @@ public class BookmarkEditDialog extends BaseDialog {
 		//else
 		//	mBookmark = bookmark;
 		if (!isNew) {
-			setThirdButtonImage(R.drawable.icons8_minus, R.string.mi_bookmark_delete);
+			setThirdButtonImage(
+					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus)
+					, R.string.mi_bookmark_delete);
 		}
 		boolean isComment = bookmark.getType()==Bookmark.TYPE_COMMENT;
 		boolean isCorrection = bookmark.getType()==Bookmark.TYPE_CORRECTION;
@@ -237,7 +242,10 @@ public class BookmarkEditDialog extends BaseDialog {
 		if (!cbtext.trim().equals(""))
 			lblSetComment.setText(activity.getString(R.string.clipb_contents) +" "+cbtext.trim());
 		if (!cbtext.trim().equals("")) {
-			setAddButtonImage(R.drawable.icons8_ok_from_clipboard, R.string.set_comment_from_cb_capt);
+			setAddButtonImage(
+					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_ok_from_clipboard, R.drawable.icons8_ok_from_clipboard),
+					//R.drawable.icons8_ok_from_clipboard,
+					R.string.set_comment_from_cb_capt);
 		}
 		lblSetComment.setOnClickListener(new View.OnClickListener() {
 			@Override

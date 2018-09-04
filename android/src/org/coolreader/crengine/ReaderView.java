@@ -28,6 +28,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -5142,7 +5144,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		dimRect( canvas, dst );
 	}
 
-	protected void drawPageBackground(Canvas canvas, Rect dst, int side) {
+	private void drawDimmedBitmap2( Canvas canvas, Bitmap bmp, Rect src, Rect dst ) {
+		Paint p = new Paint(Color.RED);
+		//ColorFilter filter = new LightingColorFilter(0xFFFFFFFF , 0x00222222); // lighten
+		ColorFilter filter = new LightingColorFilter(0xFFAFAFAF, 0x00111111);    // darken
+		p.setColorFilter(filter);
+		canvas.drawBitmap(bmp, src, dst, p);
+		dimRect( canvas, dst );
+	}
+
+	protected void drawPageBackground(Canvas canvas, Rect dst, int side, boolean addDarken) {
 		Bitmap bmp = currentBackgroundTextureBitmap;
 		if (bmp != null) {
 			int h = bmp.getHeight();
@@ -5160,7 +5171,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							hh = dst.height() - y;
 						Rect d = new Rect(x, y, x + ww, y + hh);
 						Rect s = new Rect(0, 0, ww, hh);
-						drawDimmedBitmap(canvas, bmp, s, d);
+						if (addDarken)
+							drawDimmedBitmap2(canvas, bmp, s, d);
+						else
+							drawDimmedBitmap(canvas, bmp, s, d);
 					}
 				}
 			} else {
@@ -5203,7 +5217,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					}
 					break;
 				}
-				drawDimmedBitmap(canvas, bmp, src, dst);
+				if (addDarken)
+					drawDimmedBitmap2(canvas, bmp, src, dst);
+				else
+					drawDimmedBitmap(canvas, bmp, src, dst);
 			}
 		} else {
 			canvas.drawColor(currentBackgroundColor | 0xFF000000);
@@ -5212,7 +5229,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	protected void drawPageBackground(Canvas canvas) {
 		Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawPageBackground(canvas, dst, VIEWER_TOOLBAR_NONE);
+		drawPageBackground(canvas, dst, VIEWER_TOOLBAR_NONE, false);
 	}
 
 	public class ToolbarBackgroundDrawable extends Drawable {
@@ -5225,7 +5242,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void draw(Canvas canvas) {
 			Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
 			try {
-				drawPageBackground(canvas, dst, location);
+				boolean addDarken = false;
+				if (mActivity instanceof CoolReader) {
+					int optionAppearance = Integer.valueOf(((CoolReader)mActivity).getToolbarAppearance());
+					switch (optionAppearance) {
+						case Settings.VIEWER_TOOLBAR_100_gray:      // 1
+							addDarken = true;
+							break;
+						case Settings.VIEWER_TOOLBAR_75_gray:       // 3
+							addDarken = true;
+							break;
+						case Settings.VIEWER_TOOLBAR_50_gray:       // 5
+							addDarken = true;
+							break;
+					}
+				}
+				drawPageBackground(canvas, dst, location, addDarken);
 			} catch (Exception e) {
 				L.e("Exception in ToolbarBackgroundDrawable.draw", e);
 			}

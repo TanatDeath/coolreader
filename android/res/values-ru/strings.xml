@@ -487,11 +487,14 @@
     <string name="options_view_toolbar_position_right">Справа</string>
     <string name="options_view_toolbar_appearance">Внешний вид панели инструментов</string>
     <string name="options_view_toolbar_appear_100">Размер 100%</string>
-    <string name="options_view_toolbar_appear_100_gray">Размер 100%, серые значки</string>
+    <string name="options_view_toolbar_appear_100_gray">Размер 100%, затемнить</string>
+    <string name="options_view_toolbar_appear_100_inv">Размер 100%, инвертировать иконки</string>
     <string name="options_view_toolbar_appear_75">Размер 75%</string>
-    <string name="options_view_toolbar_appear_75_gray">Размер 75%, серые значки</string>
+    <string name="options_view_toolbar_appear_75_gray">Размер 75%, затемнить</string>
+    <string name="options_view_toolbar_appear_75_inv">Размер 75%, инвертировать иконки</string>
     <string name="options_view_toolbar_appear_50">Размер 50%</string>
-    <string name="options_view_toolbar_appear_50_gray">Размер 50%, серые значки</string>
+    <string name="options_view_toolbar_appear_50_gray">Размер 50%, затемнить</string>
+    <string name="options_view_toolbar_appear_50_inv">Размер 50%, инвертировать иконки</string>
     <string name="dlg_button_back">Назад</string>
     <string name="dlg_about_donation_iron">$0.3: Cool Reader пожертвование - железо</string>
     <string name="dlg_about_donation_vip">$100: Cool Reader пожертвование - VIP</string>
@@ -656,5 +659,9 @@
     <string name="dlg_about_contributors_">и участники…</string>
     <string name="online_store_plugin_name_litres">ЛитРес</string>
     <string name="online_store_plugin_description_litres">книжный онлайн магазин</string>
+    <string name="option_toolbar_buttons_none">Скрыть</string>
+    <string name="option_toolbar_buttons_toolbar">На панели</string>
+    <string name="option_toolbar_buttons_more">Раскрывающаяся панель</string>
+    <string name="option_toolbar_buttons_both">Везде (панель и раскрывающаяся панель)</string>
 </resources>
 

@@ -1,14 +1,53 @@
 #!/usr/bin/perl -w
 
 $TARGET_DIR = "../android/res/";
+$TEMP_DIR = "../icons_temp/";
 
 #                      dpi: 120       160       240        320         480            640
+my %ic_smaller_sizes  = (ldpi=>20, mdpi=>24, hdpi=>32, xhdpi=>48, xxhdpi=>64,  xxxhdpi=>96);
 my %ic_actions_sizes  = (ldpi=>24, mdpi=>32, hdpi=>48, xhdpi=>64, xxhdpi=>96,  xxxhdpi=>128);
 my %ic_menu_sizes     = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
+my %ic_smaller_list=(
+        'icons8_ask_question.svg' => 'icons8_ask_question.png'
+);
+
 my %ic_actions_list=(
+        'icons8_copy.svg' => 'icons8_copy.png',
+	'icons8_share.svg' => 'icons8_share.png',
+	'icons8_camera_key.svg' => 'icons8_camera_key.png',
+	'icons8_camera_key_double.svg' => 'icons8_camera_key_double.png',
+	'icons8_camera_key_long.svg' => 'icons8_camera_key_long.png',
+	'icons8_down_key.svg' => 'icons8_down_key.png',
+	'icons8_down_key_double.svg' => 'icons8_down_key_double.png',
+	'icons8_down_key_long.svg' => 'icons8_down_key_long.png',
+	'icons8_esc_key.svg' => 'icons8_esc_key.png',
+	'icons8_esc_key_double.svg' => 'icons8_esc_key_double.png',
+	'icons8_esc_key_long.svg' => 'icons8_esc_key_long.png',
+	'icons8_headset_key.svg' => 'icons8_headset_key.png',
+	'icons8_headset_key_double.svg' => 'icons8_headset_key_double.png',
+	'icons8_headset_key_long.svg' => 'icons8_headset_key_long.png',
+	'icons8_page_down_key.svg' => 'icons8_page_down_key.png',
+	'icons8_page_down_key_double.svg' => 'icons8_page_down_key_double.png',
+	'icons8_page_down_key_long.svg' => 'icons8_page_down_key_long.png',
+	'icons8_page_up_key.svg' => 'icons8_page_up_key.png',
+	'icons8_page_up_key_double.svg' => 'icons8_page_up_key_double.png',
+	'icons8_page_up_key_long.svg' => 'icons8_page_up_key_long.png',
+	'icons8_search_key.svg' => 'icons8_search_key.png',
+	'icons8_search_key_double.svg' => 'icons8_search_key_double.png',
+	'icons8_search_key_long.svg' => 'icons8_search_key_long.png',
+	'icons8_up_key.svg' => 'icons8_up_key.png',
+	'icons8_up_key_double.svg' => 'icons8_up_key_double.png',
+	'icons8_up_key_long.svg' => 'icons8_up_key_long.png',
+	'icons8_volume_down_key.svg' => 'icons8_volume_down_key.png',
+	'icons8_volume_down_key_double.svg' => 'icons8_volume_down_key_double.png',
+	'icons8_volume_down_key_long.svg' => 'icons8_volume_down_key_long.png',
+	'icons8_volume_up_key.svg' => 'icons8_volume_up_key.png',
+	'icons8_volume_up_key_double.svg' => 'icons8_volume_up_key_double.png',
+	'icons8_volume_up_key_long.svg' => 'icons8_volume_up_key_long.png',
+	'icons8_zip.svg' => 'icons8_zip.png',
         'icons8_me_smb.svg' => 'icons8_me_smb.png',
         'icons8_search_history.svg' => 'icons8_search_history.png',
         'icons8_scissors.svg' => 'icons8_scissors.png',
@@ -108,6 +147,7 @@ my %ic_actions_list=(
         'icons8_touchscreen.svg' => 'icons8_touchscreen.png',
         'icons8_night_landscape_2.svg' => 'icons8_night_landscape_2.png',
         'icons8_drop_down.svg' => 'icons8_drop_down.png',
+	'icons8_drop_down_no_frame.svg' => 'icons8_drop_down_no_frame.png',
         'icons8_more.svg' => 'icons8_more.png',
         'icons8_about.svg' => 'icons8_about.png',
         'icons8_gamma.svg' => 'icons8_gamma.png',
@@ -204,9 +244,103 @@ my $resfile;
 my $cmd;
 my $ret;
 
+sub makeTemp {
+	$src_file = $_[0];
+	$resfile = "${TEMP_DIR}/drk_${src_file}";
+	open(IN, '<'.$src_file) or die $!;
+	open(OUT, '>'.$resfile) or die $!;
+	while(<IN>)
+	{
+	    $_ =~ s/808080/202020/g;
+	    print OUT $_;
+	}
+	close(IN);
+	close(OUT);	
+
+	$resfile = "${TEMP_DIR}/lgt_${src_file}";
+	open(IN, '<'.$src_file) or die $!;
+	open(OUT, '>'.$resfile) or die $!;
+	while(<IN>)
+	{
+	    $_ =~ s/808080/EEEEEE/g;
+	    print OUT $_;
+	}
+	close(IN);
+	close(OUT);	
+
+	$resfile = "${TEMP_DIR}/wdrk_${src_file}";
+	open(IN, '<'.$src_file) or die $!;
+	open(OUT, '>'.$resfile) or die $!;
+	while(<IN>)
+	{
+	    $_ =~ s/808080/65441a/g;
+	    print OUT $_;
+	}
+	close(IN);
+	close(OUT);	
+
+	$resfile = "${TEMP_DIR}/wlgt_${src_file}";
+	open(IN, '<'.$src_file) or die $!;
+	open(OUT, '>'.$resfile) or die $!;
+	while(<IN>)
+	{
+	    $_ =~ s/808080/efdbc2/g;
+	    print OUT $_;
+	}
+	close(IN);
+	close(OUT);
+}
+
+# smaller icons
+while (($srcfile, $dstfile) = each(%ic_smaller_list))
+{
+	makeTemp($srcfile);
+	while (($dpi, $size) = each(%ic_smaller_sizes))
+	{
+		$folder = "${TARGET_DIR}/drawable-${dpi}/";
+		if (-d $folder)
+		{
+			$resfile = "${folder}/${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
+			$resfile = "${folder}/drk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
+			$resfile = "${folder}/lgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
+			$resfile = "${folder}/wdrk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
+			$resfile = "${folder}/wlgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+		}
+	}
+}
+
 # action icons
 while (($srcfile, $dstfile) = each(%ic_actions_list))
 {
+	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_actions_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
@@ -217,6 +351,34 @@ while (($srcfile, $dstfile) = each(%ic_actions_list))
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
+			$resfile = "${folder}/drk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
+			$resfile = "${folder}/lgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
+			$resfile = "${folder}/wdrk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
+			$resfile = "${folder}/wlgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
 		}
 	}
 }
@@ -224,6 +386,7 @@ while (($srcfile, $dstfile) = each(%ic_actions_list))
 # menu icons
 while (($srcfile, $dstfile) = each(%ic_menu_list))
 {
+	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_menu_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
@@ -234,6 +397,34 @@ while (($srcfile, $dstfile) = each(%ic_menu_list))
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
+			$resfile = "${folder}/drk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
+			$resfile = "${folder}/lgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
+			$resfile = "${folder}/wdrk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
+			$resfile = "${folder}/wlgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
 		}
 	}
 }
@@ -241,6 +432,7 @@ while (($srcfile, $dstfile) = each(%ic_menu_list))
 # launcher icons
 while (($srcfile, $dstfile) = each(%ic_launcher_list))
 {
+	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_launcher_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
@@ -251,6 +443,34 @@ while (($srcfile, $dstfile) = each(%ic_launcher_list))
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
+			$resfile = "${folder}/drk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
+			$resfile = "${folder}/lgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
+			$resfile = "${folder}/wdrk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
+			$resfile = "${folder}/wlgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
 		}
 	}
 }
@@ -258,6 +478,7 @@ while (($srcfile, $dstfile) = each(%ic_launcher_list))
 # bigicons
 while (($srcfile, $dstfile) = each(%ic_bigicons_list))
 {
+	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_bigicons_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
@@ -265,6 +486,34 @@ while (($srcfile, $dstfile) = each(%ic_bigicons_list))
 		{
 			$resfile = "${folder}/${dstfile}";
 			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
+			$resfile = "${folder}/drk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
+			$resfile = "${folder}/lgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
+			$resfile = "${folder}/wdrk_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			print "$cmd\n";
+			$ret = system($cmd);
+			print "Failed!\n" if $ret != 0;
+
+			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
+			$resfile = "${folder}/wlgt_${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;

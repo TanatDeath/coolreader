@@ -182,6 +182,7 @@
     <string name="options_app_dictionary">Dictionary</string>
     <string name="options_app_dictionary_not_installed">(not installed)</string>
     <string name="options_app_dictionary2">Dictionary 2</string>
+    <string name="options_app_dictionary2_add_info">Defining two dictionaries allows quickly switch between them when you need to translate word or phrase in more than one dictionary</string>
     <string name="action_zoom_in">Increase font size</string>
     <string name="options_font_kerning">Font kerning</string>
     <string name="action_zoom_out">Decrease font size</string>
@@ -191,6 +192,7 @@
     <string name="options_selection_action_toolbar">Show selection toolbar</string>
     <string name="options_selection_action">Single Selection action</string>
     <string name="options_selection_action_long">Single Selection action (longtap)</string>
+    <string name="options_selection_action_long_add_info">Long double tap is an action, that fires when you doubletapping the word but hold a finger on the second tap more than 400ms.</string>
     <string name="options_multi_selection_action">Multi Selection action</string>
     <string name="options_selection_action_bookmark">Add bookmark</string>
     <string name="options_selection_action_dictionary">Find in dictionary</string>
@@ -496,11 +498,14 @@
     <string name="options_view_toolbar_position_right">Right</string>
     <string name="options_view_toolbar_appearance">Toolbar appearance</string>
     <string name="options_view_toolbar_appear_100">100% size</string>
-    <string name="options_view_toolbar_appear_100_gray">100% size, grayscale</string>
+    <string name="options_view_toolbar_appear_100_gray">100% size, darken</string>
+    <string name="options_view_toolbar_appear_100_inv">100% size, inverted icons</string>
     <string name="options_view_toolbar_appear_75">75% size</string>
-    <string name="options_view_toolbar_appear_75_gray">75% size, grayscale</string>
+    <string name="options_view_toolbar_appear_75_gray">75% size, darken</string>
+    <string name="options_view_toolbar_appear_75_inv">75% size, inverted icons</string>
     <string name="options_view_toolbar_appear_50">50% size</string>
-    <string name="options_view_toolbar_appear_50_gray">50% size, grayscale</string>
+    <string name="options_view_toolbar_appear_50_gray">50% size, darken</string>
+    <string name="options_view_toolbar_appear_50_inv">50% size, inverted icons</string>
     <string name="dlg_button_back">Back</string>
     <string name="dlg_about_donation_iron">$0.3: buy Cool Reader Iron Donation</string>
     <string name="dlg_about_donation_vip">$100: buy Cool Reader VIP Donation</string>
@@ -634,9 +639,11 @@
     <string name="fonts_menu">Fonts menu</string>
     <string name="copied_to_cb">Selection text copied to clipboard</string>
     <string name="options_app_dict_word_correction">Word correction before dictionary</string>
+    <string name="options_app_dict_word_correction_add_info">This option allows you to correct shortened words, before it will be sent to dictionary application, e.g. when you select \"l\'homme\" - it will be transformed to \"homme\", etc.</string>
     <string name="save_bookmark_last_sel">Save bookmark (last selection)</string>
     <string name="save_bookmark_last_sel_user_dic">Save user dictionary entry (last selection)</string>
     <string name="options_app_dict_longtap_change">Toggle dictionary button action - short/long tap</string>
+    <string name="options_app_dict_longtap_change_add_info">There are two different actions on a \'dictionary\' button on \'selection toolbar\' (when you select text while reading) - fired by short and long taps. This option allows to swap them.</string>
     <string name="win_title_user_dic">User dictionary</string>
     <string name="win_title_citations">Citations</string>
     <string name="dlg_userdic_page">Page</string>
@@ -644,6 +651,7 @@
     <string name="dlg_userdic_all">All</string>
     <string name="win_title_confirm_ude_delete">Delete this dictionary entry?</string>
     <string name="options_app_show_user_dic_panel">Show user dictionary panel</string>
+    <string name="options_app_show_user_dic_panel_add_info">User dictionary is a small panel under book page that shows up to 10 words (that were saved before with its translations), containing on the current page</string>
     <string name="dlg_bookmark_info">Use | for unnessary ending, ~ for split variants of the word</string>
     <string name="options_reader_toolbar_buttons">Reader toolbar buttons</string>
     <string name="lbl_find">Find: </string>
@@ -660,4 +668,9 @@
     <string name="skipped_res">Skip redraw at resolutions</string>
     <string name="search_pages">pages...</string>
     <string name="btn_shortcut">Create book shortcut</string>
+    <string name="option_add_info_empty_text"></string>
+    <string name="option_toolbar_buttons_none">None</string>
+    <string name="option_toolbar_buttons_toolbar">Toolbar</string>
+    <string name="option_toolbar_buttons_more">More</string>
+    <string name="option_toolbar_buttons_both">Both (toolbar and more)</string>
 </resources>

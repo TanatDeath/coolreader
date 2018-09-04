@@ -24,7 +24,7 @@
                 android:layout_width="0dip"
                 android:checked="false"
                 android:layout_weight="1"
-                android:src="@drawable/icons8_google_translate_user"
+                android:src="?attr/attr_icons8_google_translate_user"
                 android:contentDescription="@string/dlg_bookmark_user_dic"
                 android:text="@null" />
             <ImageButton
@@ -32,7 +32,7 @@
                 android:layout_width="0dip"
                 android:checked="false"
                 android:layout_weight="1"
-                android:src="@drawable/icons8_quote_2"
+                android:src="?attr/attr_icons8_quote_2"
                 android:contentDescription="@string/dlg_bookmark_citation"
                 android:text="@null" />
         </TableRow>
@@ -48,6 +48,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:singleLine="true"
+                android:textColor="?attr/colorIcon"
                 android:text="_" />
         </TableRow>
     </TableLayout>
@@ -71,7 +72,7 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:layout_weight="1"
-            android:src="@drawable/icons8_search"
+            android:src="?attr/cr3_viewer_find_drawable"
             android:background="@null"
             android:contentDescription="@string/dlg_bookmark_user_dic"
             android:focusable="false"

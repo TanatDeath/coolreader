@@ -29,7 +29,7 @@ public class SearchDlg extends BaseDialog {
 	CheckBox mCaseSensitive;
 	CheckBox mReverse;
 	BookInfo mBookInfo;
-	Button mSearchPages;
+	ImageButton mSearchPages;
 	ArrayList<String> mSearches;
 	private SearchList mList;
 
@@ -160,7 +160,10 @@ public class SearchDlg extends BaseDialog {
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
 		this.mBookInfo = mReaderView.getBookInfo();
-		setPositiveButtonImage(R.drawable.icons8_search, R.string.action_search);
+		setPositiveButtonImage(
+				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),
+				//R.drawable.icons8_search,
+				R.string.action_search);
         mInflater = LayoutInflater.from(getContext());
         mDialogView = mInflater.inflate(R.layout.search_dialog, null);
     	mEditView = (EditText)mDialogView.findViewById(R.id.search_text);
@@ -168,7 +171,7 @@ public class SearchDlg extends BaseDialog {
     		mEditView.setText(initialText);
     	mCaseSensitive = (CheckBox)mDialogView.findViewById(R.id.search_case_sensitive);
     	mReverse = (CheckBox)mDialogView.findViewById(R.id.search_reverse);
-    	mSearchPages = (Button)mDialogView.findViewById(R.id.btn_search_pages);
+    	mSearchPages = (ImageButton)mDialogView.findViewById(R.id.btn_search_pages);
     	mSearchPages.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				final String sText = mEditView.getText().toString().trim();

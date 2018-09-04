@@ -35,6 +35,7 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.support.annotation.RequiresPermission;
 import android.text.ClipboardManager;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
@@ -51,9 +52,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
-import com.github.johnpersano.supertoasts.library.Style;
-import com.github.johnpersano.supertoasts.library.SuperActivityToast;
-import com.github.johnpersano.supertoasts.library.SuperToast;
+//import com.github.johnpersano.supertoasts.library.Style;
+//import com.github.johnpersano.supertoasts.library.SuperActivityToast;
+//import com.github.johnpersano.supertoasts.library.SuperToast;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
@@ -64,7 +65,7 @@ public class BaseActivity extends Activity implements Settings {
 	private CRDBServiceAccessor mCRDBService;
 	protected Dictionaries mDictionaries;
 
-	private volatile SuperActivityToast myToast;
+	//private volatile SuperActivityToast myToast;
 
 	protected void unbindCRDBService() {
 		if (mCRDBService != null) {
@@ -389,11 +390,38 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.cr3_button_go_page_drawable, R.attr.cr3_button_go_percent_drawable, R.attr.cr3_browser_folder_drawable,
 						 R.attr.cr3_button_tts_drawable, R.attr.cr3_browser_folder_recent_drawable, R.attr.cr3_button_scroll_go_drawable,
 						 R.attr.cr3_btn_books_swap_drawable, R.attr.cr3_logo_button_drawable, R.attr.cr3_viewer_exit_drawable,
-						 R.attr.cr3_button_book_open_drawable, R.attr.cr3_browser_folder_current_book_drawable, R.attr.cr3_browser_folder_opds_drawable };
+						 R.attr.cr3_button_book_open_drawable,
+						 R.attr.cr3_browser_folder_current_book_drawable, R.attr.cr3_browser_folder_opds_drawable,
+						 R.attr.attr_icons8_document_1, R.attr.attr_icons8_document_z,
+						 R.attr.attr_icons8_document_down, R.attr.attr_icons8_document_down2,
+						 R.attr.attr_icons8_document_up, R.attr.attr_icons8_document_up2,
+				         R.attr.attr_icons8_document_down_ch, R.attr.attr_icons8_document_up_ch,
+					     R.attr.attr_icons8_menu, R.attr.attr_icons8_lock_portrait_2,
+					     R.attr.attr_icons8_orientation, R.attr.attr_icons8_fullscreen,
+					     R.attr.attr_icons8_touchscreen,
+					     R.attr.attr_icons8_increase_font_2, R.attr.attr_icons8_decrease_font_1,
+					     R.attr.attr_icons8_font_up, R.attr.attr_icons8_font_down,
+						 R.attr.attr_icons8_navigation_toolbar_top,
+					     R.attr.attr_icons8_css_2, R.attr.attr_icons8_info,
+				         R.attr.attr_icons8_position_info, R.attr.attr_icons8_switch_profile,
+						 R.attr.attr_icons8_google_translate, R.attr.attr_icons8_google_translate_user,
+						 R.attr.attr_icons8_manual_2, R.attr.attr_icons8_google_translate_2,
+					     R.attr.attr_icons8_google_translate_switch,
+						 R.attr.attr_icons8_settings_to_gd, R.attr.attr_icons8_settings_from_gd,
+						 R.attr.attr_icons8_position_to_gd, R.attr.attr_icons8_position_from_gd,
+						 R.attr.attr_icons8_bookmarks_to_gd, R.attr.attr_icons8_bookmarks_from_gd,
+				         R.attr.attr_icons8_book_to_gd, R.attr.attr_icons8_book_from_gd,
+						 R.attr.attr_icons8_type_filled_2, R.attr.attr_icons8_google_drive_2,
+						 R.attr.attr_icons8_quote_2, R.attr.attr_icons8_bookmark_plus,
+						 R.attr.attr_icons8_google_translate_save,
+						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting
+
+		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
 		int btnNextDrawableRes = a.getResourceId(1, 0);
-		int viewerTocDrawableRes = a.getResourceId(2, 0);
+		int viewerTocDrawableRes =
+				a.getResourceId(2, 0);
 		int viewerFindDrawableRes = a.getResourceId(3, 0);
 		int viewerSettingDrawableRes = a.getResourceId(4, 0);
 		int btnBookmarksDrawableRes = a.getResourceId(5, 0);
@@ -412,6 +440,52 @@ public class BaseActivity extends Activity implements Settings {
 		int btnBookOpenDrawableRes = a.getResourceId(18, 0);
 		int brFolderCurrBookDrawableRes = a.getResourceId(19, 0);
 		int brFolderOpdsDrawableRes = a.getResourceId(20, 0);
+		int brDocument1DrawableRes = a.getResourceId(21, 0);
+		int brDocumentZDrawableRes = a.getResourceId(22, 0);
+		int brDocumentDownDrawableRes = a.getResourceId(23, 0);
+		int brDocumentDown2DrawableRes = a.getResourceId(24, 0);
+		int brDocumentUpDrawableRes = a.getResourceId(25, 0);
+		int brDocumentUp2DrawableRes = a.getResourceId(26, 0);
+		int brDocumentDownChDrawableRes = a.getResourceId(27, 0);
+		int brDocumentUpChDrawableRes = a.getResourceId(28, 0);
+		int brMenuDrawableRes = a.getResourceId(29, 0);
+		int brLockPortrait2DrawableRes = a.getResourceId(30, 0);
+		int brOrientationDrawableRes = a.getResourceId(31, 0);
+		int brFullscreenDrawableRes = a.getResourceId(32, 0);
+		int brTouchscreenDrawableRes = a.getResourceId(33, 0);
+		int brIncreaseFont2DrawableRes = a.getResourceId(34, 0);
+		int brDecreaseFont1DrawableRes = a.getResourceId(35, 0);
+		int brFontUpDrawableRes = a.getResourceId(36, 0);
+		int brFontDownDrawableRes = a.getResourceId(37, 0);
+        int brNavigationToolbarTopDrawableRes = a.getResourceId(38, 0);
+		int brCss2DrawableRes = a.getResourceId(39, 0);
+		int brInfoDrawableRes = a.getResourceId(40, 0);
+		int brPositionInfoDrawableRes = a.getResourceId(41, 0);
+		int brSwitchProfileDrawableRes = a.getResourceId(42, 0);
+		int brGoogleTranslateDrawableRes = a.getResourceId(43, 0);
+		int brGoogleTranslateUserDrawableRes = a.getResourceId(44, 0);
+		int brManualDrawableRes = a.getResourceId(45, 0);
+		int brGoogleTranslate2DrawableRes = a.getResourceId(46, 0);
+		int brGoogleTranslateSwitchDrawableRes = a.getResourceId(47, 0);
+		int brSettingsToGdDrawableRes = a.getResourceId(48, 0);
+		int brSettingsFromGdDrawableRes = a.getResourceId(49, 0);
+
+		int brPositionToGdDrawableRes = a.getResourceId(50, 0);
+		int brPositionFromGdDrawableRes = a.getResourceId(51, 0);
+		int brBookmarksToGdDrawableRes = a.getResourceId(52, 0);
+		int brBookmarksFromGdDrawableRes = a.getResourceId(53, 0);
+		int brBookToGdDrawableRes = a.getResourceId(54, 0);
+		int brBookFromGdDrawableRes = a.getResourceId(55, 0);
+
+		int brTypeFilled2DrawableRes = a.getResourceId(56, 0);
+		int brGoogleDrive2DrawableRes = a.getResourceId(57, 0);
+		int brQuote2DrawableRes = a.getResourceId(58, 0);
+		int brBookmarkPlusDrawableRes = a.getResourceId(59, 0);
+		int brGoogleTranslateSaveDrawableRes = a.getResourceId(60, 0);
+
+		int brFolderScan  = a.getResourceId(61, 0);
+		int brAlphabeticalSorting  = a.getResourceId(62, 0);
+
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
 			ReaderAction.GO_BACK.setIconId(btnPrevDrawableRes);
@@ -457,6 +531,90 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.CURRENT_BOOK_DIRECTORY.setIconId(brFolderCurrBookDrawableRes);
 		if (brFolderOpdsDrawableRes != 0)
 			ReaderAction.OPDS_CATALOGS.setIconId(brFolderOpdsDrawableRes);
+		if (brDocument1DrawableRes != 0)
+			ReaderAction.FIRST_PAGE.setIconId(brDocument1DrawableRes);
+		if (brDocumentZDrawableRes != 0)
+			ReaderAction.LAST_PAGE.setIconId(brDocumentZDrawableRes);
+		if (brDocumentDownDrawableRes != 0)
+			ReaderAction.PAGE_DOWN.setIconId(brDocumentDownDrawableRes);
+		if (brDocumentDown2DrawableRes != 0)
+			ReaderAction.PAGE_DOWN_10.setIconId(brDocumentDown2DrawableRes);
+		if (brDocumentUpDrawableRes != 0)
+			ReaderAction.PAGE_UP.setIconId(brDocumentUpDrawableRes);
+		if (brDocumentUp2DrawableRes != 0)
+			ReaderAction.PAGE_UP_10.setIconId(brDocumentUp2DrawableRes);
+		if (brDocumentDownChDrawableRes != 0)
+			ReaderAction.NEXT_CHAPTER.setIconId(brDocumentDownChDrawableRes);
+		if (brDocumentUpChDrawableRes != 0)
+			ReaderAction.PREV_CHAPTER.setIconId(brDocumentUpChDrawableRes);
+		if (brMenuDrawableRes!= 0)
+			ReaderAction.READER_MENU.setIconId(brMenuDrawableRes);
+		if (brLockPortrait2DrawableRes!= 0)
+			ReaderAction.TOGGLE_TOUCH_SCREEN_LOCK.setIconId(brLockPortrait2DrawableRes);
+		if (brOrientationDrawableRes!= 0)
+			ReaderAction.TOGGLE_ORIENTATION.setIconId(brOrientationDrawableRes);
+		if (brFullscreenDrawableRes!= 0)
+			ReaderAction.TOGGLE_FULLSCREEN.setIconId(brFullscreenDrawableRes);
+		if (brTouchscreenDrawableRes!= 0)
+			ReaderAction.HOME_SCREEN.setIconId(brTouchscreenDrawableRes);
+		if (brIncreaseFont2DrawableRes!= 0)
+			ReaderAction.ZOOM_IN.setIconId(brIncreaseFont2DrawableRes);
+		if (brDecreaseFont1DrawableRes!= 0)
+			ReaderAction.ZOOM_OUT.setIconId(brDecreaseFont1DrawableRes);
+		if (brFontUpDrawableRes!= 0)
+			ReaderAction.FONT_PREVIOUS.setIconId(brFontUpDrawableRes);
+		if (brFontDownDrawableRes!= 0)
+			ReaderAction.FONT_NEXT.setIconId(brFontDownDrawableRes);
+		if (brNavigationToolbarTopDrawableRes != 0)
+			ReaderAction.TOGGLE_TITLEBAR.setIconId(brNavigationToolbarTopDrawableRes);
+		if (brCss2DrawableRes!= 0)
+			ReaderAction.DOCUMENT_STYLES.setIconId(brCss2DrawableRes);
+		if (brInfoDrawableRes!= 0)
+			ReaderAction.BOOK_INFO.setIconId(brInfoDrawableRes);
+		if (brPositionInfoDrawableRes!= 0)
+			ReaderAction.SHOW_POSITION_INFO_POPUP.setIconId(brPositionInfoDrawableRes);
+		if (brSwitchProfileDrawableRes!= 0)
+			ReaderAction.SWITCH_PROFILE.setIconId(brSwitchProfileDrawableRes);
+		if (brGoogleTranslateDrawableRes != 0)
+			ReaderAction.SHOW_DICTIONARY.setIconId(brGoogleTranslateDrawableRes);
+		if (brGoogleTranslateUserDrawableRes != 0)
+			ReaderAction.SHOW_USER_DIC.setIconId(brGoogleTranslateUserDrawableRes);
+		if (brManualDrawableRes !=0)
+			ReaderAction.USER_MANUAL.setIconId(brManualDrawableRes);
+		if (brGoogleTranslate2DrawableRes != 0)
+			ReaderAction.TOGGLE_DICT_ONCE.setIconId(brGoogleTranslate2DrawableRes);
+		if (brGoogleTranslateSwitchDrawableRes!=0)
+			ReaderAction.TOGGLE_DICT.setIconId(brGoogleTranslateSwitchDrawableRes);
+		if (brSettingsToGdDrawableRes!=0)
+			ReaderAction.SAVE_SETTINGS_TO_GD.setIconId(brSettingsToGdDrawableRes);
+		if (brSettingsFromGdDrawableRes!=0)
+			ReaderAction.LOAD_SETTINGS_FROM_GD.setIconId(brSettingsFromGdDrawableRes);
+		if (brPositionToGdDrawableRes!=0)
+			ReaderAction.SAVE_READING_POS.setIconId(brPositionToGdDrawableRes);
+		if (brPositionFromGdDrawableRes!=0)
+			ReaderAction.LOAD_READING_POS.setIconId(brPositionFromGdDrawableRes);
+		if (brBookmarksToGdDrawableRes!=0)
+			ReaderAction.SAVE_BOOKMARKS.setIconId(brBookmarksToGdDrawableRes);
+		if (brBookmarksFromGdDrawableRes!=0)
+			ReaderAction.LOAD_BOOKMARKS.setIconId(brBookmarksFromGdDrawableRes);
+		if (brBookToGdDrawableRes!=0)
+			ReaderAction.SAVE_CURRENT_BOOK_TO_GD.setIconId(brBookToGdDrawableRes);
+		if (brBookFromGdDrawableRes!=0)
+			ReaderAction.OPEN_BOOK_FROM_GD.setIconId(brBookFromGdDrawableRes);
+		if (brTypeFilled2DrawableRes!=0)
+			ReaderAction.FONTS_MENU.setIconId(brTypeFilled2DrawableRes);
+		if (brGoogleDrive2DrawableRes!=0)
+			ReaderAction.GD_MENU.setIconId(brGoogleDrive2DrawableRes);
+		if (brQuote2DrawableRes!=0)
+			ReaderAction.SHOW_CITATIONS.setIconId(brQuote2DrawableRes);
+		if (brBookmarkPlusDrawableRes!=0)
+			ReaderAction.SAVE_BOOKMARK_LAST_SEL.setIconId(brBookmarkPlusDrawableRes);
+		if (brGoogleTranslateSaveDrawableRes!=0)
+			ReaderAction.SAVE_BOOKMARK_LAST_SEL_USER_DIC.setIconId(brGoogleTranslateSaveDrawableRes);
+		if (brFolderScan!=0)
+			ReaderAction.SCAN_DIRECTORY_RECURSIVE.setIconId(brFolderScan);
+		if (brAlphabeticalSorting!=0)
+			ReaderAction.FILE_BROWSER_SORT_ORDER.setIconId(brAlphabeticalSorting);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1070,7 +1228,7 @@ public class BaseActivity extends Activity implements Settings {
 	public void showToast(String msg, int duration) {
 		log.v("showing toast: " + msg);
 		if (DeviceInfo.USE_CUSTOM_TOAST) {
-			ToastView.showToast(getContentView(), msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
+			ToastView.showToast(this, getContentView(), msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
 		} else {
 			// classic Toast
 			Toast toast = Toast.makeText(this, msg, duration);
@@ -1078,34 +1236,63 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
-	public void hideSToast() {
-		final SuperActivityToast toast = myToast;
-		if (toast != null && toast.isShowing()) {
-			myToast = null;
-			runOnUiThread(new Runnable() {
-				public void run() {
-					toast.dismiss();
-				}
-			});
+	public void showToast(String msg, int duration, View view, boolean forceCustom, int textSize) {
+		log.v("showing toast: " + msg);
+		View view1 = view;
+		if (view1 == null) view1 = getContentView();
+		int textSize1 = textSize;
+		if (textSize == 0) textSize1 = 16; //settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+			//	settings().getInt(ReaderView.PROP_FONT_SIZE, 20);
+		if (DeviceInfo.USE_CUSTOM_TOAST || forceCustom) {
+			ToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, textSize1);
+		} else {
+			// classic Toast
+			Toast toast = Toast.makeText(this, msg, duration);
+			toast.show();
 		}
 	}
 
-	public void showSToast(final SuperActivityToast toast) {
-		hideSToast();
-		myToast = toast;
-		runOnUiThread(new Runnable() {
-			public void run() {
-				toast.show();
-			}
-		});
-	}
+//	public void hideSToast() {
+//		final SuperActivityToast toast = myToast;
+//		if (toast != null && toast.isShowing()) {
+//			myToast = null;
+//			runOnUiThread(new Runnable() {
+//				public void run() {
+//					toast.dismiss();
+//				}
+//			});
+//		}
+//	}
+//
+//	public void showSToast(final SuperActivityToast toast) {
+//		hideSToast();
+//		myToast = toast;
+//		runOnUiThread(new Runnable() {
+//			public void run() {
+//				toast.show();
+//			}
+//		});
+//	}
+//
+//	public void showSToast(String msg) {
+//		final SuperActivityToast toast;
+//		toast = new SuperActivityToast(this, Style.blueGrey(), Style.TYPE_STANDARD);
+//		toast.setFrame(Style.FRAME_STANDARD);
+//		toast.setText(msg);
+//		this.showSToast(toast);
+//	}
 
 	public void showSToast(String msg) {
-		final SuperActivityToast toast;
-		toast = new SuperActivityToast(this, Style.blueGrey(), Style.TYPE_STANDARD);
-		toast.setFrame(Style.FRAME_STANDARD);
-		toast.setText(msg);
-		this.showSToast(toast);
+		boolean bShown = false;
+		if (this instanceof CoolReader)
+			if (((CoolReader) this).getReaderView()!=null)
+				if (((CoolReader) this).getReaderView().getSurface()!=null) {
+					bShown = true;
+					showToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), true, 0);
+				}
+		if (!bShown) {
+			showToast(msg);
+		}
 	}
 
 	protected View contentView;

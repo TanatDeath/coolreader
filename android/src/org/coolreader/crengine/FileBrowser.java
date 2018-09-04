@@ -610,6 +610,17 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo.SortOrder.TIMESTAMP.name(),	
 			FileInfo.SortOrder.TIMESTAMP_DESC.name(),	
 		};
+		int[] optionAddInfos = {
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
+		};
 		OptionsDialog.ListOption dlg = new OptionsDialog.ListOption(
 			new OptionOwner() {
 				public BaseActivity getActivity() { return mActivity; }
@@ -617,7 +628,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				public LayoutInflater getInflater() { return mInflater; }
 			}, 
 			mActivity.getString(R.string.mi_book_sort_order), 
-			ReaderView.PROP_APP_BOOK_SORT_ORDER).add(optionValues, optionLabels); 
+			ReaderView.PROP_APP_BOOK_SORT_ORDER,
+				mActivity.getString(R.string.option_add_info_empty_text)).add(optionValues, optionLabels, optionAddInfos);
 		dlg.setOnChangeHandler(new Runnable() {
 			public void run() {
 				final String newValue = properties.getProperty(ReaderView.PROP_APP_BOOK_SORT_ORDER);
@@ -1159,7 +1171,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					boolean isSimple = (viewType == VIEW_TYPE_FILE_SIMPLE);
 					if ( image!=null ) {
 						if ( isSimple ) {
-							image.setImageResource(item.format.getIconResourceId());
+							image.setImageResource(
+									//item.format.getIconResourceId()
+									item.format.getIconResourceIdThemed(mActivity)
+							);
 						} else {
 							if (coverPagesEnabled) {
 								image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));

@@ -17,6 +17,7 @@
 			android:layout_margin="5dip"
 			android:maxLines="3"
 			android:singleLine="false"
+			android:textColor="?attr/colorIcon"
 			android:text="Page 34/1024 (25%) Chapter 1" />
 
 		<TableLayout
@@ -34,7 +35,7 @@
 					android:layout_width="0dip"
 					android:checked="true"
 					android:layout_weight="1"
-					android:src="@drawable/icons8_bookmark_simple"
+					android:src="?attr/attr_icons8_bookmark_simple"
 					android:contentDescription="@string/dlg_bookmark_type_comment"
 					android:text="@null" />
 				<ImageButton
@@ -42,7 +43,7 @@
 					android:layout_width="0dip"
 					android:checked="false"
 					android:layout_weight="1"
-					android:src="@drawable/icons8_edit_row_2"
+					android:src="?attr/attr_icons8_edit_row_2"
 					android:contentDescription="@string/dlg_bookmark_type_correction"
 					android:text="@null" />
 				<ImageButton
@@ -50,7 +51,7 @@
 					android:layout_width="0dip"
 					android:checked="false"
 					android:layout_weight="1"
-					android:src="@drawable/icons8_bookmark_link"
+					android:src="?attr/attr_icons8_bookmark_link"
 					android:contentDescription="@string/dlg_bookmark_internal_link"
 					android:text="@null" />
 				<ImageButton
@@ -58,7 +59,7 @@
 					android:layout_width="0dip"
 					android:checked="false"
 					android:layout_weight="1"
-					android:src="@drawable/icons8_google_translate_user"
+					android:src="?attr/attr_icons8_google_translate_user"
 					android:contentDescription="@string/dlg_bookmark_user_dic"
 					android:text="@null" />
 				<ImageButton
@@ -66,7 +67,7 @@
 					android:layout_width="0dip"
 					android:checked="false"
 					android:layout_weight="1"
-					android:src="@drawable/icons8_quote_2"
+					android:src="?attr/attr_icons8_quote_2"
 					android:contentDescription="@string/dlg_bookmark_citation"
 					android:text="@null" />
 			</TableRow>
@@ -82,6 +83,7 @@
 					android:layout_height="wrap_content"
 					android:maxLines="1"
 					android:singleLine="true"
+					android:textColor="?attr/colorIcon"
 					android:text="_" />
 			</TableRow>
 		</TableLayout>
@@ -112,6 +114,7 @@
 			android:layout_height="wrap_content"
 			android:maxLines="3"
 			android:singleLine="false"
+			android:textColor="?attr/colorIcon"
 			android:text="@string/dlg_bookmark_edit_range_text" />
 
 		<EditText
@@ -131,6 +134,7 @@
 			android:maxLines="3"
 			android:clickable="true"
 			android:singleLine="false"
+			android:textColor="?attr/colorIcon"
 			android:text="@string/dlg_bookmark_edit_comment" />
 
 		<EditText
@@ -155,6 +159,7 @@
 			android:layout_marginBottom="3dip"
 			android:layout_marginLeft="2dip"
 			android:layout_marginRight="2dip"
+			android:textColor="?attr/colorIcon"
 			android:text="@string/set_comment_from_cb" />
 		<TextView
 			android:id="@+id/lbl_bookmark_link"
@@ -170,6 +175,7 @@
 			android:layout_marginBottom="3dip"
 			android:layout_marginLeft="2dip"
 			android:layout_marginRight="2dip"
+			android:textColor="?attr/colorIcon"
 			android:text="@string/dlg_bookmark_link" />
 	</LinearLayout>
 </ScrollView>

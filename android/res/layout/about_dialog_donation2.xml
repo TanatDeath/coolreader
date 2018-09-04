@@ -31,7 +31,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
-                    android:src="@drawable/cr3_coin_iron" />
+                    android:src="?attr/attr_cr3_coin_iron" />
 
                 <Button
                     android:id="@+id/btn_about_donation_install_iron"
@@ -49,7 +49,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
-                    android:src="@drawable/cr3_coin_bronze" />
+                    android:src="?attr/attr_cr3_coin_bronze" />
 
                 <Button
                     android:id="@+id/btn_about_donation_install_bronze"
@@ -70,7 +70,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
-                    android:src="@drawable/cr3_coin_silver" />
+                    android:src="?attr/attr_cr3_coin_silver" />
 
                 <Button
                     android:id="@+id/btn_about_donation_install_silver"
@@ -88,7 +88,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
-                    android:src="@drawable/cr3_coin_gold" />
+                    android:src="?attr/attr_cr3_coin_gold" />
 
                 <Button
                     android:id="@+id/btn_about_donation_install_gold"
@@ -109,7 +109,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
-                    android:src="@drawable/cr3_coin_platinum" />
+                    android:src="?attr/attr_cr3_coin_platinum" />
 
                 <Button
                     android:id="@+id/btn_about_donation_install_platinum"
@@ -128,7 +128,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
-                    android:src="@drawable/cr3_coin_vip" />
+                    android:src="?attr/attr_cr3_coin_vip" />
 
                 <Button
                     android:id="@+id/btn_about_donation_install_vip"

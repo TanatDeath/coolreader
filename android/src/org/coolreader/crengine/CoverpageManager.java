@@ -648,7 +648,10 @@ public class CoverpageManager {
 					} else {
 						log.d("Image for " + book + " is found in cache, drawing...");
 						Bitmap bmp = ((BitmapDrawable) CoverpageManager.this.getmCoolReader().getApplicationContext().getResources()
-								.getDrawable(R.drawable.icons8_book_2)).getBitmap();
+								.getDrawable(
+										Utils.resolveResourceIdByAttr(getmCoolReader(), R.attr.attr_icons8_book_2, R.drawable.icons8_book_2)
+										//R.drawable.icons8_book_2
+								)).getBitmap();
 						canvas.drawBitmap(bmp, null, rc, defPaint);
 					}
 				}

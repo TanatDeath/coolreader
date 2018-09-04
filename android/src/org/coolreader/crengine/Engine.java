@@ -376,7 +376,10 @@ public class Engine {
 								if (progressIcon != null)
 									mProgress.setIcon(progressIcon);
 								else
-									mProgress.setIcon(R.drawable.cr3_logo_nerd_hc);
+									mProgress.setIcon(
+											Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_cr3_logo, R.drawable.cr3_logo_nerd_hc)
+									//		R.drawable.cr3_logo_nerd_hc
+									);
 								mProgress.setMax(10000);
 								mProgress.setCancelable(false);
 								mProgress.setProgress(mainProgress);

@@ -129,7 +129,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 				ReaderAction.TOGGLE_AUTOSCROLL,
 				ReaderAction.ABOUT,
 				ReaderAction.EXIT,
-			}), false, false, false);
+			}), false, false, false, false);
 			this.toolbarView.setBackgroundDrawable(toolbarBackground);
 			this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 			this.addView(toolbarView);

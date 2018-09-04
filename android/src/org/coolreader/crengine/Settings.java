@@ -204,10 +204,13 @@ public interface Settings {
 
     public static final int VIEWER_TOOLBAR_100 = 0;
     public static final int VIEWER_TOOLBAR_100_gray = 1;
-    public static final int VIEWER_TOOLBAR_75 = 2;
-    public static final int VIEWER_TOOLBAR_75_gray = 3;
-    public static final int VIEWER_TOOLBAR_50 = 4;
-    public static final int VIEWER_TOOLBAR_50_gray = 5;
+    public static final int VIEWER_TOOLBAR_100_inv = 2;
+    public static final int VIEWER_TOOLBAR_75 = 3;
+    public static final int VIEWER_TOOLBAR_75_gray = 4;
+    public static final int VIEWER_TOOLBAR_75_inv = 5;
+    public static final int VIEWER_TOOLBAR_50 = 6;
+    public static final int VIEWER_TOOLBAR_50_gray = 7;
+    public static final int VIEWER_TOOLBAR_50_inv = 8;
     
     
     public enum Lang {

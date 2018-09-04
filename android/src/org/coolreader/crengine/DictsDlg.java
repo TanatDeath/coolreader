@@ -154,8 +154,14 @@ public class DictsDlg extends BaseDialog {
 		selEdit = (EditText)frame.findViewById(R.id.selection_text);
 		selEdit.setText(mSearchText);
 		setPositiveButtonImage(0,0);
-		setThirdButtonImage(R.drawable.icons8_search_history, R.string.dlg_button_search_hist);
-		setAddButtonImage(R.drawable.icons8_me_smb, R.string.dlg_button_pronoun_replace);
+		setThirdButtonImage(
+				//R.drawable.icons8_search_history,
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_search_history, R.drawable.icons8_search_history),
+				R.string.dlg_button_search_hist);
+		setAddButtonImage(
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_me_smb, R.drawable.icons8_me_smb),
+				//R.drawable.icons8_me_smb,
+				R.string.dlg_button_pronoun_replace);
 		btnMinus1.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				String s = StrUtils.replacePuncts(selEdit.getText().toString(),true);
