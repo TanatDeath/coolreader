@@ -758,7 +758,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //	private int selectionEndX = 0;
 //	private int selectionEndY = 0;
 	private boolean doubleTapSelectionEnabled = false;
-	private boolean gesturePageFlippingEnabled = true;
+	private int mGesturePageFlipsPerFullSwipe;
+	private boolean mIsPageMode;
 	private int secondaryTapActionType = TAP_ACTION_TYPE_LONGPRESS;
 	private boolean selectionModeActive = false;
 
@@ -1047,6 +1048,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		private final static int STATE_WAIT_FOR_DOUBLE_CLICK = 5; // flipping is in progress
 		private final static int STATE_DONE = 6; // done: no more tracking
 		private final static int STATE_BRIGHTNESS = 7; // brightness change in progress
+		private final static int STATE_FLIP_TRACKING = 8; // pages flip tracking in progress
 
 		private final static int EXPIRATION_TIME_MS = 180000;
 
@@ -1090,6 +1092,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				case STATE_WAIT_FOR_DOUBLE_CLICK:
 				case STATE_DONE:
 				case STATE_BRIGHTNESS:
+				case STATE_FLIP_TRACKING:
 					stopBrightnessControl(-1, -1);
 					break;
 			}
@@ -1097,6 +1100,40 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			unhiliteTapZone();
 			currentTapHandler = new TapHandler();
 			return true;
+		}
+
+		private void adjustStartValuesOnDrag(int swipeDistance, int distanceForFlip) {
+			if (Math.abs(swipeDistance) < distanceForFlip) {
+				return; // Nothing to do
+			}
+			int direction = swipeDistance > 0 ? 1 : -1; // Left-to-right or right-to-left swipe?
+			int value = direction * distanceForFlip;
+			while (Math.abs(swipeDistance) >= distanceForFlip) {
+				if (mIsPageMode) {
+					start_x += value;
+				} else {
+					start_y += value;
+				}
+				swipeDistance -= value;
+			}
+		}
+ 		private void updatePageFlipTracking(final int x, final int y) {
+			final int swipeDistance = mIsPageMode ? x - start_x : y - start_y;
+			final int distanceForFlip = surface.getWidth() / mGesturePageFlipsPerFullSwipe;
+			int pagesToFlip = swipeDistance / distanceForFlip;
+			if (pagesToFlip == 0) {
+				return; // Nothing to do
+			}
+			adjustStartValuesOnDrag(swipeDistance, distanceForFlip);
+			ReaderAction action = pagesToFlip > 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP;
+			while (pagesToFlip != 0) {
+				onAction(action);
+				if (pagesToFlip > 0) {
+					pagesToFlip--;
+				} else {
+					pagesToFlip++;
+				}
+			}
 		}
 
 		/// perform action and reset touch tracking state
@@ -1341,6 +1378,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						selectionModeActive = false;
 						state = STATE_DONE;
 						return cancel();
+					case STATE_FLIP_TRACKING:
+						updatePageFlipTracking(x, y);
+						state = STATE_DONE;
+						return cancel();	
 				}
 			} else if (event.getAction() == MotionEvent.ACTION_DOWN) {
 				switch (state) {
@@ -1365,6 +1406,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_BRIGHTNESS:
 					case STATE_FLIPPING:
 					case STATE_SELECTION:
+					case STATE_FLIP_TRACKING:
 						return unexpectedEvent();
 					case STATE_WAIT_FOR_DOUBLE_CLICK:
 						if (doubleTapAction == ReaderAction.START_SELECTION)
@@ -1394,7 +1436,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 						boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
 						int dir = isPageMode ? x - start_x : y - start_y;
-						if (gesturePageFlippingEnabled) {
+						if (mGesturePageFlipsPerFullSwipe == 1) {
 							if (pageFlipAnimationSpeedMs == 0 || DeviceInfo.EINK_SCREEN) {
 								// no animation
 								return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
@@ -1403,6 +1445,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							updateAnimation(x, y);
 							state = STATE_FLIPPING;
 						}
+							if (mGesturePageFlipsPerFullSwipe > 1) {
+							state = STATE_FLIP_TRACKING;
+							updatePageFlipTracking(start_x, start_y);
+						}
 						return true;
 					case STATE_FLIPPING:
 						updateAnimation(x, y);
@@ -1410,6 +1456,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_BRIGHTNESS:
 						updateBrightnessControl(x, y);
 						return true;
+					case STATE_FLIP_TRACKING:
+						updatePageFlipTracking(x, y);
+						return true;	
 					case STATE_WAIT_FOR_DOUBLE_CLICK:
 						return true;
 					case STATE_SELECTION:
@@ -2918,7 +2967,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		} else if ( key.equals(PROP_APP_DOUBLE_TAP_SELECTION) ) {
 			doubleTapSelectionEnabled = flg;
 		} else if ( key.equals(PROP_APP_GESTURE_PAGE_FLIPPING) ) {
-			gesturePageFlippingEnabled = flg;
+			mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
 		} else if ( key.equals(PROP_APP_SECONDARY_TAP_ACTION_TYPE) ) {
 			secondaryTapActionType = flg ? TAP_ACTION_TYPE_DOUBLE : TAP_ACTION_TYPE_LONGPRESS;
 		} else if ( key.equals(PROP_APP_FLICK_BACKLIGHT_CONTROL) ) {

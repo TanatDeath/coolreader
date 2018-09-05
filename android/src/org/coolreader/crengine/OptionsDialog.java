@@ -127,6 +127,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public static int[] mMotionTimeouts;
 	public static String[] mMotionTimeoutsTitles;
 	public static int[] mMotionTimeoutsAddInfos;
+	public static int[] mPagesPerFullSwipe;
+	public static int[] mPagesPerFullSwipeAddInfos;
+	public static String[] mPagesPerFullSwipeTitles;
 	int[] mInterlineSpaces = new int[] {
 			80, 85, 90, 95, 100, 105, 110, 115, 120, 130, 140, 150, 160, 180, 200
 		};
@@ -3126,10 +3129,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_trackball_disable), PROP_APP_TRACKBALL_DISABLED, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_computer_mouse,R.drawable.icons8_computer_mouse));
 		if ( !DeviceInfo.EINK_SCREEN )
-			mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL, getString(R.string.option_add_info_empty_text)).
+		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL, getString(R.string.option_add_info_empty_text)).
 					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise));
-		mOptionsControls.add(new BoolOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled),
-				PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_add_info_empty_text)).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));
+		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled), 
+			    PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_add_info_empty_text)).add(
+				mPagesPerFullSwipe, mPagesPerFullSwipeTitles, mPagesPerFullSwipeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));		
 		mOptionsControls.add(new ListOption(this, getString(R.string.options_selection_action), PROP_APP_SELECTION_ACTION, getString(R.string.option_add_info_empty_text)).add(mSelectionAction, mSelectionActionTitles, mSelectionActionAddInfos).setDefaultValue("0").
             setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
 		mOptionsControls.add(new ListOption(this, getString(R.string.options_multi_selection_action), PROP_APP_MULTI_SELECTION_ACTION, getString(R.string.option_add_info_empty_text)).add(mMultiSelectionAction, mMultiSelectionActionTitles, mMultiSelectionActionAddInfo).setDefaultValue("0").
@@ -3139,7 +3143,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.attr_icons8_document_selection1_long, R.drawable.icons8_document_selection1_long));
 		mOptionsControls.add(new BoolOption(this, getString(R.string.options_selection_keep_selection_after_dictionary), PROP_APP_SELECTION_PERSIST, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_document_selection_lock, R.drawable.icons8_document_selection_lock));
-		
+
 		mOptionsApplication = new OptionsListView(getContext());
 		mOptionsApplication.add(new LangOption(this).noIcon());
 		if ( !DeviceInfo.FORCE_HC_THEME) {
@@ -3254,6 +3258,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
         mMotionTimeouts = activity.getResources().getIntArray(R.array.motion_timeout_values);
 		mMotionTimeoutsAddInfos = activity.getResources().getIntArray(R.array.motion_timeout_add_infos);
 		for (int i=0;i<mMotionTimeouts.length; i++) mMotionTimeoutsAddInfos[i] = R.string.option_add_info_empty_text;
+
+		mPagesPerFullSwipeTitles = activity.getResources().getStringArray(R.array.pages_per_full_swipe_titles);
+		mPagesPerFullSwipe = activity.getResources().getIntArray(R.array.pages_per_full_swipe_values);
+		mPagesPerFullSwipeAddInfos = activity.getResources().getIntArray(R.array.pages_per_full_swipe_add_infos);
+		for (int i=0;i<mPagesPerFullSwipeAddInfos.length; i++) mPagesPerFullSwipeAddInfos[i] = R.string.option_add_info_empty_text;
 
 		if (mode == Mode.READER)
         	setupReaderOptions();
