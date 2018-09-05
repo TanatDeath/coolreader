@@ -17,7 +17,7 @@ li { display: list-item; text-indent: 0em;  }
 ul { display: block; list-style-type: disc; margin-left: 1em }
 ol { display: block; list-style-type: decimal; margin-left: 1em }
 
-v { text-align: left; text-align-last: right; text-indent: 1em hanging }
+v { text-align: left; text-align-last: right; text-indent: 1em hanging; hyphenate: none }
 
 stanza { $poem.all }
 stanza + stanza { margin-top: 1em; }
