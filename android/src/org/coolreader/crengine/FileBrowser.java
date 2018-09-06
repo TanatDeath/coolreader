@@ -1387,7 +1387,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				title = translateOnlineStorePluginItem(dir);
 		}
 		
-		mActivity.setBrowserTitle(title);
+		mActivity.setBrowserTitle(title, dir);
 		
 		mListView.setAdapter(currentListAdapter);
 		currentListAdapter.notifyDataSetChanged();

@@ -3,23 +3,28 @@ package org.coolreader.crengine;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 
+import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class BrowserViewLayout extends ViewGroup {
 	private BaseActivity activity;
 	private FileBrowser contentView;
 	private View titleView;
 	private CRToolBar toolbarView;
+
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
 		this.activity = context;
 		this.contentView = contentView;
-		
-		
 		this.titleView = titleView;
 		this.titleView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 		this.toolbarView = toolbar;
@@ -39,11 +44,72 @@ public class BrowserViewLayout extends ViewGroup {
 	}
 	
 	private String browserTitle = "";
-	public void setBrowserTitle(String title) {
+	private FileInfo dir = null;
+	private ArrayList<TextView> arrLblPaths = new ArrayList<TextView>();
+
+	public void setBrowserTitle(String title, FileInfo dir) {
 		this.browserTitle = title;
+		if (dir!=null) this.dir = dir;
 		((TextView)titleView.findViewById(R.id.title)).setText(title);
+		arrLblPaths.clear();
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path1));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path2));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path3));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path4));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path5));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path6));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path7));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path8));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path9));
+		arrLblPaths.add((TextView)titleView.findViewById(R.id.path10));
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorIcon});
+		int colorIcon = a.getColor(0, Color.GRAY);
+		a.recycle();
+
+		int i = 0;
+		FileInfo dir1 = this.dir;
+		FileInfo dir2 = dir1;
+		for (TextView tv : arrLblPaths) {
+			i++;
+			if (dir2!=null) dir2 = dir2.parent;
+			tv.setText(String.valueOf(""));
+			tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			if ((dir2 != null)&&(!dir2.isRootDir())) {
+				final FileInfo dir3 = dir2;
+				tv.setText(String.valueOf(dir2.filename));
+				tv.setTextColor(colorIcon);
+				tv.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						((CoolReader)activity).showDirectory(dir3);
+					}
+				});
+			}
+		}
+		((ImageButton)titleView.findViewById(R.id.btn_qp_next1)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+
+				int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+				int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+				int diff = lastVisiblePosition - firstVisiblePosition;
+				contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
+			}
+		});
+		((ImageButton)titleView.findViewById(R.id.btn_qp_prev1)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+
+				int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+				int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+				int diff = lastVisiblePosition - firstVisiblePosition;
+				contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
+			}
+		});
 	}
-	
+
 	public void onThemeChanged(InterfaceTheme theme) {
 		//titleView.setBackgroundResource(theme.getBrowserStatusBackground());
 		//toolbarView.setButtonAlpha(theme.getToolbarButtonAlpha());
@@ -51,7 +117,7 @@ public class BrowserViewLayout extends ViewGroup {
 		removeView(titleView);
 		titleView = inflater.inflate(R.layout.browser_status_bar, null);
 		addView(titleView);
-		setBrowserTitle(browserTitle);
+		setBrowserTitle(browserTitle, null);
 		toolbarView.setBackgroundResource(theme.getBrowserToolbarBackground(toolbarView.isVertical()));
 		toolbarView.onThemeChanged(theme);
 		requestLayout();

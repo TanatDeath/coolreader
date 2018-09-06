@@ -322,8 +322,10 @@
         <item name="attr_icons8_mobi">@drawable/wdrk_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/wdrk_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/wdrk_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/wdrk_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/wdrk_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/wdrk_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/wdrk_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/wdrk_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/wdrk_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/wdrk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wdrk_icons8_favorite_folder_2</item>
@@ -580,8 +582,10 @@
         <item name="attr_icons8_mobi">@drawable/wlgt_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/wlgt_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/wlgt_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/wlgt_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/wlgt_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/wlgt_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/wlgt_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/wlgt_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/wlgt_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/wlgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wlgt_icons8_favorite_folder_2</item>
@@ -838,8 +842,10 @@
         <item name="attr_icons8_mobi">@drawable/drk_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/drk_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/drk_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/drk_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/drk_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/drk_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/drk_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/drk_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/drk_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1096,8 +1102,10 @@
         <item name="attr_icons8_mobi">@drawable/lgt_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/lgt_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/lgt_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/lgt_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/lgt_icons8_copy</item>
+    	<item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/lgt_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/lgt_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1357,8 +1365,10 @@
         <item name="attr_icons8_mobi">@drawable/lgt_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/lgt_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/lgt_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/lgt_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
+        <item name="attr_icons8_copy">@drawable/lgt_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/lgt_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/lgt_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1618,8 +1628,10 @@
         <item name="attr_icons8_mobi">@drawable/drk_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/drk_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/drk_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/drk_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/drk_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/drk_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/drk_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/drk_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/drk_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1878,8 +1890,10 @@
         <item name="attr_icons8_mobi">@drawable/drk_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/drk_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/drk_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/drk_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/drk_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/drk_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/drk_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/drk_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/drk_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>
@@ -2138,8 +2152,10 @@
         <item name="attr_icons8_mobi">@drawable/lgt_icons8_mobi</item>
         <item name="attr_icons8_docx">@drawable/lgt_icons8_docx</item>
         <item name="attr_icons8_odt">@drawable/lgt_icons8_odt</item>
-	<item name="attr_icons8_copy">@drawable/lgt_icons8_copy</item>
-	<item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
+	    <item name="attr_icons8_copy">@drawable/lgt_icons8_copy</item>
+	    <item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
+        <item name="attr_icons8_back_small">@drawable/lgt_icons8_back_small</item>
+        <item name="attr_icons8_forward_small">@drawable/lgt_icons8_forward_small</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>

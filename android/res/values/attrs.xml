@@ -247,6 +247,8 @@
     <attr name="attr_icons8_odt" format="reference" />
     <attr name="attr_icons8_copy" format="reference" />
     <attr name="attr_icons8_share" format="reference" />
+    <attr name="attr_icons8_back_small" format="reference" />
+    <attr name="attr_icons8_forward_small" format="reference" />
 
     <attr name="folder_big_drawable" format="reference" />
     <attr name="folder_big_bookmark_drawable" format="reference" />

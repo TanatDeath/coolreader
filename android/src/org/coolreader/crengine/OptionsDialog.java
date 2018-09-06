@@ -3253,7 +3253,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		L.v("creating options dialog");
         setCancelable(true);
         setCanceledOnTouchOutside(true);
-
+ 
 		mMotionTimeoutsTitles = activity.getResources().getStringArray(R.array.motion_timeout_titles);
         mMotionTimeouts = activity.getResources().getIntArray(R.array.motion_timeout_values);
 		mMotionTimeoutsAddInfos = activity.getResources().getIntArray(R.array.motion_timeout_add_infos);
