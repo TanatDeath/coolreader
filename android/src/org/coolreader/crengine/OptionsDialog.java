@@ -989,6 +989,37 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if ( mProperties.getProperty(property)==null )
 				mProperties.setProperty(property, ReaderAction.NONE.id);
 		}
+
+		protected int getItemLayoutId() {
+			return R.layout.option_value;
+		}
+
+		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
+			super.updateItemContents(layout, item, listView, position);
+			ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
+			ImageView imgAddInfo = (ImageView) layout.findViewById(R.id.btn_option_add_info);
+			ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+			for ( ReaderAction a : actions )
+				if ( item.value.equals(a.id) ) {
+					if (a.getIconId()!=0)
+						img.setImageDrawable(mActivity.getResources().getDrawable(
+							a.getIconId()));
+					final String addInfo = getString(a.addInfoR);
+					if (!addInfo.equals("")) {
+						imgAddInfo.setImageDrawable(
+								mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
+										R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
+						imgAddInfo.setVisibility(View.VISIBLE);
+						imgAddInfo.setOnClickListener(new View.OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								mActivity.showToast(addInfo, Toast.LENGTH_LONG, layout, true, 0);
+							}
+						});
+					}
+				}
+		}
 	}
 
 	public enum KeyActionFlag {
@@ -1420,7 +1451,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			final  ImageView iv = (ImageView)view.findViewById(R.id.zone_icon);
 			final String propName = property + "." + tapZoneId;
 			final String longPropName = property + ".long." + tapZoneId;
-			ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
+			final ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
 			if ((iv != null)&&(action != null)) {
 				int iconId = action.iconId;
 				if (iconId == 0) {
@@ -1429,7 +1460,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				Drawable d = activity.getResources().getDrawable(action.getIconIdWithDef(activity));
 				iv.setImageDrawable(d);
 			}
-			ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
+			final ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
 			final ImageView ivl = (ImageView)view.findViewById(R.id.zone_icon_long);
 			if ((ivl != null)&&(longAction != null)) {
 				int iconId = longAction.iconId;
@@ -1447,7 +1478,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public void onClick(View v) {
 					// TODO: i18n
 					ActionOption option = new ActionOption(mOwner, getString(R.string.options_app_tap_action_short), propName, true,
-							false, getString(R.string.option_add_info_empty_text));
+							false, getString(action.addInfoR));
+					option.setIconId(action.getIconId());
 					option.setOnChangeHandler(new Runnable() {
 						public void run() {
 							ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
@@ -1462,7 +1494,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public boolean onLongClick(View v) {
 					// TODO: i18n
 					ActionOption option = new ActionOption(mOwner, getString(R.string.options_app_tap_action_long), longPropName, true,
-							true, getString(R.string.option_add_info_empty_text));
+							true, getString(longAction.addInfoR));
+					option.setIconId(action.getIconId());
 					option.setOnChangeHandler(new Runnable() {
 						public void run() {
 							ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
@@ -1660,6 +1693,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			TextView view;
 			RadioButton cb;
+			//iv = (ImageView) = layout.findViewById(R.id.option_value_text);
 			view = (TextView)layout.findViewById(R.id.option_value_text);
 			cb = (RadioButton)layout.findViewById(R.id.option_value_check);
 			ImageView btnOptionAddInfo = (ImageView)layout.findViewById(R.id.btn_option_add_info);
@@ -2128,11 +2162,29 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				if ((dict.internal==1) && (dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
 					installed = mActivity.isPackageInstalled("mobi.goldendict.android")||
 							mActivity.isPackageInstalled("mobi.goldendict.androie"); // changed package name - 4pda version 2.0.1b7
-					add(dict.id, (installed ? "GoldenDict" : dict.name + " " + sAdd), "Package: " + dict.packageName + "; class: " +
+					add(dict.id, (installed ? "GoldenDict" : dict.name + " " + sAdd), "Package: " + dict.packageName + "; \nclass: " +
 						dict.className);
 				} else {
-					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; class: " +
+					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; \nclass: " +
 							dict.className);
+				}
+			}
+		}
+
+		protected int getItemLayoutId() {
+			return R.layout.option_value;
+		}
+
+		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
+			super.updateItemContents(layout, item, listView, position);
+			ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
+			DictInfo[] dicts = Dictionaries.getDictList();
+			for (DictInfo dict : dicts) {
+				if (item.value.equals(dict.id)) {
+					if (dict.dicIcon !=0)
+						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
+//					else
+//						img.setVisibility(View.INVISIBLE);
 				}
 			}
 		}
@@ -2159,6 +2211,24 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
             }
         }
+
+		protected int getItemLayoutId() {
+			return R.layout.option_value;
+		}
+
+		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
+			super.updateItemContents(layout, item, listView, position);
+			ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
+			DictInfo[] dicts = Dictionaries.getDictList();
+			for (DictInfo dict : dicts) {
+				if (item.value.equals(dict.id)) {
+					if (dict.dicIcon !=0)
+						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
+//					else
+//						img.setVisibility(View.INVISIBLE);
+				}
+			}
+		}
     }
 	
 	class HyphenationOptions extends ListOption

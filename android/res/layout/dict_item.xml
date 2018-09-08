@@ -36,13 +36,20 @@
 			android:layout_gravity="left" />
 	</LinearLayout>
 
+	<ImageView
+		android:id="@+id/dict_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_marginRight="4dip"
+		/>
+
 	<LinearLayout android:id="@+id/dict_item_text"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_vertical|fill_horizontal"
 		android:baselineAligned="false">
-
 
 		<TextView android:id="@+id/dict_item_title"
 			style="@style/TextAppearance.Large"
