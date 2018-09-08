@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/option_item_body"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
@@ -18,6 +18,14 @@
         android:focusable="false"
         android:focusableInTouchMode="false"
     />
+    <ImageView
+        android:id="@+id/option_value_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginRight="4dip"
+        />
+
     <TextView
       style="@style/TextAppearance.Medium"
       android:id="@+id/option_value_text"
@@ -30,17 +38,15 @@
       android:layout_centerVertical="true"
     />
     <ImageView android:id="@+id/btn_option_add_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_marginRight="2dip"
         android:layout_marginLeft="2dip"
+        android:layout_gravity="center_vertical|right"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
         android:src="?attr/attr_icons8_option_info"
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:clickable="true"
         android:background="@null"
         />
-    
+
 </LinearLayout>

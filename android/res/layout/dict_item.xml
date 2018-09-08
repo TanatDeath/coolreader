@@ -43,6 +43,14 @@
 		android:layout_gravity="center_vertical|fill_horizontal"
 		android:baselineAligned="false">
 
+		<ImageView
+			android:id="@+id/dict_icon"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:layout_marginRight="4dip"
+			/>
+
 
 		<TextView android:id="@+id/dict_item_title"
 			style="@style/TextAppearance.Large"

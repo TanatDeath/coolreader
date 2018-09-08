@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -76,6 +77,8 @@ public class DictsDlg extends BaseDialog {
 			view = mInflater.inflate(res, null);
 			TextView labelView = (TextView)view.findViewById(R.id.dict_item_shortcut);
 			TextView titleTextView = (TextView)view.findViewById(R.id.dict_item_title);
+			ImageView ivIcon = (ImageView)view.findViewById(R.id.dict_icon);
+
 			Dictionaries.DictInfo b = (Dictionaries.DictInfo)getItem(position);
 			if ( labelView!=null ) {
 				labelView.setText(String.valueOf(position+1));
@@ -83,6 +86,8 @@ public class DictsDlg extends BaseDialog {
 			if ( b!=null ) {
 				if ( titleTextView!=null )
 					titleTextView.setText(b.name);
+				if (b.dicIcon!=0)
+					ivIcon.setImageDrawable(mCoolReader.getResources().getDrawable(b.dicIcon));
 			} else {
 				if ( titleTextView!=null )
 					titleTextView.setText("");
