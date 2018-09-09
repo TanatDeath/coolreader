@@ -1538,6 +1538,95 @@ LVArray<int> & LVDocView::getSectionBounds4Levels() {
 	return m_section_bounds10;
 }
 
+/// returns section bounds, in pages
+LVArray<int> & LVDocView::getSectionBounds4LevelsPages() {
+    if (m_section_bounds_valid10_pages)
+        return m_section_bounds10_pages;
+    m_section_bounds10_pages.clear();
+    m_section_bounds10_pages.add(0);
+    // Get sections from FB2 books
+    ldomNode * body = m_doc->nodeFromXPath(cs16("/FictionBook/body[1]"));
+    lUInt16 section_id = m_doc->getElementNameIndex(L"section");
+    if (body == NULL) {
+        // Get sections from EPUB books
+        body = m_doc->nodeFromXPath(cs16("/body[1]"));
+        section_id = m_doc->getElementNameIndex(L"DocFragment");
+    }
+    int fh = GetFullHeight();
+    int pc = getVisiblePageCount();
+    if (body && fh > 0) {
+        int cnt = body->getChildCount();
+        for (int i = 0; i < cnt; i++) {
+
+            ldomNode * l1section = body->getChildElementNode(i, section_id);
+            if (!l1section)
+                continue;
+
+            lvRect rc;
+            l1section->getAbsRect(rc);
+            if (getViewMode() == DVM_SCROLL) {
+                int p = (int) (((lInt64) rc.top * 10000) / fh);
+                m_section_bounds10_pages.add(p * 10);
+            } else {
+                int fh = m_pages.length();
+                if ( (pc==2 && (fh&1)) )
+                    fh++;
+                int p = m_pages.FindNearestPage(rc.top, 0);
+                m_section_bounds10_pages.add(p);
+            }
+            //plotn
+            int cnt2 = l1section->getChildCount();
+            for (int ii = 0; ii < cnt2; ii++) {
+                ldomNode *l2section = l1section->getChildElementNode(ii, section_id);
+                if (!l2section)
+                    continue;
+                lvRect rc;
+                l2section->getAbsRect(rc);
+                if (getViewMode() == DVM_SCROLL) {
+                    int p = (int) (((lInt64) rc.top * 10000) / fh);
+                    m_section_bounds10_pages.add(p * 10 + 1);
+                } else {
+                    int p = m_pages.FindNearestPage(rc.top, 0);
+                    m_section_bounds10_pages.add(p);
+                }
+                int cnt3 = l2section->getChildCount();
+                for (int iii = 0; iii < cnt3; iii++) {
+                    ldomNode *l3section = l2section->getChildElementNode(iii, section_id);
+                    if (!l3section)
+                        continue;
+                    lvRect rc;
+                    l3section->getAbsRect(rc);
+                    if (getViewMode() == DVM_SCROLL) {
+                        int p = (int) (((lInt64) rc.top * 10000) / fh);
+                        m_section_bounds10_pages.add(p * 10 + 2);
+                    } else {
+                        int p = m_pages.FindNearestPage(rc.top, 0);
+                        m_section_bounds10_pages.add(p);
+                    }
+                    int cnt4 = l3section->getChildCount();
+                    for (int iiii = 0; iiii < cnt4; iiii++) {
+                        ldomNode *l4section = l3section->getChildElementNode(iiii, section_id);
+                        if (!l4section)
+                            continue;
+                        lvRect rc;
+                        l4section->getAbsRect(rc);
+                        if (getViewMode() == DVM_SCROLL) {
+                            int p = (int) (((lInt64) rc.top * 10000) / fh);
+                            m_section_bounds10_pages.add(p * 10 + 3);
+                        } else {
+                            int p = m_pages.FindNearestPage(rc.top, 0);
+                            m_section_bounds10_pages.add(p);
+                        }
+                    } // level4
+                } // level3
+            }
+        }
+    }
+    m_section_bounds10_pages.add(10000 * 10);
+    m_section_bounds_valid10_pages = true;
+    return m_section_bounds10_pages;
+}
+
 /// returns section bounds, in 1/100 of percent
 LVArray<int> & LVDocView::getSectionBounds() {
     if (m_section_bounds_valid)
@@ -1734,6 +1823,9 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	drawbuf->SetClipRect(&hrc);
 	bool drawGauge = true;
 	lvRect info = headerRc;
+	info.left = info.left + m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);
+	info.right = info.right - m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);;
+
 //    if ( m_statusColor!=0xFF000000 ) {
 //        CRLog::trace("Status color = %06x, textColor=%06x", m_statusColor, getTextColor());
 //    } else {
@@ -1752,7 +1844,8 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
         int percent_pos = /*info.left + */percent * info.width() / 10000;
 	//    int gh = 3; //drawGauge ? 3 : 1;
 	LVArray<int> & sbounds = getSectionBounds4Levels();
-	lvRect navBar;
+    LVArray<int> & sbounds_pages = getSectionBounds4LevelsPages();
+    lvRect navBar;
 	getNavigationBarRectangle(pageIndex, navBar);
 	int gpos = info.bottom;
 //	if (drawbuf->GetBitsPerPixel() <= 2) {
@@ -1907,9 +2000,22 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 			if (phi & PGHDR_PAGE_NUMBER)
                 pageinfo += fmt::decimal(pageIndex + 1);
             if (phi & PGHDR_PAGE_COUNT) {
+                int curBound = 0;
+                int curChapterLeft = 9999;
+                int sbound_index = 0;
+                while ( sbound_index<sbounds_pages.length() ) {
+                    curBound = sbounds_pages[sbound_index];
+                    if ((curChapterLeft>curBound-pageIndex)&&(curBound-pageIndex>0))
+                        curChapterLeft=curBound-pageIndex;
+                    sbound_index++;
+                }
                 if ( !pageinfo.empty() )
                     pageinfo += " / ";
                 pageinfo += fmt::decimal(pageCount);
+                if ((sbounds_pages.length()>0)) {
+                    pageinfo += " / -";
+                    pageinfo += fmt::decimal(curChapterLeft);
+                }
             }
             if (phi & PGHDR_PERCENT) {
                 if ( !pageinfo.empty() )
@@ -5859,7 +5965,10 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->limitValueList(PROP_PAGE_MARGIN_BOTTOM, def_margin, sizeof(def_margin)/sizeof(int));
 	props->limitValueList(PROP_PAGE_MARGIN_LEFT, def_margin, sizeof(def_margin)/sizeof(int));
 	props->limitValueList(PROP_PAGE_MARGIN_RIGHT, def_margin, sizeof(def_margin)/sizeof(int));
-	static int def_updates[] = { 1, 0, 2, 3, 4, 5, 6, 7, 8, 10, 14 };
+    static int def_rounded_corners_margin[] = {0, 5, 10, 15, 20, 30, 40, 50, 60, 70,80, 90, 100, 120, 140, 160};
+    props->limitValueList(PROP_ROUNDED_CORNERS_MARGIN, def_rounded_corners_margin, sizeof(def_rounded_corners_margin)/sizeof(int));
+
+    static int def_updates[] = { 1, 0, 2, 3, 4, 5, 6, 7, 8, 10, 14 };
 	props->limitValueList(PROP_DISPLAY_FULL_UPDATE_INTERVAL, def_updates, 11);
 	int fs = props->getIntDef(PROP_STATUS_FONT_SIZE, INFO_FONT_SIZE);
     if (fs < MIN_STATUS_FONT_SIZE)
