@@ -179,7 +179,7 @@ public class GotoPageDialog extends BaseDialog {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.mReaderView = ((CoolReader)activity).getReaderView();
-		this.mReaderView.CheckAllPagesLoad();
+		this.mReaderView.CheckAllPagesLoadVisual();
         this.mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_dlg, null);
         input = (EditText)layout.findViewById(R.id.input_field);
@@ -236,7 +236,7 @@ public class GotoPageDialog extends BaseDialog {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.mReaderView = ((CoolReader)activity).getReaderView();
-		this.mReaderView.CheckAllPagesLoad();
+		this.mReaderView.CheckAllPagesLoadVisual();
 		this.mInflater = LayoutInflater.from(getContext());
 		ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_find_dlg, null);
 		TextView promptView = (TextView)layout.findViewById(R.id.lbl_find_text_pages);

@@ -575,6 +575,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			myView = view;
 			TextView labelView = (TextView)view.findViewById(R.id.option_label);
 			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			valueView.setTextColor(colorIcon);
 			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
@@ -788,6 +794,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			myView = view;
 			TextView labelView = (TextView)view.findViewById(R.id.option_label);
 			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			valueView.setTextColor(colorIcon);
 			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
@@ -840,6 +852,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			myView = view;
 			TextView labelView = (TextView)view.findViewById(R.id.option_label);
 			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			valueView.setTextColor(colorIcon);
 			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
@@ -1475,6 +1493,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 			text.setText(getString(action.nameId));
 			longtext.setText(getString(longAction.nameId));
+
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			text.setTextColor(colorIcon);
+			longtext.setTextColor(colorIcon);
+
 			view.setLongClickable(true);
 			view.setOnClickListener(new View.OnClickListener () {
 				@Override
@@ -1963,6 +1990,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				icon2 = (ImageView)view.findViewById(R.id.option_icon2);
 			}
 			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			valueView.setTextColor(colorIcon);
 			ImageView icon1 = (ImageView)view.findViewById(R.id.option_icon);
 			setup2IconView(icon1,icon2);
 			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
@@ -3188,11 +3221,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_margin_top), PROP_PAGE_MARGIN_TOP, getString(R.string.option_add_info_empty_text)).add(mMargins).setDefaultValue("5").setIconIdByAttr(R.attr.cr3_option_text_margin_top_drawable, R.drawable.cr3_option_text_margin_top));
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_margin_bottom), PROP_PAGE_MARGIN_BOTTOM, getString(R.string.option_add_info_empty_text)).add(mMargins).setDefaultValue("5").setIconIdByAttr(R.attr.cr3_option_text_margin_bottom_drawable, R.drawable.cr3_option_text_margin_bottom));
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_rounded_corners_margin), PROP_ROUNDED_CORNERS_MARGIN,
-				getString(R.string.option_add_info_empty_text)).add(mRoundedCornersMargins).setDefaultValue("0"))
-				//.
-				//setIconIdByAttr(R.attr.cr3_option_text_margin_right_drawable, R.drawable.cr3_option_text_margin_right))
-		;
-
+				getString(R.string.option_add_info_empty_text)).add(mRoundedCornersMargins).setDefaultValue("0")
+				.setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin, R.drawable.icons8_rounded_corners_margin));
 		mOptionsControls = new OptionsListView(getContext());
 		mOptionsControls.add(new KeyMapOption(this, getString(R.string.options_app_key_actions), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys));
 		mOptionsControls.add(new TapZoneOption(this, getString(R.string.options_app_tapzones_normal), PROP_APP_TAP_ZONE_ACTIONS_TAP, getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_controls_tapzones_drawable, R.drawable.cr3_option_controls_tapzones));

@@ -332,6 +332,9 @@ private:
     LVArray<int> m_section_bounds10;
     bool m_section_bounds_valid10;
 
+    LVArray<int> m_section_bounds10_pages;
+    bool m_section_bounds_valid10_pages;
+
     LVMutex _mutex;
 #if CR_ENABLE_PAGE_IMAGE_CACHE==1
     LVDocViewImageCache m_imageCache;
@@ -632,6 +635,8 @@ public:
     LVArray<int> & getSectionBounds( );
     /// returns section bounds, in 1/100 of percent * 10
     LVArray<int> & getSectionBounds4Levels( );
+    /// returns section bounds, in pages
+    LVArray<int> & getSectionBounds4LevelsPages( );
     /// sets battery state
     virtual bool setBatteryState( int newState );
     /// returns battery state

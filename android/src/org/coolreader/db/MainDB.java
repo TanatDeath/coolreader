@@ -166,6 +166,8 @@ public class MainDB extends BaseDB {
 		execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN lang_from VARCHAR DEFAULT NULL");
 		execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN lang_to VARCHAR DEFAULT NULL");
 		execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN is_citation INTEGER DEFAULT 0");
+		//addOPDSCatalogs(DEF_OPDS_URLS3);
+
 		dumpStatistics();
 		
 		return true;
@@ -239,6 +241,13 @@ public class MainDB extends BaseDB {
 		"http://www.shucang.org/s/index.php", "ShuCang.org",
 	};
 
+	private final static String[] DEF_OPDS_URLS3 = {
+			"http://manybooks.net/opds/", "ManyBooks",
+			"http://wiki.mobileread.com/wiki/OPDS", "MobileRead WIKI",
+			"http://www.smashwords.com/atom", "Smashwords",
+			"https://m.webnovel.com", "WebNovel",
+	};
+
 	private void addOPDSCatalogs(String[] catalogs) {
 		for (int i=0; i<catalogs.length-1; i+=2) {
 			String url = catalogs[i];
@@ -296,6 +305,7 @@ public class MainDB extends BaseDB {
 			}
 			if (id==null) {
 				// insert new
+				log.i("Saving "+name+" OPDS catalog");
 				execSQL("INSERT INTO opds_catalog (name, url, username, password) VALUES ("+quoteSqlString(name)+", "+quoteSqlString(url)+", "+quoteSqlString(username)+", "+quoteSqlString(password)+")");
 			} else {
 				// update existing

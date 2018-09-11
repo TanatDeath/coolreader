@@ -380,6 +380,27 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					label.setText(item.getFileNameToDisplay());
 					label.setMaxWidth(coverWidth * 3 / 2);
 				}
+				if (label.getText().toString().toLowerCase().contains("gutenberg"))
+					icon.setImageResource(R.drawable.projectgutrnberg);
+				if (label.getText().toString().toLowerCase().contains("legimi"))
+					icon.setImageResource(R.drawable.legimi);
+				if (label.getText().toString().toLowerCase().matches(".*revues.*org.*"))
+					icon.setImageResource(R.drawable.revues_org);
+				if (label.getText().toString().toLowerCase().matches(".*libres.*et.*gratuits.*"))
+					icon.setImageResource(R.drawable.ebooks_gratuits);
+				if (label.getText().toString().toLowerCase().matches(".*internet.*archive.*"))
+					icon.setImageResource(R.drawable.internet_archive);
+				if (label.getText().toString().toLowerCase().matches(".*feed.*books.*"))
+					icon.setImageResource(R.drawable.feedbooks);
+				if (label.getText().toString().toLowerCase().matches(".*flibusta.*"))
+					icon.setImageResource(R.drawable.flibusta);
+				if (label.getText().toString().toLowerCase().contains("manybooks"))
+					icon.setImageResource(R.drawable.manybooks);
+				if (label.getText().toString().toLowerCase().contains("smashwords"))
+					icon.setImageResource(R.drawable.smashwords);
+				if (label.getText().toString().toLowerCase().contains("webnovel"))
+					icon.setImageResource(R.drawable.webnovel);
+
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {

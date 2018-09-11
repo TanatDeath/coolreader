@@ -175,6 +175,7 @@ public class SearchDlg extends BaseDialog {
     	mSearchPages.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				final String sText = mEditView.getText().toString().trim();
+				mReaderView.CheckAllPagesLoadVisual();
 				final GotoPageDialog dlg = new GotoPageDialog(activity, title, sText,
 						new GotoPageDialog.GotoPageHandler() {
 							int pageNumber = 0;

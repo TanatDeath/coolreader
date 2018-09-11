@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -145,6 +146,7 @@ public class SelectionToolbarDlg {
 		//mReaderView.getS
 		
 		mWindow = new PopupWindow( mAnchor.getContext() );
+
 		mWindow.setTouchInterceptor(new OnTouchListener() {
 			
 			@Override
@@ -163,8 +165,13 @@ public class SelectionToolbarDlg {
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
 
+		ColorDrawable c = new ColorDrawable(colorGrayC);
+		c.setAlpha(130);
+		//mWindow.setBackgroundDrawable(c);
+
 		mPanel = panel;
-		mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
+		//mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
+		mPanel.findViewById(R.id.selection_copy).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_copy).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				mReaderView.copyToClipboard(selection.text);
@@ -179,7 +186,8 @@ public class SelectionToolbarDlg {
 //                return true;
 //			}
 //		});
-		mPanel.findViewById(R.id.selection_dict).setBackgroundColor(colorGrayC);
+		//mPanel.findViewById(R.id.selection_dict).setBackgroundColor(colorGrayC);
+		mPanel.findViewById(R.id.selection_dict).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_dict).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				//PositionProperties currpos = mReaderView.getDoc().getPositionProps(null);
@@ -209,7 +217,8 @@ public class SelectionToolbarDlg {
 			}
 		});
 
-		mPanel.findViewById(R.id.selection_bookmark).setBackgroundColor(colorGrayC);
+		//mPanel.findViewById(R.id.selection_bookmark).setBackgroundColor(colorGrayC);
+		mPanel.findViewById(R.id.selection_bookmark).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_bookmark).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				mReaderView.showNewBookmarkDialog(selection,Bookmark.TYPE_COMMENT);
@@ -226,7 +235,8 @@ public class SelectionToolbarDlg {
 			}
 		});
 
-		mPanel.findViewById(R.id.selection_email).setBackgroundColor(colorGrayC);
+		//mPanel.findViewById(R.id.selection_email).setBackgroundColor(colorGrayC);
+		mPanel.findViewById(R.id.selection_email).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_email).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				mReaderView.sendQuotationInEmail(selection);
@@ -240,7 +250,8 @@ public class SelectionToolbarDlg {
 			}
 		});
 
-		mPanel.findViewById(R.id.selection_find).setBackgroundColor(colorGrayC);
+		//mPanel.findViewById(R.id.selection_find).setBackgroundColor(colorGrayC);
+		mPanel.findViewById(R.id.selection_find).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_find).setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
 				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -250,7 +261,8 @@ public class SelectionToolbarDlg {
 				return true;
 			}
 		});
-		mPanel.findViewById(R.id.selection_cancel).setBackgroundColor(colorGrayC);
+		//mPanel.findViewById(R.id.selection_cancel).setBackgroundColor(colorGrayC);
+		mPanel.findViewById(R.id.selection_cancel).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_cancel).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				closeDialog(true);
@@ -294,7 +306,7 @@ public class SelectionToolbarDlg {
 //						return true;
 //					case KeyEvent.KEYCODE_DPAD_RIGHT:
 //					case KeyEvent.KEYCODE_DPAD_DOWN:
-//						//mReaderView.findNext(pattern, false, caseInsensitive);
+//					*	//mReaderView.findNext(pattern, false, caseInsensitive);
 //						return true;
 					}
 				} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {

@@ -552,6 +552,7 @@ void LVDocView::Clear() {
 		m_filename.clear();
 		m_section_bounds_valid = false;
         m_section_bounds_valid10 = false;
+		m_section_bounds_valid10_pages = false;
 	}
 	clearImageCache();
 	_navigationHistory.clear();
@@ -564,6 +565,7 @@ void LVDocView::clearImageCache() {
 #endif
     m_section_bounds_valid = false;
     m_section_bounds_valid10 = false;
+	m_section_bounds_valid10_pages = false;
     if (m_callback != NULL)
 		m_callback->OnImageCacheClear();
 }
@@ -2012,7 +2014,7 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                 if ( !pageinfo.empty() )
                     pageinfo += " / ";
                 pageinfo += fmt::decimal(pageCount);
-                if ((sbounds_pages.length()>0)) {
+                if ((sbounds_pages.length()>0)&&(curChapterLeft != 9999)) {
                     pageinfo += " / -";
                     pageinfo += fmt::decimal(curChapterLeft);
                 }
@@ -3110,6 +3112,7 @@ bool LVDocView::goLink(lString16 link, bool savePos) {
 			_page = 0;
 			m_section_bounds_valid = false;
             m_section_bounds_valid10 = false;
+			m_section_bounds_valid10_pages = false;
 			m_doc_props->setString(DOC_PROP_FILE_PATH, dir);
 			m_doc_props->setString(DOC_PROP_FILE_NAME, filename);
 			m_doc_props->setString(DOC_PROP_CODE_BASE, LVExtractPath(filename));
@@ -4397,6 +4400,8 @@ void LVDocView::createEmptyDocument() {
 	m_section_bounds_valid = false;
     m_section_bounds10.clear();
     m_section_bounds_valid10 = false;
+	m_section_bounds10_pages.clear();
+	m_section_bounds_valid10_pages = false;
     _posIsSet = false;
 	m_swapDone = false;
 

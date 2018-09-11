@@ -664,7 +664,7 @@
     <string name="dlg_userdic_all">Все</string>
     <string name="win_title_confirm_ude_delete">Удалить значение из словаря?</string>
     <string name="options_app_show_user_dic_panel">Показывать панель словаря пользователя</string>
-    <string name="options_app_show_user_dic_panel_add_info">Пользовательский словарь - это небольшая панель под книгой на которой выводятся слова (которые были ранее сохранены вместе с переводом), которые встречаются на текущей странице (до 10 слов)</string>
+    <string name="options_app_show_user_dic_panel_add_info">Пользовательский словарь - небольшая панель под книгой, на которой выводятся встречающиеся на текущей странице слова с переводом (до 10 слов)</string>
     <string name="dlg_bookmark_info">Подстановка: | необязательное окончание, ~ разделитель вариантов слова</string>
     <string name="options_reader_toolbar_buttons">Кнопки панели инструментов</string>
     <string name="lbl_find">Поиск: </string>

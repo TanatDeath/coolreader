@@ -23,262 +23,595 @@
         android:stretchColumns="1"
         >
         <TableRow android:layout_weight="1">
-			<LinearLayout
-			    android:id="@+id/tap_zone_grid_cell1" 
-                style="@style/TapZoneGridCell"
-                android:layout_width="0dip"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@+id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@+id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@+id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell2" 
+                android:id="@+id/tap_zone_grid_cell1"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                 <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@+id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@+id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell3" 
+                android:id="@+id/tap_zone_grid_cell2"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/tap_zone_grid_cell3"
+                style="@style/TapZoneGridCell"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
         </TableRow>
         <TableRow android:layout_weight="1">
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell4" 
+                android:id="@+id/tap_zone_grid_cell4"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell5" 
+                android:id="@+id/tap_zone_grid_cell5"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                 <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell6" 
+                android:id="@+id/tap_zone_grid_cell6"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                 <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
         </TableRow>
         <TableRow android:layout_weight="1">
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell7" 
+                android:id="@+id/tap_zone_grid_cell7"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                 <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell8" 
+                android:id="@+id/tap_zone_grid_cell8"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                 <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
             <LinearLayout
-                android:id="@+id/tap_zone_grid_cell9" 
+                android:id="@+id/tap_zone_grid_cell9"
                 style="@style/TapZoneGridCell"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@id/zone_icon"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                <TextView
-                    android:id="@id/tap_zone_action_text_short"
-                    style="@style/TapZoneGridCellText"
-                    android:text="@string/action_none" />
-
-                <ImageView
-                    android:id="@id/zone_icon_long"
-                    style="@style/TapZoneGridCellText"
-                    />
-
-                 <TextView
-                    android:id="@id/tap_zone_action_text_long"
-                    android:text="2"
-                    style="@style/TapZoneGridCellTextSecond"
-                 />
-             </LinearLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_short"
+                                style="@style/TapZoneGridCellText"
+                                android:text="@string/action_none" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="10"
+                    android:layout_gravity="fill_vertical|fill_horizontal"
+                    android:stretchColumns="1"
+                    >
+                    <TableRow android:layout_weight="1">
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:id="@id/zone_icon_long"
+                                style="@style/TapZoneGridCellText"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dip"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@id/tap_zone_action_text_long"
+                                android:text="2"
+                                style="@style/TapZoneGridCellTextSecond"
+                                />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
         </TableRow>
     </TableLayout>
 </LinearLayout>

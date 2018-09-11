@@ -326,6 +326,7 @@
 	    <item name="attr_icons8_share">@drawable/wdrk_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/wdrk_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/wdrk_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/wdrk_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/wdrk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wdrk_icons8_favorite_folder_2</item>
@@ -586,6 +587,7 @@
 	    <item name="attr_icons8_share">@drawable/wlgt_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/wlgt_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/wlgt_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/wlgt_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/wlgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wlgt_icons8_favorite_folder_2</item>
@@ -846,6 +848,7 @@
 	    <item name="attr_icons8_share">@drawable/drk_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/drk_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/drk_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/drk_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1106,6 +1109,7 @@
     	<item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/lgt_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/lgt_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/lgt_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1369,6 +1373,7 @@
 	    <item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/lgt_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/lgt_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/lgt_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1632,6 +1637,7 @@
 	    <item name="attr_icons8_share">@drawable/drk_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/drk_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/drk_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/drk_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1894,6 +1900,7 @@
 	    <item name="attr_icons8_share">@drawable/drk_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/drk_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/drk_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/drk_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>
@@ -2156,6 +2163,7 @@
 	    <item name="attr_icons8_share">@drawable/lgt_icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/lgt_icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/lgt_icons8_forward_small</item>
+        <item name="attr_icons8_rounded_corners_margin">@drawable/lgt_icons8_rounded_corners_margin</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>
@@ -2259,12 +2267,31 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">4</item>
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:padding">1dip</item>
+        <item name="android:layout_margin">1dip</item>
+    </style>
+    <style name="TapZoneGridCellText2l">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:maxLines">3</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
         <item name="android:padding">1dip</item>
         <item name="android:layout_margin">1dip</item>
     </style>
     <style name="TapZoneGridCellTextSecond">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:maxLines">4</item>
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:padding">1dip</item>
+        <item name="android:layout_margin">1dip</item>
+    </style>
+    <style name="TapZoneGridCellTextSecond2l">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>

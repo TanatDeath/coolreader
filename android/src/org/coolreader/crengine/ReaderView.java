@@ -24,6 +24,7 @@ import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -32,6 +33,7 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -42,6 +44,7 @@ import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -51,6 +54,10 @@ import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -80,6 +87,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
         void invalidate();
 		void onPause();
 		void onResume();
+	}
+
+	public void CheckAllPagesLoadVisual() {
+		if (arrAllPages == null) {
+			showProgress(10000, R.string.progress_please_wait);
+			CheckAllPagesLoad();
+			hideProgress();
+		}
 	}
 
 	public void CheckAllPagesLoad() {
@@ -1737,6 +1752,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void saveSetting( String name, String value ) {
+		bNeedRedrawOnce = true;
+	//	mActivity.showToast("bNeedRedrawOnce");
 		setSetting(name, value, true, true, true);
 	}
 
@@ -1745,6 +1762,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int orientation = mActivity.getScreenOrientation();
 		orientation = ( orientation==0 )? 1 : 0;
 		saveSetting(PROP_APP_SCREEN_ORIENTATION, String.valueOf(orientation));
+		bNeedRedrawOnce = true;
+	//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setScreenOrientation(orientation);
 	}
 
@@ -1753,7 +1772,57 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		boolean newBool = !mActivity.isFullscreen();
 		String newValue = newBool ? "1" : "0";
 		saveSetting(PROP_APP_FULLSCREEN, newValue);
+		bNeedRedrawOnce = true;
+	//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setFullscreen(newBool);
+	}
+
+	private void initTapZone(final BaseDialog dlg, View view, final int tapZoneId )
+	{
+		if ( view==null )
+			return;
+		final TextView text = (TextView)view.findViewById(R.id.tap_zone_action_text_short);
+		final TextView longtext = (TextView)view.findViewById(R.id.tap_zone_action_text_long);
+		final ImageView iv = (ImageView)view.findViewById(R.id.zone_icon);
+		final String propName = PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + tapZoneId;
+		final String longPropName = PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + tapZoneId;
+		Properties mProperties = new Properties(mActivity.settings());
+		final ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
+		if ((iv != null)&&(action != null)) {
+			int iconId = action.iconId;
+			if (iconId == 0) {
+				iconId = Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+			}
+			Drawable d = mActivity.getResources().getDrawable(action.getIconIdWithDef(mActivity));
+			iv.setImageDrawable(d);
+		}
+		final ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
+		final ImageView ivl = (ImageView)view.findViewById(R.id.zone_icon_long);
+		if ((ivl != null)&&(longAction != null)) {
+			int iconId = longAction.iconId;
+			if (iconId == 0) {
+				iconId = Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+			}
+			Drawable d = mActivity.getResources().getDrawable(longAction.getIconIdWithDef(mActivity));
+			ivl.setImageDrawable(d);
+		}
+		text.setText(mActivity.getResources().getText(action.nameId));
+		longtext.setText(mActivity.getResources().getText(longAction.nameId));
+
+		int colorIcon;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorIcon});
+		colorIcon = a.getColor(0, Color.GRAY);
+		a.recycle();
+		text.setTextColor(colorIcon);
+		longtext.setTextColor(colorIcon);
+
+		view.setOnClickListener(new View.OnClickListener () {
+			@Override
+			public void onClick(View v) {
+				dlg.cancel();
+			}
+		});
 	}
 
 	public void showReadingPositionPopup()
@@ -1764,7 +1833,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //		if (mActivity.isFullscreen()) {
 		buf.append( Utils.formatTime(mActivity, System.currentTimeMillis()) +  " ");
 		if (mBatteryState>=0)
-			buf.append(" [" + mBatteryState + "%]\n");
+			buf.append(" [" + mBatteryState + "%]; ");
 //		}
 		execute( new Task() {
 			Bookmark bm;
@@ -1805,10 +1874,64 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (chapterPos != null && chapterPos.length() > 0)
 							buf.append(chapterPos);
 					}
+					mActivity.showToast(buf.toString());
 				}
 			}
 			public void done() {
-				mActivity.showSToast(buf.toString());
+				BackgroundThread.instance().executeGUI(new Runnable() {
+					public void run() {
+						BaseDialog dlg = new BaseDialog(mActivity, "", false, false);
+						dlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+						//ColorDrawable c = new ColorDrawable(android.graphics.Color.TRANSPARENT);
+						final String[] mFontFaces = Engine.getFontFaceList();
+						LayoutInflater li = LayoutInflater.from(mActivity.getApplicationContext());
+						View grid = (View)li.inflate(R.layout.options_tap_zone_grid_show, null);
+						int colorGray;
+						int colorGrayC;
+						int colorIcon;
+						TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+								{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+						colorGray = a.getColor(0, Color.GRAY);
+						colorGrayC = a.getColor(1, Color.GRAY);
+						colorIcon = a.getColor(2, Color.GRAY);
+						a.recycle();
+						ColorDrawable c = new ColorDrawable(colorGrayC);
+						c.setAlpha(130);
+						dlg.getWindow().setBackgroundDrawable(c);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell1), 1);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell2), 2);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell3), 3);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell4), 4);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell5), 5);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell6), 6);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell7), 7);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell8), 8);
+						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell9), 9);
+						TextView tvLabel = (TextView) grid.findViewById(R.id.lbl_selection_text);
+						tvLabel.setText(buf);
+						tvLabel.setTextColor(colorIcon);
+						final BaseDialog dlg1 = dlg;
+						grid.findViewById(R.id.lay_bottom_text).setOnClickListener(new View.OnClickListener () {
+							@Override
+							public void onClick(View v) {
+								dlg1.cancel();
+							}
+						});
+						if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_NONE) {
+							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
+							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
+						}
+						if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) {
+							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
+						}
+						if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) {
+							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
+						}
+						dlg.setView(grid);
+						dlg.show();
+					}
+				});
+				//mActivity.showToast(buf.toString());
 			}
 		});
 	}
@@ -2826,6 +2949,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private void applySettings(Properties props)
 	{
+		bNeedRedrawOnce = true;
+		//mActivity.showToast("bNeedRedrawOnce");
 		props = new Properties(props); // make a copy
 		props.remove(PROP_TXT_OPTION_PREFORMATTED);
 		props.remove(PROP_EMBEDDED_STYLES);
@@ -4924,7 +5049,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return checkNeedRedraw(internalDX, internalDY);
 	}
 
+	public boolean bNeedRedrawOnce = false;
+
 	private boolean checkNeedRedraw(int x, int y) {
+//		if (bNeedRedrawOnce) {
+//			bNeedRedrawOnce = false;
+//			return true;
+//		}
 		boolean bChanged = false;
 		String sProp = x+"."+y;
 		boolean bNeedRedraw = !getSettings().getBool(Settings.PROP_SKIPPED_RES+"."+sProp,false);
@@ -5687,11 +5818,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			//mEngine.hideProgress();
 			arrAllPages = null;
 			hideProgress();
-			if (arrAllPages == null) {
-				showProgress(10000,R.string.progress_please_wait);
-				CheckAllPagesLoad();
-				hideProgress();
-			}
 			drawPage();
 			scheduleSwapTask();
 		}
@@ -5722,11 +5848,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				internalDY = requestedHeight;
 				log.d("OnLoadFileEnd: resizeInternal(" + internalDX + "," + internalDY + ")");
 				doc.resize(internalDX, internalDY);
-				hideProgress();
-			}
-			if (arrAllPages == null) {
-				showProgress(10000,R.string.progress_please_wait);
-				CheckAllPagesLoad();
 				hideProgress();
 			}
 		}
