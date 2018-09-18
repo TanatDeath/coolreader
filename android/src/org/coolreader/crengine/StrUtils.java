@@ -11,6 +11,13 @@ public class StrUtils {
         return s == null || s.trim().length() == 0;
     }
 
+    public static String getNonEmptyStr(String s, boolean doTrim) {
+        String res = s;
+        if (isEmptyStr(res)) res=""; else
+            if (doTrim) res = res.trim();
+        return res;
+    }
+
     public static String updateTextPre(String s, boolean bOneLine) {
         String str = s;
         if (str != null) {
@@ -183,6 +190,8 @@ public class StrUtils {
         for (String ss: arrS) {
             String repl = ss.trim().toLowerCase()
                     .replace("me","smb")
+                    .replace("he","smb")
+                    .replace("she","smb")
                     .replace("you","smb")
                     .replace("him","smb")
                     .replace("her","smb")

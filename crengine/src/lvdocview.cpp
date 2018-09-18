@@ -2512,7 +2512,9 @@ void LVDocView::Draw(LVDrawBuf & drawbuf, int position, int page, bool rotate, b
 			drawPageTo(&drawbuf, *m_pages[page], &m_pageRects[0],
 					m_pages.length(), 1);
 		if (pc == 2 && page >= 0 && page + 1 < m_pages.length())
+			//plotn
 			drawPageTo(&drawbuf, *m_pages[page + 1], &m_pageRects[1],
+			//drawPageTo(&drawbuf, *m_pages[page], &m_pageRects[1],
 					m_pages.length(), 1);
 	}
 #if CR_INTERNAL_PAGE_ORIENTATION==1

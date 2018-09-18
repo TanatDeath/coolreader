@@ -22,11 +22,13 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.db.CRDBService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.CRC32;
 
@@ -39,6 +41,7 @@ public class UserDicDlg extends BaseDialog {
 	final TableRow tr_descr;
 	final ImageButton btnUserDic;
 	final ImageButton btnCitation;
+	final ImageButton btnDicSearchHistory;
 	final RadioButton btnPage;
 	final RadioButton btnBook;
 	final RadioButton btnAll;
@@ -46,6 +49,7 @@ public class UserDicDlg extends BaseDialog {
 	final EditText selEdit;
 
 	private ArrayList<UserDicEntry> mUserDic = new ArrayList<UserDicEntry>();
+	private ArrayList<DicSearchHistoryEntry> mDicSearchHistory = new ArrayList<DicSearchHistoryEntry>();
 
 	public final static int ITEM_POSITION=0;
 
@@ -65,16 +69,28 @@ public class UserDicDlg extends BaseDialog {
 
 		public int getCount() {
 			int cnt = 0;
-			if (mUserDic != null) cnt = mUserDic.size();
+			if ((openPage==0)||(openPage==1))
+				if (mUserDic != null) cnt = mUserDic.size();
+			if ((openPage==2))
+				if (mDicSearchHistory != null) cnt = mDicSearchHistory.size();
 			return cnt;
 		}
 
 		public Object getItem(int position) {
 			int cnt = 0;
-			if (mUserDic != null) cnt = mUserDic.size();
-			if ( position<0 || position>=cnt )
-				return null;
-			return mUserDic.get(position);
+			if ((openPage==0)||(openPage==1)) {
+				if (mUserDic != null) cnt = mUserDic.size();
+				if (position < 0 || position >= cnt)
+					return null;
+				return mUserDic.get(position);
+			}
+			if ((openPage==2)) {
+				if (mDicSearchHistory != null) cnt = mDicSearchHistory.size();
+				if (position < 0 || position >= cnt)
+					return null;
+				return mDicSearchHistory.get(position);
+			}
+			return null;
 		}
 
 		public long getItemId(int position) {
@@ -91,22 +107,52 @@ public class UserDicDlg extends BaseDialog {
 			view = mInflater.inflate(res, null);
 			TextView wordView = (TextView)view.findViewById(R.id.userdic_word);
 			TextView wordTranslateView = (TextView)view.findViewById(R.id.userdic_word_translate);
-			UserDicEntry ude = null;
-			if (mUserDic!=null) ude = mUserDic.get(position);
-			if ( wordView!=null ) {
-				wordView.setText(String.valueOf(position+1));
-			}
-			String sTitle = "";
-			if ( ude!=null ) {
-				String word = StrUtils.textShrinkLines(ude.getDic_word(),true);
-				if (!StrUtils.isEmptyStr(ude.getLanguage())) word = word+" ["+ude.getLanguage()+"]";
-				if ( wordView!=null )
-					wordView.setText(word);
-					wordTranslateView.setText(StrUtils.textShrinkLines(ude.getDic_word_translate(),true));
-			} else {
-				if ( wordView!=null )
-					wordView.setText("");
+			if ((openPage==0)||(openPage==1)) {
+				UserDicEntry ude = null;
+				if (mUserDic != null) ude = mUserDic.get(position);
+				if (wordView != null) {
+					wordView.setText(String.valueOf(position + 1));
+				}
+				String sTitle = "";
+				if (ude != null) {
+					String word = StrUtils.textShrinkLines(ude.getDic_word(), true);
+					if (!StrUtils.isEmptyStr(ude.getLanguage()))
+						word = word + " [" + ude.getLanguage() + "]";
+					if (wordView != null)
+						wordView.setText(word);
+					wordTranslateView.setText(StrUtils.textShrinkLines(ude.getDic_word_translate(), true));
+				} else {
+					if (wordView != null)
+						wordView.setText("");
 					wordTranslateView.setText("");
+				}
+			}
+			if ((openPage==2)) {
+				DicSearchHistoryEntry dshe = null;
+				if (mDicSearchHistory != null) dshe = mDicSearchHistory.get(position);
+				if (wordView != null) {
+					wordView.setText(String.valueOf(position + 1));
+				}
+				String sTitle = "";
+				if (dshe != null) {
+					String word = StrUtils.textShrinkLines(dshe.getSearch_text(), true);
+					String sLangFrom = dshe.getLanguage_from();
+					String sLangTo = dshe.getLanguage_to();
+					String sLang = "";
+					if ((!StrUtils.isEmptyStr(sLangFrom))||(!StrUtils.isEmptyStr(sLangTo))) {
+						if (StrUtils.isEmptyStr(sLangFrom)) sLangFrom = "any";
+						if (StrUtils.isEmptyStr(sLangTo)) sLangTo = "any";
+						sLang = "[" +sLangFrom+" > "+sLangTo + "] ";
+					}
+					if (wordView != null)
+						wordView.setText(word);
+					wordTranslateView.setText(sLang + StrUtils.textShrinkLines(dshe.getText_translate(), true)+
+						"; "+mCoolReader.getString(R.string.txt_seen)+ " "+String.valueOf(dshe.getSeen_count()));
+				} else {
+					if (wordView != null)
+						wordView.setText("");
+					wordTranslateView.setText("");
+				}
 			}
 			return view;
 		}
@@ -117,7 +163,12 @@ public class UserDicDlg extends BaseDialog {
 
 		public boolean isEmpty() {
 			int cnt = 0;
-			if (mUserDic != null) cnt = mUserDic.size();
+			if ((openPage==0)||(openPage==1)) {
+				if (mUserDic != null) cnt = mUserDic.size();
+			}
+			if ((openPage==2)) {
+				if (mDicSearchHistory != null) cnt = mDicSearchHistory.size();
+			}
 			return cnt==0;
 		}
 
@@ -147,21 +198,29 @@ public class UserDicDlg extends BaseDialog {
 				@Override
 				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 						int position, long arg3) {
-					if ( mUserDic==null )
-						return true;
-					final UserDicEntry ude = mUserDic.get(position);
-					final UserDicDlg thisDlg = uDDlg;
-					mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-						@Override
-						public void run() {
-							activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
-							mCoolReader.getmUserDic().remove(ude.getIs_citation()+ude.getDic_word());
-							mUserDic.remove(ude);
-							if (thisDlg!=null)
-								thisDlg.listUpdated();
-							mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-						}
-					});
+					if ((openPage==0)||(openPage==1)) {
+						if (mUserDic == null)
+							return true;
+						final UserDicEntry ude = mUserDic.get(position);
+						final UserDicDlg thisDlg = uDDlg;
+						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
+							@Override
+							public void run() {
+								activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+								mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
+								mUserDic.remove(ude);
+								if (thisDlg != null)
+									thisDlg.listUpdated();
+								mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+							}
+						});
+					}
+					if ((openPage==2)) {
+						if (mCoolReader.getReaderView()==null) return false;
+						final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
+						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), dshe.getSearch_text());
+						dlg.show();
+					}
 					return true;
 				}
 			});
@@ -181,6 +240,9 @@ public class UserDicDlg extends BaseDialog {
 					mUserDic.get(position).getDic_word()+" \n"+
 						mUserDic.get(position).getDic_word_translate()
 				);
+			}
+			if (openPage==2) {
+				mCoolReader.findInDictionary( mDicSearchHistory.get(position).getSearch_text());
 			}
 			return true;
 		}
@@ -207,6 +269,16 @@ public class UserDicDlg extends BaseDialog {
 			btnPage.setEnabled(false);
 			openPage = 1;
 		}
+
+		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_button_dic_search_hist))) {
+			if (openPage == 0) {
+				if (btnPage.isChecked()) {
+					btnBook.setChecked(true);
+				}
+			}
+			btnPage.setEnabled(false);
+			openPage = 2;
+		}
 		int colorGray;
 		int colorGrayC;
 		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
@@ -217,6 +289,7 @@ public class UserDicDlg extends BaseDialog {
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnUserDic.setBackgroundColor(colorGrayC);
 		btnCitation.setBackgroundColor(colorGrayC);
+		btnDicSearchHistory.setBackgroundColor(colorGrayC);
 		btn.setBackgroundColor(colorGray);
 	}
 
@@ -226,6 +299,9 @@ public class UserDicDlg extends BaseDialog {
 		}
 		if (btn.getContentDescription().equals(R.string.dlg_bookmark_citation)) {
 			return openPage == 1;
+		}
+		if (btn.getContentDescription().equals(R.string.dlg_button_dic_search_hist)) {
+			return openPage == 2;
 		}
 		return false;
 	}
@@ -240,17 +316,19 @@ public class UserDicDlg extends BaseDialog {
 			bAllC = (btn.equals(btnAll));
 		}
 		if (bPageC) {
-			mUserDic.clear();
-			for (UserDicEntry ude: mCoolReader.getmReaderFrame().getUserDicPanel().getArrUdeWords()) {
-				if (ude.getIs_citation()==openPage)
-					if (
-					    (selEdit.getText().toString().trim().equals("")) ||
-						(
-					    	(ude.getDic_word().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim())) ||
-				        	(ude.getDic_word_translate().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim()))
-						)
-					   )
-					  mUserDic.add(ude);
+			if ((openPage==0)||(openPage==1)) {
+				mUserDic.clear();
+				for (UserDicEntry ude : mCoolReader.getmReaderFrame().getUserDicPanel().getArrUdeWords()) {
+					if (ude.getIs_citation() == openPage)
+						if (
+								(selEdit.getText().toString().trim().equals("")) ||
+										(
+												(ude.getDic_word().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim())) ||
+														(ude.getDic_word_translate().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim()))
+										)
+								)
+							mUserDic.add(ude);
+				}
 			}
 		}
 		if (bBookC) {
@@ -258,12 +336,14 @@ public class UserDicDlg extends BaseDialog {
 			CRC32 crc = new CRC32();
 			crc.update(sBookFName.getBytes());
 			String sCRC = String.valueOf(crc.getValue());
-			updUserDic(sCRC);
+			if ((openPage==0)||(openPage==1)) updUserDic(sCRC);
+			if ((openPage==2)) updDicSearchHistory(sCRC);
+
 		}
 		if (bAllC) {
-			updUserDic("");
+			if ((openPage==0)||(openPage==1)) updUserDic("");
+			if ((openPage==2)) updDicSearchHistory("");
 		}
-		listUpdated();
 	}
 
 	public UserDicDlg(final CoolReader activity, final int openPage)
@@ -285,11 +365,13 @@ public class UserDicDlg extends BaseDialog {
 		btnAll = (RadioButton)frame.findViewById(R.id.rb_userdic_all);
 		btnUserDic = (ImageButton)frame.findViewById(R.id.rb_user_dic);
 		btnCitation = (ImageButton)frame.findViewById(R.id.rb_citation);
+		btnDicSearchHistory = (ImageButton)frame.findViewById(R.id.rb_dic_search_history);
 		ImageButton btnFake = (ImageButton)frame.findViewById(R.id.btn_fake);
 		rb_descr = (TextView)frame.findViewById(R.id.lbl_rb_descr);
 		tr_descr = (TableRow)frame.findViewById(R.id.tr_rb_descr);
 		if (openPage==0) setChecked(btnUserDic);
 		if (openPage==1) setChecked(btnCitation);
+		if (openPage==2) setChecked(btnDicSearchHistory);
 		body.addView(mList);
 		setView(frame);
 		searchButton = (ImageButton) frame.findViewById(R.id.btn_search);
@@ -343,6 +425,12 @@ public class UserDicDlg extends BaseDialog {
 				checkedCallback(null);
 			}
 		});
+		btnDicSearchHistory.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				setChecked(btnDicSearchHistory);
+				checkedCallback(null);
+			}
+		});
 		searchButton.requestFocus();
 	}
 
@@ -371,6 +459,32 @@ public class UserDicDlg extends BaseDialog {
 				return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());
 			}
 		});
+		listUpdated();
+	}
+
+	private void updDicSearchHistory(final String sCRC) {
+		mDicSearchHistory.clear();
+		if (activity instanceof CoolReader) {
+			CoolReader cr = (CoolReader)activity;
+			cr.getDB().loadDicSearchHistory(new CRDBService.DicSearchHistoryLoadingCallback() {
+				@Override
+				public void onDicSearchHistoryLoaded(List<DicSearchHistoryEntry> list) {
+					ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
+					for (DicSearchHistoryEntry dshe: list1) {
+						if ((dshe.getSearch_from_book().equals(sCRC))||(sCRC.equals("")))
+							if (
+									(selEdit.getText().toString().trim().equals("")) ||
+											(
+													(dshe.getSearch_text().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim())) ||
+															(dshe.getText_translate().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim()))
+											)
+									)
+								mDicSearchHistory.add(dshe);
+					};
+					listUpdated();
+				}
+			});
+		}
 	}
 
 	@Override

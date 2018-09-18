@@ -2195,11 +2195,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			for (DictInfo dict : dicts) {
 				boolean installed = mActivity.isPackageInstalled(dict.packageName);
 				String sAdd = mActivity.getString(R.string.options_app_dictionary_not_installed);
-				if ((dict.internal==1) && (dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
+				if (((dict.internal==1)||(dict.internal==6)) &&
+						(dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
 					installed = mActivity.isPackageInstalled("mobi.goldendict.android")||
 							mActivity.isPackageInstalled("mobi.goldendict.androie"); // changed package name - 4pda version 2.0.1b7
-					add(dict.id, (installed ? "GoldenDict" : dict.name + " " + sAdd), "Package: " + dict.packageName + "; \nclass: " +
-						dict.className);
+					String sMinicard="";
+					if (dict.internal==6) sMinicard=" (minicard)";
+					add(dict.id, (installed ? "GoldenDict" + sMinicard: dict.name + " " + sAdd),
+							"Package: " + dict.packageName + "; \nclass: " + dict.className);
 				} else {
 					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; \nclass: " +
 							dict.className);
@@ -2235,14 +2238,18 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
             setDefaultValue(dicts[0].id);
             for (DictInfo dict : dicts) {
 				boolean installed = mActivity.isPackageInstalled(dict.packageName);
+
 				String sAdd = mActivity.getString(R.string.options_app_dictionary_not_installed);
-				if ((dict.internal==1) && (dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
+				if (((dict.internal==1)||(dict.internal==6)) &&
+						(dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
 					installed = mActivity.isPackageInstalled("mobi.goldendict.android")||
 							mActivity.isPackageInstalled("mobi.goldendict.androie"); // changed package name - 4pda version 2.0.1b7
-					add(dict.id, (installed ? "GoldenDict" : dict.name + " " + sAdd), "Package: " + dict.packageName + "; class: " +
-							dict.className);
+					String sMinicard="";
+					if (dict.internal==6) sMinicard=" (minicard)";
+					add(dict.id, (installed ? "GoldenDict" + sMinicard: dict.name + " " + sAdd),
+							"Package: " + dict.packageName + "; \nclass: " + dict.className);
 				} else {
-					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; class: " +
+					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; \nclass: " +
 							dict.className);
 				}
             }

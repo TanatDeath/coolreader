@@ -11,10 +11,17 @@ my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
 my %ic_smaller_list=(
-        'icons8_ask_question.svg' => 'icons8_ask_question.png'
+        'icons8_ask_question.svg' => 'icons8_ask_question.png',
+        'icons8_back_small.svg' => 'icons8_back_small.png',
+        'icons8_forward_small.svg' => 'icons8_forward_small.png',
+        'icons8_drop_down_no_frame.svg' => 'icons8_drop_down_no_frame_small.png',
+        'icons8_drop_up_no_frame.svg' => 'icons8_drop_up_no_frame_small.png',
+        'icons8_scroll_down.svg' => 'icons8_scroll_down_small.png',
+        'icons8_scroll_up.svg' => 'icons8_scroll_up_small.png'
 );
 
 my %ic_actions_list=(
+        'icons8_rounded_corners_margin.svg' => 'icons8_rounded_corners_margin.png',
         'icons8_copy.svg' => 'icons8_copy.png',
 	'icons8_share.svg' => 'icons8_share.png',
 	'icons8_camera_key.svg' => 'icons8_camera_key.png',

@@ -637,6 +637,7 @@
     <string name="dlg_button_pronoun_replace">Замена местоимений (на smb)</string>
     <string name="dlg_button_clear_hist">Очистить историю</string>
     <string name="dlg_button_search_hist">История поиска</string>
+    <string name="dlg_button_dic_search_hist">История поиска в словаре</string>
     <string name="search_hist_will_be_cleared">История поиска очищена</string>
     <string name="win_title_reading_pos">Выберите сохраненную позицию</string>
     <string name="load_reading_pos_from_gd">Восстановить позицию чтения с диска Google One</string>
@@ -690,5 +691,9 @@
     <string name="option_toolbar_buttons_toolbar">На панели</string>
     <string name="option_toolbar_buttons_more">Раскрывающаяся панель</string>
     <string name="option_toolbar_buttons_both">Везде (панель и раскрывающаяся панель)</string>
+    <string name="option_toolbar_buttons_toolbar_1st">На панели - сначала</string>
+    <string name="option_toolbar_buttons_more_1st">Раскрывающаяся панель - сначала</string>
+    <string name="option_toolbar_buttons_both_1st">Везде (панель и раскрывающаяся панель) - сначала</string>
+    <string name="txt_seen">просмотрено:</string>
 </resources>
 

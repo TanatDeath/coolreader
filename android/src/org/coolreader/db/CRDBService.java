@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 public class CRDBService extends Service {
 	public static final Logger log = L.create("db");
@@ -194,6 +195,10 @@ public class CRDBService extends Service {
 		void onUserDicLoaded(HashMap<String, UserDicEntry> dic);
 	}
 
+	public interface DicSearchHistoryLoadingCallback {
+		void onDicSearchHistoryLoaded(List<DicSearchHistoryEntry> dic);
+	}
+
 	//=======================================================================================
     // OPDS catalogs access code
     //=======================================================================================
@@ -224,6 +229,15 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				mainDB.saveUserDic(ude, action);
+			}
+		});
+	}
+
+	public void updateDicSearchHistory(final DicSearchHistoryEntry dshe, final int action) {
+		execTask(new Task("updateDicSearchHistory") {
+			@Override
+			public void work() {
+				mainDB.updateDicSearchHistory(dshe, action);
 			}
 		});
 	}
@@ -286,6 +300,21 @@ public class CRDBService extends Service {
 					@Override
 					public void run() {
 						callback.onUserDicLoaded(list);
+					}
+				});
+			}
+		});
+	}
+
+	public void loadDicSearchHistory(final DicSearchHistoryLoadingCallback callback, final Handler handler) {
+		execTask(new Task("loadDicSearchHistory") {
+			@Override
+			public void work() {
+				final List<DicSearchHistoryEntry> list = mainDB.loadDicSearchHistory();
+				sendTask(handler, new Runnable() {
+					@Override
+					public void run() {
+						callback.onDicSearchHistoryLoaded(list);
 					}
 				});
 			}
@@ -799,6 +828,10 @@ public class CRDBService extends Service {
 			getService().loadUserDic(callback, new Handler());
 		}
 
+		public void loadDicSearchHistory(DicSearchHistoryLoadingCallback callback) {
+			getService().loadDicSearchHistory(callback, new Handler());
+		}
+
     	public void loadBooksByRating(int minRating, int maxRating, FileInfoLoadingCallback callback) {
     		getService().findBooksByRating(minRating, maxRating, callback, new Handler());
     	}
@@ -841,6 +874,10 @@ public class CRDBService extends Service {
 
 		public void saveUserDic(final UserDicEntry ude, final int action) {
 			getService().saveUserDic(ude, action);
+		}
+
+		public void updateDicSearchHistory(final DicSearchHistoryEntry dshe, final int action) {
+			getService().updateDicSearchHistory(dshe, action);
 		}
 
 		public void clearSearchHistory(final BookInfo book) {

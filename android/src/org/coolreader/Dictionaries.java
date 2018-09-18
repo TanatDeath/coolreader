@@ -2,9 +2,14 @@ package org.coolreader;
 
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DicSearchHistoryEntry;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.Settings;
+import org.coolreader.crengine.UserDicEntry;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -13,25 +18,30 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 
 import com.abbyy.mobile.lingvo.api.MinicardContract;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.CRC32;
 
 public class Dictionaries {
 
 	public static class PopupFrameMetric {
 		public final int Height;
 		public final int Gravity;
+		public final int heightPixels;
+		public final int widthPixels;
 
 		PopupFrameMetric(DisplayMetrics metrics, int selectionTop, int selectionBottom) {
-			final int screenHeight = metrics.heightPixels;
+			heightPixels = metrics.heightPixels;
+			widthPixels = metrics.widthPixels;
 			final int topSpace = selectionTop;
 			final int bottomSpace = metrics.heightPixels - selectionBottom;
 			final boolean showAtBottom = bottomSpace >= topSpace;
 			final int space = (showAtBottom ? bottomSpace : topSpace) - metrics.densityDpi / 12;
-			final int maxHeight = Math.min(metrics.densityDpi * 20 / 12, screenHeight * 2 / 3);
-			final int minHeight = Math.min(metrics.densityDpi * 10 / 12, screenHeight * 2 / 3);
+			final int maxHeight = Math.min(metrics.densityDpi * 20 / 12, heightPixels * 2 / 3);
+			final int minHeight = Math.min(metrics.densityDpi * 10 / 12, heightPixels * 2 / 3);
 
 			Height = Math.max(minHeight, Math.min(maxHeight, space));
 			Gravity = showAtBottom ? android.view.Gravity.BOTTOM : android.view.Gravity.TOP;
@@ -103,6 +113,8 @@ public class Dictionaries {
 				Intent.ACTION_SEARCH, 0, R.drawable.colordict),
 		new DictInfo("ColorDictApi", "ColorDict new / GoldenDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
 				Intent.ACTION_SEARCH, 1, R.drawable.goldendict),
+		new DictInfo("ColorDictApi (minicard)", "ColorDict new / GoldenDict (minicard)", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
+				Intent.ACTION_SEARCH, 6, R.drawable.goldendict),
 		new DictInfo("AardDict", "Aard Dictionary", "aarddict.android", "aarddict.android.Article",
 				Intent.ACTION_SEARCH, 0, R.drawable.aarddict),
 		new DictInfo("AardDictLookup", "Aard Dictionary Lookup", "aarddict.android", "aarddict.android.Lookup",
@@ -234,6 +246,46 @@ public class Dictionaries {
 		if (null == curDict) {
 			throw new DictionaryException("Current dictionary are invalid!");
 		}
+		boolean isDouble = false;
+		//save to dic search history
+		if (mActivity instanceof CoolReader) {
+			DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+			dshe.setId(0L);
+			dshe.setSearch_text(s);
+			dshe.setText_translate("");
+			String sBookFName = "";
+			String sLangFrom = "";
+			String sLangTo = "";
+			CoolReader cr = (CoolReader) mActivity;
+			if (cr.getReaderView()!=null) {
+				if (cr.getReaderView().getBookInfo()!=null)
+					if (cr.getReaderView().getBookInfo().getFileInfo()!=null)
+					{
+						sBookFName = cr.getReaderView().getBookInfo().getFileInfo().filename;
+						sLangFrom = cr.getReaderView().getBookInfo().getFileInfo().lang_from;
+						sLangTo = cr.getReaderView().getBookInfo().getFileInfo().lang_to;
+					}
+			}
+			CRC32 crc = new CRC32();
+			if (!sBookFName.equals("")) {
+				crc.update(sBookFName.getBytes());
+				dshe.setSearch_from_book(String.valueOf(crc.getValue()));
+			} else dshe.setSearch_from_book("");
+			dshe.setDictionary_used(curDict.id);
+			dshe.setCreate_time(System.currentTimeMillis());
+			dshe.setLast_access_time(System.currentTimeMillis());
+			dshe.setLanguage_from(sLangFrom);
+			dshe.setLanguage_to(sLangTo);
+			dshe.setSeen_count(1L);
+			cr.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_SAVE);
+			isDouble = (cr.getReaderView().getSettings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2) &&
+					(cr.getReaderView().getSettings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2);
+		}
+
+		final String SEARCH_ACTION  = "colordict.intent.action.SEARCH";
+		final String EXTRA_QUERY   = "EXTRA_QUERY";
+		final String EXTRA_FULLSCREEN = "EXTRA_FULLSCREEN";
+
 		switch (curDict.internal) {
 		case 0:
 			Intent intent0 = new Intent(curDict.action);
@@ -255,17 +307,6 @@ public class Dictionaries {
 			}
 			break;
 		case 1:
-			final String SEARCH_ACTION  = "colordict.intent.action.SEARCH";
-			final String EXTRA_QUERY   = "EXTRA_QUERY";
-			final String EXTRA_FULLSCREEN = "EXTRA_FULLSCREEN";
-//			final String EXTRA_HEIGHT  = "EXTRA_HEIGHT";
-//			final String EXTRA_WIDTH   = "EXTRA_WIDTH";
-//			final String EXTRA_GRAVITY  = "EXTRA_GRAVITY";
-//			final String EXTRA_MARGIN_LEFT = "EXTRA_MARGIN_LEFT";
-//			final String EXTRA_MARGIN_TOP  = "EXTRA_MARGIN_TOP";
-//			final String EXTRA_MARGIN_BOTTOM = "EXTRA_MARGIN_BOTTOM";
-//			final String EXTRA_MARGIN_RIGHT = "EXTRA_MARGIN_RIGHT";
-
 			Intent intent1 = new Intent(SEARCH_ACTION);
 			if (s!=null)
 				intent1.putExtra(EXTRA_QUERY, s); //Search Query
@@ -325,12 +366,16 @@ public class Dictionaries {
 			mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 			int selectionTop = 0;
 			int selectionBottom = 0;
+			int selectionX1 = 0;
+			int selectionX2 = 0;
 			if (mActivity instanceof CoolReader) {
 				CoolReader cr = (CoolReader) mActivity;
 				if (cr.getReaderView()!=null) {
 					if (cr.getReaderView().lastSelection != null) {
 						selectionTop = cr.getReaderView().lastSelection.startY;
 						selectionBottom = cr.getReaderView().lastSelection.endY;
+						selectionX1 = cr.getReaderView().lastSelection.startX;
+						selectionX2 = cr.getReaderView().lastSelection.endX;
 					}
 					if (cr.getReaderView().getBookInfo()!=null) {
 						BookInfo book = cr.getReaderView().getBookInfo();
@@ -354,8 +399,28 @@ public class Dictionaries {
 			}
 			final PopupFrameMetric frameMetrics =
 					new PopupFrameMetric(metrics, selectionTop, selectionBottom);
-			intent5.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
-			intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
+
+			if ((isDouble)&&(frameMetrics.widthPixels>frameMetrics.heightPixels)) {
+				int iPage = 0;
+				if ((selectionX1<(frameMetrics.widthPixels / 2)) &&
+						(selectionX2<(frameMetrics.widthPixels / 2))) iPage = 1;
+				if ((selectionX1>(frameMetrics.widthPixels / 2)) &&
+						(selectionX2>(frameMetrics.widthPixels / 2))) iPage = 2;
+				if (iPage == 1) {
+					intent5.putExtra(MinicardContract.EXTRA_WIDTH, frameMetrics.widthPixels / 2);
+					intent5.putExtra(MinicardContract.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.RIGHT);
+				} else if (iPage  == 2) {
+					intent5.putExtra(MinicardContract.EXTRA_WIDTH, frameMetrics.widthPixels / 2);
+					intent5.putExtra(MinicardContract.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.LEFT);
+				} else {
+					intent5.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
+					intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
+				}
+			} else {
+				intent5.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
+				intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
+			}
+
 			intent5.putExtra(MinicardContract.EXTRA_FORCE_LEMMATIZATION, true);
 			intent5.putExtra(MinicardContract.EXTRA_TRANSLATE_VARIANTS, true);
 			intent5.putExtra(MinicardContract.EXTRA_ENABLE_SUGGESTIONS, true);
@@ -384,6 +449,72 @@ public class Dictionaries {
 			//	intent.putExtra(MinicardContract.EXTRA_LANGUAGE_TO, targetLanguage);
 			//}
 			//InternalUtil.startDictionaryActivity(fbreader, intent, this);
+		case 6:
+			final String EXTRA_HEIGHT  = "EXTRA_HEIGHT";
+			final String EXTRA_WIDTH   = "EXTRA_WIDTH";
+			final String EXTRA_GRAVITY  = "EXTRA_GRAVITY";
+//			final String EXTRA_MARGIN_LEFT = "EXTRA_MARGIN_LEFT";
+//			final String EXTRA_MARGIN_TOP  = "EXTRA_MARGIN_TOP";
+//			final String EXTRA_MARGIN_BOTTOM = "EXTRA_MARGIN_BOTTOM";
+//			final String EXTRA_MARGIN_RIGHT = "EXTRA_MARGIN_RIGHT";
+
+			Intent intent6 = new Intent(SEARCH_ACTION);
+			if (s!=null)
+				intent6.putExtra(EXTRA_QUERY, s); //Search Query
+			final DisplayMetrics metrics2 = new DisplayMetrics();
+			mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics2);
+			int selectionTop2 = 0;
+			int selectionBottom2 = 0;
+			int selectionX1_2 = 0;
+			int selectionX2_2 = 0;
+			if (mActivity instanceof CoolReader) {
+				CoolReader cr = (CoolReader) mActivity;
+				if (cr.getReaderView()!=null) {
+					if (cr.getReaderView().lastSelection != null) {
+						selectionTop2 = cr.getReaderView().lastSelection.startY;
+						selectionBottom2 = cr.getReaderView().lastSelection.endY;
+						selectionX1_2 = cr.getReaderView().lastSelection.startX;
+						selectionX2_2 = cr.getReaderView().lastSelection.endX;
+					}
+				}
+			}
+
+			if (selectionBottom2<selectionTop2) {
+				int dummy = selectionBottom2;
+				selectionBottom2 = selectionTop2;
+				selectionTop2 = dummy;
+			}
+			final PopupFrameMetric frameMetrics2 =
+					new PopupFrameMetric(metrics2, selectionTop2, selectionBottom2);
+			intent6.putExtra(EXTRA_FULLSCREEN, false);
+			if ((isDouble)&&(frameMetrics2.widthPixels>frameMetrics2.heightPixels)) {
+				int iPage = 0;
+				if ((selectionX1_2<(frameMetrics2.widthPixels / 2)) &&
+				   (selectionX2_2<(frameMetrics2.widthPixels / 2))) iPage = 1;
+				if ((selectionX1_2>(frameMetrics2.widthPixels / 2)) &&
+						(selectionX2_2>(frameMetrics2.widthPixels / 2))) iPage = 2;
+				if (iPage == 1) {
+					intent6.putExtra(EXTRA_WIDTH, frameMetrics2.widthPixels / 2);
+					intent6.putExtra(EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.RIGHT);
+				} else if (iPage  == 2) {
+					intent6.putExtra(EXTRA_WIDTH, frameMetrics2.widthPixels / 2);
+					intent6.putExtra(EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.LEFT);
+				} else {
+					intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.Height);
+					intent6.putExtra(EXTRA_GRAVITY, frameMetrics2.Gravity);
+				}
+			} else {
+				intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.Height);
+				intent6.putExtra(EXTRA_GRAVITY, frameMetrics2.Gravity);
+			}
+
+			try
+			{
+				mActivity.startActivity(intent6);
+			} catch ( ActivityNotFoundException e ) {
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+			}
+			break;
 		}
 	}
 

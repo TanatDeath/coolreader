@@ -50,7 +50,7 @@
                 style="@style/TextAppearance.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="?attr/attr_icons8_back_small"
+                android:src="?attr/attr_icons8_scroll_up_small"
                 android:background="@null"
                 android:layout_marginTop="0dip"
                 android:layout_marginBottom="0dip"
@@ -203,7 +203,7 @@
                 android:layout_marginBottom="0dip"
                 android:layout_marginLeft="0dip"
                 android:layout_marginRight="0dip"
-                android:src="?attr/attr_icons8_forward_small"
+                android:src="?attr/attr_icons8_scroll_down_small"
                 />
         </LinearLayout>
         </TableRow>

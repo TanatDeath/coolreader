@@ -244,7 +244,8 @@ public class DictsDlg extends BaseDialog {
 	}
 
 	protected void onThirdButtonClick() {
-		mCoolReader.showToast("to come...");
+		UserDicDlg dlg = new UserDicDlg(mCoolReader,2);
+		dlg.show();
 	}
 
 }

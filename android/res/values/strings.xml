@@ -625,6 +625,7 @@
     <string name="dlg_button_pronoun_replace">Pronoun replace (to smb)</string>
     <string name="dlg_button_clear_hist">Clear history</string>
     <string name="dlg_button_search_hist">Search history</string>
+    <string name="dlg_button_dic_search_hist">Dictionary search history</string>
     <string name="search_hist_will_be_cleared">Search history cleared</string>
     <string name="win_title_reading_pos">Choose reading position</string>
     <string name="load_reading_pos_from_gd">Restore reading pos from Google One</string>
@@ -674,6 +675,9 @@
     <string name="option_toolbar_buttons_toolbar">Toolbar</string>
     <string name="option_toolbar_buttons_more">More</string>
     <string name="option_toolbar_buttons_both">Both (toolbar and more)</string>
+    <string name="option_toolbar_buttons_toolbar_1st">Toolbar, in the beginning</string>
+    <string name="option_toolbar_buttons_more_1st">More, in the beginning</string>
+    <string name="option_toolbar_buttons_both_1st">Both (toolbar and more), in the beginning</string>
     <string name="pages_per_full_swipe_off">"Off"</string>
     <string name="pages_per_full_swipe_1">"1 page (right to left)"</string>
     <string name="pages_per_full_swipe_2">"2 pages (track)"</string>
@@ -695,4 +699,5 @@
     <string name="pages_per_full_swipe_18">"18 pages (track)"</string>
     <string name="pages_per_full_swipe_19">"19 pages (track)"</string>
     <string name="pages_per_full_swipe_20">"20 pages (track)"</string>
+    <string name="txt_seen">seen:</string>
 </resources>

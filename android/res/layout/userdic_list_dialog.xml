@@ -35,6 +35,14 @@
                 android:src="?attr/attr_icons8_quote_2"
                 android:contentDescription="@string/dlg_bookmark_citation"
                 android:text="@null" />
+            <ImageButton
+                android:id="@+id/rb_dic_search_history"
+                android:layout_width="0dip"
+                android:checked="false"
+                android:layout_weight="1"
+                android:src="?attr/attr_icons8_search_history"
+                android:contentDescription="@string/dlg_button_dic_search_hist"
+                android:text="@null" />
         </TableRow>
         <TableRow
             android:id="@+id/tr_rb_descr"

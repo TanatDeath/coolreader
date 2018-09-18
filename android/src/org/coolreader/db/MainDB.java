@@ -168,6 +168,23 @@ public class MainDB extends BaseDB {
 		execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN is_citation INTEGER DEFAULT 0");
 		//addOPDSCatalogs(DEF_OPDS_URLS3);
 
+		execSQL("CREATE TABLE IF NOT EXISTS dic_search_history (" +
+				"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				"search_text VARCHAR, " +
+				"text_translate VARCHAR, " +
+				"search_from_book VARCHAR, " +
+				"dictionary_used VARCHAR, " +
+				"create_time INTEGER, " +
+				"last_access_time INTEGER, " +
+				"language_from VARCHAR DEFAULT NULL, " +
+				"language_to VARCHAR DEFAULT NULL, " +
+				"seen_count INTEGER "+
+				")");
+		execSQL("CREATE INDEX IF NOT EXISTS " +
+				"dic_search_history_index ON dic_search_history (search_text) ");
+		execSQL("CREATE INDEX IF NOT EXISTS " +
+				"dic_search_history_index_date ON dic_search_history (last_access_time DESC) ");
+
 		dumpStatistics();
 		
 		return true;
@@ -180,6 +197,7 @@ public class MainDB extends BaseDB {
 				 + longQuery("SELECT count(*) FROM bookmark") + " bookmarks, "
 				 + longQuery("SELECT count(*) FROM search_history") + " search_historys, "
 				 + longQuery("SELECT count(*) FROM user_dic") + " user_dics, "
+				 + longQuery("SELECT count(*) FROM dic_search_history") + " dic_search_historys, "
 				 + longQuery("SELECT count(*) FROM folder") + " folders"
 		);
 	}
@@ -421,6 +439,66 @@ public class MainDB extends BaseDB {
 		return true;
 	}
 
+	public boolean updateDicSearchHistory(DicSearchHistoryEntry dshe, int action) {
+		Log.i("cr3", "saving dic search history");
+		Cursor rs = null;
+		try {
+			if (action==DicSearchHistoryEntry.ACTION_CLEAR_ALL) {
+				execSQL("DELETE FROM dic_search_history");
+				return true;
+			} else {
+				if (dshe == null) return false;
+				String sSearchText = dshe.getSearch_text();
+				if (!isOpened())
+					return false;
+				if (sSearchText == null)
+					return false;
+				sSearchText = sSearchText.trim();
+				if (sSearchText.length()==0)
+					return false;
+				String sql = "SELECT id FROM dic_search_history where search_text=" + quoteSqlString(sSearchText);
+				rs = mDB.rawQuery(sql, null);
+				if (rs.moveToFirst()) {
+					// need update
+					execSQL("UPDATE dic_search_history SET " +
+							" text_translate = " + quoteSqlString(dshe.getText_translate()) + ", " +
+							" search_from_book = " + quoteSqlString(String.valueOf(dshe.getSearch_from_book())) + ", " +
+							" dictionary_used = " + quoteSqlString(dshe.getDictionary_used()) + ", " +
+							" last_access_time = " + System.currentTimeMillis() + ", " +
+							" language_from = " + quoteSqlString(dshe.getLanguage_from()) + ", " +
+							" language_to = " + quoteSqlString(dshe.getLanguage_to()) + ", " +
+							" seen_count = coalesce(seen_count,0) + 1 " +
+							" WHERE id = " + rs.getInt(0)
+					);
+				} else {
+					// need insert
+					execSQL("INSERT INTO dic_search_history " +
+									"(search_text, text_translate, search_from_book, dictionary_used, " +
+									"create_time, last_access_time, language_from, language_to, seen_count) " +
+									"values (" +
+									quoteSqlString(sSearchText) + ", " +
+									quoteSqlString(dshe.getText_translate()) + ", " +
+									quoteSqlString(dshe.getSearch_from_book()) + ", " +
+									quoteSqlString(dshe.getDictionary_used()) + ", " +
+									System.currentTimeMillis() + ", " +
+									System.currentTimeMillis() + ", " +
+									quoteSqlString(dshe.getLanguage_from()) + ", " +
+									quoteSqlString(dshe.getLanguage_to()) + ", " +
+									"1 "+
+									")"
+					);
+				}
+			}
+		} catch (Exception e) {
+			Log.e("cr3", "exception while saving dic search history", e);
+			return false;
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		return true;
+	}
+
 	public boolean clearSearchHistory(BookInfo book) {
 		if (!isOpened())
 			return false;
@@ -488,6 +566,40 @@ public class MainDB extends BaseDB {
 				rs.close();
 		}
 		return hshDic;
+	}
+
+	public List<DicSearchHistoryEntry> loadDicSearchHistory() {
+		log.i("loadDicSearchHistory()");
+		ArrayList<DicSearchHistoryEntry> arrlDshe = new ArrayList<DicSearchHistoryEntry>();
+		Cursor rs = null;
+		try {
+			String sql = "SELECT id, search_text, text_translate, search_from_book, dictionary_used, " +
+					"create_time, last_access_time, language_from, language_to, seen_count "+
+					" FROM dic_search_history order by last_access_time DESC ";
+			rs = mDB.rawQuery(sql, null);
+			if ( rs.moveToFirst() ) {
+				do {
+					DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+					dshe.setId(rs.getLong(0));
+					dshe.setSearch_text(rs.getString(1));
+					dshe.setText_translate(rs.getString(2));
+					dshe.setSearch_from_book(rs.getString(3));
+					dshe.setDictionary_used(rs.getString(4));
+					dshe.setCreate_time(rs.getLong(5));
+					dshe.setLast_access_time(rs.getLong(6));
+					dshe.setLanguage_from(rs.getString(7));
+					dshe.setLanguage_to(rs.getString(8));
+					dshe.setSeen_count(rs.getLong(9));
+					arrlDshe.add(dshe);
+				} while (rs.moveToNext());
+			}
+		} catch (Exception e) {
+			Log.e("cr3", "exception while loading dic_search_history", e);
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		return arrlDshe;
 	}
 
 	public boolean loadOPDSCatalogs(ArrayList<FileInfo> list) {
