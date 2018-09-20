@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -114,6 +115,8 @@ public class SwitchProfileDialog extends BaseDialog {
 			}
 			RadioButton cb = (RadioButton)view.findViewById(R.id.option_value_check);
 			TextView title = (TextView)view.findViewById(R.id.option_value_text);
+			ImageView iv = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			iv.setVisibility(view.INVISIBLE);
 			cb.setChecked(isCurrentItem);
 			cb.setFocusable(false);
 			cb.setFocusableInTouchMode(false);

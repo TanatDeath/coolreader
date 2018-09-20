@@ -1259,8 +1259,20 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							}
 						}
 						//field2.setText(formatDate(pos!=null ? pos.getTimeStamp() : item.createTime));
-						if (field2 != null)
-							field2.setText(Utils.formatLastPosition(mActivity, mHistory.getLastPos(item)));
+						if (field2 != null) {
+							String sLangFrom = item.lang_from;
+							String sLangTo = item.lang_to;
+							String sLang = "";
+							if ((!StrUtils.isEmptyStr(sLangFrom))||(!StrUtils.isEmptyStr(sLangTo))) {
+								if (StrUtils.isEmptyStr(sLangFrom)) sLangFrom = "any";
+								if (StrUtils.isEmptyStr(sLangTo)) sLangTo = "any";
+								sLang = "[" +sLangFrom+" > "+sLangTo + "] ";
+							}
+							if (sLang.equals(""))
+								field2.setText(Utils.formatLastPosition(mActivity, mHistory.getLastPos(item)));
+								else field2.setText(sLang+"; "+Utils.formatLastPosition(mActivity, mHistory.getLastPos(item)));
+
+						}
 						//field3.setText(pos!=null ? formatPercent(pos.getPercent()) : null);
 					} 
 					

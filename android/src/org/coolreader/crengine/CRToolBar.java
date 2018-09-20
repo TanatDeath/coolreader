@@ -124,6 +124,7 @@ public class CRToolBar extends ViewGroup {
 			this.actionsMore = new ArrayList<ReaderAction>();
 			ReaderAction[] actions_all = ReaderAction.AVAILABLE_ACTIONS;
 
+			//first priority
 			for (ReaderAction a : actions_all)
 				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.ABOUT)) {
 					int aVis = 0;
@@ -131,7 +132,19 @@ public class CRToolBar extends ViewGroup {
 						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
 					} catch (Exception e) {
 					}
-					this.actions.add(a);
+					if ((aVis == 4) || (aVis == 5) || (aVis == 6)) this.actions.add(a);
+					if ((aVis == 4) || (aVis == 6)) this.actionsToolbar.add(a);
+					if ((aVis == 5) || (aVis == 6)) this.actionsMore.add(a);
+				}
+			//second priority
+			for (ReaderAction a : actions_all)
+				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.ABOUT)) {
+					int aVis = 0;
+					try {
+						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
+					} catch (Exception e) {
+					}
+					if (!((aVis == 4) || (aVis == 5) || (aVis == 6))) this.actions.add(a);
 					if ((aVis == 1) || (aVis == 3)) this.actionsToolbar.add(a);
 					if ((aVis == 2) || (aVis == 3)) this.actionsMore.add(a);
 				}

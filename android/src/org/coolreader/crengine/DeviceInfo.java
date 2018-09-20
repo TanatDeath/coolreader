@@ -109,7 +109,7 @@ public class DeviceInfo {
 		EINK_NOOK = MANUFACTURER.toLowerCase().contentEquals("barnesandnoble") &&
 				(PRODUCT.contentEquals("NOOK") || MODEL.contentEquals("NOOK") || MODEL.contentEquals("BNRV350") ||
 						MODEL.contentEquals("BNRV300") || MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510")) &&
-				DEVICE.toLowerCase().contentEquals("zoom2");
+				(DEVICE.toLowerCase().contentEquals("zoom2")||DEVICE.toLowerCase().contentEquals("ntx_6sl"));
 		EINK_NOOK_120 = EINK_NOOK && (MODEL.contentEquals("BNRV350") || MODEL.contentEquals("BNRV300") ||
 				MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510"));
 		EINK_SONY = MANUFACTURER.toLowerCase().contentEquals("sony") && MODEL.startsWith("PRS-T");

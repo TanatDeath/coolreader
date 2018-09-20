@@ -426,24 +426,40 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			LayoutInflater inflater = LayoutInflater.from(mActivity);
 			mFilesystemScroll.removeAllViews();
 			int idx = 0;
+			View view = inflater.inflate(R.layout.root_item_dir, null);
+			ImageView icon = (ImageView) view.findViewById(R.id.item_icon);
+			TextView label = (TextView) view.findViewById(R.id.item_name);
+			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
+			label.setText(R.string.open_book_from_gd_short);
+			label.setMaxWidth(coverWidth * 25 / 10);
+			view.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+				}
+			});
+			mFilesystemScroll.addView(view);
+
 			for (final FileInfo item : dirs) {
 				if (item == null)
 					continue;
-				final View view = inflater.inflate(R.layout.root_item_dir, null);
-				ImageView icon = (ImageView) view.findViewById(R.id.item_icon);
-				TextView label = (TextView) view.findViewById(R.id.item_name);
+				view = inflater.inflate(R.layout.root_item_dir, null);
+				icon = (ImageView) view.findViewById(R.id.item_icon);
+				label = (TextView) view.findViewById(R.id.item_name);
 				if (item.getType() == FileInfo.TYPE_DOWNLOAD_DIR)
 					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_bookmark_drawable, R.drawable.folder_bookmark));
 				else if (item.getType() == FileInfo.TYPE_FS_ROOT)
 					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.media_flash_microsd_drawable, R.drawable.media_flash_sd_mmc));
 				else
 					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_drawable, R.drawable.folder_blue));
+				String labText = "";
+
 				if (item.title != null)
-					label.setText(item.title); //  filename
+                    labText = item.title; //  filename
 				else if (item.getType() == FileInfo.TYPE_FS_ROOT || item.getType() == FileInfo.TYPE_DOWNLOAD_DIR)
-					label.setText(item.filename); //  filename
+                    labText = item.filename; //  filename
 				else
-					label.setText(item.pathname); //  filename
+                    labText = item.pathname; //  filename
 				label.setMaxWidth(coverWidth * 25 / 10);
 				view.setOnClickListener(new OnClickListener() {
 					@Override
@@ -451,6 +467,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						mActivity.showDirectory(item);
 					}
 				});
+				String[] arrLab = labText.split("/");
+				if (arrLab.length>2) labText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
+                label.setText(labText);
 				view.setOnLongClickListener(new OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View view) {
@@ -768,7 +787,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			ReaderAction.RECENT_BOOKS,
 			ReaderAction.USER_MANUAL,
 			ReaderAction.OPTIONS,
-			ReaderAction.OPEN_BOOK_FROM_GD,
+			//ReaderAction.OPEN_BOOK_FROM_GD,
 			ReaderAction.EXIT,	
 		};
 		mActivity.showActionsPopupMenu(actions, new OnActionHandler() {
@@ -793,10 +812,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					mActivity.showBrowserOptionsDialog();
 					return true;
 				}
-				else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
-					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-					return true;
-				}
+//				else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
+//					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+//					return true;
+//				}
 				return false;
 			}
 		});

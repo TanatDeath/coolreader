@@ -647,6 +647,7 @@
     <string name="gd_menu">Меню Google One</string>
     <string name="save_current_book_to_gd">Сохранить на диск Google One</string>
     <string name="open_book_from_gd">Открыть книгу с диска Google One</string>
+    <string name="open_book_from_gd_short">Google One</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
     <string name="clipb_contents">Буфер обмена:</string>

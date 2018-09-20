@@ -146,8 +146,10 @@ public class UserDicDlg extends BaseDialog {
 					}
 					if (wordView != null)
 						wordView.setText(word);
-					wordTranslateView.setText(sLang + StrUtils.textShrinkLines(dshe.getText_translate(), true)+
-						"; "+mCoolReader.getString(R.string.txt_seen)+ " "+String.valueOf(dshe.getSeen_count()));
+					sLang = sLang + StrUtils.textShrinkLines(dshe.getText_translate(), true);
+					if (!sLang.trim().equals("")) sLang = sLang +"; ";
+							wordTranslateView.setText(sLang+
+							mCoolReader.getString(R.string.txt_seen)+ " "+String.valueOf(dshe.getSeen_count()));
 				} else {
 					if (wordView != null)
 						wordView.setText("");

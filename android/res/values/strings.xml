@@ -635,6 +635,7 @@
     <string name="gd_menu">Google One menu</string>
     <string name="save_current_book_to_gd">Save book to Google One</string>
     <string name="open_book_from_gd">Open book from Google One</string>
+    <string name="open_book_from_gd_short">Google One</string>
     <string name="set_comment_from_cb_capt">Save with comment from clipboard</string>
     <string name="set_comment_from_cb">Set comment ...</string>
     <string name="clipb_contents">Clipboard contents:</string>

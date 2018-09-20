@@ -29,6 +29,7 @@ public class Dictionaries {
 
 	public static class PopupFrameMetric {
 		public final int Height;
+		public final int HeightMore;
 		public final int Gravity;
 		public final int heightPixels;
 		public final int widthPixels;
@@ -44,6 +45,7 @@ public class Dictionaries {
 			final int minHeight = Math.min(metrics.densityDpi * 10 / 12, heightPixels * 2 / 3);
 
 			Height = Math.max(minHeight, Math.min(maxHeight, space));
+			HeightMore = Height * 5 / 3; //((Height * 2) / 5) * 3;
 			Gravity = showAtBottom ? android.view.Gravity.BOTTOM : android.view.Gravity.TOP;
 		}
 	}
@@ -414,6 +416,11 @@ public class Dictionaries {
 					intent5.putExtra(MinicardContract.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.LEFT);
 				} else {
 					intent5.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
+					if (
+							((selectionBottom>frameMetrics.HeightMore)&&(selectionTop>frameMetrics.HeightMore)) ||
+							((selectionBottom<(frameMetrics.heightPixels-frameMetrics.HeightMore))&&
+									(selectionTop<(frameMetrics.heightPixels-frameMetrics.HeightMore)))
+					   ) intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.HeightMore); else
 					intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
 				}
 			} else {
@@ -504,8 +511,18 @@ public class Dictionaries {
 					intent6.putExtra(EXTRA_GRAVITY, frameMetrics2.Gravity);
 				}
 			} else {
-				intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.Height);
 				intent6.putExtra(EXTRA_GRAVITY, frameMetrics2.Gravity);
+				((CoolReader) mActivity).showToast("coords: "+selectionBottom2+" "+selectionTop2+" "+frameMetrics2.HeightMore+" "+
+					frameMetrics2.heightPixels+" "+frameMetrics2.Height);
+				if (
+						((selectionBottom2>frameMetrics2.HeightMore)&&(selectionTop2>frameMetrics2.HeightMore)) ||
+								((selectionBottom2<(frameMetrics2.heightPixels-frameMetrics2.HeightMore))&&
+										(selectionTop2<(frameMetrics2.heightPixels-frameMetrics2.HeightMore)))
+						) {
+					intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.HeightMore);
+					((CoolReader) mActivity).showToast("more");
+				} else
+					intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.Height);
 			}
 
 			try

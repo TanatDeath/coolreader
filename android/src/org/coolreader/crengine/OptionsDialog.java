@@ -112,16 +112,22 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 	public static final int[] mToolbarButtons = new int[] {
-			0, 1, 2, 3
+			0, 1, 2, 3, 4, 5, 6
 	};
 	public static final int[] mToolbarButtonsTitles = new int[] {
-			R.string.option_toolbar_buttons_none, R.string.option_toolbar_buttons_toolbar,
-			R.string.option_toolbar_buttons_more, R.string.option_toolbar_buttons_both
+			R.string.option_toolbar_buttons_none,
+			R.string.option_toolbar_buttons_toolbar,
+			R.string.option_toolbar_buttons_more,
+			R.string.option_toolbar_buttons_both,
+			R.string.option_toolbar_buttons_toolbar_1st,
+			R.string.option_toolbar_buttons_more_1st,
+			R.string.option_toolbar_buttons_both_1st
 	};
 
 	public static final int[] mToolbarAddInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 
 	public static int[] mMotionTimeouts;

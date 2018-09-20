@@ -32,7 +32,8 @@
         android:paddingRight="7dip"
         android:singleLine="true"
         android:ellipsize="start"
-        android:layout_gravity="center_horizontal|bottom" 
+        android:layout_gravity="center_horizontal|bottom"
+        android:gravity="center"
         android:minWidth="?android:attr/listPreferredItemHeight"
         />
 

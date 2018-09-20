@@ -176,6 +176,9 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		@Override
 		protected void onLayout(boolean changed, int l, int t, int r, int b) {
 			log.v("onLayout(" + l + ", " + t + ", " + r + ", " + b + ")");
+		//	for (StackTraceElement ste: Thread.currentThread().getStackTrace()) {
+		//		log.v(ste.toString());
+		//	};
 			r -= l;
 			b -= t;
 			t = 0;
