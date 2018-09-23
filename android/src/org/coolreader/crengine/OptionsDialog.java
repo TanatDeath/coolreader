@@ -992,7 +992,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	
 	class LangOption extends ListOption {
 		public LangOption(OptionOwner owner) {
-			super(owner, getString(R.string.options_app_locale), PROP_APP_LOCALE, getString(R.string.option_add_info_empty_text));
+			super(owner, getString(R.string.options_app_locale), PROP_APP_LOCALE, getString(R.string.options_app_locale_add_info));
 			for (Lang lang : Lang.values()) {
 				Locale l =  lang.getLocale();
 				String s = "";
@@ -3120,15 +3120,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
 				getString(R.string.option_add_info_empty_text)).noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_show_cover_pages), PROP_APP_SHOW_COVERPAGES,
-				getString(R.string.option_add_info_empty_text)).noIcon());
+				getString(R.string.options_app_show_cover_pages_add_info)).noIcon());
 		mOptionsBrowser.add(new ListOption(this, getString(R.string.options_app_cover_page_size), PROP_APP_COVERPAGE_SIZE,
-				getString(R.string.option_add_info_empty_text)).add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).setDefaultValue("1").noIcon());
+				getString(R.string.options_app_cover_page_size_add_info)).add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).setDefaultValue("1").noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_scan_book_props), PROP_APP_BOOK_PROPERTY_SCAN_ENABLED,
 				getString(R.string.option_add_info_empty_text)).setDefaultValue("1").noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
 				getString(R.string.option_add_info_empty_text)).setDefaultValue("0").noIcon());
 		mOptionsBrowser.add(new ListOption(this, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
-				getString(R.string.option_add_info_empty_text)).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).setDefaultValue("-1").noIcon());
+				getString(R.string.options_app_backlight_screen_add_info)).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).setDefaultValue("-1").noIcon());
 		mOptionsBrowser.add(new LangOption(this).noIcon());
 		mOptionsBrowser.add(new PluginsOption(this, getString(R.string.options_app_plugins), getString(R.string.option_add_info_empty_text)).noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_fullscreen), PROP_APP_FULLSCREEN,
@@ -3139,7 +3139,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		if ( !DeviceInfo.FORCE_HC_THEME) {
 			mOptionsBrowser.add(new ThemeOptions(this, getString(R.string.options_app_ui_theme),
-					getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
+					getString(R.string.options_app_ui_theme_add_info)).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
                     R.drawable.icons8_change_theme_1));
 		}
 		mOptionsBrowser.refresh();
@@ -3249,7 +3249,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		if ( !DeviceInfo.EINK_SCREEN )
 			mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_trackball_disable), PROP_APP_TRACKBALL_DISABLED, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_computer_mouse,R.drawable.icons8_computer_mouse));
-		if ( !DeviceInfo.EINK_SCREEN )
+		//if ( !DeviceInfo.EINK_SCREEN ) // nook glowlight has this option
 		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL, getString(R.string.option_add_info_empty_text)).
 					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise));
 		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled), 
@@ -3268,22 +3268,22 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication = new OptionsListView(getContext());
 		mOptionsApplication.add(new LangOption(this).noIcon());
 		if ( !DeviceInfo.FORCE_HC_THEME) {
-			mOptionsApplication.add(new ThemeOptions(this, getString(R.string.options_app_ui_theme), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
+			mOptionsApplication.add(new ThemeOptions(this, getString(R.string.options_app_ui_theme), getString(R.string.options_app_ui_theme_add_info)).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
 					R.drawable.icons8_change_theme_1));
 		}
-		mOptionsApplication.add(new SkippedResOption(this, getString(R.string.skipped_res), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_resolution,R.drawable.icons8_resolution));
+		mOptionsApplication.add(new SkippedResOption(this, getString(R.string.skipped_res), getString(R.string.skipped_res_add_info)).setIconIdByAttr(R.attr.attr_icons8_resolution,R.drawable.icons8_resolution));
 		if ( !DeviceInfo.EINK_SCREEN ) {
-			mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_backlight_timeout), PROP_APP_SCREEN_BACKLIGHT_LOCK, getString(R.string.option_add_info_empty_text)).
+			mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_backlight_timeout), PROP_APP_SCREEN_BACKLIGHT_LOCK, getString(R.string.options_app_backlight_timeout_add_info)).
 					add(mBacklightTimeout, mBacklightTimeoutTitles, mBacklightLevelsAddInfos).setDefaultValue("3").setIconIdByAttr(R.attr.attr_icons8_sun_1, R.drawable.icons8_sun_1));
 			mBacklightLevelsTitles[0] = getString(R.string.options_app_backlight_screen_default);
-			mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT, getString(R.string.option_add_info_empty_text)).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).
+			mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT, getString(R.string.options_app_backlight_screen_add_info)).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).
 					setDefaultValue("-1").
                     setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
 		}
-		mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT, getString(R.string.option_add_info_empty_text)).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
+		mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT, getString(R.string.options_app_tts_stop_motion_timeout_add_info)).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
 				setIconIdByAttr(R.attr.attr_icons8_moving_sensor,R.drawable.icons8_moving_sensor));
-		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_key_backlight_off), PROP_APP_KEY_BACKLIGHT_OFF, getString(R.string.option_add_info_empty_text)).setDefaultValue("1").noIcon());
-		mOptionsApplication.add(new IconsBoolOption(this, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS, getString(R.string.option_add_info_empty_text)).setDefaultValue("1").noIcon());
+		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_key_backlight_off), PROP_APP_KEY_BACKLIGHT_OFF, getString(R.string.options_app_key_backlight_off_add_info)).setDefaultValue("1").noIcon());
+		mOptionsApplication.add(new IconsBoolOption(this, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS, getString(R.string.options_app_settings_icons_add_info)).setDefaultValue("1").noIcon());
 		mOptionsApplication.add(new DictOptions(this, getString(R.string.options_app_dictionary), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_google_translate, R.drawable.icons8_google_translate));
 		mOptionsApplication.add(new DictOptions2(this, getString(R.string.options_app_dictionary2),
 				getString(R.string.options_app_dictionary2_add_info)).setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
@@ -3295,9 +3295,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_show_user_dic_panel), PROP_APP_SHOW_USER_DIC_PANEL, getString(R.string.options_app_show_user_dic_panel_add_info)).
 				setIconIdByAttr(R.attr.attr_icons8_google_translate_user,R.drawable.icons8_google_translate_user));
 		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_show_cover_pages), PROP_APP_SHOW_COVERPAGES,
-				getString(R.string.option_add_info_empty_text)).
+				getString(R.string.options_app_show_cover_pages_add_info)).
 			setIconIdByAttr(R.attr.attr_icons8_book, R.drawable.icons8_book));
-		mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_cover_page_size), PROP_APP_COVERPAGE_SIZE, getString(R.string.option_add_info_empty_text)).add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).
+		mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_cover_page_size),
+				PROP_APP_COVERPAGE_SIZE, getString(R.string.options_app_cover_page_size_add_info)).add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_big_and_small, R.drawable.icons8_book_big_and_small));
 		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_scan_book_props), PROP_APP_BOOK_PROPERTY_SCAN_ENABLED, getString(R.string.option_add_info_empty_text)).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties));

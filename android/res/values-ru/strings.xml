@@ -696,5 +696,17 @@
     <string name="option_toolbar_buttons_more_1st">Раскрывающаяся панель - сначала</string>
     <string name="option_toolbar_buttons_both_1st">Везде (панель и раскрывающаяся панель) - сначала</string>
     <string name="txt_seen">просмотрено:</string>
+
+    <string name="options_app_locale_add_info">При необходимости позволяет выбрать язык интерфейса отличный от языка установленного в системе (Системный выбран по умолчанию)</string>
+    <string name="options_app_ui_theme_add_info">Выбор внешнего вида меню и настроек из нескольких вариантов (Черная, Белая, Тёмная, Светлая и т.д.)</string>
+    <string name="skipped_res_add_info">Позволяет не обновлять страницу полностью для избежания переформатирования текста (при открытии диалогов, клавиатуры и т.д.)</string>
+    <string name="options_app_backlight_timeout_add_info">Принудительная установка времени подстветки экрана 2-6 минут, либо согласно настроек системы (выбрано по умолчанию)</string>
+    <string name="options_app_backlight_screen_add_info">Принудительная установка яркости экрана 1-100%, либо согласно настроек системы (выбрано по умолчанию)</string>
+    <string name="options_app_tts_stop_motion_timeout_add_info">Если датчик движения не фиксирует активность, то чтение вслух прекращается после выбранного периода времени 1-100 минут, изначально выключено</string>
+    <string name="options_app_key_backlight_off_add_info">Принудительное отключение подсветки кнопок управления (если имеются отдельные) для более комфортного чтения</string>
+    <string name="options_app_settings_icons_add_info">Отображение пиктограмм перед пунктами меню (при отключении - только наименования)</string>
+    <string name="options_app_show_cover_pages_add_info">Отображать обложки книг вместе с названиями</string>
+    <string name="options_app_cover_page_size_add_info">Выбор отображаемого размера обложки книги (Маленькие, Средние, Большие)</string>
+
 </resources>
 

@@ -45,7 +45,7 @@ public class Dictionaries {
 			final int minHeight = Math.min(metrics.densityDpi * 10 / 12, heightPixels * 2 / 3);
 
 			Height = Math.max(minHeight, Math.min(maxHeight, space));
-			HeightMore = Height * 5 / 3; //((Height * 2) / 5) * 3;
+			HeightMore = ((Height * 2) / 3) * 2; //((Height * 2) / 5) * 3;
 			Gravity = showAtBottom ? android.view.Gravity.BOTTOM : android.view.Gravity.TOP;
 		}
 	}
@@ -512,15 +512,15 @@ public class Dictionaries {
 				}
 			} else {
 				intent6.putExtra(EXTRA_GRAVITY, frameMetrics2.Gravity);
-				((CoolReader) mActivity).showToast("coords: "+selectionBottom2+" "+selectionTop2+" "+frameMetrics2.HeightMore+" "+
-					frameMetrics2.heightPixels+" "+frameMetrics2.Height);
+				//((CoolReader) mActivity).showToast("coords: "+selectionBottom2+" "+selectionTop2+" "+frameMetrics2.HeightMore+" "+
+					//frameMetrics2.heightPixels+" "+frameMetrics2.Height);
 				if (
 						((selectionBottom2>frameMetrics2.HeightMore)&&(selectionTop2>frameMetrics2.HeightMore)) ||
 								((selectionBottom2<(frameMetrics2.heightPixels-frameMetrics2.HeightMore))&&
 										(selectionTop2<(frameMetrics2.heightPixels-frameMetrics2.HeightMore)))
 						) {
 					intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.HeightMore);
-					((CoolReader) mActivity).showToast("more");
+					//((CoolReader) mActivity).showToast("more");
 				} else
 					intent6.putExtra(EXTRA_HEIGHT, frameMetrics2.Height);
 			}

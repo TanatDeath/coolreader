@@ -729,10 +729,9 @@ xml:base="http://lib.ololo.cc/opds/">
                         //System.clearProperty("http.proxyHost");
                         //System.clearProperty("http.proxyPort");
 					}
-				    
-					URLConnection conn = proxy == null ? newURL.openConnection() : newURL.openConnection(proxy);
+				    URLConnection conn = proxy == null ? newURL.openConnection() : newURL.openConnection(proxy);
 					if ( conn instanceof HttpsURLConnection ) {
-	                	HttpsURLConnection https = (HttpsURLConnection)conn;
+						HttpsURLConnection https = (HttpsURLConnection)conn;
 
 	                    // Create a trust manager that does not validate certificate chains
 	                    TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
@@ -766,20 +765,19 @@ xml:base="http://lib.ololo.cc/opds/">
 		            	connection.setRequestProperty("Referer", referer);
 		            connection.setInstanceFollowRedirects(true);
 	                connection.setUseCaches(false);
-		            
-	                if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-	                	connection.setRequestProperty("Authorization", encodePassword(username, password));
-	                	Authenticator.setDefault(new Authenticator() {
+					if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+	                	//connection.setRequestProperty("Authorization", encodePassword(username, password));
+						connection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP));
+						Authenticator.setDefault(new Authenticator() {
 	                	    protected PasswordAuthentication getPasswordAuthentication() {
 	                	        return new PasswordAuthentication(username, password.toCharArray());
-	                	    }});	            	
-	                }
-		            
-		            connection.setAllowUserInteraction(false);
+	                	    }});
+					}
+					connection.setAllowUserInteraction(false);
 		            connection.setConnectTimeout(CONNECT_TIMEOUT);
 		            connection.setReadTimeout(READ_TIMEOUT);
 		            connection.setDoInput(true);
-		            String fileName = null;
+					String fileName = null;
 		            String disp = connection.getHeaderField("Content-Disposition");
 		            if ( disp!=null ) {
 		            	int p = disp.indexOf("filename=");
@@ -791,8 +789,8 @@ xml:base="http://lib.ololo.cc/opds/">
 		            //connection.set
 		            
 		            int response = -1;
-					
 					response = connection.getResponseCode();
+					L.i("opds: "+connection.getResponseMessage());
 					if (EXTENDED_LOG) L.d("Response: " + response);
 					if ( response!=200 ) {
 						onError("Error " + response);
@@ -801,7 +799,6 @@ xml:base="http://lib.ololo.cc/opds/">
 					
 					if (cancelled)
 						break;
-					
 					String contentType = connection.getContentType();
 					String contentEncoding = connection.getContentEncoding();
 					int contentLen = connection.getContentLength();

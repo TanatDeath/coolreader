@@ -1810,6 +1810,7 @@ public class CoolReader extends BaseActivity
 				? new File(item.arcname).getPath() : null;
 		String sPathNameF = sPathName2 == null ? sPathName : sPathName2;
 		Intent shortcutIntent;
+
 		if (DeviceInfo.getSDKLevel() >= 26) {
 			shortcutIntent = new Intent(getApplicationContext(), CoolReader.class);
 		} else {
@@ -1841,7 +1842,9 @@ public class CoolReader extends BaseActivity
 					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 					//R.drawable.cr3_browser_book_hc
 			);
-			return addShortCut(this, shortcutIntent, icon, item.title);
+			String shTitle = item.title.trim();
+			if (shTitle.equals("")) shTitle = item.filename;
+			return addShortCut(this, shortcutIntent, icon, shTitle);
 		} else {
 			addIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 			this.sendBroadcast(addIntent);

@@ -701,4 +701,16 @@
     <string name="pages_per_full_swipe_19">"19 pages (track)"</string>
     <string name="pages_per_full_swipe_20">"20 pages (track)"</string>
     <string name="txt_seen">seen:</string>
+
+    <string name="options_app_locale_add_info">If necessary, allows you to select a language other than the language installed in the system (System is selected by default)</string>
+    <string name="options_app_ui_theme_add_info">Selecting the appearance of the menu and settings from several options (Black, White, Dark, Light, etc.)</string>
+    <string name="skipped_res_add_info">Allows you not to refresh the page completely (when open dialogs, keyboard, etc) to avoid text reformatting</string>
+    <string name="options_app_backlight_timeout_add_info">Forcing the screen backlight time 2-6 minutes, or according to the system settings (selected by default)</string>
+    <string name="options_app_backlight_screen_add_info">Forcing the screen brightness to be set to 1-100%, or according to the system settings (selected by default)</string>
+    <string name="options_app_tts_stop_motion_timeout_add_info">If the motion sensor does not fix the activity, then the reading aloud stops after a selected time period of 1-100 minutes, disabled by default</string>
+    <string name="options_app_key_backlight_off_add_info">Forced off the backlight of control buttons (if there are separate ones) for more comfortable reading</string>
+    <string name="options_app_settings_icons_add_info">Display of icons before menu items (when disabled - just title)</string>
+    <string name="options_app_show_cover_pages_add_info">Show book covers along with titles</string>
+    <string name="options_app_cover_page_size_add_info">Selecting the display size of the book cover (Small, Medium, Large)</string>
+
 </resources>

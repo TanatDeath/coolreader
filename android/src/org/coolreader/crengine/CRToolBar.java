@@ -789,7 +789,8 @@ public class CRToolBar extends ViewGroup {
 		this.maxMultilineLines = maxLines;
 	}
 
-	public static PopupWindow showPopup(BaseActivity context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocation) {
+	public static PopupWindow showPopup(BaseActivity context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
+	    int popupLocation = Settings.VIEWER_TOOLBAR_BOTTOM; // plotn - костыль, а то когда панель сверху, то половина ее закрашивается светлее
 		final ScrollView scroll = new ScrollView(context);
 		final CRToolBar tb = new CRToolBar(context, actions, true, true, true, false);
 		tb.setMaxLines(maxLines);
