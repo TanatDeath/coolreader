@@ -329,6 +329,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/wdrk_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/wdrk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/wdrk_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/wdrk_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/wdrk_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/wdrk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wdrk_icons8_favorite_folder_2</item>
@@ -592,6 +594,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/wlgt_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/wlgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/wlgt_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/wlgt_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/wlgt_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/wlgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wlgt_icons8_favorite_folder_2</item>
@@ -855,6 +859,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/drk_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/drk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/drk_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/drk_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1118,6 +1124,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/lgt_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/lgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/lgt_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/lgt_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1384,6 +1392,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/lgt_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/lgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/lgt_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/lgt_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1650,6 +1660,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/drk_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/drk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/drk_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/drk_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1915,6 +1927,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/drk_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/drk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/drk_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/drk_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>
@@ -2180,6 +2194,8 @@
         <item name="attr_icons8_rounded_corners_margin">@drawable/lgt_icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/lgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/lgt_icons8_scroll_up_small</item>
+        <item name="attr_icons8_drop_down_no_frame_small">@drawable/lgt_icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_scroll</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>

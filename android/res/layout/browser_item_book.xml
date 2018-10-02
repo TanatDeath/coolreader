@@ -61,66 +61,102 @@
             android:ellipsize="end"
             android:layout_gravity="left" />
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|bottom"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="5dip"
+            android:baselineAligned="false">
+
+            <TextView android:id="@+id/browser_item_field_state"
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="2dip"
+                android:text="field_state"
+                android:singleLine="true"
+                android:layout_gravity="left" />
+
+            <TextView android:id="@+id/browser_item_field1"
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="2dip"
+                android:text="field1"
+                android:singleLine="true"
+                android:layout_gravity="left" />
+            <TextView android:id="@+id/browser_item_field2"
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="field2"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="0dip"
+                android:singleLine="true"
+                android:layout_gravity="right" />
+            <!-- TextView android:id="@+id/browser_item_field4"
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:singleLine="true"
+                android:layout_gravity="right" />
+            <TextView android:id="@+id/browser_item_field3"
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:singleLine="true"
+                android:layout_gravity="right" /-->
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/browser_item_btns_body"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left|bottom"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="5dip"
+        android:layout_gravity="center_vertical|center"
+        android:layout_margin="2dip"
         android:baselineAligned="false">
-
-        <TextView android:id="@+id/browser_item_field_state"
-            style="@style/TextAppearance.Small"
+        <ImageView android:id="@+id/btn_option_add_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="0dip"
             android:layout_marginRight="2dip"
-            android:text="field_state"
-            android:singleLine="true"
-            android:layout_gravity="left" />
-
-        <TextView android:id="@+id/browser_item_field1"
-            style="@style/TextAppearance.Small"
+            android:layout_marginLeft="2dip"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:src="?attr/attr_icons8_option_info"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:clickable="true"
+            android:background="@null"
+            android:layout_gravity="center_vertical|center_horizontal"
+            />
+        <ImageView android:id="@+id/btn_add_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-	        android:layout_marginLeft="0dip"
-	        android:layout_marginRight="2dip"
-            android:text="field1"
-            android:singleLine="true"
-            android:layout_gravity="left" />
-        <TextView android:id="@+id/browser_item_field2"
-            style="@style/TextAppearance.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="field2"
-	        android:layout_marginLeft="2dip"
-	        android:layout_marginRight="0dip"
-            android:singleLine="true"
-            android:layout_gravity="right" />
-        <!-- TextView android:id="@+id/browser_item_field4"
-            style="@style/TextAppearance.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-	        android:layout_marginLeft="2dip"
-	        android:layout_marginRight="2dip"
-            android:singleLine="true"
-            android:layout_gravity="right" />
-        <TextView android:id="@+id/browser_item_field3"
-            style="@style/TextAppearance.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-	        android:layout_marginLeft="2dip"
-	        android:layout_marginRight="2dip"
-            android:singleLine="true"
-            android:layout_gravity="right" /-->
-	
-    </LinearLayout>
+            android:layout_marginRight="2dip"
+            android:layout_marginLeft="2dip"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:src="?attr/attr_icons8_drop_down_no_frame_small"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:clickable="true"
+            android:background="@null"
+            android:layout_gravity="center_vertical|center_horizontal"
+            />
 
     </LinearLayout>
-           
            
     <LinearLayout android:id="@+id/browser_item_misc_body"
         android:orientation="vertical"

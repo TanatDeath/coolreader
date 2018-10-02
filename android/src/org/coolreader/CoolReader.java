@@ -18,6 +18,7 @@ import org.coolreader.crengine.AboutDialog;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.BookInfoEditDialog;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.BookmarksDlg;
@@ -1543,6 +1544,170 @@ public class CoolReader extends BaseActivity
 			}
 		});
 	}
+
+	private abstract class Task implements Engine.EngineTask {
+
+		public void done() {
+			// override to do something useful
+		}
+
+		public void fail(Exception e) {
+			// do nothing, just log exception
+			// override to do custom action
+			log.e("Task " + this.getClass().getSimpleName() + " is failed with exception " + e.getMessage(), e);
+		}
+	}
+
+	private void execute( Engine.EngineTask task )
+	{
+		mEngine.execute(task);
+	}
+
+	public void showBookInfo(BookInfo setBI) {
+		final ArrayList<String> itemsAll = new ArrayList<String>();
+		final ArrayList<String> itemsSys = new ArrayList<String>();
+		final ArrayList<String> itemsFile = new ArrayList<String>();
+		final ArrayList<String> itemsPos = new ArrayList<String>();
+		final ArrayList<String> itemsBook = new ArrayList<String>();
+		itemsSys.add("section=section.system");
+		itemsSys.add("system.version=Cool Reader " + getVersion());
+		if (getReaderView()!=null)
+			itemsSys.add("system.battery=" + getReaderView().getmBatteryState() + "%");
+		itemsSys.add("system.time=" + Utils.formatTime(this, System.currentTimeMillis()));
+		if ((getReaderView()!=null)&&(getReaderView().getLastsetWidth()!=0)&&(getReaderView().getLastsetHeight()!=0))
+			itemsSys.add("system.resolution="+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight());
+		final BookInfo bi = setBI;
+		if ( bi!=null ) {
+			FileInfo fi = bi.getFileInfo();
+			itemsFile.add("section=section.file");
+			String fname = new File(fi.pathname).getName();
+			itemsFile.add("file.name=" + fname);
+			if ( new File(fi.pathname).getParent()!=null )
+				itemsFile.add("file.path=" + new File(fi.pathname).getParent());
+			itemsFile.add("file.size=" + fi.size);
+			if ( fi.arcname!=null ) {
+				itemsFile.add("file.arcname=" + new File(fi.arcname).getName());
+				if ( new File(fi.arcname).getParent()!=null )
+					itemsFile.add("file.arcpath=" + new File(fi.arcname).getParent());
+				itemsFile.add("file.arcsize=" + fi.arcsize);
+			}
+			itemsFile.add("file.format=" + fi.format.name());
+		}
+		execute( new Task() {
+			Bookmark bm;
+			@Override
+			public void work() {
+				if (getReaderView()!=null)
+					if (getReaderView().getDoc()!=null)
+						bm =  getReaderView().getDoc().getCurrentPageBookmark();
+				if ( bm!=null ) {
+					PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos());
+					itemsPos.add("section=section.position");
+					if ( prop.pageMode!=0 ) {
+						itemsPos.add("position.page=" + (prop.pageNumber+1) + " / " + prop.pageCount);
+					}
+					int percent = (int)(10000 * (long)prop.y / prop.fullHeight);
+					itemsPos.add("position.percent=" + (percent/100) + "." + (percent%100) + "%" );
+					String chapter = bm.getTitleText();
+					if ( chapter!=null && chapter.length()>100 )
+						chapter = chapter.substring(0, 100) + "...";
+					itemsPos.add("position.chapter=" + chapter);
+				}
+			}
+			public void done() {
+				FileInfo fi = bi.getFileInfo();
+				itemsBook.add("section=section.book");
+				if ( fi.authors!=null || fi.title!=null || fi.series!=null) {
+					itemsBook.add("book.authors=" + fi.authors);
+					itemsBook.add("book.title=" + fi.title);
+					if ( fi.series!=null ) {
+						String s = fi.series;
+						if ( fi.seriesNumber>0 )
+							s = s + " #" + fi.seriesNumber;
+						itemsBook.add("book.series=" + s);
+					}
+				}
+				if (!StrUtils.isEmptyStr(fi.language)) {
+					itemsBook.add("book.language=" + fi.language);
+				}
+				if (!StrUtils.isEmptyStr(fi.genre)) {
+					itemsBook.add("book.genre=" + fi.genre);
+				}
+				String annot = "";
+				if (!StrUtils.isEmptyStr(fi.annotation)) {
+					annot = fi.annotation;
+				}
+				if (!StrUtils.isEmptyStr(fi.srclang)) {
+					itemsBook.add("book.srclang=" + fi.srclang);
+				}
+				if (!StrUtils.isEmptyStr(fi.translator)) {
+					itemsBook.add("book.translator=" + fi.translator);
+				}
+				if (
+						(!StrUtils.isEmptyStr(fi.docauthor)) ||
+						(!StrUtils.isEmptyStr(fi.docprogram)) ||
+						(!StrUtils.isEmptyStr(fi.docdate)) ||
+						(!StrUtils.isEmptyStr(fi.docsrcurl)) ||
+						(!StrUtils.isEmptyStr(fi.docsrcocr)) ||
+						(!StrUtils.isEmptyStr(fi.docversion))
+					)
+					itemsBook.add("section=section.book_document");
+				if (!StrUtils.isEmptyStr(fi.docauthor)) {
+					itemsBook.add("book.docauthor=" + fi.docauthor);
+				}
+				if (!StrUtils.isEmptyStr(fi.docprogram)) {
+					itemsBook.add("book.docprogram=" + fi.docprogram);
+				}
+				if (!StrUtils.isEmptyStr(fi.docdate)) {
+					itemsBook.add("book.docdate=" + fi.docdate);
+				}
+				if (!StrUtils.isEmptyStr(fi.docsrcurl)) {
+					itemsBook.add("book.docsrcurl=" + fi.docsrcurl);
+				}
+				if (!StrUtils.isEmptyStr(fi.docsrcocr)) {
+					itemsBook.add("book.docsrcocr=" + fi.docsrcocr);
+				}
+				if (!StrUtils.isEmptyStr(fi.docversion)) {
+					itemsBook.add("book.docversion=" + fi.docversion);
+				}
+				if (
+						(!StrUtils.isEmptyStr(fi.publname)) ||
+						(!StrUtils.isEmptyStr(fi.publisher)) ||
+						(!StrUtils.isEmptyStr(fi.publcity)) ||
+						(!StrUtils.isEmptyStr(fi.publyear)) ||
+						(!StrUtils.isEmptyStr(fi.publisbn))
+					)
+					itemsBook.add("section=section.book_publisher");
+				if (!StrUtils.isEmptyStr(fi.publname)) {
+					itemsBook.add("book.publname=" + fi.publname);
+				}
+				if (!StrUtils.isEmptyStr(fi.publisher)) {
+					itemsBook.add("book.publisher=" + fi.publisher);
+				}
+				if (!StrUtils.isEmptyStr(fi.publcity)) {
+					itemsBook.add("book.publcity=" + fi.publcity);
+				}
+				if (!StrUtils.isEmptyStr(fi.publyear)) {
+					itemsBook.add("book.publyear=" + fi.publyear);
+				}
+				if (!StrUtils.isEmptyStr(fi.publisbn)) {
+					itemsBook.add("book.publisbn=" + fi.publisbn);
+				}
+				itemsBook.add("section=section.book_translation");
+				String lfrom = "[empty]";
+				if (!StrUtils.isEmptyStr(fi.lang_from)) lfrom = fi.lang_from;
+				String lto = "[empty]";
+				if (!StrUtils.isEmptyStr(fi.lang_to)) lto = fi.lang_to;
+				itemsBook.add("book.translation=" + lfrom + " -> " + lto);
+				for (String s: itemsPos) itemsAll.add(s);
+				for (String s: itemsBook) itemsAll.add(s);
+				for (String s: itemsFile) itemsAll.add(s);
+				for (String s: itemsSys) itemsAll.add(s);
+				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot);
+				dlg.show();
+			}
+		});
+	}
 	
 	public void editOPDSCatalog(FileInfo opds) {
 		if (opds==null) {
@@ -1842,8 +2007,7 @@ public class CoolReader extends BaseActivity
 					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 					//R.drawable.cr3_browser_book_hc
 			);
-			String shTitle = item.title.trim();
-			if (shTitle.equals("")) shTitle = item.filename;
+			String shTitle = (StrUtils.isEmptyStr(item.title)?item.filename.trim():item.title.trim());
 			return addShortCut(this, shortcutIntent, icon, shTitle);
 		} else {
 			addIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");

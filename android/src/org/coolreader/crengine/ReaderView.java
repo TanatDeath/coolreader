@@ -2021,70 +2021,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	static private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
 	public void showBookInfo() {
-		final ArrayList<String> items = new ArrayList<String>();
-		items.add("section=section.system");
-		items.add("system.version=Cool Reader " + mActivity.getVersion());
-		items.add("system.battery=" + mBatteryState + "%");
-		items.add("system.time=" + Utils.formatTime(mActivity, System.currentTimeMillis()));
-		items.add("system.resolution="+lastsetWidth+" x "+lastsetHeight);
-		final BookInfo bi = mBookInfo;
-		if ( bi!=null ) {
-			FileInfo fi = bi.getFileInfo();
-			items.add("section=section.file");
-			String fname = new File(fi.pathname).getName();
-			items.add("file.name=" + fname);
-			if ( new File(fi.pathname).getParent()!=null )
-				items.add("file.path=" + new File(fi.pathname).getParent());
-			items.add("file.size=" + fi.size);
-			if ( fi.arcname!=null ) {
-				items.add("file.arcname=" + new File(fi.arcname).getName());
-				if ( new File(fi.arcname).getParent()!=null )
-					items.add("file.arcpath=" + new File(fi.arcname).getParent());
-				items.add("file.arcsize=" + fi.arcsize);
-			}
-			items.add("file.format=" + fi.format.name());
-		}
-		execute( new Task() {
-			Bookmark bm;
-			@Override
-			public void work() {
-				bm = doc.getCurrentPageBookmark();
-				if ( bm!=null ) {
-					PositionProperties prop = doc.getPositionProps(bm.getStartPos());
-					items.add("section=section.position");
-					if ( prop.pageMode!=0 ) {
-						items.add("position.page=" + (prop.pageNumber+1) + " / " + prop.pageCount);
-					}
-					int percent = (int)(10000 * (long)prop.y / prop.fullHeight);
-					items.add("position.percent=" + (percent/100) + "." + (percent%100) + "%" );
-					String chapter = bm.getTitleText();
-					if ( chapter!=null && chapter.length()>100 )
-						chapter = chapter.substring(0, 100) + "...";
-					items.add("position.chapter=" + chapter);
-				}
-			}
-			public void done() {
-				FileInfo fi = bi.getFileInfo();
-				items.add("section=section.book");
-				if ( fi.authors!=null || fi.title!=null || fi.series!=null) {
-					items.add("book.authors=" + fi.authors);
-					items.add("book.title=" + fi.title);
-					if ( fi.series!=null ) {
-						String s = fi.series;
-						if ( fi.seriesNumber>0 )
-							s = s + " #" + fi.seriesNumber;
-						items.add("book.series=" + s);
-					}
-				}
-				if ( fi.language != null) {
-					items.add("book.language=" + fi.language);
-				}
-                items.add("book.translation=" + fi.lang_from + " -> " + fi.lang_to);
-				BookInfoDialog dlg = new BookInfoDialog(mActivity, items);
-				dlg.show();
-			}
-		});
+		mActivity.showBookInfo(mBookInfo);
 	}
 
 	private int autoScrollSpeed = 1500; // chars / minute
@@ -2832,6 +2771,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				UserDicDlg dlg2 = new UserDicDlg(((CoolReader)mActivity),1);
 				dlg2.show();
 				break;
+			case DCMD_TOGGLE_PAGE_VIEW_MODE:
+				String oldViewSetting = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
+                boolean newBool = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ).equals("0");
+                String newValue = newBool ? "1" : "0";
+                saveSetting(PROP_PAGE_VIEW_MODE, newValue);
+                //mActivity.showToast("newValue "+newValue);
+				break;
 		}
 	}
 	boolean firstShowBrowserCall = true;
@@ -3458,6 +3404,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 
+	public int getmBatteryState() {
+		return mBatteryState;
+	}
+
 	private int mBatteryState = 100;
 	public void setBatteryState( int state ) {
 		if ( state!=mBatteryState ) {
@@ -3786,6 +3736,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public int getRequestedWidth() {
 		return requestedWidth;
 	}
+	public int getLastsetWidth() {
+		return lastsetWidth;
+	}
 
 	//	private boolean mIsOnFront = false;
 	private int requestedWidth = 0;
@@ -3793,6 +3746,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public int getRequestedHeight() {
 		return requestedHeight;
+	}
+	public int getLastsetHeight() {
+		return lastsetHeight;
 	}
 
 	private int requestedHeight = 0;

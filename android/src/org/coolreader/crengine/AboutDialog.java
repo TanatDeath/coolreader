@@ -11,6 +11,8 @@ import org.coolreader.R;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -90,7 +92,27 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 
 		setTitle(R.string.dlg_about);
 		LayoutInflater inflater = LayoutInflater.from(getContext());
-		TabHost tabs = (TabHost)inflater.inflate(R.layout.about_dialog, null);
+		final TabHost tabs = (TabHost)inflater.inflate(R.layout.about_dialog, null);
+
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+		final int colorGray = a.getColor(0, Color.GRAY);
+		final int colorGrayC = a.getColor(1, Color.GRAY);
+
+		tabs.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+			@Override
+			public void onTabChanged(String tabId) {
+				for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
+					tabs.getTabWidget().getChildAt(i)
+							.setBackgroundColor(colorGrayC); // unselected
+				}
+
+				tabs.getTabWidget().getChildAt(tabs.getCurrentTab())
+						.setBackgroundColor(colorGray); // selected
+
+			}
+		});
+
 		mAppTab = (View)inflater.inflate(R.layout.about_dialog_app, null);
 		((TextView)mAppTab.findViewById(R.id.version)).setText("Cool Reader " + mCoolReader.getVersion());
 
@@ -210,7 +232,8 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		tabs.addTab(tsDonation);
 		
 		setView( tabs );
-
+		tabs.setCurrentTab(1);
+		tabs.setCurrentTab(0);
 		// 25% chance to show Donations tab
 		if ((rnd.nextInt() & 3) == 3)
 			tabs.setCurrentTab(3);

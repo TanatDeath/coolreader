@@ -414,7 +414,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_type_filled_2, R.attr.attr_icons8_google_drive_2,
 						 R.attr.attr_icons8_quote_2, R.attr.attr_icons8_bookmark_plus,
 						 R.attr.attr_icons8_google_translate_save,
-						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting
+						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting,
+						 R.attr.attr_icons8_toggle_page_view_mode
 
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
@@ -485,6 +486,7 @@ public class BaseActivity extends Activity implements Settings {
 
 		int brFolderScan  = a.getResourceId(61, 0);
 		int brAlphabeticalSorting  = a.getResourceId(62, 0);
+		int brTogglePageViewMode = a.getResourceId(63, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -615,6 +617,8 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.SCAN_DIRECTORY_RECURSIVE.setIconId(brFolderScan);
 		if (brAlphabeticalSorting!=0)
 			ReaderAction.FILE_BROWSER_SORT_ORDER.setIconId(brAlphabeticalSorting);
+		if (brTogglePageViewMode!=0)
+			ReaderAction.TOGGLE_PAGE_VIEW_MODE.setIconId(brTogglePageViewMode);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {

@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 public class BookInfoDialog extends BaseDialog {
 	private final BaseActivity mCoolReader;
+	private final BookInfo mBookInfo;
 	private final LayoutInflater mInflater; 
 	private Map<String, Integer> mLabelMap;
 	private void fillMap() {
@@ -44,7 +45,24 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.title", R.string.book_info_book_title);
 		mLabelMap.put("book.series", R.string.book_info_book_series_name);
 		mLabelMap.put("book.language", R.string.book_info_book_language);
+		mLabelMap.put("book.genre", R.string.book_info_book_genre);
+		mLabelMap.put("book.srclang", R.string.book_info_book_srclang);
+		mLabelMap.put("book.translator", R.string.book_info_book_translator);
+		mLabelMap.put("section.book_document", R.string.book_info_section_book_document);
+		mLabelMap.put("book.docauthor", R.string.book_info_book_docauthor);
+		mLabelMap.put("book.docprogram", R.string.book_info_book_docprogram);
+		mLabelMap.put("book.docdate", R.string.book_info_book_docdate);
+		mLabelMap.put("book.docsrcurl", R.string.book_info_book_docsrcurl);
+		mLabelMap.put("book.docsrcocr", R.string.book_info_book_docsrcocr);
+		mLabelMap.put("book.docversion", R.string.book_info_book_docversion);
+		mLabelMap.put("section.book_publisher", R.string.book_info_section_book_publisher);
+		mLabelMap.put("book.publname", R.string.book_info_book_publname);
+		mLabelMap.put("book.publisher", R.string.book_info_book_publisher);
+		mLabelMap.put("book.publcity", R.string.book_info_book_publcity);
+		mLabelMap.put("book.publyear", R.string.book_info_book_publyear);
+		mLabelMap.put("book.publisbn", R.string.book_info_book_publisbn);
 		mLabelMap.put("book.translation", R.string.book_info_book_translation);
+		mLabelMap.put("section.book_translation", R.string.book_info_section_book_translation);
 	}
 	
 	private void addItem(TableLayout table, String item) {
@@ -79,20 +97,25 @@ public class BookInfoDialog extends BaseDialog {
 		table.addView(tableRow);
 	}
 	
-	public BookInfoDialog(final BaseActivity activity, Collection<String> items)
+	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, String annot)
 	{
 		super(activity);
 		mCoolReader = activity;
+		mBookInfo = bi;
 		setTitle(mCoolReader.getString(R.string.dlg_book_info));
 		fillMap();
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.book_info_dialog, null);
 		TableLayout table = (TableLayout)view.findViewById(R.id.table);
 		Button btnInfo = (Button) view.findViewById(R.id.btn_edit_info);
+		TextView txtAnnot = (TextView) view.findViewById(R.id.lbl_annotation);
+		if (StrUtils.isEmptyStr(annot))
+			txtAnnot.setVisibility(View.INVISIBLE);
+		txtAnnot.setText(annot);
 		btnInfo.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				CoolReader cr = (CoolReader)mCoolReader;
-				FileInfo fi = cr.getReaderView().getBookInfo().getFileInfo();
+				FileInfo fi = mBookInfo.getFileInfo();
 				FileInfo dfi = fi.parent;
 				if (dfi == null) {
 					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
@@ -121,7 +144,7 @@ public class BookInfoDialog extends BaseDialog {
 		btnShortcut.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				CoolReader cr = (CoolReader)mCoolReader;
-				FileInfo fi = cr.getReaderView().getBookInfo().getFileInfo();
+				FileInfo fi = mBookInfo.getFileInfo();
 				cr.createBookShortcut(fi);
 			}
 		});

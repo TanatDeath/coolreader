@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import android.util.Log;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
+import org.coolreader.db.MainDB;
 import org.coolreader.plugins.OnlineStorePluginManager;
 import org.coolreader.plugins.OnlineStoreWrapper;
 
@@ -253,7 +254,13 @@ public class Scanner extends FileInfoChangeSource {
 				for (int i=0; i<baseDir.fileCount(); i++) {
 					FileInfo item = baseDir.getFile(i);
 					FileInfo fromDB = mapOfFilesFoundInDb.get(item.getPathName());
+					boolean isOldVer = true;
 					if (fromDB != null) {
+						if (fromDB.saved_with_ver == MainDB.DB_VERSION) isOldVer = false;
+						//mActivity.showToast(fromDB.filename+ " "+fromDB.saved_with_ver);
+					}
+					if (isOldVer) fromDB = null;
+					if ((fromDB != null) && (!isOldVer)) {
 						// use DB value
 						baseDir.setFile(i, fromDB);
 					} else {
@@ -264,15 +271,17 @@ public class Scanner extends FileInfoChangeSource {
 							filesForSave.add(new FileInfo(item));
 						}
 					}
+					//plotn -remove
+					//filesForParsing.add(new FileInfo(item));
 				}
-				if (filesForSave.size() > 0) {
+                if (filesForSave.size() > 0) {
 					db.saveFileInfos(filesForSave);
 				}
-				if (filesForParsing.size() == 0 || control.isStopped()) {
+                if (filesForParsing.size() == 0 || control.isStopped()) {
 					readyCallback.run();
 					return;
 				}
-				// scan files in Background thread
+                // scan files in Background thread
 				BackgroundThread.instance().postBackground(new Runnable() {
 					@Override
 					public void run() {
@@ -285,6 +294,7 @@ public class Scanner extends FileInfoChangeSource {
 									break;
 								progress.setProgress(i * 10000 / count);
 								FileInfo item = filesForParsing.get(i);
+								log.v("scanBookProperties for "+item.filename);
 								engine.scanBookProperties(item);
 								filesForSave.add(item);
 							}
@@ -336,7 +346,8 @@ public class Scanner extends FileInfoChangeSource {
 			readyCallback.run();
 			return;
 		}
-		Engine.ProgressControl progress = engine.createProgress(recursiveScan ? 0 : R.string.progress_scanning); 
+		Engine.ProgressControl progress = engine.createProgress(recursiveScan ? 0 : R.string.progress_scanning);
+		log.d("calling scanDirectoryFiles");
 		scanDirectoryFiles(db, baseDir, scanControl, progress, new Runnable() {
 			@Override
 			public void run() {

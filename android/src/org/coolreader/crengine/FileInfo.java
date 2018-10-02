@@ -38,6 +38,22 @@ public class FileInfo {
 	public String authors; // authors, delimited with '|'
 	public String series; // series name w/o number
 	public int seriesNumber; // number of book inside series
+    public int saved_with_ver; // version of database book was saved with
+	public String genre;
+	public String annotation;
+	public String srclang;
+	public String translator;
+	public String docauthor;
+	public String docprogram;
+	public String docdate;
+	public String docsrcurl;
+	public String docsrcocr;
+	public String docversion;
+	public String publname;
+	public String publisher;
+	public String publcity;
+	public String publyear;
+	public String publisbn;
 	public String path; // path to directory where file or archive is located
 	public String filename; // file name w/o path for normal file, with optional path for file inside archive 
 	public String pathname; // full path+arcname+filename

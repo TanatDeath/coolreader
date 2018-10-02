@@ -15,10 +15,12 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public final int DB_VERSION = 23;
+	public static final int DB_VERSION = 25;
 	@Override
 	protected boolean upgradeSchema() {
+		log.i("DB_VERSION "+DB_VERSION);
 		if (mDB.needUpgrade(DB_VERSION)) {
+			log.i("DB_VERSION NEED UPGRADE");
 			execSQL("CREATE TABLE IF NOT EXISTS author (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					"name VARCHAR NOT NULL COLLATE NOCASE" +
@@ -54,8 +56,24 @@ public class MainDB extends BaseDB {
 					"flags INTEGER DEFAULT 0, " +
 					"language VARCHAR DEFAULT NULL, " +
 					"lang_from VARCHAR DEFAULT NULL, " +
-					"lang_to VARCHAR DEFAULT NULL " +
-					")");
+					"lang_to VARCHAR DEFAULT NULL, " +
+					"saved_with_ver INTEGER DEFAULT 0, " +
+					"genre VARCHAR DEFAULT NULL, " +
+					"annotation VARCHAR DEFAULT NULL, " +
+					"srclang VARCHAR DEFAULT NULL, " +
+					"translator VARCHAR DEFAULT NULL, " +
+					"docauthor VARCHAR DEFAULT NULL, " +
+					"docprogram VARCHAR DEFAULT NULL, " +
+					"docdate VARCHAR DEFAULT NULL, " +
+					"docsrcurl VARCHAR DEFAULT NULL, " +
+					"docsrcocr VARCHAR DEFAULT NULL, " +
+					"docversion VARCHAR DEFAULT NULL, " +
+					"publname VARCHAR DEFAULT NULL, " +
+					"publisher VARCHAR DEFAULT NULL, " +
+					"publcity VARCHAR DEFAULT NULL, " +
+					"publyear VARCHAR DEFAULT NULL, " +
+					"publisbn VARCHAR DEFAULT NULL " +
+			")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
 			execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
@@ -134,6 +152,68 @@ public class MainDB extends BaseDB {
 			    execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN password VARCHAR DEFAULT NULL");
 			}
 
+			if (currentVersion < 24) {
+				execSQL("CREATE TABLE IF NOT EXISTS search_history (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						"book_fk INTEGER NOT NULL REFERENCES book (id), " +
+						"search_text VARCHAR " +
+						")");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"search_history_index ON search_history (book_fk) ");
+				execSQL("CREATE TABLE IF NOT EXISTS user_dic (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						"dic_word VARCHAR, " +
+						"dic_word_translate VARCHAR, " +
+						"dic_from_book VARCHAR, " +
+						"create_time INTEGER, " +
+						"last_access_time INTEGER, " +
+						"language VARCHAR DEFAULT NULL, " +
+						"seen_count INTEGER, " +
+						"is_citation INTEGER DEFAULT 0 " +
+						")");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"user_dic_index ON user_dic (dic_word) ");
+				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN link_pos VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN lang_from VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN lang_to VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN is_citation INTEGER DEFAULT 0");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN saved_with_ver INTEGER DEFAULT 0");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN genre VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN annotation VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN srclang VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN translator VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN docauthor VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN docprogram VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN docdate VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN docsrcurl VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN docsrcocr VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN docversion VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publname VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publisher VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publcity VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publyear VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publisbn VARCHAR DEFAULT NULL");
+				//addOPDSCatalogs(DEF_OPDS_URLS3);
+
+				execSQL("CREATE TABLE IF NOT EXISTS dic_search_history (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						"search_text VARCHAR, " +
+						"text_translate VARCHAR, " +
+						"search_from_book VARCHAR, " +
+						"dictionary_used VARCHAR, " +
+						"create_time INTEGER, " +
+						"last_access_time INTEGER, " +
+						"language_from VARCHAR DEFAULT NULL, " +
+						"language_to VARCHAR DEFAULT NULL, " +
+						"seen_count INTEGER "+
+						")");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"dic_search_history_index ON dic_search_history (search_text) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"dic_search_history_index_date ON dic_search_history (last_access_time DESC) ");
+
+			}
+
 			//==============================================================
 			// add more updates above this line
 				
@@ -141,49 +221,6 @@ public class MainDB extends BaseDB {
 			if (currentVersion < DB_VERSION)
 				mDB.setVersion(DB_VERSION);
 		}
-
-		execSQL("CREATE TABLE IF NOT EXISTS search_history (" +
-				"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				"book_fk INTEGER NOT NULL REFERENCES book (id), " +
-				"search_text VARCHAR " +
-				")");
-		execSQL("CREATE INDEX IF NOT EXISTS " +
-				"search_history_index ON search_history (book_fk) ");
-		execSQL("CREATE TABLE IF NOT EXISTS user_dic (" +
-				"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				"dic_word VARCHAR, " +
-				"dic_word_translate VARCHAR, " +
-				"dic_from_book VARCHAR, " +
-				"create_time INTEGER, " +
-				"last_access_time INTEGER, " +
-				"language VARCHAR DEFAULT NULL, " +
-				"seen_count INTEGER, " +
-				"is_citation INTEGER DEFAULT 0 " +
-				")");
-		execSQL("CREATE INDEX IF NOT EXISTS " +
-				"user_dic_index ON user_dic (dic_word) ");
-		execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN link_pos VARCHAR DEFAULT NULL");
-		execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN lang_from VARCHAR DEFAULT NULL");
-		execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN lang_to VARCHAR DEFAULT NULL");
-		execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN is_citation INTEGER DEFAULT 0");
-		//addOPDSCatalogs(DEF_OPDS_URLS3);
-
-		execSQL("CREATE TABLE IF NOT EXISTS dic_search_history (" +
-				"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				"search_text VARCHAR, " +
-				"text_translate VARCHAR, " +
-				"search_from_book VARCHAR, " +
-				"dictionary_used VARCHAR, " +
-				"create_time INTEGER, " +
-				"last_access_time INTEGER, " +
-				"language_from VARCHAR DEFAULT NULL, " +
-				"language_to VARCHAR DEFAULT NULL, " +
-				"seen_count INTEGER "+
-				")");
-		execSQL("CREATE INDEX IF NOT EXISTS " +
-				"dic_search_history_index ON dic_search_history (search_text) ");
-		execSQL("CREATE INDEX IF NOT EXISTS " +
-				"dic_search_history_index_date ON dic_search_history (last_access_time DESC) ");
 
 		dumpStatistics();
 		
@@ -1616,6 +1653,22 @@ public class MainDB extends BaseDB {
 			add("language", newValue.language, oldValue.language);
 			add("lang_from", newValue.lang_from, oldValue.lang_from);
 			add("lang_to", newValue.lang_to, oldValue.lang_to);
+			add("saved_with_ver", (long)MainDB.DB_VERSION, (long)oldValue.saved_with_ver);
+			add("genre", newValue.genre, oldValue.genre);
+			add("annotation", newValue.annotation, oldValue.annotation);
+			add("srclang", newValue.srclang, oldValue.srclang);
+			add("translator", newValue.translator, oldValue.translator);
+			add("docauthor", newValue.docauthor, oldValue.docauthor);
+			add("docprogram", newValue.docprogram, oldValue.docprogram);
+			add("docdate", newValue.docdate, oldValue.docdate);
+			add("docsrcurl", newValue.docsrcurl, oldValue.docsrcurl);
+			add("docsrcocr", newValue.docsrcocr, oldValue.docsrcocr);
+			add("docversion", newValue.docversion, oldValue.docversion);
+			add("publname", newValue.publname, oldValue.publname);
+			add("publisher", newValue.publisher, oldValue.publisher);
+			add("publcity", newValue.publcity, oldValue.publcity);
+			add("publyear", newValue.publyear, oldValue.publyear);
+			add("publisbn", newValue.publisbn, oldValue.publisbn);
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
@@ -1645,8 +1698,11 @@ public class MainDB extends BaseDB {
 		"s.name as series_name, " +
 		"series_number, " +
 		"format, filesize, arcsize, " +
-		"create_time, last_access_time, flags, language, lang_from, lang_to ";
-	
+		"create_time, last_access_time, flags, language, lang_from, lang_to, "+
+		"saved_with_ver, genre, annotation, srclang, translator, docauthor, "+
+		"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher," +
+		"publcity,  publyear, publisbn ";
+
 	private static final String READ_FILEINFO_SQL = 
 		"SELECT " +
 		READ_FILEINFO_FIELDS +
@@ -1676,6 +1732,22 @@ public class MainDB extends BaseDB {
 	    fileInfo.language = rs.getString(i++);
 		fileInfo.lang_from = rs.getString(i++);
 		fileInfo.lang_to = rs.getString(i++);
+		fileInfo.saved_with_ver = rs.getInt(i++);
+		fileInfo.genre = rs.getString(i++);
+		fileInfo.annotation = rs.getString(i++);
+		fileInfo.srclang = rs.getString(i++);
+		fileInfo.translator = rs.getString(i++);
+		fileInfo.docauthor = rs.getString(i++);
+		fileInfo.docprogram = rs.getString(i++);
+		fileInfo.docdate = rs.getString(i++);
+		fileInfo.docsrcurl = rs.getString(i++);
+		fileInfo.docsrcocr = rs.getString(i++);
+		fileInfo.docversion = rs.getString(i++);
+		fileInfo.publname = rs.getString(i++);
+		fileInfo.publisher = rs.getString(i++);
+		fileInfo.publcity = rs.getString(i++);
+		fileInfo.publyear = rs.getString(i++);
+		fileInfo.publisbn = rs.getString(i++);
 		fileInfo.isArchive = fileInfo.arcname!=null; 
 	}
 

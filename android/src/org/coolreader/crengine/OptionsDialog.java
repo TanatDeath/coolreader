@@ -3118,21 +3118,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsBrowser.add(new ListOption(this, getString(R.string.mi_book_sort_order), PROP_APP_BOOK_SORT_ORDER,
 				getString(R.string.option_add_info_empty_text)).add(sortOrderValues, sortOrderLabels, sortOrderAddInfos).setDefaultValue(FileInfo.SortOrder.TITLE_AUTHOR.name()).noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
-				getString(R.string.option_add_info_empty_text)).noIcon());
+				getString(R.string.mi_book_browser_simple_mode_add_info)).noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_show_cover_pages), PROP_APP_SHOW_COVERPAGES,
 				getString(R.string.options_app_show_cover_pages_add_info)).noIcon());
 		mOptionsBrowser.add(new ListOption(this, getString(R.string.options_app_cover_page_size), PROP_APP_COVERPAGE_SIZE,
 				getString(R.string.options_app_cover_page_size_add_info)).add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).setDefaultValue("1").noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_scan_book_props), PROP_APP_BOOK_PROPERTY_SCAN_ENABLED,
-				getString(R.string.option_add_info_empty_text)).setDefaultValue("1").noIcon());
+				getString(R.string.options_app_scan_book_props_add_info)).setDefaultValue("1").noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
-				getString(R.string.option_add_info_empty_text)).setDefaultValue("0").noIcon());
+				getString(R.string.options_app_browser_hide_empty_dirs_add_info)).setDefaultValue("0").noIcon());
 		mOptionsBrowser.add(new ListOption(this, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
 				getString(R.string.options_app_backlight_screen_add_info)).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).setDefaultValue("-1").noIcon());
 		mOptionsBrowser.add(new LangOption(this).noIcon());
 		mOptionsBrowser.add(new PluginsOption(this, getString(R.string.options_app_plugins), getString(R.string.option_add_info_empty_text)).noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_fullscreen), PROP_APP_FULLSCREEN,
-				getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
+				getString(R.string.options_app_fullscreen_add_info)).setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
 		if ( !DeviceInfo.EINK_SCREEN ) {
 			mOptionsBrowser.add(new NightModeOption(this, getString(R.string.options_inverse_view), PROP_NIGHT_MODE,
 					getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_night_drawable, R.drawable.cr3_option_night));
@@ -3151,6 +3151,24 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	{
         mInflater = LayoutInflater.from(getContext());
         mTabs = (TabHost)mInflater.inflate(R.layout.options, null);
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+		final int colorGray = a.getColor(0, Color.GRAY);
+		final int colorGrayC = a.getColor(1, Color.GRAY);
+
+		mTabs.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+			@Override
+			public void onTabChanged(String tabId) {
+				for (int i = 0; i < mTabs.getTabWidget().getChildCount(); i++) {
+					mTabs.getTabWidget().getChildAt(i)
+							.setBackgroundColor(colorGrayC); // unselected
+				}
+
+				mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
+						.setBackgroundColor(colorGray); // selected
+
+			}
+		});
 		// setup tabs
 		//setView(R.layout.options);
 		//setContentView(R.layout.options);
@@ -3188,40 +3206,58 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		
 		//
 		mOptionsPage = new OptionsListView(getContext());
-		mOptionsPage.add(new BoolOption(this, getString(R.string.options_app_fullscreen), PROP_APP_FULLSCREEN, getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
-		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_toolbar_position), PROP_TOOLBAR_LOCATION, getString(R.string.option_add_info_empty_text)).add(mToolbarPositions, mToolbarPositionsTitles,
+		mOptionsPage.add(new BoolOption(this, getString(R.string.options_app_fullscreen), PROP_APP_FULLSCREEN,
+				getString(R.string.options_app_fullscreen_add_info)).setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
+		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_toolbar_position), PROP_TOOLBAR_LOCATION,
+				getString(R.string.options_view_toolbar_position_add_info)).add(mToolbarPositions, mToolbarPositionsTitles,
 				mToolbarPositionsAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_navigation_toolbar_top, R.drawable.icons8_navigation_toolbar_top));
-		mOptionsPage.add(new BoolOption(this, getString(R.string.options_view_toolbar_hide_in_fullscreen), PROP_TOOLBAR_HIDE_IN_FULLSCREEN, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").
+		mOptionsPage.add(new BoolOption(this, getString(R.string.options_view_toolbar_hide_in_fullscreen), PROP_TOOLBAR_HIDE_IN_FULLSCREEN,
+				getString(R.string.options_view_toolbar_hide_in_fullscreen_add_info)).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
-		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_toolbar_appearance), PROP_TOOLBAR_APPEARANCE, getString(R.string.option_add_info_empty_text)).
+		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_toolbar_appearance), PROP_TOOLBAR_APPEARANCE,
+				getString(R.string.options_view_toolbar_appearance_add_info)).
 				add(mToolbarApperance, mToolbarApperanceTitles, mToolbarApperanceAddInfos).setDefaultValue("0").setIconIdByAttr(
 						R.attr.attr_icons8_navigation_toolbar_top, R.drawable.icons8_navigation_toolbar_top));
-		mOptionsPage.add(new ReaderToolbarOption(this, getString(R.string.options_reader_toolbar_buttons), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys));
-		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_mode), PROP_PAGE_VIEW_MODE, getString(R.string.option_add_info_empty_text)).add(mViewModes, mViewModeTitles, mViewModeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
+		mOptionsPage.add(new ReaderToolbarOption(this, getString(R.string.options_reader_toolbar_buttons),
+				getString(R.string.options_reader_toolbar_buttons_add_info)).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys));
+		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_mode), PROP_PAGE_VIEW_MODE,
+				getString(R.string.options_view_mode_add_info)).add(mViewModes, mViewModeTitles, mViewModeAddInfos).
+				setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
 		//mOptionsPage.add(new ListOption(getString(R.string.options_page_orientation), PROP_ROTATE_ANGLE).add(mOrientations, mOrientationsTitles).setDefaultValue("0"));
 		if (DeviceInfo.getSDKLevel() >= 9)
-			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION, getString(R.string.option_add_info_empty_text)).add(mOrientations_API9, mOrientationsTitles_API9, mOrientationsAddInfos_API9).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
+			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION,
+					getString(R.string.options_page_orientation_add_info)).add(mOrientations_API9, mOrientationsTitles_API9, mOrientationsAddInfos_API9).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
 		else
-			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION, getString(R.string.option_add_info_empty_text)).add(mOrientations, mOrientationsTitles, mOrientationsAddInfos).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
-		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_landscape_pages), PROP_LANDSCAPE_PAGES, getString(R.string.option_add_info_empty_text)).add(mLandscapePages, mLandscapePagesTitles, mLandscapePagesAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_pages_two_drawable, R.drawable.cr3_option_pages_two));
-		mOptionsPage.add(new NightModeOption(this, getString(R.string.options_inverse_view), PROP_NIGHT_MODE, getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_night_drawable, R.drawable.cr3_option_night));
-		mOptionsPage.add(new ColorOption(this, getString(R.string.options_color_text), PROP_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_font_color, R.drawable.icons8_font_color));
-		mOptionsPage.add(new ColorOption(this, getString(R.string.options_color_background), PROP_BACKGROUND_COLOR, 0xFFFFFF, getString(R.string.option_add_info_empty_text)).
+			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION,
+					getString(R.string.options_page_orientation_add_info)).add(mOrientations, mOrientationsTitles, mOrientationsAddInfos).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
+		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_landscape_pages), PROP_LANDSCAPE_PAGES,
+				getString(R.string.options_page_landscape_pages_add_info)).add(mLandscapePages, mLandscapePagesTitles, mLandscapePagesAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_pages_two_drawable, R.drawable.cr3_option_pages_two));
+		mOptionsPage.add(new NightModeOption(this, getString(R.string.options_inverse_view), PROP_NIGHT_MODE,
+				getString(R.string.options_inverse_view_add_info)).setIconIdByAttr(R.attr.cr3_option_night_drawable, R.drawable.cr3_option_night));
+		mOptionsPage.add(new ColorOption(this, getString(R.string.options_color_text), PROP_FONT_COLOR, 0x000000,
+				getString(R.string.options_color_text_add_info)).setIconIdByAttr(R.attr.attr_icons8_font_color, R.drawable.icons8_font_color));
+		mOptionsPage.add(new ColorOption(this, getString(R.string.options_color_background), PROP_BACKGROUND_COLOR, 0xFFFFFF,
+				getString(R.string.options_color_background_add_info)).
 				setIconIdByAttr(R.attr.attr_icons8_paint_palette1, R.drawable.icons8_paint_palette1));
 		if ( !DeviceInfo.EINK_SCREEN )
-			mOptionsPage.add(new TextureOptions(this, getString(R.string.options_background_texture), getString(R.string.option_add_info_empty_text)).
+			mOptionsPage.add(new TextureOptions(this, getString(R.string.options_background_texture),
+					getString(R.string.options_background_texture_add_info)).
 					setIconIdByAttr(R.attr.attr_icons8_texture, R.drawable.icons8_texture));
 		if ( DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED ) {
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE, getString(R.string.option_add_info_empty_text)).add(mScreenUpdateModes, mScreenUpdateModesTitles, mScreenUpdateModesAddInfos).setDefaultValue("0"));
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_update_interval), PROP_APP_SCREEN_UPDATE_INTERVAL, getString(R.string.option_add_info_empty_text)).add(mScreenFullUpdateInterval).setDefaultValue("10"));
 		}
 
-		mOptionsPage.add(new StatusBarOption(this, getString(R.string.options_page_titlebar), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_document_r_title, R.drawable.icons8_document_r_title));
-		mOptionsPage.add(new BoolOption(this, getString(R.string.options_page_footnotes), PROP_FOOTNOTES, getString(R.string.option_add_info_empty_text)).setDefaultValue("1").
+		mOptionsPage.add(new StatusBarOption(this, getString(R.string.options_page_titlebar),
+				getString(R.string.options_page_titlebar_add_info)).setIconIdByAttr(R.attr.attr_icons8_document_r_title, R.drawable.icons8_document_r_title));
+		mOptionsPage.add(new BoolOption(this, getString(R.string.options_page_footnotes), PROP_FOOTNOTES,
+				getString(R.string.options_page_footnotes_add_info)).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_document_footnote,R.drawable.icons8_document_footnote));
 		if ( !DeviceInfo.EINK_SCREEN )
-			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_animation), PROP_PAGE_ANIMATION, getString(R.string.option_add_info_empty_text)).add(mAnimation, mAnimationTitles, mAnimationAddInfos).setDefaultValue("1").noIcon());
-		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_bookmarks_highlight), PROP_APP_HIGHLIGHT_BOOKMARKS, getString(R.string.option_add_info_empty_text)).add(mHighlightMode, mHighlightModeTitles, mHighlightModeAddInfos).setDefaultValue("1").
+			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_animation), PROP_PAGE_ANIMATION,
+					getString(R.string.options_page_animation_add_info)).add(mAnimation, mAnimationTitles, mAnimationAddInfos).setDefaultValue("1").noIcon());
+		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_bookmarks_highlight), PROP_APP_HIGHLIGHT_BOOKMARKS,
+				getString(R.string.options_view_bookmarks_highlight_add_info)).add(mHighlightMode, mHighlightModeTitles, mHighlightModeAddInfos).setDefaultValue("1").
 			setIconIdByAttr(R.attr.attr_icons8_bookmark_simple_color,R.drawable.icons8_bookmark_simple_color));
 		if ( !DeviceInfo.EINK_SCREEN ) {
 			mOptionsPage.add(new ColorOption(this, getString(R.string.options_view_color_selection), PROP_HIGHLIGHT_SELECTION_COLOR, 0xCCCCCC, getString(R.string.option_add_info_empty_text)).noIcon());
@@ -3234,35 +3270,46 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_margin_top), PROP_PAGE_MARGIN_TOP, getString(R.string.option_add_info_empty_text)).add(mMargins).setDefaultValue("5").setIconIdByAttr(R.attr.cr3_option_text_margin_top_drawable, R.drawable.cr3_option_text_margin_top));
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_margin_bottom), PROP_PAGE_MARGIN_BOTTOM, getString(R.string.option_add_info_empty_text)).add(mMargins).setDefaultValue("5").setIconIdByAttr(R.attr.cr3_option_text_margin_bottom_drawable, R.drawable.cr3_option_text_margin_bottom));
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_rounded_corners_margin), PROP_ROUNDED_CORNERS_MARGIN,
-				getString(R.string.option_add_info_empty_text)).add(mRoundedCornersMargins).setDefaultValue("0")
+				getString(R.string.options_rounded_corners_margin_add_info)).add(mRoundedCornersMargins).setDefaultValue("0")
 				.setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin, R.drawable.icons8_rounded_corners_margin));
 		mOptionsControls = new OptionsListView(getContext());
-		mOptionsControls.add(new KeyMapOption(this, getString(R.string.options_app_key_actions), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys));
-		mOptionsControls.add(new TapZoneOption(this, getString(R.string.options_app_tapzones_normal), PROP_APP_TAP_ZONE_ACTIONS_TAP, getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.cr3_option_controls_tapzones_drawable, R.drawable.cr3_option_controls_tapzones));
-		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_tap_secondary_action_type), PROP_APP_SECONDARY_TAP_ACTION_TYPE, getString(R.string.option_add_info_empty_text)).add(mTapSecondaryActionType, mTapSecondaryActionTypeTitles, mTapSecondaryActionTypeAddInfos).setDefaultValue(String.valueOf(TAP_ACTION_TYPE_LONGPRESS)).
+		mOptionsControls.add(new KeyMapOption(this, getString(R.string.options_app_key_actions),
+				getString(R.string.options_app_key_actions_add_info)).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys));
+		mOptionsControls.add(new TapZoneOption(this, getString(R.string.options_app_tapzones_normal), PROP_APP_TAP_ZONE_ACTIONS_TAP,
+				getString(R.string.options_app_tapzones_normal_add_info)).setIconIdByAttr(R.attr.cr3_option_controls_tapzones_drawable, R.drawable.cr3_option_controls_tapzones));
+		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_tap_secondary_action_type), PROP_APP_SECONDARY_TAP_ACTION_TYPE,
+				getString(R.string.options_controls_tap_secondary_action_type_add_info)).add(mTapSecondaryActionType, mTapSecondaryActionTypeTitles, mTapSecondaryActionTypeAddInfos).setDefaultValue(String.valueOf(TAP_ACTION_TYPE_LONGPRESS)).
 				setIconIdByAttr(R.attr.attr_icons8_double_tap, R.drawable.icons8_double_tap));
-		mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_double_tap_selection), PROP_APP_DOUBLE_TAP_SELECTION, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
+		mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_double_tap_selection), PROP_APP_DOUBLE_TAP_SELECTION,
+				getString(R.string.options_app_double_tap_selection_add_info)).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
 		if ( !DeviceInfo.EINK_SCREEN )
-			mOptionsControls.add(new BoolOption(this, getString(R.string.options_controls_enable_volume_keys), PROP_CONTROLS_ENABLE_VOLUME_KEYS, getString(R.string.option_add_info_empty_text)).setDefaultValue("1").
+			mOptionsControls.add(new BoolOption(this, getString(R.string.options_controls_enable_volume_keys), PROP_CONTROLS_ENABLE_VOLUME_KEYS,
+					getString(R.string.options_controls_enable_volume_keys_add_info)).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
-		mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_tapzone_hilite), PROP_APP_TAP_ZONE_HILIGHT, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
+		mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_tapzone_hilite), PROP_APP_TAP_ZONE_HILIGHT,
+				getString(R.string.options_app_tapzone_hilite_add_info)).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
 		if ( !DeviceInfo.EINK_SCREEN )
-			mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_trackball_disable), PROP_APP_TRACKBALL_DISABLED, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").
+			mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_trackball_disable), PROP_APP_TRACKBALL_DISABLED,
+					getString(R.string.options_app_trackball_disable_add_info)).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_computer_mouse,R.drawable.icons8_computer_mouse));
 		//if ( !DeviceInfo.EINK_SCREEN ) // nook glowlight has this option
-		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL, getString(R.string.option_add_info_empty_text)).
+		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
+				getString(R.string.options_controls_flick_brightness_add_info)).
 					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise));
 		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled), 
-			    PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_add_info_empty_text)).add(
+			    PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_controls_gesture_page_flipping_enabled_add_info)).add(
 				mPagesPerFullSwipe, mPagesPerFullSwipeTitles, mPagesPerFullSwipeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));		
-		mOptionsControls.add(new ListOption(this, getString(R.string.options_selection_action), PROP_APP_SELECTION_ACTION, getString(R.string.option_add_info_empty_text)).add(mSelectionAction, mSelectionActionTitles, mSelectionActionAddInfos).setDefaultValue("0").
+		mOptionsControls.add(new ListOption(this, getString(R.string.options_selection_action), PROP_APP_SELECTION_ACTION,
+				getString(R.string.options_selection_action_add_info)).add(mSelectionAction, mSelectionActionTitles, mSelectionActionAddInfos).setDefaultValue("0").
             setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
-		mOptionsControls.add(new ListOption(this, getString(R.string.options_multi_selection_action), PROP_APP_MULTI_SELECTION_ACTION, getString(R.string.option_add_info_empty_text)).add(mMultiSelectionAction, mMultiSelectionActionTitles, mMultiSelectionActionAddInfo).setDefaultValue("0").
+		mOptionsControls.add(new ListOption(this, getString(R.string.options_multi_selection_action), PROP_APP_MULTI_SELECTION_ACTION,
+				getString(R.string.options_multi_selection_action_add_info)).add(mMultiSelectionAction, mMultiSelectionActionTitles, mMultiSelectionActionAddInfo).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_document_selection2, R.drawable.icons8_document_selection2));
 		mOptionsControls.add(new ListOption(this, getString(R.string.options_selection_action_long),
 				PROP_APP_SELECTION_ACTION_LONG, getString(R.string.options_selection_action_long_add_info)).add(mSelectionAction, mSelectionActionTitles, mSelectionActionAddInfos).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_document_selection1_long, R.drawable.icons8_document_selection1_long));
-		mOptionsControls.add(new BoolOption(this, getString(R.string.options_selection_keep_selection_after_dictionary), PROP_APP_SELECTION_PERSIST, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").
+		mOptionsControls.add(new BoolOption(this, getString(R.string.options_selection_keep_selection_after_dictionary), PROP_APP_SELECTION_PERSIST,
+				getString(R.string.options_selection_keep_selection_after_dictionary_add_info)).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_document_selection_lock, R.drawable.icons8_document_selection_lock));
 
 		mOptionsApplication = new OptionsListView(getContext());
@@ -3300,10 +3347,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_cover_page_size),
 				PROP_APP_COVERPAGE_SIZE, getString(R.string.options_app_cover_page_size_add_info)).add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_big_and_small, R.drawable.icons8_book_big_and_small));
-		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_scan_book_props), PROP_APP_BOOK_PROPERTY_SCAN_ENABLED, getString(R.string.option_add_info_empty_text)).
+		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_scan_book_props), PROP_APP_BOOK_PROPERTY_SCAN_ENABLED,
+				getString(R.string.options_app_scan_book_props_add_info)).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties));
-		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS, getString(R.string.option_add_info_empty_text)).setDefaultValue("0").noIcon());
-		mOptionsApplication.add(new BoolOption(this, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE, getString(R.string.option_add_info_empty_text)).
+		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
+				getString(R.string.options_app_browser_hide_empty_dirs_add_info)).setDefaultValue("0").noIcon());
+		mOptionsApplication.add(new BoolOption(this, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
+				getString(R.string.mi_book_browser_simple_mode_add_info)).
 				setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
 
 		mOptionsApplication.add(new SaveOptionsToGDOption(this, getString(R.string.save_settings_to_gd), getString(R.string.save_settings_to_gd_v), getString(R.string.option_add_info_empty_text)).
@@ -3311,7 +3361,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new LoadOptionsFromGDOption(this, getString(R.string.load_settings_from_gd), getString(R.string.load_settings_from_gd_v), getString(R.string.option_add_info_empty_text)).
 				setIconIdByAttr(R.attr.attr_icons8_settings_from_gd, R.drawable.icons8_settings_from_gd));
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_to_gd_timeout),
-				PROP_SAVE_POS_TO_GD_TIMEOUT, getString(R.string.option_add_info_empty_text)).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
+				PROP_SAVE_POS_TO_GD_TIMEOUT, getString(R.string.save_pos_to_gd_timeout_add_info)).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
 				setIconIdByAttr(R.attr.attr_icons8_position_to_gd_interval, R.drawable.icons8_position_to_gd_interval));
 
 		fillStyleEditorOptions();
@@ -3341,14 +3391,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings),
 				//R.drawable.icons8_settings,
 				R.string.tab_options_app);
-		
 		setView(mTabs);
+		mTabs.invalidate();
+		mTabs.setCurrentTab(4);
 	}
 	
 	private void addTab(String name, int imageDrawable, int contentDescription) {
 		TabHost.TabSpec ts = mTabs.newTabSpec(name);
 		Drawable icon = getContext().getResources().getDrawable(imageDrawable);
-		
 		// temporary rollback ImageButton tabs: no highlight for current tab in this implementation
 //		if (true) {
 			ts.setIndicator("", icon);

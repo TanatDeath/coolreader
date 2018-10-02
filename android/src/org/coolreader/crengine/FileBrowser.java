@@ -1077,6 +1077,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			TextView field1;
 			TextView field2;
 			TextView fieldState;
+			ImageView imageAddInfo;
+			ImageView imageAddMenu;
 			//TextView field3;
 			void setText( TextView view, String text )
 			{
@@ -1090,7 +1092,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					view.setVisibility(ViewGroup.INVISIBLE);
 				}
 			}
-			void setItem(FileInfo item, FileInfo parentItem)
+			void setItem(final FileInfo item, FileInfo parentItem)
 			{
 				if ( item==null ) {
 					image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_back_drawable, R.drawable.cr3_browser_back));
@@ -1107,6 +1109,38 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					name.setText(thisDir);
 					return;
 				}
+				if (imageAddInfo!=null) {
+					imageAddInfo.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+								@Override
+								public void onBookInfoLoaded(BookInfo bookInfo) {
+									//mActivity.showToast(item.annotation);
+									//log.v("BOOKNF annotation:"+item.annotation);
+									mActivity.showBookInfo(new BookInfo(item));
+								}
+							});
+						}
+					});
+				}
+
+				if (imageAddMenu!=null) {
+					imageAddMenu.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+								@Override
+								public void onBookInfoLoaded(BookInfo bookInfo) {
+									mActivity.showToast("Did not implemented yet...");
+								}
+							});
+						}
+					});
+				}
+
 				if ( item.isDirectory ) {
 					if (item.isBooksByAuthorRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
@@ -1305,6 +1339,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				holder.field1 = (TextView)view.findViewById(R.id.browser_item_field1);
 				holder.field2 = (TextView)view.findViewById(R.id.browser_item_field2);
 				holder.fieldState = (TextView)view.findViewById(R.id.browser_item_field_state);
+				holder.imageAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+				holder.imageAddMenu = (ImageView)view.findViewById(R.id.btn_add_menu);
+
 				//holder.field3 = (TextView)view.findViewById(R.id.browser_item_field3);
 				view.setTag(holder);
 			} else {

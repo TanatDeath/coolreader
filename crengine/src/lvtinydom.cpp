@@ -5357,8 +5357,6 @@ int ldomDocument::getFullHeight()
 #endif
 
 
-
-
 lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool shortMiddleName )
 {
     if ( delimiter.empty() )
@@ -5379,7 +5377,7 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
             author += " ";
         if ( !middleName.empty() )
             author += shortMiddleName ? lString16(middleName, 0, 1) + "." : middleName;
-        if ( !lastName.empty() && !author.empty() )
+        if ( !lastName.empty() && !author.empty() && !middleName.empty() )
             author += " ";
         author += lastName;
         if ( !authors.empty() )
@@ -5397,6 +5395,98 @@ lString16 extractDocTitle( ldomDocument * doc )
 lString16 extractDocLanguage( ldomDocument * doc )
 {
     return doc->createXPointer(L"/FictionBook/description/title-info/lang").getText();
+}
+
+lString16 extractDocGenre( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/title-info/genre").getText();
+}
+
+lString16 extractDocAnnotation( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/title-info/annotation").getText();
+}
+
+lString16 extractDocSrcLang( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/title-info/src-lang").getText();
+}
+
+lString16 extractDocTranslator( ldomDocument * doc, bool shortMiddleName  )
+{
+    lString16 firstName = doc->createXPointer(L"/FictionBook/description/title-info/translator/first-name").getText().trim();
+    lString16 lastName = doc->createXPointer(L"/FictionBook/description/title-info/translator/last-name").getText().trim();
+    lString16 middleName = doc->createXPointer(L"/FictionBook/description/title-info/translator/middle-name").getText().trim();
+    lString16 translator = firstName;
+    if ( !translator.empty() )
+      translator += " ";
+    if ( !middleName.empty() )
+      translator += shortMiddleName ? lString16(middleName, 0, 1) + "." : middleName;
+    if ( !lastName.empty() && !translator.empty()&& !middleName.empty() )
+      translator += " ";
+    translator += lastName;
+    return translator;
+
+}
+
+lString16 extractDocAuthor( ldomDocument * doc )
+{
+    lString16 nickName = doc->createXPointer(L"/FictionBook/description/document-info/author/nickname").getText();
+    lString16 email = doc->createXPointer(L"/FictionBook/description/document-info/author/email").getText();
+    if (( !nickName.empty() ) && ( !email.empty() )) return nickName + " (" +email+")";
+    if ( !nickName.empty() ) return nickName;
+    if ( !email.empty() ) return email;
+    return L"";
+}
+
+lString16 extractDocProgram( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/document-info/program-used").getText();
+}
+
+lString16 extractDocDate( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/document-info/date").getText();
+}
+
+lString16 extractDocSrcUrl( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/document-info/src-url").getText();
+}
+
+lString16 extractDocSrcOcr( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/document-info/src-ocr").getText();
+}
+
+lString16 extractDocVersion( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/document-info/version").getText();
+}
+
+lString16 extractPublName( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/publish-info/book-name").getText();
+}
+
+lString16 extractPublisher( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/publish-info/publisher").getText();
+}
+
+lString16 extractPublCity( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/publish-info/city").getText();
+}
+
+lString16 extractPublYear( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/publish-info/year").getText();
+}
+
+lString16 extractPublIsbn( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/publish-info/isbn").getText();
 }
 
 lString16 extractDocSeries( ldomDocument * doc, int * pSeriesNumber )

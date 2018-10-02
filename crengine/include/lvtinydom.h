@@ -2353,6 +2353,22 @@ public:
 lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter=lString16::empty_str, bool shortMiddleName=true );
 lString16 extractDocTitle( ldomDocument * doc );
 lString16 extractDocLanguage( ldomDocument * doc );
+lString16 extractDocGenre( ldomDocument * doc );
+lString16 extractDocAnnotation( ldomDocument * doc );
+lString16 extractDocSrcLang( ldomDocument * doc );
+lString16 extractDocTranslator( ldomDocument * doc, bool shortMiddleName  );
+lString16 extractDocAuthor( ldomDocument * doc );
+lString16 extractDocProgram( ldomDocument * doc );
+lString16 extractDocDate( ldomDocument * doc );
+lString16 extractDocSrcUrl( ldomDocument * doc );
+lString16 extractDocSrcOcr( ldomDocument * doc );
+lString16 extractDocVersion( ldomDocument * doc );
+lString16 extractPublName( ldomDocument * doc );
+lString16 extractPublisher( ldomDocument * doc );
+lString16 extractPublCity( ldomDocument * doc );
+lString16 extractPublYear( ldomDocument * doc );
+lString16 extractPublIsbn( ldomDocument * doc );
+
 /// returns "(Series Name #number)" if pSeriesNumber is NULL, separate name and number otherwise
 lString16 extractDocSeries( ldomDocument * doc, int * pSeriesNumber=NULL );
 

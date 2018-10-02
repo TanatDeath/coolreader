@@ -101,6 +101,21 @@ public:
     lString16 filedate;
     int seriesNumber;
     lString16 language;
+	lString16 genre;
+	lString16 annotation;
+	lString16 srclang;
+    lString16 translator;
+    lString16 docauthor;
+    lString16 docprogram;
+    lString16 docdate;
+    lString16 docsrcurl;
+    lString16 docsrcocr;
+    lString16 docversion;
+    lString16 publname;
+    lString16 publisher;
+    lString16 publcity;
+    lString16 publyear;
+    lString16 publisbn;
 };
 
 static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
@@ -233,6 +248,22 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     lString16 title = extractDocTitle( &doc );
     lString16 language = extractDocLanguage( &doc );
     lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
+	lString16 genre = extractDocGenre( &doc );
+	lString16 annotation = extractDocAnnotation( &doc );
+	lString16 srclang = extractDocSrcLang( &doc );
+    lString16 translator = extractDocTranslator( &doc, false );
+    lString16 docauthor = extractDocAuthor( &doc );
+    lString16 docprogram = extractDocProgram( &doc );
+    lString16 docdate = extractDocDate( &doc );
+    lString16 docsrcurl = extractDocSrcUrl( &doc );
+    lString16 docsrcocr = extractDocSrcOcr( &doc );
+    lString16 docversion = extractDocVersion( &doc );
+    lString16 publname = extractPublName( &doc );
+    lString16 publisher = extractPublisher( &doc );
+    lString16 publcity = extractPublCity( &doc );
+    lString16 publyear = extractPublYear( &doc );
+    lString16 publisbn = extractPublIsbn( &doc );
+
 #if SERIES_IN_AUTHORS==1
     if ( !series.empty() )
         authors << "    " << series;
@@ -244,6 +275,21 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     pBookProps->filename = lString16(name);
     pBookProps->filedate = getDateTimeString( t );
     pBookProps->language = language;
+	pBookProps->genre = genre;
+	pBookProps->annotation = annotation;
+	pBookProps->srclang = srclang;
+    pBookProps->translator = translator;
+    pBookProps->docauthor = docauthor;
+    pBookProps->docprogram = docprogram;
+    pBookProps->docdate = docdate;
+    pBookProps->docsrcurl = docsrcurl;
+    pBookProps->docsrcocr = docsrcocr;
+    pBookProps->docversion = docversion;
+    pBookProps->publname = publname;
+    pBookProps->publisher = publisher;
+    pBookProps->publcity = publcity;
+    pBookProps->publyear = publyear;
+    pBookProps->publisbn = publisbn;
     return true;
 }
 
@@ -287,7 +333,22 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	SET_STR_FLD("series",props.series);
 	SET_INT_FLD("seriesNumber",props.seriesNumber);
 	SET_STR_FLD("language",props.language);
-	
+	SET_STR_FLD("genre",props.genre);
+	SET_STR_FLD("annotation",props.annotation);
+	SET_STR_FLD("srclang",props.srclang);
+    SET_STR_FLD("translator",props.translator);
+    SET_STR_FLD("docauthor",props.docauthor);
+    SET_STR_FLD("docprogram",props.docprogram);
+    SET_STR_FLD("docdate",props.docdate);
+    SET_STR_FLD("docsrcurl",props.docsrcurl);
+    SET_STR_FLD("docsrcocr",props.docsrcocr);
+    SET_STR_FLD("docversion",props.docversion);
+    SET_STR_FLD("publname",props.publname);
+    SET_STR_FLD("publisher",props.publisher);
+    SET_STR_FLD("publcity",props.publcity);
+    SET_STR_FLD("publyear",props.publyear);
+    SET_STR_FLD("publisbn",props.publisbn);
+
 	return JNI_TRUE;
 }
 

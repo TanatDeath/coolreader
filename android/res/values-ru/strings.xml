@@ -112,7 +112,7 @@
     <string name="options_app_backlight_screen_default">Установленная в системе</string>
     <string name="options_app_tapzones_normal">Сенсорный экран</string>
     <string name="options_app_key_actions">Кнопки</string>
-    <string name="options_app_trackball_disable">Отключить трэкболл</string>
+    <string name="options_app_trackball_disable">Отключить трекболл</string>
     <string name="dir_sd_card_2">SD карта 2</string>
     <string name="mi_book_back_to_reading">Открытая книга</string>
     <string name="mi_book_root">В корень</string>
@@ -203,6 +203,13 @@
     <string name="mi_night_mode_enable">Ночной режим</string>
     <string name="book_info_file_format">Формат</string>
     <string name="book_info_section_book_properties">Свойства книги</string>
+    <string name="book_info_section_book_publisher">Информация об издании</string>
+    <string name="book_info_book_publname">Опубликованное название</string>
+    <string name="book_info_book_publisher">Издатель</string>
+    <string name="book_info_book_publcity">Город издания</string>
+    <string name="book_info_book_publyear">Год издания</string>
+    <string name="book_info_book_publisbn">ISBN издания</string>
+    <string name="book_info_section_book_translation">Направление перевода</string>
     <string name="book_info_book_authors">Автор(ы)</string>
     <string name="book_info_file_path">Путь к файлу</string>
     <string name="book_info_section_file_properties">Свойства файла</string>
@@ -470,6 +477,17 @@
     <string name="dlg_goto_input_percent">Введите процент для перехода:</string>
     <string name="book_info_book_language">Язык</string>
     <string name="book_info_book_translation">Перевод</string>
+    <string name="book_info_book_genre">Жанр</string>
+    <string name="book_info_book_srclang">Язык оригинала</string>
+    <string name="book_info_book_translator">Переводчик</string>
+    <string name="book_info_section_book_document">Свойства документа</string>
+    <string name="book_info_book_docauthor">Автор документа</string>
+    <string name="book_info_book_docprogram">Создан в программе</string>
+    <string name="book_info_book_docdate">Дата документа</string>
+    <string name="book_info_book_docsrcurl">URL документа</string>
+    <string name="book_info_book_docsrcocr">OCR документа</string>
+    <string name="book_info_book_docversion">Версия документа</string>
+
     <string name="book_state_toread">К прочтению</string>
     <string name="book_state_reading">Читаю</string>
     <string name="book_state_none">Нет пометки</string>
@@ -685,7 +703,7 @@
     <string name="btn_shortcut">Создать ярлык книги</string>
     <string name="tab_options_css">CSS</string>
     <string name="dlg_about_copyright">© Вадим Лопатин, 1998–2018</string>
-    <string name="dlg_about_contributors_">и участники…</string>
+    <string name="dlg_about_contributors_">и участники… (данная сборка является модификацией оригинального приложения, информация о сборке: https://github.com/plotn/coolreader/releases)</string>
     <string name="online_store_plugin_name_litres">ЛитРес</string>
     <string name="online_store_plugin_description_litres">книжный онлайн магазин</string>
     <string name="option_toolbar_buttons_none">Скрыть</string>
@@ -699,7 +717,7 @@
 
     <string name="options_app_locale_add_info">При необходимости позволяет выбрать язык интерфейса отличный от языка установленного в системе (Системный выбран по умолчанию)</string>
     <string name="options_app_ui_theme_add_info">Выбор внешнего вида меню и настроек из нескольких вариантов (Черная, Белая, Тёмная, Светлая и т.д.)</string>
-    <string name="skipped_res_add_info">Позволяет не обновлять страницу полностью для избежания переформатирования текста (при открытии диалогов, клавиатуры и т.д.)</string>
+    <string name="skipped_res_add_info">Позволяет не обновлять страницу полностью для избежания перефоматирования текста (при открытии диалогов, клавиатуры и т.д.)</string>
     <string name="options_app_backlight_timeout_add_info">Принудительная установка времени подстветки экрана 2-6 минут, либо согласно настроек системы (выбрано по умолчанию)</string>
     <string name="options_app_backlight_screen_add_info">Принудительная установка яркости экрана 1-100%, либо согласно настроек системы (выбрано по умолчанию)</string>
     <string name="options_app_tts_stop_motion_timeout_add_info">Если датчик движения не фиксирует активность, то чтение вслух прекращается после выбранного периода времени 1-100 минут, изначально выключено</string>
@@ -707,6 +725,39 @@
     <string name="options_app_settings_icons_add_info">Отображение пиктограмм перед пунктами меню (при отключении - только наименования)</string>
     <string name="options_app_show_cover_pages_add_info">Отображать обложки книг вместе с названиями</string>
     <string name="options_app_cover_page_size_add_info">Выбор отображаемого размера обложки книги (Маленькие, Средние, Большие)</string>
+    <string name="options_app_scan_book_props_add_info">Получать информацию о книгах в выбранной папке (автор, жанр, год издания и т.д.)</string>
+    <string name="options_app_browser_hide_empty_dirs_add_info">Скрывать папки не содержащие книг</string>
+    <string name="mi_book_browser_simple_mode_add_info">Данная опция отключает отображение обложек и прочей информации в папках с книгами</string>
+    <string name="save_pos_to_gd_timeout_add_info">Позиция чтения будет сохраняться каждые 1-100 минут на диск Google One, изначально выключено (требуется разрешение использования аккаунта)</string>
+    <string name="options_app_key_actions_add_info">Назначение действий для кнопок и поведения при подключении гарнитуры</string>
+    <string name="options_app_tapzones_normal_add_info">Настройка действий программы при нажатии на область экрана (экран разбит на 9 клеток 3x3)</string>
+    <string name="options_controls_tap_secondary_action_type_add_info">Настройка дополнительного действия при длинном или коротком нажатии</string>
+    <string name="options_app_double_tap_selection_add_info">Выделить текст при двойном нажатии на экран (для копирования, сохранения закладки, вызова словаря, отправки и т.д.)</string>
+    <string name="options_controls_enable_volume_keys_add_info">Листание страниц кнопками громкости</string>
+    <string name="options_app_tapzone_hilite_add_info">Выделять место нажатия на экран прямоугольником</string>
+    <string name="options_app_trackball_disable_add_info">Отключение трекбола для предотвращения случайного пролистывания (пример: HTC A8181)</string>
+    <string name="options_controls_flick_brightness_add_info">Проведите пальцем вверх или вниз для увеличения или уменьшения яркости (Выключено, Левый край, Правый край)</string>
+    <string name="option_controls_gesture_page_flipping_enabled_add_info">Листать страницы с помощью жестов (Выключено, 1-20 страниц), по умолчанию 1 страница (справа налево)</string>
+    <string name="options_selection_action_add_info">Действие, которое запускается при выделении слова</string>
+    <string name="options_multi_selection_action_add_info">Действие, которое запускается при выделении нескольких слов</string>
+    <string name="options_selection_keep_selection_after_dictionary_add_info">Сохранять выделение после вызова приложения словаря</string>
+    <string name="options_app_fullscreen_add_info">Если включено - заполнение страницей всего пространства</string>
+    <string name="options_view_toolbar_position_add_info">Выбор положения панели инструментов на экране</string>
+    <string name="options_view_toolbar_hide_in_fullscreen_add_info">Если выбрано - панель инструментов скрыта</string>
+    <string name="options_view_toolbar_appearance_add_info">Размер панели, затемнение, инверсия иконок</string>
+    <string name="options_reader_toolbar_buttons_add_info">Выбор кнопок отображаемых на панели инструментов</string>
+    <string name="options_view_mode_add_info">Страницы (перелистывание), свиток (прокручивание)</string>
+    <string name="options_page_orientation_add_info">Настройка ориентации страницы на экране</string>
+    <string name="options_page_landscape_pages_add_info">Количество страниц отображаемых в альбомном режиме (одна, две)</string>
+    <string name="options_inverse_view_add_info">Выбор режима чтения день или ночь</string>
+    <string name="options_color_text_add_info">Выбор цвета текста</string>
+    <string name="options_color_background_add_info">Выбор цвета фона</string>
+    <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета</string>
+    <string name="options_page_titlebar_add_info">Параметры отображения информации в колонтитуле</string>
+    <string name="options_page_footnotes_add_info">Отображение сносок (если есть) внизу страницы</string>
+    <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
+    <string name="options_view_bookmarks_highlight_add_info">Выбор или отключение выделения закладок</string>
+    <string name="options_rounded_corners_margin_add_info">Смещает правую и левую части элементов колонтитула ближе к центру экрана на устройствах с Edge Screen</string>
 
 </resources>
 

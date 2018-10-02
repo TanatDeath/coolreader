@@ -21,7 +21,9 @@
 			android:textStyle="bold"
 			android:layout_marginRight="5dip"
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"/>
+			android:layout_height="wrap_content"
+			android:textColor="?attr/colorIcon"
+			/>
 	</LinearLayout>
 	<LinearLayout
 		android:id="@+id/book_info_grid_cell2"
@@ -36,6 +38,8 @@
 			android:singleLine="false"
 			android:maxLines="3"
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"/>
+			android:layout_height="wrap_content"
+			android:textColor="?attr/colorIcon"
+		/>
 	</LinearLayout>
 </TableRow>
