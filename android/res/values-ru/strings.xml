@@ -703,7 +703,7 @@
     <string name="btn_shortcut">Создать ярлык книги</string>
     <string name="tab_options_css">CSS</string>
     <string name="dlg_about_copyright">© Вадим Лопатин, 1998–2018</string>
-    <string name="dlg_about_contributors_">и участники… (данная сборка является модификацией оригинального приложения, информация о сборке: https://github.com/plotn/coolreader/releases)</string>
+    <string name="dlg_about_contributors_">и участники…</string>
     <string name="online_store_plugin_name_litres">ЛитРес</string>
     <string name="online_store_plugin_description_litres">книжный онлайн магазин</string>
     <string name="option_toolbar_buttons_none">Скрыть</string>
