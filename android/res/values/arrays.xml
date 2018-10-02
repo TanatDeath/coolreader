@@ -121,6 +121,26 @@
         <item>@string/pages_per_full_swipe_18</item>
         <item>@string/pages_per_full_swipe_19</item>
         <item>@string/pages_per_full_swipe_20</item>
+        <item>@string/pages_per_full_swipe_m1</item>
+        <item>@string/pages_per_full_swipe_m2</item>
+        <item>@string/pages_per_full_swipe_m3</item>
+        <item>@string/pages_per_full_swipe_m4</item>
+        <item>@string/pages_per_full_swipe_m5</item>
+        <item>@string/pages_per_full_swipe_m6</item>
+        <item>@string/pages_per_full_swipe_m7</item>
+        <item>@string/pages_per_full_swipe_m8</item>
+        <item>@string/pages_per_full_swipe_m9</item>
+        <item>@string/pages_per_full_swipe_m10</item>
+        <item>@string/pages_per_full_swipe_m11</item>
+        <item>@string/pages_per_full_swipe_m12</item>
+        <item>@string/pages_per_full_swipe_m13</item>
+        <item>@string/pages_per_full_swipe_m14</item>
+        <item>@string/pages_per_full_swipe_m15</item>
+        <item>@string/pages_per_full_swipe_m16</item>
+        <item>@string/pages_per_full_swipe_m17</item>
+        <item>@string/pages_per_full_swipe_m18</item>
+        <item>@string/pages_per_full_swipe_m19</item>
+        <item>@string/pages_per_full_swipe_m20</item>
     </string-array>
 
     <integer-array name="pages_per_full_swipe_values">
@@ -145,9 +165,49 @@
         <item>18</item>
         <item>19</item>
         <item>20</item>
+        <item>-1</item>
+        <item>-2</item>
+        <item>-3</item>
+        <item>-4</item>
+        <item>-5</item>
+        <item>-6</item>
+        <item>-7</item>
+        <item>-8</item>
+        <item>-9</item>
+        <item>-10</item>
+        <item>-11</item>
+        <item>-12</item>
+        <item>-13</item>
+        <item>-14</item>
+        <item>-15</item>
+        <item>-16</item>
+        <item>-17</item>
+        <item>-18</item>
+        <item>-19</item>
+        <item>-20</item>
     </integer-array>
 
     <integer-array name="pages_per_full_swipe_add_infos">
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
         <item>0</item>
         <item>0</item>
         <item>0</item>
