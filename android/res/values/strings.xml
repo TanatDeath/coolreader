@@ -201,6 +201,7 @@
     <string name="options_selection_action_dictionary_1">Find in dictionary 1</string>
     <string name="options_selection_action_dictionary_2">Find in dictionary 2</string>
     <string name="options_selection_action_copy">Copy to clipboard</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="options_app_browser_hide_empty_dirs">Hide directories without books</string>
     <string name="dlg_about">About CoolReader</string>
     <string name="dlg_book_info">Book Info</string>
@@ -234,6 +235,8 @@
     <string name="book_info_system_battery">Battery</string>
     <string name="book_info_system_time">Time</string>
     <string name="book_info_system_resolution">Resolution</string>
+    <string name="book_info_system_device_model">Manufacturer / model / device / product / brand</string>
+    <string name="book_info_system_device_flags">Device features</string>
     <string name="book_info_position_chapter">Chapter</string>
     <string name="book_info_position_page">Page</string>
     <string name="book_info_position_percent">Percent</string>

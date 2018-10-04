@@ -17,10 +17,22 @@ my %ic_smaller_list=(
         'icons8_drop_down_no_frame.svg' => 'icons8_drop_down_no_frame_small.png',
         'icons8_drop_up_no_frame.svg' => 'icons8_drop_up_no_frame_small.png',
         'icons8_scroll_down.svg' => 'icons8_scroll_down_small.png',
-        'icons8_scroll_up.svg' => 'icons8_scroll_up_small.png'
+        'icons8_scroll_up.svg' => 'icons8_scroll_up_small.png',
+        'icons8_freq_down.svg' => 'icons8_freq_down.png',
+        'icons8_freq_up.svg' => 'icons8_freq_up.png',
+        'icons8_rate_down.svg' => 'icons8_rate_down.png',
+        'icons8_rate_up.svg' => 'icons8_rate_up.png',
+        'icons8_volume_down.svg' => 'icons8_volume_down.png',
+        'icons8_volume_up.svg' => 'icons8_volume_up.png'
 );
 
 my %ic_actions_list=(
+        'icons8_fast_forward.svg' => 'icons8_fast_forward.png',
+        'icons8_rewind.svg' => 'icons8_rewind.png',
+        'icons8_stop.svg' => 'icons8_stop.png',
+        'icons8_play.svg' => 'icons8_play.png',
+        'icons8_pause.svg' => 'icons8_pause.png',
+        'icons8_toggle_page_scroll.svg' => 'icons8_toggle_page_scroll.png',
         'icons8_rounded_corners_margin.svg' => 'icons8_rounded_corners_margin.png',
         'icons8_copy.svg' => 'icons8_copy.png',
 	'icons8_share.svg' => 'icons8_share.png',
@@ -195,7 +207,6 @@ my %ic_actions_list=(
         'icons8_document_2pages.svg' => 'icons8_document_2pages.png',
         'icons8_document_down_ch.svg' => 'icons8_document_down_ch.png',
         'icons8_document_up_ch.svg' => 'icons8_document_up_ch.png',
-
         'icons8_book_from_gd.svg' => 'icons8_book_from_gd.png',
         'icons8_bookmarks_from_gd.svg' => 'icons8_bookmarks_from_gd.png',
         'icons8_bookmarks_to_gd.svg' => 'icons8_bookmarks_to_gd.png',
@@ -254,8 +265,8 @@ my $ret;
 sub makeTemp {
 	$src_file = $_[0];
 	$resfile = "${TEMP_DIR}/drk_${src_file}";
-	open(IN, '<'.$src_file) or die $!;
-	open(OUT, '>'.$resfile) or die $!;
+	open(IN, '<'.$src_file) or die $src_file.':'.$!;
+	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
 	while(<IN>)
 	{
 	    $_ =~ s/808080/202020/g;
@@ -265,8 +276,8 @@ sub makeTemp {
 	close(OUT);	
 
 	$resfile = "${TEMP_DIR}/lgt_${src_file}";
-	open(IN, '<'.$src_file) or die $!;
-	open(OUT, '>'.$resfile) or die $!;
+	open(IN, '<'.$src_file) or die $src_file.':'.$!;
+	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
 	while(<IN>)
 	{
 	    $_ =~ s/808080/EEEEEE/g;
@@ -276,8 +287,8 @@ sub makeTemp {
 	close(OUT);	
 
 	$resfile = "${TEMP_DIR}/wdrk_${src_file}";
-	open(IN, '<'.$src_file) or die $!;
-	open(OUT, '>'.$resfile) or die $!;
+	open(IN, '<'.$src_file) or die $src_file.':'.$!;
+	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
 	while(<IN>)
 	{
 	    $_ =~ s/808080/65441a/g;
@@ -287,8 +298,8 @@ sub makeTemp {
 	close(OUT);	
 
 	$resfile = "${TEMP_DIR}/wlgt_${src_file}";
-	open(IN, '<'.$src_file) or die $!;
-	open(OUT, '>'.$resfile) or die $!;
+	open(IN, '<'.$src_file) or die $src_file.':'.$!;
+	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
 	while(<IN>)
 	{
 	    $_ =~ s/808080/efdbc2/g;

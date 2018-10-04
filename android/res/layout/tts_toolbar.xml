@@ -6,7 +6,7 @@
     android:id="@+id/tts_toolbar_body"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:background="#D0808080"
+    android:background="?attr/colorThemeGray2"
     android:layout_marginTop="3dip"
     android:layout_marginBottom="3dip"
     android:baselineAligned="true" android:layout_height="wrap_content">
@@ -64,51 +64,97 @@
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_stop"/>
 	</LinearLayout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:baselineAligned="true"
-        >
-        <TextView android:id="@+id/tts_lbl_volume" 
-            android:layout_height="wrap_content" 
-            android:layout_width="0dip" android:layout_weight="1"
-            android:text="@string/tts_volume"
-            android:layout_marginTop="5dip"
-            android:layout_marginBottom="2dip"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-        />
-        <TextView android:id="@+id/tts_lbl_speed" android:layout_height="wrap_content" 
-            android:layout_width="0dip" android:layout_weight="1"
-            android:text="@string/tts_rate"
-            android:layout_marginTop="5dip"
-            android:layout_marginBottom="2dip"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-        />
-    </LinearLayout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:baselineAligned="true"
-        >
-        <SeekBar android:id="@+id/tts_sb_volume" 
-            android:layout_height="wrap_content" 
-            android:layout_width="0dip" android:layout_weight="1"
-            android:layout_marginTop="5dip"
-            android:layout_marginBottom="5dip"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-        />
-        <SeekBar android:id="@+id/tts_sb_speed" 
-            android:layout_height="wrap_content" 
-            android:layout_width="0dip" android:layout_weight="1"
-            android:layout_marginTop="2dip"
-            android:layout_marginBottom="2dip"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-        />
-    </LinearLayout>
+    <TableLayout
+		android:id="@+id/tts_seek_bars"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		>
+		<TableRow>
+			<LinearLayout
+				android:orientation="horizontal"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:baselineAligned="true"
+				android:gravity="center_vertical"
+				>
+				<ImageButton android:id="@+id/btn_vol_down"
+					style="@style/TextAppearance.Small"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="?attr/attr_icons8_volume_down"
+					android:background="?attr/colorThemeGray2"
+					android:layout_marginTop="3dip"
+					android:layout_marginBottom="3dip"
+					android:layout_marginLeft="3dip"
+					android:layout_marginRight="3dip"
+					/>
+				<SeekBar android:id="@+id/tts_sb_volume"
+					android:layout_height="wrap_content"
+					android:layout_width="0dip" android:layout_weight="1"
+					android:layout_marginTop="2dip"
+					android:layout_marginBottom="2dip"
+					android:layout_marginLeft="2dip"
+					android:layout_marginRight="2dip"
+					android:max="100"
+					android:progress="50"
+					android:progressDrawable="@drawable/seekbar_progressbar"
+					android:thumb="@drawable/seekbar_thumb"
+					/>
+				<ImageButton android:id="@+id/btn_vol_up"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:background="?attr/colorThemeGray2"
+					android:layout_marginTop="3dip"
+					android:layout_marginBottom="3dip"
+					android:layout_marginLeft="3dip"
+					android:layout_marginRight="3dip"
+					android:src="?attr/attr_icons8_volume_up"
+					/>
+			</LinearLayout>
+			<LinearLayout
+				android:orientation="horizontal"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:baselineAligned="true"
+				android:gravity="center_vertical"
+				>
+				<ImageButton android:id="@+id/btn_freq_down"
+					style="@style/TextAppearance.Small"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="?attr/attr_icons8_rate_down"
+					android:background="?attr/colorThemeGray2"
+					android:layout_marginTop="3dip"
+					android:layout_marginBottom="3dip"
+					android:layout_marginLeft="3dip"
+					android:layout_marginRight="3dip"
+					/>
+				<SeekBar android:id="@+id/tts_sb_speed"
+					android:layout_height="wrap_content"
+					android:layout_width="0dip" android:layout_weight="1"
+					android:layout_marginTop="2dip"
+					android:layout_marginBottom="2dip"
+					android:layout_marginLeft="2dip"
+					android:layout_marginRight="2dip"
+					android:max="100"
+					android:progress="50"
+					android:progressDrawable="@drawable/seekbar_progressbar"
+					android:thumb="@drawable/seekbar_thumb"
+					/>
+				<ImageButton android:id="@+id/btn_freq_up"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:background="?attr/colorThemeGray2"
+					android:layout_marginTop="3dip"
+					android:layout_marginBottom="3dip"
+					android:layout_marginLeft="3dip"
+					android:layout_marginRight="3dip"
+					android:src="?attr/attr_icons8_rate_up"
+					/>
+			</LinearLayout>
+		</TableRow>
+	</TableLayout>
 </LinearLayout>

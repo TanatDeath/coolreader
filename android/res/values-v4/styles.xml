@@ -273,7 +273,7 @@
         <item name="attr_icons8_book_edit">@drawable/wdrk_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/wdrk_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/wdrk_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/wdrk_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/wdrk_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -282,11 +282,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/wdrk_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/wdrk_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/wdrk_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/wdrk_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/wdrk_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -330,7 +330,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/wdrk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/wdrk_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/wdrk_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/wdrk_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/wdrk_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/wdrk_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/wdrk_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/wdrk_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/wdrk_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/wdrk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wdrk_icons8_favorite_folder_2</item>
@@ -538,7 +542,7 @@
         <item name="attr_icons8_book_edit">@drawable/wlgt_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/wlgt_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/wlgt_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/wlgt_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/wlgt_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -547,11 +551,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/wlgt_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/wlgt_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/wlgt_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/wlgt_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/wlgt_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -595,7 +599,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/wlgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/wlgt_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/wlgt_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/wlgt_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/wlgt_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/wlgt_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/wlgt_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/wlgt_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/wlgt_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/wlgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wlgt_icons8_favorite_folder_2</item>
@@ -803,7 +811,7 @@
         <item name="attr_icons8_book_edit">@drawable/drk_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/drk_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/drk_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/drk_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/drk_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -812,11 +820,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/drk_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/drk_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/drk_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/drk_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/drk_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -860,7 +868,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/drk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/drk_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/drk_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/drk_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/drk_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/drk_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1068,7 +1080,7 @@
         <item name="attr_icons8_book_edit">@drawable/lgt_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/lgt_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/lgt_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/lgt_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/lgt_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1077,11 +1089,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/lgt_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/lgt_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/lgt_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/lgt_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/lgt_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -1125,7 +1137,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/lgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/lgt_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/lgt_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/lgt_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/lgt_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/lgt_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1336,7 +1352,7 @@
         <item name="attr_icons8_book_edit">@drawable/lgt_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/lgt_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/lgt_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/lgt_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/lgt_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1345,11 +1361,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/lgt_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/lgt_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/lgt_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/lgt_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/lgt_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -1393,7 +1409,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/lgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/lgt_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/lgt_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/lgt_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/lgt_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/lgt_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1604,7 +1624,7 @@
         <item name="attr_icons8_book_edit">@drawable/drk_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/drk_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/drk_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/drk_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/drk_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1613,11 +1633,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/drk_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/drk_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/drk_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/drk_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/drk_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -1661,7 +1681,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/drk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/drk_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/drk_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/drk_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/drk_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/drk_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1871,7 +1895,7 @@
         <item name="attr_icons8_book_edit">@drawable/drk_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/drk_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/drk_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/drk_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/drk_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1880,11 +1904,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/drk_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/drk_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/drk_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/drk_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/drk_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -1928,7 +1952,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/drk_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/drk_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/drk_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/drk_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/drk_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/drk_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/drk_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>
@@ -2138,7 +2166,7 @@
         <item name="attr_icons8_book_edit">@drawable/lgt_icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/lgt_icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/lgt_icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_nerd_hc</item>
+        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/lgt_icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/lgt_icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -2147,11 +2175,11 @@
         <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
         <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
-        <item name="attr_ic_media_play">@drawable/ic_media_play</item>
-        <item name="attr_ic_media_pause">@drawable/ic_media_pause</item>
-        <item name="attr_ic_media_rew">@drawable/ic_media_rew</item>
-        <item name="attr_ic_media_ff">@drawable/ic_media_ff</item>
-        <item name="attr_ic_media_stop">@drawable/ic_media_stop</item>
+        <item name="attr_ic_media_play">@drawable/lgt_icons8_play</item>
+        <item name="attr_ic_media_pause">@drawable/lgt_icons8_pause</item>
+        <item name="attr_ic_media_rew">@drawable/lgt_icons8_rewind</item>
+        <item name="attr_ic_media_ff">@drawable/lgt_icons8_fast_forward</item>
+        <item name="attr_ic_media_stop">@drawable/lgt_icons8_stop</item>
         <item name="attr_toast_layout_border">@drawable/toast_layout_border</item>
         <item name="attr_cr3_coin_gold">@drawable/cr3_coin_gold</item>
         <item name="attr_cr3_coin_silver">@drawable/cr3_coin_silver</item>
@@ -2195,7 +2223,11 @@
         <item name="attr_icons8_scroll_down_small">@drawable/lgt_icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/lgt_icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/lgt_icons8_drop_down_no_frame_small</item>
-        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_scroll</item>
+        <item name="attr_icons8_toggle_page_view_mode">@drawable/lgt_icons8_toggle_page_scroll</item>
+        <item name="attr_icons8_volume_up">@drawable/lgt_icons8_volume_up</item>
+        <item name="attr_icons8_volume_down">@drawable/lgt_icons8_volume_down</item>
+        <item name="attr_icons8_rate_up">@drawable/lgt_icons8_rate_up</item>
+        <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>

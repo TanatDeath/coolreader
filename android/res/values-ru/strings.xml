@@ -194,6 +194,7 @@
     <string name="options_selection_action_dictionary_1">Найти в словаре 1</string>
     <string name="options_selection_action_dictionary_2">Найти в словаре 2</string>
     <string name="options_selection_action_copy">Копировать</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="options_app_browser_hide_empty_dirs">Прятать директории без книг</string>
     <string name="dlg_about">О программе</string>
     <string name="dlg_book_info">О книге</string>
@@ -226,6 +227,8 @@
     <string name="book_info_system_battery">Батарея</string>
     <string name="book_info_system_time">Время</string>
     <string name="book_info_system_resolution">Разрешение</string>
+    <string name="book_info_system_device_model">Производитель / модель / устройство / продукт / марка</string>
+    <string name="book_info_system_device_flags">Особенности устройства</string>
     <string name="book_info_position_chapter">Глава</string>
     <string name="book_info_position_page">Страница</string>
     <string name="book_info_position_percent">Процент</string>

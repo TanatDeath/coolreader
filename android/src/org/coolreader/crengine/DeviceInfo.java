@@ -16,6 +16,7 @@ public class DeviceInfo {
 	public final static int MIN_SCREEN_BRIGHTNESS_PERCENT;
 	public final static boolean SAMSUNG_BUTTONS_HIGHLIGHT_PATCH;
 	public final static boolean EINK_SCREEN;
+	public final static boolean SCREEN_CAN_CONTROL_BRIGHTNESS;
 	public final static boolean EINK_SCREEN_UPDATE_MODES_SUPPORTED;
 	public final static boolean NOOK_NAVIGATION_KEYS;
 	public final static boolean EINK_NOOK;
@@ -125,6 +126,9 @@ public class DeviceInfo {
 
 
 		EINK_SCREEN = EINK_SONY || EINK_NOOK || EINK_ONYX || EINK_DNS || EINK_TOLINO; // TODO: set to true for eink devices like Nook Touch
+
+		SCREEN_CAN_CONTROL_BRIGHTNESS = (!EINK_SCREEN) || (EINK_NOOK && DEVICE.toLowerCase().contentEquals("ntx_6sl") &&
+				MODEL.contentEquals("BNRV510"));
 
 		// On Onyx Boox Monte Cristo 3 (and possible Monte Cristo, Monte Cristo 2) long press action on buttons are catch by system and not available for application
 		// TODO: check this on other ONYX BOOX Readers

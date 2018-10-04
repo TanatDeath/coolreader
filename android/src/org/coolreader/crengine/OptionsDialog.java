@@ -1378,8 +1378,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			((CoolReader)mActivity).readResizeHistory();
 			for (CoolReader.ResizeHistory rh: ((CoolReader)mActivity).getResizeHist()) {
 				String sProp = rh.X+"."+rh.Y;
-				String sText = rh.X+" x "+rh.Y;
-				listView.add(new BoolOption(mOwner, sText, PROP_SKIPPED_RES+"."+sProp, "").setDefaultValue("0"));
+				String sText = rh.X+" x "+rh.Y+" ("+Utils.formatDate(activity, rh.lastSet)+" "+
+						Utils.formatTime(activity, rh.lastSet)+")";
+				listView.add(new BoolOption(mOwner, sText, PROP_SKIPPED_RES+"."+sProp, "").setDefaultValue("0").
+						setIconId(0));
 			}
 			dlg.setView(listView);
 			dlg.show();

@@ -52,6 +52,7 @@
 			android:singleLine="false"
 			android:textColor="?attr/colorIcon"
 			android:layout_margin="5dip"
+			android:clickable="true"
 			/>
 
 	<TableLayout

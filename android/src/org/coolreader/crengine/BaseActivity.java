@@ -1239,6 +1239,21 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
+	public void showToast(String msg, View view) {
+		showToast(msg, Toast.LENGTH_LONG, view);
+	}
+
+	public void showToast(String msg, int duration, View view) {
+		log.v("showing toast: " + msg);
+		if (DeviceInfo.USE_CUSTOM_TOAST) {
+			ToastView.showToast(this, view, msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
+		} else {
+			// classic Toast
+			Toast toast = Toast.makeText(this, msg, duration);
+			toast.show();
+		}
+	}
+
 	public void showToast(String msg, int duration, View view, boolean forceCustom, int textSize) {
 		log.v("showing toast: " + msg);
 		View view1 = view;

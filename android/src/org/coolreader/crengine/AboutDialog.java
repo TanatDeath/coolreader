@@ -89,7 +89,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	{
 		super(activity);
 		mCoolReader = activity;
-
+		boolean isFork = !mCoolReader.getPackageName().equals(CoolReader.class.getPackage().getName());
 		setTitle(R.string.dlg_about);
 		LayoutInflater inflater = LayoutInflater.from(getContext());
 		final TabHost tabs = (TabHost)inflater.inflate(R.layout.about_dialog, null);
@@ -114,7 +114,12 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		});
 
 		mAppTab = (View)inflater.inflate(R.layout.about_dialog_app, null);
-		((TextView)mAppTab.findViewById(R.id.version)).setText("Cool Reader " + mCoolReader.getVersion());
+		if (isFork) {
+			((TextView) mAppTab.findViewById(R.id.version)).setText("Cool Reader (plotn mod) " + mCoolReader.getVersion());
+			((TextView) mAppTab.findViewById(R.id.www1)).setText("https://github.com/plotn/coolreader");
+		} else {
+			((TextView) mAppTab.findViewById(R.id.version)).setText("Cool Reader " + mCoolReader.getVersion());
+		}
 
 		mDirsTab = (View)inflater.inflate(R.layout.about_dialog_dirs, null);
 		TextView fonts_dir = (TextView)mDirsTab.findViewById(R.id.fonts_dirs);
@@ -173,7 +178,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		mLicenseTab = (View)inflater.inflate(R.layout.about_dialog_license, null);
 		String license = Engine.getInstance(mCoolReader).loadResourceUtf8(R.raw.license);
 		((TextView)mLicenseTab.findViewById(R.id.license)).setText(license);
-		boolean billingSupported = mCoolReader.isDonationSupported();
+        boolean billingSupported = mCoolReader.isDonationSupported() && !isFork;
 		mDonationTab = (View)inflater.inflate(billingSupported ? R.layout.about_dialog_donation2 : R.layout.about_dialog_donation, null);
 
 		if (billingSupported) {

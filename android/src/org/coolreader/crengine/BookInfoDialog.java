@@ -9,6 +9,7 @@ import org.coolreader.R;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.text.ClipboardManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -63,6 +64,8 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.publisbn", R.string.book_info_book_publisbn);
 		mLabelMap.put("book.translation", R.string.book_info_book_translation);
 		mLabelMap.put("section.book_translation", R.string.book_info_section_book_translation);
+		mLabelMap.put("system.device_model", R.string.book_info_system_device_model);
+		mLabelMap.put("system.device_flags", R.string.book_info_system_device_flags);
 	}
 	
 	private void addItem(TableLayout table, String item) {
@@ -94,6 +97,18 @@ public class BookInfoDialog extends BaseDialog {
 		TextView valueView = (TextView)tableRow.findViewById(R.id.value);
 		nameView.setText(name);
 		valueView.setText(value);
+		valueView.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				String text = ((TextView) v).getText().toString();
+				if ( text!=null && text.length()>0 ) {
+					ClipboardManager cm = activity.getClipboardmanager();
+					cm.setText(text);
+					L.i("Setting clipboard text: " + text);
+					activity.showToast(activity.getString(R.string.copied_to_clipboard)+": "+text,v);
+				}
+			}
+		});
+
 		table.addView(tableRow);
 	}
 	
@@ -109,6 +124,17 @@ public class BookInfoDialog extends BaseDialog {
 		TableLayout table = (TableLayout)view.findViewById(R.id.table);
 		Button btnInfo = (Button) view.findViewById(R.id.btn_edit_info);
 		TextView txtAnnot = (TextView) view.findViewById(R.id.lbl_annotation);
+		txtAnnot.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				String text = ((TextView) v).getText().toString();
+				if ( text!=null && text.length()>0 ) {
+					ClipboardManager cm = activity.getClipboardmanager();
+					cm.setText(text);
+					L.i("Setting clipboard text: " + text);
+					activity.showToast(activity.getString(R.string.copied_to_clipboard)+": "+text,v);
+				}
+			}
+		});
 		if (StrUtils.isEmptyStr(annot))
 			txtAnnot.setVisibility(View.INVISIBLE);
 		txtAnnot.setText(annot);

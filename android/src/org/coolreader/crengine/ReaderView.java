@@ -1442,7 +1442,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_DOWN_1:
 						if (distance < dragThreshold)
 							return true;
-						if (!DeviceInfo.EINK_SCREEN && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
+						if (DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
 							// backlight control enabled
 							if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick == 1
 									|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick == 2) {
@@ -5272,7 +5272,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private final static boolean centerPageInsteadOfResizing = true;
 
 	private void dimRect( Canvas canvas, Rect dst ) {
-		if (DeviceInfo.EINK_SCREEN)
+		if ((DeviceInfo.EINK_SCREEN)&&(!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS))
 			return; // no backlight
 		int alpha = dimmingAlpha;
 		if ( alpha!=255 ) {

@@ -7,6 +7,7 @@ import org.coolreader.R;
 
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -52,10 +53,12 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 	private OnColorChangedListener mListener;
 	private int mColor;
 	private GradientDrawable mPreviewDrawable;
+	private BaseActivity mActivity;
 
 	public ColorPickerDialog(BaseActivity activity, OnColorChangedListener listener, int color, String title) {
 		super(activity, title, false, true);
 		mListener = listener;
+		mActivity = activity;
 
 		Resources res = activity.getResources();
 		setTitle(title);
@@ -101,7 +104,8 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 	}
 	
 	private void setupSeekBar(SeekBar seekBar, int id, int value, Resources res) {
-		seekBar.setProgressDrawable(new TextSeekBarDrawable(res, id, value < seekBar.getMax() / 2));
+		seekBar.setProgressDrawable(new TextSeekBarDrawable(res, id, value < seekBar.getMax() / 2,
+				mActivity));
 		seekBar.setProgress(value);
 		seekBar.setOnSeekBarChangeListener(this);
 	}
@@ -251,17 +255,27 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 		private int mDelta;
 		private ScrollAnimation mAnimation;
 
-		public TextSeekBarDrawable(Resources res, int id, boolean labelOnRight) {
+		public TextSeekBarDrawable(Resources res, int id, boolean labelOnRight, BaseActivity activity) {
+			int colorGray;
+			int colorGrayC;
+			int colorIcon;
+			TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+			colorGray = a.getColor(0, Color.GRAY);
+			colorGrayC = a.getColor(1, Color.GRAY);
+			colorIcon = a.getColor(2, Color.GRAY);
+			a.recycle();
+
 			mText = res.getString(id);
-			mProgress = res.getDrawable(android.R.drawable.progress_horizontal);
+			mProgress = res.getDrawable(R.drawable.seekbar_colorbar);
 			mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			mPaint.setTypeface(Typeface.DEFAULT_BOLD);
-			mPaint.setTextSize(16);
-			mPaint.setColor(0xff000000);
+			mPaint.setTextSize(42);
+			mPaint.setColor(colorIcon);
 			mOutlinePaint = new Paint(mPaint);
 			mOutlinePaint.setStyle(Style.STROKE);
 			mOutlinePaint.setStrokeWidth(3);
-			mOutlinePaint.setColor(0xbbffc300);
+			mOutlinePaint.setColor(colorGrayC);
 			mOutlinePaint.setMaskFilter(new BlurMaskFilter(1, Blur.NORMAL));
 			mTextWidth = mOutlinePaint.measureText(mText);
 			mTextXScale = labelOnRight? 1 : 0;
