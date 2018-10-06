@@ -41,6 +41,7 @@
     <string name="mi_goto_percent">На позицию %</string>
     <string name="mi_goto_toc">Содержание</string>
     <string name="mi_folder_open">Открыть папку</string>
+    <string name="mi_folder_delete">Удалить папку</string>
     <string name="mi_folder_to_favorites">Добавить в избранное</string>
     <string name="mi_folder_left">Сдвинуть влево</string>
     <string name="mi_folder_right">Сдвинуть вправо</string>
@@ -718,7 +719,8 @@
     <string name="docx_is_not_installed">Расширение org.coolreader.docx не установлено (установите, чтобы открывать docx формат)</string>
     <string name="docx_open_converted">Открыта предварительно сохраненная преобразованная копия документа</string>
     <string name="docx_convert">CoolReader может попробовать преобразовать документ в формат html, а затем открыть его. Продолжить?</string>
-    <string name="btn_edit_info">Редактировать информацию о книге</string>
+    <string name="delete_dir_confirm">Выбранная папка не пустая. Удалить содержимое? Число файлов/папок:</string>
+    <string name="btn_edit_info">Редактировать информацию о книге</string>папок
     <string name="mark_book_as_read">Отметить книгу как прочитанную?</string>
     <string name="resizing_to">изменение размера</string>
     <string name="skipped_res">Не перерисовывать книгу на разрешениях</string>

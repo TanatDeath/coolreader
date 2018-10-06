@@ -46,6 +46,7 @@
     <string name="mi_goto_percent">Go to position %</string>
     <string name="mi_goto_toc">Table of Contents</string>
     <string name="mi_folder_open">Open folder</string>
+    <string name="mi_folder_delete">Delete folder</string>
     <string name="mi_folder_to_favorites">Add to favorites</string>
     <string name="mi_folder_left">Move left</string>
     <string name="mi_folder_right">Move right</string>
@@ -687,6 +688,7 @@
     <string name="docx_is_not_installed">extension org.coolreader.docx is not installed, install it to open docx format</string>
     <string name="docx_open_converted">Opened previously converted copy of document</string>
     <string name="docx_convert">CoolReader could try to convert document in html format, then open it. Proceed?</string>
+    <string name="delete_dir_confirm">Selected directory is not empty. Delete content? Files/folders count:</string>
     <string name="btn_edit_info">Edit book info</string>
     <string name="mark_book_as_read">Mark this book as read?</string>
     <string name="resizing_to">resizing to</string>
