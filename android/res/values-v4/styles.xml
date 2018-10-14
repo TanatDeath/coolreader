@@ -340,7 +340,9 @@
         <item name="folder_big_bookmark_drawable">@drawable/wdrk_icons8_favorite_folder_2</item>
         <item name="media_flash_microsd_drawable">@drawable/wdrk_icons8_micro_sd_2</item>
     </style>
+
     <style name="Theme.Dark" parent="@android:style/Theme">
+
         <item name="colorThemeBlue">@color/blueLight</item>
         <item name="colorThemeGray">@color/grayLight</item>
         <item name="colorThemeGreen">@color/greenLight</item>
@@ -608,7 +610,19 @@
         <item name="folder_big_drawable">@drawable/wlgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wlgt_icons8_favorite_folder_2</item>
         <item name="media_flash_microsd_drawable">@drawable/wlgt_icons8_micro_sd_2</item>
+
+        <!--
+        <item name="android:popupMenuStyle">@style/PopupMenuDark</item>
+        -->
+
     </style>
+
+    <!--
+    <style name="PopupMenuDark" parent="@android:style/Theme">
+        <item name="android:popupBackground">@color/wlgt_iconColor</item>
+    </style>
+    -->
+
     <style name="Theme.White" parent="@android:style/Theme.Light">
         <item name="colorThemeBlue">@color/blueDark</item>
         <item name="colorThemeGray">@color/grayDark</item>

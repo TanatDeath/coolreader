@@ -104,6 +104,14 @@ public class CRToolBar extends ViewGroup {
 		final LinearLayout view = (LinearLayout)inflater.inflate(R.layout.popup_toolbar_item, null);
 		ImageView icon = (ImageView)view.findViewById(R.id.action_icon);
 		TextView label = (TextView)view.findViewById(R.id.action_label);
+		int colorIcon;
+		if (activity instanceof CoolReader) {
+			TypedArray a = ((CoolReader) activity).getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			label.setTextColor(colorIcon);
+		}
 		icon.setImageResource(action != null ? action.getIconIdWithDef(activity) : Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
 		//icon.setMinimumHeight(buttonHeight);
 		icon.setMinimumWidth(buttonWidth);
@@ -362,28 +370,49 @@ public class CRToolBar extends ViewGroup {
 //			showContextMenuForChild(overflowButton);
 		}
 	}
-	
+
+	public void showPopupMenu(final ReaderAction[] actions, final OnActionHandler onActionHandler) {
+		if (popup != null)
+			popup.dismiss();
+		ArrayList<ReaderAction> act = new ArrayList<ReaderAction>();
+		for (ReaderAction ra: actions) act.add(ra);
+		showPopup(activity, activity.getContentView(), act,
+				onActionHandler, onOverflowHandler, act.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
+	}
 //	private void onMoreButtonClick() {
 //		showOverflowMenu();
 //	}
 	
 	private void onButtonClick(ReaderAction item) {
-		if (onActionHandler != null)
-			onActionHandler.onActionSelected(item);
+		if (item!=null)
+			if (onActionHandler != null)
+				onActionHandler.onActionSelected(item);
 	}
 
 	private Bitmap InverseBitmap(Bitmap src){
 		Bitmap dest = Bitmap.createBitmap(
 				src.getWidth(), src.getHeight(), src.getConfig());
 
+//		for(int i = 0; i < src.getWidth(); i++){
+//			for(int j = 0; j < src.getHeight(); j++){
+//
+//				dest.setPixel(i, j, Color.argb(
+//						Color.alpha(src.getPixel(i, j)),
+//						255 - Color.red(src.getPixel(i, j)),
+//						255 - Color.green(src.getPixel(i, j)),
+//						255 - Color.blue(src.getPixel(i, j))));
+//			}
+//		}
+
 		for(int i = 0; i < src.getWidth(); i++){
 			for(int j = 0; j < src.getHeight(); j++){
 
 				dest.setPixel(i, j, Color.argb(
 						Color.alpha(src.getPixel(i, j)),
-						255 - Color.red(src.getPixel(i, j)),
-						255 - Color.green(src.getPixel(i, j)),
-						255 - Color.blue(src.getPixel(i, j))));
+						(Color.red(src.getPixel(i, j))>160)?Color.red(src.getPixel(i, j))-160:0,
+						(Color.green(src.getPixel(i, j))>160)?Color.green(src.getPixel(i, j))-160:0,
+						(Color.blue(src.getPixel(i, j))>160)?Color.blue(src.getPixel(i, j))-160:0
+				));
 			}
 		}
 
@@ -611,33 +640,37 @@ public class CRToolBar extends ViewGroup {
         			layoutItemRect.set(layoutLineRect);
         			layoutItemRect.left += i * itemWidth + spacing;
         			layoutItemRect.right = layoutItemRect.left + itemWidth - spacing;
-        			final ReaderAction action = (visibleNonButtonCount > 0 && i + startBtn == iconActions.size()) || (lineCount > maxLines && currentLine == maxLines - 1 && i == currentLineButtons - 1) ? null : iconActions.get(startBtn + i);
-        			if (action != null)
+        			final ReaderAction action = (visibleNonButtonCount > 0 && i + startBtn == iconActions.size()) ||
+							(lineCount > maxLines && currentLine == maxLines - 1 && i == currentLineButtons - 1) ? null :
+							iconActions.get(startBtn + i);
+					//log.v("action = "+action);
+					if (action != null)
         				lastButtonIndex = startBtn + i;
-        			log.v("item=" + layoutItemRect);
-        			LinearLayout item = inflateItem(action);
+        			//log.v("item=" + layoutItemRect);
+        			final LinearLayout item = inflateItem(action);
         			//item.setLayoutParams(new LinearLayout.LayoutParams(itemRect.width(), itemRect.height()));
         			item.measure(MeasureSpec.makeMeasureSpec(layoutItemRect.width(), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(layoutItemRect.height(), MeasureSpec.EXACTLY));
         			item.layout(layoutItemRect.left, layoutItemRect.top, layoutItemRect.right, layoutItemRect.bottom);
         			//item.forceLayout();
         			addView(item);
+        			// this is overflow panel
         			item.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							if (action != null)
-								onButtonClick(action);
-							else
-								showOverflowMenu();
+						if (action != null)
+							onButtonClick(action);
+						else
+							showOverflowMenu();
 						}
 					});
-        			// doesnt work...
-					//item.setOnLongClickListener(new OnLongClickListener() {
-					//	@Override
-					//	public boolean onLongClick(View v) {
-					//		if (action == null) activity.showToast("asdf");
-					//		return true;
-					//	}
-					//});
+        			item.setOnLongClickListener(new OnLongClickListener() {
+						@Override
+						public boolean onLongClick(View v) {
+							ReaderAction ram = action.getMirrorAction();
+							if (ram != null) onButtonClick(ram);
+							return true;
+						}
+					});
         		}
 //        		addView(scroll);
         	}
@@ -827,7 +860,9 @@ public class CRToolBar extends ViewGroup {
 			@Override
 			public boolean onActionSelected(ReaderAction item) {
 				popup.dismiss();
+				if (onActionHandler==null) log.v("EMPTY!!!"); else
 				return onActionHandler.onActionSelected(item);
+				return false;
 			}
 		});
 		if (onOverflowHandler != null)

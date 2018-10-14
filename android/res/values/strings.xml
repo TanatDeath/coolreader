@@ -25,6 +25,21 @@
     <string name="context_menu_title_recent_book">Recent book</string>
     <string name="context_menu_title_folder">Folder</string>
     <string name="mi_book_open">Open book</string>
+    <string name="mi_book_info">Book info</string>
+    <string name="mi_book_edit">Edit book info</string>
+    <string name="mi_book_delete">Delete book file</string>
+    <string name="mi_book_shortcut">Create book shortcut</string>
+    <string name="mi_book_to_gd">Save book to Google One</string>
+    <string name="mi_book_no_mark">Set no mark</string>
+    <string name="mi_book_to_read">Set \'to read\' mark</string>
+    <string name="mi_book_reading">Set \'reading\' mark</string>
+    <string name="mi_book_finished">Set \'finished\' mark</string>
+    <string name="mi_book_rate_5">Rate 5 stars</string>
+    <string name="mi_book_rate_4">Rate 4 stars</string>
+    <string name="mi_book_rate_3">Rate 3 stars</string>
+    <string name="mi_book_rate_2">Rate 2 stars</string>
+    <string name="mi_book_rate_1">Rate 1 stars</string>
+    <string name="mi_book_rate_0">Rate no stars</string>
     <string name="mi_book_recent_books">Recent books</string>
     <string name="mi_book_file_remove">Delete book file</string>
     <string name="mi_book_recent_remove">Remove from list</string>
@@ -51,6 +66,9 @@
     <string name="mi_folder_left">Move left</string>
     <string name="mi_folder_right">Move right</string>
     <string name="mi_folder_remove">Remove</string>
+
+
+
     <string name="dir_recent_books">Recent Books</string>
     <string name="dir_sd_card">SD Card</string>
     <string name="dir_internal_sd_card">Internal SD Card</string>
@@ -99,7 +117,7 @@
     <string name="options_page_margin_right">Right margin</string>
     <string name="options_page_margin_top">Top margin</string>
     <string name="options_page_margin_bottom">Bottom margin</string>
-    <string name="options_rounded_corners_margin">Header margins (for rounded corners)</string>
+    <string name="options_rounded_corners_margin">Margin (for devices with rounded corners)</string>
     <string name="options_view_mode">View mode</string>
     <string name="options_view_mode_pages">Pages</string>
     <string name="options_view_mode_scroll">Scroll</string>
@@ -538,7 +556,7 @@
     <string name="tb_button_find_next">Find next</string>
     <string name="options_selection_action_mail">Share</string>
     <string name="tts_play">Play / Pause</string>
-    <string name="tts_back">Revind</string>
+    <string name="tts_back">Rewind</string>
     <string name="tts_forward">Forward</string>
     <string name="tts_stop">Stop</string>
     <string name="tts_volume">Volume</string>

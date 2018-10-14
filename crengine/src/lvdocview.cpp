@@ -1249,10 +1249,11 @@ void LVDocView::getPageHeaderRectangle(int pageIndex, lvRect & headerRc) {
 		headerRc.bottom = 0;
 	} else {
 		int h = getPageHeaderHeight();
+		int propHeaderMargin = m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);
 		headerRc.bottom = headerRc.top + h;
 		headerRc.top += HEADER_MARGIN;
-		headerRc.left += HEADER_MARGIN;
-		headerRc.right -= HEADER_MARGIN;
+		headerRc.left += HEADER_MARGIN + propHeaderMargin;
+		headerRc.right -= HEADER_MARGIN + propHeaderMargin;
 	}
 }
 

@@ -141,7 +141,7 @@ public class SelectionToolbarDlg {
 		mAnchor = readerView.getSurface();
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar, null));
-		panel.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		
 		//mReaderView.getS
 		
@@ -160,16 +160,21 @@ public class SelectionToolbarDlg {
 		});
 		//super(panel);
 		int colorGrayC;
+		int colorGray;
 		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
 		colorGrayC = a.getColor(0, Color.GRAY);
+		colorGray = a.getColor(1, Color.GRAY);
 		a.recycle();
+
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		c.setAlpha(130);
 		//mWindow.setBackgroundDrawable(c);
 
 		mPanel = panel;
+		panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+
 		//mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
 		mPanel.findViewById(R.id.selection_copy).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_copy).setOnClickListener(new OnClickListener() {
@@ -337,7 +342,7 @@ public class SelectionToolbarDlg {
 		
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 		//mWindow.setAnimationStyle(android.R.style.Animation_Toast);
-		mWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
+		mWindow.setWidth(WindowManager.LayoutParams.FILL_PARENT);
 		mWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
 //		setWidth(panel.getWidth());
 //		setHeight(panel.getHeight());

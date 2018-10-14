@@ -32,25 +32,34 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.RequiresPermission;
 import android.text.ClipboardManager;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.InflateException;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.TextView;
 import android.widget.Toast;
 //import com.github.johnpersano.supertoasts.library.Style;
 //import com.github.johnpersano.supertoasts.library.SuperActivityToast;
@@ -58,6 +67,36 @@ import android.widget.Toast;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
+
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		MenuInflater inflater = getMenuInflater();
+//		inflater.inflate(R.menu.cr3_browser_menu, menu);
+//		getLayoutInflater().setFactory(new LayoutInflater.Factory() {
+//			@Override
+//			public View onCreateView(String name, Context context, AttributeSet attrs) {
+//				if (name.equalsIgnoreCase("com.android.internal.view.menu.IconMenuItemView")) {
+//					try{
+//						LayoutInflater f = getLayoutInflater();
+//						final View view = f.createView(name, null, attrs);
+//						new Handler().post(new Runnable() {
+//							public void run() {
+//								// set the background drawable
+//								view .setBackgroundResource(R.drawable.background_tiled_dark_v3);
+//
+//								// set the text color
+//								((TextView) view).setTextColor(Color.WHITE);
+//							}
+//						});
+//						return view;
+//					} catch (InflateException e) {
+//					} catch (ClassNotFoundException e) {}
+//				}
+//				return null;
+//			}
+//		});
+//		return super.onCreateOptionsMenu(menu);
+//	}
 
 	private static final Logger log = L.create("ba");
 	private View mDecorView;
@@ -1514,13 +1553,21 @@ public class BaseActivity extends Activity implements Settings {
 		// override for specific actions
 		
 	}
-	
+
+	public void showActionsToolbarMenu(final ReaderAction[] actions, final CRToolBar.OnActionHandler onActionHandler) {
+		CRToolBar toolbarView = new CRToolBar(this, ReaderAction.createList(actions), false,
+				false, true, false);
+		toolbarView.setFocusable(false);
+		toolbarView.showPopupMenu(actions, onActionHandler);
+	}
+
 	public void showActionsPopupMenu(final ReaderAction[] actions, final CRToolBar.OnActionHandler onActionHandler) {
 		ArrayList<ReaderAction> list = new ArrayList<ReaderAction>(actions.length);
 		for (ReaderAction a : actions)
 			list.add(a);
 		showActionsPopupMenu(list, onActionHandler);
 	}
+
 	public void showActionsPopupMenu(final ArrayList<ReaderAction> actions, final CRToolBar.OnActionHandler onActionHandler) {
 		registerForContextMenu(contentView);
 		contentView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
@@ -1538,6 +1585,7 @@ public class BaseActivity extends Activity implements Settings {
                                 return onActionHandler.onActionSelected(action);
                             }
                         });
+						//item.setIcon(action.getIconId());
                     }
                 }
 			}
@@ -1974,7 +2022,6 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_RIGHT, hmargin);
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_TOP, vmargin);
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_BOTTOM, vmargin);
-
 			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN, "0");
 			
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, "0");

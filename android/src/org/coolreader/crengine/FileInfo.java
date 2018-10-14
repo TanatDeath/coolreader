@@ -39,6 +39,7 @@ public class FileInfo {
 	public String series; // series name w/o number
 	public int seriesNumber; // number of book inside series
     public int saved_with_ver; // version of database book was saved with
+	public boolean need_to_update_ver; // file was saved in old format
 	public String genre;
 	public String annotation;
 	public String srclang;
@@ -292,16 +293,19 @@ public class FileInfo {
 	public FileInfo( File f )
 	{
 		fromFile(f);
+		need_to_update_ver = false;
 	}
 	
 	public FileInfo()
 	{
+		need_to_update_ver = false;
 	}
 
 	/// doesn't copy parent and children
 	public FileInfo(FileInfo v)
 	{
 		assign(v);
+		need_to_update_ver = false;
 	}
 
 	public void assign(FileInfo v)
@@ -328,6 +332,22 @@ public class FileInfo {
 		username = v.username;
 		password = v.password;
 		id = v.id;
+		saved_with_ver = v.saved_with_ver;
+		genre = v.genre;
+		annotation = v.annotation;
+		srclang = v.srclang;
+		translator = v.translator;
+		docauthor = v.docauthor;
+		docprogram = v.docprogram;
+		docdate = v.docdate;
+		docsrcurl = v.docsrcurl;
+		docsrcocr = v.docsrcocr;
+		docversion = v.docversion;
+		publname = v.publname;
+		publisher = v.publisher;
+		publcity = v.publcity;
+		publyear = v.publyear;
+		publisbn = v.publisbn;
 	}
 	
 	/**
@@ -1165,11 +1185,7 @@ public class FileInfo {
 				return false;
 		} else if (!dirs.equals(other.dirs))
 			return false;
-		if (filename == null) {
-			if (other.filename != null)
-				return false;
-		} else if (!filename.equals(other.filename))
-			return false;
+		if (!StrUtils.euqalsIgnoreNulls(filename, other.filename, true)) return false;
 		if (files == null) {
 			if (other.files != null)
 				return false;
@@ -1187,21 +1203,9 @@ public class FileInfo {
 			return false;
 		if (isScanned != other.isScanned)
 			return false;
-		if (language == null) {
-			if (other.language != null)
-				return false;
-		} else if (!language.equals(other.language))
-			return false;
-		if (lang_from == null) {
-			if (other.lang_from != null)
-				return false;
-		} else if (!lang_from.equals(other.lang_from))
-			return false;
-		if (lang_to == null) {
-			if (other.lang_to != null)
-				return false;
-		} else if (!lang_to.equals(other.lang_to))
-			return false;
+		if (!StrUtils.euqalsIgnoreNulls(language, other.language, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(lang_from, other.lang_from, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(lang_to, other.lang_to, true)) return false;
 		if (lastAccessTime != other.lastAccessTime)
 			return false;
 		if (parent == null) {
@@ -1209,30 +1213,29 @@ public class FileInfo {
 				return false;
 		} else if (!parent.equals(other.parent))
 			return false;
-		if (path == null) {
-			if (other.path != null)
-				return false;
-		} else if (!path.equals(other.path))
-			return false;
-		if (pathname == null) {
-			if (other.pathname != null)
-				return false;
-		} else if (!pathname.equals(other.pathname))
-			return false;
-		if (series == null) {
-			if (other.series != null)
-				return false;
-		} else if (!series.equals(other.series))
-			return false;
+		if (!StrUtils.euqalsIgnoreNulls(path, other.path, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(pathname, other.pathname, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(series, other.series, true)) return false;
 		if (seriesNumber != other.seriesNumber)
 			return false;
 		if (size != other.size)
 			return false;
-		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
-			return false;
+		if (!StrUtils.euqalsIgnoreNulls(title, other.title, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(genre, other.genre, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(annotation, other.annotation, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(srclang, other.srclang, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(translator, other.translator, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(docauthor, other.docauthor, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(docprogram, other.docprogram, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(docdate, other.docdate, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(docsrcurl, other.docsrcurl, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(docsrcocr, other.docsrcocr, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(docversion, other.docversion, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(publname, other.publname, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(publisher, other.publisher, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(publcity, other.publcity, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(publyear, other.publyear, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(publisbn, other.publisbn, true)) return false;
 		return true;
 	}
 

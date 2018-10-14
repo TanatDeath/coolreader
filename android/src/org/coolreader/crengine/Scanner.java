@@ -250,19 +250,21 @@ public class Scanner extends FileInfoChangeSource {
 				Map<String, FileInfo> mapOfFilesFoundInDb = new HashMap<String, FileInfo>();
 				for (FileInfo f : list)
 					mapOfFilesFoundInDb.put(f.getPathName(), f);
-						
 				for (int i=0; i<baseDir.fileCount(); i++) {
 					FileInfo item = baseDir.getFile(i);
 					FileInfo fromDB = mapOfFilesFoundInDb.get(item.getPathName());
 					boolean isOldVer = true;
 					if (fromDB != null) {
 						if (fromDB.saved_with_ver == MainDB.DB_VERSION) isOldVer = false;
-						//mActivity.showToast(fromDB.filename+ " "+fromDB.saved_with_ver);
 					}
-					if (isOldVer) fromDB = null;
-					if ((fromDB != null) && (!isOldVer)) {
+					if (fromDB != null) {
 						// use DB value
 						baseDir.setFile(i, fromDB);
+						if (isOldVer) {
+							FileInfo fi = new FileInfo(fromDB);
+							fi.need_to_update_ver = true;
+							filesForParsing.add(fi);
+						}
 					} else {
 						// not found in DB
 						if (item.format.canParseProperties()) {

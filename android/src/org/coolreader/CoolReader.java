@@ -30,7 +30,9 @@ import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.GenreSAXElem;
 import org.coolreader.crengine.GoogleDriveTools;
+import org.coolreader.crengine.History;
 import org.coolreader.crengine.History.BookInfoLoadedCallack;
 import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.L;
@@ -1410,18 +1412,27 @@ public class CoolReader extends BaseActivity
 			askConfirmation(R.string.mark_book_as_read, new Runnable() {
 				@Override
 				public void run() {
-					book1.setReadingState(FileInfo.STATE_FINISHED);
-					BookInfo bookInfo = new BookInfo(book1);
-					CoolReader.this.getDB().saveBookInfo(bookInfo);
-					CoolReader.this.getDB().flush();
-					BookInfo bi = Services.getHistory().getBookInfo(book1);
-					if (bi != null)
-						bi.getFileInfo().setFileProperties(book1);
+					Services.getHistory().getOrCreateBookInfo(getDB(), book1, new History.BookInfoLoadedCallack() {
+						@Override
+						public void onBookInfoLoaded(BookInfo bookInfo) {
+							book1.setReadingState(FileInfo.STATE_FINISHED);
+							BookInfo bi = new BookInfo(book1);
+							getDB().saveBookInfo(bi);
+							getDB().flush();
+							if (bookInfo.getFileInfo()!=null) {
+								bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
+								if (bookInfo.getFileInfo().parent!=null)
+									directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+							}
+							BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+							if (bi2 != null)
+								bi2.getFileInfo().setFileProperties(book1);
+						}
+					});
 				}
 			});
 		}
 	}
-
 
 	@Override
     protected void setDimmingAlpha(int dimmingAlpha) {
@@ -1500,6 +1511,45 @@ public class CoolReader extends BaseActivity
 					directoryUpdated(file.parent);
 			}
 		});
+	}
+
+	public void DeleteRecursive(File dir, FileInfo fi)
+	{
+		if (dir.isDirectory())
+		{
+			String[] children = dir.list();
+			for (int i = 0; i < children.length; i++)
+			{
+				File temp = new File(dir, children[i]);
+				if (temp.isDirectory())
+				{
+					DeleteRecursive(temp, null);
+				}
+				else
+				{
+					FileInfo item = new FileInfo(temp);
+					closeBookIfOpened(item);
+					FileInfo file = Services.getScanner().findFileInTree(item);
+					if (file == null)
+						file = item;
+					if (file.deleteFile()) {
+						Services.getHistory().removeBookInfo(getDB(), file, true, true);
+					}
+//					boolean b = temp.delete();
+//					if (b == false)
+//					{
+//						Log.d("DeleteRecursive", "DELETE FAIL");
+//					}
+				}
+			}
+
+		}
+		dir.delete();
+		if (fi!=null) {
+			if (fi.parent != null)
+				directoryUpdated(fi.parent);
+			else directoryUpdated(fi);
+		}
 	}
 	
 	public void askDeleteRecent(final FileInfo item)
@@ -1651,7 +1701,34 @@ public class CoolReader extends BaseActivity
 					itemsBook.add("book.language=" + fi.language);
 				}
 				if (!StrUtils.isEmptyStr(fi.genre)) {
-					itemsBook.add("book.genre=" + fi.genre);
+					// lets try to get out genre name
+					GenreSAXElem ge = null;
+					String genreDescr = "";
+					if (!StrUtils.isEmptyStr(fi.genre)) {
+
+						String lang = CoolReader.this.getCurrentLanguage();
+						if (lang.length()>2) lang = lang.substring(0,2);
+
+						GenreSAXElem.mActivity=CoolReader.this;
+						try {
+							if (GenreSAXElem.elemList.size()==0) GenreSAXElem.initGenreList();
+						} catch (Exception e) {
+							log.e("exception while ini genre list", e);
+						}
+						ge = GenreSAXElem.getGenreDescr(lang,fi.genre);
+						if (ge != null)
+							if (ge.hshAttrs!=null) {
+								genreDescr=ge.hshAttrs.get("detailed");
+								if (StrUtils.isEmptyStr(genreDescr))
+									genreDescr=ge.hshAttrs.get("genre-title");
+								if (StrUtils.isEmptyStr(genreDescr))
+									genreDescr=ge.hshAttrs.get("title");
+						}
+					}
+					if ((!StrUtils.isEmptyStr(fi.genre)) && (!StrUtils.isEmptyStr(genreDescr)))
+							itemsBook.add("book.genre=" + genreDescr+" ("+fi.genre+")");
+					if ((!StrUtils.isEmptyStr(fi.genre)) && (StrUtils.isEmptyStr(genreDescr)))
+						itemsBook.add("book.genre=" + fi.genre);
 				}
 				String annot = "";
 				if (!StrUtils.isEmptyStr(fi.annotation)) {

@@ -11,6 +11,10 @@ public class StrUtils {
         return s == null || s.trim().length() == 0;
     }
 
+    public static boolean euqalsIgnoreNulls(String s1, String s2, boolean doTrim) {
+        return getNonEmptyStr(s1,doTrim).equals(getNonEmptyStr(s2,doTrim));
+    }
+
     public static String getNonEmptyStr(String s, boolean doTrim) {
         String res = s;
         if (isEmptyStr(res)) res=""; else

@@ -42,6 +42,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	ListView mListView;
 
 	public static final int MAX_SUBDIR_LEN = 32;
+
+	public void showItemPopupMenu() {
+		mActivity.registerForContextMenu(mActivity.contentView);
+		mActivity.contentView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
+			@Override
+			public void onCreateContextMenu(ContextMenu menu, View v,
+											ContextMenu.ContextMenuInfo menuInfo) {
+				mListView.createContextMenu(menu);
+			}
+		});
+		mActivity.contentView.showContextMenu();
+	}
 	
 	private class FileBrowserListView extends BaseListView {
 
@@ -62,6 +74,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					log.d("onItemLongClick("+position+")");
 					//return super.performItemClick(view, position, id);
 					FileInfo item = (FileInfo) getAdapter().getItem(position);
+					//mActivity.showToast(item.filename);
 					if ( item==null )
 						return false;
 					//openContextMenu(_this);
@@ -101,13 +114,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
             } else if (selectedItem!=null && selectedItem.isDirectory && !selectedItem.isOPDSDir()) {
                 inflater.inflate(R.menu.cr3_file_browser_file_folder_context_menu, menu);
                 menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_folder));
-		    } else if (selectedItem!=null && selectedItem.isDirectory) {
+		    } else if (selectedItem!=null && !selectedItem.isDirectory && !selectedItem.isOPDSDir() &&
+					!selectedItem.isOPDSBook()) {
+				inflater.inflate(R.menu.cr3_file_browser_file_context_menu, menu);
+				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
+			} else if (selectedItem!=null && selectedItem.isDirectory) {
 			    inflater.inflate(R.menu.cr3_file_browser_folder_context_menu, menu);
 			    menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
 		    } else {
-			    inflater.inflate(R.menu.cr3_file_browser_context_menu, menu);
-			    menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
-		    }
+				inflater.inflate(R.menu.cr3_file_browser_context_menu, menu);
+				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
+			}
+
 		    for ( int i=0; i<menu.size(); i++ ) {
 		    	menu.getItem(i).setOnMenuItemClickListener(new OnMenuItemClickListener() {
 					public boolean onMenuItemClick(MenuItem item) {
@@ -303,6 +321,22 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 	
 	FileInfo selectedItem = null;
+
+	void saveBookInfo() {
+		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, new History.BookInfoLoadedCallack() {
+			@Override
+			public void onBookInfoLoaded(BookInfo bookInfo) {
+				BookInfo bi = new BookInfo(selectedItem);
+				mActivity.getDB().saveBookInfo(bi);
+				mActivity.getDB().flush();
+				BookInfo bi2 = Services.getHistory().getBookInfo(selectedItem);
+				if (bi2 != null)
+					bi2.getFileInfo().setFileProperties(selectedItem);
+				if ((selectedItem.parent) != null)
+					mActivity.directoryUpdated(selectedItem.parent, selectedItem);
+			}
+		});
+	}
 	
 	public boolean onContextItemSelected(MenuItem item) {
 		
@@ -367,11 +401,157 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
             log.d("folder_open menu item selected");
             showDirectory(selectedItem, null);
             return true;
-        case R.id.folder_to_favorites:
+		case R.id.folder_delete:
+			log.d("folder_delete menu item selected");
+			//mActivity.showToast(selectedItem.pathname);
+			final File f = new File(selectedItem.pathname);
+			String[] children = f.list();
+			if (children.length>0)
+				mActivity.askConfirmation( mActivity.getString(R.string.delete_dir_confirm)+" "+children.length, new Runnable() {
+					@Override
+					public void run() {
+						mActivity.DeleteRecursive(f,selectedItem);
+					}
+				}); else mActivity.DeleteRecursive(f,selectedItem);
+			return true;
+		case R.id.folder_to_favorites:
             log.d("folder_to_favorites menu item selected");
             addToFavorites(selectedItem);
             return true;
+		case R.id.book_info:
+			log.d("book_info menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, new History.BookInfoLoadedCallack() {
+					@Override
+					public void onBookInfoLoaded(BookInfo bookInfo) {
+						BookInfo bi = new BookInfo(selectedItem);
+						mActivity.showBookInfo(bi);
+					}
+				});
+			}
+			return true;
+		case R.id.book_edit:
+			log.d("book_edit menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				mActivity.editBookInfo(currDirectory, selectedItem);
+			}
+			return true;
+		case R.id.book_shortcut:
+			log.d("book_shortcut menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				mActivity.createBookShortcut(selectedItem);
+			}
+			return true;
+		case R.id.book_to_gd:
+			log.d("book_to_gd menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				mActivity.mGoogleDriveTools.signInAndDoAnAction(
+						mActivity.mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, FileBrowser.this);
+			}
+			return true;
+		case R.id.book_no_mark:
+			log.d("book_no_mark menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int state = selectedItem.getReadingState();
+				int newState = FileInfo.STATE_NEW;
+				boolean modified = state != newState;
+				selectedItem.setReadingState(FileInfo.STATE_NEW);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_to_read:
+			log.d("book_to_read menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int state = selectedItem.getReadingState();
+				int newState = FileInfo.STATE_TO_READ;
+				boolean modified = state != newState;
+				selectedItem.setReadingState(FileInfo.STATE_TO_READ);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_reading:
+			log.d("book_reading menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int state = selectedItem.getReadingState();
+				int newState = FileInfo.STATE_READING;
+				boolean modified = state != newState;
+				selectedItem.setReadingState(FileInfo.STATE_READING);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_finished:
+			log.d("book_finished menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int state = selectedItem.getReadingState();
+				int newState = FileInfo.STATE_FINISHED;
+				boolean modified = state != newState;
+				selectedItem.setReadingState(FileInfo.STATE_FINISHED);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_rate_5:
+			log.d("book_rate_5 menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int rate = selectedItem.getRate();
+				int newRate = 5;
+				boolean modified = rate != newRate;
+				selectedItem.setRate(newRate);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_rate_4:
+			log.d("book_rate_4 menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int rate = selectedItem.getRate();
+				int newRate = 4;
+				boolean modified = rate != newRate;
+				selectedItem.setRate(newRate);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_rate_3:
+			log.d("book_rate_3 menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int rate = selectedItem.getRate();
+				int newRate = 3;
+				boolean modified = rate != newRate;
+				selectedItem.setRate(newRate);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_rate_2:
+			log.d("book_rate_2 menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int rate = selectedItem.getRate();
+				int newRate = 2;
+				boolean modified = rate != newRate;
+				selectedItem.setRate(newRate);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_rate_1:
+			log.d("book_rate_1 menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int rate = selectedItem.getRate();
+				int newRate = 1;
+				boolean modified = rate != newRate;
+				selectedItem.setRate(newRate);
+				if (modified) saveBookInfo();
+			}
+			return true;
+		case R.id.book_rate_0:
+			log.d("book_rate_0 menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				int rate = selectedItem.getRate();
+				int newRate = 0;
+				boolean modified = rate != newRate;
+				selectedItem.setRate(newRate);
+				if (modified) saveBookInfo();
+			}
+			return true;
+
 		}
+
 		return false;
 	}
 
@@ -1119,7 +1299,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								public void onBookInfoLoaded(BookInfo bookInfo) {
 									//mActivity.showToast(item.annotation);
 									//log.v("BOOKNF annotation:"+item.annotation);
-									mActivity.showBookInfo(new BookInfo(item));
+                                    BookInfo bi = new BookInfo(item);
+									mActivity.showBookInfo(bi);
 								}
 							});
 						}
@@ -1131,12 +1312,17 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 						@Override
 						public void onClick(View v) {
-							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
-								@Override
-								public void onBookInfoLoaded(BookInfo bookInfo) {
-									mActivity.showToast("Did not implemented yet...");
-								}
-							});
+							if ( item!=null ) {
+								selectedItem = item;
+								showItemPopupMenu();
+							}
+//							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+//								@Override
+//								public void onBookInfoLoaded(BookInfo bookInfo) {
+//									mActivity.showToast("Did not implemented yet...");
+//									showContextMenu();
+//								}
+//							});
 						}
 					});
 				}

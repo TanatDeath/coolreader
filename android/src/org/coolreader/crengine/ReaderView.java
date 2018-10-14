@@ -161,8 +161,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		@Override
 		public void onWindowVisibilityChanged(int visibility) {
-			if (visibility == VISIBLE)
+			if (visibility == VISIBLE) {
+				mActivity.einkRefresh();
 				startStats();
+			}
 			else
 				stopStats();
 			super.onWindowVisibilityChanged(visibility);
@@ -170,8 +172,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		@Override
 		public void onWindowFocusChanged(boolean hasWindowFocus) {
-			if (hasWindowFocus)
+			if (hasWindowFocus) {
+				mActivity.einkRefresh();
 				startStats();
+			}
 			else
 				stopStats();
 			super.onWindowFocusChanged(hasWindowFocus);
@@ -1900,7 +1904,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						colorIcon = a.getColor(2, Color.GRAY);
 						a.recycle();
 						ColorDrawable c = new ColorDrawable(colorGrayC);
-						c.setAlpha(130);
+						c.setAlpha(170);
 						dlg.getWindow().setBackgroundDrawable(c);
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell1), 1);
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell2), 2);
@@ -2681,7 +2685,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						ReaderAction.SAVE_CURRENT_BOOK_TO_GD,
 						ReaderAction.OPEN_BOOK_FROM_GD
 				};
-				mActivity.showActionsPopupMenu(actions, new CRToolBar.OnActionHandler() {
+				mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
 					@Override
 					public boolean onActionSelected(ReaderAction item) {
 						if (item == ReaderAction.SAVE_SETTINGS_TO_GD) {
@@ -2729,7 +2733,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						ReaderAction.ZOOM_IN,
 						ReaderAction.ZOOM_OUT
 				};
-				mActivity.showActionsPopupMenu(fonts_actions, new CRToolBar.OnActionHandler() {
+				mActivity.showActionsToolbarMenu(fonts_actions, new CRToolBar.OnActionHandler() {
 					@Override
 					public boolean onActionSelected(ReaderAction item) {
 						if (item == ReaderAction.FONT_PREVIOUS) {

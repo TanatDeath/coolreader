@@ -9,7 +9,9 @@
     android:background="?attr/colorThemeGray2"
     android:layout_marginTop="3dip"
     android:layout_marginBottom="3dip"
-    android:baselineAligned="true" android:layout_height="wrap_content">
+	android:layout_marginLeft="3dip"
+	android:layout_marginRight="3dip"
+	android:baselineAligned="true" android:layout_height="wrap_content">
 
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/tts_toolbar_buttons"

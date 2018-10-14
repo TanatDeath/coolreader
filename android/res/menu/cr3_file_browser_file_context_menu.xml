@@ -2,7 +2,20 @@
 <!-- Context menu for physical folder -->
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
-<item android:title="@string/mi_folder_open" android:titleCondensed="@string/mi_folder_open" android:id="@+id/folder_open"></item>
-<item android:title="@string/mi_folder_to_favorites" android:titleCondensed="@string/mi_folder_to_favorites" android:id="@+id/folder_to_favorites"></item>
-<item android:title="@string/mi_book_root" android:titleCondensed="@string/mi_book_root" android:id="@+id/book_root"></item>
+    <item android:title="@string/mi_book_open" android:titleCondensed="@string/mi_book_open" android:id="@+id/book_open"></item>
+    <item android:title="@string/mi_book_info" android:titleCondensed="@string/mi_book_info" android:id="@+id/book_info"></item>
+    <item android:title="@string/mi_book_edit" android:titleCondensed="@string/mi_book_edit" android:id="@+id/book_edit"></item>
+    <item android:title="@string/mi_book_delete" android:titleCondensed="@string/mi_book_delete" android:id="@+id/book_delete"></item>
+    <item android:title="@string/mi_book_shortcut" android:titleCondensed="@string/mi_book_shortcut" android:id="@+id/book_shortcut"></item>
+    <item android:title="@string/mi_book_to_gd" android:titleCondensed="@string/mi_book_to_gd" android:id="@+id/book_to_gd"></item>
+    <item android:title="@string/mi_book_no_mark" android:titleCondensed="@string/mi_book_no_mark" android:id="@+id/book_no_mark"></item>
+    <item android:title="@string/mi_book_to_read" android:titleCondensed="@string/mi_book_to_read" android:id="@+id/book_to_read"></item>
+    <item android:title="@string/mi_book_reading" android:titleCondensed="@string/mi_book_reading" android:id="@+id/book_reading"></item>
+    <item android:title="@string/mi_book_finished" android:titleCondensed="@string/mi_book_finished" android:id="@+id/book_finished"></item>
+    <item android:title="@string/mi_book_rate_5" android:titleCondensed="@string/mi_book_rate_5" android:id="@+id/book_rate_5"></item>
+    <item android:title="@string/mi_book_rate_4" android:titleCondensed="@string/mi_book_rate_4" android:id="@+id/book_rate_4"></item>
+    <item android:title="@string/mi_book_rate_3" android:titleCondensed="@string/mi_book_rate_3" android:id="@+id/book_rate_3"></item>
+    <item android:title="@string/mi_book_rate_2" android:titleCondensed="@string/mi_book_rate_2" android:id="@+id/book_rate_2"></item>
+    <item android:title="@string/mi_book_rate_1" android:titleCondensed="@string/mi_book_rate_1" android:id="@+id/book_rate_1"></item>
+    <item android:title="@string/mi_book_rate_0" android:titleCondensed="@string/mi_book_rate_0" android:id="@+id/book_rate_0"></item>
 </menu>

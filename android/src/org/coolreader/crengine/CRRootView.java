@@ -790,7 +790,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			//ReaderAction.OPEN_BOOK_FROM_GD,
 			ReaderAction.EXIT,	
 		};
-		mActivity.showActionsPopupMenu(actions, new OnActionHandler() {
+		mActivity.showActionsToolbarMenu(actions, new OnActionHandler() {
 			@Override
 			public boolean onActionSelected(ReaderAction item) {
 				if (item == ReaderAction.EXIT) {
@@ -821,6 +821,4 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		});
 	}
 
-	
-	
 }

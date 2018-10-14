@@ -252,7 +252,14 @@ public class BookInfoEditDialog extends BaseDialog {
 				onNegativeButtonClick();
 			}
 		});
-        ImageButton btnOpenBook = (ImageButton)view.findViewById(R.id.btn_open_book);
+		ImageButton btnOk = (ImageButton)view.findViewById(R.id.base_dlg_btn_positive);
+		btnOk.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onOkButtonClick();
+			}
+		});
+		ImageButton btnOpenBook = (ImageButton)view.findViewById(R.id.btn_open_book);
         btnOpenBook.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -406,7 +413,7 @@ public class BookInfoEditDialog extends BaseDialog {
         int rate =(int)(rbBookRating.getRating() + 0.5f);
         if (rate >=0 && rate <= 5)
             modified = file.setRate(rate) || modified;
-        int state = FileInfo.STATE_NEW;
+		int state = FileInfo.STATE_NEW;
 		int currentStateId = rgState.getCheckedRadioButtonId();
 		if (currentStateId == R.id.book_state_new)
 			state = FileInfo.STATE_NEW;
@@ -443,8 +450,12 @@ public class BookInfoEditDialog extends BaseDialog {
 
 	@Override
 	protected void onNegativeButtonClick() {
-		save();
 		super.onNegativeButtonClick();
+	}
+
+	protected void onOkButtonClick() {
+		save();
+		super.onPositiveButtonClick();
 	}
 	
 	

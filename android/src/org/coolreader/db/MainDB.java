@@ -15,10 +15,11 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 25;
+	public static final int DB_VERSION = 26;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
+		//execSQL("update book set saved_with_ver = 0 ");
 		if (mDB.needUpgrade(DB_VERSION)) {
 			log.i("DB_VERSION NEED UPGRADE");
 			execSQL("CREATE TABLE IF NOT EXISTS author (" +
@@ -1540,7 +1541,9 @@ public class MainDB extends BaseDB {
 		}
 		QueryHelper add(String fieldName, String value, String oldValue)
 		{
-			if ( value!=null && (oldValue==null || !oldValue.equals(value))) {
+			String val = StrUtils.isEmptyStr(value)?"":value;
+			String oldVal = StrUtils.isEmptyStr(oldValue)?"":oldValue;
+			if ( val!=null && (oldVal==null || !oldVal.equals(val))) {
 				fields.add(fieldName);
 				values.add(value);
 			}
@@ -1625,6 +1628,9 @@ public class MainDB extends BaseDB {
 			}
 			buf.append(" WHERE id=" + id );
 			vlog.v("executing " + buf);
+			for (Object o: values) {
+				vlog.v("value:"+o.toString());
+			}
 			mDB.execSQL(buf.toString(), values.toArray());
 			return true;
 		}
@@ -1637,23 +1643,26 @@ public class MainDB extends BaseDB {
 		QueryHelper( FileInfo newValue, FileInfo oldValue )
 		{
 			this("book");
-			add("pathname", newValue.getPathName(), oldValue.getPathName());
-			add("folder_fk", getFolderId(newValue.path), getFolderId(oldValue.path));
-			add("filename", newValue.filename, oldValue.filename);
-			add("arcname", newValue.arcname, oldValue.arcname);
-			add("title", newValue.title, oldValue.title);
-			add("series_fk", getSeriesId(newValue.series), getSeriesId(oldValue.series));
-			add("series_number", (long)newValue.seriesNumber, (long)oldValue.seriesNumber);
-			add("format", fromFormat(newValue.format), fromFormat(oldValue.format));
-			add("filesize", (long)newValue.size, (long)oldValue.size);
-			add("arcsize", (long)newValue.arcsize, (long)oldValue.arcsize);
-			add("last_access_time", (long)newValue.lastAccessTime, (long)oldValue.lastAccessTime);
-			add("create_time", (long)newValue.createTime, (long)oldValue.createTime);
-			add("flags", (long)newValue.flags, (long)oldValue.flags);
-			add("language", newValue.language, oldValue.language);
+			if (!newValue.need_to_update_ver) {
+				add("pathname", newValue.getPathName(), oldValue.getPathName());
+				add("folder_fk", getFolderId(newValue.path), getFolderId(oldValue.path));
+				add("filename", newValue.filename, oldValue.filename);
+				add("arcname", newValue.arcname, oldValue.arcname);
+				add("title", newValue.title, oldValue.title);
+				add("series_fk", getSeriesId(newValue.series), getSeriesId(oldValue.series));
+				add("series_number", (long) newValue.seriesNumber, (long) oldValue.seriesNumber);
+				add("format", fromFormat(newValue.format), fromFormat(oldValue.format));
+				add("filesize", (long) newValue.size, (long) oldValue.size);
+				add("arcsize", (long) newValue.arcsize, (long) oldValue.arcsize);
+				add("last_access_time", (long) newValue.lastAccessTime, (long) oldValue.lastAccessTime);
+				add("create_time", (long) newValue.createTime, (long) oldValue.createTime);
+				add("flags", (long) newValue.flags, (long) oldValue.flags);
+				add("language", newValue.language, oldValue.language);
+			}
 			add("lang_from", newValue.lang_from, oldValue.lang_from);
 			add("lang_to", newValue.lang_to, oldValue.lang_to);
 			add("saved_with_ver", (long)MainDB.DB_VERSION, (long)oldValue.saved_with_ver);
+			//vlog.v("QueryHelper: saved_with_ver "+(long)MainDB.DB_VERSION+"<"+(long)oldValue.saved_with_ver);
 			add("genre", newValue.genre, oldValue.genre);
 			add("annotation", newValue.annotation, oldValue.annotation);
 			add("srclang", newValue.srclang, oldValue.srclang);
