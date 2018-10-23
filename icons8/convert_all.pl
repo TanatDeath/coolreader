@@ -27,6 +27,10 @@ my %ic_smaller_list=(
 );
 
 my %ic_actions_list=(
+        'icons8_star.svg' => 'icons8_rate_star.png',
+        'icons8_star_filled.svg' => 'icons8_rate_star_filled.png',
+        'icons8_position_to_disk.svg' => 'icons8_position_to_disk.png',
+        'icons8_position_to_disk_interval.svg' => 'icons8_position_to_disk_interval.png',
         'icons8_fast_forward.svg' => 'icons8_fast_forward.png',
         'icons8_rewind.svg' => 'icons8_rewind.png',
         'icons8_stop.svg' => 'icons8_stop.png',

@@ -211,7 +211,7 @@ public class BookInfo {
 		buf.append("# file name: " + pathname.getName() + "\n");
 		buf.append("# file path: " + pathname.getParent() + "\n");
 		buf.append("# book title: " + fileInfo.title + "\n");
-		buf.append("# author: " + fileInfo.authors + "\n");
+		buf.append("# author: " + fileInfo.getAuthors() + "\n");
 		buf.append("\n");
 		for ( Bookmark bm : bookmarks ) {
 			if ( bm.getType()!=Bookmark.TYPE_COMMENT && bm.getType()!=Bookmark.TYPE_CORRECTION )
@@ -244,7 +244,7 @@ public class BookInfo {
 			writer.write("# file name: " + pathname.getName() + "\r\n");
 			writer.write("# file path: " + pathname.getParent() + "\r\n");
 			writer.write("# book title: " + fileInfo.title + "\r\n");
-			writer.write("# author: " + fileInfo.authors + "\r\n");
+			writer.write("# author: " + fileInfo.getAuthors() + "\r\n");
 			writer.write("# series: " + fileInfo.series + "\r\n");
 			writer.write("\r\n");
 			for ( Bookmark bm : bookmarks ) {

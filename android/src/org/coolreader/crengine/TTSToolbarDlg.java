@@ -90,6 +90,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		if ( "1".equals(oldViewSetting) ) {
 			changedPageMode = true;
 			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "0");
+			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "1");
 		}
 		moveSelection( ReaderCommand.DCMD_SELECT_FIRST_SENTENCE );
 	}
@@ -98,6 +99,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	{
 		if ( changedPageMode ) {
 			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "1");
+			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "0");
 		}
 	}
 	
@@ -110,6 +112,16 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			@Override
 			public void onNewSelection(Selection selection) {
 				Log.d("cr3", "onNewSelection: " + selection.text);
+				curTime = System.currentTimeMillis();
+				if (curTime - lastSaveCurPosTime > mReaderView.getDefSavePositionInterval()) {
+					lastSaveCurPosTime = curTime;
+					try {
+						final Bookmark bmk = mReaderView.getCurrentPositionBookmark();
+						if (bmk != null) mReaderView.savePositionBookmark(bmk);
+					} catch (Exception e) {
+						L.e("couldn't save current position");
+					}
+				}
 				currentSelection = selection;
 				if ( isSpeaking )
 					say( currentSelection );
@@ -156,7 +168,10 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		Log.d(TAG, "startMotionWatchdog() exit");
 	}
 	
-	private boolean isSpeaking; 
+	private boolean isSpeaking;
+	private long curTime = System.currentTimeMillis();
+	private long lastSaveCurPosTime = System.currentTimeMillis();
+
 	private void stop() {
 		isSpeaking = false;
 		if ( mTTS.isSpeaking() ) {
@@ -247,6 +262,14 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mPanel.findViewById(R.id.tts_play_pause).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				toggleStartStop();
+			}
+		});
+		mPanel.findViewById(R.id.tts_play_pause).setOnLongClickListener(new View.OnLongClickListener() {
+			public boolean onLongClick(View v) {
+				mCoolReader.tts = null;
+				mCoolReader.ttsInitialized = false;
+				mCoolReader.showToast("Re-initializing TTS");
+				return true;
 			}
 		});
 		mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);

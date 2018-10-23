@@ -867,7 +867,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								file.filename = Utils.cleanupHtmlTags(entry.content);
 								file.title = entry.title;
 								file.format = DocumentFormat.byMimeType(acquisition.type);
-								file.authors = entry.getAuthors();
+								file.setAuthors(entry.getAuthors());
 								file.isListed = true;
 								file.isScanned = true;
 								file.parent = fileOrDir;
@@ -926,8 +926,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						downloadDir = Services.getScanner().getDownloadDirectory();
 						log.d("onDownloadStart: after getDownloadDirectory()" );
 						String subdir = null;
-						if ( fileOrDir.authors!=null ) {
-							subdir = Utils.transcribeFileName(fileOrDir.authors);
+						if ( fileOrDir.getAuthors()!=null ) {
+							subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
 							if ( subdir.length()>MAX_SUBDIR_LEN )
 								subdir = subdir.substring(0, MAX_SUBDIR_LEN);
 						} else {
@@ -1416,8 +1416,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						String fn = item.getFileNameToDisplay();
 						setText( filename, fn );
 					} else {
-						setText( author, Utils.formatAuthors(item.authors) );
-						String seriesName = Utils.formatSeries(item.series, item.seriesNumber);
+						setText( author, Utils.formatAuthors(item.getAuthors()) );
+                        //setText( author, item.authors );
+                        String seriesName = Utils.formatSeries(item.series, item.seriesNumber);
 						String title = item.title;
 						String filename1 = item.filename;
 						String filename2 = item.isArchive && item.arcname != null /*&& !item.isDirectory */
@@ -1466,10 +1467,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						}
 						if (fieldState != null) {
 							fieldState.setText(state);
-							int colorBlue = Utils.resolveResourceIdByAttr(mActivity, R.attr.colorThemeBlue, Color.BLUE);
-							int colorGreen = Utils.resolveResourceIdByAttr(mActivity, R.attr.colorThemeGreen, Color.GREEN);
-							int colorGray = Utils.resolveResourceIdByAttr(mActivity, R.attr.colorThemeGray, Color.GRAY);
-
+//							int colorBlue = Utils.resolveResourceIdByAttr(mActivity, R.attr.colorThemeBlue, Color.BLUE);
+//							int colorGreen = Utils.resolveResourceIdByAttr(mActivity, R.attr.colorThemeGreen, Color.GREEN);
+//							int colorGray = Utils.resolveResourceIdByAttr(mActivity, R.attr.colorThemeGray, Color.GRAY);
+							int colorBlue;
+							int colorGreen;
+							int colorGray;
 							TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 									{R.attr.colorThemeBlue,
 									 R.attr.colorThemeGreen,

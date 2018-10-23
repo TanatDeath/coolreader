@@ -254,6 +254,9 @@ public class Bookmark {
 	private long timeStamp = System.currentTimeMillis(); // UTC timestamp
 	private long timeElapsed;
 	private String linkPos;
+	public String bookFile; // for gson saving
+	public String bookPath;
+	public String bookFileArc;
 	@Override
 	public String toString() {
 		return "Bookmark[t=" + type + ", start=" + startPos + "]";

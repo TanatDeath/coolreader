@@ -367,28 +367,29 @@ public class SelectionToolbarDlg {
 		int y = sel.startY;
 		if (y > sel.endY)
 			y = sel.endY;
-		int maxy = mReaderView.getSurface().getHeight() * 4 / 5; 
-		if (y > maxy) {
-			setReaderMode(); // selection is overlapped by toolbar: set scroll mode and move
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					//mReaderView.doEngineCommand(ReaderCommand.DCMD_REQUEST_RENDER, 0);
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									mReaderView.doEngineCommand(ReaderCommand.DCMD_SCROLL_BY, mReaderView.getSurface().getHeight() / 3);
-									mReaderView.redraw();
-								}
-							});
-						}
-					});
-				}
-			});
-		}
+		int maxy = mReaderView.getSurface().getHeight() * 4 / 5;
+		//plotn - since we have a transparent toolbar - this is not nessesary
+//		if (y > maxy) {
+//			setReaderMode(); // selection is overlapped by toolbar: set scroll mode and move
+//			BackgroundThread.instance().postGUI(new Runnable() {
+//				@Override
+//				public void run() {
+//					//mReaderView.doEngineCommand(ReaderCommand.DCMD_REQUEST_RENDER, 0);
+//					BackgroundThread.instance().postBackground(new Runnable() {
+//						@Override
+//						public void run() {
+//							BackgroundThread.instance().postGUI(new Runnable() {
+//								@Override
+//								public void run() {
+//									mReaderView.doEngineCommand(ReaderCommand.DCMD_SCROLL_BY, mReaderView.getSurface().getHeight() / 3);
+//									mReaderView.redraw();
+//								}
+//							});
+//						}
+//					});
+//				}
+//			});
+//		}
 	}
 	
 }

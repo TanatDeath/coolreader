@@ -705,7 +705,8 @@ public class CoverpageManager {
 							if (file.format.needCoverPageCaching())
 								db.saveBookCoverpage(file, imageData);
 						}
-						Services.getEngine().drawBookCover(buffer, imageData, fontFace, file.getTitleOrFileName(), file.authors, file.series, file.seriesNumber, DeviceInfo.EINK_SCREEN ? 4 : 16);
+						Services.getEngine().drawBookCover(buffer, imageData, fontFace, file.getTitleOrFileName(),
+								file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.EINK_SCREEN ? 4 : 16);
 						BackgroundThread.instance().postGUI(new Runnable() {
 							@Override
 							public void run() {
@@ -740,7 +741,8 @@ public class CoverpageManager {
 	{
 		try {
 			Bitmap bmp = Bitmap.createBitmap(file.maxWidth, file.maxHeight, DeviceInfo.BUFFER_COLOR_FORMAT);
-			Services.getEngine().drawBookCover(bmp, data, fontFace, file.file.getTitleOrFileName(), file.file.authors, file.file.series, file.file.seriesNumber, DeviceInfo.EINK_SCREEN ? 4 : 16);
+			Services.getEngine().drawBookCover(bmp, data, fontFace, file.file.getTitleOrFileName(),
+					file.file.getAuthors(), file.file.series, file.file.seriesNumber, DeviceInfo.EINK_SCREEN ? 4 : 16);
 			return bmp;
 		} catch ( Exception e ) {
     		Log.e("cr3", "exception while decoding coverpage " + e.getMessage());

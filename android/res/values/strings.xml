@@ -239,9 +239,11 @@
 
     <string name="book_info_section_book_translation">Translation direction</string>
     <string name="book_info_book_authors">Authors</string>
+    <string name="book_info_book_date">Book date</string>
     <string name="book_info_file_path">File path</string>
     <string name="book_info_section_file_properties">File properties</string>
     <string name="book_info_book_series_name">Series</string>
+    <string name="book_info_book_publseries_name">Publish series</string>
     <string name="book_info_file_arcpath">Archive path</string>
     <string name="book_info_book_title">Title</string>
     <string name="book_info_file_name">File name</string>
@@ -671,6 +673,7 @@
     <string name="win_title_reading_pos">Choose reading position</string>
     <string name="load_reading_pos_from_gd">Restore reading pos from Google One</string>
     <string name="save_pos_to_gd_timeout">Autosave reading pos to Google One timeout</string>
+    <string name="save_pos_timeout">Autosave reading pos timeout</string>
     <string name="save_bookmarks_to_gd">Save bookmarks to Google One</string>
     <string name="load_bookmarks_from_gd">Load bookmarks from Google One</string>
     <string name="gd_menu">Google One menu</string>
@@ -778,6 +781,7 @@
     <string name="options_app_browser_hide_empty_dirs_add_info">Hide folders that do not contain books</string>
     <string name="mi_book_browser_simple_mode_add_info">This option disables the display of covers and other information of books in folders</string>
     <string name="save_pos_to_gd_timeout_add_info">The reading position will be saved every 1-100 minutes on the Google One disc, disabled by default (requires account permission for access)</string>
+    <string name="save_pos_timeout_add_info">The reading position will be saved to local file on this device</string>
     <string name="options_app_key_actions_add_info">Assign actions for buttons and behavior when connecting a headset</string>
     <string name="options_app_tapzones_normal_add_info">Customize the actions of the program when you tap the screen area (screen is divided to 9 tap zones 3x3)</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Setting up an additional action for long or short press</string>
@@ -807,4 +811,6 @@
     <string name="options_page_animation_add_info">Enable or disable the animation while flipping</string>
     <string name="options_view_bookmarks_highlight_add_info">Enable or disable bookmark highlighting</string>
     <string name="options_rounded_corners_margin_add_info">Move the right and left side of the header elements closer to the center of the screen on devices with Edge Screen</string>
+    <string name="pos_recovered">Reading position was loaded from recovery file</string>
+    <string name="pos_saved">Reading position was saved</string>
 </resources>

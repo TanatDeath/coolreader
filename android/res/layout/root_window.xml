@@ -73,7 +73,8 @@
 		           style="@style/TextAppearance.Small"
 		           android:singleLine="false"
 		           android:maxLines="2"
-		        android:text="Author" 
+		        android:text="Author"
+                android:textColor="?attr/colorIcon"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"/>
           <TextView 
@@ -81,21 +82,36 @@
                    style="@style/TextAppearance.Medium"
                    android:singleLine="false"
                    android:maxLines="2"
-                android:text="Book Title" 
+                android:text="Book Title"
+                android:textColor="?attr/colorIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
           <TextView 
                 android:id="@+id/lbl_book_series"
                 style="@style/TextAppearance.Small"
-                android:text="Book Series" 
+                android:text="Book Series"
+                android:textColor="?attr/colorIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-          <TextView 
-                android:id="@+id/lbl_book_info"
-                   style="@style/TextAppearance.Small"
-                android:text="File info" 
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+          <LinearLayout
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              >
+              <TextView
+                    android:id="@+id/lbl_book_info1"
+                       style="@style/TextAppearance.Small"
+                    android:text="_"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+              <TextView
+                  android:id="@+id/lbl_book_info"
+                  style="@style/TextAppearance.Small"
+                  android:text="File info"
+                  android:textColor="?attr/colorIcon"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"/>
+          </LinearLayout>
           </LinearLayout>
       
                 <!-- ImageButton
@@ -136,7 +152,8 @@
           android:layout_marginBottom="0dip"
           android:layout_marginLeft="8dip"
           android:layout_marginRight="8dip"
-          android:text="@string/root_item_recent" 
+          android:text="@string/root_item_recent"
+          android:textColor="?attr/colorIcon"
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"/>
 
@@ -177,7 +194,8 @@
           android:layout_marginBottom="0dip"
           android:layout_marginLeft="8dip"
           android:layout_marginRight="8dip"
-          android:text="@string/root_item_filesystem" 
+          android:text="@string/root_item_filesystem"
+          android:textColor="?attr/colorIcon"
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"/>
     
@@ -212,7 +230,8 @@
           android:layout_marginBottom="0dip"
           android:layout_marginLeft="8dip"
           android:layout_marginRight="8dip"
-          android:text="@string/root_item_library" 
+          android:text="@string/root_item_library"
+          android:textColor="?attr/colorIcon"
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"/>
     
@@ -252,7 +271,8 @@
           android:layout_marginBottom="0dip"
           android:layout_marginLeft="8dip"
           android:layout_marginRight="8dip"
-          android:text="@string/root_item_online_catalogs" 
+          android:text="@string/root_item_online_catalogs"
+          android:textColor="?attr/colorIcon"
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"/>
 

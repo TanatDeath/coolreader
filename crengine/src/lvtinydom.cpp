@@ -5372,7 +5372,11 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         lString16 firstName = pauthor.relative( L"/first-name" ).getText().trim();
         lString16 lastName = pauthor.relative( L"/last-name" ).getText().trim();
         lString16 middleName = pauthor.relative( L"/middle-name" ).getText().trim();
+        lString16 nickName = pauthor.relative( L"/nickname" ).getText().trim();
+        lString16 homePage = pauthor.relative( L"/home-page" ).getText().trim();
+        lString16 email = pauthor.relative( L"/email" ).getText().trim();
         lString16 author = firstName;
+        lString16 addInfo = lString16::empty_str;
         if ( !author.empty() )
             author += " ";
         if ( !middleName.empty() )
@@ -5382,7 +5386,18 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         author += lastName;
         if ( !authors.empty() )
             authors += delimiter;
-        authors += author;
+        if (( !nickName.empty() ) || ( !homePage.empty() ) || ( !email.empty() )) {
+            addInfo = nickName;
+            if ((!addInfo.empty()) && ((!homePage.empty()) || (!email.empty())) )
+                addInfo += ", ";
+            if ( !homePage.empty() ) {
+                addInfo += homePage;
+                if ( !email.empty() ) addInfo += ", ";
+            }
+            if (!email.empty()) addInfo += email;
+            addInfo = " (" + addInfo + ")";
+        }
+        authors += author + addInfo;
     }
     return authors;
 }
@@ -5397,9 +5412,25 @@ lString16 extractDocLanguage( ldomDocument * doc )
     return doc->createXPointer(L"/FictionBook/description/title-info/lang").getText();
 }
 
-lString16 extractDocGenre( ldomDocument * doc )
+lString16 extractDocGenre( ldomDocument * doc, lString16 delimiter)
 {
-    return doc->createXPointer(L"/FictionBook/description/title-info/genre").getText();
+    if ( delimiter.empty() )
+        delimiter = ", ";
+    lString16 genres;
+    for ( int i=0; i<16; i++) {
+        lString16 path = cs16("/FictionBook/description/title-info/genre[") + fmt::decimal(i+1) + "]";
+        ldomXPointer pgenre = doc->createXPointer(path);
+        if ( !pgenre ) {
+            //CRLog::trace( "xpath not found: %s", UnicodeToUtf8(path).c_str() );
+            break;
+        }
+        lString16 genre = pgenre.getText().trim();
+        if ( !genres.empty() )
+            genres += delimiter;
+        genres += genre;
+    }
+    return genres;
+    //return doc->createXPointer(L"/FictionBook/description/title-info/genre").getText();
 }
 
 lString16 extractDocAnnotation( ldomDocument * doc )
@@ -5411,6 +5442,12 @@ lString16 extractDocSrcLang( ldomDocument * doc )
 {
     return doc->createXPointer(L"/FictionBook/description/title-info/src-lang").getText();
 }
+
+lString16 extractDocBookDate( ldomDocument * doc )
+{
+    return doc->createXPointer(L"/FictionBook/description/title-info/date").getText();
+}
+
 
 lString16 extractDocTranslator( ldomDocument * doc, bool shortMiddleName  )
 {
@@ -5493,6 +5530,27 @@ lString16 extractDocSeries( ldomDocument * doc, int * pSeriesNumber )
 {
     lString16 res;
     ldomNode * series = doc->createXPointer(L"/FictionBook/description/title-info/sequence").getNode();
+    if ( series ) {
+        lString16 sname = lString16(series->getAttributeValue(attr_name)).trim();
+        lString16 snumber = series->getAttributeValue(attr_number);
+        if ( !sname.empty() ) {
+            if ( pSeriesNumber ) {
+                *pSeriesNumber = snumber.atoi();
+                res = sname;
+            } else {
+                res << "(" << sname;
+                if ( !snumber.empty() )
+                    res << " #" << snumber << ")";
+            }
+        }
+    }
+    return res;
+}
+
+lString16 extractDocPublishSeries( ldomDocument * doc, int * pSeriesNumber )
+{
+    lString16 res;
+    ldomNode * series = doc->createXPointer(L"/FictionBook/description/publish-info/sequence").getNode();
     if ( series ) {
         lString16 sname = lString16(series->getAttributeValue(attr_name)).trim();
         lString16 snumber = series->getAttributeValue(attr_number);

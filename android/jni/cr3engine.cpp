@@ -88,6 +88,30 @@ static lString16 extractDocSeriesReverse( ldomDocument * doc, int & seriesNumber
     }
     return res;
 }
+
+static lString16 extractDocPublSeriesReverse( ldomDocument * doc, int & seriesNumber )
+{
+	seriesNumber = 0;
+    lString16 res;
+    ldomXPointer p = doc->createXPointer(L"/FictionBook/description/publish-info/sequence");
+    if ( p.isNull() )
+        return res;
+    ldomNode * series = p.getNode();
+    if ( series ) {
+        lString16 sname = series->getAttributeValue( attr_name );
+        lString16 snumber = series->getAttributeValue( attr_number );
+        if ( !sname.empty() ) {
+            res << L"(";
+            if ( !snumber.empty() ) {
+                res << L"#" << snumber << L" ";
+                seriesNumber = snumber.atoi();
+            }
+            res << sname;
+            res << L")";
+        }
+    }
+    return res;
+}
 #endif
 
 class BookProperties
@@ -104,6 +128,7 @@ public:
 	lString16 genre;
 	lString16 annotation;
 	lString16 srclang;
+	lString16 bookdate;
     lString16 translator;
     lString16 docauthor;
     lString16 docprogram;
@@ -116,6 +141,8 @@ public:
     lString16 publcity;
     lString16 publyear;
     lString16 publisbn;
+	lString16 publseries;
+	int publseriesNumber;
 };
 
 static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
@@ -248,10 +275,11 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     lString16 title = extractDocTitle( &doc );
     lString16 language = extractDocLanguage( &doc );
     lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
-	lString16 genre = extractDocGenre( &doc );
+	lString16 genre = extractDocGenre( &doc, lString16("|") );
 	lString16 annotation = extractDocAnnotation( &doc );
 	lString16 srclang = extractDocSrcLang( &doc );
-    lString16 translator = extractDocTranslator( &doc, false );
+	lString16 bookdate = extractDocBookDate( &doc );
+	lString16 translator = extractDocTranslator( &doc, false );
     lString16 docauthor = extractDocAuthor( &doc );
     lString16 docprogram = extractDocProgram( &doc );
     lString16 docdate = extractDocDate( &doc );
@@ -263,6 +291,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     lString16 publcity = extractPublCity( &doc );
     lString16 publyear = extractPublYear( &doc );
     lString16 publisbn = extractPublIsbn( &doc );
+	lString16 publseries = extractDocPublishSeries( &doc, &pBookProps->publseriesNumber );
 
 #if SERIES_IN_AUTHORS==1
     if ( !series.empty() )
@@ -278,7 +307,8 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
 	pBookProps->genre = genre;
 	pBookProps->annotation = annotation;
 	pBookProps->srclang = srclang;
-    pBookProps->translator = translator;
+	pBookProps->bookdate = bookdate;
+	pBookProps->translator = translator;
     pBookProps->docauthor = docauthor;
     pBookProps->docprogram = docprogram;
     pBookProps->docdate = docdate;
@@ -290,7 +320,8 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     pBookProps->publcity = publcity;
     pBookProps->publyear = publyear;
     pBookProps->publisbn = publisbn;
-    return true;
+	pBookProps->publseries = publseries;
+	return true;
 }
 
 
@@ -336,7 +367,8 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	SET_STR_FLD("genre",props.genre);
 	SET_STR_FLD("annotation",props.annotation);
 	SET_STR_FLD("srclang",props.srclang);
-    SET_STR_FLD("translator",props.translator);
+	SET_STR_FLD("bookdate",props.bookdate);
+	SET_STR_FLD("translator",props.translator);
     SET_STR_FLD("docauthor",props.docauthor);
     SET_STR_FLD("docprogram",props.docprogram);
     SET_STR_FLD("docdate",props.docdate);
@@ -348,6 +380,8 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
     SET_STR_FLD("publcity",props.publcity);
     SET_STR_FLD("publyear",props.publyear);
     SET_STR_FLD("publisbn",props.publisbn);
+	SET_STR_FLD("publseries",props.publseries);
+	SET_INT_FLD("publseriesNumber",props.publseriesNumber);
 
 	return JNI_TRUE;
 }

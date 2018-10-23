@@ -1281,9 +1281,9 @@ public class CoolReader extends BaseActivity
 
     // ========================================================================================
     // TTS
-	TTS tts;
-	boolean ttsInitialized;
-	boolean ttsError;
+	public TTS tts;
+	public boolean ttsInitialized;
+	public boolean ttsError;
 	
 	public boolean initTTS(final OnTTSCreatedListener listener) {
 		if ( ttsError || !TTS.isFound() ) {
@@ -1318,6 +1318,8 @@ public class CoolReader extends BaseActivity
 				phoneStateChangeHandlerInstalled = true;
 			}
 		}
+
+		// here we will try to reinitialize
 		if ( ttsInitialized && tts!=null ) {
 			BackgroundThread.instance().executeGUI(new Runnable() {
 				@Override
@@ -1327,6 +1329,7 @@ public class CoolReader extends BaseActivity
 			});
 			return true;
 		}
+
 		if ( ttsInitialized && tts!=null ) {
 			showToast("TTS initialization is already called");
 			return false;
@@ -1624,7 +1627,12 @@ public class CoolReader extends BaseActivity
 			itemsSys.add("system.battery=" + getReaderView().getmBatteryState() + "%");
 		itemsSys.add("system.time=" + Utils.formatTime(this, System.currentTimeMillis()));
 		if ((getReaderView()!=null)&&(getReaderView().getLastsetWidth()!=0)&&(getReaderView().getLastsetHeight()!=0))
-			itemsSys.add("system.resolution="+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight());
+			itemsSys.add("system.resolution="+
+					"last requested ("+
+					Utils.formatTime(this,getReaderView().getRequestedResTime())+"): "+
+						getReaderView().getRequestedWidth()+" x "+getReaderView().getRequestedHeight()+
+					"; last set ("+Utils.formatTime(this,getReaderView().getLastsetResTime())+"): "+
+					"): "+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight());
 		itemsSys.add("system.device_model=" + DeviceInfo.MANUFACTURER + " / "+DeviceInfo.MODEL+" / "+
 				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND);
 		String sDevFlags = "";
@@ -1687,9 +1695,9 @@ public class CoolReader extends BaseActivity
 			public void done() {
 				FileInfo fi = bi.getFileInfo();
 				itemsBook.add("section=section.book");
-				if ( fi.authors!=null || fi.title!=null || fi.series!=null) {
-					itemsBook.add("book.authors=" + fi.authors);
-					itemsBook.add("book.title=" + fi.title);
+				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null) {
+					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add("book.authors=" + fi.getAuthors());
+					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add("book.title=" + fi.title);
 					if ( fi.series!=null ) {
 						String s = fi.series;
 						if ( fi.seriesNumber>0 )
@@ -1697,38 +1705,50 @@ public class CoolReader extends BaseActivity
 						itemsBook.add("book.series=" + s);
 					}
 				}
+				if (!StrUtils.isEmptyStr(fi.bookdate)) itemsBook.add("book.date=" + fi.bookdate);
 				if (!StrUtils.isEmptyStr(fi.language)) {
 					itemsBook.add("book.language=" + fi.language);
 				}
+				String genreText = "";
 				if (!StrUtils.isEmptyStr(fi.genre)) {
 					// lets try to get out genre name
 					GenreSAXElem ge = null;
 					String genreDescr = "";
 					if (!StrUtils.isEmptyStr(fi.genre)) {
+						String [] arrGenre = fi.genre.split("\\|");
+						for (String genre: arrGenre) {
+							if (!StrUtils.isEmptyStr(genre)) {
+								String lang = CoolReader.this.getCurrentLanguage();
+								if (lang.length() > 2) lang = lang.substring(0, 2);
 
-						String lang = CoolReader.this.getCurrentLanguage();
-						if (lang.length()>2) lang = lang.substring(0,2);
-
-						GenreSAXElem.mActivity=CoolReader.this;
-						try {
-							if (GenreSAXElem.elemList.size()==0) GenreSAXElem.initGenreList();
-						} catch (Exception e) {
-							log.e("exception while ini genre list", e);
-						}
-						ge = GenreSAXElem.getGenreDescr(lang,fi.genre);
-						if (ge != null)
-							if (ge.hshAttrs!=null) {
-								genreDescr=ge.hshAttrs.get("detailed");
-								if (StrUtils.isEmptyStr(genreDescr))
-									genreDescr=ge.hshAttrs.get("genre-title");
-								if (StrUtils.isEmptyStr(genreDescr))
-									genreDescr=ge.hshAttrs.get("title");
+								GenreSAXElem.mActivity = CoolReader.this;
+								try {
+									if (GenreSAXElem.elemList.size() == 0)
+										GenreSAXElem.initGenreList();
+								} catch (Exception e) {
+									log.e("exception while ini genre list", e);
+								}
+								ge = GenreSAXElem.getGenreDescr(lang, genre);
+								if (ge != null)
+									if (ge.hshAttrs != null) {
+										genreDescr = ge.hshAttrs.get("detailed");
+										if (StrUtils.isEmptyStr(genreDescr))
+											genreDescr = ge.hshAttrs.get("genre-title");
+										if (StrUtils.isEmptyStr(genreDescr))
+											genreDescr = ge.hshAttrs.get("title");
+									}
+								String addGenreText = "";
+								if ((!StrUtils.isEmptyStr(genre)) && (!StrUtils.isEmptyStr(genreDescr)))
+									addGenreText = genreDescr+" ("+genre+")";
+								if ((!StrUtils.isEmptyStr(genre)) && (StrUtils.isEmptyStr(genreDescr)))
+									addGenreText = genre;
+								if (StrUtils.isEmptyStr(genreText)) genreText = addGenreText;
+									else genreText = genreText + "; "+addGenreText;
+							}
 						}
 					}
-					if ((!StrUtils.isEmptyStr(fi.genre)) && (!StrUtils.isEmptyStr(genreDescr)))
-							itemsBook.add("book.genre=" + genreDescr+" ("+fi.genre+")");
-					if ((!StrUtils.isEmptyStr(fi.genre)) && (StrUtils.isEmptyStr(genreDescr)))
-						itemsBook.add("book.genre=" + fi.genre);
+					if (!StrUtils.isEmptyStr(genreText))
+						itemsBook.add("book.genre=" + genreText);
 				}
 				String annot = "";
 				if (!StrUtils.isEmptyStr(fi.annotation)) {
@@ -1740,15 +1760,7 @@ public class CoolReader extends BaseActivity
 				if (!StrUtils.isEmptyStr(fi.translator)) {
 					itemsBook.add("book.translator=" + fi.translator);
 				}
-				if (
-						(!StrUtils.isEmptyStr(fi.docauthor)) ||
-						(!StrUtils.isEmptyStr(fi.docprogram)) ||
-						(!StrUtils.isEmptyStr(fi.docdate)) ||
-						(!StrUtils.isEmptyStr(fi.docsrcurl)) ||
-						(!StrUtils.isEmptyStr(fi.docsrcocr)) ||
-						(!StrUtils.isEmptyStr(fi.docversion))
-					)
-					itemsBook.add("section=section.book_document");
+				itemsBook.add("section=section.book_document");
 				if (!StrUtils.isEmptyStr(fi.docauthor)) {
 					itemsBook.add("book.docauthor=" + fi.docauthor);
 				}
@@ -1767,14 +1779,7 @@ public class CoolReader extends BaseActivity
 				if (!StrUtils.isEmptyStr(fi.docversion)) {
 					itemsBook.add("book.docversion=" + fi.docversion);
 				}
-				if (
-						(!StrUtils.isEmptyStr(fi.publname)) ||
-						(!StrUtils.isEmptyStr(fi.publisher)) ||
-						(!StrUtils.isEmptyStr(fi.publcity)) ||
-						(!StrUtils.isEmptyStr(fi.publyear)) ||
-						(!StrUtils.isEmptyStr(fi.publisbn))
-					)
-					itemsBook.add("section=section.book_publisher");
+				itemsBook.add("section=section.book_publisher");
 				if (!StrUtils.isEmptyStr(fi.publname)) {
 					itemsBook.add("book.publname=" + fi.publname);
 				}
@@ -1790,16 +1795,47 @@ public class CoolReader extends BaseActivity
 				if (!StrUtils.isEmptyStr(fi.publisbn)) {
 					itemsBook.add("book.publisbn=" + fi.publisbn);
 				}
+				if ( fi.publseries!=null ) {
+					String s = fi.publseries;
+					if ( fi.publseriesNumber>0 )
+						s = s + " #" + fi.publseriesNumber;
+					itemsBook.add("book.publseries=" + s);
+				}
 				itemsBook.add("section=section.book_translation");
 				String lfrom = "[empty]";
 				if (!StrUtils.isEmptyStr(fi.lang_from)) lfrom = fi.lang_from;
 				String lto = "[empty]";
 				if (!StrUtils.isEmptyStr(fi.lang_to)) lto = fi.lang_to;
 				itemsBook.add("book.translation=" + lfrom + " -> " + lto);
-				for (String s: itemsPos) itemsAll.add(s);
-				for (String s: itemsBook) itemsAll.add(s);
-				for (String s: itemsFile) itemsAll.add(s);
-				for (String s: itemsSys) itemsAll.add(s);
+				if (itemsPos.size()==1) itemsPos.clear();
+				if (itemsBook.size()==1) itemsBook.clear();
+				if (itemsFile.size()==1) itemsFile.clear();
+				if (itemsSys.size()==1) itemsSys.clear();
+				boolean bSection = true;
+				for (String s: itemsPos) {
+					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+						itemsAll.remove(itemsAll.size()-1);
+					bSection=s.startsWith("section=");
+					itemsAll.add(s);
+				}
+				for (String s: itemsBook) {
+					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+						itemsAll.remove(itemsAll.size()-1);
+					bSection=s.startsWith("section=");
+					itemsAll.add(s);
+				}
+				for (String s: itemsFile) {
+					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+						itemsAll.remove(itemsAll.size()-1);
+					bSection=s.startsWith("section=");
+					itemsAll.add(s);
+				}
+				for (String s: itemsSys) {
+					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+						itemsAll.remove(itemsAll.size()-1);
+					bSection=s.startsWith("section=");
+					itemsAll.add(s);
+				}
 				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot);
 				dlg.show();
 			}
@@ -2035,6 +2071,52 @@ public class CoolReader extends BaseActivity
 			}
 		} catch (Exception e) {
 		}
+	}
+
+	public void saveCurPosFile(String json)
+	{
+		log.d("Starting save cur_pos.json");
+		try {
+			final File fJson = new File(getSettingsFile(0).getParent() + "/cur_pos.json");
+			BufferedWriter bw = null;
+			FileWriter fw = null;
+			char[] bytesArray = new char[1000];
+			int bytesRead = 1000;
+			try {
+				fw = new FileWriter(fJson);
+				bw = new BufferedWriter(fw);
+				bw.write(json);
+				bw.close();
+				fw.close();
+			} catch (Exception e) {
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	public Bookmark readCurPosFile()
+	{
+		log.d("Reading cur_pos.json");
+		String cur_pos = "";
+		try {
+			final File fJson = new File(getSettingsFile(0).getParent() + "/cur_pos.json");
+			if (fJson.exists()) {
+				BufferedReader reader = new BufferedReader(
+						new FileReader(fJson));
+				StringBuilder stringBuilder = new StringBuilder();
+				String line = null;
+				String ls = System.getProperty("line.separator");
+				while ((line = reader.readLine()) != null) {
+					stringBuilder.append(line);
+					stringBuilder.append(ls);
+				}
+				reader.close();
+				cur_pos = stringBuilder.toString();
+				return new Gson().fromJson(cur_pos, Bookmark.class);
+			} else return null;
+		} catch (Exception e) {
+		}
+		return null;
 	}
 
 	@TargetApi(26)

@@ -403,16 +403,30 @@ public class CRToolBar extends ViewGroup {
 //						255 - Color.blue(src.getPixel(i, j))));
 //			}
 //		}
+		int colorIcon;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorIcon});
+		colorIcon = a.getColor(0, Color.GRAY);
+		a.recycle();
+		boolean isDark = (Color.red(colorIcon)+Color.green(colorIcon)+Color.blue(colorIcon))<(128*3);
 
 		for(int i = 0; i < src.getWidth(); i++){
 			for(int j = 0; j < src.getHeight(); j++){
-
-				dest.setPixel(i, j, Color.argb(
-						Color.alpha(src.getPixel(i, j)),
-						(Color.red(src.getPixel(i, j))>160)?Color.red(src.getPixel(i, j))-160:0,
-						(Color.green(src.getPixel(i, j))>160)?Color.green(src.getPixel(i, j))-160:0,
-						(Color.blue(src.getPixel(i, j))>160)?Color.blue(src.getPixel(i, j))-160:0
-				));
+				if (!isDark) {
+					dest.setPixel(i, j, Color.argb(
+							Color.alpha(src.getPixel(i, j)),
+							(Color.red(src.getPixel(i, j)) > 160) ? Color.red(src.getPixel(i, j)) - 160 : 0,
+							(Color.green(src.getPixel(i, j)) > 160) ? Color.green(src.getPixel(i, j)) - 160 : 0,
+							(Color.blue(src.getPixel(i, j)) > 160) ? Color.blue(src.getPixel(i, j)) - 160 : 0
+					));
+				} else {
+					dest.setPixel(i, j, Color.argb(
+							Color.alpha(src.getPixel(i, j)),
+							(Color.red(src.getPixel(i, j))+160 < 255) ? Color.red(src.getPixel(i, j)) + 160 : 255,
+							(Color.green(src.getPixel(i, j))+160 < 255) ? Color.green(src.getPixel(i, j)) + 160 : 255,
+							(Color.blue(src.getPixel(i, j))+160 < 255) ? Color.blue(src.getPixel(i, j)) + 160 : 255
+					));
+				}
 			}
 		}
 

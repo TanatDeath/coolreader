@@ -43,6 +43,7 @@ public interface Settings {
     public static final String PROP_PAGE_MARGIN_RIGHT       ="crengine.page.margin.right";
     public static final String PROP_ROUNDED_CORNERS_MARGIN  ="crengine.rounded.corners.margin";
     public static final String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
+    public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
     public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
     public static final String PROP_INTERLINE_SPACE         ="crengine.interline.space";
     public static final String PROP_ROTATE_ANGLE            ="window.rotate.angle";
@@ -126,6 +127,7 @@ public interface Settings {
     public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
     public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
     public static final String PROP_SAVE_POS_TO_GD_TIMEOUT = "app.autosave.reading.pos.timeout";
+    public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
 
     public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
     public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
@@ -224,7 +226,7 @@ public interface Settings {
     	RU("ru", R.string.options_app_locale_ru, R.raw.help_template_ru),
     	UK("uk", R.string.options_app_locale_uk, R.raw.help_template_ru),
     	BG("bg", R.string.options_app_locale_bg, 0),
-    	BY("by", R.string.options_app_locale_by, 0),
+    	BE("be", R.string.options_app_locale_by, 0),
     	SK("sk", R.string.options_app_locale_sk, 0),
     	TR("tr", R.string.options_app_locale_tr, 0),
     	LT("lt", R.string.options_app_locale_lt, 0),

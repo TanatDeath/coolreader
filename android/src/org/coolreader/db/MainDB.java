@@ -15,7 +15,7 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 26;
+	public static final int DB_VERSION = 28;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -73,7 +73,10 @@ public class MainDB extends BaseDB {
 					"publisher VARCHAR DEFAULT NULL, " +
 					"publcity VARCHAR DEFAULT NULL, " +
 					"publyear VARCHAR DEFAULT NULL, " +
-					"publisbn VARCHAR DEFAULT NULL " +
+					"publisbn VARCHAR DEFAULT NULL, " +
+                    "bookdate VARCHAR DEFAULT NULL, " +
+                    "publseries_fk INTEGER REFERENCES series (id), " +
+                    "publseries_number INTEGER " +
 			")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
@@ -194,7 +197,7 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publcity VARCHAR DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publyear VARCHAR DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publisbn VARCHAR DEFAULT NULL");
-				//addOPDSCatalogs(DEF_OPDS_URLS3);
+                        //addOPDSCatalogs(DEF_OPDS_URLS3);
 
 				execSQL("CREATE TABLE IF NOT EXISTS dic_search_history (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -215,7 +218,13 @@ public class MainDB extends BaseDB {
 
 			}
 
-			//==============================================================
+			if (currentVersion < 28) {
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN bookdate VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publseries_fk INTEGER REFERENCES series (id)");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publseries_number INTEGER");
+			}
+
+				//==============================================================
 			// add more updates above this line
 				
 			// set current version
@@ -1418,7 +1427,7 @@ public class MainDB extends BaseDB {
 					QueryHelper h = new QueryHelper(fileInfo, oldValue);
 					h.update(fileInfo.id);
 				}
-				authorsChanged = !eq(fileInfo.authors, oldValue.authors);
+				authorsChanged = !eq(fileInfo.getAuthors(), oldValue.getAuthors());
 			} else {
 				// inserting
 				vlog.d("inserting new file " + fileInfo.getPathName());
@@ -1433,7 +1442,7 @@ public class MainDB extends BaseDB {
 				if ( authorsChanged ) {
 					vlog.d("updating authors for file " + fileInfo.getPathName());
 					beginChanges();
-					Long[] authorIds = getAuthorIds(fileInfo.authors);
+					Long[] authorIds = getAuthorIds(fileInfo.getAuthors());
 					saveBookAuthors(fileInfo.id, authorIds);
 				}
 				return true;
@@ -1666,6 +1675,7 @@ public class MainDB extends BaseDB {
 			add("genre", newValue.genre, oldValue.genre);
 			add("annotation", newValue.annotation, oldValue.annotation);
 			add("srclang", newValue.srclang, oldValue.srclang);
+			add("bookdate", newValue.bookdate, oldValue.bookdate);
 			add("translator", newValue.translator, oldValue.translator);
 			add("docauthor", newValue.docauthor, oldValue.docauthor);
 			add("docprogram", newValue.docprogram, oldValue.docprogram);
@@ -1678,6 +1688,8 @@ public class MainDB extends BaseDB {
 			add("publcity", newValue.publcity, oldValue.publcity);
 			add("publyear", newValue.publyear, oldValue.publyear);
 			add("publisbn", newValue.publisbn, oldValue.publisbn);
+			add("publseries_fk", getSeriesId(newValue.publseries), getSeriesId(oldValue.publseries));
+			add("publseries_number", (long) newValue.publseriesNumber, (long) oldValue.publseriesNumber);
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
@@ -1708,15 +1720,19 @@ public class MainDB extends BaseDB {
 		"series_number, " +
 		"format, filesize, arcsize, " +
 		"create_time, last_access_time, flags, language, lang_from, lang_to, "+
-		"saved_with_ver, genre, annotation, srclang, translator, docauthor, "+
+		"saved_with_ver, genre, annotation, srclang, bookdate, translator, docauthor, "+
 		"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher," +
-		"publcity,  publyear, publisbn ";
+		"publcity,  publyear, publisbn, "+
+		"sp.name as publseries_name, " +
+		"publseries_number "
+		;
 
 	private static final String READ_FILEINFO_SQL = 
 		"SELECT " +
 		READ_FILEINFO_FIELDS +
 		"FROM book b " +
 		"LEFT JOIN series s ON s.id=b.series_fk " +
+		"LEFT JOIN series sp ON sp.id=b.publseries_fk " +
 		"LEFT JOIN folder f ON f.id=b.folder_fk ";
 	private void readFileInfoFromCursor( FileInfo fileInfo, Cursor rs )
 	{
@@ -1729,7 +1745,7 @@ public class MainDB extends BaseDB {
 		fileInfo.filename = rs.getString(i++);
 		fileInfo.arcname = rs.getString(i++);
 		fileInfo.title = rs.getString(i++);
-		fileInfo.authors = rs.getString(i++);
+		fileInfo.setAuthors(rs.getString(i++));
 		fileInfo.series = rs.getString(i++);
 		fileInfo.seriesNumber = rs.getInt(i++);
 		fileInfo.format = DocumentFormat.byId(rs.getInt(i++));
@@ -1745,6 +1761,7 @@ public class MainDB extends BaseDB {
 		fileInfo.genre = rs.getString(i++);
 		fileInfo.annotation = rs.getString(i++);
 		fileInfo.srclang = rs.getString(i++);
+		fileInfo.bookdate = rs.getString(i++);
 		fileInfo.translator = rs.getString(i++);
 		fileInfo.docauthor = rs.getString(i++);
 		fileInfo.docprogram = rs.getString(i++);
@@ -1757,6 +1774,8 @@ public class MainDB extends BaseDB {
 		fileInfo.publcity = rs.getString(i++);
 		fileInfo.publyear = rs.getString(i++);
 		fileInfo.publisbn = rs.getString(i++);
+		fileInfo.publseries = rs.getString(i++);
+		fileInfo.publseriesNumber = rs.getInt(i++);
 		fileInfo.isArchive = fileInfo.arcname!=null; 
 	}
 

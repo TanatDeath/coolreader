@@ -258,6 +258,11 @@
     <attr name="attr_icons8_volume_down" format="reference" />
     <attr name="attr_icons8_rate_up" format="reference" />
     <attr name="attr_icons8_rate_down" format="reference" />
+    <attr name="attr_icons8_position_to_disk" format="reference" />
+    <attr name="attr_icons8_position_to_disk_interval" format="reference" />
+
+    <attr name="attr_icons8_rate_star" format="reference" />
+    <attr name="attr_icons8_rate_star_filled" format="reference" />
 
     <attr name="folder_big_drawable" format="reference" />
     <attr name="folder_big_bookmark_drawable" format="reference" />

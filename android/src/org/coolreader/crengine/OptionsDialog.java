@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -45,6 +46,8 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.util.ArrayUtils;
 
 public class OptionsDialog extends BaseDialog implements TabContentFactory, OptionOwner, Settings {
 
@@ -133,7 +136,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public static int[] mMotionTimeouts;
 	public static String[] mMotionTimeoutsTitles;
 	public static int[] mMotionTimeoutsAddInfos;
-	public static int[] mPagesPerFullSwipe;
+    public static int[] mMotionTimeouts1;
+    public static String[] mMotionTimeoutsTitles1;
+    public static int[] mMotionTimeoutsAddInfos1;
+    public static int[] mPagesPerFullSwipe;
 	public static int[] mPagesPerFullSwipeAddInfos;
 	public static String[] mPagesPerFullSwipeTitles;
 	int[] mInterlineSpaces = new int[] {
@@ -1378,7 +1384,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			((CoolReader)mActivity).readResizeHistory();
 			for (CoolReader.ResizeHistory rh: ((CoolReader)mActivity).getResizeHist()) {
 				String sProp = rh.X+"."+rh.Y;
-				String sText = rh.X+" x "+rh.Y+" ("+Utils.formatDate(activity, rh.lastSet)+" "+
+				String sText = rh.X+" x "+rh.Y+" ("+Utils.formatDate2(activity, rh.lastSet)+" "+
 						Utils.formatTime(activity, rh.lastSet)+")";
 				listView.add(new BoolOption(mOwner, sText, PROP_SKIPPED_RES+"."+sProp, "").setDefaultValue("0").
 						setIconId(0));
@@ -3357,7 +3363,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new BoolOption(this, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
 				getString(R.string.mi_book_browser_simple_mode_add_info)).
 				setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
-
+		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_timeout),
+				PROP_SAVE_POS_TIMEOUT, getString(R.string.save_pos_timeout_add_info)).add(mMotionTimeouts1, mMotionTimeoutsTitles1, mMotionTimeoutsAddInfos1).setDefaultValue(Integer.toString(mMotionTimeouts1[2])).
+				setIconIdByAttr(R.attr.attr_icons8_position_to_disk_interval, R.drawable.icons8_position_to_disk_interval));
 		mOptionsApplication.add(new SaveOptionsToGDOption(this, getString(R.string.save_settings_to_gd), getString(R.string.save_settings_to_gd_v), getString(R.string.option_add_info_empty_text)).
 				setIconIdByAttr(R.attr.attr_icons8_settings_to_gd, R.drawable.icons8_settings_to_gd));
 		mOptionsApplication.add(new LoadOptionsFromGDOption(this, getString(R.string.load_settings_from_gd), getString(R.string.load_settings_from_gd_v), getString(R.string.option_add_info_empty_text)).
@@ -3432,6 +3440,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
         mMotionTimeouts = activity.getResources().getIntArray(R.array.motion_timeout_values);
 		mMotionTimeoutsAddInfos = activity.getResources().getIntArray(R.array.motion_timeout_add_infos);
 		for (int i=0;i<mMotionTimeouts.length; i++) mMotionTimeoutsAddInfos[i] = R.string.option_add_info_empty_text;
+		mMotionTimeoutsTitles1 = Arrays.copyOfRange(mMotionTimeoutsTitles,1,mMotionTimeoutsTitles.length-1);
+		mMotionTimeouts1 = Arrays.copyOfRange(mMotionTimeouts,1,mMotionTimeouts.length-1);
+		mMotionTimeoutsAddInfos1 = Arrays.copyOfRange(mMotionTimeoutsAddInfos,1,mMotionTimeoutsAddInfos.length-1);
 
 		mPagesPerFullSwipeTitles = activity.getResources().getStringArray(R.array.pages_per_full_swipe_titles);
 		mPagesPerFullSwipe = activity.getResources().getIntArray(R.array.pages_per_full_swipe_values);

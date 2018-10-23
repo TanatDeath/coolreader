@@ -287,11 +287,12 @@ public class UserDicDlg extends BaseDialog {
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
-		rb_descr.setBackgroundColor(colorGrayC);
+        int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+        rb_descr.setBackgroundColor(colorGrayCT);
 		//tr_descr.setBackgroundColor(colorGrayC);
-		btnUserDic.setBackgroundColor(colorGrayC);
-		btnCitation.setBackgroundColor(colorGrayC);
-		btnDicSearchHistory.setBackgroundColor(colorGrayC);
+		btnUserDic.setBackgroundColor(colorGrayCT);
+		btnCitation.setBackgroundColor(colorGrayCT);
+		btnDicSearchHistory.setBackgroundColor(colorGrayCT);
 		btn.setBackgroundColor(colorGray);
 	}
 

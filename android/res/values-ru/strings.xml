@@ -26,14 +26,14 @@
     <string name="mi_book_shortcut">Создать ярлык книги</string>
     <string name="mi_book_to_gd">Сохранить на диск Google One</string>
     <string name="mi_book_no_mark">Убрать пометку</string>
-    <string name="mi_book_to_read">Установить пометку \'к прочтению\'</string>
-    <string name="mi_book_reading">Установить пометку \'читаю\'</string>
-    <string name="mi_book_finished">Установить пометку \'прочитана\'</string>
+    <string name="mi_book_to_read">Пометка \'к прочтению\'</string>
+    <string name="mi_book_reading">Пометка \'читаю\'</string>
+    <string name="mi_book_finished">Пометка \'прочитана\'</string>
     <string name="mi_book_rate_5">Оценить на 5 звезд</string>
-    <string name="mi_book_rate_4">Оценить на 4 звезд</string>
-    <string name="mi_book_rate_3">Оценить на 3 звезд</string>
-    <string name="mi_book_rate_2">Оценить на 2 звезд</string>
-    <string name="mi_book_rate_1">Оценить на 1 звезд</string>
+    <string name="mi_book_rate_4">Оценить на 4 звезды</string>
+    <string name="mi_book_rate_3">Оценить на 3 звезды</string>
+    <string name="mi_book_rate_2">Оценить на 2 звезды</string>
+    <string name="mi_book_rate_1">Оценить на 1 звезду</string>
     <string name="mi_book_rate_0">Убрать оценку</string>
     <string name="mi_book_recent_books">Последние</string>
     <string name="mi_book_file_remove">Удалить файл</string>
@@ -228,9 +228,11 @@
     <string name="book_info_book_publisbn">ISBN издания</string>
     <string name="book_info_section_book_translation">Направление перевода</string>
     <string name="book_info_book_authors">Автор(ы)</string>
+    <string name="book_info_book_date">Дата книги</string>
     <string name="book_info_file_path">Путь к файлу</string>
     <string name="book_info_section_file_properties">Свойства файла</string>
     <string name="book_info_book_series_name">Серия</string>
+    <string name="book_info_book_publseries_name">Серия публикации</string>
     <string name="book_info_file_arcpath">Путь к архиву</string>
     <string name="book_info_book_title">Название</string>
     <string name="book_info_file_name">Имя файла</string>
@@ -699,6 +701,7 @@
     <string name="win_title_reading_pos">Выберите сохраненную позицию</string>
     <string name="load_reading_pos_from_gd">Восстановить позицию чтения с диска Google One</string>
     <string name="save_pos_to_gd_timeout">Интервал автосохранения позиции чтения на диск Google One</string>
+    <string name="save_pos_timeout">Интервал автосохранения позиции чтения</string>
     <string name="save_bookmarks_to_gd">Сохранить закладки на диск Google One</string>
     <string name="load_bookmarks_from_gd">Загрузить закладки с диска Google One</string>
     <string name="gd_menu">Меню Google One</string>
@@ -734,7 +737,7 @@
     <string name="docx_is_not_installed">Расширение org.coolreader.docx не установлено (установите, чтобы открывать docx формат)</string>
     <string name="docx_open_converted">Открыта предварительно сохраненная преобразованная копия документа</string>
     <string name="docx_convert">CoolReader может попробовать преобразовать документ в формат html, а затем открыть его. Продолжить?</string>
-    <string name="delete_dir_confirm">Выбранная папка не пустая. Удалить содержимое? Число файлов/папок:</string>
+    <string name="delete_dir_confirm">Папка не пустая. Очистить? Файлов/папок:</string>
     <string name="btn_edit_info">Редактировать информацию о книге</string>папок
     <string name="mark_book_as_read">Отметить книгу как прочитанную?</string>
     <string name="resizing_to">изменение размера</string>
@@ -769,6 +772,7 @@
     <string name="options_app_browser_hide_empty_dirs_add_info">Скрывать папки не содержащие книг</string>
     <string name="mi_book_browser_simple_mode_add_info">Данная опция отключает отображение обложек и прочей информации в папках с книгами</string>
     <string name="save_pos_to_gd_timeout_add_info">Позиция чтения будет сохраняться каждые 1-100 минут на диск Google One, изначально выключено (требуется разрешение использования аккаунта)</string>
+    <string name="save_pos_timeout_add_info">Позиция чтения будет сохраняться в на этом устройстве</string>
     <string name="options_app_key_actions_add_info">Назначение действий для кнопок и поведения при подключении гарнитуры</string>
     <string name="options_app_tapzones_normal_add_info">Настройка действий программы при нажатии на область экрана (экран разбит на 9 клеток 3x3)</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Настройка дополнительного действия при длинном или коротком нажатии</string>
@@ -798,6 +802,7 @@
     <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
     <string name="options_view_bookmarks_highlight_add_info">Выбор или отключение выделения закладок</string>
     <string name="options_rounded_corners_margin_add_info">Смещает правую и левую части элементов колонтитула ближе к центру экрана на устройствах с Edge Screen</string>
-
+    <string name="pos_recovered">Позиция чтения была загружена из файла восстановления</string>
+    <string name="pos_saved">Позиция чтения была сохранена</string>
 </resources>
 

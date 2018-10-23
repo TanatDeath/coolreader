@@ -335,6 +335,11 @@
         <item name="attr_icons8_volume_down">@drawable/wdrk_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/wdrk_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/wdrk_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/wdrk_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/wdrk_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/wdrk_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/wdrk_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/wdrk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wdrk_icons8_favorite_folder_2</item>
@@ -606,6 +611,11 @@
         <item name="attr_icons8_volume_down">@drawable/wlgt_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/wlgt_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/wlgt_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/wlgt_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/wlgt_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/wlgt_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/wlgt_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/wlgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/wlgt_icons8_favorite_folder_2</item>
@@ -887,6 +897,11 @@
         <item name="attr_icons8_volume_down">@drawable/drk_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/drk_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/drk_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/drk_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1156,6 +1171,11 @@
         <item name="attr_icons8_volume_down">@drawable/lgt_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/lgt_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/lgt_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/lgt_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1428,6 +1448,11 @@
         <item name="attr_icons8_volume_down">@drawable/lgt_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/lgt_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/lgt_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/lgt_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/lgt_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/lgt_icons8_favorite_folder_2</item>
@@ -1700,6 +1725,11 @@
         <item name="attr_icons8_volume_down">@drawable/drk_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/drk_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/drk_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/drk_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/drk_icons8_folder</item>
         <item name="folder_big_bookmark_drawable">@drawable/drk_icons8_favorite_folder_2</item>
@@ -1971,6 +2001,11 @@
         <item name="attr_icons8_volume_down">@drawable/drk_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/drk_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/drk_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/drk_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>
@@ -2242,6 +2277,11 @@
         <item name="attr_icons8_volume_down">@drawable/lgt_icons8_volume_down</item>
         <item name="attr_icons8_rate_up">@drawable/lgt_icons8_rate_up</item>
         <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
+        <item name="attr_icons8_position_to_disk">@drawable/lgt_icons8_position_to_disk</item>
+        <item name="attr_icons8_position_to_disk_interval">@drawable/lgt_icons8_position_to_disk_interval</item>
+
+        <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
+        <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>

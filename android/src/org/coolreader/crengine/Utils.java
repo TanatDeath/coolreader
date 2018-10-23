@@ -55,10 +55,16 @@ public class Utils {
 	public static String authorNameFileAs(String name) {
 		if (name == null || name.length() == 0)
 			return name;
-		int lastSpace = name.lastIndexOf(' ');
-		if (lastSpace >= 0 && lastSpace < name.length() - 1)
-			return name.substring(lastSpace + 1) + " " + name.substring(0, lastSpace);
-		return name;
+		String name1 = name;
+		String name2 = "";
+		if (name.contains("(")) {
+			name1 = name.substring(0,name.indexOf("(")).trim();
+			name2 = name.substring(name.indexOf("(")).trim();
+		}
+		int lastSpace = name1.lastIndexOf(' ');
+		if (lastSpace >= 0 && lastSpace < name1.length() - 1)
+			return name1.substring(lastSpace + 1) + " " + name1.substring(0, lastSpace)+" "+name2;
+		return name1.trim()+" "+name2.trim();
 	}
 
 	public static boolean moveFile(File oldPlace, File newPlace) {
@@ -256,8 +262,8 @@ public class Utils {
 		StringBuilder buf = new StringBuilder(authors.length());
 		for ( String a : list ) {
 			if ( buf.length()>0 )
-				buf.append(", ");
-			buf.append(Utils.authorNameFileAs(a));
+				buf.append("; ");
+			buf.append(Utils.authorNameFileAs(a).trim());
 //			String[] items = a.split(" ");
 //			if ( items.length==3 && items[1]!=null && items[1].length()>=1 )
 //				buf.append(items[0] + " " + items[1].charAt(0) + ". " + items[2]);
@@ -387,6 +393,19 @@ public class Utils {
 			return DateFormat.getDateFormat(activity.getApplicationContext()).format(c.getTime());
 		}
 	}
+
+    public static String formatDate2( Activity activity, long timeStamp )
+    {
+        if ( timeStamp<5000*60*60*24*1000 )
+            return "";
+        TimeZone tz = java.util.TimeZone.getDefault();
+        Calendar now = Calendar.getInstance(tz);
+        Calendar c = Calendar.getInstance(tz);
+        c.setTimeInMillis(timeStamp);
+        if ( c.get(Calendar.YEAR)<1980 )
+            return "";
+        return DateFormat.getDateFormat(activity.getApplicationContext()).format(c.getTime());
+    }
 	
 //	static private ThreadLocal<SimpleDateFormat> dateFormatThreadLocal = new ThreadLocal<SimpleDateFormat>(); 
 //	static private ThreadLocal<SimpleDateFormat> timeFormatThreadLocal = new ThreadLocal<SimpleDateFormat>();

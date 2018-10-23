@@ -143,7 +143,7 @@ public class StatusBar extends LinearLayout implements Settings {
 			StringBuilder title = new StringBuilder();
 			StringBuilder pos = new StringBuilder();
 			if (book != null) {
-				String authors = Utils.formatAuthorsNormalNames(book.authors);
+				String authors = Utils.formatAuthorsNormalNames(book.getAuthors());
 				append(title, book.title, null);
 				append(title, authors, " - ");
 				if (title.length() == 0)

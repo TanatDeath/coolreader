@@ -43,6 +43,7 @@ public class FileInfo {
 	public String genre;
 	public String annotation;
 	public String srclang;
+    public String bookdate;
 	public String translator;
 	public String docauthor;
 	public String docprogram;
@@ -55,7 +56,9 @@ public class FileInfo {
 	public String publcity;
 	public String publyear;
 	public String publisbn;
-	public String path; // path to directory where file or archive is located
+    public String publseries; // series name w/o number
+    public int publseriesNumber; // number of book inside series
+    public String path; // path to directory where file or archive is located
 	public String filename; // file name w/o path for normal file, with optional path for file inside archive 
 	public String pathname; // full path+arcname+filename
 	public String arcname; // archive file name w/o path
@@ -336,6 +339,7 @@ public class FileInfo {
 		genre = v.genre;
 		annotation = v.annotation;
 		srclang = v.srclang;
+		bookdate = v.bookdate;
 		translator = v.translator;
 		docauthor = v.docauthor;
 		docprogram = v.docprogram;
@@ -348,7 +352,9 @@ public class FileInfo {
 		publcity = v.publcity;
 		publyear = v.publyear;
 		publisbn = v.publisbn;
-	}
+        publseries = v.publseries;
+        publseriesNumber = v.publseriesNumber;
+    }
 	
 	/**
 	 * @return archive file path and name, null if this object is neither archive nor a file inside archive
@@ -882,13 +888,40 @@ public class FileInfo {
 	}
 	
 	public String getAuthors() {
-		return authors;
+		if (authors!=null) {
+			String[] list = authors.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			return resS;
+		}
+		return null;
 	}
 	
 	public boolean setAuthors(String authors) {
 		if (eq(this.authors, authors))
 			return false;
-		this.authors = authors;
+		if (authors!=null) {
+			String[] list = authors.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			this.authors = resS;
+		} else this.authors = null;
 		return true;
 	}
 	
@@ -1224,6 +1257,7 @@ public class FileInfo {
 		if (!StrUtils.euqalsIgnoreNulls(genre, other.genre, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(annotation, other.annotation, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(srclang, other.srclang, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(bookdate, other.bookdate, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(translator, other.translator, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(docauthor, other.docauthor, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(docprogram, other.docprogram, true)) return false;
@@ -1236,6 +1270,9 @@ public class FileInfo {
 		if (!StrUtils.euqalsIgnoreNulls(publcity, other.publcity, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(publyear, other.publyear, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(publisbn, other.publisbn, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(publseries, other.publseries, true)) return false;
+		if (publseriesNumber != other.publseriesNumber)
+			return false;
 		return true;
 	}
 

@@ -44,6 +44,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("section.book", R.string.book_info_section_book_properties);
 		mLabelMap.put("book.authors", R.string.book_info_book_authors);
 		mLabelMap.put("book.title", R.string.book_info_book_title);
+		mLabelMap.put("book.date", R.string.book_info_book_date);
 		mLabelMap.put("book.series", R.string.book_info_book_series_name);
 		mLabelMap.put("book.language", R.string.book_info_book_language);
 		mLabelMap.put("book.genre", R.string.book_info_book_genre);
@@ -62,6 +63,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.publcity", R.string.book_info_book_publcity);
 		mLabelMap.put("book.publyear", R.string.book_info_book_publyear);
 		mLabelMap.put("book.publisbn", R.string.book_info_book_publisbn);
+		mLabelMap.put("book.publseries", R.string.book_info_book_publseries_name);
 		mLabelMap.put("book.translation", R.string.book_info_book_translation);
 		mLabelMap.put("section.book_translation", R.string.book_info_section_book_translation);
 		mLabelMap.put("system.device_model", R.string.book_info_system_device_model);

@@ -372,6 +372,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private Bookmark hyplinkBookmark;
 
 	private BookInfo mBookInfo;
+	private Bookmark lastSavedToGdBookmark;
 
 	private Properties mSettings = new Properties();
 
@@ -737,8 +738,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void sendQuotationInEmail( Selection sel ) {
 		StringBuilder buf = new StringBuilder();
-		if (mBookInfo.getFileInfo().authors!=null)
-			buf.append("|" + mBookInfo.getFileInfo().authors + "\n");
+		if (mBookInfo.getFileInfo().getAuthors()!=null)
+			buf.append("|" + mBookInfo.getFileInfo().getAuthors() + "\n");
 		if (mBookInfo.getFileInfo().title!=null)
 			buf.append("|" + mBookInfo.getFileInfo().title + "\n");
 		if (sel.chapter!=null && sel.chapter.length()>0)
@@ -1665,7 +1666,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public Bookmark updateBookmark(final Bookmark bookmark) {
 		Bookmark bm = mBookInfo.updateBookmark(bookmark);
 		if (bm != null) {
-			scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			highlightBookmarks();
 		}
 		return bm;
@@ -1674,7 +1675,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public void addBookmark(final Bookmark bookmark) {
 		mBookInfo.addBookmark(bookmark);
 		highlightBookmarks();
-		scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+		scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 	}
 
 	public void addBookmark( final int shortcut )
@@ -1706,7 +1707,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					}
 					highlightBookmarks();
 					mActivity.showToast(s);
-					scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 				}
 			}
 		});
@@ -2332,7 +2333,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					donePageTurn(wantPageTurn());
 					//redraw();
 					drawPage(null, false);
-					scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 				}
 			});
 			scheduleGc();
@@ -2844,7 +2845,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					drawPage( doneHandler, false );
 				}
 				if (isMoveCommand)
-					scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			}
 		});
 	}
@@ -3112,6 +3113,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if ( oldSettings==null )
 			oldSettings = mSettings;
 		Properties changedSettings = newSettings.diff(oldSettings);
+		boolean viewModeAutoChanged = false;
+        for ( Map.Entry<Object, Object> entry : changedSettings.entrySet() ) {
+            String key = (String)entry.getKey();
+            String value = (String)entry.getValue();
+            if ( PROP_PAGE_VIEW_MODE_AUTOCHANGED.equals(key) ) {
+                viewModeAutoChanged = "1".equals(value);
+                newSettings.setBool(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, false);
+                break;
+            }
+        }
 		for ( Map.Entry<Object, Object> entry : changedSettings.entrySet() ) {
 			String key = (String)entry.getKey();
 			String value = (String)entry.getValue();
@@ -3122,7 +3133,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				newSettings.setBool(PROP_SHOW_TIME, flg);
 			} else if ( PROP_PAGE_VIEW_MODE.equals(key) ) {
 				boolean flg = "1".equals(value);
-				viewMode = flg ? ViewMode.PAGES : ViewMode.SCROLL;
+				if (viewModeAutoChanged)
+                    viewMode = (!flg) ? ViewMode.PAGES : ViewMode.SCROLL;
+				    else viewMode = flg ? ViewMode.PAGES : ViewMode.SCROLL;
+				if (viewModeAutoChanged) {
+					final String sVal = (viewMode == ViewMode.PAGES) ? "1" : "0";
+					BackgroundThread.instance().postGUI(new Runnable() {
+						@Override
+						public void run() {
+							saveSetting(PROP_PAGE_VIEW_MODE, sVal);
+							saveSetting(PROP_PAGE_VIEW_MODE_AUTOCHANGED, "0");
+						}}, 2000);
+				}
 			} else if ( PROP_APP_SCREEN_ORIENTATION.equals(key)
 					|| PROP_PAGE_ANIMATION.equals(key)
 					|| PROP_CONTROLS_ENABLE_VOLUME_KEYS.equals(key)
@@ -3342,6 +3364,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	{
 		lastSelection = null;
 		hyplinkBookmark = null;
+		lastSavedToGdBookmark = null;
 		BackgroundThread.ensureGUI();
 		save();
 		log.i("loadDocument(" + fileName + ")");
@@ -3752,6 +3775,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int requestedWidth = 0;
 	private int lastsetWidth = 0;
 
+	public long getRequestedResTime() {
+		return requestedResTime;
+	}
+	private long requestedResTime;
+
 	public int getRequestedHeight() {
 		return requestedHeight;
 	}
@@ -3761,6 +3789,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private int requestedHeight = 0;
 	private int lastsetHeight = 0;
+	public long getLastsetResTime() {
+		return lastsetResTime;
+	}
+	private long lastsetResTime;
 //	public void setOnFront(boolean front) {
 //		if (mIsOnFront == front)
 //			return;
@@ -3778,12 +3810,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		boolean bNeed = (width != lastsetWidth) || (height != lastsetHeight);
 		requestedWidth = width;
 		requestedHeight = height;
+		requestedResTime = System.currentTimeMillis();
 		if (!checkNeedRedraw(width,height)) {
 			//getActivity().showToast("requestResize (and skipped): "+width+", "+height);
 			return;
 		}
 		lastsetWidth = width;
 		lastsetHeight = height;
+		lastsetResTime = System.currentTimeMillis();
 		if (bNeed) getActivity().showToast(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
 		checkSize();
 	}
@@ -4302,7 +4336,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		{
 			animationScheduler.cancel();
 			currentAnimation = null;
-			scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			lastSavedBookmark = null;
 			updateCurrentPositionStatus();
 
@@ -4380,7 +4414,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			draw();
 			doc.doCommand(ReaderCommand.DCMD_GO_POS.nativeId, pointerDestPos);
 			//}
-			scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			close();
 		}
 
@@ -4767,7 +4801,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			doc.doCommand(ReaderCommand.DCMD_GO_PAGE_DONT_SAVE_HISTORY.nativeId, moved ? page2 : page1);
 			//}
-			scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			close();
 			// preparing images for next page flip
 			preparePageImage(0);
@@ -5063,7 +5097,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return;
 		log.v("drawPage() : submitting DrawPageTask");
 		// evaluate if we need to redraw page on this resolution
-		scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+		scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 		//if (checkNeedRedraw())
 			post( new DrawPageTask(doneHandler, isPartially) );
 //		log.w("doc.getPageText");
@@ -5203,6 +5237,21 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				log.v("updating loaded book info");
 				updateLoadedBookInfo();
 				log.i("Document " + filename + " is loaded successfully");
+				if ( pos==null ) {
+					Bookmark bmk = getActivity().readCurPosFile();
+					if (bmk!=null) {
+						boolean bSameBook=true;
+						if (!bmk.bookFile.equals(mBookInfo.getFileInfo().filename)) bSameBook=false;
+						if (!bmk.bookPath.equals(mBookInfo.getFileInfo().pathname)) bSameBook=false;
+						if (!StrUtils.isEmptyStr(bmk.bookFileArc))
+							if (!bmk.bookFileArc.equals(mBookInfo.getFileInfo().arcname))
+								bSameBook=false;
+						if (bSameBook) {
+							pos=bmk.getStartPos();
+							getActivity().showToast(mActivity.getString(R.string.pos_recovered));
+						}
+					}
+				}
 				if ( pos!=null ) {
 					log.i("Restoring position : " + pos);
 					restorePositionBackground(pos);
@@ -5494,8 +5543,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private int lastSavePositionTaskId = 0;
 
-	private final static int DEF_SAVE_POSITION_INTERVAL = 180000; // 3 minutes
-	private void scheduleSaveCurrentPositionBookmark(final int delayMillis) {
+	public int getDefSavePositionInterval() {
+		return
+		  (getSettings().getInt(ReaderView.PROP_SAVE_POS_TIMEOUT, 0))*1000*60;
+	}
+
+	public void scheduleSaveCurrentPositionBookmark(final int delayMillis) {
 		// GUI thread required
 		BackgroundThread.instance().executeGUI(new Runnable() {
 			@Override
@@ -5526,19 +5579,29 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 									}
 								}
 							}}, delayMillis);
-						int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_GD_TIMEOUT, 0))*1000*60;
-						if (autosaveInterval > 0)
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									if (mylastSavePositionTaskId == lastSavePositionTaskId) {
-										if (bookInfo != null) {
-											log.v("saving last position to google drive");
-											((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).
-													mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS_QUIET, ReaderView.this);
+						boolean bNeedSave = true;
+						if (lastSavedToGdBookmark!=null) {
+							if (!(bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+								bNeedSave = false;
+							}
+						}
+						if (!bNeedSave) {
+							int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_GD_TIMEOUT, 0)) * 1000 * 60;
+							if (autosaveInterval > 0)
+								BackgroundThread.instance().postGUI(new Runnable() {
+									@Override
+									public void run() {
+										if (mylastSavePositionTaskId == lastSavePositionTaskId) {
+											if (bookInfo != null) {
+												log.v("saving last position to google drive");
+												mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("&");
+												((CoolReader) mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader) mActivity).
+														mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS_QUIET, ReaderView.this);
+											}
 										}
 									}
-								}}, autosaveInterval);
+								}, autosaveInterval);
+						}
 					}
 				}
 			}
@@ -5637,10 +5700,20 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (bmk != null && mBookInfo != null && isBookLoaded()) {
 			//setBookPosition();
 			if (lastSavedBookmark == null || !lastSavedBookmark.getStartPos().equals(bmk.getStartPos())) {
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				Bookmark bmk2 = new Bookmark(bmk);
+				bmk2.bookFile=mBookInfo.getFileInfo().filename;
+				bmk2.bookPath=mBookInfo.getFileInfo().pathname;
+				bmk2.bookFileArc="";
+				if (mBookInfo.getFileInfo().isArchive)
+				  bmk2.bookFileArc=mBookInfo.getFileInfo().arcname;
+				final String prettyJson = gson.toJson(bmk2);
+  			    getActivity().saveCurPosFile(prettyJson);
 				Services.getHistory().updateRecentDir();
 				mActivity.getDB().saveBookInfo(mBookInfo);
 				mActivity.getDB().flush();
 				lastSavedBookmark = bmk;
+				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("*");
 			}
 		}
 	}
@@ -5966,7 +6039,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			public void work() {
 				BackgroundThread.ensureBackground();
 				doc.doCommand(ReaderCommand.DCMD_SCROLL_BY.nativeId, delta);
-				scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
+				scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			}
 			public void done() {
 				drawPage();

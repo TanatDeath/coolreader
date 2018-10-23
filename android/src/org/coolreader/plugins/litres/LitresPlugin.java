@@ -219,7 +219,7 @@ public class LitresPlugin implements OnlineStorePlugin {
 	
 	private void addBookFileInfo(final FileInfo dir, OnlineStoreBook book) {
 		FileInfo fileInfo = new FileInfo();
-		fileInfo.authors = book.getAuthors();
+		fileInfo.setAuthors(book.getAuthors());
 		fileInfo.title = book.bookTitle;
 		fileInfo.size = book.zipSize;
 		fileInfo.format = DocumentFormat.FB2;

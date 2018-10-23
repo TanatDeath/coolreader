@@ -20,6 +20,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		private CoolReader activity;
 		private LinearLayout content;
 		private TextView lblWordFound;
+		private TextView lblStar;
 		private ArrayList<TextView> arrLblWords = new ArrayList<TextView>();
 
 	public ArrayList<UserDicEntry> getArrUdeWords() {
@@ -81,6 +82,17 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			LayoutInflater inflater = LayoutInflater.from(activity);
 			content = (LinearLayout)inflater.inflate(R.layout.user_dic_panel, null);
 			lblWordFound = (TextView)content.findViewById(R.id.word_found);
+			lblStar = (TextView)content.findViewById(R.id.tview_saving);
+			lblStar.setText("#");
+            lblStar.setTextColor(0xFF000000 | color);
+            lblStar.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (activity.getReaderView()!=null)
+                        activity.getReaderView().scheduleSaveCurrentPositionBookmark(1);
+                        activity.showToast(activity.getString(R.string.pos_saved));
+                }
+            });
 			arrLblWords.clear();
 			arrUdeWords.clear();
 			lblWord = (TextView)content.findViewById(R.id.word1);
@@ -212,6 +224,23 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					updateUserDicWords();
 				}
 			}, 500);
+		}
+
+		public void updateSavingMark(final String mark) {
+			BackgroundThread.instance().postGUI(new Runnable() {
+				@Override
+				public void run() {
+					lblStar.setTextColor(0xFF000000 | color);
+					lblStar.setText(mark);
+				}
+			}, 500);
+			BackgroundThread.instance().postGUI(new Runnable() {
+				@Override
+				public void run() {
+					lblStar.setText("#");
+                    lblStar.setTextColor(0xFF000000 | color);
+				}
+			}, 3000);
 		}
 
 		public void updateUserDicWords() {

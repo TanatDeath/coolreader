@@ -1,5 +1,7 @@
 package org.coolreader.crengine;
 
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.view.*;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -38,6 +40,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	public ArrayList<FileInfo> lastRecentFiles = new ArrayList<FileInfo>();
 	public CRRootView(CoolReader activity) {
 		super(activity);
+		int colorBlue;
+		int colorGreen;
+		int colorGray;
+		int colorIcon;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeBlue,
+						R.attr.colorThemeGreen,
+						R.attr.colorThemeGray,
+						R.attr.colorIcon});
+		colorBlue = a.getColor(0, Color.BLUE);
+		colorGreen = a.getColor(1, Color.GREEN);
+		colorGray = a.getColor(2, Color.GRAY);
+		colorIcon = a.getColor(3, Color.GRAY);
+		a.recycle();
 		this.mActivity = activity;
 		this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		this.mCoverpageManager = Services.getCoverpageManager();
@@ -146,11 +162,34 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			cover.setMaxWidth(coverWidth);
 			cover.setTag(new CoverpageManager.ImageItem(item, coverWidth, coverHeight));
 
-			setBookInfoItem(mView, R.id.lbl_book_author, Utils.formatAuthors(item.authors));
+			setBookInfoItem(mView, R.id.lbl_book_author, Utils.formatAuthors(item.getAuthors()));
 			setBookInfoItem(mView, R.id.lbl_book_title, currentBook.getFileInfo().title);
 			setBookInfoItem(mView, R.id.lbl_book_series, Utils.formatSeries(item.series, item.seriesNumber));
 			String state = Utils.formatReadingState(mActivity, item);
-			state = state + " " + Utils.formatFileInfo(mActivity, item) + " ";
+			int colorBlue;
+			int colorGreen;
+			int colorGray;
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeBlue,
+							R.attr.colorThemeGreen,
+							R.attr.colorThemeGray,
+							R.attr.colorIcon});
+			colorBlue = a.getColor(0, Color.BLUE);
+			colorGreen = a.getColor(1, Color.GREEN);
+			colorGray = a.getColor(2, Color.GRAY);
+			colorIcon = a.getColor(3, Color.GRAY);
+			a.recycle();
+			TextView tvInfo = (TextView)mView.findViewById(R.id.lbl_book_info1);
+			int n = item.getReadingState();
+			if (n == FileInfo.STATE_READING)
+				tvInfo.setTextColor(colorGreen);
+			else if (n == FileInfo.STATE_TO_READ)
+				tvInfo.setTextColor(colorBlue);
+			else if (n == FileInfo.STATE_FINISHED)
+				tvInfo.setTextColor(colorGray);
+			setBookInfoItem(mView, R.id.lbl_book_info1, state);
+			state =  " " + Utils.formatFileInfo(mActivity, item) + " ";
 			if (Services.getHistory() != null)
 				state = state + " " + Utils.formatLastPosition(mActivity, Services.getHistory().getLastPos(item));
 			setBookInfoItem(mView, R.id.lbl_book_info, state);
@@ -170,6 +209,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	
 	private final static int MAX_RECENT_BOOKS = 12;
 	private void updateRecentBooks(ArrayList<BookInfo> books) {
+		int colorBlue;
+		int colorGreen;
+		int colorGray;
+		int colorIcon;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeBlue,
+						R.attr.colorThemeGreen,
+						R.attr.colorThemeGray,
+						R.attr.colorIcon});
+		colorBlue = a.getColor(0, Color.BLUE);
+		colorGreen = a.getColor(1, Color.GREEN);
+		colorGray = a.getColor(2, Color.GRAY);
+		colorIcon = a.getColor(3, Color.GRAY);
+		a.recycle();
 		boolean bNotNeeded = false;
 		if (lastRecentFiles.size()==books.size()) {
 			bNotNeeded = true;
@@ -204,6 +257,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				);
 				if (label != null) {
 					label.setText("More...");
+					label.setTextColor(colorIcon);
 				}
 				view.setOnClickListener(new OnClickListener() {
 					@Override
@@ -217,7 +271,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				cover.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item, coverWidth, coverHeight));
 				if (label != null) {
 					String title = item.title;
-					String authors = Utils.formatAuthors(item.authors);
+					String authors = Utils.formatAuthors(item.getAuthors());
 					String s = item.getFileNameToDisplay();
 					if (!Utils.empty(title) && !Utils.empty(authors))
 						s = title + " - " + authors;
@@ -226,6 +280,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					else if (!Utils.empty(authors))
 						s = authors;
 					label.setText(s != null ? s : "");
+					label.setTextColor(colorIcon);
 					label.setMaxWidth(coverWidth);
 				}
 				view.setOnClickListener(new OnClickListener() {
@@ -285,6 +340,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	ArrayList<FileInfo> lastCatalogs = new ArrayList<FileInfo>();
 	private void updateOnlineCatalogs(ArrayList<FileInfo> catalogs) {
+		int colorBlue;
+		int colorGreen;
+		int colorGray;
+		int colorIcon;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeBlue,
+						R.attr.colorThemeGreen,
+						R.attr.colorThemeGray,
+						R.attr.colorIcon});
+		colorBlue = a.getColor(0, Color.BLUE);
+		colorGreen = a.getColor(1, Color.GREEN);
+		colorGray = a.getColor(2, Color.GRAY);
+		colorIcon = a.getColor(3, Color.GRAY);
+		a.recycle();
 		String lang = mActivity.getCurrentLanguage();
 		boolean defEnableLitres = lang.toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
 		boolean enableLitres = mActivity.settings().getBool(Settings.PROP_APP_PLUGIN_ENABLED + "." + OnlineStorePluginManager.PLUGIN_PKG_LITRES, defEnableLitres);
@@ -311,6 +380,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			if (item.isOPDSRoot()) {
 				icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_opds_add_drawable, R.drawable.cr3_browser_folder_opds_add));
 				label.setText("Add");
+				label.setTextColor(colorIcon);
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -320,6 +390,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			} else if (item.isOnlineCatalogPluginDir()) {
 				icon.setImageResource(R.drawable.litres);
 				label.setText(item.filename);
+				label.setTextColor(colorIcon);
 				view.setOnLongClickListener(new OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
@@ -378,6 +449,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			} else {
 				if (label != null) {
 					label.setText(item.getFileNameToDisplay());
+					label.setTextColor(colorIcon);
 					label.setMaxWidth(coverWidth * 3 / 2);
 				}
 				if (label.getText().toString().toLowerCase().contains("gutenberg"))
@@ -422,6 +494,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	private void updateFilesystems(List<FileInfo> dirs) {
 		if (dirs==null) return;
+		int colorBlue;
+		int colorGreen;
+		int colorGray;
+		int colorIcon;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeBlue,
+						R.attr.colorThemeGreen,
+						R.attr.colorThemeGray,
+						R.attr.colorIcon});
+		colorBlue = a.getColor(0, Color.BLUE);
+		colorGreen = a.getColor(1, Color.GREEN);
+		colorGray = a.getColor(2, Color.GRAY);
+		colorIcon = a.getColor(3, Color.GRAY);
+		a.recycle();
 		if (dirs.size()!=0) {
 			LayoutInflater inflater = LayoutInflater.from(mActivity);
 			mFilesystemScroll.removeAllViews();
@@ -431,6 +517,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			TextView label = (TextView) view.findViewById(R.id.item_name);
 			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
 			label.setText(R.string.open_book_from_gd_short);
+			label.setTextColor(colorIcon);
 			label.setMaxWidth(coverWidth * 25 / 10);
 			view.setOnClickListener(new OnClickListener() {
 				@Override
@@ -461,6 +548,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				else
                     labText = item.pathname; //  filename
 				label.setMaxWidth(coverWidth * 25 / 10);
+				label.setTextColor(colorIcon);
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -470,6 +558,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				String[] arrLab = labText.split("/");
 				if (arrLab.length>2) labText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
                 label.setText(labText);
+				label.setTextColor(colorIcon);
 				view.setOnLongClickListener(new OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View view) {
@@ -533,6 +622,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
     }
 
     private void updateLibraryItems(ArrayList<FileInfo> dirs) {
+		int colorBlue;
+		int colorGreen;
+		int colorGray;
+		int colorIcon;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeBlue,
+						R.attr.colorThemeGreen,
+						R.attr.colorThemeGray,
+						R.attr.colorIcon});
+		colorBlue = a.getColor(0, Color.BLUE);
+		colorGreen = a.getColor(1, Color.GREEN);
+		colorGray = a.getColor(2, Color.GRAY);
+		colorIcon = a.getColor(3, Color.GRAY);
+		a.recycle();
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		mLibraryScroll.removeAllViews();
 		for (final FileInfo item : dirs) {
@@ -545,6 +648,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			if (label != null) {
 				label.setText(item.filename);
+				label.setTextColor(colorIcon);
 				label.setMinWidth(coverWidth);
 				label.setMaxWidth(coverWidth * 2);
 			}
