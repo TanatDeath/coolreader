@@ -1803,7 +1803,7 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_updateSelectionInter
         r.sort();
 		if ( !r.getStart().isVisibleWordStart() )
 			r.getStart().prevVisibleWordStart();
-		//lString16 start = r.getStart().toString();
+		lString16 start = r.getStart().toString();
 		if ( !r.getEnd().isVisibleWordEnd() )
 			r.getEnd().nextVisibleWordEnd();
         if ( r.isNull() )

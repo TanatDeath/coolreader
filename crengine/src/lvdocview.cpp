@@ -6554,7 +6554,8 @@ void LVDrawBookCover(LVDrawBuf & buf, LVImageSourceRef image, lString8 fontFace,
 		return;
 	}
 
-
+    // plotn 20181110 - since we become to draw cover in java code, the below is not needed now
+    return;
     CRLog::trace("drawing default cover page %d x %d", dx, dy);
 	lvRect rc(0, 0, buf.GetWidth(), buf.GetHeight());
     buf.FillRect(rc, palette->frame);

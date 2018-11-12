@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Context menu for physical folder -->
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/options_view_toolbar_position" android:titleCondensed="@string/options_view_toolbar_position" android:id="@+id/options_view_toolbar_position"></item>
+    <item android:title="@string/view_toolbar_position_change" android:titleCondensed="@string/view_toolbar_position_change" android:id="@+id/view_toolbar_position_change"></item>
+    <item android:title="@string/options_view_toolbar_hide_in_fullscreen" android:titleCondensed="@string/options_view_toolbar_hide_in_fullscreen" android:id="@+id/options_view_toolbar_hide_in_fullscreen"></item>
+    <item android:title="@string/options_view_toolbar_appearance" android:titleCondensed="@string/options_view_toolbar_appearance" android:id="@+id/options_view_toolbar_appearance"></item>
+    <item android:title="@string/options_reader_toolbar_buttons" android:titleCondensed="@string/options_reader_toolbar_buttons" android:id="@+id/options_reader_toolbar_buttons"></item>
+    <item android:title="@string/options_app_tapzones_normal" android:titleCondensed="@string/options_app_tapzones_normal" android:id="@+id/options_app_tapzones_normal"></item>
+    <item android:title="@string/options_app_key_actions" android:titleCondensed="@string/options_app_key_actions" android:id="@+id/options_app_key_actions"></item>
+</menu>

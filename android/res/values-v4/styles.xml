@@ -337,6 +337,12 @@
         <item name="attr_icons8_rate_down">@drawable/wdrk_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/wdrk_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/wdrk_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/wdrk_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/wdrk_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/wdrk_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/wdrk_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/wdrk_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/wdrk_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/wdrk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/wdrk_icons8_rate_star_filled</item>
@@ -613,6 +619,12 @@
         <item name="attr_icons8_rate_down">@drawable/wlgt_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/wlgt_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/wlgt_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/wlgt_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/wlgt_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/wlgt_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/wlgt_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/wlgt_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/wlgt_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/wlgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/wlgt_icons8_rate_star_filled</item>
@@ -899,6 +911,12 @@
         <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/drk_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/drk_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/drk_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/drk_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/drk_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/drk_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/drk_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/drk_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -1173,6 +1191,12 @@
         <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/lgt_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/lgt_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/lgt_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/lgt_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/lgt_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/lgt_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/lgt_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/lgt_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
@@ -1450,6 +1474,12 @@
         <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/lgt_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/lgt_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/lgt_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/lgt_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/lgt_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/lgt_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/lgt_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/lgt_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
@@ -1727,6 +1757,12 @@
         <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/drk_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/drk_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/drk_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/drk_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/drk_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/drk_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/drk_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/drk_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -2003,6 +2039,12 @@
         <item name="attr_icons8_rate_down">@drawable/drk_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/drk_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/drk_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/drk_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/drk_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/drk_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/drk_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/drk_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/drk_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -2279,6 +2321,12 @@
         <item name="attr_icons8_rate_down">@drawable/lgt_icons8_rate_down</item>
         <item name="attr_icons8_position_to_disk">@drawable/lgt_icons8_position_to_disk</item>
         <item name="attr_icons8_position_to_disk_interval">@drawable/lgt_icons8_position_to_disk_interval</item>
+        <item name="attr_icons8_folder_year">@drawable/lgt_icons8_folder_year</item>
+        <item name="attr_icons8_folder_stars">@drawable/lgt_icons8_folder_stars</item>
+        <item name="attr_icons8_folder_num">@drawable/lgt_icons8_folder_num</item>
+        <item name="attr_icons8_folder_hash">@drawable/lgt_icons8_folder_hash</item>
+        <item name="attr_icons8_folder_author">@drawable/lgt_icons8_folder_author</item>
+        <item name="attr_icons8_cancel_small">@drawable/lgt_icons8_cancel_small</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>

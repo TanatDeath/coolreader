@@ -444,7 +444,8 @@ public class Utils {
 	}
 
 	public static String formatFileInfo(Activity activity, FileInfo item) {
-		return formatSize(item.size) + " " + (item.format!=null ? item.format.name().toLowerCase() : "") + " " + formatDate(activity, item.createTime);
+		return formatSize(item.size) + " " + (item.format!=null ? item.format.name().toLowerCase() : "") + " " +
+				formatDate(activity, item.getCreateTime());
 	}
 
 	public static String formatLastPosition(Activity activity, Bookmark pos) {

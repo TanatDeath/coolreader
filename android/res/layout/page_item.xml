@@ -48,6 +48,7 @@
 			android:layout_height="wrap_content"
 			android:singleLine="false"
 			android:ellipsize="end"
+			android:textColor="?attr/colorIcon"
 			android:textAppearance="?android:attr/textAppearanceSmall"
 			android:maxLines="6"
 			android:layout_gravity="left" />

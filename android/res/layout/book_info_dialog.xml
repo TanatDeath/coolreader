@@ -10,51 +10,34 @@
 		android:layout_height="match_parent"
 		android:orientation="vertical">
 
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="horizontal">
-
-			<Button android:id="@+id/btn_edit_info"
-				android:layout_width="wrap_content"
-				android:layout_weight="1"
-				android:layout_height="fill_parent"
-				android:layout_marginTop="5dip"
-				android:layout_marginBottom="5dip"
-				android:layout_marginLeft="5dip"
-				android:layout_marginRight="5dip"
-				android:focusable="false"
-				android:focusableInTouchMode="false"
-				android:text="@string/btn_edit_info"
-				android:drawableLeft="?attr/attr_icons8_book_edit"
-				android:contentDescription="@string/btn_edit_info"/>
-
-			<Button android:id="@+id/btn_shortcut"
-				android:layout_width="wrap_content"
-				android:layout_weight="1"
-				android:layout_height="fill_parent"
-				android:layout_marginTop="5dip"
-				android:layout_marginBottom="5dip"
-				android:layout_marginLeft="5dip"
-				android:layout_marginRight="5dip"
-				android:focusable="false"
-				android:focusableInTouchMode="false"
-				android:text="@string/btn_shortcut"
-				android:drawableLeft="?attr/attr_icons8_book_link"
-				android:contentDescription="@string/btn_shortcut"/>
-
-		</LinearLayout>
-		<TextView
+		<uk.co.deanwild.flowtextview.FlowTextView
 			android:id="@+id/lbl_annotation"
-			style="@style/TextAppearance.Medium"
+			style="@style/TextAppearance.Small"
+			android:textColor="?attr/colorIcon"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:singleLine="false"
-			android:textColor="?attr/colorIcon"
-			android:layout_margin="5dip"
-			android:clickable="true"
-			/>
+			android:layout_marginTop="5dip"
+			android:layout_marginBottom="5dip"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+			>
 
+			<ImageView
+				android:id="@+id/book_cover"
+				android:scaleType="fitCenter"
+				android:minHeight="120dip"
+				android:minWidth="100dip"
+				android:maxHeight="200dip"
+				android:maxWidth="150dip"
+				android:drawable="?attr/cr3_browser_book_drawable"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dip"
+				android:layout_marginBottom="5dip"
+				android:layout_marginLeft="5dip"
+				android:layout_marginRight="5dip"
+				/>
+		</uk.co.deanwild.flowtextview.FlowTextView>
 	<TableLayout
 		android:id="@+id/table"
 		style="@style/TextAppearance.Small"

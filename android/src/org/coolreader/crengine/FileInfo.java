@@ -25,6 +25,18 @@ public class FileInfo {
 	public final static String SERIES_TAG = "@seriesRoot";
 	public final static String SERIES_GROUP_PREFIX = "@seriesGroup:";
 	public final static String SERIES_PREFIX = "@series:";
+	public final static String BOOK_DATE_TAG = "@bookdateRoot";
+	public final static String BOOK_DATE_GROUP_PREFIX = "@bookdateGroup:";
+	public final static String BOOK_DATE_PREFIX = "@bookdate:";
+	public final static String DOC_DATE_TAG = "@docdateRoot";
+	public final static String DOC_DATE_GROUP_PREFIX = "@docdateGroup:";
+	public final static String DOC_DATE_PREFIX = "@docdate:";
+	public final static String PUBL_YEAR_TAG = "@publyearRoot";
+	public final static String PUBL_YEAR_GROUP_PREFIX = "@publyearGroup:";
+	public final static String PUBL_YEAR_PREFIX = "@publyeardate:";
+	public final static String FILE_DATE_TAG = "@filedateRoot";
+	public final static String FILE_DATE_GROUP_PREFIX = "@filedateGroup:";
+	public final static String FILE_DATE_PREFIX = "@filedate:";
 	public final static String RATING_TAG = "@ratingRoot";
 	public final static String STATE_TO_READ_TAG = "@stateToReadRoot";
 	public final static String STATE_READING_TAG = "@stateReadingRoot";
@@ -43,22 +55,28 @@ public class FileInfo {
 	public String genre;
 	public String annotation;
 	public String srclang;
-    public String bookdate;
+    private String bookdate;
 	public String translator;
 	public String docauthor;
 	public String docprogram;
-	public String docdate;
+	private String docdate;
 	public String docsrcurl;
 	public String docsrcocr;
 	public String docversion;
 	public String publname;
 	public String publisher;
 	public String publcity;
-	public String publyear;
+	private String publyear;
 	public String publisbn;
     public String publseries; // series name w/o number
     public int publseriesNumber; // number of book inside series
-    public String path; // path to directory where file or archive is located
+	public long fileCreateTime;
+	public long symCount;
+	public long wordCount;
+	public long bookDateN; //converted to nubmer from string
+	public long docDateN;
+	public long publYearN;
+	public String path; // path to directory where file or archive is located
 	public String filename; // file name w/o path for normal file, with optional path for file inside archive 
 	public String pathname; // full path+arcname+filename
 	public String arcname; // archive file name w/o path
@@ -70,7 +88,7 @@ public class FileInfo {
 	public DocumentFormat format;
 	public int size; // full file size
 	public int arcsize; // compressed size
-	public long createTime;
+	private long createTime;
 	public long lastAccessTime;
 	public int flags;
 	public boolean isArchive;
@@ -80,7 +98,8 @@ public class FileInfo {
 	public FileInfo parent; // parent item
 	public Object tag; // some additional information
 	public boolean askedMarkRead = false; // did we ask to mark book as read
-	
+	public boolean askedMarkReading = false; // did we ask to mark book as reading
+	public ArrayList<Integer> arrReadBeg = new ArrayList<Integer>();
 	private ArrayList<FileInfo> files;// files
 	private ArrayList<FileInfo> dirs; // directories
 
@@ -114,8 +133,36 @@ public class FileInfo {
     public static final int TYPE_FS_ROOT = 1;
     public static final int TYPE_DOWNLOAD_DIR = 2;
 
+	public long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(long createTime) {
+		this.createTime = createTime;
+	}
+
+	public long getFileCreateTime() {
+		return fileCreateTime;
+	}
+
+	public void setFileCreateTime(long fileCreateTime) {
+		this.fileCreateTime = fileCreateTime;
+	}
+
+	public String getBookdate() {
+		return bookdate;
+	}
+
+	public String getDocdate() {
+		return docdate;
+	}
+
+	public String getPublyear() {
+		return publyear;
+	}
+
 	/**
-	 * Get book reading state. 
+	 * Get book reading state.
 	 * @return reading state (one of STATE_XXX constants)
 	 */
 	public int getReadingState() {
@@ -131,7 +178,7 @@ public class FileInfo {
 	}
 
 	/**
-	 * Get book reading state. 
+	 * Get book reading state.
 	 * @return reading state (one of STATE_XXX constants)
 	 */
 	public int getRate() {
@@ -237,6 +284,7 @@ public class FileInfo {
 			pathname = parts[0];
 			File f = new File(pathname);
 			filename = f.getName();
+			fileCreateTime = f.lastModified();
 			path = f.getPath();
 			File arc = new File(arcname);
 			if (arc.isFile() && arc.exists()) {
@@ -277,6 +325,7 @@ public class FileInfo {
 	
 	private void fromFile( File f )
 	{
+		fileCreateTime = f.lastModified();
 		if ( !f.isDirectory() ) {
 			DocumentFormat fmt = DocumentFormat.byExtension(f.getName());
 			filename = f.getName();
@@ -339,21 +388,22 @@ public class FileInfo {
 		genre = v.genre;
 		annotation = v.annotation;
 		srclang = v.srclang;
-		bookdate = v.bookdate;
+		setBookdate(v.bookdate);
 		translator = v.translator;
 		docauthor = v.docauthor;
 		docprogram = v.docprogram;
-		docdate = v.docdate;
+		setDocdate(v.docdate);
 		docsrcurl = v.docsrcurl;
 		docsrcocr = v.docsrcocr;
 		docversion = v.docversion;
 		publname = v.publname;
 		publisher = v.publisher;
 		publcity = v.publcity;
-		publyear = v.publyear;
+		setPublyear(v.publyear);
 		publisbn = v.publisbn;
         publseries = v.publseries;
         publseriesNumber = v.publseriesNumber;
+        fileCreateTime = v.fileCreateTime;
     }
 	
 	/**
@@ -445,6 +495,26 @@ public class FileInfo {
 	{
 		return SERIES_TAG.equals(pathname);
 	}
+
+	public boolean isBooksByBookdateRoot()
+	{
+		return BOOK_DATE_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByDocdateRoot()
+	{
+		return DOC_DATE_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByPublyearRoot()
+	{
+		return PUBL_YEAR_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByFiledateRoot()
+	{
+		return FILE_DATE_TAG.equals(pathname);
+	}
 	
 	public boolean isBooksByRatingRoot()
 	{
@@ -480,6 +550,26 @@ public class FileInfo {
 	{
 		return pathname!=null && pathname.startsWith(SERIES_PREFIX);
 	}
+
+	public boolean isBooksByBookdateDir()
+	{
+		return pathname!=null && pathname.startsWith(BOOK_DATE_PREFIX);
+	}
+
+	public boolean isBooksByDocdateDir()
+	{
+		return pathname!=null && pathname.startsWith(DOC_DATE_PREFIX);
+	}
+
+	public boolean isBooksByPublyearDir()
+	{
+		return pathname!=null && pathname.startsWith(PUBL_YEAR_PREFIX);
+	}
+
+	public boolean isBooksByFiledateDir()
+	{
+		return pathname!=null && pathname.startsWith(FILE_DATE_PREFIX);
+	}
 	
 	public long getAuthorId()
 	{
@@ -491,6 +581,33 @@ public class FileInfo {
 	public long getSeriesId()
 	{
 		if (!isBooksBySeriesDir())
+			return 0;
+		return id;
+	}
+
+	public long getBookdateId()
+	{
+		if (!isBooksByBookdateDir())
+			return 0;
+		return id;
+	}
+	public long getDocdateId()
+	{
+		if (!isBooksByDocdateDir())
+			return 0;
+		return id;
+	}
+
+	public long getPublyearId()
+	{
+		if (!isBooksByPublyearDir())
+			return 0;
+		return id;
+	}
+
+	public long getFiledateId()
+	{
+		if (!isBooksByFiledateDir())
 			return 0;
 		return id;
 	}
@@ -832,6 +949,18 @@ public class FileInfo {
 		}
 		return new File(pathname).exists();
 	}
+
+	public long fileLastModified()
+	{
+		if (isDirectory)
+			return 0;
+		if ( isArchive ) {
+			if ( arcname!=null )
+				return new File(arcname).lastModified();
+			return 0;
+		}
+		return new File(pathname).lastModified();
+	}
 	
 	/**
 	 * @return true if item (file, directory, or archive) exists
@@ -967,7 +1096,136 @@ public class FileInfo {
 		this.seriesNumber = seriesNumber;
 		return true;
 	}
-	
+
+	public boolean setGenre(String genre) {
+		if (eq(this.genre, genre))
+			return false;
+		this.genre = genre;
+		return true;
+	}
+
+	public boolean setAnnotation(String annotation) {
+		if (eq(this.annotation, annotation))
+			return false;
+		this.annotation = annotation;
+		return true;
+	}
+
+	public boolean setSrclang(String srclang) {
+		if (eq(this.srclang, srclang))
+			return false;
+		this.srclang = srclang;
+		return true;
+	}
+
+	public boolean setBookdate(String bookdate) {
+		if (eq(this.bookdate, bookdate))
+			return false;
+		this.bookdate = bookdate;
+		this.bookDateN = StrUtils.parseDateLong(bookdate);
+		return true;
+	}
+
+	public boolean setTranslator(String translator) {
+		if (eq(this.translator, translator))
+			return false;
+		this.translator = translator;
+		return true;
+	}
+
+	public boolean setDocauthor(String docauthor) {
+		if (eq(this.docauthor, docauthor))
+			return false;
+		this.docauthor = docauthor;
+		return true;
+	}
+
+	public boolean setDocprogram(String docprogram) {
+		if (eq(this.docprogram, docprogram))
+			return false;
+		this.docprogram = docprogram;
+		return true;
+	}
+
+	public boolean setDocdate(String docdate) {
+		if (eq(this.docdate, docdate))
+			return false;
+		this.docdate = docdate;
+		this.docDateN = StrUtils.parseDateLong(docdate);
+		return true;
+	}
+
+	public boolean setDocsrcurl(String docsrcurl) {
+		if (eq(this.docsrcurl, docsrcurl))
+			return false;
+		this.docsrcurl = docsrcurl;
+		return true;
+	}
+
+	public boolean setDocsrcocr(String docsrcocr) {
+		if (eq(this.docsrcocr, docsrcocr))
+			return false;
+		this.docsrcocr = docsrcocr;
+		return true;
+	}
+
+	public boolean setDocversion(String docversion) {
+		if (eq(this.docversion, docversion))
+			return false;
+		this.docversion = docversion;
+		return true;
+	}
+
+	public boolean setPublname(String publname) {
+		if (eq(this.publname, publname))
+			return false;
+		this.publname = publname;
+		return true;
+	}
+
+	public boolean setPublisher(String publisher) {
+		if (eq(this.publisher, publisher))
+			return false;
+		this.publisher = publisher;
+		return true;
+	}
+
+	public boolean setPublcity(String publcity) {
+		if (eq(this.publcity, publcity))
+			return false;
+		this.publcity = publcity;
+		return true;
+	}
+
+	public boolean setPublyear(String publyear) {
+		if (eq(this.publyear, publyear))
+			return false;
+		this.publyear = publyear;
+		this.publYearN = StrUtils.parseDateLong(publyear);
+		return true;
+	}
+
+	public boolean setPublisbn(String publisbn) {
+		if (eq(this.publisbn, publisbn))
+			return false;
+		this.publisbn = publisbn;
+		return true;
+	}
+
+	public boolean setPublseries(String publseries) {
+		if (eq(this.publseries, publseries))
+			return false;
+		this.publseries = publseries;
+		return true;
+	}
+
+	public boolean setPublseriesNumber(int publseriesNumber) {
+		if (this.publseriesNumber == publseriesNumber)
+			return false;
+		this.publseriesNumber = publseriesNumber;
+		return true;
+	}
+
 	public int getSeriesNumber() {
 		return series != null && series.length() > 0 ? seriesNumber : 0;
 	}
@@ -1271,8 +1529,12 @@ public class FileInfo {
 		if (!StrUtils.euqalsIgnoreNulls(publyear, other.publyear, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(publisbn, other.publisbn, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(publseries, other.publseries, true)) return false;
-		if (publseriesNumber != other.publseriesNumber)
-			return false;
+		if (publseriesNumber != other.publseriesNumber) return false;
+		if (fileCreateTime != other.fileCreateTime) return false;
+		if (seriesNumber != other.seriesNumber) return false;
+		if (bookDateN != other.bookDateN) return false;
+		if (docDateN != other.docDateN) return false;
+		if (publYearN != other.publYearN) return false;
 		return true;
 	}
 
@@ -1283,6 +1545,8 @@ public class FileInfo {
 	}
 	
 	public boolean allowSorting() {
-		return isDirectory && !isRootDir() && !isRecentDir() && !isOPDSDir() && !isBooksBySeriesDir();
+		return isDirectory && !isRootDir() && !isRecentDir() && !isOPDSDir() && !isBooksBySeriesDir()
+				&& !isBooksByBookdateDir()&& !isBooksByDocdateDir()&& !isBooksByPublyearDir()
+				&& !isBooksByFiledateDir();
 	}
 }

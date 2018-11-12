@@ -19,6 +19,8 @@ import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -519,7 +521,74 @@ public class CRToolBar extends ViewGroup {
 				}
 		}
 	}
-	
+
+	public boolean onContextItemSelected(MenuItem item) {
+
+		CoolReader cr = null;
+		if (activity!=null)
+			if (activity instanceof CoolReader)
+				cr = ((CoolReader) activity);
+
+		switch (item.getItemId()) {
+			case R.id.options_view_toolbar_position:
+				if (cr!=null) {
+					log.d("options_view_toolbar_position menu item selected");
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_LOCATION);
+				};
+				break;
+			case R.id.view_toolbar_position_change:
+				if (cr!=null) {
+					log.d("view_toolbar_position_change menu item selected");
+					int toolbarLocation =
+							(cr.settings()).getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_SHORT_SIDE);
+					if (toolbarLocation == Settings.VIEWER_TOOLBAR_LONG_SIDE)
+						toolbarLocation = Settings.VIEWER_TOOLBAR_TOP;
+					else toolbarLocation++;
+					(cr.settings()).setInt(Settings.PROP_TOOLBAR_LOCATION, toolbarLocation);
+					cr.setSettings(cr.settings(), 0, true);
+					calcLayout();
+				};
+				break;
+			case R.id.options_view_toolbar_hide_in_fullscreen:
+				if (cr!=null) {
+					log.d("options_view_toolbar_hide_in_fullscreen menu item selected");
+					boolean hideToolb =
+							(cr.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
+					hideToolb = !hideToolb;
+					(cr.settings()).setBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, hideToolb);
+					cr.setSettings(cr.settings(), 0, true);
+					calcLayout();
+				};
+				break;
+			case R.id.options_view_toolbar_appearance:
+				if (cr!=null) {
+					log.d("options_view_toolbar_appearance menu item selected");
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_APPEARANCE);
+				};
+				break;
+			case R.id.options_reader_toolbar_buttons:
+				if (cr!=null) {
+					log.d("options_reader_toolbar_buttons menu item selected");
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_BUTTONS);
+				};
+				break;
+			case R.id.options_app_tapzones_normal:
+				if (cr!=null) {
+					log.d("options_app_tapzones_normal menu item selected");
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TAP_ZONE_ACTIONS_TAP);
+				};
+				break;
+			case R.id.options_app_key_actions:
+				if (cr!=null) {
+					log.d("options_app_key_actions menu item selected");
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_KEY_ACTIONS_PRESS);
+				};
+				break;
+		}
+		return true;
+	}
+
+
 	private ImageButton addButton(Rect rect, final ReaderAction item, boolean left) {
 		Rect rc = new Rect(rect);
 		if (isVertical) {
@@ -556,13 +625,37 @@ public class CRToolBar extends ViewGroup {
 						if (ram != null) onButtonClick(ram);
 					}
 				} else {
-					int toolbarLocation =
-							(((CoolReader)activity).settings()).getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_SHORT_SIDE);
-					if (toolbarLocation == Settings.VIEWER_TOOLBAR_LONG_SIDE)
-						toolbarLocation = Settings.VIEWER_TOOLBAR_TOP; else toolbarLocation++;
-					(((CoolReader)activity).settings()).setInt(Settings.PROP_TOOLBAR_LOCATION, toolbarLocation);
-					((CoolReader)activity).setSettings(((CoolReader)activity).settings(), 0,true);
-					calcLayout();
+					if (activity!=null)
+						if (activity instanceof CoolReader) {
+							final CoolReader cr = ((CoolReader) activity);
+							cr.registerForContextMenu(cr.contentView);
+							cr.contentView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
+								@Override
+								public void onCreateContextMenu(ContextMenu menu, View v,
+																ContextMenu.ContextMenuInfo menuInfo) {
+									menu.clear();
+									MenuInflater inflater = cr.getMenuInflater();
+									inflater.inflate(R.menu.cr3_reader_toolbar_context_menu, menu);
+									menu.setHeaderTitle(cr.getString(R.string.options_view_toolbar_settings));
+									for ( int i=0; i<menu.size(); i++ ) {
+										if (menu.getItem(i).getItemId()==R.id.options_view_toolbar_hide_in_fullscreen) {
+											boolean hideToolb =
+													(cr.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
+											menu.getItem(i).setCheckable(true);
+											menu.getItem(i).setChecked(hideToolb);
+										}
+										menu.getItem(i).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+											public boolean onMenuItemClick(MenuItem item) {
+												onContextItemSelected(item);
+												return true;
+											}
+										});
+									}
+
+								}
+							});
+							cr.contentView.showContextMenu();
+						}
 				}
 				return true;
 			}

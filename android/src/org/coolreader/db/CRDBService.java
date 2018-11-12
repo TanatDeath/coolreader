@@ -429,6 +429,22 @@ public class CRDBService extends Service {
 			}
 		});
 	}
+
+    public void loadByDateList(FileInfo parent, final String field, final ItemGroupsLoadingCallback callback, final Handler handler) {
+        final FileInfo p = new FileInfo(parent);
+        execTask(new Task("loadByDateList") {
+            @Override
+            public void work() {
+                mainDB.loadByDateList(p, field);
+                sendTask(handler, new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onItemGroupsLoaded(p);
+                    }
+                });
+            }
+        });
+    }
 	
 	public void loadTitleList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent); 
@@ -468,6 +484,22 @@ public class CRDBService extends Service {
 			public void work() {
 				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 				mainDB.findSeriesBooks(list, seriesId);
+				sendTask(handler, new Runnable() {
+					@Override
+					public void run() {
+						callback.onFileInfoListLoaded(list);
+					}
+				});
+			}
+		});
+	}
+
+	public void findByDateBooks(final long bookdateId, final String field, final FileInfoLoadingCallback callback, final Handler handler) {
+		execTask(new Task("findByDateBooks") {
+			@Override
+			public void work() {
+				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				mainDB.findByDateBooks(list, field, bookdateId);
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
@@ -807,6 +839,10 @@ public class CRDBService extends Service {
     	public void loadSeriesList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
     		getService().loadSeriesList(parent, callback, new Handler());
     	}
+
+        public void loadByDateList(FileInfo parent, final String field, final ItemGroupsLoadingCallback callback) {
+            getService().loadByDateList(parent, field, callback, new Handler());
+        }
     	
     	public void loadTitleList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
     		getService().loadTitleList(parent, callback, new Handler());
@@ -819,6 +855,10 @@ public class CRDBService extends Service {
     	public void loadSeriesBooks(long seriesId, FileInfoLoadingCallback callback) {
     		getService().findSeriesBooks(seriesId, callback, new Handler());
     	}
+
+		public void loadByDateBooks(long bookdateId, final String field, FileInfoLoadingCallback callback) {
+			getService().findByDateBooks(bookdateId, field, callback, new Handler());
+		}
 
 		public void loadSearchHistory(BookInfo book, SearchHistoryLoadingCallback callback) {
 			getService().loadSearchHistory(book, callback, new Handler());

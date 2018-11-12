@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.view.*;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,7 +33,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private LinearLayout mFilesystemScroll;
 	private LinearLayout mLibraryScroll;
 	private LinearLayout mOnlineCatalogsScroll;
-	private CoverpageManager mCoverpageManager;
+    private Button btnStateToRead;
+    private Button btnStateReading;
+    private Button btnStateFinished;
+    private CoverpageManager mCoverpageManager;
 	private int coverWidth;
 	private int coverHeight;
 	private BookInfo currentBook;
@@ -644,8 +648,16 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			TextView label = (TextView)view.findViewById(R.id.item_name);
 			if (item.isSearchShortcut())
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
-			else if (item.isBooksByAuthorRoot() || item.isBooksByTitleRoot() || item.isBooksBySeriesRoot())
+			else if ( item.isBooksByRatingRoot() )
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
+			else if ( item.isBooksByTitleRoot() )
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
+			else if ( item.isBooksBySeriesRoot() )
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
+			else if (item.isBooksByAuthorRoot())
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
+			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() || item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
 			if (label != null) {
 				label.setText(item.filename);
 				label.setTextColor(colorIcon);
@@ -703,7 +715,73 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		
 		mOnlineCatalogsScroll = (LinearLayout)mView.findViewById(R.id.scroll_online_catalogs);
 
-		updateCurrentBook(Services.getHistory().getLastBook());
+        btnStateToRead  = (Button)view.findViewById(R.id.book_state_toread);
+		btnStateToRead.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				FileInfo dir = new FileInfo();
+				dir.isDirectory = true;
+				dir.pathname = FileInfo.STATE_TO_READ_TAG;
+				dir.filename = mActivity.getString(R.string.folder_name_books_by_state_to_read);
+				dir.isListed = true;
+				dir.isScanned = true;
+				mActivity.showDirectory(dir);
+			}
+		});
+		btnStateReading  = (Button)view.findViewById(R.id.book_state_reading);
+		btnStateReading.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				FileInfo dir = new FileInfo();
+				dir.isDirectory = true;
+				dir.pathname = FileInfo.STATE_READING_TAG;
+				dir.filename = mActivity.getString(R.string.folder_name_books_by_state_reading);
+				dir.isListed = true;
+				dir.isScanned = true;
+				mActivity.showDirectory(dir);
+			}
+		});
+		btnStateFinished  = (Button)view.findViewById(R.id.book_state_finished);
+        btnStateFinished.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				FileInfo dir = new FileInfo();
+				dir.isDirectory = true;
+				dir.pathname = FileInfo.STATE_FINISHED_TAG;
+				dir.filename = mActivity.getString(R.string.folder_name_books_by_state_finished);
+				dir.isListed = true;
+				dir.isScanned = true;
+				mActivity.showDirectory(dir);
+			}
+		});
+
+        int colorBlue;
+        int colorGreen;
+        int colorGray;
+        int colorIcon;
+        int colorGrayC;
+        TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+                {R.attr.colorThemeBlue,
+                        R.attr.colorThemeGreen,
+                        R.attr.colorThemeGray,
+                        R.attr.colorIcon,
+                        R.attr.colorThemeGray2Contrast});
+        colorBlue = a.getColor(0, Color.BLUE);
+        colorGreen = a.getColor(1, Color.GREEN);
+        colorGray = a.getColor(2, Color.GRAY);
+        colorIcon = a.getColor(3, Color.GRAY);
+        colorGrayC = a.getColor(4, Color.GRAY);
+        a.recycle();
+
+        btnStateReading.setTextColor(colorGreen);
+        btnStateToRead.setTextColor(colorBlue);
+        btnStateFinished.setTextColor(colorGray);
+        int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+        btnStateToRead.setBackgroundColor(colorGrayCT);
+        btnStateReading.setBackgroundColor(colorGrayCT);
+        btnStateFinished.setBackgroundColor(colorGrayCT);
+
+        updateCurrentBook(Services.getHistory().getLastBook());
 		
 //		((ImageButton)mView.findViewById(R.id.btn_recent_books)).setOnClickListener(new OnClickListener() {
 //			@Override

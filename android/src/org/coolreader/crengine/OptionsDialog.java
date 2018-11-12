@@ -53,6 +53,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	ReaderView mReaderView;
 	BaseActivity mActivity;
+
+	public String selectedOption;
+
 	String[] mFontFaces;
 	int[] mFontSizes = new int[] {
 		9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -3255,7 +3258,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE, getString(R.string.option_add_info_empty_text)).add(mScreenUpdateModes, mScreenUpdateModesTitles, mScreenUpdateModesAddInfos).setDefaultValue("0"));
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_update_interval), PROP_APP_SCREEN_UPDATE_INTERVAL, getString(R.string.option_add_info_empty_text)).add(mScreenFullUpdateInterval).setDefaultValue("10"));
 		}
-
+		if (DeviceInfo.EINK_SCREEN)
+			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_blackpage_interval), PROP_APP_SCREEN_BLACKPAGE_INTERVAL,
+				getString(R.string.option_add_info_empty_text)).add(mScreenFullUpdateInterval).setDefaultValue("0"));
 		mOptionsPage.add(new StatusBarOption(this, getString(R.string.options_page_titlebar),
 				getString(R.string.options_page_titlebar_add_info)).setIconIdByAttr(R.attr.attr_icons8_document_r_title, R.drawable.icons8_document_r_title));
 		mOptionsPage.add(new BoolOption(this, getString(R.string.options_page_footnotes), PROP_FOOTNOTES,
@@ -3339,6 +3344,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.attr_icons8_moving_sensor,R.drawable.icons8_moving_sensor));
 		mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_key_backlight_off), PROP_APP_KEY_BACKLIGHT_OFF, getString(R.string.options_app_key_backlight_off_add_info)).setDefaultValue("1").noIcon());
 		mOptionsApplication.add(new IconsBoolOption(this, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS, getString(R.string.options_app_settings_icons_add_info)).setDefaultValue("1").noIcon());
+
 		mOptionsApplication.add(new DictOptions(this, getString(R.string.options_app_dictionary), getString(R.string.option_add_info_empty_text)).setIconIdByAttr(R.attr.attr_icons8_google_translate, R.drawable.icons8_google_translate));
 		mOptionsApplication.add(new DictOptions2(this, getString(R.string.options_app_dictionary2),
 				getString(R.string.options_app_dictionary2_add_info)).setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
@@ -3424,7 +3430,52 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		ts.setContent(this);
 		mTabs.addTab(ts);
 	}
-	
+
+	@Override
+	protected void onStart() {
+		if (!StrUtils.isEmptyStr(selectedOption))
+			BackgroundThread.instance().postGUI(new Runnable() {
+				@Override
+				public void run() {
+					OptionBase selOpt = null;
+					if (mOptionsStyles!=null)
+						for (OptionBase opt: mOptionsStyles.mOptions) {
+							if (opt.property.equals(selectedOption)) selOpt = opt;
+						}
+					if (mOptionsCSS!=null)
+						for (OptionBase opt: mOptionsCSS.mOptions) {
+							if (opt.property.equals(selectedOption)) selOpt = opt;
+						}
+					if (mOptionsPage!=null)
+						for (OptionBase opt: mOptionsPage.mOptions) {
+							if (opt.property.equals(selectedOption)) selOpt = opt;
+						}
+					if (mOptionsApplication!=null)
+						for (OptionBase opt: mOptionsApplication.mOptions) {
+							if (opt.property.equals(selectedOption)) selOpt = opt;
+						}
+					if (mOptionsControls!=null)
+						for (OptionBase opt: mOptionsControls.mOptions) {
+							if (opt.property.equals(selectedOption)) selOpt = opt;
+						}
+					if (mOptionsBrowser!=null)
+						for (OptionBase opt: mOptionsBrowser.mOptions) {
+							if (opt.property.equals(selectedOption)) selOpt = opt;
+						}
+					if (selOpt!=null) {
+						selOpt.onSelect();
+						if (selOpt.optionsListView!=null) {
+							if (selOpt.optionsListView == mOptionsStyles) mTabs.setCurrentTab(0);
+							if (selOpt.optionsListView == mOptionsCSS) mTabs.setCurrentTab(1);
+							if (selOpt.optionsListView == mOptionsPage) mTabs.setCurrentTab(2);
+							if (selOpt.optionsListView == mOptionsControls) mTabs.setCurrentTab(3);
+							if (selOpt.optionsListView == mOptionsApplication) mTabs.setCurrentTab(4);
+						}
+					}
+					selectedOption = "";
+				}}, 100);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		L.v("creating OptionsDialog");

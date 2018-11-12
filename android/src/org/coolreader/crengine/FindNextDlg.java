@@ -2,7 +2,10 @@ package org.coolreader.crengine;
 
 import org.coolreader.R;
 
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -73,12 +76,27 @@ public class FindNextDlg {
 				mReaderView.findNext(pattern, false, caseInsensitive);
 			}
 		});
+
+		int colorGrayC;
+		int colorGray;
+		TypedArray a = mReaderView.getActivity().getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorGray = a.getColor(1, Color.GRAY);
+		a.recycle();
+
+		ColorDrawable c = new ColorDrawable(colorGrayC);
+		c.setAlpha(130);
+		mPanel.findViewById(R.id.search_btn_prev).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_next).setBackgroundDrawable(c);
+
 		mPanel.findViewById(R.id.search_btn_close).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				mReaderView.clearSelection();
 				mWindow.dismiss();
 			}
 		});
+		mPanel.findViewById(R.id.search_btn_close).setBackgroundDrawable(c);
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener( new OnKeyListener() {
 
@@ -133,16 +151,18 @@ public class FindNextDlg {
 		mWindow.setFocusable(true);
 		mWindow.setTouchable(true);
 		mWindow.setOutsideTouchable(true);
+		panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 		mWindow.setContentView(panel);
 		
 		
-		int [] location = new int[2];
-		mAnchor.getLocationOnScreen(location);
+		//int [] location = new int[2];
+		//mAnchor.getLocationOnScreen(location);
 		//mWindow.update(location[0], location[1], mPanel.getWidth(), mPanel.getHeight() );
 		//mWindow.setWidth(mPanel.getWidth());
 		//mWindow.setHeight(mPanel.getHeight());
 
-		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], location[1] + mAnchor.getHeight() - mPanel.getHeight());
+		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL,
+				mReaderView.locationFindNext[0], mReaderView.locationFindNext[1] + mReaderView.heightFindNext - mPanel.getHeight());
 //		if ( mWindow.isShowing() )
 //			mWindow.update(mAnchor, 50, 50);
 		//dlg.mWindow.showAsDropDown(dlg.mAnchor);

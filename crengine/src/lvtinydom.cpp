@@ -5435,7 +5435,22 @@ lString16 extractDocGenre( ldomDocument * doc, lString16 delimiter)
 
 lString16 extractDocAnnotation( ldomDocument * doc )
 {
-    return doc->createXPointer(L"/FictionBook/description/title-info/annotation").getText();
+    ldomNode * body = doc->nodeFromXPath(cs16("/FictionBook/description/title-info/annotation[1]"));
+    lString16 res;
+    res = "";
+    if (body != NULL) {
+        int cnt = body->getChildCount();
+        for (int i = 0; i < cnt; i++) {
+            ldomNode *l1section = body->getChildNode(i);
+            if (!l1section)
+                continue;
+            lString16 res2 = l1section->getText();
+            if (res.length()==0) res = res2; else
+                res = res + "\n" + res2;
+        }
+        if (cnt==0) return doc->createXPointer(L"/FictionBook/description/title-info/annotation").getText();
+    }
+    return res;
 }
 
 lString16 extractDocSrcLang( ldomDocument * doc )

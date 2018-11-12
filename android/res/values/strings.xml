@@ -246,6 +246,7 @@
     <string name="book_info_book_publseries_name">Publish series</string>
     <string name="book_info_file_arcpath">Archive path</string>
     <string name="book_info_book_title">Title</string>
+    <string name="book_info_book_annotation">Annotation</string>
     <string name="book_info_file_name">File name</string>
     <string name="book_info_file_arcname">Archive name</string>
     <string name="book_info_section_current_position">Reading position</string>
@@ -327,6 +328,7 @@
     <string name="options_screen_update_mode_fast2">Fast 2</string>
     <string name="options_screen_update_mode_quality">Quality</string>
     <string name="options_screen_update_interval">Full screen update interval</string>
+    <string name="options_screen_blackpage_interval">Force black page paint interval</string>
     <string name="options_render_font_gamma">Font Gamma</string>
     <string name="action_toggle_titlebar">Toggle Title Bar</string>
     <string name="action_show_position_info">Show position popup</string>
@@ -470,6 +472,8 @@
     <string name="book_info_book_genre">Genre</string>
     <string name="book_info_book_srclang">Source language</string>
     <string name="book_info_book_translator">Translator</string>
+    <string name="book_info_book_symcount">Stats - symbol count</string>
+    <string name="book_info_book_wordcount">Stats - average word count</string>
     <string name="book_info_section_book_document">Document properties</string>
     <string name="book_info_book_docauthor">Document author</string>
     <string name="book_info_book_docprogram">Created in program</string>
@@ -478,6 +482,10 @@
     <string name="book_info_book_docsrcocr">Document OCR</string>
     <string name="book_info_book_docversion">Document version</string>
     <string name="folder_name_books_by_series">Series</string>
+    <string name="folder_name_books_by_bookdate">Book date</string>
+    <string name="folder_name_books_by_docdate">Doc date</string>
+    <string name="folder_name_books_by_publyear">Publish year</string>
+    <string name="folder_name_books_by_filedate">File date</string>
     <string name="folder_name_books_by_title">Titles</string>
     <string name="dlg_about_donation_platinum">$30: buy Cool Reader Platinum Donation</string>
     <string name="mi_donation">Donate</string>
@@ -488,7 +496,7 @@
     <string name="options_app_locale_system">System</string>
     <string name="options_app_locale">Interface language</string>
     <string name="options_app_locale_bg">Български</string>
-    <string name="options_app_locale_by">Belorussian</string>
+    <string name="options_app_locale_by">Belarusian</string>
     <string name="options_app_locale_de">Deutsch</string>
     <string name="options_app_locale_cs">Czech</string>
     <string name="options_app_locale_en">English</string>
@@ -533,7 +541,9 @@
     <string name="options_page_show_titlebar_top">Top</string>
     <string name="options_view_toolbar_position_short_side">Short side</string>
     <string name="options_view_toolbar_position_bottom">Bottom</string>
+    <string name="options_view_toolbar_settings">Toolbar settings</string>
     <string name="options_view_toolbar_position">Toolbar position</string>
+    <string name="view_toolbar_position_change">Change toolbar position</string>
     <string name="options_view_toolbar_position_top">Top</string>
     <string name="options_view_toolbar_position_left">Left</string>
     <string name="options_view_toolbar_position_long_side">Long side</string>
@@ -712,6 +722,7 @@
     <string name="delete_dir_confirm">Selected directory is not empty. Delete content? Files/folders count:</string>
     <string name="btn_edit_info">Edit book info</string>
     <string name="mark_book_as_read">Mark this book as read?</string>
+    <string name="mark_book_as_reading">Set \'reading\' mark to this book?</string>
     <string name="resizing_to">resizing to</string>
     <string name="skipped_res">Skip redraw at resolutions</string>
     <string name="search_pages">pages...</string>

@@ -159,6 +159,7 @@ public class SearchDlg extends BaseDialog {
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
+
 		this.mBookInfo = mReaderView.getBookInfo();
 		setPositiveButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),

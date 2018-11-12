@@ -1,11 +1,7 @@
 package org.coolreader.crengine;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +10,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.coolreader.CoolReader;
-import org.coolreader.Dictionaries;
 import org.coolreader.R;
 import org.coolreader.crengine.Engine.HyphDict;
 import org.coolreader.crengine.InputDialog.InputHandler;
@@ -30,7 +25,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
@@ -52,8 +46,6 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -75,6 +67,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int wasX = 0;
 	private int wasY = 0;
 
+	public long lastSelTime = 0;
+	private int curBlackpageInterval = 0; //for periodic blackpage draw
+
 	public ArrayList<String> getArrAllPages() {
 		return arrAllPages;
 	}
@@ -84,7 +79,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public interface BookView {
         void draw();
         void draw(boolean isPartially);
-        void invalidate();
+		void draw(boolean isPartially, boolean isBlack);
+		void invalidate();
 		void onPause();
 		void onResume();
 	}
@@ -233,6 +229,38 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				log.e("exception while drawing", e);
 			}
 		}
+
+		protected void doDrawBlack(Canvas canvas)
+		{
+			try {
+				log.d("doDrawBlack() called");
+				if (isProgressActive()) {
+					log.d("onDrawBlack() -- drawing progress " + (currentProgressPosition / 100));
+					drawBlackPageBackground(canvas);
+					doDrawProgress(canvas, currentProgressPosition, currentProgressTitle);
+				} else if (mInitialized && mCurrentPageInfo != null && mCurrentPageInfo.bitmap != null) {
+					log.d("onDrawBlack() -- drawing page image");
+
+					if (currentAutoScrollAnimation != null) {
+						currentAutoScrollAnimation.draw(canvas);
+						return;
+					}
+
+					if (currentAnimation != null) {
+						currentAnimation.draw(canvas);
+						return;
+					}
+					//canvas.drawColor(Color.rgb(32, 32, 32));
+					drawBlackPageBackground(canvas);
+				} else {
+					log.d("onDrawBlack() -- drawing empty screen");
+					drawBlackPageBackground(canvas);
+				}
+			} catch ( Exception e ) {
+				log.e("exception while drawing", e);
+			}
+		}
+
 		@Override
 		public void draw()
 		{
@@ -245,6 +273,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				@Override
 				public void drawTo(Canvas c) {
 					doDraw(c);
+				}
+			}, null, isPartially);
+		}
+
+		@Override
+		public void draw(boolean isPartially, boolean isBlack)
+		{
+			drawCallback(new DrawCanvasCallback() {
+				@Override
+				public void drawTo(Canvas c) {
+					doDrawBlack(c);
 				}
 			}, null, isPartially);
 		}
@@ -375,6 +414,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private Bookmark lastSavedToGdBookmark;
 
 	private Properties mSettings = new Properties();
+
+	public int [] locationFindNext = new int[2];
+	public int heightFindNext;
+	public int widthFindNext;
 
 	public Engine getEngine()
 	{
@@ -577,12 +620,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private int nextUpdateId = 0;
 	private void updateSelection(int startX, int startY, int endX, int endY, final boolean isUpdateEnd ) {
+		if (isUpdateEnd)
+			lastSelTime = System.currentTimeMillis();
 		final Selection sel = new Selection();
+//		getActivity().showToast("upd: "+nextUpdateId+" "+isUpdateEnd);
+//		log.v("upd: "+nextUpdateId+" "+isUpdateEnd);
 		final int myId = ++nextUpdateId;
 		sel.startX = startX;
 		sel.startY = startY;
 		sel.endX = endX;
 		sel.endY = endY;
+		final boolean selMode = selectionModeActive;
 		mEngine.execute(new Task() {
 			@Override
 			public void work() throws Exception {
@@ -603,7 +651,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if ( isUpdateEnd ) {
 					String text = sel.text;
 					if ( text!=null && text.length()>0 ) {
-						onSelectionComplete( sel );
+						onSelectionComplete( sel, selMode );
 					} else {
 						clearSelection();
 					}
@@ -627,17 +675,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int mSelectionAction = SELECTION_ACTION_TOOLBAR;
 	private int mSelectionActionLong = SELECTION_ACTION_TOOLBAR;
 	private int mMultiSelectionAction = SELECTION_ACTION_TOOLBAR;
-	private void onSelectionComplete( Selection sel ) {
+	private void onSelectionComplete( Selection sel, boolean selMode ) {
 
 		//mActivity.showToast("startPos: "+sel.startPos+"; endPos: "+sel.endPos+
 		//		"startX: "+sel.startX+"; startY: "+sel.startY+"; chapter: "+sel.chapter);
-
 		boolean bSkipDic = mActivity.skipFindInDic;
 		mActivity.skipFindInDic = false;
 		lastSelection = sel;
 		int iSelectionAction;
 		int iSelectionAction1 = (lastDuration > DOUBLE_CLICK_INTERVAL) ? mSelectionActionLong : mSelectionAction;
 		iSelectionAction = isMultiSelection(sel) ? mMultiSelectionAction : iSelectionAction1;
+		if (selMode) iSelectionAction = mMultiSelectionAction;
 		switch ( iSelectionAction ) {
 			case SELECTION_ACTION_TOOLBAR:
 				SelectionToolbarDlg.showDialog(mActivity, ReaderView.this, sel);
@@ -1321,7 +1369,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.skipFindInDic = true;
 						}
 					} else {
-						updateSelection( start_x, start_y, start_x, start_y, false );
+						long curTime = System.currentTimeMillis();
+						// avoid too fast selection calling
+						if (curTime - lastSelTime > 300)
+							updateSelection( start_x, start_y, start_x, start_y, false );
 					}
 				}
 			});
@@ -1394,10 +1445,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return cancel();
 					case STATE_SELECTION:
 						// If the second tap is within a radius of the first tap point, assume the user is trying to double tap on the same point
-						if ( start_x-x <= DOUBLE_TAP_RADIUS && x-start_x <= DOUBLE_TAP_RADIUS && y-start_y <= DOUBLE_TAP_RADIUS && start_y-y <= DOUBLE_TAP_RADIUS )
-							updateSelection( start_x, start_y, start_x, start_y, true );
-						else
-							updateSelection( start_x, start_y, x, y, true );
+						if ( start_x-x <= DOUBLE_TAP_RADIUS && x-start_x <= DOUBLE_TAP_RADIUS && y-start_y <= DOUBLE_TAP_RADIUS && start_y-y <= DOUBLE_TAP_RADIUS ) {
+							//log.v("upd2: "+nextUpdateId+" ");
+							updateSelection(start_x, start_y, start_x, start_y, true);
+						}
+						else {
+							//log.v("upd3: "+nextUpdateId+" ");
+							updateSelection(start_x, start_y, x, y, true);
+						}
 						selectionModeActive = false;
 						state = STATE_DONE;
 						return cancel();
@@ -1486,7 +1541,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_WAIT_FOR_DOUBLE_CLICK:
 						return true;
 					case STATE_SELECTION:
-						updateSelection( start_x, start_y, x, y, false );
+						//log.v("upd4: "+nextUpdateId+" ");
+						updateSelection(start_x, start_y, x, y, false);
 						break;
 				}
 
@@ -1527,6 +1583,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (initialText != null && initialText.length() > 40)
 			initialText = initialText.substring(0, 40);
 		BackgroundThread.ensureGUI();
+		this.getSurface().getLocationOnScreen(locationFindNext);
+		heightFindNext = this.getSurface().getHeight();
+		widthFindNext = this.getSurface().getWidth();
 		SearchDlg dlg = new SearchDlg( mActivity, this, initialText);
 		dlg.show();
 	}
@@ -2466,6 +2525,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	{
 		BackgroundThread.ensureGUI();
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
+		boolean eink = false;
 		switch ( cmd ) {
 			case DCMD_FILE_BROWSER_ROOT:
 				mActivity.showRootWindow();
@@ -2573,16 +2633,51 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				drawPage();
 				break;
 			case DCMD_PAGEDOWN:
-				if ( param==1 && !DeviceInfo.EINK_SCREEN)
+				eink = DeviceInfo.EINK_SCREEN;
+			//	eink = true;
+				if ( param==1 && !eink)
 					animatePageFlip(1, onFinishHandler);
-				else
-					doEngineCommand(cmd, param, onFinishHandler);
+				else {
+					if ((mActivity.getScreenBlackpageInterval()!=0) &&
+							(curBlackpageInterval > mActivity.getScreenBlackpageInterval()-1)) {
+						curBlackpageInterval = 0;
+						bookView.draw(false, true);
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								//drawPage();
+								doEngineCommand(cmd, param, onFinishHandler);
+							}
+						}, 500);
+					} else {
+						if (mActivity.getScreenBlackpageInterval()!=0) curBlackpageInterval++;
+						doEngineCommand(cmd, param, onFinishHandler);
+					}
+				}
+			//	log.v("asdf "+curBlackpageInterval+" "+mActivity.getScreenBlackpageInterval());
 				break;
 			case DCMD_PAGEUP:
-				if ( param==1 && !DeviceInfo.EINK_SCREEN)
+				eink = DeviceInfo.EINK_SCREEN;
+			//	eink = true;
+				if ( param==1 && !eink)
 					animatePageFlip(-1, onFinishHandler);
-				else
-					doEngineCommand(cmd, param, onFinishHandler);
+				else {
+					if ((mActivity.getScreenBlackpageInterval()!=0) &&
+							(curBlackpageInterval > mActivity.getScreenBlackpageInterval()-1)) {
+						curBlackpageInterval = 0;
+						bookView.draw(false, true);
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								//drawPage();
+								doEngineCommand(cmd, param, onFinishHandler);
+							}
+						}, 500);
+					} else {
+						if (mActivity.getScreenBlackpageInterval()!=0) curBlackpageInterval++;
+						doEngineCommand(cmd, param, onFinishHandler);
+					}
+				}
 				break;
 			case DCMD_BEGIN:
 			case DCMD_END:
@@ -2610,7 +2705,21 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				showTOC();
 				break;
 			case DCMD_FILE_BROWSER:
-				mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null);
+			    boolean needBrowser = true;
+                if (mBookInfo != null) {
+                    final FileInfo fileInfo = mBookInfo.getFileInfo();
+                    if (fileInfo != null) {
+                        final Bookmark bmk = doc != null ? doc.getCurrentPageBookmark() : null;
+                        final PositionProperties props = bmk != null ? doc.getPositionProps(bmk.getStartPos()) : null;
+                        if (props != null) {
+							needBrowser = !(mActivity.willBeCheckAskReading(fileInfo, props, 7));
+                        	mActivity.checkAskReading(fileInfo, props, 7, true);
+
+                        }
+                    }
+                }
+                if (needBrowser)
+                    mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null);
 				break;
 			case DCMD_CURRENT_BOOK_DIRECTORY:
 				mActivity.showBrowser(getOpenedFileInfo());
@@ -2779,6 +2888,19 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_SHOW_CITATIONS:
 				UserDicDlg dlg2 = new UserDicDlg(((CoolReader)mActivity),1);
 				dlg2.show();
+//				bookView.draw(false,true);
+//				BackgroundThread.instance().postGUI(new Runnable() {
+//					@Override
+//					public void run() {
+//						drawPage();
+//					}}, 300);
+				//surface.invalidate();
+//				try {
+//					Class.forName("android.view.View").getDeclaredMethod("invalidate",
+//							new Class[]{Integer.TYPE}).invoke(surface, Integer.valueOf(536870917));
+//				} catch (Exception e) {
+//					mActivity.showToast(e.getClass().toString()+" " +e.getMessage());
+//				}
 				break;
 			case DCMD_TOGGLE_PAGE_VIEW_MODE:
 				String oldViewSetting = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
@@ -2786,6 +2908,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
                 String newValue = newBool ? "1" : "0";
                 saveSetting(PROP_PAGE_VIEW_MODE, newValue);
                 //mActivity.showToast("newValue "+newValue);
+//				bookView.draw(false,true);
+//				surface.invalidate();
+//				try {
+//					Class.forName("android.view.View").getDeclaredMethod("invalidate",
+//							new Class[]{Integer.TYPE}).invoke(surface, Integer.valueOf(268437764));
+//				} catch (Exception e) {
+//					mActivity.showToast(e.getClass().toString()+" " +e.getMessage());
+//				}
 				break;
 		}
 	}
@@ -2922,8 +3052,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		int updMode      = props.getInt(PROP_APP_SCREEN_UPDATE_MODE, 0);
 		int updInterval  = props.getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
+		int blackpageInterval  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_INTERVAL, 0);
 		mActivity.setScreenUpdateMode(updMode, surface);
 		mActivity.setScreenUpdateInterval(updInterval, surface);
+		mActivity.setScreenBlackpageInterval(blackpageInterval);
 
 		getActivity().readResizeHistory();
 
@@ -5423,9 +5555,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
+	protected void drawBlackPageBackground(Canvas canvas, Rect dst, int side, boolean addDarken) {
+		canvas.drawColor(Color.rgb(0, 0, 0));
+	}
+
 	protected void drawPageBackground(Canvas canvas) {
 		Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
 		drawPageBackground(canvas, dst, VIEWER_TOOLBAR_NONE, false);
+	}
+
+	protected void drawBlackPageBackground(Canvas canvas) {
+		Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+		drawBlackPageBackground(canvas, dst, VIEWER_TOOLBAR_NONE, false);
 	}
 
 	public class ToolbarBackgroundDrawable extends Drawable {

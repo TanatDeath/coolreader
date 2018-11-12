@@ -8,7 +8,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -29,6 +34,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class FileBrowser extends LinearLayout implements FileInfoChangeListener {
 
@@ -439,7 +445,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		case R.id.book_shortcut:
 			log.d("book_shortcut menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
-				mActivity.createBookShortcut(selectedItem);
+				DisplayMetrics outMetrics = new DisplayMetrics();
+				mActivity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+				int mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
+				int w = mWindowSize * 4 / 10;
+				int h = w * 4 / 3;
+				Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+				Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), selectedItem, bmp, new CoverpageManager.CoverpageBitmapReadyListener() {
+					@Override
+					public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
+						mActivity.createBookShortcut(selectedItem,bitmap);
+					}
+				});
 			}
 			return true;
 		case R.id.book_to_gd:
@@ -1081,6 +1098,30 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				mActivity.getDB().loadSeriesList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
+            if (fileOrDir.isBooksByBookdateRoot()) {
+                // refresh authors list
+                log.d("Updating bookdate list");
+                mActivity.getDB().loadByDateList(fileOrDir, "book_date_n", new ItemGroupsLoadingCallback(fileOrDir));
+                return;
+            }
+			if (fileOrDir.isBooksByDocdateRoot()) {
+				// refresh authors list
+				log.d("Updating docdate list");
+				mActivity.getDB().loadByDateList(fileOrDir, "doc_date_n", new ItemGroupsLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByPublyearRoot()) {
+				// refresh authors list
+				log.d("Updating publyear list");
+				mActivity.getDB().loadByDateList(fileOrDir, "publ_year_n", new ItemGroupsLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByFiledateRoot()) {
+				// refresh authors list
+				log.d("Updating filedate list");
+				mActivity.getDB().loadByDateList(fileOrDir, "file_create_time", new ItemGroupsLoadingCallback(fileOrDir));
+				return;
+			}
 			if (fileOrDir.isBooksByRatingRoot()) {
 				log.d("Updating rated books list");
 				mActivity.getDB().loadBooksByRating(1, 10, new FileInfoLoadingCallback(fileOrDir));
@@ -1115,6 +1156,26 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (fileOrDir.isBooksBySeriesDir()) {
 				log.d("Updating series book list");
 				mActivity.getDB().loadSeriesBooks(fileOrDir.getSeriesId(), new FileInfoLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByBookdateDir()) {
+				log.d("Updating bookdate book list");
+				mActivity.getDB().loadByDateBooks(fileOrDir.getBookdateId(), "book_date_n", new FileInfoLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByDocdateDir()) {
+				log.d("Updating docdate book list");
+				mActivity.getDB().loadByDateBooks(fileOrDir.getDocdateId(), "doc_date_n", new FileInfoLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByPublyearDir()) {
+				log.d("Updating publyear book list");
+				mActivity.getDB().loadByDateBooks(fileOrDir.getPublyearId(), "publ_year_n", new FileInfoLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByFiledateDir()) {
+				log.d("Updating filedate book list");
+				mActivity.getDB().loadByDateBooks(fileOrDir.getFiledateId(), "file_create_time",  new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 		} else {
@@ -1329,12 +1390,16 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 				if ( item.isDirectory ) {
 					if (item.isBooksByAuthorRoot())
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 					else if (item.isBooksBySeriesRoot())
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
+                    else if (item.isBooksByBookdateRoot()||item.isBooksByDocdateRoot()||item.isBooksByPublyearRoot()||item.isBooksByFiledateRoot())
+                        image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
+                    else if (item.isBooksByTitleRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
-					else if (item.isBooksByTitleRoot())
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
-					else if (item.isBooksByRatingRoot() || item.isBooksByStateReadingRoot() || item.isBooksByStateToReadRoot() || item.isBooksByStateFinishedRoot())
+					else if (item.isBooksByRatingRoot() )
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
+					else if (item.isBooksByStateReadingRoot() || item.isBooksByStateToReadRoot() || item.isBooksByStateFinishedRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 					else if (item.isOPDSRoot() || item.isOPDSDir())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_opds_drawable, R.drawable.cr3_browser_folder_opds));
@@ -1365,7 +1430,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						setText(field1, "books: " + String.valueOf(bookCount));
 						setText(field2, "folders: 0");
 						setText(fieldState, "");
-					} else if ( item.isBooksBySeriesDir() ) {
+					} else if ( item.isBooksBySeriesDir() || item.isBooksByBookdateDir() || item.isBooksByDocdateDir()
+							|| item.isBooksByPublyearDir() || item.isBooksByFiledateDir()) {
 						int bookCount = 0;
 						if (item.fileCount() > 0)
 							bookCount = item.fileCount();
@@ -1374,11 +1440,14 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						setText(field1, "books: " + String.valueOf(bookCount));
 						setText(field2, "folders: 0");
 						setText(fieldState, "");
-					} else  if (item.isOPDSDir()) {
+					}  else  if (item.isOPDSDir()) {
 						setText(field1, item.title);
 						setText(field2, "");
 						setText(fieldState, "");
-					} else  if ( !item.isOPDSDir() && !item.isSearchShortcut() && ((!item.isOPDSRoot() && !item.isBooksByAuthorRoot() && !item.isBooksBySeriesRoot() && !item.isBooksByTitleRoot()) || item.dirCount()>0) && !item.isOnlineCatalogPluginDir()) {
+					} else  if ( !item.isOPDSDir() && !item.isSearchShortcut() && ((!item.isOPDSRoot()
+                            && !item.isBooksByAuthorRoot() && !item.isBooksBySeriesRoot() && !item.isBooksByBookdateRoot()
+							&& !item.isBooksByDocdateRoot() && !item.isBooksByPublyearRoot() && !item.isBooksByFiledateRoot()
+                            && !item.isBooksByTitleRoot()) || item.dirCount()>0) && !item.isOnlineCatalogPluginDir()) {
 						setText(field1, "books: " + String.valueOf(item.fileCount()));
 						setText(field2, "folders: " + String.valueOf(item.dirCount()));
 						setText(fieldState, "");
@@ -1625,7 +1694,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 		
 		mActivity.setBrowserTitle(title, dir);
-		
 		mListView.setAdapter(currentListAdapter);
 		currentListAdapter.notifyDataSetChanged();
 		mListView.setSelection(index);

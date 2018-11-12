@@ -68,6 +68,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -1403,6 +1404,22 @@ public class CoolReader extends BaseActivity
 			}
 		});
 	}
+
+	public void showOptionsDialogExt(final OptionsDialog.Mode mode, final String selectOption)
+	{
+		BackgroundThread.instance().postBackground(new Runnable() {
+			public void run() {
+				final String[] mFontFaces = Engine.getFontFaceList();
+				BackgroundThread.instance().executeGUI(new Runnable() {
+					public void run() {
+						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mode);
+						dlg.selectedOption = selectOption;
+						dlg.show();
+					}
+				});
+			}
+		});
+	}
 	
 	public void updateCurrentPositionStatus(FileInfo book, Bookmark position, PositionProperties props) {
 		mReaderFrame.getStatusBar().updateCurrentPositionStatus(book, position, props);
@@ -1435,9 +1452,61 @@ public class CoolReader extends BaseActivity
 				}
 			});
 		}
+		checkAskReading(book, props,13, false);
 	}
 
-	@Override
+	public boolean willBeCheckAskReading(FileInfo book, PositionProperties props, int pagesCnt) {
+		if ((!book.askedMarkReading) && (book.getReadingState() != FileInfo.STATE_READING) && (props.pageNumber + 1 < 15)) {
+			if (!book.arrReadBeg.contains(props.pageNumber)) book.arrReadBeg.add(props.pageNumber);
+			if (book.arrReadBeg.size() > pagesCnt) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void checkAskReading(FileInfo book, PositionProperties props, int pagesCnt, final boolean openBrowser) {
+		if ((!book.askedMarkReading)&&(book.getReadingState()!=FileInfo.STATE_READING) && (props.pageNumber+1<15)) {
+			if (!book.arrReadBeg.contains(props.pageNumber)) book.arrReadBeg.add(props.pageNumber);
+			if (book.arrReadBeg.size()>pagesCnt) {
+				book.askedMarkReading = true;
+				final FileInfo book1=book;
+				askConfirmation(R.string.mark_book_as_reading, new Runnable() {
+					@Override
+					public void run() {
+						Services.getHistory().getOrCreateBookInfo(getDB(), book1, new History.BookInfoLoadedCallack() {
+							@Override
+							public void onBookInfoLoaded(BookInfo bookInfo) {
+								book1.setReadingState(FileInfo.STATE_READING);
+								BookInfo bi = new BookInfo(book1);
+								getDB().saveBookInfo(bi);
+								getDB().flush();
+								if (bookInfo.getFileInfo()!=null) {
+									bookInfo.getFileInfo().setReadingState(FileInfo.STATE_READING);
+									if (bookInfo.getFileInfo().parent!=null)
+										directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+								}
+								BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+								if (bi2 != null)
+									bi2.getFileInfo().setFileProperties(book1);
+								if (openBrowser)
+									showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null);
+							}
+						});
+					}
+				},  new Runnable() {
+					@Override
+					public void run() {
+						if (openBrowser)
+							showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null);
+					}
+				});
+			}
+		}
+	}
+
+
+		@Override
     protected void setDimmingAlpha(int dimmingAlpha) {
 		if (mReaderView != null)
 			mReaderView.setDimmingAlpha(dimmingAlpha);
@@ -1632,7 +1701,7 @@ public class CoolReader extends BaseActivity
 					Utils.formatTime(this,getReaderView().getRequestedResTime())+"): "+
 						getReaderView().getRequestedWidth()+" x "+getReaderView().getRequestedHeight()+
 					"; last set ("+Utils.formatTime(this,getReaderView().getLastsetResTime())+"): "+
-					"): "+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight());
+					+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight());
 		itemsSys.add("system.device_model=" + DeviceInfo.MANUFACTURER + " / "+DeviceInfo.MODEL+" / "+
 				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND);
 		String sDevFlags = "";
@@ -1694,9 +1763,36 @@ public class CoolReader extends BaseActivity
 			}
 			public void done() {
 				FileInfo fi = bi.getFileInfo();
+				if ((fi!=null)&&(mReaderView!=null))
+					if ((fi.symCount==0)||(fi.wordCount==0)) {
+						int iPageCnt = 0;
+						int iSymCnt = 0;
+						int iWordCnt = 0;
+						if (mReaderView.getArrAllPages()!=null)
+							iPageCnt = mReaderView.getArrAllPages().size();
+						else {
+							mReaderView.CheckAllPagesLoadVisual();
+							iPageCnt = mReaderView.getArrAllPages().size();
+						}
+						for (int i=0;i<iPageCnt;i++) {
+							String sPage = mReaderView.getArrAllPages().get(i);
+							if (sPage == null) sPage = "";
+							sPage = sPage.replace("\\n", " ");
+							sPage = sPage.replace("\\r", " ");
+							iSymCnt=iSymCnt + sPage.replaceAll("\\s+"," ").length();
+							iWordCnt=iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
+									replaceAll("\\s+"," ").split("\\s").length;
+						}
+						fi.symCount = iSymCnt;
+						fi.wordCount = iWordCnt;
+						BookInfo bi = new BookInfo(fi);
+						getDB().saveBookInfo(bi);
+						getDB().flush();
+					}
 				itemsBook.add("section=section.book");
 				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null) {
-					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add("book.authors=" + fi.getAuthors());
+					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add("book.authors=" + fi.getAuthors().
+							replaceAll("\\|","; "));
 					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add("book.title=" + fi.title);
 					if ( fi.series!=null ) {
 						String s = fi.series;
@@ -1705,7 +1801,7 @@ public class CoolReader extends BaseActivity
 						itemsBook.add("book.series=" + s);
 					}
 				}
-				if (!StrUtils.isEmptyStr(fi.bookdate)) itemsBook.add("book.date=" + fi.bookdate);
+				if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add("book.date=" + fi.getBookdate());
 				if (!StrUtils.isEmptyStr(fi.language)) {
 					itemsBook.add("book.language=" + fi.language);
 				}
@@ -1726,7 +1822,7 @@ public class CoolReader extends BaseActivity
 									if (GenreSAXElem.elemList.size() == 0)
 										GenreSAXElem.initGenreList();
 								} catch (Exception e) {
-									log.e("exception while ini genre list", e);
+									log.e("exception while init genre list", e);
 								}
 								ge = GenreSAXElem.getGenreDescr(lang, genre);
 								if (ge != null)
@@ -1760,6 +1856,12 @@ public class CoolReader extends BaseActivity
 				if (!StrUtils.isEmptyStr(fi.translator)) {
 					itemsBook.add("book.translator=" + fi.translator);
 				}
+				if (fi.symCount!=0) {
+					itemsBook.add("book.symcount=" + fi.symCount);
+				}
+				if (fi.symCount!=0) {
+					itemsBook.add("book.wordcount=" + fi.wordCount);
+				}
 				itemsBook.add("section=section.book_document");
 				if (!StrUtils.isEmptyStr(fi.docauthor)) {
 					itemsBook.add("book.docauthor=" + fi.docauthor);
@@ -1767,8 +1869,8 @@ public class CoolReader extends BaseActivity
 				if (!StrUtils.isEmptyStr(fi.docprogram)) {
 					itemsBook.add("book.docprogram=" + fi.docprogram);
 				}
-				if (!StrUtils.isEmptyStr(fi.docdate)) {
-					itemsBook.add("book.docdate=" + fi.docdate);
+				if (!StrUtils.isEmptyStr(fi.getDocdate())) {
+					itemsBook.add("book.docdate=" + fi.getDocdate());
 				}
 				if (!StrUtils.isEmptyStr(fi.docsrcurl)) {
 					itemsBook.add("book.docsrcurl=" + fi.docsrcurl);
@@ -1789,8 +1891,8 @@ public class CoolReader extends BaseActivity
 				if (!StrUtils.isEmptyStr(fi.publcity)) {
 					itemsBook.add("book.publcity=" + fi.publcity);
 				}
-				if (!StrUtils.isEmptyStr(fi.publyear)) {
-					itemsBook.add("book.publyear=" + fi.publyear);
+				if (!StrUtils.isEmptyStr(fi.getPublyear())) {
+					itemsBook.add("book.publyear=" + fi.getPublyear());
 				}
 				if (!StrUtils.isEmptyStr(fi.publisbn)) {
 					itemsBook.add("book.publisbn=" + fi.publisbn);
@@ -2148,7 +2250,11 @@ public class CoolReader extends BaseActivity
 	}
 
 	@TargetApi(23)
-	public boolean createBookShortcut(FileInfo item) {
+	public boolean createBookShortcut(FileInfo item, Bitmap bmp) {
+
+		if (DeviceInfo.getSDKLevel() < 26) {
+			this.showToast("Shortcut creation cannot be guaranteed on systems below API26 (Android 8.0)");
+		}
 		final String sPathName = item.pathname;
 		final String sPathName2 = item.isArchive && item.arcname != null
 				? new File(item.arcname).getPath() : null;
@@ -2186,6 +2292,7 @@ public class CoolReader extends BaseActivity
 					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 					//R.drawable.cr3_browser_book_hc
 			);
+			if (bmp!=null) icon = Icon.createWithBitmap(bmp);
 			String shTitle = (StrUtils.isEmptyStr(item.title)?item.filename.trim():item.title.trim());
 			return addShortCut(this, shortcutIntent, icon, shTitle);
 		} else {
@@ -2202,7 +2309,7 @@ public class CoolReader extends BaseActivity
 				ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
 
 				Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader");
+				intent.setPackage("org.coolreader.mod.plotn");
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.RECENT_DIR_TAG);
 
@@ -2217,7 +2324,7 @@ public class CoolReader extends BaseActivity
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader");
+				intent.setPackage("org.coolreader.mod.plotn");
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_READING_TAG);
 
@@ -2232,7 +2339,7 @@ public class CoolReader extends BaseActivity
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader");
+				intent.setPackage("org.coolreader.mod.plotn");
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_TO_READ_TAG);
 
@@ -2247,7 +2354,7 @@ public class CoolReader extends BaseActivity
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader");
+				intent.setPackage("org.coolreader.mod.plotn");
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_FINISHED_TAG);
 
@@ -2262,7 +2369,7 @@ public class CoolReader extends BaseActivity
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader");
+				intent.setPackage("org.coolreader.mod.plotn");
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.SEARCH_SHORTCUT_TAG);
 

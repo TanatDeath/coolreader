@@ -15,7 +15,7 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 28;
+	public static final int DB_VERSION = 32;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -76,8 +76,14 @@ public class MainDB extends BaseDB {
 					"publisbn VARCHAR DEFAULT NULL, " +
                     "bookdate VARCHAR DEFAULT NULL, " +
                     "publseries_fk INTEGER REFERENCES series (id), " +
-                    "publseries_number INTEGER " +
-			")");
+                    "publseries_number INTEGER, " +
+					"file_create_time INTEGER, " +
+					"sym_count INTEGER, " +
+					"word_count INTEGER, " +
+                    "book_date_n INTEGER, " +
+					"doc_date_n INTEGER, " +
+                    "publ_year_n INTEGER " +
+					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
 			execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
@@ -218,13 +224,40 @@ public class MainDB extends BaseDB {
 
 			}
 
-			if (currentVersion < 28) {
+			if (currentVersion < 29) {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN bookdate VARCHAR DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publseries_fk INTEGER REFERENCES series (id)");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publseries_number INTEGER");
 			}
 
-				//==============================================================
+			if (currentVersion < 31) {
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN file_create_time INTEGER");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN sym_count INTEGER");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN word_count INTEGER");
+                execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN book_date_n INTEGER");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN doc_date_n INTEGER");
+                execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publ_year_n INTEGER");
+
+				String sql = READ_FILEINFO_SQL + " WHERE file_create_time is null";
+				Cursor rs = null;
+				try {
+					rs = mDB.rawQuery(sql, null);
+					if ( rs.moveToFirst() ) {
+						do {
+							FileInfo fileInfo = new FileInfo();
+							readFileInfoFromCursor( fileInfo, rs );
+							if ( !fileInfo.fileExists() )
+								continue;
+							long lm = fileInfo.fileLastModified();
+							execSQL("UPDATE book SET file_create_time="+ lm +" WHERE id=" + fileInfo.id);
+						} while (rs.moveToNext());
+					}
+				} finally {
+					if (rs != null)
+						rs.close();
+				}
+			}
+			//==============================================================
 			// add more updates above this line
 				
 			// set current version
@@ -848,9 +881,25 @@ public class MainDB extends BaseDB {
 	private static abstract class ItemGroupExtractor {
 		public abstract String getComparisionField(FileInfo item);
 		public String getItemFirstLetters(FileInfo item, int level) {
-			String name = getComparisionField(item); //.filename;
-			int l = name == null ? 0 : (name.length() < level ? name.length() : level);  
-			return l > 0 ? name.substring(0, l).toUpperCase() : "_";
+			try {
+				String name = getComparisionField(item); //.filename;
+				//vlog.i("getItemFirstLetters: "+name);
+				int l = name == null ? 0 : (name.length() < level ? name.length() : level);
+				if (l > 0) {
+					String sRet = "error";
+					if (name!=null) {
+						if (name.length()>=l) sRet = name.substring(0, l).toUpperCase();
+							else sRet = name;
+					} else sRet="[empty]";
+					if (sRet.equals("")) sRet="[empty]";
+					return sRet;
+				} else {
+					return "_";
+				}
+			} catch (Exception e) {
+				vlog.e("getItemFirstLetters error",e);
+			}
+			return "[error]";
 		}
 	}
 
@@ -879,13 +928,14 @@ public class MainDB extends BaseDB {
 		return groupDir;
 	}
 	
-	private void sortItems(ArrayList<FileInfo> items, final ItemGroupExtractor extractor) {
+	private void sortItems(ArrayList<FileInfo> items, final ItemGroupExtractor extractor, final boolean sortAsc) {
 		Collections.sort(items, new Comparator<FileInfo>() {
 			@Override
 			public int compare(FileInfo lhs, FileInfo rhs) {
 				String l = extractor.getComparisionField(lhs) != null ? extractor.getComparisionField(lhs).toUpperCase() : "";
 				String r = extractor.getComparisionField(rhs) != null ? extractor.getComparisionField(rhs).toUpperCase() : "";
-				return l.compareTo(r);
+				if (sortAsc) return l.compareTo(r);
+				return r.compareTo(l);
 			}
 		});
 	}
@@ -913,7 +963,13 @@ public class MainDB extends BaseDB {
 				lastFirstLetter = firstLetter;
 			}
 		}
-		if (itemCount <= topLevelGroupsCount * 11 / 10 || itemCount < 8) {
+		boolean bNoGroups = false;
+		if (groupPrefixTag.equals(FileInfo.BOOK_DATE_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.DOC_DATE_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.FILE_DATE_GROUP_PREFIX)) bNoGroups = true;
+
+		if ((itemCount <= topLevelGroupsCount * 11 / 10 || itemCount < 8)||(bNoGroups)) {
 			// small number of items: add as is
 			addItems(parent, items, start, end); 
 			return;
@@ -934,7 +990,7 @@ public class MainDB extends BaseDB {
 		}
 	}
 	
-	private boolean loadItemList(ArrayList<FileInfo> list, String sql, String groupPrefixTag) {
+	private boolean loadItemList(ArrayList<FileInfo> list, String sql, String groupPrefixTag, boolean sortAsc) {
 		boolean found = false;
 		Cursor rs = null;
 		try {
@@ -967,7 +1023,7 @@ public class MainDB extends BaseDB {
 			if ( rs!=null )
 				rs.close();
 		}
-		sortItems(list, new ItemGroupFilenameExtractor());
+		sortItems(list, new ItemGroupFilenameExtractor(), sortAsc);
 		return found;
 	}
 	
@@ -977,7 +1033,7 @@ public class MainDB extends BaseDB {
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 		String sql = "SELECT author.id, author.name, count(*) as book_count FROM author INNER JOIN book_author ON  book_author.author_fk = author.id GROUP BY author.name, author.id ORDER BY author.name";
-		boolean found = loadItemList(list, sql, FileInfo.AUTHOR_PREFIX);
+		boolean found = loadItemList(list, sql, FileInfo.AUTHOR_PREFIX, true);
 		addGroupedItems(parent, list, 0, list.size(), FileInfo.AUTHOR_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
 		endReading();
 		return found;
@@ -988,9 +1044,41 @@ public class MainDB extends BaseDB {
 		beginReading();
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series INNER JOIN book ON book.series_fk = series.id GROUP BY series.name, series.id ORDER BY series.name";
-		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX);
+		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series INNER JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id GROUP BY series.name, series.id ORDER BY series.name";
+		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX, true);
 		addGroupedItems(parent, list, 0, list.size(), FileInfo.SERIES_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		endReading();
+		return found;
+	}
+
+	public boolean loadByDateList(FileInfo parent, final String field) {
+		Log.i("cr3", "loadByDateList()");
+		beginReading();
+		parent.clear();
+		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
+			"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) as integer) end";
+		String f2 = "case when coalesce("+field+",0)=0 then '[empty]' " +
+			" else strftime('%Y-%m', datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) end";
+		String sql = "SELECT "+f1+" as date_n, "+
+			f2 + " as date_s, " +
+			" count(*) as book_count FROM book GROUP BY " + f1 + ", " +f2;
+		String prefix = FileInfo.BOOK_DATE_PREFIX;
+		String groupPrefix = FileInfo.BOOK_DATE_GROUP_PREFIX;
+		if (field.equals("doc_date_n")) {
+			prefix = FileInfo.DOC_DATE_PREFIX;
+			groupPrefix = FileInfo.DOC_DATE_GROUP_PREFIX;
+		}
+		if (field.equals("publ_year_n")) {
+			prefix = FileInfo.PUBL_YEAR_PREFIX;
+			groupPrefix = FileInfo.PUBL_YEAR_GROUP_PREFIX;
+		}
+		if (field.equals("file_create_time")) {
+			prefix = FileInfo.FILE_DATE_PREFIX;
+			groupPrefix = FileInfo.FILE_DATE_GROUP_PREFIX;
+		}
+		boolean found = loadItemList(list, sql, prefix, false);
+		addGroupedItems(parent, list, 0, list.size(), groupPrefix, 1, new ItemGroupFilenameExtractor());
 		endReading();
 		return found;
 	}
@@ -1002,7 +1090,7 @@ public class MainDB extends BaseDB {
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 		String sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' ORDER BY b.title";
 		boolean found = findBooks(sql, list);
-		sortItems(list, new ItemGroupTitleExtractor());
+		sortItems(list, new ItemGroupTitleExtractor(), true);
 		// remove duplicate titles
 		for (int i=list.size() - 1; i>0; i--) {
 			String title = list.get(i).title; 
@@ -1031,7 +1119,19 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " INNER JOIN series ON series.id = b.series_fk WHERE series.id = " + seriesId + " ORDER BY b.series_number, b.title";
+		String sql = READ_FILEINFO_SQL + " INNER JOIN series ON series.id = b.series_fk or series.id = b.publseries_fk WHERE series.id = " + seriesId + " ORDER BY b.series_number, b.title";
+		return findBooks(sql, list);
+	}
+
+	public boolean findByDateBooks(ArrayList<FileInfo> list, final String field, long bookdateId)
+	{
+		if (!isOpened())
+			return false;
+		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
+				"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) as integer) end";
+		String sql = READ_FILEINFO_SQL + " WHERE "+f1+" = " + bookdateId +
+				" ORDER BY b.title";
+		vlog.i(sql);
 		return findBooks(sql, list);
 	}
 	
@@ -1222,7 +1322,8 @@ public class MainDB extends BaseDB {
 						item.arcname = fi.arcname;
 						item.arcsize = fi.arcsize;
 						item.path = fi.path;
-						item.createTime = fi.createTime;
+						item.setCreateTime(fi.getCreateTime());
+						item.setFileCreateTime(fi.getFileCreateTime());
 						save(item);
 						fileInfoCache.put(item);
 						return item;
@@ -1664,7 +1765,7 @@ public class MainDB extends BaseDB {
 				add("filesize", (long) newValue.size, (long) oldValue.size);
 				add("arcsize", (long) newValue.arcsize, (long) oldValue.arcsize);
 				add("last_access_time", (long) newValue.lastAccessTime, (long) oldValue.lastAccessTime);
-				add("create_time", (long) newValue.createTime, (long) oldValue.createTime);
+				add("create_time", (long) newValue.getCreateTime(), (long) oldValue.getCreateTime());
 				add("flags", (long) newValue.flags, (long) oldValue.flags);
 				add("language", newValue.language, oldValue.language);
 			}
@@ -1675,21 +1776,29 @@ public class MainDB extends BaseDB {
 			add("genre", newValue.genre, oldValue.genre);
 			add("annotation", newValue.annotation, oldValue.annotation);
 			add("srclang", newValue.srclang, oldValue.srclang);
-			add("bookdate", newValue.bookdate, oldValue.bookdate);
+			add("bookdate", newValue.getBookdate(), oldValue.getBookdate());
 			add("translator", newValue.translator, oldValue.translator);
 			add("docauthor", newValue.docauthor, oldValue.docauthor);
 			add("docprogram", newValue.docprogram, oldValue.docprogram);
-			add("docdate", newValue.docdate, oldValue.docdate);
+			add("docdate", newValue.getDocdate(), oldValue.getDocdate());
 			add("docsrcurl", newValue.docsrcurl, oldValue.docsrcurl);
 			add("docsrcocr", newValue.docsrcocr, oldValue.docsrcocr);
 			add("docversion", newValue.docversion, oldValue.docversion);
 			add("publname", newValue.publname, oldValue.publname);
 			add("publisher", newValue.publisher, oldValue.publisher);
 			add("publcity", newValue.publcity, oldValue.publcity);
-			add("publyear", newValue.publyear, oldValue.publyear);
+			add("publyear", newValue.getPublyear(), oldValue.getPublyear());
 			add("publisbn", newValue.publisbn, oldValue.publisbn);
 			add("publseries_fk", getSeriesId(newValue.publseries), getSeriesId(oldValue.publseries));
 			add("publseries_number", (long) newValue.publseriesNumber, (long) oldValue.publseriesNumber);
+			add("file_create_time", (long) newValue.getFileCreateTime(), (long) oldValue.getFileCreateTime());
+			//vlog.v("FCD1:"+newValue.seriesNumber());
+			//vlog.v("FCD2:"+oldValue.getFileCreateTime());
+			add("sym_count", (long) newValue.symCount, (long) oldValue.symCount);
+			add("word_count", (long) newValue.wordCount, (long) oldValue.wordCount);
+			add("book_date_n", (long) newValue.bookDateN, (long) oldValue.bookDateN);
+			add("doc_date_n", (long) newValue.docDateN, (long) oldValue.docDateN);
+			add("publ_year_n", (long) newValue.publYearN, (long) oldValue.publYearN);
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
@@ -1724,7 +1833,7 @@ public class MainDB extends BaseDB {
 		"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher," +
 		"publcity,  publyear, publisbn, "+
 		"sp.name as publseries_name, " +
-		"publseries_number "
+		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n  "
 		;
 
 	private static final String READ_FILEINFO_SQL = 
@@ -1751,8 +1860,8 @@ public class MainDB extends BaseDB {
 		fileInfo.format = DocumentFormat.byId(rs.getInt(i++));
 		fileInfo.size = rs.getInt(i++);
 		fileInfo.arcsize = rs.getInt(i++);
-		fileInfo.createTime = rs.getInt(i++);
-		fileInfo.lastAccessTime = rs.getInt(i++);
+		fileInfo.setCreateTime(rs.getLong(i++));
+		fileInfo.lastAccessTime = rs.getLong(i++);
 		fileInfo.flags = rs.getInt(i++);
 	    fileInfo.language = rs.getString(i++);
 		fileInfo.lang_from = rs.getString(i++);
@@ -1761,22 +1870,28 @@ public class MainDB extends BaseDB {
 		fileInfo.genre = rs.getString(i++);
 		fileInfo.annotation = rs.getString(i++);
 		fileInfo.srclang = rs.getString(i++);
-		fileInfo.bookdate = rs.getString(i++);
+		fileInfo.setBookdate(rs.getString(i++));
 		fileInfo.translator = rs.getString(i++);
 		fileInfo.docauthor = rs.getString(i++);
 		fileInfo.docprogram = rs.getString(i++);
-		fileInfo.docdate = rs.getString(i++);
+		fileInfo.setDocdate(rs.getString(i++));
 		fileInfo.docsrcurl = rs.getString(i++);
 		fileInfo.docsrcocr = rs.getString(i++);
 		fileInfo.docversion = rs.getString(i++);
 		fileInfo.publname = rs.getString(i++);
 		fileInfo.publisher = rs.getString(i++);
 		fileInfo.publcity = rs.getString(i++);
-		fileInfo.publyear = rs.getString(i++);
+		fileInfo.setPublyear(rs.getString(i++));
 		fileInfo.publisbn = rs.getString(i++);
 		fileInfo.publseries = rs.getString(i++);
 		fileInfo.publseriesNumber = rs.getInt(i++);
-		fileInfo.isArchive = fileInfo.arcname!=null; 
+		fileInfo.setFileCreateTime(rs.getLong(i++));
+		fileInfo.symCount = rs.getLong(i++);
+		fileInfo.wordCount = rs.getLong(i++);
+		fileInfo.bookDateN = rs.getLong(i++);
+		fileInfo.docDateN = rs.getLong(i++);
+		fileInfo.publYearN = rs.getLong(i++);
+		fileInfo.isArchive = fileInfo.arcname!=null;
 	}
 
 	private boolean findBooks(String sql, ArrayList<FileInfo> list) {
@@ -1852,7 +1967,11 @@ public class MainDB extends BaseDB {
 				return list;
 			if ( buf.length()>0 )
 				buf.append(" AND ");
-			buf.append(" b.series_fk IN (" + seriesIds + ") ");
+            buf.append(" ( ");
+			buf.append(" (b.series_fk IN (" + seriesIds + ")) ");
+            buf.append(" OR ");
+            buf.append(" (b.publseries_fk IN (" + seriesIds + ")) ");
+            buf.append(" ) ");
 			hasCondition = true;
 		}
 		if ( title!=null && title.length()>0 ) {

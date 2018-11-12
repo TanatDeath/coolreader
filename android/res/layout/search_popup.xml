@@ -8,13 +8,17 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:baselineAligned="true"
+    android:layout_marginTop="3dip"
+    android:layout_marginBottom="3dip"
+    android:layout_marginLeft="3dip"
+    android:layout_marginRight="3dip"
     >
 
     <ImageButton android:id="@+id/search_btn_prev"
         style="@style/TextAppearance.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="?attr/attr_cr3_find_prev"
+        android:src="?attr/attr_icons8_back_small"
         android:background="@null"
         android:layout_marginTop="2dip"
         android:layout_marginBottom="2dip"
@@ -29,7 +33,7 @@
         android:layout_marginBottom="2dip"
         android:layout_marginLeft="8dip"
         android:layout_marginRight="8dip"
-        android:src="?attr/attr_cr3_find_close"
+        android:src="?attr/attr_icons8_cancel_small"
         android:contentDescription="@string/tb_button_find_close"/>
     <ImageButton android:id="@+id/search_btn_next"
         android:layout_width="wrap_content"
@@ -39,6 +43,6 @@
         android:layout_marginBottom="2dip"
         android:layout_marginLeft="10dip"
         android:layout_marginRight="8dip"
-        android:src="?attr/attr_cr3_find_next"
+        android:src="?attr/attr_icons8_forward_small"
         android:contentDescription="@string/tb_button_find_next"/>
 </LinearLayout>

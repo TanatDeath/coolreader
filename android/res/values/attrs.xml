@@ -260,6 +260,12 @@
     <attr name="attr_icons8_rate_down" format="reference" />
     <attr name="attr_icons8_position_to_disk" format="reference" />
     <attr name="attr_icons8_position_to_disk_interval" format="reference" />
+    <attr name="attr_icons8_folder_year" format="reference" />
+    <attr name="attr_icons8_folder_stars" format="reference" />
+    <attr name="attr_icons8_folder_num" format="reference" />
+    <attr name="attr_icons8_folder_hash" format="reference" />
+    <attr name="attr_icons8_folder_author" format="reference" />
+    <attr name="attr_icons8_cancel_small" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

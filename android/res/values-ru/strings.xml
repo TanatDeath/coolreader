@@ -235,6 +235,7 @@
     <string name="book_info_book_publseries_name">Серия публикации</string>
     <string name="book_info_file_arcpath">Путь к архиву</string>
     <string name="book_info_book_title">Название</string>
+    <string name="book_info_book_annotation">Аннотация</string>
     <string name="book_info_file_name">Имя файла</string>
     <string name="book_info_file_arcname">Имя архива</string>
     <string name="book_info_section_current_position">Позиция чтения</string>
@@ -314,6 +315,7 @@
     <string name="options_screen_update_mode_fast">Быстрый</string>
     <string name="options_screen_update_mode_fast2">Быстрый 2</string>
     <string name="options_screen_update_interval">Интервал полного обновления</string>
+    <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы</string>
     <string name="options_render_font_gamma">Гамма-коррекция шрифта</string>
     <string name="action_toggle_titlebar">Вкл/выкл колонтитул</string>
     <string name="action_show_position_info">Информация о позиции</string>
@@ -451,6 +453,10 @@
     <string name="win_title_confirm_history_record_delete">Вы действительно хотите удалить эту книгу из списка последних книг?</string>
     <string name="win_title_confirm_book_delete">Вы действительно хотите удалить эту книгу?</string>
     <string name="folder_name_books_by_series">Серии</string>
+    <string name="folder_name_books_by_bookdate">Дата книги</string>
+    <string name="folder_name_books_by_docdate">Дата документа</string>
+    <string name="folder_name_books_by_publyear">Год публикации</string>
+    <string name="folder_name_books_by_filedate">Дата файла</string>
     <string name="folder_name_books_by_title">Названия</string>
     <string name="dlg_about_donation_platinum">$30: купить Платиновую монету Cool Reader</string>
     <string name="mi_donation">Пожертвовать</string>
@@ -501,6 +507,8 @@
     <string name="book_info_book_genre">Жанр</string>
     <string name="book_info_book_srclang">Язык оригинала</string>
     <string name="book_info_book_translator">Переводчик</string>
+    <string name="book_info_book_symcount">Статистика - число символов</string>
+    <string name="book_info_book_wordcount">Статистика - число слов (примерное)</string>
     <string name="book_info_section_book_document">Свойства документа</string>
     <string name="book_info_book_docauthor">Автор документа</string>
     <string name="book_info_book_docprogram">Создан в программе</string>
@@ -520,7 +528,9 @@
     <string name="options_page_show_titlebar_top">Вверху</string>
     <string name="options_view_toolbar_position_short_side">По короткому краю</string>
     <string name="options_view_toolbar_position_bottom">Внизу</string>
-    <string name="options_view_toolbar_position">Панель инструментов</string>
+    <string name="options_view_toolbar_settings">Настройки панели инструментов</string>
+    <string name="options_view_toolbar_position">Положение панели инструментов</string>
+    <string name="view_toolbar_position_change">Изменить положение панели</string>
     <string name="options_view_toolbar_position_top">Сверху</string>
     <string name="options_view_toolbar_position_left">Слева</string>
     <string name="options_view_toolbar_position_long_side">По длинному краю</string>
@@ -740,6 +750,7 @@
     <string name="delete_dir_confirm">Папка не пустая. Очистить? Файлов/папок:</string>
     <string name="btn_edit_info">Редактировать информацию о книге</string>папок
     <string name="mark_book_as_read">Отметить книгу как прочитанную?</string>
+    <string name="mark_book_as_reading">Установить пометку \'читаю\' у этой книги?</string>
     <string name="resizing_to">изменение размера</string>
     <string name="skipped_res">Не перерисовывать книгу на разрешениях</string>
     <string name="search_pages">страницы...</string>

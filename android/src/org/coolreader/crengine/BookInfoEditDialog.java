@@ -44,6 +44,7 @@ public class BookInfoEditDialog extends BaseDialog {
 
 	private BookInfo mBookInfo;
 	private FileInfo mParentDir;
+	private Bitmap mBookCover;
 	private LayoutInflater mInflater;
 	private int mWindowSize;
 	private boolean mIsRecentBooksItem;
@@ -252,7 +253,25 @@ public class BookInfoEditDialog extends BaseDialog {
 	AuthorList authors;
 	EditText edLangFrom;
 	EditText edLangTo;
-	@Override
+    EditText edGenre;
+    EditText edAnnotation;
+    EditText edSrclang;
+    EditText edBookdate;
+    EditText edTranslator;
+    EditText edDocauthor;
+    EditText edDocprogram;
+    EditText edDocdate;
+    EditText edDocsrcurl;
+    EditText edDocsrcocr;
+    EditText edDocversion;
+    EditText edPublname;
+    EditText edPublisher;
+    EditText edPublcity;
+    EditText edPublyear;
+    EditText edPublisbn;
+    EditText edPublseriesName;
+    EditText edPublseriesNumber;
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -308,7 +327,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnShortcutBook.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-			mActivity.createBookShortcut(mBookInfo.getFileInfo());
+			mActivity.createBookShortcut(mBookInfo.getFileInfo(),mBookCover);
 			dismiss();
 			}
 		});
@@ -361,6 +380,24 @@ public class BookInfoEditDialog extends BaseDialog {
         edSeriesNumber = (EditText)view.findViewById(R.id.book_series_number);
    		edLangFrom = (EditText)view.findViewById(R.id.book_lang_from);
 		edLangTo = (EditText)view.findViewById(R.id.book_lang_to);
+        edGenre = (EditText)view.findViewById(R.id.genre);
+        edAnnotation = (EditText)view.findViewById(R.id.annotation);
+        edSrclang = (EditText)view.findViewById(R.id.srclang);
+        edBookdate = (EditText)view.findViewById(R.id.bookdate);
+        edTranslator = (EditText)view.findViewById(R.id.translator);
+        edDocauthor = (EditText)view.findViewById(R.id.docauthor);
+        edDocprogram = (EditText)view.findViewById(R.id.docprogram);
+        edDocdate = (EditText)view.findViewById(R.id.docdate);
+        edDocsrcurl = (EditText)view.findViewById(R.id.docsrcurl);
+        edDocsrcocr = (EditText)view.findViewById(R.id.docsrcocr);
+        edDocversion = (EditText)view.findViewById(R.id.docversion);
+        edPublname = (EditText)view.findViewById(R.id.publname);
+        edPublisher = (EditText)view.findViewById(R.id.publisher);
+        edPublcity = (EditText)view.findViewById(R.id.publcity);
+        edPublyear = (EditText)view.findViewById(R.id.publyear);
+        edPublisbn = (EditText)view.findViewById(R.id.publisbn);
+        edPublseriesName = (EditText)view.findViewById(R.id.book_publseries_name);
+        edPublseriesNumber = (EditText)view.findViewById(R.id.book_publseries_number);
 		int state = file.getReadingState();
  		setChecked(btnStateNone);
 		if (state == FileInfo.STATE_TO_READ) setChecked(btnStateToRead);
@@ -431,6 +468,7 @@ public class BookInfoEditDialog extends BaseDialog {
 			@Override
 			public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
 		        BitmapDrawable drawable = new BitmapDrawable(bitmap);
+				mBookCover = bitmap;
 				image.setImageDrawable(drawable);
 			}
 		}); 
@@ -460,7 +498,26 @@ public class BookInfoEditDialog extends BaseDialog {
         	edSeriesNumber.setText(String.valueOf(file.seriesNumber));
         edLangFrom.setText(file.lang_from);
 		edLangTo.setText(file.lang_to);
-        LinearLayout llBookAuthorsList = (LinearLayout)view.findViewById(R.id.book_authors_list);
+        edGenre.setText(file.genre);
+        edAnnotation.setText(file.annotation);
+        edSrclang.setText(file.srclang);
+        edBookdate.setText(file.getBookdate());
+        edTranslator.setText(file.translator);
+        edDocauthor.setText(file.docauthor);
+        edDocprogram.setText(file.docprogram);
+        edDocdate.setText(file.getDocdate());
+        edDocsrcurl.setText(file.docsrcurl);
+        edDocsrcocr.setText(file.docsrcocr);
+        edDocversion.setText(file.docversion);
+        edPublname.setText(file.publname);
+        edPublisher.setText(file.publisher);
+        edPublcity.setText(file.publcity);
+        edPublyear.setText(file.getPublyear());
+        edPublisbn.setText(file.publisbn);
+        edPublseriesName.setText(file.publseries);
+		if (file.publseries != null && file.publseries.trim().length() > 0 && file.publseriesNumber > 0)
+			edPublseriesNumber.setText(String.valueOf(file.publseriesNumber));
+		LinearLayout llBookAuthorsList = (LinearLayout)view.findViewById(R.id.book_authors_list);
         authors = new AuthorList(llBookAuthorsList, file.getAuthors());
         mChosenRate = 1;
         setRate(btnStar1);
@@ -507,7 +564,24 @@ public class BookInfoEditDialog extends BaseDialog {
         modified = file.setSeriesName(edSeriesName.getText().toString().trim()) || modified;
         modified = file.setLangFrom(edLangFrom.getText().toString().trim()) || modified;
         modified = file.setLangTo(edLangTo.getText().toString().trim()) || modified;
-		if (mActivity.getReaderView()!=null) {
+        modified = file.setGenre(edGenre.getText().toString().trim()) || modified;
+        modified = file.setAnnotation(edAnnotation.getText().toString().trim()) || modified;
+        modified = file.setSrclang(edSrclang.getText().toString().trim()) || modified;
+        modified = file.setBookdate(edBookdate.getText().toString().trim()) || modified;
+        modified = file.setTranslator(edTranslator.getText().toString().trim()) || modified;
+        modified = file.setDocauthor(edDocauthor.getText().toString().trim()) || modified;
+        modified = file.setDocprogram(edDocprogram.getText().toString().trim()) || modified;
+        modified = file.setDocdate(edDocdate.getText().toString().trim()) || modified;
+        modified = file.setDocsrcurl(edDocsrcurl.getText().toString().trim()) || modified;
+        modified = file.setDocsrcocr(edDocsrcocr.getText().toString().trim()) || modified;
+        modified = file.setDocversion(edDocversion.getText().toString().trim()) || modified;
+        modified = file.setPublname(edPublname.getText().toString().trim()) || modified;
+        modified = file.setPublisher(edPublisher.getText().toString().trim()) || modified;
+        modified = file.setPublcity(edPublcity.getText().toString().trim()) || modified;
+        modified = file.setPublyear(edPublyear.getText().toString().trim()) || modified;
+        modified = file.setPublisbn(edPublisbn.getText().toString().trim()) || modified;
+        modified = file.setPublseries(edPublseriesName.getText().toString().trim()) || modified;
+        if (mActivity.getReaderView()!=null) {
 			if (mActivity.getReaderView().getBookInfo()!=null) {
 				BookInfo book = mActivity.getReaderView().getBookInfo();
 				book.getFileInfo().lang_from = edLangFrom.getText().toString().trim();
@@ -524,6 +598,16 @@ public class BookInfoEditDialog extends BaseDialog {
     	    }
         }
         modified = file.setSeriesNumber(number) || modified;
+        number = 0;
+        if (file.publseries != null && file.publseries.length() > 0) {
+            String numberString = edPublseriesNumber.getText().toString().trim();
+            try {
+                number = Integer.valueOf(numberString);
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
+        modified = file.setPublseriesNumber(number) || modified;
         int rate = mChosenRate;
         if (rate >=0 && rate <= 5)
             modified = file.setRate(rate) || modified;

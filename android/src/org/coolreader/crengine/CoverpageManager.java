@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Random;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
@@ -10,12 +11,17 @@ import org.coolreader.db.CRDBService;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -636,7 +642,13 @@ public class CoverpageManager {
 				Rect rc = new Rect(fullrc.left, fullrc.top, fullrc.right - shadowW, fullrc.bottom - shadowH);
 				synchronized (mCache) {
 					Bitmap bitmap = mCache.getBitmap(book);
+					boolean isDefCover = false;
 					if (bitmap != null) {
+						Bitmap emptyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+						emptyBitmap.eraseColor(Color.rgb(0,0,0));
+						if (bitmap.sameAs(emptyBitmap)) isDefCover = true;
+					}
+					if ((bitmap != null) && (!isDefCover)) {
 						log.d("Image for " + book + " is found in cache, drawing...");
 						Rect dst = getBestCoverSize(rc, bitmap.getWidth(), bitmap.getHeight());
 						canvas.drawBitmap(bitmap, null, dst, defPaint);
@@ -646,12 +658,21 @@ public class CoverpageManager {
 						}
 						return;
 					} else {
-						log.d("Image for " + book + " is found in cache, drawing...");
-						Bitmap bmp = ((BitmapDrawable) CoverpageManager.this.getmCoolReader().getApplicationContext().getResources()
-								.getDrawable(
-										Utils.resolveResourceIdByAttr(getmCoolReader(), R.attr.attr_icons8_book_2, R.drawable.icons8_book_2)
+						log.d("Image for " + book + " is not found in cache, drawing...");
+						Bitmap bmp; // = ((BitmapDrawable) CoverpageManager.this.getmCoolReader().getApplicationContext().getResources()
+								//.getDrawable(
+								//		Utils.resolveResourceIdByAttr(getmCoolReader(), R.attr.attr_icons8_book_2, R.drawable.icons8_book_2)
 										//R.drawable.icons8_book_2
-								)).getBitmap();
+								//)).getBitmap();
+						String sTitle = "";
+						String sAuthors = "";
+						if (book.file!=null) {
+							sTitle = StrUtils.getNonEmptyStr(book.file.title, true);
+							sAuthors = StrUtils.getNonEmptyStr(book.file.authors,true).replace("\\|", "\n");
+							if (StrUtils.isEmptyStr(sTitle)) sTitle = StrUtils.stripExtension(book.file.filename);
+						}
+						bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
+							rc.width(), rc.height());
 						canvas.drawBitmap(bmp, null, rc, defPaint);
 					}
 				}
@@ -710,8 +731,30 @@ public class CoverpageManager {
 						BackgroundThread.instance().postGUI(new Runnable() {
 							@Override
 							public void run() {
-								ImageItem item = new ImageItem(file, buffer.getWidth(), buffer.getHeight());
-								callback.onCoverpageReady(item, buffer);
+								boolean isDefCover = false;
+								if (buffer != null) {
+									Bitmap emptyBitmap = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), buffer.getConfig());
+									emptyBitmap.eraseColor(Color.rgb(0,0,0));
+									if (buffer.sameAs(emptyBitmap)) isDefCover = true;
+								}
+								ImageItem item = null;
+								if ((buffer!=null)&&(isDefCover)) {
+									String sTitle = "";
+									String sAuthors = "";
+									if (file!=null) {
+										sTitle = StrUtils.getNonEmptyStr(file.title, true);
+										sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
+										if (StrUtils.isEmptyStr(sTitle))
+											sTitle = StrUtils.stripExtension(file.filename);
+										Bitmap bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
+												buffer.getWidth(), buffer.getHeight());
+										item = new ImageItem(file, bmp.getWidth(), bmp.getHeight());
+										callback.onCoverpageReady(item, bmp);
+									}
+								} else {
+									item = new ImageItem(file, buffer.getWidth(), buffer.getHeight());
+									callback.onCoverpageReady(item, buffer);
+								}
 							}
 						});
 					}
@@ -771,5 +814,71 @@ public class CoverpageManager {
 			
 		}
 	}
+
+	static Random random = new Random();
+
+	public static int randomColor() {
+		return Color.HSVToColor(new float[] { random.nextInt(360), random.nextFloat(), (3f + random.nextInt(4)) / 10f });
+	}
+
+	public static int randomColor(int hash) {
+		try {
+			hash = Math.abs(hash);
+			String num = "" + hash;
+			float hue = 360f * Float.parseFloat(num.substring(0, 2)) / 100f;
+			float sat = Float.parseFloat(num.substring(1, 3)) / 100f;
+			float value = Float.parseFloat(num.substring(2, 4)) / 100f;
+
+			return Color.HSVToColor(new float[] { hue, sat, Math.max(Math.min(0.1f, value), 0.5f) });
+		} catch (Exception e) {
+			return Color.HSVToColor(new float[] { new Random().nextInt(360), new Random().nextFloat(), (3f + new Random().nextInt(4)) / 10f });
+		}
+	}
+
+	public Bitmap getBookCoverWithTitleBitmap(String title, String author, int w, int h) {
+
+		if (StrUtils.isEmptyStr(author)) {
+			author = "";
+		}
+		if (StrUtils.isEmptyStr(title)) {
+			title = "";
+		}
+
+		title = StrUtils.ellipsize(title, 20);
+		author = StrUtils.ellipsize(author, 40);
+
+		TextPaint pNormal = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+		pNormal.setColor(Color.WHITE);
+		pNormal.setTextSize(h / 11);
+
+		TextPaint pBold = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+		pBold.setColor(Color.WHITE);
+		pBold.setTextSize(h / 14);
+		pBold.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
+		Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(bitmap);
+		c.save();
+		c.drawColor(randomColor((title + author).hashCode()));
+
+		int margin = Dips.dpToPx(10);
+		StaticLayout mTextLayout = new StaticLayout(author, pBold, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+		c.translate(margin, Dips.dpToPx(20));
+		mTextLayout.draw(c);
+
+		StaticLayout text2 = new StaticLayout(title, pNormal, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+		c.translate(0, mTextLayout.getHeight() + (margin));
+		text2.draw(c);
+
+		Canvas c2 = new Canvas(bitmap);
+		Drawable bookBGWithMark = CoverpageManager.this.getmCoolReader().getApplicationContext().
+				getResources().getDrawable(R.drawable.bookeffect_cr);
+		bookBGWithMark.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+		bookBGWithMark.draw(c2);
+
+		return bitmap;
+
+	}
+
 
 }

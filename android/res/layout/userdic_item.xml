@@ -38,6 +38,7 @@
          android:maxLines="3"
 		 android:textStyle="bold" 
          android:ellipsize="end"
+         android:textColor="?attr/colorIcon"
          android:layout_gravity="left" />
      <TextView android:id="@+id/userdic_word_translate"
          style="@android:style/TextAppearance.Small"
@@ -47,6 +48,7 @@
          android:singleLine="false"
          android:maxLines="6"
          android:ellipsize="end"
+         android:textColor="?attr/colorIcon"
          android:layout_gravity="left" />
 </LinearLayout>
 </LinearLayout>

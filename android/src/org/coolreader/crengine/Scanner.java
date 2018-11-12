@@ -59,7 +59,8 @@ public class Scanner extends FileInfoChangeSource {
 				item.pathname = entry.getName();
 				item.size = (int)entry.getSize();
 				//item.createTime = entry.getTime();
-				item.createTime = zf.lastModified();
+				item.setCreateTime(zf.lastModified()); // it looks strange whilst if fileinfo.create used zip entry date...
+				item.setFileCreateTime(zf.lastModified());
 				item.arcname = zip.pathname;
 				item.arcsize = (int)entry.getCompressedSize();
 				item.isArchive = true;
@@ -468,6 +469,14 @@ public class Scanner extends FileInfoChangeSource {
 			return createTitleRoot();
 		else if (FileInfo.SERIES_TAG.equals(path))
 			return createSeriesRoot();
+		else if (FileInfo.BOOK_DATE_TAG.equals(path))
+			return createBookdateRoot();
+		else if (FileInfo.DOC_DATE_TAG.equals(path))
+			return createDocdateRoot();
+		else if (FileInfo.PUBL_YEAR_TAG.equals(path))
+			return createPublyearRoot();
+		else if (FileInfo.FILE_DATE_TAG.equals(path))
+			return createFiledateRoot();
 		else if (FileInfo.RATING_TAG.equals(path))
 			return createBooksByRatingRoot();
 		else if (FileInfo.STATE_READING_TAG.equals(path))
@@ -570,6 +579,46 @@ public class Scanner extends FileInfoChangeSource {
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.SERIES_TAG;
 		dir.filename = mActivity.getString(R.string.folder_name_books_by_series);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createBookdateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.BOOK_DATE_TAG;
+		dir.filename = mActivity.getString(R.string.folder_name_books_by_bookdate);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createDocdateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.DOC_DATE_TAG;
+		dir.filename = mActivity.getString(R.string.folder_name_books_by_docdate);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createPublyearRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.PUBL_YEAR_TAG;
+		dir.filename = mActivity.getString(R.string.folder_name_books_by_publyear);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createFiledateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.FILE_DATE_TAG;
+		dir.filename = mActivity.getString(R.string.folder_name_books_by_filedate);
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -835,9 +884,13 @@ public class Scanner extends FileInfoChangeSource {
 		result.add(pathToFileInfo(FileInfo.TITLE_TAG));
 		result.add(pathToFileInfo(FileInfo.SERIES_TAG));
 		result.add(pathToFileInfo(FileInfo.RATING_TAG));
-		result.add(pathToFileInfo(FileInfo.STATE_TO_READ_TAG));
-		result.add(pathToFileInfo(FileInfo.STATE_READING_TAG));
-		result.add(pathToFileInfo(FileInfo.STATE_FINISHED_TAG));
+		//result.add(pathToFileInfo(FileInfo.STATE_TO_READ_TAG));
+		//result.add(pathToFileInfo(FileInfo.STATE_READING_TAG));
+		//result.add(pathToFileInfo(FileInfo.STATE_FINISHED_TAG));
+		result.add(pathToFileInfo(FileInfo.BOOK_DATE_TAG));
+		result.add(pathToFileInfo(FileInfo.DOC_DATE_TAG));
+		result.add(pathToFileInfo(FileInfo.PUBL_YEAR_TAG));
+		result.add(pathToFileInfo(FileInfo.FILE_DATE_TAG));
 		return result;
 	}
 	

@@ -844,6 +844,7 @@ public class Engine {
 			long duration = Utils.timeInterval(start);
 			L.v("drawBookCover took " + duration + " ms");
 		}
+
 	}
 
 	public static String[] getFontFaceList() {

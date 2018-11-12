@@ -1247,6 +1247,14 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
+	private int mScreenBlackpageInterval = 0;
+	public int getScreenBlackpageInterval() {
+		return mScreenBlackpageInterval;
+	}
+	public void setScreenBlackpageInterval( int screenBlackpageInterval) {
+		mScreenBlackpageInterval = screenBlackpageInterval;
+	}
+
 	public void showToast(int stringResourceId) {
 		showToast(stringResourceId, Toast.LENGTH_LONG);
 	}
@@ -1467,7 +1475,9 @@ public class BaseActivity extends Activity implements Settings {
 			setScreenUpdateMode(stringToInt(value, 0), getContentView());
         } else if ( key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL) ) {
 			setScreenUpdateInterval(stringToInt(value, 10), getContentView());
-        } else if ( key.equals(PROP_APP_THEME) ) {
+		} else if ( key.equals(PROP_APP_SCREEN_BLACKPAGE_INTERVAL) ) {
+			setScreenBlackpageInterval(stringToInt(value, 0));
+		} else if ( key.equals(PROP_APP_THEME) ) {
         	setCurrentTheme(value);
         } else if ( key.equals(PROP_APP_SCREEN_ORIENTATION) ) {
         	int orientation = 0;
@@ -2026,6 +2036,7 @@ public class BaseActivity extends Activity implements Settings {
 			
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_INTERVAL, "10");
+			props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_INTERVAL, "0");
 	        
 	        props.applyDefault(ReaderView.PROP_NIGHT_MODE, "0");
 	        if (DeviceInfo.FORCE_HC_THEME) {
