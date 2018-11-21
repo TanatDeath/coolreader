@@ -3,10 +3,6 @@
           package="org.coolreader"
           android:installLocation="auto">
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="26" />
-
     <supports-screens
         android:xlargeScreens="true"
         android:largeScreens="true"
@@ -32,8 +28,8 @@
         android:allowBackup="true"
         android:allowClearUserData="true"
         android:icon="@mipmap/cr3_logo"
-        android:label="@string/app_name"
-        android:process="org.coolreader"
+        android:label="@string/app_name_fork"
+        android:process="org.coolreader.mod.plotn"
         android:resizeableActivity="true"
         >
 
@@ -51,123 +47,606 @@
 -->
         <meta-data android:name="android.max_aspect" android:value="2.1" />
         <activity android:name=".CoolReader"
-                  android:label="@string/app_name"
+                  android:label="@string/app_name_fork"
                   android:configChanges="orientation|keyboardHidden|locale|screenSize|screenLayout|layoutDirection"
                   android:theme="@android:style/Theme.NoTitleBar"
                   android:launchMode="singleInstance"
                   android:windowSoftInputMode="stateHidden"
                   android:screenOrientation="sensor">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER"/>
             </intent-filter>
             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:host="*" android:scheme="file" />
-                <data android:mimeType="application/octet-stream" />
-                <data android:pathPattern=".*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\..*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\.zip"/>
-                <data android:pathPattern=".*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\.txt"/>
-                <data android:pathPattern=".*\\.html"/>
-                <data android:pathPattern=".*\\.xhtml"/>
-                <data android:pathPattern=".*\\.htm"/>
-                <data android:pathPattern=".*\\.chm"/>
-                <data android:pathPattern=".*\\.epub"/>
-                <data android:pathPattern=".*\\..*\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.epub"/>
-                <data android:pathPattern=".*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\..*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\.pdb"/>
-                <data android:pathPattern=".*\\.doc"/>
-                <data android:pathPattern=".*\\.prc"/>
-                <data android:pathPattern=".*\\.pml"/>
-                <data android:pathPattern=".*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\.tcr"/>
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*\\.pml"/>
+                <data android:pathPattern="/.*\\.azw"/>
+                <data android:pathPattern="/.*\\.tcr"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:host="*" android:scheme="file" android:mimeType="text/plain"/>
-                <data android:pathPattern=".*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\..*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\.zip"/>
-                <data android:pathPattern=".*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\.txt"/>
-                <data android:pathPattern=".*\\.html"/>
-                <data android:pathPattern=".*\\.xhtml"/>
-                <data android:pathPattern=".*\\.htm"/>
-                <data android:pathPattern=".*\\.chm"/>
-                <data android:pathPattern=".*\\.epub"/>
-                <data android:pathPattern=".*\\..*\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.epub"/>
-                <data android:pathPattern=".*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\..*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.epub"/>
-                <data android:pathPattern=".*\\.pdb"/>
-                <data android:pathPattern=".*\\.doc"/>
-                <data android:pathPattern=".*\\.prc"/>
                 <data android:pathPattern=".*\\.pml"/>
-                <data android:pathPattern=".*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.mobi"/>
                 <data android:pathPattern=".*\\.azw"/>
                 <data android:pathPattern=".*\\.tcr"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="*" android:scheme="file" android:mimeType="text/plain"/>
+                <data android:pathPattern=".*\\.pml"/>
+                <data android:pathPattern=".*\\.azw"/>
+                <data android:pathPattern=".*\\.tcr"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="*" android:scheme="http"/>
+                <data android:pathPattern=".*\\.azw"/>
+                <data android:pathPattern=".*\\.tcr"/>
+                <data android:pathPattern=".*\\.pml"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:host="*" android:scheme="file" />
+                <data android:mimeType="application/x-pilot-prc"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain"/>
-                <data android:mimeType="text/html"/>
-                <data android:mimeType="text/richtext"/>
-                <data android:mimeType="application/x-cbr"/>
-                <data android:mimeType="application/x-cbz"/>
+            </intent-filter>
+        </activity>
 
-                <data android:mimeType="application/zip"/>
-                <data android:mimeType="application/rtf"/>
-                <data android:mimeType="application/x-rtf"/>
-                <data android:mimeType="application/x-chm"/>
+        <activity-alias
+            android:name=".CoolReaderForFB2"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/x-fictionbook+xml" />
+                <data android:mimeType="application/x-fictionbook" />
+                <data android:mimeType="application/x-fb2" />
                 <data android:mimeType="application/fb2"/>
                 <data android:mimeType="application/fb2.zip"/>
-                <data android:mimeType="application/epub"/>
-                <data android:mimeType="application/epub+zip"/>
-                <data android:mimeType="application/x-fictionbook"/>
-                <data android:mimeType="application/x-fictionbook+xml"/>
-                <data android:mimeType="application/x-pilot-prc"/>
-                <data android:mimeType="application/x-mobipocket-ebook"/>
+                <data android:mimeType="text/fb2+xml" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- alias activity to disable EPUB -->
+        <activity-alias
+            android:name=".CoolReaderForEPUB"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\..*\\.epub" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\..*\\.epub" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/epub+zip" />
+                <data android:mimeType="application/epub" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- alias activity to disable TXT -->
+        <activity-alias
+            android:name=".CoolReaderForTXT"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.zip" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.zip" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <!-- alias activity to disable HTML -->
+        <activity-alias
+            android:name=".CoolReaderForHTML"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.html" />
+                <data android:pathPattern="/.*\\..*\\.html" />
+                <data android:pathPattern="/.*\\..*\\..*\\.html" />
+                <data android:pathPattern="/.*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\..*\\.xhtml" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.html" />
+                <data android:pathPattern="/.*\\..*\\.html" />
+                <data android:pathPattern="/.*\\..*\\..*\\.html" />
+                <data android:pathPattern="/.*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\..*\\.xhtml" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="text/html" />
+                <data android:mimeType="application/xhtml+xml" />
+            </intent-filter>
+        </activity-alias>
+        <!-- alias activity to disable CHM -->
+        <activity-alias
+            android:name=".CoolReaderForCHM"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.chm" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.chm" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/vnd.ms-htmlhelp" />
+                <data android:mimeType="application/x-chm"/>
+            </intent-filter>
+        </activity-alias>
+
+        <!-- alias activity to disable CBZ -->
+        <activity-alias
+            android:name=".CoolReaderForCBZ"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/x-cdisplay" />
+                <data android:mimeType="application/x-cbz" />
+                <data android:mimeType="application/x-cbr" />
+                <data android:mimeType="application/x-cbt" />
+            </intent-filter>
+        </activity-alias>
+        <!-- alias activity to disable RTF -->
+        <activity-alias
+            android:name=".CoolReaderForRTF"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf.zip" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf.zip" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="text/rtf" />
+                <data android:mimeType="application/rtf" />
+                <data android:mimeType="application/rtf+zip" />
+                <data android:mimeType="application/x-rtf"/>
+                <data android:mimeType="text/richtext"/>
+
+            </intent-filter>
+        </activity-alias>
+        <!-- alias activity to disable DOCX -->
+        <activity-alias
+            android:name=".CoolReaderForDOCX"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.docx" />
+                <data android:pathPattern="/.*\\..*\\.docx" />
+                <data android:pathPattern="/.*\\..*\\..*\\.docx" />
+                <data android:pathPattern="/.*\\.docm" />
+                <data android:pathPattern="/.*\\..*\\.docm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.docm" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.docx" />
+                <data android:pathPattern="/.*\\..*\\.docx" />
+                <data android:pathPattern="/.*\\..*\\..*\\.docx" />
+                <data android:pathPattern="/.*\\.docm" />
+                <data android:pathPattern="/.*\\..*\\.docm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.docm" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+            </intent-filter>
+        </activity-alias>
+        <!-- alias activity to disable DOCX -->
+        <activity-alias
+            android:name=".CoolReaderForDOC"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.doc" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.doc" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
                 <data android:mimeType="application/msword"/>
                 <data android:mimeType="application/doc"/>
                 <data android:mimeType="application/vnd.msword"/>
@@ -177,13 +656,77 @@
                 <data android:mimeType="application/x-msw6"/>
                 <data android:mimeType="application/x-msword"/>
             </intent-filter>
+        </activity-alias>
+        <!-- alias activity to disable MOBI -->
+        <activity-alias
+            android:name=".CoolReaderForMOBI"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain"/>
-            </intent-filter>
-        </activity>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
 
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\..*\\.pdb" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\..*\\.pdb" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/x-mobipocket-ebook" />
+                <data android:mimeType="application/x-pdb-plucker-ebook" />
+                <data android:mimeType="application/x-pdb-textread-ebook" />
+                <data android:mimeType="application/x-pdb-peanutpress-ebook" />
+                <data android:mimeType="application/x-pdb-ztxt-ebook" />
+                <data android:mimeType="application/vnd.palm" />
+                <data android:mimeType="application/x-pdb-plucker-ebook" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- Sync support -->
         <service android:name=".sync.SyncService" />

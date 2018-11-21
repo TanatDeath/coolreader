@@ -347,7 +347,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/wdrk_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/wdrk_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/wdrk_icons8_settings_search</item>
-
+        <item name="attr_icons8_pages_total">@drawable/wdrk_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/wdrk_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/wdrk_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/wdrk_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/wdrk_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/wdrk_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/wdrk_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/wdrk_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/wdrk_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/wdrk_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/wdrk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/wdrk_icons8_rate_star_filled</item>
@@ -634,6 +643,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/wlgt_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/wlgt_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/wlgt_icons8_settings_search</item>
+        <item name="attr_icons8_pages_total">@drawable/wlgt_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/wlgt_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/wlgt_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/wlgt_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/wlgt_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/wlgt_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/wlgt_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/wlgt_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/wlgt_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/wlgt_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/wlgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/wlgt_icons8_rate_star_filled</item>
@@ -930,6 +949,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/drk_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/drk_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/drk_icons8_settings_search</item>
+        <item name="attr_icons8_pages_total">@drawable/drk_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/drk_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/drk_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/drk_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/drk_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/drk_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/drk_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/drk_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/drk_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/drk_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -1214,6 +1243,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/lgt_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/lgt_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/lgt_icons8_settings_search</item>
+        <item name="attr_icons8_pages_total">@drawable/lgt_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/lgt_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/lgt_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/lgt_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/lgt_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/lgt_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/lgt_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/lgt_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/lgt_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/lgt_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
@@ -1501,6 +1540,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/lgt_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/lgt_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/lgt_icons8_settings_search</item>
+        <item name="attr_icons8_pages_total">@drawable/lgt_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/lgt_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/lgt_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/lgt_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/lgt_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/lgt_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/lgt_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/lgt_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/lgt_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/lgt_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
@@ -1788,6 +1837,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/drk_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/drk_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/drk_icons8_settings_search</item>
+        <item name="attr_icons8_pages_total">@drawable/drk_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/drk_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/drk_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/drk_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/drk_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/drk_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/drk_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/drk_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/drk_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/drk_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -2074,6 +2133,16 @@
         <item name="attr_icons8_blackpage_duration">@drawable/drk_icons8_blackpage_duration</item>
         <item name="attr_icons8_blackpage_interval">@drawable/drk_icons8_blackpage_interval</item>
         <item name="attr_icons8_settings_search">@drawable/drk_icons8_settings_search</item>
+        <item name="attr_icons8_pages_total">@drawable/drk_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/drk_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/drk_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/drk_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/drk_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/drk_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/drk_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/drk_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/drk_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/drk_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -2356,6 +2425,16 @@
         <item name="attr_icons8_folder_hash">@drawable/lgt_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/lgt_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/lgt_icons8_cancel_small</item>
+        <item name="attr_icons8_pages_total">@drawable/lgt_icons8_pages_total</item>
+        <item name="attr_icons8_page_percent">@drawable/lgt_icons8_page_percent</item>
+        <item name="attr_icons8_page_num">@drawable/lgt_icons8_page_num</item>
+        <item name="attr_icons8_expand">@drawable/lgt_icons8_expand</item>
+        <item name="attr_icons8_chapter_marks">@drawable/lgt_icons8_chapter_marks</item>
+        <item name="attr_icons8_book_title">@drawable/lgt_icons8_book_title</item>
+        <item name="attr_icons8_battery_percent">@drawable/lgt_icons8_battery_percent</item>
+        <item name="attr_icons8_book_title2">@drawable/lgt_icons8_book_title2</item>
+        <item name="attr_icons8_fav_star">@drawable/lgt_icons8_fav_star</item>
+        <item name="attr_icons8_fav_star_filled">@drawable/lgt_icons8_fav_star_filled</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>

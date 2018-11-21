@@ -6,15 +6,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MenuItem.OnMenuItemClickListener;
@@ -35,6 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 public class FileBrowser extends LinearLayout implements FileInfoChangeListener {
 
@@ -46,6 +43,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	LayoutInflater mInflater;
 	History mHistory;
 	ListView mListView;
+	ArrayList<FileInfo> mFileSystemFolders;
+	ArrayList<String> mOnlyFSFolders;
+	HashMap<Long, String> mFileSystemFoldersH;
 
 	public static final int MAX_SUBDIR_LEN = 32;
 
@@ -241,7 +241,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	private void invalidateAdapter(final FileListAdapter adapter) {
 		adapter.notifyInvalidated();
 	}
-	
+
 	CoverpageManager.CoverpageReadyListener coverpageListener;
 	public FileBrowser(CoolReader activity, Engine engine, Scanner scanner, History history) {
 		super(activity);
@@ -251,7 +251,21 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		this.mInflater = LayoutInflater.from(activity);// activity.getLayoutInflater();
 		this.mHistory = history;
 		this.mCoverpageManager = Services.getCoverpageManager();
-
+		Services.getFileSystemFolders().loadFavoriteFolders(mActivity.getDB());
+		ArrayList<FileInfo> favFolders = new ArrayList<FileInfo>();
+		favFolders = Services.getFileSystemFolders().getFavoriteFolders();
+		ArrayList<String> favFoldersS = new ArrayList<String>();
+		favFolders = Services.getFileSystemFolders().getFavoriteFolders();
+		for (FileInfo fi: favFolders) {
+			favFoldersS.add(fi.pathname);
+		}
+		this.mFileSystemFolders = Services.getFileSystemFolders().getFileSystemFolders();
+		this.mFileSystemFoldersH = new HashMap<Long, String>();
+		this.mOnlyFSFolders = new ArrayList<String>();
+		for (FileInfo fi: this.mFileSystemFolders) {
+			this.mFileSystemFoldersH.put(fi.id, fi.pathname);
+			if (!favFoldersS.contains(fi.pathname)) this.mOnlyFSFolders.add(fi.pathname);
+		}
 		coverpageListener =	new CoverpageReadyListener() {
 			@Override
 			public void onCoverpagesReady(ArrayList<CoverpageManager.ImageItem> files) {
@@ -1320,13 +1334,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			TextView fieldState;
 			ImageView imageAddInfo;
 			ImageView imageAddMenu;
+			ImageView imageFavFolder;
 			//TextView field3;
-			void setText( TextView view, String text )
+			void setText( TextView view, String text, int color )
 			{
 				if ( view==null )
 					return;
 				if ( text!=null && text.length()>0 ) {
 					view.setText(text);
+					if (color != 0) view.setTextColor(color);
 					view.setVisibility(ViewGroup.VISIBLE);
 				} else {
 					view.setText(null);
@@ -1335,6 +1351,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			void setItem(final FileInfo item, FileInfo parentItem)
 			{
+				int colorIcon;
+				TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorIcon});
+				colorIcon = a.getColor(0, Color.GRAY);
+
 				if ( item==null ) {
 					image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_back_drawable, R.drawable.cr3_browser_back));
 					String thisDir = "";
@@ -1388,6 +1409,57 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					});
 				}
 
+				if (imageFavFolder!=null) {
+					//ArrayList<FileInfo> ff = Services.getFileSystemFolders().getFavoriteFolders();
+					boolean isFav = false;
+					if (mOnlyFSFolders.contains(item.pathname)) {
+						imageFavFolder.setImageResource(
+								Utils.resolveResourceIdByAttr(mActivity,
+										R.attr.attr_icons8_fav_star_filled, R.drawable.drk_icons8_fav_star_filled));
+					} else {
+						imageFavFolder.setImageResource(
+								Utils.resolveResourceIdByAttr(mActivity,
+										R.attr.attr_icons8_fav_star, R.drawable.drk_icons8_fav_star));
+					}
+					item.isFav = false;
+					Long id = -1L;
+					if (mFileSystemFoldersH!=null)
+						for (Map.Entry<Long, String> entry : mFileSystemFoldersH.entrySet()) {
+							if (entry.getValue().equals(item.pathname)) {
+								id = entry.getKey();
+								item.isFav = true;
+								imageFavFolder.setImageResource(
+										Utils.resolveResourceIdByAttr(mActivity,
+												R.attr.attr_icons8_fav_star_filled, R.drawable.drk_icons8_fav_star_filled));
+							}
+						}
+					final Long id2 = id;
+					imageFavFolder.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							if ( item!=null ) {
+								selectedItem = item;
+								if (!mOnlyFSFolders.contains(item.pathname)) {
+									if (!item.isFav) {
+										addToFavorites(selectedItem);
+										item.isFav = true;
+										mFileSystemFoldersH.put(item.id, item.pathname);
+									} else {
+										FileInfo fi = new FileInfo(item);
+										fi.id = id2;
+										Services.getFileSystemFolders().removeFavoriteFolder(mActivity.getDB(), fi);
+										item.isFav = false;
+										mFileSystemFoldersH.remove(id2);
+									}
+									currentListAdapter = new FileListAdapter();
+									mListView.setAdapter(currentListAdapter);
+								}
+							}
+						}
+					});
+				}
+
 				if ( item.isDirectory ) {
 					if (item.isBooksByAuthorRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.drk_icons8_folder_author));
@@ -1419,7 +1491,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (item.isOnlineCatalogPluginDir())
 						title = translateOnlineStorePluginItem(item);
 					
-					setText(name, title);
+					setText(name, title, 0);
 
 					if ( item.isBooksByAuthorDir() ) {
 						int bookCount = 0;
@@ -1427,9 +1499,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							bookCount = item.fileCount();
 						else if (item.tag != null && item.tag instanceof Integer)
 							bookCount = (Integer)item.tag;
-						setText(field1, "books: " + String.valueOf(bookCount));
-						setText(field2, "folders: 0");
-						setText(fieldState, "");
+						setText(field1, "books: " + String.valueOf(bookCount), colorIcon);
+						setText(field2, "folders: 0", colorIcon);
+						setText(fieldState, "", colorIcon);
 					} else if ( item.isBooksBySeriesDir() || item.isBooksByBookdateDir() || item.isBooksByDocdateDir()
 							|| item.isBooksByPublyearDir() || item.isBooksByFiledateDir()) {
 						int bookCount = 0;
@@ -1437,24 +1509,24 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							bookCount = item.fileCount();
 						else if (item.tag != null && item.tag instanceof Integer)
 							bookCount = (Integer)item.tag;
-						setText(field1, "books: " + String.valueOf(bookCount));
-						setText(field2, "folders: 0");
-						setText(fieldState, "");
+						setText(field1, "books: " + String.valueOf(bookCount), colorIcon);
+						setText(field2, "folders: 0", colorIcon);
+						setText(fieldState, "", colorIcon);
 					}  else  if (item.isOPDSDir()) {
-						setText(field1, item.title);
-						setText(field2, "");
-						setText(fieldState, "");
+						setText(field1, item.title, colorIcon);
+						setText(field2, "", colorIcon);
+						setText(fieldState, "", colorIcon);
 					} else  if ( !item.isOPDSDir() && !item.isSearchShortcut() && ((!item.isOPDSRoot()
                             && !item.isBooksByAuthorRoot() && !item.isBooksBySeriesRoot() && !item.isBooksByBookdateRoot()
 							&& !item.isBooksByDocdateRoot() && !item.isBooksByPublyearRoot() && !item.isBooksByFiledateRoot()
                             && !item.isBooksByTitleRoot()) || item.dirCount()>0) && !item.isOnlineCatalogPluginDir()) {
-						setText(field1, "books: " + String.valueOf(item.fileCount()));
-						setText(field2, "folders: " + String.valueOf(item.dirCount()));
-						setText(fieldState, "");
+						setText(field1, "books: " + String.valueOf(item.fileCount()), colorIcon);
+						setText(field2, "folders: " + String.valueOf(item.dirCount()), colorIcon);
+						setText(fieldState, "", colorIcon);
 					} else {
-						setText(field1, "");
-						setText(field2, "");
-						setText(fieldState, "");
+						setText(field1, "", colorIcon);
+						setText(field2, "", colorIcon);
+						setText(fieldState, "", colorIcon);
 					}
 				} else {
 					boolean isSimple = (viewType == VIEW_TYPE_FILE_SIMPLE);
@@ -1483,9 +1555,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					}
 					if ( isSimple ) {
 						String fn = item.getFileNameToDisplay();
-						setText( filename, fn );
+						setText( filename, fn , 0);
 					} else {
-						setText( author, Utils.formatAuthors(item.getAuthors()) );
+						setText( author, Utils.formatAuthors(item.getAuthors()), colorIcon );
                         //setText( author, item.authors );
                         String seriesName = Utils.formatSeries(item.series, item.seriesNumber);
 						String title = item.title;
@@ -1519,9 +1591,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							sLang = "[" +sLangFrom+" > "+sLangTo + "] ";
 						}
 						if (sLang.equals(""))
-							setText( name, title );
-						else setText( name, title + "; "+sLang);
-						setText( series, seriesName );
+							setText( name, title, 0 );
+						else setText( name, title + "; "+sLang, 0);
+						setText( series, seriesName , colorIcon);
 
 //						field1.setVisibility(VISIBLE);
 //						field2.setVisibility(VISIBLE);
@@ -1530,8 +1602,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						if (field1 != null) {
 							if (fieldState == null)	{
 								field1.setText(onlineBookInfo + "  " + state + " " + Utils.formatFileInfo(mActivity, item));
+								field1.setTextColor(colorIcon);
 							} else {
 								field1.setText(onlineBookInfo + " " + Utils.formatFileInfo(mActivity, item));
+								field1.setTextColor(colorIcon);
 							}
 						}
 						if (fieldState != null) {
@@ -1542,7 +1616,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							int colorBlue;
 							int colorGreen;
 							int colorGray;
-							TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+							a = mActivity.getTheme().obtainStyledAttributes(new int[]
 									{R.attr.colorThemeBlue,
 									 R.attr.colorThemeGreen,
 									 R.attr.colorThemeGray});
@@ -1563,6 +1637,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						//field2.setText(formatDate(pos!=null ? pos.getTimeStamp() : item.createTime));
 						if (field2 != null) {
 							field2.setText(Utils.formatLastPosition(mActivity, mHistory.getLastPos(item)));
+							field2.setTextColor(colorIcon);
 						}
 						//field3.setText(pos!=null ? formatPercent(pos.getPercent()) : null);
 					} 
@@ -1599,6 +1674,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				holder.fieldState = (TextView)view.findViewById(R.id.browser_item_field_state);
 				holder.imageAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
 				holder.imageAddMenu = (ImageView)view.findViewById(R.id.btn_add_menu);
+				holder.imageFavFolder = (ImageView)view.findViewById(R.id.btn_fav_folder);
 
 				//holder.field3 = (TextView)view.findViewById(R.id.browser_item_field3);
 				view.setTag(holder);

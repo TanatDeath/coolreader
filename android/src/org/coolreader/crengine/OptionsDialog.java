@@ -1551,17 +1551,32 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_show_titlebar), PROP_STATUS_LOCATION, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mStatusPositions,
 					mStatusPositionsTitles, mStatusPositionsAddInfos).setDefaultValue("1"));
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_titlebar_font_face), PROP_STATUS_FONT_FACE,
-					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mFontFaces).setDefaultValue(mFontFaces[0]).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mFontFaces).
+					setDefaultValue(mFontFaces[0]).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
 					R.drawable.cr3_option_font_face));
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_titlebar_font_size), PROP_STATUS_FONT_SIZE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(
 					filterFontSizes(mStatusFontSizes)).setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
-			listView.add(new ColorOption(mOwner, getString(R.string.options_page_titlebar_font_color), PROP_STATUS_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text), this.lastFilteredValue));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_title), PROP_SHOW_TITLE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1"));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_page_number), PROP_SHOW_PAGE_NUMBER, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1"));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_page_count), PROP_SHOW_PAGE_COUNT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1"));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_percent), PROP_SHOW_POS_PERCENT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0"));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_chapter_marks), PROP_STATUS_CHAPTER_MARKS, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1"));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_battery_percent), PROP_SHOW_BATTERY_PERCENT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1"));
+			listView.add(new ColorOption(mOwner, getString(R.string.options_page_titlebar_font_color), PROP_STATUS_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setIconIdByAttr(R.attr.attr_icons8_font_color,
+							R.drawable.drk_icons8_font_color));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_title), PROP_SHOW_TITLE,
+                    getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_title2,
+							R.drawable.drk_icons8_book_title2));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_page_number), PROP_SHOW_PAGE_NUMBER, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
+					R.drawable.drk_icons8_page_num));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_page_count), PROP_SHOW_PAGE_COUNT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_pages_total,
+					R.drawable.drk_icons8_pages_total));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_percent), PROP_SHOW_POS_PERCENT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_page_percent,
+					R.drawable.drk_icons8_page_percent));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_chapter_marks), PROP_STATUS_CHAPTER_MARKS, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_chapter_marks,
+					R.drawable.drk_icons8_chapter_marks));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_battery_percent), PROP_SHOW_BATTERY_PERCENT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_battery_percent,
+					R.drawable.drk_icons8_battery_percent));
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -1618,13 +1633,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(), this);
 			listView.add(new ListOption(mOwner, getString(R.string.options_format_image_scaling_block_mode), PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE,
-				getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mImageScalingModes, mImageScalingModesTitles, mImageScalingModesAddInfos).setDefaultValue("2"));
+				getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mImageScalingModes, mImageScalingModesTitles, mImageScalingModesAddInfos).
+					setDefaultValue("2").setIconIdByAttr(R.attr.attr_icons8_expand,
+					R.drawable.drk_icons8_expand));
 			listView.add(new ListOption(mOwner, getString(R.string.options_format_image_scaling_block_scale), PROP_IMG_SCALING_ZOOMIN_BLOCK_SCALE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mImageScalingFactors,
-					mImageScalingFactorsTitles, mImageScalingFactorsAddInfos).setDefaultValue("2"));
+					mImageScalingFactorsTitles, mImageScalingFactorsAddInfos).
+					setDefaultValue("2").setIconIdByAttr(R.attr.attr_icons8_expand,
+					R.drawable.drk_icons8_expand));
 			listView.add(new ListOption(mOwner, getString(R.string.options_format_image_scaling_inline_mode), PROP_IMG_SCALING_ZOOMIN_INLINE_MODE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mImageScalingModes,
-					mImageScalingModesTitles, mImageScalingModesAddInfos).setDefaultValue("2"));
+					mImageScalingModesTitles, mImageScalingModesAddInfos).
+					setDefaultValue("2").setIconIdByAttr(R.attr.attr_icons8_expand,
+					R.drawable.drk_icons8_expand));
 			listView.add(new ListOption(mOwner, getString(R.string.options_format_image_scaling_inline_scale), PROP_IMG_SCALING_ZOOMIN_INLINE_SCALE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mImageScalingFactors,
-					mImageScalingFactorsTitles, mImageScalingFactorsAddInfos).setDefaultValue("2"));
+					mImageScalingFactorsTitles, mImageScalingFactorsAddInfos).
+					setDefaultValue("2").setIconIdByAttr(R.attr.attr_icons8_expand,
+					R.drawable.drk_icons8_expand));
 			dlg.setView(listView);
 			dlg.show();
 		}

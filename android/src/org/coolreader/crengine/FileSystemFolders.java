@@ -1,5 +1,7 @@
 package org.coolreader.crengine;
 
+import android.util.Log;
+
 import org.coolreader.db.CRDBService;
 
 import java.io.File;
@@ -20,6 +22,10 @@ public class FileSystemFolders extends FileInfoChangeSource {
         }
     };
     private Scanner mScanner;
+
+    public ArrayList<FileInfo> getFavoriteFolders() {
+        return favoriteFolders;
+    }
 
     private ArrayList<FileInfo> favoriteFolders = null;
 

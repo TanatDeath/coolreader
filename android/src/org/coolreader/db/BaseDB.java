@@ -113,7 +113,7 @@ public abstract class BaseDB {
 	public void execSQLIgnoreErrors( String... sqls )
 	{
 		for ( String sql : sqls ) {
-			try { 
+			try {
 				mDB.execSQL(sql);
 			} catch ( SQLException e ) {
 				// ignore

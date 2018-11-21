@@ -270,6 +270,16 @@
     <attr name="attr_icons8_blackpage_duration" format="reference" />
     <attr name="attr_icons8_blackpage_interval" format="reference" />
     <attr name="attr_icons8_settings_search" format="reference" />
+    <attr name="attr_icons8_pages_total" format="reference" />
+    <attr name="attr_icons8_page_percent" format="reference" />
+    <attr name="attr_icons8_page_num" format="reference" />
+    <attr name="attr_icons8_expand" format="reference" />
+    <attr name="attr_icons8_chapter_marks" format="reference" />
+    <attr name="attr_icons8_book_title" format="reference" />
+    <attr name="attr_icons8_battery_percent" format="reference" />
+    <attr name="attr_icons8_book_title2" format="reference" />
+    <attr name="attr_icons8_fav_star" format="reference" />
+    <attr name="attr_icons8_fav_star_filled" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

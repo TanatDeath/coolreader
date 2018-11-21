@@ -285,7 +285,14 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						s = authors;
 					label.setText(s != null ? s : "");
 					label.setTextColor(colorIcon);
-					label.setMaxWidth(coverWidth);
+                    int n = item.getReadingState();
+                    if (n == FileInfo.STATE_READING)
+                        label.setTextColor(colorGreen);
+                    else if (n == FileInfo.STATE_TO_READ)
+                        label.setTextColor(colorBlue);
+                    else if (n == FileInfo.STATE_FINISHED)
+                        label.setTextColor(colorGray);
+                    label.setMaxWidth(coverWidth);
 				}
 				view.setOnClickListener(new OnClickListener() {
 					@Override

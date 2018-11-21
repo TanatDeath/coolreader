@@ -102,6 +102,7 @@ public class FileInfo {
 	public ArrayList<Integer> arrReadBeg = new ArrayList<Integer>();
 	private ArrayList<FileInfo> files;// files
 	private ArrayList<FileInfo> dirs; // directories
+	public boolean isFav; // only for display star in file browser
 
 	// 16 lower bits reserved for document flags
 	public static final int DONT_USE_DOCUMENT_STYLES_FLAG = 1;

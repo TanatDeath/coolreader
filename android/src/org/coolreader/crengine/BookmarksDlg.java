@@ -6,7 +6,9 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -109,10 +111,20 @@ public class BookmarksDlg  extends BaseDialog {
 			} else {
 				view = (View)convertView;
 			}
+			int colorIcon;
+			TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+
 			TextView labelView = (TextView)view.findViewById(R.id.bookmark_item_shortcut);
+			if (labelView!=null) labelView.setTextColor(colorIcon);
 			TextView posTextView = (TextView)view.findViewById(R.id.bookmark_item_pos_text);
+			if (posTextView!=null) posTextView.setTextColor(colorIcon);
 			TextView titleTextView = (TextView)view.findViewById(R.id.bookmark_item_title);
+			if (titleTextView!=null) titleTextView.setTextColor(colorIcon);
 			TextView commentTextView = (TextView)view.findViewById(R.id.bookmark_item_comment_text);
+			if (commentTextView!=null) commentTextView.setTextColor(colorIcon);
 			if ( type==ITEM_CORRECTION && posTextView!=null )
 				posTextView.setPaintFlags(posTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG );
 				
