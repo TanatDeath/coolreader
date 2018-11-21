@@ -343,6 +343,11 @@
         <item name="attr_icons8_folder_hash">@drawable/wdrk_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/wdrk_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/wdrk_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/wdrk_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/wdrk_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/wdrk_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/wdrk_icons8_settings_search</item>
+
 
         <item name="attr_icons8_rate_star">@drawable/wdrk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/wdrk_icons8_rate_star_filled</item>
@@ -625,6 +630,10 @@
         <item name="attr_icons8_folder_hash">@drawable/wlgt_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/wlgt_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/wlgt_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/wlgt_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/wlgt_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/wlgt_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/wlgt_icons8_settings_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/wlgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/wlgt_icons8_rate_star_filled</item>
@@ -917,6 +926,10 @@
         <item name="attr_icons8_folder_hash">@drawable/drk_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/drk_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/drk_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/drk_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/drk_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/drk_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/drk_icons8_settings_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -1197,6 +1210,10 @@
         <item name="attr_icons8_folder_hash">@drawable/lgt_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/lgt_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/lgt_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/lgt_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/lgt_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/lgt_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/lgt_icons8_settings_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
@@ -1480,6 +1497,10 @@
         <item name="attr_icons8_folder_hash">@drawable/lgt_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/lgt_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/lgt_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/lgt_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/lgt_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/lgt_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/lgt_icons8_settings_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
@@ -1763,6 +1784,10 @@
         <item name="attr_icons8_folder_hash">@drawable/drk_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/drk_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/drk_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/drk_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/drk_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/drk_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/drk_icons8_settings_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -2045,6 +2070,10 @@
         <item name="attr_icons8_folder_hash">@drawable/drk_icons8_folder_hash</item>
         <item name="attr_icons8_folder_author">@drawable/drk_icons8_folder_author</item>
         <item name="attr_icons8_cancel_small">@drawable/drk_icons8_cancel_small</item>
+        <item name="attr_icons8_eink">@drawable/drk_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/drk_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/drk_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/drk_icons8_settings_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/drk_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/drk_icons8_rate_star_filled</item>
@@ -2330,6 +2359,10 @@
 
         <item name="attr_icons8_rate_star">@drawable/lgt_icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/lgt_icons8_rate_star_filled</item>
+        <item name="attr_icons8_eink">@drawable/lgt_icons8_eink</item>
+        <item name="attr_icons8_blackpage_duration">@drawable/lgt_icons8_blackpage_duration</item>
+        <item name="attr_icons8_blackpage_interval">@drawable/lgt_icons8_blackpage_interval</item>
+        <item name="attr_icons8_settings_search">@drawable/lgt_icons8_settings_search</item>
 
         <item name="folder_big_drawable">@drawable/folder_big_hc</item>
         <item name="folder_big_bookmark_drawable">@drawable/folder_big_bookmark_hc</item>

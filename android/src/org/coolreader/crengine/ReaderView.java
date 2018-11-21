@@ -69,6 +69,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public long lastSelTime = 0;
 	private int curBlackpageInterval = 0; //for periodic blackpage draw
+    private int blackpageDuration = 300;
 
 	public ArrayList<String> getArrAllPages() {
 		return arrAllPages;
@@ -1516,7 +1517,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int dir = isPageMode ? x - start_x : y - start_y;
 						if (Math.abs(mGesturePageFlipsPerFullSwipe) == 1) {
 							dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
-							if (pageFlipAnimationSpeedMs == 0 || DeviceInfo.EINK_SCREEN) {
+							if (pageFlipAnimationSpeedMs == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 								// no animation
 								return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
 							}
@@ -2130,7 +2131,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private final static boolean AUTOSCROLL_SPEED_NOTIFICATION_ENABLED = false;
 	private void notifyAutoscroll(final String msg) {
-		if (DeviceInfo.EINK_SCREEN)
+		if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			return; // disable toast for eink
 		if (AUTOSCROLL_SPEED_NOTIFICATION_ENABLED) {
 			final int myId = ++autoScrollNotificationId;
@@ -2219,7 +2220,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				public void run() {
 					if (initPageTurn(startProgress)) {
 						log.d("AutoScrollAnimation: starting autoscroll timer");
-						timerInterval = DeviceInfo.EINK_SCREEN ? ANIMATION_INTERVAL_EINK : ANIMATION_INTERVAL_NORMAL;
+						timerInterval = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? ANIMATION_INTERVAL_EINK : ANIMATION_INTERVAL_NORMAL;
 						startTimer(timerInterval);
 					} else {
 						currentAutoScrollAnimation = null;
@@ -2633,7 +2634,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				drawPage();
 				break;
 			case DCMD_PAGEDOWN:
-				eink = DeviceInfo.EINK_SCREEN;
+				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 			//	eink = true;
 				if ( param==1 && !eink)
 					animatePageFlip(1, onFinishHandler);
@@ -2648,16 +2649,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								//drawPage();
 								doEngineCommand(cmd, param, onFinishHandler);
 							}
-						}, 500);
+						}, blackpageDuration);
 					} else {
 						if (mActivity.getScreenBlackpageInterval()!=0) curBlackpageInterval++;
 						doEngineCommand(cmd, param, onFinishHandler);
 					}
 				}
-			//	log.v("asdf "+curBlackpageInterval+" "+mActivity.getScreenBlackpageInterval());
 				break;
 			case DCMD_PAGEUP:
-				eink = DeviceInfo.EINK_SCREEN;
+				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 			//	eink = true;
 				if ( param==1 && !eink)
 					animatePageFlip(-1, onFinishHandler);
@@ -2672,7 +2672,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								//drawPage();
 								doEngineCommand(cmd, param, onFinishHandler);
 							}
-						}, 500);
+						}, blackpageDuration);
 					} else {
 						if (mActivity.getScreenBlackpageInterval()!=0) curBlackpageInterval++;
 						doEngineCommand(cmd, param, onFinishHandler);
@@ -2725,7 +2725,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showBrowser(getOpenedFileInfo());
 				break;
 			case DCMD_OPTIONS_DIALOG:
+				mActivity.optionsFilter = "";
 				mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
+				break;
+			case DCMD_OPTIONS_DIALOG_FILTERED:
+				showFilterDialog();
 				break;
 			case DCMD_READER_MENU:
 				mActivity.showReaderMenu();
@@ -3053,9 +3057,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int updMode      = props.getInt(PROP_APP_SCREEN_UPDATE_MODE, 0);
 		int updInterval  = props.getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
 		int blackpageInterval  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_INTERVAL, 0);
-		mActivity.setScreenUpdateMode(updMode, surface);
+        blackpageDuration  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_DURATION, 300);
+        mActivity.setScreenUpdateMode(updMode, surface);
 		mActivity.setScreenUpdateInterval(updInterval, surface);
 		mActivity.setScreenBlackpageInterval(blackpageInterval);
+        mActivity.setScreenBlackpageDuration(blackpageDuration);
 
 		getActivity().readResizeHistory();
 
@@ -3576,7 +3582,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if ( state!=mBatteryState ) {
 			log.i("Battery state changed: " + state);
 			mBatteryState = state;
-			if (!DeviceInfo.EINK_SCREEN && !isAutoScrollActive()) {
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) && !isAutoScrollActive()) {
 				drawPage();
 			}
 		}
@@ -3609,7 +3615,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				//log.d("Recycling free bitmap "+bmp.getWidth()+"x"+bmp.getHeight());
 				//bmp.recycle(); //20110109 
 			}
-			Bitmap bmp = Bitmap.createBitmap(dx, dy, DeviceInfo.BUFFER_COLOR_FORMAT);
+			Bitmap bmp = Bitmap.createBitmap(dx, dy, DeviceInfo.getBufferColorFormat(BaseActivity.getScreenForceEink()));
 			runtime.trackFree(dx*dy*2);
 			//bmp.setDensity(0);
 			usedList.add(bmp);
@@ -4424,11 +4430,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				canvas = holder.lockCanvas(rc);
 				//log.v("before draw(canvas)");
 				if ( canvas!=null ) {
-					if (DeviceInfo.EINK_SCREEN){
+					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())){
 						EinkScreen.PrepareController(surface, isPartially);
 					}
 					callback.drawTo(canvas);
-					if (DeviceInfo.EINK_SCREEN){
+					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())){
 						EinkScreen.UpdateController(surface, isPartially);
 					}
 				}
@@ -5457,7 +5463,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private final static boolean centerPageInsteadOfResizing = true;
 
 	private void dimRect( Canvas canvas, Rect dst ) {
-		if ((DeviceInfo.EINK_SCREEN)&&(!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS))
+		if ((DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))&&(!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS))
 			return; // no backlight
 		int alpha = dimmingAlpha;
 		if ( alpha!=255 ) {
@@ -6396,6 +6402,26 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
+	public void showFilterDialog() {
+		showInputDialog(mActivity.getString(R.string.mi_filter_option), mActivity.getString(R.string.mi_filter_option),
+				false,
+				1, 2, 3,
+				new InputDialog.InputHandler() {
+					@Override
+					public boolean validate(String s) {
+						return true;
+					}
+					@Override
+					public void onOk(String s) {
+						mActivity.optionsFilter = s;
+						mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
+					}
+					@Override
+					public void onCancel() {
+					}
+				});
+	}
+
 	public void showGoToPageDialog( final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final GotoPageDialog.GotoPageHandler handler )
 	{
 		BackgroundThread.instance().executeGUI(new Runnable() {
@@ -6440,6 +6466,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		});
 	}
+
 
 	public void showGoToPercentDialog() {
 		getCurrentPositionProperties(new PositionPropertiesCallback() {

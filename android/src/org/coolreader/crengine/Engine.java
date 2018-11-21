@@ -1761,8 +1761,8 @@ public class Engine {
 	public ProgressControl createProgress(int resourceId) {
 		return new ProgressControl(resourceId);
 	}
-	private static final int PROGRESS_UPDATE_INTERVAL = DeviceInfo.EINK_SCREEN ? 4000 : 500;
-	private static final int PROGRESS_SHOW_INTERVAL = DeviceInfo.EINK_SCREEN ? 4000 : 1500;
+	private static final int PROGRESS_UPDATE_INTERVAL = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4000 : 500;
+	private static final int PROGRESS_SHOW_INTERVAL = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4000 : 1500;
 	public class ProgressControl {
 		private final int resourceId;
 		private long createTime = Utils.timeStamp();

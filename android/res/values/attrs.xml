@@ -266,6 +266,10 @@
     <attr name="attr_icons8_folder_hash" format="reference" />
     <attr name="attr_icons8_folder_author" format="reference" />
     <attr name="attr_icons8_cancel_small" format="reference" />
+    <attr name="attr_icons8_eink" format="reference" />
+    <attr name="attr_icons8_blackpage_duration" format="reference" />
+    <attr name="attr_icons8_blackpage_interval" format="reference" />
+    <attr name="attr_icons8_settings_search" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

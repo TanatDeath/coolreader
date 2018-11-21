@@ -148,6 +148,10 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
     public static final String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";
     public static final String PROP_APP_SCREEN_BLACKPAGE_INTERVAL = "app.screen.blackpage.interval";
+    public static final String PROP_APP_SCREEN_BLACKPAGE_DURATION = "app.screen.blackpage.duration";
+    public static final String PROP_APP_SCREEN_FORCE_EINK = "app.screen.force.eink";
+
+
     public static final String PROP_APP_SECONDARY_TAP_ACTION_TYPE = "app.touch.secondary.action.type";
     public static final String PROP_APP_GESTURE_PAGE_FLIPPING = "app.touch.gesture.page.flipping";
 

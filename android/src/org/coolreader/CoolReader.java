@@ -187,6 +187,8 @@ public class CoolReader extends BaseActivity
 
 	public boolean skipFindInDic = false; // skip find in dic when bookmark toast is shown
 
+	public String optionsFilter = "font"; //filter used for options
+
 	/** Called when the activity is first created. */
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -546,7 +548,7 @@ public class CoolReader extends BaseActivity
 		if (mReaderView != null)
 			mReaderView.onAppResume();
 		
-		if (DeviceInfo.EINK_SCREEN) {
+		if (DeviceInfo.isEinkScreen(getScreenForceEink())) {
             if (DeviceInfo.EINK_SONY) {
                 SharedPreferences pref = getSharedPreferences(PREF_FILE, 0);
                 String res = pref.getString(PREF_LAST_BOOK, null);
@@ -1706,7 +1708,7 @@ public class CoolReader extends BaseActivity
 				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND);
 		String sDevFlags = "";
 		if (DeviceInfo.AMOLED_SCREEN) sDevFlags = sDevFlags + ", AMOLED screen";
-		if (DeviceInfo.EINK_SCREEN) sDevFlags = sDevFlags + ", EINK screen";
+		if (DeviceInfo.isEinkScreen(false)) sDevFlags = sDevFlags + ", EINK screen";
 		if (DeviceInfo.EINK_NOOK) sDevFlags = sDevFlags + ", EINK Nook";
 		if (DeviceInfo.EINK_NOOK_120) sDevFlags = sDevFlags + ", EINK Nook 120";
 		if (DeviceInfo.EINK_SONY) sDevFlags = sDevFlags + ", EINK Sony";
@@ -2283,13 +2285,13 @@ public class CoolReader extends BaseActivity
 
 		addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
 					Intent.ShortcutIconResource.fromContext(getApplicationContext(),
-							Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+							Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
 					//		R.drawable.cr3_browser_book_hc
 					));
 
 		if (DeviceInfo.getSDKLevel() >= 26) {
 			Icon icon = Icon.createWithResource(getApplicationContext(),
-					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
 					//R.drawable.cr3_browser_book_hc
 			);
 			if (bmp!=null) icon = Icon.createWithBitmap(bmp);
@@ -2302,7 +2304,7 @@ public class CoolReader extends BaseActivity
 		}
 	}
 
-    @TargetApi(25)
+    @TargetApi(25) 
     public void createDynShortcuts() {
 		try {
 			if (DeviceInfo.getSDKLevel() >= 25) {
@@ -2317,7 +2319,7 @@ public class CoolReader extends BaseActivity
 						.setShortLabel(this.getString(R.string.mi_book_recent_books))
 						.setLongLabel(this.getString(R.string.mi_book_recent_books))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
 								//R.drawable.cr3_browser_book_hc
 						))
 						.setIntent(intent)
@@ -2332,7 +2334,7 @@ public class CoolReader extends BaseActivity
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_reading))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_reading))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
 								//R.drawable.cr3_browser_book_hc
 						))
 						.setIntent(intent)
@@ -2348,7 +2350,7 @@ public class CoolReader extends BaseActivity
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_to_read))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
 								//R.drawable.cr3_browser_book_hc
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
 						))
 						.setIntent(intent)
 						.build();
@@ -2362,7 +2364,7 @@ public class CoolReader extends BaseActivity
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_finished))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_finished))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
 						//		R.drawable.cr3_browser_book_hc
 						))
 						.setIntent(intent)
@@ -2378,7 +2380,7 @@ public class CoolReader extends BaseActivity
 						.setLongLabel(this.getString(R.string.dlg_book_search))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
 								//R.drawable.cr3_browser_find_hc
-								Utils.resolveResourceIdByAttr(this, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search)
+								Utils.resolveResourceIdByAttr(this, R.attr.cr3_viewer_find_drawable, R.drawable.drk_icons8_search)
 						))
 						.setIntent(intent)
 						.build();

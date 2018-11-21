@@ -162,7 +162,7 @@ public class SearchDlg extends BaseDialog {
 
 		this.mBookInfo = mReaderView.getBookInfo();
 		setPositiveButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),
+				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.drk_icons8_search),
 				//R.drawable.icons8_search,
 				R.string.action_search);
         mInflater = LayoutInflater.from(getContext());

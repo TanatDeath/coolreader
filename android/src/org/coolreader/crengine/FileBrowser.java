@@ -826,7 +826,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}, 
 			mActivity.getString(R.string.mi_book_sort_order), 
 			ReaderView.PROP_APP_BOOK_SORT_ORDER,
-				mActivity.getString(R.string.option_add_info_empty_text)).add(optionValues, optionLabels, optionAddInfos);
+				mActivity.getString(R.string.option_add_info_empty_text), "").add(optionValues, optionLabels, optionAddInfos);
 		dlg.setOnChangeHandler(new Runnable() {
 			public void run() {
 				final String newValue = properties.getProperty(ReaderView.PROP_APP_BOOK_SORT_ORDER);
@@ -1390,15 +1390,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 				if ( item.isDirectory ) {
 					if (item.isBooksByAuthorRoot())
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.drk_icons8_folder_author));
 					else if (item.isBooksBySeriesRoot())
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.drk_icons8_folder_hash));
                     else if (item.isBooksByBookdateRoot()||item.isBooksByDocdateRoot()||item.isBooksByPublyearRoot()||item.isBooksByFiledateRoot())
-                        image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
+                        image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.drk_icons8_folder_year));
                     else if (item.isBooksByTitleRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 					else if (item.isBooksByRatingRoot() )
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.drk_icons8_folder_stars));
 					else if (item.isBooksByStateReadingRoot() || item.isBooksByStateToReadRoot() || item.isBooksByStateFinishedRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 					else if (item.isOPDSRoot() || item.isOPDSDir())

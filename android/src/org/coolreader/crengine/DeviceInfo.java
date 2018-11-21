@@ -15,7 +15,7 @@ public class DeviceInfo {
 	public final static String BRAND;
 	public final static int MIN_SCREEN_BRIGHTNESS_PERCENT;
 	public final static boolean SAMSUNG_BUTTONS_HIGHLIGHT_PATCH;
-	public final static boolean EINK_SCREEN;
+	private final static boolean EINK_SCREEN;
 	public final static boolean SCREEN_CAN_CONTROL_BRIGHTNESS;
 	public final static boolean EINK_SCREEN_UPDATE_MODES_SUPPORTED;
 	public final static boolean NOOK_NAVIGATION_KEYS;
@@ -24,24 +24,44 @@ public class DeviceInfo {
 	public final static boolean EINK_ONYX;
 	public final static boolean EINK_DNS;
 	public final static boolean EINK_TOLINO;
-	public final static boolean FORCE_HC_THEME;
+	private final static boolean FORCE_HC_THEME;
 	public final static boolean EINK_SONY;
 	public final static boolean SONY_NAVIGATION_KEYS;
-	public final static boolean USE_CUSTOM_TOAST;
+	private final static boolean USE_CUSTOM_TOAST;
 	public final static boolean AMOLED_SCREEN;
 	public final static boolean POCKETBOOK;
 	public final static boolean ONYX_BUTTONS_LONG_PRESS_NOT_AVAILABLE;
 	public final static boolean NOFLIBUSTA;
 	public final static boolean NAVIGATE_LEFTRIGHT; // map left/right keys to single page flip
 	public final static boolean REVERT_LANDSCAPE_VOLUME_KEYS; // revert volume keys in landscape mode
-	public final static android.graphics.Bitmap.Config BUFFER_COLOR_FORMAT;
+	private final static android.graphics.Bitmap.Config BUFFER_COLOR_FORMAT;
 	public final static boolean USE_OPENGL = true;
-	public final static int PIXEL_FORMAT;
+	private final static int PIXEL_FORMAT;
 	public final static String  DEF_FONT_FACE;
 	public final static boolean USE_BITMAP_MEMORY_HACK; // revert volume keys in landscape mode
 	public final static Integer DEF_FONT_SIZE;
 	public final static boolean ONE_COLUMN_IN_LANDSCAPE;
-	
+
+	public static boolean isEinkScreen(boolean isEinkFromSettings) {
+		return EINK_SCREEN || isEinkFromSettings;
+	}
+
+	public static boolean isForceHCTheme(boolean isEinkFromSettings) {
+		return FORCE_HC_THEME || isEinkFromSettings;
+	}
+
+	public static boolean isUseCustomToast(boolean isEinkFromSettings) {
+		return USE_CUSTOM_TOAST || isEinkFromSettings;
+	}
+
+	public static android.graphics.Bitmap.Config getBufferColorFormat(boolean isEinkFromSettings) {
+		return isEinkScreen(isEinkFromSettings) || USE_OPENGL ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
+	}
+
+	public static int getPixelFormat(boolean isEinkFromSettings) {
+		return (getBufferColorFormat(isEinkFromSettings) == android.graphics.Bitmap.Config.RGB_565) ? PixelFormat.RGB_565 : PixelFormat.RGBA_8888;
+	}
+
 	// minimal screen backlight level percent for different devices
 	private static final String[] MIN_SCREEN_BRIGHTNESS_DB = {
 		"LGE;LG-P500",       "6", // LG Optimus One

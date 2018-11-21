@@ -52,7 +52,7 @@ public class BaseDialog extends Dialog {
 		addButtonContentDescriptionId = descriptionId;
 	}
 	
-	public static final boolean DARK_THEME = !DeviceInfo.FORCE_HC_THEME;
+	public static final boolean DARK_THEME = !DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink());
 	public BaseDialog( BaseActivity activity )
 	{
 		this( activity, "", false, false );
@@ -77,11 +77,11 @@ public class BaseDialog extends Dialog {
 		this.needCancelButton = showNegativeButton;
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 //		requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
-		if (!DeviceInfo.EINK_SCREEN) {
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 			lp.alpha = 1.0f;
 			lp.dimAmount = 0.0f;
-			lp.format = DeviceInfo.PIXEL_FORMAT;
+			lp.format = DeviceInfo.getPixelFormat(BaseActivity.getScreenForceEink());
 			lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
 			lp.horizontalMargin = 0;
 			lp.verticalMargin = 0;

@@ -172,7 +172,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		//	mBookmark = bookmark;
 		if (!isNew) {
 			setThirdButtonImage(
-					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus)
+					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.drk_icons8_minus)
 					, R.string.mi_bookmark_delete);
 		}
 		boolean isComment = bookmark.getType()==Bookmark.TYPE_COMMENT;
@@ -244,7 +244,7 @@ public class BookmarkEditDialog extends BaseDialog {
 			lblSetComment.setText(activity.getString(R.string.clipb_contents) +" "+cbtext.trim());
 		if (!cbtext.trim().equals("")) {
 			setAddButtonImage(
-					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_ok_from_clipboard, R.drawable.icons8_ok_from_clipboard),
+					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_ok_from_clipboard, R.drawable.drk_icons8_ok_from_clipboard),
 					//R.drawable.icons8_ok_from_clipboard,
 					R.string.set_comment_from_cb_capt);
 		}

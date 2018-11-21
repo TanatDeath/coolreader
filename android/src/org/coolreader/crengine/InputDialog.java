@@ -4,6 +4,7 @@ import org.coolreader.R;
 
 import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -37,6 +38,7 @@ public class InputDialog extends BaseDialog {
         }
         SeekBar seekBar = (SeekBar)layout.findViewById(R.id.goto_position_seek_bar);
         if (seekBar != null) {
+        	if (!isNumberEdit) seekBar.setVisibility(View.INVISIBLE);
         	seekBar.setMax(maxValue - minValue);
         	seekBar.setProgress(currentValue);
         	seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {

@@ -210,29 +210,29 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		tabs.setup();
 		TabHost.TabSpec tsApp = tabs.newTabSpec("App");
 		tsApp.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_link, R.drawable.icons8_link)));
-				//getContext().getResources().getDrawable(R.drawable.icons8_link));
+				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_link, R.drawable.drk_icons8_link)));
+				//getContext().getResources().getDrawable(R.drawable.drk_icons8_link));
 		tsApp.setContent(this);
 		tabs.addTab(tsApp);
 
 		TabHost.TabSpec tsDirectories = tabs.newTabSpec("Directories");
 		tsDirectories.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_folder_2, R.drawable.icons8_folder_2)));
-				//getContext().getResources().getDrawable(R.drawable.icons8_folder_2));
+				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_folder_2, R.drawable.drk_icons8_folder_2)));
+				//getContext().getResources().getDrawable(R.drawable.drk_icons8_folder_2));
 		tsDirectories.setContent(this);
 		tabs.addTab(tsDirectories);
 
 		TabHost.TabSpec tsLicense = tabs.newTabSpec("License");
 		tsLicense.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_star, R.drawable.icons8_star)));
-				//getContext().getResources().getDrawable(R.drawable.icons8_star));
+				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_star, R.drawable.drk_icons8_star)));
+				//getContext().getResources().getDrawable(R.drawable.drk_icons8_star));
 		tsLicense.setContent(this);
 		tabs.addTab(tsLicense);
 		
 		TabHost.TabSpec tsDonation = tabs.newTabSpec("Donation");
 		tsDonation.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_happy, R.drawable.icons8_happy)));
-				//getContext().getResources().getDrawable(R.drawable.icons8_happy));
+				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_happy, R.drawable.drk_icons8_happy)));
+				//getContext().getResources().getDrawable(R.drawable.drk_icons8_happy));
 		tsDonation.setContent(this);
 		tabs.addTab(tsDonation);
 		

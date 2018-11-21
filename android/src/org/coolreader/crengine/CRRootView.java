@@ -519,7 +519,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			View view = inflater.inflate(R.layout.root_item_dir, null);
 			ImageView icon = (ImageView) view.findViewById(R.id.item_icon);
 			TextView label = (TextView) view.findViewById(R.id.item_name);
-			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
+			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.drk_icons8_google_drive_2));
 			label.setText(R.string.open_book_from_gd_short);
 			label.setTextColor(colorIcon);
 			label.setMaxWidth(coverWidth * 25 / 10);
@@ -649,15 +649,15 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			if (item.isSearchShortcut())
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
 			else if ( item.isBooksByRatingRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.drk_icons8_folder_stars));
 			else if ( item.isBooksByTitleRoot() )
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			else if ( item.isBooksBySeriesRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.drk_icons8_folder_hash));
 			else if (item.isBooksByAuthorRoot())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.drk_icons8_folder_author));
 			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() || item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.drk_icons8_folder_year));
 			if (label != null) {
 				label.setText(item.filename);
 				label.setTextColor(colorIcon);

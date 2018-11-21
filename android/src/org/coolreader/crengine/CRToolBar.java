@@ -533,6 +533,8 @@ public class CRToolBar extends ViewGroup {
 			case R.id.options_view_toolbar_position:
 				if (cr!=null) {
 					log.d("options_view_toolbar_position menu item selected");
+					if (activity instanceof CoolReader)
+						((CoolReader)activity).optionsFilter = "";
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_LOCATION);
 				};
 				break;
@@ -563,24 +565,32 @@ public class CRToolBar extends ViewGroup {
 			case R.id.options_view_toolbar_appearance:
 				if (cr!=null) {
 					log.d("options_view_toolbar_appearance menu item selected");
+					if (activity instanceof CoolReader)
+						((CoolReader)activity).optionsFilter = "";
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_APPEARANCE);
 				};
 				break;
 			case R.id.options_reader_toolbar_buttons:
 				if (cr!=null) {
 					log.d("options_reader_toolbar_buttons menu item selected");
+					if (activity instanceof CoolReader)
+						((CoolReader)activity).optionsFilter = "";
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_BUTTONS);
 				};
 				break;
 			case R.id.options_app_tapzones_normal:
 				if (cr!=null) {
 					log.d("options_app_tapzones_normal menu item selected");
+					if (activity instanceof CoolReader)
+						((CoolReader)activity).optionsFilter = "";
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TAP_ZONE_ACTIONS_TAP);
 				};
 				break;
 			case R.id.options_app_key_actions:
 				if (cr!=null) {
 					log.d("options_app_key_actions menu item selected");
+					if (activity instanceof CoolReader)
+						((CoolReader)activity).optionsFilter = "";
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_KEY_ACTIONS_PRESS);
 				};
 				break;

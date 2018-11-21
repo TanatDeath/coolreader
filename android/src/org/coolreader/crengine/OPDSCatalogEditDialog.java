@@ -36,7 +36,7 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		usernameEdit.setText(mItem.username);
 		passwordEdit.setText(mItem.password);
 		setThirdButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.drk_icons8_minus),
 				//R.drawable.icons8_minus,
 				R.string.mi_catalog_delete);
 		setView(view);

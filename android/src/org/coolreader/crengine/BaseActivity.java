@@ -208,11 +208,11 @@ public class BaseActivity extends Activity implements Settings {
 		
 		log.i("diagonal=" + diagonalInches + "  isSmartphone=" + isSmartphone());
 		//log.i("CoolReader.window=" + getWindow());
-		if (!DeviceInfo.EINK_SCREEN) {
+		if (!DeviceInfo.isEinkScreen(getScreenForceEink())) {
 			WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 			lp.alpha = 1.0f;
 			lp.dimAmount = 0.0f;
-			lp.format = DeviceInfo.PIXEL_FORMAT;
+			lp.format = DeviceInfo.getPixelFormat(getScreenForceEink());
 			lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
 			lp.horizontalMargin = 0;
 			lp.verticalMargin = 0;
@@ -224,7 +224,7 @@ public class BaseActivity extends Activity implements Settings {
 
 		// load settings
 		Properties props = settings();
-		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.FORCE_HC_THEME ? "HICONTRAST1" : "LIGHT");
+		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST1" : "LIGHT");
 		String lang = props.getProperty(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 		setLanguage(lang);
 		setCurrentTheme(theme);
@@ -232,7 +232,7 @@ public class BaseActivity extends Activity implements Settings {
 		
 		setScreenBacklightDuration(props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK, 3));
 
-		setFullscreen( props.getBool(ReaderView.PROP_APP_FULLSCREEN, DeviceInfo.EINK_SCREEN));
+		setFullscreen( props.getBool(ReaderView.PROP_APP_FULLSCREEN, DeviceInfo.isEinkScreen(getScreenForceEink())));
 		int orientation = props.getInt(ReaderView.PROP_APP_SCREEN_ORIENTATION, 0); //(DeviceInfo.EINK_SCREEN?0:4)
 		if (orientation < 0 || orientation > 5)
 			orientation = 5;
@@ -367,7 +367,7 @@ public class BaseActivity extends Activity implements Settings {
 	public void setCurrentTheme(String themeCode) {
 		InterfaceTheme theme = InterfaceTheme.findByCode(themeCode);
 		if (null == theme)
-			theme = DeviceInfo.FORCE_HC_THEME ? InterfaceTheme.HICONTRAST1 : InterfaceTheme.LIGHT;
+			theme = DeviceInfo.isForceHCTheme(getScreenForceEink()) ? InterfaceTheme.HICONTRAST1 : InterfaceTheme.LIGHT;
 		if (currentTheme != theme) {
 			setCurrentTheme(theme);
 		}
@@ -454,8 +454,7 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_quote_2, R.attr.attr_icons8_bookmark_plus,
 						 R.attr.attr_icons8_google_translate_save,
 						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting,
-						 R.attr.attr_icons8_toggle_page_view_mode
-
+						 R.attr.attr_icons8_toggle_page_view_mode, R.attr.attr_icons8_settings_search
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -526,6 +525,7 @@ public class BaseActivity extends Activity implements Settings {
 		int brFolderScan  = a.getResourceId(61, 0);
 		int brAlphabeticalSorting  = a.getResourceId(62, 0);
 		int brTogglePageViewMode = a.getResourceId(63, 0);
+		int brSettingsSearch = a.getResourceId(64, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -658,6 +658,8 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.FILE_BROWSER_SORT_ORDER.setIconId(brAlphabeticalSorting);
 		if (brTogglePageViewMode!=0)
 			ReaderAction.TOGGLE_PAGE_VIEW_MODE.setIconId(brTogglePageViewMode);
+		if (brSettingsSearch!=0)
+			ReaderAction.OPTIONS_FILTER.setIconId(brSettingsSearch);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -676,7 +678,7 @@ public class BaseActivity extends Activity implements Settings {
 			WindowManager.LayoutParams attrs = wnd.getAttributes();
 			attrs.screenOrientation = screenOrientation;
 			wnd.setAttributes(attrs);
-			if (DeviceInfo.EINK_SCREEN){
+			if (DeviceInfo.isEinkScreen(getScreenForceEink())){
 				//TODO:
 				//EinkScreen.ResetController(mReaderView);
 			}
@@ -1255,6 +1257,22 @@ public class BaseActivity extends Activity implements Settings {
 		mScreenBlackpageInterval = screenBlackpageInterval;
 	}
 
+    private int mScreenBlackpageDuration = 300;
+    public int getScreenBlackpageDuration() {
+        return mScreenBlackpageDuration;
+    }
+    public void setScreenBlackpageDuration( int screenBlackpageDuration) {
+        mScreenBlackpageDuration = screenBlackpageDuration;
+    }
+
+    private static boolean mScreenForceEink = false;
+    public static boolean getScreenForceEink() {
+        return BaseActivity.mScreenForceEink;
+    }
+    public static void setScreenForceEink( boolean screenForceEink) {
+        BaseActivity.mScreenForceEink = screenForceEink;
+    }
+
 	public void showToast(int stringResourceId) {
 		showToast(stringResourceId, Toast.LENGTH_LONG);
 	}
@@ -1277,7 +1295,7 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void showToast(String msg, int duration) {
 		log.v("showing toast: " + msg);
-		if (DeviceInfo.USE_CUSTOM_TOAST) {
+		if (DeviceInfo.isUseCustomToast(getScreenForceEink())) {
 			ToastView.showToast(this, getContentView(), msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
 		} else {
 			// classic Toast
@@ -1292,7 +1310,7 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void showToast(String msg, int duration, View view) {
 		log.v("showing toast: " + msg);
-		if (DeviceInfo.USE_CUSTOM_TOAST) {
+		if (DeviceInfo.isUseCustomToast(getScreenForceEink())) {
 			ToastView.showToast(this, view, msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
 		} else {
 			// classic Toast
@@ -1308,7 +1326,7 @@ public class BaseActivity extends Activity implements Settings {
 		int textSize1 = textSize;
 		if (textSize == 0) textSize1 = 16; //settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 			//	settings().getInt(ReaderView.PROP_FONT_SIZE, 20);
-		if (DeviceInfo.USE_CUSTOM_TOAST || forceCustom) {
+		if (DeviceInfo.isUseCustomToast(getScreenForceEink()) || forceCustom) {
 			ToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, textSize1);
 		} else {
 			// classic Toast
@@ -1477,7 +1495,11 @@ public class BaseActivity extends Activity implements Settings {
 			setScreenUpdateInterval(stringToInt(value, 10), getContentView());
 		} else if ( key.equals(PROP_APP_SCREEN_BLACKPAGE_INTERVAL) ) {
 			setScreenBlackpageInterval(stringToInt(value, 0));
-		} else if ( key.equals(PROP_APP_THEME) ) {
+        } else if ( key.equals(PROP_APP_SCREEN_BLACKPAGE_DURATION) ) {
+            setScreenBlackpageDuration(stringToInt(value, 300));
+        } else if ( key.equals(PROP_APP_SCREEN_FORCE_EINK) ) {
+            setScreenForceEink(stringToInt(value, 0)==0?false:true);
+        } else if ( key.equals(PROP_APP_THEME) ) {
         	setCurrentTheme(value);
         } else if ( key.equals(PROP_APP_SCREEN_ORIENTATION) ) {
         	int orientation = 0;
@@ -1487,7 +1509,7 @@ public class BaseActivity extends Activity implements Settings {
         		// ignore
         	}
         	setScreenOrientation(orientation);
-        } else if ( !DeviceInfo.EINK_SCREEN && PROP_APP_SCREEN_BACKLIGHT.equals(key) ) {
+        } else if ( !DeviceInfo.isEinkScreen(getScreenForceEink()) && PROP_APP_SCREEN_BACKLIGHT.equals(key) ) {
         	try {
         		final int n = Integer.valueOf(value);
         		// delay before setting brightness
@@ -1605,6 +1627,8 @@ public class BaseActivity extends Activity implements Settings {
 	
 	public void showBrowserOptionsDialog()
 	{
+		if (this instanceof CoolReader)
+			((CoolReader)this).optionsFilter = "";
 		OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, OptionsDialog.Mode.BROWSER);
 		dlg.show();
 	}
@@ -1927,9 +1951,9 @@ public class BaseActivity extends Activity implements Settings {
 
 	        props.applyDefault(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 	        
-	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.FORCE_HC_THEME ? "HICONTRAST1" : "LIGHT");
-	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.FORCE_HC_THEME ? "HICONTRAST1" : "LIGHT");
-	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.FORCE_HC_THEME ? "HICONTRAST2" : "DARK");
+	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST1" : "LIGHT");
+	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST1" : "LIGHT");
+	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST2" : "DARK");
 	        props.applyDefault(ReaderView.PROP_APP_SELECTION_PERSIST, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK, "3");
 	        if ("1".equals(props.getProperty(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK)))
@@ -2037,9 +2061,11 @@ public class BaseActivity extends Activity implements Settings {
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_INTERVAL, "10");
 			props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_INTERVAL, "0");
-	        
-	        props.applyDefault(ReaderView.PROP_NIGHT_MODE, "0");
-	        if (DeviceInfo.FORCE_HC_THEME) {
+            props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_DURATION, "300");
+            props.applyDefault(ReaderView.PROP_APP_SCREEN_FORCE_EINK, "0");
+
+            props.applyDefault(ReaderView.PROP_NIGHT_MODE, "0");
+	        if (DeviceInfo.isForceHCTheme(getScreenForceEink())) {
 	        	props.applyDefault(ReaderView.PROP_PAGE_BACKGROUND_IMAGE, Engine.NO_TEXTURE.id);
 	        } else {
 	        	if ( props.getBool(ReaderView.PROP_NIGHT_MODE, false) )
@@ -2050,7 +2076,7 @@ public class BaseActivity extends Activity implements Settings {
 	        props.applyDefault(ReaderView.PROP_PAGE_BACKGROUND_IMAGE_DAY, Engine.DEF_DAY_BACKGROUND_TEXTURE);
 	        props.applyDefault(ReaderView.PROP_PAGE_BACKGROUND_IMAGE_NIGHT, Engine.DEF_NIGHT_BACKGROUND_TEXTURE);
 	        
-	        props.applyDefault(ReaderView.PROP_FONT_GAMMA, DeviceInfo.EINK_SCREEN ? "1.5" : "1.0");
+	        props.applyDefault(ReaderView.PROP_FONT_GAMMA, DeviceInfo.isEinkScreen(getScreenForceEink()) ? "1.5" : "1.0");
 			
 			props.setProperty(ReaderView.PROP_MIN_FILE_SIZE_TO_CACHE, "100000");
 			props.setProperty(ReaderView.PROP_FORCED_MIN_FILE_SIZE_TO_CACHE, "32768");
@@ -2063,7 +2089,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, "0");
 
 			
-			if (!DeviceInfo.EINK_SCREEN) {
+			if (!DeviceInfo.isEinkScreen(getScreenForceEink())) {
 				props.applyDefault(ReaderView.PROP_APP_HIGHLIGHT_BOOKMARKS, "1");
 				props.applyDefault(ReaderView.PROP_HIGHLIGHT_SELECTION_COLOR, "#AAAAAA");
 				props.applyDefault(ReaderView.PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT, "#AAAA55");
@@ -2255,7 +2281,7 @@ public class BaseActivity extends Activity implements Settings {
 				}
 			}
 			if (hasHardwareMenuKey == null) {
-				if (DeviceInfo.EINK_SCREEN)
+				if (DeviceInfo.isEinkScreen(getScreenForceEink()))
 					hasHardwareMenuKey = false;			
 				else if (DeviceInfo.getSDKLevel() < DeviceInfo.ICE_CREAM_SANDWICH)
 					hasHardwareMenuKey = true;

@@ -391,8 +391,8 @@ public class CoverpageManager {
 		}
 	}
 
-	private final static int COVERPAGE_UPDATE_DELAY = DeviceInfo.EINK_SCREEN ? 1000 : 100;
-	private final static int COVERPAGE_MAX_UPDATE_DELAY = DeviceInfo.EINK_SCREEN ? 3000 : 300;
+	private final static int COVERPAGE_UPDATE_DELAY = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 1000 : 100;
+	private final static int COVERPAGE_MAX_UPDATE_DELAY = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 3000 : 300;
 	private Runnable lastReadyNotifyTask;
 	private long firstReadyTimestamp;
 	private void notifyBitmapIsReady(final ImageItem file) {
@@ -727,7 +727,7 @@ public class CoverpageManager {
 								db.saveBookCoverpage(file, imageData);
 						}
 						Services.getEngine().drawBookCover(buffer, imageData, fontFace, file.getTitleOrFileName(),
-								file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.EINK_SCREEN ? 4 : 16);
+								file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 16);
 						BackgroundThread.instance().postGUI(new Runnable() {
 							@Override
 							public void run() {
@@ -783,9 +783,9 @@ public class CoverpageManager {
 	private Bitmap drawCoverpage(byte[] data, ImageItem file)
 	{
 		try {
-			Bitmap bmp = Bitmap.createBitmap(file.maxWidth, file.maxHeight, DeviceInfo.BUFFER_COLOR_FORMAT);
+			Bitmap bmp = Bitmap.createBitmap(file.maxWidth, file.maxHeight, DeviceInfo.getBufferColorFormat(BaseActivity.getScreenForceEink()));
 			Services.getEngine().drawBookCover(bmp, data, fontFace, file.file.getTitleOrFileName(),
-					file.file.getAuthors(), file.file.series, file.file.seriesNumber, DeviceInfo.EINK_SCREEN ? 4 : 16);
+					file.file.getAuthors(), file.file.series, file.file.seriesNumber, DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 16);
 			return bmp;
 		} catch ( Exception e ) {
     		Log.e("cr3", "exception while decoding coverpage " + e.getMessage());

@@ -54,6 +54,8 @@
     <string name="mi_bookmark_goto">Перейти на закладку</string>
     <string name="mi_goto_page">На страницу №</string>
     <string name="mi_goto_percent">На позицию %</string>
+    <string name="mi_filter_option">Поиск в настройках</string>
+    <string name="mi_no_options">Не найдено опций для:</string>
     <string name="mi_goto_toc">Содержание</string>
     <string name="mi_folder_open">Открыть папку</string>
     <string name="mi_folder_delete">Удалить папку</string>
@@ -148,6 +150,7 @@
     <string name="action_go_last_page">На последнюю страницу</string>
     <string name="action_file_browser">Открыть книгу</string>
     <string name="action_options">Настройки</string>
+    <string name="action_options_filtered">Настройки (с фильтрацией)</string>
     <string name="action_toggle_day_night">День / ночь</string>
     <string name="action_reader_menu">Меню чтения</string>
     <string name="options_app_tap_action_short">Короткое нажатие</string>
@@ -316,6 +319,11 @@
     <string name="options_screen_update_mode_fast2">Быстрый 2</string>
     <string name="options_screen_update_interval">Интервал полного обновления</string>
     <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы</string>
+    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на EINK экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
+    <string name="options_screen_blackpage_duration">Длительность отрисовки черной страницы</string>
+    <string name="options_screen_blackpage_duration_add_info">Время (в мс) на которое будет показана черная заливка области чтения</string>
+    <string name="options_screen_force_eink">Это EINK устройство (если не определилось автоматически)</string>
+    <string name="options_screen_force_eink_add_info">Вы можете принудительно указать, что это EINK устройство, в случаях, когда это не определил CoolReader. Если вы меняете эту настройку - закройте и откройте диалог настроек заново, чтобы увидеть настройки для eink</string>
     <string name="options_render_font_gamma">Гамма-коррекция шрифта</string>
     <string name="action_toggle_titlebar">Вкл/выкл колонтитул</string>
     <string name="action_show_position_info">Информация о позиции</string>
