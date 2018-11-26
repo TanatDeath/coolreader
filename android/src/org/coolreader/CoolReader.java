@@ -16,6 +16,7 @@ import org.coolreader.Dictionaries.DictionaryException;
 import org.coolreader.crengine.AboutDialog;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.BookInfoEditDialog;
@@ -134,7 +135,13 @@ public class CoolReader extends BaseActivity
 
 	private HashMap<String, UserDicEntry> mUserDic;
 
-    public boolean ismDictWordCorrrection() {
+	public HashMap<String, BaseDialog> getmBaseDialog() {
+		return mBaseDialog;
+	}
+
+	private HashMap<String, BaseDialog> mBaseDialog = new HashMap<String, BaseDialog>();
+
+	public boolean ismDictWordCorrrection() {
         return mDictWordCorrrection;
     }
 
@@ -1733,12 +1740,12 @@ public class CoolReader extends BaseActivity
 			itemsFile.add("file.name=" + fname);
 			if ( new File(fi.pathname).getParent()!=null )
 				itemsFile.add("file.path=" + new File(fi.pathname).getParent());
-			itemsFile.add("file.size=" + fi.size);
+			itemsFile.add("file.size=" + StrUtils.readableFileSize(fi.size));
 			if ( fi.arcname!=null ) {
 				itemsFile.add("file.arcname=" + new File(fi.arcname).getName());
 				if ( new File(fi.arcname).getParent()!=null )
 					itemsFile.add("file.arcpath=" + new File(fi.arcname).getParent());
-				itemsFile.add("file.arcsize=" + fi.arcsize);
+				itemsFile.add("file.arcsize=" + StrUtils.readableFileSize(fi.arcsize));
 			}
 			itemsFile.add("file.format=" + fi.format.name());
 		}

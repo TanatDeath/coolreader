@@ -265,7 +265,7 @@ public class OpenBookFromGdDlg extends BaseDialog {
 	public OpenBookFromGdDlg(final CoolReader activity, MetadataBuffer mdb, ArrayList<DriveId> adid,
 							 ArrayList<String> adidmd)
 	{
-		super(activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
+		super("OpenBookFromGdDlg", activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
 		mBooksList = mdb;

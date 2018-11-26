@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -1949,7 +1950,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			public void done() {
 				BackgroundThread.instance().executeGUI(new Runnable() {
 					public void run() {
-						BaseDialog dlg = new BaseDialog(mActivity, "", false, false);
+						BaseDialog dlg = new BaseDialog("ReadingPositionPopup",
+								mActivity, "", false, false);
 						dlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
 						//ColorDrawable c = new ColorDrawable(android.graphics.Color.TRANSPARENT);
 						final String[] mFontFaces = Engine.getFontFaceList();
@@ -5195,6 +5197,21 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			bNeedRedrawOnce = false;
 //			return true;
 //		}
+		boolean bSkipRedraw = false;
+		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry)it.next();
+			try {
+				BaseDialog sVal = (BaseDialog) pair.getValue();
+				if (sVal.isShowing()) {
+					log.i("Dialog "+pair.getKey()+" is shown now, skip redraw reader view");
+					return false;
+				}
+			} catch (Exception e) {
+				log.w("Could not check the dialogs...");
+			}
+		}
+		if (bSkipRedraw) return true;
 		boolean bChanged = false;
 		String sProp = x+"."+y;
 		boolean bNeedRedraw = !getSettings().getBool(Settings.PROP_SKIPPED_RES+"."+sProp,false);

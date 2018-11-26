@@ -173,7 +173,7 @@ public class GotoPageDialog extends BaseDialog {
 	
 	public GotoPageDialog(BaseActivity activity, final String title, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final GotoPageHandler handler )
 	{
-		super(activity, title, true, false);
+		super("GotoPageDialog", activity, title, true, false);
 		this.arrFound = null;
 		this.handler = handler;
 		this.minValue = minValue;
@@ -230,7 +230,7 @@ public class GotoPageDialog extends BaseDialog {
 
 	public GotoPageDialog(BaseActivity activity, final String title, final String findtext, final GotoPageHandler handler )
 	{
-		super(activity, title, true, false);
+		super("GotoPageDialog", activity, title, true, false);
 		arrFound = new ArrayList<String[]>();
 		this.handler = handler;
 		this.minValue = minValue;

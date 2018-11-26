@@ -25,7 +25,7 @@ public class InputDialog extends BaseDialog {
 	int maxValue;
 	public InputDialog( BaseActivity activity, final String title, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final InputHandler handler )
 	{
-		super(activity, title, true, false);
+		super("InputDialog", activity, title, true, false);
 		this.handler = handler;
 		this.minValue = minValue;
 		this.maxValue = maxValue;

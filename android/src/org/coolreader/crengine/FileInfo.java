@@ -290,6 +290,7 @@ public class FileInfo {
 			File arc = new File(arcname);
 			if (arc.isFile() && arc.exists()) {
 				arcsize = (int)arc.length();
+				size = arcsize;
 				isArchive = true;
 				try {
 					//ZipFile zip = new ZipFile(new File(arcname));
@@ -303,7 +304,7 @@ public class FileInfo {
 							filename = itemf.getName();
 							path = itemf.getPath();
 							format = DocumentFormat.byExtension(name);
-							size = (int)entry.getSize();
+							//size = (int)entry.getSize();//plotn - guess this is same as compressed...
 							arcsize = (int)entry.getCompressedSize();
 							createTime = entry.getTime();
 							break;

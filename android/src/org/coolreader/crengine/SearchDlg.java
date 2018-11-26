@@ -155,7 +155,7 @@ public class SearchDlg extends BaseDialog {
 	
 	public SearchDlg(BaseActivity coolReader, ReaderView readerView, String initialText)
 	{
-		super(coolReader, coolReader.getResources().getString(R.string.win_title_search), true, false);
+		super("SearchDlg", coolReader, coolReader.getResources().getString(R.string.win_title_search), true, false);
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;

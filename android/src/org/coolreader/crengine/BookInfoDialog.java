@@ -187,7 +187,7 @@ public class BookInfoDialog extends BaseDialog {
 	
 	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, String annot)
 	{
-		super(activity, "", true, false);
+		super("BookInfoDialog", activity, "", true, false);
 		mCoolReader = activity;
 		mBookInfo = bi;
 		setThirdButtonImage(

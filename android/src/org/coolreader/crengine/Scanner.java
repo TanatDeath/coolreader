@@ -57,7 +57,8 @@ public class Scanner extends FileInfoChangeSource {
 				item.filename = f.getName();
 				item.path = f.getPath();
 				item.pathname = entry.getName();
-				item.size = (int)entry.getSize();
+				//item.size = (int)entry.getSize();
+				item.size = (int)zf.length();
 				//item.createTime = entry.getTime();
 				item.setCreateTime(zf.lastModified()); // it looks strange whilst if fileinfo.create used zip entry date...
 				item.setFileCreateTime(zf.lastModified());

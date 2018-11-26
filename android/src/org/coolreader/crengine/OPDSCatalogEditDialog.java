@@ -19,7 +19,7 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 	private final Runnable mOnUpdate;
 
 	public OPDSCatalogEditDialog(CoolReader activity, FileInfo item, Runnable onUpdate) {
-		super(activity, activity.getString((item.id == null) ? R.string.dlg_catalog_add_title
+		super("OPDSCatalogEditDialog", activity, activity.getString((item.id == null) ? R.string.dlg_catalog_add_title
 				: R.string.dlg_catalog_edit_title), true,
 				false);
 		mActivity = activity;

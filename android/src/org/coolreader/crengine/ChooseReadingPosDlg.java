@@ -157,7 +157,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 
 	public ChooseReadingPosDlg(CoolReader activity, MetadataBuffer mdb)
 	{
-		super(activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
+		super("ChooseReadingPosDlg", activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;

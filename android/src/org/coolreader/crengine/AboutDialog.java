@@ -87,7 +87,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 
 	public AboutDialog( CoolReader activity)
 	{
-		super(activity);
+		super("AboutDialog", activity);
 		mCoolReader = activity;
 		boolean isFork = !mCoolReader.getPackageName().equals(CoolReader.class.getPackage().getName());
 		setTitle(R.string.dlg_about);

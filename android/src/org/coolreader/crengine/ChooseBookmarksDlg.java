@@ -157,7 +157,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 	public ChooseBookmarksDlg(CoolReader activity, MetadataBuffer mdb)
 	{
-		super(activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;

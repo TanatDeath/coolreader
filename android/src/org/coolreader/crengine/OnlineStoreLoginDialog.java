@@ -22,7 +22,7 @@ public class OnlineStoreLoginDialog extends BaseDialog {
 	private Runnable mOnLoginHandler;
 	public OnlineStoreLoginDialog(BaseActivity activity, OnlineStoreWrapper plugin, Runnable onLoginHandler)
 	{
-		super(activity, null, false, false);
+		super("OnlineStoreLoginDialog", activity, null, false, false);
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mActivity = activity;

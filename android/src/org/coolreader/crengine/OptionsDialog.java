@@ -25,6 +25,8 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -37,8 +39,10 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -1115,6 +1119,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		KEY_ACTION_FLAG_DOUBLE
 	}
 	class KeyMapOption extends SubmenuOption {
+
+		private ListView listView;
+
 		public KeyMapOption( OptionOwner owner, String label, String addInfo, String filter ) {
 			super(owner, label, PROP_APP_KEY_ACTIONS_PRESS, addInfo, filter);
 		}
@@ -1163,8 +1170,25 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
-			OptionsListView listView = new OptionsListView(getContext(), this);
+			BaseDialog dlg = new BaseDialog("KeyMapDialog", mActivity, label, false, false);
+			View view = mInflater.inflate(R.layout.searchable_listview, null);
+			LinearLayout viewList = (LinearLayout)view.findViewById(R.id.lv_list);
+			final EditText tvSearchText = (EditText)view.findViewById(R.id.search_text);
+			ImageButton ibSearch = (ImageButton)view.findViewById(R.id.btn_search);
+			final OptionsListView listView = new OptionsListView(getContext(), this);
+			tvSearchText.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+					listView.listUpdated(cs.toString());
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+				@Override
+				public void afterTextChanged(Editable arg0) {}
+			});
+
 			if ( DeviceInfo.NOOK_NAVIGATION_KEYS ) {
 				addKey(listView, ReaderView.KEYCODE_PAGE_TOPLEFT, "Top left navigation button");
 				addKey(listView, ReaderView.KEYCODE_PAGE_BOTTOMLEFT, "Bottom left navigation button");
@@ -1349,7 +1373,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				);
 			}
 
-			dlg.setView(listView);
+			viewList.addView(listView);
+			ibSearch.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
+					tvSearchText.setText("");
+					listView.listUpdated("");
+				}
+			});
+			dlg.setView(view);
+			ibSearch.requestFocus();
+			//dlg.setView(listView);
 			dlg.show();
 		}
 
@@ -1416,6 +1450,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 
 	class ReaderToolbarOption extends SubmenuOption {
+
+		private ListView listView;
+
 		public ReaderToolbarOption( OptionOwner owner, String label, String addInfo, String filter ) {
 			super(owner, label, PROP_TOOLBAR_BUTTONS, addInfo, filter);
 		}
@@ -1469,8 +1506,25 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
-			OptionsListView listView = new OptionsListView(getContext(), this);
+			BaseDialog dlg = new BaseDialog("ReaderToolbarDialog", mActivity, label, false, false);
+			View view = mInflater.inflate(R.layout.searchable_listview, null);
+			LinearLayout viewList = (LinearLayout)view.findViewById(R.id.lv_list);
+			final EditText tvSearchText = (EditText)view.findViewById(R.id.search_text);
+			ImageButton ibSearch = (ImageButton)view.findViewById(R.id.btn_search);
+			final OptionsListView listView = new OptionsListView(getContext(), this);
+			tvSearchText.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+					listView.listUpdated(cs.toString());
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+				@Override
+				public void afterTextChanged(Editable arg0) {}
+			});
+
 
 			ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
 
@@ -1480,7 +1534,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						)
 					addAction(listView, a);
 
-			dlg.setView(listView);
+			viewList.addView(listView);
+			ibSearch.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
+					tvSearchText.setText("");
+					listView.listUpdated("");
+				}
+			});
+			dlg.setView(view);
+			ibSearch.requestFocus();
+			//dlg.setView(listView);
 			dlg.show();
 		}
 
@@ -1506,13 +1570,32 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 
 	class SkippedResOption extends SubmenuOption {
+
+		private ListView listView;
+
 		public SkippedResOption( OptionOwner owner, String label, String addInfo, String filter ) {
 			super(owner, label, PROP_SKIPPED_RES, addInfo,filter);
 		}
 
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
-			OptionsListView listView = new OptionsListView(getContext(),this);
+			BaseDialog dlg = new BaseDialog("SkippedResDialog", mActivity, label, false, false);
+			View view = mInflater.inflate(R.layout.searchable_listview, null);
+			LinearLayout viewList = (LinearLayout)view.findViewById(R.id.lv_list);
+			final EditText tvSearchText = (EditText)view.findViewById(R.id.search_text);
+			ImageButton ibSearch = (ImageButton)view.findViewById(R.id.btn_search);
+			final OptionsListView listView = new OptionsListView(getContext(), this);
+			tvSearchText.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+					listView.listUpdated(cs.toString());
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+				@Override
+				public void afterTextChanged(Editable arg0) {}
+			});
 
 			((CoolReader)mActivity).readResizeHistory();
 			for (CoolReader.ResizeHistory rh: ((CoolReader)mActivity).getResizeHist()) {
@@ -1522,7 +1605,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				listView.add(new BoolOption(mOwner, sText, PROP_SKIPPED_RES+"."+sProp, "", this.lastFilteredValue).setDefaultValue("0").
 						setIconId(0));
 			}
-			dlg.setView(listView);
+			viewList.addView(listView);
+			ibSearch.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
+					tvSearchText.setText("");
+					listView.listUpdated("");
+				}
+			});
+			dlg.setView(view);
+			ibSearch.requestFocus();
+			//dlg.setView(listView);
 			dlg.show();
 		}
 
@@ -1546,7 +1639,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
+			BaseDialog dlg = new BaseDialog("StatusBarDialog", mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(), this);
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_show_titlebar), PROP_STATUS_LOCATION, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mStatusPositions,
 					mStatusPositionsTitles, mStatusPositionsAddInfos).setDefaultValue("1"));
@@ -1613,7 +1706,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			super(owner, label, PROP_APP_PLUGIN_ENABLED, addInfo, filter);
 		}
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
+			BaseDialog dlg = new BaseDialog("PluginsDialog", mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(),this);
 			boolean defEnableLitres = activity.getCurrentLanguage().toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
 			listView.add(new BoolOption(mOwner, "LitRes", PROP_APP_PLUGIN_ENABLED + "." +
@@ -1630,7 +1723,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			super(owner, label, PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE, addInfo, filter);
 		}
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
+			BaseDialog dlg = new BaseDialog("ImageScalingDialog", mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(), this);
 			listView.add(new ListOption(mOwner, getString(R.string.options_format_image_scaling_block_mode), PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE,
 				getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mImageScalingModes, mImageScalingModesTitles, mImageScalingModesAddInfos).
@@ -1768,7 +1861,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		public String getValueLabel() { return ">"; }
 		public void onSelect() {
-			BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
+			BaseDialog dlg = new BaseDialog("TapZoneDialog", mActivity, label, false, false);
 			grid = (View)mInflater.inflate(R.layout.options_tap_zone_grid, null);
 			initTapZone(grid.findViewById(R.id.tap_zone_grid_cell1), 1);
 			initTapZone(grid.findViewById(R.id.tap_zone_grid_cell2), 2);
@@ -1809,7 +1902,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			super(owner, label, property, addInfo, filter);
 		}
 		public int getItemViewType() {
-			return OPTION_VIEW_TYPE_SUBMENU; 
+			return OPTION_VIEW_TYPE_SUBMENU;
 		}
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
@@ -1837,8 +1930,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 						@Override
 						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-							//toast.show();
 							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 						}
 					});
@@ -1849,12 +1940,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	
 	public static class ListOption extends OptionBase {
 		private ArrayList<Three> list = new ArrayList<Three>();
+		private ArrayList<Three> listFiltered = new ArrayList<Three>();
+		private BaseAdapter listAdapter;
+		private ListView listView;
 
 		public ListOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
 			super(owner, label, property, addInfo, filter);
 		}
 		public void add(String value, String label, String addInfo) {
 			list.add( new Three(value, label, addInfo) );
+			listFiltered.add( new Three(value, label, addInfo) );
 			this.updateFilteredMark(value);
 			this.updateFilteredMark(label);
 			this.updateFilteredMark(addInfo);
@@ -2009,14 +2104,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		
 		public String getValueLabel() { return findValueLabel(mProperties.getProperty(property)); }
-		
-		public void onSelect() {
-			final BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
 
-			final ListView listView = new BaseListView(mActivity, false);
-			
-			
-			ListAdapter listAdapter = new BaseAdapter() {
+		private void listUpdated(String sText) {
+			listFiltered.clear();
+			for(int i=0;i<list.size();i++){
+				if (
+						((list.get(i).label.toLowerCase()).contains(sText.toLowerCase()))||
+						((list.get(i).value.toLowerCase()).contains(sText.toLowerCase()))||
+						((list.get(i).addInfo.toLowerCase()).contains(sText.toLowerCase()))
+					) {
+					OptionsDialog.Three item = new OptionsDialog.Three(
+							list.get(i).value, list.get(i).label, list.get(i).addInfo);
+					listFiltered.add(item);
+				}
+			}
+			listAdapter = new BaseAdapter() {
 
 				public boolean areAllItemsEnabled() {
 					return true;
@@ -2027,11 +2129,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 
 				public int getCount() {
-					return list.size();
+					return listFiltered.size();
 				}
 
 				public Object getItem(int position) {
-					return list.get(position);
+					return listFiltered.get(position);
 				}
 
 				public long getItemId(int position) {
@@ -2043,7 +2145,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 
 				public View getView(final int position, View convertView,
-						ViewGroup parent) {
+									ViewGroup parent) {
 					ViewGroup layout;
 					if ( convertView==null ) {
 						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(), null);
@@ -2051,13 +2153,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					} else {
 						layout = (ViewGroup)convertView;
 					}
-					final Three item = list.get(position);
+					final Three item = listFiltered.get(position);
 					updateItemContents( layout, item, listView, position );
 					//cb.setClickable(false);
 //					cb.setOnClickListener(new View.OnClickListener() {
 //						@Override
 //						public void onClick(View v) {
-//							
+//
 //						}
 //					});
 					return layout;
@@ -2072,11 +2174,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 
 				public boolean isEmpty() {
-					return list.size()==0;
+					return listFiltered.size()==0;
 				}
 
 				private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
-				
+
 				public void registerDataSetObserver(DataSetObserver observer) {
 					observers.add(observer);
 				}
@@ -2084,20 +2186,52 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public void unregisterDataSetObserver(DataSetObserver observer) {
 					observers.remove(observer);
 				}
-				
+
 			};
 			int selItem = getSelectedItemIndex();
 			if ( selItem<0 )
 				selItem = 0;
 			listView.setAdapter(listAdapter);
 			listView.setSelection(selItem);
-			dlg.setView(listView);
+		}
+
+		public void onSelect() {
+			final BaseDialog dlg = new BaseDialog("ListOptionDialog", mActivity, label, false, false);
+			View view = mInflater.inflate(R.layout.searchable_listview, null);
+			LinearLayout viewList = (LinearLayout)view.findViewById(R.id.lv_list);
+			final EditText tvSearchText = (EditText)view.findViewById(R.id.search_text);
+			tvSearchText.addTextChangedListener(new TextWatcher() {
+
+				@Override
+				public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+					listUpdated(cs.toString());
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+				@Override
+				public void afterTextChanged(Editable arg0) {}
+			});
+			ImageButton ibSearch = (ImageButton)view.findViewById(R.id.btn_search);
+			listView = new BaseListView(mActivity, false);
+			listUpdated("");
+			viewList.addView(listView);
+			ibSearch.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
+					tvSearchText.setText("");
+					listUpdated("");
+				}
+			});
+			dlg.setView(view);
+			ibSearch.requestFocus();
 			//final AlertDialog d = dlg.create();
 			listView.setOnItemClickListener(new OnItemClickListener() {
 
 				public void onItemClick(AdapterView<?> adapter, View listview,
 						int position, long id) {
-					Three item = list.get(position);
+					Three item = listFiltered.get(position);
 					onClick(item);
 					dlg.dismiss();
 					closed();
@@ -2224,7 +2358,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				//view = new TextView(getContext());
 				if (label.contains("~"))
 					view = mInflater.inflate(R.layout.option_item_2text, null);
-					else view = mInflater.inflate(R.layout.option_item, null);
+				else view = mInflater.inflate(R.layout.option_item, null);
 			} else {
 				view = (View)convertView;
 			}
@@ -2327,7 +2461,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public String getValueLabel() { return findValueLabel(mProperties.getProperty(property)); }
 
 		public void onSelect() {
-			final BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
+			final BaseDialog dlg = new BaseDialog("ListOption2TextDialog", mActivity, label, false, false);
 
 			final ListView listView = new BaseListView(mActivity, false);
 
@@ -2431,7 +2565,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				optionsListView.refresh();
 		}
 	}
-	
+
 	class DictOptions extends ListOption
 	{
 		public DictOptions( OptionOwner owner, String label, String addInfo, String filter )
@@ -2719,7 +2853,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	public OptionsDialog(BaseActivity activity, ReaderView readerView, String[] fontFaces, Mode mode)
 	{
-		super(activity, null, false, false);
+		super("OptionsDialog", activity, null, false, false);
 		String filter = "";
 		if (activity instanceof CoolReader) filter = ((CoolReader)activity).optionsFilter;
 		if (!filter.trim().equals("")) this.title = getString(R.string.mi_filter_option) + " ("+filter+")";
@@ -2741,6 +2875,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	
 	class OptionsListView extends BaseListView {
 		public ArrayList<OptionBase> mOptions = new ArrayList<OptionBase>();
+		public ArrayList<OptionBase> mOptionsFiltered = new ArrayList<OptionBase>();
+		public ArrayList<OptionBase> mOptionsThis;
 		private ListAdapter mAdapter;
 		private OptionBase root;
 		public void refresh()
@@ -2773,12 +2909,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return this;
 		}
 
-		public OptionsListView( Context context, OptionBase root )
-		{
-			super(context, false);
-			setFocusable(true);
-			setFocusableInTouchMode(true);
-			this.root = root;
+		public void listUpdated(String sText) {
+			mOptionsFiltered.clear();
+			for(int i=0;i<mOptions.size();i++){
+				if (
+						((mOptions.get(i).label.toLowerCase()).contains(sText.toLowerCase()))||
+						((mOptions.get(i).property.toLowerCase()).contains(sText.toLowerCase()))||
+						((mOptions.get(i).addInfo.toLowerCase()).contains(sText.toLowerCase()))
+						) {
+					mOptionsFiltered.add(mOptions.get(i));
+				}
+			}
+			mOptionsThis = mOptionsFiltered;
+			if ((sText.equals(""))&&(mOptions.size()==0)) mOptionsThis = mOptions;
 			mAdapter = new BaseAdapter() {
 				public boolean areAllItemsEnabled() {
 					return false;
@@ -2786,7 +2929,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 				public boolean isEnabled(int position) {
 					boolean isPageMode = mProperties.getBool(PROP_PAGE_VIEW_MODE, true);
-					OptionBase option = mOptions.get(position);
+					OptionBase option = mOptionsThis.get(position);
 					String prop = option.property;
 					if ( prop.equals(PROP_STATUS_LINE) || prop.equals(PROP_FOOTNOTES) )
 						return isPageMode;
@@ -2794,11 +2937,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 
 				public int getCount() {
-					return mOptions.size();
+					return mOptionsThis.size();
 				}
 
 				public Object getItem(int position) {
-					return mOptions.get(position);
+					return mOptionsThis.get(position);
 				}
 
 				public long getItemId(int position) {
@@ -2811,15 +2954,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					return position;
 				}
 
-				
+
 				public View getView(int position, View convertView, ViewGroup parent) {
-					OptionBase item = mOptions.get(position);
+					OptionBase item = mOptionsThis.get(position);
 					return item.getView(convertView, parent);
 				}
 
 				public int getViewTypeCount() {
 					//return OPTION_VIEW_TYPE_COUNT;
-					return mOptions.size() > 0 ? mOptions.size() : 1;
+					return mOptionsThis.size() > 0 ? mOptionsThis.size() : 1;
 				}
 
 				public boolean hasStableIds() {
@@ -2827,11 +2970,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 
 				public boolean isEmpty() {
-					return mOptions.size()==0;
+					return mOptionsThis.size()==0;
 				}
 
 				private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
-				
+
 				public void registerDataSetObserver(DataSetObserver observer) {
 					observers.add(observer);
 				}
@@ -2842,9 +2985,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			};
 			setAdapter(mAdapter);
 		}
+
+		public OptionsListView( Context context, OptionBase root )
+		{
+			super(context, false);
+			setFocusable(true);
+			setFocusableInTouchMode(true);
+			this.root = root;
+			listUpdated("");
+		}
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
-			mOptions.get(position).onSelect();
+			if (mOptionsThis!=null)
+				mOptionsThis.get(position).onSelect();
+			else mOptions.get(position).onSelect();
 			return true;
 		}
 		
@@ -2890,7 +3044,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public void SelectOrFilter(boolean isSelect) {
 			BaseDialog dlg = null;
 			if (isSelect) {
-				dlg = new BaseDialog(mActivity, label, false, false);
+				dlg = new BaseDialog("StyleEditorDialog", mActivity, label, false, false);
 			}
 			OptionsListView listView = new OptionsListView(getContext(), this);
 			String[] firstLineOptions = {"", "text-align: justify", "text-align: left", "text-align: center", "text-align: right", };
@@ -3713,6 +3867,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				R.string.tab_options_app);
 		setView(mTabs);
 		mTabs.invalidate();
+		mTabs.setCurrentTab(4);
 		if (mOptionsApplication.mOptions.size()>0) mTabs.setCurrentTab(4); else
 		if (mOptionsStyles.mOptions.size()>0) mTabs.setCurrentTab(0); else
 		if (mOptionsCSS.mOptions.size()>0) mTabs.setCurrentTab(1); else

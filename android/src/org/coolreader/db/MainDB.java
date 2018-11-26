@@ -15,7 +15,7 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 32;
+	public static final int DB_VERSION = 34;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -1762,13 +1762,13 @@ public class MainDB extends BaseDB {
 				add("series_fk", getSeriesId(newValue.series), getSeriesId(oldValue.series));
 				add("series_number", (long) newValue.seriesNumber, (long) oldValue.seriesNumber);
 				add("format", fromFormat(newValue.format), fromFormat(oldValue.format));
-				add("filesize", (long) newValue.size, (long) oldValue.size);
 				add("arcsize", (long) newValue.arcsize, (long) oldValue.arcsize);
 				add("last_access_time", (long) newValue.lastAccessTime, (long) oldValue.lastAccessTime);
 				add("create_time", (long) newValue.getCreateTime(), (long) oldValue.getCreateTime());
 				add("flags", (long) newValue.flags, (long) oldValue.flags);
 				add("language", newValue.language, oldValue.language);
 			}
+			add("filesize", (long) newValue.size, (long) oldValue.size);
 			add("lang_from", newValue.lang_from, oldValue.lang_from);
 			add("lang_to", newValue.lang_to, oldValue.lang_to);
 			add("saved_with_ver", (long)MainDB.DB_VERSION, (long)oldValue.saved_with_ver);

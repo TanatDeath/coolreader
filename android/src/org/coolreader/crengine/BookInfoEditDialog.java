@@ -62,7 +62,7 @@ public class BookInfoEditDialog extends BaseDialog {
 
 	public BookInfoEditDialog(CoolReader activity, FileInfo baseDir, BookInfo book, boolean isRecentBooksItem)
 	{
-		super(activity, null, false, false);
+		super("BookInfoEditDialog", activity, null, false, false);
 		this.mParentDir = baseDir;
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);

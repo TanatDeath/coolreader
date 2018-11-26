@@ -47,7 +47,7 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 	
 	public OnlineStoreBookInfoDialog(CoolReader activity, OnlineStoreBookInfo book, FileInfo fileInfo)
 	{
-		super(activity, null, false, false);
+		super("OnlineStoreBookInfoDialog", activity, null, false, false);
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;

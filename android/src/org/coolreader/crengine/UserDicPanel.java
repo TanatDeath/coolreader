@@ -288,7 +288,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 						String[] arrKey = sKey.split("~");
 						boolean bWas = false;
 						for (String sK : arrKey) {
-							CoolReader.log.i(sK);
+							//CoolReader.log.i(sK);
 							String sK2 = sK.replaceAll("-", " ");
 							String sK3 = sK.replaceAll("-", "");
 							String[] arrK = sK.split("\\|");

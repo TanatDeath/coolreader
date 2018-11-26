@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -14,6 +15,13 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class StrUtils {
+
+    public static String readableFileSize(long size) {
+        if(size <= 0) return "0";
+        final String[] units = new String[] { "Bi", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
 
     public static boolean isEmptyStr(String s) {
         return s == null || s.trim().length() == 0;

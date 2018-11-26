@@ -351,7 +351,7 @@ public class UserDicDlg extends BaseDialog {
 
 	public UserDicDlg(final CoolReader activity, final int openPage)
 	{
-		super(activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
+		super("UserDicDlg", activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
 		mUserDic.clear();

@@ -151,7 +151,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 
 	public ChooseConfFileDlg(CoolReader activity, MetadataBuffer mdb)
 	{
-		super(activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
+		super("ChooseConfFileDlg", activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;

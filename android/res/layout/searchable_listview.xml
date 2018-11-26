@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Option item layout for CR3 options dialog
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="@+id/lv_body"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:paddingRight="?android:attr/scrollbarSize"
+    >
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/page_item_body"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/search_text"
+            android:layout_width="0dip" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dip"
+            android:layout_marginBottom="3dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:text=""
+            style="@style/TextAppearance.Widget.EditText"
+            android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
+            />
+        <ImageButton android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dip"
+            android:layout_marginBottom="3dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:src="?attr/cr3_button_cancel_drawable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:background="@null"
+            />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/lv_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:paddingRight="?android:attr/scrollbarSize"
+        >
+    </LinearLayout>
+
+</LinearLayout>

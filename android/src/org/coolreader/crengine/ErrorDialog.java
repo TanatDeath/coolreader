@@ -8,7 +8,7 @@ import org.coolreader.R;
 
 public class ErrorDialog extends BaseDialog {
 	public ErrorDialog(BaseActivity activity, final String title, final String message) {
-		super(activity, title, false, true);
+		super("ErrorDialog", activity, title, false, true);
 		// TODO: improve this dialog
 		LayoutInflater mInflater = LayoutInflater.from(getContext());
 		ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.error_msg_dlg, null);

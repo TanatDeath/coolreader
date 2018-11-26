@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 import android.app.Dialog;
@@ -27,6 +28,7 @@ public class BaseDialog extends Dialog {
 	BaseActivity activity;
 	String title;
 	boolean needCancelButton;
+	String dlgName;
 	int positiveButtonImage;
 	int positiveButtonContentDescriptionId = R.string.dlg_button_ok;
 	int negativeButtonImage;
@@ -53,15 +55,15 @@ public class BaseDialog extends Dialog {
 	}
 	
 	public static final boolean DARK_THEME = !DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink());
-	public BaseDialog( BaseActivity activity )
+	public BaseDialog(String dlgName, BaseActivity activity )
 	{
-		this( activity, "", false, false );
+		this(dlgName, activity, "", false, false );
 	}
-	public BaseDialog( BaseActivity activity, String title, boolean showNegativeButton, boolean windowed )
+	public BaseDialog(String dlgName, BaseActivity activity, String title, boolean showNegativeButton, boolean windowed )
 	{
-		this( activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed );
+		this(dlgName, activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed );
 	}
-	public BaseDialog( BaseActivity activity, String title, boolean showNegativeButton, boolean fullscreen, boolean dark, boolean windowed )
+	public BaseDialog(String dlgName, BaseActivity activity, String title, boolean showNegativeButton, boolean fullscreen, boolean dark, boolean windowed )
 	{
 		//super(activity, fullscreen ? R.style.Dialog_Fullscreen : R.style.Dialog_Normal);
 		//super(activity, fullscreen ? R.style.Dialog_Fullscreen : android.R.style.Theme_Dialog); //android.R.style.Theme_Light_NoTitleBar_Fullscreen : android.R.style.Theme_Light
@@ -75,6 +77,7 @@ public class BaseDialog extends Dialog {
 		this.activity = activity;
 		this.title = title;
 		this.needCancelButton = showNegativeButton;
+		this.dlgName = dlgName;
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 //		requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
@@ -98,7 +101,21 @@ public class BaseDialog extends Dialog {
 				onClose();
 			}
         });
+		setOnShowListener(new OnShowListener() {
+			@Override
+			public void onShow(DialogInterface dialog) {
+				whenShow();
+			}
+		});
         onCreate();
+	}
+
+	protected void whenShow() {
+		// when dialog is shown
+		if (activity instanceof CoolReader) {
+			CoolReader cr = (CoolReader)activity;
+			cr.getmBaseDialog().put(this.dlgName,this);
+		}
 	}
 
 	public void setView( View view )
@@ -271,6 +288,10 @@ public class BaseDialog extends Dialog {
 	
 	protected void onClose() {
 		// when dialog is closed
+		if (activity instanceof CoolReader) {
+			CoolReader cr = (CoolReader)activity;
+			cr.getmBaseDialog().remove(this.dlgName);
+		}
 	}
 	
 	

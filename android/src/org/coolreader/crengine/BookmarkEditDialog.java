@@ -160,7 +160,7 @@ public class BookmarkEditDialog extends BaseDialog {
 
 	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType)
 	{
-		super(activity, "", true, false);
+		super("BookmarkEditDialog", activity, "", true, false);
 		mCoolReader = activity;
 		mReaderView = readerView;
 		mIsNew = isNew;
