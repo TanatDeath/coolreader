@@ -6429,6 +6429,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return true;
 					}
 					@Override
+					public boolean validateNoCancel(String s) {
+						return true;
+					}
+					@Override
 					public void onOk(String s) {
 						mActivity.optionsFilter = s;
 						mActivity.showOptionsDialog(OptionsDialog.Mode.READER);

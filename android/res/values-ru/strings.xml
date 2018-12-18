@@ -23,6 +23,8 @@
     <string name="mi_book_info">О книге</string>
     <string name="mi_book_edit">Редактировать информацию</string>
     <string name="mi_book_delete">Удалить файл книги</string>
+    <string name="mi_book_set_custom_cover">Установить обложку из изображения</string>
+    <string name="mi_book_delete_custom_cover">Удалить обложку из изображения</string>
     <string name="mi_book_shortcut">Создать ярлык книги</string>
     <string name="mi_book_to_gd">Сохранить на диск Google One</string>
     <string name="mi_book_no_mark">Убрать пометку</string>
@@ -815,7 +817,7 @@
     <string name="options_inverse_view_add_info">Выбор режима чтения день или ночь</string>
     <string name="options_color_text_add_info">Выбор цвета текста</string>
     <string name="options_color_background_add_info">Выбор цвета фона</string>
-    <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета</string>
+    <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета. Для добавления текстуры - отправьте изображение из программы просмотра изображений в CoolReader</string>
     <string name="options_page_titlebar_add_info">Параметры отображения информации в колонтитуле</string>
     <string name="options_page_footnotes_add_info">Отображение сносок (если есть) внизу страницы</string>
     <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
@@ -823,5 +825,28 @@
     <string name="options_rounded_corners_margin_add_info">Смещает правую и левую части элементов колонтитула ближе к центру экрана на устройствах с Edge Screen</string>
     <string name="pos_recovered">Позиция чтения была загружена из файла восстановления</string>
     <string name="pos_saved">Позиция чтения была сохранена</string>
+    <string name="dlg_picture_came">Входящие изображения</string>
+    <string name="pic_copy_texture">Скопировать изображение в папку текстур (замостить)</string>
+    <string name="pic_copy_texture_activate">Скопировать изображение в папку текстур и применить</string>
+    <string name="pic_copy_background">Скопировать изображение в папку фонов (растянуть)</string>
+    <string name="pic_copy_background_activate">Скопировать изображение в папку фонов и применить</string>
+    <string name="pic_remember_for_later">Запомнить изображение, чтобы применить позднее</string>
+    <string name="pic_set_to_current_book">Нажмите на обложку, чтобы заменить ее у текущей книги</string>
+    <string name="pic_set_to_recent_book">Нажмите на обложку, чтобы заменить ее у одной из последних открытых книг</string>
+    <string name="pic_image_was_remembered">Изображение запомнено, вы сможете использовать его позднее</string>
+    <string name="pic_filename">Введите имя файла</string>
+    <string name="pic_problem">Возникла проблема при получении (обработке) изображения</string>
+    <string name="pic_file_exists">Файл существует. Пожалуйста, введите другое имя файла</string>
+    <string name="pic_delete_cover">Удалить обложку для этой книги?</string>
+    <string name="texture_switch_mode">Переключить режим отображения текстуры (замостить/растянуть)?</string>
+    <string name="dlg_button_book_custom_cover">Выбрать обложку</string>
+    <string name="pic_no_pic">Нет запомненного изображения. Отправьте в CoolReader изображение из другого приложения (например галереи)</string>
+    <string name="pic_no_custom_cover">Этой книге не присвоена обложка</string>
+    <string name="warn_empty_file_name">Невозможно открыть файл - пустое имя файла</string>
+    <string name="warn_http">Невозможно открыть файл из гиперссылки</string>
+    <string name="book_quick_search">Быстрый поиск</string>
+    <string name="font_test_phrase">Съешь ещё этих мягких французских булок да выпей чаю</string>
+    <string name="font_test_phrase2">В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!</string>
+    <string name="font_test_phrase3">Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства</string>
 </resources>
 

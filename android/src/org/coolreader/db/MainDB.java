@@ -8,7 +8,6 @@ import android.util.Log;
 import org.coolreader.crengine.*;
 
 import java.util.*;
-import java.util.zip.CRC32;
 
 public class MainDB extends BaseDB {
 	public static final Logger log = L.create("mdb");
@@ -1821,7 +1820,7 @@ public class MainDB extends BaseDB {
 	}
 
 	private static final String READ_FILEINFO_FIELDS = 
-		"b.id AS id, pathname," +
+		"b.id AS id, pathname, " +
 		"f.name as path, " +
 		"filename, arcname, title, " +
 		"(SELECT GROUP_CONCAT(a.name,'|') FROM author a JOIN book_author ba ON a.id=ba.author_fk WHERE ba.book_fk=b.id) as authors, " +
@@ -1830,7 +1829,7 @@ public class MainDB extends BaseDB {
 		"format, filesize, arcsize, " +
 		"create_time, last_access_time, flags, language, lang_from, lang_to, "+
 		"saved_with_ver, genre, annotation, srclang, bookdate, translator, docauthor, "+
-		"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher," +
+		"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher, " +
 		"publcity,  publyear, publisbn, "+
 		"sp.name as publseries_name, " +
 		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n  "
@@ -1948,43 +1947,56 @@ public class MainDB extends BaseDB {
 	public ArrayList<FileInfo> findByPatterns(int maxCount, String author, String title, String series, String filename)
 	{
 		beginReading();
+		boolean bQuickSearch = StrUtils.getNonEmptyStr(title,true).equals("##QUICK_SEARCH##");
+		String sDefCond = bQuickSearch ? " OR ":" AND ";
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+		String searchText =  StrUtils.getNonEmptyStr(author, true);
+		String authorSearch =  StrUtils.getNonEmptyStr(bQuickSearch ? author : author, true);
+		String titleSearch = StrUtils.getNonEmptyStr(bQuickSearch ? author : title, true);
+		String seriesSearch = StrUtils.getNonEmptyStr(bQuickSearch ? author : series, true);
+		String filenameSearch = StrUtils.getNonEmptyStr(bQuickSearch ? author : filename, true);
 		
 		StringBuilder buf = new StringBuilder();
 		boolean hasCondition = false;
-		if ( author!=null && author.length()>0 ) {
-			String authorIds = findAuthors(maxCount, author);
-			if (authorIds == null || authorIds.length() == 0)
+		if (!StrUtils.isEmptyStr(authorSearch)) {
+			String authorIds = findAuthors(maxCount, authorSearch);
+			if ((authorIds == null || authorIds.length() == 0) && (!bQuickSearch))
 				return list;
 			if ( buf.length()>0 )
-				buf.append(" AND ");
-			buf.append(" b.id IN (SELECT ba.book_fk FROM book_author ba WHERE ba.author_fk IN (" + authorIds + ")) ");
+				buf.append(sDefCond);
+			if ((!StrUtils.isEmptyStr(authorIds))&&(bQuickSearch)) authorIds = "-1";
+			buf.append(" ( b.id IN (SELECT ba.book_fk FROM book_author ba WHERE ba.author_fk IN (" + authorIds + ")) ) ");
 			hasCondition = true;
 		}
-		if ( series!=null && series.length()>0 ) {
-			String seriesIds = findSeries(maxCount, series);
-			if (seriesIds == null || seriesIds.length() == 0)
+		if ( !StrUtils.isEmptyStr(seriesSearch) ) {
+			String seriesIds = findSeries(maxCount, seriesSearch);
+			if ((seriesIds == null || seriesIds.length() == 0) && (!bQuickSearch))
 				return list;
 			if ( buf.length()>0 )
-				buf.append(" AND ");
-            buf.append(" ( ");
+				buf.append(sDefCond);
+			if ((!StrUtils.isEmptyStr(seriesIds))&&(bQuickSearch)) seriesIds = "-1";
+			buf.append(" ( ");
 			buf.append(" (b.series_fk IN (" + seriesIds + ")) ");
             buf.append(" OR ");
             buf.append(" (b.publseries_fk IN (" + seriesIds + ")) ");
             buf.append(" ) ");
 			hasCondition = true;
 		}
-		if ( title!=null && title.length()>0 ) {
+		if ( !StrUtils.isEmptyStr(titleSearch) ) {
 			hasCondition = true;
 		}
-		if ( filename!=null && filename.length()>0 ) {
+		if ( !StrUtils.isEmptyStr(filenameSearch) ) {
 			hasCondition = true;
 		}
-		if (!hasCondition)
-			return list;
-		
+		if ( bQuickSearch ) {
+			hasCondition = true;
+			if ( buf.length()>0 )
+				buf.append(sDefCond);
+			buf.append(" (1=1) ");
+		}
+		if (!hasCondition) return list;
 		String condition = buf.length()==0 ? "" : " WHERE " + buf.toString();
-		String sql = READ_FILEINFO_SQL + condition;
+		String sql = READ_FILEINFO_SQL + condition + " ORDER BY file_create_time desc";
 		Log.d("cr3", "sql: " + sql );
 		Cursor rs = null;
 		try { 
@@ -1992,12 +2004,57 @@ public class MainDB extends BaseDB {
 			if ( rs.moveToFirst() ) {
 				int count = 0;
 				do {
-					if ( title!=null && title.length()>0 )
-						if (!Utils.matchPattern(rs.getString(5), title))
-							continue;
-					if ( filename!=null && filename.length()>0 )
-						if (!Utils.matchPattern(rs.getString(3), filename))
-							continue;
+					boolean bDidntFindAll = false;
+					int matchesCnt = 0;
+					if ( !StrUtils.isEmptyStr(titleSearch) ) {
+						if (!Utils.matchPattern(rs.getString(5), titleSearch))
+							bDidntFindAll = true;
+						else
+							matchesCnt++;
+					}
+					if ( !StrUtils.isEmptyStr(filenameSearch) ) {
+						if (!Utils.matchPattern(rs.getString(3), filenameSearch))
+							bDidntFindAll = true;
+						else
+							matchesCnt++;
+					}
+					if (bQuickSearch) {
+						int i=0;
+						for (String s: READ_FILEINFO_FIELDS.split(", ")) {
+							String sField = rs.getString(i);
+							if (s.contains("book_date_n")||
+							   s.contains("doc_date_n")||
+							   s.contains("publ_year_n")||
+							   s.contains("file_create_time")||
+							   s.contains("create_time")||
+							   s.contains("last_access_time")
+							) {
+								final long unixTime = rs.getLong(i);
+								java.util.Date dateTime=new java.util.Date((long)unixTime);
+								android.text.format.DateFormat df = new android.text.format.DateFormat();
+								sField = df.format("yyyy-MM-dd hh:mm:ss a", dateTime).toString();
+							}
+							if (Utils.matchPattern(sField, searchText)) {
+								matchesCnt++;
+							}
+							i++;
+						}
+//					"b.id AS id, pathname," +
+//					"f.name as path, " +
+//					"filename, arcname, title, " +
+//					"(SELECT GROUP_CONCAT(a.name,'|') FROM author a JOIN book_author ba ON a.id=ba.author_fk WHERE ba.book_fk=b.id) as authors, " +
+//					"s.name as series_name, " +
+//					"series_number, " +
+//					"format, filesize, arcsize, " +
+//					"create_time, last_access_time, flags, language, lang_from, lang_to, "+
+//					"saved_with_ver, genre, annotation, srclang, bookdate, translator, docauthor, "+
+//					"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher," +
+//					"publcity,  publyear, publisbn, "+
+//					"sp.name as publseries_name, " +
+//					"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n  "
+					}
+					if ((bDidntFindAll)&&(!bQuickSearch)) continue;
+					if ((matchesCnt==0)&&(bQuickSearch)) continue;
 					FileInfo fi = new FileInfo(); 
 					readFileInfoFromCursor( fi, rs );
 					list.add(fi);

@@ -225,7 +225,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				return true;
 			}
 			if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-				showFindBookDialog();
+				showFindBookDialog(false, "");
 				return true;
 			}
 			return super.onKeyDown(keyCode, event);
@@ -253,19 +253,20 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		this.mCoverpageManager = Services.getCoverpageManager();
 		Services.getFileSystemFolders().loadFavoriteFolders(mActivity.getDB());
 		ArrayList<FileInfo> favFolders = new ArrayList<FileInfo>();
-		favFolders = Services.getFileSystemFolders().getFavoriteFolders();
 		ArrayList<String> favFoldersS = new ArrayList<String>();
 		favFolders = Services.getFileSystemFolders().getFavoriteFolders();
-		for (FileInfo fi: favFolders) {
-			favFoldersS.add(fi.pathname);
-		}
+		if (favFolders!=null)
+			for (FileInfo fi: favFolders) {
+				favFoldersS.add(fi.pathname);
+			}
 		this.mFileSystemFolders = Services.getFileSystemFolders().getFileSystemFolders();
 		this.mFileSystemFoldersH = new HashMap<Long, String>();
 		this.mOnlyFSFolders = new ArrayList<String>();
-		for (FileInfo fi: this.mFileSystemFolders) {
-			this.mFileSystemFoldersH.put(fi.id, fi.pathname);
-			if (!favFoldersS.contains(fi.pathname)) this.mOnlyFSFolders.add(fi.pathname);
-		}
+		if (this.mFileSystemFolders!=null)
+			for (FileInfo fi: this.mFileSystemFolders) {
+				this.mFileSystemFoldersH.put(fi.id, fi.pathname);
+				if (!favFoldersS.contains(fi.pathname)) this.mOnlyFSFolders.add(fi.pathname);
+			}
 		coverpageListener =	new CoverpageReadyListener() {
 			@Override
 			public void onCoverpagesReady(ArrayList<CoverpageManager.ImageItem> files) {
@@ -454,6 +455,30 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			log.d("book_edit menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
 				mActivity.editBookInfo(currDirectory, selectedItem);
+			}
+			return true;
+		case R.id.book_set_custom_cover:
+			log.d("book_set_custom_cover menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				if (mActivity.picReceived!=null) {
+					if (mActivity.picReceived.bmpReceived!=null) {
+						BookInfo bi = new BookInfo(selectedItem);
+						PictureCameDialog dlg = new PictureCameDialog(mActivity,
+								bi, "");
+						dlg.show();
+					}
+				} else {
+					mActivity.showToast(R.string.pic_no_pic);
+				}
+			}
+			return true;
+		case R.id.book_delete_custom_cover:
+			log.d("book_delete_custom_cover menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+					BookInfo bi = new BookInfo(selectedItem);
+					PictureCameDialog dlg = new PictureCameDialog(mActivity,
+								bi, "");
+					dlg.deleteBookPicture(selectedItem);
 			}
 			return true;
 		case R.id.book_shortcut:
@@ -672,24 +697,28 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		showDirectory(dir, null);
 	}
 	
-	public void showFindBookDialog()
+	public void showFindBookDialog(boolean isQuick, String sText)
 	{
 		BookSearchDialog dlg = new BookSearchDialog( mActivity, new BookSearchDialog.SearchCallback() {
 			@Override
 			public void done(FileInfo[] results) {
-				if (results != null) {
-					if (results.length == 0) {
-						mActivity.showToast(R.string.dlg_book_search_not_found);
-					} else {
-						showSearchResult(results);
-					}
+			if (results != null) {
+				if (results.length == 0) {
+					mActivity.showToast(R.string.dlg_book_search_not_found);
 				} else {
-					if (currDirectory == null || currDirectory.isRootDir())
-						mActivity.showRootWindow();
+					showSearchResult(results);
 				}
+			} else {
+				if (currDirectory == null || currDirectory.isRootDir())
+					mActivity.showRootWindow();
+			}
 			}
 		});
-		dlg.show();
+		if (!isQuick)
+			dlg.show();
+		else
+			dlg.qfind(dlg.callback, sText);
+			;
 	}
 
 	public void showRootDirectory()
@@ -1097,7 +1126,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				return;
 			}
 			if (fileOrDir.isSearchShortcut()) {
-				showFindBookDialog();
+				showFindBookDialog(false, "");
+				return;
+			}
+			if (fileOrDir.isQSearchShortcut()) {
+				showFindBookDialog(true, fileOrDir.filename);
 				return;
 			}
 			if (fileOrDir.isBooksByAuthorRoot()) {

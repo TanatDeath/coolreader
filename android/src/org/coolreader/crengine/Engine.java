@@ -568,6 +568,8 @@ public class Engine {
 
 	private native static String[] getFontFileNameListInternal();
 
+	private native static String[] getFontFaceAndFileNameListInternal();
+
 	private native static String[] getArchiveItemsInternal(String arcName); // pairs: pathname, size
 
 	private native static boolean setKeyBacklightInternal(int value);
@@ -633,8 +635,9 @@ public class Engine {
 		public final static HyphDict NONE = new HyphDict("NONE", HYPH_NONE, 0, "[None]", "");
 		public final static HyphDict ALGORITHM = new HyphDict("ALGORITHM", HYPH_ALGO, 0, "[Algorythmic]", ""); 
 		public final static HyphDict BOOK_LANGUAGE = new HyphDict("BOOK LANGUAGE", HYPH_BOOK, 0, "[From Book Language]", ""); 
-		public final static HyphDict RUSSIAN = new HyphDict("RUSSIAN", HYPH_DICT, R.raw.russian_enus_hyphen, "Russian", "ru"); 
-		public final static HyphDict ENGLISH = new HyphDict("ENGLISH", HYPH_DICT, R.raw.english_us_hyphen, "English US", "en"); 
+		public final static HyphDict RUSSIAN = new HyphDict("RUSSIAN", HYPH_DICT, R.raw.russian_enus_hyphen, "Russian", "ru");
+		public final static HyphDict BELARUSSIAN = new HyphDict("BELARUSSIAN", HYPH_DICT, R.raw.belarusian_hyphen, "Belarussian", "be");
+		public final static HyphDict ENGLISH = new HyphDict("ENGLISH", HYPH_DICT, R.raw.english_us_hyphen, "English US", "en");
 		public final static HyphDict GERMAN = new HyphDict("GERMAN", HYPH_DICT, R.raw.german_hyphen, "German", "de"); 
 		public final static HyphDict UKRAINIAN = new HyphDict("UKRAINIAN", HYPH_DICT,R.raw.ukrain_hyphen, "Ukrainian", "uk"); 
 		public final static HyphDict SPANISH = new HyphDict("SPANISH", HYPH_DICT,R.raw.spanish_hyphen, "Spanish", "es"); 
@@ -856,6 +859,12 @@ public class Engine {
 	public static String[] getFontFileNameList() {
 		synchronized(lock) {
 			return getFontFileNameListInternal();
+		}
+	}
+
+	public static String[] getFontFaceAndFileNameList() {
+		synchronized(lock) {
+			return getFontFaceAndFileNameListInternal();
 		}
 	}
 
@@ -1686,10 +1695,16 @@ public class Engine {
 	enum DataDirType {
 		TexturesDirs,
 		BackgroundsDirs,
-		HyphsDirs
+		HyphsDirs,
+		CustomCoversDirs,
+		DownloadsDirs
 	}
 
 	public static ArrayList<String> getDataDirs(DataDirType dirType) {
+		return getDataDirsExt(dirType, false);
+	}
+
+	public static ArrayList<String> getDataDirsExt(DataDirType dirType, boolean doCreate) {
 		ArrayList<String> res = new ArrayList<String>();
 		for (File d : getStorageDirectories(false)) {
 			File base = new File(d, ".cr3");
@@ -1699,26 +1714,86 @@ public class Engine {
 				continue;
 			switch (dirType) {
 				case TexturesDirs:
+					//asdf
 					File subdirTextures = new File(base, "textures");
-					if (subdirTextures.isDirectory())
-						res.add(subdirTextures.getAbsolutePath());
-					else
-						res.add(subdirTextures.getAbsolutePath() + " [not found]");
+					boolean bCreated = false;
+					if ((doCreate) && (!subdirTextures.exists())) {
+                        if (subdirTextures.mkdir()) {
+                            res.add(subdirTextures.getAbsolutePath());
+                            bCreated = true;
+                        }
+                    }
+                    if (!bCreated) {
+                        if (subdirTextures.isDirectory())
+                            res.add(subdirTextures.getAbsolutePath());
+                        else
+                            res.add(subdirTextures.getAbsolutePath() + " [not found]");
+                    }
 					break;
 				case BackgroundsDirs:
 					File subdirBackgrounds = new File(base, "backgrounds");
-					if (subdirBackgrounds.isDirectory())
-						res.add(subdirBackgrounds.getAbsolutePath());
-					else
-						res.add(subdirBackgrounds.getAbsolutePath() + " [not found]");
+                    bCreated = false;
+                    if ((doCreate) && (!subdirBackgrounds.exists())) {
+                        if (subdirBackgrounds.mkdir()) {
+                            res.add(subdirBackgrounds.getAbsolutePath());
+                            bCreated = true;
+                        }
+                    }
+                    if (!bCreated) {
+                        if (subdirBackgrounds.isDirectory())
+                            res.add(subdirBackgrounds.getAbsolutePath());
+                        else
+                            res.add(subdirBackgrounds.getAbsolutePath() + " [not found]");
+                    }
 					break;
 				case HyphsDirs:
 					File subdirHyph = new File(base, "hyph");
-					if (subdirHyph.isDirectory())
-						res.add(subdirHyph.getAbsolutePath());
-					else
-						res.add(subdirHyph.getAbsolutePath() + " [not found]");
-					break;
+                    bCreated = false;
+                    if ((doCreate) && (!subdirHyph.exists())) {
+                        if (subdirHyph.mkdir()) {
+                            res.add(subdirHyph.getAbsolutePath());
+                            bCreated = true;
+                        }
+                    }
+                    if (!bCreated) {
+                        if (subdirHyph.isDirectory())
+                            res.add(subdirHyph.getAbsolutePath());
+                        else
+                            res.add(subdirHyph.getAbsolutePath() + " [not found]");
+                        break;
+                    }
+				case CustomCoversDirs:
+					File subdirCustomCovers = new File(base, "customcovers");
+					bCreated = false;
+					if ((doCreate) && (!subdirCustomCovers.exists())) {
+						if (subdirCustomCovers.mkdir()) {
+							res.add(subdirCustomCovers.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subdirCustomCovers.isDirectory())
+							res.add(subdirCustomCovers.getAbsolutePath());
+						else
+							res.add(subdirCustomCovers.getAbsolutePath() + " [not found]");
+						break;
+					}
+				case DownloadsDirs:
+					File subdirDownloads = new File(base, "downloads");
+					bCreated = false;
+					if ((doCreate) && (!subdirDownloads.exists())) {
+						if (subdirDownloads.mkdir()) {
+							res.add(subdirDownloads.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subdirDownloads.isDirectory())
+							res.add(subdirDownloads.getAbsolutePath());
+						else
+							res.add(subdirDownloads.getAbsolutePath() + " [not found]");
+						break;
+					}
 			}
 		}
 		return res;

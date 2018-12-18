@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical" >
+
+	<LinearLayout
+		android:id="@+id/ll_main"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content">
+
+			<LinearLayout
+				android:id="@+id/ll_image_came"
+				android:orientation="vertical"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="2dip"
+				android:gravity="center_vertical"
+				>
+				<TableLayout
+					android:id="@+id/rg_type"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:stretchColumns="1"
+					android:orientation="vertical">
+
+					<TableRow
+						android:layout_weight="1"
+						>
+
+						<LinearLayout
+							android:id="@+id/current_book"
+							android:orientation="horizontal"
+							android:layout_width="0dip"
+							android:layout_weight="1"
+							android:layout_height="fill_parent"
+							android:layout_marginLeft="1dip"
+							android:layout_marginRight="1dip"
+							android:layout_marginTop="1dip"
+							android:layout_marginBottom="1dip"
+							android:minHeight="?android:attr/listPreferredItemHeight"
+							>
+							<ImageView android:id="@+id/image_came"
+								android:layout_width="fill_parent"
+								android:layout_height="fill_parent"
+								android:padding="3dip"
+								android:layout_gravity="center_vertical|center_horizontal"
+								android:scaleType="fitCenter"
+								android:gravity="center_vertical|left"
+								android:minHeight="120dip"
+								android:minWidth="100dip"
+								android:maxHeight="200dip"
+								android:maxWidth="150dip"
+								android:drawable="?attr/cr3_browser_book_drawable"
+								/>
+						</LinearLayout>
+						<LinearLayout
+							android:orientation="vertical"
+							android:layout_width="0dip"
+							android:layout_weight="2"
+							android:layout_height="wrap_content">
+							<Button
+								android:id="@+id/ib_copy_to_texture"
+								android:layout_width="fill_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="2dip"
+								android:drawableLeft="?attr/attr_icons8_texture"
+								android:contentDescription="@null"
+								android:text="@string/pic_copy_texture" />
+							<Button
+								android:id="@+id/ib_copy_to_texture_act"
+								android:layout_width="fill_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="2dip"
+								android:drawableLeft="?attr/attr_icons8_texture"
+								android:contentDescription="@null"
+								android:text="@string/pic_copy_texture_activate" />
+							<Button
+								android:id="@+id/ib_copy_to_background"
+								android:layout_width="fill_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="2dip"
+								android:drawableLeft="?attr/attr_icons8_texture"
+								android:contentDescription="@null"
+								android:text="@string/pic_copy_background" />
+							<Button
+								android:id="@+id/ib_copy_to_background_act"
+								android:layout_width="fill_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="2dip"
+								android:drawableLeft="?attr/attr_icons8_texture"
+								android:contentDescription="@null"
+								android:text="@string/pic_copy_background_activate" />
+							<Button
+								android:id="@+id/ib_save_for_later"
+								android:layout_width="fill_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginBottom="2dip"
+								android:drawableLeft="?attr/attr_icons8_texture"
+								android:contentDescription="@null"
+								android:text="@string/pic_remember_for_later" />
+						</LinearLayout>
+					</TableRow>
+				</TableLayout>
+			</LinearLayout>
+
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>

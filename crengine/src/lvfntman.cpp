@@ -495,6 +495,21 @@ public:
         }
         list.sort();
     }
+
+    virtual void getFontFaceAndFileNameList(lString16Collection &list)
+    {
+        list.clear();
+        for ( int i=0; i<_registered_list.length(); i++ ) {
+            if (_registered_list[i]->getDef()->getDocumentId() == -1) {
+                lString16 name = Utf8ToUnicode( _registered_list[i]->getDef()->getTypeFace() );
+                lString16 fileName = Utf8ToUnicode(_registered_list[i]->getDef()->getName());
+                if (!list.contains(name + "~" + fileName))
+                    list.add(name + "~" + fileName);
+            }
+        }
+        list.sort();
+    }
+
     virtual void clearFallbackFonts()
     {
         for ( int i=0; i<_registered_list.length(); i++ ) {
@@ -2659,6 +2674,13 @@ public:
         FONT_MAN_GUARD
         _cache.getFontFileNameList(list);
     }
+    /// returns registered font faces and files
+    virtual void getFontFaceAndFileNameList( lString16Collection & list )
+    {
+        FONT_MAN_GUARD
+        _cache.getFontFaceAndFileNameList(list);
+    }
+
 bool setalias(lString8 alias,lString8 facename,int id,bool italic, bool bold)
 {
     FONT_MAN_GUARD
@@ -3347,6 +3369,13 @@ public:
         FONT_MAN_GUARD
         _cache.getFontFileNameList(list);
     }
+    /// returns registered font files and faces
+    virtual void getFontFaceAndFileNameList( lString16Collection & list )
+    {
+        FONT_MAN_GUARD
+        _cache.getFontFaceAndFileNameList(list);
+    }
+
     virtual bool Init( lString8 path )
     {
         _path = path;
@@ -3510,6 +3539,12 @@ public:
     {
         FONT_MAN_GUARD
         _cache.getFontFileNameList(list);
+    }
+    /// returns registered font files and faces
+    virtual void getFontFaceAndFileNameList( lString16Collection & list )
+    {
+        FONT_MAN_GUARD
+        _cache.getFontFaceAndFileNameList(list);
     }
 };
 

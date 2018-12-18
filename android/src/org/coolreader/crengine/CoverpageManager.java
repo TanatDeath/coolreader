@@ -1,15 +1,20 @@
 package org.coolreader.crengine;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
+import java.util.zip.CRC32;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -641,39 +646,86 @@ public class CoverpageManager {
 				}
 				Rect rc = new Rect(fullrc.left, fullrc.top, fullrc.right - shadowW, fullrc.bottom - shadowH);
 				synchronized (mCache) {
-					Bitmap bitmap = mCache.getBitmap(book);
-					boolean isDefCover = false;
-					if (bitmap != null) {
-						Bitmap emptyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-						emptyBitmap.eraseColor(Color.rgb(0,0,0));
-						if (bitmap.sameAs(emptyBitmap)) isDefCover = true;
+					boolean isCustomCover = false;
+					final String sBookFName = book.file.filename;
+					CRC32 crc = new CRC32();
+					crc.update(sBookFName.getBytes());
+					final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
+					String sDir = "";
+					ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CustomCoversDirs, true);
+					if (tDirs.size()>0) sDir=tDirs.get(0);
+					if (!StrUtils.isEmptyStr(sDir))
+						if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
+					if (!StrUtils.isEmptyStr(sDir)) {
+						//getmCoolReader().showToast(sDir + sFName);
+						try {
+							File f = new File(sDir + sFName);
+							if (f.exists()) {
+								//rc = new Rect(fullrc.left, fullrc.top, fullrc.right, fullrc.bottom);
+								log.d("Image for " + book + " is custom, drawing...");
+								Bitmap bitmap = BitmapFactory.decodeFile(sDir + sFName);
+								Rect dst = getBestCoverSize(rc, bitmap.getWidth(), bitmap.getHeight());
+//								Log.i("ASDF", "draw: "+bitmap.getWidth());
+//								Log.i("ASDF", "draw: "+bitmap.getHeight());
+//								Log.i("ASDF", "draw: "+rc.left);
+//								Log.i("ASDF", "draw: "+rc.top);
+//								Log.i("ASDF", "draw: "+rc.right);
+//								Log.i("ASDF", "draw: "+rc.bottom);
+//								Log.i("ASDF", "draw: "+dst.left);
+//								Log.i("ASDF", "draw: "+dst.top);
+//								Log.i("ASDF", "draw: "+dst.right);
+//								Log.i("ASDF", "draw: "+dst.bottom);
+                                log.d("Image for " + book + " is custom, drawing...");
+                                Paint p = new Paint();
+                                p.setColor(getDominantColor(bitmap));
+                                canvas.drawRect(rc, p);
+                                canvas.drawBitmap(bitmap, null, dst, defPaint);
+								if (shadowSizePercent > 0) {
+									Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
+									drawShadow(canvas, rc, shadowRect);
+								}isCustomCover = true;
+                                return;
+							}
+						} catch (Exception e) {
+
+						}
 					}
-					if ((bitmap != null) && (!isDefCover)) {
-						log.d("Image for " + book + " is found in cache, drawing...");
-						Rect dst = getBestCoverSize(rc, bitmap.getWidth(), bitmap.getHeight());
-						canvas.drawBitmap(bitmap, null, dst, defPaint);
-						if (shadowSizePercent > 0) {
-							Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
-							drawShadow(canvas, rc, shadowRect);
+					if (!isCustomCover) {
+						Bitmap bitmap = mCache.getBitmap(book);
+						boolean isDefCover = false;
+						if (bitmap != null) {
+							Bitmap emptyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+							emptyBitmap.eraseColor(Color.rgb(0, 0, 0));
+							if (bitmap.sameAs(emptyBitmap)) isDefCover = true;
 						}
-						return;
-					} else {
-						log.d("Image for " + book + " is not found in cache, drawing...");
-						Bitmap bmp; // = ((BitmapDrawable) CoverpageManager.this.getmCoolReader().getApplicationContext().getResources()
-								//.getDrawable(
-								//		Utils.resolveResourceIdByAttr(getmCoolReader(), R.attr.attr_icons8_book_2, R.drawable.icons8_book_2)
-										//R.drawable.icons8_book_2
-								//)).getBitmap();
-						String sTitle = "";
-						String sAuthors = "";
-						if (book.file!=null) {
-							sTitle = StrUtils.getNonEmptyStr(book.file.title, true);
-							sAuthors = StrUtils.getNonEmptyStr(book.file.authors,true).replace("\\|", "\n");
-							if (StrUtils.isEmptyStr(sTitle)) sTitle = StrUtils.stripExtension(book.file.filename);
+						if ((bitmap != null) && (!isDefCover)) {
+							log.d("Image for " + book + " is found in cache, drawing...");
+							Rect dst = getBestCoverSize(rc, bitmap.getWidth(), bitmap.getHeight());
+							canvas.drawBitmap(bitmap, null, dst, defPaint);
+							if (shadowSizePercent > 0) {
+								Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
+								drawShadow(canvas, rc, shadowRect);
+							}
+							return;
+						} else {
+							log.d("Image for " + book + " is not found in cache, drawing...");
+							Bitmap bmp; // = ((BitmapDrawable) CoverpageManager.this.getmCoolReader().getApplicationContext().getResources()
+							//.getDrawable(
+							//		Utils.resolveResourceIdByAttr(getmCoolReader(), R.attr.attr_icons8_book_2, R.drawable.icons8_book_2)
+							//R.drawable.icons8_book_2
+							//)).getBitmap();
+							String sTitle = "";
+							String sAuthors = "";
+							if (book.file != null) {
+								sTitle = StrUtils.getNonEmptyStr(book.file.title, true);
+								sAuthors = StrUtils.getNonEmptyStr(book.file.authors, true).replace("\\|", "\n");
+								if (StrUtils.isEmptyStr(sTitle))
+									sTitle = StrUtils.stripExtension(book.file.filename);
+							}
+							bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
+									rc.width(), rc.height());
+							canvas.drawBitmap(bmp, null, rc, defPaint);
 						}
-						bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
-							rc.width(), rc.height());
-						canvas.drawBitmap(bmp, null, rc, defPaint);
 					}
 				}
 				log.d("Image for " + book + " is not found in cache, scheduling generation...");
@@ -731,29 +783,57 @@ public class CoverpageManager {
 						BackgroundThread.instance().postGUI(new Runnable() {
 							@Override
 							public void run() {
-								boolean isDefCover = false;
-								if (buffer != null) {
-									Bitmap emptyBitmap = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), buffer.getConfig());
-									emptyBitmap.eraseColor(Color.rgb(0,0,0));
-									if (buffer.sameAs(emptyBitmap)) isDefCover = true;
-								}
+								boolean isCustomCover = false;
+								final String sBookFName = file.filename;
+								CRC32 crc = new CRC32();
+								crc.update(sBookFName.getBytes());
+								final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
+								String sDir = "";
+								ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CustomCoversDirs, true);
+								if (tDirs.size()>0) sDir=tDirs.get(0);
+								if (!StrUtils.isEmptyStr(sDir))
+									if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
 								ImageItem item = null;
-								if ((buffer!=null)&&(isDefCover)) {
-									String sTitle = "";
-									String sAuthors = "";
-									if (file!=null) {
-										sTitle = StrUtils.getNonEmptyStr(file.title, true);
-										sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
-										if (StrUtils.isEmptyStr(sTitle))
-											sTitle = StrUtils.stripExtension(file.filename);
-										Bitmap bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
-												buffer.getWidth(), buffer.getHeight());
-										item = new ImageItem(file, bmp.getWidth(), bmp.getHeight());
-										callback.onCoverpageReady(item, bmp);
+								if (!StrUtils.isEmptyStr(sDir)) {
+									//getmCoolReader().showToast(sDir + sFName);
+									try {
+										File f = new File(sDir + sFName);
+										if (f.exists()) {
+											Bitmap bmp = BitmapFactory.decodeFile(sDir + sFName);
+											Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp,
+													buffer.getWidth(), buffer.getHeight(), true);
+											isCustomCover = true;
+											item = new ImageItem(file, resizedbitmap.getWidth(), resizedbitmap.getHeight());
+											callback.onCoverpageReady(item, resizedbitmap);
+										}
+									} catch (Exception e) {
+
 									}
-								} else {
-									item = new ImageItem(file, buffer.getWidth(), buffer.getHeight());
-									callback.onCoverpageReady(item, buffer);
+								}
+								if (!isCustomCover) {
+									boolean isDefCover = false;
+									if (buffer != null) {
+										Bitmap emptyBitmap = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), buffer.getConfig());
+										emptyBitmap.eraseColor(Color.rgb(0, 0, 0));
+										if (buffer.sameAs(emptyBitmap)) isDefCover = true;
+									}
+									if ((buffer != null) && (isDefCover)) {
+										String sTitle = "";
+										String sAuthors = "";
+										if (file != null) {
+											sTitle = StrUtils.getNonEmptyStr(file.title, true);
+											sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
+											if (StrUtils.isEmptyStr(sTitle))
+												sTitle = StrUtils.stripExtension(file.filename);
+											Bitmap bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
+													buffer.getWidth(), buffer.getHeight());
+											item = new ImageItem(file, bmp.getWidth(), bmp.getHeight());
+											callback.onCoverpageReady(item, bmp);
+										}
+									} else {
+										item = new ImageItem(file, buffer.getWidth(), buffer.getHeight());
+										callback.onCoverpageReady(item, buffer);
+									}
 								}
 							}
 						});
@@ -769,15 +849,35 @@ public class CoverpageManager {
 		if (srcWidth < 20 || srcHeight < 20) {
 			return dst;
 		}
-		int sw = srcHeight * w / h;
-		int sh = srcWidth * h / w;
-		if (sw <= w)
-			sh = h;
-		else
-			sw = w;
-		int dx = (w - sw) / 2;
-		int dy = (h - sh) / 2;
-		return new Rect(dst.left + dx, dst.top + dy, dst.left + sw + dx, dst.top + sh + dy); 
+		int w1 = srcWidth;
+		int h1 = srcHeight;
+		// reduce if needed
+		if (w1>w) {
+			h1= (int)((double)h1 * (double)w / (double)w1);
+			w1=w;
+		}
+		if (h1>h) {
+			w1=(int) ((double)w1 * (double)h / (double)h1);
+			h1=h;
+		}
+		//enlarge if needed
+		if ((w1<w) && (h1<h)) {
+			int w2 = (int) ((double)w1 * (double)h / (double)h1);
+			int h2 = h;
+			int h3 = (int) ((double)h1 * (double)w / (double)w1);
+			int w3 = w;
+			if ((w2<=w1)&&(h2<=h1)) {
+				w1=w2;
+				h1=h2;
+			} else
+			if ((w3<=w1)&&(h3<=h1)) {
+				w1=w3;
+				h1=h3;
+			}
+		}
+		int dx = (w - w1) / 2;
+		int dy = (h - h1) / 2;
+		return new Rect(dst.left + dx, dst.top + dy, dst.left + w1, dst.top + h1);
 	}
 	
 	private Bitmap drawCoverpage(byte[] data, ImageItem file)
@@ -845,7 +945,7 @@ public class CoverpageManager {
 		}
 
 		title = StrUtils.ellipsize(title, 20);
-		author = StrUtils.ellipsize(author, 40);
+		author = StrUtils.ellipsize(author.replaceAll("\\|",", "), 40);
 
 		TextPaint pNormal = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
 		pNormal.setColor(Color.WHITE);
@@ -878,6 +978,38 @@ public class CoverpageManager {
 
 		return bitmap;
 
+	}
+
+	public static int getDominantColor(Bitmap bitmap) {
+		if (null == bitmap) return Color.TRANSPARENT;
+
+		int redBucket = 0;
+		int greenBucket = 0;
+		int blueBucket = 0;
+		int alphaBucket = 0;
+
+		boolean hasAlpha = bitmap.hasAlpha();
+		int pixelCount = bitmap.getWidth() * bitmap.getHeight();
+		int[] pixels = new int[pixelCount];
+		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+		for (int y = 0, h = bitmap.getHeight(); y < h; y++)
+		{
+			for (int x = 0, w = bitmap.getWidth(); x < w; x++)
+			{
+				int color = pixels[x + y * w]; // x + y * width
+				redBucket += (color >> 16) & 0xFF; // Color.red
+				greenBucket += (color >> 8) & 0xFF; // Color.greed
+				blueBucket += (color & 0xFF); // Color.blue
+				if (hasAlpha) alphaBucket += (color >>> 24); // Color.alpha
+			}
+		}
+
+		return Color.argb(
+				(hasAlpha) ? (alphaBucket / pixelCount) : 255,
+				redBucket / pixelCount,
+				greenBucket / pixelCount,
+				blueBucket / pixelCount);
 	}
 
 

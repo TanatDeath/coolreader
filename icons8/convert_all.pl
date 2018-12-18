@@ -11,6 +11,7 @@ my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
 my %ic_smaller_list=(
+        'icons8_cancel.svg' => 'icons8_cancel_small.png',
         'icons8_ask_question.svg' => 'icons8_ask_question.png',
         'icons8_back_small.svg' => 'icons8_back_small.png',
         'icons8_forward_small.svg' => 'icons8_forward_small.png',
@@ -23,10 +24,29 @@ my %ic_smaller_list=(
         'icons8_rate_down.svg' => 'icons8_rate_down.png',
         'icons8_rate_up.svg' => 'icons8_rate_up.png',
         'icons8_volume_down.svg' => 'icons8_volume_down.png',
-        'icons8_volume_up.svg' => 'icons8_volume_up.png'
+        'icons8_volume_up.svg' => 'icons8_volume_up.png',
+        'icons8_star.svg' => 'icons8_fav_star.png',
+        'icons8_star_filled.svg' => 'icons8_fav_star_filled.png'
 );
 
 my %ic_actions_list=(
+        'icons8_pages_total.svg' => 'icons8_pages_total.png',
+        'icons8_page_percent.svg' => 'icons8_page_percent.png',
+        'icons8_page_num.svg' => 'icons8_page_num.png',
+        'icons8_expand.svg' => 'icons8_expand.png',
+        'icons8_chapter_marks.svg' => 'icons8_chapter_marks.png',
+        'icons8_book_title.svg' => 'icons8_book_title.png',
+        'icons8_battery_percent.svg' => 'icons8_battery_percent.png',
+        'icons8_book_title2.svg' => 'icons8_book_title2.png',
+        'icons8_blackpage_duration.svg' => 'icons8_blackpage_duration.png',
+        'icons8_blackpage_interval.svg' => 'icons8_blackpage_interval.png',
+        'icons8_eink.svg' => 'icons8_eink.png',
+        'icons8_settings_search.svg' => 'icons8_settings_search.png',
+        'icons8_folder_year.svg' => 'icons8_folder_year.png',
+        'icons8_folder_stars.svg' => 'icons8_folder_stars.png',
+        'icons8_folder_num.svg' => 'icons8_folder_num.png',
+        'icons8_folder_hash.svg' => 'icons8_folder_hash.png',
+        'icons8_folder_author.svg' => 'icons8_folder_author.png',
         'icons8_star.svg' => 'icons8_rate_star.png',
         'icons8_star_filled.svg' => 'icons8_rate_star_filled.png',
         'icons8_position_to_disk.svg' => 'icons8_position_to_disk.png',
@@ -322,11 +342,11 @@ while (($srcfile, $dstfile) = each(%ic_smaller_list))
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
+			#$resfile = "${folder}/${dstfile}";
+			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			#print "$cmd\n";
+			#$ret = system($cmd);
+			#print "Failed!\n" if $ret != 0;
 
 			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
 			$resfile = "${folder}/drk_${dstfile}";
@@ -368,11 +388,11 @@ while (($srcfile, $dstfile) = each(%ic_actions_list))
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
+			#$resfile = "${folder}/${dstfile}";
+			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			#print "$cmd\n";
+			#$ret = system($cmd);
+			#print "Failed!\n" if $ret != 0;
 
 			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
 			$resfile = "${folder}/drk_${dstfile}";
@@ -414,11 +434,11 @@ while (($srcfile, $dstfile) = each(%ic_menu_list))
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
+			#$resfile = "${folder}/${dstfile}";
+			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			#print "$cmd\n";
+			#$ret = system($cmd);
+			#print "Failed!\n" if $ret != 0;
 
 			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
 			$resfile = "${folder}/drk_${dstfile}";
@@ -460,11 +480,11 @@ while (($srcfile, $dstfile) = each(%ic_launcher_list))
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
+			#$resfile = "${folder}/${dstfile}";
+			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			#print "$cmd\n";
+			#$ret = system($cmd);
+			#print "Failed!\n" if $ret != 0;
 
 			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
 			$resfile = "${folder}/drk_${dstfile}";
@@ -506,11 +526,11 @@ while (($srcfile, $dstfile) = each(%ic_bigicons_list))
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
+			#$resfile = "${folder}/${dstfile}";
+			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			#print "$cmd\n";
+			#$ret = system($cmd);
+			#print "Failed!\n" if $ret != 0;
 
 			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
 			$resfile = "${folder}/drk_${dstfile}";

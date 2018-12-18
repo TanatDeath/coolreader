@@ -37,6 +37,7 @@ public class BaseDialog extends Dialog {
 	int thirdButtonContentDescriptionId;
 	int addButtonImage;
 	int addButtonContentDescriptionId;
+
 	public void setPositiveButtonImage(int imageId, int descriptionId) {
 		positiveButtonImage = imageId;
 		positiveButtonContentDescriptionId = descriptionId;

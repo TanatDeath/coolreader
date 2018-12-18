@@ -136,9 +136,9 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		}
 		fonts_dir.setText(sbuf.toString());
 
-		ArrayList<String> testuresDirs = Engine.getDataDirs(Engine.DataDirType.TexturesDirs);
+		ArrayList<String> texturesDirs = Engine.getDataDirs(Engine.DataDirType.TexturesDirs);
 		sbuf = new StringBuilder();
-		it = testuresDirs.iterator();
+		it = texturesDirs.iterator();
 		while (it.hasNext()) {
 			String s = it.next();
 			sbuf.append(s);

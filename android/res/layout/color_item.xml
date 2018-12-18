@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Book item layout for CR3 file browser
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/dict_item_body"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:baselineAligned="false"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="2dip"
+	android:layout_marginRight="2dip"
+	>
+
+	<TableLayout
+		android:id="@+id/color_cell"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:stretchColumns="1"
+		android:orientation="vertical">
+
+		<TableRow
+			android:layout_weight="1"
+			>
+			<TextView android:id="@+id/color_item_title_w"
+				style="@style/TextAppearance.Medium"
+				android:text="10% Title Text"
+				android:layout_width="0dip"
+				android:layout_weight="1"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:ellipsize="end"
+				android:textColor="@color/White"
+				android:layout_gravity="left" />
+			<TextView android:id="@+id/color_item_title_b"
+				style="@style/TextAppearance.Medium"
+				android:text="10% Title Text"
+				android:layout_width="0dip"
+				android:layout_weight="1"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:ellipsize="end"
+				android:textColor="@color/Black"
+				android:layout_gravity="left" />
+		</TableRow>
+	</TableLayout>
+
+</LinearLayout>

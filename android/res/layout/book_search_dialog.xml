@@ -3,78 +3,100 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent" 
   android:layout_height="wrap_content"
+  android:layout_marginLeft="4dip"
+  android:layout_marginRight="4dip"
+  android:stretchColumns="1"
 >
      <TextView
        android:id="@+id/search_status" 
        android:layout_width="fill_parent" 
        android:layout_height="wrap_content"
+       android:textColor="?attr/colorIcon"
        style="@style/TextAppearance.Small"
-       android:text="@string/dlg_book_search_prompt" 
+       android:text="@string/dlg_book_search_prompt"
+       android:layout_marginLeft="4dip"
+       android:layout_marginRight="4dip"
      />
     <TableRow>
         <TextView
+          android:textColor="?attr/colorIcon"
           android:layout_width="wrap_content" 
           android:layout_height="wrap_content"
           style="@style/TextAppearance.Small"
           android:text="@string/dlg_book_search_filename" 
-          android:layout_marginRight="8dip"
+          android:layout_marginLeft="4dip"
+          android:layout_marginRight="4dip"
         />
         <EditText 
           android:id="@+id/search_text_filename" 
           android:layout_width="fill_parent" 
           android:layout_height="wrap_content"
-          android:text="" 
+          android:text=""
+          android:layout_marginLeft="4dip"
+          android:layout_marginRight="4dip"
           style="@style/TextAppearance.Widget.EditText"
           android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
         />
     </TableRow>
- <TableRow>
-  <TextView
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content"
-          style="@style/TextAppearance.Small"
-    android:text="@string/dlg_book_search_author" 
-          android:layout_marginRight="8dip"
-  />
-  <EditText 
-    android:id="@+id/search_text_author" 
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content"
-    android:text="" 
-    style="@style/TextAppearance.Widget.EditText"
-    android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
-  />
- </TableRow>
+    <TableRow>
+      <TextView
+        android:textColor="?attr/colorIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dip"
+        android:layout_marginRight="4dip"
+        style="@style/TextAppearance.Small"
+        android:text="@string/dlg_book_search_author"
+      />
+      <EditText
+        android:id="@+id/search_text_author"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_marginLeft="4dip"
+        android:layout_marginRight="4dip"
+        style="@style/TextAppearance.Widget.EditText"
+        android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
+      />
+    </TableRow>
     <TableRow>
         <TextView
+          android:textColor="?attr/colorIcon"
           android:layout_width="wrap_content" 
           android:layout_height="wrap_content"
           style="@style/TextAppearance.Small"
-          android:text="@string/dlg_book_search_title" 
-          android:layout_marginRight="8dip"
+          android:text="@string/dlg_book_search_title"
+          android:layout_marginLeft="4dip"
+          android:layout_marginRight="4dip"
         />
         <EditText 
           android:id="@+id/search_text_title" 
           android:layout_width="fill_parent" 
           android:layout_height="wrap_content"
-          android:text="" 
+          android:text=""
+          android:layout_marginLeft="4dip"
+          android:layout_marginRight="4dip"
           style="@style/TextAppearance.Widget.EditText"
           android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
         />
     </TableRow>
     <TableRow>
         <TextView
+          android:textColor="?attr/colorIcon"
           android:layout_width="wrap_content" 
           android:layout_height="wrap_content"
           style="@style/TextAppearance.Small"
           android:text="@string/dlg_book_search_series" 
-          android:layout_marginRight="8dip"
+          android:layout_marginLeft="4dip"
+          android:layout_marginRight="4dip"
         />
         <EditText 
           android:id="@+id/search_text_series" 
           android:layout_width="fill_parent" 
           android:layout_height="wrap_content"
-          android:text="" 
+          android:text=""
+          android:layout_marginLeft="4dip"
+          android:layout_marginRight="4dip"
           style="@style/TextAppearance.Widget.EditText"
           android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
         />

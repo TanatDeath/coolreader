@@ -136,6 +136,9 @@
                 <data android:pathPattern="/.*\\.fbz" />
                 <data android:pathPattern="/.*\\..*\\.fbz" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.zip" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -158,6 +161,9 @@
                 <data android:pathPattern="/.*\\.fbz" />
                 <data android:pathPattern="/.*\\..*\\.fbz" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.zip" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -175,6 +181,7 @@
                 <data android:mimeType="application/x-fb2" />
                 <data android:mimeType="application/fb2"/>
                 <data android:mimeType="application/fb2.zip"/>
+                <data android:mimeType="application/zip"/>
                 <data android:mimeType="text/fb2+xml" />
             </intent-filter>
         </activity-alias>
@@ -725,6 +732,168 @@
                 <data android:mimeType="application/x-pdb-ztxt-ebook" />
                 <data android:mimeType="application/vnd.palm" />
                 <data android:mimeType="application/x-pdb-plucker-ebook" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- alias activity to disable PIC -->
+        <activity-alias
+            android:name=".CoolReaderForPIC"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\.png" />
+                <data android:pathPattern="/.*\\..*\\.png" />
+                <data android:pathPattern="/.*\\..*\\..*\\.png" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\.png" />
+                <data android:pathPattern="/.*\\..*\\.png" />
+                <data android:pathPattern="/.*\\..*\\..*\\.png" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MUTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- alias activity to disable PIC -->
+        <activity-alias
+            android:name=".CoolReaderForPIC"
+            android:targetActivity=".CoolReader" >
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+
+                <data android:pathPattern="/.*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\.png" />
+                <data android:pathPattern="/.*\\..*\\.png" />
+                <data android:pathPattern="/.*\\..*\\..*\\.png" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:scheme="content" />
+
+                <data android:pathPattern="/.*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\.png" />
+                <data android:pathPattern="/.*\\..*\\.png" />
+                <data android:pathPattern="/.*\\..*\\..*\\.png" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MUTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
             </intent-filter>
         </activity-alias>
 

@@ -28,6 +28,8 @@
     <string name="mi_book_info">Book info</string>
     <string name="mi_book_edit">Edit book info</string>
     <string name="mi_book_delete">Delete book file</string>
+    <string name="mi_book_set_custom_cover">Set custom cover</string>
+    <string name="mi_book_delete_custom_cover">Delete custom cover</string>
     <string name="mi_book_shortcut">Create book shortcut</string>
     <string name="mi_book_to_gd">Save book to Google One</string>
     <string name="mi_book_no_mark">Set no mark</string>
@@ -824,7 +826,7 @@
     <string name="options_inverse_view_add_info">Selecting the reading mode day or night</string>
     <string name="options_color_text_add_info">Selecting the color of the text</string>
     <string name="options_color_background_add_info">Background color selection</string>
-    <string name="options_background_texture_add_info">Select a texture (picture) instead of a solid color</string>
+    <string name="options_background_texture_add_info">Select a texture (picture) instead of a solid color. You can add a texture by sending it to CoolReader from image viewing software.</string>
     <string name="options_page_titlebar_add_info">Information display options in the header</string>
     <string name="options_page_footnotes_add_info">Display footnotes (if any) at the bottom of the page</string>
     <string name="options_page_animation_add_info">Enable or disable the animation while flipping</string>
@@ -832,4 +834,27 @@
     <string name="options_rounded_corners_margin_add_info">Move the right and left side of the header elements closer to the center of the screen on devices with Edge Screen</string>
     <string name="pos_recovered">Reading position was loaded from recovery file</string>
     <string name="pos_saved">Reading position was saved</string>
+    <string name="dlg_picture_came">Picture(s) came dialog</string>
+    <string name="pic_copy_texture">Copy image to textures folder (tiled)</string>
+    <string name="pic_copy_texture_activate">Copy image to textures folder and activate</string>
+    <string name="pic_copy_background">Copy image to background folder (stretched)</string>
+    <string name="pic_copy_background_activate">Copy image to background folder and activate</string>
+    <string name="pic_remember_for_later">Remember image for later use</string>
+    <string name="pic_set_to_current_book">Tap the cover to apply image to current book</string>
+    <string name="pic_set_to_recent_book">Tap the cover to apply image to one of the recent books</string>
+    <string name="pic_image_was_remembered">The image was remembered, you can use it later</string>
+    <string name="pic_filename">Enter filename</string>
+    <string name="pic_problem">Problem occured while getting (processing) image</string>
+    <string name="pic_file_exists">File exists. Please use another file name</string>
+    <string name="pic_delete_cover">Delete custom cover for this book?</string>
+    <string name="texture_switch_mode">Switch mode (tile/stretch) of the texture?</string>
+    <string name="dlg_button_book_custom_cover">Select custom cover</string>
+    <string name="pic_no_pic">No picture remembered. Send a picture to CoolReader from external application (e.g. from gallery)</string>
+    <string name="pic_no_custom_cover">This book have not custom cover assigned</string>
+    <string name="warn_empty_file_name">Cannot open file - file name is empty</string>
+    <string name="warn_http">Cannot open file from hyperlink</string>
+    <string name="book_quick_search">Quick search</string>
+    <string name="font_test_phrase">The quick brown fox jumps over the lazy dog</string>
+    <string name="font_test_phrase2">Jackdaws love my big sphinx of quartz</string>
+    <string name="font_test_phrase3">The five boxing wizards jump quickly</string>
 </resources>

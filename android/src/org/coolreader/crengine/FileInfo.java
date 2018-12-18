@@ -44,6 +44,7 @@ public class FileInfo {
 	public final static String TITLE_TAG = "@titlesRoot";
 	public final static String TITLE_GROUP_PREFIX = "@titleGroup:";
 	public final static String SEARCH_SHORTCUT_TAG = "@search";
+	public final static String QSEARCH_SHORTCUT_TAG = "@qsearch";
 
 	public Long id; // db id
 	public String title; // book title
@@ -486,6 +487,11 @@ public class FileInfo {
 	public boolean isSearchShortcut()
 	{
 		return SEARCH_SHORTCUT_TAG.equals(pathname);
+	}
+
+	public boolean isQSearchShortcut()
+	{
+		return QSEARCH_SHORTCUT_TAG.equals(pathname);
 	}
 	
 	public boolean isBooksByAuthorRoot()

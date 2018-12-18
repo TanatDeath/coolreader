@@ -53,6 +53,14 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFileNa
 
 /*
  * Class:     org_coolreader_crengine_Engine
+ * Method:    getFontFaceAndFileNameListInternal
+ * Signature: ()[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFaceAndFileNameListInternal
+        (JNIEnv *, jclass);
+
+/*
+ * Class:     org_coolreader_crengine_Engine
  * Method:    getArchiveItemsInternal
  * Signature: (Ljava/lang/String;)[Ljava/lang/String;
  */

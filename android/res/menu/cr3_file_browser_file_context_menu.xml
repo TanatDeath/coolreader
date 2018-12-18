@@ -6,6 +6,8 @@
     <item android:title="@string/mi_book_info" android:titleCondensed="@string/mi_book_info" android:id="@+id/book_info"></item>
     <item android:title="@string/mi_book_edit" android:titleCondensed="@string/mi_book_edit" android:id="@+id/book_edit"></item>
     <item android:title="@string/mi_book_delete" android:titleCondensed="@string/mi_book_delete" android:id="@+id/book_delete"></item>
+    <item android:title="@string/mi_book_set_custom_cover" android:titleCondensed="@string/mi_book_set_custom_cover" android:id="@+id/book_set_custom_cover"></item>
+    <item android:title="@string/mi_book_delete_custom_cover" android:titleCondensed="@string/mi_book_delete_custom_cover" android:id="@+id/book_delete_custom_cover"></item>
     <item android:title="@string/mi_book_shortcut" android:titleCondensed="@string/mi_book_shortcut" android:id="@+id/book_shortcut"></item>
     <item android:title="@string/mi_book_to_gd" android:titleCondensed="@string/mi_book_to_gd" android:id="@+id/book_to_gd"></item>
     <item android:title="@string/mi_book_no_mark" android:titleCondensed="@string/mi_book_no_mark" android:id="@+id/book_no_mark"></item>

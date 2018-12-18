@@ -15,6 +15,7 @@ public class InputDialog extends BaseDialog {
 
 	public interface InputHandler {
 		boolean validate( String s ) throws Exception;
+		boolean validateNoCancel( String s ) throws Exception;
 		void onOk( String s ) throws Exception;
 		void onCancel();
 	};
@@ -23,6 +24,14 @@ public class InputDialog extends BaseDialog {
 	private EditText input;
 	int minValue;
 	int maxValue;
+
+	public InputDialog( BaseActivity activity, final String title, final String prompt,
+						String defVal, final InputHandler handler ) {
+		this(activity, title, prompt, false, 1, 2, 3, handler );
+		input.setText(defVal);
+	}
+
+
 	public InputDialog( BaseActivity activity, final String title, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final InputHandler handler )
 	{
 		super("InputDialog", activity, title, true, false);
@@ -82,10 +91,13 @@ public class InputDialog extends BaseDialog {
 	protected void onPositiveButtonClick() {
         String value = input.getText().toString().trim();
         try {
-        	if ( handler.validate(value) )
-        		handler.onOk(value);
-        	else
-        		handler.onCancel();
+			if ( handler.validateNoCancel(value) )
+				if ( handler.validate(value) )
+					handler.onOk(value);
+				else
+					handler.onCancel();
+			else
+				return;
         } catch ( Exception e ) {
         	handler.onCancel();
         }

@@ -22,7 +22,7 @@ public class BookSearchDialog extends BaseDialog {
 	final EditText seriesEdit;
 	final EditText filenameEdit;
 	final TextView statusText;
-	final SearchCallback callback;
+	public final SearchCallback callback;
 	
 	private int searchTaskId = 0;
 	private boolean searchActive = false;
@@ -115,6 +115,18 @@ public class BookSearchDialog extends BaseDialog {
 		if (mCoolReader == null || mCoolReader.getDB() == null)
 			return;
 		mCoolReader.getDB().findByPatterns(MAX_RESULTS, author, title, series, filename, new CRDBService.BookSearchCallback() {
+			@Override
+			public void onBooksFound(ArrayList<FileInfo> fileList) {
+				cb.done(fileList.toArray(new FileInfo[fileList.size()]));
+			}
+		});
+	}
+
+	protected void qfind( final SearchCallback cb, String sText ) {
+		if (mCoolReader == null || mCoolReader.getDB() == null)
+			return;
+		mCoolReader.getDB().findByPatterns(MAX_RESULTS, sText, "##QUICK_SEARCH##",
+				"", "", new CRDBService.BookSearchCallback() {
 			@Override
 			public void onBooksFound(ArrayList<FileInfo> fileList) {
 				cb.done(fileList.toArray(new FileInfo[fileList.size()]));

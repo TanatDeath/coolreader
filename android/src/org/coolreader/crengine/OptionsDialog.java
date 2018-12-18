@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -15,16 +16,20 @@ import org.coolreader.R;
 import org.coolreader.crengine.ColorPickerDialog.OnColorChangedListener;
 import org.coolreader.plugins.OnlineStorePluginManager;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -49,6 +54,8 @@ import android.widget.RadioButton;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabWidget;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +70,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public String selectedOption;
 
 	String[] mFontFaces;
+	String[] mFontFacesFiles;
+
 	int[] mFontSizes = new int[] {
 		9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
 		31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 48, 52, 56, 60, 64, 68, 72, 78, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340
@@ -1081,7 +1090,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mProperties.setProperty(property, ReaderAction.NONE.id);
 		}
 
-		protected int getItemLayoutId() {
+		protected int getItemLayoutId(int position, final Three item) {
 			return R.layout.option_value;
 		}
 
@@ -1376,7 +1385,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			viewList.addView(listView);
 			ibSearch.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
 					tvSearchText.setText("");
 					listView.listUpdated("");
 				}
@@ -1537,7 +1545,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			viewList.addView(listView);
 			ibSearch.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
 					tvSearchText.setText("");
 					listView.listUpdated("");
 				}
@@ -1608,7 +1615,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			viewList.addView(listView);
 			ibSearch.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
 					tvSearchText.setText("");
 					listView.listUpdated("");
 				}
@@ -1643,9 +1649,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			OptionsListView listView = new OptionsListView(getContext(), this);
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_show_titlebar), PROP_STATUS_LOCATION, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mStatusPositions,
 					mStatusPositionsTitles, mStatusPositionsAddInfos).setDefaultValue("1"));
-			listView.add(new ListOption(mOwner, getString(R.string.options_page_titlebar_font_face), PROP_STATUS_FONT_FACE,
-					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mFontFaces).
-					setDefaultValue(mFontFaces[0]).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
+			listView.add(new FontsOptions(mOwner, getString(R.string.options_page_titlebar_font_face), PROP_STATUS_FONT_FACE,
+					getString(R.string.option_add_info_empty_text), false, this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
 					R.drawable.cr3_option_font_face));
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_titlebar_font_size), PROP_STATUS_FONT_SIZE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(
 					filterFontSizes(mStatusFontSizes)).setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
@@ -1939,9 +1944,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 	
 	public static class ListOption extends OptionBase {
-		private ArrayList<Three> list = new ArrayList<Three>();
-		private ArrayList<Three> listFiltered = new ArrayList<Three>();
-		private BaseAdapter listAdapter;
+		protected ArrayList<Three> list = new ArrayList<Three>();
+		protected ArrayList<Three> listFiltered = new ArrayList<Three>();
+		protected BaseAdapter listAdapter;
 		private ListView listView;
 
 		public ListOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
@@ -2058,7 +2063,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			
 		}
 		
-		protected int getItemLayoutId() {
+		protected int getItemLayoutId(int position, final Three item) {
 			return R.layout.option_value; 
 		}
 		
@@ -2071,9 +2076,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ImageView btnOptionAddInfo = (ImageView)layout.findViewById(R.id.btn_option_add_info);
 
 			if (item.addInfo.trim().equals("")) {
-				btnOptionAddInfo.setVisibility(View.INVISIBLE);
+				if (btnOptionAddInfo!=null)
+					btnOptionAddInfo.setVisibility(View.INVISIBLE);
 			} else {
-				btnOptionAddInfo.setImageDrawable(
+				if (btnOptionAddInfo!=null)
+					btnOptionAddInfo.setImageDrawable(
 						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
 								R.attr.attr_icons8_option_info, R.drawable.drk_icons8_ask_question)));
 				final View view1 = layout;
@@ -2147,13 +2154,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public View getView(final int position, View convertView,
 									ViewGroup parent) {
 					ViewGroup layout;
+					final Three item = listFiltered.get(position);
 					if ( convertView==null ) {
-						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(), null);
+						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
 						//view = new TextView(getContext());
 					} else {
 						layout = (ViewGroup)convertView;
 					}
-					final Three item = listFiltered.get(position);
 					updateItemContents( layout, item, listView, position );
 					//cb.setClickable(false);
 //					cb.setOnClickListener(new View.OnClickListener() {
@@ -2219,7 +2226,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			viewList.addView(listView);
 			ibSearch.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					final String sText = StrUtils.getNonEmptyStr(tvSearchText.getText().toString(),true);
 					tvSearchText.setText("");
 					listUpdated("");
 				}
@@ -2237,11 +2243,29 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					closed();
 				}
 			});
+			dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+				@Override
+
+				public void onDismiss(DialogInterface dialog) {
+					String sOldProp = StrUtils.getNonEmptyStr(mProperties.getProperty(property),false);
+					String sNewProp = StrUtils.getNonEmptyStr(onSelectDismiss(sOldProp),false);
+					if (!sNewProp.equals(sOldProp))
+						mProperties.setProperty(property, sNewProp);
+				}
+			});
 			dlg.show();
+		}
+
+		public String onSelectDismiss(String propValue) {
+			return propValue;
+		}
+
+		public Three OnPreClick ( Three item ) {
+			return item;
 		}
 		
 		public void onClick( Three item ) {
-			mProperties.setProperty(property, item.value);
+			mProperties.setProperty(property, OnPreClick(item).value);
 			refreshList();
 			if ( onChangeHandler!=null )
 				onChangeHandler.run();
@@ -2346,7 +2370,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		}
 
-		protected int getItemLayoutId() {
+		protected int getItemLayoutId(int position, final Three item) {
 			return R.layout.option_value;
 		}
 
@@ -2495,13 +2519,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public View getView(final int position, View convertView,
 									ViewGroup parent) {
 					ViewGroup layout;
+					final Three item = list.get(position);
 					if ( convertView==null ) {
-						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(), null);
+						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
 						//view = new TextView(getContext());
 					} else {
 						layout = (ViewGroup)convertView;
 					}
-					final Three item = list.get(position);
 					updateItemContents( layout, item, listView, position );
 					//cb.setClickable(false);
 //					cb.setOnClickListener(new View.OnClickListener() {
@@ -2591,7 +2615,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 		}
 
-		protected int getItemLayoutId() {
+		protected int getItemLayoutId(int position, final Three item) {
 			return R.layout.option_value;
 		}
 
@@ -2636,7 +2660,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
             }
         }
 
-		protected int getItemLayoutId() {
+		protected int getItemLayoutId(int position, final Three item) {
 			return R.layout.option_value;
 		}
 
@@ -2804,20 +2828,105 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			textureSampleCache.clear();
 		}
 
-		protected int getItemLayoutId() {
+		protected int getItemLayoutId(int position, final Three item) {
 			return R.layout.option_value_image; 
 		}
-		
+
+		@Override
+		public Three OnPreClick ( Three item ) {
+			File f = new File(item.value);
+			if (f.exists()) return item;
+			File f1 = new File(item.value.replace("/textures/", "/backgrounds/"));
+			if (f1.exists()) {
+				item.value = item.value.replace("/textures/", "/backgrounds/");
+				return item;
+			}
+			File f2 = new File(item.value.replace("/backgrounds/", "/textures/"));
+			if (f2.exists()) {
+				item.value = item.value.replace("/backgrounds/", "/textures/");
+				return item;
+			}
+			return item;
+		}
+
+		@Override
+		public String onSelectDismiss(String propValue) {
+			File f = new File(propValue);
+			if (f.exists()) return propValue;
+			File f1 = new File(propValue.replace("/textures/", "/backgrounds/"));
+			if (f1.exists()) {
+				propValue = propValue.replace("/textures/", "/backgrounds/");
+				return propValue;
+			}
+			File f2 = new File(propValue.replace("/backgrounds/", "/textures/"));
+			if (f2.exists()) {
+				propValue = propValue.replace("/backgrounds/", "/textures/");
+				return propValue;
+			}
+			return propValue;
+		}
+
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			super.updateItemContents(layout, item, listView, position);
 			ImageView img = (ImageView)layout.findViewById(R.id.option_value_image);
-			int cl = mProperties.getColor(PROP_BACKGROUND_COLOR, Color.WHITE);
-			BackgroundTextureInfo texture = Services.getEngine().getTextureInfoById(item.value);
+            ImageView imgT = (ImageView)layout.findViewById(R.id.option_value_type);
+            int cl = mProperties.getColor(PROP_BACKGROUND_COLOR, Color.WHITE);
+			final BackgroundTextureInfo texture = Services.getEngine().getTextureInfoById(item.value);
 			img.setBackgroundColor(cl);
+			if (texture.tiled) imgT.setImageResource(Utils.resolveResourceIdByAttr(activity,
+                    R.attr.attr_icons8_texture, R.drawable.drk_icons8_texture));
+			else
+                imgT.setImageResource(Utils.resolveResourceIdByAttr(activity,
+                        R.attr.attr_icons8_fullscreen, R.drawable.drk_icons8_fullscreen));
+			imgT.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(final View v) {
+					final BackgroundTextureInfo texture = Services.getEngine().getTextureInfoById(item.value);
+					if ((texture.resourceId == 0)&&(!texture.id.equals(BackgroundTextureInfo.NO_TEXTURE_ID))) {
+						activity.askConfirmation(R.string.texture_switch_mode, new Runnable() {
+							@Override
+							public void run() {
+								ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.TexturesDirs, true);
+								tDirs = Engine.getDataDirsExt(Engine.DataDirType.BackgroundsDirs, true);
+								File f = new File(texture.id);
+								String sNewName = texture.id;
+								if (texture.id.contains("/textures/"))
+									sNewName = sNewName.replace("/textures/", "/backgrounds/");
+								else
+									sNewName = sNewName.replace("/backgrounds/", "/textures/");
+								File fTo = new File(sNewName);
+								if (!f.renameTo(fTo))
+									activity.showToast(activity.getString(R.string.pic_problem));
+								else {
+									BackgroundTextureInfo[] textures = mReaderView.getEngine().getAvailableTextures();
+									ArrayList<Three> listTemp = new ArrayList<Three>();
+									for (Three th : list) {
+										if (th.value.equals(texture.id))
+											th.value=sNewName;
+										listTemp.add(th);
+									}
+									list=listTemp;
+									listTemp = new ArrayList<Three>();
+									for (Three th : listFiltered) {
+										if (th.value.equals(texture.id))
+											th.value=sNewName;
+										listTemp.add(th);
+									}
+									listFiltered = listTemp;
+									if (!texture.tiled) ((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
+											R.attr.attr_icons8_texture, R.drawable.drk_icons8_texture));
+									else
+										((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
+												R.attr.attr_icons8_fullscreen, R.drawable.drk_icons8_fullscreen));
+									listAdapter.notifyDataSetChanged();
+									listAdapter.notifyDataSetInvalidated();
+								}
+							}
+						});
+					}
+				}
+			});
 			if ( texture.resourceId!=0 ) {
-//				img.setImageDrawable(null);
-//				img.setImageResource(texture.resourceId);
-//				img.setBackgroundColor(Color.TRANSPARENT);
 				Drawable drawable = textureSampleCache.getImage(texture.resourceId);
 				if ( drawable!=null ) {
 					img.setImageResource(0);
@@ -2843,6 +2952,117 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 		}
 	}
+
+	class FontsOptions extends ListOption
+	{
+		ArrayList<String> faces = new ArrayList<String>();
+		ArrayList<String> faceValues = new ArrayList<String>();
+
+		public FontsOptions( OptionOwner owner, String label, String property, String addInfo, boolean bForCSS, String filter )
+		{
+			super( owner, label, property, addInfo, filter );
+			HashMap<String,ArrayList<String>> fontFiles = new HashMap<String,ArrayList<String>>();
+			if (bForCSS) {
+				faces.add("-");
+				faceValues.add("");
+				faces.add(getString(R.string.options_css_font_face_sans_serif));
+				faceValues.add("font-family: sans-serif");
+				faces.add(getString(R.string.options_css_font_face_serif));
+				faceValues.add("font-family: serif");
+				faces.add(getString(R.string.options_css_font_face_monospace));
+				faceValues.add("font-family: \"Courier New\", \"Courier\", monospace");
+			};
+			for (String face : mFontFacesFiles) {
+				String sFace = face;
+				String sFile = "";
+				if (face.contains("~")) {
+					sFace = face.split("~")[0];
+					sFile = face.split("~")[1];
+				}
+				if ((!StrUtils.isEmptyStr(sFace))&&(!StrUtils.isEmptyStr(sFile))) {
+					if (fontFiles.get(sFace) == null) {
+						ArrayList<String> alFiles = new ArrayList<String>();
+						alFiles.add(sFile);
+						fontFiles.put(sFace,alFiles);
+					} else {
+						ArrayList<String> alFiles = fontFiles.get(sFace);
+						alFiles.add(sFile);
+						fontFiles.put(sFace,alFiles);
+					}
+				}
+				if (!faces.contains(sFace)) {
+					faces.add(sFace);
+					faceValues.add((bForCSS ? "font-family: " : "") + sFace);
+				}
+			}
+			int i;
+			for (i = 0; i < faces.size(); i++) {
+				String addI = "";
+				if (fontFiles.get(faces.get(i)) != null) {
+					for (String s: fontFiles.get(faces.get(i))) {
+						addI = addI + "~" + s;
+					}
+				}
+				if (!StrUtils.isEmptyStr(addI)) addI = addI.substring(1);
+				add(faceValues.get(i), faces.get(i), addI);
+			}
+			if (faces.size()>0) setDefaultValue(faceValues.get(0));
+		}
+
+		protected void closed() {
+
+		}
+
+		protected int getItemLayoutId(int position, final Three item) {
+            return R.layout.option_value_3text;
+		}
+
+		private void addItem(TableLayout table, Three item, final String addInfo, final String testPhrase) {
+			TableRow tableRow = (TableRow)mInflater.inflate(R.layout.font_option_item, null);
+			ImageView btnOptionAddInfo = null;
+			btnOptionAddInfo = (ImageView)tableRow.findViewById(R.id.btn_option_add_info1);
+			if ((btnOptionAddInfo!=null)&&(StrUtils.isEmptyStr(addInfo))) btnOptionAddInfo.setVisibility(View.INVISIBLE);
+			else
+				btnOptionAddInfo.setImageDrawable(
+					activity.getResources().getDrawable(Utils.resolveResourceIdByAttr(activity,
+						R.attr.attr_icons8_option_info, R.drawable.drk_icons8_ask_question)));
+			if (btnOptionAddInfo != null) {
+				btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						mActivity.showToast(addInfo, Toast.LENGTH_LONG, v, true, 0);
+					}
+				});
+			}
+			TextView txt1 = (TextView)tableRow.findViewById(R.id.option_value_add_text1);
+			txt1.setText(testPhrase);
+			Typeface tf = null;
+			if (StrUtils.isEmptyStr(addInfo))
+				tf = Typeface.create(item.value.replaceAll("font-family: ",""),Typeface.NORMAL);
+			else
+				tf = Typeface.createFromFile(addInfo);
+			txt1.setTypeface(tf);
+			table.addView(tableRow);
+		}
+
+		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
+			super.updateItemContents(layout, item, listView, position);
+
+			TableLayout table = (TableLayout)layout.findViewById(R.id.table_add_text1);
+			table.removeAllViews();
+			String[] sAdd = {""};
+			if (!StrUtils.isEmptyStr(item.addInfo)) sAdd = item.addInfo.split("~");
+			String sAdd1 = "";
+			String sAdd2 = "";
+			String sAdd3 = "";
+			if (sAdd.length>0) sAdd1=sAdd[0];
+			if (sAdd.length>1) sAdd2=sAdd[1];
+			if (sAdd.length>2) sAdd3=sAdd[2];
+			addItem(table,item,sAdd1,getString(R.string.font_test_phrase));
+			if (!StrUtils.isEmptyStr(sAdd2)) addItem(table,item,sAdd2,getString(R.string.font_test_phrase2));
+			if (!StrUtils.isEmptyStr(sAdd3)) addItem(table,item,sAdd3,getString(R.string.font_test_phrase3));
+		}
+	}
 	
 	//byte[] fakeLongArrayForDebug;
 	
@@ -2851,7 +3071,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		BROWSER,
 	}
 
-	public OptionsDialog(BaseActivity activity, ReaderView readerView, String[] fontFaces, Mode mode)
+	public OptionsDialog(BaseActivity activity, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles, Mode mode)
 	{
 		super("OptionsDialog", activity, null, false, false);
 		String filter = "";
@@ -2860,6 +3080,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mActivity = activity;
 		mReaderView = readerView;
 		mFontFaces = fontFaces;
+		mFontFacesFiles = fontFacesFiles;
 		mProperties = new Properties(mActivity.settings()); //  readerView.getSettings();
 		mOldProperties = new Properties(mProperties);
 		if (mode == Mode.READER) {
@@ -3079,25 +3300,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(identOptions,
 					identOptionNames, addInfosI).setIconIdByAttr(R.attr.cr3_option_text_indent_drawable, R.drawable.cr3_option_text_indent));
 
-			ArrayList<String> faces = new ArrayList<String>(); 
-			ArrayList<String> faceValues = new ArrayList<String>();
-			faces.add("-");
-		    faceValues.add("");
-			faces.add(getString(R.string.options_css_font_face_sans_serif));
-		    faceValues.add("font-family: sans-serif");
-			faces.add(getString(R.string.options_css_font_face_serif));
-		    faceValues.add("font-family: serif");
-			faces.add(getString(R.string.options_css_font_face_monospace));
-			faceValues.add("font-family: \"Courier New\", \"Courier\", monospace");
-			for (String face : mFontFaces) {
-			    faces.add(face);
-			    faceValues.add("font-family: " + face);
-			}
-			int[] faceAddInfos = new int[faces.size()];
-			for (int i=0; i<faces.size(); i++) faceAddInfos[i] = R.string.option_add_info_empty_text;
-			listView.add(new ListOption(mOwner, getString(R.string.options_css_font_face), prefix + ".font-face",
-					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(faceValues.toArray(new String[]{}), faces.toArray(new String[]{}),
-					faceAddInfos).setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
+			listView.add(new FontsOptions(mOwner, getString(R.string.options_css_font_face), prefix + ".font-face",
+					getString(R.string.option_add_info_empty_text), true, this.lastFilteredValue).
+					setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
 			
 		    String[] fontSizeStyles = {
 		        "", // inherited
@@ -3615,8 +3820,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		//new TabHost(getContext());
 		
 		mOptionsStyles = new OptionsListView(getContext(), null);
-		mOptionsStyles.add(new ListOption(this, getString(R.string.options_font_face), PROP_FONT_FACE,
-				getString(R.string.option_add_info_empty_text), filter).add(mFontFaces).setDefaultValue(mFontFaces[0]).setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
+		mOptionsStyles.add(new FontsOptions(this, getString(R.string.options_font_face), PROP_FONT_FACE,
+				getString(R.string.option_add_info_empty_text), false, filter).setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
 		mOptionsStyles.add(new ListOption(this, getString(R.string.options_font_size), PROP_FONT_SIZE,
 				getString(R.string.option_add_info_empty_text), filter).add(filterFontSizes(mFontSizes)).setDefaultValue("24").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
 		mOptionsStyles.add(new BoolOption(this, getString(R.string.options_font_embolden), PROP_FONT_WEIGHT_EMBOLDEN,
@@ -3639,8 +3844,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsStyles.add(new ListOption(this, getString(R.string.options_render_font_gamma), PROP_FONT_GAMMA, getString(R.string.option_add_info_empty_text), filter).add(mGammas).setDefaultValue("1.0").setIconIdByAttr(R.attr.cr3_option_font_gamma_drawable, R.drawable.cr3_option_font_gamma));
 		mOptionsStyles.add(new ListOption(this, getString(R.string.options_format_min_space_width_percent), PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, getString(R.string.option_add_info_empty_text), filter).addPercents(mMinSpaceWidths).setDefaultValue("50").setIconIdByAttr(R.attr.cr3_option_text_width_drawable, R.drawable.cr3_option_text_width));
 		mOptionsStyles.add(new ListOption(this, getString(R.string.options_font_hinting), PROP_FONT_HINTING, getString(R.string.option_add_info_empty_text), filter).add(mHinting, mHintingTitles, mHintingAddInfos).setDefaultValue("2").noIcon());
-		mOptionsStyles.add(new ListOption(this, getString(R.string.options_font_fallback_face), PROP_FALLBACK_FONT_FACE, getString(R.string.option_add_info_empty_text), filter).add(mFontFaces).setDefaultValue(mFontFaces[0]).setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
-		
+		mOptionsStyles.add(new FontsOptions(this, getString(R.string.options_font_fallback_face), PROP_FALLBACK_FONT_FACE, getString(R.string.option_add_info_empty_text), false, filter).setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
 		//
 		mOptionsPage = new OptionsListView(getContext(), null);
 		mOptionsPage.add(new BoolOption(this, getString(R.string.options_app_fullscreen), PROP_APP_FULLSCREEN,

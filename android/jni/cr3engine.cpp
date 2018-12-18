@@ -740,6 +740,21 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFileNa
 
 /*
  * Class:     org_coolreader_crengine_Engine
+ * Method:    getFontFaceAndFileNameList
+ * Signature: ()[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFaceAndFileNameListInternal
+		(JNIEnv * penv, jclass cls)
+{
+	LOGI("getFontFileListInternal called");
+	CRJNIEnv env(penv);
+	lString16Collection list;
+	COFFEE_TRY_JNI(penv, fontMan->getFontFaceAndFileNameList(list));
+	return env.toJavaStringArray(list);
+}
+
+/*
+ * Class:     org_coolreader_crengine_Engine
  * Method:    setCacheDirectoryInternal
  * Signature: (Ljava/lang/String;I)Z
  */
@@ -823,6 +838,7 @@ static JNINativeMethod sEngineMethods[] = {
   {"initInternal", "([Ljava/lang/String;)Z", (void*)Java_org_coolreader_crengine_Engine_initInternal},
   {"uninitInternal", "()V", (void*)Java_org_coolreader_crengine_Engine_uninitInternal},
   {"getFontFaceListInternal", "()[Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_getFontFaceListInternal},
+  {"getFontFaceAndFileNameListInternal", "()[Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_getFontFaceAndFileNameListInternal},
   {"setCacheDirectoryInternal", "(Ljava/lang/String;I)Z", (void*)Java_org_coolreader_crengine_Engine_setCacheDirectoryInternal},
   {"scanBookPropertiesInternal", "(Lorg/coolreader/crengine/FileInfo;)Z", (void*)Java_org_coolreader_crengine_Engine_scanBookPropertiesInternal},
   {"setHyphenationMethod", "(I[B)Z", (void*)Java_org_coolreader_crengine_Engine_setHyphenationMethod},

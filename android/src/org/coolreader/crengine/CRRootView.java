@@ -4,6 +4,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.view.*;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -77,9 +78,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		createViews();
 		
 	}
-	
-	
-	
+
 	private long menuDownTs = 0;
 	private long backDownTs = 0;
 
@@ -761,6 +760,24 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				mActivity.showDirectory(dir);
 			}
 		});
+		ImageButton btnQuickSearch  = (ImageButton)view.findViewById(R.id.btn_quick_search);
+		final EditText edQuickSearch = (EditText)view.findViewById(R.id.quick_search);
+		btnQuickSearch.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String sText = edQuickSearch.getText().toString();
+				if (!StrUtils.isEmptyStr(sText)) {
+					FileInfo dir = new FileInfo();
+					dir.isDirectory = true;
+					dir.pathname = FileInfo.QSEARCH_SHORTCUT_TAG;
+					dir.filename = sText;
+					dir.isListed = true;
+					dir.isScanned = true;
+					edQuickSearch.setText("");
+					mActivity.showDirectory(dir);
+				}
+			}
+		});
 
         int colorBlue;
         int colorGreen;
@@ -787,6 +804,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
         btnStateToRead.setBackgroundColor(colorGrayCT);
         btnStateReading.setBackgroundColor(colorGrayCT);
         btnStateFinished.setBackgroundColor(colorGrayCT);
+		edQuickSearch.setBackgroundColor(colorGrayCT);
 
         updateCurrentBook(Services.getHistory().getLastBook());
 		

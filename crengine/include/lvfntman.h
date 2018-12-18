@@ -392,6 +392,8 @@ public:
     virtual void getFaceList( lString16Collection & ) { }
     /// returns available font files
     virtual void getFontFileNameList( lString16Collection & ) { }
+    /// returns available font names and files (~ separated)
+    virtual void getFontFaceAndFileNameList( lString16Collection & ) { }
 
     /// returns first found face from passed list, or return face for font found by family only
     virtual lString8 findFontFace(lString8 commaSeparatedFaceList, css_font_family_t fallbackByFamily);

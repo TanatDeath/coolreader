@@ -1,5 +1,7 @@
 package org.coolreader.crengine;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -115,7 +117,36 @@ public class GenreSAXElem {
             }
             ; //end of DefaultHandler object
         };
-        InputStream targetStream = mActivity.getResources().openRawResource(R.raw.fb2genres_utf8_wo_bom);
-        saxParser.parse(targetStream,handler);
+        File[] dataDirs = Engine.getDataDirectories(null, false, true);
+        File existingFile = null;
+        for ( File dir : dataDirs ) {
+            File f = new File(dir, "fb2genres_utf8_wo_bom.xml");
+            if ( f.exists() && f.isFile() ) {
+                existingFile = f;
+                break;
+            }
+        }
+        InputStream targetStreamF = null;
+        InputStream targetStream = null;
+        if (existingFile!=null) targetStreamF = new FileInputStream(existingFile);
+        targetStream = mActivity.getResources().openRawResource(R.raw.fb2genres_utf8_wo_bom);
+        if (targetStreamF!=null) {
+            try {
+                saxParser.parse(targetStreamF, handler);
+            } catch (Exception e) {
+                mActivity.showToast("Could not parse genres from file: fb2genres_utf8_wo_bom.xml. "+e.getMessage());
+                try {
+                    saxParser.parse(targetStream, handler);
+                } catch (Exception e1) {
+                    mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. "+e1.getMessage());
+                }
+            }
+        } else {
+            try {
+                saxParser.parse(targetStream, handler);
+            } catch (Exception e1) {
+                mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. "+e1.getMessage());
+            }
+        }
     }
 }

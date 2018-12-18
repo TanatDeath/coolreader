@@ -1629,7 +1629,7 @@ public class BaseActivity extends Activity implements Settings {
 	{
 		if (this instanceof CoolReader)
 			((CoolReader)this).optionsFilter = "";
-		OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, OptionsDialog.Mode.BROWSER);
+		OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, null, OptionsDialog.Mode.BROWSER);
 		dlg.show();
 	}
 

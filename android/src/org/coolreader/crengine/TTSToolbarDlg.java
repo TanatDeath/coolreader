@@ -5,11 +5,25 @@ import java.util.HashMap;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 
+import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Message;
+import android.media.MediaMetadata;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
+import android.os.Build;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -29,6 +43,8 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.s_trace.motion_watchdog.HandlerThread;
 import com.s_trace.motion_watchdog.MotionWatchdogHandler;
 
+import static android.media.session.MediaSession.*;
+
 public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	PopupWindow mWindow;
 	View mAnchor;
@@ -36,6 +52,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	ReaderView mReaderView;
 	View mPanel;
 	TTS mTTS;
+	private static NotificationChannel channel;
 	ImageButton playPauseButton;
 	ImageView ivVolDown;
 	ImageView ivVolUp;
@@ -44,6 +61,205 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	SeekBar sbSpeed;
 	SeekBar sbVolume;
 	private HandlerThread mMotionWatchdog;
+	private static String CHANNEL_ID = "CoolReader_channel";
+
+	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
+	// For TTS notification:
+	private static final String ACTION_TTS_PREV = "org.coolreader.crengine.tts.prev";
+	private static final String ACTION_TTS_PLAY = "org.coolreader.crengine.tts.play";
+	private static final String ACTION_TTS_PAUSE = "org.coolreader.crengine.tts.pause";
+	private static final String ACTION_TTS_NEXT = "org.coolreader.crengine.tts.next";
+	private static final String ACTION_TTS_STOP = "org.coolreader.crengine.tts.stop";
+	private static final int TTS_NOTIFICATION_ID = 0; // Use same ID for all TTS notifications
+	private static final int COVER_HEIGHT = 256;
+	private static final int COVER_WIDTH = 256;
+	private FileInfo mFileInfo = null;
+	private Bitmap mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
+	private NotificationManager mNotificationManager;
+	private MediaSession mMediaSession;
+	private BroadcastReceiver mTtsControlReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			Log.d(TAG, "mTtsControlReceiver onReceive: got " + intent);
+			if (action == null) {
+				Log.w(TAG, "mTtsControlReceiver onReceive: got intent with null action!");
+				return;
+			}
+			switch (action) {
+				case ACTION_TTS_PREV:
+					jumpToSentence(ReaderCommand.DCMD_SELECT_PREV_SENTENCE);
+					break;
+				case ACTION_TTS_PLAY:
+					if (!isSpeaking) {
+						toggleStartStop();
+					}
+					break;
+				case ACTION_TTS_PAUSE:
+					if (isSpeaking) {
+						toggleStartStop();
+					}
+					break;
+				case ACTION_TTS_NEXT:
+					jumpToSentence(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
+					break;
+				case ACTION_TTS_STOP:
+					stopAndClose();
+					break;
+				default:
+					Log.w(TAG, "mTtsControlReceiver onReceive: got unexpected " + intent);
+					break;
+			}
+		}
+	};
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void setMediaSessionPlaybackState(int state) {
+		if (mMediaSession == null) {
+			return;
+		}
+		PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+				.setActions(PlaybackState.ACTION_PLAY
+						| PlaybackState.ACTION_STOP
+						| PlaybackState.ACTION_PAUSE
+						| PlaybackState.ACTION_PLAY_PAUSE
+						| PlaybackState.ACTION_SKIP_TO_NEXT
+						| PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+				.setState(state, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1);
+		mMediaSession.setPlaybackState(stateBuilder.build());
+	}
+
+	public NotificationChannel createNotificationChannel() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			if (channel == null) {
+				NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "CoolReader", NotificationManager.IMPORTANCE_LOW);
+				channel.enableLights(false);
+				channel.enableVibration(false);
+				NotificationManager notificationManager = mCoolReader.getSystemService(NotificationManager.class);
+				notificationManager.createNotificationChannel(channel);
+			}
+		}
+		return channel;
+	}
+
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void displayNotification(boolean isSpeaking) {
+		createNotificationChannel();
+		mNotificationManager = (NotificationManager)
+				mCoolReader.getSystemService(Context.NOTIFICATION_SERVICE);
+		if (mNotificationManager == null) {
+			Log.i(TAG, "displayNotification: can't get NotificationService");
+			return;
+		}
+		Notification.Builder builder;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder = new Notification.Builder(mCoolReader, CHANNEL_ID);
+		} else {
+			builder = new Notification.Builder(mCoolReader);
+		}
+		// Show controls on lock screen even when user hides sensitive content.
+		builder.setVisibility(Notification.VISIBILITY_PUBLIC);
+		builder.setSmallIcon(R.drawable.cr3_logo);
+		// Add media control buttons that invoke intents in your media service
+		PendingIntent prevPendingIntent = PendingIntent.getBroadcast(mCoolReader, 0,
+				new Intent(ACTION_TTS_PREV), 0);
+		PendingIntent playPendingIntent = PendingIntent.getBroadcast(mCoolReader, 1,
+				new Intent(ACTION_TTS_PLAY), 0);
+		PendingIntent pausePendingIntent = PendingIntent.getBroadcast(mCoolReader, 1,
+				new Intent(ACTION_TTS_PAUSE), 0);
+		PendingIntent nextPendingIntent = PendingIntent.getBroadcast(mCoolReader, 2,
+				new Intent(ACTION_TTS_NEXT), 0);
+		PendingIntent stopPendingIntent = PendingIntent.getBroadcast(mCoolReader, 3,
+				new Intent(ACTION_TTS_STOP), 0);
+		builder.addAction(R.drawable.ic_media_rew, "Previous", prevPendingIntent); // #0
+		if (isSpeaking) {
+			builder.addAction(R.drawable.ic_media_pause, "Pause", pausePendingIntent); // #1
+		} else {
+			builder.addAction(R.drawable.ic_media_play, "Play", playPendingIntent); // #1
+		}
+		builder.addAction(R.drawable.ic_media_ff, "Next", nextPendingIntent);  // #2
+		builder.addAction(R.drawable.ic_media_stop, "Stop", stopPendingIntent);  // #3
+		// Apply the media style template
+		builder.setStyle(new Notification.MediaStyle()
+				.setShowActionsInCompactView(1 /* #1: play or pause button */)
+				.setMediaSession(mMediaSession.getSessionToken())
+		);
+		builder.setContentTitle(mFileInfo.getTitle());
+		builder.setContentText(mFileInfo.getAuthors());
+		builder.setLargeIcon(mBookCover);
+		mNotificationManager.notify(TTS_NOTIFICATION_ID, builder.build());
+	}
+
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void startMediaSession() {
+		final BookInfo bookInfo = mReaderView.getBookInfo();
+		if (bookInfo == null) {
+			Log.w(TAG, "startMediaSession: mReaderView.getBookInfo() returned null!");
+			return;
+		}
+		mMediaSession = new MediaSession(mCoolReader, "TTS");
+		mMediaSession.setFlags(FLAG_HANDLES_MEDIA_BUTTONS|FLAG_HANDLES_TRANSPORT_CONTROLS);
+		mMediaSession.setCallback(new Callback() {
+			@Override
+			public void onPlay() {
+				Log.i(TAG, "onPlay");
+				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_PLAY));
+			}
+			@Override
+			public void onPause() {
+				Log.i(TAG, "onPause");
+				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_PAUSE));
+			}
+			@Override
+			public void onSkipToNext() {
+				Log.i(TAG, "onSkipToNext");
+				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_NEXT));
+			}
+			@Override
+			public void onSkipToPrevious() {
+				Log.i(TAG, "onSkipToPrevious");
+				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_PREV));
+			}
+			@Override
+			public void onStop() {
+				Log.i(TAG, "onStop");
+				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_STOP));
+			}
+		});
+		mFileInfo = bookInfo.getFileInfo();
+		Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), mFileInfo, mBookCover,
+				new CoverpageManager.CoverpageBitmapReadyListener() {
+					@Override
+					public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
+						mBookCover = bitmap;
+						displayNotification(isSpeaking);
+						MediaMetadata metadata = new MediaMetadata.Builder()
+								.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+								.putString(MediaMetadata.METADATA_KEY_TITLE, mFileInfo.getTitle())
+								.putString(MediaMetadata.METADATA_KEY_ARTIST, mFileInfo.getAuthors())
+								.build();
+						mMediaSession.setMetadata(metadata);
+						setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
+						mMediaSession.setActive(true);
+					}
+				}
+		);
+	}
+	private void jumpToSentence(ReaderCommand dcmdSelectSentence) {
+		if (isSpeaking) {
+			isSpeaking = false;
+			mTTS.stop();
+			isSpeaking = true;
+		}
+		moveSelection(dcmdSelectSentence);
+	}
+	private void registerTtsControlReceiver() {
+		IntentFilter intentFilter = new IntentFilter(ACTION_TTS_PREV);
+		intentFilter.addAction(ACTION_TTS_PLAY);
+		intentFilter.addAction(ACTION_TTS_PAUSE);
+		intentFilter.addAction(ACTION_TTS_NEXT);
+		intentFilter.addAction(ACTION_TTS_STOP);
+		mCoolReader.registerReceiver(mTtsControlReceiver, intentFilter);
+	}
 
 	static public TTSToolbarDlg showDialog( CoolReader coolReader, ReaderView readerView, TTS tts)
 	{
@@ -81,6 +297,17 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				mReaderView.save();
 			}
 		});
+		mCoolReader.unregisterReceiver(mTtsControlReceiver);
+		if (mNotificationManager != null) {
+			mNotificationManager.cancel(TTS_NOTIFICATION_ID);
+		}
+		try {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				mMediaSession.setActive(false);
+				mMediaSession.release();
+			}
+		} catch (Throwable ignored) {
+		}
 	}
 	
 	private boolean changedPageMode;
@@ -151,7 +378,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	}
 
 	private void startMotionWatchdog(){
-		String TAG = "MotionWatchdog";
 		Log.d(TAG, "startMotionWatchdog() enter");
 
 		Properties settings = mReaderView.getSettings();
@@ -193,13 +419,22 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
 					//R.drawable.ic_media_play
 			);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
+			}
 			stop();
 		} else {
 			playPauseButton.setImageResource(
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
 					//R.drawable.ic_media_pause
 			);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				setMediaSessionPlaybackState(PlaybackState.STATE_PLAYING);
+			}
 			start();
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			displayNotification(isSpeaking);
 		}
 	}
 	
@@ -217,6 +452,11 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mAnchor = readerView.getSurface();
 		mTTS = tts;
 		mTTS.setOnUtteranceCompletedListener(this);
+
+		registerTtsControlReceiver();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			startMediaSession();
+		}
 
 		int colorGrayC;
 		int colorGray;
@@ -275,23 +515,25 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.tts_back).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if ( isSpeaking ) {
-					isSpeaking = false;
-					mTTS.stop();
-					isSpeaking = true;
-				}
-				moveSelection( ReaderCommand.DCMD_SELECT_PREV_SENTENCE );
+//				if ( isSpeaking ) {
+//					isSpeaking = false;
+//					mTTS.stop();
+//					isSpeaking = true;
+//				}
+				//moveSelection( ReaderCommand.DCMD_SELECT_PREV_SENTENCE );
+				jumpToSentence( ReaderCommand.DCMD_SELECT_PREV_SENTENCE );
 			}
 		});
 		mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.tts_forward).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if ( isSpeaking ) {
-					isSpeaking = false;
-					mTTS.stop();
-					isSpeaking = true;
-				}
-				moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
+//				if ( isSpeaking ) {
+//					isSpeaking = false;
+//					mTTS.stop();
+//					isSpeaking = true;
+//				}
+//				moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
+				jumpToSentence( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
 			}
 		});
 		mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);

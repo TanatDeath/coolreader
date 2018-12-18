@@ -41,6 +41,8 @@ import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.N2EpdController;
 import org.coolreader.crengine.OPDSCatalogEditDialog;
 import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.crengine.PictureCameDialog;
+import org.coolreader.crengine.PictureReceived;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderAction;
@@ -128,6 +130,7 @@ public class CoolReader extends BaseActivity
 	private BrowserViewLayout mBrowserFrame;
 	public CRRootView mHomeFrame;
 	private Engine mEngine;
+	public PictureReceived picReceived = null;
 
 	public HashMap<String, UserDicEntry> getmUserDic() {
 		return mUserDic;
@@ -427,53 +430,101 @@ public class CoolReader extends BaseActivity
 //					fileToOpen = fileToOpen.substring("file://".length());
 			}
 		}
+		if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
+			if (intent.getType().startsWith("image/")) {
+				ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+				if (imageUris != null) {
+					showToast("Not implemented yet");
+				}
+			}
+		}
 		if (Intent.ACTION_SEND.equals(intent.getAction())) {
-			fileToOpen = intent.getStringExtra(Intent.EXTRA_SUBJECT);
-			if (fileToOpen.equals(FileInfo.RECENT_DIR_TAG)) {
-                this.showRecentBooks();
-                return true;
-            }
-			if (fileToOpen.equals(FileInfo.STATE_READING_TAG)) {
-				FileInfo dir = new FileInfo();
-				dir.isDirectory = true;
-				dir.pathname = fileToOpen;
-				dir.filename = this.getString(R.string.folder_name_books_by_state_reading);
-				dir.isListed = true;
-				dir.isScanned = true;
-				this.showDirectory(dir);
-				return true;
+			if (intent.getType().startsWith("image/")) {
+				Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+				if (imageUri != null) {
+					PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, imageUri, intent.getType());
+					dlg.show();
+				}
+			} else {
+				fileToOpen = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+				if (fileToOpen != null) {
+					if (fileToOpen.equals(FileInfo.RECENT_DIR_TAG)) {
+						this.showRecentBooks();
+						return true;
+					}
+					if (fileToOpen.equals(FileInfo.STATE_READING_TAG)) {
+						final FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = fileToOpen;
+						dir.filename = this.getString(R.string.folder_name_books_by_state_reading);
+						dir.isListed = true;
+						dir.isScanned = true;
+						waitForCRDBService(new Runnable() {
+							@Override
+							public void run() {
+								showDirectory(dir);
+							}
+						});
+						return true;
+					}
+					if (fileToOpen.equals(FileInfo.STATE_TO_READ_TAG)) {
+						final FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = fileToOpen;
+						dir.filename = this.getString(R.string.folder_name_books_by_state_to_read);
+						dir.isListed = true;
+						dir.isScanned = true;
+						waitForCRDBService(new Runnable() {
+							@Override
+							public void run() {
+								showDirectory(dir);
+							}
+						});
+						return true;
+					}
+					if (fileToOpen.equals(FileInfo.STATE_FINISHED_TAG)) {
+						final FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = fileToOpen;
+						dir.filename = this.getString(R.string.folder_name_books_by_state_finished);
+						dir.isListed = true;
+						dir.isScanned = true;
+						waitForCRDBService(new Runnable() {
+							@Override
+							public void run() {
+								showDirectory(dir);
+							}
+						});
+						return true;
+					}
+					if (fileToOpen.equals(FileInfo.SEARCH_SHORTCUT_TAG)) {
+						final FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = fileToOpen;
+						dir.filename = this.getString(R.string.dlg_book_search);
+						dir.isListed = true;
+						dir.isScanned = true;
+						waitForCRDBService(new Runnable() {
+							@Override
+							public void run() {
+								showDirectory(dir);
+							}
+						});
+						return true;
+					}
+				}
+				if (StrUtils.isEmptyStr(fileToOpen)) {
+					//showToast(intent.getType());
+					String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
+					if (!StrUtils.isEmptyStr(sText)) {
+						if (sText.toLowerCase().startsWith("http"))
+							showToast(R.string.warn_http);
+						else
+							showToast(R.string.warn_empty_file_name);
+					}
+					return true;
+				}
 			}
-            if (fileToOpen.equals(FileInfo.STATE_TO_READ_TAG)) {
-                FileInfo dir = new FileInfo();
-                dir.isDirectory = true;
-                dir.pathname = fileToOpen;
-                dir.filename = this.getString(R.string.folder_name_books_by_state_to_read);
-                dir.isListed = true;
-                dir.isScanned = true;
-                this.showDirectory(dir);
-                return true;
-            }
-			if (fileToOpen.equals(FileInfo.STATE_FINISHED_TAG)) {
-				FileInfo dir = new FileInfo();
-				dir.isDirectory = true;
-				dir.pathname = fileToOpen;
-				dir.filename = this.getString(R.string.folder_name_books_by_state_finished);
-				dir.isListed = true;
-				dir.isScanned = true;
-				this.showDirectory(dir);
-				return true;
-			}
-            if (fileToOpen.equals(FileInfo.SEARCH_SHORTCUT_TAG)) {
-                FileInfo dir = new FileInfo();
-                dir.isDirectory = true;
-                dir.pathname = fileToOpen;
-                dir.filename = this.getString(R.string.dlg_book_search);
-                dir.isListed = true;
-                dir.isScanned = true;
-                this.showDirectory(dir);
-                return true;
-            }
-
 		}
 
 		if (fileToOpen == null && intent.getExtras() != null) {
@@ -486,7 +537,13 @@ public class CoolReader extends BaseActivity
 				fileToOpen = fileToOpen.replace("%2F", "/");
 			}
 			log.d("FILE_TO_OPEN = " + fileToOpen);
-			loadDocument(fileToOpen, new Runnable() {
+			// image handling
+			if (
+					(fileToOpen.toLowerCase().endsWith(".jpg"))||
+							(fileToOpen.toLowerCase().endsWith(".jpeg"))||
+							(fileToOpen.toLowerCase().endsWith(".png"))
+					) pictureCame(fileToOpen);
+			else loadDocument(fileToOpen, new Runnable() {
 				@Override
 				public void run() {
 					BackgroundThread.instance().postGUI(new Runnable() {
@@ -983,7 +1040,7 @@ public class CoolReader extends BaseActivity
 								mBrowser.showRecentBooks();
 								break;
 							case DCMD_SEARCH:
-								mBrowser.showFindBookDialog();
+								mBrowser.showFindBookDialog(false, "");
 								break;
 							case DCMD_CURRENT_BOOK:
 								showCurrentBook();
@@ -1040,7 +1097,12 @@ public class CoolReader extends BaseActivity
 			}
 		});
 	}
-	
+
+	public void pictureCame(final String item) {
+		PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, item, "");
+		dlg.show();
+	}
+
 	public void loadDocument( FileInfo item )
 	{
 		loadDocument(item, null);
@@ -1404,9 +1466,10 @@ public class CoolReader extends BaseActivity
 		BackgroundThread.instance().postBackground(new Runnable() {
 			public void run() {
 				final String[] mFontFaces = Engine.getFontFaceList();
+				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(new Runnable() {
 					public void run() {
-						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mode);
+						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
 						dlg.show();
 					}
 				});
@@ -1419,9 +1482,10 @@ public class CoolReader extends BaseActivity
 		BackgroundThread.instance().postBackground(new Runnable() {
 			public void run() {
 				final String[] mFontFaces = Engine.getFontFaceList();
+				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(new Runnable() {
 					public void run() {
-						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mode);
+						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
 						dlg.selectedOption = selectOption;
 						dlg.show();
 					}
@@ -1948,6 +2012,7 @@ public class CoolReader extends BaseActivity
 					itemsAll.add(s);
 				}
 				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot);
+				//PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, null, "image/jpeg");
 				dlg.show();
 			}
 		});

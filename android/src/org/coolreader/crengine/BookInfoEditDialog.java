@@ -322,6 +322,21 @@ public class BookInfoEditDialog extends BaseDialog {
 			dismiss();
 			}
 		});
+        ImageButton btnCustomCover = (ImageButton)view.findViewById(R.id.book_custom_cover);
+		btnCustomCover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+		        if (mActivity.picReceived!=null) {
+					if (mActivity.picReceived.bmpReceived!=null) {
+						PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
+								mBookInfo, "");
+						dlg.show();
+					}
+                } else {
+                    ((CoolReader)activity).showToast(R.string.pic_no_pic);
+                }
+            }
+        });
 
 		ImageButton btnShortcutBook = (ImageButton)view.findViewById(R.id.book_shortcut);
 		btnShortcutBook.setOnClickListener(new View.OnClickListener() {

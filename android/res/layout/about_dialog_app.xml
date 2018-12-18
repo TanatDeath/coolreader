@@ -62,7 +62,7 @@
 			<TextView android:text="https://icons8.com" android:id="@+id/www_icons8"
 				style="@style/TextAppearance.Small"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
-			<TextView android:text="With the help of code examples from projects (dictionary popup windows, book shortcuts): FBReader, Librera, AlReader"
+			<TextView android:text="With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook"
 				android:id="@+id/thirdparty4"
 				style="@style/TextAppearance.Small"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
