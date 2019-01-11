@@ -12,7 +12,7 @@
    viewBox="0 0 48 48"
    version="1.1"
    id="svg16092"
-   sodipodi:docname="icons8_bookmark_simple_green.svg"
+   sodipodi:docname="icons8_bookmark_simple_color.svg"
    inkscape:version="0.92.3 (2405546, 2018-03-11)">
   <metadata
      id="metadata16098">
@@ -42,7 +42,7 @@
      id="namedview16094"
      showgrid="false"
      inkscape:zoom="4.9166667"
-     inkscape:cx="24"
+     inkscape:cx="-12.813559"
      inkscape:cy="24"
      inkscape:window-x="70"
      inkscape:window-y="27"
@@ -51,11 +51,11 @@
   <path
      d="M 25.118644,0.9491526 H 5.1186441 c -2.21,0 -3.98,1.7151045 -3.98,3.8326359 l -0.02,30.6610875 13.9999999,-5.748954 14,5.748954 V 4.7817885 c 0,-2.1175314 -1.79,-3.8326359 -4,-3.8326359 z m 0,28.7447694 -10,-4.167992 -9.9999999,4.167992 V 4.7817885 H 25.118644 Z"
      id="path16088"
-     style="fill:#80c380;fill-opacity:1;stroke-width:0.97885597"
+     style="fill:#808080;fill-opacity:1;stroke-width:0.97885597"
      inkscape:connector-curvature="0" />
   <path
      inkscape:connector-curvature="0"
      d="m 40.983051,13.0317 h -20 c -2.21,0 -3.98,1.715104 -3.98,3.832636 l -0.02,30.661088 14,-5.748954 14,5.748954 V 16.864336 c 0,-2.117532 -1.79,-3.832636 -4,-3.832636 z m 0,28.74477 -10,-4.167992 -10,4.167992 V 16.864336 h 20 z"
      id="path16088-3"
-     style="fill:#cd8080;fill-opacity:1;stroke-width:0.97885597" />
+     style="fill:none;fill-opacity:1;stroke-width:0.97885597;stroke:#808080;stroke-opacity:1" />
 </svg>

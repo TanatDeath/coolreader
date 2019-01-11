@@ -30,6 +30,11 @@ my %ic_smaller_list=(
 );
 
 my %ic_actions_list=(
+        'icons8_disable_toolbar.svg' => 'icons8_disable_toolbar.png',
+        'icons8_fix_landsc.svg' => 'icons8_fix_landsc.png',
+        'icons8_fix_port.svg' => 'icons8_fix_port.png',
+        'icons8_port_to_landsc.svg' => 'icons8_port_to_landsc.png',
+        'icons8_landsc_to_port.svg' => 'icons8_landsc_to_port.png',
         'icons8_ligature.svg' => 'icons8_ligature.png',
         'icons8_pages_total.svg' => 'icons8_pages_total.png',
         'icons8_page_percent.svg' => 'icons8_page_percent.png',
@@ -287,92 +292,16 @@ my $resfile;
 my $cmd;
 my $ret;
 
-sub makeTemp {
-	$src_file = $_[0];
-	$resfile = "${TEMP_DIR}/drk_${src_file}";
-	open(IN, '<'.$src_file) or die $src_file.':'.$!;
-	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
-	while(<IN>)
-	{
-	    $_ =~ s/808080/202020/g;
-	    print OUT $_;
-	}
-	close(IN);
-	close(OUT);	
-
-	$resfile = "${TEMP_DIR}/lgt_${src_file}";
-	open(IN, '<'.$src_file) or die $src_file.':'.$!;
-	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
-	while(<IN>)
-	{
-	    $_ =~ s/808080/EEEEEE/g;
-	    print OUT $_;
-	}
-	close(IN);
-	close(OUT);	
-
-	$resfile = "${TEMP_DIR}/wdrk_${src_file}";
-	open(IN, '<'.$src_file) or die $src_file.':'.$!;
-	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
-	while(<IN>)
-	{
-	    $_ =~ s/808080/65441a/g;
-	    print OUT $_;
-	}
-	close(IN);
-	close(OUT);	
-
-	$resfile = "${TEMP_DIR}/wlgt_${src_file}";
-	open(IN, '<'.$src_file) or die $src_file.':'.$!;
-	open(OUT, '>'.$resfile) or die $resfile.':'.$!;
-	while(<IN>)
-	{
-	    $_ =~ s/808080/efdbc2/g;
-	    print OUT $_;
-	}
-	close(IN);
-	close(OUT);
-}
-
 # smaller icons
 while (($srcfile, $dstfile) = each(%ic_smaller_list))
 {
-	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_smaller_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			#$resfile = "${folder}/${dstfile}";
-			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			#print "$cmd\n";
-			#$ret = system($cmd);
-			#print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
-			$resfile = "${folder}/drk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
-			$resfile = "${folder}/lgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
-			$resfile = "${folder}/wdrk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
-			$resfile = "${folder}/wlgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			$resfile = "${folder}/${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -383,42 +312,13 @@ while (($srcfile, $dstfile) = each(%ic_smaller_list))
 # action icons
 while (($srcfile, $dstfile) = each(%ic_actions_list))
 {
-	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_actions_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			#$resfile = "${folder}/${dstfile}";
-			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			#print "$cmd\n";
-			#$ret = system($cmd);
-			#print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
-			$resfile = "${folder}/drk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
-			$resfile = "${folder}/lgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
-			$resfile = "${folder}/wdrk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
-			$resfile = "${folder}/wlgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			$resfile = "${folder}/${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -429,45 +329,17 @@ while (($srcfile, $dstfile) = each(%ic_actions_list))
 # menu icons
 while (($srcfile, $dstfile) = each(%ic_menu_list))
 {
-	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_menu_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			#$resfile = "${folder}/${dstfile}";
-			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			#print "$cmd\n";
-			#$ret = system($cmd);
-			#print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
-			$resfile = "${folder}/drk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			$resfile = "${folder}/${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
 
-			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
-			$resfile = "${folder}/lgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
-			$resfile = "${folder}/wdrk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
-			$resfile = "${folder}/wlgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
 		}
 	}
 }
@@ -475,45 +347,17 @@ while (($srcfile, $dstfile) = each(%ic_menu_list))
 # launcher icons
 while (($srcfile, $dstfile) = each(%ic_launcher_list))
 {
-	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_launcher_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			#$resfile = "${folder}/${dstfile}";
-			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			#print "$cmd\n";
-			#$ret = system($cmd);
-			#print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
-			$resfile = "${folder}/drk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			$resfile = "${folder}/${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
 
-			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
-			$resfile = "${folder}/lgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
-			$resfile = "${folder}/wdrk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
-			$resfile = "${folder}/wlgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
 		}
 	}
 }
@@ -521,45 +365,17 @@ while (($srcfile, $dstfile) = each(%ic_launcher_list))
 # bigicons
 while (($srcfile, $dstfile) = each(%ic_bigicons_list))
 {
-	makeTemp($srcfile);
 	while (($dpi, $size) = each(%ic_bigicons_sizes))
 	{
 		$folder = "${TARGET_DIR}/drawable-${dpi}/";
 		if (-d $folder)
 		{
-			#$resfile = "${folder}/${dstfile}";
-			#$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
-			#print "$cmd\n";
-			#$ret = system($cmd);
-			#print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/drk_${src_file}";
-			$resfile = "${folder}/drk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
+			$resfile = "${folder}/${dstfile}";
+			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
 
-			$srcfile_2 = "${TEMP_DIR}/lgt_${src_file}";
-			$resfile = "${folder}/lgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wdrk_${src_file}";
-			$resfile = "${folder}/wdrk_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
-
-			$srcfile_2 = "${TEMP_DIR}/wlgt_${src_file}";
-			$resfile = "${folder}/wlgt_${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile_2}";
-			print "$cmd\n";
-			$ret = system($cmd);
-			print "Failed!\n" if $ret != 0;
 		}
 	}
 }
