@@ -515,9 +515,11 @@ public class CRToolBar extends ViewGroup {
 				ib.setImageBitmap(bmpGrayscale);
 			} else if (this.invIcons) {
 				ib.setImageBitmap(InverseBitmap(bitmap));
+				//activity.tintViewIcons(ib,true);
 			} else
 				{
 					ib.setImageBitmap(bitmap);
+					activity.tintViewIcons(ib,true);
 				}
 		}
 	}
@@ -621,7 +623,6 @@ public class CRToolBar extends ViewGroup {
 		if (rc.isEmpty())
 			return null;
 		ImageButton ib = new ImageButton(getContext());
-
 		ib.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
@@ -780,7 +781,8 @@ public class CRToolBar extends ViewGroup {
 							showOverflowMenu();
 						}
 					});
-        			item.setOnLongClickListener(new OnLongClickListener() {
+					activity.tintViewIcons(item,true);
+					item.setOnLongClickListener(new OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
 							ReaderAction ram = action.getMirrorAction();
@@ -1040,6 +1042,7 @@ public class CRToolBar extends ViewGroup {
 			popup.showAtLocation(anchor, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 0); //location[0], popupY - anchor.getHeight());
 		else
 			popup.showAtLocation(anchor, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0); //, location[0], popupY);
+        context.tintViewIcons(tb);
 		return popup;
 	}
 	

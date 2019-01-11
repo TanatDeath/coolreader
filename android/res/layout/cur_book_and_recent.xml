@@ -43,6 +43,7 @@
              android:maxHeight="200dip"
              android:maxWidth="150dip"
              android:drawable="?attr/cr3_browser_book_drawable"
+             android:tag="tint"
              />
 
          

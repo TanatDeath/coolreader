@@ -31,6 +31,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
+                    android:tag="tint"
                     android:src="?attr/attr_cr3_coin_iron" />
 
                 <Button
@@ -49,6 +50,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
+                    android:tag="tint"
                     android:src="?attr/attr_cr3_coin_bronze" />
 
                 <Button
@@ -70,6 +72,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
+                    android:tag="tint"
                     android:src="?attr/attr_cr3_coin_silver" />
 
                 <Button
@@ -88,6 +91,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
+                    android:tag="tint"
                     android:src="?attr/attr_cr3_coin_gold" />
 
                 <Button
@@ -109,6 +113,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
+                    android:tag="tint"
                     android:src="?attr/attr_cr3_coin_platinum" />
 
                 <Button
@@ -128,6 +133,7 @@
                     android:layout_gravity="center_vertical|left"
                     android:layout_margin="2dip"
                     android:paddingLeft="12dip"
+                    android:tag="tint"
                     android:src="?attr/attr_cr3_coin_vip" />
 
                 <Button

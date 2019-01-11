@@ -936,7 +936,10 @@ LVStreamRef LVDocView::getCoverPageImageStream() {
 	lUInt16 path[] = { el_FictionBook, el_description, el_title_info,
 			el_coverpage, 0 };
 	//lUInt16 path[] = { el_FictionBook, el_description, el_title_info, el_coverpage, el_image, 0 };
-	ldomNode * cover_el = m_doc->getRootNode()->findChildElement(path);
+	ldomNode * rootNode = m_doc->getRootNode();
+	ldomNode * cover_el = 0;
+	if (rootNode)
+		cover_el = rootNode->findChildElement(path);
 	//ldomNode * cover_img_el = m_doc->getRootNode()->findChildElement( path );
 
 	if (cover_el) {
@@ -960,7 +963,10 @@ LVImageSourceRef LVDocView::getCoverPageImage() {
 	lUInt16 path[] = { el_FictionBook, el_description, el_title_info,
 			el_coverpage, 0 };
 	//lUInt16 path[] = { el_FictionBook, el_description, el_title_info, el_coverpage, el_image, 0 };
-	ldomNode * cover_el = m_doc->getRootNode()->findChildElement(path);
+	ldomNode * cover_el = 0;
+	ldomNode * rootNode = m_doc->getRootNode();
+	if (rootNode)
+		cover_el = rootNode->findChildElement(path);
 	//ldomNode * cover_img_el = m_doc->getRootNode()->findChildElement( path );
 
 	if (cover_el) {
@@ -2637,7 +2643,9 @@ LVImageSourceRef LVDocView::getImageByPoint(lvPoint pt) {
     if (ptr.isNull())
         return res;
     //CRLog::debug("node: %s", LCSTR(ptr.toString()));
-    res = ptr.getNode()->getObjectImageSource();
+    ldomNode* node = ptr.getNode();
+    if (node)
+        res = node->getObjectImageSource();
     if (!res.isNull())
         CRLog::debug("getImageByPoint(%d, %d) : found image %d x %d", pt.x, pt.y, res->GetWidth(), res->GetHeight());
     return res;
@@ -4607,7 +4615,10 @@ bool LVDocView::ParseDocument() {
 
 		if (m_doc_format == doc_format_html) {
 			static lUInt16 path[] = { el_html, el_head, el_title, 0 };
-			ldomNode * el = m_doc->getRootNode()->findChildElement(path);
+			ldomNode * el = NULL;
+			ldomNode * rootNode = m_doc->getRootNode();
+			if (rootNode)
+				el = rootNode->findChildElement(path);
 			if (el != NULL) {
                 lString16 s = el->getText(L' ', 1024);
 				if (!s.empty()) {
@@ -5957,6 +5968,7 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->limitValueList(PROP_DISPLAY_INVERSE, bool_options_def_false, 2);
 	props->limitValueList(PROP_BOOKMARK_ICONS, bool_options_def_false, 2);
 	props->limitValueList(PROP_FONT_KERNING_ENABLED, bool_options_def_false, 2);
+	props->limitValueList(PROP_FONT_LIGATURES_ENABLED, bool_options_def_false, 2);
     //props->limitValueList(PROP_FLOATING_PUNCTUATION, bool_options_def_true, 2);
     static int def_bookmark_highlight_modes[] = { 0, 1, 2 };
     props->setIntDef(PROP_HIGHLIGHT_COMMENT_BOOKMARKS, highlight_mode_underline);
@@ -6117,6 +6129,10 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
             bool kerning = props->getBoolDef(PROP_FONT_KERNING_ENABLED, false);
             fontMan->setKerning(kerning);
             REQUEST_RENDER("propsApply - kerning")
+        } else if (name == PROP_FONT_LIGATURES_ENABLED) {
+            bool ligatures = props->getBoolDef(PROP_FONT_LIGATURES_ENABLED, false);
+            fontMan->setLigatures(ligatures);
+            REQUEST_RENDER("propsApply - ligatures")
         } else if (name == PROP_FONT_WEIGHT_EMBOLDEN) {
             bool embolden = props->getBoolDef(PROP_FONT_WEIGHT_EMBOLDEN, false);
             int v = embolden ? STYLE_FONT_EMBOLD_MODE_EMBOLD

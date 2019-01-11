@@ -127,6 +127,7 @@ public class BaseDialog extends Dialog {
 			setContentView(layoutView);
 		}
 		contentsLayout.removeAllViews();
+		activity.tintViewIcons(view);
 		contentsLayout.addView(view);
 	}
 	
@@ -161,16 +162,19 @@ public class BaseDialog extends Dialog {
 		ImageButton negativeButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_negative);
 		ImageButton backButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_back);
 		ImageButton addButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_add);
+		activity.tintViewIcons(layout);
 		if (positiveButtonImage != 0) {
 			positiveButton.setImageResource(positiveButtonImage);
 			if (positiveButtonContentDescriptionId != 0)
 				Utils.setContentDescription(positiveButton, getContext().getString(positiveButtonContentDescriptionId));
 			//backButton.setImageResource(positiveButtonImage);
+			activity.tintViewIcons(positiveButton,true);
 		}
 		if (thirdButtonImage != 0) {
 			negativeButton.setImageResource(thirdButtonImage);
 			if (thirdButtonContentDescriptionId != 0)
 				Utils.setContentDescription(negativeButton, getContext().getString(thirdButtonContentDescriptionId));
+			activity.tintViewIcons(negativeButton,true);
 		}
 		if (addButtonImage != 0) {
 			addButton.setImageResource(addButtonImage);
@@ -182,6 +186,7 @@ public class BaseDialog extends Dialog {
 					}
 				});
 			}
+			activity.tintViewIcons(addButton,true);
 		}
 		if (negativeButtonImage != 0) {
 			if (thirdButtonImage == 0) {

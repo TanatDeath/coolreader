@@ -1016,7 +1016,21 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						if ( dir==null )
 							dir = downloadDir;
 						mScanner.listDirectory(dir);
-						FileInfo item = dir.findItemByPathName(file.getAbsolutePath());
+						final FileInfo item = dir.findItemByPathName(file.getAbsolutePath());
+						if ((item!=null) && (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false))) {
+							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+								@Override
+								public void onBookInfoLoaded(BookInfo bookInfo) {
+									item.setReadingState(FileInfo.STATE_TO_READ);
+									BookInfo bi = new BookInfo(item);
+									mActivity.getDB().saveBookInfo(bi);
+									mActivity.getDB().flush();
+									if (bookInfo.getFileInfo() != null) {
+										bookInfo.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
+									}
+								}
+							});
+						}
 						if ( item!=null )
 							mActivity.loadDocument(item);
 						else
@@ -1391,6 +1405,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 				if ( item==null ) {
 					image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_back_drawable, R.drawable.cr3_browser_back));
+                    mActivity.tintViewIcons(image,true);
 					String thisDir = "";
 					if ( parentItem!=null ) {
 						if ( parentItem.pathname.startsWith("@") )
@@ -1405,6 +1420,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					return;
 				}
 				if (imageAddInfo!=null) {
+					mActivity.tintViewIcons(imageAddInfo,true);
 					imageAddInfo.setOnClickListener(new OnClickListener() {
 
 						@Override
@@ -1423,6 +1439,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				}
 
 				if (imageAddMenu!=null) {
+					mActivity.tintViewIcons(imageAddMenu,true);
 					imageAddMenu.setOnClickListener(new OnClickListener() {
 
 						@Override
@@ -1448,11 +1465,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (mOnlyFSFolders.contains(item.pathname)) {
 						imageFavFolder.setImageResource(
 								Utils.resolveResourceIdByAttr(mActivity,
-										R.attr.attr_icons8_fav_star_filled, R.drawable.drk_icons8_fav_star_filled));
+										R.attr.attr_icons8_fav_star_filled, R.drawable.icons8_fav_star_filled));
+                        mActivity.tintViewIcons(imageFavFolder,true);
 					} else {
 						imageFavFolder.setImageResource(
 								Utils.resolveResourceIdByAttr(mActivity,
-										R.attr.attr_icons8_fav_star, R.drawable.drk_icons8_fav_star));
+										R.attr.attr_icons8_fav_star, R.drawable.icons8_fav_star));
+                        mActivity.tintViewIcons(imageFavFolder,true);
 					}
 					item.isFav = false;
 					Long id = -1L;
@@ -1463,7 +1482,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								item.isFav = true;
 								imageFavFolder.setImageResource(
 										Utils.resolveResourceIdByAttr(mActivity,
-												R.attr.attr_icons8_fav_star_filled, R.drawable.drk_icons8_fav_star_filled));
+												R.attr.attr_icons8_fav_star_filled, R.drawable.icons8_fav_star_filled));
+                                mActivity.tintViewIcons(imageFavFolder,true);
 							}
 						}
 					final Long id2 = id;
@@ -1495,15 +1515,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 				if ( item.isDirectory ) {
 					if (item.isBooksByAuthorRoot())
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.drk_icons8_folder_author));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 					else if (item.isBooksBySeriesRoot())
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.drk_icons8_folder_hash));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
                     else if (item.isBooksByBookdateRoot()||item.isBooksByDocdateRoot()||item.isBooksByPublyearRoot()||item.isBooksByFiledateRoot())
-                        image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.drk_icons8_folder_year));
+                        image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
                     else if (item.isBooksByTitleRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 					else if (item.isBooksByRatingRoot() )
-						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.drk_icons8_folder_stars));
+						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
 					else if (item.isBooksByStateReadingRoot() || item.isBooksByStateToReadRoot() || item.isBooksByStateFinishedRoot())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 					else if (item.isOPDSRoot() || item.isOPDSDir())
@@ -1518,7 +1538,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_zip_drawable, R.drawable.cr3_browser_folder_zip));
 					else
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_drawable, R.drawable.cr3_browser_folder));
-
+                    mActivity.tintViewIcons(image,true);
 					String title = item.filename;
 					
 					if (item.isOnlineCatalogPluginDir())
@@ -1569,6 +1589,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 									//item.format.getIconResourceId()
 									item.format.getIconResourceIdThemed(mActivity)
 							);
+                            mActivity.tintViewIcons(image,true);
 						} else {
 							if (coverPagesEnabled) {
 								image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
@@ -1584,6 +1605,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								image.setMaxHeight(0);
 								image.setMaxWidth(0);
 							}
+                            mActivity.tintViewIcons(image,true);
 						}
 					}
 					if ( isSimple ) {

@@ -27,6 +27,7 @@ import org.coolreader.crengine.CRRootView;
 import org.coolreader.crengine.CRToolBar;
 import org.coolreader.crengine.CRToolBar.OnActionHandler;
 import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DeviceOrientation;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.FileBrowser;
@@ -71,27 +72,44 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.PowerManager;
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.provider.Settings.Secure;
+import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.google.android.gms.common.util.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class CoolReader extends BaseActivity
+public class CoolReader extends BaseActivity implements SensorEventListener
 {
 	public static final Logger log = L.create("cr");
+
+	public static int REQUEST_CODE_OPEN_DOCUMENT_TREE = 200001;
+	public Uri sdCardUri = null;
+	private FileInfo fileToDelete = null;
 	
 	private ReaderView mReaderView;
 
@@ -118,6 +136,35 @@ public class CoolReader extends BaseActivity
 	}
 
 	private ArrayList<ResizeHistory> resizeHist = new ArrayList<ResizeHistory>();
+
+	Sensor accelerometer;
+	Sensor magnetometer;
+	Sensor vectorSensor;
+	DeviceOrientation deviceOrientation;
+	SensorManager mSensorManager;
+
+	public int sensorPrevRot = -1;
+	public int sensorCurRot = -1;
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER)
+			return;
+		int ornt = deviceOrientation.getOrientation();
+		if (sensorPrevRot==-1) sensorPrevRot = ornt;
+		if (sensorCurRot==-1) sensorCurRot = ornt;
+        if (sensorCurRot!=ornt) {
+            sensorPrevRot = sensorCurRot;
+			sensorCurRot = ornt;
+			if (mReaderView!=null) mReaderView.resized();
+		}
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		// TODO Auto-generated method stub
+
+	}
 
 	public ReaderViewLayout getmReaderFrame() {
 		return mReaderFrame;
@@ -204,9 +251,18 @@ public class CoolReader extends BaseActivity
     protected void onCreate(Bundle savedInstanceState)
     {
     	startServices();
-    	
+
 		log.i("CoolReader.onCreate() entered");
 		super.onCreate(savedInstanceState);
+
+		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
+			Sensor s = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
+			mSensorManager.registerListener(this,s, SensorManager.SENSOR_DELAY_NORMAL);
+		}
+		accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+		deviceOrientation = new DeviceOrientation();
 
 		// Can request only one set of permissions at a time
 		// Then request all permission at a time.
@@ -572,6 +628,8 @@ public class CoolReader extends BaseActivity
 	@Override
 	protected void onPause() {
 		super.onPause();
+		mSensorManager.unregisterListener(deviceOrientation.getEventListener());
+        mSensorManager.unregisterListener(this);
 		if (mReaderView != null)
 			mReaderView.onAppPause();
 		Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
@@ -607,6 +665,15 @@ public class CoolReader extends BaseActivity
 	protected void onResume() {
 		log.i("CoolReader.onResume()");
 		super.onResume();
+
+		mSensorManager.registerListener(deviceOrientation.getEventListener(), accelerometer, SensorManager.SENSOR_DELAY_UI);
+		mSensorManager.registerListener(deviceOrientation.getEventListener(), magnetometer, SensorManager.SENSOR_DELAY_UI);
+
+        if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
+            Sensor s = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
+            mSensorManager.registerListener(this,s, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
 		//Properties props = SettingsManager.instance(this).get();
 		
 		if (mReaderView != null)
@@ -857,12 +924,14 @@ public class CoolReader extends BaseActivity
 	}
 
 	public void directoryUpdated(FileInfo dir, FileInfo selected) {
-		if (dir.isOPDSRoot())
-			mHomeFrame.refreshOnlineCatalogs();
-		else if (dir.isRecentDir())
-			mHomeFrame.refreshRecentBooks();
-		if (mBrowser != null)
-			mBrowser.refreshDirectory(dir, selected);
+		if (dir!=null) {
+			if (dir.isOPDSRoot())
+				mHomeFrame.refreshOnlineCatalogs();
+			else if (dir.isRecentDir())
+				mHomeFrame.refreshRecentBooks();
+			if (mBrowser != null)
+				mBrowser.refreshDirectory(dir, selected);
+		}
 	}
 	public void directoryUpdated(FileInfo dir) {
 		directoryUpdated(dir, null);
@@ -1242,6 +1311,32 @@ public class CoolReader extends BaseActivity
         if (mGoogleDriveTools != null) {
 			mGoogleDriveTools.onActivityResult(requestCode, resultCode, intent);
         }
+		if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE) {
+			if (resultCode == Activity.RESULT_OK) {
+				if (fileToDelete!=null) {
+					File file = fileToDelete.getFile();
+					if (file!=null) {
+						DocumentFile documentFile = DocumentFile.fromTreeUri(this, intent.getData());
+						int res = fileToDelete.deleteFileDocTree(this,intent.getData());
+						if (res == -1) {
+							showToast("Could not find file, make sure the root of ExtSD was selected");
+							return;
+						}
+						if (res == 0) {
+							showToast("Could not delete file");
+							return;
+						}
+						sdCardUri = intent.getData();
+						Services.getHistory().removeBookInfo(getDB(), fileToDelete, true, true);
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								directoryUpdated(fileToDelete.parent, null);
+							}}, 700);
+					} // if (file!=null)
+				}
+			}
+		} //if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE)
 	}
 	
 	public void setDict( String id ) {
@@ -1639,7 +1734,7 @@ public class CoolReader extends BaseActivity
 			return;
 		mReaderView.closeIfOpened(book);
 	}
-	
+
 	public void askDeleteBook(final FileInfo item)
 	{
 		askConfirmation(R.string.win_title_confirm_book_delete, new Runnable() {
@@ -1651,9 +1746,37 @@ public class CoolReader extends BaseActivity
 					file = item;
 				if (file.deleteFile()) {
 					Services.getHistory().removeBookInfo(getDB(), file, true, true);
+					BackgroundThread.instance().postGUI(new Runnable() {
+						@Override
+						public void run() {
+							directoryUpdated(item.parent, null);
+						}}, 700);
+				} else {
+					boolean bSucceed = false;
+					int res = 0;
+					if (sdCardUri!=null) {
+						res = file.deleteFileDocTree(CoolReader.this, sdCardUri);
+						bSucceed = res == 1;
+					}
+					if (!bSucceed) {
+						fileToDelete = null;
+						showToast("Could not delete file, if the file is on External SD, choose ExtSD root in the dialog");
+						if (file.getFile() != null) {
+							fileToDelete = file;
+							Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+							startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
+						}
+					} else {
+						Services.getHistory().removeBookInfo(getDB(), file, true, true);
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								directoryUpdated(item.parent, null);
+							}}, 700);
+					}
 				}
-				if (file.parent != null)
-					directoryUpdated(file.parent);
+
+
 			}
 		});
 	}
@@ -2357,13 +2480,13 @@ public class CoolReader extends BaseActivity
 
 		addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
 					Intent.ShortcutIconResource.fromContext(getApplicationContext(),
-							Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
+							Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 					//		R.drawable.cr3_browser_book_hc
 					));
 
 		if (DeviceInfo.getSDKLevel() >= 26) {
 			Icon icon = Icon.createWithResource(getApplicationContext(),
-					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
+					Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 					//R.drawable.cr3_browser_book_hc
 			);
 			if (bmp!=null) icon = Icon.createWithBitmap(bmp);
@@ -2391,7 +2514,7 @@ public class CoolReader extends BaseActivity
 						.setShortLabel(this.getString(R.string.mi_book_recent_books))
 						.setLongLabel(this.getString(R.string.mi_book_recent_books))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 								//R.drawable.cr3_browser_book_hc
 						))
 						.setIntent(intent)
@@ -2406,7 +2529,7 @@ public class CoolReader extends BaseActivity
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_reading))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_reading))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 								//R.drawable.cr3_browser_book_hc
 						))
 						.setIntent(intent)
@@ -2422,7 +2545,7 @@ public class CoolReader extends BaseActivity
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_to_read))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
 								//R.drawable.cr3_browser_book_hc
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 						))
 						.setIntent(intent)
 						.build();
@@ -2436,7 +2559,7 @@ public class CoolReader extends BaseActivity
 						.setShortLabel(this.getString(R.string.folder_name_books_by_state_finished))
 						.setLongLabel(this.getString(R.string.folder_name_books_by_state_finished))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
-								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.drk_icons8_book)
+								Utils.resolveResourceIdByAttr(this, R.attr.attr_icons8_book, R.drawable.icons8_book)
 						//		R.drawable.cr3_browser_book_hc
 						))
 						.setIntent(intent)
@@ -2452,7 +2575,7 @@ public class CoolReader extends BaseActivity
 						.setLongLabel(this.getString(R.string.dlg_book_search))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
 								//R.drawable.cr3_browser_find_hc
-								Utils.resolveResourceIdByAttr(this, R.attr.cr3_viewer_find_drawable, R.drawable.drk_icons8_search)
+								Utils.resolveResourceIdByAttr(this, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search)
 						))
 						.setIntent(intent)
 						.build();

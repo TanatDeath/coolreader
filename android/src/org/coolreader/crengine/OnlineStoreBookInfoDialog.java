@@ -324,6 +324,21 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 			public void onBookDownloaded(OnlineStoreBook book, boolean trial,
 					File savedFileName) {
 				progress.hide();
+				final FileInfo item = new FileInfo(savedFileName);
+                if ((item!=null) && (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false))) {
+                    Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+                        @Override
+                        public void onBookInfoLoaded(BookInfo bookInfo) {
+                            item.setReadingState(FileInfo.STATE_TO_READ);
+                            BookInfo bi = new BookInfo(item);
+                            mActivity.getDB().saveBookInfo(bi);
+                            mActivity.getDB().flush();
+                            if (bookInfo.getFileInfo() != null) {
+                                bookInfo.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
+                            }
+                        }
+                    });
+                }
 				openBook(trial);
 			}
 		});

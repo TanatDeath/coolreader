@@ -13,6 +13,8 @@
     <string name="mi_options">Options</string>
     <string name="mi_font_size_increase">Increase font size </string>
     <string name="mi_font_size_decrease">Decrease font size</string>
+    <string name="mi_font_select">Select font face</string>
+    <string name="mi_font_bold">Font embolden</string>
     <string name="mi_font_previous">Previous font</string>
     <string name="mi_font_next">Next font</string>
     <string name="progress_please_wait">Please wait</string>
@@ -211,6 +213,7 @@
     <string name="options_app_dictionary2_add_info">Defining two dictionaries allows quickly switch between them when you need to translate word or phrase in more than one dictionary</string>
     <string name="action_zoom_in">Increase font size</string>
     <string name="options_font_kerning">Font kerning</string>
+    <string name="options_font_ligatures">Use ligatures (very slowly!)</string>
     <string name="action_zoom_out">Decrease font size</string>
     <string name="options_style_floating_punctuation">Floating punctuation</string>
     <string name="action_toggle_document_styles">Toggle document styles</string>
@@ -463,6 +466,8 @@
     <string name="options_css_text_align_right">Right</string>
     <string name="action_switch_settings_profile">Switch profile</string>
     <string name="options_app_settings_icons">Icons in settings</string>
+    <string name="options_app_settings_icons_is_custom_color">Set custom icons color (only modern icons)</string>
+    <string name="options_app_settings_icons_custom_color">Custom icons color</string>
     <string name="mi_text_autoformat_enable">Enable text autoformat</string>
     <string name="mi_text_autoformat_disable">Disable text autoformat</string>
     <string name="action_toggle_text_autoformat">Toggle text autoformat</string>
@@ -506,7 +511,7 @@
     <string name="options_app_locale_system">System</string>
     <string name="options_app_locale">Interface language</string>
     <string name="options_app_locale_bg">Български</string>
-    <string name="options_app_locale_by">Belarusian</string>
+    <string name="options_app_locale_be">Belarusian</string>
     <string name="options_app_locale_de">Deutsch</string>
     <string name="options_app_locale_cs">Czech</string>
     <string name="options_app_locale_en">English</string>
@@ -541,6 +546,7 @@
     <string name="dlg_goto_input_page_number">Input page number to go:</string>
     <string name="dlg_goto_input_percent">Input position percent to go:</string>
     <string name="book_state_toread">To read</string>
+    <string name="book_mark_toread">Mark downloaded as \"To read\"</string>
     <string name="book_state_reading">Reading</string>
     <string name="book_state_none">No mark</string>
     <string name="book_state_finished">Finished</string>
@@ -563,13 +569,13 @@
     <string name="options_view_toolbar_appearance">Toolbar appearance</string>
     <string name="options_view_toolbar_appear_100">100% size</string>
     <string name="options_view_toolbar_appear_100_gray">100% size, darken</string>
-    <string name="options_view_toolbar_appear_100_inv">100% size, inverted icons</string>
+    <string name="options_view_toolbar_appear_100_inv">100% size, gray icons</string>
     <string name="options_view_toolbar_appear_75">75% size</string>
     <string name="options_view_toolbar_appear_75_gray">75% size, darken</string>
-    <string name="options_view_toolbar_appear_75_inv">75% size, inverted icons</string>
+    <string name="options_view_toolbar_appear_75_inv">75% size, gray icons</string>
     <string name="options_view_toolbar_appear_50">50% size</string>
     <string name="options_view_toolbar_appear_50_gray">50% size, darken</string>
-    <string name="options_view_toolbar_appear_50_inv">50% size, inverted icons</string>
+    <string name="options_view_toolbar_appear_50_inv">50% size, gray icons</string>
     <string name="dlg_button_back">Back</string>
     <string name="dlg_about_donation_iron">$0.3: buy Cool Reader Iron Donation</string>
     <string name="dlg_about_donation_vip">$100: buy Cool Reader VIP Donation</string>
@@ -857,4 +863,8 @@
     <string name="font_test_phrase">The quick brown fox jumps over the lazy dog</string>
     <string name="font_test_phrase2">Jackdaws love my big sphinx of quartz</string>
     <string name="font_test_phrase3">The five boxing wizards jump quickly</string>
+    <string name="fix_new_orientation">Fix current screen orientation</string>
+    <string name="fix_old_orientation">Revert to old screen orientation and fix it</string>
+    <string name="orientation_popup_toolbar_duration">Hide orientation popup toolbar after</string>
+    <string name="disable_orientation_popup_toolbar">Disable orientation popup toolbar</string>
 </resources>

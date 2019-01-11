@@ -36,6 +36,7 @@
 					android:checked="true"
 					android:layout_weight="1"
 					android:src="?attr/attr_icons8_bookmark_simple"
+                                        android:tag="tint"
 					android:contentDescription="@string/dlg_bookmark_type_comment"
 					android:text="@null" />
 				<ImageButton
@@ -44,6 +45,7 @@
 					android:checked="false"
 					android:layout_weight="1"
 					android:src="?attr/attr_icons8_edit_row_2"
+                                        android:tag="tint"
 					android:contentDescription="@string/dlg_bookmark_type_correction"
 					android:text="@null" />
 				<ImageButton
@@ -52,6 +54,7 @@
 					android:checked="false"
 					android:layout_weight="1"
 					android:src="?attr/attr_icons8_bookmark_link"
+                                        android:tag="tint"
 					android:contentDescription="@string/dlg_bookmark_internal_link"
 					android:text="@null" />
 				<ImageButton
@@ -60,6 +63,7 @@
 					android:checked="false"
 					android:layout_weight="1"
 					android:src="?attr/attr_icons8_google_translate_user"
+                                        android:tag="tint"
 					android:contentDescription="@string/dlg_bookmark_user_dic"
 					android:text="@null" />
 				<ImageButton
@@ -68,6 +72,7 @@
 					android:checked="false"
 					android:layout_weight="1"
 					android:src="?attr/attr_icons8_quote_2"
+                                        android:tag="tint"
 					android:contentDescription="@string/dlg_bookmark_citation"
 					android:text="@null" />
 			</TableRow>

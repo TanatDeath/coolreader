@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -209,30 +210,36 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		
 		tabs.setup();
 		TabHost.TabSpec tsApp = tabs.newTabSpec("App");
-		tsApp.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_link, R.drawable.drk_icons8_link)));
-				//getContext().getResources().getDrawable(R.drawable.drk_icons8_link));
+		Drawable d = getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_link, R.drawable.icons8_link));
+		mCoolReader.tintViewIcons(d,true);
+		tsApp.setIndicator("", d);
+				//getContext().getResources().getDrawable(R.drawable.icons8_link));
 		tsApp.setContent(this);
 		tabs.addTab(tsApp);
 
 		TabHost.TabSpec tsDirectories = tabs.newTabSpec("Directories");
-		tsDirectories.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_folder_2, R.drawable.drk_icons8_folder_2)));
-				//getContext().getResources().getDrawable(R.drawable.drk_icons8_folder_2));
+
+		Drawable d2 = getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_folder_2, R.drawable.icons8_folder_2));
+		mCoolReader.tintViewIcons(d2,true);
+
+		tsDirectories.setIndicator("", d2);
+				//getContext().getResources().getDrawable(R.drawable.icons8_folder_2));
 		tsDirectories.setContent(this);
 		tabs.addTab(tsDirectories);
 
 		TabHost.TabSpec tsLicense = tabs.newTabSpec("License");
-		tsLicense.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_star, R.drawable.drk_icons8_star)));
-				//getContext().getResources().getDrawable(R.drawable.drk_icons8_star));
+		Drawable d3 = getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_star, R.drawable.icons8_star));
+		mCoolReader.tintViewIcons(d3,true);
+		tsLicense.setIndicator("", d3);
+				//getContext().getResources().getDrawable(R.drawable.icons8_star));
 		tsLicense.setContent(this);
 		tabs.addTab(tsLicense);
 		
 		TabHost.TabSpec tsDonation = tabs.newTabSpec("Donation");
-		tsDonation.setIndicator("",
-				getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_happy, R.drawable.drk_icons8_happy)));
-				//getContext().getResources().getDrawable(R.drawable.drk_icons8_happy));
+		Drawable d4 = getContext().getResources().getDrawable(Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_happy, R.drawable.icons8_happy));
+		mCoolReader.tintViewIcons(d4,true);
+		tsDonation.setIndicator("", d4);
+				//getContext().getResources().getDrawable(R.drawable.icons8_happy));
 		tsDonation.setContent(this);
 		tabs.addTab(tsDonation);
 		

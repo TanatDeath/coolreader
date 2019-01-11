@@ -2625,6 +2625,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
 				syncViewSettings(getSettings(), true, true);
 				break;
+			case DCMD_FONT_SELECT:
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
+				break;
+			case DCMD_FONT_BOLD:
+				Properties props1 = new Properties(mActivity.settings());
+				props1.setProperty(PROP_FONT_WEIGHT_EMBOLDEN,
+						props1.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
+				mActivity.setSettings(props1, -1, true);
+				break;
 			case DCMD_FONT_NEXT:
 				switchFontFace(1);
 				break;
@@ -2847,7 +2857,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						ReaderAction.FONT_PREVIOUS,
 						ReaderAction.FONT_NEXT,
 						ReaderAction.ZOOM_IN,
-						ReaderAction.ZOOM_OUT
+						ReaderAction.ZOOM_OUT,
+						ReaderAction.FONT_SELECT,
+						ReaderAction.FONT_BOLD
 				};
 				mActivity.showActionsToolbarMenu(fonts_actions, new CRToolBar.OnActionHandler() {
 					@Override
@@ -2865,6 +2877,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						} else if (item == ReaderAction.ZOOM_OUT) {
 							doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
 							syncViewSettings(getSettings(), true, true);
+							return true;
+						} else if (item == ReaderAction.FONT_SELECT) {
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
+							return true;
+						} else if (item == ReaderAction.FONT_BOLD) {
+							Properties props = new Properties(mActivity.settings());
+							props.setProperty(PROP_FONT_WEIGHT_EMBOLDEN,
+									props.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
+							mActivity.setSettings(props, -1, true);
 							return true;
 						}
 						return false;
@@ -3914,6 +3936,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	//	private boolean mIsOnFront = false;
 	private int requestedWidth = 0;
 	private int lastsetWidth = 0;
+	private int lastsetOrientation = -1;
 
 	public long getRequestedResTime() {
 		return requestedResTime;
@@ -3933,6 +3956,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return lastsetResTime;
 	}
 	private long lastsetResTime;
+
+	OrientationToolbarDlg orientationToolbarDlg = null;
+
 //	public void setOnFront(boolean front) {
 //		if (mIsOnFront == front)
 //			return;
@@ -3948,6 +3974,41 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private void requestResize(int width, int height) {
 		boolean bNeed = (width != lastsetWidth) || (height != lastsetHeight);
+		// check if orientation was switched
+		boolean bSwitched = false;
+		if (
+			   (
+				 ((width>height) && (lastsetWidth<lastsetHeight))
+				 ||
+				 ((width<height) && (lastsetWidth>lastsetHeight))
+			   ) &&
+			   (width != lastsetWidth) &&
+			   (height != lastsetHeight)
+		   ) bSwitched = true;
+		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry)it.next();
+			try {
+				BaseDialog sVal = (BaseDialog) pair.getValue();
+				if (sVal.isShowing()) {
+					bSwitched = false;
+				}
+			} catch (Exception e) {
+				log.w("Could not check the dialogs...");
+			}
+		}
+		int iOrnt = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
+		int curOrientation = getActivity().sensorCurRot;
+		if ((bSwitched)&&(iOrnt==4)) {
+			int iSett = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION, 10);
+			if (orientationToolbarDlg!=null)
+				if (orientationToolbarDlg.mWindow != null)
+					orientationToolbarDlg.mWindow.dismiss();
+			if (iSett > 0)
+				orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
+						curOrientation, false);
+		}
+		lastsetOrientation = getActivity().getScreenOrientation();
 		requestedWidth = width;
 		requestedHeight = height;
 		requestedResTime = System.currentTimeMillis();
@@ -3958,8 +4019,42 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		lastsetWidth = width;
 		lastsetHeight = height;
 		lastsetResTime = System.currentTimeMillis();
-		if (bNeed) getActivity().showToast(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
+		if (bNeed) {
+			//getActivity().showToast(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
+            if (mActivity.getmReaderFrame()!=null)
+             	if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
+					mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
+		}
 		checkSize();
+	}
+
+	public void resized() {
+		boolean bSwitched = true;
+		//Log.i("ASDF", "resized ");
+		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry)it.next();
+			try {
+				BaseDialog sVal = (BaseDialog) pair.getValue();
+				if (sVal.isShowing()) {
+					bSwitched = false;
+				}
+			} catch (Exception e) {
+				log.w("Could not check the dialogs...");
+			}
+		}
+		if (bSwitched) {
+			int iSett = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION, 10);
+			int iOrnt = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
+			int curOrientation = getActivity().sensorCurRot;
+			if (orientationToolbarDlg!=null)
+				if (orientationToolbarDlg.mWindow != null)
+					orientationToolbarDlg.mWindow.dismiss();
+			//Log.i("ASDF", "resized "+iSett+" "+iOrnt);
+			if ((iSett > 0) && (iOrnt != 4))
+				orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
+						curOrientation, true);
+		}
 	}
 
 	private void checkSize() {

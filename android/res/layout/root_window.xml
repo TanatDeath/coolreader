@@ -42,6 +42,7 @@
              android:maxHeight="200dip"
              android:maxWidth="150dip"
              android:drawable="?attr/cr3_browser_book_drawable"
+             android:tag="tint"
              />
 
          
@@ -123,17 +124,17 @@
                     android:layout_height="?android:attr/listPreferredItemHeight"
                     android:contentDescription="@string/mi_options"
                 /-->
-              <ImageButton
-                    android:id="@+id/btn_menu"
-                    android:src="?attr/cr3_button_more_drawable"
-                    android:background="?attr/cr3_toolbar_button_background_drawable"
-                    android:layout_weight="1"
-                    android:gravity="right"
-                    android:layout_gravity="right"
-                    android:layout_width="?android:attr/listPreferredItemHeight"
-                    android:layout_height="?android:attr/listPreferredItemHeight"
-                    android:contentDescription="@string/btn_toolbar_more"
-                />
+        <ImageButton
+            android:id="@+id/btn_menu"
+            android:layout_width="?android:attr/listPreferredItemHeight"
+            android:layout_height="?android:attr/listPreferredItemHeight"
+            android:layout_gravity="right"
+            android:layout_weight="1"
+            android:background="?attr/cr3_toolbar_button_background_drawable"
+            android:contentDescription="@string/btn_toolbar_more"
+            android:gravity="right"
+            android:src="?attr/cr3_button_more_drawable"
+            android:tag="tint" />
           </LinearLayout>
 	    </LinearLayout>
 
@@ -144,18 +145,71 @@
 	    android:text="@string/dir_recent_books" 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"/-->
-    <TextView 
-          style="@style/TextAppearance.Small"
-          android:singleLine="true"
-          android:maxLines="1"
-          android:layout_marginTop="2dip"
-          android:layout_marginBottom="0dip"
-          android:layout_marginLeft="8dip"
-          android:layout_marginRight="8dip"
-          android:text="@string/root_item_recent"
-          android:textColor="?attr/colorIcon"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"/>
+    <TableLayout
+        android:id="@+id/tl_recent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_weight="1"
+            >
+            <TextView
+                style="@style/TextAppearance.Small"
+                android:singleLine="true"
+                android:maxLines="1"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="8dip"
+                android:layout_marginRight="2dip"
+                android:gravity="left|center_vertical"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:text="@string/root_item_recent"
+                android:textColor="?attr/colorIcon"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/book_recent_toread"
+                android:layout_width="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:src="@null"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:contentDescription="@string/book_state_toread"
+                android:text="@string/book_state_toread" />
+            <Button
+                android:id="@+id/book_recent_reading"
+                android:layout_width="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:src="@null"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:contentDescription="@string/book_state_reading"
+                android:text="@string/book_state_reading" />
+            <Button
+                android:id="@+id/book_recent_finished"
+                android:layout_width="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:contentDescription="@string/book_state_finished"
+                android:text="@string/book_state_finished" />
+        </TableRow>
+    </TableLayout>
 
     <HorizontalScrollView
 	      android:layout_marginLeft="4dip"
@@ -347,6 +401,7 @@
                 android:layout_marginRight="2dip"
                 android:background="@null"
                 android:src="?attr/attr_icons8_forward_small"
+                android:tag="tint"
                 />
 
         </TableRow>

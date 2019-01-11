@@ -25,6 +25,7 @@
 		  android:layout_marginLeft="2dip"
 		  android:layout_marginRight="2dip"
 		  android:src="?attr/cr3_option_pages_two_drawable"
+		  android:tag="tint"
 		  android:background="@null"
 		  android:contentDescription="@string/search_pages"/>
 </LinearLayout>
@@ -50,6 +51,7 @@
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
 		android:src="?attr/cr3_button_cancel_drawable"
+		android:tag="tint"
 		android:focusable="false"
 		android:focusableInTouchMode="false"
 		android:background="@null"

@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -20,6 +21,8 @@ public class BrowserViewLayout extends ViewGroup {
 	private FileBrowser contentView;
 	private View titleView;
 	private CRToolBar toolbarView;
+	private Button btnMarkToRead;
+	private boolean bMarkToRead = true;
 
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
@@ -41,6 +44,10 @@ public class BrowserViewLayout extends ViewGroup {
 		contentView.setFocusableInTouchMode(false);
 		setFocusable(true);
 		setFocusableInTouchMode(true);
+		activity.tintViewIcons(contentView);
+		activity.tintViewIcons(toolbarView);
+		activity.tintViewIcons(titleView);
+		bMarkToRead = activity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false);
 	}
 	
 	private String browserTitle = "";
@@ -98,6 +105,7 @@ public class BrowserViewLayout extends ViewGroup {
 				contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
 			}
 		});
+		activity.tintViewIcons(((ImageButton)titleView.findViewById(R.id.btn_qp_next1)),true);
 		((ImageButton)titleView.findViewById(R.id.btn_qp_prev1)).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -108,6 +116,28 @@ public class BrowserViewLayout extends ViewGroup {
 				contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
 			}
 		});
+		if (btnMarkToRead!=null) {
+			btnMarkToRead.setVisibility(VISIBLE);
+			if (this.dir != null)
+				if (!(this.dir.isOPDSDir() || this.dir.isOPDSRoot() || this.dir.isOnlineCatalogPluginDir()))
+					btnMarkToRead.setVisibility(INVISIBLE);
+		}
+		activity.tintViewIcons(((ImageButton)titleView.findViewById(R.id.btn_qp_prev1)),true);
+	}
+
+	private void paintMarkButton() {
+		int colorGrayC;
+		int colorBlue;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorBlue = a.getColor(1, Color.BLUE);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (bMarkToRead) btnMarkToRead.setBackgroundColor(colorGrayCT2);
+		else btnMarkToRead.setBackgroundColor(colorGrayCT);
+		btnMarkToRead.setTextColor(colorBlue);
 	}
 
 	public void onThemeChanged(InterfaceTheme theme) {
@@ -116,6 +146,19 @@ public class BrowserViewLayout extends ViewGroup {
 		LayoutInflater inflater = LayoutInflater.from(activity);// activity.getLayoutInflater();
 		removeView(titleView);
 		titleView = inflater.inflate(R.layout.browser_status_bar, null);
+		btnMarkToRead  = (Button)titleView.findViewById(R.id.btn_mark_toread);
+		btnMarkToRead.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bMarkToRead = !bMarkToRead;
+				Properties props = new Properties(activity.settings());
+				props.setProperty(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, bMarkToRead?"1":"0");
+				activity.setSettings(props, -1, true);
+				paintMarkButton();
+			}
+		});
+		paintMarkButton();
+
 		addView(titleView);
 		setBrowserTitle(browserTitle, null);
 		toolbarView.setBackgroundResource(theme.getBrowserToolbarBackground(toolbarView.isVertical()));

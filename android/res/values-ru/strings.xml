@@ -202,6 +202,7 @@
     <string name="options_app_dictionary_not_installed">(не установлен)</string>
     <string name="action_zoom_in">Увеличить шрифт</string>
     <string name="options_font_kerning">Кернинг шрифта</string>
+    <string name="options_font_ligatures">Использовать лигатуры (очень медленно!)</string>
     <string name="action_zoom_out">Уменьшить шрифт</string>
     <string name="options_style_floating_punctuation">Висячая пунктуация</string>
     <string name="options_style_document_embedded_styles">Внутренние стили документа</string>
@@ -448,6 +449,8 @@
     <string name="options_css_text_align_right">По правому краю</string>
     <string name="action_switch_settings_profile">Профиль настроек</string>
     <string name="options_app_settings_icons">Пиктограммы в настройках</string>
+    <string name="options_app_settings_icons_is_custom_color">Установить цвет пиктограмм (только для новых)</string>
+    <string name="options_app_settings_icons_custom_color">Цвет пиктограмм</string>
     <string name="mi_text_autoformat_enable">Разрешить автоформатирование текста</string>
     <string name="mi_text_autoformat_disable">Запретить автоформатирование текста</string>
     <string name="action_toggle_text_autoformat">Переключить автоформатирование текста</string>
@@ -474,6 +477,8 @@
     <string name="mi_font_next">Следующий шрифт</string>
     <string name="mi_font_size_decrease">Уменьшить шрифт</string>
     <string name="mi_font_size_increase">Увеличить шрифт</string>
+    <string name="mi_font_select">Выбрать шрифт</string>
+    <string name="mi_font_bold">Утолщенный шрифт</string>
     <string name="mi_font_previous">Предыдущий шрифт</string>
     <string name="options_multi_selection_action">Действие для нескольких выделенных слов</string>
     <string name="dlg_about_donation_total">Всего: </string>
@@ -528,6 +533,7 @@
     <string name="book_info_book_docversion">Версия документа</string>
 
     <string name="book_state_toread">К прочтению</string>
+    <string name="book_mark_toread">Помечать скачанные как \"К прочтению\"</string>
     <string name="book_state_reading">Читаю</string>
     <string name="book_state_none">Нет пометки</string>
     <string name="book_state_finished">Прочитана</string>
@@ -550,13 +556,13 @@
     <string name="options_view_toolbar_appearance">Внешний вид панели инструментов</string>
     <string name="options_view_toolbar_appear_100">Размер 100%</string>
     <string name="options_view_toolbar_appear_100_gray">Размер 100%, затемнена</string>
-    <string name="options_view_toolbar_appear_100_inv">Размер 100%, инвертировать иконки</string>
+    <string name="options_view_toolbar_appear_100_inv">Размер 100%, серые иконки</string>
     <string name="options_view_toolbar_appear_75">Размер 75%</string>
     <string name="options_view_toolbar_appear_75_gray">Размер 75%, затемнена</string>
-    <string name="options_view_toolbar_appear_75_inv">Размер 75%, инвертировать иконки</string>
+    <string name="options_view_toolbar_appear_75_inv">Размер 75%, серые иконки</string>
     <string name="options_view_toolbar_appear_50">Размер 50%</string>
     <string name="options_view_toolbar_appear_50_gray">Размер 50%, затемнена</string>
-    <string name="options_view_toolbar_appear_50_inv">Размер 50%, инвертировать иконки</string>
+    <string name="options_view_toolbar_appear_50_inv">Размер 50%, серые иконки</string>
     <string name="dlg_button_back">Назад</string>
     <string name="dlg_about_donation_iron">$0.3: Cool Reader пожертвование - железо</string>
     <string name="dlg_about_donation_vip">$100: Cool Reader пожертвование - VIP</string>
@@ -618,7 +624,7 @@
     <string name="online_store_purchase_new_balance">Остаток на счете:</string>
     <string name="options_app_plugins">Плагины</string>
     <string name="note1_reader_menu">ВНИМАНИЕ! В новой версии для поддержки полноэкранного режима и гашения экранных кнопок под Android 3 и 4 в приложении указана целевая платформа Android 4. В этом режиме экранная кнопка меню недоступна. Без панели инструментов в режиме чтения меню можно вызвать коротким нажатием в центре экрана. Длинное нажатие открывает настройки. Включить панель инструментов для режима чтения? (Этот выбор всегда можно изменить в Настройках/Страница/Панель инструментов)</string>
-    <string name="root_item_recent">Последние открытые книги</string>
+    <string name="root_item_recent">Последние открытые</string>
     <string name="root_item_library">Библиотека</string>
     <string name="root_item_filesystem">Открыть книгу из файловой системы</string>
     <string name="root_item_online_catalogs">Сетевые библиотеки</string>
@@ -848,5 +854,9 @@
     <string name="font_test_phrase">Съешь ещё этих мягких французских булок да выпей чаю</string>
     <string name="font_test_phrase2">В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!</string>
     <string name="font_test_phrase3">Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства</string>
+    <string name="fix_new_orientation">Зафиксировать эту ориентацию экрана</string>
+    <string name="fix_old_orientation">Вернуться к предыдущей ориентации экрана</string>
+    <string name="orientation_popup_toolbar_duration">Скрывать панель ориентации через</string>
+    <string name="disable_orientation_popup_toolbar">Отключить панель ориентации</string>
 </resources>
 

@@ -25,6 +25,7 @@
                 android:checked="false"
                 android:layout_weight="1"
                 android:src="?attr/attr_icons8_google_translate_user"
+                android:tag="tint"
                 android:contentDescription="@string/dlg_bookmark_user_dic"
                 android:text="@null" />
             <ImageButton
@@ -33,6 +34,7 @@
                 android:checked="false"
                 android:layout_weight="1"
                 android:src="?attr/attr_icons8_quote_2"
+                android:tag="tint"
                 android:contentDescription="@string/dlg_bookmark_citation"
                 android:text="@null" />
             <ImageButton
@@ -41,6 +43,7 @@
                 android:checked="false"
                 android:layout_weight="1"
                 android:src="?attr/attr_icons8_search_history"
+                android:tag="tint"
                 android:contentDescription="@string/dlg_button_dic_search_hist"
                 android:text="@null" />
         </TableRow>
@@ -81,6 +84,7 @@
             android:checked="false"
             android:layout_weight="1"
             android:src="?attr/cr3_viewer_find_drawable"
+            android:tag="tint"
             android:background="@null"
             android:contentDescription="@string/dlg_bookmark_user_dic"
             android:focusable="false"

@@ -390,6 +390,7 @@ public class SelectionToolbarDlg {
 //				}
 //			});
 //		}
+		mCoolReader.tintViewIcons(mPanel);
 	}
 	
 }

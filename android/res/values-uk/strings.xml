@@ -415,7 +415,7 @@
     <string name="options_app_locale_system">Системна</string>
     <string name="options_app_locale">Мова інтерфейсу (Interface language)</string>
     <string name="options_app_locale_bg">Български</string>
-    <string name="options_app_locale_by">Belarusian</string>
+    <string name="options_app_locale_be">Belarusian</string>
     <string name="options_app_locale_de">Deutsch</string>
     <string name="options_app_locale_cs">Czech</string>
     <string name="options_app_locale_en">English</string>

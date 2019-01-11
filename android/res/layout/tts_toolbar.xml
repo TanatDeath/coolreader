@@ -29,6 +29,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
             android:src="?attr/attr_ic_media_play"
+            android:tag="tint"
 	        android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_play"/>
@@ -40,6 +41,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_rew"
+                android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_back"/>
@@ -51,6 +53,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_ff"
+                android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_forward"/>
@@ -62,6 +65,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_stop"
+                android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_stop"/>
@@ -86,6 +90,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:src="?attr/attr_icons8_volume_down"
+                                        android:tag="tint"
 					android:background="?attr/colorThemeGray2"
 					android:layout_marginTop="3dip"
 					android:layout_marginBottom="3dip"
@@ -108,6 +113,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:background="?attr/colorThemeGray2"
+                                        android:tag="tint"
 					android:layout_marginTop="3dip"
 					android:layout_marginBottom="3dip"
 					android:layout_marginLeft="3dip"
@@ -128,6 +134,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:src="?attr/attr_icons8_rate_down"
+                                        android:tag="tint"
 					android:background="?attr/colorThemeGray2"
 					android:layout_marginTop="3dip"
 					android:layout_marginBottom="3dip"
@@ -150,6 +157,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:background="?attr/colorThemeGray2"
+                                        android:tag="tint"
 					android:layout_marginTop="3dip"
 					android:layout_marginBottom="3dip"
 					android:layout_marginLeft="3dip"

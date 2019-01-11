@@ -64,6 +64,7 @@
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:src="?attr/attr_icons8_option_info"
+        android:tag="tint"
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:clickable="true"

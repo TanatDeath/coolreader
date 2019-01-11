@@ -350,8 +350,10 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					}
 				}
 				currentSelection = selection;
-				if ( isSpeaking )
-					say( currentSelection );
+				if ( isSpeaking ) {
+					mTTS.stop(); //plotn - experiments
+					say(currentSelection);
+				}
 			}
 			
 			@Override
@@ -441,6 +443,8 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	@Override
 	public void onUtteranceCompleted(String utteranceId) {
 		Log.d("cr3", "onUtteranceCompleted " + utteranceId);
+		//stop();
+		//start();
 		if ( isSpeaking )
 			moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
 	}
@@ -723,7 +727,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 			}
 		});
-		
+		mCoolReader.tintViewIcons(mPanel);
 		mPanel.requestFocus();
 	}
 	

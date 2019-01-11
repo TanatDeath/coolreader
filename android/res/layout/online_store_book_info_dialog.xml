@@ -33,6 +33,7 @@
                 android:layout_centerVertical="true"
                 android:minWidth="?android:attr/listPreferredItemHeight"
                 android:src="?attr/cr3_button_prev_drawable"
+                android:tag="tint"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:background="@null"
@@ -109,6 +110,7 @@
                     android:maxHeight="200dip"
                     android:maxWidth="150dip"
                     android:drawable="?attr/cr3_browser_book_drawable"
+                    android:tag="tint"
                     />
             </LinearLayout>
             <LinearLayout 

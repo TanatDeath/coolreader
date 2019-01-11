@@ -129,7 +129,7 @@ public class BookInfoDialog extends BaseDialog {
 				if (!StrUtils.isEmptyStr(sAuthors)) sFind = sFind + ", " + sAuthors;
 				btnOptionAddInfo.setImageDrawable(
 						activity.getResources().getDrawable(Utils.resolveResourceIdByAttr(activity,
-								R.attr.attr_icons8_option_info, R.drawable.drk_icons8_ask_question)));
+								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
 				final View view1 = view;
 				final String sFind1 = sFind;
 				if (btnOptionAddInfo != null)
@@ -191,10 +191,10 @@ public class BookInfoDialog extends BaseDialog {
 		mCoolReader = activity;
 		mBookInfo = bi;
 		setThirdButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_book_edit, R.drawable.drk_icons8_book_edit)
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_book_edit, R.drawable.icons8_book_edit)
 				, R.string.btn_edit_info);
 		setPositiveButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_book_link, R.drawable.drk_icons8_book_link),
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_book_link, R.drawable.icons8_book_link),
 				R.string.mi_book_shortcut);
 		FileInfo file = mBookInfo.getFileInfo();
 		DisplayMetrics outMetrics = new DisplayMetrics();

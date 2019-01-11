@@ -25,6 +25,7 @@
 
     <ImageView android:id="@+id/action_icon"
         android:src="?attr/cr3_button_next_drawable"
+        android:tag="tint"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|top"

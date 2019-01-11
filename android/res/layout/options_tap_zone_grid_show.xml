@@ -631,6 +631,7 @@
                     android:layout_marginLeft="5dip"
                     android:layout_marginRight="5dip"
                     android:src="?attr/attr_icons8_sunrise"
+                    android:tag="tint"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:background="@null"
@@ -664,6 +665,7 @@
                 <ImageButton
                     android:id="@+id/tap_zone_show_btn_right"
                     android:src="?attr/attr_icons8_sunrise"
+                    android:tag="tint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dip"

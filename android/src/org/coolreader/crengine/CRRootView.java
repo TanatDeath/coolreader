@@ -37,7 +37,13 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
     private Button btnStateToRead;
     private Button btnStateReading;
     private Button btnStateFinished;
-    private CoverpageManager mCoverpageManager;
+	private Button btnRecentToRead;
+	private Button btnRecentReading;
+	private Button btnRecentFinished;
+	private boolean bRecentToRead = true;
+	private boolean bRecentReading = true;
+	private boolean bRecentFinished = true;
+	private CoverpageManager mCoverpageManager;
 	private int coverWidth;
 	private int coverHeight;
 	private BookInfo currentBook;
@@ -211,7 +217,16 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	}	
 	
 	private final static int MAX_RECENT_BOOKS = 12;
-	private void updateRecentBooks(ArrayList<BookInfo> books) {
+	private void updateRecentBooks(ArrayList<BookInfo> booksF) {
+		ArrayList<BookInfo> books = new ArrayList<BookInfo>();
+		for (BookInfo bi: booksF) {
+			boolean bSkip = false;
+			int n = bi.getFileInfo().getReadingState();
+			if ((n == FileInfo.STATE_READING)  && (!bRecentReading)) bSkip = true;
+			if ((n == FileInfo.STATE_TO_READ)  && (!bRecentToRead)) bSkip = true;
+			if ((n == FileInfo.STATE_FINISHED)  && (!bRecentFinished)) bSkip = true;
+			if (!bSkip) books.add(bi);
+		}
 		int colorBlue;
 		int colorGreen;
 		int colorGray;
@@ -258,6 +273,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_next_drawable, R.drawable.cr3_button_next)
 						//R.drawable.cr3_button_next
 				);
+				mActivity.tintViewIcons(cover,true);
 				if (label != null) {
 					label.setText("More...");
 					label.setTextColor(colorIcon);
@@ -389,6 +405,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			TextView label = (TextView)view.findViewById(R.id.item_name);
 			if (item.isOPDSRoot()) {
 				icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_opds_add_drawable, R.drawable.cr3_browser_folder_opds_add));
+                mActivity.tintViewIcons(icon,true);
 				label.setText("Add");
 				label.setTextColor(colorIcon);
 				view.setOnClickListener(new OnClickListener() {
@@ -462,27 +479,28 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					label.setTextColor(colorIcon);
 					label.setMaxWidth(coverWidth * 3 / 2);
 				}
-				if (label.getText().toString().toLowerCase().contains("gutenberg"))
-					icon.setImageResource(R.drawable.projectgutrnberg);
-				if (label.getText().toString().toLowerCase().contains("legimi"))
-					icon.setImageResource(R.drawable.legimi);
-				if (label.getText().toString().toLowerCase().matches(".*revues.*org.*"))
-					icon.setImageResource(R.drawable.revues_org);
-				if (label.getText().toString().toLowerCase().matches(".*libres.*et.*gratuits.*"))
-					icon.setImageResource(R.drawable.ebooks_gratuits);
-				if (label.getText().toString().toLowerCase().matches(".*internet.*archive.*"))
-					icon.setImageResource(R.drawable.internet_archive);
-				if (label.getText().toString().toLowerCase().matches(".*feed.*books.*"))
-					icon.setImageResource(R.drawable.feedbooks);
-				if (label.getText().toString().toLowerCase().matches(".*flibusta.*"))
-					icon.setImageResource(R.drawable.flibusta);
-				if (label.getText().toString().toLowerCase().contains("manybooks"))
-					icon.setImageResource(R.drawable.manybooks);
-				if (label.getText().toString().toLowerCase().contains("smashwords"))
-					icon.setImageResource(R.drawable.smashwords);
-				if (label.getText().toString().toLowerCase().contains("webnovel"))
-					icon.setImageResource(R.drawable.webnovel);
 
+				if (label.getText().toString().toLowerCase().contains("gutenberg"))
+					icon.setImageResource(R.drawable.projectgutrnberg); else
+				if (label.getText().toString().toLowerCase().contains("legimi"))
+					icon.setImageResource(R.drawable.legimi); else
+				if (label.getText().toString().toLowerCase().matches(".*revues.*org.*"))
+					icon.setImageResource(R.drawable.revues_org); else
+				if (label.getText().toString().toLowerCase().matches(".*libres.*et.*gratuits.*"))
+					icon.setImageResource(R.drawable.ebooks_gratuits); else
+				if (label.getText().toString().toLowerCase().matches(".*internet.*archive.*"))
+					icon.setImageResource(R.drawable.internet_archive); else
+				if (label.getText().toString().toLowerCase().matches(".*feed.*books.*"))
+					icon.setImageResource(R.drawable.feedbooks); else
+				if (label.getText().toString().toLowerCase().matches(".*flibusta.*"))
+					icon.setImageResource(R.drawable.flibusta); else
+				if (label.getText().toString().toLowerCase().contains("manybooks"))
+					icon.setImageResource(R.drawable.manybooks); else
+				if (label.getText().toString().toLowerCase().contains("smashwords"))
+					icon.setImageResource(R.drawable.smashwords); else
+				if (label.getText().toString().toLowerCase().contains("webnovel"))
+					icon.setImageResource(R.drawable.webnovel); else
+					mActivity.tintViewIcons(icon,true);
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -525,7 +543,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			View view = inflater.inflate(R.layout.root_item_dir, null);
 			ImageView icon = (ImageView) view.findViewById(R.id.item_icon);
 			TextView label = (TextView) view.findViewById(R.id.item_name);
-			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.drk_icons8_google_drive_2));
+			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
+            mActivity.tintViewIcons(icon,true);
 			label.setText(R.string.open_book_from_gd_short);
 			label.setTextColor(colorIcon);
 			label.setMaxWidth(coverWidth * 25 / 10);
@@ -549,6 +568,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.media_flash_microsd_drawable, R.drawable.media_flash_sd_mmc));
 				else
 					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_drawable, R.drawable.folder_blue));
+                mActivity.tintViewIcons(icon,true);
 				String labText = "";
 
 				if (item.title != null)
@@ -655,15 +675,16 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			if (item.isSearchShortcut())
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
 			else if ( item.isBooksByRatingRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.drk_icons8_folder_stars));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
 			else if ( item.isBooksByTitleRoot() )
 				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			else if ( item.isBooksBySeriesRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.drk_icons8_folder_hash));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
 			else if (item.isBooksByAuthorRoot())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.drk_icons8_folder_author));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() || item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.drk_icons8_folder_year));
+				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
+            mActivity.tintViewIcons(image,true);
 			if (label != null) {
 				label.setText(item.filename);
 				label.setTextColor(colorIcon);
@@ -700,6 +721,22 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		view.setBackgroundResource(theme.getRootDelimiterResourceId());
 		view.setMinimumHeight(theme.getRootDelimiterHeight());
 		view.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, theme.getRootDelimiterHeight()));
+	}
+
+	private void paintRecentButtons() {
+		int colorGrayC;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (bRecentToRead) btnRecentToRead.setBackgroundColor(colorGrayCT2);
+		else btnRecentToRead.setBackgroundColor(colorGrayCT);
+		if (bRecentReading) btnRecentReading.setBackgroundColor(colorGrayCT2);
+		else btnRecentReading.setBackgroundColor(colorGrayCT);
+		if (bRecentFinished) btnRecentFinished.setBackgroundColor(colorGrayCT2);
+		else btnRecentFinished.setBackgroundColor(colorGrayCT);
 	}
 	
 	private void createViews() {
@@ -760,7 +797,35 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				mActivity.showDirectory(dir);
 			}
 		});
-		ImageButton btnQuickSearch  = (ImageButton)view.findViewById(R.id.btn_quick_search);
+		btnRecentToRead  = (Button)view.findViewById(R.id.book_recent_toread);
+		btnRecentToRead.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bRecentToRead = !bRecentToRead;
+				paintRecentButtons();
+				refreshRecentBooks();
+			}
+		});
+		btnRecentReading  = (Button)view.findViewById(R.id.book_recent_reading);
+		btnRecentReading.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bRecentReading = !bRecentReading;
+				paintRecentButtons();
+				refreshRecentBooks();
+			}
+		});
+		btnRecentFinished  = (Button)view.findViewById(R.id.book_recent_finished);
+		btnRecentFinished.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bRecentFinished = !bRecentFinished;
+				paintRecentButtons();
+				refreshRecentBooks();
+			}
+		});
+		ImageButton btnQuickSearch = (ImageButton)view.findViewById(R.id.btn_quick_search);
+		mActivity.tintViewIcons(btnQuickSearch, true);
 		final EditText edQuickSearch = (EditText)view.findViewById(R.id.quick_search);
 		btnQuickSearch.setOnClickListener(new OnClickListener() {
 			@Override
@@ -800,34 +865,17 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
         btnStateReading.setTextColor(colorGreen);
         btnStateToRead.setTextColor(colorBlue);
         btnStateFinished.setTextColor(colorGray);
-        int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		btnRecentReading.setTextColor(colorGreen);
+		btnRecentToRead.setTextColor(colorBlue);
+		btnRecentFinished.setTextColor(colorGray);
+		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
         btnStateToRead.setBackgroundColor(colorGrayCT);
         btnStateReading.setBackgroundColor(colorGrayCT);
         btnStateFinished.setBackgroundColor(colorGrayCT);
+		paintRecentButtons();
 		edQuickSearch.setBackgroundColor(colorGrayCT);
 
         updateCurrentBook(Services.getHistory().getLastBook());
-		
-//		((ImageButton)mView.findViewById(R.id.btn_recent_books)).setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				Activities.showRecentBooks();
-//			}
-//		});
-//
-//		((ImageButton)mView.findViewById(R.id.btn_online_catalogs)).setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				Activities.showOnlineCatalogs();
-//			}
-//		});
-		
-//		((ImageButton)mView.findViewById(R.id.btn_settings)).setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				showSettings();
-//			}
-//		});
 
 		((ImageButton)mView.findViewById(R.id.btn_menu)).setOnClickListener(new OnClickListener() {
 			@Override
@@ -835,6 +883,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				showMenu();
 			}
 		});
+		mActivity.tintViewIcons(((ImageButton)mView.findViewById(R.id.btn_menu)),true);
 
 		mView.findViewById(R.id.current_book).setOnClickListener(new OnClickListener() {
 			@Override

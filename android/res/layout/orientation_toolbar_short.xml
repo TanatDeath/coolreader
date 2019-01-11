@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/orient_body"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+	android:background="?attr/colorThemeGray2"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="3dip"
+	android:layout_marginRight="3dip"
+    android:baselineAligned="true"
+    >
+
+	<LinearLayout
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:baselineAligned="true"
+	    >
+	
+	    <ImageButton android:id="@+id/fix_new_orientation"
+            android:layout_width="0dip" android:layout_weight="1"
+	        android:layout_height="match_parent"
+	        android:src="?attr/attr_icons8_fix_landsc"
+                android:tag="tint"
+            android:minHeight="?android:attr/listPreferredItemHeight"
+			android:minWidth="?android:attr/listPreferredItemHeight"
+	        android:layout_marginTop="2dip"
+	        android:layout_marginBottom="2dip"
+	        android:layout_marginLeft="1dip"
+	        android:layout_marginRight="1dip"
+	        android:contentDescription="@string/fix_new_orientation"/>
+	    <ImageButton android:id="@+id/disable_popup_toolbar"
+            android:layout_width="0dip" android:layout_weight="1"
+	        android:layout_height="match_parent"
+	        android:layout_marginTop="2dip"
+	        android:layout_marginBottom="2dip"
+	        android:layout_marginLeft="1dip"
+	        android:layout_marginRight="1dip"
+	        android:src="?attr/attr_icons8_disable_toolbar"
+                android:tag="tint"
+	        android:contentDescription="@string/disable_orientation_popup_toolbar"/>
+		<ImageButton android:id="@+id/btn_orientation_settings"
+			android:layout_width="0dip" android:layout_weight="1"
+			android:layout_height="match_parent"
+			android:layout_marginTop="2dip"
+			android:layout_marginBottom="2dip"
+			android:layout_marginLeft="1dip"
+			android:layout_marginRight="1dip"
+			android:src="?attr/attr_icons8_settings"
+			android:tag="tint"
+			/>
+		<ImageButton android:id="@+id/orientation_cancel"
+            android:layout_width="0dip" android:layout_weight="1"
+	        android:layout_height="match_parent"
+            android:minHeight="?android:attr/listPreferredItemHeight"
+			android:minWidth="?android:attr/listPreferredItemHeight"
+	        android:layout_marginTop="2dip"
+	        android:layout_marginBottom="2dip"
+	        android:layout_marginLeft="1dip"
+	        android:layout_marginRight="1dip"
+	        android:src="?attr/cr3_viewer_exit_drawable"
+                android:tag="tint"
+	        android:contentDescription="@string/dlg_button_cancel"/>
+	</LinearLayout>
+</LinearLayout>

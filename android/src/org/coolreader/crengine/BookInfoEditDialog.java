@@ -565,8 +565,7 @@ public class BookInfoEditDialog extends BaseDialog {
         	parent.removeView(btnRemoveRecent);
         	parent.removeView(btnOpenFolder);
         }
-        
-        setView(view);
+	   setView(view);
 	}
 	
 	private void save() {

@@ -26,6 +26,7 @@
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="match_parent"
 	        android:src="?attr/attr_icons8_copy"
+                android:tag="tint"
             android:minHeight="?android:attr/listPreferredItemHeight"
 			android:minWidth="?android:attr/listPreferredItemHeight"
 	        android:layout_marginTop="2dip"
@@ -37,6 +38,7 @@
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="match_parent"
             android:src="?attr/attr_icons8_google_translate"
+            android:tag="tint"
             android:minHeight="?android:attr/listPreferredItemHeight"
 			android:minWidth="?android:attr/listPreferredItemHeight"
 	        android:layout_marginTop="2dip"
@@ -52,6 +54,7 @@
 	        android:layout_marginLeft="1dip"
 	        android:layout_marginRight="1dip"
 	        android:src="?attr/attr_icons8_bookmark_simple"
+                android:tag="tint"
 	        android:contentDescription="@string/options_selection_action_bookmark"/>
         <ImageButton android:id="@+id/selection_email"
             android:layout_width="0dip" android:layout_weight="1"
@@ -63,6 +66,7 @@
             android:layout_marginLeft="1dip"
             android:layout_marginRight="1dip"
             android:src="?attr/attr_icons8_share"
+            android:tag="tint"
 	        android:contentDescription="@string/options_selection_action_mail"/>
         <ImageButton android:id="@+id/selection_find"
             android:layout_width="0dip" android:layout_weight="1"
@@ -74,6 +78,7 @@
             android:layout_marginLeft="1dip"
             android:layout_marginRight="1dip"
             android:src="?attr/cr3_viewer_find_drawable"
+            android:tag="tint"
 	        android:contentDescription="@string/dlg_button_find"/>
         <ImageButton android:id="@+id/selection_cancel"
             android:layout_width="0dip" android:layout_weight="1"
@@ -85,6 +90,7 @@
 	        android:layout_marginLeft="1dip"
 	        android:layout_marginRight="1dip"
 	        android:src="?attr/cr3_viewer_exit_drawable"
+                android:tag="tint"
 	        android:contentDescription="@string/dlg_button_cancel"/>
 	</LinearLayout>
 	<TableLayout
@@ -107,6 +113,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:src="?attr/attr_icons8_back_small"
+                                        android:tag="tint"
 					android:background="?attr/colorThemeGray2"
 					android:layout_marginTop="2dip"
 					android:layout_marginBottom="2dip"
@@ -129,6 +136,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:background="?attr/colorThemeGray2Contrast"
+                                        android:tag="tint"
 					android:layout_marginTop="2dip"
 					android:layout_marginBottom="2dip"
 					android:layout_marginLeft="2dip"
@@ -149,6 +157,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:src="?attr/attr_icons8_back_small"
+                                        android:tag="tint"
 					android:background="?attr/colorThemeGray2"
 					android:layout_marginTop="2dip"
 					android:layout_marginBottom="2dip"
@@ -171,6 +180,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:background="?attr/colorThemeGray2Contrast"
+                                        android:tag="tint"
 					android:layout_marginTop="2dip"
 					android:layout_marginBottom="2dip"
 					android:layout_marginLeft="2dip"

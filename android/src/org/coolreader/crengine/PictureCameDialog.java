@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
@@ -268,6 +269,15 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 			}
 		});
 		final Button ibPicRememberForLater=(Button)view.findViewById(R.id.ib_save_for_later);
+		int resId = Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_texture, R.drawable.icons8_texture);
+		Drawable img = getContext().getResources().getDrawable( R.drawable.icons8_texture );
+		mActivity.tintViewIcons(img,true);
+		ibPicCopyTexture.setCompoundDrawables( img, null, null, null );
+		ibPicCopyTextureAct.setCompoundDrawables( img, null, null, null );
+		ibPicCopyBackground.setCompoundDrawables( img, null, null, null );
+		ibPicCopyBackgroundAct.setCompoundDrawables( img, null, null, null );
+		ibPicRememberForLater.setCompoundDrawables( img, null, null, null );
+		//imageCame.setImageDrawable(img);
 		ibPicRememberForLater.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				activity.showToast(R.string.pic_image_was_remembered);

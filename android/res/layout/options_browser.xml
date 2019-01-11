@@ -29,6 +29,7 @@
          android:layout_centerVertical="true"
          android:layout_gravity="center_vertical|left"
          android:src="?attr/cr3_button_prev_drawable"
+         android:tag="tint"
          android:focusable="false"
          android:focusableInTouchMode="false"
          android:background="@null"

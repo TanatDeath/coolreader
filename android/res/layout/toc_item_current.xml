@@ -26,6 +26,7 @@
         android:layout_marginRight="0dip"
         android:layout_marginLeft="0dip"
         android:src="?attr/attr_cr3_toc_item_collapsed"
+        android:tag="tint"
         />
 	<!--  LinearLayout
 	    android:orientation="horizontal"

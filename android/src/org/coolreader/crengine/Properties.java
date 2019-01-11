@@ -130,7 +130,9 @@ public class Properties extends java.util.Properties {
 
 	@Override
 	synchronized public Object setProperty(String name, String value) {
-		return super.setProperty(name, value);
+		if (!StrUtils.isEmptyStr(name))
+			return super.setProperty(name, value);
+		else return null;
 	}
 
 	@Override

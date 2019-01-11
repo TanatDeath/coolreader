@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
@@ -162,7 +163,7 @@ public class SearchDlg extends BaseDialog {
 
 		this.mBookInfo = mReaderView.getBookInfo();
 		setPositiveButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.drk_icons8_search),
+				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),
 				//R.drawable.icons8_search,
 				R.string.action_search);
         mInflater = LayoutInflater.from(getContext());
@@ -220,6 +221,7 @@ public class SearchDlg extends BaseDialog {
 				body.addView(mList);
 			}
 		});
+		mCoolReader.tintViewIcons(mDialogView);
 		//setView(mDialogView);
 		//setFlingHandlers(mList, null, null);
 		// setup buttons

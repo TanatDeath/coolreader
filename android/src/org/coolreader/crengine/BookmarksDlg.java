@@ -164,6 +164,7 @@ public class BookmarksDlg  extends BaseDialog {
 				if ( posTextView!=null )
 					posTextView.setText("");
 			}
+			activity.tintViewIcons(view);
 			return view;
 		}
 

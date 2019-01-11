@@ -71,6 +71,7 @@ public interface Settings {
     public static final String PROP_SHOW_PAGE_COUNT         ="window.status.pos.page.count";
     public static final String PROP_SHOW_PAGE_NUMBER        ="window.status.pos.page.number";
     public static final String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
+    public static final String PROP_FONT_LIGATURES_ENABLED  ="font.ligatures.enabled";
     public static final String PROP_FLOATING_PUNCTUATION    ="crengine.style.floating.punctuation.enabled";
     public static final String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";
     public static final String PROP_HYPHENATION_DICT        ="crengine.hyphenation.dictionary.code"; // non-crengine
@@ -78,6 +79,8 @@ public interface Settings {
 
     public static final String PROP_PROFILE_NUMBER          ="crengine.profile.number"; // current settings profile number
     public static final String PROP_APP_SETTINGS_SHOW_ICONS ="app.settings.show.icons";
+    public static final String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
+    public static final String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
     public static final String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
 
 	 // image scaling settings
@@ -105,6 +108,7 @@ public interface Settings {
     public static final String PROP_APP_SHOW_COVERPAGES     ="app.browser.coverpages";
     public static final String PROP_APP_COVERPAGE_SIZE     ="app.browser.coverpage.size"; // 0==small, 2==BIG
     public static final String PROP_APP_SCREEN_ORIENTATION  ="app.screen.orientation";
+    public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
     public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
     public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
     public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
@@ -128,6 +132,7 @@ public interface Settings {
     public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
     public static final String PROP_SAVE_POS_TO_GD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
+    public static final String PROP_APP_MARK_DOWNLOADED_TO_READ = "app.mark.downloaded.toread";
 
     public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
     public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
@@ -231,7 +236,7 @@ public interface Settings {
     	RU("ru", R.string.options_app_locale_ru, R.raw.help_template_ru),
     	UK("uk", R.string.options_app_locale_uk, R.raw.help_template_ru),
     	BG("bg", R.string.options_app_locale_bg, 0),
-    	BE("be", R.string.options_app_locale_by, 0),
+    	BE("be", R.string.options_app_locale_be, 0),
     	SK("sk", R.string.options_app_locale_sk, 0),
     	TR("tr", R.string.options_app_locale_tr, 0),
     	LT("lt", R.string.options_app_locale_lt, 0),
@@ -335,6 +340,8 @@ public interface Settings {
 	    "app.touch.*",
 
 	    "app.ui.theme*",
+        PROP_APP_ICONS_IS_CUSTOM_COLOR,
+        PROP_APP_ICONS_CUSTOM_COLOR
 	};
 
 

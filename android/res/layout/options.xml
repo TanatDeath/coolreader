@@ -26,6 +26,7 @@
 		        android:minHeight="?android:attr/listPreferredItemHeight"
 		        android:minWidth="?android:attr/listPreferredItemHeight"
 	            android:src="?attr/cr3_button_prev_drawable"
+                    android:tag="tint"
 	            android:focusable="false"
 	            android:focusableInTouchMode="false"
 	            android:background="@null"

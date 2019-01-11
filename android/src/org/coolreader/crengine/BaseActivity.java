@@ -33,6 +33,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.DrawFilter;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,6 +62,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 //import com.github.johnpersano.supertoasts.library.Style;
@@ -454,7 +459,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_quote_2, R.attr.attr_icons8_bookmark_plus,
 						 R.attr.attr_icons8_google_translate_save,
 						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting,
-						 R.attr.attr_icons8_toggle_page_view_mode, R.attr.attr_icons8_settings_search
+						 R.attr.attr_icons8_toggle_page_view_mode, R.attr.attr_icons8_settings_search,
+				         R.attr.cr3_option_font_face_drawable, R.attr.cr3_option_text_bold_drawable
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -526,6 +532,8 @@ public class BaseActivity extends Activity implements Settings {
 		int brAlphabeticalSorting  = a.getResourceId(62, 0);
 		int brTogglePageViewMode = a.getResourceId(63, 0);
 		int brSettingsSearch = a.getResourceId(64, 0);
+		int brFontFace = a.getResourceId(65, 0);
+		int brFontBold = a.getResourceId(66, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -660,6 +668,10 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.TOGGLE_PAGE_VIEW_MODE.setIconId(brTogglePageViewMode);
 		if (brSettingsSearch!=0)
 			ReaderAction.OPTIONS_FILTER.setIconId(brSettingsSearch);
+		if (brFontFace!=0)
+			ReaderAction.FONT_SELECT.setIconId(brFontFace);
+		if (brFontBold!=0)
+			ReaderAction.FONT_BOLD.setIconId(brFontBold);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -2029,6 +2041,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_SHOW_POS_PERCENT, "0"); 
 			props.applyDefault(ReaderView.PROP_SHOW_PAGE_COUNT, "1");
 			props.applyDefault(ReaderView.PROP_FONT_KERNING_ENABLED, "0");
+			props.applyDefault(ReaderView.PROP_FONT_LIGATURES_ENABLED, "0");
 			props.applyDefault(ReaderView.PROP_SHOW_TIME, "1");
 			props.applyDefault(ReaderView.PROP_FONT_ANTIALIASING, "2");
 			props.applyDefault(ReaderView.PROP_APP_GESTURE_PAGE_FLIPPING, "1");
@@ -2290,6 +2303,63 @@ public class BaseActivity extends Activity implements Settings {
 			}
 		}
 		return hasHardwareMenuKey;
+	}
+
+	public ArrayList<View> getAllChildren(View v) {
+		if (!(v instanceof ViewGroup)) {
+			ArrayList<View> viewArrayList = new ArrayList<View>();
+			viewArrayList.add(v);
+			return viewArrayList;
+		}
+		ArrayList<View> result = new ArrayList<View>();
+		ViewGroup vg = (ViewGroup) v;
+		for (int i = 0; i < vg.getChildCount(); i++) {
+			View child = vg.getChildAt(i);
+			ArrayList<View> viewArrayList = new ArrayList<View>();
+			viewArrayList.add(v);
+			viewArrayList.addAll(getAllChildren(child));
+			result.addAll(viewArrayList);
+		}
+		return result;
+	}
+
+	public void tintViewIcons(View v) {
+		tintViewIcons(v, false);
+	}
+
+	public void tintViewIcons(Object o, boolean forceTint) {
+        Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
+        int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
+        TypedArray a = this.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.isTintedIcons, R.attr.colorIcon});
+		int isTintedIcons = a.getInt(0, 0);
+		int colorIcon = a.getColor(1, Color.argb(255,128,128,128));
+		if (custIcons) colorIcon = custColor;
+		a.recycle();
+		if (isTintedIcons == 1) {
+			if (o instanceof View) {
+				View v = (View) o;
+				ArrayList<View> ch = getAllChildren(v);
+				for (View vc : ch) {
+					Object tag = vc.getTag();
+					String stag = "";
+					if (tag != null) stag = tag.toString();
+					if ((stag.contains("tint")) || forceTint) {
+						//int col = Color.argb(200,200,50,50);
+						if (vc instanceof ImageView) ((ImageView) vc).setColorFilter(colorIcon);
+						if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(colorIcon);
+						//if (vc instanceof ImageView) ((ImageView) vc).setColorFilter(col);
+						//if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(col);
+					}
+				}
+			}
+			if (o instanceof Drawable) {
+				Drawable d = (Drawable) o;
+				if (forceTint) {
+					d.setColorFilter(colorIcon, PorterDuff.Mode.SRC_ATOP);
+				}
+			}
+		}
 	}
 	
 }
