@@ -1,11 +1,15 @@
 package org.coolreader.crengine;
 
+import android.util.Log;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
 public class Properties extends java.util.Properties {
+	public static final Logger elog = L.create("props", Log.ERROR);
+
 	public Properties() {
 		super();
 	}
@@ -130,9 +134,12 @@ public class Properties extends java.util.Properties {
 
 	@Override
 	synchronized public Object setProperty(String name, String value) {
-		if (!StrUtils.isEmptyStr(name))
+		try {
 			return super.setProperty(name, value);
-		else return null;
+		} catch (NullPointerException e) {
+			elog.e("Properties.setProperty(): value can't be null, name=" + name);
+			return null;
+		}
 	}
 
 	@Override

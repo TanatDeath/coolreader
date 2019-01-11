@@ -3746,9 +3746,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
         
         mOptionsBrowser = new OptionsListView(getContext(), null);
 
-		final Properties properties = new Properties();
-		Properties sett = mActivity.settings();
-		properties.setProperty(ReaderView.PROP_APP_BOOK_SORT_ORDER, sett.getProperty(ReaderView.PROP_APP_BOOK_SORT_ORDER));
 		int[] sortOrderLabels = {
 			FileInfo.SortOrder.FILENAME.resourceId,	
 			FileInfo.SortOrder.FILENAME_DESC.resourceId,	

@@ -54,6 +54,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	TTS mTTS;
 	private static NotificationChannel channel;
 	ImageButton playPauseButton;
+	ImageButton playPauseButtonEll;
 	ImageView ivVolDown;
 	ImageView ivVolUp;
 	ImageView ivFreqDown;
@@ -92,12 +93,12 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					break;
 				case ACTION_TTS_PLAY:
 					if (!isSpeaking) {
-						toggleStartStop();
+						toggleStartStopExt(false);
 					}
 					break;
 				case ACTION_TTS_PAUSE:
 					if (isSpeaking) {
-						toggleStartStop();
+						toggleStartStopExt(false);
 					}
 					break;
 				case ACTION_TTS_NEXT:
@@ -351,7 +352,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				}
 				currentSelection = selection;
 				if ( isSpeaking ) {
-					mTTS.stop(); //plotn - experiments
+					if (isAlwaysStop) mTTS.stop();
 					say(currentSelection);
 				}
 			}
@@ -397,6 +398,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	}
 	
 	private boolean isSpeaking;
+	private boolean isAlwaysStop;
 	private long curTime = System.currentTimeMillis();
 	private long lastSaveCurPosTime = System.currentTimeMillis();
 
@@ -412,27 +414,53 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 
 	public void pause() {
 		if (isSpeaking)
-			toggleStartStop();
+			toggleStartStopExt(false);
 	}
-	
+
+	private void toggleStartStopExt(boolean b) {
+		isAlwaysStop = b;
+		toggleStartStop();
+	}
+
 	private void toggleStartStop() {
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+
+		ColorDrawable c = new ColorDrawable(colorGrayC);
+		c.setAlpha(130);
+
 		if ( isSpeaking ) {
 			playPauseButton.setImageResource(
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
 					//R.drawable.ic_media_play
 			);
+			playPauseButtonEll.setImageResource(
+					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
+					//R.drawable.ic_media_play
+			);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
 			}
+			playPauseButton.setBackgroundDrawable(c);
+			playPauseButtonEll.setBackgroundDrawable(c);
 			stop();
 		} else {
 			playPauseButton.setImageResource(
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
 					//R.drawable.ic_media_pause
 			);
+			playPauseButtonEll.setImageResource(
+					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
+					//R.drawable.ic_media_pause
+			);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				setMediaSessionPlaybackState(PlaybackState.STATE_PLAYING);
 			}
+			playPauseButton.setBackgroundDrawable(c);
+			playPauseButtonEll.setBackgroundDrawable(c);
 			start();
 		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -480,6 +508,12 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				//R.drawable.ic_media_play
 		);
 		playPauseButton.setBackgroundDrawable(c);
+		playPauseButtonEll = (ImageButton)panel.findViewById(R.id.tts_play_pause_ell);
+		playPauseButtonEll.setImageResource(
+				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
+				//R.drawable.ic_media_play
+		);
+		playPauseButtonEll.setBackgroundDrawable(c);
 		//panel.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		
@@ -505,10 +539,23 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.tts_play_pause).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				toggleStartStop();
+				toggleStartStopExt(false);
+			}
+		});
+		mPanel.findViewById(R.id.tts_play_pause_ell).setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				toggleStartStopExt(true);
 			}
 		});
 		mPanel.findViewById(R.id.tts_play_pause).setOnLongClickListener(new View.OnLongClickListener() {
+			public boolean onLongClick(View v) {
+				mCoolReader.tts = null;
+				mCoolReader.ttsInitialized = false;
+				mCoolReader.showToast("Re-initializing TTS");
+				return true;
+			}
+		});
+		mPanel.findViewById(R.id.tts_play_pause_ell).setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
 				mCoolReader.tts = null;
 				mCoolReader.ttsInitialized = false;

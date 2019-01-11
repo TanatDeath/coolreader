@@ -858,11 +858,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				log.i("read&write to storage permissions GRANTED, adding sd card mount point...");
 				Services.refreshServices(this);
 				rebaseSettings();
-				getDBService().setPathCorrector(Engine.getInstance(this).getPathCorrector());
-				getDBService().get().reopenDatabase();
 				waitForCRDBService(new Runnable() {
 					@Override
 					public void run() {
+						getDBService().setPathCorrector(Engine.getInstance(CoolReader.this).getPathCorrector());
+						getDB().reopenDatabase();
 						Services.getHistory().loadFromDB(getDB(), 200);
 					}
 				});
@@ -1744,13 +1744,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				FileInfo file = Services.getScanner().findFileInTree(item);
 				if (file == null)
 					file = item;
-				if (file.deleteFile()) {
-					Services.getHistory().removeBookInfo(getDB(), file, true, true);
-					BackgroundThread.instance().postGUI(new Runnable() {
+				final FileInfo finalFile = file;
+ 				if (file.deleteFile()) {
+					waitForCRDBService(new Runnable() {
 						@Override
 						public void run() {
+						Services.getHistory().removeBookInfo(getDB(), finalFile, true, true);
+					BackgroundThread.instance().postGUI(new Runnable() {
+								@Override
+								public void run() {
 							directoryUpdated(item.parent, null);
 						}}, 700);
+					}
+					});
 				} else {
 					boolean bSucceed = false;
 					int res = 0;
@@ -1767,16 +1773,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
 						}
 					} else {
-						Services.getHistory().removeBookInfo(getDB(), file, true, true);
-						BackgroundThread.instance().postGUI(new Runnable() {
+						waitForCRDBService(new Runnable() {
 							@Override
 							public void run() {
-								directoryUpdated(item.parent, null);
-							}}, 700);
+								Services.getHistory().removeBookInfo(getDB(), finalFile, true, true);
+								BackgroundThread.instance().postGUI(new Runnable() {
+									@Override
+									public void run() {
+										directoryUpdated(item.parent, null);
+									}}, 700);
+							}
+						});
 					}
 				}
-
-
 			}
 		});
 	}
@@ -1825,8 +1834,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		askConfirmation(R.string.win_title_confirm_history_record_delete, new Runnable() {
 			@Override
 			public void run() {
-				Services.getHistory().removeBookInfo(getDB(), item, true, false);
-				directoryUpdated(Services.getScanner().createRecentRoot());
+				waitForCRDBService(new Runnable() {
+					@Override
+					public void run() {
+						Services.getHistory().removeBookInfo(getDB(), item, true, false);
+						directoryUpdated(Services.getScanner().createRecentRoot());
+					}
+				});
 			}
 		});
 	}
@@ -1837,8 +1851,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			@Override
 			public void run() {
 				if (item != null && item.isOPDSDir()) {
-					getDB().removeOPDSCatalog(item.id);
-					directoryUpdated(Services.getScanner().createRecentRoot());
+					waitForCRDBService(new Runnable() {
+						@Override
+						public void run() {
+							getDB().removeOPDSCatalog(item.id);
+							directoryUpdated(Services.getScanner().createRecentRoot());
+						}
+					});
 				}
 			}
 		});
@@ -1850,14 +1869,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public void editBookInfo(final FileInfo currDirectory, final FileInfo item) {
-		Services.getHistory().getOrCreateBookInfo(getDB(), item, new BookInfoLoadedCallack() {
+		waitForCRDBService(new Runnable() {
 			@Override
-			public void onBookInfoLoaded(BookInfo bookInfo) {
-				if (bookInfo == null)
-					bookInfo = new BookInfo(item);
-				BookInfoEditDialog dlg = new BookInfoEditDialog(CoolReader.this, currDirectory, bookInfo, 
-						currDirectory.isRecentDir());
-				dlg.show();
+			public void run() {
+				Services.getHistory().getOrCreateBookInfo(getDB(), item, new BookInfoLoadedCallack() {
+					@Override
+					public void onBookInfoLoaded(BookInfo bookInfo) {
+						if (bookInfo == null)
+							bookInfo = new BookInfo(item);
+						BookInfoEditDialog dlg = new BookInfoEditDialog(CoolReader.this, currDirectory, bookInfo,
+								currDirectory.isRecentDir());
+						dlg.show();
+					}
+				});
 			}
 		});
 	}
