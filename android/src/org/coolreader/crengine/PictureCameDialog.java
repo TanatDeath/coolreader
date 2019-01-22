@@ -40,6 +40,10 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 	private BookInfo currentBook;
 	private CoverpageManager mCoverpageManager;
 	private PictureReceived picReceived = null;
+	private boolean bThisIsTexture = false;
+	private Button ibPicTexture;
+	private Button ibPicBackground;
+
 
 	public static final Logger log = L.create("cr");
 
@@ -79,7 +83,23 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		return fname2+"."+fname1ext;
 	}
 
-	private void proceedTexture(boolean isTexture, final boolean needToActivate) {
+	private void switchTexture(boolean isTexture) {
+		bThisIsTexture = isTexture;
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGray = a.getColor(0, Color.GRAY);
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (ibPicTexture!=null) ibPicTexture.setBackgroundColor(colorGrayCT);
+		if (ibPicBackground!=null) ibPicBackground.setBackgroundColor(colorGrayCT);
+		if ((ibPicTexture!=null)&&(bThisIsTexture)) ibPicTexture.setBackgroundColor(colorGrayCT2);
+		if ((ibPicBackground!=null)&&(!bThisIsTexture)) ibPicBackground.setBackgroundColor(colorGrayCT2);
+	}
+
+	private void proceedTexture(final boolean needToActivate) {
 		PictureReceived pic = ((CoolReader)activity).picReceived;
 		if (pic.bmpReceived!=null) {
 			String filename = "texture";
@@ -108,7 +128,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 
 			}
 			String sDir = "";
-			if (isTexture) {
+			if (bThisIsTexture) {
 				ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.TexturesDirs, true);
 				if (tDirs.size()>0) sDir=tDirs.get(0);
 			} else {
@@ -244,40 +264,36 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		if (((CoolReader)activity).picReceived!=null)
 			if (((CoolReader)activity).picReceived.bmpReceived!=null)
 				imageCame.setImageBitmap(((CoolReader)activity).picReceived.bmpReceived);
-		final Button ibPicCopyTexture=(Button)view.findViewById(R.id.ib_copy_to_texture);
-		ibPicCopyTexture.setOnClickListener(new View.OnClickListener() {
+
+		ibPicTexture=(Button)view.findViewById(R.id.ib_texture);
+		ibPicTexture.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				proceedTexture(true, false);
+				switchTexture(true);
 			}
 		});
-		final Button ibPicCopyTextureAct=(Button)view.findViewById(R.id.ib_copy_to_texture_act);
-		ibPicCopyTextureAct.setOnClickListener(new View.OnClickListener() {
+		ibPicBackground=(Button)view.findViewById(R.id.ib_background);
+		ibPicBackground.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				proceedTexture(true, true);
+				switchTexture(false);
 			}
 		});
-		final Button ibPicCopyBackground=(Button)view.findViewById(R.id.ib_copy_to_background);
-		ibPicCopyBackground.setOnClickListener(new View.OnClickListener() {
+		switchTexture(true);
+		final Button ibPicCopy=(Button)view.findViewById(R.id.ib_copy);
+		ibPicCopy.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				proceedTexture(false, false);
+				proceedTexture(false);
 			}
 		});
-		final Button ibPicCopyBackgroundAct=(Button)view.findViewById(R.id.ib_copy_to_background_act);
-		ibPicCopyBackgroundAct.setOnClickListener(new View.OnClickListener() {
+		final Button ibPicCopyAct=(Button)view.findViewById(R.id.ib_copy_activate);
+		ibPicCopyAct.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				proceedTexture(false, true);
+				proceedTexture(true);
 			}
 		});
 		final Button ibPicRememberForLater=(Button)view.findViewById(R.id.ib_save_for_later);
 		int resId = Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_texture, R.drawable.icons8_texture);
 		Drawable img = getContext().getResources().getDrawable( R.drawable.icons8_texture );
 		mActivity.tintViewIcons(img,true);
-		ibPicCopyTexture.setCompoundDrawables( img, null, null, null );
-		ibPicCopyTextureAct.setCompoundDrawables( img, null, null, null );
-		ibPicCopyBackground.setCompoundDrawables( img, null, null, null );
-		ibPicCopyBackgroundAct.setCompoundDrawables( img, null, null, null );
-		ibPicRememberForLater.setCompoundDrawables( img, null, null, null );
-		//imageCame.setImageDrawable(img);
 		ibPicRememberForLater.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				activity.showToast(R.string.pic_image_was_remembered);
@@ -294,14 +310,12 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		ibPicCopyTexture.setBackgroundColor(colorGrayCT);
-		ibPicCopyTexture.setTextColor(colorIcon);
-		ibPicCopyTextureAct.setBackgroundColor(colorGrayCT);
-		ibPicCopyTextureAct.setTextColor(colorIcon);
-		ibPicCopyBackground.setBackgroundColor(colorGrayCT);
-		ibPicCopyBackground.setTextColor(colorIcon);
-		ibPicCopyBackgroundAct.setBackgroundColor(colorGrayCT);
-		ibPicCopyBackgroundAct.setTextColor(colorIcon);
+		ibPicCopy.setBackgroundColor(colorGrayCT);
+		ibPicCopy.setTextColor(colorIcon);
+		ibPicCopyAct.setBackgroundColor(colorGrayCT);
+		ibPicCopyAct.setTextColor(colorIcon);
+		ibPicTexture.setTextColor(colorIcon);
+		ibPicBackground.setTextColor(colorIcon);
 		ibPicRememberForLater.setBackgroundColor(colorGrayCT);
 		ibPicRememberForLater.setTextColor(colorIcon);
 		imageCame.setMinimumHeight(h);

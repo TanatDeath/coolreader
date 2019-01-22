@@ -1712,6 +1712,7 @@ public class MainDB extends BaseDB {
 					if ( stmt!=null )
 						stmt.close();
 				}
+				flushAndTransaction();
 				return id;
 			} catch ( Exception e ) {
 				Log.e("cr3db", "insert failed: " + e.getMessage());
@@ -1741,6 +1742,7 @@ public class MainDB extends BaseDB {
 				vlog.v("value:"+o.toString());
 			}
 			mDB.execSQL(buf.toString(), values.toArray());
+			flushAndTransaction();
 			return true;
 		}
 		Long fromFormat( DocumentFormat f )
@@ -2094,12 +2096,14 @@ public class MainDB extends BaseDB {
 			return;
 		execSQLIgnoreErrors("DELETE FROM bookmark WHERE book_fk=" + bookId + " AND type=0");
 		execSQLIgnoreErrors("UPDATE book SET last_access_time=0 WHERE id=" + bookId);
+		flushAndTransaction();
 	}
 	
 	public void deleteBookmark(Bookmark bm) {
 		if (bm.getId() == null)
 			return;
 		execSQLIgnoreErrors("DELETE FROM bookmark WHERE id=" + bm.getId());
+		flushAndTransaction();
 	}
 
 	public BookInfo loadBookInfo(FileInfo fileInfo) {

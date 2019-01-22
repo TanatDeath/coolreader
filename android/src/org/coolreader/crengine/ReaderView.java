@@ -2094,7 +2094,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	static private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
 	public void showBookInfo() {
-		mActivity.showBookInfo(mBookInfo);
+		mActivity.showBookInfo(mBookInfo, BookInfoDialog.BOOK_INFO);
 	}
 
 	private int autoScrollSpeed = 1500; // chars / minute

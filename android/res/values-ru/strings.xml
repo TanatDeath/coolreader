@@ -220,6 +220,12 @@
     <string name="options_app_browser_hide_empty_dirs">Прятать директории без книг</string>
     <string name="dlg_about">О программе</string>
     <string name="dlg_book_info">О книге</string>
+    <string name="book_info_action_book_info">Информация о книге:</string>
+    <string name="book_info_action_opds_info">Информация о книге - в OPDS каталоге:</string>
+    <string name="book_info_action_opds_info_final">Книга скачана из OPDS каталога:</string>
+    <string name="book_info_action_open">Открыть книгу</string>
+    <string name="book_info_action_download">Скачать книгу</string>
+    <string name="book_info_action_unavailable">Сначала вы должны скачать книгу</string>
     <string name="mi_book_styles_enable">Разрешить встроенные стили документа</string>
     <string name="mi_book_styles_disable">Запретить встроенные стили документа</string>
     <string name="mi_night_mode_disable">Дневной режим</string>
@@ -286,6 +292,7 @@
     <string name="dlg_book_search_author">Автор</string>
     <string name="dlg_book_search_found">Найдено книг:</string>
     <string name="dlg_book_search_prompt">Задайте параметры поиска:</string>
+    <string name="dlg_book_search_terms">Текст поиска:</string>
     <string name="mi_book_search">Найти</string>
     <string name="dlg_book_search_not_found">Книги не найдены</string>
     <string name="dir_search_results">Результаты поиска</string>
@@ -303,6 +310,7 @@
     <string name="options_page_animation_slide_2_pages">Сдвиг (2 стр.)</string>
     <string name="progress_downloading">Загружаю</string>
     <string name="mi_book_opds_root">Онлайн-каталоги</string>
+    <string name="opds_search">Поиск в каталоге...</string>
     <string name="mi_tts_play">Читать вслух</string>
     <string name="options_format_image_scaling_block_scale">Макс. увеличение для обычных картинок</string>
     <string name="options_format_image_scaling_mode_integer_factor">В целое число раз</string>
@@ -832,10 +840,12 @@
     <string name="pos_recovered">Позиция чтения была загружена из файла восстановления</string>
     <string name="pos_saved">Позиция чтения была сохранена</string>
     <string name="dlg_picture_came">Входящие изображения</string>
-    <string name="pic_copy_texture">Скопировать изображение в папку текстур (замостить)</string>
-    <string name="pic_copy_texture_activate">Скопировать изображение в папку текстур и применить</string>
-    <string name="pic_copy_background">Скопировать изображение в папку фонов (растянуть)</string>
-    <string name="pic_copy_background_activate">Скопировать изображение в папку фонов и применить</string>
+    <string name="pic_came_texture">Текстура (замостить)</string>
+    <string name="pic_copy">Скопировать в библиотеку</string>
+    <string name="pic_came_background">Фон (растянуть)</string>
+    <string name="pic_copy_activate">Скопировать и применить</string>
+    <string name="pic_came_this_is">Это изображение:</string>
+    <string name="pic_do_an_action">Выполнить действие:</string>
     <string name="pic_remember_for_later">Запомнить изображение, чтобы применить позднее</string>
     <string name="pic_set_to_current_book">Нажмите на обложку, чтобы заменить ее у текущей книги</string>
     <string name="pic_set_to_recent_book">Нажмите на обложку, чтобы заменить ее у одной из последних открытых книг</string>

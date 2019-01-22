@@ -1,9 +1,13 @@
 package org.coolreader.crengine;
 
+import android.util.Log;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,6 +25,7 @@ public class GenreSAXElem {
 
     public static BaseActivity mActivity;
     public static ArrayList<GenreSAXElem> elemList = new ArrayList<GenreSAXElem>();
+    public static HashMap<String, String[]> elemList2 = new HashMap<String, String[]>();
 
     public String qName;
     public GenreSAXElem parentLink;
@@ -92,6 +97,25 @@ public class GenreSAXElem {
         return foundDescr;
     }
 
+    public static void splitS(String str) {
+        if (str.contains(" ")) {
+            String sKey = str.split(" ")[0];
+            if (!StrUtils.isEmptyStr(sKey)) {
+                String sVal = str.substring(sKey.length()).trim();
+                String sValAdd = "";
+                if (!StrUtils.isEmptyStr(sVal)) {
+                    if (sVal.contains("|")) {
+                        String sVal2 = sVal.split("\\|")[0];
+                        sValAdd = sVal.substring(sVal2.length()+1);
+                        if (!StrUtils.isEmptyStr(sVal2)) sVal = sVal2;
+                    }
+                }
+                String[] sV = {sVal, sValAdd};
+                elemList2.put(sKey, sV);
+            }
+        }
+    }
+
     public static void initGenreList() throws SAXException, ParserConfigurationException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         final SAXParser saxParser = factory.newSAXParser();
@@ -119,8 +143,16 @@ public class GenreSAXElem {
         };
         File[] dataDirs = Engine.getDataDirectories(null, false, true);
         File existingFile = null;
+        File existingFile2 = null;
         for ( File dir : dataDirs ) {
             File f = new File(dir, "fb2genres_utf8_wo_bom.xml");
+            if ( f.exists() && f.isFile() ) {
+                existingFile = f;
+                break;
+            }
+        }
+        for ( File dir : dataDirs ) {
+            File f = new File(dir, "genres_rus.txt");
             if ( f.exists() && f.isFile() ) {
                 existingFile = f;
                 break;
@@ -130,9 +162,14 @@ public class GenreSAXElem {
         InputStream targetStream = null;
         if (existingFile!=null) targetStreamF = new FileInputStream(existingFile);
         targetStream = mActivity.getResources().openRawResource(R.raw.fb2genres_utf8_wo_bom);
+        InputStream targetStreamF2 = null;
+        InputStream targetStream2 = null;
+        if (existingFile2!=null) targetStreamF2 = new FileInputStream(existingFile2);
+        targetStream2 = mActivity.getResources().openRawResource(R.raw.genres_rus);
         if (targetStreamF!=null) {
             try {
                 saxParser.parse(targetStreamF, handler);
+                targetStreamF.close();
             } catch (Exception e) {
                 mActivity.showToast("Could not parse genres from file: fb2genres_utf8_wo_bom.xml. "+e.getMessage());
                 try {
@@ -144,8 +181,39 @@ public class GenreSAXElem {
         } else {
             try {
                 saxParser.parse(targetStream, handler);
+                targetStream.close();
             } catch (Exception e1) {
                 mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. "+e1.getMessage());
+            }
+        }
+        if (targetStreamF2!=null) {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(targetStreamF2));
+                String str = "";
+                while ((str = reader.readLine()) != null) splitS(str);
+                targetStreamF2.close();
+            } catch (Exception e) {
+                mActivity.showToast("Could not parse genres from file: genres_rus.txt. "+
+                        e.getClass().getSimpleName()+" "+e.getMessage());
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(targetStream2));
+                    String str = "";
+                    while ((str = reader.readLine()) != null) splitS(str);
+                    targetStream2.close();
+                } catch (Exception e1) {
+                    mActivity.showToast("Could not parse genres from resource: genres_rus.txt. "+
+                            e1.getClass().getSimpleName()+" "+e1.getMessage());
+                }
+            }
+        } else {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(targetStream2));
+                String str = "";
+                while ((str = reader.readLine()) != null) splitS(str);
+                targetStream2.close();
+            } catch (Exception e1) {
+                mActivity.showToast("Could not parse genres from resource: genres_rus.txt. "+
+                        e1.getClass().getSimpleName()+" "+e1.getMessage());
             }
         }
     }

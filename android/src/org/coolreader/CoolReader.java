@@ -1109,7 +1109,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								mBrowser.showRecentBooks();
 								break;
 							case DCMD_SEARCH:
-								mBrowser.showFindBookDialog(false, "");
+								mBrowser.showFindBookDialog(false, "", null);
 								break;
 							case DCMD_CURRENT_BOOK:
 								showCurrentBook();
@@ -1904,7 +1904,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mEngine.execute(task);
 	}
 
-	public void showBookInfo(BookInfo setBI) {
+	public void showBookInfo(BookInfo setBI, final int actionType) {
 		final ArrayList<String> itemsAll = new ArrayList<String>();
 		final ArrayList<String> itemsSys = new ArrayList<String>();
 		final ArrayList<String> itemsFile = new ArrayList<String>();
@@ -2044,8 +2044,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								} catch (Exception e) {
 									log.e("exception while init genre list", e);
 								}
+								genreDescr = "";
 								ge = GenreSAXElem.getGenreDescr(lang, genre);
-								if (ge != null)
+								String[] ge2 = null;
+								if (ge != null) {
 									if (ge.hshAttrs != null) {
 										genreDescr = ge.hshAttrs.get("detailed");
 										if (StrUtils.isEmptyStr(genreDescr))
@@ -2053,13 +2055,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 										if (StrUtils.isEmptyStr(genreDescr))
 											genreDescr = ge.hshAttrs.get("title");
 									}
+								} else {
+									ge2 = GenreSAXElem.elemList2.get(genre);
+									if (ge2!=null) {
+										if (lang.toUpperCase().equals("RU")) genreDescr = ge2[0];
+										else genreDescr = ge2[1];
+									}
+								}
 								String addGenreText = "";
 								if ((!StrUtils.isEmptyStr(genre)) && (!StrUtils.isEmptyStr(genreDescr)))
 									addGenreText = genreDescr+" ("+genre+")";
 								if ((!StrUtils.isEmptyStr(genre)) && (StrUtils.isEmptyStr(genreDescr)))
 									addGenreText = genre;
 								if (StrUtils.isEmptyStr(genreText)) genreText = addGenreText;
-									else genreText = genreText + "; "+addGenreText;
+								else genreText = genreText + "; "+addGenreText;
 							}
 						}
 					}
@@ -2158,7 +2167,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					bSection=s.startsWith("section=");
 					itemsAll.add(s);
 				}
-				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot);
+				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot,
+						actionType, null, null);
 				//PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, null, "image/jpeg");
 				dlg.show();
 			}

@@ -232,6 +232,12 @@
     <string name="options_app_browser_hide_empty_dirs">Hide directories without books</string>
     <string name="dlg_about">About CoolReader</string>
     <string name="dlg_book_info">Book Info</string>
+    <string name="book_info_action_book_info">Book info:</string>
+    <string name="book_info_action_opds_info">OPDS entry book info:</string>
+    <string name="book_info_action_opds_info_final">Book has been downloaded from OPDS:</string>
+    <string name="book_info_action_open">Open book</string>
+    <string name="book_info_action_download">Download book</string>
+    <string name="book_info_action_unavailable">First you should download the book</string>
     <string name="mi_book_styles_enable">Enable document internal styles</string>
     <string name="mi_book_styles_disable">Disable document internal styles</string>
     <string name="mi_night_mode_disable">Day mode</string>
@@ -299,6 +305,7 @@
     <string name="dlg_book_search_author">Author</string>
     <string name="dlg_book_search_found">Books found:</string>
     <string name="dlg_book_search_prompt">Enter search pattern:</string>
+    <string name="dlg_book_search_terms">Search text:</string>
     <string name="mi_book_search">Find</string>
     <string name="dlg_book_search_not_found">No books found</string>
     <string name="dir_search_results">Search results</string>
@@ -318,6 +325,7 @@
     <string name="options_page_animation_slide_2_pages">Slide (2 pages)</string>
     <string name="progress_downloading">Downloading</string>
     <string name="mi_book_opds_root">Online catalogs</string>
+    <string name="opds_search">Search in catalog...</string>
     <string name="mi_tts_play">Read Aloud</string>
     <string name="options_format_image_scaling_block_scale">Block image max zoom</string>
     <string name="options_format_image_scaling_mode_integer_factor">Integer scale</string>
@@ -841,10 +849,12 @@
     <string name="pos_recovered">Reading position was loaded from recovery file</string>
     <string name="pos_saved">Reading position was saved</string>
     <string name="dlg_picture_came">Picture(s) came dialog</string>
-    <string name="pic_copy_texture">Copy image to textures folder (tiled)</string>
-    <string name="pic_copy_texture_activate">Copy image to textures folder and activate</string>
-    <string name="pic_copy_background">Copy image to background folder (stretched)</string>
-    <string name="pic_copy_background_activate">Copy image to background folder and activate</string>
+    <string name="pic_came_texture">Texture (tiled)</string>
+    <string name="pic_copy">Copy to library</string>
+    <string name="pic_came_background">Background (stretched)</string>
+    <string name="pic_copy_activate">Copy and activate</string>
+    <string name="pic_came_this_is">This is a:</string>
+    <string name="pic_do_an_action">Perform an action:</string>
     <string name="pic_remember_for_later">Remember image for later use</string>
     <string name="pic_set_to_current_book">Tap the cover to apply image to current book</string>
     <string name="pic_set_to_recent_book">Tap the cover to apply image to one of the recent books</string>

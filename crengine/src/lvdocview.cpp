@@ -1245,7 +1245,7 @@ int LVDocView::getPageHeaderHeight() {
         int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() * 11/10 + HEADER_MARGIN / 2 : 0;
         if ( bh>h )
             h = bh;
-        return h + HEADER_MARGIN;
+        return h + HEADER_MARGIN + 20; //plotn - due to different marker heights
 }
 
 /// calculate page header rectangle
@@ -1886,11 +1886,11 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	int h = GetHeight();
 	if (w > h)
 		w = h;
-	int markh = 3;
-	int markw = 1;
+	int markh = 5;
+	int markw = 2;
 	if (w > 700) {
-		markh = 7;
-        markw = 2;
+		markh = 8;
+        markw = 3;
 	}
 	for ( int x = info.left; x<info.right; x++ ) {
 		int cl = -1;
@@ -1918,8 +1918,8 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
             sz1 = 1;
 		} else {
             if ( x < info.left + percent_pos ) {
-                sz = 3;
-                sz1 = 3;
+                sz = 4;
+                sz1 = 4;
 				if ( boundCategory==0 )
 					cl = cl1;
                 else
@@ -1927,23 +1927,27 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                     sz1 = 0;
             } else {
 				if ( boundCategory!=0 ) {
-                    sz = markh;
-                    sz1 = markh + (3 - curBoundLevel);
+				    int curBoundInv = maxLevel - curBoundLevel - 1; // 0 - the topmost marker
+                    //CRLog::trace("curBoundLevel =  %d, maxLevel = %d", (int) curBoundLevel,
+					//			 (int) maxLevel);
+                    if (curBoundInv < 0) curBoundInv = 0;
+                    sz = markh + (curBoundInv * 3);
+                    sz1 = markh + (curBoundInv * 3);
                 }
 				cl = cl1;
 				szx = markw;
                 int maxLevelC = maxLevel;
-                if (curBoundLevel == 0) szx = markw * maxLevelC;
+                //if (curBoundLevel == 0) szx = markw * maxLevelC;
                 if (maxLevelC > 1) maxLevelC = maxLevelC - 1;
-                if (curBoundLevel == 1) szx = markw * maxLevelC;
+                //if (curBoundLevel == 1) szx = markw * maxLevelC;
                 if (maxLevelC > 1) maxLevelC = maxLevelC - 1;
-                if (curBoundLevel == 2) szx = markw * maxLevelC;
+                //if (curBoundLevel == 2) szx = markw * maxLevelC;
                 if (maxLevelC > 1) maxLevelC = maxLevelC - 1;
-                if (curBoundLevel == 3) szx = markw * maxLevelC;
-			}
+                //if (curBoundLevel == 3) szx = markw * maxLevelC;
+            }
 		}
         if ( cl!=-1 && sz>0 )
-            drawbuf->FillRect(x, gpos - 2 - sz/2, x + szx, gpos - 2 + sz1 / 2 + 1, cl);
+            drawbuf->FillRect(x, gpos - 2 - sz/2 - 1, x + szx, gpos - 2 + sz1 / 2 + 1 + 1, cl);
 	}
 
 	lString16 text;

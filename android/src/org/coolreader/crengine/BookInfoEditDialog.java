@@ -280,7 +280,7 @@ public class BookInfoEditDialog extends BaseDialog {
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.book_info_edit_dialog, null);
         
         ImageButton btnBack = (ImageButton)view.findViewById(R.id.base_dlg_btn_back);
-        btnBack.setOnClickListener(new View.OnClickListener() {
+		btnBack.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				onNegativeButtonClick();

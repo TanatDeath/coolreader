@@ -108,6 +108,7 @@ public class FileInfo {
 	private ArrayList<FileInfo> files;// files
 	private ArrayList<FileInfo> dirs; // directories
 	public boolean isFav; // only for display star in file browser
+	public ArrayList<OPDSUtil.LinkInfo> links = new ArrayList<OPDSUtil.LinkInfo>(); // for OPDS entries
 
 	// 16 lower bits reserved for document flags
 	public static final int DONT_USE_DOCUMENT_STYLES_FLAG = 1;
@@ -464,6 +465,11 @@ public class FileInfo {
 	public boolean isOPDSDir()
 	{
 		return pathname!=null && pathname.startsWith(OPDS_DIR_PREFIX) && (getOPDSEntryInfo() == null || getOPDSEntryInfo().getBestAcquisitionLink() == null);
+	}
+
+	public boolean isOPDSSearchDir()
+	{
+		return isOPDSDir() && pathname!=null && pathname.startsWith(OPDS_DIR_PREFIX+"search:");
 	}
 	
 	public boolean isOPDSBook()

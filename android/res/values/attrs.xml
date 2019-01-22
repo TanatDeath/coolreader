@@ -208,6 +208,7 @@
     <attr name="attr_cr3_toc_item_expanded" format="reference" />
     <attr name="attr_cr3_toc_item_normal" format="reference" />
     <attr name="attr_ic_media_play" format="reference" />
+    <attr name="attr_ic_media_play_ell" format="reference" />
     <attr name="attr_ic_media_pause" format="reference" />
     <attr name="attr_ic_media_rew" format="reference" />
     <attr name="attr_ic_media_ff" format="reference" />

@@ -16,7 +16,7 @@ public abstract class BaseDB {
 
 	public static final Logger log = L.create("bdb");
 	public static final Logger vlog = L.create("bdb", Log.INFO);
-	
+
 	protected SQLiteDatabase mDB;
 	private File mFileName;
 	private boolean restoredFromBackup;
@@ -89,66 +89,81 @@ public abstract class BaseDB {
 	protected abstract boolean upgradeSchema();
 
 	protected abstract String dbFileName();
-	
+
 	private SQLiteDatabase openDB(File dbFile) {
 		restoredFromBackup = false;
 		SQLiteDatabase db = null;
 		try {
 			db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+			db.rawQuery("PRAGMA synchronous=3", null);
+			db.rawQuery("PRAGMA journal_mode = DELETE", null);
 			return db;
 		} catch (SQLiteException e) {
-			log.e("Error while opening DB " + dbFile.getAbsolutePath());
+			log.e("Error while opening DB " + dbFile.getAbsolutePath() + ". " + e.getMessage());
 			Utils.moveCorruptedFileToBackup(dbFile);
 			restoredFromBackup = Utils.restoreFromBackup(dbFile);
 			try {
 				db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+				db.rawQuery("PRAGMA synchronous=3", null);
+				db.rawQuery("PRAGMA journal_mode = DELETE", null);
 				return db;
 			} catch (SQLiteException ee) {
-				log.e("Error while opening DB " + dbFile.getAbsolutePath());
+				log.e("Error while opening DB " + dbFile.getAbsolutePath() + ". " + e.getMessage());
 			}
 		}
 		return null;
 	}
 
-	public void execSQLIgnoreErrors( String... sqls )
-	{
-		for ( String sql : sqls ) {
+	public void execSQLIgnoreErrors(String... sqls) {
+		boolean bDML = false;
+		for (String sql : sqls) {
 			try {
+				if (
+						(sql.toUpperCase().contains("UPDATE")) ||
+								(sql.toUpperCase().contains("INSERT")) ||
+								(sql.toUpperCase().contains("DELETE"))
+						) bDML = true;
 				mDB.execSQL(sql);
-			} catch ( SQLException e ) {
+			} catch (SQLException e) {
 				// ignore
 				Log.w("cr3db", "query failed, ignoring: " + sql);
 			}
 		}
+		if (bDML) flushAndTransaction();
 	}
-	
+
 	protected void ensureOpened() {
 		if (!isOpened())
 			throw new DBRuntimeException("DB is not opened");
 	}
 
-	public void execSQL( String... sqls )
-	{
+	public void execSQL(String... sqls) {
 		ensureOpened();
-		for ( String sql : sqls ) {
-			try { 
+		boolean bDML = false;
+		for (String sql : sqls) {
+			try {
+				if (
+						(sql.toUpperCase().contains("UPDATE")) ||
+								(sql.toUpperCase().contains("INSERT")) ||
+								(sql.toUpperCase().contains("DELETE"))
+						) bDML = true;
 				mDB.execSQL(sql);
-			} catch ( SQLException e ) {
+			} catch (SQLException e) {
 				// ignore
 				Log.w("cr3", "query failed: " + sql);
 				throw e;
 			}
 		}
+		if (bDML) flushAndTransaction();
 	}
 
-	public Long longQuery( String sql )
-	{
+	public Long longQuery(String sql) {
 		ensureOpened();
 		SQLiteStatement stmt = null;
 		try {
 			stmt = mDB.compileStatement(sql);
 			return stmt.simpleQueryForLong();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			// not found or error
 			return null;
 		} finally {
@@ -156,15 +171,14 @@ public abstract class BaseDB {
 				stmt.close();
 		}
 	}
-	
-	public String stringQuery( String sql )
-	{
+
+	public String stringQuery(String sql) {
 		ensureOpened();
 		SQLiteStatement stmt = null;
 		try {
 			stmt = mDB.compileStatement(sql);
 			return stmt.simpleQueryForString();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			// not found or error
 			return null;
 		} finally {
@@ -172,20 +186,20 @@ public abstract class BaseDB {
 				stmt.close();
 		}
 	}
-	
+
 	public static String quoteSqlString(String src) {
 		if (src == null)
 			return "null";
 		String s = src.replaceAll("\\'", "\\'\\'");
 		return "'" + s + "'";
 	}
-	
+
 	public void clearCaches() {
 		// override it
 	}
 
 	private boolean changed = false;
-	
+
 	/**
 	 * Begin transaction, if not yet started, for changes.
 	 */
@@ -235,5 +249,18 @@ public abstract class BaseDB {
 			}
 			mDB.endTransaction();
 		}
+	}
+
+	public void flushAndTransaction() {
+		boolean bNeedStart = false;
+		if (mDB != null && mDB.inTransaction()) {
+			mDB.setTransactionSuccessful();
+			bNeedStart = true;
+			log.i("flush: committing changes");
+		} else {
+			log.i("flush: rolling back changes");
+		}
+		mDB.endTransaction();
+		if (bNeedStart) mDB.beginTransaction();
 	}
 }

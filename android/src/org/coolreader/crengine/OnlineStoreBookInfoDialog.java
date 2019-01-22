@@ -330,12 +330,13 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
                         @Override
                         public void onBookInfoLoaded(BookInfo bookInfo) {
                             item.setReadingState(FileInfo.STATE_TO_READ);
-                            BookInfo bi = new BookInfo(item);
-                            mActivity.getDB().saveBookInfo(bi);
+							BookInfo bi = new BookInfo(item);
+                            mActivity.getDB().	saveBookInfo(bi);
                             mActivity.getDB().flush();
                             if (bookInfo.getFileInfo() != null) {
                                 bookInfo.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
                             }
+							mActivity.showToast(item.pathname+" is marked as 'to read'");
                         }
                     });
                 }

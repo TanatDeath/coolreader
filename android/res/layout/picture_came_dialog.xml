@@ -67,49 +67,89 @@
 							android:layout_width="0dip"
 							android:layout_weight="2"
 							android:layout_height="wrap_content">
-							<Button
-								android:id="@+id/ib_copy_to_texture"
-								android:layout_width="fill_parent"
+							<TextView
+								android:id="@+id/lbl_this_is"
+								style="@style/TextAppearance.Medium"
+								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:layout_marginBottom="2dip"
-								android:drawableLeft="?attr/attr_icons8_texture"
-                                android:tag="tint"
-								android:contentDescription="@null"
-								android:text="@string/pic_copy_texture" />
-							<Button
-								android:id="@+id/ib_copy_to_texture_act"
-								android:layout_width="fill_parent"
+								android:layout_margin="5dip"
+								android:singleLine="true"
+								android:textColor="?attr/colorIcon"
+								android:text="@string/pic_came_this_is" />
+							<TableLayout
+								android:id="@+id/tl_pic_type"
+								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
-								android:layout_marginBottom="2dip"
-								android:drawableLeft="?attr/attr_icons8_texture"
-                                android:tag="tint"
-								android:contentDescription="@null"
-								android:text="@string/pic_copy_texture_activate" />
-							<Button
-								android:id="@+id/ib_copy_to_background"
-								android:layout_width="fill_parent"
+								android:stretchColumns="1"
+								android:orientation="vertical">
+								<TableRow
+									android:layout_weight="1"
+									>
+									<Button
+										android:id="@+id/ib_texture"
+										android:layout_width="0dip"
+										android:layout_weight="1"
+										android:layout_height="fill_parent"
+										android:layout_marginBottom="2dip"
+										android:tag="tint"
+										android:contentDescription="@null"
+										android:text="@string/pic_came_texture" />
+									<Button
+										android:id="@+id/ib_background"
+										android:layout_width="0dip"
+										android:layout_weight="1"
+										android:layout_height="fill_parent"
+										android:layout_marginBottom="2dip"
+										android:tag="tint"
+										android:contentDescription="@null"
+										android:text="@string/pic_came_background" />
+								</TableRow>
+							</TableLayout>
+							<TextView
+								android:id="@+id/lbl_do_an_action"
+								style="@style/TextAppearance.Medium"
+								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:layout_marginBottom="2dip"
-								android:drawableLeft="?attr/attr_icons8_texture"
-                                                                android:tag="tint"
-								android:contentDescription="@null"
-								android:text="@string/pic_copy_background" />
-							<Button
-								android:id="@+id/ib_copy_to_background_act"
-								android:layout_width="fill_parent"
+								android:layout_margin="5dip"
+								android:singleLine="true"
+								android:textColor="?attr/colorIcon"
+								android:text="@string/pic_do_an_action" />
+							<TableLayout
+								android:id="@+id/tl_pic_apply"
+								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
-								android:layout_marginBottom="2dip"
-								android:drawableLeft="?attr/attr_icons8_texture"
-                                                                android:tag="tint"
-								android:contentDescription="@null"
-								android:text="@string/pic_copy_background_activate" />
+								android:stretchColumns="1"
+								android:orientation="vertical">
+								<TableRow
+									android:layout_weight="1"
+									>
+									<Button
+										android:id="@+id/ib_copy"
+										android:layout_width="0dip"
+										android:layout_weight="1"
+										android:layout_height="fill_parent"
+										android:layout_marginBottom="2dip"
+										android:tag="tint"
+										android:contentDescription="@null"
+										android:text="@string/pic_copy" />
+									<Button
+										android:id="@+id/ib_copy_activate"
+										android:layout_width="0dip"
+										android:layout_weight="1"
+										android:layout_height="fill_parent"
+										android:layout_marginBottom="2dip"
+										android:tag="tint"
+										android:contentDescription="@null"
+										android:text="@string/pic_copy_activate" />
+								</TableRow>
+							</TableLayout>
+
 							<Button
 								android:id="@+id/ib_save_for_later"
 								android:layout_width="fill_parent"
 								android:layout_height="wrap_content"
 								android:layout_marginBottom="2dip"
-								android:drawableLeft="?attr/attr_icons8_texture"
-                                android:tag="tint"
+								android:tag="tint"
 								android:contentDescription="@null"
 								android:text="@string/pic_remember_for_later" />
 						</LinearLayout>
