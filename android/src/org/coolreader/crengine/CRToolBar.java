@@ -502,6 +502,11 @@ public class CRToolBar extends ViewGroup {
 				ib.setImageBitmap(bmpWithText);
 			}
 		}
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.isTintedIcons, R.attr.colorIcon});
+		int isTintedIcons = a.getInt(0, 0);
+		boolean nghtMode = nightMode && (isTintedIcons == 1);
+		a.recycle();
 		if ((icId!=0)||(item == null)) {
 			if (this.grayIcons) {
 				Bitmap bmpGrayscale = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
@@ -512,13 +517,16 @@ public class CRToolBar extends ViewGroup {
 				ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
 				paint.setColorFilter(f);
 				c.drawBitmap(bitmap, 0, 0, paint);
-				ib.setImageBitmap(bmpGrayscale);
+				if (nghtMode) ib.setImageBitmap(InverseBitmap(bmpGrayscale));
+				else ib.setImageBitmap(bmpGrayscale);
 			} else if (this.invIcons) {
-				ib.setImageBitmap(InverseBitmap(bitmap));
+				if (nghtMode) ib.setImageBitmap(bitmap);
+				else ib.setImageBitmap(InverseBitmap(bitmap));
 				//activity.tintViewIcons(ib,true);
 			} else
 				{
-					ib.setImageBitmap(bitmap);
+					if (nghtMode) ib.setImageBitmap(InverseBitmap(bitmap));
+					else ib.setImageBitmap(bitmap);
 					activity.tintViewIcons(ib,true);
 				}
 		}

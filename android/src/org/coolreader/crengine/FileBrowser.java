@@ -17,6 +17,9 @@ import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.*;
+
+import com.google.android.gms.common.util.IOUtils;
+
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
@@ -28,7 +31,9 @@ import org.coolreader.plugins.*;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,6 +52,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	History mHistory;
 	ListView mListView;
 	ArrayList<FileInfo> mFileSystemFolders;
+	ArrayList<FileInfo> mfavFolders;
 	ArrayList<String> mOnlyFSFolders;
 	HashMap<Long, String> mFileSystemFoldersH;
 
@@ -62,6 +68,20 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 		});
 		mActivity.contentView.showContextMenu();
+	}
+
+	private boolean contains(ArrayList<FileInfo> fiA, String s) {
+		for (FileInfo fi: fiA) {
+			if (fi.pathname.contains(s)) return true;
+		}
+		return false;
+	}
+
+	private boolean containsEq(ArrayList<FileInfo> fiA, String s) {
+		for (FileInfo fi: fiA) {
+			if (fi.pathname.equals(s)) return true;
+		}
+		return false;
 	}
 	
 	private class FileBrowserListView extends BaseListView {
@@ -275,9 +295,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		Services.getFileSystemFolders().loadFavoriteFolders(mActivity.getDB());
 		ArrayList<FileInfo> favFolders = new ArrayList<FileInfo>();
 		ArrayList<String> favFoldersS = new ArrayList<String>();
-		favFolders = Services.getFileSystemFolders().getFavoriteFolders();
-		if (favFolders!=null)
-			for (FileInfo fi: favFolders) {
+		this.mfavFolders = Services.getFileSystemFolders().getFavoriteFolders();
+		if (this.mfavFolders!=null)
+			for (FileInfo fi: this.mfavFolders) {
 				favFoldersS.add(fi.pathname);
 			}
 		this.mFileSystemFolders = Services.getFileSystemFolders().getFileSystemFolders();
@@ -401,6 +421,33 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			return true;
 		case R.id.book_opds_root:
 			showOPDSRootDirectory();
+			return true;
+		case R.id.mi_opds_fav:
+			if (selectedItem.isOPDSDir()) {
+				if (!selectedItem.isFav) {
+					addToFavorites(selectedItem);
+					selectedItem.isFav = true;
+					boolean bExists = false;
+					for (FileInfo fiF: mfavFolders)
+						if (fiF.pathname.equals(selectedItem.pathname)) {
+							bExists = true;
+							break;
+						}
+					if (!bExists) mfavFolders.add(selectedItem);
+				} else {
+					FileInfo fi = new FileInfo(selectedItem);
+					Services.getFileSystemFolders().removeFavoriteFolder(mActivity.getDB(), fi);
+					selectedItem.isFav = false;
+					for (FileInfo fi2 : mfavFolders) {
+						if (fi2.pathname.equals(selectedItem.pathname)) {
+							mfavFolders.remove(fi2);
+							break;
+						}
+					}
+				}
+			}
+			currentListAdapter = new FileListAdapter();
+			mListView.setAdapter(currentListAdapter);
 			return true;
 		case R.id.book_root:
 			showRootDirectory();
@@ -916,6 +963,20 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		});
 		dlg.onSelect();
 	}
+
+	private static boolean isArchive(File f) {
+		int fileSignature = 0;
+		RandomAccessFile raf = null;
+		try {
+			raf = new RandomAccessFile(f, "r");
+			fileSignature = raf.readInt();
+		} catch (IOException e) {
+			// handle if you like
+		} finally {
+			IOUtils.closeQuietly(raf);
+		}
+		return fileSignature == 0x504B0304 || fileSignature == 0x504B0506 || fileSignature == 0x504B0708;
+	}
 	
 	public void showOPDSDir( final FileInfo fileOrDir, final FileInfo itemToSelect, final String annot ) {
 		
@@ -965,6 +1026,16 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							file.parent = fileOrDir;
 							items.add(file);
 						}
+						ArrayList<FileInfo> itemsF = new ArrayList<FileInfo>();
+						for (FileInfo fi: mfavFolders) {
+							if ((fi.isOPDSDir())&&(fileOrDir.parent == null)) {
+								FileInfo fi2 = new FileInfo(fi);
+								fi2.parent = fileOrDir;
+								fi2.isFav = true;
+								if (fi2.pathname.startsWith(fileOrDir.pathname)) itemsF.add(fi2);
+							}
+						}
+						ArrayList<FileInfo> itemsE = new ArrayList<FileInfo>();
 						for ( EntryInfo entry : entries ) {
 							OPDSUtil.LinkInfo acquisition = entry.getBestAcquisitionLink();
 							if ( acquisition!=null ) {
@@ -980,7 +1051,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								file.parent = fileOrDir;
 								file.tag = entry;
 								file.links = entry.links;
-								items.add(file);
+								itemsE.add(file);
 							} else if ( entry.link.type!=null && entry.link.type.startsWith("application/atom+xml") ) {
 								FileInfo file = new FileInfo();
 								file.isDirectory = true;
@@ -992,8 +1063,34 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								file.tag = entry;
 								file.links = entry.links;
 								file.parent = fileOrDir;
-								items.add(file);
+								itemsE.add(file);
 							}
+						}
+						for (FileInfo fiF: itemsF) {
+							boolean bExists = false;
+							for (FileInfo fiE: itemsE) {
+								if (fiE.pathname.equals(fiF.pathname)) {
+									bExists = true;
+									break;
+								}
+							}
+							for (FileInfo fi: items) {
+								if (fi.pathname.equals(fiF.pathname)) {
+									bExists = true;
+									break;
+								}
+							}
+							if (!bExists) items.add(fiF);
+						}
+						for (FileInfo fiE: itemsE) {
+							boolean bExists = false;
+							for (FileInfo fi: items) {
+								if (fi.pathname.equals(fiE.pathname)) {
+									bExists = true;
+									break;
+								}
+							}
+							if (!bExists) items.add(fiE);
 						}
 						if ( items.size()>0 ) {
 							fileOrDir.replaceItems(items);
@@ -1061,30 +1158,80 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						mEngine.hideProgress();
 						//mActivity.showToast("Download is finished");
 						FileInfo fi = new FileInfo(file);
+						boolean isArch = isArchive(file);
 						FileInfo dir = mScanner.findParent(fi, downloadDir);
 						if ( dir==null )
 							dir = downloadDir;
+						String sPath = file.getAbsolutePath();
+						String sPathZ = sPath;
+						File fileZ = new File(sPath);
+						if (isArch) {
+							int i = 0;
+							sPathZ = sPath + ".zip";
+							fileZ = new File(sPathZ);
+							boolean bExists = fileZ.exists();
+							while (bExists) {
+								i++;
+								sPathZ = sPath + " ("+i+").zip";
+								fileZ = new File(sPathZ);
+								bExists = fileZ.exists();
+							}
+							file.renameTo(fileZ);
+						}
 						mScanner.listDirectory(dir);
-						final FileInfo item = dir.findItemByPathName(file.getAbsolutePath());
-						if ((item!=null) && (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false))) {
-							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
-								@Override
-								public void onBookInfoLoaded(BookInfo bookInfo) {
-									item.setReadingState(FileInfo.STATE_TO_READ);
-									BookInfo bi = new BookInfo(item);
-									mActivity.getDB().saveBookInfo(bi);
-									mActivity.getDB().flush();
-									if (bookInfo.getFileInfo() != null) {
-										bookInfo.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
-									}
-									mActivity.showToast(item.pathname+" is marked as 'to read'");
-								}
-							});
+						final FileInfo item = dir.findItemByPathName(sPathZ);
+						BackgroundThread.ensureGUI();
+						if (item.getTitle() == null) {
+							if (mEngine.scanBookProperties(item))
+								mActivity.showToast("title: "+item.title);
+							else
+								mActivity.showToast("unsucc");
+							if (item.getTitle() != null) {
+								mActivity.getDB().saveBookInfo(new BookInfo(item));
+								mActivity.getDB().flush();
+							}
 						}
 						if ( item!=null ) {
-							//mActivity.loadDocument(item);
-							if (StrUtils.isEmptyStr(item.annotation)) item.annotation = annot;
-							mActivity.showBookInfo(new BookInfo(item), BookInfoDialog.OPDS_FINAL_INFO);
+							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item,
+								new History.BookInfoLoadedCallack() {
+									@Override
+									public void onBookInfoLoaded(final BookInfo bookInfo) {
+										BookInfo bif2 = bookInfo;
+										if (bif2 == null) bif2 = new BookInfo(item);
+										final BookInfo bif = bif2;
+										if (StrUtils.isEmptyStr(bif.getFileInfo().annotation))
+											bif.getFileInfo().setAnnotation(annot);
+										if (bif.getFileInfo().getTitle() != null) {
+											if (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false)) {
+												bif.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
+												mActivity.showToast(item.pathname+
+														mActivity.getString(R.string.mi_opds_mark_as_toread));
+											}
+											mActivity.getDB().saveBookInfo(bif);
+											mActivity.getDB().flush();
+										}
+										FileInfo dir1 =bif.getFileInfo().parent;
+										if (dir1 == null) {
+											dir1 = mScanner.findParent(bif.getFileInfo(), downloadDir);
+											bif.getFileInfo().parent = dir1;
+										}
+										if (dir1!=null) {
+											final FileInfo dir2 = dir1;
+											bif.getFileInfo().setFileProperties(bif.getFileInfo());
+											dir2.setFile(bif.getFileInfo());
+											mActivity.directoryUpdated(dir2, bif.getFileInfo());
+//											mActivity.directoryUpdated(dir2);
+//											mScanner.scanDirectory(mActivity.getDB(), dir2, new Runnable() {
+//												public void run() {
+//													if (dir2.allowSorting())
+//														dir2.sort(mSortOrder);
+//													//showDirectoryInternal(dir, file);
+//												}
+//											}, false, new Scanner.ScanControl() );
+										}
+										mActivity.showBookInfo(bif, BookInfoDialog.OPDS_FINAL_INFO);
+									}
+								});
 						}
 						else
 							mActivity.loadDocument(fi);
@@ -1323,26 +1470,32 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	public void scanCurrentDirectoryRecursive() {
 		if (currDirectory == null)
 			return;
-		log.i("scanCurrentDirectoryRecursive started");
-		final Scanner.ScanControl control = new Scanner.ScanControl(); 
-		final ProgressDialog dlg = ProgressDialog.show(mActivity, 
-				mActivity.getString(R.string.dlg_scan_title), 
-				mActivity.getString(R.string.dlg_scan_message),
-				true, true, new OnCancelListener() {
-					@Override
-					public void onCancel(DialogInterface dialog) {
-						log.i("scanCurrentDirectoryRecursive : stop handler");
-						control.stop();
-					}
-		});
-		mScanner.scanDirectory(mActivity.getDB(), currDirectory, new Runnable() {
-			@Override
-			public void run() {
-				log.i("scanCurrentDirectoryRecursive : finish handler");
-				if ( dlg.isShowing() )
-					dlg.dismiss();
-			}
-		}, true, control); 
+		if (currDirectory.isOPDSDir()) {
+			currDirectory.dirs = null;
+			currDirectory.files = null;
+			showOPDSDir(currDirectory, null, "");
+		} else {
+			log.i("scanCurrentDirectoryRecursive started");
+			final Scanner.ScanControl control = new Scanner.ScanControl();
+			final ProgressDialog dlg = ProgressDialog.show(mActivity,
+					mActivity.getString(R.string.dlg_scan_title),
+					mActivity.getString(R.string.dlg_scan_message),
+					true, true, new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface dialog) {
+							log.i("scanCurrentDirectoryRecursive : stop handler");
+							control.stop();
+						}
+					});
+			mScanner.scanDirectory(mActivity.getDB(), currDirectory, new Runnable() {
+				@Override
+				public void run() {
+					log.i("scanCurrentDirectoryRecursive : finish handler");
+					if (dlg.isShowing())
+						dlg.dismiss();
+				}
+			}, true, control);
+		}
 	}
 
 
@@ -1539,9 +1692,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 				if (imageFavFolder!=null) {
                     imageFavFolder.setVisibility(VISIBLE);
-					//ArrayList<FileInfo> ff = Services.getFileSystemFolders().getFavoriteFolders();
+                    //ArrayList<FileInfo> ff = Services.getFileSystemFolders().getFavoriteFolders();
 					boolean isFav = false;
-					if (mOnlyFSFolders.contains(item.pathname)) {
+					if
+					(
+						(mOnlyFSFolders.contains(item.pathname))
+						||
+						(containsEq(mfavFolders, item.pathname))
+					)
+					{
 						imageFavFolder.setImageResource(
 								Utils.resolveResourceIdByAttr(mActivity,
 										R.attr.attr_icons8_fav_star_filled, R.drawable.icons8_fav_star_filled));
@@ -1552,20 +1711,21 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 										R.attr.attr_icons8_fav_star, R.drawable.icons8_fav_star));
                         mActivity.tintViewIcons(imageFavFolder,true);
 					}
-					if (item.isOPDSDir()||item.isOPDSRoot()) imageFavFolder.setVisibility(INVISIBLE);
-					item.isFav = false;
+					if (item.pathname.startsWith(FileInfo.OPDS_DIR_PREFIX+"search:")) imageFavFolder.setVisibility(INVISIBLE);
+					if (!item.isOPDSDir()) item.isFav = false;
 					Long id = -1L;
-					if (mFileSystemFoldersH!=null)
-						for (Map.Entry<Long, String> entry : mFileSystemFoldersH.entrySet()) {
-							if (entry.getValue().equals(item.pathname)) {
-								id = entry.getKey();
-								item.isFav = true;
-								imageFavFolder.setImageResource(
-										Utils.resolveResourceIdByAttr(mActivity,
-												R.attr.attr_icons8_fav_star_filled, R.drawable.icons8_fav_star_filled));
-                                mActivity.tintViewIcons(imageFavFolder,true);
+					if (!item.isOPDSDir())
+						if (mFileSystemFoldersH!=null)
+							for (Map.Entry<Long, String> entry : mFileSystemFoldersH.entrySet()) {
+								if (entry.getValue().equals(item.pathname)) {
+									id = entry.getKey();
+									item.isFav = true;
+									imageFavFolder.setImageResource(
+											Utils.resolveResourceIdByAttr(mActivity,
+													R.attr.attr_icons8_fav_star_filled, R.drawable.icons8_fav_star_filled));
+									mActivity.tintViewIcons(imageFavFolder,true);
+								}
 							}
-						}
 					final Long id2 = id;
 					imageFavFolder.setOnClickListener(new OnClickListener() {
 
@@ -1573,17 +1733,36 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						public void onClick(View v) {
 							if ( item!=null ) {
 								selectedItem = item;
+								boolean bCont = containsEq(mfavFolders, item.pathname);
+								bCont = bCont && item.isOPDSDir();
 								if (!mOnlyFSFolders.contains(item.pathname)) {
-									if (!item.isFav) {
+									if (!(item.isFav||bCont)) {
 										addToFavorites(selectedItem);
 										item.isFav = true;
-										mFileSystemFoldersH.put(item.id, item.pathname);
+										if (!item.isOPDSDir()) mFileSystemFoldersH.put(item.id, item.pathname);
+										if (item.isOPDSDir()) {
+											boolean bExists = false;
+											for (FileInfo fiF: mfavFolders)
+												if (fiF.pathname.equals(item.pathname)) {
+													bExists = true;
+													break;
+												}
+											if (!bExists) mfavFolders.add(item);
+										}
 									} else {
 										FileInfo fi = new FileInfo(item);
-										fi.id = id2;
+										if (!item.isOPDSDir()) fi.id = id2;
 										Services.getFileSystemFolders().removeFavoriteFolder(mActivity.getDB(), fi);
 										item.isFav = false;
-										mFileSystemFoldersH.remove(id2);
+										if (!item.isOPDSDir()) mFileSystemFoldersH.remove(id2);
+										else {
+											for (FileInfo fi2: mfavFolders) {
+												if (fi2.pathname.equals(item.pathname)) {
+													mfavFolders.remove(fi2);
+													break;
+												}
+											}
+										}
 									}
 									currentListAdapter = new FileListAdapter();
 									mListView.setAdapter(currentListAdapter);

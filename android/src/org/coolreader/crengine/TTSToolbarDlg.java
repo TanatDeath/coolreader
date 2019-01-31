@@ -310,8 +310,23 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				avgWordTimeSpanThis = ((double)curTimeSpan) / dWordCountThis;
 			}
 			if ((avgWordTimeSpan>0)&&(avgWordTimeSpanThis>0)) {
-				if ((avgWordTimeSpanThis>avgWordTimeSpan * 5)&&(isSpeaking)) CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-						"possibly tts unexpectedly stopped...");
+                if ((avgWordTimeSpanThis > avgWordTimeSpan * 7) && (isSpeaking) && (iSentenceCount > 20)) {
+                    CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
+                            "possibly tts unexpectedly stopped...");
+                    mCoolReader.showToast("Trying to force restart TTS");
+                    if (currentSelection != null) {
+                        if (isSpeaking) {
+                            if (isAlwaysStop) {
+                                mTTS.stop();
+                                CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
+                                        "stop tts between reading of sentences");
+                            }
+                            say(currentSelection);
+                        }
+                    } else {
+                        moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
+                    }
+                }
 			}
 			CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
 					"timer event, avgWordTimeSpan = "+avgWordTimeSpan+", avgWordTimeSpanThis = "+avgWordTimeSpanThis+

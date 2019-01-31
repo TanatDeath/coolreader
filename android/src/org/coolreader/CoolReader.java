@@ -1176,13 +1176,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	{
 		loadDocument(item, null);
 	}
-	
+
 	public void loadDocument( FileInfo item, Runnable callback )
 	{
 		log.d("Activities.loadDocument(" + item.pathname + ")");
 		loadDocument(item.getPathName(), callback);
 	}
-	
+
 	public void showOpenedBook()
 	{
 		showReader();

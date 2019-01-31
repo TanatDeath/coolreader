@@ -94,6 +94,7 @@ public class FileSystemFolders extends FileInfoChangeSource {
                 if(findFavoriteFolder(folder) != -1)
                     return;
                 FileInfo dbFolder = new FileInfo(folder);
+                dbFolder.parent = folder.parent;
                 int maxPos = 0;
                 if(!favoriteFolders.isEmpty()){
                     FileInfo lastFolder = favoriteFolders.get(favoriteFolders.size()-1);

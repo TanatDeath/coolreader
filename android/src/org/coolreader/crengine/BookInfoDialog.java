@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -51,6 +52,15 @@ public class BookInfoDialog extends BaseDialog {
 	private String sAuthors = "";
 	private String sBookTitle = "";
 	private String sFileName = "";
+	ImageButton btnBack;
+	ImageButton btnOpenBook;
+	ImageButton btnBookFolderOpen;
+	ImageButton btnBookShortcut;
+	ImageButton btnBookEdit;
+	Button btnMarkToRead;
+	ImageButton btnBookDownload;
+	boolean bMarkToRead;
+
 	private Map<String, Integer> mLabelMap;
 	private void fillMap() {
 		mLabelMap = new HashMap<String, Integer>();
@@ -174,39 +184,19 @@ public class BookInfoDialog extends BaseDialog {
 		table.addView(tableRow);
 	}
 
-	@Override
-	protected void onPositiveButtonClick() {
-		CoolReader cr = (CoolReader)mCoolReader;
-		if (mBookInfo!=null) {
-			FileInfo fi = mBookInfo.getFileInfo();
-			cr.createBookShortcut(fi,mBookCover);
-		} else cr.showToast(R.string.book_info_action_unavailable);
-		//super.onPositiveButtonClick();
-	}
-
-	@Override
-	protected void onThirdButtonClick() {
-		CoolReader cr = (CoolReader)mCoolReader;
-		if (mBookInfo!=null) {
-			FileInfo fi = mBookInfo.getFileInfo();
-			FileInfo dfi = fi.parent;
-			if (dfi == null) {
-				dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-			}
-			if (dfi != null) {
-				cr.editBookInfo(dfi, fi);
-				dismiss();
-			}
-		} else cr.showToast(R.string.book_info_action_unavailable);
-	}
-
-	@Override
-	protected void onNegativeButtonClick() {
-		super.onNegativeButtonClick();
-//		CoolReader cr = (CoolReader)mCoolReader;
-//		FileInfo fi = mBookInfo.getFileInfo();
-//		//cr.loadDocument(fi);
-		//super.onPositiveButtonClick();
+	private void paintMarkButton() {
+		int colorGrayC;
+		int colorBlue;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorBlue = a.getColor(1, Color.BLUE);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (bMarkToRead) btnMarkToRead.setBackgroundColor(colorGrayCT2);
+		else btnMarkToRead.setBackgroundColor(colorGrayCT);
+		btnMarkToRead.setTextColor(colorBlue);
 	}
 
 	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
@@ -219,14 +209,29 @@ public class BookInfoDialog extends BaseDialog {
 		protected Bitmap doInBackground(String... urls) {
 			String urldisplay = urls[0];
 			Bitmap mIcon11 = null;
+			Bitmap resizedBitmap = null;
 			try {
 				InputStream in = new java.net.URL(urldisplay).openStream();
 				mIcon11 = BitmapFactory.decodeStream(in);
+
+				final int maxSize = 200;
+				int outWidth;
+				int outHeight;
+				int inWidth = mIcon11.getWidth();
+				int inHeight = mIcon11.getHeight();
+				if(inWidth > inHeight){
+					outWidth = maxSize;
+					outHeight = (inHeight * maxSize) / inWidth;
+				} else {
+					outHeight = maxSize;
+					outWidth = (inWidth * maxSize) / inHeight;
+				}
+				resizedBitmap = Bitmap.createScaledBitmap(mIcon11, outWidth, outHeight, false);
 			} catch (Exception e) {
 				Log.e("Error", e.getMessage());
 				e.printStackTrace();
 			}
-			return mIcon11;
+			return resizedBitmap;
 		}
 
 		protected void onPostExecute(Bitmap result) {
@@ -237,21 +242,12 @@ public class BookInfoDialog extends BaseDialog {
 	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, final String annot,
 						  int actionType, FileInfo fiOPDS, FileBrowser fb)
 	{
-		super("BookInfoDialog", activity, "", true, false);
+		super("BookInfoDialog", activity, null, false, false);
 		mCoolReader = activity;
 		mBookInfo = bi;
 		mActionType = actionType;
 		mFileInfoOPDS = fiOPDS;
 		mFileBrowser = fb;
-		setNegativeButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_prev_drawable, R.drawable.cr3_button_prev)
-				, R.string.action_go_back);
-		setThirdButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_book_edit, R.drawable.icons8_book_edit)
-				, R.string.btn_edit_info);
-		setPositiveButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_book_link, R.drawable.icons8_book_link),
-				R.string.mi_book_shortcut);
 		FileInfo file = null;
 		if (mBookInfo!=null)
 			file = mBookInfo.getFileInfo();
@@ -259,7 +255,7 @@ public class BookInfoDialog extends BaseDialog {
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
-		setTitle(mCoolReader.getString(R.string.dlg_book_info));
+		//setTitle(mCoolReader.getString(R.string.dlg_book_info));
 		fillMap();
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.book_info_dialog, null);
@@ -276,6 +272,94 @@ public class BookInfoDialog extends BaseDialog {
 				} else cr.showToast(R.string.book_info_action_unavailable);
 			}
 		});
+		btnBack = ((ImageButton)view.findViewById(R.id.base_dlg_btn_back));
+		btnBack.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onNegativeButtonClick();
+			}
+		});
+
+		btnOpenBook = ((ImageButton)view.findViewById(R.id.btn_open_book));
+		btnOpenBook.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				CoolReader cr = (CoolReader)mCoolReader;
+				if (mBookInfo!=null) {
+					FileInfo fi = mBookInfo.getFileInfo();
+					cr.loadDocument(fi);
+					dismiss();
+				} else cr.showToast(R.string.book_info_action_unavailable);
+			}
+		});
+
+		btnBookFolderOpen = ((ImageButton)view.findViewById(R.id.book_folder_open));
+
+			btnBookFolderOpen.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				CoolReader cr = (CoolReader)mCoolReader;
+				cr.showDirectory(mBookInfo.getFileInfo());
+				dismiss();
+			}
+		});
+
+		btnBookShortcut = ((ImageButton)view.findViewById(R.id.book_create_shortcut));
+
+		btnBookShortcut.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			CoolReader cr = (CoolReader)mCoolReader;
+			if (mBookInfo!=null) {
+				FileInfo fi = mBookInfo.getFileInfo();
+				cr.createBookShortcut(fi,mBookCover);
+			} else cr.showToast(R.string.book_info_action_unavailable);
+			}
+		});
+
+		btnBookEdit = ((ImageButton)view.findViewById(R.id.book_edit));
+		btnBookEdit.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			CoolReader cr = (CoolReader) mCoolReader;
+			if (mBookInfo!=null) {
+				FileInfo fi = mBookInfo.getFileInfo();
+				FileInfo dfi = fi.parent;
+				if (dfi == null) {
+					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+				}
+				if (dfi != null) {
+					cr.editBookInfo(dfi, fi);
+					dismiss();
+				}
+			} else cr.showToast(R.string.book_info_action_unavailable);
+			}
+		});
+
+		btnMarkToRead = ((Button)view.findViewById(R.id.btn_mark_toread));
+		bMarkToRead = activity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false);
+
+		btnMarkToRead.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			bMarkToRead = !bMarkToRead;
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, bMarkToRead?"1":"0");
+			activity.setSettings(props, -1, true);
+			paintMarkButton();
+			}
+		});
+		paintMarkButton();
+		btnBookDownload = ((ImageButton)view.findViewById(R.id.book_download));
+		final String annot2 = annot;
+		btnBookDownload.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
+				dismiss();
+			}
+		});
 		int w = mWindowSize * 4 / 10;
 		int h = w * 4 / 3;
 		image.setMinimumHeight(h);
@@ -284,27 +368,33 @@ public class BookInfoDialog extends BaseDialog {
 		image.setMaxWidth(w);
 		Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
 		if (file != null) {
-			Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), file, bmp, new CoverpageManager.CoverpageBitmapReadyListener() {
-				@Override
-				public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
-					mBookCover = bitmap;
-					BitmapDrawable drawable = new BitmapDrawable(bitmap);
-					image.setImageDrawable(drawable);
-					if (mFileInfoOPDS!=null) {
-						for (OPDSUtil.LinkInfo link: mFileInfoOPDS.links) {
-							if (link.type.contains("image")) {
-								new DownloadImageTask(image).execute(link.href);
-								break;
-							}
-						}
+			if (mFileInfoOPDS!=null) {
+				String sTitle = StrUtils.getNonEmptyStr(file.title, true);
+				String sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
+				if (StrUtils.isEmptyStr(sTitle))
+					sTitle = StrUtils.stripExtension(file.filename);
+				Bitmap bmp2 = Services.getCoverpageManager().getBookCoverWithTitleBitmap(sTitle, sAuthors,
+					150, 200);
+				image.setImageBitmap(bmp2);
+				for (OPDSUtil.LinkInfo link : mFileInfoOPDS.links) {
+					if (link.type.contains("image")) {
+						new DownloadImageTask(image).execute(link.href);
+						break;
 					}
 				}
-			});
+			} else {
+				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), file, bmp, new CoverpageManager.CoverpageBitmapReadyListener() {
+					@Override
+					public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
+						mBookCover = bitmap;
+						BitmapDrawable drawable = new BitmapDrawable(bitmap);
+						image.setImageDrawable(drawable);
+					}
+				});
+			}
 		}
 		TableLayout table = (TableLayout)view.findViewById(R.id.table);
-		Button btnAction = (Button) view.findViewById(R.id.ib_action);
 		FlowTextView txtAnnot = (FlowTextView) view.findViewById(R.id.lbl_annotation);
-		TextView txtAction = (TextView) view.findViewById(R.id.lbl_action);
 		txtAnnot.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				String text = ((FlowTextView) v).getText().toString();
@@ -329,40 +419,23 @@ public class BookInfoDialog extends BaseDialog {
 		txtAnnot.setTextColor(colorIcon);
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		btnAction.setBackgroundColor(colorGrayCT);
-		btnAction.setTextColor(colorIcon);
 		if (actionType == BOOK_INFO) {
-			txtAction.setText(R.string.book_info_action_book_info);
-			btnAction.setText(R.string.book_info_action_open);
-			btnAction.setVisibility(View.INVISIBLE);
+			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
+			parent.removeView(btnBookDownload);
+			parent.removeView(btnMarkToRead);
 		}
 		if (actionType == OPDS_INFO) {
-			txtAction.setText(R.string.book_info_action_opds_info);
-			btnAction.setText(R.string.book_info_action_download);
-			btnAction.setVisibility(View.VISIBLE);
+			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
+			parent.removeView(btnOpenBook);
+			parent.removeView(btnBookFolderOpen);
+			parent.removeView(btnBookShortcut);
+			parent.removeView(btnBookEdit);
 		}
 		if (actionType == OPDS_FINAL_INFO) {
-			txtAction.setText(R.string.book_info_action_opds_info_final);
-			btnAction.setText(R.string.book_info_action_open);
-			btnAction.setVisibility(View.VISIBLE);
+			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
+			parent.removeView(btnBookDownload);
+			parent.removeView(btnMarkToRead);
 		}
-		final String annot2 = annot;
-		btnAction.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if ((mActionType == BOOK_INFO) || (mActionType == OPDS_FINAL_INFO)) {
-					CoolReader cr = (CoolReader)mCoolReader;
-					FileInfo fi = mBookInfo.getFileInfo();
-					cr.loadDocument(fi);
-					dismiss();
-				}
-				if (mActionType == OPDS_INFO) {
-					if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
-					dismiss();
-				}
-			}
-		});
 		for ( String item : items ) {
 			int p = item.indexOf("=");
 			if ( p>=0 ) {

@@ -288,6 +288,7 @@
     <attr name="attr_icons8_fix_port" format="reference" />
     <attr name="attr_icons8_port_to_landsc" format="reference" />
     <attr name="attr_icons8_landsc_to_port" format="reference" />
+    <attr name="attr_icons8_download_book" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

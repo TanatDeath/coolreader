@@ -369,7 +369,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
-
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -673,6 +673,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -987,6 +988,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1289,6 +1291,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1594,6 +1597,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1899,6 +1903,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2203,6 +2208,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2503,6 +2509,7 @@
         <item name="attr_icons8_fix_port">@drawable/icons8_fix_port</item>
         <item name="attr_icons8_port_to_landsc">@drawable/icons8_port_to_landsc</item>
         <item name="attr_icons8_landsc_to_port">@drawable/icons8_landsc_to_port</item>
+        <item name="attr_icons8_download_book">@drawable/icons8_download_book</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

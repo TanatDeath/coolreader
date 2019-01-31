@@ -14,7 +14,7 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 34;
+	public static final int DB_VERSION = 35;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -154,7 +154,8 @@ public class MainDB extends BaseDB {
                 execSQL("CREATE TABLE IF NOT EXISTS favorite_folders (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "path VARCHAR NOT NULL, " +
-                        "position INTEGER NOT NULL default 0" +
+                        "position INTEGER NOT NULL default 0, " +
+						"filename VARCHAR " +
                         ")");
 			if (currentVersion < 23) {
 			    execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN username VARCHAR DEFAULT NULL");
@@ -255,6 +256,9 @@ public class MainDB extends BaseDB {
 					if (rs != null)
 						rs.close();
 				}
+			}
+			if (currentVersion < 35) {
+				execSQLIgnoreErrors("ALTER TABLE favorite_folders ADD COLUMN filename VARCHAR ");
 			}
 			//==============================================================
 			// add more updates above this line
@@ -730,17 +734,19 @@ public class MainDB extends BaseDB {
         Cursor rs = null;
         ArrayList<FileInfo> list = new ArrayList<FileInfo>();
         try {
-            String sql = "SELECT id, path, position FROM favorite_folders ORDER BY position, path";
+            String sql = "SELECT id, path, position, filename FROM favorite_folders ORDER BY position, path";
             rs = mDB.rawQuery(sql, null);
             if ( rs.moveToFirst() ) {
                 do {
                     Long id = rs.getLong(0);
                     String path = rs.getString(1);
                     int pos = rs.getInt(2);
-                    FileInfo favorite = new FileInfo(path);
+					FileInfo favorite = new FileInfo(path);
                     favorite.id = id;
                     favorite.seriesNumber = pos;
                     favorite.setType(FileInfo.TYPE_NOT_SET);
+                    if (!StrUtils.isEmptyStr(rs.getString(3)))
+                    	favorite.filename = rs.getString(3);
                     list.add(favorite);
                 } while (rs.moveToNext());
             }
@@ -760,10 +766,11 @@ public class MainDB extends BaseDB {
     public void updateFavoriteFolder(FileInfo folder){
         SQLiteStatement stmt = null;
         try {
-            stmt = mDB.compileStatement("UPDATE favorite_folders SET position = ?, path = ? WHERE id = ?");
+            stmt = mDB.compileStatement("UPDATE favorite_folders SET position = ?, path = ?, filename = ? WHERE id = ?");
             stmt.bindLong(1, folder.seriesNumber);
             stmt.bindString(2, folder.pathname);
-            stmt.bindLong(3, folder.id);
+			stmt.bindString(3, folder.filename);
+            stmt.bindLong(4, folder.id);
             stmt.execute();
         } finally {
             if(stmt!= null)
@@ -774,9 +781,19 @@ public class MainDB extends BaseDB {
     public void createFavoritesFolder(FileInfo folder){
         SQLiteStatement stmt = null;
         try {
-            stmt = mDB.compileStatement("INSERT INTO favorite_folders (id, path, position) VALUES (NULL, ?, ?)");
+            stmt = mDB.compileStatement("INSERT INTO favorite_folders (id, path, position, filename) VALUES (NULL, ?, ?, ?)");
             stmt.bindString(1, folder.pathname);
-            stmt.bindLong(2, folder.seriesNumber);
+			stmt.bindLong(2, folder.seriesNumber);
+			String fname = folder.filename;
+			if ((folder.isOPDSDir()) && (folder.parent != null)) {
+				if (folder.parent.parent != null) {
+					fname = fname + " | " + folder.parent.filename;
+					if (folder.parent.parent.parent != null) {
+						fname = fname + " | " + folder.parent.parent.filename;
+					}
+				}
+			}
+			stmt.bindString(3, fname);
             folder.id = stmt.executeInsert();
         } finally {
             if(stmt!= null)

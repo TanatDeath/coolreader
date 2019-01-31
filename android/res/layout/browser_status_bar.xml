@@ -209,30 +209,6 @@
                 />
         </LinearLayout>
         </TableRow>
-        <TableRow>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|left"
-                android:layout_width="0dip" android:layout_weight="1"
-                >
-                <Button
-                    android:id="@+id/btn_mark_toread"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dip"
-                    android:layout_marginBottom="2dip"
-                    android:layout_marginLeft="2dip"
-                    android:layout_marginRight="2dip"
-                    android:layout_weight="1"
-                    android:src="@null"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:textColor="?attr/colorIcon"
-                    android:contentDescription="@string/book_mark_toread"
-                    android:text="@string/book_mark_toread" />
-            </LinearLayout>
-        </TableRow>
         </TableLayout>
 
     </LinearLayout>

@@ -30,6 +30,8 @@ my %ic_smaller_list=(
 );
 
 my %ic_actions_list=(
+        'icons8_download_book.svg' => 'icons8_download_book.png',
+        'icons8_play_ell.svg' => 'icons8_play_ell.png',
         'icons8_disable_toolbar.svg' => 'icons8_disable_toolbar.png',
         'icons8_fix_landsc.svg' => 'icons8_fix_landsc.png',
         'icons8_fix_port.svg' => 'icons8_fix_port.png',

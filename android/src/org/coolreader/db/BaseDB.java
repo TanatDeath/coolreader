@@ -260,7 +260,7 @@ public abstract class BaseDB {
 		} else {
 			log.i("flush: rolling back changes");
 		}
-		mDB.endTransaction();
+		if (mDB.inTransaction()) mDB.endTransaction();
 		if (bNeedStart) mDB.beginTransaction();
 	}
 }

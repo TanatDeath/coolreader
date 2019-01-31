@@ -105,8 +105,8 @@ public class FileInfo {
 	public boolean askedMarkRead = false; // did we ask to mark book as read
 	public boolean askedMarkReading = false; // did we ask to mark book as reading
 	public ArrayList<Integer> arrReadBeg = new ArrayList<Integer>();
-	private ArrayList<FileInfo> files;// files
-	private ArrayList<FileInfo> dirs; // directories
+	public ArrayList<FileInfo> files;// files
+	public ArrayList<FileInfo> dirs; // directories
 	public boolean isFav; // only for display star in file browser
 	public ArrayList<OPDSUtil.LinkInfo> links = new ArrayList<OPDSUtil.LinkInfo>(); // for OPDS entries
 
@@ -283,45 +283,52 @@ public class FileInfo {
 	
 	public FileInfo( String pathName )
 	{
-		String[] parts = splitArcName( pathName );
-		if ( parts[1]!=null ) {
-			// from archive
-			isArchive = true;
-			arcname = parts[1];
-			pathname = parts[0];
-			File f = new File(pathname);
-			filename = f.getName();
-			fileCreateTime = f.lastModified();
-			path = f.getPath();
-			File arc = new File(arcname);
-			if (arc.isFile() && arc.exists()) {
-				arcsize = (int)arc.length();
-				size = arcsize;
-				isArchive = true;
-				try {
-					//ZipFile zip = new ZipFile(new File(arcname));
-					ArrayList<ZipEntry> entries = Services.getEngine().getArchiveItems(arcname);
-					//for ( Enumeration<?> e = zip.entries(); e.hasMoreElements(); ) {
-					for (ZipEntry entry : entries) {
-						String name = entry.getName();
-						
-						if ( !entry.isDirectory() && pathname.equals(name) ) {
-							File itemf = new File(name);
-							filename = itemf.getName();
-							path = itemf.getPath();
-							format = DocumentFormat.byExtension(name);
-							//size = (int)entry.getSize();//plotn - guess this is same as compressed...
-							arcsize = (int)entry.getCompressedSize();
-							createTime = entry.getTime();
-							break;
-						}
-					}
-				} catch ( Exception e ) {
-					Log.e("cr3", "error while reading contents of " + arcname);
-				}
-			}
+		if (pathName.startsWith(FileInfo.OPDS_DIR_PREFIX)) {
+			filename = pathName;
+			path = "";
+			pathname = pathName;
+			isDirectory = true;
 		} else {
-			fromFile(new File(pathName));
+			String[] parts = splitArcName(pathName);
+			if (parts[1] != null) {
+				// from archive
+				isArchive = true;
+				arcname = parts[1];
+				pathname = parts[0];
+				File f = new File(pathname);
+				filename = f.getName();
+				fileCreateTime = f.lastModified();
+				path = f.getPath();
+				File arc = new File(arcname);
+				if (arc.isFile() && arc.exists()) {
+					arcsize = (int) arc.length();
+					size = arcsize;
+					isArchive = true;
+					try {
+						//ZipFile zip = new ZipFile(new File(arcname));
+						ArrayList<ZipEntry> entries = Services.getEngine().getArchiveItems(arcname);
+						//for ( Enumeration<?> e = zip.entries(); e.hasMoreElements(); ) {
+						for (ZipEntry entry : entries) {
+							String name = entry.getName();
+
+							if (!entry.isDirectory() && pathname.equals(name)) {
+								File itemf = new File(name);
+								filename = itemf.getName();
+								path = itemf.getPath();
+								format = DocumentFormat.byExtension(name);
+								//size = (int)entry.getSize();//plotn - guess this is same as compressed...
+								arcsize = (int) entry.getCompressedSize();
+								createTime = entry.getTime();
+								break;
+							}
+						}
+					} catch (Exception e) {
+						Log.e("cr3", "error while reading contents of " + arcname);
+					}
+				}
+			} else {
+				fromFile(new File(pathName));
+			}
 		}
 	}
 	

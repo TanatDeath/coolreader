@@ -136,6 +136,8 @@
     <string name="dir_sd_card_2">SD карта 2</string>
     <string name="mi_book_back_to_reading">Открытая книга</string>
     <string name="mi_book_root">В корень</string>
+    <string name="mi_opds_fav">Избранное - добавить/удалить</string>
+    <string name="mi_opds_mark_as_toread"> помечен как \'к прочтению\'</string>
     <string name="action_none">(нет действия)</string>
     <string name="action_pagedown">Следующая страница</string>
     <string name="action_pageup">Предыдущая страница</string>
@@ -541,7 +543,7 @@
     <string name="book_info_book_docversion">Версия документа</string>
 
     <string name="book_state_toread">К прочтению</string>
-    <string name="book_mark_toread">Помечать скачанные как \"К прочтению\"</string>
+    <string name="book_mark_toread">Отметить \"К прочтению\"</string>
     <string name="book_state_reading">Читаю</string>
     <string name="book_state_none">Нет пометки</string>
     <string name="book_state_finished">Прочитана</string>

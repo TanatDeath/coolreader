@@ -936,7 +936,6 @@ public class CoverpageManager {
 	}
 
 	public Bitmap getBookCoverWithTitleBitmap(String title, String author, int w, int h) {
-
 		if (StrUtils.isEmptyStr(author)) {
 			author = "";
 		}

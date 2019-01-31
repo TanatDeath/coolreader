@@ -30,7 +30,7 @@ my %ic_smaller_list=(
 );
 
 my %ic_actions_list=(
-        'icons8_ligature.svg' => 'icons8_ligature.png'
+        'icons8_play_ell.svg' => 'icons8_play_ell.png'
 );
 
 my %ic_menu_list=(

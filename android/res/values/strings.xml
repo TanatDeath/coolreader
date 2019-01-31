@@ -146,6 +146,8 @@
     <string name="options_app_trackball_disable">Disable trackball</string>
     <string name="dir_sd_card_2">SD Card 2</string>
     <string name="mi_book_back_to_reading">Current book</string>
+    <string name="mi_opds_fav">Favorites - add/remove</string>
+    <string name="mi_opds_mark_as_toread"> is marked as \'to read\'</string>
     <string name="mi_book_root">Root</string>
     <string name="action_none">(No action)</string>
     <string name="action_pagedown">Next page</string>
@@ -554,7 +556,7 @@
     <string name="dlg_goto_input_page_number">Input page number to go:</string>
     <string name="dlg_goto_input_percent">Input position percent to go:</string>
     <string name="book_state_toread">To read</string>
-    <string name="book_mark_toread">Mark downloaded as \"To read\"</string>
+    <string name="book_mark_toread">Mark as \"To read\"</string>
     <string name="book_state_reading">Reading</string>
     <string name="book_state_none">No mark</string>
     <string name="book_state_finished">Finished</string>
