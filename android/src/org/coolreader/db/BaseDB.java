@@ -82,6 +82,7 @@ public abstract class BaseDB {
 			upgradeSchema();
 			return true;
 		} catch (SQLiteException e) {
+			log.e(e.getMessage());
 			return false;
 		}
 	}

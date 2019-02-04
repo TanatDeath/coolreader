@@ -55,6 +55,15 @@
             android:singleLine="false"
             android:maxLines="4"
             android:layout_gravity="left" />
+        <TextView android:id="@+id/linkToFile"
+            style="@style/TextAppearance.Small"
+            android:text=""
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:maxLines="4"
+            android:textColor="?attr/colorIcon"
+            android:layout_gravity="left" />
     </LinearLayout>
            
            

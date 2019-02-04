@@ -245,6 +245,7 @@
     <string name="mi_night_mode_disable">Day mode</string>
     <string name="mi_night_mode_enable">Night mode</string>
     <string name="book_info_file_format">Format</string>
+    <string name="book_info_opds_link">OPDS link</string>
     <string name="book_info_section_book_properties">Book properties</string>
     <string name="book_info_section_book_publisher">Publish info</string>
     <string name="book_info_book_publname">Publish name</string>
@@ -320,8 +321,8 @@
     <string name="dlg_about_textures_dirs">Textures directories:</string>
     <string name="dlg_about_backgrounds_dirs">Backgrounds directories:</string>
     <string name="dlg_about_hyphenations_dirs">Hyphenation dictionaries directories:</string>
-    <string name="dlg_about_copyright">© Vadim Lopatin, 1998–2018</string>
-    <string name="dlg_about_contributors_">and contributors …</string>
+    <string name="dlg_about_copyright">© Vadim Lopatin, 1998–2019</string>
+    <string name="dlg_about_contributors_">and contributors…</string>
     <string name="mi_book_browser_normal_mode">Normal mode</string>
     <string name="mi_book_browser_simple_mode">Simple file list</string>
     <string name="options_page_animation_slide_2_pages">Slide (2 pages)</string>
@@ -657,7 +658,7 @@
     <string name="black_list_enforced">Cannot add this URL since it is added to black list of catalogs which may violate DMCA by request of LitRes.ru</string>
     <string name="black_list_warning">WARNING: this URL is added to black list of catalogs which may violate DMCA by request of LitRes.ru Do you really want to add this catalog?</string>
     <string name="error">Error</string>
-    <string name="cant_open_file">Can\'t open file!</string>
+    <string name="cant_open_file">Can\'t open file \"%s\"!</string>
     <string name="options_app_tts_stop_motion_timeout">Stop reading aloud on motion sensor timeout</string>
     <string name="motion_timeout_off">"Off"</string>
     <string name="motion_timeout_1min">"1 minute"</string>
@@ -762,26 +763,26 @@
     <string name="option_toolbar_buttons_more_1st">More, in the beginning</string>
     <string name="option_toolbar_buttons_both_1st">Both (toolbar and more), in the beginning</string>
     <string name="pages_per_full_swipe_off">"Off"</string>
-    <string name="pages_per_full_swipe_1">"1 page (right-to-left, don't track)"</string>
-    <string name="pages_per_full_swipe_2">"2 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_3">"3 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_4">"4 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_5">"5 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_6">"6 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_7">"7 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_8">"8 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_9">"9 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_10">"10 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_11">"11 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_12">"12 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_13">"13 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_14">"14 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_15">"15 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_16">"16 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_17">"17 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_18">"18 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_19">"19 pages (right-to-left)"</string>
-    <string name="pages_per_full_swipe_20">"20 pages (right-to-left)"</string>
+    <string name="pages_per_full_swipe_1">"1 page (right to left)"</string>
+    <string name="pages_per_full_swipe_2">"2 pages (track)"</string>
+    <string name="pages_per_full_swipe_3">"3 pages (track)"</string>
+    <string name="pages_per_full_swipe_4">"4 pages (track)"</string>
+    <string name="pages_per_full_swipe_5">"5 pages (track)"</string>
+    <string name="pages_per_full_swipe_6">"6 pages (track)"</string>
+    <string name="pages_per_full_swipe_7">"7 pages (track)"</string>
+    <string name="pages_per_full_swipe_8">"8 pages (track)"</string>
+    <string name="pages_per_full_swipe_9">"9 pages (track)"</string>
+    <string name="pages_per_full_swipe_10">"10 pages (track)"</string>
+    <string name="pages_per_full_swipe_11">"11 pages (track)"</string>
+    <string name="pages_per_full_swipe_12">"12 pages (track)"</string>
+    <string name="pages_per_full_swipe_13">"13 pages (track)"</string>
+    <string name="pages_per_full_swipe_14">"14 pages (track)"</string>
+    <string name="pages_per_full_swipe_15">"15 pages (track)"</string>
+    <string name="pages_per_full_swipe_16">"16 pages (track)"</string>
+    <string name="pages_per_full_swipe_17">"17 pages (track)"</string>
+    <string name="pages_per_full_swipe_18">"18 pages (track)"</string>
+    <string name="pages_per_full_swipe_19">"19 pages (track)"</string>
+    <string name="pages_per_full_swipe_20">"20 pages (track)"</string>
     <string name="pages_per_full_swipe_m1">"1 page (left-to-right, don't track)"</string>
     <string name="pages_per_full_swipe_m2">"2 pages (left-to-right)"</string>
     <string name="pages_per_full_swipe_m3">"3 pages (left-to-right)"</string>
@@ -879,4 +880,18 @@
     <string name="fix_old_orientation">Revert to old screen orientation and fix it</string>
     <string name="orientation_popup_toolbar_duration">Hide orientation popup toolbar after</string>
     <string name="disable_orientation_popup_toolbar">Disable orientation popup toolbar</string>
+    <string name="error_while_opening">Error while opening document \"%s\"</string>
+    <string name="datadir_is_removed">Application data directory \"%s\" has been removed by other app.\nPossibly it was some kind of disc space optimizer.\nUnfortunately all the settings were lost.</string>
+    <string name="font_not_compat_with_language">"Font \"%s\" isn't compatible with language \"%s\". Instead will be used fallback font."</string>
+    <string name="fontconfig_language_orthography_database">"Languages character set database by Fontconfig:
+        https://www.fontconfig.org/ "
+    </string>
+    <string name="third_party_components_used">"Third party components used: zlib, libpng, libjpeg, freetype, harfbuzz,
+        chmlib, antiword, Nook EPD utils by DairyKnight "
+    </string>
+    <string name="third_party_farm_fresh_icon_set">Farm-Fresh icon set from http://www.fatcow.com/free-icons</string>
+    <string name="open_previously_downloaded">Book was already downloaded, open it instead of new download?</string>
+    <string name="could_not_find_by_link">Could not find local file, showing OPDS entry</string>
+    <string name="force_tts_koef">Force TTS restart koef</string>
+    <string name="force_tts_koef_add_info">When TTS engine is unexpectedly stopped by system, application will try to force restart TTS. Higher value means more timeout to wait</string>
 </resources>

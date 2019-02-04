@@ -3,6 +3,7 @@ package org.coolreader.db;
 import java.util.ArrayList;
 
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.StrUtils;
 
 public class FileInfoCache {
 
@@ -49,6 +50,15 @@ public class FileInfoCache {
 		moveOnTop(index);
 		return item;
 	}
+
+	public FileInfo getByOPDSLink(String opdsLink) {
+		int index = findByOpdsLink(opdsLink);
+		if (index == -1)
+			return null;
+		FileInfo item = list.get(index);
+		moveOnTop(index);
+		return item;
+	}
 	
 	public FileInfo get(Long id) {
 		if (id == null)
@@ -79,6 +89,16 @@ public class FileInfoCache {
 			return -1;
 		for (int i=0; i<list.size(); i++) {
 			if (path.equals(list.get(i).getPathName()))
+				return i;
+		}
+		return -1;
+	}
+
+	private int findByOpdsLink(String opdsLink) {
+		if (opdsLink == null)
+			return -1;
+		for (int i=0; i<list.size(); i++) {
+			if (StrUtils.euqalsIgnoreNulls(opdsLink, list.get(i).opdsLink, true))
 				return i;
 		}
 		return -1;

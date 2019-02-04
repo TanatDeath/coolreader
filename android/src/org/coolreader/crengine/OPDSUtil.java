@@ -207,7 +207,24 @@ xml:base="http://lib.ololo.cc/opds/">
 					buf.append(", ");
 				buf.append(a.name);
 			}
-			return buf.toString();
+			// plotn - dedup
+			String bufS = buf.toString();
+			if (bufS!=null) {
+				String[] list = bufS.split(",");
+				ArrayList<String> arrS = new ArrayList<String>();
+				for (String s : list) {
+					s = s.replaceAll("\\s+", " ").trim();
+					if (!arrS.contains(s)) arrS.add(s);
+				}
+				String resS = "";
+				for (String s : arrS) {
+					resS = resS + ", " + s;
+				}
+				if (resS.length() > 0) resS = resS.substring(1);
+				return resS;
+			}
+
+			return bufS;
 		}
 	}
 	

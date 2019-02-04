@@ -18,8 +18,8 @@ android {
         targetSdkVersion 26
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 32250
-        versionName "3.2.26-1"
+        versionCode 32270
+        versionName "3.2.27-1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -56,6 +56,9 @@ android {
                     arguments "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
                 }
             }
+            packagingOptions{
+                doNotStrip "**/*.so"
+            }
         }
         release_minsize {
             signingConfig signingConfigs.release
@@ -80,7 +83,7 @@ android {
                 }
             }
             packagingOptions{
-                doNotStrip "*/*/*.so"
+                doNotStrip "**/*.so"
             }
         }
     }

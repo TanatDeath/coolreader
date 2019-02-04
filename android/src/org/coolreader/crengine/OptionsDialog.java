@@ -178,6 +178,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	int[] mScreenFullUpdateInterval = new int[] {
 			0, 2, 3, 4, 5, 7, 10, 15, 20
 		};
+	int[] mForceTTSKoef = new int[] {
+		0, 2, 3, 4, 5, 7, 10, 15, 20
+	};
 	int[] mScreenBlackPageDuration = new int[] {
 			0, 100, 200, 300, 500, 700, 1000, 2000, 3000, 4000, 5000
 	};
@@ -4072,6 +4075,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_to_gd_timeout),
 				PROP_SAVE_POS_TO_GD_TIMEOUT, getString(R.string.save_pos_to_gd_timeout_add_info), filter).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
 				setIconIdByAttr(R.attr.attr_icons8_position_to_gd_interval, R.drawable.icons8_position_to_gd_interval));
+		mOptionsApplication.add(new ListOption(this, getString(R.string.force_tts_koef),
+				PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), filter).
+				add(mForceTTSKoef).
+				setDefaultValue("0").
+				setIconIdByAttr(R.attr.cr3_button_tts_drawable, R.drawable.icons8_speaker));
 
 		fillStyleEditorOptions(filter);
 		

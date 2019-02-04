@@ -383,6 +383,10 @@ public class CRDBService extends Service {
     public interface FileInfoLoadingCallback {
     	void onFileInfoListLoaded(ArrayList<FileInfo> list);
     }
+
+	public interface FileInfo1LoadingCallback {
+		void onFileInfoLoaded(FileInfo fi);
+	}
     
     public interface RecentBooksLoadingCallback {
     	void onRecentBooksListLoaded(ArrayList<BookInfo> bookList);
@@ -612,6 +616,30 @@ public class CRDBService extends Service {
 						callback.onBooksInfoLoaded(bookInfo);
 					}
 				});
+			}
+		});
+	}
+
+	public void loadFileInfoByOPDSLink(final String opdsLink, final FileInfo1LoadingCallback callback, final Handler handler) {
+		execTask(new Task("loadFileInfoByOPDSLink") {
+			@Override
+			public void work() {
+				if (StrUtils.isEmptyStr(opdsLink)) {
+					sendTask(handler, new Runnable() {
+						@Override
+						public void run() {
+							callback.onFileInfoLoaded(null);
+						}
+					});
+				} else {
+					final FileInfo fileInfo = mainDB.loadFileInfoByOPDSLink(opdsLink);
+					sendTask(handler, new Runnable() {
+						@Override
+						public void run() {
+							callback.onFileInfoLoaded(fileInfo);
+						}
+					});
+				}
 			}
 		});
 	}
@@ -934,7 +962,11 @@ public class CRDBService extends Service {
     		getService().loadBookInfo(new FileInfo(fileInfo), callback, new Handler());
     	}
 
-        public void createFavoriteFolder(final FileInfo folder) {
+		public void loadFileInfoByOPDSLink(final String opdsLink, final FileInfo1LoadingCallback callback) {
+			getService().loadFileInfoByOPDSLink(opdsLink, callback, new Handler());
+		}
+
+		public void createFavoriteFolder(final FileInfo folder) {
             getService().createFavoriteFolder(folder);
        	}
 

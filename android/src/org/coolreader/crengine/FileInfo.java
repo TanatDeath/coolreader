@@ -88,6 +88,11 @@ public class FileInfo {
 	public String language; // document language
 	public String lang_from; // translate from
 	public String lang_to; // translate to
+	public String opdsLink;
+	public String pathR; // path form opds-assigned entry
+	public String pathnameR; // pathname form opds-assigned entry
+	public String arcnameR; // arcname form opds-assigned entry
+	public String opdsLinkR; // link form opds-assigned entry
 	public String username; // username for online catalogs
 	public String password; // password for online catalogs
 	public DocumentFormat format;
@@ -419,6 +424,7 @@ public class FileInfo {
         publseries = v.publseries;
         publseriesNumber = v.publseriesNumber;
         fileCreateTime = v.fileCreateTime;
+        opdsLink = v.opdsLink;
     }
 	
 	/**
@@ -596,6 +602,17 @@ public class FileInfo {
 		return pathname!=null && pathname.startsWith(FILE_DATE_PREFIX);
 	}
 	
+	public boolean isOnSDCard() {
+		if (null == parent)
+			return false;
+		if ( ( ( "SD".equals(filename) && "SD".equals(title)) ||
+				("EXT SD".equals(filename) && "EXT SD".equals(title)) ) &&
+				isDirectory && !isArchive && 0 == size && 0 == arcsize &&
+				ROOT_DIR_TAG.equals(parent.pathname) )
+			return true;
+		return parent.isOnSDCard();
+	}
+
 	public long getAuthorId()
 	{
 		if (!isBooksByAuthorDir())
@@ -771,13 +788,13 @@ public class FileInfo {
 	{
 		if ( dirs!=null )
 			for ( FileInfo dir : dirs )
-				if ( pathName.equals(dir.getPathName() ))
+				if ( isOnSDCard() && pathName.compareToIgnoreCase(dir.getPathName()) == 0 || pathName.equals(dir.getPathName()) )
 					return dir;
 		if ( files!=null )
 			for ( FileInfo file : files ) {
-				if ( pathName.equals(file.getPathName() ))
+				if ( isOnSDCard() && pathName.compareToIgnoreCase(file.getPathName()) == 0 || pathName.equals(file.getPathName()) )
 					return file;
-				if ( file.getPathName().startsWith(pathName+"@/" ))
+				if ( isOnSDCard() && file.getPathName().toLowerCase().startsWith(pathName.toLowerCase()+"@/") || file.getPathName().startsWith(pathName+"@/" ))
 					return file;
 			}
 		return null;
@@ -1282,6 +1299,13 @@ public class FileInfo {
 		return true;
 	}
 
+	public boolean setOpdsLink(String opdsLink) {
+		if (eq(this.opdsLink, opdsLink))
+			return false;
+		this.opdsLink = opdsLink;
+		return true;
+	}
+
 	public int getSeriesNumber() {
 		return series != null && series.length() > 0 ? seriesNumber : 0;
 	}
@@ -1591,6 +1615,7 @@ public class FileInfo {
 		if (bookDateN != other.bookDateN) return false;
 		if (docDateN != other.docDateN) return false;
 		if (publYearN != other.publYearN) return false;
+		if (!StrUtils.euqalsIgnoreNulls(opdsLink, other.opdsLink, true)) return false;
 		return true;
 	}
 

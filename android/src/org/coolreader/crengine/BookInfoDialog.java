@@ -47,6 +47,8 @@ public class BookInfoDialog extends BaseDialog {
 	private FileInfo mFileInfoOPDS;
 	private FileBrowser mFileBrowser;
 	private final LayoutInflater mInflater;
+	private FileInfo mFileInfoSearchDir = null;
+	private String mAuthors = "";
 	private int mWindowSize;
 	private Bitmap mBookCover;
 	private String sAuthors = "";
@@ -59,6 +61,7 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnBookEdit;
 	Button btnMarkToRead;
 	ImageButton btnBookDownload;
+	ImageButton btnFindAuthors;
 	boolean bMarkToRead;
 
 	private Map<String, Integer> mLabelMap;
@@ -77,6 +80,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("file.arcsize", R.string.book_info_file_arcsize);
 		mLabelMap.put("file.size", R.string.book_info_file_size);
 		mLabelMap.put("file.format", R.string.book_info_file_format);
+		mLabelMap.put("file.opds_link", R.string.book_info_opds_link);
 		mLabelMap.put("section.position", R.string.book_info_section_current_position);
 		mLabelMap.put("position.percent", R.string.book_info_position_percent);
 		mLabelMap.put("position.page", R.string.book_info_position_page);
@@ -240,7 +244,7 @@ public class BookInfoDialog extends BaseDialog {
 	}
 	
 	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, final String annot,
-						  int actionType, FileInfo fiOPDS, FileBrowser fb)
+						  int actionType, FileInfo fiOPDS, FileBrowser fb, FileInfo currDir)
 	{
 		super("BookInfoDialog", activity, null, false, false);
 		mCoolReader = activity;
@@ -252,6 +256,23 @@ public class BookInfoDialog extends BaseDialog {
 		if (mBookInfo!=null)
 			file = mBookInfo.getFileInfo();
 		else file = fiOPDS;
+		mFileInfoSearchDir = null;
+		if (currDir!=null) {
+			if (currDir.isOPDSDir())  {
+				FileInfo par = currDir;
+				while (par.parent != null) par=par.parent;
+				for (int i=0; i<par.dirCount(); i++)
+					if (par.getDir(i).pathname.startsWith(FileInfo.OPDS_DIR_PREFIX + "search:")) {
+						mFileInfoSearchDir = par.getDir(i);
+						break;
+					}
+			}
+		}
+		for (String s: items) {
+			if (s.startsWith("book.authors=")) {
+				mAuthors = s.substring("book.authors=".length()).trim();
+			}
+		}
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
@@ -360,6 +381,15 @@ public class BookInfoDialog extends BaseDialog {
 				dismiss();
 			}
 		});
+		btnFindAuthors = ((ImageButton)view.findViewById(R.id.btn_find_authors));
+		btnFindAuthors.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if ((mFileBrowser != null) && (mFileInfoSearchDir!=null))
+					mFileBrowser.showFindBookDialog(false, mAuthors, mFileInfoSearchDir);
+				dismiss();
+			}
+		});
 		int w = mWindowSize * 4 / 10;
 		int h = w * 4 / 3;
 		image.setMinimumHeight(h);
@@ -419,6 +449,10 @@ public class BookInfoDialog extends BaseDialog {
 		txtAnnot.setTextColor(colorIcon);
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if ((StrUtils.isEmptyStr(mAuthors))||(mFileInfoSearchDir==null)) {
+			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
+			parent.removeView(btnFindAuthors);
+		}
 		if (actionType == BOOK_INFO) {
 			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
 			parent.removeView(btnBookDownload);

@@ -96,7 +96,9 @@
                 android:text="field2"
                 android:layout_marginLeft="2dip"
                 android:layout_marginRight="0dip"
-                android:singleLine="true"
+                android:singleLine="false"
+                android:maxLines="5"
+                android:ellipsize="middle"
                 android:layout_gravity="right" />
             <!-- TextView android:id="@+id/browser_item_field4"
                 style="@style/TextAppearance.Small"
@@ -117,7 +119,6 @@
                 android:singleLine="true"
                 android:layout_gravity="right" /-->
         </LinearLayout>
-
     </LinearLayout>
 
     <LinearLayout android:id="@+id/browser_item_btns_body"

@@ -42,17 +42,21 @@
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
 			<TextView android:text="https://github.com/buggins/coolreader/" android:id="@+id/www1"
 				style="@style/TextAppearance.Medium"
-				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
-			<TextView android:text="Third party components used: zlib, libpng, libjpeg, freetype, harfbuzz, chmlib, antiword, Nook EPD utils by DairyKnight"
+				android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
+			<TextView android:text="@string/third_party_components_used"
 				android:id="@+id/thirdparty"
             	style="@style/TextAppearance.Small"
-				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
-			<TextView android:text="Farm-Fresh icon set from http://www.fatcow.com/free-icons"
-            	android:id="@+id/thirdparty2"
+				android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+			<TextView android:text="@string/fontconfig_language_orthography_database"
+					  android:id="@+id/thirdparty2"
+					  style="@style/TextAppearance.Small"
+					  android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+			<TextView android:text="@string/third_party_farm_fresh_icon_set"
+            	android:id="@+id/thirdparty3"
             	style="@style/TextAppearance.Small"
             	android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="CoffeeCatch> library: https://github.com/xroche/coffeecatch"
-            	android:id="@+id/thirdparty3"
+            	android:id="@+id/thirdparty4"
             	style="@style/TextAppearance.Small"
             	android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="Metro vector icon set by"
@@ -63,7 +67,7 @@
 				style="@style/TextAppearance.Small"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
 			<TextView android:text="With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook"
-				android:id="@+id/thirdparty4"
+				android:id="@+id/thirdparty7"
 				style="@style/TextAppearance.Small"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 		</LinearLayout>

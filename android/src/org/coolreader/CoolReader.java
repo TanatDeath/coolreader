@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Date;
 import java.util.Map;
 
 import org.coolreader.Dictionaries.DictionaryException;
@@ -62,7 +63,6 @@ import org.koekak.android.ebookdownloader.SonyBookSelector;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -72,9 +72,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -85,19 +83,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.PowerManager;
 import android.support.v4.provider.DocumentFile;
-import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.provider.Settings.Secure;
-import android.view.WindowManager;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import com.google.android.gms.common.util.Strings;
 import com.google.gson.Gson;
@@ -225,6 +216,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	private boolean justCreated = false;
 
+	private boolean dataDirIsRemoved = false;
+
 	private static final int PERM_REQUEST_STORAGE_CODE = 1;
 	private static final int PERM_REQUEST_READ_PHONE_STATE_CODE = 2;
 
@@ -251,7 +244,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     protected void onCreate(Bundle savedInstanceState)
     {
     	startServices();
-
 		log.i("CoolReader.onCreate() entered");
 		super.onCreate(savedInstanceState);
 
@@ -330,8 +322,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 
 		showRootWindow();
-        createDynShortcuts();
-		
+		if (null != Engine.getExternalSettingsDirName()) {
+			// if external data directory created or already exist.
+			if (!Engine.DATADIR_IS_EXIST_AT_START && getExtDataDirCreateTime() > 0) {
+				dataDirIsRemoved = true;
+				log.e("DataDir removed by other application!");
+			}
+		}
+		createDynShortcuts();
         log.i("CoolReader.onCreate() exiting");
     }
 
@@ -593,6 +591,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				fileToOpen = fileToOpen.replace("%2F", "/");
 			}
 			log.d("FILE_TO_OPEN = " + fileToOpen);
+			final String finalFileToOpen = fileToOpen;
 			// image handling
 			if (
 					(fileToOpen.toLowerCase().endsWith(".jpg"))||
@@ -606,7 +605,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						@Override
 						public void run() {
 							// if document not loaded show error & then root window
-							ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error), CoolReader.this.getString(R.string.cant_open_file));
+							ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error), CoolReader.this.getString(R.string.cant_open_file, finalFileToOpen));
 							errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 								@Override
 								public void onDismiss(DialogInterface dialog) {
@@ -768,8 +767,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (!processIntent(getIntent()))
 				showLastLocation();
 		}
-		
-		
+		if (dataDirIsRemoved) {
+			// show message
+			ErrorDialog dlg = new ErrorDialog(this, getString(R.string.error), getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()));
+			dlg.show();
+		}
+		if (Engine.getExternalSettingsDirName() != null) {
+			setExtDataDirCreateTime(new Date());
+		} else {
+			setExtDataDirCreateTime(null);
+		}
 		stopped = false;
 
 		log.i("CoolReader.onStart() exiting");
@@ -867,6 +874,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					}
 				});
 				mHomeFrame.refreshView();
+			}
+			if (Engine.getExternalSettingsDirName() != null) {
+				setExtDataDirCreateTime(new Date());
+			} else {
+				setExtDataDirCreateTime(null);
 			}
 		} else if (PERM_REQUEST_READ_PHONE_STATE_CODE == requestCode) {
 			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -1904,7 +1916,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mEngine.execute(task);
 	}
 
-	public void showBookInfo(BookInfo setBI, final int actionType) {
+	public void showOPDSBookInfo(final FileInfo item, final FileBrowser fb, FileInfo currDir) {
+		final ArrayList<String> itemsAll = new ArrayList<String>();
+		itemsAll.add("section=section.file");
+		itemsAll.add("file.format=" + item.format.name());
+		itemsAll.add("file.name=" + item.pathname);
+		itemsAll.add("section=section.book");
+		if (!StrUtils.isEmptyStr(item.authors))
+			itemsAll.add("book.authors="+item.getAuthors());
+		itemsAll.add("book.title="+item.title);
+		BookInfoDialog dlg = new BookInfoDialog(this, itemsAll, null, item.filename,
+				BookInfoDialog.OPDS_INFO, item, fb, currDir);
+		dlg.show();
+	}
+
+	public void showBookInfo(BookInfo setBI, final int actionType, final FileInfo currDir) {
 		final ArrayList<String> itemsAll = new ArrayList<String>();
 		final ArrayList<String> itemsSys = new ArrayList<String>();
 		final ArrayList<String> itemsFile = new ArrayList<String>();
@@ -1959,6 +1985,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				itemsFile.add("file.arcsize=" + StrUtils.readableFileSize(fi.arcsize));
 			}
 			itemsFile.add("file.format=" + fi.format.name());
+			if (!StrUtils.isEmptyStr(fi.opdsLink)) {
+				itemsBook.add("file.opds_link=" + fi.opdsLink);
+			}
 		}
 		execute( new Task() {
 			Bookmark bm;
@@ -2168,7 +2197,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					itemsAll.add(s);
 				}
 				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot,
-						actionType, null, null);
+						actionType, null, null, currDir);
 				//PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, null, "image/jpeg");
 				dlg.show();
 			}
@@ -2289,7 +2318,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	
 	/**
 	 * Get last stored location.
-	 * @param location
 	 * @return
 	 */
 	private String getLastLocation() {
@@ -2351,6 +2379,22 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 		// TODO: support other locations as well
 		showRootWindow();
+	}
+
+	public void setExtDataDirCreateTime(Date d) {
+		try {
+			SharedPreferences.Editor editor = getPrefs().edit();
+			editor.putLong(PREF_EXT_DATADIR_CREATETIME, (null != d) ? d.getTime() : 0);
+			editor.commit();
+		} catch (Exception e) {
+			// ignore
+		}
+	}
+
+	public long getExtDataDirCreateTime() {
+		long res = getPrefs().getLong(PREF_EXT_DATADIR_CREATETIME, 0);
+		log.i("getExtDataDirCreateTime() = " + res);
+		return res;
 	}
 
 	public void showCurrentBook() {

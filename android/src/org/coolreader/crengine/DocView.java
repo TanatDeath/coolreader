@@ -181,6 +181,19 @@ public class DocView {
 	}
 
 	/**
+	 * create empty document with specified message (e.g. to show errors)
+	 * @param title
+	 * @param message
+	 * @return
+	 */
+	public void createDefaultDocument(String title, String message)
+	{
+		synchronized(mutex) {
+			createDefaultDocumentInternal(title, message);
+		}
+	}
+
+	/**
 	 * Load document from file.
 	 * @param fileName
 	 * @return
@@ -444,6 +457,8 @@ public class DocView {
 	private native void createInternal();
 
 	private native void destroyInternal();
+
+	private native void createDefaultDocumentInternal(String title, String message);
 
 	private native boolean loadDocumentInternal(String fileName);
 

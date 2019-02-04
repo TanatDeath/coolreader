@@ -133,6 +133,7 @@ public interface Settings {
     public static final String PROP_SAVE_POS_TO_GD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_APP_MARK_DOWNLOADED_TO_READ = "app.mark.downloaded.toread";
+    public static final String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
 
     public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
     public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";

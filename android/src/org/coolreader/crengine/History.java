@@ -32,6 +32,10 @@ public class History extends FileInfoChangeSource {
 	public interface BookInfoLoadedCallack {
 		void onBookInfoLoaded(BookInfo bookInfo);
 	}
+
+	public interface FileInfo1LoadedCallack {
+		void onFileInfoLoaded(FileInfo fileInfo);
+	}
 	
 	public void getOrCreateBookInfo(final CRDBService.LocalBinder db, final FileInfo file, final BookInfoLoadedCallack callback)
 	{
@@ -48,6 +52,16 @@ public class History extends FileInfoChangeSource {
 					mBooks.add(0, bookInfo);
 				}
 				callback.onBookInfoLoaded(bookInfo);
+			}
+		});
+	}
+
+	public void getFileInfoByOPDSLink(final CRDBService.LocalBinder db, final String opdsLink, final FileInfo1LoadedCallack callback)
+	{
+		db.loadFileInfoByOPDSLink(opdsLink, new CRDBService.FileInfo1LoadingCallback() {
+			@Override
+			public void onFileInfoLoaded(FileInfo fileInfo) {
+				callback.onFileInfoLoaded(fileInfo);
 			}
 		});
 	}

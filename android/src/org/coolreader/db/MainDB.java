@@ -14,7 +14,7 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 35;
+	public static final int DB_VERSION = 37;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -81,7 +81,8 @@ public class MainDB extends BaseDB {
 					"word_count INTEGER, " +
                     "book_date_n INTEGER, " +
 					"doc_date_n INTEGER, " +
-                    "publ_year_n INTEGER " +
+                    "publ_year_n INTEGER, " +
+					"opds_link VARCHAR DEFAULT NULL " +
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
@@ -259,6 +260,14 @@ public class MainDB extends BaseDB {
 			}
 			if (currentVersion < 35) {
 				execSQLIgnoreErrors("ALTER TABLE favorite_folders ADD COLUMN filename VARCHAR ");
+			}
+			if (currentVersion < 36)
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN opds_link VARCHAR DEFAULT NULL");
+			if (currentVersion < 37) {
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"book_opds_link_index ON book (opds_link) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"book_opds_link_index ON book (opds_link) ");
 			}
 			//==============================================================
 			// add more updates above this line
@@ -1365,6 +1374,19 @@ public class MainDB extends BaseDB {
 		return findMovedFileInfo(path);
 	}
 
+	private FileInfo findFileInfoByOPDSLink(String opdsLink)
+	{
+		FileInfo existing = fileInfoCache.getByOPDSLink(opdsLink);
+		if (existing != null)
+			return existing;
+		FileInfo fileInfo = new FileInfo();
+		if (findBy(fileInfo, "opds_link", opdsLink)) {
+			fileInfoCache.put(fileInfo);
+			return fileInfo;
+		}
+		return null;
+	}
+
 	private FileInfo findFileInfoById(Long id)
 	{
 		if (id == null)
@@ -1817,6 +1839,7 @@ public class MainDB extends BaseDB {
 			add("book_date_n", (long) newValue.bookDateN, (long) oldValue.bookDateN);
 			add("doc_date_n", (long) newValue.docDateN, (long) oldValue.docDateN);
 			add("publ_year_n", (long) newValue.publYearN, (long) oldValue.publYearN);
+			add("opds_link", newValue.opdsLink, oldValue.opdsLink);
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
@@ -1851,7 +1874,7 @@ public class MainDB extends BaseDB {
 		"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher, " +
 		"publcity,  publyear, publisbn, "+
 		"sp.name as publseries_name, " +
-		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n  "
+		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n, opds_link  "
 		;
 
 	private static final String READ_FILEINFO_SQL = 
@@ -1909,6 +1932,7 @@ public class MainDB extends BaseDB {
 		fileInfo.bookDateN = rs.getLong(i++);
 		fileInfo.docDateN = rs.getLong(i++);
 		fileInfo.publYearN = rs.getLong(i++);
+		fileInfo.opdsLink = rs.getString(i++);
 		fileInfo.isArchive = fileInfo.arcname!=null;
 	}
 
@@ -2058,19 +2082,6 @@ public class MainDB extends BaseDB {
 							}
 							i++;
 						}
-//					"b.id AS id, pathname," +
-//					"f.name as path, " +
-//					"filename, arcname, title, " +
-//					"(SELECT GROUP_CONCAT(a.name,'|') FROM author a JOIN book_author ba ON a.id=ba.author_fk WHERE ba.book_fk=b.id) as authors, " +
-//					"s.name as series_name, " +
-//					"series_number, " +
-//					"format, filesize, arcsize, " +
-//					"create_time, last_access_time, flags, language, lang_from, lang_to, "+
-//					"saved_with_ver, genre, annotation, srclang, bookdate, translator, docauthor, "+
-//					"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher," +
-//					"publcity,  publyear, publisbn, "+
-//					"sp.name as publseries_name, " +
-//					"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n  "
 					}
 					if ((bDidntFindAll)&&(!bQuickSearch)) continue;
 					if ((matchesCnt==0)&&(bQuickSearch)) continue;
@@ -2162,6 +2173,25 @@ public class MainDB extends BaseDB {
 		}
 		return null;
 	}
+
+	public FileInfo loadFileInfoByOPDSLink(String opdsLink) {
+		if (!isOpened())
+			return null;
+		try {
+			FileInfo cached = fileInfoCache.getByOPDSLink(opdsLink);
+			if (cached != null) {
+				return new FileInfo(cached);
+			}
+			FileInfo fileInfo = new FileInfo();
+			if (loadByOPDSLink(fileInfo, opdsLink)) {
+				fileInfoCache.put(fileInfo);
+				return new FileInfo(fileInfo);
+			}
+		} catch (Exception e) {
+			// ignore
+		}
+		return null;
+	}
 	
 	private boolean loadByPathname(FileInfo fileInfo) {
 		if (findBy(fileInfo, "pathname", fileInfo.getPathName())) {
@@ -2175,6 +2205,15 @@ public class MainDB extends BaseDB {
 			return true;
 		}
 		
+		return false;
+	}
+
+	private boolean loadByOPDSLink(FileInfo fileInfo, String opdsLink) {
+		if (findBy(fileInfo, "opds_link", opdsLink)) {
+			fileInfoCache.put(fileInfo);
+			return true;
+		}
+
 		return false;
 	}
 

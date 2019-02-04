@@ -829,6 +829,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //	private int selectionEndY = 0;
 	private boolean doubleTapSelectionEnabled = false;
 	private int mGesturePageFlipsPerFullSwipe;
+	private boolean mIsPageMode;
 	private int secondaryTapActionType = TAP_ACTION_TYPE_LONGPRESS;
 	private boolean selectionModeActive = false;
 
@@ -1189,18 +1190,20 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				Log.i(TAG, "adjustStartValuesOnDrag: start_x=" + start_x + ", swipeDistance=" + swipeDistance);
 			}
 		}
- 		private void updatePageFlipTracking(final int x) {
-			final int swipeDistance = x - start_x;
+
+		private void updatePageFlipTracking(final int x, final int y) {
+			if (!mOpened)
+				return;
+			final int swipeDistance = mIsPageMode ? x - start_x : y - start_y;
 			final int distanceForFlip = surface.getWidth() / mGesturePageFlipsPerFullSwipe;
 			int pagesToFlip = swipeDistance / distanceForFlip;
 			if (pagesToFlip == 0) {
 				return; // Nothing to do
 			}
 			adjustStartValuesOnDrag(swipeDistance, distanceForFlip);
-			ReaderAction action = pagesToFlip > 0 ? ReaderAction.PAGE_UP : ReaderAction.PAGE_DOWN;
+			ReaderAction action = pagesToFlip > 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP;
 			while (pagesToFlip != 0) {
 				onAction(action);
-				Log.i(TAG, "updatePageFlipTracking: " + action);
 				if (pagesToFlip > 0) {
 					pagesToFlip--;
 				} else {
@@ -1459,7 +1462,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						state = STATE_DONE;
 						return cancel();
 					case STATE_FLIP_TRACKING:
-						updatePageFlipTracking(x);
+						updatePageFlipTracking(x, y);
 						state = STATE_DONE;
 						return cancel();	
 				}
@@ -1528,7 +1531,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 							if (Math.abs(mGesturePageFlipsPerFullSwipe) > 1) {
 							state = STATE_FLIP_TRACKING;
-							updatePageFlipTracking(start_x);
+							updatePageFlipTracking(start_x, start_y);
 						}
 						return true;
 					case STATE_FLIPPING:
@@ -1538,7 +1541,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						updateBrightnessControl(x, y);
 						return true;
 					case STATE_FLIP_TRACKING:
-						updatePageFlipTracking(x);
+						updatePageFlipTracking(x, y);
 						return true;	
 					case STATE_WAIT_FOR_DOUBLE_CLICK:
 						return true;
@@ -2094,7 +2097,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	static private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
 	public void showBookInfo() {
-		mActivity.showBookInfo(mBookInfo, BookInfoDialog.BOOK_INFO);
+		mActivity.showBookInfo(mBookInfo, BookInfoDialog.BOOK_INFO, null);
 	}
 
 	private int autoScrollSpeed = 1500; // chars / minute
@@ -2530,42 +2533,43 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
 		boolean eink = false;
 		switch ( cmd ) {
-			case DCMD_FILE_BROWSER_ROOT:
-				mActivity.showRootWindow();
-				break;
-			case DCMD_ABOUT:
-				mActivity.showAboutDialog();
-				break;
-			case DCMD_SWITCH_PROFILE:
-				showSwitchProfileDialog();
-				break;
-			case DCMD_TOGGLE_AUTOSCROLL:
-				toggleAutoScroll();
-				break;
-			case DCMD_AUTOSCROLL_SPEED_INCREASE:
-				changeAutoScrollSpeed(1);
-				break;
-			case DCMD_AUTOSCROLL_SPEED_DECREASE:
-				changeAutoScrollSpeed(-1);
-				break;
-			case DCMD_SHOW_DICTIONARY:
-				mActivity.showDictionary();
-				break;
-			case DCMD_OPEN_PREVIOUS_BOOK:
-				loadPreviousDocument(new Runnable() {
-					@Override
-					public void run() {
-						// do nothing
-					}
-				});
-				break;
-			case DCMD_BOOK_INFO:
+		case DCMD_FILE_BROWSER_ROOT:
+			mActivity.showRootWindow();
+			break;
+		case DCMD_ABOUT:
+			mActivity.showAboutDialog();
+			break;
+		case DCMD_SWITCH_PROFILE:
+			showSwitchProfileDialog();
+			break;
+		case DCMD_TOGGLE_AUTOSCROLL:
+			toggleAutoScroll();
+			break;
+		case DCMD_AUTOSCROLL_SPEED_INCREASE:
+			changeAutoScrollSpeed(1);
+			break;
+		case DCMD_AUTOSCROLL_SPEED_DECREASE:
+			changeAutoScrollSpeed(-1);
+			break;
+		case DCMD_SHOW_DICTIONARY:
+			mActivity.showDictionary();
+			break;
+		case DCMD_OPEN_PREVIOUS_BOOK:
+			loadPreviousDocument(new Runnable() {
+				@Override
+				public void run() {
+					// do nothing
+				}
+			});
+			break;
+		case DCMD_BOOK_INFO:
+			if (isBookLoaded())
 				showBookInfo();
-				break;
-			case DCMD_USER_MANUAL:
-				showManual();
-				break;
-			case DCMD_TTS_PLAY:
+			break;
+		case DCMD_USER_MANUAL:
+			showManual();
+			break;
+		case DCMD_TTS_PLAY:
 			{
 				log.i("DCMD_TTS_PLAY: initializing TTS");
 				if ( !mActivity.initTTS(new TTS.OnTTSCreatedListener() {
@@ -2585,74 +2589,78 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 			}
 			break;
-			case DCMD_TOGGLE_DOCUMENT_STYLES:
+		case DCMD_TOGGLE_DOCUMENT_STYLES:
+			if (isBookLoaded())
 				toggleDocumentStyles();
-				break;
-			case DCMD_SHOW_HOME_SCREEN:
-				mActivity.showHomeScreen();
-				break;
-			case DCMD_TOGGLE_ORIENTATION:
-				toggleScreenOrientation();
-				break;
-			case DCMD_TOGGLE_FULLSCREEN:
-				toggleFullscreen();
-				break;
-			case DCMD_TOGGLE_TITLEBAR:
-				toggleTitlebar();
-				break;
-			case DCMD_SHOW_POSITION_INFO_POPUP:
+			break;
+		case DCMD_SHOW_HOME_SCREEN:
+			mActivity.showHomeScreen();
+			break;
+		case DCMD_TOGGLE_ORIENTATION:
+			toggleScreenOrientation();
+			break;
+		case DCMD_TOGGLE_FULLSCREEN:
+			toggleFullscreen();
+			break;
+		case DCMD_TOGGLE_TITLEBAR:
+			toggleTitlebar();
+			break;
+		case DCMD_SHOW_POSITION_INFO_POPUP:
+			if (isBookLoaded())
 				showReadingPositionPopup();
-				break;
-			case DCMD_TOGGLE_SELECTION_MODE:
+			break;
+		case DCMD_TOGGLE_SELECTION_MODE:
+			if (isBookLoaded())
 				toggleSelectionMode();
-				break;
-			case DCMD_TOGGLE_TOUCH_SCREEN_LOCK:
-				isTouchScreenEnabled = !isTouchScreenEnabled;
-				if ( isTouchScreenEnabled )
-					mActivity.showToast(R.string.action_touch_screen_enabled_toast);
-				else
-					mActivity.showToast(R.string.action_touch_screen_disabled_toast);
-				break;
-			case DCMD_LINK_BACK:
-			case DCMD_LINK_FORWARD:
-				navigateByHistory(cmd);
-				break;
-			case DCMD_ZOOM_OUT:
-				doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
-				syncViewSettings(getSettings(), true, true);
-				break;
-			case DCMD_ZOOM_IN:
-				doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
-				syncViewSettings(getSettings(), true, true);
-				break;
-			case DCMD_FONT_SELECT:
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
-				break;
-			case DCMD_FONT_BOLD:
-				Properties props1 = new Properties(mActivity.settings());
-				props1.setProperty(PROP_FONT_WEIGHT_EMBOLDEN,
-						props1.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
-				mActivity.setSettings(props1, -1, true);
-				break;
-			case DCMD_FONT_NEXT:
-				switchFontFace(1);
-				break;
-			case DCMD_FONT_PREVIOUS:
-				switchFontFace(-1);
-				break;
-			case DCMD_MOVE_BY_CHAPTER:
+			break;
+		case DCMD_TOGGLE_TOUCH_SCREEN_LOCK:
+			isTouchScreenEnabled = !isTouchScreenEnabled;
+			if ( isTouchScreenEnabled )
+				mActivity.showToast(R.string.action_touch_screen_enabled_toast);
+			else
+				mActivity.showToast(R.string.action_touch_screen_disabled_toast);
+			break;
+		case DCMD_LINK_BACK:
+		case DCMD_LINK_FORWARD:
+			navigateByHistory(cmd);
+            break;
+		case DCMD_ZOOM_OUT:
+            doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
+            syncViewSettings(getSettings(), true, true);
+            break;
+		case DCMD_ZOOM_IN:
+            doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
+            syncViewSettings(getSettings(), true, true);
+            break;
+		case DCMD_FONT_SELECT:
+			mActivity.optionsFilter = "";
+			mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
+			break;
+		case DCMD_FONT_BOLD:
+			Properties props1 = new Properties(mActivity.settings());
+			props1.setProperty(PROP_FONT_WEIGHT_EMBOLDEN,
+					props1.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
+			mActivity.setSettings(props1, -1, true);
+			break;
+		case DCMD_FONT_NEXT:
+			switchFontFace(1);
+            break;
+		case DCMD_FONT_PREVIOUS:
+			switchFontFace(-1);
+            break;
+		case DCMD_MOVE_BY_CHAPTER:
+			if (isBookLoaded())
 				doEngineCommand(cmd, param, onFinishHandler);
-				drawPage();
-				break;
-			case DCMD_PAGEDOWN:
+            drawPage();
+			break;
+		case DCMD_PAGEDOWN:
+			if (isBookLoaded()) {
 				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-			//	eink = true;
-				if ( param==1 && !eink)
+				if (param == 1 && !eink)
 					animatePageFlip(1, onFinishHandler);
 				else {
-					if ((mActivity.getScreenBlackpageInterval()!=0) &&
-							(curBlackpageInterval > mActivity.getScreenBlackpageInterval()-1)) {
+					if ((mActivity.getScreenBlackpageInterval() != 0) &&
+							(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
 						curBlackpageInterval = 0;
 						bookView.draw(false, true);
 						BackgroundThread.instance().postGUI(new Runnable() {
@@ -2663,19 +2671,20 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							}
 						}, blackpageDuration);
 					} else {
-						if (mActivity.getScreenBlackpageInterval()!=0) curBlackpageInterval++;
+						if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
 						doEngineCommand(cmd, param, onFinishHandler);
 					}
 				}
-				break;
-			case DCMD_PAGEUP:
+			}
+			break;
+		case DCMD_PAGEUP:
+			if (isBookLoaded()) {
 				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-			//	eink = true;
-				if ( param==1 && !eink)
+				if (param == 1 && !eink)
 					animatePageFlip(-1, onFinishHandler);
 				else {
-					if ((mActivity.getScreenBlackpageInterval()!=0) &&
-							(curBlackpageInterval > mActivity.getScreenBlackpageInterval()-1)) {
+					if ((mActivity.getScreenBlackpageInterval() != 0) &&
+							(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
 						curBlackpageInterval = 0;
 						bookView.draw(false, true);
 						BackgroundThread.instance().postGUI(new Runnable() {
@@ -2686,171 +2695,174 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							}
 						}, blackpageDuration);
 					} else {
-						if (mActivity.getScreenBlackpageInterval()!=0) curBlackpageInterval++;
+						if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
 						doEngineCommand(cmd, param, onFinishHandler);
 					}
 				}
-				break;
-			case DCMD_BEGIN:
-			case DCMD_END:
+			}
+			break;
+		case DCMD_BEGIN:
+		case DCMD_END:
+			if (isBookLoaded())
 				doEngineCommand(cmd, param);
-				break;
-			case DCMD_RECENT_BOOKS_LIST:
-				mActivity.showRecentBooks();
-				break;
-			case DCMD_SEARCH:
+			break;
+		case DCMD_RECENT_BOOKS_LIST:
+			mActivity.showRecentBooks();
+			break;
+		case DCMD_SEARCH:
+			if (isBookLoaded())
 				showSearchDialog(null);
-				break;
-			case DCMD_EXIT:
-				mActivity.finish();
-				break;
-			case DCMD_BOOKMARKS:
+			break;
+		case DCMD_EXIT:
+			mActivity.finish();
+			break;
+		case DCMD_BOOKMARKS:
+			if (isBookLoaded())
 				mActivity.showBookmarksDialog(false, null);
-				break;
-			case DCMD_GO_PERCENT_DIALOG:
+			break;
+		case DCMD_GO_PERCENT_DIALOG:
+			if (isBookLoaded())
 				showGoToPercentDialog();
-				break;
-			case DCMD_GO_PAGE_DIALOG:
+			break;
+		case DCMD_GO_PAGE_DIALOG:
+			if (isBookLoaded())
 				showGoToPageDialog();
-				break;
-			case DCMD_TOC_DIALOG:
+			break;
+		case DCMD_TOC_DIALOG:
+			if (isBookLoaded())
 				showTOC();
-				break;
-			case DCMD_FILE_BROWSER:
-			    boolean needBrowser = true;
-                if (mBookInfo != null) {
-                    final FileInfo fileInfo = mBookInfo.getFileInfo();
-                    if (fileInfo != null) {
-                        final Bookmark bmk = doc != null ? doc.getCurrentPageBookmark() : null;
-                        final PositionProperties props = bmk != null ? doc.getPositionProps(bmk.getStartPos()) : null;
-                        if (props != null) {
-							needBrowser = !(mActivity.willBeCheckAskReading(fileInfo, props, 7));
-                        	mActivity.checkAskReading(fileInfo, props, 7, true);
-
-                        }
-                    }
-                }
-                if (needBrowser)
-                    mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null);
-				break;
-			case DCMD_CURRENT_BOOK_DIRECTORY:
-				mActivity.showBrowser(getOpenedFileInfo());
-				break;
-			case DCMD_OPTIONS_DIALOG:
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
-				break;
-			case DCMD_OPTIONS_DIALOG_FILTERED:
-				showFilterDialog();
-				break;
-			case DCMD_READER_MENU:
-				mActivity.showReaderMenu();
-				break;
-			case DCMD_TOGGLE_DAY_NIGHT_MODE:
-				toggleDayNightMode();
-				break;
-			case DCMD_TOGGLE_DICT_ONCE:
-				log.i("Next dictionary will be the 2nd for one time");
-				mActivity.showToast(mActivity.getString(R.string.next_dict_will_be_2nd));
-				mActivity.mDictionaries.setiDic2IsActive(2);
-				break;
-			case DCMD_TOGGLE_DICT:
-				if (mActivity.mDictionaries.isiDic2IsActive() > 0) {
-					mActivity.mDictionaries.setiDic2IsActive(0);
-				}
-				else {
-					mActivity.mDictionaries.setiDic2IsActive(1);
-				}
-				log.i(mActivity.getString(R.string.switched_to_dic) + ": "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
-				mActivity.showToast(mActivity.getString(R.string.switched_to_dic) + ": "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
-				break;
-			default:
-				// do nothing
-				break;
-			case DCMD_SAVE_SETTINGS_TO_GD:
-				log.i("Save settings to GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
-				break;
-			case DCMD_LOAD_SETTINGS_FROM_GD:
-				log.i("Load settings from GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
-				break;
-			case DCMD_SAVE_READING_POS:
-				log.i("Save reading pos to GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, this);
-				break;
-			case DCMD_LOAD_READING_POS:
-				log.i("Load reading pos from GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, this);
-				break;
-			case DCMD_SAVE_BOOKMARKS:
-				log.i("Save bookmarks to GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, this);
-				break;
-			case DCMD_LOAD_BOOKMARKS:
-				log.i("Load bookmarks from GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, this);
-				break;
-			case DCMD_SAVE_CURRENT_BOOK_TO_GD:
-				log.i("Save current book to GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, this);
-				break;
-			case DCMD_OPEN_BOOK_FROM_GD:
-				log.i("Open book from GD");
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-				break;
-			case DCMD_GD_MENU:
-				log.i("GD menu");
-				ReaderAction[] actions = {
-						ReaderAction.SAVE_SETTINGS_TO_GD,
-						ReaderAction.LOAD_SETTINGS_FROM_GD,
-						ReaderAction.SAVE_READING_POS,
-						ReaderAction.LOAD_READING_POS,
-						ReaderAction.SAVE_BOOKMARKS,
-						ReaderAction.LOAD_BOOKMARKS,
-						ReaderAction.SAVE_CURRENT_BOOK_TO_GD,
-						ReaderAction.OPEN_BOOK_FROM_GD
-				};
-				mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
-					@Override
-					public boolean onActionSelected(ReaderAction item) {
-						if (item == ReaderAction.SAVE_SETTINGS_TO_GD) {
-							log.i("Save settings to GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
-							return true;
-						} else if (item == ReaderAction.LOAD_SETTINGS_FROM_GD) {
-							log.i("Load settings from GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
-							return true;
-						} else if (item == ReaderAction.SAVE_READING_POS) {
-							log.i("Save reading pos to GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, ReaderView.this);
-							return true;
-						} else if (item == ReaderAction.LOAD_READING_POS) {
-							log.i("Load reading pos from GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, ReaderView.this);
-							return true;
-						} else if (item == ReaderAction.SAVE_BOOKMARKS) {
-							log.i("Save bookmarks to GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, ReaderView.this);
-							return true;
-						} else if (item == ReaderAction.LOAD_BOOKMARKS) {
-							log.i("Load bookmarks from GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, ReaderView.this);
-							return true;
-						} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_GD) {
-							log.i("Save current book to GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, ReaderView.this);
-							return true;
-						} else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
-							log.i("Open book from GD");
-							((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, ReaderView.this);
-							return true;
-						}
-						return false;
+			break;
+		case DCMD_FILE_BROWSER:
+			boolean needBrowser = true;
+			if (mBookInfo != null) {
+				final FileInfo fileInfo = mBookInfo.getFileInfo();
+				if (fileInfo != null) {
+					final Bookmark bmk = doc != null ? doc.getCurrentPageBookmark() : null;
+					final PositionProperties props = bmk != null ? doc.getPositionProps(bmk.getStartPos()) : null;
+					if (props != null) {
+						needBrowser = !(mActivity.willBeCheckAskReading(fileInfo, props, 7));
+						mActivity.checkAskReading(fileInfo, props, 7, true);
 					}
-				});
-				break;
+				}
+			}
+			if (needBrowser)
+				mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null);
+			break;
+		case DCMD_CURRENT_BOOK_DIRECTORY:
+			mActivity.showBrowser(getOpenedFileInfo());
+			break;
+		case DCMD_OPTIONS_DIALOG:
+			mActivity.optionsFilter = "";
+			mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
+			break;
+		case DCMD_OPTIONS_DIALOG_FILTERED:
+			showFilterDialog();
+			break;
+		case DCMD_READER_MENU:
+			mActivity.showReaderMenu();
+			break;
+		case DCMD_TOGGLE_DAY_NIGHT_MODE:
+			toggleDayNightMode();
+			break;
+		case DCMD_TOGGLE_DICT_ONCE:
+			log.i("Next dictionary will be the 2nd for one time");
+			mActivity.showToast(mActivity.getString(R.string.next_dict_will_be_2nd));
+			mActivity.mDictionaries.setiDic2IsActive(2);
+			break;
+		case DCMD_TOGGLE_DICT:
+			if (mActivity.mDictionaries.isiDic2IsActive() > 0) {
+				mActivity.mDictionaries.setiDic2IsActive(0);
+			}
+			else {
+				mActivity.mDictionaries.setiDic2IsActive(1);
+			}
+			log.i("Switched to dictionary: "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
+			mActivity.showToast("Switched to dictionary: "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
+			break;
+		case DCMD_SAVE_SETTINGS_TO_GD:
+			log.i("Save settings to GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
+			break;
+		case DCMD_LOAD_SETTINGS_FROM_GD:
+			log.i("Load settings from GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
+			break;
+		case DCMD_SAVE_READING_POS:
+			log.i("Save reading pos to GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, this);
+			break;
+		case DCMD_LOAD_READING_POS:
+			log.i("Load reading pos from GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, this);
+			break;
+		case DCMD_SAVE_BOOKMARKS:
+			log.i("Save bookmarks to GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, this);
+			break;
+		case DCMD_LOAD_BOOKMARKS:
+			log.i("Load bookmarks from GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, this);
+			break;
+		case DCMD_SAVE_CURRENT_BOOK_TO_GD:
+			log.i("Save current book to GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, this);
+			break;
+		case DCMD_OPEN_BOOK_FROM_GD:
+			log.i("Open book from GD");
+			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+			break;
+		case DCMD_GD_MENU:
+			log.i("GD menu");
+			ReaderAction[] actions = {
+					ReaderAction.SAVE_SETTINGS_TO_GD,
+					ReaderAction.LOAD_SETTINGS_FROM_GD,
+					ReaderAction.SAVE_READING_POS,
+					ReaderAction.LOAD_READING_POS,
+					ReaderAction.SAVE_BOOKMARKS,
+					ReaderAction.LOAD_BOOKMARKS,
+					ReaderAction.SAVE_CURRENT_BOOK_TO_GD,
+					ReaderAction.OPEN_BOOK_FROM_GD
+			};
+			mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
+				@Override
+				public boolean onActionSelected(ReaderAction item) {
+					if (item == ReaderAction.SAVE_SETTINGS_TO_GD) {
+						log.i("Save settings to GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
+						return true;
+					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_GD) {
+						log.i("Load settings from GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
+						return true;
+					} else if (item == ReaderAction.SAVE_READING_POS) {
+						log.i("Save reading pos to GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, ReaderView.this);
+						return true;
+					} else if (item == ReaderAction.LOAD_READING_POS) {
+						log.i("Load reading pos from GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, ReaderView.this);
+						return true;
+					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
+						log.i("Save bookmarks to GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, ReaderView.this);
+						return true;
+					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
+						log.i("Load bookmarks from GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, ReaderView.this);
+						return true;
+					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_GD) {
+						log.i("Save current book to GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, ReaderView.this);
+						return true;
+					} else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
+						log.i("Open book from GD");
+						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, ReaderView.this);
+						return true;
+					}
+					return false;
+				}
+			});
+			break;
 			case DCMD_FONTS_MENU:
 				log.i("Fonts menu");
 				ReaderAction[] fonts_actions = {
@@ -2916,34 +2928,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_SHOW_CITATIONS:
 				UserDicDlg dlg2 = new UserDicDlg(((CoolReader)mActivity),1);
 				dlg2.show();
-//				bookView.draw(false,true);
-//				BackgroundThread.instance().postGUI(new Runnable() {
-//					@Override
-//					public void run() {
-//						drawPage();
-//					}}, 300);
-				//surface.invalidate();
-//				try {
-//					Class.forName("android.view.View").getDeclaredMethod("invalidate",
-//							new Class[]{Integer.TYPE}).invoke(surface, Integer.valueOf(536870917));
-//				} catch (Exception e) {
-//					mActivity.showToast(e.getClass().toString()+" " +e.getMessage());
-//				}
 				break;
 			case DCMD_TOGGLE_PAGE_VIEW_MODE:
 				String oldViewSetting = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
                 boolean newBool = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ).equals("0");
                 String newValue = newBool ? "1" : "0";
                 saveSetting(PROP_PAGE_VIEW_MODE, newValue);
-                //mActivity.showToast("newValue "+newValue);
-//				bookView.draw(false,true);
-//				surface.invalidate();
-//				try {
-//					Class.forName("android.view.View").getDeclaredMethod("invalidate",
-//							new Class[]{Integer.TYPE}).invoke(surface, Integer.valueOf(268437764));
-//				} catch (Exception e) {
-//					mActivity.showToast(e.getClass().toString()+" " +e.getMessage());
-//				}
+				break;
+			default:
+				// do nothing
 				break;
 		}
 	}
@@ -2994,7 +2987,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						// do nothing
 						break;
 				}
-				if (isMoveCommand)
+				if (isMoveCommand && isBookLoaded())
 					updateCurrentPositionStatus();
 			}
 			public void done() {
@@ -3002,7 +2995,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					invalidImages = true;
 					drawPage( doneHandler, false );
 				}
-				if (isMoveCommand)
+				if (isMoveCommand && isBookLoaded())
 					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			}
 		});
@@ -3080,15 +3073,35 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		int updMode      = props.getInt(PROP_APP_SCREEN_UPDATE_MODE, 0);
 		int updInterval  = props.getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
+
 		int blackpageInterval  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_INTERVAL, 0);
         blackpageDuration  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_DURATION, 300);
-        mActivity.setScreenUpdateMode(updMode, surface);
+		mActivity.setScreenUpdateMode(updMode, surface);
 		mActivity.setScreenUpdateInterval(updInterval, surface);
 		mActivity.setScreenBlackpageInterval(blackpageInterval);
-        mActivity.setScreenBlackpageDuration(blackpageDuration);
+		mActivity.setScreenBlackpageDuration(blackpageDuration);
 
 		getActivity().readResizeHistory();
 
+		if (null != mBookInfo) {
+			FileInfo fileInfo = mBookInfo.getFileInfo();
+			final String bookLanguage = fileInfo.getLanguage();
+			final String fontFace = props.getProperty(PROP_FONT_FACE);
+			if (null != bookLanguage && bookLanguage.length() > 0) {
+				boolean res = Engine.checkFontLanguageCompatibility(fontFace, bookLanguage);
+				log.d("Checking font \"" + fontFace + "\" for compatibility with language \"" + bookLanguage + "\": res=" + res);
+				if (!res) {
+					BackgroundThread.instance().executeGUI(new Runnable() {
+						@Override
+						public void run() {
+							mActivity.showToast(R.string.font_not_compat_with_language, fontFace, bookLanguage);
+						}
+					});
+				}
+			} else {
+				log.d("Can't get book's language to check font compatibility! bookInfo=" + fileInfo);
+			}
+		}
 		doc.applySettings(props);
 		//syncViewSettings(props, save, saveDelayed);
 		drawPage();
@@ -4011,6 +4024,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		lastsetOrientation = getActivity().getScreenOrientation();
 		requestedWidth = width;
 		requestedHeight = height;
+		if (requestedWidth <= 0)
+			requestedWidth = 80;
+		if (requestedHeight <= 0)
+			requestedHeight = 80;
 		requestedResTime = System.currentTimeMillis();
 		if (!checkNeedRedraw(width,height)) {
 			//getActivity().showToast("requestResize (and skipped): "+width+", "+height);
@@ -4183,6 +4200,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //	}
 	private void animatePageFlip( final int dir, final Runnable onFinishHandler )
 	{
+		if (!mOpened)
+			return;
 		BackgroundThread.instance().executeBackground(new Runnable() {
 			@Override
 			public void run() {
@@ -4368,6 +4387,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private void startAnimation( final int startX, final int startY, final int maxX, final int maxY, final int newX, final int newY )
 	{
+		if (!mOpened)
+			return;
 		alog.d("startAnimation("+startX + ", " + startY+")");
 		BackgroundThread.instance().executeBackground(new Runnable() {
 			@Override
@@ -4432,6 +4453,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private AnimationUpdate currentAnimationUpdate;
 	private void updateAnimation( final int x, final int y )
 	{
+		if (!mOpened)
+			return;
 		alog.d("updateAnimation("+x + ", " + y+")");
 		synchronized(AnimationUpdate.class) {
 			if (currentAnimationUpdate != null)
@@ -4449,6 +4472,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private void stopAnimation( final int x, final int y )
 	{
+		if (!mOpened)
+			return;
 		alog.d("stopAnimation("+x+", "+y+")");
 		BackgroundThread.instance().executeBackground(new Runnable() {
 			@Override
@@ -4464,6 +4489,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	DelayedExecutor animationScheduler = DelayedExecutor.createBackground("animation");
 	private void scheduleAnimation()
 	{
+		if (!mOpened)
+			return;
 		animationScheduler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -5343,17 +5370,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 	private void drawPage( Runnable doneHandler, boolean isPartially )
 	{
-		if ( !mInitialized || !mOpened )
+		if ( !mInitialized )
 			return;
 		log.v("drawPage() : submitting DrawPageTask");
 		// evaluate if we need to redraw page on this resolution
-		scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
-		//if (checkNeedRedraw())
-			post( new DrawPageTask(doneHandler, isPartially) );
-//		log.w("doc.getPageText");
-//		String sPage = doc.getPageText(false,3);
-//		if (sPage == null) sPage = "null";
-//		log.w("sPage:"+sPage);
+		if ( mOpened )
+			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
+		post( new DrawPageTask(doneHandler, isPartially) );
 	}
 
 	private int internalDX = 0;
@@ -5520,14 +5543,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			log.d("LoadDocumentTask, GUI thread is finished successfully");
 			if (Services.getHistory() != null) {
 				Services.getHistory().updateBookAccess(mBookInfo, getTimeElapsed());
-				if (mActivity.getDB() != null)
-					mActivity.getDB().saveBookInfo(mBookInfo);
+				mActivity.waitForCRDBService(new Runnable() {
+					@Override
+					public void run() {
+						mActivity.getDB().saveBookInfo(mBookInfo);
+					}
+				});
 				if (coverPageBytes!=null && mBookInfo!=null && mBookInfo.getFileInfo()!=null) {
 					if (mBookInfo.getFileInfo().format.needCoverPageCaching()) {
 						// TODO: fix it
 //		        		if (mActivity.getBrowser() != null)
 //		        			mActivity.getBrowser().setCoverpageData(new FileInfo(mBookInfo.getFileInfo()), coverPageBytes);
-					}
+				}
 					if (DeviceInfo.EINK_NOOK)
 						updateNookTouchCoverpage(mBookInfo.getFileInfo().getPathName(), coverPageBytes);
 					//mEngine.setProgressDrawable(coverPageDrawable);
@@ -5556,12 +5583,26 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void fail( Exception e )
 		{
 			BackgroundThread.ensureGUI();
+			close();
 			log.v("LoadDocumentTask failed for " + mBookInfo, e);
-			Services.getHistory().removeBookInfo(mActivity.getDB(), mBookInfo.getFileInfo(), true, false );
+			mActivity.waitForCRDBService(new Runnable() {
+				@Override
+				public void run() {
+					Services.getHistory().removeBookInfo(mActivity.getDB(), mBookInfo.getFileInfo(), true, false );
+				}
+			});
 			mBookInfo = null;
 			log.d("LoadDocumentTask is finished with exception " + e.getMessage());
-			mOpened = false;
-			drawPage();
+	        mOpened = false;
+	        BackgroundThread.instance().executeBackground(new Runnable() {
+		        @Override
+		        public void run() {
+			        doc.createDefaultDocument(mActivity.getString(R.string.error), mActivity.getString(R.string.error_while_opening, filename));
+			        doc.requestRender();
+			        preparePageImage(0);
+			        drawPage();
+		        }
+	        });
 			hideProgress();
 			mActivity.showToast("Error while loading document");
 			if ( errorHandler!=null ) {
@@ -6929,12 +6970,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		holder.addCallback(this);
 
 		BackgroundThread.ensureGUI();
-		this.mActivity = activity;
-		this.mEngine = engine;
-		surface.setFocusable(true);
-		surface.setFocusableInTouchMode(true);
-
-		BackgroundThread.instance().postBackground(new Runnable() {
+        this.mActivity = activity;
+        this.mEngine = engine;
+        surface.setFocusable(true);
+        surface.setFocusableInTouchMode(true);
+        // set initial size to exclude java.lang.IllegalArgumentException in Bitmap.createBitmap(0, 0)
+        // surface.getWidth() at this point return 0
+        requestResize(600, 800);
+        
+        BackgroundThread.instance().postBackground(new Runnable() {
 
 			@Override
 			public void run() {

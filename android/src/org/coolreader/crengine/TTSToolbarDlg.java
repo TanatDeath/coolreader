@@ -51,6 +51,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	View mAnchor;
 	CoolReader mCoolReader;
 	String mLogFileRoot = "";
+	int mForceTTSKoef = 0;
 	ReaderView mReaderView;
 	View mPanel;
 	TTS mTTS;
@@ -66,6 +67,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	private HandlerThread mMotionWatchdog;
 	private HandlerThread mTimerHandler;
 	private static String CHANNEL_ID = "CoolReader_channel";
+	private static int MIN_FORCE_TTS_START_TIME = 5000;
 
 	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
 	// For TTS notification:
@@ -309,12 +311,26 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			if (dWordCountThis>0) {
 				avgWordTimeSpanThis = ((double)curTimeSpan) / dWordCountThis;
 			}
-			if ((avgWordTimeSpan>0)&&(avgWordTimeSpanThis>0)) {
-                if ((avgWordTimeSpanThis > avgWordTimeSpan * 7) && (isSpeaking) && (iSentenceCount > 20)) {
+			if ((avgWordTimeSpan>0) && (mForceTTSKoef>0)) {
+				boolean needForce = isSpeaking && (iSentenceCount > 20);
+				boolean needForceBase = needForce;
+				// if there is enough time spent
+				if (needForce)
+					needForce = needForce && (avgWordTimeSpanThis > avgWordTimeSpan * mForceTTSKoef);
+				// end min time has reached
+				if (needForce)
+					needForce = needForce && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
+				// if current sentence is empty - just wait min time
+				if (avgWordTimeSpanThis < 0.1)
+					needForce = needForceBase && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
+				if (needForce) {
                     CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
                             "possibly tts unexpectedly stopped...");
                     mCoolReader.showToast("Trying to force restart TTS");
-                    if (currentSelection != null) {
+					iSentenceCount = 0;
+					dWordCount = 0.0f;
+					lTimeSpan = 0L;
+					if (currentSelection != null) {
                         if (isSpeaking) {
                             if (isAlwaysStop) {
                                 mTTS.stop();
@@ -502,6 +518,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			if (sWord.length()<4) dWordCountThis = dWordCountThis + 0.8d;
 				else if (sWord.length()<7) dWordCountThis = dWordCountThis + 1d;
 			else dWordCountThis = dWordCountThis + 1.2d;
+			if (sWord.replaceAll("\\p{Punct}", "").length()==0) dWordCountThis = 0;
 		}
 		lastSaveSpeakTime = System.currentTimeMillis();
 		displayNotification(isSpeaking,selection.text);
@@ -622,7 +639,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
 				isSpeaking?"utterance complete, while is speaking":"utterance complete, while NOT is speaking");
 		if ( isSpeaking ) {
-			if (iSentenceCount<50) {
+			if ((iSentenceCount<50) && (dWordCountThis>5)) {
 				dWordCount = dWordCount + dWordCountThis;
 				iSentenceCount = iSentenceCount + 1;
 				lTimeSpan = lTimeSpan + System.currentTimeMillis() - lastSaveSpeakTime;
@@ -635,7 +652,8 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	{
 		mCoolReader = coolReader;
         mLogFileRoot = mCoolReader.getSettingsFile(0).getParent() + "/";
-		mReaderView = readerView;
+        mForceTTSKoef = readerView.getSettings().getInt(Settings.PROP_APP_TTS_FORCE_KOEF, 0);
+        mReaderView = readerView;
 		mAnchor = readerView.getSurface();
 		mTTS = tts;
 		mTTS.setOnUtteranceCompletedListener(this);
