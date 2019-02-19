@@ -5,6 +5,7 @@ import org.coolreader.R;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 public class OPDSCatalogEditDialog extends BaseDialog {
@@ -16,6 +17,11 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 	private final EditText urlEdit;
 	private final EditText usernameEdit;
 	private final EditText passwordEdit;
+	private final EditText proxyaddrEdit;
+	private final EditText proxyportEdit;
+	private final EditText proxyunameEdit;
+	private final EditText proxypasswEdit;
+	private final CheckBox onionDefProxyChb;
 	private final Runnable mOnUpdate;
 
 	public OPDSCatalogEditDialog(CoolReader activity, FileInfo item, Runnable onUpdate) {
@@ -31,10 +37,20 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		urlEdit = (EditText) view.findViewById(R.id.catalog_url);
 		usernameEdit = (EditText) view.findViewById(R.id.catalog_username);
 		passwordEdit = (EditText) view.findViewById(R.id.catalog_password);
+		proxyaddrEdit = (EditText) view.findViewById(R.id.edt_proxy_addr);
+		proxyportEdit = (EditText) view.findViewById(R.id.edt_proxy_port);
+		proxyunameEdit = (EditText) view.findViewById(R.id.edt_proxy_uname);
+		proxypasswEdit = (EditText) view.findViewById(R.id.edt_proxy_passw);
+		onionDefProxyChb = (CheckBox) view.findViewById(R.id.chb_onion_def_proxy);
 		nameEdit.setText(mItem.filename);
 		urlEdit.setText(mItem.getOPDSUrl());
 		usernameEdit.setText(mItem.username);
 		passwordEdit.setText(mItem.password);
+		proxyaddrEdit.setText(mItem.proxy_addr);
+		proxyportEdit.setText(mItem.proxy_port);
+		proxyunameEdit.setText(mItem.proxy_uname);
+		proxypasswEdit.setText(mItem.proxy_passw);
+		onionDefProxyChb.setChecked(mItem.onion_def_proxy==1);
 		setThirdButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
 				//R.drawable.icons8_minus,
@@ -79,7 +95,10 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 	private void save() {
 		activity.getDB().saveOPDSCatalog(mItem.id,
 				urlEdit.getText().toString(), nameEdit.getText().toString(), 
-				usernameEdit.getText().toString(), passwordEdit.getText().toString());
+				usernameEdit.getText().toString(), passwordEdit.getText().toString(),
+				proxyaddrEdit.getText().toString(), proxyportEdit.getText().toString(),
+				proxyunameEdit.getText().toString(), proxypasswEdit.getText().toString(),
+				onionDefProxyChb.isChecked()?1:0);
 		mOnUpdate.run();
 		super.onPositiveButtonClick();
 	}

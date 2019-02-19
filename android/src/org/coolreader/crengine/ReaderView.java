@@ -4031,14 +4031,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		requestedResTime = System.currentTimeMillis();
 		if (!checkNeedRedraw(width,height)) {
 			//getActivity().showToast("requestResize (and skipped): "+width+", "+height);
+            if (mActivity.getmReaderFrame()!=null)
+                if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
+                    mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.request_resize)+": "+width+", "+height);
 			return;
 		}
 		lastsetWidth = width;
 		lastsetHeight = height;
 		lastsetResTime = System.currentTimeMillis();
 		if (bNeed) {
-			//getActivity().showToast(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
-            if (mActivity.getmReaderFrame()!=null)
+		    if (mActivity.getmReaderFrame()!=null)
              	if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
 					mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
 		}
@@ -4047,7 +4049,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void resized() {
 		boolean bSwitched = true;
-		//Log.i("ASDF", "resized ");
 		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry)it.next();
@@ -5846,6 +5847,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public int getDefSavePositionInterval() {
 		return
 		  (getSettings().getInt(ReaderView.PROP_SAVE_POS_TIMEOUT, 0))*1000*60;
+	}
+
+	public int getDefSavePositionIntervalSpeak() {
+		return
+		  (getSettings().getInt(ReaderView.PROP_SAVE_POS_SPEAK_TIMEOUT, 0))*1000;
 	}
 
 	public void scheduleSaveCurrentPositionBookmark(final int delayMillis) {

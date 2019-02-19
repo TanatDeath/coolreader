@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import java.util.ArrayList;
 
+import org.coolreader.db.BaseDB;
 import org.coolreader.db.CRDBService;
 
 import android.util.Log;
@@ -183,5 +184,17 @@ public class History extends FileInfoChangeSource {
 			Log.v("cr3", "History.loadFromDB() : mRecentBooksFolder is null");
 		return true;
 	}
+
+	public BaseDB getMainDB(final CRDBService.LocalBinder db)
+	{
+		Log.v("cr3", "History.getMainDB()");
+		return db.getService().getMainDB();
+	}
+
+    public BaseDB getCoverDB(final CRDBService.LocalBinder db)
+    {
+        Log.v("cr3", "History.getMainDB()");
+        return db.getService().getCoverDB();
+    }
 
 }

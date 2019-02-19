@@ -5,6 +5,7 @@
     android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/notice_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dip"
@@ -13,6 +14,7 @@
         android:layout_marginTop="10dip"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
+        android:textColor="?attr/colorIcon"
         android:text="@string/note1_reader_menu" />
 
     <LinearLayout
@@ -30,6 +32,8 @@
             android:layout_height="wrap_content"
             android:minWidth="100dip"
             android:text="@string/dlg_button_ok"
+            android:textColor="?attr/colorIcon"
+            android:layout_margin="3dip"
             />
 
         <Button
@@ -38,6 +42,8 @@
             android:layout_height="wrap_content"
             android:minWidth="100dip"
             android:text="@string/dlg_button_cancel"
+            android:textColor="?attr/colorIcon"
+            android:layout_margin="3dip"
             />
 
     </LinearLayout>        

@@ -1234,6 +1234,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						final FileInfo item = dir.findItemByPathName(sPathZ);
 						BackgroundThread.ensureGUI();
 						item.opdsLink = url;
+						fileOrDir.pathnameR = item.pathname;
+						fileOrDir.arcnameR = item.arcname;
+						fileOrDir.pathR = item.path;
+						mActivity.getDB().saveBookInfo(new BookInfo(fileOrDir));
+						mActivity.getDB().flush();
 						if (item.getTitle() == null) {
 							if (!mEngine.scanBookProperties(item))
 								mActivity.showToast("Could not read file properties, possibly format is unsupported");
@@ -1248,6 +1253,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 									@Override
 									public void onBookInfoLoaded(final BookInfo bookInfo) {
 										BookInfo bif2 = bookInfo;
+
 										if (bif2 == null) bif2 = new BookInfo(item);
 										final BookInfo bif = bif2;
 										if (StrUtils.isEmptyStr(bif.getFileInfo().annotation))
@@ -1292,7 +1298,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				if ( fileOrDir.format!=null )
 					defFileName = defFileName + fileOrDir.format.getExtensions()[0];
 				final OPDSUtil.DownloadTask downloadTask = OPDSUtil.create(mActivity, uri, defFileName, fileOrDir.isDirectory?"application/atom+xml":fileMimeType, 
-						myCurrDirectory.getOPDSUrl(), callback, fileOrDir.username, fileOrDir.password);
+						myCurrDirectory.getOPDSUrl(), callback, fileOrDir.username, fileOrDir.password,
+						fileOrDir.proxy_addr, fileOrDir.proxy_port,
+						fileOrDir.proxy_uname, fileOrDir.proxy_passw,
+						fileOrDir.onion_def_proxy);
 				downloadTask.run();
 			} catch (MalformedURLException e) {
 				log.e("MalformedURLException: " + url);

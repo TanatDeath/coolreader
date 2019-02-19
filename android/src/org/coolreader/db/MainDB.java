@@ -14,7 +14,7 @@ public class MainDB extends BaseDB {
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
 	
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 37;
+	public static final int DB_VERSION = 38;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -132,7 +132,13 @@ public class MainDB extends BaseDB {
                         "url VARCHAR NOT NULL COLLATE NOCASE, " +
                         "last_usage INTEGER DEFAULT 0," +
                         "username VARCHAR DEFAULT NULL, " +
-                        "password VARCHAR DEFAULT NULL" +
+                        "password VARCHAR DEFAULT NULL, " +
+						"last_usage INTEGER DEFAULT 0, " +
+						"proxy_addr VARCHAR DEFAULT NULL, " +
+						"proxy_port VARCHAR DEFAULT NULL, " +
+						"proxy_uname VARCHAR DEFAULT NULL, " +
+						"proxy_passw VARCHAR DEFAULT NULL, " +
+						"onion_def_proxy INTEGER DEFAULT 1 " +
                         ")");
 			if (currentVersion < 7) {
 				addOPDSCatalogs(DEF_OPDS_URLS1);
@@ -269,6 +275,13 @@ public class MainDB extends BaseDB {
 				execSQL("CREATE INDEX IF NOT EXISTS " +
 						"book_opds_link_index ON book (opds_link) ");
 			}
+			if (currentVersion < 38) {
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN proxy_addr VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN proxy_port VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN proxy_uname VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN proxy_passw VARCHAR DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN onion_def_proxy INTEGER DEFAULT 1");
+			}
 			//==============================================================
 			// add more updates above this line
 				
@@ -362,7 +375,8 @@ public class MainDB extends BaseDB {
 		for (int i=0; i<catalogs.length-1; i+=2) {
 			String url = catalogs[i];
 			String name = catalogs[i+1];
-			saveOPDSCatalog(null, url, name, null, null);
+			saveOPDSCatalog(null, url, name, null, null,
+					null,null,null,null,1);
 		}
 	}
 
@@ -394,7 +408,8 @@ public class MainDB extends BaseDB {
 	}
 
 	
-	public boolean saveOPDSCatalog(Long id, String url, String name, String username, String password) {
+	public boolean saveOPDSCatalog(Long id, String url, String name, String username, String password,
+		String proxy_addr, String proxy_port, String proxy_uname, String proxy_passw, int onion_def_proxy) {
 		if (!isOpened())
 			return false;
 		if (url==null || name==null)
@@ -416,10 +431,22 @@ public class MainDB extends BaseDB {
 			if (id==null) {
 				// insert new
 				log.i("Saving "+name+" OPDS catalog");
-				execSQL("INSERT INTO opds_catalog (name, url, username, password) VALUES ("+quoteSqlString(name)+", "+quoteSqlString(url)+", "+quoteSqlString(username)+", "+quoteSqlString(password)+")");
+				execSQL("INSERT INTO opds_catalog (name, url, username, password, "+
+						"proxy_addr, proxy_port, proxy_uname, proxy_passw, onion_def_proxy) VALUES ("+
+						quoteSqlString(name)+", "+quoteSqlString(url)+", "+
+						quoteSqlString(username)+", "+quoteSqlString(password)+", "+
+						quoteSqlString(proxy_addr)+", "+quoteSqlString(proxy_port)+", "+
+						quoteSqlString(proxy_uname)+", "+quoteSqlString(proxy_passw)+", "+
+						String.valueOf(onion_def_proxy)+
+						")");
 			} else {
 				// update existing
-				execSQL("UPDATE opds_catalog SET name="+quoteSqlString(name)+", url="+quoteSqlString(url)+", username="+quoteSqlString(username)+", password="+quoteSqlString(password)+" WHERE id=" + id);
+				execSQL("UPDATE opds_catalog SET name="+quoteSqlString(name)+", url="+quoteSqlString(url)+
+						", username="+quoteSqlString(username)+", password="+quoteSqlString(password)+
+						", proxy_addr="+quoteSqlString(proxy_addr)+", proxy_port="+quoteSqlString(proxy_port)+
+						", proxy_uname="+quoteSqlString(proxy_uname)+", proxy_passw="+quoteSqlString(proxy_passw)+
+						", onion_def_proxy="+String.valueOf(onion_def_proxy)+
+						" WHERE id=" + id);
 			}
 			updateOPDSCatalogLastUsage(url);
 				
@@ -630,6 +657,7 @@ public class MainDB extends BaseDB {
 	public HashMap<String, UserDicEntry> loadUserDic() {
 		log.i("loadUserDic()");
 		HashMap<String, UserDicEntry> hshDic = new HashMap<String, UserDicEntry>();
+		if (mDB == null) return hshDic;
 		Cursor rs = null;
 		try {
 			String sql = "SELECT id, dic_word, dic_word_translate, dic_from_book, "+
@@ -698,8 +726,11 @@ public class MainDB extends BaseDB {
 		log.i("loadOPDSCatalogs()");
 		boolean found = false;
 		Cursor rs = null;
+		if (mDB == null) return false;
 		try {
-			String sql = "SELECT id, name, url, username, password FROM opds_catalog ORDER BY last_usage DESC, name";
+			String sql = "SELECT id, name, url, username, password, "+
+				" proxy_addr, proxy_port, proxy_uname, proxy_passw, onion_def_proxy "+
+				" FROM opds_catalog ORDER BY last_usage DESC, name";
 			rs = mDB.rawQuery(sql, null);
 			if ( rs.moveToFirst() ) {
 				// remove existing entries
@@ -711,12 +742,22 @@ public class MainDB extends BaseDB {
 					String url = rs.getString(2);
 					String username = rs.getString(3);
 					String password = rs.getString(4);
+					String proxy_addr = rs.getString(5);
+					String proxy_port = rs.getString(6);
+					String proxy_uname = rs.getString(7);
+					String proxy_passw = rs.getString(8);
+					int onion_def_proxy = rs.getInt(9);
 					FileInfo opds = new FileInfo();
 					opds.isDirectory = true;
 					opds.pathname = FileInfo.OPDS_DIR_PREFIX + url;
 					opds.filename = name;
 					opds.username = username;
 					opds.password = password;
+					opds.proxy_addr = proxy_addr;
+					opds.proxy_port = proxy_port;
+					opds.proxy_uname = proxy_uname;
+					opds.proxy_passw = proxy_passw;
+					opds.onion_def_proxy = onion_def_proxy;
 					opds.isListed = true;
 					opds.isScanned = true;
 					opds.id = id;
@@ -742,6 +783,7 @@ public class MainDB extends BaseDB {
         log.i("loadFavoriteFolders()");
         Cursor rs = null;
         ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        if (mDB == null) return list;
         try {
             String sql = "SELECT id, path, position, filename FROM favorite_folders ORDER BY position, path";
             rs = mDB.rawQuery(sql, null);
@@ -1904,7 +1946,7 @@ public class MainDB extends BaseDB {
 		fileInfo.setCreateTime(rs.getLong(i++));
 		fileInfo.lastAccessTime = rs.getLong(i++);
 		fileInfo.flags = rs.getInt(i++);
-	    fileInfo.language = rs.getString(i++);
+	    fileInfo.language = StrUtils.getNonEmptyStr(rs.getString(i++),false).toLowerCase();
 		fileInfo.lang_from = rs.getString(i++);
 		fileInfo.lang_to = rs.getString(i++);
 		fileInfo.saved_with_ver = rs.getInt(i++);

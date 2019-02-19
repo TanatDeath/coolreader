@@ -1,12 +1,19 @@
 // Main Class
 package org.coolreader;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +36,7 @@ import org.coolreader.crengine.CRToolBar;
 import org.coolreader.crengine.CRToolBar.OnActionHandler;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
+import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.FileBrowser;
@@ -41,8 +49,10 @@ import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.N2EpdController;
+import org.coolreader.crengine.NoticeDialog;
 import org.coolreader.crengine.OPDSCatalogEditDialog;
 import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.crengine.FileUtils;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.PictureReceived;
 import org.coolreader.crengine.PositionProperties;
@@ -51,11 +61,13 @@ import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
+import org.coolreader.crengine.SimpleDownload;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.TTS;
 import org.coolreader.crengine.TTS.OnTTSCreatedListener;
 import org.coolreader.crengine.UserDicEntry;
 import org.coolreader.crengine.Utils;
+import org.coolreader.db.BaseDB;
 import org.coolreader.db.CRDBService;
 import org.coolreader.donations.CRDonationService;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
@@ -83,6 +95,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Environment;
 import android.support.v4.provider.DocumentFile;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -292,20 +305,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			mReaderView.setBatteryState(initialBatteryState);
 
 		//==========================================
+		//plotn - possibly this code hungs the start of application with no internet
 		// Donations related code
-		try {
-			
-			mDonationService = new CRDonationService(this);
-			mDonationService.bind();
-    		SharedPreferences pref = getSharedPreferences(DONATIONS_PREF_FILE, 0);
-    		try {
-    			mTotalDonations = pref.getFloat(DONATIONS_PREF_TOTAL_AMOUNT, 0.0f);
-    		} catch (Exception e) {
-    			log.e("exception while reading total donations from preferences", e);
-    		}
-		} catch (VerifyError e) {
-			log.e("Exception while trying to initialize billing service for donations");
-		}
+//		try {
+//
+//			mDonationService = new CRDonationService(this);
+//			mDonationService.bind();
+//    		SharedPreferences pref = getSharedPreferences(DONATIONS_PREF_FILE, 0);
+//    		try {
+//    			mTotalDonations = pref.getFloat(DONATIONS_PREF_TOTAL_AMOUNT, 0.0f);
+//    		} catch (Exception e) {
+//    			log.e("exception while reading total donations from preferences", e);
+//    		}
+//		} catch (VerifyError e) {
+//			log.e("Exception while trying to initialize billing service for donations");
+//		}
 
 		N2EpdController.n2MainActivity = this;
 
@@ -475,11 +489,61 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (intent == null)
 			return false;
 		String fileToOpen = null;
+		String intentAction = intent.getAction();
 		if (Intent.ACTION_VIEW.equals(intent.getAction())) {
 			Uri uri = intent.getData();
+			String stype = intent.getType();
 			intent.setData(null);
 			if (uri != null) {
+				String sLastSeg = uri.getLastPathSegment();
 				fileToOpen = uri.getPath();
+				File file = new File(fileToOpen);
+				if ((uri.toString().startsWith("content"))&&(!file.exists())) {
+					String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+					String fname = sLastSeg;
+					File nfile = new File(downlDir + "/" +fname);
+					if (nfile.exists()) fileToOpen = downlDir + "/" +fname;
+					else {
+						FileOutputStream fos = null;
+						try {
+							String sExt = DocumentFormat.extByMimeType(stype);
+							if ((sLastSeg.startsWith("enc")||(StrUtils.isEmptyStr(sLastSeg)))) { //need to create filename
+								int i = 0;
+								boolean bExists = true;
+								while (bExists) {
+									sLastSeg = i == 0 ? "CoolReader_Downloaded" : "CoolReader_Downloaded ("+i+")";
+									i++;
+									File f = new File(downlDir+"/"+sLastSeg);
+									bExists = f.exists();
+								}
+							}
+							fileToOpen = downlDir+"/"+sLastSeg;
+							if (!StrUtils.isEmptyStr(sExt)) {
+								if (!fileToOpen.toLowerCase().endsWith(sExt)) {
+									if (!fileToOpen.endsWith(".")) fileToOpen = fileToOpen+".";
+								}
+								fileToOpen = fileToOpen+sExt;
+							}
+							fos = new FileOutputStream(fileToOpen);
+							BufferedOutputStream out = new BufferedOutputStream(fos);
+							InputStream in = getApplicationContext().getContentResolver().openInputStream(uri);
+							byte[] buffer = new byte[8192];
+							int len = 0;
+
+							while ((len = in.read(buffer)) >= 0) {
+								out.write(buffer, 0, len);
+							}
+							out.flush();
+							fos.getFD().sync();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				//fileToOpen = FileUtils.getPath(getApplicationContext(), uri);
+                //fileToOpen = FileUtils.getRealPathFromURI(getContentResolver(), uri);
+				//if (fileToOpen == null) fileToOpen = uri.getPath();
+
 //				if (fileToOpen.startsWith("file://"))
 //					fileToOpen = fileToOpen.substring("file://".length());
 			}
@@ -493,6 +557,41 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		if (Intent.ACTION_SEND.equals(intent.getAction())) {
+//			String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
+//			String stype = intent.getType();
+//			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+//			if (sText.toLowerCase().startsWith("http")) {
+//				String sLastSeg = sText;
+//				int len1 = sLastSeg.split("/").length;
+//				if (len1>1) sLastSeg = sLastSeg.split("/")[len1-1];
+//				String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+//				try {
+//					String sExt = DocumentFormat.extByMimeType(stype);
+//					sExt = "jpg";
+//					if ((sLastSeg.startsWith("enc")||(StrUtils.isEmptyStr(sLastSeg)))) { //need to create filename
+//						int i = 0;
+//						boolean bExists = true;
+//						while (bExists) {
+//							sLastSeg = i == 0 ? "CoolReader_Downloaded" : "CoolReader_Downloaded ("+i+")";
+//							i++;
+//							File f = new File(downlDir+"/"+sLastSeg);
+//							bExists = f.exists();
+//						}
+//					}
+//					fileToOpen = downlDir+"/"+sLastSeg;
+//					if (!StrUtils.isEmptyStr(sExt)) {
+//						if (!fileToOpen.toLowerCase().endsWith(sExt)) {
+//							if (!fileToOpen.endsWith(".")) fileToOpen = fileToOpen+".";
+//						}
+//						fileToOpen = fileToOpen+sExt;
+//					}
+//					SimpleDownload sd = new SimpleDownload();
+//					sd.mCoolReader = this;
+//					sd.execute(new String[] { sText, fileToOpen });
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
 			if (intent.getType().startsWith("image/")) {
 				Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 				if (imageUri != null) {
@@ -569,9 +668,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 				if (StrUtils.isEmptyStr(fileToOpen)) {
 					//showToast(intent.getType());
-					String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
-					if (!StrUtils.isEmptyStr(sText)) {
-						if (sText.toLowerCase().startsWith("http"))
+					String sText1 = intent.getStringExtra(Intent.EXTRA_TEXT);
+					if (!StrUtils.isEmptyStr(sText1)) {
+						if (sText1.toLowerCase().startsWith("http"))
 							showToast(R.string.warn_http);
 						else
 							showToast(R.string.warn_empty_file_name);
@@ -605,7 +704,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						@Override
 						public void run() {
 							// if document not loaded show error & then root window
-							ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error), CoolReader.this.getString(R.string.cant_open_file, finalFileToOpen));
+							ErrorDialog errDialog = new ErrorDialog(CoolReader.this,
+                                    CoolReader.this.getString(R.string.error),
+                                    CoolReader.this.getString(R.string.cant_open_file, finalFileToOpen));
 							errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 								@Override
 								public void onDismiss(DialogInterface dialog) {
@@ -718,6 +819,48 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //				}
 //			}
 //		});
+
+		waitForCRDBService(new Runnable() {
+			@Override
+			public void run() {
+				BaseDB db = Services.getHistory().getMainDB(getDB());
+				BaseDB cdb = Services.getHistory().getCoverDB(getDB());
+				String sMesg ="";
+				if (db !=null) {
+					if (!StrUtils.isEmptyStr(db.mOriginalDBFile)) {
+						sMesg = sMesg + "MainDB:" + getString(R.string.db_action_corrupted) + ". \n";
+						sMesg = sMesg + "MainDB:" + getString(R.string.db_action_performed_ren) +
+								db.mOriginalDBFile + " -> " + db.mBackedDBFile + " \n";
+					}
+					if ((!StrUtils.isEmptyStr(db.mDeletedDBFile))||(!StrUtils.isEmptyStr(db.mBackupRestoredDBFile))) {
+						sMesg = sMesg + "MainDB:" + getString(R.string.db_action_restored) + ". \n";
+						if (!StrUtils.isEmptyStr(db.mDeletedDBFile))
+							sMesg = sMesg+"MainDB:"+ getString(R.string.db_action_performed_del)+" "+
+								db.mDeletedDBFile+" \n";
+						if (!StrUtils.isEmptyStr(db.mBackupRestoredDBFile))
+							sMesg = sMesg + "MainDB:" + getString(R.string.db_action_performed_ren)+" " +
+									db.mBackupRestoredDBFile + " -> " + db.mBackupRestoredToDBFile + " \n";
+					}
+				}
+				if (cdb !=null) {
+					if (!StrUtils.isEmptyStr(cdb.mOriginalDBFile)) {
+						sMesg = sMesg + "CoverDB:" + getString(R.string.db_action_corrupted) + ". \n";
+						sMesg = sMesg + "CoverDB:" + getString(R.string.db_action_performed_ren)+" " +
+								cdb.mOriginalDBFile + " -> " + cdb.mBackedDBFile + " \n";
+					}
+					if ((!StrUtils.isEmptyStr(cdb.mDeletedDBFile))||(!StrUtils.isEmptyStr(cdb.mBackupRestoredDBFile))) {
+						sMesg = sMesg + "CoverDB:" + getString(R.string.db_action_restored) + ". \n";
+						if (!StrUtils.isEmptyStr(cdb.mDeletedDBFile))
+							sMesg = sMesg+"CoverDB:"+ getString(R.string.db_action_performed_del)+" "+
+									cdb.mDeletedDBFile+" \n";
+						if (!StrUtils.isEmptyStr(cdb.mBackupRestoredDBFile))
+							sMesg = sMesg + "CoverDB:" + getString(R.string.db_action_performed_ren)+" " +
+									cdb.mBackupRestoredDBFile + " -> " + cdb.mBackupRestoredToDBFile + " \n";
+					}
+				}
+				if (!StrUtils.isEmptyStr(sMesg)) notificationDB(sMesg);
+			}
+		});
 
 		if (mHomeFrame == null) {
 			waitForCRDBService(new Runnable() {
@@ -1400,6 +1543,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     }
 
     public boolean isDonationSupported() {
+    	if (mDonationService == null) return false;
     	return mDonationService.isBillingSupported();
     }
 
@@ -2314,6 +2458,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_NONE), false);
 			}
 		});
+	}
+
+	public void notificationDB(String sMesg)
+	{
+		showNotice(sMesg, new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		}, null);
 	}
 	
 	/**

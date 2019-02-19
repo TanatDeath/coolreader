@@ -9,78 +9,336 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/lbl_catalog_name"
-            style="@style/TextAppearance.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:singleLine="false"
-            android:text="@string/dlg_catalog_edit_name" />
-
-        <EditText
-            android:id="@+id/catalog_name"
-            style="@style/TextAppearance.Widget.EditText"
+        <TableLayout
+            android:id="@+id/table"
+            style="@style/TextAppearance.Small"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:editable="true"
-            android:singleLine="true"
-            android:text="New catalog name" />
-
-        <TextView
-            android:id="@+id/lbl_catalog_url"
-            style="@style/TextAppearance.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:singleLine="false"
-            android:text="@string/dlg_catalog_edit_url" />
-
-        <EditText
-            android:id="@+id/catalog_url"
-            style="@style/TextAppearance.Widget.EditText"
+            android:stretchColumns="1"
+            android:layout_weight="10"
+            android:layout_margin="2dp"
+            >
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_catalog_name"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_name" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/catalog_name"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:singleLine="true"
+                        android:text="New catalog name" />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_catalog_url"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_url" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/catalog_url"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:singleLine="true"
+                        android:text="http://" />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_catalog_username"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_username" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/catalog_username"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:singleLine="true"
+                        android:text=""
+                        />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_catalog_password"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_password" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/catalog_password"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:password="true"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:text=""
+                        />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_proxy_addr"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_proxy_addr" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/edt_proxy_addr"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:singleLine="true"
+                        android:text=""
+                        />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_proxy_port"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_proxy_port" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/edt_proxy_port"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:singleLine="true"
+                        android:text=""
+                        />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_proxy_uname"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_proxy_uname" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/edt_proxy_uname"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:singleLine="true"
+                        android:text=""
+                        />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/lbl_proxy_passw"
+                        style="@style/TextAppearance.Small"
+                        android:textColor="?attr/colorIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="3"
+                        android:singleLine="false"
+                        android:text="@string/dlg_catalog_edit_proxy_passw" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:gravity="left"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/edt_proxy_passw"
+                        style="@style/TextAppearance.Widget.EditText"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="true"
+                        android:password="true"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:text=""
+                    />
+                </LinearLayout>
+            </TableRow>
+        </TableLayout>
+        <CheckBox
+            android:id="@+id/chb_onion_def_proxy"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:editable="true"
-            android:singleLine="true"
-            android:text="http://" />
-
-        <TextView
-            android:id="@+id/lbl_catalog_username"
-            style="@style/TextAppearance.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:singleLine="false"
-            android:text="@string/dlg_catalog_edit_username" />
-
-        <EditText
-            android:id="@+id/catalog_username"
-            style="@style/TextAppearance.Widget.EditText"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:editable="true"
-            android:singleLine="true"
-            android:text="http://" />
-
-        <TextView
-            android:id="@+id/lbl_catalog_password"
-            style="@style/TextAppearance.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:singleLine="false"
-            android:text="@string/dlg_catalog_edit_password" />
-
-        <EditText
-            android:id="@+id/catalog_password"
-            style="@style/TextAppearance.Widget.EditText"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:editable="true"
-            android:password="true"
-            android:inputType="textPassword"
-            android:singleLine="true"
-            android:text="http://" />
+            android:textColor="?attr/colorIcon"
+            android:text="@string/dlg_catalog_edit_onion_def_proxy"
+            />
     </LinearLayout>
 </ScrollView>

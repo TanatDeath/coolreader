@@ -24,6 +24,7 @@
 					  style="@style/TextAppearance.Small"
 					  android:gravity="left"
 					  android:layout_margin="2dip"
+					  android:textColor="?attr/colorIcon"
 					  android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 		</LinearLayout>
 	</LinearLayout>
@@ -45,22 +46,27 @@
 				android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
 			<TextView android:text="@string/third_party_components_used"
 				android:id="@+id/thirdparty"
+				android:textColor="?attr/colorIcon"
             	style="@style/TextAppearance.Small"
 				android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="@string/fontconfig_language_orthography_database"
 					  android:id="@+id/thirdparty2"
+					  android:textColor="?attr/colorIcon"
 					  style="@style/TextAppearance.Small"
 					  android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="@string/third_party_farm_fresh_icon_set"
             	android:id="@+id/thirdparty3"
             	style="@style/TextAppearance.Small"
+				android:textColor="?attr/colorIcon"
             	android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="CoffeeCatch> library: https://github.com/xroche/coffeecatch"
             	android:id="@+id/thirdparty4"
+				android:textColor="?attr/colorIcon"
             	style="@style/TextAppearance.Small"
             	android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="Metro vector icon set by"
 				android:id="@+id/thirdparty6"
+				android:textColor="?attr/colorIcon"
 				style="@style/TextAppearance.Small"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="https://icons8.com" android:id="@+id/www_icons8"
@@ -68,6 +74,7 @@
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
 			<TextView android:text="With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook"
 				android:id="@+id/thirdparty7"
+				android:textColor="?attr/colorIcon"
 				style="@style/TextAppearance.Small"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 		</LinearLayout>

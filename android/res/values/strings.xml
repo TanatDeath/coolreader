@@ -369,6 +369,11 @@
     <string name="dlg_catalog_edit_username">Login</string>
     <string name="dlg_catalog_edit_password">Password</string>
     <string name="dlg_catalog_add_title">Add Catalog</string>
+    <string name="dlg_catalog_edit_proxy_addr">Proxy address</string>
+    <string name="dlg_catalog_edit_proxy_port">Proxy port</string>
+    <string name="dlg_catalog_edit_proxy_uname">Proxy login</string>
+    <string name="dlg_catalog_edit_proxy_passw">Proxy password</string>
+    <string name="dlg_catalog_edit_onion_def_proxy">Set proxy to 127.0.0.1:8118 for onion links</string>
     <string formatted="false" name="options_format_min_space_width_percent">Min space width %</string>
     <string name="options_selection_keep_selection_after_dictionary">Keep selection after dictionary</string>
     <string name="action_toggle_autoscroll">Autoscroll</string>
@@ -690,6 +695,30 @@
     <string name="motion_timeout_90min">"90 minutes"</string>
     <string name="motion_timeout_95min">"95 minutes"</string>
     <string name="motion_timeout_100min">"100 minutes"</string>
+    <string name="timeout_same_as_usual">"Same as common timeout"</string>
+    <string name="timeout_10sec">"10 seconds"</string>
+    <string name="timeout_20sec">"20 seconds"</string>
+    <string name="timeout_30sec">"30 seconds"</string>
+    <string name="timeout_40sec">"40 seconds"</string>
+    <string name="timeout_50sec">"50 seconds"</string>
+    <string name="timeout_1_5min">"1,5 minutes"</string>
+    <string name="force_tts_0koef">"Disable force restart"</string>
+    <string name="force_tts_2koef">"6 words (after phrase)"</string>
+    <string name="force_tts_3koef">"9 words (after phrase)"</string>
+    <string name="force_tts_4koef">"12 words (after phrase)"</string>
+    <string name="force_tts_5koef">"15 words (after phrase)"</string>
+    <string name="force_tts_7koef">"21 words (after phrase)"</string>
+    <string name="force_tts_9koef">"27 words (after phrase)"</string>
+    <string name="force_tts_10sec">"10 seconds (after phrase)"</string>
+    <string name="force_tts_15sec">"15 seconds (after phrase)"</string>
+    <string name="force_tts_20sec">"20 seconds (after phrase)"</string>
+    <string name="force_tts_25sec">"25 seconds (after phrase)"</string>
+    <string name="force_tts_30sec">"30 seconds (after phrase)"</string>
+    <string name="force_tts_40sec">"40 seconds (after phrase)"</string>
+    <string name="force_tts_50sec">"50 seconds (after phrase)"</string>
+    <string name="force_tts_60sec">"1 minute (after phrase)"</string>
+    <string name="force_tts_90sec">"1,5 minutes (after phrase)"</string>
+    <string name="force_tts_120sec">"2 minutes (after phrase)"</string>
     <string name="save_settings_to_gd">Save settings to Google One</string>
     <string name="save_settings_to_gd_v">Save cr3.ini file to Google One at CoolReader&#47;settings folder</string>
     <string name="load_settings_from_gd">Restore settings from Google One</string>
@@ -711,6 +740,7 @@
     <string name="load_reading_pos_from_gd">Restore reading pos from Google One</string>
     <string name="save_pos_to_gd_timeout">Autosave reading pos to Google One timeout</string>
     <string name="save_pos_timeout">Autosave reading pos timeout</string>
+    <string name="save_pos_timeout_speak">Autosave reading pos timeout (when TTS is activated)</string>
     <string name="save_bookmarks_to_gd">Save bookmarks to Google One</string>
     <string name="load_bookmarks_from_gd">Load bookmarks from Google One</string>
     <string name="gd_menu">Google One menu</string>
@@ -751,6 +781,7 @@
     <string name="mark_book_as_read">Mark this book as read?</string>
     <string name="mark_book_as_reading">Set \'reading\' mark to this book?</string>
     <string name="resizing_to">resizing to</string>
+    <string name="request_resize">resize request (and skipped): </string>
     <string name="skipped_res">Skip redraw at resolutions</string>
     <string name="search_pages">pages...</string>
     <string name="btn_shortcut">Create book shortcut</string>
@@ -883,15 +914,26 @@
     <string name="error_while_opening">Error while opening document \"%s\"</string>
     <string name="datadir_is_removed">Application data directory \"%s\" has been removed by other app.\nPossibly it was some kind of disc space optimizer.\nUnfortunately all the settings were lost.</string>
     <string name="font_not_compat_with_language">"Font \"%s\" isn't compatible with language \"%s\". Instead will be used fallback font."</string>
-    <string name="fontconfig_language_orthography_database">"Languages character set database by Fontconfig:
-        https://www.fontconfig.org/ "
+    <string name="fontconfig_language_orthography_database">"Languages character set database by Fontconfig: https://www.fontconfig.org/ "
     </string>
-    <string name="third_party_components_used">"Third party components used: zlib, libpng, libjpeg, freetype, harfbuzz,
-        chmlib, antiword, Nook EPD utils by DairyKnight "
+    <string name="third_party_components_used">"Third party components used: zlib, libpng, libjpeg, freetype, harfbuzz, chmlib, antiword, Nook EPD utils by DairyKnight "
     </string>
     <string name="third_party_farm_fresh_icon_set">Farm-Fresh icon set from http://www.fatcow.com/free-icons</string>
     <string name="open_previously_downloaded">Book was already downloaded, open it instead of new download?</string>
     <string name="could_not_find_by_link">Could not find local file, showing OPDS entry</string>
     <string name="force_tts_koef">Force TTS restart koef</string>
     <string name="force_tts_koef_add_info">When TTS engine is unexpectedly stopped by system, application will try to force restart TTS. Higher value means more timeout to wait</string>
+    <string name="orient_0">disable orientation panel</string>
+    <string name="orient_1">1 sec</string>
+    <string name="orient_3">3 sec</string>
+    <string name="orient_5">5 sec</string>
+    <string name="orient_10">10 sec</string>
+    <string name="orient_15">15 sec</string>
+    <string name="orient_20">20 sec</string>
+    <string name="orient_30">30 sec</string>
+    <string name="orient_add_info">Orientation panel appears when you rotating your device, showing additional options (return, fix orientation)</string>
+    <string name="db_action_corrupted">Database is corrupted</string>
+    <string name="db_action_restored">Database is restored from backup</string>
+    <string name="db_action_performed_del">Performed delete: </string>
+    <string name="db_action_performed_ren">Performed rename: </string>
 </resources>

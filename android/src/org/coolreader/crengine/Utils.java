@@ -14,6 +14,7 @@ import java.util.TimeZone;
 
 import org.coolreader.R;
 import org.coolreader.crengine.FileInfo.SortOrder;
+import org.coolreader.db.BaseDB;
 
 import android.app.Activity;
 import android.content.Context;
@@ -126,13 +127,19 @@ public class Utils {
 		}
 	}
 	
-	public static boolean restoreFromBackup(File f) {
+	public static boolean restoreFromBackup(BaseDB db, File f) {
 		File backup = new File(f.getAbsolutePath() + ".good.bak.2");
-		if (f.exists())
+
+		if (f.exists()) {
+			db.mDeletedDBFile = f.getPath();
 			f.delete();
+		}
 		if (backup.exists()) {
-			if (backup.renameTo(f))
-				return true; 
+			if (backup.renameTo(f)) {
+				db.mBackupRestoredDBFile = backup.getPath();
+				db.mBackupRestoredToDBFile = f.getPath();
+				return true;
+			}
 		}
 		return false;
 	}
@@ -148,12 +155,14 @@ public class Utils {
 		f.renameTo(backup);
 	}
 	
-	public static void moveCorruptedFileToBackup(File f) {
+	public static void moveCorruptedFileToBackup(BaseDB db, File f) {
 		if (!f.exists())
 			return;
 		Log.e("cr3", "Moving corrupted file " + f + " to backup.");
 		File backup = getBackupFileName(f, false);
+		db.mOriginalDBFile = f.getPath();
 		f.renameTo(backup);
+		db.mBackedDBFile = backup.getPath();
 	}
 	
 	private final static int MAX_BACKUP_FILES = 5;

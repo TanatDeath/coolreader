@@ -132,6 +132,7 @@ public interface Settings {
     public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
     public static final String PROP_SAVE_POS_TO_GD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
+    public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
     public static final String PROP_APP_MARK_DOWNLOADED_TO_READ = "app.mark.downloaded.toread";
     public static final String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
 

@@ -303,26 +303,39 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					"timer event - every 5 sec");
 
 			long curTimeSpan = System.currentTimeMillis() - lastSaveSpeakTime;
+			long curTimeSpanRestart = System.currentTimeMillis() - lastRestartTime;
 			double avgWordTimeSpan = 0;
 			if (dWordCount>0) {
 				avgWordTimeSpan = ((double)lTimeSpan) / dWordCount;
 			}
+			double thisPhraseExpectedTime = avgWordTimeSpan * dWordCountThis;
 			double avgWordTimeSpanThis = 0;
 			if (dWordCountThis>0) {
 				avgWordTimeSpanThis = ((double)curTimeSpan) / dWordCountThis;
 			}
 			if ((avgWordTimeSpan>0) && (mForceTTSKoef>0)) {
+				//mCoolReader.showToast("checking force "+curTimeSpan);
 				boolean needForce = isSpeaking && (iSentenceCount > 20);
 				boolean needForceBase = needForce;
 				// if there is enough time spent
-				if (needForce)
-					needForce = needForce && (avgWordTimeSpanThis > avgWordTimeSpan * mForceTTSKoef);
+				if (mForceTTSKoef > 9) {
+					if (needForce)
+						needForce = needForce &&
+								curTimeSpan > thisPhraseExpectedTime + (mForceTTSKoef * 1000);
+				} else {
+					if (needForce)
+						needForce = needForce &&
+								curTimeSpan > thisPhraseExpectedTime + (mForceTTSKoef * avgWordTimeSpan * 3);
+				}
+				//		(avgWordTimeSpanThis > avgWordTimeSpan * ((double)mForceTTSKoef));
 				// end min time has reached
 				if (needForce)
 					needForce = needForce && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
 				// if current sentence is empty - just wait min time
-				if (avgWordTimeSpanThis < 0.1)
-					needForce = needForceBase && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
+				//if (avgWordTimeSpanThis < 0.1)
+				//	needForce = needForceBase && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
+				//if (mForceTTSKoef>9)
+				//	needForce = (curTimeSpan>(mForceTTSKoef * 1000));
 				if (needForce) {
                     CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
                             "possibly tts unexpectedly stopped...");
@@ -332,9 +345,20 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					lTimeSpan = 0L;
 					if (currentSelection != null) {
                         if (isSpeaking) {
-                            if (isAlwaysStop) {
-                                mTTS.stop();
-                                CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
+                            if (
+                            	 (isAlwaysStop)&&
+							       (
+								      (curTimeSpanRestart > MIN_FORCE_TTS_START_TIME)||
+										  (lastRestartTime==0)
+							       )
+							   )
+                            {
+								lastRestartTime = System.currentTimeMillis();
+                                //mTTS.stop();
+								mCoolReader.tts = null;
+								mCoolReader.ttsInitialized = false;
+
+								CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
                                         "stop tts between reading of sentences");
                             }
                             say(currentSelection);
@@ -477,7 +501,10 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			public void onNewSelection(Selection selection) {
 				Log.d("cr3", "onNewSelection: " + selection.text);
 				curTime = System.currentTimeMillis();
-				if (curTime - lastSaveCurPosTime > mReaderView.getDefSavePositionInterval()) {
+				long interv = mReaderView.getDefSavePositionIntervalSpeak();
+				if (interv == 0)
+                    interv = mReaderView.getDefSavePositionInterval();
+				if (curTime - lastSaveCurPosTime > interv) {
 					CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
 							"it is time to save position");
 					lastSaveCurPosTime = curTime;
@@ -558,6 +585,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	private long lTimeSpan;
 	private long curTime = System.currentTimeMillis();
 	private long lastSaveSpeakTime = System.currentTimeMillis();
+	private long lastRestartTime = 0;
 	private long lastSaveCurPosTime = System.currentTimeMillis();
 
 	private void stop() {

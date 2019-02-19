@@ -458,6 +458,11 @@ xml:base="http://lib.ololo.cc/opds/">
 		private URL url;
 		private String username;
 		private String password;
+		private String proxy_addr;
+		private String proxy_port;
+		private String proxy_uname;
+		private String proxy_passw;
+		private int onion_def_proxy;
 		final private String expectedType;
 		final private String referer;
 		final private String defaultFileName;
@@ -466,7 +471,12 @@ xml:base="http://lib.ololo.cc/opds/">
 		private HttpURLConnection connection;
 		private DelayedProgress delayedProgress;
 		OPDSHandler handler;
-		public DownloadTask(CoolReader coolReader, URL url, String defaultFileName, String expectedType, String referer, DownloadCallback callback, String username, String password) {
+		public DownloadTask(CoolReader coolReader, URL url, String defaultFileName, String expectedType, String referer,
+							DownloadCallback callback, String username, String password,
+							String proxy_addr, String proxy_port,
+							String proxy_uname, String proxy_passw,
+							int onion_def_proxy
+							) {
 			this.url = url;
 			this.coolReader = coolReader;
 			this.callback = callback; 
@@ -475,6 +485,11 @@ xml:base="http://lib.ololo.cc/opds/">
 			this.defaultFileName = defaultFileName;
 			this.username = username;
 			this.password = password;
+			this.proxy_addr = proxy_addr;
+			this.proxy_port = proxy_port;
+			this.proxy_uname = proxy_uname;
+			this.proxy_passw = proxy_passw;
+			this.onion_def_proxy = onion_def_proxy;
 			L.d("Created DownloadTask for " + url);
 		}
 		private void setProgressMessage( String url, int totalSize ) {
@@ -738,7 +753,7 @@ xml:base="http://lib.ololo.cc/opds/">
 					}
 					Proxy proxy = null;
                     System.setProperty("http.keepAlive", "false");					
-					if (useOrobotProxy) {
+					if ((useOrobotProxy)&&(onion_def_proxy==1)) {
                         // Set-up proxy
                         //System.setProperty("http.proxyHost", "127.0.0.1");
                         //System.setProperty("http.proxyPort", "8118");
@@ -749,7 +764,23 @@ xml:base="http://lib.ololo.cc/opds/">
                         //System.clearProperty("http.proxyHost");
                         //System.clearProperty("http.proxyPort");
 					}
+					if ((!StrUtils.isEmptyStr(proxy_addr))&&(!StrUtils.isEmptyStr(proxy_port))) {
+						int port = 0;
+						try {
+							port = Integer.valueOf(proxy_port);
+							proxy = new Proxy(Proxy.Type.HTTP,
+									new InetSocketAddress(proxy_addr, port)); // ORobot proxy running on this device
+							L.d("Using proxy: " + proxy);
+						} catch (Exception e) {
+							L.e("Wrong proxy port value: " + proxy_port);
+						}
+					}
 				    URLConnection conn = proxy == null ? newURL.openConnection() : newURL.openConnection(proxy);
+					if ((!StrUtils.isEmptyStr(proxy_addr))&&(!StrUtils.isEmptyStr(proxy_port))&&
+							(!StrUtils.isEmptyStr(proxy_uname))&&(!StrUtils.isEmptyStr(proxy_passw))) {
+						conn.setRequestProperty("Proxy-Authorization",
+								"Basic " + Base64.encodeToString((proxy_uname + ":" + proxy_passw).getBytes(), Base64.NO_WRAP));
+					}
 					if ( conn instanceof HttpsURLConnection ) {
 						HttpsURLConnection https = (HttpsURLConnection)conn;
 
@@ -1000,10 +1031,18 @@ xml:base="http://lib.ololo.cc/opds/">
 		
 	}
 	private static DownloadTask currentTask;
-	public static DownloadTask create(CoolReader coolReader, URL uri, String defaultFileName, String expectedType, String referer, DownloadCallback callback, String username, String password) {
+	public static DownloadTask create(CoolReader coolReader, URL uri, String defaultFileName, String expectedType,
+									  String referer, DownloadCallback callback, String username, String password,
+									  String proxy_addr, String proxy_port,
+									  String proxy_uname, String proxy_passw,
+									  int onion_def_proxy) {
 		if (currentTask != null)
 			currentTask.cancel();
-		final DownloadTask task = new DownloadTask(coolReader, uri, defaultFileName, expectedType, referer, callback, username, password);
+		final DownloadTask task = new DownloadTask(coolReader, uri, defaultFileName, expectedType,
+				referer, callback, username, password,
+				proxy_addr, proxy_port,
+				proxy_uname, proxy_passw,
+				onion_def_proxy);
 		currentTask = task;
 		return task;
 	}

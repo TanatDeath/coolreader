@@ -50,10 +50,20 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	}
 	
 	private void setupDonationButton( final Button btn, final String packageName ) {
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGray = a.getColor(0, Color.GRAY);
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
 		if ( isPackageInstalled(packageName)) {
 			btn.setEnabled(false);
 			btn.setText(R.string.dlg_about_donation_installed);
+			btn.setBackgroundColor(colorGrayC);
+			btn.setTextColor(colorIcon);
 		} else {
+			btn.setBackgroundColor(colorGrayC);
+			btn.setTextColor(colorIcon);
 			btn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -64,6 +74,12 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	}
 	
 	private void setupInAppDonationButton( final Button btn, final double amount ) {
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGray = a.getColor(0, Color.GRAY);
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
 		btn.setText("$" + amount);
 		btn.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -71,6 +87,8 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 				mCoolReader.makeDonation(amount);
 			}
 		});
+		btn.setBackgroundColor(colorGrayC);
+		btn.setTextColor(colorIcon);
 	}
 	
 	private void updateTotalDonations() {

@@ -106,7 +106,7 @@ public class BaseActivity extends Activity implements Settings {
 	private static final Logger log = L.create("ba");
 	private View mDecorView;
 
-	private CRDBServiceAccessor mCRDBService;
+	protected CRDBServiceAccessor mCRDBService;
 	protected Dictionaries mDictionaries;
 
 	//private volatile SuperActivityToast myToast;
@@ -1556,7 +1556,12 @@ public class BaseActivity extends Activity implements Settings {
 
 	
 	public void showNotice(int questionResourceId, final Runnable action, final Runnable cancelAction) {
-		NoticeDialog dlg = new NoticeDialog(this, action, cancelAction);
+		NoticeDialog dlg = new NoticeDialog(this, "", action, cancelAction);
+		dlg.show();
+	}
+
+	public void showNotice(String sText, final Runnable action, final Runnable cancelAction) {
+		NoticeDialog dlg = new NoticeDialog(this, sText, action, cancelAction);
 		dlg.show();
 	}
 

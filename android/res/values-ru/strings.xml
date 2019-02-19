@@ -354,6 +354,11 @@
     <string name="dlg_catalog_edit_username">Имя пользователя</string>
     <string name="dlg_catalog_edit_password">Пароль</string>
     <string name="dlg_catalog_add_title">Добавить каталог</string>
+    <string name="dlg_catalog_edit_proxy_addr">Адрес прокси</string>
+    <string name="dlg_catalog_edit_proxy_port">Порт прокси</string>
+    <string name="dlg_catalog_edit_proxy_uname">Имя пользователя для прокси</string>
+    <string name="dlg_catalog_edit_proxy_passw">Пароль для прокси</string>
+    <string name="dlg_catalog_edit_onion_def_proxy">Установить прокси 127.0.0.1:8118 для ссылок onion</string>
     <string name="options_format_min_space_width_percent">Мин. ширина пробела</string>
     <string name="options_selection_keep_selection_after_dictionary">Сохранять выделение после словаря</string>
     <string name="action_toggle_autoscroll">Автолистание</string>
@@ -675,6 +680,30 @@
     <string name="motion_timeout_90min">"90 минут"</string>
     <string name="motion_timeout_95min">"95 минут"</string>
     <string name="motion_timeout_100min">"100 минут"</string>
+    <string name="timeout_same_as_usual">"Совпадает с обычным интервалом"</string>
+    <string name="timeout_10sec">"10 секунд"</string>
+    <string name="timeout_20sec">"20 секунд"</string>
+    <string name="timeout_30sec">"30 секунд"</string>
+    <string name="timeout_40sec">"40 секунд"</string>
+    <string name="timeout_50sec">"50 секунд"</string>
+    <string name="timeout_1_5min">"1,5 минут"</string>
+    <string name="force_tts_0koef">"Отключить принудительный рестарт TTS"</string>
+    <string name="force_tts_2koef">"6 слов (после фразы)"</string>
+    <string name="force_tts_3koef">"9 слов (после фразы)"</string>
+    <string name="force_tts_4koef">"12 слов (после фразы)"</string>
+    <string name="force_tts_5koef">"15 слов (после фразы)"</string>
+    <string name="force_tts_7koef">"21 слов (после фразы)"</string>
+    <string name="force_tts_9koef">"27 слов (после фразы)"</string>
+    <string name="force_tts_10sec">"10 секунд (после фразы)"</string>
+    <string name="force_tts_15sec">"15 секунд (после фразы)"</string>
+    <string name="force_tts_20sec">"20 секунд (после фразы)"</string>
+    <string name="force_tts_25sec">"25 секунд (после фразы)"</string>
+    <string name="force_tts_30sec">"30 секунд (после фразы)"</string>
+    <string name="force_tts_40sec">"40 секунд (после фразы)"</string>
+    <string name="force_tts_50sec">"50 секунд (после фразы)"</string>
+    <string name="force_tts_60sec">"1 минута (после фразы)"</string>
+    <string name="force_tts_90sec">"1,5 минут (после фразы)"</string>
+    <string name="force_tts_120sec">"2 минуты (после фразы)"</string>
     <string name="pages_per_full_swipe_off">"Выключено"</string>
     <string name="pages_per_full_swipe_1">"1 страница (справа налево, не отслеживать)"</string>
     <string name="pages_per_full_swipe_2">"2 страницы (справа налево)"</string>
@@ -739,6 +768,7 @@
     <string name="load_reading_pos_from_gd">Восстановить позицию чтения с диска Google One</string>
     <string name="save_pos_to_gd_timeout">Интервал автосохранения позиции чтения на диск Google One</string>
     <string name="save_pos_timeout">Интервал автосохранения позиции чтения</string>
+    <string name="save_pos_timeout_speak">Интервал автосохранения позиции чтения (при работе TTS)</string>
     <string name="save_bookmarks_to_gd">Сохранить закладки на диск Google One</string>
     <string name="load_bookmarks_from_gd">Загрузить закладки с диска Google One</string>
     <string name="gd_menu">Меню Google One</string>
@@ -779,6 +809,7 @@
     <string name="mark_book_as_read">Отметить книгу как прочитанную?</string>
     <string name="mark_book_as_reading">Установить пометку \'читаю\' у этой книги?</string>
     <string name="resizing_to">изменение размера</string>
+    <string name="request_resize">запрос изменения размера (пропущен): </string>
     <string name="skipped_res">Не перерисовывать книгу на разрешениях</string>
     <string name="search_pages">страницы...</string>
     <string name="btn_shortcut">Создать ярлык книги</string>
@@ -874,15 +905,26 @@
     <string name="error_while_opening">Ошибка открытия документа \"%s\"</string>
     <string name="datadir_is_removed">Каталог с данными приложения \"%s\" был удален другой программой!\nВозможно какой-то оптимизатор дискового пространства?\nК сожалению, все настройки утеряны.</string>
     <string name="font_not_compat_with_language">"Шрифт \"%s\" не совместим с языком \"%s\". Вместо него будет задействован дополнительный шрифт."</string>
-    <string name="fontconfig_language_orthography_database">Набор символов различных писменностей от Fontconfig:
-        https://www.fontconfig.org/
+    <string name="fontconfig_language_orthography_database">Набор символов различных писменностей от Fontconfig: https://www.fontconfig.org/
     </string>
-    <string name="third_party_components_used">Использованы следующие компоненты третьих сторон: zlib, libpng, libjpeg,
-        freetype, harfbuzz, chmlib, antiword, Nook EPD utils от DairyKnight
+    <string name="third_party_components_used">Использованы следующие компоненты третьих сторон: zlib, libpng, libjpeg, freetype, harfbuzz, chmlib, antiword, Nook EPD utils от DairyKnight
     </string>
     <string name="open_previously_downloaded">Книга была скачана ранее, открыть ее?</string>
     <string name="could_not_find_by_link">Книга не найдена на этом устройстве, открытие из OPDS</string>
     <string name="force_tts_koef">Коэффициент перезапуска TTS</string>
     <string name="force_tts_koef_add_info">В случаях, когда TTS движок неожиданно останавливается системой, будет сделана попытка перезапустить его. Чем выше значение, тем больше выдерживается пауза.</string>
+    <string name="orient_0">Отключить панель ориентации</string>
+    <string name="orient_1">1 сек</string>
+    <string name="orient_3">3 сек</string>
+    <string name="orient_5">5 сек</string>
+    <string name="orient_10">10 сек</string>
+    <string name="orient_15">15 сек</string>
+    <string name="orient_20">20 сек</string>
+    <string name="orient_30">30 сек</string>
+    <string name="orient_add_info">Панель ориентации показывается, когда вы поворачиваете устройство, позволяя выбрать дополнительные действия - вернуть, зафиксировать ориентацию экрана</string>
+    <string name="db_action_corrupted">База данных повреждена</string>
+    <string name="db_action_restored">База данных восстановлена из архива</string>
+    <string name="db_action_performed_del">Выполнено удаление: </string>
+    <string name="db_action_performed_ren">Выполнено переименование: </string>
 </resources>
 

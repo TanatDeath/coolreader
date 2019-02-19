@@ -154,13 +154,23 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public static int[] mMotionTimeouts;
 	public static String[] mMotionTimeoutsTitles;
 	public static int[] mMotionTimeoutsAddInfos;
-    public static int[] mMotionTimeouts1;
+	public static int[] mMotionTimeoutsSec;
+	public static String[] mMotionTimeoutsTitlesSec;
+	public static int[] mMotionTimeoutsAddInfosSec;
+	public static int[] mMotionTimeouts1;
     public static String[] mMotionTimeoutsTitles1;
     public static int[] mMotionTimeoutsAddInfos1;
-    public static int[] mPagesPerFullSwipe;
+	public static int[] mPagesPerFullSwipe;
 	public static int[] mPagesPerFullSwipeAddInfos;
 	public static String[] mPagesPerFullSwipeTitles;
-	int[] mInterlineSpaces = new int[] {
+	public static int[] mForceTTS;
+	public static String[] mForceTTSTitles;
+	public static int[] mForceTTSAddInfos;
+	public static int[] mOrient;
+	public static String[] mOrientTitles;
+	public static int[] mOrientAddInfos;
+
+    int[] mInterlineSpaces = new int[] {
 			80, 85, 90, 95, 100, 105, 110, 115, 120, 130, 140, 150, 160, 180, 200
 		};
 	int[] mMinSpaceWidths = new int[] {
@@ -178,14 +188,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	int[] mScreenFullUpdateInterval = new int[] {
 			0, 2, 3, 4, 5, 7, 10, 15, 20
 		};
-	int[] mForceTTSKoef = new int[] {
-		0, 2, 3, 4, 5, 7, 10, 15, 20
-	};
 	int[] mScreenBlackPageDuration = new int[] {
 			0, 100, 200, 300, 500, 700, 1000, 2000, 3000, 4000, 5000
-	};
-	int[] mOrientationPopupToolbarDuration = new int[] {
-			0, 1, 3, 5, 10, 15, 20, 30
 	};
 	int[] mScreenUpdateModes = new int[] {
 			0, 1, 2//, 2, 3
@@ -3897,9 +3901,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION,
 					getString(R.string.options_page_orientation_add_info), filter).add(mOrientations_API9, mOrientationsTitles_API9, mOrientationsAddInfos_API9).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
 			mOptionsPage.add(new ListOption(this, getString(R.string.orientation_popup_toolbar_duration),
-					PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION,
-					getString(R.string.option_add_info_empty_text), filter).
-					add(mOrientationPopupToolbarDuration).setDefaultValue("10").noIcon());
+						PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION,
+					getString(R.string.orient_add_info), filter).
+					add(mOrient, mOrientTitles, mOrientAddInfos).setDefaultValue("10").noIcon());
 		}
 		else
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION,
@@ -4066,6 +4070,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_timeout),
 				PROP_SAVE_POS_TIMEOUT, getString(R.string.save_pos_timeout_add_info), filter).add(mMotionTimeouts1, mMotionTimeoutsTitles1, mMotionTimeoutsAddInfos1).setDefaultValue(Integer.toString(mMotionTimeouts1[2])).
 				setIconIdByAttr(R.attr.attr_icons8_position_to_disk_interval, R.drawable.icons8_position_to_disk_interval));
+		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_timeout_speak),
+				PROP_SAVE_POS_SPEAK_TIMEOUT, getString(R.string.option_add_info_empty_text), filter).
+				add(mMotionTimeoutsSec, mMotionTimeoutsTitlesSec, mMotionTimeoutsAddInfosSec).setDefaultValue("0").
+				setIconIdByAttr(R.attr.attr_icons8_position_to_disk_interval, R.drawable.icons8_position_to_disk_interval));
 		mOptionsApplication.add(new SaveOptionsToGDOption(this, getString(R.string.save_settings_to_gd),
 				getString(R.string.save_settings_to_gd_v), getString(R.string.option_add_info_empty_text), filter).
 				setIconIdByAttr(R.attr.attr_icons8_settings_to_gd, R.drawable.icons8_settings_to_gd));
@@ -4077,7 +4085,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.attr_icons8_position_to_gd_interval, R.drawable.icons8_position_to_gd_interval));
 		mOptionsApplication.add(new ListOption(this, getString(R.string.force_tts_koef),
 				PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), filter).
-				add(mForceTTSKoef).
+				add(mForceTTS, mForceTTSTitles, mForceTTSAddInfos).
 				setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_button_tts_drawable, R.drawable.icons8_speaker));
 
@@ -4202,7 +4210,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mMotionTimeoutsTitles = activity.getResources().getStringArray(R.array.motion_timeout_titles);
         mMotionTimeouts = activity.getResources().getIntArray(R.array.motion_timeout_values);
 		mMotionTimeoutsAddInfos = activity.getResources().getIntArray(R.array.motion_timeout_add_infos);
+		mMotionTimeoutsTitlesSec = activity.getResources().getStringArray(R.array.motion_timeout_sec_titles);
+		mMotionTimeoutsSec = activity.getResources().getIntArray(R.array.motion_timeout_sec_values);
+		mMotionTimeoutsAddInfosSec = activity.getResources().getIntArray(R.array.motion_timeout_sec_add_infos);
 		for (int i=0;i<mMotionTimeouts.length; i++) mMotionTimeoutsAddInfos[i] = R.string.option_add_info_empty_text;
+		for (int i=0;i<mMotionTimeoutsSec.length; i++) mMotionTimeoutsAddInfosSec[i] = R.string.option_add_info_empty_text;
 		mMotionTimeoutsTitles1 = Arrays.copyOfRange(mMotionTimeoutsTitles,1,mMotionTimeoutsTitles.length-1);
 		mMotionTimeouts1 = Arrays.copyOfRange(mMotionTimeouts,1,mMotionTimeouts.length-1);
 		mMotionTimeoutsAddInfos1 = Arrays.copyOfRange(mMotionTimeoutsAddInfos,1,mMotionTimeoutsAddInfos.length-1);
@@ -4211,6 +4223,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mPagesPerFullSwipe = activity.getResources().getIntArray(R.array.pages_per_full_swipe_values);
 		mPagesPerFullSwipeAddInfos = activity.getResources().getIntArray(R.array.pages_per_full_swipe_add_infos);
 		for (int i=0;i<mPagesPerFullSwipeAddInfos.length; i++) mPagesPerFullSwipeAddInfos[i] = R.string.option_add_info_empty_text;
+
+		mForceTTSTitles = activity.getResources().getStringArray(R.array.force_tts_titles);
+		mForceTTS = activity.getResources().getIntArray(R.array.force_tts_values);
+		mForceTTSAddInfos = activity.getResources().getIntArray(R.array.force_tts_add_infos);
+		for (int i=0;i<mForceTTSAddInfos.length; i++) mForceTTSAddInfos[i] = R.string.option_add_info_empty_text;
+
+		mOrientTitles = activity.getResources().getStringArray(R.array.orient_titles);
+		mOrient = activity.getResources().getIntArray(R.array.orient_values);
+		mOrientAddInfos = activity.getResources().getIntArray(R.array.orient_add_infos);
+		for (int i=0;i<mOrientAddInfos.length; i++) mOrientAddInfos[i] = R.string.option_add_info_empty_text;
 
 		String filter = "";
 		if (activity instanceof CoolReader) filter = ((CoolReader)activity).optionsFilter;

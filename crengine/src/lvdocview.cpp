@@ -1871,10 +1871,35 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
         //                      + 1, cl1); // cl3
 
 	int sbound_index = 0;
-    int maxLevel = 1;
-    bool enableMarks = !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sbounds.length()<info.width()/5;
     int curBound = 0;
     int curBoundLevel = 0;
+    int sboundsLengthLev0 = 0;
+    int sboundsLengthLev1 = 0;
+    int sboundsLengthLev2 = 0;
+    int sboundsLengthLev3 = 0;
+
+    while ( sbound_index<sbounds.length() ) {
+        curBound = sbounds[sbound_index];
+        curBoundLevel = curBound % 10;
+        if (curBoundLevel == 0) sboundsLengthLev0++;
+        if (curBoundLevel == 1) sboundsLengthLev1++;
+        if (curBoundLevel == 2) sboundsLengthLev2++;
+        if (curBoundLevel == 3) sboundsLengthLev3++;
+        sbound_index++;
+    }
+
+    sbound_index = 0;
+
+    int maxLevel = 1;
+    //asdf
+    bool enableMarks = !leftPage && (phi & PGHDR_CHAPTER_MARKS) /*&& sbounds.length()<info.width()/5*/;
+    bool enableMarks0 = !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev0<info.width()/5;
+    bool enableMarks1 = enableMarks0 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev1<info.width()/5;
+    bool enableMarks2 = enableMarks0 && enableMarks1 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev2<info.width()/5;
+    bool enableMarks3 = enableMarks0 && enableMarks1 && enableMarks2 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev3<info.width()/5;
+
+    curBound = 0;
+    curBoundLevel = 0;
     while ( enableMarks && sbound_index<sbounds.length() ) {
         curBound = sbounds[sbound_index];
         curBoundLevel = curBound % 10;
@@ -1922,9 +1947,21 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                 sz1 = 4;
 				if ( boundCategory==0 )
 					cl = cl1;
-                else
+                else {
                     sz = 0;
                     sz1 = 0;
+                }
+                // check if marker amount is too much
+                if (
+                        ((curBoundLevel == 0) && (!enableMarks0)) ||
+                        ((curBoundLevel == 1) && (!enableMarks1)) ||
+                        ((curBoundLevel == 2) && (!enableMarks2)) ||
+                        ((curBoundLevel == 3) && (!enableMarks3))
+                        ) {
+                    sz = 4;
+                    sz1 = 4;
+                    cl = cl1;
+                }
             } else {
 				if ( boundCategory!=0 ) {
 				    int curBoundInv = maxLevel - curBoundLevel - 1; // 0 - the topmost marker
@@ -1944,6 +1981,17 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                 //if (curBoundLevel == 2) szx = markw * maxLevelC;
                 if (maxLevelC > 1) maxLevelC = maxLevelC - 1;
                 //if (curBoundLevel == 3) szx = markw * maxLevelC;
+                // check if marker amount is too much
+                if (
+                     ((curBoundLevel == 0) && (!enableMarks0)) ||
+                     ((curBoundLevel == 1) && (!enableMarks1)) ||
+                     ((curBoundLevel == 2) && (!enableMarks2)) ||
+                     ((curBoundLevel == 3) && (!enableMarks3))
+                   ) {
+                    sz = 1;
+                    sz1 = 1;
+                    cl = cl1;
+                }
             }
 		}
         if ( cl!=-1 && sz>0 )
@@ -1957,22 +2005,6 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	if (!m_pageHeaderOverride.empty()) {
 		text = m_pageHeaderOverride;
 	} else {
-
-//		if (!leftPage) {
-//			drawbuf->FillRect(info.left, gpos - 3, info.left + percent_pos,
-//					gpos - 3 + 1, cl1);
-//			drawbuf->FillRect(info.left, gpos - 1, info.left + percent_pos,
-//					gpos - 1 + 1, cl1);
-//		}
-
-		// disable section marks for left page, and for too many marks
-//		if (!leftPage && (phi & PGHDR_CHAPTER_MARKS) && sbounds.length()<info.width()/5 ) {
-//			for (int i = 0; i < sbounds.length(); i++) {
-//				int x = info.left + sbounds[i] * (info.width() - 1) / 10000;
-//				lUInt32 c = x < info.left + percent_pos ? cl2 : cl1;
-//				drawbuf->FillRect(x, gpos - 4, x + 1, gpos - 0 + 2, c);
-//			}
-//		}
 
 		if (getVisiblePageCount() == 1 || !(pageIndex & 1)) {
 			int dwIcons = 0;
@@ -4659,9 +4691,9 @@ bool LVDocView::ParseDocument() {
 			m_doc_props->setString(DOC_PROP_AUTHORS, extractDocAuthors(m_doc));
 			m_doc_props->setString(DOC_PROP_TITLE, extractDocTitle(m_doc));
 			if (txt_autodet_lang.length() > 0)
-				m_doc_props->setString(DOC_PROP_LANGUAGE, txt_autodet_lang);
+				m_doc_props->setString(DOC_PROP_LANGUAGE, txt_autodet_lang);        // already in lowercase
 			else
-				m_doc_props->setString(DOC_PROP_LANGUAGE, extractDocLanguage(m_doc));
+				m_doc_props->setString(DOC_PROP_LANGUAGE, extractDocLanguage(m_doc).lowercase());
             int seriesNumber = -1;
             lString16 seriesName = extractDocSeries(m_doc, &seriesNumber);
             m_doc_props->setString(DOC_PROP_SERIES_NAME, seriesName);

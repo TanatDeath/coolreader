@@ -273,7 +273,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     #endif
     lString16 authors = extractDocAuthors( &doc, lString16("|"), false );
     lString16 title = extractDocTitle( &doc );
-    lString16 language = extractDocLanguage( &doc );
+    lString16 language = extractDocLanguage( &doc ).lowercase();
     lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
 	lString16 genre = extractDocGenre( &doc, lString16("|") );
 	lString16 annotation = extractDocAnnotation( &doc );

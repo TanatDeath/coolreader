@@ -19,7 +19,15 @@ public class CRDBService extends Service {
 	public static final Logger log = L.create("db");
 	public static final Logger vlog = L.create("db", Log.ASSERT);
 
-    private MainDB mainDB = new MainDB();
+	public MainDB getMainDB() {
+		return mainDB;
+	}
+
+	public CoverDB getCoverDB() {
+		return coverDB;
+	}
+
+	private MainDB mainDB = new MainDB();
     private CoverDB coverDB = new CoverDB();
 	
     @Override
@@ -204,11 +212,19 @@ public class CRDBService extends Service {
     	void onOPDSCatalogsLoaded(ArrayList<FileInfo> catalogs);
     }
     
-	public void saveOPDSCatalog(final Long id, final String url, final String name, final String username, final String password) {
+	public void saveOPDSCatalog(final Long id, final String url, final String name,
+								final String username, final String password,
+								final String proxy_addr, final String proxy_port,
+								final String proxy_uname, final String proxy_passw,
+								final int onion_def_proxy
+								) {
 		execTask(new Task("saveOPDSCatalog") {
 			@Override
 			public void work() {
-				mainDB.saveOPDSCatalog(id, url, name, username, password);
+				mainDB.saveOPDSCatalog(id, url, name, username, password,
+						proxy_addr, proxy_port,
+						proxy_uname, proxy_passw,
+				  		onion_def_proxy);
 			}
 		});
 	}
@@ -830,7 +846,7 @@ public class CRDBService extends Service {
      * Provides interface for asynchronous operations with database.
      */
     public class LocalBinder extends Binder {
-        private CRDBService getService() {
+        public CRDBService getService() {
             return CRDBService.this;
         }
         
@@ -846,8 +862,16 @@ public class CRDBService extends Service {
     		getService().loadOPDSCatalogs(callback, new Handler());
     	}
 
-    	public void saveOPDSCatalog(final Long id, final String url, final String name, final String username, final String password) {
-    		getService().saveOPDSCatalog(id, url, name, username, password);
+    	public void saveOPDSCatalog(final Long id, final String url, final String name,
+									final String username, final String password,
+									final String proxy_addr, final String proxy_port,
+									final String proxy_uname, final String proxy_passw,
+									final int onion_def_proxy
+									) {
+    		getService().saveOPDSCatalog(id, url, name, username, password,
+					proxy_addr,proxy_port,
+					proxy_uname, proxy_passw,
+					onion_def_proxy);
     	}
 
     	public void updateOPDSCatalogLastUsage(final String url) {

@@ -17,9 +17,15 @@ public abstract class BaseDB {
 	public static final Logger log = L.create("bdb");
 	public static final Logger vlog = L.create("bdb", Log.INFO);
 
+	public String mOriginalDBFile = "";
+	public String mBackedDBFile = "";
+	public String mDeletedDBFile = "";
+	public String mBackupRestoredDBFile = "";
+	public String mBackupRestoredToDBFile = "";
+
 	protected SQLiteDatabase mDB;
 	private File mFileName;
-	private boolean restoredFromBackup;
+	public boolean restoredFromBackup;
 	private boolean error = false;
 
 	public File getFileName() {
@@ -46,9 +52,9 @@ public abstract class BaseDB {
 		if (!res) {
 			log.e("Closing DB due error while upgrade of schema: " + dbFile.getAbsolutePath());
 			close();
-			Utils.moveCorruptedFileToBackup(dbFile);
+			Utils.moveCorruptedFileToBackup(this, dbFile);
 			if (!restoredFromBackup)
-				Utils.restoreFromBackup(dbFile);
+				Utils.restoreFromBackup(this, dbFile);
 			mDB = openDB(dbFile);
 			res = checkSchema();
 			if (!res)
@@ -101,8 +107,8 @@ public abstract class BaseDB {
 			return db;
 		} catch (SQLiteException e) {
 			log.e("Error while opening DB " + dbFile.getAbsolutePath() + ". " + e.getMessage());
-			Utils.moveCorruptedFileToBackup(dbFile);
-			restoredFromBackup = Utils.restoreFromBackup(dbFile);
+			Utils.moveCorruptedFileToBackup(this, dbFile);
+			restoredFromBackup = Utils.restoreFromBackup(this, dbFile);
 			try {
 				db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
 				db.rawQuery("PRAGMA synchronous=3", null);
@@ -219,9 +225,11 @@ public abstract class BaseDB {
 	 * Begin transaction, if not yet started, for faster reading.
 	 */
 	public void beginReading() {
-		if (!mDB.inTransaction()) {
-			vlog.v("starting readonly transaction");
-			mDB.beginTransaction();
+		if (mDB != null) {
+			if (!mDB.inTransaction()) {
+				vlog.v("starting readonly transaction");
+				mDB.beginTransaction();
+			}
 		}
 	}
 

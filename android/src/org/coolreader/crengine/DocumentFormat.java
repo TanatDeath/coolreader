@@ -163,6 +163,54 @@ public enum DocumentFormat {
 				return values()[i];
 		return null;
 	}
+
+	public static String extByMimeType( String stype )
+	{
+		String sExt = "";
+		if (stype.equals("text/plain")) sExt = "txt";
+		if (stype.equals("text/plain")) sExt = "txt";
+		if (stype.equals("application/x-fictionbook+xml")) sExt = "fb2";
+		if (stype.equals("application/x-fictionbook")) sExt = "fb2";
+		if (stype.equals("application/x-fb2")) sExt = "fb2";
+		if (stype.equals("application/fb2")) sExt = "fb2";
+		if (stype.equals("application/fb2.zip")) sExt = "fb2.zip";
+		if (stype.equals("application/zip")) sExt = "zip";
+		if (stype.equals("text/fb2+xml")) sExt = "fb2";
+		if (stype.equals("application/epub+zip")) sExt = "epub.zip";
+		if (stype.equals("application/epub")) sExt = "epub";
+		if (stype.equals("application/xhtml+xml")) sExt = "html";
+		if (stype.equals("application/vnd.ms-htmlhelp")) sExt = "chm";
+		if (stype.equals("application/x-chm")) sExt = "chm";
+		if (stype.equals("application/x-cdisplay")) sExt = "cbz";
+		if (stype.equals("application/x-cbz")) sExt = "cbz";
+		if (stype.equals("application/x-cbr")) sExt = "cbr";
+		if (stype.equals("application/x-cbt")) sExt = "cbt";
+		if (stype.equals("application/rtf")) sExt = "rtf";
+		if (stype.equals("application/rtf+zip")) sExt = "rtf.zip";
+		if (stype.equals("application/x-rtf")) sExt = "rtf";
+		if (stype.equals("text/richtext")) sExt = "rtf";
+		if (stype.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) sExt = "docx";
+		if (stype.equals("application/msword")) sExt = "doc";
+		if (stype.equals("application/doc")) sExt = "doc";
+		if (stype.equals("application/vnd.msword")) sExt = "doc";
+		if (stype.equals("application/vnd.ms-word")) sExt = "doc";
+		if (stype.equals("application/winword")) sExt = "doc";
+		if (stype.equals("application/word")) sExt = "doc";
+		if (stype.equals("application/x-msw6")) sExt = "doc";
+		if (stype.equals("application/x-msword")) sExt = "doc";
+		if (stype.equals("application/x-mobipocket-ebook")) sExt = "mobi";
+		if (stype.equals("application/x-pdb-plucker-ebook")) sExt = "mobi";
+		if (stype.equals("application/x-pdb-textread-ebook")) sExt = "mobi";
+		if (stype.equals("application/x-pdb-peanutpress-ebook")) sExt = "mobi";
+		if (stype.equals("application/x-pdb-ztxt-ebook")) sExt = "mobi";
+		if (stype.equals("application/vnd.palm")) sExt = "mobi";
+		if (stype.equals("application/x-pdb-plucker-ebook")) sExt = "mobi";
+		if (stype.equals("image/jpeg")) sExt = "jpg";
+		if (stype.equals("image/png")) sExt = "png";
+		if (stype.equals("image/*")) sExt = "png";
+		if (stype.equals("application/x-pilot-prc")) sExt = "azw";
+		return sExt;
+	}
 	
 	private DocumentFormat( String cssFileName, int cssResourceId, int iconResourceId, boolean canParseProperties, boolean canParseCoverpages, int priority, String extensions[], String mimeFormats[] )
 	{

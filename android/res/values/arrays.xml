@@ -99,6 +99,159 @@
         <item>0</item>
     </integer-array>
 
+    <string-array name="motion_timeout_sec_titles">
+        <item>@string/timeout_same_as_usual</item>
+        <item>@string/timeout_10sec</item>
+        <item>@string/timeout_20sec</item>
+        <item>@string/timeout_30sec</item>
+        <item>@string/timeout_40sec</item>
+        <item>@string/timeout_50sec</item>
+        <item>@string/motion_timeout_1min</item>
+        <item>@string/timeout_1_5min</item>
+        <item>@string/motion_timeout_2min</item>
+        <item>@string/motion_timeout_3min</item>
+        <item>@string/motion_timeout_4min</item>
+        <item>@string/motion_timeout_5min</item>
+        <item>@string/motion_timeout_6min</item>
+        <item>@string/motion_timeout_7min</item>
+        <item>@string/motion_timeout_8min</item>
+        <item>@string/motion_timeout_9min</item>
+        <item>@string/motion_timeout_10min</item>
+    </string-array>
+
+    <integer-array name="motion_timeout_sec_values">
+        <item>0</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
+        <item>90</item>
+        <item>120</item>
+        <item>180</item>
+        <item>240</item>
+        <item>300</item>
+        <item>360</item>
+        <item>420</item>
+        <item>480</item>
+        <item>540</item>
+        <item>600</item>
+    </integer-array>
+
+    <integer-array name="motion_timeout_sec_add_infos">
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+    </integer-array>
+
+    <string-array name="force_tts_titles">
+        <item>@string/force_tts_0koef</item>
+        <item>@string/force_tts_2koef</item>
+        <item>@string/force_tts_3koef</item>
+        <item>@string/force_tts_4koef</item>
+        <item>@string/force_tts_5koef</item>
+        <item>@string/force_tts_7koef</item>
+        <item>@string/force_tts_9koef</item>
+        <item>@string/force_tts_10sec</item>
+        <item>@string/force_tts_15sec</item>
+        <item>@string/force_tts_20sec</item>
+        <item>@string/force_tts_25sec</item>
+        <item>@string/force_tts_30sec</item>
+        <item>@string/force_tts_40sec</item>
+        <item>@string/force_tts_50sec</item>
+        <item>@string/force_tts_60sec</item>
+        <item>@string/force_tts_90sec</item>
+        <item>@string/force_tts_120sec</item>
+    </string-array>
+
+    <integer-array name="force_tts_values">
+        <item>0</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>7</item>
+        <item>9</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
+        <item>90</item>
+        <item>120</item>
+    </integer-array>
+
+    <integer-array name="force_tts_add_infos">
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+    </integer-array>
+
+    <string-array name="orient_titles">
+        <item>@string/orient_0</item>
+        <item>@string/orient_1</item>
+        <item>@string/orient_3</item>
+        <item>@string/orient_5</item>
+        <item>@string/orient_10</item>
+        <item>@string/orient_15</item>
+        <item>@string/orient_20</item>
+        <item>@string/orient_30</item>
+    </string-array>
+
+    <integer-array name="orient_values">
+        <item>0</item>
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+    </integer-array>
+
+    <integer-array name="orient_add_infos">
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+    </integer-array>
+
     <string-array name="pages_per_full_swipe_titles">
         <item>@string/pages_per_full_swipe_off</item>
         <item>@string/pages_per_full_swipe_1</item>

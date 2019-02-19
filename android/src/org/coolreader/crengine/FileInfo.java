@@ -95,6 +95,12 @@ public class FileInfo {
 	public String opdsLinkR; // link form opds-assigned entry
 	public String username; // username for online catalogs
 	public String password; // password for online catalogs
+	public String proxy_addr;
+	public String proxy_port;
+	public String proxy_uname;
+	public String proxy_passw;
+	public int onion_def_proxy;
+
 	public DocumentFormat format;
 	public int size; // full file size
 	public int arcsize; // compressed size
@@ -403,6 +409,11 @@ public class FileInfo {
 		lang_to = v.lang_to;
 		username = v.username;
 		password = v.password;
+		proxy_addr = v.proxy_addr;
+		proxy_port = v.proxy_port;
+		proxy_uname = v.proxy_uname;
+		proxy_passw = v.proxy_passw;
+		onion_def_proxy = v.onion_def_proxy;
 		id = v.id;
 		saved_with_ver = v.saved_with_ver;
 		genre = v.genre;
