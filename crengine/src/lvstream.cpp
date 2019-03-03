@@ -2686,8 +2686,7 @@ public:
             NextPosition = (lUInt32)m_stream->GetPos();
             NextPosition += SeekLen;
             m_stream->Seek(NextPosition, LVSEEK_SET, NULL);
-
-	        lString16 fName;
+            lString16 fName;
             if (ZipHeader.PackVer >= 63 && (ZipHeader.Flags & 0x0800) == 0x0800) {
                 // Language encoding flag (EFS).  If this bit is set,
                 // the filename and comment fields for this file

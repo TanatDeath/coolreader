@@ -469,6 +469,7 @@ public class BookInfoDialog extends BaseDialog {
 			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
 			parent.removeView(btnBookDownload);
 			parent.removeView(btnMarkToRead);
+			parent.removeView(btnFindAuthors);
 		}
 		for ( String item : items ) {
 			int p = item.indexOf("=");

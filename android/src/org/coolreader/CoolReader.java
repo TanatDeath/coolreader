@@ -858,7 +858,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 									cdb.mBackupRestoredDBFile + " -> " + cdb.mBackupRestoredToDBFile + " \n";
 					}
 				}
-				if (!StrUtils.isEmptyStr(sMesg)) notificationDB(sMesg);
+				if (!StrUtils.isEmptyStr(sMesg)) {
+					notificationDB(sMesg);
+					if (db !=null) {
+						db.mOriginalDBFile = "";
+						db.mBackedDBFile = "";
+						db.mDeletedDBFile = "";
+						db.mBackupRestoredDBFile ="";
+					}
+					if (cdb !=null) {
+						cdb.mOriginalDBFile = "";
+						cdb.mBackedDBFile = "";
+						cdb.mDeletedDBFile = "";
+						cdb.mBackupRestoredDBFile ="";
+					}
+				}
 			}
 		});
 
