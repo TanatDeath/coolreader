@@ -453,8 +453,9 @@ public class Utils {
 	}
 
 	public static String formatFileInfo(Activity activity, FileInfo item) {
+		int prof = item.getProfileId();
 		return formatSize(item.size) + " " + (item.format!=null ? item.format.name().toLowerCase() : "") + " " +
-				formatDate(activity, item.getCreateTime());
+				formatDate(activity, item.getCreateTime())+" {p"+prof+"}";
 	}
 
 	public static String formatLastPosition(Activity activity, Bookmark pos) {

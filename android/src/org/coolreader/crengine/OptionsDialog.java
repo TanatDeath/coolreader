@@ -1122,7 +1122,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					if (a.getIconId()!=0) {
 						img.setImageDrawable(mActivity.getResources().getDrawable(
 								a.getIconId()));
-						mActivity.tintViewIcons(img);
+						mActivity.tintViewIcons(img, true);
 					}
 					final String addInfo = getString(a.addInfoR);
 					if (!addInfo.equals("")) {

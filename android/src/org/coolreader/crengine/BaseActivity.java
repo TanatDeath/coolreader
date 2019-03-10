@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 
 import org.coolreader.CoolReader;
 import org.coolreader.Dictionaries;
@@ -1674,6 +1675,20 @@ public class BaseActivity extends Activity implements Settings {
 		log.i("Switching from profile " + currentProfile + " to " + profile);
 		mSettingsManager.saveSettings(currentProfile, null);
 		final Properties loadedSettings = mSettingsManager.loadSettings(profile);
+		try {
+			if (this instanceof CoolReader)
+				if (((CoolReader) this).getmReaderFrame()!=null) {
+					for (Map.Entry<Object, Object> entry : loadedSettings.entrySet()) {
+						String key = (String) entry.getKey();
+						String value = (String) entry.getValue();
+						if (key.equals(PROP_TOOLBAR_APPEARANCE)) {
+							((CoolReader) this).setToolbarAppearance(value);
+						}
+						((CoolReader) this).getmReaderFrame().updateCRToolbar(((CoolReader) this));
+					}
+				}
+		} catch (Exception e) {
+		}
 		mSettingsManager.setSettings(loadedSettings, 0, true);
 		currentProfile = profile;
 	}

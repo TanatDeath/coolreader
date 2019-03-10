@@ -1659,6 +1659,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			TextView author;
 			TextView series;
 			TextView filename;
+			LinearLayout linearLayoutF1and2;
 			TextView field1;
 			TextView field2;
 			TextView linkToFile;
@@ -2044,6 +2045,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
  					}
 					
 				}
+				if ((linearLayoutF1and2!=null)&&(field2!=null)) {
+					if (StrUtils.isEmptyStr(field2.getText().toString())) {
+						linearLayoutF1and2.removeView(field2);
+					}
+				}
 			}
 		}
 		
@@ -2072,6 +2078,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				holder.filename = (TextView)view.findViewById(R.id.book_filename);
 				holder.field1 = (TextView)view.findViewById(R.id.browser_item_field1);
 				holder.field2 = (TextView)view.findViewById(R.id.browser_item_field2);
+				holder.linearLayoutF1and2 = (LinearLayout)view.findViewById(R.id.browser_item_fields1_and_2);
 				holder.linkToFile = (TextView)view.findViewById(R.id.linkToFile);
 				holder.fieldState = (TextView)view.findViewById(R.id.browser_item_field_state);
 				holder.imageAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
