@@ -118,6 +118,8 @@
 					android:layout_marginRight="2dip"
 					android:max="100"
 					android:progress="50"
+					android:progressDrawable="@drawable/seekbar_progressbar"
+					android:thumb="@drawable/seekbar_thumb"
 					/>
 				<ImageButton android:id="@+id/btn_vol_up"
 					android:layout_width="wrap_content"
@@ -160,6 +162,8 @@
 					android:layout_marginRight="2dip"
 					android:max="100"
 					android:progress="50"
+					android:progressDrawable="@drawable/seekbar_progressbar"
+					android:thumb="@drawable/seekbar_thumb"
 					/>
 				<ImageButton android:id="@+id/btn_freq_up"
 					android:layout_width="wrap_content"

@@ -4,16 +4,12 @@ package org.coolreader;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -490,14 +486,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			return false;
 		String fileToOpen = null;
 		String intentAction = intent.getAction();
-		if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
+		if (Intent.ACTION_VIEW.equals(intentAction)) {
 			Uri uri = intent.getData();
 			String stype = intent.getType();
 			intent.setData(null);
 			if (uri != null) {
 				String sLastSeg = uri.getLastPathSegment();
 				fileToOpen = uri.getPath();
+				if (uri.getEncodedPath().contains("%00"))
+					fileToOpen = uri.getEncodedPath();
+				else
+					fileToOpen = uri.getPath();
 				File file = new File(fileToOpen);
+				// try to fix for Onyx Darwin 5 - not needed
+//				if ((!file.exists())&&(fileToOpen.contains("/mnt/sdcard"))) {
+//					File tfile = new File(fileToOpen.replace("/mnt/sdcard", "/storage/emulated/0"));
+//					if (tfile.exists()) {
+//						file = tfile;
+//						fileToOpen = fileToOpen.replace("/mnt/sdcard", "/storage/emulated/0");
+//					}
+//					if (fileToOpen.startsWith("file://")) fileToOpen = fileToOpen.substring(7);
+//				}
 				if ((uri.toString().startsWith("content"))&&(!file.exists())) {
 					String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
 					String fname = sLastSeg;
@@ -543,12 +553,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				//fileToOpen = FileUtils.getPath(getApplicationContext(), uri);
                 //fileToOpen = FileUtils.getRealPathFromURI(getContentResolver(), uri);
 				//if (fileToOpen == null) fileToOpen = uri.getPath();
-
 //				if (fileToOpen.startsWith("file://"))
 //					fileToOpen = fileToOpen.substring("file://".length());
 			}
 		}
-		if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
+		if (Intent.ACTION_SEND_MULTIPLE.equals(intentAction)) {
 			if (intent.getType().startsWith("image/")) {
 				ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
 				if (imageUris != null) {
@@ -556,7 +565,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 			}
 		}
-		if (Intent.ACTION_SEND.equals(intent.getAction())) {
+		if (Intent.ACTION_SEND.equals(intentAction)) {
 //			String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
 //			String stype = intent.getType();
 //			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -683,6 +692,27 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (fileToOpen == null && intent.getExtras() != null) {
 			log.d("extras=" + intent.getExtras());
 			fileToOpen = intent.getExtras().getString(OPEN_FILE_PARAM);
+		}
+		if (fileToOpen != null) {
+			// parse uri from system filemanager
+			if (fileToOpen.contains("%00")) {
+				// splitter between archive file name and inner file.
+				fileToOpen = fileToOpen.replace("%00", "@/");
+				fileToOpen = Uri.decode(fileToOpen);
+			}
+			if (fileToOpen.startsWith("/document/primary:")) {
+				// scheme="content", host="com.android.externalstorage.documents"
+				// decode special uri form: /document/primary:<somebody>
+				File[] dataDirs = Engine.getStorageDirectories(false);
+				if (dataDirs != null && dataDirs.length > 0) {
+					fileToOpen = fileToOpen.replace("/document/primary:", dataDirs[0].getAbsolutePath() + "/");
+				}
+			} else if (fileToOpen.startsWith("/1////")) {
+				// scheme="content", host="com.google.android.apps.nbu.files.provider"
+				// caused by "Google Files", package="com.google.android.apps.nbu.files"
+				// skip "/1///"
+				fileToOpen = fileToOpen.substring(5);
+			}
 		}
 		if (fileToOpen != null) {
 			// patch for opening of books from ReLaunch (under Nook Simple Touch) 
@@ -2515,6 +2545,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			location = FileInfo.ROOT_DIR_TAG;
 		if (location.startsWith(BOOK_LOCATION_PREFIX)) {
 			location = location.substring(BOOK_LOCATION_PREFIX.length());
+			final String floc = location;
 			loadDocument(location, new Runnable() {
 				@Override
 				public void run() {
@@ -2522,7 +2553,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						@Override
 						public void run() {
 							// if document not loaded show error & then root window
-							ErrorDialog errDialog = new ErrorDialog(CoolReader.this, "Error", "Can't open file!");
+							ErrorDialog errDialog = new ErrorDialog(CoolReader.this, "Error",
+                                    "Can't open file: "+floc);
 							errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 								@Override
 								public void onDismiss(DialogInterface dialog) {

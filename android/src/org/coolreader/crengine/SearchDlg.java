@@ -145,7 +145,7 @@ public class SearchDlg extends BaseDialog {
 											   int position, long arg3) {
 					//openContextMenu(SearchDlg.SearchList.this);
 					mEditView.setText(mSearches.get(position));
-					mSearchPages.callOnClick();
+					searchPagesClick();
 					return true;
 				}
 			});
@@ -156,6 +156,37 @@ public class SearchDlg extends BaseDialog {
 			mEditView.setText(mSearches.get(position));
 			return true;
 		}
+	}
+
+	public void searchPagesClick() {
+		final String sText = mEditView.getText().toString().trim();
+		mReaderView.CheckAllPagesLoadVisual();
+		final GotoPageDialog dlg = new GotoPageDialog(activity, title, sText,
+				new GotoPageDialog.GotoPageHandler() {
+					int pageNumber = 0;
+
+					@Override
+					public boolean validate(String s) {
+						pageNumber = Integer.valueOf(s);
+						return pageNumber > 0; // && pageNumber <= mReaderView.props.pageCount;
+					}
+
+					@Override
+					public void onOk(String s) {
+						mReaderView.goToPage(pageNumber);
+					}
+
+					@Override
+					public void onOkPage(String s) {
+						mReaderView.goToPage(pageNumber);
+					}
+
+					@Override
+					public void onCancel() {
+					}
+				});
+		dlg.show();
+		dismiss();
 	}
 	
 	public SearchDlg(BaseActivity coolReader, ReaderView readerView, String initialText)
@@ -180,30 +211,7 @@ public class SearchDlg extends BaseDialog {
     	mSearchPages = (ImageButton)mDialogView.findViewById(R.id.btn_search_pages);
     	mSearchPages.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
-				final String sText = mEditView.getText().toString().trim();
-				mReaderView.CheckAllPagesLoadVisual();
-				final GotoPageDialog dlg = new GotoPageDialog(activity, title, sText,
-						new GotoPageDialog.GotoPageHandler() {
-							int pageNumber = 0;
-							@Override
-							public boolean validate(String s) {
-								pageNumber = Integer.valueOf(s);
-								return pageNumber>0; // && pageNumber <= mReaderView.props.pageCount;
-							}
-							@Override
-							public void onOk(String s) {
-								mReaderView.goToPage(pageNumber);
-							}
-							@Override
-							public void onOkPage(String s) {
-								mReaderView.goToPage(pageNumber);
-							}
-							@Override
-							public void onCancel() {
-							}
-						});
-				dlg.show();
-				dismiss();
+				searchPagesClick();
 			}
 		});
 		ImageButton btnMinus1 = (ImageButton)mDialogView.findViewById(R.id.search_dlg_clear_hist_btn);

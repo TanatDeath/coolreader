@@ -835,7 +835,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void toggleSelectionMode() {
 		selectionModeActive = !selectionModeActive;
-		mActivity.showToast( selectionModeActive ? R.string.action_toggle_selection_mode_on : R.string.action_toggle_selection_mode_off);
+		if (mActivity.getmReaderFrame()!=null)
+			if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
+				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(
+						mActivity.getString(selectionModeActive ?
+								R.string.action_toggle_selection_mode_on : R.string.action_toggle_selection_mode_off));
 	}
 
 	private ImageViewer currentImageViewer;
@@ -3553,14 +3557,25 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			fileName = getManualFileName();
 			log.i("Manual document: " + fileName);
 		}
+		//Fix for Onyx - not needed
+//		if (fileName.contains("/mnt/sdcard")) {
+//			File file = new File(fileName);
+//			if (!file.exists()) {
+//				File tfile = new File(fileName.replace("/mnt/sdcard", "/storage/emulated/0"));
+//				if (tfile.exists()) {
+//					fileName = fileName.replace("/mnt/sdcard", "/storage/emulated/0");
+//				}
+//			}
+//		}
 		String normalized = mEngine.getPathCorrector().normalize(fileName);
 		if (normalized == null) {
 			log.e("Trying to load book from non-standard path " + fileName);
-			mActivity.showSToast("Trying to load book from non-standard path " + fileName);
-			hideProgress();
-			if (errorHandler != null)
-				errorHandler.run();
-			return false;
+			//mActivity.showSToast("Trying to load book from non-standard path " + fileName); // this cause Onyx Darwin 5 to shutdown CR
+			// this cause not to try to load book
+			//hideProgress();
+			//if (errorHandler != null)
+			//	errorHandler.run();
+			//return false;
 		} else if (!normalized.equals(fileName)) {
 			log.w("Filename normalized to " + normalized);
 			fileName = normalized;
@@ -3581,10 +3596,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if ( book==null ) {
 			log.v("loadDocument() : book not found in history, looking for location directory");
 			FileInfo dir = Services.getScanner().findParent(new FileInfo(fileName), Services.getScanner().getRoot());
+			if (dir!=null) log.v("loadDocument() : parent dir is: "+dir.pathname);
+			if (dir==null) log.v("loadDocument() : parent dir is NULL");
 			if ( dir!=null ) {
 				log.v("loadDocument() : document location found : " + dir);
 				fi = dir.findItemByPathName(fileName);
 				log.v("loadDocument() : item inside location : " + fi);
+			} else {
+				File tfile = new File(fileName);
+				if (tfile.exists())
+					fi = new FileInfo(fileName);
 			}
 			if ( fi==null ) {
 				log.v("loadDocument() : no file item " + fileName + " found inside " + dir);

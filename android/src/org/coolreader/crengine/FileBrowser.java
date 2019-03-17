@@ -2024,7 +2024,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							field2.setBackgroundColor(colorGrayCT);
 						}
 						TextView fld = linkToFile;
-						if (fld == null) fld = field2;
+						if (fld == null) fld = field2; else fld.setText("");
 						if (
 							 (fld != null)
 						  	  && ((!StrUtils.isEmptyStr(item.pathnameR))||(!StrUtils.isEmptyStr(item.arcnameR)))
@@ -2038,7 +2038,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							}
 								else s = item.pathnameR;
 							s = s.replace("/storage/emulated/0","/s/e/0");
-							fld.setText(s);
+							final String fS = s;
+							fld.setText(fS);
+							//log.i("Setting linked file for: " + item.pathname + " to " +
+							//		item.pathnameR);
 							fld.setTextColor(colorIcon);
 							fld.setBackgroundColor(colorGrayCT2);
 						}

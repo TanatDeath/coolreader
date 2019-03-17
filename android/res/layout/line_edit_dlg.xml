@@ -40,7 +40,5 @@
         android:padding="10dip"
         android:max="100"
         android:progress="50"
-		android:progressDrawable="@drawable/seekbar_progressbar"
-		android:thumb="@drawable/seekbar_thumb"
     />
 </LinearLayout>

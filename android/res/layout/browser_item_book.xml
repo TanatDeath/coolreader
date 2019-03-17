@@ -80,26 +80,33 @@
                 android:singleLine="true"
                 android:layout_gravity="left" />
 
-            <TextView android:id="@+id/browser_item_field1"
-                style="@style/TextAppearance.Small"
-                android:layout_width="wrap_content"
+            <LinearLayout android:id="@+id/browser_item_fields1_and_2"
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="0dip"
-                android:layout_marginRight="2dip"
-                android:text="field1"
-                android:singleLine="true"
-                android:layout_gravity="left" />
-            <TextView android:id="@+id/browser_item_field2"
-                style="@style/TextAppearance.Small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="field2"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="0dip"
-                android:singleLine="false"
-                android:maxLines="5"
-                android:ellipsize="middle"
-                android:layout_gravity="right" />
+                >
+
+                <TextView android:id="@+id/browser_item_field1"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="0dip"
+                    android:layout_marginRight="2dip"
+                    android:text="field1"
+                    android:singleLine="true"
+                    android:layout_gravity="left" />
+                <TextView android:id="@+id/browser_item_field2"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="field2"
+                    android:layout_marginLeft="2dip"
+                    android:layout_marginRight="0dip"
+                    android:singleLine="false"
+                    android:maxLines="5"
+                    android:ellipsize="middle"
+                    android:layout_gravity="right" />
+            </LinearLayout>
             <!-- TextView android:id="@+id/browser_item_field4"
                 style="@style/TextAppearance.Small"
                 android:layout_width="wrap_content"

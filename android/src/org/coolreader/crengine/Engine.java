@@ -1105,7 +1105,7 @@ public class Engine {
 	}
 	
 	public static HashSet<String> listStorageDir() {
-	    final HashSet<String> out = new HashSet<String>();
+		final HashSet<String> out = new HashSet<String>();
 	    File dir = new File("/storage");
 	    try {
 		    if (dir.exists() && dir.isDirectory()) {
@@ -1120,7 +1120,9 @@ public class Engine {
 	    } catch (Exception e) {
 	    	// ignore
 	    }
-	    return out;
+	    //File tfile = new File("/mnt/sdcard");
+		//if ((DeviceInfo.EINK_ONYX) && (tfile.exists()) && (tfile.isDirectory())) out.add(tfile.getAbsolutePath()); // hack for Onyx Darwin 5
+ 	    return out;
 	}
 	public static HashSet<String> getExternalMounts() {
 	    final HashSet<String> out = new HashSet<String>();
@@ -1333,6 +1335,7 @@ public class Engine {
 			"/mnt/sdcard/extStorages/SdCard",
 			"/storage/extSdCard",
 			"/storage/external_SD",
+			"/mnt/sdcard", //Onyx Darwin 5
 		};
 		// collect mount points from all possible sources
 		HashSet<String> mountPointsToAdd = new HashSet<String>();

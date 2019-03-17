@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.coolreader"
-          android:installLocation="auto">
+    package="org.coolreader"
+    android:installLocation="auto">
 
     <supports-screens
         android:xlargeScreens="true"
@@ -34,25 +34,25 @@
         >
 
         <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyCr_nWVRATHYaPyTn0wxpjpy4QR2eTEvB0" />
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCr_nWVRATHYaPyTn0wxpjpy4QR2eTEvB0" />
 
         <meta-data android:name="android.max_aspect" android:value="2.1" />
 
         <meta-data
-        android:name="com.google.android.gms.version"
-        android:value="@integer/google_play_services_version" />
-<!--
-           android:configChanges="orientation|keyboardHidden|locale|screenSize"
--->
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <!--
+                   android:configChanges="orientation|keyboardHidden|locale|screenSize"
+        -->
         <meta-data android:name="android.max_aspect" android:value="2.1" />
         <activity android:name=".CoolReader"
-                  android:label="@string/app_name_fork"
-                  android:configChanges="orientation|keyboardHidden|locale|screenSize|screenLayout|layoutDirection"
-                  android:theme="@android:style/Theme.NoTitleBar"
-                  android:launchMode="singleInstance"
-                  android:windowSoftInputMode="stateHidden"
-                  android:screenOrientation="sensor">
+            android:label="@string/app_name_fork"
+            android:configChanges="orientation|keyboardHidden|locale|screenSize|screenLayout|layoutDirection"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="sensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -1071,87 +1071,6 @@
                 <data android:mimeType="application/x-pdb-ztxt-ebook" />
                 <data android:mimeType="application/vnd.palm" />
                 <data android:mimeType="application/x-pdb-plucker-ebook" />
-            </intent-filter>
-        </activity-alias>
-
-        <!-- alias activity to disable PIC -->
-        <activity-alias
-            android:name=".CoolReaderForPIC"
-            android:targetActivity=".CoolReader" >
-            <!-- intent-filter with recognized extensions and */* mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\.png" />
-                <data android:pathPattern="/.*\\..*\\.png" />
-                <data android:pathPattern="/.*\\..*\\..*\\.png" />
-            </intent-filter>
-            <!-- intent-filter with recognized extensions and null mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\.png" />
-                <data android:pathPattern="/.*\\..*\\.png" />
-                <data android:pathPattern="/.*\\..*\\..*\\.png" />
-            </intent-filter>
-            <!-- intent-filter with no extensions and recognized mime-types -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND_MUTIPLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-                <data android:mimeType="image/*" />
             </intent-filter>
         </activity-alias>
 

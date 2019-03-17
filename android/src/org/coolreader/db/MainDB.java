@@ -18,6 +18,7 @@ public class MainDB extends BaseDB {
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
+		log.i("DB_VERSION INSTALLED "+mDB.getVersion());
 		//execSQL("update book set saved_with_ver = 0 ");
 		if (mDB.needUpgrade(DB_VERSION)) {
 			log.i("DB_VERSION NEED UPGRADE");
@@ -133,7 +134,6 @@ public class MainDB extends BaseDB {
                         "last_usage INTEGER DEFAULT 0," +
                         "username VARCHAR DEFAULT NULL, " +
                         "password VARCHAR DEFAULT NULL, " +
-						"last_usage INTEGER DEFAULT 0, " +
 						"proxy_addr VARCHAR DEFAULT NULL, " +
 						"proxy_port VARCHAR DEFAULT NULL, " +
 						"proxy_uname VARCHAR DEFAULT NULL, " +
