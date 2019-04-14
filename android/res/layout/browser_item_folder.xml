@@ -63,7 +63,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
 	        android:layout_marginRight="8dip"
-            android:singleLine="true"
+            android:singleLine="false"
+            android:maxLines="3"
+            android:ellipsize="end"
             android:layout_gravity="right" />
         <TextView android:id="@+id/browser_item_field2"
             style="@style/TextAppearance.Small"
@@ -71,7 +73,9 @@
             android:layout_height="wrap_content"
 	        android:layout_marginRight="8dip"
             android:layout_weight="1"
-            android:singleLine="true"
+            android:singleLine="false"
+            android:maxLines="3"
+            android:ellipsize="end"
             android:layout_gravity="right" />
     </LinearLayout>
             

@@ -64,6 +64,10 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnFindAuthors;
 	boolean bMarkToRead;
 
+	public BookInfo getmBookInfo() {
+		return mBookInfo;
+	}
+
 	private Map<String, Integer> mLabelMap;
 	private void fillMap() {
 		mLabelMap = new HashMap<String, Integer>();
@@ -358,6 +362,41 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
+		ImageButton btnSaveToGD = (ImageButton)view.findViewById(R.id.save_to_gd);
+
+		btnSaveToGD.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				((CoolReader)activity).mGoogleDriveTools.signInAndDoAnAction(
+						((CoolReader)activity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, BookInfoDialog.this);
+			}
+		});
+
+		ImageButton btnDeleteBook = (ImageButton)view.findViewById(R.id.book_delete);
+		btnDeleteBook.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				((CoolReader)activity).askDeleteBook(mBookInfo.getFileInfo());
+				dismiss();
+			}
+		});
+
+		ImageButton btnCustomCover = (ImageButton)view.findViewById(R.id.book_custom_cover);
+		btnCustomCover.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (((CoolReader)activity).picReceived!=null) {
+					if (((CoolReader)activity).picReceived.bmpReceived!=null) {
+						PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
+								mBookInfo, "");
+						dlg.show();
+					}
+				} else {
+					((CoolReader)activity).showToast(R.string.pic_no_pic);
+				}
+			}
+		});
+
 		btnMarkToRead = ((Button)view.findViewById(R.id.btn_mark_toread));
 		bMarkToRead = activity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false);
 
@@ -464,6 +503,9 @@ public class BookInfoDialog extends BaseDialog {
 			parent.removeView(btnBookFolderOpen);
 			parent.removeView(btnBookShortcut);
 			parent.removeView(btnBookEdit);
+			parent.removeView(btnSaveToGD);
+			parent.removeView(btnDeleteBook);
+			parent.removeView(btnCustomCover);
 		}
 		if (actionType == OPDS_FINAL_INFO) {
 			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());

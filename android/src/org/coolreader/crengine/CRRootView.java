@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
 import org.coolreader.crengine.CRToolBar.OnActionHandler;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
@@ -559,6 +561,31 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				}
 			});
 			mFilesystemScroll.addView(view);
+
+			View viewDBX = inflater.inflate(R.layout.root_item_dir, null);
+			ImageView iconDBX = (ImageView) viewDBX.findViewById(R.id.item_icon);
+			TextView labelDBX = (TextView) viewDBX.findViewById(R.id.item_name);
+			iconDBX.setImageResource(Utils.resolveResourceIdByAttr(mActivity,
+					R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
+			mActivity.tintViewIcons(iconDBX,true);
+			labelDBX.setText(R.string.open_book_from_dbx_short);
+			labelDBX.setTextColor(colorIcon);
+			labelDBX.setMaxWidth(coverWidth * 25 / 10);
+			viewDBX.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					CloudAction.dbxOpenBookDialog(mActivity);
+				}
+			});
+			viewDBX.setOnLongClickListener(new OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
+					mActivity.dbxInputTokenDialog.show();
+					return true;
+				}
+			});
+			mFilesystemScroll.addView(viewDBX);
 
 			for (final FileInfo item : dirs) {
 				if (item == null)

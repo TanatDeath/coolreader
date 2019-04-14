@@ -15,8 +15,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import org.coolreader.Dictionaries.DictionaryException;
+import org.coolreader.cloud.dropbox.DBXConfig;
+import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
+import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
 import org.coolreader.crengine.AboutDialog;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
@@ -38,17 +42,15 @@ import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.GenreSAXElem;
-import org.coolreader.crengine.GoogleDriveTools;
+import org.coolreader.cloud.deprecated.GoogleDriveTools;
 import org.coolreader.crengine.History;
 import org.coolreader.crengine.History.BookInfoLoadedCallack;
 import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.N2EpdController;
-import org.coolreader.crengine.NoticeDialog;
 import org.coolreader.crengine.OPDSCatalogEditDialog;
 import org.coolreader.crengine.OptionsDialog;
-import org.coolreader.crengine.FileUtils;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.PictureReceived;
 import org.coolreader.crengine.PositionProperties;
@@ -57,7 +59,6 @@ import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
-import org.coolreader.crengine.SimpleDownload;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.TTS;
 import org.coolreader.crengine.TTS.OnTTSCreatedListener;
@@ -110,6 +111,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public static int REQUEST_CODE_OPEN_DOCUMENT_TREE = 200001;
 	public Uri sdCardUri = null;
 	private FileInfo fileToDelete = null;
+
+	public DBXInputTokenDialog dbxInputTokenDialog = null;
 	
 	private ReaderView mReaderView;
 
@@ -486,6 +489,36 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			return false;
 		String fileToOpen = null;
 		String intentAction = intent.getAction();
+		if (Intent.ACTION_VIEW.equals(intentAction)) {
+			Uri uri = intent.getData();
+			String sUri = "";
+			if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
+			if (sUri.contains(DBXConfig.DBX_REDIRECT_URL)) {
+			    final String code = uri.getQueryParameter("code");
+			    //showToast("code = "+code);
+			    if (!StrUtils.isEmptyStr(code)) {
+                    new DBXFinishAuthorization(this, uri, new DBXFinishAuthorization.Callback() {
+                        @Override
+                        public void onComplete(boolean result) {
+                            DBXConfig.didLogin = result;
+                            CoolReader.this.showToast(R.string.dbx_auth_finished_ok);
+                            if (dbxInputTokenDialog!=null)
+                            	if (dbxInputTokenDialog.isShowing()) {
+									dbxInputTokenDialog.tokenEdit.setText(code);
+									dbxInputTokenDialog.onPositiveButtonClick();
+								}
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            DBXConfig.didLogin = false;
+                            CoolReader.this.showToast(getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+                        }
+                    }).execute(code);
+                }
+			    return true;
+            }
+		}
 		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
 			Uri uri = intent.getData();

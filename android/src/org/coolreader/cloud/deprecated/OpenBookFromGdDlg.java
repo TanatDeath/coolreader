@@ -1,10 +1,8 @@
-package org.coolreader.crengine;
+package org.coolreader.cloud.deprecated;
 
 import android.content.Context;
-import android.content.IntentSender;
 import android.database.DataSetObserver;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,19 +18,15 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.MetadataBuffer;
-import com.google.android.gms.drive.OpenFileActivityOptions;
-import com.google.android.gms.drive.query.Filters;
-import com.google.android.gms.drive.query.SearchableField;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.Task;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.StrUtils;
 
 import java.util.ArrayList;
 
@@ -265,7 +259,7 @@ public class OpenBookFromGdDlg extends BaseDialog {
 	public OpenBookFromGdDlg(final CoolReader activity, MetadataBuffer mdb, ArrayList<DriveId> adid,
 							 ArrayList<String> adidmd)
 	{
-		super("OpenBookFromGdDlg", activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
+		super("OpenBookFromGdDlg", activity, activity.getResources().getString(R.string.win_title_open_book_from_gd), false, true);
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
 		mBooksList = mdb;
@@ -275,7 +269,7 @@ public class OpenBookFromGdDlg extends BaseDialog {
 		mDriveIdList1 = new ArrayList<DriveId>(adid);
 		mDriveStrList1 = new ArrayList<String>(adidmd);
 
-        View frame = mInflater.inflate(R.layout.open_book_from_gd_dialog, null);
+        View frame = mInflater.inflate(R.layout.open_book_from_cloud_dialog, null);
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.book_list);
 		mList = new OpenBookFromGDList(activity, this);
 		btnWhole = (RadioButton)frame.findViewById(R.id.rb_whole);
@@ -320,20 +314,6 @@ public class OpenBookFromGdDlg extends BaseDialog {
 
 		btnRoot.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
-//				OpenFileActivityOptions openOptions =
-//						new OpenFileActivityOptions.Builder()
-//								.setActivityStartFolder(mDriveIdList.get(0))
-//								//.setSelectionFilter(Filters.eq(SearchableField.MIME_TYPE, "text/plain"))
-//								//.setMimeType(alist)
-//								.build();
-//
-//				activity.mGoogleDriveTools.getmDriveClient().newOpenFileActivityIntentSender(openOptions).continueWith(new Continuation<IntentSender, Object>() {
-//					@Override
-//					public Void then(@NonNull Task<IntentSender> task) throws Exception {
-//						activity.showToast("ds1");
-//						return null;
-//					}
-//				});;
 				mDriveIdList = new ArrayList<DriveId>(mDriveIdList1);
 				mDriveStrList = new ArrayList<String>(mDriveStrList1);
 				driveToGoTo = mDriveIdList.get(mDriveIdList.size()-1);
@@ -358,41 +338,6 @@ public class OpenBookFromGdDlg extends BaseDialog {
 		setView(frame);
 		setFlingHandlers(mList, null, null);
 		btnFind.requestFocus();
-
-//		btnPage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//			@Override
-//			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//				if ( isChecked ) {
-//					mUserDic.clear();
-//					for (UserDicEntry ude: activity.getmReaderFrame().getUserDicPanel().getArrUdeWords()) {
-//						mUserDic.add(ude);
-//					}
-//					listUpdated();
-//				}
-//			}
-//		});
-//		btnBook.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//			@Override
-//			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//				if ( isChecked ) {
-//					final String sBookFName = mCoolReader.getReaderView().getBookInfo().getFileInfo().filename;
-//					CRC32 crc = new CRC32();
-//					crc.update(sBookFName.getBytes());
-//					String sCRC = String.valueOf(crc.getValue());
-//					updUserDic(sCRC);
-//					listUpdated();
-//				}
-//			}
-//		});
-//		btnAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//			@Override
-//			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//				if ( isChecked ) {
-//					updUserDic("");
-//					listUpdated();
-//				}
-//			}
-//		});
 	}
 
 	@Override
@@ -412,7 +357,6 @@ public class OpenBookFromGdDlg extends BaseDialog {
 		setTitle(mCoolReader.getResources().getString(R.string.win_title_open_book_from_gd));
 		setCancelable(true);
 		super.onCreate(savedInstanceState);
-		//registerForContextMenu(mList);
 	}
 
 }

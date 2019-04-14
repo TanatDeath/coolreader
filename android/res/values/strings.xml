@@ -229,6 +229,7 @@
     <string name="options_selection_action_dictionary">Find in dictionary</string>
     <string name="options_selection_action_dictionary_1">Find in dictionary 1</string>
     <string name="options_selection_action_dictionary_2">Find in dictionary 2</string>
+    <string name="options_selection_action_dictionary_list">Dictionary list</string>
     <string name="options_selection_action_copy">Copy to clipboard</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="options_app_browser_hide_empty_dirs">Hide directories without books</string>
@@ -725,9 +726,9 @@
     <string name="load_settings_from_gd_v">Restore settings from file cr3.ini located in CoolReader&#47;settings folder on Google One</string>
     <string name="switched_to_dic">Switched to dictionary</string>
     <string name="next_dict_will_be_2nd">Next dictionary will be the 2nd for one time</string>
-    <string name="gd_begin">Google One - begin of operation</string>
-    <string name="gd_error">Google One error</string>
-    <string name="gd_ok">Google One - successfully completed</string>
+    <string name="cloud_begin">Cloud - begin of operation</string>
+    <string name="cloud_error">Cloud - error</string>
+    <string name="cloud_ok">Cloud - successfully completed</string>
     <string name="win_title_conf_file">Choose configuration file</string>
     <string name="save_reading_pos_to_gd">Save reading position to Google One</string>
     <string name="dlg_button_delete_word">Delete word</string>
@@ -747,6 +748,7 @@
     <string name="save_current_book_to_gd">Save book to Google One</string>
     <string name="open_book_from_gd">Open book from Google One</string>
     <string name="open_book_from_gd_short">Google One</string>
+    <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="set_comment_from_cb_capt">Save with comment from clipboard</string>
     <string name="set_comment_from_cb">Set comment ...</string>
     <string name="clipb_contents">Clipboard contents:</string>
@@ -769,9 +771,10 @@
     <string name="dlg_bookmark_info">Use | for unnessary ending, ~ for split variants of the word</string>
     <string name="options_reader_toolbar_buttons">Reader toolbar buttons</string>
     <string name="lbl_find">Find: </string>
-    <string name="dlg_whole_gd">Whole drive</string>
-    <string name="dlg_folder_gd">In current folder</string>
+    <string name="dlg_whole_drive">Whole drive</string>
+    <string name="dlg_folder_drive">In current folder</string>
     <string name="win_title_open_book_from_gd">Open book from Google One</string>
+    <string name="win_title_open_book_from_cloud">Open book from cloud</string>
     <string name="dlg_bookmark_link">Link to bookmark</string>
     <string name="docx_is_not_installed">extension org.coolreader.docx is not installed, install it to open docx format</string>
     <string name="docx_open_converted">Opened previously converted copy of document</string>
@@ -936,4 +939,18 @@
     <string name="db_action_restored">Database is restored from backup</string>
     <string name="db_action_performed_del">Performed delete: </string>
     <string name="db_action_performed_ren">Performed rename: </string>
+    <string name="cloud_need_authorization">Need authorization</string>
+    <string name="dbx_input_token">Input token</string>
+    <string name="dbx_delete_token">Delete token file</string>
+    <string name="success">Success</string>
+    <string name="unsuccess">Unsuccess</string>
+    <string name="dbx_no_browser">Cannot finish this action - web browser is not installed.</string>
+    <string name="dbx_long_tap">You can open this window later via long tap on Dropbox icon. Select an action:</string>
+    <string name="dbx_auth">Authorize in Dropbox</string>
+    <string name="dbx_auth_auto">Auto mode</string>
+    <string name="dbx_auth_manual">Manual token input</string>
+    <string name="dbx_prev_auth">Previous authorization</string>
+    <string name="dbx_auth_finished_ok">Dropbox: authorization finished successfully</string>
+    <string name="dbx_auth_finished_error">Dropbox: authorization error</string>
+    <string name="dbx_token_hint">Paste token here</string>
 </resources>

@@ -188,6 +188,7 @@ public interface Settings {
     public static final int SELECTION_ACTION_SEND_TO = 8;
     public static final int SELECTION_ACTION_USER_DIC = 9;
     public static final int SELECTION_ACTION_CITATION = 10;
+    public static final int SELECTION_ACTION_DICTIONARY_LIST = 11;
 
     // available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     public static final int TAP_ACTION_TYPE_LONGPRESS = 0;

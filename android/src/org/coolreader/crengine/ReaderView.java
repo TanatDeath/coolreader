@@ -12,6 +12,9 @@ import java.util.concurrent.Callable;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.dropbox.DBXConfig;
+import org.coolreader.cloud.dropbox.DBXPerformAction;
 import org.coolreader.crengine.Engine.HyphDict;
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
@@ -31,11 +34,9 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.text.ClipboardManager;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
@@ -52,8 +53,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.users.FullAccount;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.coolreader.cloud.dropbox.DBXGetCurrentAccountTask;
 
 public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, OnKeyListener, OnTouchListener, OnFocusChangeListener {
 
@@ -82,7 +87,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
         void draw();
         void draw(boolean isPartially);
 		void draw(boolean isPartially, boolean isBlack);
-		void invalidate();
+        void invalidate();
 		void onPause();
 		void onResume();
 	}
@@ -226,6 +231,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				} else {
 					log.d("onDraw() -- drawing empty screen");
 					drawPageBackground(canvas);
+				}
+				if (selectionModeActive) {
+					Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+					int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
+					Utils.drawFrame2(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4);
 				}
 			} catch ( Exception e ) {
 				log.e("exception while drawing", e);
@@ -765,6 +775,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case SELECTION_ACTION_CITATION:
 				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION);
 				break;
+            case SELECTION_ACTION_DICTIONARY_LIST:
+                DictsDlg dlg = new DictsDlg(mActivity, this, sel.text);
+                dlg.show();
+                if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
+                    clearSelection();
+                break;
 			default:
 				clearSelection();
 				break;
@@ -840,6 +856,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(
 						mActivity.getString(selectionModeActive ?
 								R.string.action_toggle_selection_mode_on : R.string.action_toggle_selection_mode_off));
+                bookView.draw(false);
 	}
 
 	private ImageViewer currentImageViewer;
@@ -3603,14 +3620,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				fi = dir.findItemByPathName(fileName);
 				log.v("loadDocument() : item inside location : " + fi);
 			} else {
-				File tfile = new File(fileName);
+				/*File tfile = new File(fileName);
 				if (tfile.exists())
-					fi = new FileInfo(fileName);
+				*/
+				log.v("loadDocument() : dir == null, BUT : " + fileName);
+				fi = new FileInfo(fileName);
 			}
 			if ( fi==null ) {
 				log.v("loadDocument() : no file item " + fileName + " found inside " + dir);
-				if (errorHandler != null)
-					errorHandler.run();
+				if (errorHandler != null) errorHandler.run();
 				return false;
 			}
 			if ( fi.isDirectory ) {
@@ -4089,7 +4107,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (orientationToolbarDlg!=null)
 				if (orientationToolbarDlg.mWindow != null)
 					orientationToolbarDlg.mWindow.dismiss();
-			//Log.i("ASDF", "resized "+iSett+" "+iOrnt);
 			if ((iSett > 0) && (iOrnt != 4))
 				orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
 						curOrientation, true);

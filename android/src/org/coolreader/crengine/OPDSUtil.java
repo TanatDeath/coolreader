@@ -906,10 +906,14 @@ xml:base="http://lib.ololo.cc/opds/">
 						itemsLoadedPartially = false;
 					}
 				} catch (Exception e) {
-					L.e("Exception while trying to open URI " + url.toString(), e);
+					L.e("Exception while trying to open URI " + url.toString()
+							+" "+e.getMessage(), e);
 					if ( progressShown )
 						Services.getEngine().hideProgress();
-					onError("Error occured while reading OPDS catalog");
+					String sErr = e.getMessage();
+					if (!StrUtils.isEmptyStr(sErr))
+						if (sErr.length()>100) sErr = sErr.substring(0,99);
+					onError("Error occured while reading OPDS catalog: "+sErr);
 					break;
 				} finally {
 					if ( connection!=null )

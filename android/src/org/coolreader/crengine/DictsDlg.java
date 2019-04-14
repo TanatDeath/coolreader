@@ -11,6 +11,7 @@ import org.coolreader.R;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -88,6 +89,13 @@ public class DictsDlg extends BaseDialog {
 					titleTextView.setText(b.name);
 				if (b.dicIcon!=0)
 					ivIcon.setImageDrawable(mCoolReader.getResources().getDrawable(b.dicIcon));
+				if (b.icon != null) {
+					//Drawable fakeIcon = mCoolReader.getResources().getDrawable(R.drawable.lingvo);
+					//b.icon.setBounds(0,0,fakeIcon.getIntrinsicWidth(),fakeIcon.getIntrinsicHeight());
+ 					ivIcon.setImageDrawable(b.icon);
+					//ivIcon.setMaxHeight(fakeIcon.getIntrinsicHeight());
+					//ivIcon.setMaxWidth(fakeIcon.getIntrinsicWidth());
+				}
 			} else {
 				if ( titleTextView!=null )
 					titleTextView.setText("");
@@ -100,7 +108,7 @@ public class DictsDlg extends BaseDialog {
 		}
 
 		public boolean isEmpty() {
-			return Dictionaries.getDictList().length==0;
+			return Dictionaries.getDictList(mCoolReader).size()==0;
 		}
 
 		private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();

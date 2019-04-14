@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.cloud.deprecated;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -21,7 +21,6 @@ import com.google.android.gms.drive.query.Query;
 import com.google.android.gms.drive.query.SearchableField;
 import com.google.android.gms.drive.query.SortOrder;
 import com.google.android.gms.drive.query.SortableField;
-import com.google.android.gms.drive.widget.DataBufferAdapter;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 
@@ -36,20 +35,28 @@ import com.google.gson.GsonBuilder;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.OpenBookFromCloudDlg;
+import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookInfoDialog;
+import org.coolreader.crengine.BookInfoEditDialog;
+import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.ChooseBookmarksDlg;
+import org.coolreader.crengine.ChooseConfFileDlg;
+import org.coolreader.crengine.ChooseReadingPosDlg;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.ReaderView;
+import org.coolreader.crengine.Services;
+import org.coolreader.crengine.StrUtils;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.zip.CRC32;
 
 public class GoogleDriveTools {
@@ -138,38 +145,38 @@ public class GoogleDriveTools {
                 break;
             case REQUEST_CODE_SAVE_SETTINGS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (save cr3.ini)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (save cr3.ini)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_SETTINGS_LIST:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load saved cr3.ini list)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load saved cr3.ini list)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_SETTINGS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load chosen cr3.ini)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load chosen cr3.ini)");
                     if (CheckSingIn())
                         searchCoolReaderFolder(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_SAVE_READING_POS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (save reading pos)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (save reading pos)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_SAVE_READING_POS_QUIET:
@@ -179,85 +186,85 @@ public class GoogleDriveTools {
                 break;
             case REQUEST_CODE_LOAD_READING_POS_LIST:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load reading pos list)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load reading pos list)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_READING_POS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load chosen reading pos)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load chosen reading pos)");
                     if (CheckSingIn())
                         searchCoolReaderFolder(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_SAVE_BOOKMARKS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (save bookmarks)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (save bookmarks)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_BOOKMARKS_LIST:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load bookmarks list)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load bookmarks list)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_BOOKMARKS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load chosen bookmarks)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load chosen bookmarks)");
                     if (CheckSingIn())
                         searchCoolReaderFolder(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (save current book)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (save current book)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (get folder contents)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (get folder contents)");
                     if (CheckSingIn())
                         syncReq(requestCode, mActionObject, false);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_FOLDER_CONTENTS:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (get folder contents)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (get folder contents)");
                     if (CheckSingIn())
-                        if (mActionObject instanceof OpenBookFromGdDlg)
-                            loadBooksList(((OpenBookFromGdDlg)mActionObject).driveToGoTo.asDriveFolder(),
+                        if (mActionObject instanceof OpenBookFromCloudDlg)
+                            loadBooksList(((OpenBookFromCloudDlg)mActionObject).getGDDriveToGo().asDriveFolder(),
                                     REQUEST_CODE_LOAD_FOLDER_CONTENTS, mActionObject, true);
                     else
-                        mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
             case REQUEST_CODE_LOAD_BOOK_FILE:
                 if (resultCode == Activity.RESULT_OK) {
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_begin) + " (load book file)");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_begin) + " (load book file)");
                     if (CheckSingIn())
                             loadBookFile(mActionObject, false);
                         else
-                            mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + " : sing in");
+                            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + " : sing in");
                 }
                 break;
         }
@@ -301,7 +308,7 @@ public class GoogleDriveTools {
                         }
                         {
                             if (!bQuiet)
-                                mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search CoolReader folder");
+                                mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search CoolReader folder");
                         }
                     }
                 });
@@ -347,7 +354,7 @@ public class GoogleDriveTools {
                                     (nextAction == REQUEST_CODE_LOAD_BOOKMARKS)
                                ) {
                                 Log.e(TAG, "Error search CoolReader folder");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": CoolReader folder not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": CoolReader folder not found");
                             }
                         } else {
                             Metadata m = metadataBuffer.get(0);
@@ -392,7 +399,7 @@ public class GoogleDriveTools {
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search CoolReader folder", e);
                         if (!bQuiet)
-                            mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search CoolReader folder");
+                            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search CoolReader folder");
                     }
                 });
     }
@@ -419,7 +426,7 @@ public class GoogleDriveTools {
                                             (nextAction == REQUEST_CODE_LOAD_SETTINGS)
                                     ) {
                                 Log.e(TAG, "Error search settings folder");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": settings folder not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": settings folder not found");
                             }
                         } else {
                             Metadata m = metadataBuffer.get(0);
@@ -445,7 +452,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search settings folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search settings folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search settings folder");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -473,7 +480,7 @@ public class GoogleDriveTools {
                                     (nextAction == REQUEST_CODE_LOAD_READING_POS_LIST)
                                     ) {
                                 Log.e(TAG, "Error search reading pos folder");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading pos folder not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading pos folder not found");
                             }
                         } else {
                             Metadata m = metadataBuffer.get(0);
@@ -499,7 +506,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search reading_pos folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search reading_pos folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search reading_pos folder");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -527,7 +534,7 @@ public class GoogleDriveTools {
                                     (nextAction == REQUEST_CODE_LOAD_BOOKMARKS_LIST)
                                ) {
                                 Log.e(TAG, "Error search bookmarks folder");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": bookmarks folder not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": bookmarks folder not found");
                             }
                         } else {
                             Metadata m = metadataBuffer.get(0);
@@ -553,7 +560,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search bookmarks folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search bookmarks folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search bookmarks folder");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -598,7 +605,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search books folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search Books folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search Books folder");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -623,7 +630,7 @@ public class GoogleDriveTools {
                         if (metadataBuffer.getCount() == 0) {
                             if (nextAction == REQUEST_CODE_LOAD_SETTINGS_LIST) {
                                 Log.e(TAG, "Error search settings files");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": settings files were not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": settings files were not found");
                             }
                         } else {
                             if (nextAction == REQUEST_CODE_LOAD_SETTINGS_LIST) {
@@ -637,7 +644,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search files in settings folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search files in settings folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search files in settings folder");
                     }
                 });
     }
@@ -647,7 +654,7 @@ public class GoogleDriveTools {
 
         final ReaderView rv = (ReaderView)actionObject;
         if (rv == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": no reading book");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": no reading book");
             return;
         }
         final String sBookFName = rv.getBookInfo().getFileInfo().filename;
@@ -670,7 +677,7 @@ public class GoogleDriveTools {
                         if (metadataBuffer.getCount() == 0) {
                             if (nextAction == REQUEST_CODE_LOAD_READING_POS_LIST) {
                                 Log.e(TAG, "Error search reading pos files");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading pos files were not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading pos files were not found");
                             }
                         } else {
                             if (nextAction == REQUEST_CODE_LOAD_READING_POS_LIST) {
@@ -684,7 +691,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search files in reading pos folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search files in reading pos folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search files in reading pos folder");
                     }
                 });
     }
@@ -694,7 +701,7 @@ public class GoogleDriveTools {
 
         final ReaderView rv = (ReaderView)actionObject;
         if (rv == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": no reading book");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": no reading book");
             return;
         }
         final String sBookFName = rv.getBookInfo().getFileInfo().filename;
@@ -717,7 +724,7 @@ public class GoogleDriveTools {
                         if (metadataBuffer.getCount() == 0) {
                             if (nextAction == REQUEST_CODE_LOAD_BOOKMARKS_LIST) {
                                 Log.e(TAG, "Error search bookmarks files");
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": bookmarks files were not found");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": bookmarks files were not found");
                             }
                         } else {
                             if (nextAction == REQUEST_CODE_LOAD_BOOKMARKS_LIST) {
@@ -731,7 +738,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search files in bookmarks folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search files in bookmarks folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search files in bookmarks folder");
                     }
                 });
     }
@@ -744,9 +751,9 @@ public class GoogleDriveTools {
         Task<MetadataBuffer> queryTask = null;
         String findText = "";
         boolean bWholeS = false;
-        if (mActionObject instanceof OpenBookFromGdDlg) {
-            findText = ((OpenBookFromGdDlg) mActionObject).edtFind.getText().toString().trim();
-            bWholeS = ((OpenBookFromGdDlg)mActionObject).mWholeSearch;
+        if (mActionObject instanceof OpenBookFromCloudDlg) {
+            findText = ((OpenBookFromCloudDlg) mActionObject).edtFind.getText().toString().trim();
+            bWholeS = ((OpenBookFromCloudDlg)mActionObject).mWholeSearch;
         }
         if (findText.equals("")) {
             if (parentFolder == mRootFolder) query1 = new Query.Builder()
@@ -812,14 +819,14 @@ public class GoogleDriveTools {
                                 adidmd.add("root");
                                 adidmd.add("CoolReader");
                                 adidmd.add("Books");
-                                OpenBookFromGdDlg dlg = new OpenBookFromGdDlg(mCoolReader, metadataBuffer, adid, adidmd);
+                            OpenBookFromCloudDlg dlg = new OpenBookFromCloudDlg(mCoolReader, metadataBuffer, adid, adidmd);
                                     dlg.show();
                         }
                         if (nextAction == REQUEST_CODE_LOAD_FOLDER_CONTENTS) {
-                            if (((OpenBookFromGdDlg)mActionObject).isShowing()) {
-                                ((OpenBookFromGdDlg) mActionObject).mBooksList = metadataBuffer;
-                                ((OpenBookFromGdDlg) mActionObject).mFoundWhole = bWholeS2;
-                                ((OpenBookFromGdDlg) mActionObject).listUpdated();
+                            if (((OpenBookFromCloudDlg)mActionObject).isShowing()) {
+                                ((OpenBookFromCloudDlg) mActionObject).setGDBooksList(metadataBuffer);
+                                ((OpenBookFromCloudDlg) mActionObject).mFoundWhole = bWholeS2;
+                                ((OpenBookFromCloudDlg) mActionObject).listUpdated();
                             }
                         }
                     }
@@ -828,7 +835,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search files in folder", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search files in folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search files in folder");
                     }
                 });
     }
@@ -882,7 +889,7 @@ public class GoogleDriveTools {
                             boolean bWasErr = false;
                             if (file.exists()){
                                 if (!file.delete()) {
-                                    if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": delete .bk file");
+                                    if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": delete .bk file");
                                     bWasErr = true;
                                 };
                             }
@@ -891,13 +898,13 @@ public class GoogleDriveTools {
                                     copyFile(sFName, sFName + ".bk");
                                 } catch (Exception e) {
                                     bWasErr = true;
-                                    if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": copy current file to .bk");
+                                    if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": copy current file to .bk");
                                 }
                             }
                             if (!bWasErr) {
                                 if (fSett.exists()) {
                                     if (!fSett.delete()) {
-                                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": delete cr3.ini file");
+                                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": delete cr3.ini file");
                                         bWasErr = true;
                                     };
                                 }
@@ -907,16 +914,16 @@ public class GoogleDriveTools {
                                     copyFile(newName, sFName);
                                 } catch (Exception e) {
                                     bWasErr = true;
-                                    if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": copy new file to current");
+                                    if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": copy new file to current");
                                 }
                             }
                             if (!bWasErr) {
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok) + ": " + newName + " created. Closing app");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok) + ": " + newName + " created. Closing app");
                                 mCoolReader.finish();
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading settings file", e);
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading settings file");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading settings file");
                         }
                         Task<Void> discardTask = getDriveResourceClient().discardContents(contents);
                         return discardTask;
@@ -926,7 +933,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error reading settings file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading settings file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading settings file");
                     }
                 });
     }
@@ -957,7 +964,7 @@ public class GoogleDriveTools {
                             }
                             os.close();
                             is.close();
-                            mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok) + ": successfully saved to "+fName);
+                            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok) + ": successfully saved to "+fName);
                             FileInfo fi = new FileInfo(fBook);
                             FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
                             if ( dir==null )
@@ -970,7 +977,7 @@ public class GoogleDriveTools {
                                 mCoolReader.loadDocument(fi);
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading book file", e);
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading book file");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading book file");
                         }
                         Task<Void> discardTask = getDriveResourceClient().discardContents(contents);
                         return discardTask;
@@ -980,7 +987,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error reading book file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading book file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading book file");
                     }
                 });
     }
@@ -1014,12 +1021,12 @@ public class GoogleDriveTools {
                                     if ( mCoolReader.getReaderView().getBookInfo()!=null )
                                         mCoolReader.getReaderView().getBookInfo().setLastPosition(bmk);
                                         mCoolReader.getReaderView().goToBookmark(bmk);
-                                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok) + ": reading pos updated");
+                                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok) + ": reading pos updated");
                                 }
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading settings file", e);
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading settings file");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading settings file");
                         }
                         Task<Void> discardTask = getDriveResourceClient().discardContents(contents);
                         return discardTask;
@@ -1029,7 +1036,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error reading settings file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading settings file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading settings file");
                     }
                 });
     }
@@ -1039,11 +1046,11 @@ public class GoogleDriveTools {
 
         final ReaderView rv = mCoolReader.getReaderView();
         if (rv == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": no reading book");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": no reading book");
             return;
         }
         if (rv.getBookInfo() == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": no reading book");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": no reading book");
             return;
         }
 
@@ -1078,10 +1085,10 @@ public class GoogleDriveTools {
                                 }
                             }
                             rv.highlightBookmarks();
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok) + ": " + iCreated + " bookmark(s) created");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok) + ": " + iCreated + " bookmark(s) created");
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading bookmarks file", e);
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading bookmarks file");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading bookmarks file");
                         }
                         Task<Void> discardTask = getDriveResourceClient().discardContents(contents);
                         return discardTask;
@@ -1091,7 +1098,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error reading settings file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": reading settings file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": reading settings file");
                     }
                 });
     }
@@ -1130,7 +1137,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error creating CoolReader folder ...");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": create CoolReader folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": create CoolReader folder");
                     }
                 });
     }
@@ -1158,7 +1165,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error create settings folder");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": create settings folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": create settings folder");
                     }
                 });
     }
@@ -1186,7 +1193,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error create reading_pos folder");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": create reading_pos folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": create reading_pos folder");
                     }
                 });
     }
@@ -1214,7 +1221,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error create bookmarks folder");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": create bookmarks folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": create bookmarks folder");
                     }
                 });
     }
@@ -1246,7 +1253,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error create Books folder");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": create Books folder");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": create Books folder");
                     }
                 });
     }
@@ -1278,7 +1285,7 @@ public class GoogleDriveTools {
                             outputStream.write(buffer, 0, buffer.length);
                         } catch (Exception e) {
                             bWasErr = true;
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": Error saving file ("+e.getClass().getSimpleName()+")");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": Error saving file ("+e.getClass().getSimpleName()+")");
                         }
 
                         if (!bWasErr) {
@@ -1298,14 +1305,14 @@ public class GoogleDriveTools {
                         new OnSuccessListener<DriveFile>() {
                             @Override
                             public void onSuccess(DriveFile driveFile) {
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok)+": "+sFName+" created");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok)+": "+sFName+" created");
                             }
                         })
                 .addOnFailureListener(mCoolReader, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error save cr3.ini to drive");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": save cr3.ini file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": save cr3.ini file");
                     }
                 });
     }
@@ -1315,7 +1322,7 @@ public class GoogleDriveTools {
 
         final ReaderView rv = (ReaderView)actionObject;
         if (rv == null) {
-            mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": no reading book");
+            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": no reading book");
             return;
         }
         final String sBookFName = rv.getBookInfo().getFileInfo().filename;
@@ -1355,7 +1362,7 @@ public class GoogleDriveTools {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         Log.e(TAG, "Error delete reading_pos file", e);
-                                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": delete reading pos file");
+                                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": delete reading pos file");
                                     }
                                 });
                             }
@@ -1366,7 +1373,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search reading_pos file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search reading_pos file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search reading_pos file");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -1378,7 +1385,7 @@ public class GoogleDriveTools {
 
         final ReaderView rv = (ReaderView)actionObject;
         if (rv == null) {
-            mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": no reading book");
+            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": no reading book");
             return;
         }
         final String sBookFName = rv.getBookInfo().getFileInfo().filename;
@@ -1418,7 +1425,7 @@ public class GoogleDriveTools {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 Log.e(TAG, "Error delete bookmarks file", e);
-                                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": delete bookmarks file");
+                                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": delete bookmarks file");
                                             }
                                         });
                             }
@@ -1429,7 +1436,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search bookmarks file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search bookmarks file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search bookmarks file");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -1444,7 +1451,7 @@ public class GoogleDriveTools {
             final ReaderView rv = (ReaderView) actionObject;
             if (rv == null) {
                 if (!bQuiet)
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": no reading book");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": no reading book");
                 return;
             }
             bi = rv.getBookInfo();
@@ -1452,9 +1459,12 @@ public class GoogleDriveTools {
         if (actionObject instanceof BookInfoEditDialog) {
             bi = ((BookInfoEditDialog)actionObject).getmBookInfo();
         }
+        if (actionObject instanceof BookInfoDialog) {
+            bi = ((BookInfoDialog)actionObject).getmBookInfo();
+        }
         if (bi == null) {
             if (!bQuiet)
-                mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": no reading book");
+                mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": no reading book");
             return;
         }
         FileInfo item = bi.getFileInfo();
@@ -1485,7 +1495,7 @@ public class GoogleDriveTools {
                         } else {
                             Metadata m = metadataBuffer.get(0);
                             if (nextAction == REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD) {
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": book has been already saved");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": book has been already saved");
                             }
                         } //else - if file was
                     }
@@ -1494,7 +1504,7 @@ public class GoogleDriveTools {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error search bookmarks file", e);
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": search book file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": search book file");
                         //showMessage(getString(R.string.query_failed));
                         //finish();
                     }
@@ -1507,7 +1517,7 @@ public class GoogleDriveTools {
 
         final ReaderView rv = (ReaderView)actionObject;
         if (rv == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": book was not found");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": book was not found");
             return;
         }
         final Bookmark bmk = rv.getCurrentPositionBookmark();
@@ -1516,7 +1526,7 @@ public class GoogleDriveTools {
         final String prettyJson = gson.toJson(bmk);
 
         if (bmk == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": pos was not get");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": pos was not get");
             return;
         }
         //FileInfo fi = rv.getOpenedFileInfo();
@@ -1558,14 +1568,14 @@ public class GoogleDriveTools {
                         new OnSuccessListener<DriveFile>() {
                             @Override
                             public void onSuccess(DriveFile driveFile) {
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok)+": "+sFName+" created");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok)+": "+sFName+" created");
                             }
                         })
                 .addOnFailureListener(mCoolReader, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error save reading pos to drive");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": save reading pos file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": save reading pos file");
                     }
                 });
     }
@@ -1576,11 +1586,11 @@ public class GoogleDriveTools {
 
         final ReaderView rv = (ReaderView)actionObject;
         if (rv == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": book was not found");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": book was not found");
             return;
         }
         if (rv.getBookInfo() == null) {
-            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": book was not found");
+            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": book was not found");
             return;
         }
         final ArrayList<Bookmark> abmk = rv.getBookInfo().getAllBookmarks();
@@ -1624,14 +1634,14 @@ public class GoogleDriveTools {
                         new OnSuccessListener<DriveFile>() {
                             @Override
                             public void onSuccess(DriveFile driveFile) {
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok)+": "+sFName+" created");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok)+": "+sFName+" created");
                             }
                         })
                 .addOnFailureListener(mCoolReader, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error save bookmarks to drive");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": save bookmarks file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": save bookmarks file");
                     }
                 });
     }
@@ -1644,7 +1654,7 @@ public class GoogleDriveTools {
             final ReaderView rv = (ReaderView) actionObject;
             if (rv == null) {
                 if (!bQuiet)
-                    mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": book was not found");
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": book was not found");
                 return;
             }
             bi = rv.getBookInfo();
@@ -1652,9 +1662,12 @@ public class GoogleDriveTools {
         if (actionObject instanceof BookInfoEditDialog) {
             bi = ((BookInfoEditDialog)actionObject).getmBookInfo();
         }
+        if (actionObject instanceof BookInfoDialog) {
+            bi = ((BookInfoDialog)actionObject).getmBookInfo();
+        }
         if (bi == null) {
             if (!bQuiet)
-                mCoolReader.showToast(mCoolReader.getString(R.string.gd_error) + ": book was not found");
+                mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": book was not found");
             return;
         }
         final FileInfo item = bi.getFileInfo();
@@ -1686,7 +1699,7 @@ public class GoogleDriveTools {
                             outputStream.write(buffer, 0, buffer.length);
                         } catch (Exception e) {
                             bWasErr = true;
-                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": Error saving file ("+e.getClass().getSimpleName()+")");
+                            if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": Error saving file ("+e.getClass().getSimpleName()+")");
                         }
 
                         if (!bWasErr) {
@@ -1708,14 +1721,14 @@ public class GoogleDriveTools {
                         new OnSuccessListener<DriveFile>() {
                             @Override
                             public void onSuccess(DriveFile driveFile) {
-                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_ok)+": "+sBookFNameF+" created");
+                                if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_ok)+": "+sBookFNameF+" created");
                             }
                         })
                 .addOnFailureListener(mCoolReader, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error save book to drive");
-                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.gd_error)+": save book file");
+                        if (!bQuiet) mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+": save book file");
                     }
                 });
     }

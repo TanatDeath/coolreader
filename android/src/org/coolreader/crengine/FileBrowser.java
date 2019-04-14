@@ -1911,6 +1911,28 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						} else {
 							if (coverPagesEnabled) {
 								image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
+								if (item.isOPDSBook()) {
+									final FileInfo finalItem = item;
+									if	(
+											(
+												(!StrUtils.isEmptyStr(item.pathnameR))||
+												(!StrUtils.isEmptyStr(item.arcnameR))
+											) && (!StrUtils.isEmptyStr(item.opdsLinkR))
+									) {
+											Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), finalItem.opdsLinkR,
+													new History.FileInfo1LoadedCallack() {
+														@Override
+														public void onFileInfoLoaded(final FileInfo fileInfo) {
+															if (fileInfo!=null) {
+																image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), fileInfo));
+															} else {
+																image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
+															}
+														}
+													}
+											);
+										}
+								}
 //								still doesnt work
 //								if (item!=null)
 //									if (item.isOPDSBook() || item.isOPDSRoot() || item.isOPDSDir()) {

@@ -499,6 +499,20 @@ public class Utils {
 		canvas.drawRect(new Rect(rect.right - 1, rect.top + 1, rect.right, rect.bottom), paint);
 		canvas.drawRect(new Rect(rect.left + 1, rect.bottom - 1, rect.right - 1, rect.bottom), paint);
 	}
+
+	public static void drawFrame2(Canvas canvas, Rect rect, Paint paint, int thick) {
+		for (int i = 1; i<=thick; i++) {
+			int marg = 2;
+			int l = rect.left+marg;
+			int r = rect.right-marg;
+			int t = rect.top+marg;
+			int b = rect.bottom-marg;
+			canvas.drawRect(new Rect(l, t, r, t + thick), paint);
+			canvas.drawRect(new Rect(l, t + thick, l + thick, b), paint);
+			canvas.drawRect(new Rect(r - thick, t + thick, r, b), paint);
+			canvas.drawRect(new Rect(l + thick, b - thick, r - thick, b), paint);
+		}
+	}
 	
 	public static Paint createSolidPaint(int color) {
 		Paint res = new Paint();

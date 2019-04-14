@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -365,7 +366,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_SEARCH_WEB,
 			ReaderView.SELECTION_ACTION_SEND_TO,
 			ReaderView.SELECTION_ACTION_USER_DIC,
-			ReaderView.SELECTION_ACTION_CITATION
+			ReaderView.SELECTION_ACTION_CITATION,
+			ReaderView.SELECTION_ACTION_DICTIONARY_LIST
 	};
 	int[] mSelectionActionTitles = new int[] {
 			R.string.options_selection_action_toolbar, 
@@ -379,8 +381,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_selection_action_mail,
 			R.string.mi_user_dic,
 			R.string.mi_citation,
+			R.string.options_selection_action_dictionary_list,
 		};
 	int[] mSelectionActionAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -404,7 +408,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_SEARCH_WEB,
 			ReaderView.SELECTION_ACTION_SEND_TO,
 			ReaderView.SELECTION_ACTION_USER_DIC,
-			ReaderView.SELECTION_ACTION_CITATION
+			ReaderView.SELECTION_ACTION_CITATION,
+			ReaderView.SELECTION_ACTION_DICTIONARY_LIST
 		};
 	int[] mMultiSelectionActionTitles = new int[] {
 			R.string.options_selection_action_toolbar, 
@@ -418,8 +423,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_selection_action_mail,
 			R.string.mi_user_dic,
 			R.string.mi_citation,
+			R.string.options_selection_action_dictionary_list,
 		};
 	int[] mMultiSelectionActionAddInfo = new int[] {
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -2621,11 +2628,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	class DictOptions extends ListOption
 	{
-		public DictOptions( OptionOwner owner, String label, String addInfo, String filter )
+		public DictOptions(OptionOwner owner, String label, String addInfo, String filter )
 		{
 			super( owner, label, PROP_APP_DICTIONARY, addInfo, filter );
-			DictInfo[] dicts = Dictionaries.getDictList();
-			setDefaultValue(dicts[0].id);
+			List<DictInfo> dicts = Dictionaries.getDictList(mActivity);
+			setDefaultValue(dicts.get(0).id);
 			for (DictInfo dict : dicts) {
 				boolean installed = mActivity.isPackageInstalled(dict.packageName);
 				String sAdd = mActivity.getString(R.string.options_app_dictionary_not_installed);
@@ -2635,11 +2642,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 							mActivity.isPackageInstalled("mobi.goldendict.androie"); // changed package name - 4pda version 2.0.1b7
 					String sMinicard="";
 					if (dict.internal==6) sMinicard=" (minicard)";
+					String sInfo = "Package: " + dict.packageName + "; \nclass: " + dict.className;
 					add(dict.id, (installed ? "GoldenDict" + sMinicard: dict.name + " " + sAdd),
-							"Package: " + dict.packageName + "; \nclass: " + dict.className);
+							sInfo);
 				} else {
-					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; \nclass: " +
-							dict.className);
+					String sInfo = "Package: " + dict.packageName + "; \nclass: " + dict.className;
+					add(dict.id, dict.name + (installed ? "" : " " + sAdd),
+							sInfo);
 				}
 			}
 		}
@@ -2651,11 +2660,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			super.updateItemContents(layout, item, listView, position);
 			ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
-			DictInfo[] dicts = Dictionaries.getDictList();
+			List<DictInfo> dicts = Dictionaries.getDictList(mActivity);
 			for (DictInfo dict : dicts) {
 				if (item.value.equals(dict.id)) {
 					if (dict.dicIcon !=0)
 						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
+                    if (dict.icon != null)
+                        img.setImageDrawable(dict.icon);
 //					else
 //						img.setVisibility(View.INVISIBLE);
 				}
@@ -2668,8 +2679,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
         public DictOptions2( OptionOwner owner, String label, String addInfo, String filter )
         {
             super( owner, label, PROP_APP_DICTIONARY_2, addInfo, filter );
-            DictInfo[] dicts = Dictionaries.getDictList();
-            setDefaultValue(dicts[0].id);
+            List<DictInfo> dicts = Dictionaries.getDictList(mActivity);
+            setDefaultValue(dicts.get(0).id);
             for (DictInfo dict : dicts) {
 				boolean installed = mActivity.isPackageInstalled(dict.packageName);
 
@@ -2680,11 +2691,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 							mActivity.isPackageInstalled("mobi.goldendict.androie"); // changed package name - 4pda version 2.0.1b7
 					String sMinicard="";
 					if (dict.internal==6) sMinicard=" (minicard)";
+					String sInfo = "Package: " + dict.packageName + "; \nclass: " + dict.className;
 					add(dict.id, (installed ? "GoldenDict" + sMinicard: dict.name + " " + sAdd),
-							"Package: " + dict.packageName + "; \nclass: " + dict.className);
+							sInfo);
 				} else {
-					add(dict.id, dict.name + (installed ? "" : " " + sAdd),"Package: " + dict.packageName + "; \nclass: " +
-							dict.className);
+					String sInfo = "Package: " + dict.packageName + "; \nclass: " + dict.className;
+					add(dict.id, dict.name + (installed ? "" : " " + sAdd),sInfo);
 				}
             }
         }
@@ -2696,13 +2708,18 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			super.updateItemContents(layout, item, listView, position);
 			ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
-			DictInfo[] dicts = Dictionaries.getDictList();
+			List<DictInfo> dicts = Dictionaries.getDictList(mActivity);
 			for (DictInfo dict : dicts) {
 				if (item.value.equals(dict.id)) {
-					if (dict.dicIcon !=0)
+					if (dict.dicIcon !=0) {
+						img.setVisibility(View.VISIBLE);
 						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
-//					else
-//						img.setVisibility(View.INVISIBLE);
+					} else if (dict.icon != null) {
+                        img.setVisibility(View.VISIBLE);
+                        img.setImageDrawable(dict.icon);
+                    }
+					else
+						img.setVisibility(View.INVISIBLE);
 				}
 			}
 		}

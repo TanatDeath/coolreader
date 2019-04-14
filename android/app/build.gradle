@@ -16,6 +16,7 @@ android {
         applicationId "org.coolreader.mod.plotn"
         minSdkVersion 14
         targetSdkVersion 26
+        multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
         versionCode 32290
@@ -165,11 +166,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    //implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.android.gms:play-services-drive:15.0.1'
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
     implementation 'com.google.android.gms:play-services-identity:15.0.1'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.github.deano2390:FlowTextView:2.0.5'
+    implementation 'com.dropbox.core:dropbox-core-sdk:3.0.11'
+    api 'com.squareup.okhttp3:okhttp:3.10.0'
     //implementation 'com.github.johnpersano:supertoasts:2.0'
 }

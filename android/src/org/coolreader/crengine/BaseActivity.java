@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -2282,8 +2283,8 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	
-	public static DictInfo[] getDictList() {
-		return Dictionaries.getDictList();
+	public List<DictInfo> getDictList() {
+		return Dictionaries.getDictList(this);
 	}
 
 	public boolean isPackageInstalled(String packageName) {

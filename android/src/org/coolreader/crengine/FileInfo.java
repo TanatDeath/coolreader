@@ -818,6 +818,10 @@ public class FileInfo {
 	}
 	
 	public boolean pathNameEquals(FileInfo item) {
+//		Log.i("cr3", "pathNameEquals1 " + item.arcname);
+//		Log.i("cr3", "pathNameEquals2 " + arcname);
+//		Log.i("cr3", "pathNameEquals3 " + item.pathname);
+//		Log.i("cr3", "pathNameEquals4 " + pathname);
 		return isDirectory == item.isDirectory && eq(arcname, item.arcname) && eq(pathname, item.pathname);
 	}
 	

@@ -25,6 +25,7 @@
 
 
     <LinearLayout
+        android:id="@+id/ll_find_group"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
         android:layout_width="fill_parent"
@@ -52,6 +53,19 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+        <ImageButton android:id="@+id/goto_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dip"
+            android:layout_marginBottom="5dip"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:src="?attr/attr_icons8_level_up_filled"
+            android:tag="tint"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:background="@null"
+            android:contentDescription="root"/>
         <ImageButton android:id="@+id/goto_root"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -71,14 +85,14 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:layout_weight="1"
-            android:text="@string/dlg_whole_gd" />
+            android:text="@string/dlg_whole_drive" />
         <RadioButton
             android:id="@+id/rb_folder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="false"
             android:layout_weight="1"
-            android:text="@string/dlg_folder_gd" />
+            android:text="@string/dlg_folder_drive" />
         <ImageButton android:id="@+id/do_find"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -217,6 +217,7 @@
     <string name="options_selection_action_dictionary">Найти в словаре</string>
     <string name="options_selection_action_dictionary_1">Найти в словаре 1</string>
     <string name="options_selection_action_dictionary_2">Найти в словаре 2</string>
+    <string name="options_selection_action_dictionary_list">Список словарей</string>
     <string name="options_selection_action_copy">Копировать</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="options_app_browser_hide_empty_dirs">Прятать директории без книг</string>
@@ -753,9 +754,9 @@
     <string name="load_settings_from_gd_v">Восстановить настройки из файла cr3.ini на диске Google One (из папки CoolReader&#47;settings)</string>
     <string name="switched_to_dic">Переключение на словарь</string>
     <string name="next_dict_will_be_2nd">Следующий перевод будет в словаре 2 (однократно)</string>
-    <string name="gd_begin">Google One - начало операции</string>
-    <string name="gd_error">Ошибка работы с Google One</string>
-    <string name="gd_ok">Google One - операция выполнена успешно</string>
+    <string name="cloud_begin">Работа с облаком - начало операции</string>
+    <string name="cloud_error">Ошибка работы с облаком</string>
+    <string name="cloud_ok">Работа с облаком - операция выполнена успешно</string>
     <string name="win_title_conf_file">Выбрать файл конфигурации</string>
     <string name="save_reading_pos_to_gd">Сохранить позицию чтения на диск Google One</string>
     <string name="dlg_button_delete_word">Удалить слово</string>
@@ -797,9 +798,10 @@
     <string name="dlg_bookmark_info">Подстановка: | необязательное окончание, ~ разделитель вариантов слова</string>
     <string name="options_reader_toolbar_buttons">Кнопки панели инструментов</string>
     <string name="lbl_find">Поиск: </string>
-    <string name="dlg_whole_gd">По всему диску</string>
-    <string name="dlg_folder_gd">В этой папке</string>
+    <string name="dlg_whole_drive">По всему диску</string>
+    <string name="dlg_folder_drive">В этой папке</string>
     <string name="win_title_open_book_from_gd">Открыть книгу с диска Google One</string>
+    <string name="win_title_open_book_from_cloud">Открыть книгу из облака</string>
     <string name="dlg_bookmark_link">Ссылка на закладку</string>
     <string name="docx_is_not_installed">Расширение org.coolreader.docx не установлено (установите, чтобы открывать docx формат)</string>
     <string name="docx_open_converted">Открыта предварительно сохраненная преобразованная копия документа</string>
@@ -926,5 +928,19 @@
     <string name="db_action_restored">База данных восстановлена из архива</string>
     <string name="db_action_performed_del">Выполнено удаление: </string>
     <string name="db_action_performed_ren">Выполнено переименование: </string>
+    <string name="cloud_need_authorization">Необходима авторизация</string>
+    <string name="dbx_input_token">Введите токен</string>
+    <string name="dbx_delete_token">Удалить файл токена</string>
+    <string name="success">Успешно</string>
+    <string name="unsuccess">Неуспешно</string>
+    <string name="dbx_no_browser">Невозможно завершить операцию - необходимо установить веб браузер</string>
+    <string name="dbx_long_tap">Это окно в будущем можно вызвать по длинному нажатию на иконку Dropbox. Выберите действие:</string>
+    <string name="dbx_auth">Авторизация в Dropbox</string>
+    <string name="dbx_auth_auto">Автоматический режим</string>
+    <string name="dbx_auth_manual">Ручной ввод токена</string>
+    <string name="dbx_prev_auth">Предыдущая авторизация</string>
+    <string name="dbx_auth_finished_ok">Dropbox: успешная авторизация</string>
+    <string name="dbx_auth_finished_error">Dropbox: ошибка авторизации</string>
+    <string name="dbx_token_hint">Вставьте токен в это поле</string>
 </resources>
 

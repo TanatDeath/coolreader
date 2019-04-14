@@ -17,6 +17,10 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 
@@ -84,6 +88,7 @@ public class Dictionaries {
 		public final String action;
 		public final Integer internal;
 		public final int dicIcon;
+		public Drawable icon;
 		public String dataKey = SearchManager.QUERY;
 
 		public boolean isInstalled() {
@@ -96,7 +101,7 @@ public class Dictionaries {
 
 		public boolean isInstalled = false;
 		public DictInfo ( String id, String name, String packageName, String className, String action, Integer internal,
-						  int dicIcon) {
+						  int dicIcon, Drawable icon) {
 			this.id = id;
 			this.name = name;
 			this.packageName = packageName;
@@ -104,49 +109,52 @@ public class Dictionaries {
 			this.action = action;
 			this.internal = internal;
 			this.dicIcon = dicIcon;
+			this.icon = icon;
 		}
 		public DictInfo setDataKey(String key) { this.dataKey = key; return this; }
 	}
 
 	static final DictInfo dicts[] = {
 		new DictInfo("Fora", "Fora Dictionary", "com.ngc.fora", "com.ngc.fora.ForaDictionary",
-				Intent.ACTION_SEARCH, 0, R.drawable.fora),
+				Intent.ACTION_SEARCH, 0, R.drawable.fora, null),
 		new DictInfo("ColorDict", "ColorDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 0, R.drawable.colordict),
+				Intent.ACTION_SEARCH, 0, R.drawable.colordict, null),
 		new DictInfo("ColorDictApi", "ColorDict new / GoldenDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 1, R.drawable.goldendict),
+				Intent.ACTION_SEARCH, 1, R.drawable.goldendict, null),
 		new DictInfo("ColorDictApi (minicard)", "ColorDict new / GoldenDict (minicard)", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 6, R.drawable.goldendict),
+				Intent.ACTION_SEARCH, 6, R.drawable.goldendict, null),
 		new DictInfo("AardDict", "Aard Dictionary", "aarddict.android", "aarddict.android.Article",
-				Intent.ACTION_SEARCH, 0, R.drawable.aarddict),
+				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null),
 		new DictInfo("AardDictLookup", "Aard Dictionary Lookup", "aarddict.android", "aarddict.android.Lookup",
-				Intent.ACTION_SEARCH, 0, R.drawable.aarddict),
+				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null),
 		new DictInfo("Aard2", "Aard 2 Dictionary", "itkach.aard2", "aard2.lookup",
-				Intent.ACTION_SEARCH, 3, R.drawable.aard2),
+				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null),
 		new DictInfo("Dictan", "Dictan Dictionary", "info.softex.dictan", null,
-				Intent.ACTION_VIEW, 2, R.drawable.dictan),
+				Intent.ACTION_VIEW, 2, R.drawable.dictan, null),
 		new DictInfo("FreeDictionary.org", "Free Dictionary . org", "org.freedictionary", "org.freedictionary.MainActivity",
-				"android.intent.action.VIEW", 0, R.drawable.freedictionary),
+				"android.intent.action.VIEW", 0, R.drawable.freedictionary, null),
 		new DictInfo("ABBYYLingvo", "ABBYY Lingvo", "com.abbyy.mobile.lingvo.market", null /*com.abbyy.mobile.lingvo.market.MainActivity*/,
-				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0, R.drawable.lingvo).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
+				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0, R.drawable.lingvo, null).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		new DictInfo("ABBYYLingvo (minicard)", "ABBYY Lingvo (minicard)", "com.abbyy.mobile.lingvo.market", null,
-				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 5, R.drawable.lingvo).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
+				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 5, R.drawable.lingvo, null).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		//new DictInfo("ABBYYLingvoLive", "ABBYY Lingvo Live", "com.abbyy.mobile.lingvolive", null, "com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		new DictInfo("LingoQuizLite", "Lingo Quiz Lite", "mnm.lite.lingoquiz", "mnm.lite.lingoquiz.ExchangeActivity",
-				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz).setDataKey("EXTRA_WORD"),
+				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null).setDataKey("EXTRA_WORD"),
 		new DictInfo("LingoQuiz", "Lingo Quiz", "mnm.lingoquiz", "mnm.lingoquiz.ExchangeActivity",
-				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz).setDataKey("EXTRA_WORD"),
+				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null).setDataKey("EXTRA_WORD"),
 		new DictInfo("LEODictionary", "LEO Dictionary", "org.leo.android.dict", "org.leo.android.dict.LeoDict",
-				"android.intent.action.SEARCH", 0, R.drawable.leo).setDataKey("query"),
+				"android.intent.action.SEARCH", 0, R.drawable.leo, null).setDataKey("query"),
 		new DictInfo("PopupDictionary", "Popup Dictionary", "com.barisatamer.popupdictionary", "com.barisatamer.popupdictionary.MainActivity",
-				"android.intent.action.VIEW", 0,R.drawable.popup),
+				"android.intent.action.VIEW", 0,R.drawable.popup, null),
 		new DictInfo("GoogleTranslate", "Google Translate", "com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity",
-				Intent.ACTION_SEND, 4, R.drawable.googledic),
+				Intent.ACTION_SEND, 4, R.drawable.googledic, null),
 		new DictInfo("YandexTranslate", "Yandex Translate", "ru.yandex.translate", "ru.yandex.translate.ui.activities.MainActivity",
-				Intent.ACTION_SEND, 4, R.drawable.ytr_ic_launcher),
-		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.main.MainActivity",
-				Intent.ACTION_SEND, 4, R.drawable.wiki),
+				Intent.ACTION_SEND, 4, R.drawable.ytr_ic_launcher, null),
+		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.search.SearchActivity",
+				Intent.ACTION_SEND, 4, R.drawable.wiki, null),
 	};
+
+	public static List<DictInfo> dictsSendTo = new ArrayList<DictInfo>();
 
 	public static final String DEFAULT_DICTIONARY_ID = "com.ngc.fora";
 	
@@ -161,10 +169,49 @@ public class Dictionaries {
 	static DictInfo defaultDictionary() {
 		return findById(DEFAULT_DICTIONARY_ID);
 	}
-		
-	
-	public static DictInfo[] getDictList() {
-		return dicts;
+
+	public static void addDicsSendTo(BaseActivity act, List<DictInfo> ldi) {
+		if (dictsSendTo.size()==0) {
+			//intent for adding other apps
+			Intent queryIntent = new Intent(Intent.ACTION_SEND);
+			queryIntent.setType("text/plain");
+			PackageManager pm = act.getPackageManager();
+			List<ResolveInfo> resolveInfos = pm.queryIntentActivities(queryIntent, 0);
+			for (int i = 0; i < resolveInfos.size(); i++) {
+				ResolveInfo ri = resolveInfos.get(i);
+				String packageName = ri.activityInfo.packageName;
+				Drawable icon = null;
+				try {
+					icon = pm.getApplicationIcon(ri.activityInfo.packageName);
+//					Drawable fakeIcon = act.getResources().getDrawable(R.drawable.lingvo);
+//					Bitmap b = ((BitmapDrawable)icon).getBitmap();
+//					Bitmap bitmapResized = Bitmap.createScaledBitmap(b,
+//							fakeIcon.getIntrinsicWidth(), fakeIcon.getIntrinsicHeight(), false);
+//					icon = new BitmapDrawable(act.getResources(), bitmapResized);
+				}
+				catch (PackageManager.NameNotFoundException e) {
+					e.printStackTrace();
+				}
+				if (!packageName.contains("coolreader")) {
+					DictInfo di = new DictInfo(ri.activityInfo.name,
+							ri.activityInfo.loadLabel(pm).toString(),
+							packageName, ri.activityInfo.name,
+							Intent.ACTION_SEND,4,0, icon);
+					dictsSendTo.add(di);
+					ldi.add(di);
+				}
+			}
+
+		} else {
+			for (DictInfo di: dictsSendTo) ldi.add(di);
+		}
+	}
+
+	public static List<DictInfo> getDictList(BaseActivity act) {
+		List<DictInfo> ldi = new ArrayList<DictInfo>();
+		for (DictInfo di: dicts) ldi.add(di);
+		addDicsSendTo(act, ldi);
+		return ldi;
 	}
 
 
@@ -190,6 +237,7 @@ public class Dictionaries {
 		for (DictInfo dict : dicts) {
 			if ((dict.isInstalled()) || (!bOnlyInstalled)) dlist.add(dict);
 		}
+		addDicsSendTo(act, dlist);
 		return dlist;
 	}
 
@@ -304,7 +352,7 @@ public class Dictionaries {
 			try {
 				mActivity.startActivity( intent0 );
 			} catch ( ActivityNotFoundException e ) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			} catch ( Exception e ) {
 				throw new DictionaryException("Can't open dictionary \"" + curDict.name + "\"");
 			}
@@ -318,7 +366,7 @@ public class Dictionaries {
 			{
 				mActivity.startActivity(intent1);
 			} catch ( ActivityNotFoundException e ) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			}
 			break;
 		case 2:
@@ -336,7 +384,7 @@ public class Dictionaries {
 	        try {
 	        	mActivity.startActivityForResult(intent2, DICTAN_ARTICLE_REQUEST_CODE);
 	        } catch (ActivityNotFoundException e) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 	        }
 			break;
 		case 3:
@@ -347,7 +395,7 @@ public class Dictionaries {
 			{
 				mActivity.startActivity(intent3);
 			} catch ( ActivityNotFoundException e ) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			}
 			break;
 		case 4:
@@ -360,7 +408,7 @@ public class Dictionaries {
 			{
 				mActivity.startActivity(intent4);
 			} catch ( ActivityNotFoundException e ) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			}
 			break;
 		case 5:
@@ -447,7 +495,7 @@ public class Dictionaries {
 			try {
 				mActivity.startActivity( intent5 );
 			} catch ( ActivityNotFoundException e ) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			} catch ( Exception e ) {
 				throw new DictionaryException("Can't open dictionary \"" + curDict.name + "\"");
 			}
@@ -530,7 +578,7 @@ public class Dictionaries {
 			{
 				mActivity.startActivity(intent6);
 			} catch ( ActivityNotFoundException e ) {
-				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed");
+				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			}
 			break;
 		}
