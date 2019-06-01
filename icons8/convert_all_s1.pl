@@ -15,8 +15,7 @@ my %ic_smaller_list=(
 );
 
 my %ic_actions_list=(
-        'icons8_play_ell.svg' => 'icons8_play_ell.png',
-        'icons8_folder_az.svg' => 'icons8_folder_az.png'
+        'icons8_level_up_filled.svg' => 'icons8_level_up_filled.png'
 );
 
 my %ic_menu_list=(
