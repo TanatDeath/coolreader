@@ -518,12 +518,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			//mActivity.showToast(selectedItem.pathname);
 			final File f = new File(selectedItem.pathname);
 			String[] children = f.list();
-			if (children.length>0)
-				mActivity.askConfirmation( mActivity.getString(R.string.delete_dir_confirm)+" "+children.length, new Runnable() {
+			if (children!=null)
+				if (children.length>0)
+					mActivity.askConfirmation( mActivity.getString(R.string.delete_dir_confirm)+" "+children.length, new Runnable() {
 					@Override
 					public void run() {
-						mActivity.DeleteRecursive(f,selectedItem);
-					}
+							mActivity.DeleteRecursive(f,selectedItem);
+						}
 				}); else mActivity.DeleteRecursive(f,selectedItem);
 			return true;
 		case R.id.folder_to_favorites:
@@ -1237,6 +1238,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						fileOrDir.pathnameR = item.pathname;
 						fileOrDir.arcnameR = item.arcname;
 						fileOrDir.pathR = item.path;
+						if (StrUtils.isEmptyStr(fileOrDir.filename)) fileOrDir.filename = item.filename;
 						mActivity.getDB().saveBookInfo(new BookInfo(fileOrDir));
 						mActivity.getDB().flush();
 						if (item.getTitle() == null) {

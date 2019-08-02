@@ -24,6 +24,7 @@ import com.dropbox.core.v2.files.Metadata;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.StrUtils;
@@ -38,6 +39,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 	private LayoutInflater mInflater;
 	private OpenBookFromGDList mGDList;
 	private OpenBookFromDBXList mDBXList;
+	private OpenBookFromYNDList mYNDList;
 
 	public boolean mWholeSearch = false;
 	private TextView lblFolder;
@@ -66,9 +68,14 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		if (mDBXList != null) mDBXList.mLFR = lfr;
 	}
 
+	public void setYNDLfrList(YNDListFiles lfr) {
+		if (mYNDList != null) mYNDList.mLFR = lfr;
+	}
+
 	public void listUpdated() {
 		if (mGDList != null) mGDList.listUpdated();
 		if (mDBXList != null) mDBXList.listUpdated();
+		if (mYNDList != null) mYNDList.listUpdated();
 	}
 
 	class OpenBookFromGDAdapter extends BaseAdapter {
@@ -296,6 +303,117 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		}
 	}
 
+	class OpenBookFromYNDAdapter extends BaseAdapter {
+
+		public boolean areAllItemsEnabled() {
+			return true;
+		}
+
+		public boolean isEnabled(int arg0) {
+			return true;
+		}
+
+		public int getCount() {
+			int cnt = 0;
+			if (mYNDList.mLFR != null) cnt = mYNDList.mLFR.fileList.size();
+			return cnt;
+		}
+
+		public Object getItem(int position) {
+			int cnt = 0;
+			int pos = position;
+			if (mYNDList.mLFR != null) cnt = mYNDList.mLFR.fileList.size();
+			if ( pos<0 || pos>=cnt )
+				return null;
+			return mYNDList.mLFR.fileList.get(pos);
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+
+		public int getItemViewType(int position) {
+			return ITEM_POSITION;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view;
+			View view1;
+			View view2;
+			int res = R.layout.open_book_from_gd_item;
+			int res1 = R.layout.open_book_from_gd_item1;
+			int res2 = R.layout.open_book_from_gd_item2;
+			view = mInflater.inflate(res, null);
+			TextView fileView = (TextView)view.findViewById(R.id.file_name);
+			TextView descrView = (TextView)view.findViewById(R.id.file_descr);
+			TextView timeView = (TextView)view.findViewById(R.id.file_time);
+			view1 = mInflater.inflate(res1, null);
+			TextView fileView1 = (TextView)view1.findViewById(R.id.file_name);
+			view2 = mInflater.inflate(res2, null);
+			TextView fileView2 = (TextView)view2.findViewById(R.id.file_name);
+			TextView timeView2 = (TextView)view2.findViewById(R.id.file_time);
+			YNDListFiles.YNDListFile md = null;
+			String sFile = "";
+			if (mYNDList.mLFR != null) md = mYNDList.mLFR.fileList.get(position);
+			String sTitle = "";
+			String sFTime = "";
+			if ( md!=null ) {
+				Date dt = null;
+				sFile = StrUtils.getNonEmptyStr(md.name,true);
+				sTitle = "";
+				if (md.type.equals("dir")) {
+					sFile = "["+sFile+"]";
+				}
+				if (sTitle == null) sTitle ="";
+				final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
+				CharSequence sFName0 = "";
+				if ( dt != null) sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", dt);
+				sFTime = sFName0.toString();
+				if (sFTime == null) sFTime ="";
+				if ((sFTime.isEmpty())&&(sTitle.isEmpty())) {
+					fileView1.setText(sFile);
+				}
+				if ((!sFTime.isEmpty())&&(sTitle.isEmpty())) {
+					fileView2.setText(sFile);
+					timeView2.setText(sFTime);
+				}
+				if ((!sFTime.isEmpty())&&(!sTitle.isEmpty())) {
+					fileView.setText(sFile);
+					descrView.setText(StrUtils.textShrinkLines(sTitle, true));
+					timeView.setText(sFTime);
+				}
+			} else {
+				fileView1.setText(sFile);
+				descrView.setText("");
+				timeView.setText("");
+			}
+			if ((sFTime.isEmpty())&&(sTitle.isEmpty())) return view1;
+			if ((!sFTime.isEmpty())&&(sTitle.isEmpty())) return view2;
+			if ((!sFTime.isEmpty())&&(!sTitle.isEmpty())) return view;
+			return null;
+		}
+
+		public boolean hasStableIds() {
+			return true;
+		}
+
+		public boolean isEmpty() {
+			int cnt = 0;
+			if (mYNDList.mLFR != null) cnt = mYNDList.mLFR.fileList.size();
+			return cnt==0;
+		}
+
+		private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
+
+		public void registerDataSetObserver(DataSetObserver observer) {
+			observers.add(observer);
+		}
+
+		public void unregisterDataSetObserver(DataSetObserver observer) {
+			observers.remove(observer);
+		}
+	}
+
 	class OpenBookFromGDList extends BaseListView {
 
 		public com.google.android.gms.drive.MetadataBuffer mBooksList;
@@ -449,6 +567,82 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 
 	}
 
+	class OpenBookFromYNDList extends BaseListView {
+
+		public ArrayList<String> mDriveStrList;
+		public ArrayList<String> mDriveStrList1;
+		public YNDListFiles mLFR;
+
+		public boolean ismWholeSearchW() {
+			return false;
+//            if (mLFR == null) return false;
+//			if (mLFR.size()<=1) return true;
+//			return mFoundWhole;
+		}
+
+		private String getFolderText() {
+			String res = "";
+			String sRoot = "root";
+			if (mFoundWhole) sRoot = "search";
+			for (String didmd: mDriveStrList) {
+				res = res + "\\" + didmd.toString();
+				if (res.equals("\\"+sRoot)) res = "";
+				if (res.equals("\\root")) res = "";
+			}
+			//if (mDriveStrList.size()<=1) res=sRoot;
+			return res;
+		}
+
+		public void listUpdated() {
+			updateAdapter(new OpenBookFromYNDAdapter());
+			lblFolder.setText(getFolderText());
+		}
+
+		private ListAdapter mAdapter;
+		private OpenBookFromCloudDlg uDDlg;
+
+		public OpenBookFromYNDList( Context context, OpenBookFromCloudDlg udd) {
+			super(context, true);
+			uDDlg = udd;
+			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+			setLongClickable(true);
+			setOnItemLongClickListener(new OnItemLongClickListener() {
+				@Override
+				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+											   int position, long arg3) {
+					openContextMenu(OpenBookFromYNDList.this);
+					return true;
+				}
+			});
+		}
+
+		@Override
+		public boolean performItemClick(View view, int position, long id) {
+			YNDListFiles.YNDListFile md = null;
+			if (mLFR != null) md = mLFR.fileList.get(position);
+			if (md != null)
+				if (md.type.equals("dir")) {
+					btnFolder.setChecked(true);
+					mDriveStrList.add(md.name);
+					mLFR = null;
+					listUpdated();
+					String sFolder=getFolderText();
+					CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
+				} else {
+					String sFolder=getFolderText();
+					CloudAction.yndDownloadFile(mCoolReader, OpenBookFromCloudDlg.this, sFolder, md);
+					dismiss();
+				}
+			return true;
+		}
+
+		public void updateAdapter( OpenBookFromYNDAdapter adapter ) {
+			mAdapter = adapter;
+			setAdapter(mAdapter);
+		}
+
+	}
+
 	private View initCommon(final CoolReader activity) {
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
@@ -594,6 +788,54 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		return mDBXList;
 	}
 
+	private BaseListView initForYND(YNDListFiles lfr) {
+		mYNDList = new OpenBookFromYNDList(mCoolReader, this);
+		mYNDList.mLFR = lfr;
+		mYNDList.mDriveStrList = new ArrayList<String>();
+		mYNDList.mDriveStrList1 = new ArrayList<String>();
+		mYNDList.setAdapter(new OpenBookFromYNDAdapter());
+
+		System.out.println("initForYND");
+
+		btnFind.setOnClickListener(new Button.OnClickListener() {
+			public void onClick(View v) {
+				btnFolder.setChecked(true);
+				mYNDList.mDriveStrList.clear();
+				mYNDList.mLFR = null;
+				listUpdated();
+				CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, "", edtFind.getText().toString());
+			}
+		});
+
+		btnRoot.setOnClickListener(new Button.OnClickListener() {
+			public void onClick(View v) {
+				btnFolder.setChecked(true);
+				mYNDList.mDriveStrList.clear();
+				mYNDList.mLFR = null;
+				listUpdated();
+				CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, "", "");
+			}
+		});
+
+		btnUp.setOnClickListener(new Button.OnClickListener() {
+			public void onClick(View v) {
+				if (mYNDList.mDriveStrList.size()>0) {
+					btnFolder.setChecked(true);
+					mYNDList.mDriveStrList.remove(mYNDList.mDriveStrList.size()-1);
+					mYNDList.mLFR = null;
+					listUpdated();
+					String sFolder=mYNDList.getFolderText();
+					CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
+				}
+			}
+		});
+
+		lblFolder.setText(mYNDList.getFolderText());
+		rgScope.removeView(btnWhole);
+		rgScope.removeView(btnFolder);
+		return mYNDList;
+	}
+
 	public OpenBookFromCloudDlg(final CoolReader activity,
 								com.google.android.gms.drive.MetadataBuffer mdb,
 								ArrayList<com.google.android.gms.drive.DriveId> adid,
@@ -617,6 +859,19 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 				+" - DropBox", false, true);
 		View v = initCommon(activity);
 		BaseListView blv = initForDBX(lfr);
+		ViewGroup body = (ViewGroup)v.findViewById(R.id.book_list);
+		body.addView(blv);
+		setView(v);
+		setFlingHandlers(blv, null, null);
+		btnFind.requestFocus();
+	}
+
+	public OpenBookFromCloudDlg(final CoolReader activity, YNDListFiles lfr)
+	{
+		super("OpenBookFromCloudDlg", activity, activity.getResources().getString(R.string.win_title_open_book_from_cloud)
+				+" - Yandex", false, true);
+		View v = initCommon(activity);
+		BaseListView blv = initForYND(lfr);
 		ViewGroup body = (ViewGroup)v.findViewById(R.id.book_list);
 		body.addView(blv);
 		setView(v);

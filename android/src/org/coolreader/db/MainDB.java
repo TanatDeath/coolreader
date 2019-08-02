@@ -6,13 +6,16 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 import org.coolreader.crengine.*;
+import org.coolreader.crengine.Properties;
 
 import java.util.*;
 
 public class MainDB extends BaseDB {
 	public static final Logger log = L.create("mdb");
 	public static final Logger vlog = L.create("mdb", Log.VERBOSE);
-	
+
+	public int iMaxGroupSize = 8;
+
 	private boolean pathCorrectionRequired = false;
 	public static final int DB_VERSION = 38;
 	@Override
@@ -1036,7 +1039,10 @@ public class MainDB extends BaseDB {
 		if (groupPrefixTag.equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) bNoGroups = true;
 		if (groupPrefixTag.equals(FileInfo.FILE_DATE_GROUP_PREFIX)) bNoGroups = true;
 
-		if ((itemCount <= topLevelGroupsCount * 11 / 10 || itemCount < 8)||(bNoGroups)) {
+		int iMaxItemsCount = iMaxGroupSize;
+		log.i("iMaxItemsCount "+iMaxItemsCount);
+		if (iMaxItemsCount<8) iMaxItemsCount = 8;
+		if ((itemCount <= topLevelGroupsCount * 11 / 10 || itemCount < iMaxItemsCount)||(bNoGroups)) {
 			// small number of items: add as is
 			addItems(parent, items, start, end); 
 			return;
@@ -1099,7 +1105,9 @@ public class MainDB extends BaseDB {
 		beginReading();
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = "SELECT author.id, author.name, count(*) as book_count FROM author INNER JOIN book_author ON  book_author.author_fk = author.id GROUP BY author.name, author.id ORDER BY author.name";
+		String sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
+				" INNER JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
+				" INNER JOIN book_author ON  book_author.author_fk = author.id GROUP BY author.name, author.id ORDER BY author.name";
 		boolean found = loadItemList(list, sql, FileInfo.AUTHOR_PREFIX, true);
 		addGroupedItems(parent, list, 0, list.size(), FileInfo.AUTHOR_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
 		endReading();
@@ -1111,7 +1119,9 @@ public class MainDB extends BaseDB {
 		beginReading();
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series INNER JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id GROUP BY series.name, series.id ORDER BY series.name";
+		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series "+
+				" INNER JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id "+
+				" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
 		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX, true);
 		addGroupedItems(parent, list, 0, list.size(), FileInfo.SERIES_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
 		endReading();
@@ -1129,7 +1139,7 @@ public class MainDB extends BaseDB {
 			" else strftime('%Y-%m', datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) end";
 		String sql = "SELECT "+f1+" as date_n, "+
 			f2 + " as date_s, " +
-			" count(*) as book_count FROM book GROUP BY " + f1 + ", " +f2;
+			" count(*) as book_count FROM book where (not (book.pathname like '@opds%')) GROUP BY " + f1 + ", " +f2;
 		String prefix = FileInfo.BOOK_DATE_PREFIX;
 		String groupPrefix = FileInfo.BOOK_DATE_GROUP_PREFIX;
 		if (field.equals("doc_date_n")) {
@@ -1155,7 +1165,7 @@ public class MainDB extends BaseDB {
 		beginReading();
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' ORDER BY b.title";
+		String sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) ORDER BY b.title";
 		boolean found = findBooks(sql, list);
 		sortItems(list, new ItemGroupTitleExtractor(), true);
 		// remove duplicate titles
@@ -1178,7 +1188,8 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id WHERE book_author.author_fk = " + authorId + " ORDER BY b.title";
+		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id "+
+				" WHERE (not (b.pathname like '@opds%')) and book_author.author_fk = " + authorId + " ORDER BY b.title";
 		return findBooks(sql, list);
 	}
 	
@@ -1186,7 +1197,8 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " INNER JOIN series ON series.id = b.series_fk or series.id = b.publseries_fk WHERE series.id = " + seriesId + " ORDER BY b.series_number, b.title";
+		String sql = READ_FILEINFO_SQL + " INNER JOIN series ON series.id = b.series_fk or series.id = b.publseries_fk "+
+				" WHERE (not (b.pathname like '@opds%')) and series.id = " + seriesId + " ORDER BY b.series_number, b.title";
 		return findBooks(sql, list);
 	}
 
@@ -1196,7 +1208,7 @@ public class MainDB extends BaseDB {
 			return false;
 		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
 				"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) as integer) end";
-		String sql = READ_FILEINFO_SQL + " WHERE "+f1+" = " + bookdateId +
+		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+f1+" = " + bookdateId +
 				" ORDER BY b.title";
 		vlog.i(sql);
 		return findBooks(sql, list);
@@ -1206,7 +1218,8 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " WHERE ((flags>>20)&15) BETWEEN " + minRate + " AND " + maxRate + " ORDER BY ((flags>>20)&15) DESC, b.title LIMIT 1000";
+		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+
+				" ((flags>>20)&15) BETWEEN " + minRate + " AND " + maxRate + " ORDER BY ((flags>>20)&15) DESC, b.title LIMIT 1000";
 		return findBooks(sql, list);
 	}
 	
@@ -1214,7 +1227,8 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " WHERE ((flags>>16)&15) = " + state + " ORDER BY b.title LIMIT 1000";
+		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+
+				" ((flags>>16)&15) = " + state + " ORDER BY b.title LIMIT 1000";
 		return findBooks(sql, list);
 	}
 	

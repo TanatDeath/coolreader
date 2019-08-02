@@ -9,7 +9,7 @@
     <item android:title="@string/mi_book_set_custom_cover" android:titleCondensed="@string/mi_book_set_custom_cover" android:id="@+id/book_set_custom_cover"></item>
     <item android:title="@string/mi_book_delete_custom_cover" android:titleCondensed="@string/mi_book_delete_custom_cover" android:id="@+id/book_delete_custom_cover"></item>
     <item android:title="@string/mi_book_shortcut" android:titleCondensed="@string/mi_book_shortcut" android:id="@+id/book_shortcut"></item>
-    <item android:title="@string/mi_book_to_gd" android:titleCondensed="@string/mi_book_to_gd" android:id="@+id/book_to_gd"></item>
+    <item android:title="@string/mi_book_to_cloud" android:titleCondensed="@string/mi_book_to_cloud" android:id="@+id/book_to_gd"></item>
     <item android:title="@string/mi_book_no_mark" android:titleCondensed="@string/mi_book_no_mark" android:id="@+id/book_no_mark"></item>
     <item android:title="@string/mi_book_to_read" android:titleCondensed="@string/mi_book_to_read" android:id="@+id/book_to_read"></item>
     <item android:title="@string/mi_book_reading" android:titleCondensed="@string/mi_book_reading" android:id="@+id/book_reading"></item>

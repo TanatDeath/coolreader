@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.CloudSyncFolder;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXPerformAction;
 import org.coolreader.crengine.Engine.HyphDict;
@@ -2832,47 +2833,48 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			log.i("Open book from GD");
 			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
 			break;
-		case DCMD_GD_MENU:
-			log.i("GD menu");
+		case DCMD_CLOUD_MENU:
+			log.i("CLOUD menu");
 			ReaderAction[] actions = {
-					ReaderAction.SAVE_SETTINGS_TO_GD,
-					ReaderAction.LOAD_SETTINGS_FROM_GD,
+					ReaderAction.SAVE_SETTINGS_TO_CLOUD,
+					ReaderAction.LOAD_SETTINGS_FROM_CLOUD,
 					ReaderAction.SAVE_READING_POS,
 					ReaderAction.LOAD_READING_POS,
 					ReaderAction.SAVE_BOOKMARKS,
 					ReaderAction.LOAD_BOOKMARKS,
-					ReaderAction.SAVE_CURRENT_BOOK_TO_GD,
+					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD,
 					ReaderAction.OPEN_BOOK_FROM_GD
 			};
 			mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
 				@Override
 				public boolean onActionSelected(ReaderAction item) {
-					if (item == ReaderAction.SAVE_SETTINGS_TO_GD) {
-						log.i("Save settings to GD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
+					if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
+						log.i("Save settings to CLOUD");
+						//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
+						CloudSyncFolder.saveSettingsFile(((CoolReader)mActivity),false);
 						return true;
-					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_GD) {
-						log.i("Load settings from GD");
+					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
+						log.i("Load settings from CLOUD");
 						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
 						return true;
 					} else if (item == ReaderAction.SAVE_READING_POS) {
-						log.i("Save reading pos to GD");
+						log.i("Save reading pos to CLOUD");
 						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, ReaderView.this);
 						return true;
 					} else if (item == ReaderAction.LOAD_READING_POS) {
-						log.i("Load reading pos from GD");
+						log.i("Load reading pos from CLOUD");
 						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, ReaderView.this);
 						return true;
 					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
-						log.i("Save bookmarks to GD");
+						log.i("Save bookmarks to CLOUD");
 						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, ReaderView.this);
 						return true;
 					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
-						log.i("Load bookmarks from GD");
+						log.i("Load bookmarks from CLOUD");
 						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, ReaderView.this);
 						return true;
-					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_GD) {
-						log.i("Save current book to GD");
+					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD) {
+						log.i("Save current book to CLOUD");
 						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, ReaderView.this);
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
@@ -3356,6 +3358,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS.equals(key)
 					|| PROP_APP_SELECTION_ACTION.equals(key)
 					|| PROP_APP_FILE_BROWSER_SIMPLE_MODE.equals(key)
+					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE.equals(key)
 					|| PROP_APP_GESTURE_PAGE_FLIPPING.equals(key)
 					|| PROP_APP_HIGHLIGHT_BOOKMARKS.equals(key)
 					|| PROP_HIGHLIGHT_SELECTION_COLOR.equals(key)

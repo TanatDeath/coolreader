@@ -46,7 +46,7 @@ public class DBXInputTokenDialog extends BaseDialog {
 	final Button authManual;
 	final Button authAuto;
 
-	private static final class SimpleSessionStore implements DbxSessionStore {
+	public static final class SimpleSessionStore implements DbxSessionStore {
 		private String token;
 
 		public SimpleSessionStore() {
@@ -69,6 +69,28 @@ public class DBXInputTokenDialog extends BaseDialog {
 		}
 	}
 
+	public void saveDBXToken() {
+		if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
+			Log.i("DBX","Starting save dbx.token");
+			try {
+				final File fDBX = new File(mCoolReader.getSettingsFile(0).getParent() + "/dbx.token");
+				BufferedWriter bw = null;
+				FileWriter fw = null;
+				char[] bytesArray = new char[1000];
+				int bytesRead = 1000;
+				try {
+					fw = new FileWriter(fDBX);
+					bw = new BufferedWriter(fw);
+					bw.write(tokenEdit.getText().toString());
+					bw.close();
+					fw.close();
+				} catch (Exception e) {
+				}
+			} catch (Exception e) {
+			}
+		}
+	}
+
 	public DBXInputTokenDialog(CoolReader activity)
 	{
 		super("DBXInputTokenDialog", activity, activity.getString( R.string.dbx_auth), true, false);
@@ -83,38 +105,21 @@ public class DBXInputTokenDialog extends BaseDialog {
 		ImageButton tokenOk =view.findViewById(R.id.input_token_ok_btn);
 		tokenOk.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
-				if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
-					Log.i("DBX","Starting save dbx.token");
-					try {
-						final File fDBX = new File(mCoolReader.getSettingsFile(0).getParent() + "/dbx.token");
-						BufferedWriter bw = null;
-						FileWriter fw = null;
-						char[] bytesArray = new char[1000];
-						int bytesRead = 1000;
-						try {
-							fw = new FileWriter(fDBX);
-							bw = new BufferedWriter(fw);
-							bw.write(tokenEdit.getText().toString());
-							bw.close();
-							fw.close();
-						} catch (Exception e) {
-						}
-					} catch (Exception e) {
+				saveDBXToken();
+				new DBXFinishAuthorization(mCoolReader, null, new DBXFinishAuthorization.Callback() {
+					@Override
+					public void onComplete(boolean result) {
+						DBXConfig.didLogin = result;
+						mCoolReader.showToast(R.string.dbx_auth_finished_ok);
+						dismiss();
 					}
-					new DBXFinishAuthorization(mCoolReader, null, new DBXFinishAuthorization.Callback() {
-						@Override
-						public void onComplete(boolean result) {
-							DBXConfig.didLogin = result;
-							mCoolReader.showToast(R.string.dbx_auth_finished_ok);
-						}
 
-						@Override
-						public void onError(Exception e) {
-							DBXConfig.didLogin = false;
-							mCoolReader.showToast(mCoolReader.getString(R.string.dbx_auth_finished_error)+": "+e.getMessage());
-						}
-					}).execute(tokenEdit.getText().toString());
-				}
+					@Override
+					public void onError(Exception e) {
+						DBXConfig.didLogin = false;
+						mCoolReader.showToast(mCoolReader.getString(R.string.dbx_auth_finished_error)+": "+e.getMessage());
+					}
+				}).execute(tokenEdit.getText().toString());
 			}
 		});
 		TextView tokenDeleteTxt = (TextView) view.findViewById(R.id.txt_delete_token);

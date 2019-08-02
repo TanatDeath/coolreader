@@ -47,6 +47,10 @@ public class DBXConfig {
                 mDbxRequestConfig = DbxRequestConfig.newBuilder("CoolReaderExperience")
                         .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                         .build();
+                DbxAppInfo appInfo = new DbxAppInfo(DBXConfig.DBX_KEY, DBXConfig.DBX_SECRET);
+                DBXConfig.webAuth = new DbxWebAuth(DBXConfig.mDbxRequestConfig, appInfo);
+                DBXConfig.sessionStore = new DBXInputTokenDialog.SimpleSessionStore();
+
                 BufferedReader reader = new BufferedReader(
                         new FileReader(fDBX));
                 StringBuilder stringBuilder = new StringBuilder();
@@ -58,8 +62,22 @@ public class DBXConfig {
                 }
                 reader.close();
                 String token = stringBuilder.toString().trim();
-                cr.showToast("Using token: [" + token + "]");
-                mDbxClient = new DbxClientV2(mDbxRequestConfig, token);
+                cr.showToast("Using Dropbox token: [" + token + "]");
+                final CoolReader crf = cr;
+                new DBXFinishAuthorization(cr, null, new DBXFinishAuthorization.Callback() {
+                    @Override
+                    public void onComplete(boolean result) {
+                        crf.showToast(R.string.dbx_auth_finished_ok);
+                        didLogin = result;
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        DBXConfig.didLogin = false;
+                        crf.showToast(crf.getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+                    }
+                }).execute(token);
+                return false;
             }
             return true;
         }

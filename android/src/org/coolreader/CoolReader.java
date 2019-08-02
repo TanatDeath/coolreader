@@ -21,6 +21,8 @@ import org.coolreader.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
+import org.coolreader.cloud.yandex.YNDConfig;
+import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.AboutDialog;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
@@ -66,6 +68,7 @@ import org.coolreader.crengine.UserDicEntry;
 import org.coolreader.crengine.Utils;
 import org.coolreader.db.BaseDB;
 import org.coolreader.db.CRDBService;
+import org.coolreader.db.MainDB;
 import org.coolreader.donations.CRDonationService;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
 
@@ -113,7 +116,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private FileInfo fileToDelete = null;
 
 	public DBXInputTokenDialog dbxInputTokenDialog = null;
-	
+	public YNDInputTokenDialog yndInputTokenDialog = null;
+
 	private ReaderView mReaderView;
 
     public class ResizeHistory {
@@ -493,31 +497,51 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			Uri uri = intent.getData();
 			String sUri = "";
 			if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
-			if (sUri.contains(DBXConfig.DBX_REDIRECT_URL)) {
-			    final String code = uri.getQueryParameter("code");
-			    //showToast("code = "+code);
-			    if (!StrUtils.isEmptyStr(code)) {
-                    new DBXFinishAuthorization(this, uri, new DBXFinishAuthorization.Callback() {
-                        @Override
-                        public void onComplete(boolean result) {
-                            DBXConfig.didLogin = result;
-                            CoolReader.this.showToast(R.string.dbx_auth_finished_ok);
-                            if (dbxInputTokenDialog!=null)
-                            	if (dbxInputTokenDialog.isShowing()) {
-									dbxInputTokenDialog.tokenEdit.setText(code);
-									dbxInputTokenDialog.onPositiveButtonClick();
-								}
-                        }
+			if (sUri.contains(YNDConfig.YND_REDIRECT_URL)) {
+				String token = "";
+				if (sUri.contains("#access_token=")) {
+					token = sUri.substring(sUri.indexOf("#access_token="));
+					if (token.contains("&")) token=token.split("\\&")[0];
+					token=token.replace("#access_token=","");
+				}
+				if (!StrUtils.isEmptyStr(token)) {
+					YNDConfig.didLogin = true;
+					CoolReader.this.showToast(R.string.ynd_auth_finished_ok);
+					if (yndInputTokenDialog!=null)
+						if (yndInputTokenDialog.isShowing()) {
+							yndInputTokenDialog.tokenEdit.setText(token);
+							yndInputTokenDialog.saveYNDToken();
+							yndInputTokenDialog.onPositiveButtonClick();
+						}
+				}
+				return true;
+			} else
+				if (sUri.contains(DBXConfig.DBX_REDIRECT_URL)) {
+					final String code = uri.getQueryParameter("code");
+					//showToast("code = "+code);
+					if (!StrUtils.isEmptyStr(code)) {
+						new DBXFinishAuthorization(this, uri, new DBXFinishAuthorization.Callback() {
+							@Override
+							public void onComplete(boolean result) {
+								DBXConfig.didLogin = result;
+								CoolReader.this.showToast(R.string.dbx_auth_finished_ok);
+								if (dbxInputTokenDialog!=null)
+									if (dbxInputTokenDialog.isShowing()) {
+										dbxInputTokenDialog.tokenEdit.setText(code);
+										dbxInputTokenDialog.saveDBXToken();
+										dbxInputTokenDialog.onPositiveButtonClick();
+									}
+							}
 
-                        @Override
-                        public void onError(Exception e) {
-                            DBXConfig.didLogin = false;
-                            CoolReader.this.showToast(getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
-                        }
-                    }).execute(code);
-                }
-			    return true;
-            }
+							@Override
+							public void onError(Exception e) {
+								DBXConfig.didLogin = false;
+								CoolReader.this.showToast(getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+							}
+						}).execute(code);
+					}
+					return true;
+				}
 		}
 		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
@@ -1182,10 +1206,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
         for ( Map.Entry<Object, Object> entry : changedProps.entrySet() ) {
     		String key = (String)entry.getKey();
-    		String value = (String)entry.getValue();
+    		final String value = (String)entry.getValue();
     		applyAppSetting( key, value );
+    		if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE)) {
+				waitForCRDBService(new Runnable() {
+					@Override
+					public void run() {
+						BaseDB db = Services.getHistory().getMainDB(getDB());
+						((MainDB) db).iMaxGroupSize = Integer.valueOf(value);
+					}
+				});
+			}
         }
-		// Show/Hide soft navbar after OptionDialog is closed.
+        // Show/Hide soft navbar after OptionDialog is closed.
 		setSystemUiVisibility();
 	}
 
@@ -2141,7 +2174,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void showOPDSBookInfo(final FileInfo item, final FileBrowser fb, FileInfo currDir) {
 		final ArrayList<String> itemsAll = new ArrayList<String>();
 		itemsAll.add("section=section.file");
-		itemsAll.add("file.format=" + item.format.name());
+		String sFormat = "";
+		if (item.format != null) sFormat = item.format.name();
+		itemsAll.add("file.format=" + sFormat);
 		itemsAll.add("file.name=" + item.pathname);
 		itemsAll.add("section=section.book");
 		if (!StrUtils.isEmptyStr(item.authors))
@@ -2206,7 +2241,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					itemsFile.add("file.arcpath=" + new File(fi.arcname).getParent());
 				itemsFile.add("file.arcsize=" + StrUtils.readableFileSize(fi.arcsize));
 			}
-			itemsFile.add("file.format=" + fi.format.name());
+			String sFormat = "";
+			if (fi.format != null) sFormat = fi.format.name();
+			itemsFile.add("file.format=" + sFormat);
 			if (!StrUtils.isEmptyStr(fi.opdsLink)) {
 				itemsBook.add("file.opds_link=" + fi.opdsLink);
 			}

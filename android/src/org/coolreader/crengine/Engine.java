@@ -1717,12 +1717,13 @@ public class Engine {
 		}
 	}
 
-	enum DataDirType {
+	public enum DataDirType {
 		TexturesDirs,
 		BackgroundsDirs,
 		HyphsDirs,
 		CustomCoversDirs,
-		DownloadsDirs
+		DownloadsDirs,
+		CloudSyncDirs
 	}
 
 	public static ArrayList<String> getDataDirs(DataDirType dirType) {
@@ -1801,6 +1802,22 @@ public class Engine {
 							res.add(subdirCustomCovers.getAbsolutePath());
 						else
 							res.add(subdirCustomCovers.getAbsolutePath() + " [not found]");
+						break;
+					}
+				case CloudSyncDirs:
+					File subdirSync = new File(base, "cloudsync");
+					bCreated = false;
+					if ((doCreate) && (!subdirSync.exists())) {
+						if (subdirSync.mkdir()) {
+							res.add(subdirSync.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subdirSync.isDirectory())
+							res.add(subdirSync.getAbsolutePath());
+						else
+							res.add(subdirSync.getAbsolutePath() + " [not found]");
 						break;
 					}
 				case DownloadsDirs:

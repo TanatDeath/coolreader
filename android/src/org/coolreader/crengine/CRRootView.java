@@ -13,6 +13,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
+import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.CRToolBar.OnActionHandler;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
@@ -586,6 +587,31 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				}
 			});
 			mFilesystemScroll.addView(viewDBX);
+
+			View viewYandex = inflater.inflate(R.layout.root_item_dir, null);
+			ImageView iconYandex = (ImageView) viewYandex.findViewById(R.id.item_icon);
+			TextView labelYandex = (TextView) viewYandex.findViewById(R.id.item_name);
+			iconYandex.setImageResource(Utils.resolveResourceIdByAttr(mActivity,
+					R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
+			mActivity.tintViewIcons(iconYandex,true);
+			labelYandex.setText(R.string.open_book_from_y_short);
+			labelYandex.setTextColor(colorIcon);
+			labelYandex.setMaxWidth(coverWidth * 25 / 10);
+			viewYandex.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					CloudAction.yndOpenBookDialog(mActivity);
+				}
+			});
+			viewYandex.setOnLongClickListener(new OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					mActivity.yndInputTokenDialog = new YNDInputTokenDialog(mActivity);
+					mActivity.yndInputTokenDialog.show();
+					return true;
+				}
+			});
+			mFilesystemScroll.addView(viewYandex);
 
 			for (final FileInfo item : dirs) {
 				if (item == null)

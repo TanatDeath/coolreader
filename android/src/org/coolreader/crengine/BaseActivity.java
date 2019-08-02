@@ -460,7 +460,7 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_position_to_gd, R.attr.attr_icons8_position_from_gd,
 						 R.attr.attr_icons8_bookmarks_to_gd, R.attr.attr_icons8_bookmarks_from_gd,
 				         R.attr.attr_icons8_book_to_gd, R.attr.attr_icons8_book_from_gd,
-						 R.attr.attr_icons8_type_filled_2, R.attr.attr_icons8_google_drive_2,
+						 R.attr.attr_icons8_type_filled_2, R.attr.attr_icons8_cloud_storage,
 						 R.attr.attr_icons8_quote_2, R.attr.attr_icons8_bookmark_plus,
 						 R.attr.attr_icons8_google_translate_save,
 						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting,
@@ -640,9 +640,9 @@ public class BaseActivity extends Activity implements Settings {
 		if (brGoogleTranslateSwitchDrawableRes!=0)
 			ReaderAction.TOGGLE_DICT.setIconId(brGoogleTranslateSwitchDrawableRes);
 		if (brSettingsToGdDrawableRes!=0)
-			ReaderAction.SAVE_SETTINGS_TO_GD.setIconId(brSettingsToGdDrawableRes);
+			ReaderAction.SAVE_SETTINGS_TO_CLOUD.setIconId(brSettingsToGdDrawableRes);
 		if (brSettingsFromGdDrawableRes!=0)
-			ReaderAction.LOAD_SETTINGS_FROM_GD.setIconId(brSettingsFromGdDrawableRes);
+			ReaderAction.LOAD_SETTINGS_FROM_CLOUD.setIconId(brSettingsFromGdDrawableRes);
 		if (brPositionToGdDrawableRes!=0)
 			ReaderAction.SAVE_READING_POS.setIconId(brPositionToGdDrawableRes);
 		if (brPositionFromGdDrawableRes!=0)
@@ -652,13 +652,13 @@ public class BaseActivity extends Activity implements Settings {
 		if (brBookmarksFromGdDrawableRes!=0)
 			ReaderAction.LOAD_BOOKMARKS.setIconId(brBookmarksFromGdDrawableRes);
 		if (brBookToGdDrawableRes!=0)
-			ReaderAction.SAVE_CURRENT_BOOK_TO_GD.setIconId(brBookToGdDrawableRes);
+			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD.setIconId(brBookToGdDrawableRes);
 		if (brBookFromGdDrawableRes!=0)
 			ReaderAction.OPEN_BOOK_FROM_GD.setIconId(brBookFromGdDrawableRes);
 		if (brTypeFilled2DrawableRes!=0)
 			ReaderAction.FONTS_MENU.setIconId(brTypeFilled2DrawableRes);
 		if (brGoogleDrive2DrawableRes!=0)
-			ReaderAction.GD_MENU.setIconId(brGoogleDrive2DrawableRes);
+			ReaderAction.CLOUD_MENU.setIconId(brGoogleDrive2DrawableRes);
 		if (brQuote2DrawableRes!=0)
 			ReaderAction.SHOW_CITATIONS.setIconId(brQuote2DrawableRes);
 		if (brBookmarkPlusDrawableRes!=0)
@@ -2132,7 +2132,8 @@ public class BaseActivity extends Activity implements Settings {
 			props.setProperty(ReaderView.PROP_FORCED_MIN_FILE_SIZE_TO_CACHE, "32768");
 			props.applyDefault(ReaderView.PROP_HYPHENATION_DICT, Engine.HyphDict.RUSSIAN.toString());
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SIMPLE_MODE, "0");
-			
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE, "8");
+
 			props.applyDefault(ReaderView.PROP_STATUS_LOCATION, Settings.VIEWER_STATUS_PAGE);
 			//props.applyDefault(ReaderView.PROP_TOOLBAR_LOCATION, DeviceInfo.getSDKLevel() < DeviceInfo.HONEYCOMB ? Settings.VIEWER_TOOLBAR_NONE : Settings.VIEWER_TOOLBAR_SHORT_SIDE);
 			props.applyDefault(ReaderView.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE);

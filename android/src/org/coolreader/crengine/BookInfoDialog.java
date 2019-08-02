@@ -362,7 +362,7 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
-		ImageButton btnSaveToGD = (ImageButton)view.findViewById(R.id.save_to_gd);
+		ImageButton btnSaveToGD = (ImageButton)view.findViewById(R.id.save_to_cloud);
 
 		btnSaveToGD.setOnClickListener(new View.OnClickListener() {
 			@Override

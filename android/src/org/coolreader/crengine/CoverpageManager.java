@@ -771,7 +771,9 @@ public class CoverpageManager {
 					@Override
 					public void run() {
 						byte[] imageData = data;
-						if (data == null && file.format.canParseCoverpages) {
+						boolean bCan = false;
+						if (file.format!=null) bCan = file.format.canParseCoverpages;
+						if (data == null && bCan) {
 							imageData = Services.getEngine().scanBookCover(file.getPathName());
 							if (imageData == null)
 								imageData = new byte[] {};

@@ -104,7 +104,7 @@
 				android:layout_marginLeft="3dip"
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/btn_shortcut"/>
-			<ImageButton android:id="@+id/save_to_gd"
+			<ImageButton android:id="@+id/save_to_cloud"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -116,7 +116,7 @@
 				android:background="@null"
 				android:layout_marginLeft="3dip"
 				android:layout_marginRight="3dip"
-				android:contentDescription="@string/save_current_book_to_gd"/>
+				android:contentDescription="@string/save_current_book_to_cloud"/>
 			<ImageButton android:id="@+id/book_delete"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
