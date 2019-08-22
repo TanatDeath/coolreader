@@ -14,6 +14,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.Dictionaries;
 import org.coolreader.Dictionaries.DictInfo;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudSyncFolder;
 import org.coolreader.crengine.ColorPickerDialog.OnColorChangedListener;
 import org.coolreader.plugins.OnlineStorePluginManager;
 
@@ -925,7 +926,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
+					CloudSyncFolder.saveSettingsFiles(((CoolReader)mActivity),false);
 					return;
 				}
 			});
@@ -984,7 +985,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
+					CloudSyncFolder.loadSettingsFiles(((CoolReader)mActivity),false);
 					return;
 				}
 			});
@@ -1871,6 +1872,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						public void run() {
 							ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
 							text.setText(getString(action.nameId));
+							int iconId = action.iconId;
+							if (iconId == 0) {
+								iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+							}
+							Drawable d = activity.getResources().getDrawable(action.getIconIdWithDef(activity));
+							iv.setImageDrawable(d);
+							mActivity.tintViewIcons(iv,true);
 						}
 					});
 					option.onSelect();
@@ -1887,6 +1895,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						public void run() {
 							ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
 							longtext.setText(getString(longAction.nameId));
+							int iconId = longAction.iconId;
+							if (iconId == 0) {
+								iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+							}
+							Drawable d = activity.getResources().getDrawable(longAction.getIconIdWithDef(activity));
+							ivl.setImageDrawable(d);
+							mActivity.tintViewIcons(ivl, true);
 						}
 					});
 					option.onSelect();
@@ -4103,7 +4118,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.load_settings_from_cloud_v), getString(R.string.option_add_info_empty_text), filter).
 				setIconIdByAttr(R.attr.attr_icons8_settings_from_gd, R.drawable.icons8_settings_from_gd));
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_to_cloud_timeout),
-				PROP_SAVE_POS_TO_GD_TIMEOUT, getString(R.string.save_pos_to_cloud_timeout_add_info), filter).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
+				PROP_SAVE_POS_TO_CLOUD_TIMEOUT, getString(R.string.save_pos_to_cloud_timeout_add_info), filter).add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
 				setIconIdByAttr(R.attr.attr_icons8_position_to_gd_interval, R.drawable.icons8_position_to_gd_interval));
 		mOptionsApplication.add(new ListOption(this, getString(R.string.force_tts_koef),
 				PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), filter).

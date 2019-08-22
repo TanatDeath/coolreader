@@ -1,9 +1,15 @@
 package org.coolreader.crengine;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudFileInfo;
+import org.coolreader.cloud.CloudSyncFolder;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -17,15 +23,13 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.drive.Metadata;
-import com.google.android.gms.drive.MetadataBuffer;
-
 public class ChooseConfFileDlg extends BaseDialog {
 	private CoolReader mCoolReader;
 	private LayoutInflater mInflater;
 	private ConfFileList mList;
 
-	public MetadataBuffer mSettingsList;
+	public ArrayList<CloudFileInfo> mSettingsList;
+	public ArrayList<CloudFileInfo> mSettingsFile;
 
 	public final static int ITEM_POSITION=0;
 
@@ -40,13 +44,13 @@ public class ChooseConfFileDlg extends BaseDialog {
 
 		public int getCount() {
 			int cnt = 0;
-			if (mSettingsList != null) cnt = mSettingsList.getCount();
+			if (mSettingsList != null) cnt = mSettingsList.size();
 			return cnt;
 		}
 
 		public Object getItem(int position) {
 			int cnt = 0;
-			if (mSettingsList != null) cnt = mSettingsList.getCount();
+			if (mSettingsList != null) cnt = mSettingsList.size();
 			if ( position<0 || position>=cnt )
 				return null;
 			return mSettingsList.get(position);
@@ -71,7 +75,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 			TextView labelView = (TextView)view.findViewById(R.id.conf_file_shortcut);
 			TextView titleTextView = (TextView)view.findViewById(R.id.conf_file_title);
 			TextView addTextView = (TextView)view.findViewById(R.id.conf_file_pos_text);
-		 	Metadata md = null;
+		 	CloudFileInfo md = null;
 			if (mSettingsList!=null) md = mSettingsList.get(position);
 			if ( labelView!=null ) {
 				labelView.setText(String.valueOf(position+1));
@@ -80,16 +84,10 @@ public class ChooseConfFileDlg extends BaseDialog {
 			String sAdd = "unknown file name format";
 			if ( md!=null ) {
 				if ( titleTextView!=null )
-					sTitle = md.getTitle().toLowerCase();
-				    sAdd = "";
-				    if (sTitle.contains("cr3.ini")) {
-						int ipos = sTitle.indexOf("cr3.ini");
-						sAdd = sTitle.substring(ipos+8,sTitle.length());
-						sTitle = sTitle.substring(0,ipos+7);
-					}
-					titleTextView.setText(sTitle);
-				    if (sAdd.equals(mCoolReader.getAndroid_id())) sAdd = "current";
-					addTextView.setText(md.getDescription()+" ("+sAdd+")");
+					sTitle = md.name.toLowerCase();
+				    titleTextView.setText(sTitle);
+				    if (sTitle.contains(mCoolReader.getAndroid_id())) sAdd = " (current)";
+					addTextView.setText(md.comment+sAdd);
 			} else {
 				if ( titleTextView!=null )
 					titleTextView.setText("");
@@ -104,7 +102,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 
 		public boolean isEmpty() {
 			int cnt = 0;
-			if (mSettingsList != null) cnt = mSettingsList.getCount();
+			if (mSettingsList != null) cnt = mSettingsList.size();
 			return cnt==0;
 		}
 
@@ -140,22 +138,62 @@ public class ChooseConfFileDlg extends BaseDialog {
 		public boolean performItemClick(View view, int position, long id) {
 			if ( mSettingsList==null )
 				return true;
-			Metadata m = mSettingsList.get(position);
-			mCoolReader.mGoogleDriveTools.signInAndDoAnAction(mCoolReader.mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS, m);
-			dismiss();
+			CloudFileInfo m = mSettingsList.get(position);
+			//mCoolReader.mGoogleDriveTools.signInAndDoAnAction(mCoolReader.mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS, m);
+			if (m != null) {
+				ArrayList<CloudFileInfo> afi = new ArrayList<CloudFileInfo>();
+				String fname = m.name;
+				for (CloudFileInfo fi : mSettingsFile) {
+					String findStr = fname.replace("_cr3_ini_","_cr3.ini.*").replace(".info","");
+					if (fi.name.matches(".*"+findStr+".*")) afi.add(fi);
+				}
+				CloudSyncFolder.restoreSettingsFiles(mCoolReader,m, afi,false);
+				dismiss();
+			}
 			return true;
 		}
 		
 		
 	}
 
-	public ChooseConfFileDlg(CoolReader activity, MetadataBuffer mdb)
+	public ChooseConfFileDlg(CoolReader activity, File[] matchingFilesInfo, File[] matchingFiles)
 	{
 		super("ChooseConfFileDlg", activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		mSettingsList = mdb;
+		mSettingsList = new ArrayList<CloudFileInfo>();
+		for (File f: matchingFilesInfo) {
+			String sComment = "";
+			File fInfo = new File(f.getPath());
+			if (fInfo.exists()) {
+				sComment = Utils.readFileToString(f.getPath());
+			}
+			CloudFileInfo yfile = new CloudFileInfo();
+			yfile.comment = sComment;
+			yfile.name = f.getName();
+			yfile.path = f.getPath();
+			yfile.created = new Date(f.lastModified());
+			yfile.modified = new Date(f.lastModified());
+			mSettingsList.add(yfile);
+		}
+		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+			@Override
+			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+				return -(o1.created.compareTo(o2.created));
+			}
+		};
+		Collections.sort(mSettingsList, compareByDate);
+		mSettingsFile = new ArrayList<CloudFileInfo>();
+		for (File f: matchingFiles) {
+			CloudFileInfo yfile = new CloudFileInfo();
+			yfile.comment = "";
+			yfile.name = f.getName();
+			yfile.path = f.getPath();
+			yfile.created = new Date(f.lastModified());
+			yfile.modified = new Date(f.lastModified());
+			mSettingsFile.add(yfile);
+		}
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);

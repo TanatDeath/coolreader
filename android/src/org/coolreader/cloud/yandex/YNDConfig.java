@@ -26,12 +26,13 @@ import java.io.InputStreamReader;
 import okhttp3.OkHttpClient;
 
 public class YNDConfig {
-    public static final String YND_ID = "da6aa587a2924b49b072cd5729fd03e2";
-    public static final String YND_PASSW = "c5f96c0876854504ba7420e4b2a44b7b";
+    public static final String YND_ID = "set yours";
+    public static final String YND_PASSW = "set yours";
     public static final String YND_CALLBACK_URL = "https://yxda6aa587a2924b49b072cd5729fd03e2.oauth.yandex.ru/auth/finish?platform=android";
     public static final String YND_REDIRECT_URL = "https://github.com/plotn/coolreader/ynd";
     public static final String YND_AUTH_URL = "https://oauth.yandex.ru/authorize";
     public static final String YND_DISK_URL = "https://cloud-api.yandex.net:443/v1/disk/resources";
+    public static final String YND_DISK_URL_LAST_UPL = "https://cloud-api.yandex.net:443/v1/disk/resources/last-uploaded";
     public static final String YND_DOWNLOAD_URL = "https://cloud-api.yandex.net:443/v1/disk/resources/download";
     public static final Integer YND_ITEMS_LIMIT = 20000;
     public static boolean didLogin = false;

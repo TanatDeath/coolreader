@@ -547,21 +547,24 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			LayoutInflater inflater = LayoutInflater.from(mActivity);
 			mFilesystemScroll.removeAllViews();
 			int idx = 0;
-			View view = inflater.inflate(R.layout.root_item_dir, null);
-			ImageView icon = (ImageView) view.findViewById(R.id.item_icon);
-			TextView label = (TextView) view.findViewById(R.id.item_name);
-			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
-            mActivity.tintViewIcons(icon,true);
-			label.setText(R.string.open_book_from_gd_short);
-			label.setTextColor(colorIcon);
-			label.setMaxWidth(coverWidth * 25 / 10);
-			view.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-				}
-			});
-			mFilesystemScroll.addView(view);
+			ImageView icon = null;
+			TextView label = null;
+			View view = null;
+//			view = inflater.inflate(R.layout.root_item_dir, null);
+//			icon = (ImageView) view.findViewById(R.id.item_icon);
+//			label = (TextView) view.findViewById(R.id.item_name);
+//			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
+//            mActivity.tintViewIcons(icon,true);
+//			label.setText(R.string.open_book_from_gd_short);
+//			label.setTextColor(colorIcon);
+//			label.setMaxWidth(coverWidth * 25 / 10);
+//			view.setOnClickListener(new OnClickListener() {
+//				@Override
+//				public void onClick(View v) {
+//					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+//				}
+//			});
+//			mFilesystemScroll.addView(view);
 
 			View viewDBX = inflater.inflate(R.layout.root_item_dir, null);
 			ImageView iconDBX = (ImageView) viewDBX.findViewById(R.id.item_icon);

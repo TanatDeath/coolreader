@@ -593,8 +593,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		case R.id.book_to_gd:
 			log.d("book_to_gd menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
-				mActivity.mGoogleDriveTools.signInAndDoAnAction(
-						mActivity.mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, FileBrowser.this);
+				mActivity.showToast("to come...");
+				//mActivity.mGoogleDriveTools.signInAndDoAnAction(
+				//		mActivity.mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, FileBrowser.this);
 			}
 			return true;
 		case R.id.book_no_mark:

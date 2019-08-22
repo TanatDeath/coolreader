@@ -2801,37 +2801,39 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			log.i("Switched to dictionary: "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
 			mActivity.showToast("Switched to dictionary: "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
 			break;
-		case DCMD_SAVE_SETTINGS_TO_GD:
-			log.i("Save settings to GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
+		case DCMD_SAVE_SETTINGS_TO_CLOUD:
+			log.i("Save settings to CLOUD");
+			CloudSyncFolder.saveSettingsFiles(((CoolReader)mActivity),false);
 			break;
-		case DCMD_LOAD_SETTINGS_FROM_GD:
-			log.i("Load settings from GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
+		case DCMD_LOAD_SETTINGS_FROM_CLOUD:
+			log.i("Load settings from CLOUD");
+			CloudSyncFolder.loadSettingsFiles(((CoolReader)mActivity),false);
 			break;
 		case DCMD_SAVE_READING_POS:
-			log.i("Save reading pos to GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, this);
+			log.i("Save reading pos to CLOUD");
+			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
 			break;
 		case DCMD_LOAD_READING_POS:
-			log.i("Load reading pos from GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, this);
+			log.i("Load reading pos from CLOUD");
+			CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
 			break;
 		case DCMD_SAVE_BOOKMARKS:
-			log.i("Save bookmarks to GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, this);
+			log.i("Save bookmarks to CLOUD");
+			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
 			break;
 		case DCMD_LOAD_BOOKMARKS:
-			log.i("Load bookmarks from GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, this);
+			log.i("Load bookmarks from CLOUD");
+			CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
 			break;
-		case DCMD_SAVE_CURRENT_BOOK_TO_GD:
-			log.i("Save current book to GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, this);
+		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD:
+			log.i("Save current book to CLOUD");
+			mActivity.showToast("To come...");
+			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, this);
 			break;
-		case DCMD_OPEN_BOOK_FROM_GD:
-			log.i("Open book from GD");
-			((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+		case DCMD_OPEN_BOOK_FROM_CLOUD:
+			log.i("Open book from CLOUD");
+			mActivity.showToast("To come...");
+			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
 			break;
 		case DCMD_CLOUD_MENU:
 			log.i("CLOUD menu");
@@ -2841,45 +2843,44 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					ReaderAction.SAVE_READING_POS,
 					ReaderAction.LOAD_READING_POS,
 					ReaderAction.SAVE_BOOKMARKS,
-					ReaderAction.LOAD_BOOKMARKS,
-					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD,
-					ReaderAction.OPEN_BOOK_FROM_GD
+					ReaderAction.LOAD_BOOKMARKS //,
+					//ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD,
+					//ReaderAction.OPEN_BOOK_FROM_GD
 			};
 			mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
 				@Override
 				public boolean onActionSelected(ReaderAction item) {
 					if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
 						log.i("Save settings to CLOUD");
-						//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_SETTINGS, null);
-						CloudSyncFolder.saveSettingsFile(((CoolReader)mActivity),false);
+						CloudSyncFolder.saveSettingsFiles(((CoolReader)mActivity),false);
 						return true;
 					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
 						log.i("Load settings from CLOUD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_SETTINGS_LIST, null);
+						CloudSyncFolder.loadSettingsFiles(((CoolReader)mActivity),false);
 						return true;
 					} else if (item == ReaderAction.SAVE_READING_POS) {
 						log.i("Save reading pos to CLOUD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS, ReaderView.this);
+						CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
 						return true;
 					} else if (item == ReaderAction.LOAD_READING_POS) {
 						log.i("Load reading pos from CLOUD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS_LIST, ReaderView.this);
+						CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
 						return true;
 					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
 						log.i("Save bookmarks to CLOUD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_BOOKMARKS, ReaderView.this);
+						CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
 						return true;
 					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
 						log.i("Load bookmarks from CLOUD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS_LIST, ReaderView.this);
+						CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD) {
 						log.i("Save current book to CLOUD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, ReaderView.this);
+						mActivity.showToast("To come ....");
 						return true;
-					} else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
-						log.i("Open book from GD");
-						((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, ReaderView.this);
+					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD) {
+						log.i("Open book from CLOUD");
+						mActivity.showToast("To come ....");
 						return true;
 					}
 					return false;
@@ -3110,9 +3111,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			FileInfo fileInfo = mBookInfo.getFileInfo();
 			final String bookLanguage = fileInfo.getLanguage();
 			final String fontFace = props.getProperty(PROP_FONT_FACE);
-			if (null != bookLanguage && bookLanguage.length() > 0) {
-				boolean res = Engine.checkFontLanguageCompatibility(fontFace, bookLanguage);
-				log.d("Checking font \"" + fontFace + "\" for compatibility with language \"" + bookLanguage + "\": res=" + res);
+			String fcLangCode = null;
+			if (null != bookLanguage && bookLanguage.length() > 0)
+				fcLangCode = Engine.findCompatibleFcLangCode(bookLanguage);
+			if (null != fcLangCode && fcLangCode.length() > 0) {
+				boolean res = Engine.checkFontLanguageCompatibility(fontFace, fcLangCode);
+				log.d("Checking font \"" + fontFace + "\" for compatibility with language \"" + bookLanguage + "\" fcLangCode=" + fcLangCode + ": res=" + res);
 				if (!res) {
 					BackgroundThread.instance().executeGUI(new Runnable() {
 						@Override
@@ -3122,7 +3126,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					});
 				}
 			} else {
-				log.d("Can't get book's language to check font compatibility! bookInfo=" + fileInfo);
+				if (null != bookLanguage)
+					log.d("Can't find compatible language code in embedded FontConfig catalog: language=\"" + bookLanguage + "\" bookInfo=" + fileInfo);
 			}
 		}
 		doc.applySettings(props);
@@ -5885,6 +5890,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private int lastSavePositionTaskId = 0;
+	private int lastSavePositionCloudTaskId = 0;
 
 	public int getDefSavePositionInterval() {
 		return
@@ -5929,22 +5935,23 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							}}, delayMillis);
 						boolean bNeedSave = true;
 						if (lastSavedToGdBookmark!=null) {
-							if (!(bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+							if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
 								bNeedSave = false;
 							}
 						}
-						if (!bNeedSave) {
-							int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_GD_TIMEOUT, 0)) * 1000 * 60;
+						if (bNeedSave) {
+							final int mylastSavePositionCloudTaskId = ++lastSavePositionCloudTaskId;
+							int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_CLOUD_TIMEOUT, 0)) * 1000 * 60;
 							if (autosaveInterval > 0)
 								BackgroundThread.instance().postGUI(new Runnable() {
 									@Override
 									public void run() {
-										if (mylastSavePositionTaskId == lastSavePositionTaskId) {
+										if (mylastSavePositionCloudTaskId == lastSavePositionCloudTaskId) {
 											if (bookInfo != null) {
-												log.v("saving last position to google drive");
 												mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("&");
-												((CoolReader) mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader) mActivity).
-														mGoogleDriveTools.REQUEST_CODE_SAVE_READING_POS_QUIET, ReaderView.this);
+												log.i("Save reading pos to CLOUD");
+												lastSavedToGdBookmark = bmk;
+												CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
 											}
 										}
 									}
@@ -6236,9 +6243,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				internalDY = requestedHeight;
 				log.d("OnLoadFileEnd: resizeInternal(" + internalDX + "," + internalDY + ")");
 				doc.resize(internalDX, internalDY);
-				hideProgress();
 			}
+			hideProgress();
 		}
+
 		public void OnLoadFileError(String message) {
 			log.d("readerCallback.OnLoadFileError(" + message + ")");
 			arrAllPages = null;
@@ -6288,10 +6296,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			});
 			return true;
 		}
+
 		public void OnLoadFileStart(String filename) {
 			cancelSwapTask();
 			BackgroundThread.ensureBackground();
 			log.d("readerCallback.OnLoadFileStart " + filename);
+			if (enable_progress_callback) {
+				showProgress(1000, R.string.progress_loading);
+			}
 			arrAllPages = null;
 		}
 		/// Override to handle external links
@@ -6307,13 +6319,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	};
 
 	private volatile SwapToCacheTask currentSwapTask;
+
 	private void scheduleSwapTask() {
 		currentSwapTask = new SwapToCacheTask();
 		currentSwapTask.reschedule();
 	}
+
 	private void cancelSwapTask() {
 		currentSwapTask = null;
 	}
+
 	private class SwapToCacheTask extends Task {
 		boolean isTimeout;
 		long startTime;

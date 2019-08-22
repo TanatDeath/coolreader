@@ -5,9 +5,11 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -15,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
 import org.coolreader.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -44,7 +45,6 @@ import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.GenreSAXElem;
-import org.coolreader.cloud.deprecated.GoogleDriveTools;
 import org.coolreader.crengine.History;
 import org.coolreader.crengine.History.BookInfoLoadedCallack;
 import org.coolreader.crengine.InterfaceTheme;
@@ -91,6 +91,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -103,7 +104,6 @@ import android.view.ViewGroup;
 
 import android.provider.Settings.Secure;
 
-import com.google.android.gms.common.util.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -237,8 +237,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int PERM_REQUEST_STORAGE_CODE = 1;
 	private static final int PERM_REQUEST_READ_PHONE_STATE_CODE = 2;
 
-	public GoogleDriveTools mGoogleDriveTools = null;
-
 	public String getAndroid_id() {
 		return android_id;
 	}
@@ -326,16 +324,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		N2EpdController.n2MainActivity = this;
 
-		mGoogleDriveTools = new GoogleDriveTools(this);
 		android_id = Secure.getString(getApplicationContext().getContentResolver(),
 				Secure.ANDROID_ID);
 
 		String manufacturer = Build.MANUFACTURER;
 		String model = Build.MODEL;
 		if (model.startsWith(manufacturer)) {
-			mModel = Strings.capitalize(model);
+			mModel = model.toUpperCase();
 		} else {
-			mModel = Strings.capitalize(manufacturer) + " " + model;
+			mModel = manufacturer.toUpperCase() + " " + model;
 		}
 
 		showRootWindow();
@@ -1013,8 +1010,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 		if (dataDirIsRemoved) {
 			// show message
-			ErrorDialog dlg = new ErrorDialog(this, getString(R.string.error), getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()));
-			dlg.show();
+			showNotice(getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()), new Runnable() {
+				@Override
+				public void run() {
+
+				}
+			}, null);
+			// this could cause to show book not in correct dimrnions - till it was resized (by sensor etc.) - so I replaced by notice
+			//ErrorDialog dlg = new ErrorDialog(this, getString(R.string.error), getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()));
+			//dlg.show();
 		}
 		if (Engine.getExternalSettingsDirName() != null) {
 			setExtDataDirCreateTime(new Date());
@@ -1195,7 +1199,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	@Override
 	public void onSettingsChanged(Properties props, Properties oldProps) {
-		Properties changedProps = oldProps!=null ? props.diff(oldProps) : props;
+		Properties changedProps = oldProps != null ? props.diff(oldProps) : props;
 		if (mHomeFrame != null) {
 			mHomeFrame.refreshOnlineCatalogs();
 		}
@@ -1219,7 +1223,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
         }
         // Show/Hide soft navbar after OptionDialog is closed.
-		setSystemUiVisibility();
+		applyFullscreen(getWindow());
 	}
 
     protected boolean allowLowBrightness() {
@@ -1574,10 +1578,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     		mDonationService.onActivityResult(requestCode, resultCode, intent);
     	}
 
-        if (mGoogleDriveTools != null) {
-			mGoogleDriveTools.onActivityResult(requestCode, resultCode, intent);
-        }
-		if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE) {
+        if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE) {
 			if (resultCode == Activity.RESULT_OK) {
 				if (fileToDelete!=null) {
 					File file = fileToDelete.getFile();
@@ -1782,6 +1783,31 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							listener.onCreated(tts);
 						}
 					});
+					// will play silence
+					if (Build.VERSION.SDK_INT >= 24) {
+						MediaPlayer mp = new MediaPlayer();
+						try {
+							final FileDescriptor fd = getResources().openRawResourceFd(R.raw.silence).getFileDescriptor();
+							mp.setDataSource(fd);
+							mp.prepareAsync();
+							mp.start();
+							mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+								@Override
+								public void onCompletion(MediaPlayer mp) {
+									L.i("silence completed");
+									//try {
+										//fd.close();
+									//} catch (IOException e) {
+									//	L.e(e.getMessage());
+									//}
+								}
+							});
+
+							L.i("silence");
+						} catch (IOException e) {
+							L.e("silence error: "+e.getMessage());
+						}
+					}
 				} else {
 					ttsError = true;
 					BackgroundThread.instance().executeGUI(new Runnable() {

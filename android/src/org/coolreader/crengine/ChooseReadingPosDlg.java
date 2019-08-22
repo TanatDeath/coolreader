@@ -1,9 +1,15 @@
 package org.coolreader.crengine;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudFileInfo;
+import org.coolreader.cloud.CloudSyncFolder;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -17,15 +23,12 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.drive.Metadata;
-import com.google.android.gms.drive.MetadataBuffer;
-
 public class ChooseReadingPosDlg extends BaseDialog {
 	private CoolReader mCoolReader;
 	private LayoutInflater mInflater;
 	private ReadingPosListView mList;
 
-	public MetadataBuffer mReadingPosList;
+	public ArrayList<CloudFileInfo> mReadingPosList;
 
 	public final static int ITEM_POSITION=0;
 
@@ -40,13 +43,13 @@ public class ChooseReadingPosDlg extends BaseDialog {
 
 		public int getCount() {
 			int cnt = 0;
-			if (mReadingPosList != null) cnt = mReadingPosList.getCount();
+			if (mReadingPosList != null) cnt = mReadingPosList.size();
 			return cnt;
 		}
 
 		public Object getItem(int position) {
 			int cnt = 0;
-			if (mReadingPosList != null) cnt = mReadingPosList.getCount();
+			if (mReadingPosList != null) cnt = mReadingPosList.size();
 			if ( position<0 || position>=cnt )
 				return null;
 			return mReadingPosList.get(position);
@@ -71,7 +74,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			TextView labelView = (TextView)view.findViewById(R.id.conf_file_shortcut);
 			TextView titleTextView = (TextView)view.findViewById(R.id.conf_file_title);
 			TextView addTextView = (TextView)view.findViewById(R.id.conf_file_pos_text);
-		 	Metadata md = null;
+		 	CloudFileInfo md = null;
 			if (mReadingPosList!=null) md = mReadingPosList.get(position);
 			if ( labelView!=null ) {
 				labelView.setText(String.valueOf(position+1));
@@ -82,10 +85,10 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			String sAdd0 = "";
 			if ( md!=null ) {
 				if ( titleTextView!=null )
-					sTitle0 = md.getTitle();
-					sTitle = md.getDescription();
+					sTitle0 = md.name;
+					sTitle = md.comment;
 					final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
-					final CharSequence sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", md.getCreatedDate());
+					final CharSequence sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", md.created);
 					final String sFName = sFName0.toString();
 					sAdd = "";
 				    if (sTitle.contains("~from")) {
@@ -110,7 +113,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 
 		public boolean isEmpty() {
 			int cnt = 0;
-			if (mReadingPosList != null) cnt = mReadingPosList.getCount();
+			if (mReadingPosList != null) cnt = mReadingPosList.size();
 			return cnt==0;
 		}
 
@@ -146,22 +149,44 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		public boolean performItemClick(View view, int position, long id) {
 			if ( mReadingPosList==null )
 				return true;
-			Metadata m = mReadingPosList.get(position);
-			mCoolReader.mGoogleDriveTools.signInAndDoAnAction(mCoolReader.mGoogleDriveTools.REQUEST_CODE_LOAD_READING_POS, m);
+			CloudFileInfo m = mReadingPosList.get(position);
+			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_READING_POS, m.path,false);
 			dismiss();
 			return true;
 		}
-		
-		
+
 	}
 
-	public ChooseReadingPosDlg(CoolReader activity, MetadataBuffer mdb)
+	public ChooseReadingPosDlg(CoolReader activity, File[] matchingFiles)
 	{
 		super("ChooseReadingPosDlg", activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		mReadingPosList = mdb;
+		mReadingPosList = new ArrayList<CloudFileInfo>();
+		for (File f: matchingFiles) {
+			if (f.getName().endsWith(".json")) {
+				String sComment = "";
+				File fInfo = new File(f.getPath().replace(".json",".info"));
+				if (fInfo.exists()) {
+					sComment = Utils.readFileToString(f.getPath().replace(".json",".info"));
+				}
+				CloudFileInfo yfile = new CloudFileInfo();
+				yfile.comment = sComment;
+				yfile.name = f.getName();
+				yfile.path = f.getPath();
+				yfile.created = new Date(f.lastModified());
+				yfile.modified = new Date(f.lastModified());
+				mReadingPosList.add(yfile);
+			}
+		}
+		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+			@Override
+			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+				return -(o1.created.compareTo(o2.created));
+			}
+		};
+		Collections.sort(mReadingPosList, compareByDate);
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);

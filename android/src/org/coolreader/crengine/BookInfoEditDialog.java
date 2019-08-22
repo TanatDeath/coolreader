@@ -352,8 +352,9 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnSaveToGD.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(
-						((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, BookInfoEditDialog.this);
+			//	((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(
+			//			((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, BookInfoEditDialog.this);
+			mActivity.showToast("To come...");
 			}
 		});
 

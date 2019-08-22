@@ -5,6 +5,7 @@ import android.util.Log;
 import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -64,8 +65,12 @@ public class YNDPerformAction {
             if (!YNDConfig.init(mCoolReader)) return;
         if (StrUtils.isEmptyStr(folder)) folder = "/";
         folder = folder.replace("\\","/");
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(YNDConfig.YND_DISK_URL).newBuilder();
-        urlBuilder.addQueryParameter("path", folder);
+        HttpUrl.Builder urlBuilder = null;
+        if (Utils.empty(findStr)) {
+            urlBuilder = HttpUrl.parse(YNDConfig.YND_DISK_URL).newBuilder();
+            urlBuilder.addQueryParameter("path", folder);
+        }
+        else urlBuilder = HttpUrl.parse(YNDConfig.YND_DISK_URL_LAST_UPL).newBuilder();
         urlBuilder.addQueryParameter("limit", String.valueOf(YNDConfig.YND_ITEMS_LIMIT));
         String url = urlBuilder.build().toString();
         Request request = new Request.Builder()

@@ -24,6 +24,8 @@
 
 #include <../../crengine/include/fb2def.h>
 
+#include "fc-lang-cat.h"
+
 #define XS_IMPLEMENT_SCHEME 1
 #include <../../crengine/include/fb2def.h>
 #include <sys/stat.h>
@@ -273,7 +275,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     #endif
     lString16 authors = extractDocAuthors( &doc, lString16("|"), false );
     lString16 title = extractDocTitle( &doc );
-    lString16 language = extractDocLanguage( &doc ).lowercase();
+    lString16 language = extractDocLanguage( &doc );
     lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
 	lString16 genre = extractDocGenre( &doc, lString16("|") );
 	lString16 annotation = extractDocAnnotation( &doc );
@@ -766,6 +768,33 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_setCacheDirectory
 	COFFEE_TRY_JNI(penv, res = ldomDocCache::init(env.fromJavaString(dir), size ));
 	return res ? JNI_TRUE : JNI_FALSE;
 }
+
+/*
+ * Class:     org_coolreader_crengine_Engine
+ * Method:    haveFcLangCodeInternal
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_haveFcLangCodeInternal
+		(JNIEnv *env, jclass cls, jstring langCode)
+{
+	jboolean res = JNI_FALSE;
+	const char* langCode_ptr = env->GetStringUTFChars(langCode, 0);
+	if (langCode_ptr) {
+		struct fc_lang_catalog* lang_ptr = fc_lang_cat;
+		for (int i = 0; i < fc_lang_cat_sz; i++)
+		{
+			if (strcmp(lang_ptr->lang_code, langCode_ptr) == 0)
+			{
+				res = JNI_TRUE;
+				break;
+			}
+			lang_ptr++;
+		}
+		env->ReleaseStringUTFChars(langCode, langCode_ptr);
+	}
+	return res;
+}
+
 
 /*
  * Class:     org_coolreader_crengine_Engine

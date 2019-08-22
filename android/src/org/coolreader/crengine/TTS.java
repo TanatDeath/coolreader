@@ -1,5 +1,7 @@
 package org.coolreader.crengine;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -9,6 +11,8 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.os.Build;
 
 /**
  * Wrapper for android.speech.tts.TextToSpeech

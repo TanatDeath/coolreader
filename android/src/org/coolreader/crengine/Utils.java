@@ -1,8 +1,10 @@
 package org.coolreader.crengine;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -640,5 +642,39 @@ public class Utils {
 		if (0 == resId)
 			resId = fallbackResId;
 		return resId;
+	}
+
+	public static String readFileToString(String filePath)
+	{
+		StringBuilder contentBuilder = new StringBuilder();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(filePath));
+			String sCurrentLine;
+			while ((sCurrentLine = br.readLine()) != null)
+			{
+				contentBuilder.append(sCurrentLine).append("\n");
+			}
+			br.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return contentBuilder.toString();
+	}
+
+	public static void copyFile(String fromPath, String toPath) throws IOException
+	{
+		File f = new File(fromPath);
+		FileInputStream is = new FileInputStream(f);
+		byte[] bytesArray = new byte[1000];
+		int bytesRead = 1000;
+		OutputStream os = new FileOutputStream(toPath);
+		while (bytesRead != -1) {
+			bytesRead = is.read(bytesArray, 0, 1000);
+			if (bytesRead != -1) os.write(bytesArray,0,bytesRead);
+		}
+		os.close();
+		is.close();
 	}
 }

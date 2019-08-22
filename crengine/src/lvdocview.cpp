@@ -1250,11 +1250,13 @@ int LVDocView::GetFullHeight() {
 int LVDocView::getPageHeaderHeight() {
 	if (!getPageHeaderInfo())
 		return 0;
-        int h = getInfoFont()->getHeight();
-        int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() * 11/10 + HEADER_MARGIN / 2 : 0;
-        if ( bh>h )
-            h = bh;
-        return h + HEADER_MARGIN + 20; //plotn - due to different marker heights
+	if (!getInfoFont())
+		return 0;
+	int h = getInfoFont()->getHeight();
+	int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() * 11/10 + HEADER_MARGIN / 2 : 0;
+	if ( bh>h )
+		h = bh;
+	return h + HEADER_MARGIN + 20; //plotn - due to different marker heights
 }
 
 /// calculate page header rectangle
@@ -4704,9 +4706,9 @@ bool LVDocView::ParseDocument() {
 			m_doc_props->setString(DOC_PROP_AUTHORS, extractDocAuthors(m_doc));
 			m_doc_props->setString(DOC_PROP_TITLE, extractDocTitle(m_doc));
 			if (txt_autodet_lang.length() > 0)
-				m_doc_props->setString(DOC_PROP_LANGUAGE, txt_autodet_lang);        // already in lowercase
+				m_doc_props->setString(DOC_PROP_LANGUAGE, txt_autodet_lang);
 			else
-				m_doc_props->setString(DOC_PROP_LANGUAGE, extractDocLanguage(m_doc).lowercase());
+				m_doc_props->setString(DOC_PROP_LANGUAGE, extractDocLanguage(m_doc));
             int seriesNumber = -1;
             lString16 seriesName = extractDocSeries(m_doc, &seriesNumber);
             m_doc_props->setString(DOC_PROP_SERIES_NAME, seriesName);

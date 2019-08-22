@@ -30,7 +30,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 	private final LayoutInflater mInflater;
 	public final EditText tokenEdit;
 	final Button tokenDelete;
-	final Button authManual;
+	//final Button authManual;
 	final Button authAuto;
 
 	public void saveYNDToken() {
@@ -66,7 +66,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 		View view = mInflater.inflate(R.layout.ynd_input_token, null);
 		tokenEdit = (EditText)view.findViewById(R.id.ynd_input_token_text);
 		tokenDelete = (Button) view.findViewById(R.id.ynd_btn_delete_token);
-		authManual = (Button) view.findViewById(R.id.ynd_btn_auth_manual);
+		//authManual = (Button) view.findViewById(R.id.ynd_btn_auth_manual);
 		authAuto = (Button) view.findViewById(R.id.ynd_btn_auth_auto_ynd);
 		ImageButton tokenOk =view.findViewById(R.id.ynd_input_token_ok_btn);
 		tokenOk.setOnClickListener(new Button.OnClickListener() {
@@ -123,30 +123,6 @@ public class YNDInputTokenDialog extends BaseDialog {
 		});
 
 		authAuto.setBackgroundColor(colorGrayC);
-
-		authManual.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-//				DBXConfig.mDbxRequestConfig = new DbxRequestConfig("CoolReaderExperience");
-//				DbxAppInfo appInfo = new DbxAppInfo(DBXConfig.DBX_KEY, DBXConfig.DBX_SECRET);
-//				DBXConfig.webAuth = new DbxWebAuth(DBXConfig.mDbxRequestConfig, appInfo);
-//				DbxWebAuth.Request webAuthRequest = DbxWebAuth.newRequestBuilder()
-//						.withNoRedirect()
-//						.build();
-//
-//				String authorizeUrl = DBXConfig.webAuth.authorize(webAuthRequest);
-//				//String code = new BufferedReader(new InputStreamReader(System.in)).readLine();
-//				//if (code == null) {
-//				try {
-//					Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUrl));
-//					mCoolReader.startActivity(myIntent);
-//				} catch (ActivityNotFoundException e) {
-//					mCoolReader.showToast(R.string.dbx_no_browser);
-//					e.printStackTrace();
-//				}
-			}
-		});
-
-		authManual.setBackgroundColor(colorGrayC);
 		setView( view );
 	}
 

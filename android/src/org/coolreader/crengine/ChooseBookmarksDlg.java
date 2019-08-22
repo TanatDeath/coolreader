@@ -1,9 +1,15 @@
 package org.coolreader.crengine;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudFileInfo;
+import org.coolreader.cloud.CloudSyncFolder;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -17,15 +23,12 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.drive.Metadata;
-import com.google.android.gms.drive.MetadataBuffer;
-
 public class ChooseBookmarksDlg extends BaseDialog {
 	private CoolReader mCoolReader;
 	private LayoutInflater mInflater;
 	private BookmarksListView mList;
 
-	public MetadataBuffer mBookmarksList;
+	public ArrayList<CloudFileInfo> mBookmarksList;
 
 	public final static int ITEM_POSITION=0;
 
@@ -40,13 +43,13 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 		public int getCount() {
 			int cnt = 0;
-			if (mBookmarksList != null) cnt = mBookmarksList.getCount();
+			if (mBookmarksList != null) cnt = mBookmarksList.size();
 			return cnt;
 		}
 
 		public Object getItem(int position) {
 			int cnt = 0;
-			if (mBookmarksList != null) cnt = mBookmarksList.getCount();
+			if (mBookmarksList != null) cnt = mBookmarksList.size();
 			if ( position<0 || position>=cnt )
 				return null;
 			return mBookmarksList.get(position);
@@ -71,7 +74,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			TextView labelView = (TextView)view.findViewById(R.id.conf_file_shortcut);
 			TextView titleTextView = (TextView)view.findViewById(R.id.conf_file_title);
 			TextView addTextView = (TextView)view.findViewById(R.id.conf_file_pos_text);
-		 	Metadata md = null;
+		 	CloudFileInfo md = null;
 			if (mBookmarksList!=null) md = mBookmarksList.get(position);
 			if ( labelView!=null ) {
 				labelView.setText(String.valueOf(position+1));
@@ -82,10 +85,10 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			String sAdd0 = "";
 			if ( md!=null ) {
 				if ( titleTextView!=null )
-					sTitle0 = md.getTitle();
-					sTitle = md.getDescription();
+					sTitle0 = md.name;
+					sTitle = md.comment;
 					final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
-					final CharSequence sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", md.getCreatedDate());
+					final CharSequence sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", md.created);
 					final String sFName = sFName0.toString();
 					sAdd = "";
 				    if (sTitle.contains("~from")) {
@@ -110,7 +113,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 		public boolean isEmpty() {
 			int cnt = 0;
-			if (mBookmarksList != null) cnt = mBookmarksList.getCount();
+			if (mBookmarksList != null) cnt = mBookmarksList.size();
 			return cnt==0;
 		}
 
@@ -146,8 +149,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		public boolean performItemClick(View view, int position, long id) {
 			if ( mBookmarksList==null )
 				return true;
-			Metadata m = mBookmarksList.get(position);
-			mCoolReader.mGoogleDriveTools.signInAndDoAnAction(mCoolReader.mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKMARKS, m);
+			CloudFileInfo m = mBookmarksList.get(position);
+			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, m.path,false);
 			dismiss();
 			return true;
 		}
@@ -155,13 +158,36 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		
 	}
 
-	public ChooseBookmarksDlg(CoolReader activity, MetadataBuffer mdb)
+	public ChooseBookmarksDlg(CoolReader activity, File[] matchingFiles)
 	{
 		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		mBookmarksList = mdb;
+		mBookmarksList = new ArrayList<CloudFileInfo>();
+		for (File f: matchingFiles) {
+			if (f.getName().endsWith(".json")) {
+				String sComment = "";
+				File fInfo = new File(f.getPath().replace(".json",".info"));
+				if (fInfo.exists()) {
+					sComment = Utils.readFileToString(f.getPath().replace(".json",".info"));
+				}
+				CloudFileInfo yfile = new CloudFileInfo();
+				yfile.comment = sComment;
+				yfile.name = f.getName();
+				yfile.path = f.getPath();
+				yfile.created = new Date(f.lastModified());
+				yfile.modified = new Date(f.lastModified());
+				mBookmarksList.add(yfile);
+			}
+		}
+		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+			@Override
+			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+				return -(o1.created.compareTo(o2.created));
+			}
+		};
+		Collections.sort(mBookmarksList, compareByDate);
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
@@ -185,7 +211,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.v("cr3", "creating ChooseConfFileDlg");
-		setTitle(mCoolReader.getResources().getString(R.string.win_title_reading_pos));
+		setTitle(mCoolReader.getResources().getString(R.string.win_title_bookmarks));
 		setCancelable(true);
 		super.onCreate(savedInstanceState);
 		//registerForContextMenu(mList);

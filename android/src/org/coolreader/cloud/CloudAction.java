@@ -38,7 +38,7 @@ public class CloudAction {
     public String param; // param(s) passed to an action...
     public String param2; // param(s) passed to an action...
     public com.dropbox.core.v2.files.Metadata mDbxMd; // metadata for dropbox
-    public YNDListFiles.YNDListFile mYndMd; // metadata for yandex
+    public CloudFileInfo mYndMd; // metadata for yandex
     public String mFile;
 
     public CoolReader mActivity;
@@ -70,7 +70,7 @@ public class CloudAction {
         mFile = sFile;
     }
 
-    public CloudAction(CoolReader cr, int a, String p, YNDListFiles.YNDListFile md, String sFile) {
+    public CloudAction(CoolReader cr, int a, String p, CloudFileInfo md, String sFile) {
         action = a;
         param = p;
         mYndMd = md;
@@ -325,7 +325,7 @@ public class CloudAction {
     }
 
     public static void yndDownloadFile(final CoolReader cr, final OpenBookFromCloudDlg dlg,
-                                       final String sFolder, YNDListFiles.YNDListFile md) {
+                                       final String sFolder, CloudFileInfo md) {
         try {
             final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
             final String fName = downloadDir.pathname+"/YandexDisc/"+md.name;

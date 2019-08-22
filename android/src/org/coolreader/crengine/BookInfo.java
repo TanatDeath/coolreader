@@ -124,6 +124,13 @@ public class BookInfo {
 		return list;
 	}
 
+	synchronized public ArrayList<Bookmark> getAllBookmarksWOPos()
+	{
+		ArrayList<Bookmark> list = new ArrayList<Bookmark>(bookmarks.size() + 1);
+		list.addAll(bookmarks);
+		return list;
+	}
+
 	synchronized public Bookmark findBookmark(Bookmark bm)
 	{
 		if ( bm==null )
