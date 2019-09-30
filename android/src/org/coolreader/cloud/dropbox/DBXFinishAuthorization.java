@@ -10,6 +10,8 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.users.FullAccount;
 
 import org.coolreader.CoolReader;
+import org.coolreader.cloud.CloudAction;
+import org.coolreader.crengine.BackgroundThread;
 
 import java.util.HashMap;
 
@@ -22,9 +24,10 @@ public class DBXFinishAuthorization extends AsyncTask<String, Void, Boolean> {
     public final Callback mCallback;
     public final Uri mUri;
     public Exception mException;
+    public String access_token = "";
 
     public interface Callback {
-        void onComplete(boolean result);
+        void onComplete(boolean result, String accessToken);
         void onError(Exception e);
     }
 
@@ -40,7 +43,7 @@ public class DBXFinishAuthorization extends AsyncTask<String, Void, Boolean> {
         if (mException != null) {
             mCallback.onError(mException);
         } else {
-            mCallback.onComplete(ok);
+            mCallback.onComplete(ok, access_token);
         }
     }
 
@@ -55,11 +58,24 @@ public class DBXFinishAuthorization extends AsyncTask<String, Void, Boolean> {
                 p.put("state",new String[]{mUri.getQueryParameter("state")});
                 authFinish = DBXConfig.webAuth.finishFromRedirect(DBXConfig.DBX_REDIRECT_URL,
                         DBXConfig.sessionStore, p);
+                access_token = authFinish.getAccessToken();
             }
-            else
-                authFinish = DBXConfig.webAuth.finishFromCode(params[0]);
-            DBXConfig.mDbxClient = new DbxClientV2(DBXConfig.mDbxRequestConfig, authFinish.getAccessToken());
+            else {
+                access_token = params[0];
+                //authFinish = DBXConfig.webAuth.finishFromCode(params[0]);
+//                HashMap<String, String[]> p = new HashMap<String, String[]>();
+//                p.put("code",new String[]{params[0]});
+//                authFinish = DBXConfig.webAuth.finishFromRedirect(DBXConfig.DBX_REDIRECT_URL,
+//                        DBXConfig.sessionStore, p);
+            }
+            DBXConfig.mDbxClient = new DbxClientV2(DBXConfig.mDbxRequestConfig, access_token);
             DBXConfig.didLogin = true;
+            BackgroundThread.instance().postGUI(new Runnable() {
+                @Override
+                public void run() {
+                    CloudAction.dbxOpenBookDialog(mCoolReader);
+                }
+            }, 500);
         } catch (Exception e) {
             System.err.println("Error in DbxWebAuth.authorize: " + e.getMessage());
             mException = e;

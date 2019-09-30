@@ -531,7 +531,7 @@
     <string name="btn_toolbar_more">Яшчэ...</string>
     <string name="black_list_enforced">Немагчыма дадаць адрас. Па запыце LitRes.ru ён дададзены ў чорны спіс каталогаў, якія парушаюць закон аб аўтарскіх правах.</string>
     <string name="black_list_warning">Увага! Па запыце LitRes.ru гэты адрас дададзены ў чорны спіс каталогаў, якія парушаюць  закон аб аўтарскіх правах. Вы сапраўды хочаце карыстацца гэтым каталогам?</string>
-    <string name="cant_open_file">Немагчыма адкрыць файл!</string>
+    <string name="cant_open_file">Немагчыма адкрыць файл \"%s\"!</string>
     <string name="error">Памылка</string>
     <string name="options_app_tts_stop_motion_timeout">Спыняць чытанне ўслых пры бяздзейнасці датчыка руху</string>
     <string name="motion_timeout_off">"Не спыняць"</string>

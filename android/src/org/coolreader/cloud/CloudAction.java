@@ -1,5 +1,8 @@
 package org.coolreader.cloud;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 
 import com.dropbox.core.v2.users.FullAccount;
@@ -12,7 +15,9 @@ import org.coolreader.cloud.yandex.YNDConfig;
 import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.cloud.yandex.YNDPerformAction;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.StrUtils;
 
@@ -21,6 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CloudAction {
+
+    private static final String TAG = "CloudAction";
+
     public static final int NO_ACTION = 0;
     public static final int DBX_GET_CURRENT_ACCOUNT = 20000;
     public static final int DBX_LIST_FOLDER = 20001;
@@ -372,6 +380,40 @@ public class CloudAction {
         } catch (Exception e) {
             cr.showToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage());
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void emailSendBook(CoolReader cr, BookInfo bi) {
+        Log.d(TAG, "Starting emailSendBook...");
+
+        final ReaderView rv = cr.getReaderView();
+        if ((rv == null)&&(bi == null)) {
+            cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            return;
+        }
+        try {
+            BookInfo bookinfo = bi;
+            if (bi == null) bookinfo = rv.getBookInfo();
+            String sBookFN = bookinfo.getFileInfo().pathname;
+            if (!StrUtils.isEmptyStr(bookinfo.getFileInfo().arcname))
+                sBookFN = bookinfo.getFileInfo().arcname;
+            final String sBookFName = sBookFN;
+            File bookFile = new File(sBookFName);
+            //Uri path = Uri.fromFile(bookFile);
+            String sPkg = cr.getApplicationContext().getPackageName();
+            Uri path = FileProvider.getUriForFile(cr, "org.coolreader.mod.plotn.fileprovider", bookFile);
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// set the type to 'email'
+            emailIntent.setType("vnd.android.cursor.dir/email");
+// the attachment
+            emailIntent.putExtra(Intent.EXTRA_STREAM, path);
+// the mail subject
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, bookinfo.getFileInfo().title + " " +
+                bookinfo.getFileInfo().getAuthors());
+            cr.startActivity(Intent.createChooser(emailIntent, "Send book by email..."));
+        } catch (Exception e) {
+            cr.showToast("Could not email book: "+e.getMessage());
+            e.printStackTrace();
         }
     }
 }

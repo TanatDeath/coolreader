@@ -188,6 +188,8 @@
     <attr name="attr_icons8_bookmarks_from_gd" format="reference" />
     <attr name="attr_icons8_book_to_gd" format="reference" />
     <attr name="attr_icons8_book_from_gd" format="reference" />
+    <attr name="attr_icons8_book_from_ynd" format="reference" />
+    <attr name="attr_icons8_book_from_dbx" format="reference" />
     <attr name="attr_icons8_type_filled_2" format="reference" />
     <attr name="attr_icons8_google_drive_2" format="reference" />
     <attr name="attr_icons8_quote_2" format="reference" />
@@ -293,6 +295,7 @@
     <attr name="attr_icons8_yandex" format="reference" />
     <attr name="attr_icons8_level_up_filled" format="reference" />
     <attr name="attr_icons8_cloud_storage" format="reference" />
+    <attr name="attr_icons8_send_by_email" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

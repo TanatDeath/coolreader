@@ -1103,6 +1103,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 	}
 
+	class GeoOption extends ListOption {
+		public GeoOption(OptionOwner owner, String filter) {
+			super(owner, getString(R.string.options_app_locale), PROP_APP_LOCALE, getString(R.string.options_app_locale_add_info), filter);
+			for (Lang lang : Lang.values()) {
+				Locale l =  lang.getLocale();
+				String s = "";
+				if (l!=null) s = lang.getLocale().getDisplayName();
+				add(lang.code, getString(lang.nameId), s);
+			}
+			if ( mProperties.getProperty(property)==null )
+				mProperties.setProperty(property, Lang.DEFAULT.code);
+			this.updateFilteredMark(Lang.DEFAULT.code);
+		}
+	}
+
 	class ActionOption extends ListOption {
 		public ActionOption( OptionOwner owner, String label, String property, boolean isTap, boolean allowRepeat,
 							 String addInfo, String filter) {
@@ -2108,7 +2123,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 
 		protected void closed() {
-			
 		}
 		
 		protected int getItemLayoutId(int position, final Three item) {
@@ -2317,6 +2331,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public void onClick( Three item ) {
 			mProperties.setProperty(property, OnPreClick(item).value);
 			refreshList();
+			mActivity.showToast("asdf "+item.value);
 			if ( onChangeHandler!=null )
 				onChangeHandler.run();
 			if ( optionsListView!=null )
@@ -3282,9 +3297,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
-			if (mOptionsThis!=null)
+			if (mOptionsThis!=null) {
 				mOptionsThis.get(position).onSelect();
-			else mOptions.get(position).onSelect();
+			 	//asdf
+				mActivity.showToast(mOptionsThis.get(position).label);
+			}
+			else {
+				mOptions.get(position).onSelect();
+				//asdf
+				mActivity.showToast(mOptions.get(position).label);
+			}
 			return true;
 		}
 		

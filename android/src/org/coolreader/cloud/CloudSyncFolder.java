@@ -1,5 +1,7 @@
 package org.coolreader.cloud;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -88,6 +90,11 @@ public class CloudSyncFolder {
                 if (!bQuiet)
                     cr.showToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")");
             }
+        }
+        if (!bWasErr) {
+            if (!bQuiet)
+                cr.showToast(cr.getString(R.string.cloud_ok) + ": Settings file(s) were saved");
+
         }
     }
 
@@ -275,6 +282,11 @@ public class CloudSyncFolder {
                 bWasErr = true;
                 if (!bQuiet)
                     cr.showToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")");
+            }
+            if (!bWasErr) {
+                if (!bQuiet)
+                    cr.showToast(cr.getString(R.string.cloud_ok) + ": Successfully saved");
+
             }
         }
     }

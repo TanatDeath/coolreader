@@ -526,6 +526,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							mActivity.DeleteRecursive(f,selectedItem);
 						}
 				}); else mActivity.DeleteRecursive(f,selectedItem);
+			if (f.isFile()) mActivity.askDeleteBook(selectedItem);
 			return true;
 		case R.id.folder_to_favorites:
             log.d("folder_to_favorites menu item selected");
@@ -1399,6 +1400,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				return;
 			}
 			if (fileOrDir.isQSearchShortcut()) {
+				currDirectory = null;
 				showFindBookDialog(true, fileOrDir.filename, null);
 				return;
 			}

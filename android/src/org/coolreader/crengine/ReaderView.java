@@ -564,6 +564,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (bmk != null)
 			savePositionBookmark(bmk);
 		log.i("calling bookView.onPause()");
+		boolean bNeedSave = true;
+		if (lastSavedToGdBookmark!=null) {
+			if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+				bNeedSave = false;
+			}
+		}
+		if (bNeedSave) {
+			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, true);
+			lastSavedToGdBookmark = bmk;
+		}
 		bookView.onPause();
 	}
 
@@ -2784,7 +2794,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			mActivity.showReaderMenu();
 			break;
 		case DCMD_TOGGLE_DAY_NIGHT_MODE:
-			toggleDayNightMode();
+//			toggleDayNightMode();
+			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
+			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
+			mActivity.geoLastData.doSignal(false,false);
 			break;
 		case DCMD_TOGGLE_DICT_ONCE:
 			log.i("Next dictionary will be the 2nd for one time");
@@ -2812,6 +2825,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		case DCMD_SAVE_READING_POS:
 			log.i("Save reading pos to CLOUD");
 			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
+			Bookmark bmk = getCurrentPositionBookmark();
+			lastSavedToGdBookmark = bmk;
 			break;
 		case DCMD_LOAD_READING_POS:
 			log.i("Load reading pos from CLOUD");
@@ -2835,6 +2850,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			mActivity.showToast("To come...");
 			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
 			break;
+		case DCMD_OPEN_BOOK_FROM_CLOUD_YND:
+			log.i("Open book from CLOUD_YND");
+			CloudAction.yndOpenBookDialog(mActivity);
+			break;
+		case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
+			log.i("Open book from CLOUD_DBX");
+			CloudAction.dbxOpenBookDialog(mActivity);
+			break;
+		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL:
+			log.i("DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
+			CloudAction.emailSendBook(mActivity, null);
+			break;
 		case DCMD_CLOUD_MENU:
 			log.i("CLOUD menu");
 			ReaderAction[] actions = {
@@ -2843,7 +2870,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					ReaderAction.SAVE_READING_POS,
 					ReaderAction.LOAD_READING_POS,
 					ReaderAction.SAVE_BOOKMARKS,
-					ReaderAction.LOAD_BOOKMARKS //,
+					ReaderAction.LOAD_BOOKMARKS,
+					ReaderAction.OPEN_BOOK_FROM_CLOUD_YND,
+					ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX,
+					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL //,
 					//ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD,
 					//ReaderAction.OPEN_BOOK_FROM_GD
 			};
@@ -2861,6 +2891,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					} else if (item == ReaderAction.SAVE_READING_POS) {
 						log.i("Save reading pos to CLOUD");
 						CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
+						Bookmark bmk = getCurrentPositionBookmark();
+						lastSavedToGdBookmark = bmk;
 						return true;
 					} else if (item == ReaderAction.LOAD_READING_POS) {
 						log.i("Load reading pos from CLOUD");
@@ -2878,9 +2910,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						log.i("Save current book to CLOUD");
 						mActivity.showToast("To come ....");
 						return true;
-					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD) {
-						log.i("Open book from CLOUD");
-						mActivity.showToast("To come ....");
+					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
+						log.i("Open book from CLOUD_YND");
+						CloudAction.yndOpenBookDialog(mActivity);
+						return true;
+					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
+						log.i("Open book from CLOUD_DBX");
+						CloudAction.dbxOpenBookDialog(mActivity);
+						return true;
+					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL) {
+						log.i("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
+						CloudAction.emailSendBook(mActivity, null);
 						return true;
 					}
 					return false;
@@ -2967,7 +3007,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	boolean firstShowBrowserCall = true;
 
 
-	private TTSToolbarDlg ttsToolbar;
+	public TTSToolbarDlg ttsToolbar;
 	public void stopTTS() {
 		if (ttsToolbar != null)
 			ttsToolbar.pause();

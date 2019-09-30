@@ -47,13 +47,13 @@ import com.s_trace.motion_watchdog.MotionWatchdogHandler;
 import static android.media.session.MediaSession.*;
 
 public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
-	PopupWindow mWindow;
-	View mAnchor;
+	public PopupWindow mWindow;
+	public View mAnchor;
 	CoolReader mCoolReader;
 	String mLogFileRoot = "";
 	int mForceTTSKoef = 0;
 	ReaderView mReaderView;
-	View mPanel;
+	public View mPanel;
 	TTS mTTS;
 	private static NotificationChannel channel;
 	ImageButton playPauseButton;
@@ -673,6 +673,27 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				lTimeSpan = lTimeSpan + System.currentTimeMillis() - lastSaveSpeakTime;
 			}
 			moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
+		}
+	}
+
+	public void repaintButtons()
+	{
+		int colorGrayC;
+		int colorGray;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorGray = a.getColor(1, Color.GRAY);
+		a.recycle();
+
+		ColorDrawable c = new ColorDrawable(colorGrayC);
+		c.setAlpha(130);
+		if (mPanel!=null) {
+			mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
+			mPanel.findViewById(R.id.tts_play_pause_ell).setBackgroundDrawable(c);
+			mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
+			mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
+			mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
 		}
 	}
 

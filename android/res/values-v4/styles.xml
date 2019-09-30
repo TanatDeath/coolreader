@@ -374,6 +374,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -682,6 +683,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1001,6 +1003,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1308,6 +1311,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1618,6 +1622,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1928,6 +1933,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2237,6 +2243,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2542,6 +2549,7 @@
         <item name="attr_icons8_level_up_filled">@drawable/icons8_level_up_filled</item>
         <item name="attr_icons8_yandex">@drawable/icons8_yandex_logo</item>
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
+        <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

@@ -500,7 +500,7 @@
     <string name="options_font_fallback_face">Fallback font</string>
     <string name="win_title_confirm_catalog_delete">Do you really want to delete this catalog?</string>
     <string name="win_title_confirm_history_record_delete">Do you really want to remove this book from recent list?</string>
-    <string name="win_title_confirm_book_delete">Do you really want to delete this book?</string>
+    <string name="win_title_confirm_book_delete">Do you really want to delete this book / archive ?</string>
     <string name="book_info_book_language">Language</string>
     <string name="book_info_book_translation">Translation</string>
     <string name="book_info_book_genre">Genre</string>
@@ -748,7 +748,10 @@
     <string name="load_bookmarks_from_cloud">Load bookmarks from cloud storage</string>
     <string name="cloud_menu">Cloud storage menu</string>
     <string name="save_current_book_to_cloud">Save book to cloud storage</string>
+    <string name="save_current_book_to_cloud_email">Send book via Email</string>
     <string name="open_book_from_gd">Open book from Google One</string>
+    <string name="open_book_from_dbx">Open book from Dropbox</string>
+    <string name="open_book_from_ynd">Open book from Yandex disc</string>
     <string name="open_book_from_gd_short">Google One</string>
     <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="open_book_from_y_short">Yandex</string>
@@ -967,4 +970,13 @@
     <string name="ynd_delete_token">Delete token file</string>
     <string name="ynd_token_hint">Paste token here</string>
     <string name="ynd_prev_auth">Previous authorization</string>
+    <string name="ask_open_as_text">Open as plain text?</string>
+    <string name="options_app_geo">In headphones in transport</string>
+    <string name="options_app_geo_add_info">Allows to show popup window informing about transport stops and metro stations nearby</string>
+    <string name="options_app_geo_1">Off</string>
+    <string name="options_app_geo_2">Show metro stations nearby</string>
+    <string name="options_app_geo_2_add_info">Only Moscow, St.Petersburg, Ekaterinburg and Novosibirsk</string>
+    <string name="options_app_geo_3">Show transport stops</string>
+    <string name="options_app_geo_3_add_info">Only in Moscow</string>
+    <string name="options_app_geo_4">Show both</string>
 </resources>

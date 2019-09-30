@@ -2005,8 +2005,19 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                 }
             }
 		}
-        if ( cl!=-1 && sz>0 )
-            drawbuf->FillRect(x, gpos - 2 - sz/2 - 1, x + szx, gpos - 2 + sz1 / 2 + 1 + 1, cl);
+        if ( cl!=-1 && sz>0 ) {
+        	if (sz>1)
+				drawbuf->FillRect(x, gpos - 2 - sz / 2 - 1, x + szx, gpos - 2 + sz1 / 2 + 1 + 1, cl);
+        	else {
+        		// draw dotted line
+        		int x0 = x;
+        		while (x0<=x+szx) {
+					if(x0 % 2 == 0)
+						drawbuf->FillRect(x0, gpos - 2 - sz / 2 - 1, x0+1, gpos - 2 + sz1 / 2 + 1 + 1, cl);
+        			x0++;
+        		}
+        	}
+		}
 	}
 
 	lString16 text;
@@ -2228,6 +2239,13 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
 #define FOOTNOTE_MARGIN 8
 			int fny = clip.top + (page.height ? page.height + FOOTNOTE_MARGIN
 					: FOOTNOTE_MARGIN);
+			//plotn - for print footnotes at the bottom of page
+			int totHeig = 0;
+			for (int fn = 0; fn < page.footnotes.length(); fn++) {
+				totHeig+=page.footnotes[fn].height;
+			}
+			if (pageRect->bottom>fny+totHeig+m_pageMargins.bottom) fny = pageRect->bottom - totHeig - +m_pageMargins.bottom;
+			//\plotn
 			int fy = fny;
 			bool footnoteDrawed = false;
 			for (int fn = 0; fn < page.footnotes.length(); fn++) {

@@ -17,6 +17,9 @@ import org.coolreader.Dictionaries.DictInfo;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBServiceAccessor;
+import org.coolreader.geo.GeoToastView;
+import org.coolreader.geo.MetroStation;
+import org.coolreader.geo.TransportStop;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -35,26 +38,18 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.DrawFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PowerManager;
-import android.support.annotation.RequiresPermission;
 import android.text.ClipboardManager;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.InflateException;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
@@ -66,7 +61,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 //import com.github.johnpersano.supertoasts.library.Style;
 //import com.github.johnpersano.supertoasts.library.SuperActivityToast;
@@ -436,6 +430,7 @@ public class BaseActivity extends Activity implements Settings {
             minFontSize = 9;
         }
 
+	@SuppressWarnings("ResourceType")
 	public void updateActionsIcons() {
 		int [] attrs = { R.attr.cr3_button_prev_drawable, R.attr.cr3_button_next_drawable, R.attr.cr3_viewer_toc_drawable,
 						 R.attr.cr3_viewer_find_drawable, R.attr.cr3_viewer_settings_drawable, R.attr.cr3_button_bookmarks_drawable,
@@ -464,12 +459,14 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_position_to_gd, R.attr.attr_icons8_position_from_gd,
 						 R.attr.attr_icons8_bookmarks_to_gd, R.attr.attr_icons8_bookmarks_from_gd,
 				         R.attr.attr_icons8_book_to_gd, R.attr.attr_icons8_book_from_gd,
+						 R.attr.attr_icons8_book_from_ynd, R.attr.attr_icons8_book_from_dbx,
 						 R.attr.attr_icons8_type_filled_2, R.attr.attr_icons8_cloud_storage,
 						 R.attr.attr_icons8_quote_2, R.attr.attr_icons8_bookmark_plus,
 						 R.attr.attr_icons8_google_translate_save,
 						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting,
 						 R.attr.attr_icons8_toggle_page_view_mode, R.attr.attr_icons8_settings_search,
-				         R.attr.cr3_option_font_face_drawable, R.attr.cr3_option_text_bold_drawable
+				         R.attr.cr3_option_font_face_drawable, R.attr.cr3_option_text_bold_drawable,
+						 R.attr.attr_icons8_send_by_email
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -530,19 +527,23 @@ public class BaseActivity extends Activity implements Settings {
 		int brBookmarksFromGdDrawableRes = a.getResourceId(53, 0);
 		int brBookToGdDrawableRes = a.getResourceId(54, 0);
 		int brBookFromGdDrawableRes = a.getResourceId(55, 0);
+		int brBookFromYndDrawableRes = a.getResourceId(56, 0);
+		int brBookFromDbxDrawableRes = a.getResourceId(57, 0);
 
-		int brTypeFilled2DrawableRes = a.getResourceId(56, 0);
-		int brGoogleDrive2DrawableRes = a.getResourceId(57, 0);
-		int brQuote2DrawableRes = a.getResourceId(58, 0);
-		int brBookmarkPlusDrawableRes = a.getResourceId(59, 0);
-		int brGoogleTranslateSaveDrawableRes = a.getResourceId(60, 0);
+		int brTypeFilled2DrawableRes = a.getResourceId(58, 0);
+		int brGoogleDrive2DrawableRes = a.getResourceId(59, 0);
+		int brQuote2DrawableRes = a.getResourceId(60, 0);
+		int brBookmarkPlusDrawableRes = a.getResourceId(61, 0);
+		int brGoogleTranslateSaveDrawableRes = a.getResourceId(62, 0);
 
-		int brFolderScan  = a.getResourceId(61, 0);
-		int brAlphabeticalSorting  = a.getResourceId(62, 0);
-		int brTogglePageViewMode = a.getResourceId(63, 0);
-		int brSettingsSearch = a.getResourceId(64, 0);
-		int brFontFace = a.getResourceId(65, 0);
-		int brFontBold = a.getResourceId(66, 0);
+		int brFolderScan  = a.getResourceId(63, 0);
+		int brAlphabeticalSorting  = a.getResourceId(64, 0);
+		int brTogglePageViewMode = a.getResourceId(65, 0);
+		int brSettingsSearch = a.getResourceId(66, 0);
+		int brFontFace = a.getResourceId(67, 0);
+		int brFontBold = a.getResourceId(68, 0);
+
+		int brBookmarksToEmailDrawableRes = a.getResourceId(69, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -657,8 +658,12 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.LOAD_BOOKMARKS.setIconId(brBookmarksFromGdDrawableRes);
 		if (brBookToGdDrawableRes!=0)
 			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD.setIconId(brBookToGdDrawableRes);
-		if (brBookFromGdDrawableRes!=0)
-			ReaderAction.OPEN_BOOK_FROM_CLOUD.setIconId(brBookFromGdDrawableRes);
+		//if (brBookFromGdDrawableRes!=0)
+		//	ReaderAction.OPEN_BOOK_FROM_CLOUD.setIconId(brBookFromGdDrawableRes);
+		if (brBookFromYndDrawableRes!=0)
+			ReaderAction.OPEN_BOOK_FROM_CLOUD_YND.setIconId(brBookFromYndDrawableRes);
+		if (brBookFromDbxDrawableRes!=0)
+			ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX.setIconId(brBookFromDbxDrawableRes);
 		if (brTypeFilled2DrawableRes!=0)
 			ReaderAction.FONTS_MENU.setIconId(brTypeFilled2DrawableRes);
 		if (brGoogleDrive2DrawableRes!=0)
@@ -681,6 +686,8 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.FONT_SELECT.setIconId(brFontFace);
 		if (brFontBold!=0)
 			ReaderAction.FONT_BOLD.setIconId(brFontBold);
+		if (brBookmarksToEmailDrawableRes!=0)
+			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL.setIconId(brBookmarksToEmailDrawableRes);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1208,7 +1215,7 @@ public class BaseActivity extends Activity implements Settings {
 			if (wl == null) {
 				PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 				wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-				/* | PowerManager.ON_AFTER_RELEASE */, "cr3");
+				/* | PowerManager.ON_AFTER_RELEASE */, "cr3:wakelogtag");
 				log.d("ScreenBacklightControl: WakeLock created");
 			}
 			if (!isStarted()) {
@@ -1399,6 +1406,18 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
+	public void showGeoToast(String msg, int duration, View view, int textSize,
+							 MetroStation ms, TransportStop ts, Double msDist, Double tsDist, MetroStation msBefore,
+							 boolean bSameStation, boolean bSameStop) {
+		log.v("showing toast: " + msg);
+		View view1 = view;
+		if (view1 == null) view1 = getContentView();
+		int textSize1 = textSize;
+		if (textSize == 0) textSize1 = 16; //settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+		GeoToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, textSize1,
+				ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
+	}
+
 //	public void hideSToast() {
 //		final SuperActivityToast toast = myToast;
 //		if (toast != null && toast.isShowing()) {
@@ -1436,6 +1455,21 @@ public class BaseActivity extends Activity implements Settings {
 				if (((CoolReader) this).getReaderView().getSurface()!=null) {
 					bShown = true;
 					showToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), true, 0);
+				}
+		if (!bShown) {
+			showToast(msg);
+		}
+	}
+
+	public void showGeoToast(String msg, MetroStation ms, TransportStop ts, Double msDist, Double tsDist, MetroStation msBefore,
+							 boolean bSameStation, boolean bSameStop) {
+		boolean bShown = false;
+		if (this instanceof CoolReader)
+			if (((CoolReader) this).getReaderView()!=null)
+				if (((CoolReader) this).getReaderView().getSurface()!=null) {
+					bShown = true;
+					showGeoToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), 0,
+							ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
 				}
 		if (!bShown) {
 			showToast(msg);

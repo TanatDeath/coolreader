@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class DBXConfig {
-    public static final String DBX_KEY = "set yours";
-    public static final String DBX_SECRET = "set yours";
+    public static final String DBX_KEY = "put_yours";
+    public static final String DBX_SECRET = "put_yours";
     public static final String DBX_REDIRECT_URL = "https://github.com/plotn/coolreader";
     public static DbxRequestConfig mDbxRequestConfig = null;
     public static DbxClientV2 mDbxClient = null;
@@ -44,12 +44,20 @@ public class DBXConfig {
         } else {
             //mDbxRequestConfig = DbxRequestConfig.newBuilder("CoolReaderExperience").build();
             if (!didLogin) {
-                mDbxRequestConfig = DbxRequestConfig.newBuilder("CoolReaderExperience")
-                        .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
-                        .build();
+                mDbxRequestConfig = new DbxRequestConfig("CoolReaderExperience");
+//                mDbxRequestConfig = DbxRequestConfig.newBuilder("CoolReaderExperience")
+//                        .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
+//                        .build();
                 DbxAppInfo appInfo = new DbxAppInfo(DBXConfig.DBX_KEY, DBXConfig.DBX_SECRET);
                 DBXConfig.webAuth = new DbxWebAuth(DBXConfig.mDbxRequestConfig, appInfo);
                 DBXConfig.sessionStore = new DBXInputTokenDialog.SimpleSessionStore();
+//                DbxWebAuth.Request webAuthRequest = DbxWebAuth.newRequestBuilder()
+//                        .withRedirectUri(DBXConfig.DBX_REDIRECT_URL, DBXConfig.sessionStore)
+//                        .build();
+                DbxWebAuth.Request webAuthRequest = DbxWebAuth.newRequestBuilder()
+                        .withNoRedirect()
+                        .build();
+                String authorizeUrl = DBXConfig.webAuth.authorize(webAuthRequest);
 
                 BufferedReader reader = new BufferedReader(
                         new FileReader(fDBX));
@@ -61,12 +69,12 @@ public class DBXConfig {
                     stringBuilder.append(ls);
                 }
                 reader.close();
-                String token = stringBuilder.toString().trim();
+                final String token = stringBuilder.toString().trim();
                 cr.showToast("Using Dropbox token: [" + token + "]");
                 final CoolReader crf = cr;
                 new DBXFinishAuthorization(cr, null, new DBXFinishAuthorization.Callback() {
                     @Override
-                    public void onComplete(boolean result) {
+                    public void onComplete(boolean result, String accessToken) {
                         crf.showToast(R.string.dbx_auth_finished_ok);
                         didLogin = result;
                     }

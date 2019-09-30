@@ -1,24 +1,30 @@
 // Main Class
 package org.coolreader;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.coolreader.Dictionaries.DictionaryException;
+import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
@@ -70,12 +76,25 @@ import org.coolreader.db.BaseDB;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.donations.CRDonationService;
+import org.coolreader.geo.GeoLastData;
+import org.coolreader.geo.LocationTracker;
+import org.coolreader.geo.MetroLine;
+import org.coolreader.geo.MetroLocation;
+import org.coolreader.geo.MetroStation;
+import org.coolreader.geo.ProviderLocationTracker;
+import org.coolreader.geo.TransportStop;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
 
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -85,11 +104,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -106,6 +127,18 @@ import android.provider.Settings.Secure;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+//import javax.imageio.*;
+
+//import net.htmlparser.jericho.HTMLElementName;
+//import net.htmlparser.jericho.Source;
+//import net.htmlparser.jericho.TextExtractor;
+
+import okhttp3.Call;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class CoolReader extends BaseActivity implements SensorEventListener
 {
@@ -128,6 +161,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         public int wasY;
         public int cnt;
     }
+
+    public GeoLastData geoLastData = new GeoLastData(this);
 
     public ArrayList<ResizeHistory> getResizeHist() {
         return resizeHist;
@@ -344,6 +379,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		createDynShortcuts();
+		createGeoListener();
         log.i("CoolReader.onCreate() exiting");
     }
 
@@ -484,7 +520,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		processIntent(intent);
 	}
 
-	private boolean processIntent(Intent intent) {
+	private boolean processIntent(final Intent intent) {
 		log.d("intent=" + intent);
 		if (intent == null)
 			return false;
@@ -519,13 +555,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					if (!StrUtils.isEmptyStr(code)) {
 						new DBXFinishAuthorization(this, uri, new DBXFinishAuthorization.Callback() {
 							@Override
-							public void onComplete(boolean result) {
+							public void onComplete(boolean result, String accessToken) {
 								DBXConfig.didLogin = result;
 								CoolReader.this.showToast(R.string.dbx_auth_finished_ok);
 								if (dbxInputTokenDialog!=null)
 									if (dbxInputTokenDialog.isShowing()) {
-										dbxInputTokenDialog.tokenEdit.setText(code);
-										dbxInputTokenDialog.saveDBXToken();
+										dbxInputTokenDialog.saveDBXToken(accessToken);
 										dbxInputTokenDialog.onPositiveButtonClick();
 									}
 							}
@@ -620,13 +655,184 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		if (Intent.ACTION_SEND.equals(intentAction)) {
-//			String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
-//			String stype = intent.getType();
-//			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-//			if (sText.toLowerCase().startsWith("http")) {
-//				String sLastSeg = sText;
-//				int len1 = sLastSeg.split("/").length;
-//				if (len1>1) sLastSeg = sLastSeg.split("/")[len1-1];
+			String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
+			String stype = intent.getType();
+			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+			if (sText.toLowerCase().startsWith("http")) {
+				String sLastSeg = sText;
+				int len1 = sLastSeg.split("/").length;
+				if (len1 > 1) sLastSeg = sLastSeg.split("/")[len1 - 1];
+				sLastSeg = sLastSeg.replace("&", "_").replace("#", "_")
+						.replace("?", "_").replace("%", "_")
+						.replace(":","/")
+						.replace("/","_").replace("\\","")
+						.replace("\\\\","");
+				final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+				if (!((sLastSeg.endsWith(".html"))||(sLastSeg.endsWith(".htm"))))
+					sLastSeg = sLastSeg + ".html";
+				String fName = downloadDir.pathname+"/Downloaded/"+sLastSeg;
+				final File fPath = new File(downloadDir.pathname+"/Downloaded");
+				if (!fPath.exists()) fPath.mkdir();
+				int i = 0;
+				boolean bExists = true;
+				String fNameBase = fName.replace(".html","").replace(".htm","");
+				while (bExists) {
+					fName = i == 0 ? fName :
+							fNameBase + " ("+i+").html";
+					i++;
+					File f = new File(fName);
+					bExists = f.exists();
+				}
+				final String fFName = fName;
+				// do download file
+				if (!StrUtils.isEmptyStr(sText)) {
+					final HttpUrl.Builder urlBuilder = HttpUrl.parse(sText).newBuilder();
+					final String url = urlBuilder.build().toString();
+					Request request = new Request.Builder()
+							.url(url)
+							.build();
+					OkHttpClient client = new OkHttpClient();
+					Call call = client.newCall(request);
+					call.enqueue(new okhttp3.Callback() {
+						public void onResponse(Call call, Response response)
+								throws IOException {
+							String sUrl = response.request().url().toString();
+							if (sUrl.contains("imgurl=")) {
+								sUrl=sUrl.substring(sUrl.indexOf("imgurl=")+7);
+								if (sUrl.contains("?")) sUrl = sUrl.split("\\?")[0];
+								final Intent intent4 = new Intent(android.content.Intent.ACTION_SEND);
+								intent4.setType("text/plain");
+								intent4.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
+								intent4.putExtra(android.content.Intent.EXTRA_TEXT, sUrl);
+								BackgroundThread.instance().postBackground(new Runnable() {
+									@Override
+									public void run() {
+										BackgroundThread.instance().postGUI(new Runnable() {
+											@Override
+											public void run() {
+												processIntent(intent4);
+											}
+										}, 200);
+									}
+								});
+							} else {
+								//https://www.google.com/imgres?imgurl=https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg?auto%3Dcompress%26cs%3Dtinysrgb%26dpr%3D1%26w%3D500&imgrefurl=https://www.pexels.com/search/galaxy%2520wallpaper/&tbnid=ch8IfDIaCMZBvM&vet=1&docid=nvJrYCoGRBCahM&w=500&h=667&q=wallpaper&source=sh/x/im
+								InputStream is = response.body().byteStream();
+								BufferedInputStream input = new BufferedInputStream(is);
+								OutputStream output = new FileOutputStream(fFName);
+								byte[] data = new byte[1024];
+								long total = 0;
+								int count = 0;
+								while ((count = input.read(data)) != -1) {
+									total += count;
+									output.write(data, 0, count);
+								}
+								output.flush();
+								output.close();
+								input.close();
+
+								boolean bIsImage = false;
+								BitmapFactory.Options options = new BitmapFactory.Options();
+								options.inJustDecodeBounds = true;
+								Bitmap bitmap = BitmapFactory.decodeFile(fFName, options);
+								if (options.outWidth != -1 && options.outHeight != -1) {
+									bIsImage = true;
+								}
+
+								if (!bIsImage) {
+									try {
+//								FileInputStream is2 = new FileInputStream(fFName);
+//								Source source = new Source(is2);
+//								source.fullSequentialParse();
+//								TextExtractor extractor = source.getFirstElement(HTMLElementName.BODY).getTextExtractor();
+//								extractor.setConvertNonBreakingSpaces(true);
+//								extractor.setExcludeNonHTMLElements(false);
+//								extractor.setIncludeAttributes(false);
+//								FileWriter fw = new FileWriter(fFName + ".txt");
+//								extractor.writeTo(fw);
+//								fw.close();
+										Document doc = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
+
+										FileWriter fw = new FileWriter(fFName + ".txt");
+										fw.write(doc.body().text().replace((char)0,' '));
+										fw.close();
+									} catch (Exception e) {
+
+									}
+									BackgroundThread.instance().postBackground(new Runnable() {
+										@Override
+										public void run() {
+											BackgroundThread.instance().postGUI(new Runnable() {
+												@Override
+												public void run() {
+													File ftxt = new File(fFName + ".txt");
+													String sMes = "Downloaded successfully, opening";
+													boolean bTxtExists = ftxt.exists();
+													if (bTxtExists)
+														sMes = sMes + ". Converted to text successfully.";
+													CoolReader.this.showToast(sMes);
+													if (bTxtExists) {
+														askConfirmation(R.string.ask_open_as_text, new Runnable() {
+															@Override
+															public void run() {
+																final FileInfo fi = new FileInfo(fFName + ".txt");
+																CoolReader.this.loadDocument(fi);
+															}
+														}, new Runnable() {
+															@Override
+															public void run() {
+																final FileInfo fi = new FileInfo(fFName);
+																CoolReader.this.loadDocument(fi);
+															}
+														});
+													} else {
+														final FileInfo fi = new FileInfo(fFName);
+														CoolReader.this.loadDocument(fi);
+													}
+												}
+											}, 500);
+										}
+									});
+								} else {
+									File f = new File(fFName);
+									File f2 = new File(fFName.replace(".html", ""));
+									f.renameTo(f2);
+									BackgroundThread.instance().postBackground(new Runnable() {
+										@Override
+										public void run() {
+											BackgroundThread.instance().postGUI(new Runnable() {
+												@Override
+												public void run() {
+													PictureCameDialog dlg = new PictureCameDialog(CoolReader.this,
+															fFName.replace(".html", ""), "");
+													dlg.show();
+												}
+											}, 500);
+										}
+									});
+								}
+							}
+						}
+
+						public void onFailure(Call call, IOException e) {
+							final IOException ef = e;
+							BackgroundThread.instance().postBackground(new Runnable() {
+								@Override
+								public void run() {
+									BackgroundThread.instance().postGUI(new Runnable() {
+										@Override
+										public void run() {
+											CoolReader.this.showToast("Download error: "+ef.getMessage()+
+													" ["+ef.getClass().getSimpleName()+"]");
+										}
+									}, 500);
+								}
+							});
+						}
+					});
+				}
+				return true;
+			}
 //				String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
 //				try {
 //					String sExt = DocumentFormat.extByMimeType(stype);
@@ -814,6 +1020,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		super.onPause();
 		mSensorManager.unregisterListener(deviceOrientation.getEventListener());
         mSensorManager.unregisterListener(this);
+		geoLastData.gps.stop(); geoLastData.netw.stop();
 		if (mReaderView != null)
 			mReaderView.onAppPause();
 		Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
@@ -853,6 +1060,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), accelerometer, SensorManager.SENSOR_DELAY_UI);
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), magnetometer, SensorManager.SENSOR_DELAY_UI);
 
+		geoLastData.gps.start(geoLastData.geoListener);
+		geoLastData.netw.start(geoLastData.netwListener);
+
         if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
             Sensor s = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
             mSensorManager.registerListener(this,s, SensorManager.SENSOR_DELAY_NORMAL);
@@ -877,6 +1087,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
                 }
             }
 		}
+		if (getReaderView()!=null)
+			if (getReaderView().ttsToolbar!=null)
+				getReaderView().ttsToolbar.repaintButtons();
 	}
 
 	@Override
@@ -2961,6 +3174,133 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} catch (Exception e) {
 
 		}
+	}
+
+	public void createGeoListener() {
+
+		geoLastData.gps = new ProviderLocationTracker(this,
+				ProviderLocationTracker.ProviderType.GPS);
+		geoLastData.geoListener = new LocationTracker.LocationUpdateListener() {
+			@Override
+			public void onUpdate(Location oldLoc, long oldTime, Location newLoc,
+								 long newTime) {
+				geoLastData.geoUpdateCoords(oldLoc, oldTime, newLoc, newTime);
+			}
+
+		};
+
+		geoLastData.netw = new ProviderLocationTracker(this,
+				ProviderLocationTracker.ProviderType.NETWORK);
+
+		geoLastData.netwListener = new LocationTracker.LocationUpdateListener() {
+			@Override
+			public void onUpdate(Location oldLoc, long oldTime, Location newLoc,
+								 long newTime) {
+				geoLastData.geoUpdateCoords(oldLoc, oldTime, newLoc, newTime);
+			}
+
+		};
+
+		String s ="";
+		try {
+			InputStream is = getResources().openRawResource(R.raw.metro_coords);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+			String str = "";
+			while ((str = reader.readLine()) != null) s=s + " " +str;
+			is.close();
+		} catch (Exception e) {
+//			showToast("Could not parse genres from file: genres_rus.txt. "+
+//					e.getClass().getSimpleName()+" "+e.getMessage());
+		}
+		if (geoLastData.metroLocations == null) geoLastData.metroLocations = new ArrayList<MetroLocation>();
+		geoLastData.metroLocations.clear();
+		try {
+			JSONArray jsonA = new JSONArray(s);
+			if (jsonA != null) {
+				int i = 0;
+				while (i < jsonA.length()) {
+					JSONObject jso = (JSONObject) jsonA.get(i);
+					MetroLocation metroLocation = new MetroLocation();
+					if (jso.has("id")) { metroLocation.id = jso.getInt("id"); }
+					if (jso.has("name")) { metroLocation.name = jso.getString("name"); }
+					if (jso.has("url")) { metroLocation.url = jso.getString("url"); }
+					ArrayList<MetroLine> metroLines = null;
+					if (jso.has("lines")) {
+						JSONArray jsonL = jso.getJSONArray("lines");
+						metroLines = new ArrayList<MetroLine>();
+						int j = 0;
+						while (j < jsonL.length()) {
+							JSONObject jsoL = (JSONObject) jsonL.get(j);
+							MetroLine metroLine = new MetroLine();
+							if (jsoL.has("id")) { metroLine.id = jsoL.getInt("id"); }
+							if (jsoL.has("hex_color")) { metroLine.hexColor = jsoL.getString("hex_color"); }
+							if (jsoL.has("name")) { metroLine.name = jsoL.getString("name"); }
+							ArrayList<MetroStation> metroStations = null;
+							if (jsoL.has("stations")) {
+								JSONArray jsonS = jsoL.getJSONArray("stations");
+								metroStations = new ArrayList<MetroStation>();
+								int k = 0;
+								while (k < jsonS.length()) {
+									JSONObject jsoS = (JSONObject) jsonS.get(k);
+									MetroStation metroStation = new MetroStation();
+									if (jsoS.has("id")) { metroStation.id = jsoS.getDouble("id"); }
+									if (jsoS.has("name")) { metroStation.name = jsoS.getString("name"); }
+									if (metroStation.name.contains("окоссов")) geoLastData.tempStation = metroStation; // !!!!
+									if (jsoS.has("lat")) { metroStation.lat = jsoS.getDouble("lat"); }
+									if (jsoS.has("lng")) { metroStation.lon = jsoS.getDouble("lng"); }
+									if (jsoS.has("order")) { metroStation.order = jsoS.getInt("order"); }
+									metroStations.add(metroStation);
+									k++;
+								}
+								metroLine.metroStations = metroStations;
+							}
+							metroLines.add(metroLine);
+							j++;
+						}
+					}
+					metroLocation.metroLines = metroLines;
+					geoLastData.metroLocations.add(metroLocation);
+					i++;
+				}
+			}
+		} catch (JSONException e) {
+
+		}
+		if (geoLastData.transportStops == null) geoLastData.transportStops = new ArrayList<TransportStop>();
+		geoLastData.transportStops.clear();
+		String sT ="";
+		try {
+			InputStream is = getResources().openRawResource(R.raw.data_398);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is, "windows-1251"));
+			String str = "";
+			while ((str = reader.readLine()) != null) sT=sT + " " +str;
+			is.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			JSONArray jsonA = new JSONArray(sT);
+			if (jsonA != null) {
+				int i = 0;
+				while (i < jsonA.length()) {
+					JSONObject jso = (JSONObject) jsonA.get(i);
+					TransportStop transportStop = new TransportStop();
+					if (jso.has("Street")) { transportStop.street = jso.getString("Street"); }
+					if (jso.has("Name")) { transportStop.name = jso.getString("Name"); }
+					if (jso.has("Latitude_WGS84")) { transportStop.lat = jso.getDouble("Latitude_WGS84"); }
+					if (jso.has("Longitude_WGS84")) { transportStop.lon = jso.getDouble("Longitude_WGS84"); }
+					if (jso.has("District")) { transportStop.district = jso.getString("District"); }
+					if (jso.has("RouteNumbers")) { transportStop.routeNumbers = jso.getString("RouteNumbers"); }
+					geoLastData.transportStops.add(transportStop);
+					geoLastData.tempStop = transportStop;
+					i++;
+				}
+			}
+		} catch (JSONException e) {
+
+		}
+		geoLastData.gps.start(geoLastData.geoListener);
+		geoLastData.netw.start(geoLastData.netwListener);
 	}
 
 }

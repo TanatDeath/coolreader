@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.CoverpageManager.CoverpageBitmapReadyListener;
 
 import android.content.res.TypedArray;
@@ -347,14 +348,12 @@ public class BookInfoEditDialog extends BaseDialog {
 			}
 		});
 
-		ImageButton btnSaveToGD = (ImageButton)view.findViewById(R.id.save_to_cloud);
+		ImageButton btnSendByEmail = (ImageButton)view.findViewById(R.id.save_to_cloud);
 
-		btnSaveToGD.setOnClickListener(new View.OnClickListener() {
+		btnSendByEmail.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-			//	((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(
-			//			((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, BookInfoEditDialog.this);
-			mActivity.showToast("To come...");
+				CloudAction.emailSendBook(mActivity, mBookInfo);
 			}
 		});
 

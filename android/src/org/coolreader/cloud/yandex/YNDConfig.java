@@ -16,6 +16,7 @@ import com.dropbox.core.DbxHost;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.StrUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,8 +27,8 @@ import java.io.InputStreamReader;
 import okhttp3.OkHttpClient;
 
 public class YNDConfig {
-    public static final String YND_ID = "set yours";
-    public static final String YND_PASSW = "set yours";
+    public static final String YND_ID = "put_yours";
+    public static final String YND_PASSW = "put_yours";
     public static final String YND_CALLBACK_URL = "https://yxda6aa587a2924b49b072cd5729fd03e2.oauth.yandex.ru/auth/finish?platform=android";
     public static final String YND_REDIRECT_URL = "https://github.com/plotn/coolreader/ynd";
     public static final String YND_AUTH_URL = "https://oauth.yandex.ru/authorize";
@@ -48,7 +49,7 @@ public class YNDConfig {
             cr.yndInputTokenDialog.show();
             return false;
         } else {
-            if (!didLogin) {
+            if ((!didLogin)||(StrUtils.isEmptyStr(yndToken))) {
                 BufferedReader reader = new BufferedReader(
                         new FileReader(fYND));
                 StringBuilder stringBuilder = new StringBuilder();

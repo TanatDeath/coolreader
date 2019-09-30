@@ -2061,25 +2061,27 @@ public class MainDB extends BaseDB {
 			String authorIds = findAuthors(maxCount, authorSearch);
 			if ((authorIds == null || authorIds.length() == 0) && (!bQuickSearch))
 				return list;
-			if ( buf.length()>0 )
-				buf.append(sDefCond);
-			if ((!StrUtils.isEmptyStr(authorIds))&&(bQuickSearch)) authorIds = "-1";
-			buf.append(" ( b.id IN (SELECT ba.book_fk FROM book_author ba WHERE ba.author_fk IN (" + authorIds + ")) ) ");
-			hasCondition = true;
+			if (!StrUtils.isEmptyStr(authorIds)) {
+				if ( buf.length()>0 )
+					buf.append(sDefCond);
+				buf.append(" ( b.id IN (SELECT ba.book_fk FROM book_author ba WHERE ba.author_fk IN (" + authorIds + ")) ) ");
+				hasCondition = true;
+			}
 		}
 		if ( !StrUtils.isEmptyStr(seriesSearch) ) {
 			String seriesIds = findSeries(maxCount, seriesSearch);
 			if ((seriesIds == null || seriesIds.length() == 0) && (!bQuickSearch))
 				return list;
-			if ( buf.length()>0 )
-				buf.append(sDefCond);
-			if ((!StrUtils.isEmptyStr(seriesIds))&&(bQuickSearch)) seriesIds = "-1";
-			buf.append(" ( ");
-			buf.append(" (b.series_fk IN (" + seriesIds + ")) ");
-            buf.append(" OR ");
-            buf.append(" (b.publseries_fk IN (" + seriesIds + ")) ");
-            buf.append(" ) ");
-			hasCondition = true;
+			if (!StrUtils.isEmptyStr(seriesIds)) {
+				if ( buf.length()>0 )
+					buf.append(sDefCond);
+				buf.append(" ( ");
+				buf.append(" (b.series_fk IN (" + seriesIds + ")) ");
+				buf.append(" OR ");
+				buf.append(" (b.publseries_fk IN (" + seriesIds + ")) ");
+				buf.append(" ) ");
+				hasCondition = true;
+			}
 		}
 		if ( !StrUtils.isEmptyStr(titleSearch) ) {
 			hasCondition = true;
@@ -2133,8 +2135,20 @@ public class MainDB extends BaseDB {
 								android.text.format.DateFormat df = new android.text.format.DateFormat();
 								sField = df.format("yyyy-MM-dd hh:mm:ss a", dateTime).toString();
 							}
-							if (Utils.matchPattern(sField, searchText)) {
+							//Log.i("!!!",s+":"+sField+"~"+searchText);
+							if ((Utils.matchPattern(sField, searchText))||
+									(StrUtils.getNonEmptyStr(sField, true).toLowerCase().contains(
+											StrUtils.getNonEmptyStr(searchText,true).toLowerCase()))||
+									(StrUtils.getNonEmptyStr(sField, true).toLowerCase().matches(
+											StrUtils.getNonEmptyStr(searchText,true).toLowerCase()))||
+									(StrUtils.getNonEmptyStr(sField, true).toLowerCase().matches(
+											".*"+StrUtils.getNonEmptyStr(searchText,true).toLowerCase()+".*"))||
+									(StrUtils.getNonEmptyStr(sField, true).contains(StrUtils.getNonEmptyStr(searchText,true)))||
+									(StrUtils.getNonEmptyStr(sField, true).matches(StrUtils.getNonEmptyStr(searchText,true)))||
+									(StrUtils.getNonEmptyStr(sField, true).matches(".*"+StrUtils.getNonEmptyStr(searchText,true)+".*"))
+							) {
 								matchesCnt++;
+								//Log.i("!!!","matched!");
 							}
 							i++;
 						}

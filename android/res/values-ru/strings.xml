@@ -483,7 +483,7 @@
     <string name="options_font_fallback_face">Дополнительный шрифт</string>
     <string name="win_title_confirm_catalog_delete">Вы действительно хотите удалить этот каталог?</string>
     <string name="win_title_confirm_history_record_delete">Вы действительно хотите удалить эту книгу из списка последних книг?</string>
-    <string name="win_title_confirm_book_delete">Вы действительно хотите удалить эту книгу?</string>
+    <string name="win_title_confirm_book_delete">Вы действительно хотите удалить эту книгу / архив ?</string>
     <string name="folder_name_books_by_series">Серии</string>
     <string name="folder_name_books_by_bookdate">Дата книги</string>
     <string name="folder_name_books_by_docdate">Дата документа</string>
@@ -776,7 +776,10 @@
     <string name="load_bookmarks_from_cloud">Загрузить закладки из облачного хранилища</string>
     <string name="cloud_menu">Меню облачного хранилища</string>
     <string name="save_current_book_to_cloud">Сохранить в облачное хранилище</string>
+    <string name="save_current_book_to_cloud_email">Отправить книгу по Email</string>
     <string name="open_book_from_gd">Открыть книгу с диска Google One</string>
+    <string name="open_book_from_dbx">Открыть книгу из DropBox</string>
+    <string name="open_book_from_ynd">Открыть книгу с Яндекс диска</string>
     <string name="open_book_from_gd_short">Google One</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
@@ -955,5 +958,14 @@
     <string name="ynd_delete_token">Удалить файл токена</string>
     <string name="ynd_token_hint">Вставьте токен в это поле</string>
     <string name="ynd_prev_auth">Предыдущая авторизация</string>
+    <string name="ask_open_as_text">Открыть как простой текст?</string>
+    <string name="options_app_geo">В наушниках в транспорте</string>
+    <string name="options_app_geo_add_info">Показывает всплывающее сообщение, когда вы находитесь рядом с остановками общественного транспорта или метро</string>
+    <string name="options_app_geo_1">Выключено</string>
+    <string name="options_app_geo_2">Показывать станции метро рядом</string>
+    <string name="options_app_geo_2_add_info">Только Москва, Санкт-Петербург, Екатеринбург и Новосибирск</string>
+    <string name="options_app_geo_3">Показывать остановки общественного транспорта</string>
+    <string name="options_app_geo_3_add_info">Только в Москве</string>
+    <string name="options_app_geo_4">Показывать остановки и метро</string>
 </resources>
 

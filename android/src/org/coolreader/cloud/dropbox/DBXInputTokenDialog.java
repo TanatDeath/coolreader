@@ -69,8 +69,8 @@ public class DBXInputTokenDialog extends BaseDialog {
 		}
 	}
 
-	public void saveDBXToken() {
-		if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
+	public void saveDBXToken(String token) {
+		if (!StrUtils.isEmptyStr(token)) {
 			Log.i("DBX","Starting save dbx.token");
 			try {
 				final File fDBX = new File(mCoolReader.getSettingsFile(0).getParent() + "/dbx.token");
@@ -81,7 +81,7 @@ public class DBXInputTokenDialog extends BaseDialog {
 				try {
 					fw = new FileWriter(fDBX);
 					bw = new BufferedWriter(fw);
-					bw.write(tokenEdit.getText().toString());
+					bw.write(token);
 					bw.close();
 					fw.close();
 				} catch (Exception e) {
@@ -105,12 +105,12 @@ public class DBXInputTokenDialog extends BaseDialog {
 		ImageButton tokenOk =view.findViewById(R.id.input_token_ok_btn);
 		tokenOk.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
-				saveDBXToken();
 				new DBXFinishAuthorization(mCoolReader, null, new DBXFinishAuthorization.Callback() {
 					@Override
-					public void onComplete(boolean result) {
+					public void onComplete(boolean result, String accessToken) {
 						DBXConfig.didLogin = result;
 						mCoolReader.showToast(R.string.dbx_auth_finished_ok);
+						saveDBXToken(accessToken);
 						dismiss();
 					}
 

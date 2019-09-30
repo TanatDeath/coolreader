@@ -215,7 +215,7 @@ public class Utils {
 		return ch;
 	}
 	
-	public static boolean matchPattern(String text, String pattern) {
+	public static boolean matchPatternInternal(String text, String pattern) {
 		if (pattern == null)
 			return true;
 		if (text == null)
@@ -238,6 +238,12 @@ public class Utils {
 				return true;
 		}
 		return false;
+	}
+
+	public static boolean matchPattern(String text, String pattern) {
+		return (matchPatternInternal(text,pattern)) || (matchPatternInternal(
+				StrUtils.getNonEmptyStr(text,true).toLowerCase(),
+				StrUtils.getNonEmptyStr(pattern,true).toLowerCase()));
 	}
 	
 	public static String[] splitByWhitespace(String str) {

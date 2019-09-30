@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sep_row"
+	android:layout_margin="2dip"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_weight="1"
+	>
+	<LinearLayout
+		android:id="@+id/left_stop_ll"
+		android:layout_width="0dip"
+		android:layout_height="fill_parent"
+		android:gravity="center_vertical|center_horizontal"
+		android:layout_weight="1"
+		android:orientation="horizontal">
+		<View
+			android:layout_width="fill_parent"
+			android:layout_height="1dip"
+			android:layout_margin="2dip"
+			android:id="@+id/sepRow"
+			/>
+	</LinearLayout>
+</TableRow>
