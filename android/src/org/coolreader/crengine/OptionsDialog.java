@@ -16,6 +16,8 @@ import org.coolreader.Dictionaries.DictInfo;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudSyncFolder;
 import org.coolreader.crengine.ColorPickerDialog.OnColorChangedListener;
+import org.coolreader.geo.MetroLocation;
+import org.coolreader.geo.TransportStop;
 import org.coolreader.plugins.OnlineStorePluginManager;
 
 import android.app.SearchManager;
@@ -1105,16 +1107,44 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	class GeoOption extends ListOption {
 		public GeoOption(OptionOwner owner, String filter) {
-			super(owner, getString(R.string.options_app_locale), PROP_APP_LOCALE, getString(R.string.options_app_locale_add_info), filter);
-			for (Lang lang : Lang.values()) {
-				Locale l =  lang.getLocale();
-				String s = "";
-				if (l!=null) s = lang.getLocale().getDisplayName();
-				add(lang.code, getString(lang.nameId), s);
-			}
+			super(owner, getString(R.string.options_app_geo), PROP_APP_GEO,
+					getString(R.string.options_app_geo_add_info), filter);
+			add("1", getString(R.string.options_app_geo_1),"");
+			add("2", getString(R.string.options_app_geo_2),getString(R.string.options_app_geo_2_add_info));
+			add("3", getString(R.string.options_app_geo_3),getString(R.string.options_app_geo_3_add_info));
+			add("4", getString(R.string.options_app_geo_4),"");
 			if ( mProperties.getProperty(property)==null )
-				mProperties.setProperty(property, Lang.DEFAULT.code);
-			this.updateFilteredMark(Lang.DEFAULT.code);
+				mProperties.setProperty(property, "1");
+		}
+
+		@Override
+		public void onClick( Three item ) {
+		    super.onClick(item);
+			CoolReader cr = (CoolReader)mActivity;
+			if ((item.value.equals("2"))||(item.value.equals("3"))||(item.value.equals("4"))) {
+				if (cr.geoLastData != null) {
+					cr.geoLastData.gps.stop();
+					cr.geoLastData.netw.stop();
+					if ((item.value.equals("2")) || (item.value.equals("4")))
+						cr.geoLastData.loadMetroStations(cr);
+					if ((item.value.equals("3")) || (item.value.equals("4")))
+						cr.geoLastData.loadTransportStops(cr);
+					cr.geoLastData.gps.start(cr.geoLastData.geoListener);
+					cr.geoLastData.netw.start(cr.geoLastData.netwListener);
+				}
+				((CoolReader) mActivity).checkLocationPermission();
+			} else {
+				if (cr.geoLastData != null) {
+					cr.geoLastData.gps.stop();
+					cr.geoLastData.netw.stop();
+					if (cr.geoLastData.metroLocations == null)
+						cr.geoLastData.metroLocations = new ArrayList<MetroLocation>();
+					cr.geoLastData.metroLocations.clear();
+					if (cr.geoLastData.transportStops == null)
+						cr.geoLastData.transportStops = new ArrayList<TransportStop>();
+					cr.geoLastData.transportStops.clear();
+				}
+			}
 		}
 	}
 
@@ -2331,7 +2361,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public void onClick( Three item ) {
 			mProperties.setProperty(property, OnPreClick(item).value);
 			refreshList();
-			mActivity.showToast("asdf "+item.value);
 			if ( onChangeHandler!=null )
 				onChangeHandler.run();
 			if ( optionsListView!=null )
@@ -3299,13 +3328,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public boolean performItemClick(View view, int position, long id) {
 			if (mOptionsThis!=null) {
 				mOptionsThis.get(position).onSelect();
-			 	//asdf
-				mActivity.showToast(mOptionsThis.get(position).label);
 			}
 			else {
 				mOptions.get(position).onSelect();
-				//asdf
-				mActivity.showToast(mOptions.get(position).label);
 			}
 			return true;
 		}
@@ -4020,7 +4045,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_rounded_corners_margin), PROP_ROUNDED_CORNERS_MARGIN,
 				getString(R.string.options_rounded_corners_margin_add_info), filter).add(mRoundedCornersMargins).setDefaultValue("0")
 				.setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin, R.drawable.icons8_rounded_corners_margin));
-		mOptionsControls = new OptionsListView(getContext(), null);
+        mOptionsPage.add(new GeoOption(this, filter).
+                setIconIdByAttr(R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
+        mOptionsControls = new OptionsListView(getContext(), null);
 		OptionBase kmO = new KeyMapOption(this, getString(R.string.options_app_key_actions),
 				getString(R.string.options_app_key_actions_add_info), filter).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);
 		((KeyMapOption)kmO).updateFilterEnd();

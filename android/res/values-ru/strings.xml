@@ -963,7 +963,7 @@
     <string name="options_app_geo_add_info">Показывает всплывающее сообщение, когда вы находитесь рядом с остановками общественного транспорта или метро</string>
     <string name="options_app_geo_1">Выключено</string>
     <string name="options_app_geo_2">Показывать станции метро рядом</string>
-    <string name="options_app_geo_2_add_info">Только Москва, Санкт-Петербург, Екатеринбург и Новосибирск</string>
+    <string name="options_app_geo_2_add_info">Только в Москве, Санкт-Петербурге, Екатеринбурге и Новосибирске</string>
     <string name="options_app_geo_3">Показывать остановки общественного транспорта</string>
     <string name="options_app_geo_3_add_info">Только в Москве</string>
     <string name="options_app_geo_4">Показывать остановки и метро</string>

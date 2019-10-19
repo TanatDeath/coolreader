@@ -27,8 +27,8 @@ import java.io.InputStreamReader;
 import okhttp3.OkHttpClient;
 
 public class YNDConfig {
-    public static final String YND_ID = "put_yours";
-    public static final String YND_PASSW = "put_yours";
+    public static final String YND_ID = "da6aa587a2924b49b072cd5729fd03e2";//"put_yours";
+    public static final String YND_PASSW = "c5f96c0876854504ba7420e4b2a44b7b";//"put_yours";
     public static final String YND_CALLBACK_URL = "https://yxda6aa587a2924b49b072cd5729fd03e2.oauth.yandex.ru/auth/finish?platform=android";
     public static final String YND_REDIRECT_URL = "https://github.com/plotn/coolreader/ynd";
     public static final String YND_AUTH_URL = "https://oauth.yandex.ru/authorize";

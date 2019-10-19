@@ -175,7 +175,8 @@ public interface Settings {
     public static final String PROP_APP_STARTUP_ACTION = "app.startup.action";
 
     public static final String PROP_APP_PLUGIN_ENABLED = "app.plugin.enabled.litres";
-    
+
+    public static final String PROP_APP_GEO = "app.geo.locations";
 
     // available options for PROP_APP_SELECTION_ACTION setting
     public static final int SELECTION_ACTION_TOOLBAR = 0;

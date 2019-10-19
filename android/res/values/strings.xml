@@ -975,8 +975,11 @@
     <string name="options_app_geo_add_info">Allows to show popup window informing about transport stops and metro stations nearby</string>
     <string name="options_app_geo_1">Off</string>
     <string name="options_app_geo_2">Show metro stations nearby</string>
-    <string name="options_app_geo_2_add_info">Only Moscow, St.Petersburg, Ekaterinburg and Novosibirsk</string>
+    <string name="options_app_geo_2_add_info">Only in Moscow, St.Petersburg, Ekaterinburg and Novosibirsk</string>
     <string name="options_app_geo_3">Show transport stops</string>
     <string name="options_app_geo_3_add_info">Only in Moscow</string>
     <string name="options_app_geo_4">Show both</string>
+    <string name="title_location_permission">Location permission</string>
+    <string name="text_location_permission">Location permission is required, grant?</string>
+    <string name="ok">Ok</string>
 </resources>

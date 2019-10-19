@@ -67,6 +67,7 @@ import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
+import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.TTS;
 import org.coolreader.crengine.TTS.OnTTSCreatedListener;
@@ -93,6 +94,7 @@ import org.koekak.android.ebookdownloader.SonyBookSelector;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -118,6 +120,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.provider.DocumentFile;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -145,6 +149,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public static final Logger log = L.create("cr");
 
 	public static int REQUEST_CODE_OPEN_DOCUMENT_TREE = 200001;
+	public static int REQUEST_CODE_LOCATION_PERMISSION = 200002;
 	public Uri sdCardUri = null;
 	private FileInfo fileToDelete = null;
 
@@ -1060,8 +1065,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), accelerometer, SensorManager.SENSOR_DELAY_UI);
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), magnetometer, SensorManager.SENSOR_DELAY_UI);
 
-		geoLastData.gps.start(geoLastData.geoListener);
-		geoLastData.netw.start(geoLastData.netwListener);
+		int iGeo = settings().getInt(Settings.PROP_APP_GEO, 0);
+		if (iGeo>1) {
+			geoLastData.gps.start(geoLastData.geoListener);
+			geoLastData.netw.start(geoLastData.netwListener);
+		}
 
         if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
             Sensor s = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
@@ -3200,107 +3208,40 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 
 		};
-
-		String s ="";
-		try {
-			InputStream is = getResources().openRawResource(R.raw.metro_coords);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			String str = "";
-			while ((str = reader.readLine()) != null) s=s + " " +str;
-			is.close();
-		} catch (Exception e) {
-//			showToast("Could not parse genres from file: genres_rus.txt. "+
-//					e.getClass().getSimpleName()+" "+e.getMessage());
+		int iGeo = settings().getInt(Settings.PROP_APP_GEO, 0);
+		if ((iGeo==2)||(iGeo==4)) geoLastData.loadMetroStations(this);
+		if ((iGeo==3)||(iGeo==4)) geoLastData.loadTransportStops(this);
+		if (iGeo>1) {
+			geoLastData.gps.start(geoLastData.geoListener);
+			geoLastData.netw.start(geoLastData.netwListener);
 		}
-		if (geoLastData.metroLocations == null) geoLastData.metroLocations = new ArrayList<MetroLocation>();
-		geoLastData.metroLocations.clear();
-		try {
-			JSONArray jsonA = new JSONArray(s);
-			if (jsonA != null) {
-				int i = 0;
-				while (i < jsonA.length()) {
-					JSONObject jso = (JSONObject) jsonA.get(i);
-					MetroLocation metroLocation = new MetroLocation();
-					if (jso.has("id")) { metroLocation.id = jso.getInt("id"); }
-					if (jso.has("name")) { metroLocation.name = jso.getString("name"); }
-					if (jso.has("url")) { metroLocation.url = jso.getString("url"); }
-					ArrayList<MetroLine> metroLines = null;
-					if (jso.has("lines")) {
-						JSONArray jsonL = jso.getJSONArray("lines");
-						metroLines = new ArrayList<MetroLine>();
-						int j = 0;
-						while (j < jsonL.length()) {
-							JSONObject jsoL = (JSONObject) jsonL.get(j);
-							MetroLine metroLine = new MetroLine();
-							if (jsoL.has("id")) { metroLine.id = jsoL.getInt("id"); }
-							if (jsoL.has("hex_color")) { metroLine.hexColor = jsoL.getString("hex_color"); }
-							if (jsoL.has("name")) { metroLine.name = jsoL.getString("name"); }
-							ArrayList<MetroStation> metroStations = null;
-							if (jsoL.has("stations")) {
-								JSONArray jsonS = jsoL.getJSONArray("stations");
-								metroStations = new ArrayList<MetroStation>();
-								int k = 0;
-								while (k < jsonS.length()) {
-									JSONObject jsoS = (JSONObject) jsonS.get(k);
-									MetroStation metroStation = new MetroStation();
-									if (jsoS.has("id")) { metroStation.id = jsoS.getDouble("id"); }
-									if (jsoS.has("name")) { metroStation.name = jsoS.getString("name"); }
-									if (metroStation.name.contains("окоссов")) geoLastData.tempStation = metroStation; // !!!!
-									if (jsoS.has("lat")) { metroStation.lat = jsoS.getDouble("lat"); }
-									if (jsoS.has("lng")) { metroStation.lon = jsoS.getDouble("lng"); }
-									if (jsoS.has("order")) { metroStation.order = jsoS.getInt("order"); }
-									metroStations.add(metroStation);
-									k++;
-								}
-								metroLine.metroStations = metroStations;
-							}
-							metroLines.add(metroLine);
-							j++;
-						}
+	}
+
+	public boolean checkLocationPermission() {
+		if (ContextCompat.checkSelfPermission(this,
+				Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+					Manifest.permission.ACCESS_FINE_LOCATION)) {
+				new AlertDialog.Builder(this)
+						.setTitle(R.string.title_location_permission)
+						.setMessage(R.string.text_location_permission)
+						.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						ActivityCompat.requestPermissions(CoolReader.this,
+								new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+								REQUEST_CODE_LOCATION_PERMISSION);
 					}
-					metroLocation.metroLines = metroLines;
-					geoLastData.metroLocations.add(metroLocation);
-					i++;
-				}
+				}).create().show();
+			} else {
+				ActivityCompat.requestPermissions(CoolReader.this,
+						new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+						REQUEST_CODE_LOCATION_PERMISSION);
 			}
-		} catch (JSONException e) {
-
+			return false;
+		} else {
+			return true;
 		}
-		if (geoLastData.transportStops == null) geoLastData.transportStops = new ArrayList<TransportStop>();
-		geoLastData.transportStops.clear();
-		String sT ="";
-		try {
-			InputStream is = getResources().openRawResource(R.raw.data_398);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(is, "windows-1251"));
-			String str = "";
-			while ((str = reader.readLine()) != null) sT=sT + " " +str;
-			is.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		try {
-			JSONArray jsonA = new JSONArray(sT);
-			if (jsonA != null) {
-				int i = 0;
-				while (i < jsonA.length()) {
-					JSONObject jso = (JSONObject) jsonA.get(i);
-					TransportStop transportStop = new TransportStop();
-					if (jso.has("Street")) { transportStop.street = jso.getString("Street"); }
-					if (jso.has("Name")) { transportStop.name = jso.getString("Name"); }
-					if (jso.has("Latitude_WGS84")) { transportStop.lat = jso.getDouble("Latitude_WGS84"); }
-					if (jso.has("Longitude_WGS84")) { transportStop.lon = jso.getDouble("Longitude_WGS84"); }
-					if (jso.has("District")) { transportStop.district = jso.getString("District"); }
-					if (jso.has("RouteNumbers")) { transportStop.routeNumbers = jso.getString("RouteNumbers"); }
-					geoLastData.transportStops.add(transportStop);
-					geoLastData.tempStop = transportStop;
-					i++;
-				}
-			}
-		} catch (JSONException e) {
-
-		}
-		geoLastData.gps.start(geoLastData.geoListener);
-		geoLastData.netw.start(geoLastData.netwListener);
 	}
 
 }

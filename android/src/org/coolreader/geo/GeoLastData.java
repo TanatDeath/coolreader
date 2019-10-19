@@ -3,13 +3,24 @@ package org.coolreader.geo;
 import android.location.Location;
 
 import org.coolreader.CoolReader;
+import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.StrUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GeoLastData {
+
+    public static final Logger log = L.create("geo");
 
     public static Double MIN_DIST_NEAR = 100D; // meters
     public static Double MIN_DIST_STATION_SIGNAL1 = 200D; // meters
@@ -271,6 +282,109 @@ public class GeoLastData {
                     }
         }
         return null;
+    }
+
+    public static void loadMetroStations(CoolReader cr) {
+        String s ="";
+        try {
+            InputStream is = cr.getResources().openRawResource(R.raw.metro_coords);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String str = "";
+            while ((str = reader.readLine()) != null) s=s + " " +str;
+            is.close();
+        } catch (Exception e) {
+            log.e("load metro stations file", e);
+        }
+        if (cr.geoLastData.metroLocations == null) cr.geoLastData.metroLocations = new ArrayList<MetroLocation>();
+        cr.geoLastData.metroLocations.clear();
+        try {
+            JSONArray jsonA = new JSONArray(s);
+            if (jsonA != null) {
+                int i = 0;
+                while (i < jsonA.length()) {
+                    JSONObject jso = (JSONObject) jsonA.get(i);
+                    MetroLocation metroLocation = new MetroLocation();
+                    if (jso.has("id")) { metroLocation.id = jso.getInt("id"); }
+                    if (jso.has("name")) { metroLocation.name = jso.getString("name"); }
+                    if (jso.has("url")) { metroLocation.url = jso.getString("url"); }
+                    ArrayList<MetroLine> metroLines = null;
+                    if (jso.has("lines")) {
+                        JSONArray jsonL = jso.getJSONArray("lines");
+                        metroLines = new ArrayList<MetroLine>();
+                        int j = 0;
+                        while (j < jsonL.length()) {
+                            JSONObject jsoL = (JSONObject) jsonL.get(j);
+                            MetroLine metroLine = new MetroLine();
+                            if (jsoL.has("id")) { metroLine.id = jsoL.getInt("id"); }
+                            if (jsoL.has("hex_color")) { metroLine.hexColor = jsoL.getString("hex_color"); }
+                            if (jsoL.has("name")) { metroLine.name = jsoL.getString("name"); }
+                            ArrayList<MetroStation> metroStations = null;
+                            if (jsoL.has("stations")) {
+                                JSONArray jsonS = jsoL.getJSONArray("stations");
+                                metroStations = new ArrayList<MetroStation>();
+                                int k = 0;
+                                while (k < jsonS.length()) {
+                                    JSONObject jsoS = (JSONObject) jsonS.get(k);
+                                    MetroStation metroStation = new MetroStation();
+                                    if (jsoS.has("id")) { metroStation.id = jsoS.getDouble("id"); }
+                                    if (jsoS.has("name")) { metroStation.name = jsoS.getString("name"); }
+                                    if (metroStation.name.contains("окоссов")) cr.geoLastData.tempStation = metroStation; // !!!!
+                                    if (jsoS.has("lat")) { metroStation.lat = jsoS.getDouble("lat"); }
+                                    if (jsoS.has("lng")) { metroStation.lon = jsoS.getDouble("lng"); }
+                                    if (jsoS.has("order")) { metroStation.order = jsoS.getInt("order"); }
+                                    metroStations.add(metroStation);
+                                    k++;
+                                }
+                                metroLine.metroStations = metroStations;
+                            }
+                            metroLines.add(metroLine);
+                            j++;
+                        }
+                    }
+                    metroLocation.metroLines = metroLines;
+                    cr.geoLastData.metroLocations.add(metroLocation);
+                    i++;
+                }
+            }
+        } catch (JSONException e) {
+            log.e("parse metro stations file", e);
+        }
+    }
+
+    public static void loadTransportStops(CoolReader cr) {
+        if (cr.geoLastData.transportStops == null) cr.geoLastData.transportStops = new ArrayList<TransportStop>();
+        cr.geoLastData.transportStops.clear();
+        String sT ="";
+        try {
+            InputStream is = cr.getResources().openRawResource(R.raw.data_398);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "windows-1251"));
+            String str = "";
+            while ((str = reader.readLine()) != null) sT=sT + " " +str;
+            is.close();
+        } catch (Exception e) {
+            log.e("load transport stops file", e);
+        }
+        try {
+            JSONArray jsonA = new JSONArray(sT);
+            if (jsonA != null) {
+                int i = 0;
+                while (i < jsonA.length()) {
+                    JSONObject jso = (JSONObject) jsonA.get(i);
+                    TransportStop transportStop = new TransportStop();
+                    if (jso.has("Street")) { transportStop.street = jso.getString("Street"); }
+                    if (jso.has("Name")) { transportStop.name = jso.getString("Name"); }
+                    if (jso.has("Latitude_WGS84")) { transportStop.lat = jso.getDouble("Latitude_WGS84"); }
+                    if (jso.has("Longitude_WGS84")) { transportStop.lon = jso.getDouble("Longitude_WGS84"); }
+                    if (jso.has("District")) { transportStop.district = jso.getString("District"); }
+                    if (jso.has("RouteNumbers")) { transportStop.routeNumbers = jso.getString("RouteNumbers"); }
+                    cr.geoLastData.transportStops.add(transportStop);
+                    cr.geoLastData.tempStop = transportStop;
+                    i++;
+                }
+            }
+        } catch (JSONException e) {
+            log.e("parse transport stops file", e);
+        }
     }
 
 }
