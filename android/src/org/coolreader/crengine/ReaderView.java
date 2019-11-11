@@ -69,7 +69,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private final SurfaceView surface;
 	private final BookView bookView;
-	public SurfaceView getSurface() { return surface; }
+	public SurfaceView getSurface() {
+		return surface;
+	}
 
 	private int wasX = 0;
 	private int wasY = 0;
@@ -148,7 +150,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		@Override
 		public boolean onTrackballEvent(MotionEvent event) {
 			log.d("onTrackballEvent(" + event + ")");
-			if ( mSettings.getBool(PROP_APP_TRACKBALL_DISABLED, false) ) {
+			if (mSettings.getBool(PROP_APP_TRACKBALL_DISABLED, false)) {
 				log.d("trackball is disabled in settings");
 				return true;
 			}
@@ -158,7 +160,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		@Override
 		protected void onSizeChanged(final int w, final int h, int oldw, int oldh) {
-			log.i("onSizeChanged("+w + ", " + h +")");
+			log.i("onSizeChanged(" + w + ", " + h + ")");
 			super.onSizeChanged(w, h, oldw, oldh);
 			requestResize(w, h);
 		}
@@ -168,8 +170,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (visibility == VISIBLE) {
 				mActivity.einkRefresh();
 				startStats();
-			}
-			else
+			} else
 				stopStats();
 			super.onWindowVisibilityChanged(visibility);
 		}
@@ -179,8 +180,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (hasWindowFocus) {
 				mActivity.einkRefresh();
 				startStats();
-			}
-			else
+			} else
 				stopStats();
 			super.onWindowFocusChanged(hasWindowFocus);
 		}
@@ -275,13 +275,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 
 		@Override
-		public void draw()
-		{
+		public void draw() {
 			draw(false);
 		}
 		@Override
-		public void draw(boolean isPartially)
-		{
+		public void draw(boolean isPartially) {
 			drawCallback(new DrawCanvasCallback() {
 				@Override
 				public void drawTo(Canvas c) {
@@ -291,8 +289,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 
 		@Override
-		public void draw(boolean isPartially, boolean isBlack)
-		{
+		public void draw(boolean isPartially, boolean isBlack) {
 			drawCallback(new DrawCanvasCallback() {
 				@Override
 				public void drawTo(Canvas c) {
@@ -382,8 +379,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	static class Sync<T> extends Object {
 		private volatile T result = null;
 		private volatile boolean completed = false;
-		public void set( T res )
-		{
+		public void set(T res) {
 			log.d("sync.set() called from " + Thread.currentThread().getName());
 			result = res;
 			completed = true;
@@ -392,8 +388,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			log.d("sync.set() returned from notify " + Thread.currentThread().getName());
 		}
-		public T get()
-		{
+		public T get() {
 			log.d("sync.get() called from " + Thread.currentThread().getName());
 			while ( !completed ) {
 				try {
@@ -432,44 +427,38 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public int heightFindNext;
 	public int widthFindNext;
 
-	public Engine getEngine()
-	{
+	public Engine getEngine() {
 		return mEngine;
 	}
 
-	public CoolReader getActivity()
-	{
+	public CoolReader getActivity() {
 		return mActivity;
 	}
 
 	private int lastResizeTaskId = 0;
 
-	public boolean isBookLoaded()
-	{
+	public boolean isBookLoaded() {
 		return mOpened;
 	}
 
-	public int getOrientation()
-	{
+	public int getOrientation()	{
 		int angle = mSettings.getInt(PROP_APP_SCREEN_ORIENTATION, 0);
-		if ( angle==4 )
+		if (angle == 4)
 			angle = mActivity.getOrientationFromSensor();
 		return angle;
 	}
 
-	private int overrideKey( int keyCode )
-	{
+	private int overrideKey(int keyCode) {
 		return keyCode;
 	}
 
-	public int getTapZone( int x, int y, int dx, int dy )
-	{
+	public int getTapZone(int x, int y, int dx, int dy) {
 		int x1 = dx / 3;
 		int x2 = dx * 2 / 3;
 		int y1 = dy / 3;
 		int y2 = dy * 2 / 3;
 		int zone = 0;
-		if ( y<y1 ) {
+		if (y < y1) {
 			if ( x<x1 )
 				zone = 1;
 			else if ( x<x2 )
@@ -477,14 +466,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			else
 				zone = 3;
 		} else if ( y<y2 ) {
-			if ( x<x1 )
+			if (x < x1)
 				zone = 4;
 			else if ( x<x2 )
 				zone = 5;
 			else
 				zone = 6;
 		} else {
-			if ( x<x1 )
+			if (x < x1)
 				zone = 7;
 			else if ( x<x2 )
 				zone = 8;
@@ -508,8 +497,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return action;
 	}
 
-	public FileInfo getOpenedFileInfo()
-	{
+	public FileInfo getOpenedFileInfo() {
 		if ( isBookLoaded() && mBookInfo!=null )
 			return mBookInfo.getFileInfo();
 		return null;
@@ -585,7 +573,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		bookView.onResume();
 	}
 
-	private boolean startTrackingKey( KeyEvent event ) {
+	private boolean startTrackingKey(KeyEvent event) {
 		if ( event.getRepeatCount()==0 ) {
 			stopTracking();
 			trackedKeyEvent = event;
@@ -602,7 +590,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			currentTapHandler.cancel();
 	}
 
-	private boolean isTracked( KeyEvent event ) {
+	private boolean isTracked(KeyEvent event) {
 		if ( trackedKeyEvent!=null) {
 			int tkeKc = trackedKeyEvent.getKeyCode();
 			int eKc = event.getKeyCode();
@@ -642,7 +630,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private int nextUpdateId = 0;
-	private void updateSelection(int startX, int startY, int endX, int endY, final boolean isUpdateEnd ) {
+	private void updateSelection(int startX, int startY, int endX, int endY, final boolean isUpdateEnd) {
 		if (isUpdateEnd)
 			lastSelTime = System.currentTimeMillis();
 		final Selection sel = new Selection();
@@ -657,7 +645,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mEngine.execute(new Task() {
 			@Override
 			public void work() throws Exception {
-				if ( myId != nextUpdateId && !isUpdateEnd )
+				if (myId != nextUpdateId && !isUpdateEnd)
 					return;
 				doc.updateSelection(sel);
 				if ( !sel.isEmpty() ) {
@@ -671,7 +659,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 			@Override
 			public void done() {
-				if ( isUpdateEnd ) {
+				if (isUpdateEnd) {
 					String text = sel.text;
 					if ( text!=null && text.length()>0 ) {
 						onSelectionComplete( sel, selMode );
@@ -683,7 +671,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public static boolean isMultiSelection(Selection sel){
+	public static boolean isMultiSelection(Selection sel) {
 		String str = sel.text;
 		if(str != null){
 			for(int i = 0; i < str.length(); i++){
@@ -698,7 +686,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int mSelectionAction = SELECTION_ACTION_TOOLBAR;
 	private int mSelectionActionLong = SELECTION_ACTION_TOOLBAR;
 	private int mMultiSelectionAction = SELECTION_ACTION_TOOLBAR;
-	private void onSelectionComplete( Selection sel, boolean selMode ) {
+	private void onSelectionComplete(Selection sel, boolean selMode) {
 
 		//mActivity.showToast("startPos: "+sel.startPos+"; endPos: "+sel.endPos+
 		//		"startX: "+sel.startX+"; startY: "+sel.startY+"; chapter: "+sel.chapter);
@@ -709,7 +697,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int iSelectionAction1 = (lastDuration > DOUBLE_CLICK_INTERVAL) ? mSelectionActionLong : mSelectionAction;
 		iSelectionAction = isMultiSelection(sel) ? mMultiSelectionAction : iSelectionAction1;
 		if (selMode) iSelectionAction = mMultiSelectionAction;
-		switch ( iSelectionAction ) {
+		switch (iSelectionAction) {
 			case SELECTION_ACTION_TOOLBAR:
 				SelectionToolbarDlg.showDialog(mActivity, ReaderView.this, sel);
 				break;
@@ -799,7 +787,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	}
 
-	public void showNewBookmarkDialog( Selection sel, int chosenType ) {
+	public void showNewBookmarkDialog(Selection sel, int chosenType) {
 		if ( mBookInfo==null )
 			return;
 		Bookmark bmk = new Bookmark();
@@ -825,7 +813,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mActivity.sendBookFragment(mBookInfo, buf.toString());
 	}
 
-	public void copyToClipboard( String text ) {
+	public void copyToClipboard(String text) {
 		if ( text!=null && text.length()>0 ) {
 			ClipboardManager cm = mActivity.getClipboardmanager();
 			cm.setText(text);
@@ -1627,7 +1615,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		dlg.show();
 	}
 
-	public void findText( final String pattern, final boolean reverse, final boolean caseInsensitive )
+	public void findText(final String pattern, final boolean reverse, final boolean caseInsensitive)
 	{
 		BackgroundThread.ensureGUI();
 		final ReaderView view = this;
@@ -1655,7 +1643,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void findNext( final String pattern, final boolean reverse, final boolean caseInsensitive )
+	public void findNext(final String pattern, final boolean reverse, final boolean caseInsensitive)
 	{
 		BackgroundThread.ensureGUI();
 		mEngine.execute(new Task() {
@@ -1715,8 +1703,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void goToBookmark( Bookmark bm )
-	{
+	public void goToBookmark(Bookmark bm) {
 		BackgroundThread.ensureGUI();
 		final String pos = bm.getStartPos();
 		mEngine.execute(new Task() {
@@ -1731,8 +1718,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public boolean goToBookmark( final int shortcut )
-	{
+	public boolean goToBookmark(final int shortcut) {
 		BackgroundThread.ensureGUI();
 		if ( mBookInfo!=null ) {
 			Bookmark bm = mBookInfo.findShortcutBookmark(shortcut);
@@ -1774,8 +1760,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 	}
 
-	public void addBookmark( final int shortcut )
-	{
+	public void addBookmark(final int shortcut) {
 		BackgroundThread.ensureGUI();
 		// set bookmark instead
 		mEngine.execute(new Task() {
@@ -1809,8 +1794,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public boolean onMenuItem( final int itemId )
-	{
+	public boolean onMenuItem(final int itemId) {
 		BackgroundThread.ensureGUI();
 		ReaderAction action = ReaderAction.findByMenuId(itemId);
 		if ( action.isNone() )
@@ -1819,19 +1803,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return true;
 	}
 
-	public void onAction( final ReaderAction action )
-	{
+	public void onAction(final ReaderAction action)	{
 		onAction(action, null);
 	}
-	public void onAction( final ReaderAction action, final Runnable onFinishHandler )
-	{
+
+	public void onAction(final ReaderAction action, final Runnable onFinishHandler)	{
 		BackgroundThread.ensureGUI();
 		if ( action.cmd!=ReaderCommand.DCMD_NONE )
 			onCommand( action.cmd, action.param, onFinishHandler );
 	}
 
-	public void toggleDayNightMode()
-	{
+	public void toggleDayNightMode() {
 		Properties settings = getSettings();
 		OptionsDialog.toggleDayNightMode(settings);
 		//setSettings(settings, mActivity.settings());
@@ -1843,7 +1825,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return mSettings.getBool(PROP_NIGHT_MODE, false);
 	}
 
-	public String getSetting( String name ) {
+	public String getSetting(String name) {
 		return mSettings.getProperty(name);
 	}
 
@@ -1852,18 +1834,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		invalidImages = true;
 	}
 
-	public void setSetting( String name, String value ) {
+	public void setSetting(String name, String value) {
 		setSetting(name, value, true, false, true);
 	}
 
-	public void saveSetting( String name, String value ) {
+	public void saveSetting(String name, String value) {
 		bNeedRedrawOnce = true;
 	//	mActivity.showToast("bNeedRedrawOnce");
 		setSetting(name, value, true, true, true);
 	}
 
-	public void toggleScreenOrientation()
-	{
+	public void toggleScreenOrientation() {
 		int orientation = mActivity.getScreenOrientation();
 		orientation = ( orientation==0 )? 1 : 0;
 		saveSetting(PROP_APP_SCREEN_ORIENTATION, String.valueOf(orientation));
@@ -1872,8 +1853,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mActivity.setScreenOrientation(orientation);
 	}
 
-	public void toggleFullscreen()
-	{
+	public void toggleFullscreen() {
 		boolean newBool = !mActivity.isFullscreen();
 		String newValue = newBool ? "1" : "0";
 		saveSetting(PROP_APP_FULLSCREEN, newValue);
@@ -1882,8 +1862,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mActivity.setFullscreen(newBool);
 	}
 
-	private void initTapZone(final BaseDialog dlg, View view, final int tapZoneId )
-	{
+	private void initTapZone(final BaseDialog dlg, View view, final int tapZoneId) {
 		if ( view==null )
 			return;
 		final TextView text = (TextView)view.findViewById(R.id.tap_zone_action_text_short);
@@ -1930,8 +1909,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void showReadingPositionPopup()
-	{
+	public void showReadingPositionPopup() {
 		if (mBookInfo==null)
 			return;
 		final StringBuilder buf = new StringBuilder();
@@ -2013,6 +1991,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell7), 7);
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell8), 8);
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell9), 9);
+						mActivity.tintViewIcons(grid,true);
 						TextView tvLabel = (TextView) grid.findViewById(R.id.lbl_selection_text);
 						tvLabel.setText(buf);
 						tvLabel.setTextColor(colorIcon);
@@ -2042,8 +2021,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void toggleTitlebar()
-	{
+	public void toggleTitlebar() {
 		boolean newBool = "1".equals(getSetting(PROP_STATUS_LINE));
 		String newValue = !newBool ? "1" : "0";
 		mActivity.setSetting(PROP_STATUS_LINE, newValue, true);
@@ -2238,7 +2216,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			final int numPaints = 32;
 			shadePaints = new Paint[numPaints];
 			hilitePaints = new Paint[numPaints];
-			for ( int i=0; i<numPaints; i++ ) {
+			for (int i=0; i<numPaints; i++) {
 				shadePaints[i] = new Paint();
 				hilitePaints[i] = new Paint();
 				hilitePaints[i].setStyle(Paint.Style.FILL);
@@ -2446,7 +2424,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int dir = (startIndex<endIndex) ? 1 : -1;
 			int dx = rc.bottom - rc.top;
 			Rect rect = new Rect(rc);
-			for ( int i=0; i<n; i++ ) {
+			for (int i=0; i<n; i++) {
 				int index = startIndex + i*dir;
 				int x1 = rc.top + dx*i/n;
 				int x2 = rc.top + dx*(i+1)/n;
@@ -2527,8 +2505,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	}
 
-	public void onCommand( final ReaderCommand cmd, final int param )
-	{
+	public void onCommand(final ReaderCommand cmd, final int param) {
 		onCommand( cmd, param, null );
 	}
 
@@ -2559,8 +2536,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void onCommand( final ReaderCommand cmd, final int param, final Runnable onFinishHandler )
-	{
+	public void onCommand(final ReaderCommand cmd, final int param, final Runnable onFinishHandler) {
 		BackgroundThread.ensureGUI();
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
 		boolean eink = false;
@@ -2794,10 +2770,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			mActivity.showReaderMenu();
 			break;
 		case DCMD_TOGGLE_DAY_NIGHT_MODE:
-//			toggleDayNightMode();
-			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
-			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
-			mActivity.geoLastData.doSignal(false,false);
+			toggleDayNightMode();
+			//mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
+			//mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
+			//mActivity.geoLastData.doSignal(false,false);
 			break;
 		case DCMD_TOGGLE_DICT_ONCE:
 			log.i("Next dictionary will be the 2nd for one time");
@@ -3013,14 +2989,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			ttsToolbar.pause();
 	}
 
-	public void doEngineCommand( final ReaderCommand cmd, final int param )
+	public void doEngineCommand(final ReaderCommand cmd, final int param)
 	{
 		doEngineCommand( cmd, param, null );
 	}
-	public void doEngineCommand( final ReaderCommand cmd, final int param, final Runnable doneHandler )
+	public void doEngineCommand(final ReaderCommand cmd, final int param, final Runnable doneHandler)
 	{
 		BackgroundThread.ensureGUI();
-		log.d("doCommand("+cmd + ", " + param +")");
+		log.d("doCommand("+ cmd + ", " + param +")");
 		post(new Task() {
 			boolean res;
 			boolean isMoveCommand;
@@ -3087,7 +3063,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void doCommandFromBackgroundThread( final ReaderCommand cmd, final int param )
+	public void doCommandFromBackgroundThread(final ReaderCommand cmd, final int param)
 	{
 		log.d("doCommandFromBackgroundThread("+cmd + ", " + param +")");
 		BackgroundThread.ensureBackground();
@@ -3192,8 +3168,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	/**
 	 * Read JNI view settings, update and save if changed 
 	 */
-	private void syncViewSettings( final Properties currSettings, final boolean save, final boolean saveDelayed )
-	{
+	private void syncViewSettings(final Properties currSettings, final boolean save, final boolean saveDelayed) {
 		post( new Task() {
 			Properties props;
 			public void work() {
@@ -3221,7 +3196,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return new Properties(mSettings);
 	}
 
-	static public int stringToInt( String value, int defValue ) {
+	static public int stringToInt(String value, int defValue) {
 		if ( value==null )
 			return defValue;
 		try {
@@ -3282,8 +3257,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private boolean hiliteTapZoneOnTap = false;
 	private boolean enableVolumeKeys = true;
 	static private final int DEF_PAGE_FLIP_MS = 300;
-	public void applyAppSetting( String key, String value )
-	{
+	public void applyAppSetting(String key, String value) {
 		boolean flg = "1".equals(value);
 		if ( key.equals(PROP_APP_TAP_ZONE_HILIGHT) ) {
 			hiliteTapZoneOnTap = flg;
@@ -3539,8 +3513,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-	public void closeIfOpened( final FileInfo fileInfo )
-	{
+	public void closeIfOpened(final FileInfo fileInfo) {
 		if ( this.mBookInfo!=null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened ) {
 			close();
 		}
@@ -3555,8 +3528,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return false;
 	}
 
-	public boolean loadDocument( final FileInfo fileInfo, final Runnable errorHandler )
-	{
+	public boolean loadDocument(final FileInfo fileInfo, final Runnable errorHandler)	{
 		log.v("loadDocument(" + fileInfo.getPathName() + ")");
 		if ( this.mBookInfo!=null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened ) {
 			log.d("trying to load already opened document");
@@ -3591,8 +3563,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	 * @param errorHandler
 	 * @return
 	 */
-	public boolean loadPreviousDocument( final Runnable errorHandler )
-	{
+	public boolean loadPreviousDocument(final Runnable errorHandler) {
 		BackgroundThread.ensureGUI();
 		BookInfo bi = Services.getHistory().getPreviousBook();
 		if (bi!=null && bi.getFileInfo()!=null) {
@@ -3604,8 +3575,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return false;
 	}
 
-	public boolean loadDocument( String fileName, final Runnable errorHandler )
-	{
+	public boolean loadDocument(String fileName, final Runnable errorHandler) {
 		lastSelection = null;
 		hyplinkBookmark = null;
 		lastSavedToGdBookmark = null;
@@ -3702,7 +3672,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private int mBatteryState = 100;
-	public void setBatteryState( int state ) {
+	public void setBatteryState(int state) {
 		if ( state!=mBatteryState ) {
 			log.i("Battery state changed: " + state);
 			mBatteryState = state;
@@ -3722,8 +3692,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public static final int MAX_FREE_LIST_SIZE=2;
 		ArrayList<Bitmap> freeList = new ArrayList<Bitmap>();
 		ArrayList<Bitmap> usedList = new ArrayList<Bitmap>();
-		public synchronized Bitmap get( int dx, int dy ) {
-			for ( int i=0; i<freeList.size(); i++ ) {
+		public synchronized Bitmap get(int dx, int dy) {
+			for (int i=0; i<freeList.size(); i++) {
 				Bitmap bmp = freeList.get(i);
 				if ( bmp.getWidth()==dx && bmp.getHeight()==dy ) {
 					// found bitmap of proper size
@@ -3733,7 +3703,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					return bmp;
 				}
 			}
-			for ( int i=freeList.size()-1; i>=0; i-- ) {
+			for (int i=freeList.size()-1; i>=0; i--) {
 				Bitmap bmp = freeList.remove(i);
 				runtime.trackAlloc(bmp.getWidth() * bmp.getHeight() * 2);
 				//log.d("Recycling free bitmap "+bmp.getWidth()+"x"+bmp.getHeight());
@@ -3753,8 +3723,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				runtime.trackAlloc(bmp.getWidth() * bmp.getHeight() * 2);
 			}
 		}
-		public synchronized void release( Bitmap bmp ) {
-			for ( int i=0; i<usedList.size(); i++ ) {
+		public synchronized void release(Bitmap bmp) {
+			for (int i=0; i<usedList.size(); i++) {
 				if ( usedList.get(i)==bmp ) {
 					freeList.add(bmp);
 					usedList.remove(i);
@@ -3806,8 +3776,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	 * @param offset is kind of page: 0==current, -1=previous, 1=next page
 	 * @return page image and properties, null if requested page is unavailable (e.g. requested next/prev page is out of document range)
 	 */
-	private BitmapInfo preparePageImage( int offset )
-	{
+	private BitmapInfo preparePageImage(int offset) {
 		BackgroundThread.ensureBackground();
 		log.v("preparePageImage( "+offset+")");
 		//if (offset == 0) {
@@ -3830,7 +3799,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			invalidImages = false;
 		}
 
-		if ( internalDX==0 || internalDY==0 ) {
+		if (internalDX == 0 || internalDY == 0) {
 			if (requestedWidth > 0 && requestedHeight > 0) {
 				internalDX = requestedWidth;
 				internalDY = requestedHeight;
@@ -4285,8 +4254,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	//	private void animatePageFlip( final int dir ) {
 //		animatePageFlip(dir, null);
 //	}
-	private void animatePageFlip( final int dir, final Runnable onFinishHandler )
-	{
+	private void animatePageFlip(final int dir, final Runnable onFinishHandler) {
 		if (!mOpened)
 			return;
 		BackgroundThread.instance().executeBackground(new Runnable() {
@@ -4347,7 +4315,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	static private Rect tapZoneBounds( int startX, int startY, int maxX, int maxY ) {
+	static private Rect tapZoneBounds(int startX, int startY, int maxX, int maxY) {
 		if ( startX<0 )
 			startX=0;
 		if ( startY<0 )
@@ -4369,8 +4337,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private void unhiliteTapZone() {
 		hiliteTapZone( false, 0, 0, surface.getWidth(), surface.getHeight() );
 	}
-	private void hiliteTapZone( final boolean hilite, final int startX, final int startY, final int maxX, final int maxY )
-	{
+	private void hiliteTapZone(final boolean hilite, final int startX, final int startY, final int maxX, final int maxY) {
 		alog.d("highliteTapZone("+startX + ", " + startY+")");
 		final int myHiliteId = ++nextHiliteId;
 		int txcolor = mSettings.getColor(PROP_FONT_COLOR, Color.BLACK);
@@ -4423,7 +4390,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		});
 	}
-	private void scheduleUnhilite( int delay ) {
+	private void scheduleUnhilite(int delay) {
 		final int myHiliteId = nextHiliteId;
 		BackgroundThread.instance().postGUI(new Runnable() {
 			@Override
@@ -4472,8 +4439,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private static final boolean showBrightnessFlickToast = false;
 
 
-	private void startAnimation( final int startX, final int startY, final int maxX, final int maxY, final int newX, final int newY )
-	{
+	private void startAnimation(final int startX, final int startY, final int maxX, final int maxY, final int newX, final int newY) {
 		if (!mOpened)
 			return;
 		alog.d("startAnimation("+startX + ", " + startY+")");
@@ -4538,8 +4504,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	}
 	private AnimationUpdate currentAnimationUpdate;
-	private void updateAnimation( final int x, final int y )
-	{
+	private void updateAnimation(final int x, final int y) {
 		if (!mOpened)
 			return;
 		alog.d("updateAnimation("+x + ", " + y+")");
@@ -4552,13 +4517,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		try {
 			// give a chance to background thread to process event faster
 			Thread.sleep(0);
-		} catch ( InterruptedException e ) {
+		} catch (InterruptedException e) {
 			// ignore
 		}
 	}
 
-	private void stopAnimation( final int x, final int y )
-	{
+	private void stopAnimation(final int x, final int y) {
 		if (!mOpened)
 			return;
 		alog.d("stopAnimation("+x+", "+y+")");
@@ -4574,8 +4538,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	DelayedExecutor animationScheduler = DelayedExecutor.createBackground("animation");
-	private void scheduleAnimation()
-	{
+	private void scheduleAnimation() {
 		if (!mOpened)
 			return;
 		animationScheduler.post(new Runnable() {
@@ -4588,12 +4551,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	interface ViewAnimationControl
-	{
-		public void update( int x, int y );
-		public void stop( int x, int y );
+	interface ViewAnimationControl {
+		public void update(int x, int y);
+		public void stop(int x, int y);
 		public void animate();
-		public void move( int duration, boolean accelerated );
+		public void move(int duration, boolean accelerated);
 		public boolean isStarted();
 		abstract void draw( Canvas canvas );
 	}
@@ -4603,8 +4565,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private static final int[] accelerationShape = new int[] {
 			0, 6, 24, 54, 95, 146, 206, 273, 345, 421, 500, 578, 654, 726, 793, 853, 904, 945, 975, 993, 1000
 	};
-	static public int accelerate( int x0, int x1, int x )
-	{
+	static public int accelerate(int x0, int x1, int x) {
 		if ( x<x0 )
 			x = x0;
 		if (x>x1)
@@ -4613,11 +4574,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int pos = x1 > x0 ? 100 * intervals * (x - x0) / (x1-x0) : x1;
 		int interval = pos / 100;
 		int part = pos % 100;
-		if ( interval<0 )
+		if (interval<0)
 			interval = 0;
-		else if ( interval>intervals )
+		else if (interval > intervals)
 			interval = intervals;
-		int y = interval==intervals ? 100000 : accelerationShape[interval]*100 + (accelerationShape[interval+1]-accelerationShape[interval]) * part;
+		int y = interval == intervals ? 100000 : accelerationShape[interval] * 100 + (accelerationShape[interval + 1]-accelerationShape[interval]) * part;
 		return x0 + (x1 - x0) * y / 100000;
 	}
 
@@ -4718,8 +4679,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int pointerCurrPos;
 		BitmapInfo image1;
 		BitmapInfo image2;
-		ScrollViewAnimation( int startY, int maxY )
-		{
+		ScrollViewAnimation(int startY, int maxY) {
 			super();
 			this.startY = startY;
 			this.maxY = maxY;
@@ -4768,14 +4728,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 
 		@Override
-		public void move( int duration, boolean accelerated  ) {
+		public void move(int duration, boolean accelerated) {
 			if ( duration>0  && pageFlipAnimationSpeedMs!=0 ) {
 				int steps = (int)(duration / getAvgAnimationDrawDuration()) + 2;
 				int x0 = pointerCurrPos;
 				int x1 = pointerDestPos;
 				if ( (x0-x1)<10 && (x0-x1)>-10 )
 					steps = 2;
-				for ( int i=1; i<steps; i++ ) {
+				for (int i=1; i<steps; i++) {
 					int x = x0 + (x1-x0) * i / steps;
 					pointerCurrPos = accelerated ? accelerate( x0, x1, x ) : x;
 					draw();
@@ -4861,7 +4821,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		double a = 0;
 		double b = Math.PI/2;
 		double c = 0;
-		for ( int i=0; i<15; i++ ) {
+		for (int i=0; i<15; i++) {
 			c = (a + b) / 2;
 			double cq = c - Math.sin(c);
 			if ( cq < dx )
@@ -4872,7 +4832,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return c;
 	}
 	static {
-		for ( int i=0; i<=SIN_TABLE_SIZE; i++ ) {
+		for (int i=0; i<=SIN_TABLE_SIZE; i++) {
 			double angle = Math.PI / 2 * i / SIN_TABLE_SIZE;
 			int s = (int)Math.round(Math.sin(angle) * SIN_TABLE_SCALE);
 			SIN_TABLE[i] = s;
@@ -4905,8 +4865,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		BitmapInfo image1;
 		BitmapInfo image2;
 
-		PageViewAnimation( int startX, int maxX, int direction )
-		{
+		PageViewAnimation(int startX, int maxX, int direction) {
 			super();
 			this.startX = startX;
 			this.maxX = maxX;
@@ -4947,7 +4906,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			final int numPaints = 16;
 			shadePaints = new Paint[numPaints];
 			hilitePaints = new Paint[numPaints];
-			for ( int i=0; i<numPaints; i++ ) {
+			for (int i=0; i<numPaints; i++) {
 				shadePaints[i] = new Paint();
 				hilitePaints[i] = new Paint();
 				hilitePaints[i].setStyle(Paint.Style.FILL);
@@ -4966,12 +4925,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			log.d("PageViewAnimation -- created in " + duration + " millis");
 		}
 
-		private void drawGradient( Canvas canvas, Rect rc, Paint[] paints, int startIndex, int endIndex ) {
+		private void drawGradient(Canvas canvas, Rect rc, Paint[] paints, int startIndex, int endIndex) {
 			int n = (startIndex<endIndex) ? endIndex-startIndex+1 : startIndex-endIndex + 1;
 			int dir = (startIndex<endIndex) ? 1 : -1;
 			int dx = rc.right - rc.left;
 			Rect rect = new Rect(rc);
-			for ( int i=0; i<n; i++ ) {
+			for (int i=0; i<n; i++) {
 				int index = startIndex + i*dir;
 				int x1 = rc.left + dx*i/n;
 				int x2 = rc.left + dx*(i+1)/n;
@@ -4985,7 +4944,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		}
 
-		private void drawShadow( Canvas canvas, Rect rc ) {
+		private void drawShadow(Canvas canvas, Rect rc) {
 			drawGradient(canvas, rc, shadePaints, shadePaints.length/2, shadePaints.length/10);
 		}
 
@@ -5069,7 +5028,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				int n = distortdx / 5 + 1;
 				int dst0 = SIN_TABLE[distortanglestart * SIN_TABLE_SIZE / PI_DIV_2] * maxdistortdx / SIN_TABLE_SCALE;
 				int src0 = distortanglestart * maxdistortdx / SIN_TABLE_SCALE;
-				for ( int i=0; i<n; i++ ) {
+				for (int i=0; i<n; i++) {
 					int angledelta = distortangleend - distortanglestart;
 					int startangle = distortanglestart + i * angledelta / n;
 					int endangle = distortanglestart + (i+1) * angledelta / n;
@@ -5099,15 +5058,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 
 		@Override
-		public void move( int duration, boolean accelerated ) {
+		public void move(int duration, boolean accelerated) {
 			if ( duration > 0 && pageFlipAnimationSpeedMs!=0 ) {
 				int steps = (int)(duration / getAvgAnimationDrawDuration()) + 2;
 				int x0 = currShift;
 				int x1 = destShift;
-				if ( (x0-x1)<10 && (x0-x1)>-10 )
+				if ( (x0 - x1) < 10 && (x0 - x1) > -10 )
 					steps = 2;
-				for ( int i=1; i<steps; i++ ) {
-					int x = x0 + (x1-x0) * i / steps;
+				for (int i=1; i < steps; i++) {
+					int x = x0 + (x1 - x0) * i / steps;
 					currShift = accelerated ? accelerate( x0, x1, x ) : x;
 					draw();
 				}
@@ -5658,6 +5617,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 				highlightBookmarks();
 
+				hideProgress();
+
 				drawPage();
 				BackgroundThread.instance().postGUI(new Runnable() {
 					public void run() {
@@ -5899,7 +5860,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 
 	private int dimmingAlpha = 255; // no dimming
-	public void setDimmingAlpha( int alpha ) {
+	public void setDimmingAlpha(int alpha) {
 		if ( alpha>255 )
 			alpha = 255;
 		if ( alpha<32 )
@@ -5916,14 +5877,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-	private void restorePositionBackground( String pos )
-	{
+	private void restorePositionBackground(String pos) {
 		BackgroundThread.ensureBackground();
 		if (pos != null) {
 			BackgroundThread.ensureBackground();
 			doc.goToPosition(pos, false);
 			preparePageImage(0);
-			hideProgress();
 			drawPage();
 			updateCurrentPositionStatus();
 		}
@@ -6113,7 +6072,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-	public Bookmark saveCurrentPositionBookmarkSync( final boolean saveToDB ) {
+	public Bookmark saveCurrentPositionBookmarkSync(final boolean saveToDB) {
 		++lastSavePositionTaskId;
 		Bookmark bmk = BackgroundThread.instance().callBackground(new Callable<Bookmark>() {
 			@Override
@@ -6284,7 +6243,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				log.d("OnLoadFileEnd: resizeInternal(" + internalDX + "," + internalDY + ")");
 				doc.resize(internalDX, internalDY);
 			}
-			hideProgress();
 		}
 
 		public void OnLoadFileError(String message) {
@@ -6407,8 +6365,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private boolean invalidImages = true;
-	public void clearImageCache()
-	{
+	public void clearImageCache() {
 		BackgroundThread.instance().postBackground( new Runnable() {
 			public void run() {
 				invalidImages = true;
@@ -6416,8 +6373,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void setStyleSheet( final String css )
-	{
+	public void setStyleSheet(final String css) {
 		BackgroundThread.ensureGUI();
 		if ( css!=null && css.length()>0 ) {
 			post(new Task() {
@@ -6428,14 +6384,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-	public void goToPosition( int position )
-	{
+	public void goToPosition(int position) {
 		BackgroundThread.ensureGUI();
 		doEngineCommand(ReaderCommand.DCMD_GO_POS, position);
 	}
 
-	public void moveBy( final int delta )
-	{
+	public void moveBy(final int delta) {
 		BackgroundThread.ensureGUI();
 		log.d("moveBy(" + delta + ")");
 		post(new Task() {
@@ -6450,14 +6404,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		});
 	}
 
-	public void goToPage( int pageNumber )
-	{
+	public void goToPage(int pageNumber) {
 		BackgroundThread.ensureGUI();
 		doEngineCommand(ReaderCommand.DCMD_GO_PAGE, pageNumber-1);
 	}
 
-	public void goToPercent( final int percent )
-	{
+	public void goToPercent(final int percent) {
 		BackgroundThread.ensureGUI();
 		if ( percent>=0 && percent<=100 )
 			post( new Task() {
@@ -6478,7 +6430,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void onFail();
 	}
 
-	public void moveSelection( final ReaderCommand command, final int param, final MoveSelectionCallback callback ) {
+	public void moveSelection(final ReaderCommand command, final int param, final MoveSelectionCallback callback) {
 		post( new Task() {
 			private boolean res;
 			private Selection selection = new Selection();
@@ -6646,8 +6598,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		syncViewSettings(getSettings(), true, true);
 	}
 
-	public void showInputDialog( final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final InputHandler handler )
-	{
+	public void showInputDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final InputHandler handler) {
 		BackgroundThread.instance().executeGUI(new Runnable() {
 			@Override
 			public void run() {
@@ -6682,8 +6633,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				});
 	}
 
-	public void showGoToPageDialog( final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final GotoPageDialog.GotoPageHandler handler )
-	{
+	public void showGoToPageDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final GotoPageDialog.GotoPageHandler handler) {
 		BackgroundThread.instance().executeGUI(new Runnable() {
 			@Override
 			public void run() {
@@ -7080,7 +7030,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
         // set initial size to exclude java.lang.IllegalArgumentException in Bitmap.createBitmap(0, 0)
         // surface.getWidth() at this point return 0
         requestResize(600, 800);
-        
+		requestedWidth = 100;
+		requestedHeight = 100;
+
         BackgroundThread.instance().postBackground(new Runnable() {
 
 			@Override

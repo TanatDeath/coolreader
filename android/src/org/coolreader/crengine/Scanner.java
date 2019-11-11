@@ -460,6 +460,8 @@ public class Scanner extends FileInfoChangeSource {
 			return null;
 		if (FileInfo.OPDS_LIST_TAG.equals(path))
 			return createOPDSRoot();
+		else if (FileInfo.RESCAN_LIBRARY_TAG.equals(path))
+			return createRescanRoot();
 		else if (FileInfo.SEARCH_SHORTCUT_TAG.equals(path))
 			return createSearchRoot();
 		else if (FileInfo.RECENT_DIR_TAG.equals(path))
@@ -552,7 +554,21 @@ public class Scanner extends FileInfoChangeSource {
 	private void addSearchRoot() {
 		addRoot(createSearchRoot());
 	}
-	
+
+	public FileInfo createRescanRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.RESCAN_LIBRARY_TAG;
+		dir.filename = mActivity.getString(R.string.mi_book_rescan);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addRescanRoot() {
+		addRoot(createRescanRoot());
+	}
+
 	public FileInfo createAuthorsRoot() {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
@@ -884,6 +900,7 @@ public class Scanner extends FileInfoChangeSource {
 	
 	public ArrayList<FileInfo> getLibraryItems() {
 		ArrayList<FileInfo> result = new ArrayList<FileInfo>();
+		result.add(pathToFileInfo(FileInfo.RESCAN_LIBRARY_TAG));
 		result.add(pathToFileInfo(FileInfo.SEARCH_SHORTCUT_TAG));
 		result.add(pathToFileInfo(FileInfo.AUTHORS_TAG));
 		result.add(pathToFileInfo(FileInfo.TITLE_TAG));

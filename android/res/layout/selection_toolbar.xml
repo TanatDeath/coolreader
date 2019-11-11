@@ -14,7 +14,18 @@
 	android:layout_marginRight="3dip"
     android:baselineAligned="true"
     >
-
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:baselineAligned="true"
+			android:id="@+id/recentDics"
+			android:layout_marginTop="1dip"
+			android:layout_marginBottom="1dip"
+			android:layout_marginLeft="1dip"
+			android:layout_marginRight="1dip"
+			>
+	</LinearLayout>
 	<LinearLayout
 	    android:orientation="horizontal"
 	    android:layout_width="fill_parent"

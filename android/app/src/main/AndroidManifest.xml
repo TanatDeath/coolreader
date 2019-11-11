@@ -18,7 +18,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!-- uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/-->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- Stop TTS on incoming call -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <!-- Hide Android3 soft buttons on Archos -->
@@ -33,6 +33,7 @@
         android:label="@string/app_name_fork"
         android:process="org.coolreader.mod.plotn"
         android:resizeableActivity="true"
+        android:usesCleartextTraffic="true"
         >
 
         <meta-data android:name="android.max_aspect" android:value="2.1" />
@@ -191,6 +192,9 @@
                 <data android:pathPattern="/.*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb3" />
                 <data android:pathPattern="/.*\\.fb2\\.zip" />
                 <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
@@ -232,7 +236,6 @@
                 <data android:pathPattern=".*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
@@ -244,6 +247,24 @@
                 <data android:pathPattern=".*..*..*..*..*..*\\.fb2"/>
                 <data android:pathPattern=".*..*..*..*..*..*..*\\.fb2"/>
                 <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb2"/>
+                <data android:pathPattern="/.*\\.FB3"/>
+                <data android:pathPattern=".*\\.FB3"/>
+                <data android:pathPattern="/.*\\.fb3"/>
+                <data android:pathPattern=".*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb3"/>
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -260,6 +281,9 @@
                 <data android:pathPattern="/.*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb3" />
                 <data android:pathPattern="/.*\\.fb2\\.zip" />
                 <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
@@ -301,7 +325,6 @@
                 <data android:pathPattern=".*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
@@ -313,6 +336,24 @@
                 <data android:pathPattern=".*..*..*..*..*..*\\.fb2"/>
                 <data android:pathPattern=".*..*..*..*..*..*..*\\.fb2"/>
                 <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb2"/>
+                <data android:pathPattern="/.*\\.FB3"/>
+                <data android:pathPattern=".*\\.FB3"/>
+                <data android:pathPattern="/.*\\.fb3"/>
+                <data android:pathPattern=".*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
+                <data android:pathPattern=".*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb3"/>
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb3"/>
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -329,10 +370,12 @@
                 <data android:mimeType="application/x-fictionbook" />
                 <data android:mimeType="application/x-fb2" />
                 <data android:mimeType="application/fb2"/>
+                <data android:mimeType="application/fb3"/>
                 <data android:mimeType="application/fb2.zip"/>
                 <data android:mimeType="application/zip"/>
                 <data android:mimeType="text/fb2+xml"/>
                 <data android:mimeType="application/fb2"/>
+                <data android:mimeType="application/fb3"/>
                 <data android:mimeType="application/fb2+zip"/>
                 <data android:mimeType="application/x-zip-compressed-fb2"/>
                 <data android:mimeType="application/x-fictionbook-ebook"/>
@@ -497,6 +540,15 @@
                 <data android:pathPattern="/.*\\.html" />
                 <data android:pathPattern="/.*\\..*\\.html" />
                 <data android:pathPattern="/.*\\..*\\..*\\.html" />
+                <data android:pathPattern="/.*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odp" />
                 <data android:pathPattern="/.*\\.txt\\.htm" />
                 <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
@@ -507,6 +559,18 @@
                 <data android:pathPattern="/.*\\.html"/>
                 <data android:pathPattern=".*\\.HTML"/>
                 <data android:pathPattern="/.*\\.HTML"/>
+                <data android:pathPattern=".*\\.odt"/>
+                <data android:pathPattern="/.*\\.odt"/>
+                <data android:pathPattern=".*\\.ODT"/>
+                <data android:pathPattern="/.*\\.ODT"/>
+                <data android:pathPattern=".*\\.ods"/>
+                <data android:pathPattern="/.*\\.ods"/>
+                <data android:pathPattern=".*\\.ODS"/>
+                <data android:pathPattern="/.*\\.ODS"/>
+                <data android:pathPattern=".*\\.odp"/>
+                <data android:pathPattern="/.*\\.odp"/>
+                <data android:pathPattern=".*\\.ODP"/>
+                <data android:pathPattern="/.*\\.ODP"/>
                 <data android:pathPattern=".*\\.htm"/>
                 <data android:pathPattern="/.*\\.htm"/>
                 <data android:pathPattern=".*\\.HTM"/>
@@ -527,6 +591,15 @@
                 <data android:pathPattern="/.*\\.html" />
                 <data android:pathPattern="/.*\\..*\\.html" />
                 <data android:pathPattern="/.*\\..*\\..*\\.html" />
+                <data android:pathPattern="/.*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odp" />
                 <data android:pathPattern="/.*\\.txt\\.htm" />
                 <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
@@ -537,6 +610,18 @@
                 <data android:pathPattern="/.*\\.html"/>
                 <data android:pathPattern=".*\\.HTML"/>
                 <data android:pathPattern="/.*\\.HTML"/>
+                <data android:pathPattern=".*\\.odt"/>
+                <data android:pathPattern="/.*\\.odt"/>
+                <data android:pathPattern=".*\\.ODT"/>
+                <data android:pathPattern="/.*\\.ODT"/>
+                <data android:pathPattern=".*\\.ods"/>
+                <data android:pathPattern="/.*\\.ods"/>
+                <data android:pathPattern=".*\\.ODS"/>
+                <data android:pathPattern="/.*\\.ODS"/>
+                <data android:pathPattern=".*\\.odp"/>
+                <data android:pathPattern="/.*\\.odp"/>
+                <data android:pathPattern=".*\\.ODP"/>
+                <data android:pathPattern="/.*\\.ODP"/>
                 <data android:pathPattern=".*\\.htm"/>
                 <data android:pathPattern="/.*\\.htm"/>
                 <data android:pathPattern=".*\\.HTM"/>
@@ -555,6 +640,11 @@
                 <data android:scheme="content" />
                 <data android:mimeType="text/html" />
                 <data android:mimeType="application/xhtml+xml" />
+                <!--
+                <data android:mimeType="application/vnd.oasis.opendocument.text" />
+                <data android:mimeType="application/vnd.oasis.opendocument.spreadsheet" />
+                <data android:mimeType="application/vnd.oasis.opendocument.presentation" />
+                -->
             </intent-filter>
         </activity-alias>
         <!-- alias activity to disable CHM -->
@@ -847,11 +937,16 @@
                 <data android:pathPattern="/.*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docx" />
+                <data android:pathPattern="/.*\\.tmdx" />
+                <data android:pathPattern="/.*\\..*\\.tmdx" />
+                <data android:pathPattern="/.*\\..*\\..*\\.tmdx" />
                 <data android:pathPattern="/.*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docm" />
                 <data android:pathPattern=".*\\.docx"/>
                 <data android:pathPattern="/.*\\.docx"/>
+                <data android:pathPattern=".*\\.tmdx"/>
+                <data android:pathPattern="/.*\\.tmdx"/>
                 <data android:pathPattern=".*\\.docm"/>
                 <data android:pathPattern="/.*\\.docm"/>
             </intent-filter>
@@ -870,11 +965,16 @@
                 <data android:pathPattern="/.*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docx" />
+                <data android:pathPattern="/.*\\.tmdx" />
+                <data android:pathPattern="/.*\\..*\\.tmdx" />
+                <data android:pathPattern="/.*\\..*\\..*\\.tmdx" />
                 <data android:pathPattern="/.*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docm" />
                 <data android:pathPattern=".*\\.docx"/>
                 <data android:pathPattern="/.*\\.docx"/>
+                <data android:pathPattern=".*\\.tmdx"/>
+                <data android:pathPattern="/.*\\.tmdx"/>
                 <data android:pathPattern=".*\\.docm"/>
                 <data android:pathPattern="/.*\\.docm"/>
             </intent-filter>
@@ -890,6 +990,18 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/textmaker.wordprocessingml.document" />
             </intent-filter>
         </activity-alias>
         <!-- alias activity to disable DOCX -->
@@ -949,6 +1061,8 @@
                 <data android:mimeType="application/word"/>
                 <data android:mimeType="application/x-msw6"/>
                 <data android:mimeType="application/x-msword"/>
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+                <data android:mimeType="application/textmaker.wordprocessingml.document"/>
                 <data android:mimeType="application/doc+zip"/>
                 <data android:mimeType="application/doc.zip"/>
             </intent-filter>
@@ -1181,13 +1295,13 @@
             </intent-filter>
         </receiver>
         <provider
-            android:name=".GenericFileProvider"
-            android:authorities="org.coolreader.mod.plotn.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
+                android:name=".GenericFileProvider"
+                android:authorities="org.coolreader.mod.plotn.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
             <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths"/>
         </provider>
     </application>
 

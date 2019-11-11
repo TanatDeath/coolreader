@@ -79,6 +79,7 @@ public class Dictionaries {
 	public DictInfo currentDictionary;
 	public DictInfo currentDictionary2;
 	public DictInfo currentDictionary3;
+	public List<DictInfo> diRecent = new ArrayList<DictInfo>();
 
 	public static class DictInfo {
 		public final String id; 
@@ -158,16 +159,23 @@ public class Dictionaries {
 
 	public static final String DEFAULT_DICTIONARY_ID = "com.ngc.fora";
 	
-	static DictInfo findById(String id) {
-		for(DictInfo d: dicts) {
-			if (d.id.equals(id))
-				return d;
+	static DictInfo findById(String id, BaseActivity act) {
+		if (act == null) {
+			for (DictInfo d : dicts) {
+				if (d.id.equals(id))
+					return d;
+			}
+		} else {
+			for (DictInfo d : getDictList(act)) {
+				if (d.id.equals(id))
+					return d;
+			}
 		}
 		return null;
 	}
 	
 	static DictInfo defaultDictionary() {
-		return findById(DEFAULT_DICTIONARY_ID);
+		return findById(DEFAULT_DICTIONARY_ID, null);
 	}
 
 	public static void addDicsSendTo(BaseActivity act, List<DictInfo> ldi) {
@@ -241,14 +249,14 @@ public class Dictionaries {
 		return dlist;
 	}
 
-	public void setDict( String id ) {
-		DictInfo d = findById(id);
+	public void setDict( String id, BaseActivity act ) {
+		DictInfo d = findById(id, act);
 		if (d != null)
 			currentDictionary = d;
 	}
 
-	public void setDict2( String id ) {
-		DictInfo d = findById(id);
+	public void setDict2( String id, BaseActivity act ) {
+		DictInfo d = findById(id, act);
 		if (d != null)
 			currentDictionary2 = d;
 	}
@@ -282,7 +290,16 @@ public class Dictionaries {
 			super(msg);
 		}
 	}
-	
+
+	public DictInfo getCurDictionary() {
+		DictInfo curDict = currentDictionary;
+		if (iDic2IsActive > 0 && currentDictionary2 != null)
+			curDict = currentDictionary2;
+		if (currentDictionary3 != null)
+			curDict = currentDictionary3;
+		return curDict;
+	}
+
 	@SuppressLint("NewApi")
 	public void findInDictionary(String s) throws DictionaryException {
 		log.d("lookup in dictionary: " + s);
@@ -297,6 +314,10 @@ public class Dictionaries {
 		if (null == curDict) {
 			throw new DictionaryException("Current dictionary are invalid!");
 		}
+		if (diRecent.contains(curDict)) diRecent.remove(curDict);
+		diRecent.add(0,curDict);
+		if (diRecent.size()>5)
+			while (diRecent.size()>5) diRecent.remove(5);
 		boolean isDouble = false;
 		//save to dic search history
 		if (mActivity instanceof CoolReader) {

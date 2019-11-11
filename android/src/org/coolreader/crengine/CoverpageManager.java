@@ -534,6 +534,8 @@ public class CoverpageManager {
 
 	private void queueForDrawing(final CRDBService.LocalBinder db, ImageItem file) {
 		synchronized (LOCK) {
+			if (file == null || file.file == null || file.file.format == null)
+				return;
 			BitmapCacheItem item = mCache.getItem(file);
 			if (item != null && (item.state == State.READY || item.state == State.DRAWING))
 				return;

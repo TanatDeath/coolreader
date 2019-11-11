@@ -43,6 +43,7 @@ import org.coolreader.crengine.BrowserViewLayout;
 import org.coolreader.crengine.CRRootView;
 import org.coolreader.crengine.CRToolBar;
 import org.coolreader.crengine.CRToolBar.OnActionHandler;
+import org.coolreader.crengine.ConvertOdtFormat;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
 import org.coolreader.crengine.DocumentFormat;
@@ -221,7 +222,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private FileBrowser mBrowser;
 	private View mBrowserTitleBar;
 	private CRToolBar mBrowserToolBar;
-	private BrowserViewLayout mBrowserFrame;
+	public BrowserViewLayout mBrowserFrame;
 	public CRRootView mHomeFrame;
 	private Engine mEngine;
 	public PictureReceived picReceived = null;
@@ -258,8 +259,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	//View startupView;
 	//CRDB mDB;
-	private ViewGroup mCurrentFrame;
-	private ViewGroup mPreviousFrame;
+	public ViewGroup mCurrentFrame;
+	public ViewGroup mPreviousFrame;
 
 	private String mOptionAppearance = "0";
 
@@ -530,11 +531,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (intent == null)
 			return false;
 		String fileToOpen = null;
+		String scheme = null;
+		String host = null;
 		String intentAction = intent.getAction();
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
 			Uri uri = intent.getData();
 			String sUri = "";
-			if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
+			if (uri != null) {
+				scheme = uri.getScheme();
+				host = uri.getHost();
+				sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
+			}
 			if (sUri.contains(YNDConfig.YND_REDIRECT_URL)) {
 				String token = "";
 				if (sUri.contains("#access_token=")) {
@@ -965,12 +972,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				fileToOpen = fileToOpen.replace("%00", "@/");
 				fileToOpen = Uri.decode(fileToOpen);
 			}
-			if (fileToOpen.startsWith("/document/primary:")) {
-				// scheme="content", host="com.android.externalstorage.documents"
-				// decode special uri form: /document/primary:<somebody>
-				File[] dataDirs = Engine.getStorageDirectories(false);
-				if (dataDirs != null && dataDirs.length > 0) {
-					fileToOpen = fileToOpen.replace("/document/primary:", dataDirs[0].getAbsolutePath() + "/");
+			if ("content".equals(scheme)) {
+				if ("com.android.externalstorage.documents".equals(host)) {
+					// application "Files" by Google, package="com.android.externalstorage.documents"
+					if (fileToOpen.matches("^/document/.*:.*$")) {
+						// decode special uri form: /document/primary:<somebody>
+						//                          /document/XXXX-XXXX:<somebody>
+						String shortcut = fileToOpen.replaceFirst("^/document/(.*):.*$", "$1");
+						String mountRoot = Engine.getMountRootByShortcut(shortcut);
+						if (mountRoot != null)
+							fileToOpen = fileToOpen.replaceFirst("^/document/.*:(.*)$", mountRoot + "/$1");
+					}
+				} else if ("com.google.android.apps.nbu.files.provider".equals(host)) {
+					// application "Files" by Google, package="com.google.android.apps.nbu.files"
+					if (fileToOpen.startsWith("/1////")) {
+						// skip "/1///"
+						fileToOpen = fileToOpen.substring(5);
+						fileToOpen = Uri.decode(fileToOpen);
+					} else if (fileToOpen.startsWith("/1/file:///")) {
+						// skip "/1/file://"
+						fileToOpen = fileToOpen.substring(10);
+						fileToOpen = Uri.decode(fileToOpen);
+					}
 				}
 			} else if (fileToOpen.startsWith("/1////")) {
 				// scheme="content", host="com.google.android.apps.nbu.files.provider"
@@ -983,6 +1006,40 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			// patch for opening of books from ReLaunch (under Nook Simple Touch) 
 			while (fileToOpen.indexOf("%2F") >= 0) {
 				fileToOpen = fileToOpen.replace("%2F", "/");
+			}
+			if (
+				(fileToOpen.toUpperCase().endsWith(".ODT"))||
+				(fileToOpen.toUpperCase().endsWith(".ODS"))||
+				(fileToOpen.toUpperCase().endsWith(".ODP"))
+			   ) {
+				final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+				FileInfo item = new FileInfo(fileToOpen);
+				File f = new File(downloadDir.pathname+"/converted/"+item.filename+".html");
+				if (f.exists()) {
+					FileInfo fi = new FileInfo(f);
+					showToast(getString(R.string.docx_open_converted));
+					loadDocument(fi);
+					return true;
+				} else {
+					final FileInfo item1 = item;
+					askConfirmation(R.string.docx_convert, new Runnable() {
+						@Override
+						public void run() {
+							try {
+								log.i("Convert odt file");
+								ConvertOdtFormat.convertOdtFile(item1.pathname, downloadDir.pathname + "/converted/");
+								File f = new File(downloadDir.pathname+"/converted/"+item1.filename+".html");
+								if (f.exists()) {
+									FileInfo fi = new FileInfo(f);
+									loadDocument(fi);
+								}
+							} catch (Exception e) {
+								showToast("exception while converting odt file");
+							}
+						}
+					});
+					return true;
+				}
 			}
 			log.d("FILE_TO_OPEN = " + fileToOpen);
 			final String finalFileToOpen = fileToOpen;
@@ -1461,10 +1518,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		return mPreviousFrame != null && mPreviousFrame == mHomeFrame;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void setCurrentFrame(ViewGroup newFrame) {
         if (mCurrentFrame != newFrame) {
 			mPreviousFrame = mCurrentFrame;
 			log.i("New current frame: " + newFrame.getClass().toString());
+			if (mCurrentFrame == mBrowserFrame) {
+				FileBrowser.mListPosCacheOld = (HashMap<String, Integer>) FileBrowser.mListPosCache.clone();
+			}
 			mCurrentFrame = newFrame;
 			setContentView(mCurrentFrame);
 			mCurrentFrame.requestFocus();
@@ -1480,6 +1541,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mCurrentFrame == mBrowserFrame) {
 				// update recent books directory
 				mBrowser.refreshDirectory(Services.getScanner().getRecentDir(), null);
+				mBrowser.scrollToLastPos();
 			}
 			onUserActivity();
 		}
@@ -1542,13 +1604,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		return mBrowserFrame != null;
 	}
 	
-	private void runInBrowser(final Runnable task) {
+	private void runInBrowser(final Runnable task, final boolean dontShowBrowser) {
 		waitForCRDBService(new Runnable() {
 			@Override
 			public void run() {
 				if (mBrowserFrame != null) {
 					task.run();
-					setCurrentFrame(mBrowserFrame);
+					if (!dontShowBrowser) setCurrentFrame(mBrowserFrame);
 				} else {
 					mBrowser = new FileBrowser(CoolReader.this, Services.getEngine(), Services.getScanner(), Services.getHistory());
 					mBrowser.setCoverPagesEnabled(settings().getBool(ReaderView.PROP_APP_SHOW_COVERPAGES, true));
@@ -1624,8 +1686,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					mBrowserFrame = new BrowserViewLayout(CoolReader.this, mBrowser, mBrowserToolBar, mBrowserTitleBar);
 					
 					task.run();
-					setCurrentFrame(mBrowserFrame);
-
+					if (!dontShowBrowser) setCurrentFrame(mBrowserFrame);
 //					if (getIntent() == null)
 //						mBrowser.showDirectory(Services.getScanner().getDownloadDirectory(), null);
 				}
@@ -1640,7 +1701,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void run() {
 				// do nothing, browser is shown
 			}
-		});
+		}, false);
 	}
 	
 	public void showManual() {
@@ -1686,7 +1747,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void run() {
 				mBrowser.showDirectory(dir, null);
 			}
-		});
+		}, FileInfo.RESCAN_LIBRARY_TAG.equals(dir.pathname));
 	}
 	
 	public void showBrowser(final String dir) {
@@ -1695,7 +1756,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void run() {
 				mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null);
 			}
-		});
+		}, FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
 	}
 	
 	public void showRecentBooks() {
@@ -1705,7 +1766,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void run() {
 				mBrowser.showRecentBooks();
 			}
-		});
+		}, false);
 	}
 
 	public void showOnlineCatalogs() {
@@ -1715,7 +1776,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void run() {
 				mBrowser.showOPDSRootDirectory();
 			}
-		});
+		}, false);
 	}
 
 	public void showDirectory(FileInfo path) {
@@ -1730,7 +1791,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void run() {
 				mBrowser.showDirectory(path, null);
 			}
-		});
+		}, false);
 	}
 
 	
@@ -1828,11 +1889,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public void setDict( String id ) {
-		mDictionaries.setDict(id);
+		mDictionaries.setDict(id, this);
 	}
 
 	public void setDict2( String id ) {
-		mDictionaries.setDict2(id);
+		mDictionaries.setDict2(id, this);
 	}
 
 	public void setDictWordCorrection (String id) {

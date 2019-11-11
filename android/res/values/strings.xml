@@ -300,6 +300,7 @@
     <string name="toast_bookmark_export_ok">Bookmarks were saved to </string>
     <string name="toast_bookmark_export_failed">Error while saving bookmarks to </string>
     <string name="mi_book_scan_recursive">Scan books in directory</string>
+    <string name="mi_book_rescan">Scan all</string>
     <string name="dlg_scan_title">Scanning directories</string>
     <string name="dlg_scan_message">It may take several minutes to finish</string>
     <string name="dlg_book_search">Find book</string>
@@ -922,7 +923,7 @@
     <string name="disable_orientation_popup_toolbar">Disable orientation popup toolbar</string>
     <string name="error_while_opening">Error while opening document \"%s\"</string>
     <string name="datadir_is_removed">Application data directory \"%s\" has been removed by other app.\nPossibly it was some kind of disc space optimizer.\nUnfortunately all the settings were lost.</string>
-    <string name="font_not_compat_with_language">Warning: font \"%s\" does not contain the full character set of the language \"%s\". Missing characters will be taken from the additional font.</string>
+    <string name="font_not_compat_with_language">Warning: font \"%s\" does not contain the full character set of the language \"%s\". Missing characters will be taken from the fallback font.</string>
     <string name="fontconfig_language_orthography_database">"Languages character set database by Fontconfig:
         https://www.fontconfig.org/ "
     </string>
@@ -982,4 +983,5 @@
     <string name="title_location_permission">Location permission</string>
     <string name="text_location_permission">Location permission is required, grant?</string>
     <string name="ok">Ok</string>
+    <string name="third_party_tango_mod_icon_set">High-contrast icons based on Tango Icon Library: http://tango.freedesktop.org/Tango_Icon_Library.</string>
 </resources>

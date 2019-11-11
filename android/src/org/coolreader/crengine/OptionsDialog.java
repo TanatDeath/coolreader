@@ -8,6 +8,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TreeMap;
 
 import org.coolreader.CoolReader;
@@ -27,6 +28,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -2725,10 +2727,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				if (item.value.equals(dict.id)) {
 					if (dict.dicIcon !=0)
 						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
-                    if (dict.icon != null)
-                        img.setImageDrawable(dict.icon);
-//					else
-//						img.setVisibility(View.INVISIBLE);
+                    if (dict.icon != null) {
+						Drawable fakeIcon = mActivity.getResources().getDrawable(R.drawable.lingvo);
+						final Bitmap bmp = Bitmap.createBitmap(dict.icon.getIntrinsicWidth(), dict.icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+						final Canvas canvas = new Canvas(bmp);
+						dict.icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+						dict.icon.draw(canvas);
+						Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+								bmp, fakeIcon.getIntrinsicWidth(), fakeIcon.getIntrinsicHeight(), false);
+						img.setImageBitmap(resizedBitmap);
+					}
 				}
 			}
 		}
@@ -2774,12 +2782,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					if (dict.dicIcon !=0) {
 						img.setVisibility(View.VISIBLE);
 						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
-					} else if (dict.icon != null) {
-                        img.setVisibility(View.VISIBLE);
-                        img.setImageDrawable(dict.icon);
-                    }
-					else
-						img.setVisibility(View.INVISIBLE);
+					}
+					if (dict.icon != null) {
+						Drawable fakeIcon = mActivity.getResources().getDrawable(R.drawable.lingvo);
+						final Bitmap bmp = Bitmap.createBitmap(dict.icon.getIntrinsicWidth(), dict.icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+						final Canvas canvas = new Canvas(bmp);
+						dict.icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+						dict.icon.draw(canvas);
+						Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+								bmp, fakeIcon.getIntrinsicWidth(), fakeIcon.getIntrinsicHeight(), false);
+						img.setImageBitmap(resizedBitmap);
+					}
 				}
 			}
 		}
@@ -3167,9 +3180,83 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if (sAdd.length>0) sAdd1=sAdd[0];
 			if (sAdd.length>1) sAdd2=sAdd[1];
 			if (sAdd.length>2) sAdd3=sAdd[2];
-			addItem(table,item,sAdd1,getString(R.string.font_test_phrase));
-			if (!StrUtils.isEmptyStr(sAdd2)) addItem(table,item,sAdd2,getString(R.string.font_test_phrase2));
-			if (!StrUtils.isEmptyStr(sAdd3)) addItem(table,item,sAdd3,getString(R.string.font_test_phrase3));
+			String s = mActivity.getCurrentLanguage();
+			if (s.toUpperCase().startsWith("RU")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.RUSSIAN.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.RUSSIAN.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.RUSSIAN.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.RUSSIAN[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.RUSSIAN[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.RUSSIAN[r3]);
+			} else
+			if (s.toUpperCase().startsWith("DE")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.GERMAN.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.GERMAN.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.GERMAN.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.GERMAN[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.GERMAN[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.GERMAN[r3]);
+			} else
+			if (s.toUpperCase().startsWith("EN")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.ENGLISH.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.ENGLISH.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.ENGLISH.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.ENGLISH[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.ENGLISH[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.ENGLISH[r3]);
+			} else
+			if (s.toUpperCase().startsWith("ES")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.SPAIN.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.SPAIN.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.SPAIN.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.SPAIN[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.SPAIN[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.SPAIN[r3]);
+			} else
+			if (s.toUpperCase().startsWith("NL")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.DUTCH.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.DUTCH.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.DUTCH.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.DUTCH[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.DUTCH[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.DUTCH[r3]);
+			}  else
+			if (s.toUpperCase().startsWith("CS")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.CH.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.CH.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.CH.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.CH[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.CH[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.CH[r3]);
+			} else
+			if (s.toUpperCase().startsWith("FR")) {
+				int r1 = (int)(Math.random()*((FontsPangramms.FRENCH.length-1)+1));
+				int r2 = (int)(Math.random()*((FontsPangramms.FRENCH.length-1)+1));
+				int r3 = (int)(Math.random()*((FontsPangramms.FRENCH.length-1)+1));
+				addItem(table, item, sAdd1, FontsPangramms.FRENCH[r1]);
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, FontsPangramms.FRENCH[r2]);
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, FontsPangramms.FRENCH[r3]);
+			} else {
+				addItem(table, item, sAdd1, getString(R.string.font_test_phrase));
+				if (!StrUtils.isEmptyStr(sAdd2))
+					addItem(table, item, sAdd2, getString(R.string.font_test_phrase2));
+				if (!StrUtils.isEmptyStr(sAdd3))
+					addItem(table, item, sAdd3, getString(R.string.font_test_phrase3));
+			}
 		}
 	}
 	
@@ -4046,7 +4133,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.options_rounded_corners_margin_add_info), filter).add(mRoundedCornersMargins).setDefaultValue("0")
 				.setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin, R.drawable.icons8_rounded_corners_margin));
         mOptionsPage.add(new GeoOption(this, filter).
-                setIconIdByAttr(R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
+                setIconIdByAttr(R.attr.attr_icons8_train_headphones, R.drawable.train_headphones));
         mOptionsControls = new OptionsListView(getContext(), null);
 		OptionBase kmO = new KeyMapOption(this, getString(R.string.options_app_key_actions),
 				getString(R.string.options_app_key_actions_add_info), filter).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);

@@ -844,7 +844,7 @@ xml:base="http://lib.ololo.cc/opds/">
 					L.i("opds: "+connection.getResponseMessage());
 					if (EXTENDED_LOG) L.d("Response: " + response);
 					if ( response!=200 ) {
-						onError("Error " + response);
+						onError("Error " + response + ": " + connection.getResponseMessage());
 						return;
 					}
 					

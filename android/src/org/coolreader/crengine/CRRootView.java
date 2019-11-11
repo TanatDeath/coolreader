@@ -1,7 +1,10 @@
 package org.coolreader.crengine;
 
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.*;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +21,7 @@ import org.coolreader.crengine.CRToolBar.OnActionHandler;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBService.OPDSCatalogsLoadingCallback;
+import org.coolreader.layouts.FlowLayout;
 import org.coolreader.plugins.OnlineStorePluginManager;
 import org.coolreader.plugins.OnlineStoreWrapper;
 import org.coolreader.plugins.litres.LitresPlugin;
@@ -34,9 +38,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private final CoolReader mActivity;
 	private ViewGroup mView;
 	private LinearLayout mRecentBooksScroll;
-	private LinearLayout mFilesystemScroll;
-	private LinearLayout mLibraryScroll;
-	private LinearLayout mOnlineCatalogsScroll;
+	private FlowLayout mFilesystemScroll;
+	private FlowLayout mLibraryScroll;
+	private FlowLayout mOnlineCatalogsScroll;
     private Button btnStateToRead;
     private Button btnStateReading;
     private Button btnStateFinished;
@@ -244,16 +248,16 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		colorGray = a.getColor(2, Color.GRAY);
 		colorIcon = a.getColor(3, Color.GRAY);
 		a.recycle();
-		boolean bNotNeeded = false;
-		if (lastRecentFiles.size()==books.size()) {
-			bNotNeeded = true;
-			for (int i=0;i<lastRecentFiles.size();i++) {
-				if (!lastRecentFiles.get(i).equals(books.get(i).getFileInfo())) {
-					bNotNeeded = false;
-				}
-			}
-		}
-		if (bNotNeeded) return;
+//		boolean bNotNeeded = false;
+//		if (lastRecentFiles.size()==books.size()) {
+//			bNotNeeded = true;
+//			for (int i=0;i<lastRecentFiles.size();i++) {
+//				if (!lastRecentFiles.get(i).equals(books.get(i).getFileInfo())) {
+//					bNotNeeded = false;
+//				}
+//			}
+//		}
+//		if (bNotNeeded) return;
 
 		lastRecentFiles.clear();
 		for (int i=0;i<books.size();i++) lastRecentFiles.add(books.get(i).getFileInfo());
@@ -407,11 +411,12 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		mOnlineCatalogsScroll.removeAllViews();
 		for (final FileInfo item : catalogs) {
-			final View view = inflater.inflate(R.layout.root_item_online_catalog, null);
+			final View view = inflater.inflate(R.layout.root_item_library_h, null);
 			ImageView icon = (ImageView)view.findViewById(R.id.item_icon);
+			setImageResourceSmall(icon,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			TextView label = (TextView)view.findViewById(R.id.item_name);
 			if (item.isOPDSRoot()) {
-				icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_opds_add_drawable, R.drawable.cr3_browser_folder_opds_add));
+				setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_opds_add_drawable, R.drawable.cr3_browser_folder_opds_add));
                 mActivity.tintViewIcons(icon,true);
 				label.setText("Add");
 				label.setTextColor(colorIcon);
@@ -422,7 +427,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					}
 				});
 			} else if (item.isOnlineCatalogPluginDir()) {
-				icon.setImageResource(R.drawable.litres);
+				setImageResourceSmall(icon, R.drawable.litres);
 				label.setText(item.filename);
 				label.setTextColor(colorIcon);
 				view.setOnLongClickListener(new OnLongClickListener() {
@@ -488,25 +493,25 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				}
 
 				if (label.getText().toString().toLowerCase().contains("gutenberg"))
-					icon.setImageResource(R.drawable.projectgutrnberg); else
+					setImageResourceSmall(icon, R.drawable.projectgutrnberg); else
 				if (label.getText().toString().toLowerCase().contains("legimi"))
-					icon.setImageResource(R.drawable.legimi); else
+					setImageResourceSmall(icon, R.drawable.legimi); else
 				if (label.getText().toString().toLowerCase().matches(".*revues.*org.*"))
-					icon.setImageResource(R.drawable.revues_org); else
+					setImageResourceSmall(icon, R.drawable.revues_org); else
 				if (label.getText().toString().toLowerCase().matches(".*libres.*et.*gratuits.*"))
-					icon.setImageResource(R.drawable.ebooks_gratuits); else
+					setImageResourceSmall(icon, R.drawable.ebooks_gratuits); else
 				if (label.getText().toString().toLowerCase().matches(".*internet.*archive.*"))
-					icon.setImageResource(R.drawable.internet_archive); else
+					setImageResourceSmall(icon, R.drawable.internet_archive); else
 				if (label.getText().toString().toLowerCase().matches(".*feed.*books.*"))
-					icon.setImageResource(R.drawable.feedbooks); else
+					setImageResourceSmall(icon, R.drawable.feedbooks); else
 				if (label.getText().toString().toLowerCase().matches(".*flibusta.*"))
-					icon.setImageResource(R.drawable.flibusta); else
+					setImageResourceSmall(icon, R.drawable.flibusta); else
 				if (label.getText().toString().toLowerCase().contains("manybooks"))
-					icon.setImageResource(R.drawable.manybooks); else
+					setImageResourceSmall(icon, R.drawable.manybooks); else
 				if (label.getText().toString().toLowerCase().contains("smashwords"))
-					icon.setImageResource(R.drawable.smashwords); else
+					setImageResourceSmall(icon, R.drawable.smashwords); else
 				if (label.getText().toString().toLowerCase().contains("webnovel"))
-					icon.setImageResource(R.drawable.webnovel); else
+					setImageResourceSmall(icon, R.drawable.webnovel); else
 					mActivity.tintViewIcons(icon,true);
 				view.setOnClickListener(new OnClickListener() {
 					@Override
@@ -566,10 +571,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 //			});
 //			mFilesystemScroll.addView(view);
 
-			View viewDBX = inflater.inflate(R.layout.root_item_dir, null);
+			View viewDBX = inflater.inflate(R.layout.root_item_library_h, null);
 			ImageView iconDBX = (ImageView) viewDBX.findViewById(R.id.item_icon);
 			TextView labelDBX = (TextView) viewDBX.findViewById(R.id.item_name);
-			iconDBX.setImageResource(Utils.resolveResourceIdByAttr(mActivity,
+			setImageResourceSmall(iconDBX, Utils.resolveResourceIdByAttr(mActivity,
 					R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
 			mActivity.tintViewIcons(iconDBX,true);
 			labelDBX.setText(R.string.open_book_from_dbx_short);
@@ -591,10 +596,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			});
 			mFilesystemScroll.addView(viewDBX);
 
-			View viewYandex = inflater.inflate(R.layout.root_item_dir, null);
+			View viewYandex = inflater.inflate(R.layout.root_item_library_h, null);
 			ImageView iconYandex = (ImageView) viewYandex.findViewById(R.id.item_icon);
 			TextView labelYandex = (TextView) viewYandex.findViewById(R.id.item_name);
-			iconYandex.setImageResource(Utils.resolveResourceIdByAttr(mActivity,
+			setImageResourceSmall(iconYandex, Utils.resolveResourceIdByAttr(mActivity,
 					R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
 			mActivity.tintViewIcons(iconYandex,true);
 			labelYandex.setText(R.string.open_book_from_y_short);
@@ -619,15 +624,15 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			for (final FileInfo item : dirs) {
 				if (item == null)
 					continue;
-				view = inflater.inflate(R.layout.root_item_dir, null);
+				view = inflater.inflate(R.layout.root_item_library_h, null);
 				icon = (ImageView) view.findViewById(R.id.item_icon);
 				label = (TextView) view.findViewById(R.id.item_name);
 				if (item.getType() == FileInfo.TYPE_DOWNLOAD_DIR)
-					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_bookmark_drawable, R.drawable.folder_bookmark));
+					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_bookmark_drawable, R.drawable.folder_bookmark));
 				else if (item.getType() == FileInfo.TYPE_FS_ROOT)
-					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.media_flash_microsd_drawable, R.drawable.media_flash_sd_mmc));
+					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.media_flash_microsd_drawable, R.drawable.media_flash_sd_mmc));
 				else
-					icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_drawable, R.drawable.folder_blue));
+					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_drawable, R.drawable.folder_blue));
                 mActivity.tintViewIcons(icon,true);
 				String labText = "";
 
@@ -711,6 +716,19 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
         });
     }
 
+    private void setImageResourceSmall(ImageView image, int resId) {
+		if (resId>0) {
+			Drawable fakeIcon = mActivity.getResources().getDrawable(resId);
+			final Bitmap bmp = Bitmap.createBitmap(fakeIcon.getIntrinsicWidth()*3/4, fakeIcon.getIntrinsicHeight()*3/4, Bitmap.Config.ARGB_8888);
+			final Canvas canvas = new Canvas(bmp);
+			fakeIcon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+			fakeIcon.draw(canvas);
+			Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+					bmp, fakeIcon.getIntrinsicWidth()*3/4, fakeIcon.getIntrinsicHeight()*3/4, false);
+			image.setImageBitmap(resizedBitmap);
+		}
+	}
+
     private void updateLibraryItems(ArrayList<FileInfo> dirs) {
 		int colorBlue;
 		int colorGreen;
@@ -729,21 +747,24 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		mLibraryScroll.removeAllViews();
 		for (final FileInfo item : dirs) {
-			final View view = inflater.inflate(R.layout.root_item_library, null);
+			final View view = inflater.inflate(R.layout.root_item_library_h, null);
 			ImageView image = (ImageView)view.findViewById(R.id.item_icon);
 			TextView label = (TextView)view.findViewById(R.id.item_name);
+			setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
+			if (item.isRescanShortcut())
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_scan, R.drawable.icons8_folder_scan));
 			if (item.isSearchShortcut())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
 			else if ( item.isBooksByRatingRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
 			else if ( item.isBooksByTitleRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			else if ( item.isBooksBySeriesRoot() )
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
 			else if (item.isBooksByAuthorRoot())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() || item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
-				image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
+				setImageResourceSmall(image, Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
             mActivity.tintViewIcons(image,true);
 			if (label != null) {
 				label.setText(item.filename);
@@ -761,19 +782,6 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		}
 		mLibraryScroll.invalidate();
 	}
-
-//	private HorizontalListView createHScroll(int layoutId, OnLongClickListener longClickListener) {
-//		LinearLayout layout = (LinearLayout)mView.findViewById(layoutId);
-//		layout.removeAllViews();
-//		HorizontalListView view = new HorizontalListView(mActivity, null);
-//		view.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-////		view.setFadingEdgeLength(10);
-////		view.setHorizontalFadingEdgeEnabled(true);
-//		layout.addView(view);
-//		if (longClickListener != null)
-//			layout.setOnLongClickListener(longClickListener); 
-//		return view;
-//	}
 	
 	private void updateDelimiterTheme(int viewId) {
 		View view = mView.findViewById(viewId);
@@ -812,11 +820,11 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		
 		mRecentBooksScroll = (LinearLayout)mView.findViewById(R.id.scroll_recent_books);
 		
-		mFilesystemScroll = (LinearLayout)mView.findViewById(R.id.scroll_filesystem);
+		mFilesystemScroll = (FlowLayout)mView.findViewById(R.id.scroll_filesystem);
 
-		mLibraryScroll = (LinearLayout)mView.findViewById(R.id.scroll_library);
+		mLibraryScroll = (FlowLayout)mView.findViewById(R.id.scroll_library);
 		
-		mOnlineCatalogsScroll = (LinearLayout)mView.findViewById(R.id.scroll_online_catalogs);
+		mOnlineCatalogsScroll = (FlowLayout)mView.findViewById(R.id.scroll_online_catalogs);
 
         btnStateToRead  = (Button)view.findViewById(R.id.book_state_toread);
 		btnStateToRead.setOnClickListener(new OnClickListener() {

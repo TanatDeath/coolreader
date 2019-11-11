@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "org.coolreader.mod.plotn"
-        minSdkVersion 14
-        targetSdkVersion 26
+        minSdkVersion 24
+        targetSdkVersion 28
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
@@ -64,7 +64,6 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
-            //useProguard false
             jniDebuggable true
             debuggable true
             externalNativeBuild {
@@ -149,4 +148,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support:support-annotations:28.0.0'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation files('libs/commons.jar')
+    implementation files('libs/OpenDocument.jar')
+    //implementation 'org.jopendocument:jOpenDocument:1.3'
 }

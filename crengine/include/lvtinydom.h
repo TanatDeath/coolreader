@@ -32,6 +32,7 @@
 #include "dtddef.h"
 #include "lvstyles.h"
 #include "lvdrawbuf.h"
+#include "lvembeddedfont.h"
 #include "lvstsheet.h"
 #include "lvpagesplitter.h"
 #include "lvptrvec.h"
@@ -851,7 +852,7 @@ public:
     /// returns object image source
     LVImageSourceRef getObjectImageSource();
     /// returns object image ref name
-    lString16 getObjectImageRefName();
+    lString16 getObjectImageRefName(bool percentDecode = true);
     /// returns object image stream
     LVStreamRef getObjectImageStream();
     /// formats final block

@@ -11,6 +11,10 @@ import org.coolreader.R;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -90,11 +94,14 @@ public class DictsDlg extends BaseDialog {
 				if (b.dicIcon!=0)
 					ivIcon.setImageDrawable(mCoolReader.getResources().getDrawable(b.dicIcon));
 				if (b.icon != null) {
-					//Drawable fakeIcon = mCoolReader.getResources().getDrawable(R.drawable.lingvo);
-					//b.icon.setBounds(0,0,fakeIcon.getIntrinsicWidth(),fakeIcon.getIntrinsicHeight());
- 					ivIcon.setImageDrawable(b.icon);
-					//ivIcon.setMaxHeight(fakeIcon.getIntrinsicHeight());
-					//ivIcon.setMaxWidth(fakeIcon.getIntrinsicWidth());
+					Drawable fakeIcon = mCoolReader.getResources().getDrawable(R.drawable.lingvo);
+					final Bitmap bmp = Bitmap.createBitmap(b.icon.getIntrinsicWidth(), b.icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+					final Canvas canvas = new Canvas(bmp);
+					b.icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+					b.icon.draw(canvas);
+					Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+							bmp, fakeIcon.getIntrinsicWidth(), fakeIcon.getIntrinsicHeight(), false);
+					ivIcon.setImageBitmap(resizedBitmap);
 				}
 			} else {
 				if ( titleTextView!=null )

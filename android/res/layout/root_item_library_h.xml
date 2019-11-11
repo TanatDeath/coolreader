@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Recent Book item layout for CR3 root window
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/browser_item_body"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:layout_margin="5dip"
+    >
+
+    <ImageView android:id="@+id/item_icon"
+        android:src="?attr/cr3_browser_folder_authors_drawable"
+        android:tag="tint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:gravity="center_horizontal" 
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="3dip"
+        />
+    
+    <TextView android:id="@+id/item_name"
+        style="@style/TextAppearance.Small2"
+        android:text="by author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:gravity="left"
+        android:layout_gravity="left"
+        android:layout_marginRight="3dip"
+        android:layout_marginBottom="10dip"
+        android:minWidth="?android:attr/listPreferredItemHeight"
+        />
+
+</LinearLayout>

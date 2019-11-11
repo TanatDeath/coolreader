@@ -49,6 +49,7 @@ public class FileInfo {
 	public final static String TITLE_GROUP_PREFIX = "@titleGroup:";
 	public final static String SEARCH_SHORTCUT_TAG = "@search";
 	public final static String QSEARCH_SHORTCUT_TAG = "@qsearch";
+	public final static String RESCAN_LIBRARY_TAG = "@rescan";
 
 	public Long id; // db id
 	public String title; // book title
@@ -582,7 +583,12 @@ public class FileInfo {
 	{
 		return TITLE_TAG.equals(pathname);
 	}
-	
+
+	public boolean isRescanShortcut()
+	{
+		return RESCAN_LIBRARY_TAG.equals(pathname);
+	}
+
 	public boolean isBooksByAuthorDir()
 	{
 		return pathname!=null && pathname.startsWith(AUTHOR_PREFIX);

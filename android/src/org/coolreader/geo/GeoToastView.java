@@ -8,6 +8,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import org.coolreader.geo.GeoLastData;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -155,7 +157,8 @@ public class GeoToastView {
         LayoutInflater inflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         window.setContentView(inflater.inflate(R.layout.geo_toast, null, true));
         LinearLayout toast_ll = (LinearLayout) window.getContentView().findViewById(R.id.geo_toast_ll);
-        toast_ll.setBackgroundColor(colorGrayC);
+        //toast_ll.setBackgroundColor(colorGrayC);
+        toast_ll.setBackgroundColor(Color.argb(220, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
         TableLayout geoTable = (TableLayout) window.getContentView().findViewById(R.id.geo_table);
         if (t.metroStation != null) {
             TableRow getMetroTRow = (TableRow) inflater.inflate(R.layout.geo_metro_item, null);
@@ -171,6 +174,8 @@ public class GeoToastView {
             View metro = window.getContentView().findViewById(R.id.metroColor);
             String sColor = GeoLastData.getStationHexColor(t.metroStation);
             metro.setBackgroundColor(Color.parseColor("#"+sColor));
+            //float inPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, mActivity.getResources().getDisplayMetrics());
+            //metro.setLayoutParams(new TableRow.LayoutParams((int) inPixels, (int) inPixels));
             TextView tvD = (TextView) window.getContentView().findViewById(R.id.center_station_dist);
             tvD.setTextSize(fontSize-4);
             tvD.setTextColor(updColor(colorIcon));
@@ -212,9 +217,20 @@ public class GeoToastView {
                 tvP.setText(">");
                 TextView tvP2 = (TextView) window.getContentView().findViewById(R.id.right_mark_name);
                 tvP2.setText(">");
-
             }
-
+            List<String> interchangeColors = GeoLastData.getStationInterchangeColors(t.metroStation);
+            if (interchangeColors.size()>0) {
+                TableRow getInterchangesTRow = (TableRow) inflater.inflate(R.layout.geo_metro_interchange_item, null);
+                geoTable.addView(getInterchangesTRow);
+                LinearLayout llInter = (LinearLayout) window.getContentView().findViewById(R.id.interchanges_ll);
+                for (String sCol: interchangeColors) {
+                    View v = new View(mActivity);
+                    v.setBackgroundColor(Color.parseColor("#"+sCol));
+                    float inPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, mActivity.getResources().getDisplayMetrics());
+                    v.setLayoutParams(new LinearLayout.LayoutParams((int) inPixels, (int) inPixels));
+                    llInter.addView(v);
+                }
+            }
         }
         if (t.transportStop != null) {
             if (t.metroStation != null) {

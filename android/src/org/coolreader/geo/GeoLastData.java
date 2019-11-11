@@ -58,7 +58,7 @@ public class GeoLastData {
         lastStation = lastSt;
         lastStationDist = -1D;
         if (lastSt!=null)
-            lastStationDist = geoDistance(lat, lastSt.lat, lon, lastSt.lon,0D, 0D);
+            lastStationDist = geoDistance2(lat, lastSt.lat, lastSt.lat_m, lon, lastSt.lon, lastSt.lon_m,0D, 0D);
     }
 
     public void setLastStop(Double lon, Double lat, TransportStop lastSt) {
@@ -71,7 +71,7 @@ public class GeoLastData {
 
     public void updateDistance(Double lon, Double lat) {
         if (lastStation!=null)
-            lastStationDist = geoDistance(lat, lastStation.lat, lon, lastStation.lon,0D, 0D);
+            lastStationDist = geoDistance2(lat, lastStation.lat, lastStation.lat_m, lon, lastStation.lon, lastStation.lon_m,0D, 0D);
         if (lastStop!=null)
             lastStopDist = geoDistance(lat, lastStop.lat, lon, lastStop.lon,0D, 0D);
     }
@@ -146,6 +146,15 @@ public class GeoLastData {
         return Math.sqrt(distance);
     }
 
+    public static double geoDistance2(double lat1, double lat2, double lat3, double lon1,
+                                     double lon2, double lon3, double el1, double el2) {
+        double res1 = geoDistance(lat1, lat2, lon1, lon2, el1, el2);
+        double res2 = geoDistance(lat1, lat3, lon1, lon3, el1, el2);
+        if (res1 < res2) return res1;
+        return res2;
+    }
+
+
     public MetroStation getClosestStation(Double lon, Double lat, MetroStation exceptS) {
         double dist = -1;
         double closestDist = -1;
@@ -155,7 +164,7 @@ public class GeoLastData {
                 for (MetroStation ms: mll.metroStations) {
                     if (exceptS!=null)
                         if (ms.equals(exceptS)) continue;
-                    dist = geoDistance(lat, ms.lat, lon, ms.lon,0D, 0D);
+                    dist = geoDistance2(lat, ms.lat, ms.lat_m, lon, ms.lon, ms.lon_m,0D, 0D);
                     if ((dist<closestDist)||(closestDist<0)) {
                         closestDist = dist;
                         closestStation = ms;
@@ -184,9 +193,12 @@ public class GeoLastData {
 
     public boolean isNearClosestStation(Double lon, Double lat, MetroStation closestStation, MetroStation closeStation) {
         if ((closestStation != null) && (closeStation != null)) {
-            Double dist = geoDistance(lat, closestStation.lat, lon, closestStation.lon,0D, 0D);
-            Double stationsDist = geoDistance(closestStation.lat, closeStation.lat,
-                    closestStation.lon, closeStation.lon, 0D, 0D);
+            Double dist = geoDistance2(lat, closestStation.lat, closestStation.lat_m, lon, closestStation.lon, closestStation.lon_m, 0D, 0D);
+            Double stationsDist = geoDistance2(closestStation.lat, closeStation.lat, closeStation.lat_m,
+                    closestStation.lon, closeStation.lon, closeStation.lon_m, 0D, 0D);
+            Double stationsDist2 = geoDistance2(closestStation.lat_m, closeStation.lat_m, closeStation.lat_m,
+                    closestStation.lon, closeStation.lon, closeStation.lon_m, 0D, 0D);
+            if (stationsDist2<stationsDist) stationsDist = stationsDist2;
             if ((dist<stationsDist) || (dist<MIN_DIST_NEAR)) {
                 return true;
             }
@@ -197,9 +209,9 @@ public class GeoLastData {
     public boolean isNearClosestStop(Double lon, Double lat, TransportStop closestStop, TransportStop closeStop) {
         if ((closestStop != null) && (closeStop != null)) {
             Double dist = geoDistance(lat, closestStop.lat, lon, closestStop.lon,0D, 0D);
-            Double stationsDist = geoDistance(closestStop.lat, closeStop.lat,
+            Double stopsDist = geoDistance(closestStop.lat, closeStop.lat,
                     closestStop.lon, closeStop.lon, 0D, 0D);
-            if ((dist<stationsDist) || (dist<MIN_DIST_NEAR)) {
+            if ((dist<stopsDist) || (dist<MIN_DIST_NEAR)) {
                 return true;
             }
         }
@@ -327,10 +339,23 @@ public class GeoLastData {
                                     JSONObject jsoS = (JSONObject) jsonS.get(k);
                                     MetroStation metroStation = new MetroStation();
                                     if (jsoS.has("id")) { metroStation.id = jsoS.getDouble("id"); }
-                                    if (jsoS.has("name")) { metroStation.name = jsoS.getString("name"); }
-                                    if (metroStation.name.contains("окоссов")) cr.geoLastData.tempStation = metroStation; // !!!!
+                                    if (jsoS.has("name")) {
+                                        metroStation.name = jsoS.getString("name");
+                                    } else
+                                        metroStation.name = "";
+                                    if (jsoS.has("alias")) {
+                                        metroStation.alias = jsoS.getString("alias");
+                                    } else
+                                        metroStation.alias = metroStation.name;
+                                    if (metroStation.name.contains("оровиц")) cr.geoLastData.tempStation = metroStation; // !!!!
                                     if (jsoS.has("lat")) { metroStation.lat = jsoS.getDouble("lat"); }
                                     if (jsoS.has("lng")) { metroStation.lon = jsoS.getDouble("lng"); }
+                                    if (jsoS.has("lat_m")) {
+                                        metroStation.lat_m = jsoS.getDouble("lat_m");
+                                    } else metroStation.lat_m = metroStation.lat;
+                                    if (jsoS.has("lng_m")) {
+                                        metroStation.lon_m = jsoS.getDouble("lng_m");
+                                    } else metroStation.lon_m = metroStation.lon;
                                     if (jsoS.has("order")) { metroStation.order = jsoS.getInt("order"); }
                                     metroStations.add(metroStation);
                                     k++;
@@ -342,6 +367,33 @@ public class GeoLastData {
                         }
                     }
                     metroLocation.metroLines = metroLines;
+                    ArrayList<MetroInterchange> metroInterchanges = null;
+                    if (jso.has("interchanges")) {
+                        JSONArray jsonL = jso.getJSONArray("interchanges");
+                        metroInterchanges = new ArrayList<MetroInterchange>();
+                        int j = 0;
+                        while (j < jsonL.length()) {
+                            JSONObject jsoL = (JSONObject) jsonL.get(j);
+                            if (jsoL.has("interchange")) {
+                                MetroInterchange mi = new MetroInterchange();
+                                JSONArray jsL = jsoL.getJSONArray("interchange");
+                                int jj = 0;
+                                while (jj < jsL.length()) {
+                                    String st = "";
+                                    JSONObject o = (JSONObject) jsL.get(jj);
+                                    if (o.has("station")) st = o.getString("station");
+                                    if ((jj==0) && (!StrUtils.isEmptyStr(st))) mi.name1 = st;
+                                    if ((jj==1) && (!StrUtils.isEmptyStr(st))) mi.name2 = st;
+                                    jj++;
+                                }
+                                if ((!StrUtils.isEmptyStr(mi.name1))&&(!StrUtils.isEmptyStr(mi.name2)))
+                                    metroInterchanges.add(mi);
+                            }
+                            //metroLines.add(metroLine);
+                            j++;
+                        }
+                    }
+                    metroLocation.metroInterchanges = metroInterchanges;
                     cr.geoLastData.metroLocations.add(metroLocation);
                     i++;
                 }
@@ -385,6 +437,43 @@ public class GeoLastData {
         } catch (JSONException e) {
             log.e("parse transport stops file", e);
         }
+    }
+
+    public static String getStationColor(MetroLocation ml, String ms) {
+        for (MetroLine mln: ml.metroLines)
+            for (int i=0; i < mln.metroStations.size(); i++) {
+                if ((mln.metroStations.get(i).name.equals(ms))||
+                        (mln.metroStations.get(i).alias.equals(ms))) {
+                        return mln.hexColor;
+                }
+            }
+        return "";
+    }
+
+    public static List<String> getStationInterchangeColors(MetroStation ms) {
+        ArrayList<String> res = new ArrayList<String>();
+        for (MetroLocation ml: metroLocations)
+            for (MetroLine mln: ml.metroLines)
+                for (int i=0; i < mln.metroStations.size(); i++) {
+                    if (ms.equals(mln.metroStations.get(i))) {
+                        if (ml.metroInterchanges != null) {
+                            for (MetroInterchange mi: ml.metroInterchanges) {
+                                String stI = "";
+                                if ((mi.name1.equals(ms.name))||(mi.name1.equals(ms.alias)))
+                                    stI = mi.name2;
+                                if ((mi.name2.equals(ms.name))||(mi.name2.equals(ms.alias)))
+                                    stI= mi.name1;
+                                if (!StrUtils.isEmptyStr(stI)) {
+                                    String sCol = getStationColor(ml, stI);
+                                    if (!StrUtils.isEmptyStr(sCol)) {
+                                        if (!res.contains(sCol)) res.add(sCol);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+        return res;
     }
 
 }

@@ -55,6 +55,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	ArrayList<FileInfo> mfavFolders;
 	ArrayList<String> mOnlyFSFolders;
 	HashMap<Long, String> mFileSystemFoldersH;
+	public static HashMap<String, Integer> mListPosCacheOld = new HashMap<String, Integer>();
+	public static HashMap<String, Integer> mListPosCache = new HashMap<String, Integer>();
 
 	public static final int MAX_SUBDIR_LEN = 32;
 
@@ -118,6 +120,58 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					
 					showContextMenu();
 					return true;
+				}
+			});
+	        setOnScrollListener(new OnScrollListener() {
+
+				private int oldTop;
+				private int oldFirstVisibleItem;
+
+				@Override
+				public void onScrollStateChanged(AbsListView view, int scrollState) {
+				//	if (onScrollListener != null) {
+				//		onScrollListener.onScrollStateChanged(view, scrollState);
+				//	}
+				}
+
+				@Override
+				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				//	if (onScrollListener != null) {
+				//		onScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+				//	}
+
+				//	if (onDetectScrollListener != null) {
+				//		onDetectedListScroll(view, firstVisibleItem);
+				//	}
+					if (currDirectory != null)
+						if (!StrUtils.isEmptyStr(currDirectory.pathname)) {
+							if (mActivity.mCurrentFrame == mActivity.mBrowserFrame) {
+								int i = firstVisibleItem + (visibleItemCount / 3);
+								mListPosCache.put(currDirectory.pathname, i);
+							}
+						}
+				}
+
+				private void onDetectedListScroll(AbsListView absListView, int firstVisibleItem) {
+					View view = absListView.getChildAt(0);
+					int top = (view == null) ? 0 : view.getTop();
+
+				//	if (firstVisibleItem == oldFirstVisibleItem) {
+				//		if (top > oldTop) {
+				//			onDetectScrollListener.onUpScrolling();
+				//		} else if (top < oldTop) {
+				//			onDetectScrollListener.onDownScrolling();
+				//		}
+				//	} else {
+				//		if (firstVisibleItem < oldFirstVisibleItem) {
+				//			onDetectScrollListener.onUpScrolling();
+				//		} else {
+				//			onDetectScrollListener.onDownScrolling();
+				//		}
+				//	}
+
+					oldTop = top;
+					oldFirstVisibleItem = firstVisibleItem;
 				}
 			});
 			setChoiceMode(CHOICE_MODE_SINGLE);
@@ -224,7 +278,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				showOnlineCatalogBookDialog(item);
 			else {
 				if (
-						(item.format.name().equals("DOCX"))||
+						//(item.format.name().equals("DOCX"))|| //we have native docx support now
 						(item.format.name().equals("ODT"))
 				   ){
 					final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
@@ -234,39 +288,23 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						mActivity.showToast(mActivity.getString(R.string.docx_open_converted));
 						mActivity.loadDocument(fi);
 					} else {
-						PackageManager pm = mActivity.getPackageManager();
-						boolean binst = false;
-						try {
-							pm.getPackageInfo("org.coolreader.docx", 0); //PackageManager.GET_ACTIVITIES);
-							binst = true;
-						} catch (PackageManager.NameNotFoundException e) {
-							binst = false;
-						}
-						if (!binst) {
-							mActivity.showToast(mActivity.getString(R.string.docx_is_not_installed));
-						} else {
-							final FileInfo item1 = item;
-							mActivity.askConfirmation(R.string.docx_convert, new Runnable() {
-								@Override
-								public void run() {
-								Intent intent = new Intent(Intent.ACTION_SEND);
-								intent.setPackage("org.coolreader.docx");
-								intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-								intent.setType("text/plain");
-								final String fName = downloadDir.pathname + "/converted/";
-								intent.putExtra(android.content.Intent.EXTRA_SUBJECT, fName);
-								intent.putExtra(android.content.Intent.EXTRA_TEXT, item1.pathname);
+						final FileInfo item1 = item;
+						mActivity.askConfirmation(R.string.docx_convert, new Runnable() {
+							@Override
+							public void run() {
 								try {
-									log.i("start docx intent");
-									mActivity.startActivity(intent);
-								} catch (ActivityNotFoundException e) {
-									mActivity.showToast(mActivity.getString(R.string.docx_is_not_installed));
+									log.i("Convert odt file");
+									ConvertOdtFormat.convertOdtFile(item1.pathname, downloadDir.pathname + "/converted/");
+									File f = new File(downloadDir.pathname+"/converted/"+item1.filename+".html");
+									if (f.exists()) {
+										FileInfo fi = new FileInfo(f);
+										mActivity.loadDocument(fi);
+									}
 								} catch (Exception e) {
-									mActivity.showToast("exception while working with org.coolreader.docx");
+									mActivity.showToast("exception while converting odt file");
 								}
-								}
-							});
-						}
+							}
+						});
 					}
 				} else mActivity.loadDocument(item);
 			}
@@ -732,6 +770,25 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		} else {
 			if (dir.pathNameEquals(currDirectory))
 				showDirectory(currDirectory, selected);
+		}
+	}
+
+	public void scrollToLastPos() {
+		// try to restore position
+		if (currDirectory!=null) {
+			Integer firstVisibleItem1 = mListPosCache.get(currDirectory.pathname);
+			if (firstVisibleItem1 == null) firstVisibleItem1 = 0;
+			Integer firstVisibleItem2 = 0;
+			if (mListPosCacheOld != null) {
+				firstVisibleItem2 = mListPosCacheOld.get(currDirectory.pathname);
+				if (firstVisibleItem2 == null) firstVisibleItem2 = 0;
+				if ((firstVisibleItem2 > 0) && (firstVisibleItem1 == 0))
+					firstVisibleItem1 = firstVisibleItem2;
+				mListPosCacheOld = null;
+			}
+			if (firstVisibleItem1 > 0) {
+				mListView.setSelection(firstVisibleItem1);
+			}
 		}
 	}
 
@@ -1397,6 +1454,56 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			if (fileOrDir.isSearchShortcut()) {
 				showFindBookDialog(false, "", null);
+				return;
+			}
+			if (fileOrDir.isRescanShortcut()) {
+				ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
+				//lets reduce the list
+				boolean bReduced = true;
+				while (bReduced) {
+					bReduced = false;
+					for (FileInfo fi : folders) {
+						String sFName = fi.pathname;
+						if (!sFName.endsWith("/")) sFName = sFName + "/";
+						for (FileInfo fiC : folders) {
+							if ((fiC.pathname.startsWith(sFName)) && (!fiC.pathname.equals(sFName))
+									&& (!fiC.pathname.equals(fi.pathname))) {
+								bReduced = true;
+								folders.remove(fiC);
+								break;
+							}
+						}
+						if (bReduced) break;
+					}
+				}
+				for (FileInfo fi: folders) {
+					File f = new File(fi.pathname);
+					if (f.exists() && f.isDirectory()) {
+						String pathText = fi.pathname;
+						String[] arrLab = pathText.split("/");
+						if (arrLab.length>2) pathText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
+						log.i("scanDirectoryRecursive started (all)");
+						final Scanner.ScanControl control = new Scanner.ScanControl();
+						final ProgressDialog dlg = ProgressDialog.show(mActivity,
+								pathText + " - " + mActivity.getString(R.string.dlg_scan_title),
+								mActivity.getString(R.string.dlg_scan_message),
+								true, true, new OnCancelListener() {
+									@Override
+									public void onCancel(DialogInterface dialog) {
+										log.i("scanDirectoryRecursive (all) : stop handler");
+										control.stop();
+									}
+								});
+						mScanner.scanDirectory(mActivity.getDB(), fi, new Runnable() {
+							@Override
+							public void run() {
+								log.i("scanDirectoryRecursive (all) : finish handler");
+								if (dlg.isShowing())
+									dlg.dismiss();
+							}
+						}, true, control);
+					}
+				}
 				return;
 			}
 			if (fileOrDir.isQSearchShortcut()) {
@@ -2214,6 +2321,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		mListView.setSelection(index);
 		mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		mListView.invalidate();
+		// try to restore position
+		scrollToLastPos();
 	}
 
 	private class MyGestureListener extends SimpleOnGestureListener {

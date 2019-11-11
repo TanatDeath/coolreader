@@ -7,4 +7,5 @@ public class MetroLocation {
     public String name;
     public String url;
     public List<MetroLine> metroLines;
+    public List<MetroInterchange> metroInterchanges;
 }
