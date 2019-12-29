@@ -103,6 +103,22 @@ public:
         list.sort();
     }
 
+    //plotn
+    virtual void getFontFaceAndFileNameList(lString16Collection &list)
+    {
+        list.clear();
+        for ( int i=0; i<_registered_list.length(); i++ ) {
+            if (_registered_list[i]->getDef()->getDocumentId() == -1) {
+                lString16 name = Utf8ToUnicode( _registered_list[i]->getDef()->getTypeFace() );
+                lString16 fileName = Utf8ToUnicode(_registered_list[i]->getDef()->getName());
+                if (!list.contains(name + "~" + fileName))
+                    list.add(name + "~" + fileName);
+            }
+        }
+        list.sort();
+    }
+    //\plotn
+
     virtual void clearFallbackFonts() {
         for (int i = 0; i < _registered_list.length(); i++) {
             _registered_list[i]->getFont()->setFallbackFont(LVFontRef());

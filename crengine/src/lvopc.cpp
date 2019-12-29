@@ -136,9 +136,24 @@ void OpcPackage::readContentTypes()
                 for(int i = 0; i < root->getChildCount(); i++) {
                     ldomNode * typeNode = root->getChildNode(i);
 
-                    if(typeNode->getNodeName() == cs16("Override")) //Don't care about Extensions
-                        m_contentTypes.set( typeNode->getAttributeValue(L"ContentType"),
-                                            typeNode->getAttributeValue(L"PartName") );
+                    //plotn - add TextMaker file format
+                    //if(typeNode->getNodeName() == cs16("Override")) //Don't care about Extensions
+                    //    m_contentTypes.set( typeNode->getAttributeValue(L"ContentType"),
+                    //                        typeNode->getAttributeValue(L"PartName") );
+
+                    if(typeNode->getNodeName() == cs16("Override")) { //Don't care about Extensions
+                        lString16 contentType = typeNode->getAttributeValue(L"ContentType");
+                        lString16 partName = typeNode->getAttributeValue(L"PartName");
+                        if (
+                                (partName == L"/word/document.xml")&&
+                                (contentType == L"application/textmaker.wordprocessingml.document.main+xml")
+                           ) {
+                            m_contentTypes.set(L"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml",
+                                               typeNode->getAttributeValue(L"PartName"));
+                        } else
+                            m_contentTypes.set(typeNode->getAttributeValue(L"ContentType"),
+                                           typeNode->getAttributeValue(L"PartName"));
+                    }
                 }
             }
             delete doc;

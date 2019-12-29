@@ -446,6 +446,11 @@ void LVFreeTypeFontManager::getFontFileNameList(lString16Collection &list) {
     _cache.getFontFileNameList(list);
 }
 
+void LVFreeTypeFontManager::getFontFaceAndFileNameList(lString16Collection &list) {
+    FONT_MAN_GUARD
+    _cache.getFontFaceAndFileNameList(list);
+}
+
 bool LVFreeTypeFontManager::setalias(lString8 alias, lString8 facename, int id, bool italic, bool bold) {
     FONT_MAN_GUARD
     lString8 fontname = lString8("\0");
