@@ -48,6 +48,7 @@
                 android:textStyle="bold"
                 android:minWidth="100dip"
 	            android:layout_gravity="center_vertical|right"
+                android:textColor="?attr/colorIcon"
                 android:text="@string/online_store_new_account" />
 
    	    </LinearLayout>
@@ -56,7 +57,8 @@
             style="@style/TextAppearance.Large"
             android:singleLine="true"
             android:layout_margin="10dp"
-            android:text="Plugin name" 
+            android:text="Plugin name"
+            android:textColor="?attr/colorIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView 
@@ -64,7 +66,8 @@
             style="@style/TextAppearance.Small"
             android:singleLine="true"
             android:layout_margin="10dp"
-            android:text="Plugin description" 
+            android:text="Plugin description"
+            android:textColor="?attr/colorIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -74,6 +77,7 @@
             android:singleLine="true"
             android:text="@string/online_store_username"
             android:textStyle="bold"
+            android:textColor="?attr/colorIcon"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -94,6 +98,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:textStyle="bold"
+            android:textColor="?attr/colorIcon"
             android:text="@string/online_store_password"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
@@ -116,6 +121,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:textStyle="bold"
+            android:textColor="?attr/colorIcon"
             android:text="@string/online_store_password_repeat"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
@@ -138,6 +144,7 @@
             android:id="@+id/lbl_last_name" 
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
+            android:textColor="?attr/colorIcon"
             android:text="@string/online_store_new_account_param_last_name"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
@@ -160,6 +167,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:text="@string/online_store_new_account_param_first_name"
+            android:textColor="?attr/colorIcon"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -181,6 +189,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:text="@string/online_store_new_account_param_middle_name"
+            android:textColor="?attr/colorIcon"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -201,6 +210,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:text="@string/online_store_new_account_param_email"
+            android:textColor="?attr/colorIcon"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -209,6 +219,7 @@
             style="@style/TextAppearance.Small"
             android:singleLine="false"
             android:maxLines="4"
+            android:textColor="?attr/colorIcon"
             android:text="@string/online_store_new_account_param_email_description_litres"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
@@ -253,6 +264,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:text="@string/online_store_new_account_param_city"
+            android:textColor="?attr/colorIcon"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -287,6 +299,7 @@
 	            android:singleLine="true"
 	            android:text="@string/online_store_new_account_param_subscribe"
 	            android:layout_margin="10dp"
+                android:textColor="?attr/colorIcon"
 	            android:layout_width="fill_parent"
 	            android:layout_height="wrap_content"/>
 	        
@@ -298,6 +311,7 @@
             android:maxLines="6"
             android:text="@string/online_store_new_account_param_subscribe_description_litres"
             android:layout_margin="10dp"
+            android:textColor="?attr/colorIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>

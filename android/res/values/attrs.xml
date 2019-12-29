@@ -297,6 +297,7 @@
     <attr name="attr_icons8_cloud_storage" format="reference" />
     <attr name="attr_icons8_send_by_email" format="reference" />
     <attr name="attr_icons8_train_headphones" format="reference" />
+    <attr name="attr_icons8_theatre_mask" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

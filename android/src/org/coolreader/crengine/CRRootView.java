@@ -1,11 +1,15 @@
 package org.coolreader.crengine;
 
+import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -26,8 +30,10 @@ import org.coolreader.plugins.OnlineStorePluginManager;
 import org.coolreader.plugins.OnlineStoreWrapper;
 import org.coolreader.plugins.litres.LitresPlugin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.CRC32;
 
 import static android.view.ContextMenu.ContextMenuInfo;
 
@@ -38,8 +44,14 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private final CoolReader mActivity;
 	private ViewGroup mView;
 	private LinearLayout mRecentBooksScroll;
+	private TextView mTextFilesystem;
+	private boolean bFilesystemHidden = false;
 	private FlowLayout mFilesystemScroll;
+	private TextView mTextLibrary;
+	private boolean bLibraryHidden = false;
 	private FlowLayout mLibraryScroll;
+	private TextView mTextOnlineCatalogs;
+	private boolean bOnlineCatalogsHidden = false;
 	private FlowLayout mOnlineCatalogsScroll;
     private Button btnStateToRead;
     private Button btnStateReading;
@@ -373,6 +385,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
     public void refreshFileSystemFolders() {
         ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
         updateFilesystems(folders);
+		bFilesystemHidden = false;
     }
 
 	ArrayList<FileInfo> lastCatalogs = new ArrayList<FileInfo>();
@@ -402,10 +415,6 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		if (opdsRoot.dirCount() == 0)
 			opdsRoot.addItems(catalogs);
 		catalogs.add(0, opdsRoot);
-		
-//		if (lastCatalogs.equals(catalogs)) {
-//			return; // not changed
-//		}
 		lastCatalogs = catalogs;
 		
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
@@ -513,6 +522,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				if (label.getText().toString().toLowerCase().contains("webnovel"))
 					setImageResourceSmall(icon, R.drawable.webnovel); else
 					mActivity.tintViewIcons(icon,true);
+				findIconForCatalog(item, icon);
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -729,7 +739,41 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		}
 	}
 
-    private void updateLibraryItems(ArrayList<FileInfo> dirs) {
+	private void findIconForCatalog(FileInfo item, ImageView icon) {
+		if (!StrUtils.isEmptyStr(item.pathname)) {
+			String path = item.pathname.replace(FileInfo.OPDS_DIR_PREFIX, "");
+			CRC32 crc = new CRC32();
+			crc.update(path.getBytes());
+			final String sFName = String.valueOf(crc.getValue()) + "_icon.png";
+			String sDir = "";
+			ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
+			if (tDirs.size() > 0) sDir = tDirs.get(0);
+			if (!StrUtils.isEmptyStr(sDir))
+				if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\"))) sDir = sDir + "/";
+			if (!StrUtils.isEmptyStr(sDir)) {
+				try {
+					File f = new File(sDir + sFName);
+					if (f.exists()) {
+						Bitmap bitmap = BitmapFactory.decodeFile(sDir + sFName);
+						icon.setColorFilter(null);
+						Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+								bitmap, icon.getDrawable().getIntrinsicWidth(),
+								icon.getDrawable().getIntrinsicHeight(), false);
+						icon.setImageBitmap(resizedBitmap);
+					}
+					;
+				} catch (Exception e) {
+					log.e("Catalog custom icon error: " + e.getMessage());
+				}
+			}
+		}
+//		if (label.getText().toString().toLowerCase().contains("webnovel"))
+//			setImageResourceSmall(icon, R.drawable.webnovel); else
+//			mActivity.tintViewIcons(icon,true);
+
+	}
+
+	private void updateLibraryItems(ArrayList<FileInfo> dirs) {
 		int colorBlue;
 		int colorGreen;
 		int colorGray;
@@ -763,7 +807,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
 			else if (item.isBooksByAuthorRoot())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
-			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() || item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
+			else if (item.isBooksByGenreRoot())
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_theatre_mask, R.drawable.icons8_theatre_mask));
+			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() ||
+					item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
 				setImageResourceSmall(image, Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));
             mActivity.tintViewIcons(image,true);
 			if (label != null) {
@@ -819,11 +866,69 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		updateDelimiterTheme(R.id.delimiter5);
 		
 		mRecentBooksScroll = (LinearLayout)mView.findViewById(R.id.scroll_recent_books);
-		
+
+		mTextFilesystem = (TextView) mView.findViewById(R.id.tv_item_filesystem);
+		mTextFilesystem.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bFilesystemHidden = !bFilesystemHidden;
+				if (bFilesystemHidden) {
+					mFilesystemScroll.removeAllViews();
+				} else {
+					mFilesystemScroll.removeAllViews();
+					refreshFileSystemFolders();
+				}
+			}
+		});
+
 		mFilesystemScroll = (FlowLayout)mView.findViewById(R.id.scroll_filesystem);
 
+		mTextLibrary = (TextView) mView.findViewById(R.id.tv_item_library);
+		mTextLibrary.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bLibraryHidden = !bLibraryHidden;
+				if (bLibraryHidden) {
+					mLibraryScroll.removeAllViews();
+				} else {
+					mLibraryScroll.removeAllViews();
+					BackgroundThread.instance().postGUI(new Runnable() {
+						@Override
+						public void run() {
+							if (Services.getScanner() != null)
+								updateLibraryItems(Services.getScanner().getLibraryItems());
+								bLibraryHidden = false;
+						}
+					});
+				}
+			}
+		});
 		mLibraryScroll = (FlowLayout)mView.findViewById(R.id.scroll_library);
-		
+
+		mTextOnlineCatalogs = (TextView) mView.findViewById(R.id.tv_item_online_catalogs);
+		mTextOnlineCatalogs.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				bOnlineCatalogsHidden = !bOnlineCatalogsHidden;
+				if (bOnlineCatalogsHidden) {
+					mOnlineCatalogsScroll.removeAllViews();
+				} else {
+					mOnlineCatalogsScroll.removeAllViews();
+					mActivity.waitForCRDBService(new Runnable() {
+						@Override
+						public void run() {
+							mActivity.getDB().loadOPDSCatalogs(new OPDSCatalogsLoadingCallback() {
+								@Override
+								public void onOPDSCatalogsLoaded(ArrayList<FileInfo> catalogs) {
+									updateOnlineCatalogs(catalogs);
+									bOnlineCatalogsHidden = false;
+								}
+							});
+						}
+					});
+				}
+			}
+		});
 		mOnlineCatalogsScroll = (FlowLayout)mView.findViewById(R.id.scroll_online_catalogs);
 
         btnStateToRead  = (Button)view.findViewById(R.id.book_state_toread);
@@ -898,6 +1003,16 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		btnQuickSearch.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				try {
+					btnQuickSearch.requestFocus();
+					View view = mActivity.findViewById(android.R.id.content);
+					if (view != null) {
+						InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+					}
+				} catch (Exception e) {
+					log.e(e.getMessage());
+				}
 				String sText = edQuickSearch.getText().toString();
 				if (!StrUtils.isEmptyStr(sText)) {
 					FileInfo dir = new FileInfo();

@@ -433,6 +433,22 @@ public class CRDBService extends Service {
 		});
 	}
 
+	public void loadGenresList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
+		final FileInfo p = new FileInfo(parent);
+		execTask(new Task("loadGenresList") {
+			@Override
+			public void work() {
+				mainDB.loadGenresList(p);
+				sendTask(handler, new Runnable() {
+					@Override
+					public void run() {
+						callback.onItemGroupsLoaded(p);
+					}
+				});
+			}
+		});
+	}
+
 	public void loadSeriesList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent); 
 		execTask(new Task("loadSeriesList") {
@@ -487,6 +503,22 @@ public class CRDBService extends Service {
 			public void work() {
 				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 				mainDB.findAuthorBooks(list, authorId);
+				sendTask(handler, new Runnable() {
+					@Override
+					public void run() {
+						callback.onFileInfoListLoaded(list);
+					}
+				});
+			}
+		});
+	}
+
+	public void findGenreBooks(final long genreId, final FileInfoLoadingCallback callback, final Handler handler) {
+		execTask(new Task("findGenreBooks") {
+			@Override
+			public void work() {
+				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				mainDB.findGenreBooks(list, genreId);
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
@@ -887,6 +919,10 @@ public class CRDBService extends Service {
     		getService().loadAuthorsList(parent, callback, new Handler());
     	}
 
+		public void loadGenresList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
+			getService().loadGenresList(parent, callback, new Handler());
+		}
+
     	public void loadSeriesList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
     		getService().loadSeriesList(parent, callback, new Handler());
     	}
@@ -902,6 +938,10 @@ public class CRDBService extends Service {
     	public void loadAuthorBooks(long authorId, FileInfoLoadingCallback callback) {
     		getService().findAuthorBooks(authorId, callback, new Handler());
     	}
+
+		public void loadGenreBooks(long genreId, FileInfoLoadingCallback callback) {
+			getService().findGenreBooks(genreId, callback, new Handler());
+		}
     	
     	public void loadSeriesBooks(long seriesId, FileInfoLoadingCallback callback) {
     		getService().findSeriesBooks(seriesId, callback, new Handler());

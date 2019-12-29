@@ -7,6 +7,8 @@ import org.coolreader.plugins.AuthenticationCallback;
 import org.coolreader.plugins.OnlineStoreRegistrationParam;
 import org.coolreader.plugins.OnlineStoreWrapper;
 
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -59,7 +61,18 @@ public class OnlineStoreNewAccountDialog extends BaseDialog {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        mInflater = LayoutInflater.from(getContext());
+		int colorGray;
+		int colorGrayC;
+		int colorIcon;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		colorGray = a.getColor(0, Color.GRAY);
+		colorGrayC = a.getColor(1, Color.GRAY);
+		colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorGrayCT= colorGrayC;// Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		mInflater = LayoutInflater.from(getContext());
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.online_store_new_account_dialog, null);
         
         ImageButton btnBack = (ImageButton)view.findViewById(R.id.base_dlg_btn_back);
@@ -76,7 +89,8 @@ public class OnlineStoreNewAccountDialog extends BaseDialog {
 				onPositiveButtonClick();
 			}
 		});
-        
+        btnRegister.setBackgroundColor(colorGrayCT);
+
         lblTitle = (TextView)view.findViewById(R.id.dlg_title);
         lblDescription = (TextView)view.findViewById(R.id.lbl_description);
 

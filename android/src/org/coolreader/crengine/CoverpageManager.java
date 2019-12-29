@@ -788,7 +788,7 @@ public class CoverpageManager {
 							@Override
 							public void run() {
 								boolean isCustomCover = false;
-								final String sBookFName = file.filename;
+								final String sBookFName = StrUtils.getNonEmptyStr(file.filename, false);
 								CRC32 crc = new CRC32();
 								crc.update(sBookFName.getBytes());
 								final String sFName = String.valueOf(crc.getValue()) + "_cover.png";

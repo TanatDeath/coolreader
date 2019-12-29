@@ -47,6 +47,7 @@
 	            android:minWidth="100dip"
 	            android:layout_gravity="center_vertical"
 	            android:textStyle="bold"
+                android:textColor="?attr/colorIcon"
 	            />
 	        
             <Button
@@ -57,6 +58,7 @@
 	            android:layout_marginRight="10dip"
                 android:minWidth="100dip"
 	            android:layout_gravity="center_vertical|right"
+                android:textColor="?attr/colorIcon"
                 android:text="@string/online_store_new_account" />
 
 	        	    </LinearLayout>
@@ -65,7 +67,8 @@
             style="@style/TextAppearance.Large"
             android:singleLine="true"
             android:layout_margin="10dp"
-            android:text="Plugin name" 
+            android:text="Plugin name"
+                android:textColor="?attr/colorIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView 
@@ -73,7 +76,8 @@
             style="@style/TextAppearance.Small"
             android:singleLine="true"
             android:layout_margin="10dp"
-            android:text="Plugin description" 
+            android:text="Plugin description"
+                android:textColor="?attr/colorIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView 
@@ -81,13 +85,14 @@
             android:singleLine="true"
             android:text="@string/online_store_username"
             android:layout_margin="10dp"
+                android:textColor="?attr/colorIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <EditText 
             android:id="@+id/ed_login" 
             android:layout_width="fill_parent" 
             android:layout_height="wrap_content"
-            android:text="login" 
+            android:text="login"
             android:inputType="textEmailAddress"
             android:layout_margin="10dp"
             style="@style/TextAppearance.Widget.EditText"
@@ -99,6 +104,7 @@
             style="@style/TextAppearance.Medium"
             android:singleLine="true"
             android:text="@string/online_store_password"
+                android:textColor="?attr/colorIcon"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -119,7 +125,8 @@
             style="@style/TextAppearance.Large"
             android:singleLine="true"
             android:layout_margin="10dp"
-            android:text="URL" 
+            android:text="URL"
+                android:textColor="?attr/colorIcon"
             android:autoLink="web"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

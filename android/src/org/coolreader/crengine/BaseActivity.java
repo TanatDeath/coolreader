@@ -17,6 +17,7 @@ import org.coolreader.Dictionaries.DictInfo;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBServiceAccessor;
+import org.coolreader.db.MainDB;
 import org.coolreader.geo.GeoToastView;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
@@ -1539,6 +1540,7 @@ public class BaseActivity extends Activity implements Settings {
 		    android.content.res.Configuration conf = res.getConfiguration();
 		    conf.locale = (lang == Lang.DEFAULT) ? defaultLocale : lang.getLocale();
 		    currentLanguage = (lang == Lang.DEFAULT) ? Lang.getCode(defaultLocale) : lang.code;
+			MainDB.currentLanguage = currentLanguage;
 		    res.updateConfiguration(conf, dm);
 		} catch (Exception e) {
 			log.e("error while setting locale " + lang, e);

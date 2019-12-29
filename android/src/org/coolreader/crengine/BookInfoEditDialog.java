@@ -513,7 +513,9 @@ public class BookInfoEditDialog extends BaseDialog {
         	edSeriesNumber.setText(String.valueOf(file.seriesNumber));
         edLangFrom.setText(file.lang_from);
 		edLangTo.setText(file.lang_to);
-        edGenre.setText(file.genre);
+		String genreR = file.genre_list;
+		if (StrUtils.isEmptyStr(genreR)) genreR = file.genre;
+		edGenre.setText(genreR);
         edAnnotation.setText(file.annotation);
         edSrclang.setText(file.srclang);
         edBookdate.setText(file.getBookdate());

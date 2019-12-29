@@ -2,11 +2,36 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.parser.Parser;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.zip.CRC32;
+
+import okhttp3.HttpUrl;
 
 public class OPDSCatalogEditDialog extends BaseDialog {
 
@@ -14,6 +39,7 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 	private final LayoutInflater mInflater;
 	private final FileInfo mItem;
 	private final EditText nameEdit;
+	private final ImageButton imgBtn;
 	private final EditText urlEdit;
 	private final EditText usernameEdit;
 	private final EditText passwordEdit;
@@ -23,6 +49,44 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 	private final EditText proxypasswEdit;
 	private final CheckBox onionDefProxyChb;
 	private final Runnable mOnUpdate;
+
+	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+
+		String imgFName;
+		ImageButton bmImage;
+
+		public DownloadImageTask(String imgFName, ImageButton bmImage) {
+			this.imgFName = imgFName;
+			this.bmImage = bmImage;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			String urldisplay = urls[0];
+			Bitmap mIcon11 = null;
+			try {
+				InputStream in = new java.net.URL(urldisplay).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+				File file = new File(imgFName);
+				OutputStream fOut = new FileOutputStream(file);
+				mIcon11.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+				fOut.flush();
+				fOut.close();
+			} catch (Exception e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+					result, bmImage.getDrawable().getIntrinsicWidth(), bmImage.getDrawable().getIntrinsicHeight(), false);
+			bmImage.setImageBitmap(resizedBitmap);
+			bmImage.setColorFilter(null);
+			imgBtn.setEnabled(true);
+			imgBtn.setVisibility(View.VISIBLE);
+		}
+	}
 
 	public OPDSCatalogEditDialog(CoolReader activity, FileInfo item, Runnable onUpdate) {
 		super("OPDSCatalogEditDialog", activity, activity.getString((item.id == null) ? R.string.dlg_catalog_add_title
@@ -34,6 +98,78 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.catalog_edit_dialog, null);
 		nameEdit = (EditText) view.findViewById(R.id.catalog_name);
+		imgBtn = (ImageButton) view.findViewById(R.id.test_catalog_btn);
+		imgBtn.setOnClickListener(new Button.OnClickListener() {
+			public void onClick(View v) {
+				if (!StrUtils.isEmptyStr(urlEdit.getText().toString())) {
+					imgBtn.setEnabled(false);
+					imgBtn.setVisibility(View.INVISIBLE);
+					BackgroundThread.instance().postGUI(new Runnable() {
+						@Override
+						public void run() {
+							imgBtn.setEnabled(true);
+							imgBtn.setVisibility(View.VISIBLE);
+						}
+					}, 5000);
+					final HttpUrl.Builder urlBuilder = HttpUrl.parse(urlEdit.getText().toString()).newBuilder();
+					BackgroundThread.instance().postBackground(new Runnable() {
+						@Override
+						public void run() {
+							Document doc = null;
+							try {
+								doc = Jsoup.parse(urlBuilder.build().url(), 60000);
+								if (doc != null) {
+									for (Element el : doc.getAllElements()) {
+										if (el.tag().getName().equals("title")) {
+											if (el.parentNode() != null) {
+												Element par = (Element) el.parentNode();
+												if (par.tag().getName().equals("feed")) {
+													nameEdit.setText(el.text());
+													activity.showToast(activity.getString(R.string.ok));
+												}
+											}
+										}
+										if (el.tag().getName().equals("icon")) {
+											if (el.parentNode() != null) {
+												Element par = (Element) el.parentNode();
+												if (par.tag().getName().equals("feed")) {
+													final String sUrl = urlEdit.getText().toString();
+													CRC32 crc = new CRC32();
+													crc.update(sUrl.getBytes());
+													final String sFName = String.valueOf(crc.getValue()) + "_icon.png";
+													String sDir = "";
+													ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
+													if (tDirs.size()>0) sDir=tDirs.get(0);
+													if (!StrUtils.isEmptyStr(sDir))
+														if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
+													if (!StrUtils.isEmptyStr(sDir)) {
+														try {
+															File f = new File(sDir + sFName);
+															if (f.exists()) f.delete();
+															new DownloadImageTask(sDir + sFName, imgBtn).execute(el.text());
+														} catch (Exception e) {
+															activity.showToast( activity.getString(R.string.pic_problem)+" "+
+																	e.getMessage());
+														}
+													}
+												}
+											}
+										} // if icon
+									}
+								} // if doc is not null
+								//mActivity.showToast(doc.body().text());
+							} catch (IOException e) {
+								mActivity.showToast(activity.getString(R.string.error)+": "+e.getMessage());
+								Log.e("opds", "OPDS check catalog: "+e.getMessage());
+							}
+						}
+					});
+//					FileWriter fw = new FileWriter(fFName + ".txt");
+//					fw.write(.replace((char) 0, ' '));
+//					fw.close();
+				}
+			}
+		});
 		urlEdit = (EditText) view.findViewById(R.id.catalog_url);
 		usernameEdit = (EditText) view.findViewById(R.id.catalog_username);
 		passwordEdit = (EditText) view.findViewById(R.id.catalog_password);

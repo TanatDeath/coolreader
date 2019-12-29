@@ -468,6 +468,8 @@ public class Scanner extends FileInfoChangeSource {
 			return getRecentDir();
 		else if (FileInfo.AUTHORS_TAG.equals(path))
 			return createAuthorsRoot();
+		else if (FileInfo.GENRE_TAG.equals(path))
+			return createGenreRoot();
 		else if (FileInfo.TITLE_TAG.equals(path))
 			return createTitleRoot();
 		else if (FileInfo.SERIES_TAG.equals(path))
@@ -574,6 +576,16 @@ public class Scanner extends FileInfoChangeSource {
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.AUTHORS_TAG;
 		dir.filename = mActivity.getString(R.string.folder_name_books_by_author);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createGenreRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.GENRE_TAG;
+		dir.filename = mActivity.getString(R.string.folder_name_books_by_genre);
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -913,6 +925,7 @@ public class Scanner extends FileInfoChangeSource {
 		result.add(pathToFileInfo(FileInfo.DOC_DATE_TAG));
 		result.add(pathToFileInfo(FileInfo.PUBL_YEAR_TAG));
 		result.add(pathToFileInfo(FileInfo.FILE_DATE_TAG));
+		result.add(pathToFileInfo(FileInfo.GENRE_TAG));
 		return result;
 	}
 	

@@ -386,6 +386,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 		createDynShortcuts();
 		createGeoListener();
+		GenreSAXElem.mActivity = CoolReader.this;
+		try {
+			if (GenreSAXElem.elemList.size() == 0)
+				GenreSAXElem.initGenreList();
+		} catch (Exception e) {
+			log.e("exception while init genre list", e);
+		}
         log.i("CoolReader.onCreate() exiting");
     }
 
@@ -1742,12 +1749,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	
 	public static final String OPEN_DIR_PARAM = "DIR_TO_OPEN";
 	public void showBrowser(final FileInfo dir) {
+		String pathname = "";
+		if (dir != null) pathname = dir.pathname;
 		runInBrowser(new Runnable() {
 			@Override
 			public void run() {
 				mBrowser.showDirectory(dir, null);
 			}
-		}, FileInfo.RESCAN_LIBRARY_TAG.equals(dir.pathname));
+		}, FileInfo.RESCAN_LIBRARY_TAG.equals(pathname));
 	}
 	
 	public void showBrowser(final String dir) {
@@ -2622,12 +2631,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					itemsBook.add("book.language=" + fi.language);
 				}
 				String genreText = "";
-				if (!StrUtils.isEmptyStr(fi.genre)) {
+				String genreR = fi.genre_list;
+				if (StrUtils.isEmptyStr(genreR)) genreR = fi.genre;
+				if (!StrUtils.isEmptyStr(genreR)) {
 					// lets try to get out genre name
 					GenreSAXElem ge = null;
 					String genreDescr = "";
-					if (!StrUtils.isEmptyStr(fi.genre)) {
-						String [] arrGenre = fi.genre.split("\\|");
+					if (!StrUtils.isEmptyStr(genreR)) {
+						String [] arrGenre = genreR.split("\\|");
 						for (String genre: arrGenre) {
 							if (!StrUtils.isEmptyStr(genre)) {
 								String lang = CoolReader.this.getCurrentLanguage();

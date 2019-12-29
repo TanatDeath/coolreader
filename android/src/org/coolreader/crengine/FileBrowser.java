@@ -1276,11 +1276,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							dir = downloadDir;
 						String sPath = file.getAbsolutePath();
 						String sPathZ = sPath;
-						File fileZ = new File(sPath);
-						if (isArch) {
+						if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))) {
 							int i = 0;
 							sPathZ = sPath + ".zip";
-							fileZ = new File(sPathZ);
+							File fileZ = new File(sPathZ);
 							boolean bExists = fileZ.exists();
 							while (bExists) {
 								i++;
@@ -1601,6 +1600,17 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (fileOrDir.isBooksByFiledateDir()) {
 				log.d("Updating filedate book list");
 				mActivity.getDB().loadByDateBooks(fileOrDir.getFiledateId(), "file_create_time",  new FileInfoLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByGenreRoot()) {
+				// refresh authors list
+				log.d("Updating genre list");
+				mActivity.getDB().loadGenresList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByGenreDir()) {
+				log.d("Updating genre book list");
+				mActivity.getDB().loadGenreBooks(fileOrDir.getGenreId(), new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 		} else {
@@ -1976,7 +1986,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					
 					setText(name, title, 0);
 
-					if ( item.isBooksByAuthorDir() ) {
+					if ( item.isBooksByAuthorDir() || item.isBooksByGenreDir()) {
 						int bookCount = 0;
 						if (item.fileCount() > 0)
 							bookCount = item.fileCount();

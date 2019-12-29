@@ -1905,7 +1905,8 @@ public class Engine {
 		HyphsDirs,
 		CustomCoversDirs,
 		DownloadsDirs,
-		CloudSyncDirs
+		CloudSyncDirs,
+		IconDirs
 	}
 
 	public static ArrayList<String> getDataDirs(DataDirType dirType) {
@@ -1924,7 +1925,6 @@ public class Engine {
 				continue;
 			switch (dirType) {
 				case TexturesDirs:
-					//asdf
 					File subdirTextures = new File(base, "textures");
 					boolean bCreated = false;
 					if ((doCreate) && (!subdirTextures.exists())) {
@@ -1986,6 +1986,22 @@ public class Engine {
 							res.add(subdirCustomCovers.getAbsolutePath());
 						else
 							res.add(subdirCustomCovers.getAbsolutePath() + " [not found]");
+						break;
+					}
+				case IconDirs:
+					File subditIconDirs = new File(base, "icons");
+					bCreated = false;
+					if ((doCreate) && (!subditIconDirs.exists())) {
+						if (subditIconDirs.mkdir()) {
+							res.add(subditIconDirs.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subditIconDirs.isDirectory())
+							res.add(subditIconDirs.getAbsolutePath());
+						else
+							res.add(subditIconDirs.getAbsolutePath() + " [not found]");
 						break;
 					}
 				case CloudSyncDirs:

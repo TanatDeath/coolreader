@@ -29,9 +29,9 @@ public class GenreSAXElem {
 
     public String qName;
     public GenreSAXElem parentLink;
-    public HashMap<String,String> hshAttrs;
+    public HashMap<String, String> hshAttrs;
 
-    public GenreSAXElem(String qName, GenreSAXElem parentLink, HashMap<String,String> hshAttrs) {
+    public GenreSAXElem(String qName, GenreSAXElem parentLink, HashMap<String, String> hshAttrs) {
         this.qName = qName;
         this.parentLink = parentLink;
         this.hshAttrs = hshAttrs;
@@ -40,16 +40,16 @@ public class GenreSAXElem {
 
     public static GenreSAXElem getGenreDescr(String lang, String genre) {
         GenreSAXElem found = null;
-        for (GenreSAXElem g: elemList) {
-            if (g.hshAttrs!=null) {
-                if (g.hshAttrs.get("value")!=null)
-                    if ((g.hshAttrs.get("value").equalsIgnoreCase(genre))&&
+        for (GenreSAXElem g : elemList) {
+            if (g.hshAttrs != null) {
+                if (g.hshAttrs.get("value") != null)
+                    if ((g.hshAttrs.get("value").equalsIgnoreCase(genre)) &&
                             (
-                                    (g.qName.equalsIgnoreCase("genre"))||
-                                            (g.qName.equalsIgnoreCase("subgenre"))||
+                                    (g.qName.equalsIgnoreCase("genre")) ||
+                                            (g.qName.equalsIgnoreCase("subgenre")) ||
                                             (g.qName.equalsIgnoreCase("genre-alt"))
                             )
-                            ) {
+                    ) {
                         found = g;
                         break;
                     }
@@ -57,34 +57,34 @@ public class GenreSAXElem {
         }
         GenreSAXElem foundDescr = null;
         GenreSAXElem foundDescrEn = null;
-        if (found!=null) {
-            for (GenreSAXElem g: elemList) {
-                if (g.hshAttrs!=null) {
+        if (found != null) {
+            for (GenreSAXElem g : elemList) {
+                if (g.hshAttrs != null) {
                     if (
-                            (g.parentLink==found) &&
+                            (g.parentLink == found) &&
                                     (
-                                            (g.qName.equalsIgnoreCase("root-descr"))||
+                                            (g.qName.equalsIgnoreCase("root-descr")) ||
                                                     (g.qName.equalsIgnoreCase("genre-descr"))
                                     )
-                            ) {
-                        if (g.hshAttrs.get("lang")!=null) {
+                    ) {
+                        if (g.hshAttrs.get("lang") != null) {
                             if (g.hshAttrs.get("lang").equalsIgnoreCase("en")) foundDescrEn = g;
                             if (g.hshAttrs.get("lang").equalsIgnoreCase(lang)) foundDescr = g;
                         }
                     }
                 }
             }
-            if ((foundDescrEn==null)&&(foundDescr==null)&&(found.parentLink!=null)) {
-                for (GenreSAXElem g: elemList) {
-                    if (g.hshAttrs!=null) {
+            if ((foundDescrEn == null) && (foundDescr == null) && (found.parentLink != null)) {
+                for (GenreSAXElem g : elemList) {
+                    if (g.hshAttrs != null) {
                         if (
-                                (g.parentLink==found.parentLink) &&
+                                (g.parentLink == found.parentLink) &&
                                         (
-                                                (g.qName.equalsIgnoreCase("root-descr"))||
-                                                (g.qName.equalsIgnoreCase("genre-descr"))
+                                                (g.qName.equalsIgnoreCase("root-descr")) ||
+                                                        (g.qName.equalsIgnoreCase("genre-descr"))
                                         )
-                                ) {
-                            if (g.hshAttrs.get("lang")!=null) {
+                        ) {
+                            if (g.hshAttrs.get("lang") != null) {
                                 if (g.hshAttrs.get("lang").equalsIgnoreCase("en")) foundDescrEn = g;
                                 if (g.hshAttrs.get("lang").equalsIgnoreCase(lang)) foundDescr = g;
                             }
@@ -93,7 +93,7 @@ public class GenreSAXElem {
                 }
             }
         }
-        if (foundDescr!=null) return foundDescr;
+        if (foundDescr != null) return foundDescr;
         return foundDescr;
     }
 
@@ -106,7 +106,7 @@ public class GenreSAXElem {
                 if (!StrUtils.isEmptyStr(sVal)) {
                     if (sVal.contains("|")) {
                         String sVal2 = sVal.split("\\|")[0];
-                        sValAdd = sVal.substring(sVal2.length()+1);
+                        sValAdd = sVal.substring(sVal2.length() + 1);
                         if (!StrUtils.isEmptyStr(sVal2)) sVal = sVal2;
                     }
                 }
@@ -139,43 +139,44 @@ public class GenreSAXElem {
             public void characters(char ch[], int start, int length) throws SAXException {
 
             }
+
             ; //end of DefaultHandler object
         };
         File[] dataDirs = Engine.getDataDirectories(null, false, true);
         File existingFile = null;
         File existingFile2 = null;
-        for ( File dir : dataDirs ) {
+        for (File dir : dataDirs) {
             File f = new File(dir, "fb2genres_utf8_wo_bom.xml");
-            if ( f.exists() && f.isFile() ) {
+            if (f.exists() && f.isFile()) {
                 existingFile = f;
                 break;
             }
         }
-        for ( File dir : dataDirs ) {
+        for (File dir : dataDirs) {
             File f = new File(dir, "genres_rus.txt");
-            if ( f.exists() && f.isFile() ) {
+            if (f.exists() && f.isFile()) {
                 existingFile = f;
                 break;
             }
         }
         InputStream targetStreamF = null;
         InputStream targetStream = null;
-        if (existingFile!=null) targetStreamF = new FileInputStream(existingFile);
+        if (existingFile != null) targetStreamF = new FileInputStream(existingFile);
         targetStream = mActivity.getResources().openRawResource(R.raw.fb2genres_utf8_wo_bom);
         InputStream targetStreamF2 = null;
         InputStream targetStream2 = null;
-        if (existingFile2!=null) targetStreamF2 = new FileInputStream(existingFile2);
+        if (existingFile2 != null) targetStreamF2 = new FileInputStream(existingFile2);
         targetStream2 = mActivity.getResources().openRawResource(R.raw.genres_rus);
-        if (targetStreamF!=null) {
+        if (targetStreamF != null) {
             try {
                 saxParser.parse(targetStreamF, handler);
                 targetStreamF.close();
             } catch (Exception e) {
-                mActivity.showToast("Could not parse genres from file: fb2genres_utf8_wo_bom.xml. "+e.getMessage());
+                mActivity.showToast("Could not parse genres from file: fb2genres_utf8_wo_bom.xml. " + e.getMessage());
                 try {
                     saxParser.parse(targetStream, handler);
                 } catch (Exception e1) {
-                    mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. "+e1.getMessage());
+                    mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. " + e1.getMessage());
                 }
             }
         } else {
@@ -183,26 +184,26 @@ public class GenreSAXElem {
                 saxParser.parse(targetStream, handler);
                 targetStream.close();
             } catch (Exception e1) {
-                mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. "+e1.getMessage());
+                mActivity.showToast("Could not parse genres from resource: fb2genres_utf8_wo_bom.xml. " + e1.getMessage());
             }
         }
-        if (targetStreamF2!=null) {
+        if (targetStreamF2 != null) {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(targetStreamF2));
                 String str = "";
                 while ((str = reader.readLine()) != null) splitS(str);
                 targetStreamF2.close();
             } catch (Exception e) {
-                mActivity.showToast("Could not parse genres from file: genres_rus.txt. "+
-                        e.getClass().getSimpleName()+" "+e.getMessage());
+                mActivity.showToast("Could not parse genres from file: genres_rus.txt. " +
+                        e.getClass().getSimpleName() + " " + e.getMessage());
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(targetStream2));
                     String str = "";
                     while ((str = reader.readLine()) != null) splitS(str);
                     targetStream2.close();
                 } catch (Exception e1) {
-                    mActivity.showToast("Could not parse genres from resource: genres_rus.txt. "+
-                            e1.getClass().getSimpleName()+" "+e1.getMessage());
+                    mActivity.showToast("Could not parse genres from resource: genres_rus.txt. " +
+                            e1.getClass().getSimpleName() + " " + e1.getMessage());
                 }
             }
         } else {
@@ -212,9 +213,51 @@ public class GenreSAXElem {
                 while ((str = reader.readLine()) != null) splitS(str);
                 targetStream2.close();
             } catch (Exception e1) {
-                mActivity.showToast("Could not parse genres from resource: genres_rus.txt. "+
-                        e1.getClass().getSimpleName()+" "+e1.getMessage());
+                mActivity.showToast("Could not parse genres from resource: genres_rus.txt. " +
+                        e1.getClass().getSimpleName() + " " + e1.getMessage());
             }
         }
+    }
+
+    public static String[] getGenreDescrFull(String lang, String genre) {
+        String genreDescr = "";
+        String genreDescrEN = "";
+        GenreSAXElem ge = GenreSAXElem.getGenreDescr(lang, genre);
+        String[] ge2 = null;
+        if (ge != null) {
+            if (ge.hshAttrs != null) {
+                genreDescr = ge.hshAttrs.get("detailed");
+                if (StrUtils.isEmptyStr(genreDescr))
+                    genreDescr = ge.hshAttrs.get("genre-title");
+                if (StrUtils.isEmptyStr(genreDescr))
+                    genreDescr = ge.hshAttrs.get("title");
+            }
+        } else {
+            ge2 = GenreSAXElem.elemList2.get(genre);
+            if (ge2!=null) {
+                if (lang.toUpperCase().equals("RU")) genreDescr = ge2[0];
+                else genreDescr = ge2[1];
+            }
+        }
+        ge = GenreSAXElem.getGenreDescr("EN", genre);
+        ge2 = null;
+        if (ge != null) {
+            if (ge.hshAttrs != null) {
+                genreDescrEN = ge.hshAttrs.get("detailed");
+                if (StrUtils.isEmptyStr(genreDescrEN))
+                    genreDescrEN = ge.hshAttrs.get("genre-title");
+                if (StrUtils.isEmptyStr(genreDescrEN))
+                    genreDescrEN = ge.hshAttrs.get("title");
+            }
+        } else {
+            ge2 = GenreSAXElem.elemList2.get(genre);
+            if (ge2!=null) {
+                genreDescrEN = ge2[1];
+            }
+        }
+        String[] res = new String[2];
+        res[0] = genreDescrEN;
+        res[1] = genreDescr;
+        return res;
     }
 }

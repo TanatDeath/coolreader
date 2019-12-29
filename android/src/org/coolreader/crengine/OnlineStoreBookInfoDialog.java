@@ -15,8 +15,10 @@ import org.coolreader.plugins.PurchaseBookCallback;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -87,7 +89,18 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        mInflater = LayoutInflater.from(getContext());
+		int colorGray;
+		int colorGrayC;
+		int colorIcon;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		colorGray = a.getColor(0, Color.GRAY);
+		colorGrayC = a.getColor(1, Color.GRAY);
+		colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorGrayCT= colorGrayC;// Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		mInflater = LayoutInflater.from(getContext());
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.online_store_book_info_dialog, null);
         mContentView = view;
         
@@ -105,6 +118,7 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 				onBuyButtonClick();
 			}
 		});
+		btnBuyOrDownload.setBackgroundColor(colorGrayCT);
         btnPreview = (Button)view.findViewById(R.id.btn_preview);
         btnPreview.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -112,6 +126,7 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 				onPreviewButtonClick();
 			}
 		});
+        btnPreview.setBackgroundColor(colorGrayCT);
         lblTitle = (TextView)view.findViewById(R.id.lbl_book_title);
         lblSeries = (TextView)view.findViewById(R.id.lbl_book_series);
         lblAuthors = (TextView)view.findViewById(R.id.lbl_book_author);

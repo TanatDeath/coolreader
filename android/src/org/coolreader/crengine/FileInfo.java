@@ -41,6 +41,9 @@ public class FileInfo {
 	public final static String FILE_DATE_TAG = "@filedateRoot";
 	public final static String FILE_DATE_GROUP_PREFIX = "@filedateGroup:";
 	public final static String FILE_DATE_PREFIX = "@filedate:";
+	public final static String GENRE_TAG = "@genreRoot";
+	public final static String GENRE_GROUP_PREFIX = "@genreGroup:";
+	public final static String GENRE_PREFIX = "@genre:";
 	public final static String RATING_TAG = "@ratingRoot";
 	public final static String STATE_TO_READ_TAG = "@stateToReadRoot";
 	public final static String STATE_READING_TAG = "@stateReadingRoot";
@@ -58,7 +61,8 @@ public class FileInfo {
 	public int seriesNumber; // number of book inside series
     public int saved_with_ver; // version of database book was saved with
 	public boolean need_to_update_ver; // file was saved in old format
-	public String genre;
+	public String genre; // Genre list written directly
+	public String genre_list; // Genre list from genre table
 	public String annotation;
 	public String srclang;
     private String bookdate;
@@ -418,6 +422,8 @@ public class FileInfo {
 		id = v.id;
 		saved_with_ver = v.saved_with_ver;
 		genre = v.genre;
+		genre_list = v.genre_list;
+		//if (StrUtils.isEmptyStr(genre_list)) genre_list = v.genre;
 		annotation = v.annotation;
 		srclang = v.srclang;
 		setBookdate(v.bookdate);
@@ -584,6 +590,11 @@ public class FileInfo {
 		return TITLE_TAG.equals(pathname);
 	}
 
+	public boolean isBooksByGenreRoot()
+	{
+		return GENRE_TAG.equals(pathname);
+	}
+
 	public boolean isRescanShortcut()
 	{
 		return RESCAN_LIBRARY_TAG.equals(pathname);
@@ -617,6 +628,11 @@ public class FileInfo {
 	public boolean isBooksByFiledateDir()
 	{
 		return pathname!=null && pathname.startsWith(FILE_DATE_PREFIX);
+	}
+
+	public boolean isBooksByGenreDir()
+	{
+		return pathname!=null && pathname.startsWith(GENRE_PREFIX);
 	}
 	
 	public boolean isOnSDCard() {
@@ -670,7 +686,14 @@ public class FileInfo {
 			return 0;
 		return id;
 	}
-	
+
+	public long getGenreId()
+	{
+		if (!isBooksByGenreDir())
+			return 0;
+		return id;
+	}
+
 	public boolean isHidden()
 	{
 		return pathname.startsWith(".");
@@ -884,6 +907,7 @@ public class FileInfo {
 		boolean modified = false;
 		modified = setTitle(file.getTitle()) || modified;
 		modified = setAuthors(file.getAuthors()) || modified;
+		modified = setGenres(file.getGenres()) || modified;
 		modified = setSeriesName(file.getSeriesName()) || modified;
 		modified = setSeriesNumber(file.getSeriesNumber()) || modified;
 		modified = setReadingState(file.getReadingState()) || modified;
@@ -1147,6 +1171,52 @@ public class FileInfo {
 		} else this.authors = null;
 		return true;
 	}
+
+	public String getGenres() {
+		String genreR = this.genre_list;
+		if (StrUtils.isEmptyStr(genreR)) genreR = this.genre;
+		if (genreR!=null) {
+			String[] list = genreR.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			return resS;
+		}
+		return null;
+	}
+
+	public boolean setGenres(String genres) {
+		String genreR = this.genre_list;
+		if (StrUtils.isEmptyStr(genreR)) genreR = this.genre;
+		if ((eq(genreR, genres)) && (!StrUtils.isEmptyStr(this.genre_list)))
+			return false;
+		if (genres!=null) {
+			String[] list = genres.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			this.genre = resS;
+			this.genre_list = resS;
+		} else {
+			this.genre = null;
+			this.genre_list = null;
+		}
+		return true;
+	}
 	
 	public String getTitle() {
 		return title;
@@ -1192,9 +1262,12 @@ public class FileInfo {
 	}
 
 	public boolean setGenre(String genre) {
-		if (eq(this.genre, genre))
+		String genreR = this.genre_list;
+		if (StrUtils.isEmptyStr(genreR)) genreR = this.genre;
+		if (eq(genreR, genre))
 			return false;
 		this.genre = genre;
+		this.genre_list = genre;
 		return true;
 	}
 
@@ -1614,6 +1687,7 @@ public class FileInfo {
 			return false;
 		if (!StrUtils.euqalsIgnoreNulls(title, other.title, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(genre, other.genre, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(genre_list, other.genre_list, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(annotation, other.annotation, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(srclang, other.srclang, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(bookdate, other.bookdate, true)) return false;
