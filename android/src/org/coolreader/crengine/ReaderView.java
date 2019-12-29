@@ -3829,6 +3829,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return currentImageViewer.prepareImage();
 
 		PositionProperties currpos = doc.getPositionProps(null);
+		if (null == currpos)
+			return null;
 
 		boolean isPageView = currpos.pageMode!=0;
 
