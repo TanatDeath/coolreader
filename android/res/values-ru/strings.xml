@@ -228,6 +228,9 @@
     <string name="book_info_action_opds_info_final">Книга скачана из OPDS каталога:</string>
     <string name="book_info_action_open">Открыть книгу</string>
     <string name="book_info_action_download">Скачать книгу</string>
+    <string name="book_info_action_downloading">Книга скачивается...</string>
+    <string name="book_info_action_download1">Нажмите на обложку, чтобы скачать книгу</string>
+    <string name="book_info_action_download2">Нажмите на обложку, чтобы открыть книгу</string>
     <string name="book_info_action_unavailable">Сначала вы должны скачать книгу</string>
     <string name="mi_book_styles_enable">Разрешить встроенные стили документа</string>
     <string name="mi_book_styles_disable">Запретить встроенные стили документа</string>

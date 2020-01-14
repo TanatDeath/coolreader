@@ -62,6 +62,7 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnBookEdit;
 	Button btnMarkToRead;
 	ImageButton btnBookDownload;
+	String annot2 = "";
 	ImageButton btnFindAuthors;
 	boolean bMarkToRead;
 
@@ -203,8 +204,10 @@ public class BookInfoDialog extends BaseDialog {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (bMarkToRead) btnMarkToRead.setBackgroundColor(colorGrayCT2);
-		else btnMarkToRead.setBackgroundColor(colorGrayCT);
+		//if (bMarkToRead) btnMarkToRead.setBackgroundColor(colorGrayCT2);
+		//	else btnMarkToRead.setBackgroundColor(colorGrayCT);
+		if (bMarkToRead) btnMarkToRead.setBackgroundResource(R.drawable.button_bg_dashed_border);
+			else btnMarkToRead.setBackgroundColor(colorGrayCT);
 		btnMarkToRead.setTextColor(colorBlue);
 	}
 
@@ -295,7 +298,12 @@ public class BookInfoDialog extends BaseDialog {
 					FileInfo fi = mBookInfo.getFileInfo();
 					cr.loadDocument(fi);
 					dismiss();
-				} else cr.showToast(R.string.book_info_action_unavailable);
+				} else //cr.showToast(R.string.book_info_action_unavailable);
+				{
+					cr.showToast(R.string.book_info_action_downloading);
+					if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
+					dismiss();
+				}
 			}
 		});
 		btnBack = ((ImageButton)view.findViewById(R.id.base_dlg_btn_back));
@@ -316,7 +324,12 @@ public class BookInfoDialog extends BaseDialog {
 					FileInfo fi = mBookInfo.getFileInfo();
 					cr.loadDocument(fi);
 					dismiss();
-				} else cr.showToast(R.string.book_info_action_unavailable);
+				} else {
+					//cr.showToast(R.string.book_info_action_unavailable);
+					cr.showToast(R.string.book_info_action_downloading);
+					if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
+					dismiss();
+				}
 			}
 		});
 
@@ -412,7 +425,7 @@ public class BookInfoDialog extends BaseDialog {
 		});
 		paintMarkButton();
 		btnBookDownload = ((ImageButton)view.findViewById(R.id.book_download));
-		final String annot2 = annot;
+		annot2 = annot;
 		btnBookDownload.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -475,7 +488,10 @@ public class BookInfoDialog extends BaseDialog {
 				}
 			}
 		});
-		SpannableString ss = new SpannableString(annot);
+		String sss = "";
+		if (mActionType == OPDS_INFO) sss = "["+mCoolReader.getString(R.string.book_info_action_download1)+"]\n";
+		if (mActionType == OPDS_FINAL_INFO) sss = sss = "["+mCoolReader.getString(R.string.book_info_action_download2)+"]\n";
+		SpannableString ss = new SpannableString(sss+annot);
 		txtAnnot.setText(ss);
 		int colorGray;
 		int colorGrayC;

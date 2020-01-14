@@ -1,7 +1,5 @@
 package org.coolreader.cloud;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -22,12 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.zip.CRC32;
 
 public class CloudSyncFolder {

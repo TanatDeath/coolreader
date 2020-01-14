@@ -4,10 +4,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.dropbox.core.DbxAuthFinish;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxSessionStore;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.users.FullAccount;
 
 import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudAction;

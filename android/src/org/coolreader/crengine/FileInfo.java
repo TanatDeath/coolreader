@@ -1721,8 +1721,9 @@ public class FileInfo {
 	}
 	
 	public boolean allowSorting() {
-		return isDirectory && !isRootDir() && !isRecentDir() && !isOPDSDir() && !isBooksBySeriesDir()
-				&& !isBooksByBookdateDir()&& !isBooksByDocdateDir()&& !isBooksByPublyearDir()
-				&& !isBooksByFiledateDir();
+		return isDirectory && !isRecentDir();
+//		&& !isRootDir() && !isRecentDir() && !isOPDSDir() && !isBooksBySeriesDir()
+//				&& !isBooksByBookdateDir()&& !isBooksByDocdateDir()&& !isBooksByPublyearDir()
+//				&& !isBooksByFiledateDir();
 	}
 }

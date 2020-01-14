@@ -133,12 +133,6 @@ import android.provider.Settings.Secure;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-//import javax.imageio.*;
-
-//import net.htmlparser.jericho.HTMLElementName;
-//import net.htmlparser.jericho.Source;
-//import net.htmlparser.jericho.TextExtractor;
-
 import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;

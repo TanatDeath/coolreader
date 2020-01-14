@@ -45,7 +45,9 @@ public class OrientationToolbarDlg {
 		}
 	};
 
-	static public OrientationToolbarDlg showDialog( CoolReader coolReader, ReaderView readerView,
+	public static long lastOrientationShowTime = 0L;
+
+	public static OrientationToolbarDlg showDialog( CoolReader coolReader, ReaderView readerView,
 													int curOrientation, boolean isShortMode)
 	{
 		OrientationToolbarDlg dlg = new OrientationToolbarDlg(coolReader, readerView, curOrientation, isShortMode);

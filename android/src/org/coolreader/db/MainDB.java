@@ -2124,7 +2124,7 @@ public class MainDB extends BaseDB {
 		"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list "
 		;
 
-	private static final String READ_FILEINFO_SQL = 
+	private static final String READ_FILEINFO_SQL =
 		"SELECT " +
 		READ_FILEINFO_FIELDS +
 		"FROM book b " +
@@ -2306,7 +2306,8 @@ public class MainDB extends BaseDB {
 			buf.append(" (1=1) ");
 		}
 		if (!hasCondition) return list;
-		String condition = buf.length()==0 ? "" : " WHERE " + buf.toString();
+		String condition = buf.length()==0 ? " WHERE (not (b.pathname like '@opds%'))" :
+				" WHERE (" + buf.toString() + ")  and (not (b.pathname like '@opds%'))";
 		String sql = READ_FILEINFO_SQL + condition + " ORDER BY file_create_time desc";
 		Log.d("cr3", "sql: " + sql );
 		Cursor rs = null;

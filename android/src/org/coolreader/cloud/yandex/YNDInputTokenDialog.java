@@ -1,7 +1,6 @@
 package org.coolreader.cloud.yandex;
 
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -17,11 +16,8 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.dropbox.DBXConfig;
-import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.StrUtils;
 
 import java.io.BufferedWriter;

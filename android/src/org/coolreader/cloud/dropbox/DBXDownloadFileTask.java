@@ -4,15 +4,10 @@ import android.os.AsyncTask;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 
 import org.coolreader.CoolReader;
-import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.Services;
-import org.coolreader.crengine.StrUtils;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

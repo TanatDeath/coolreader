@@ -14,23 +14,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.dropbox.core.DbxAppInfo;
-import com.dropbox.core.DbxAuthFinish;
-import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.DbxSessionStore;
-import com.dropbox.core.DbxStandardSessionStore;
 import com.dropbox.core.DbxWebAuth;
-import com.dropbox.core.v2.DbxClientV2;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.cloud.OpenBookFromCloudDlg;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.BookSearchDialog;
-import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.Services;
 import org.coolreader.crengine.StrUtils;
 
 import java.io.BufferedWriter;

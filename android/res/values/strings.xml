@@ -240,6 +240,9 @@
     <string name="book_info_action_opds_info_final">Book has been downloaded from OPDS:</string>
     <string name="book_info_action_open">Open book</string>
     <string name="book_info_action_download">Download book</string>
+    <string name="book_info_action_download1">Click cover to download the book</string>
+    <string name="book_info_action_download2">Click cover to open the book</string>
+    <string name="book_info_action_downloading">Book is downloading...</string>
     <string name="book_info_action_unavailable">First you should download the book</string>
     <string name="mi_book_styles_enable">Enable document internal styles</string>
     <string name="mi_book_styles_disable">Disable document internal styles</string>

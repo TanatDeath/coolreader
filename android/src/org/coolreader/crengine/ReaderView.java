@@ -2771,9 +2771,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_TOGGLE_DAY_NIGHT_MODE:
 			toggleDayNightMode();
-			//mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
-			//mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
-			//mActivity.geoLastData.doSignal(false,false);
+			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
+			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
+			mActivity.geoLastData.doSignal(false,false);
 			break;
 		case DCMD_TOGGLE_DICT_ONCE:
 			log.i("Next dictionary will be the 2nd for one time");
@@ -4075,9 +4075,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (orientationToolbarDlg!=null)
 				if (orientationToolbarDlg.mWindow != null)
 					orientationToolbarDlg.mWindow.dismiss();
-			if (iSett > 0)
-				orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
-						curOrientation, false);
+			if (iSett > 0) {
+				long curTime = System.currentTimeMillis();
+				long interv = 3000L; // 3 seconds
+				if (curTime - OrientationToolbarDlg.lastOrientationShowTime > interv) {
+					OrientationToolbarDlg.lastOrientationShowTime = curTime;
+					orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
+							curOrientation, false);
+				}
+			}
 		}
 		lastsetOrientation = getActivity().getScreenOrientation();
 		requestedWidth = width;
@@ -4126,9 +4132,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (orientationToolbarDlg!=null)
 				if (orientationToolbarDlg.mWindow != null)
 					orientationToolbarDlg.mWindow.dismiss();
-			if ((iSett > 0) && (iOrnt != 4))
-				orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
-						curOrientation, true);
+			if ((iSett > 0) && (iOrnt != 4)) {
+				long curTime = System.currentTimeMillis();
+				long interv = 3000L; // 3 seconds
+				if (curTime - OrientationToolbarDlg.lastOrientationShowTime > interv) {
+					OrientationToolbarDlg.lastOrientationShowTime = curTime;
+					orientationToolbarDlg = OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
+							curOrientation, true);
+				}
+			}
 		}
 	}
 

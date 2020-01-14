@@ -8,11 +8,14 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TableLayout;
@@ -22,6 +25,8 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.Settings;
 import org.coolreader.geo.GeoLastData;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
@@ -160,7 +165,37 @@ public class GeoToastView {
         //toast_ll.setBackgroundColor(colorGrayC);
         toast_ll.setBackgroundColor(Color.argb(220, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
         TableLayout geoTable = (TableLayout) window.getContentView().findViewById(R.id.geo_table);
+        if ((t.transportStop != null)||(t.metroStation != null)) {
+            TableRow getSettTRow = (TableRow) inflater.inflate(R.layout.geo_sett_item, null);
+            geoTable.addView(getSettTRow);
+            Properties props = new Properties(mActivity.settings());
+            int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+            Button btnGeoSett = (Button) window.getContentView().findViewById(R.id.btn_geo_sett);
+            Button btnGeoOff = (Button) window.getContentView().findViewById(R.id.btn_geo_off);
+            Button btnGeoMode = (Button) window.getContentView().findViewById(R.id.btn_geo_mode);
+            Button[] btns = new Button[] {btnGeoSett, btnGeoOff, btnGeoMode};
+            for (Button btn: btns) {
+                btn.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+                //dicButton.setHeight(dicButton.getHeight()-4);
+                btn.setTextColor(colorIcon);
+                btn.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+                btn.setPadding(3, 3, 3, 3);
+                //dicButton.setBackground(null);
+                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                llp.setMargins(4, 1, 1, 4);
+                //btn.setLayoutParams(llp);
+                btn.setMaxLines(1);
+                btn.setEllipsize(TextUtils.TruncateAt.END);
+                mActivity.tintViewIcons(btn, true);
+            }
+        }
         if (t.metroStation != null) {
+            TableRow getSepRow = (TableRow) inflater.inflate(R.layout.geo_sep_item, null);
+            geoTable.addView(getSepRow);
+            View sep = window.getContentView().findViewById(R.id.sepRow);
+            sep.setBackgroundColor(updColor(colorIcon));
             TableRow getMetroTRow = (TableRow) inflater.inflate(R.layout.geo_metro_item, null);
             geoTable.addView(getMetroTRow);
             TextView tv = (TextView) window.getContentView().findViewById(R.id.center_station_name);
@@ -233,12 +268,10 @@ public class GeoToastView {
             }
         }
         if (t.transportStop != null) {
-            if (t.metroStation != null) {
-                TableRow getSepRow = (TableRow) inflater.inflate(R.layout.geo_sep_item, null);
-                geoTable.addView(getSepRow);
-                View sep = window.getContentView().findViewById(R.id.sepRow);
-                sep.setBackgroundColor(updColor(colorIcon));
-            }
+            TableRow getSepRow = (TableRow) inflater.inflate(R.layout.geo_sep_item, null);
+            geoTable.addView(getSepRow);
+            View sep = window.getContentView().findViewById(R.id.sepRow);
+            sep.setBackgroundColor(updColor(colorIcon));
             TableRow getStopTRow = (TableRow) inflater.inflate(R.layout.geo_stop_item, null);
             geoTable.addView(getStopTRow);
             TextView tv = (TextView) window.getContentView().findViewById(R.id.center_stop_name);

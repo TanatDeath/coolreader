@@ -1378,6 +1378,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		@Override
 		public void onItemGroupsLoaded(FileInfo parent) {
 			baseDir.setItems(parent);
+			//plotn - very experimental
+			baseDir.sort(mSortOrder);
 			showDirectoryInternal(baseDir, null);
 		}
 	};
@@ -1385,11 +1387,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	private class FileInfoLoadingCallback implements CRDBService.FileInfoLoadingCallback {
 		private final FileInfo baseDir;
 		public FileInfoLoadingCallback(FileInfo baseDir) {
+			//plotn - very experimental
+			baseDir.sort(mSortOrder);
 			this.baseDir = baseDir;
 		}
 		@Override
 		public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
 			baseDir.setItems(list);
+			//plotn - very experimental
+			baseDir.sort(mSortOrder);
 			showDirectoryInternal(baseDir, null);
 		}
 	};
