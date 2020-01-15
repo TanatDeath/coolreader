@@ -1267,7 +1267,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
                             selector.notifyScanner(file.getAbsolutePath());
                         }
 						mEngine.hideProgress();
-						//mActivity.showToast("Download is finished");
 						//fileOrDir.parent.pathname // @opds:http://89.179.127.112/opds/search/books/u/0/
 						FileInfo fi = new FileInfo(file);
 						boolean isArch = isArchive(file);
@@ -1276,7 +1275,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							dir = downloadDir;
 						String sPath = file.getAbsolutePath();
 						String sPathZ = sPath;
-						if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))) {
+						log.d("onDownloadEnd: sPath = " + sPath);
+						if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))
+								&&(!sPathZ.toLowerCase().endsWith(".epub"))) {
 							int i = 0;
 							sPathZ = sPath + ".zip";
 							File fileZ = new File(sPathZ);
@@ -1290,7 +1291,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							file.renameTo(fileZ);
 						}
 						mScanner.listDirectory(dir);
-						final FileInfo item = dir.findItemByPathName(sPathZ);
+						FileInfo item1 = dir.findItemByPathName(sPathZ);
+						if (item1 == null) item1 = new FileInfo(sPathZ);
+						final FileInfo item = item1;
+						log.d("onDownloadEnd: sPathZ = " + sPathZ);
 						BackgroundThread.ensureGUI();
 						item.opdsLink = url;
 						fileOrDir.pathnameR = item.pathname;

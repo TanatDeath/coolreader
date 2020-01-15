@@ -321,6 +321,7 @@ public:
     virtual void reset() {
         init();
     }
+
     virtual ~docx_PropertiesContainer() {}
 
     docx_PropertiesContainer() {

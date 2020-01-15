@@ -2771,9 +2771,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_TOGGLE_DAY_NIGHT_MODE:
 			toggleDayNightMode();
-			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
-			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
-			mActivity.geoLastData.doSignal(false,false);
+//			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
+//			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
+//			mActivity.geoLastData.doSignal(false,false);
 			break;
 		case DCMD_TOGGLE_DICT_ONCE:
 			log.i("Next dictionary will be the 2nd for one time");

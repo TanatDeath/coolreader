@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -25,6 +26,8 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.geo.GeoLastData;
@@ -153,9 +156,19 @@ public class GeoToastView {
         }
         Toast t = queue.poll();
         window = new PopupWindow(t.anchor.getContext());
+        window.setTouchInterceptor(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
+                    window.dismiss();
+                    return true;
+                }
+                return false;
+            }
+        });
         window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
         window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setTouchable(false);
+        window.setTouchable(true);
         window.setFocusable(false);
         window.setOutsideTouchable(true);
         window.setBackgroundDrawable(null);
@@ -171,9 +184,28 @@ public class GeoToastView {
             Properties props = new Properties(mActivity.settings());
             int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
             Button btnGeoSett = (Button) window.getContentView().findViewById(R.id.btn_geo_sett);
+            btnGeoSett.setText(mActivity.getString(R.string.options_app_geo_sett));
+            btnGeoSett.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    ((CoolReader) mActivity).optionsFilter = "";
+                    ((CoolReader) mActivity).showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_GEO);
+                    window.dismiss();
+                }
+            });
             Button btnGeoOff = (Button) window.getContentView().findViewById(R.id.btn_geo_off);
-            Button btnGeoMode = (Button) window.getContentView().findViewById(R.id.btn_geo_mode);
-            Button[] btns = new Button[] {btnGeoSett, btnGeoOff, btnGeoMode};
+            btnGeoOff.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if (DeviceInfo.getSDKLevel() >= 9) {
+                        int iSett = mActivity.settings().getInt(Settings.PROP_APP_GEO, 1);
+                        Properties props1 = new Properties(mActivity.settings());
+                        props1.setProperty(Settings.PROP_APP_GEO, "1");
+                        mActivity.setSettings(props1, -1, true);
+                        window.dismiss();
+                    }
+                }
+            });
+            btnGeoOff.setText(mActivity.getString(R.string.options_app_geo_off));
+            Button[] btns = new Button[] {btnGeoSett, btnGeoOff};
             for (Button btn: btns) {
                 btn.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
                 //dicButton.setHeight(dicButton.getHeight()-4);

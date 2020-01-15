@@ -267,7 +267,7 @@ public abstract class BaseDB {
 			bNeedStart = true;
 			log.i("flush: committing changes");
 		} else {
-			log.i("flush: rolling back changes");
+			log.i("flush: was not in transaction");
 		}
 		if (mDB.inTransaction()) mDB.endTransaction();
 		if (bNeedStart) mDB.beginTransaction();

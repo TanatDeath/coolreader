@@ -332,7 +332,8 @@ public class FileInfo {
 								filename = itemf.getName();
 								path = itemf.getPath();
 								format = DocumentFormat.byExtension(name);
-								//size = (int)entry.getSize();//plotn - guess this is same as compressed...
+								if (format == null) format = DocumentFormat.NONE;
+ 								//size = (int)entry.getSize();//plotn - guess this is same as compressed...
 								arcsize = (int) entry.getCompressedSize();
 								createTime = entry.getTime();
 								break;
@@ -363,6 +364,7 @@ public class FileInfo {
 			path = f.getParent();
 			pathname = f.getAbsolutePath();
 			format = fmt;
+			if (format == null) format = DocumentFormat.NONE;
 			createTime = f.lastModified();
 			size = (int)f.length();
 		} else {

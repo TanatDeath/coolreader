@@ -375,6 +375,7 @@ public class UserDicDlg extends BaseDialog {
 		if (openPage==0) setChecked(btnUserDic);
 		if (openPage==1) setChecked(btnCitation);
 		if (openPage==2) setChecked(btnDicSearchHistory);
+		checkedCallback(null);
 		body.addView(mList);
 		setView(frame);
 		searchButton = (ImageButton) frame.findViewById(R.id.btn_search);

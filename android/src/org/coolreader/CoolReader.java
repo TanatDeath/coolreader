@@ -2433,7 +2433,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						@Override
 						public void run() {
 							getDB().removeOPDSCatalog(item.id);
-							directoryUpdated(Services.getScanner().createRecentRoot());
+							directoryUpdated(Services.getScanner().createOPDSRoot());
 						}
 					});
 				}
