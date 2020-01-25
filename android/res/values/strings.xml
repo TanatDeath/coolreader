@@ -771,7 +771,7 @@
     <string name="save_bookmark_last_sel_user_dic">Save user dictionary entry (last selection)</string>
     <string name="options_app_dict_longtap_change">Toggle dictionary button action - short/long tap</string>
     <string name="options_app_dict_longtap_change_add_info">There are two different actions on a \'dictionary\' button on \'selection toolbar\' (when you select text while reading) - fired by short and long taps. This option allows to swap them.</string>
-    <string name="win_title_user_dic">User dictionary</string>
+    <string name="win_title_user_dic">User dic / cites / search history</string>
     <string name="win_title_citations">Citations</string>
     <string name="dlg_userdic_page">Page</string>
     <string name="dlg_userdic_book">Book</string>
@@ -922,9 +922,16 @@
     <string name="font_test_phrase2">Jackdaws love my big sphinx of quartz</string>
     <string name="font_test_phrase3">The five boxing wizards jump quickly</string>
     <string name="fix_new_orientation">Fix current screen orientation</string>
+    <string name="fix_new_orientation_short">Fix</string>
     <string name="fix_old_orientation">Revert to old screen orientation and fix it</string>
+    <string name="fix_old_orientation_short">Revert and fix</string>
     <string name="orientation_popup_toolbar_duration">Hide orientation popup toolbar after</string>
     <string name="disable_orientation_popup_toolbar">Disable orientation popup toolbar</string>
+    <string name="disable_orientation_popup_toolbar_short">Disable toolbar</string>
+    <string name="orientation_popup_toolbar_sett">Orientation popup toolbar settings</string>
+    <string name="orientation_popup_toolbar_sett_short">Settings</string>
+    <string name="orientation_popup_toolbar_hide">Hide orientation popup toolbar</string>
+    <string name="orientation_popup_toolbar_hide_short">Hide</string>
     <string name="error_while_opening">Error while opening document \"%s\"</string>
     <string name="datadir_is_removed">Application data directory \"%s\" has been removed by other app.\nPossibly it was some kind of disc space optimizer.\nUnfortunately all the settings were lost.</string>
     <string name="font_not_compat_with_language">Warning: font \"%s\" does not contain the full character set of the language \"%s\". Missing characters will be taken from the fallback font.</string>
@@ -977,6 +984,8 @@
     <string name="ynd_prev_auth">Previous authorization</string>
     <string name="ask_open_as_text">Open as plain text?</string>
     <string name="options_app_geo">In headphones in transport</string>
+    <string name="options_app_geo_sett">Settings</string>
+    <string name="options_app_geo_off">Off</string>
     <string name="options_app_geo_add_info">Allows to show popup window informing about transport stops and metro stations nearby</string>
     <string name="options_app_geo_1">Off</string>
     <string name="options_app_geo_2">Show metro stations nearby</string>
@@ -988,4 +997,17 @@
     <string name="text_location_permission">Location permission is required, grant?</string>
     <string name="ok">Ok</string>
     <string name="third_party_tango_mod_icon_set">High-contrast icons based on Tango Icon Library: http://tango.freedesktop.org/Tango_Icon_Library.</string>
+    <string name="rounded_corners_margin_pos_text">Status bar margin position</string>
+    <string name="rounded_corners_margin_pos_0">Both sides</string>
+    <string name="rounded_corners_margin_pos_1">Both sides, fullscreen only</string>
+    <string name="rounded_corners_margin_pos_2">Left</string>
+    <string name="rounded_corners_margin_pos_3">Left, fullscreen only</string>
+    <string name="rounded_corners_margin_pos_4">Right</string>
+    <string name="rounded_corners_margin_pos_5">Right, fullscreen only</string>
+    <string name="ext_fullscreen_margin_text">Extended fullscreen mode</string>
+    <string name="ext_fullscreen_margin_add_info">For devices with cutout(s) - stretch window to fit whole screen (cutouts may overlap application areas). For Android 9 and higher</string>
+    <string name="ext_fullscreen_margin_0">Disabled</string>
+    <string name="ext_fullscreen_margin_1">Enabled</string>
+    <string name="ext_fullscreen_margin_2">Enabled, read line margin: </string>
+    <string name="ext_fullscreen_margin_3">Enabled, 2 text lines in the statusbar</string>
 </resources>

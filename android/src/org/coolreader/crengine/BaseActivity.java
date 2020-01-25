@@ -106,6 +106,8 @@ public class BaseActivity extends Activity implements Settings {
 	protected CRDBServiceAccessor mCRDBService;
 	protected Dictionaries mDictionaries;
 
+	public int iCutoutMode = 0; // for cutout screens
+
 	//private volatile SuperActivityToast myToast;
 
 	protected void unbindCRDBService() {
@@ -165,6 +167,9 @@ public class BaseActivity extends Activity implements Settings {
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+		//WindowManager.LayoutParams lp1 = getWindow().getAttributes();
+		//lp1.layoutInDisplayCutoutMode =  LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+		//getWindow().setAttributes(lp1);
 		log.i("BaseActivity.onCreate() entered");
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mDecorView = getWindow().getDecorView();
@@ -235,9 +240,6 @@ public class BaseActivity extends Activity implements Settings {
 		if (backlight < -1 || backlight > 100)
 			backlight = -1;
 		setScreenBacklightLevel(backlight);
-
-    
-		
 		bindCRDBService();
 	}
 	
@@ -1622,10 +1624,34 @@ public class BaseActivity extends Activity implements Settings {
         	}
         } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
         	Services.getScanner().setHideEmptyDirs(flg);
-        }
+        } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
+        	iCutoutMode = stringToInt(value, 0);
+			setCutoutMode(iCutoutMode);
+		}
 	}
 
-	
+	@TargetApi(28)
+	public void setCutoutMode(int val) {
+		WindowManager.LayoutParams lp1 = getWindow().getAttributes();
+		if (DeviceInfo.getSDKLevel() >= 28) {
+			if (val == 0)
+				lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+			else
+				lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+			getWindow().setAttributes(lp1);
+		}
+	}
+
+	@TargetApi(28)
+	public void setCutoutModeRaw(int val) {
+		if (DeviceInfo.getSDKLevel() >= 28) {
+			WindowManager.LayoutParams lp1 = getWindow().getAttributes();
+			lp1.layoutInDisplayCutoutMode = val;
+			getWindow().setFlags(0, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().setAttributes(lp1);
+		}
+	}
+
 	public void showNotice(int questionResourceId, final Runnable action, final Runnable cancelAction) {
 		NoticeDialog dlg = new NoticeDialog(this, "", action, cancelAction);
 		dlg.show();
@@ -2166,8 +2192,10 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_TOP, vmargin);
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_BOTTOM, vmargin);
 			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN, "0");
-			
-	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, "0");
+			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN_POS, "0");
+			props.applyDefault(ReaderView.PROP_EXT_FULLSCREEN_MARGIN, "0");
+
+			props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_INTERVAL, "10");
 			props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_INTERVAL, "0");
             props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_DURATION, "300");

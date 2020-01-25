@@ -179,7 +179,8 @@ public enum DocumentFormat {
 		if (stype.equals("application/fb2.zip")) sExt = "fb2.zip";
 		if (stype.equals("application/zip")) sExt = "zip";
 		if (stype.equals("text/fb2+xml")) sExt = "fb2";
-		if (stype.equals("application/epub+zip")) sExt = "epub.zip";
+		//if (stype.equals("application/epub+zip")) sExt = "epub.zip";
+		if (stype.equals("application/epub+zip")) sExt = "epub";
 		if (stype.equals("application/epub")) sExt = "epub";
 		if (stype.equals("application/xhtml+xml")) sExt = "html";
 		if (stype.equals("application/vnd.ms-htmlhelp")) sExt = "chm";
@@ -212,6 +213,9 @@ public enum DocumentFormat {
 		if (stype.equals("image/png")) sExt = "png";
 		if (stype.equals("image/*")) sExt = "png";
 		if (stype.equals("application/x-pilot-prc")) sExt = "azw";
+		if (stype.equals("application/vnd.oasis.opendocument.text")) sExt = "odt";
+		if (stype.equals("application/vnd.oasis.opendocument.spreadsheet")) sExt = "ods";
+		if (stype.equals("application/vnd.oasis.opendocument.presentation")) sExt = "odp";
 		return sExt;
 	}
 	

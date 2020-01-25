@@ -129,6 +129,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.provider.Settings.Secure;
+import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -531,10 +532,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.d("intent=" + intent);
 		if (intent == null)
 			return false;
-		String fileToOpen = null;
+		String fileToOpen = "";
 		String scheme = null;
 		String host = null;
-		String intentAction = intent.getAction();
+		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
 			Uri uri = intent.getData();
 			String sUri = "";
@@ -591,15 +592,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
 			Uri uri = intent.getData();
-			String stype = intent.getType();
+			String stype = StrUtils.getNonEmptyStr(intent.getType(),false);
 			intent.setData(null);
 			if (uri != null) {
 				String sLastSeg = uri.getLastPathSegment();
-				fileToOpen = uri.getPath();
+				fileToOpen = StrUtils.getNonEmptyStr(uri.getPath(),false);
 				if (uri.getEncodedPath().contains("%00"))
-					fileToOpen = uri.getEncodedPath();
+					fileToOpen = StrUtils.getNonEmptyStr(uri.getEncodedPath(),false);
 				else
-					fileToOpen = uri.getPath();
+					fileToOpen = StrUtils.getNonEmptyStr(uri.getPath(),false);
 				File file = new File(fileToOpen);
 				// try to fix for Onyx Darwin 5 - not needed
 //				if ((!file.exists())&&(fileToOpen.contains("/mnt/sdcard"))) {
@@ -613,28 +614,42 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if ((uri.toString().startsWith("content"))&&(!file.exists())) {
 					String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
 					String fname = sLastSeg;
-					File nfile = new File(downlDir + "/" +fname);
-					if (nfile.exists()) fileToOpen = downlDir + "/" +fname;
-					else {
+					//File nfile = new File(downlDir + "/" +fname);
+					boolean bExists = true;
+					String sExt = DocumentFormat.extByMimeType(stype);
+					String fNameBase = fname;
+					String sResName = downlDir + "/" +fname;
+					int i = 0;
+					while (bExists) {
+						fname = i == 0 ? fname + "." + sExt :
+								fNameBase + " ("+i+")." + sExt;
+						i++;
+						sResName = downlDir + "/" + fname;
+						File f = new File(sResName);
+						bExists = f.exists();
+					}
+					//if (nfile.exists()) fileToOpen = downlDir + "/" +fname;
+					//else
+					{
 						FileOutputStream fos = null;
 						try {
-							String sExt = DocumentFormat.extByMimeType(stype);
 							if ((sLastSeg.startsWith("enc")||(StrUtils.isEmptyStr(sLastSeg)))) { //need to create filename
-								int i = 0;
-								boolean bExists = true;
+								i = 0;
+								bExists = true;
 								while (bExists) {
 									sLastSeg = i == 0 ? "CoolReader_Downloaded" : "CoolReader_Downloaded ("+i+")";
 									i++;
-									File f = new File(downlDir+"/"+sLastSeg);
+									sResName = downlDir+"/"+sLastSeg + "." + sExt;
+									File f = new File(sResName);
 									bExists = f.exists();
 								}
 							}
-							fileToOpen = downlDir+"/"+sLastSeg;
+							fileToOpen = sResName;
 							if (!StrUtils.isEmptyStr(sExt)) {
 								if (!fileToOpen.toLowerCase().endsWith(sExt)) {
 									if (!fileToOpen.endsWith(".")) fileToOpen = fileToOpen+".";
+									fileToOpen = fileToOpen+sExt;
 								}
-								fileToOpen = fileToOpen+sExt;
 							}
 							fos = new FileOutputStream(fileToOpen);
 							BufferedOutputStream out = new BufferedOutputStream(fos);
@@ -660,7 +675,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		if (Intent.ACTION_SEND_MULTIPLE.equals(intentAction)) {
-			if (intent.getType().startsWith("image/")) {
+			if (StrUtils.getNonEmptyStr(intent.getType(),false).startsWith("image/")) {
 				ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
 				if (imageUris != null) {
 					showToast("Not implemented yet");
@@ -668,8 +683,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		if (Intent.ACTION_SEND.equals(intentAction)) {
-			String sText = intent.getStringExtra(Intent.EXTRA_TEXT);
-			String stype = intent.getType();
+			String sText = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_TEXT),false);
+			String stype = StrUtils.getNonEmptyStr(intent.getType(),false);
 			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if (sText.toLowerCase().startsWith("http")) {
 				String sLastSeg = sText;
@@ -874,15 +889,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //					e.printStackTrace();
 //				}
 //			}
-			if (intent.getType().startsWith("image/")) {
+			if (StrUtils.getNonEmptyStr(intent.getType(),false).startsWith("image/")) {
 				Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 				if (imageUri != null) {
 					PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, imageUri, intent.getType());
 					dlg.show();
 				}
 			} else {
-				fileToOpen = intent.getStringExtra(Intent.EXTRA_SUBJECT);
-				if (fileToOpen != null) {
+				fileToOpen = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_SUBJECT),false);
+				if (!StrUtils.isEmptyStr(fileToOpen)) {
 					if (fileToOpen.equals(FileInfo.RECENT_DIR_TAG)) {
 						this.showRecentBooks();
 						return true;
@@ -950,7 +965,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 				if (StrUtils.isEmptyStr(fileToOpen)) {
 					//showToast(intent.getType());
-					String sText1 = intent.getStringExtra(Intent.EXTRA_TEXT);
+					String sText1 = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_TEXT),false);
 					if (!StrUtils.isEmptyStr(sText1)) {
 						if (sText1.toLowerCase().startsWith("http"))
 							showToast(R.string.warn_http);
@@ -962,11 +977,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 
-		if (fileToOpen == null && intent.getExtras() != null) {
+		if (StrUtils.isEmptyStr(fileToOpen) && intent.getExtras() != null) {
 			log.d("extras=" + intent.getExtras());
-			fileToOpen = intent.getExtras().getString(OPEN_FILE_PARAM);
+			fileToOpen = StrUtils.getNonEmptyStr(intent.getExtras().getString(OPEN_FILE_PARAM),false);
 		}
-		if (fileToOpen != null) {
+		if (!StrUtils.isEmptyStr(fileToOpen)) {
 			// parse uri from system filemanager
 			if (fileToOpen.contains("%00")) {
 				// splitter between archive file name and inner file.
@@ -1003,7 +1018,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				fileToOpen = fileToOpen.substring(5);
 			}
 		}
-		if (fileToOpen != null) {
+		if (!StrUtils.isEmptyStr(fileToOpen)) {
 			// patch for opening of books from ReLaunch (under Nook Simple Touch) 
 			while (fileToOpen.indexOf("%2F") >= 0) {
 				fileToOpen = fileToOpen.replace("%2F", "/");
@@ -1521,7 +1536,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	@SuppressWarnings("unchecked")
 	private void setCurrentFrame(ViewGroup newFrame) {
-        if (mCurrentFrame != newFrame) {
+		if (newFrame == mReaderFrame)
+			setCutoutMode(this.iCutoutMode);
+		else
+			setCutoutModeRaw(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
+		if (mCurrentFrame != newFrame) {
 			mPreviousFrame = mCurrentFrame;
 			log.i("New current frame: " + newFrame.getClass().toString());
 			if (mCurrentFrame == mBrowserFrame) {

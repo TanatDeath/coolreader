@@ -377,6 +377,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -688,6 +690,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1010,6 +1014,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1320,6 +1326,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1633,6 +1641,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1946,6 +1956,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2258,6 +2270,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2566,6 +2580,8 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
+        <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

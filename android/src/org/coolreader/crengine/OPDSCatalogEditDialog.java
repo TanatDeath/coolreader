@@ -79,12 +79,15 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		}
 
 		protected void onPostExecute(Bitmap result) {
-			Bitmap resizedBitmap = Bitmap.createScaledBitmap(
-					result, bmImage.getDrawable().getIntrinsicWidth(), bmImage.getDrawable().getIntrinsicHeight(), false);
-			bmImage.setImageBitmap(resizedBitmap);
-			bmImage.setColorFilter(null);
-			imgBtn.setEnabled(true);
-			imgBtn.setVisibility(View.VISIBLE);
+			if ((bmImage!=null)&&(result!=null))
+				if (bmImage.getDrawable()!=null) {
+				Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+						result, bmImage.getDrawable().getIntrinsicWidth(), bmImage.getDrawable().getIntrinsicHeight(), false);
+				bmImage.setImageBitmap(resizedBitmap);
+				bmImage.setColorFilter(null);
+				imgBtn.setEnabled(true);
+				imgBtn.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 
@@ -111,59 +114,65 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 							imgBtn.setVisibility(View.VISIBLE);
 						}
 					}, 5000);
-					final HttpUrl.Builder urlBuilder = HttpUrl.parse(urlEdit.getText().toString()).newBuilder();
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							Document doc = null;
-							try {
-								doc = Jsoup.parse(urlBuilder.build().url(), 60000);
-								if (doc != null) {
-									for (Element el : doc.getAllElements()) {
-										if (el.tag().getName().equals("title")) {
-											if (el.parentNode() != null) {
-												Element par = (Element) el.parentNode();
-												if (par.tag().getName().equals("feed")) {
-													nameEdit.setText(el.text());
-													activity.showToast(activity.getString(R.string.ok));
-												}
-											}
-										}
-										if (el.tag().getName().equals("icon")) {
-											if (el.parentNode() != null) {
-												Element par = (Element) el.parentNode();
-												if (par.tag().getName().equals("feed")) {
-													final String sUrl = urlEdit.getText().toString();
-													CRC32 crc = new CRC32();
-													crc.update(sUrl.getBytes());
-													final String sFName = String.valueOf(crc.getValue()) + "_icon.png";
-													String sDir = "";
-													ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
-													if (tDirs.size()>0) sDir=tDirs.get(0);
-													if (!StrUtils.isEmptyStr(sDir))
-														if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
-													if (!StrUtils.isEmptyStr(sDir)) {
-														try {
-															File f = new File(sDir + sFName);
-															if (f.exists()) f.delete();
-															new DownloadImageTask(sDir + sFName, imgBtn).execute(el.text());
-														} catch (Exception e) {
-															activity.showToast( activity.getString(R.string.pic_problem)+" "+
-																	e.getMessage());
-														}
+					HttpUrl url = HttpUrl.parse(urlEdit.getText().toString());
+					if (url==null) {
+						activity.showToast("Bad URL");
+					} else {
+						final HttpUrl.Builder urlBuilder = url.newBuilder();
+						BackgroundThread.instance().postBackground(new Runnable() {
+							@Override
+							public void run() {
+								Document doc = null;
+								try {
+									doc = Jsoup.parse(urlBuilder.build().url(), 60000);
+									if (doc != null) {
+										for (Element el : doc.getAllElements()) {
+											if (el.tag().getName().equals("title")) {
+												if (el.parentNode() != null) {
+													Element par = (Element) el.parentNode();
+													if (par.tag().getName().equals("feed")) {
+														nameEdit.setText(el.text());
+														activity.showToast(activity.getString(R.string.ok));
 													}
 												}
 											}
-										} // if icon
-									}
-								} // if doc is not null
-								//mActivity.showToast(doc.body().text());
-							} catch (IOException e) {
-								mActivity.showToast(activity.getString(R.string.error)+": "+e.getMessage());
-								Log.e("opds", "OPDS check catalog: "+e.getMessage());
+											if (el.tag().getName().equals("icon")) {
+												if (el.parentNode() != null) {
+													Element par = (Element) el.parentNode();
+													if (par.tag().getName().equals("feed")) {
+														final String sUrl = urlEdit.getText().toString();
+														CRC32 crc = new CRC32();
+														crc.update(sUrl.getBytes());
+														final String sFName = String.valueOf(crc.getValue()) + "_icon.png";
+														String sDir = "";
+														ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
+														if (tDirs.size() > 0) sDir = tDirs.get(0);
+														if (!StrUtils.isEmptyStr(sDir))
+															if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\")))
+																sDir = sDir + "/";
+														if (!StrUtils.isEmptyStr(sDir)) {
+															try {
+																File f = new File(sDir + sFName);
+																if (f.exists()) f.delete();
+																new DownloadImageTask(sDir + sFName, imgBtn).execute(el.text());
+															} catch (Exception e) {
+																activity.showToast(activity.getString(R.string.pic_problem) + " " +
+																		e.getMessage());
+															}
+														}
+													}
+												}
+											} // if icon
+										}
+									} // if doc is not null
+									//mActivity.showToast(doc.body().text());
+								} catch (IOException e) {
+									mActivity.showToast(activity.getString(R.string.error) + ": " + e.getMessage());
+									Log.e("opds", "OPDS check catalog: " + e.getMessage());
+								}
 							}
-						}
-					});
+						});
+					}
 //					FileWriter fw = new FileWriter(fFName + ".txt");
 //					fw.write(.replace((char) 0, ' '));
 //					fw.close();

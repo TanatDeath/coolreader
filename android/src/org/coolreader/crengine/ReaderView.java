@@ -2771,6 +2771,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_TOGGLE_DAY_NIGHT_MODE:
 			toggleDayNightMode();
+//			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
+//					0, true);
+
 //			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
 //			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
 //			mActivity.geoLastData.doSignal(false,false);

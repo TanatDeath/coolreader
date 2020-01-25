@@ -26,25 +26,6 @@
 			/>
 	</LinearLayout>
 	<LinearLayout
-		android:id="@+id/center_sett_ll"
-		android:layout_width="0dip"
-		android:layout_height="fill_parent"
-		android:gravity="center_vertical|center_horizontal"
-		android:layout_weight="5"
-		android:orientation="horizontal">
-		<Button
-			android:id="@+id/btn_geo_off"
-			style="@style/TextAppearance.Small"
-			android:singleLine="false"
-			android:maxLines="15"
-			android:layout_marginRight="5dip"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:textColor="?attr/colorIcon"
-			android:text="off"
-			/>
-	</LinearLayout>
-	<LinearLayout
 		android:id="@+id/right_stop_ll"
 		android:layout_width="0dip"
 		android:layout_height="fill_parent"
@@ -52,7 +33,7 @@
 		android:layout_weight="2"
 		android:orientation="horizontal">
 		<Button
-			android:id="@+id/btn_geo_mode"
+			android:id="@+id/btn_geo_off"
 			style="@style/TextAppearance.Small"
 			android:singleLine="false"
 			android:maxLines="15"

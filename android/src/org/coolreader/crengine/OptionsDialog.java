@@ -80,7 +80,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	int[] mFontSizes = new int[] {
 		9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-		31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 48, 52, 56, 60, 64, 68, 72, 78, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340
+		31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 48, 50, 52, 54, 56, 60, 64, 68, 72, 78, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340
 	};
 	int[] mStatusFontSizes = new int[] {
 			9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 25, 26, 27, 28, 29, 30,
@@ -472,6 +472,41 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	int[] mViewModeTitles = new int[] {
 			R.string.options_view_mode_pages, R.string.options_view_mode_scroll
 		};
+	int[] mRoundedCornersMarginPos = new int[] {
+			0, 1, 2, 3, 4, 5
+	};
+	int[] mRoundedCornersMarginPosAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+	};
+	int[] mRoundedCornersMarginPosTitles = new int[] {
+			R.string.rounded_corners_margin_pos_0, R.string.rounded_corners_margin_pos_1,
+			R.string.rounded_corners_margin_pos_2, R.string.rounded_corners_margin_pos_3,
+			R.string.rounded_corners_margin_pos_4, R.string.rounded_corners_margin_pos_5
+	};
+
+	int[] mExtFullscreenMargin = new int[] {
+			0, 1, 2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 90, 100
+	};
+	int[] mExtFullscreenMarginAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+	};
+	int[] mExtFullscreenMarginPosTitles = new int[] {
+			R.string.ext_fullscreen_margin_0, R.string.ext_fullscreen_margin_1,
+			R.string.ext_fullscreen_margin_3,
+			-5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -80, -90, -100
+	};
+
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -2081,6 +2116,22 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			for ( int i=0; i<values.length; i++ ) {
 				String value = String.valueOf(values[i]); 
 				String label = mActivity.getString(labelIDs[i]);
+				String addInfo = mActivity.getString(addInfos[i]);
+				add(value, label, addInfo);
+				this.updateFilteredMark(value);
+				this.updateFilteredMark(label);
+				this.updateFilteredMark(addInfo);
+			}
+			return this;
+		}
+		public ListOption add2(int[]values, int labelID, int[]labelIDs, int[]addInfos) {
+			for ( int i=0; i<values.length; i++ ) {
+				String value = String.valueOf(values[i]);
+				String labelConst = mActivity.getString(labelID);
+				String sLab = "";
+				if (labelIDs[i]<0) sLab = labelConst.trim()+" " + String.valueOf((int)-labelIDs[i]);
+					else sLab = mActivity.getString(labelIDs[i]);
+				String label = sLab;
 				String addInfo = mActivity.getString(addInfos[i]);
 				add(value, label, addInfo);
 				this.updateFilteredMark(value);
@@ -4132,7 +4183,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_rounded_corners_margin), PROP_ROUNDED_CORNERS_MARGIN,
 				getString(R.string.options_rounded_corners_margin_add_info), filter).add(mRoundedCornersMargins).setDefaultValue("0")
 				.setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin, R.drawable.icons8_rounded_corners_margin));
-        mOptionsPage.add(new GeoOption(this, filter).
+		mOptionsPage.add(new ListOption(this, getString(R.string.rounded_corners_margin_pos_text), PROP_ROUNDED_CORNERS_MARGIN_POS,
+				getString(R.string.option_add_info_empty_text), filter).add(mRoundedCornersMarginPos,
+				mRoundedCornersMarginPosTitles, mRoundedCornersMarginPosAddInfos).
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin2, R.drawable.icons8_rounded_corners_margin2));
+		mOptionsPage.add(new ListOption(this, getString(R.string.ext_fullscreen_margin_text), PROP_EXT_FULLSCREEN_MARGIN,
+				getString(R.string.ext_fullscreen_margin_add_info), filter).add2(mExtFullscreenMargin,
+				R.string.ext_fullscreen_margin_2,
+				mExtFullscreenMarginPosTitles, mExtFullscreenMarginAddInfos).
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_ext_fullscreen, R.drawable.icons8_ext_fullscreen));
+		mOptionsPage.add(new GeoOption(this, filter).
                 setIconIdByAttr(R.attr.attr_icons8_train_headphones, R.drawable.train_headphones));
         mOptionsControls = new OptionsListView(getContext(), null);
 		OptionBase kmO = new KeyMapOption(this, getString(R.string.options_app_key_actions),
