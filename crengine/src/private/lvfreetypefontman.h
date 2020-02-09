@@ -98,6 +98,8 @@ public:
     /// returns registered font files
     virtual void getFontFileNameList(lString16Collection &list);
 
+    virtual void getFontFaceAndFileNameList(lString16Collection &list);
+
     bool setalias(lString8 alias, lString8 facename, int id, bool italic, bool bold);
 
     virtual LVFontRef

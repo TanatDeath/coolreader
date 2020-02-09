@@ -189,6 +189,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -285,9 +286,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -502,6 +503,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -598,9 +600,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -826,6 +828,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -922,9 +925,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -1138,6 +1141,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -1234,9 +1238,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -1453,6 +1457,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -1549,9 +1554,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -1768,6 +1773,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -1864,9 +1870,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -2082,6 +2088,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -2178,9 +2185,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
@@ -2396,6 +2403,7 @@
         <item name="attr_icons8_bookmark_simple_color">@drawable/icons8_bookmark_simple_color</item>
         <item name="attr_icons8_me_smb">@drawable/icons8_me_smb</item>
         <item name="attr_icons8_search_history">@drawable/icons8_search_history</item>
+        <item name="attr_icons8_search_history_small">@drawable/icons8_search_history_small</item>
         <item name="attr_icons8_scissors">@drawable/icons8_scissors</item>
         <item name="attr_icons8_back_key">@drawable/icons8_back_key</item>
         <item name="attr_icons8_back_key_double">@drawable/icons8_back_key_double</item>
@@ -2492,9 +2500,9 @@
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
         <item name="attr_cr3_find_close">@drawable/cr3_find_close</item>
         <item name="attr_cr3_find_next">@drawable/cr3_find_next</item>
-        <item name="attr_cr3_toc_item_collapsed">@drawable/cr3_toc_item_collapsed</item>
-        <item name="attr_cr3_toc_item_expanded">@drawable/cr3_toc_item_expanded</item>
-        <item name="attr_cr3_toc_item_normal">@drawable/cr3_toc_item_normal</item>
+        <item name="attr_cr3_toc_item_collapsed">@drawable/icons8_toc_item_collapsed</item>
+        <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
+        <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>

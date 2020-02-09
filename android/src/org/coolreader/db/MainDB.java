@@ -19,7 +19,7 @@ public class MainDB extends BaseDB {
 	public int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 39;
+	public static final int DB_VERSION = 41;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -165,13 +165,13 @@ public class MainDB extends BaseDB {
 						"proxy_port VARCHAR DEFAULT NULL, " +
 						"proxy_uname VARCHAR DEFAULT NULL, " +
 						"proxy_passw VARCHAR DEFAULT NULL, " +
-						"onion_def_proxy INTEGER DEFAULT 1 " +
+						"onion_def_proxy INTEGER DEFAULT 1, " +
+						"books_downloaded INTEGER DEFAULT 0, " +
+						"was_error INTEGER DEFAULT 0" +
                         ")");
 			if (currentVersion < 7) {
 				addOPDSCatalogs(DEF_OPDS_URLS1);
 			}
-			if (currentVersion < 8)
-				addOPDSCatalogs(DEF_OPDS_URLS2);
 			if (currentVersion < 13)
 			    execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN language VARCHAR DEFAULT NULL");
 			if (currentVersion < 14)
@@ -313,6 +313,14 @@ public class MainDB extends BaseDB {
 			if (currentVersion < 39) {
 				addOPDSCatalogs(DEF_OPDS_URLS3);
 			}
+
+			if (currentVersion < 41) {
+				removeOPDSCatalogsByURLs(OBSOLETE_OPDS_URLS);
+				addOPDSCatalogs(DEF_OPDS_URLS3);
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN books_downloaded INTEGER DEFAULT 0");
+				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN was_error INTEGER DEFAULT 0");
+			}
+
 			//==============================================================
 			// add more updates above this line
 				
@@ -389,27 +397,42 @@ public class MainDB extends BaseDB {
     // OPDS access code
     //=======================================================================================
 	private final static String[] DEF_OPDS_URLS1 = {
-		"http://www.feedbooks.com/catalog.atom", "Feedbooks",
+		// feedbooks.com tested 2020.01
+		// offers preview or requires registration
+		//"http://www.feedbooks.com/catalog.atom", "Feedbooks",
+		// tested 2020.01 - error 500
 		"http://bookserver.archive.org/catalog/", "Internet Archive",
-		"http://m.gutenberg.org/", "Project Gutenberg", 
-//		"http://ebooksearch.webfactional.com/catalog.atom", "eBookSearch", 
-//		"http://bookserver.revues.org/", "Revues.org",
-//		"http://www.legimi.com/opds/root.atom", "Legimi",
-		"http://www.ebooksgratuits.com/opds/", "Ebooks libres et gratuits",
+		// obsolete link
+		//"http://m.gutenberg.org/", "Project Gutenberg",
+		//		"http://ebooksearch.webfactional.com/catalog.atom", "eBookSearch",
+		//"http://bookserver.revues.org/", "Revues.org",
+		//"http://www.legimi.com/opds/root.atom", "Legimi",
+		//https://www.ebooksgratuits.com/opds/index.php
+		// tested 2020.01
+		"http://www.ebooksgratuits.com/opds/", "Ebooks libres et gratuits (fr)",
 	};
 
-	private final static String[] DEF_OPDS_URLS2 = {
-//		"http://www.shucang.org/s/index.php", "ShuCang.org",
+	private final static String[] OBSOLETE_OPDS_URLS = {
+			"http://m.gutenberg.org/", // "Project Gutenberg" old URL
+			"http://www.shucang.org/s/index.php", //"ShuCang.org"
+			"http://www.legimi.com/opds/root.atom", //"Legimi",
+			"http://bookserver.revues.org/", //"Revues.org",
+			"http://ebooksearch.webfactional.com/catalog.atom", //
 	};
 
 	private final static String[] DEF_OPDS_URLS3 = {
-			"http://manybooks.net/opds/", "ManyBooks",
-			"http://wiki.mobileread.com/wiki/OPDS", "MobileRead WIKI",
-			"http://www.smashwords.com/atom", "Smashwords",
-			"https://m.webnovel.com", "WebNovel",
-			"http://asmodei.org/opds", "asmodei.org",
-			"http://fb.litlib.net/", "litlib",
-			"http://opds.oreilly.com/opds/", "oreilly",
+		// o'reilly
+		"http://opds.oreilly.com/opds/", "O'Reilly",
+		"http://m.gutenberg.org/ebooks.opds/", "Project Gutenberg",
+		//"https://api.gitbook.com/opds/catalog.atom", "GitBook",
+		"http://srv.manybooks.net/opds/index.php", "ManyBooks",
+		//"http://opds.openedition.org/", "OpenEdition (fr)",
+		"https://gallica.bnf.fr/opds", "Gallica (fr)",
+		"https://www.textos.info/catalogo.atom", "textos.info (es)",
+		"https://wolnelektury.pl/opds/", "Wolne Lektury (pl)",
+		"http://www.bokselskap.no/wp-content/themes/bokselskap/tekster/opds/root.xml", "Bokselskap (no)",
+		"http://asmodei.org/opds", "asmodei.org",
+		"http://fb.litlib.net/", "litlib",
 	};
 
 	private void addOPDSCatalogs(String[] catalogs) {
@@ -421,28 +444,36 @@ public class MainDB extends BaseDB {
 		}
 	}
 
-	public void removeOPDSCatalogsFromBlackList() {
-		if (OPDSConst.BLACK_LIST_MODE != OPDSConst.BLACK_LIST_MODE_FORCE) {
-		    execSQLIgnoreErrors("DELETE FROM opds_catalog WHERE url='http://flibusta.net/opds/'");
-		} else {
-			for (String url : OPDSConst.BLACK_LIST) {
-			    execSQLIgnoreErrors("DELETE FROM opds_catalog WHERE url=" + quoteSqlString(url));
-			}
+	public void removeOPDSCatalogsByURLs(String ... urls) {
+		for (String url : urls) {
+			execSQLIgnoreErrors("DELETE FROM opds_catalog WHERE url=" + quoteSqlString(url));
 		}
 	}
-	
-	public void updateOPDSCatalogLastUsage(String url) {
+
+	public void removeOPDSCatalogsFromBlackList() {
+		if (OPDSConst.BLACK_LIST_MODE != OPDSConst.BLACK_LIST_MODE_FORCE) {
+			removeOPDSCatalogsByURLs("http://flibusta.net/opds/");
+		} else {
+			removeOPDSCatalogsByURLs(OPDSConst.BLACK_LIST);
+		}
+	}
+
+	public void updateOPDSCatalog(String url, String field, String value) {
 		try {
 			Long existingIdByUrl = longQuery("SELECT id FROM opds_catalog WHERE url=" + quoteSqlString(url));
 			if (existingIdByUrl == null)
 				return;
 			// update existing
-			Long lastUsage = longQuery("SELECT max(last_usage) FROM opds_catalog");
-			if (lastUsage == null)
-				lastUsage = 1L;
-			else
-				lastUsage = lastUsage + 1;
-			execSQL("UPDATE opds_catalog SET last_usage="+ lastUsage +" WHERE id=" + existingIdByUrl);
+			if (value.toLowerCase().equals("max")) {
+				Long fValue = longQuery("SELECT max("+field+") FROM opds_catalog");
+				if (fValue == null)
+					fValue = 1L;
+				else
+					fValue = fValue + 1;
+				execSQL("UPDATE opds_catalog SET "+field+"=" + fValue + " WHERE id=" + existingIdByUrl);
+			} else {
+				execSQL("UPDATE opds_catalog SET "+field+"=" + value + " WHERE id=" + existingIdByUrl);
+			}
 		} catch (Exception e) {
 			log.e("exception while updating OPDS catalog item", e);
 		}
@@ -489,7 +520,7 @@ public class MainDB extends BaseDB {
 						", onion_def_proxy="+String.valueOf(onion_def_proxy)+
 						" WHERE id=" + id);
 			}
-			updateOPDSCatalogLastUsage(url);
+			updateOPDSCatalog(url, "last_usage", "max");
 				
 		} catch (Exception e) {
 			log.e("exception while saving OPDS catalog item", e);
@@ -770,8 +801,9 @@ public class MainDB extends BaseDB {
 		if (mDB == null) return false;
 		try {
 			String sql = "SELECT id, name, url, username, password, "+
-				" proxy_addr, proxy_port, proxy_uname, proxy_passw, onion_def_proxy "+
-				" FROM opds_catalog ORDER BY last_usage DESC, name";
+				" proxy_addr, proxy_port, proxy_uname, proxy_passw, "+
+				" onion_def_proxy, books_downloaded, was_error "+
+				" FROM opds_catalog ORDER BY coalesce(was_error,0), last_usage DESC, name";
 			rs = mDB.rawQuery(sql, null);
 			if ( rs.moveToFirst() ) {
 				// remove existing entries
@@ -788,6 +820,8 @@ public class MainDB extends BaseDB {
 					String proxy_uname = rs.getString(7);
 					String proxy_passw = rs.getString(8);
 					int onion_def_proxy = rs.getInt(9);
+					Long book_downloaded = rs.getLong(10);
+					int was_error = rs.getInt(11);
 					FileInfo opds = new FileInfo();
 					opds.isDirectory = true;
 					opds.pathname = FileInfo.OPDS_DIR_PREFIX + url;
@@ -802,6 +836,8 @@ public class MainDB extends BaseDB {
 					opds.isListed = true;
 					opds.isScanned = true;
 					opds.id = id;
+					opds.book_downloaded = book_downloaded;
+					opds.was_error = was_error;
 					list.add(opds);
 					found = true;
 				} while (rs.moveToNext());
@@ -1497,8 +1533,9 @@ public class MainDB extends BaseDB {
 		genreStmt.bindString(1, genreCode.trim());
 		String[] geEN = GenreSAXElem.getGenreDescrFull("EN",genreCode.trim());
 		String[] geRU = GenreSAXElem.getGenreDescrFull("RU",genreCode.trim());
+
 		if (StrUtils.isEmptyStr(geEN[0]))
-			genreStmt.bindNull(2);
+			genreStmt.bindString(2, genreCode.trim());
 		else
 			genreStmt.bindString(2, geEN[0]);
 		id = genreStmt.executeInsert();
@@ -1509,14 +1546,14 @@ public class MainDB extends BaseDB {
 		genreStmtT.bindString(1, genreCode.trim());
 		genreStmtT.bindString(2, "EN");
 		if (StrUtils.isEmptyStr(geEN[1]))
-			genreStmtT.bindNull(3);
+			genreStmtT.bindString(3, genreCode.trim());
 		else
 			genreStmtT.bindString(3, geEN[1]);
 		Long id2 = genreStmtT.executeInsert();
 		genreStmtT.bindString(1, genreCode.trim());
 		genreStmtT.bindString(2, "RU");
 		if (StrUtils.isEmptyStr(geRU[1]))
-			genreStmtT.bindNull(3);
+			genreStmtT.bindString(3, genreCode.trim());
 		else
 			genreStmtT.bindString(3, geRU[1]);
 		id2 = genreStmtT.executeInsert();

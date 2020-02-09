@@ -185,6 +185,14 @@ public class CloudSyncFolder {
             if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
             return;
         }
+        if (rv.getBookInfo() == null) {
+            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            return;
+        }
+        if (rv.getBookInfo().getFileInfo() == null) {
+            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            return;
+        }
 
         ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CloudSyncDirs, true);
         String sDir = "";

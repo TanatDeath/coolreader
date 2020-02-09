@@ -113,6 +113,11 @@ void LVBitmapFontManager::getFontFileNameList(lString16Collection &list) {
     _cache.getFontFileNameList(list);
 }
 
+void LVBitmapFontManager::getFontFaceAndFileNameList(lString16Collection &list) {
+    FONT_MAN_GUARD
+    _cache.getFontFaceAndFileNameList(list);
+}
+
 bool LVBitmapFontManager::Init(lString8 path) {
     _path = path;
     return true;

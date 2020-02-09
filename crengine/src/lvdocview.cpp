@@ -173,7 +173,8 @@ LVDocView::LVDocView(int bitsPerPixel) :
 					| PGHDR_CLOCK
 #endif
 					| PGHDR_BATTERY | PGHDR_PAGE_COUNT | PGHDR_AUTHOR
-					| PGHDR_TITLE), m_showCover(true)
+					| PGHDR_TITLE
+					| PGHDR_PAGES_TO_CHAPTER), m_showCover(true)
 #if CR_INTERNAL_PAGE_ORIENTATION==1
 			, m_rotateAngle(CR_ROTATE_ANGLE_0)
 #endif
@@ -1256,10 +1257,47 @@ int LVDocView::getPageHeaderHeight() {
 	if (!getInfoFont())
 		return 0;
 	int h = getInfoFont()->getHeight();
+	int h2 = h;
 	int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() * 11/10 + HEADER_MARGIN / 2 : 0;
 	if ( bh>h )
 		h = bh;
-	return h + HEADER_MARGIN + 20; //plotn - due to different marker heights
+	bool isPortrait = (m_dx < m_font_size * MIN_EM_PER_PAGE || m_dx * 5 < m_dy * 6);
+	int iMarg = m_props->getIntDef(PROP_EXT_FULLSCREEN_MARGIN, 0);
+	int iMod = m_props->getIntDef(PROP_EXT_FULLSCREEN_MOD, 0);
+    int iLines = m_props->getIntDef(PROP_STATUS_LINE, 0);
+	if (iMarg == 1) iMarg = 0;
+	if (iMarg == 2) iMarg = h2;
+	int iFullScreen = m_props->getIntDef(PROP_APP_FULLSCREEN, 0);
+	if (iFullScreen == 0) iMarg = 0;
+	if ((iMod == 1)&&(!isPortrait)) iMarg = 0;
+	if ((iMod == 2)&&(isPortrait)) iMarg = 0;
+	if ((iLines == 2)&&(iMarg<h2)) iMarg = h2; //always 2 lines mode
+	return h + HEADER_MARGIN + 20 + iMarg; //plotn - due to different marker heights
+}
+
+bool LVDocView::isPageHeader2lines() {
+	if (!getPageHeaderInfo())
+		return false;
+	if (!getInfoFont())
+		return false;
+	int h = getInfoFont()->getHeight();
+	int h2 = h;
+	int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() * 11/10 + HEADER_MARGIN / 2 : 0;
+	if ( bh>h )
+		h = bh;
+	int iMarg = m_props->getIntDef(PROP_EXT_FULLSCREEN_MARGIN, 0);
+	int iMod = m_props->getIntDef(PROP_EXT_FULLSCREEN_MOD, 0);
+    int iLines = m_props->getIntDef(PROP_STATUS_LINE, 0);
+    if (iMarg == 1) iMarg = 0;
+	if (iMarg == 2) iMarg = h2;
+	int iFullScreen = m_props->getIntDef(PROP_APP_FULLSCREEN, 0);
+	if (iFullScreen == 0) iMarg = 0;
+	bool isPortrait = (m_dx < m_font_size * MIN_EM_PER_PAGE || m_dx * 5 < m_dy * 6);
+	if ((iMod == 1)&&(!isPortrait)) iMarg = 0;
+	if ((iMod == 2)&&(isPortrait)) iMarg = 0;
+    if ((iLines == 2)&&(iMarg<h2)) iMarg = h2; //always 2 lines mode
+    if (iMarg >= h2) return true;
+	return false;
 }
 
 /// calculate page header rectangle
@@ -1847,9 +1885,31 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	drawbuf->SetClipRect(&hrc);
 	bool drawGauge = true;
 	lvRect info = headerRc;
-	info.left = info.left + m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);
-	info.right = info.right - m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);;
+	int iMarginPos = m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN_POS, 0);
+    int iMarginMod = m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN_MOD, 0);
+    bool bMarginFscr = m_props->getBoolDef(PROP_ROUNDED_CORNERS_MARGIN_FSCR, false);
+    int iFullScreen = m_props->getIntDef(PROP_APP_FULLSCREEN, 0);
+    bool isPortrait = (m_dx < m_font_size * MIN_EM_PER_PAGE || m_dx * 5 < m_dy * 6);
+    bool bSetM = (
+                    ((isPortrait)&&(iMarginMod!=2)) ||
+                    ((!isPortrait)&&(iMarginMod!=1))
+                 );
+    bSetM = bSetM &&
+                    (
+                      ((iFullScreen == 1) && (bMarginFscr)) || (!bMarginFscr)
+                    );
 
+    if (bSetM) {
+        if (
+                ((iMarginPos == 0) || (iMarginPos == 1))
+            )
+            info.left = info.left + m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);
+        if (
+                ((iMarginPos == 0) || (iMarginPos == 2))
+           )
+           info.right = info.right - m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);;
+    }
+	bool can2lines = isPageHeader2lines();
 //    if ( m_statusColor!=0xFF000000 ) {
 //        CRLog::trace("Status color = %06x, textColor=%06x", m_statusColor, getTextColor());
 //    } else {
@@ -1905,7 +1965,7 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
     sbound_index = 0;
 
     int maxLevel = 1;
-    //asdf
+
     bool enableMarks = !leftPage && (phi & PGHDR_CHAPTER_MARKS) /*&& sbounds.length()<info.width()/5*/;
     bool enableMarks0 = !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev0<info.width()/5;
     bool enableMarks1 = enableMarks0 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev1<info.width()/5;
@@ -2024,8 +2084,11 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	}
 
 	lString16 text;
+	lString16 text2;
+
 	//int iy = info.top; // + (info.height() - m_infoFont->getHeight()) * 2 / 3;
-        int iy = info.top + /*m_infoFont->getHeight() +*/ (info.height() - m_infoFont->getHeight()) / 2 - HEADER_MARGIN/2;
+    int iy = info.top + /*m_infoFont->getHeight() +*/ (info.height() - m_infoFont->getHeight()) / 2 - HEADER_MARGIN/2;
+	int iy2 = info.top + /*m_infoFont->getHeight() +*/ (info.height() - (m_infoFont->getHeight() * 2 + 2) ) / 2 - HEADER_MARGIN/2;
 
 	if (!m_pageHeaderOverride.empty()) {
 		text = m_pageHeaderOverride;
@@ -2034,11 +2097,13 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 		if (getVisiblePageCount() == 1 || !(pageIndex & 1)) {
 			int dwIcons = 0;
 			int icony = iy + m_infoFont->getHeight() / 2;
+			int icony2 = iy2 + m_infoFont->getHeight() / 2;
 			for (int ni = 0; ni < m_headerIcons.length(); ni++) {
 				LVImageSourceRef icon = m_headerIcons[ni];
 				int h = icon->GetHeight();
 				int w = icon->GetWidth();
-				drawbuf->Draw(icon, info.left + dwIcons, icony - h / 2, w, h);
+				if (!can2lines) drawbuf->Draw(icon, info.left + dwIcons, icony - h / 2, w, h);
+				if (can2lines) drawbuf->Draw(icon, info.left + dwIcons, icony2 - h / 2, w, h);
 				dwIcons += w + 4;
 			}
 			info.left += dwIcons;
@@ -2067,56 +2132,84 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 			}
 		}
 		lString16 pageinfo;
+		lString16 pageinfo1;
+		lString16 pageinfoPerc;
 		if (pageCount > 0) {
 			if (phi & PGHDR_PAGE_NUMBER)
                 pageinfo += fmt::decimal(pageIndex + 1);
             if (phi & PGHDR_PAGE_COUNT) {
-                int curBound = 0;
-                int curChapterLeft = 9999;
-                int sbound_index = 0;
-                while ( sbound_index<sbounds_pages.length() ) {
-                    curBound = sbounds_pages[sbound_index];
-                    if ((curChapterLeft>curBound-pageIndex)&&(curBound-pageIndex>0))
-                        curChapterLeft=curBound-pageIndex;
-                    sbound_index++;
-                }
                 if ( !pageinfo.empty() )
                     pageinfo += " / ";
                 pageinfo += fmt::decimal(pageCount);
-                if ((sbounds_pages.length()>0)&&(curChapterLeft != 9999)) {
-                    pageinfo += " / -";
-                    pageinfo += fmt::decimal(curChapterLeft);
-                }
             }
+			if (phi & PGHDR_PAGES_TO_CHAPTER) {
+				int curBound = 0;
+				int curChapterLeft = 9999;
+				int sbound_index = 0;
+				while (sbound_index < sbounds_pages.length()) {
+					curBound = sbounds_pages[sbound_index];
+					if ((curChapterLeft > curBound - pageIndex) && (curBound - pageIndex > 0))
+						curChapterLeft = curBound - pageIndex;
+					sbound_index++;
+				}
+				if ((sbounds_pages.length() > 0) && (curChapterLeft != 9999)) {
+					if ( !pageinfo.empty() ) pageinfo += " / ";
+					pageinfo += "-";
+					pageinfo += fmt::decimal(curChapterLeft);
+				}
+			}
+			pageinfo1 = pageinfo;
             if (phi & PGHDR_PERCENT) {
                 if ( !pageinfo.empty() )
                     pageinfo += "  ";
                 //pageinfo += lString16::itoa(percent/100)+L"%"; //+L"."+lString16::itoa(percent/10%10)+L"%";
-                pageinfo += fmt::decimal(percent/100);
-                pageinfo += ",";
+				pageinfoPerc += fmt::decimal(percent/100);
+				pageinfoPerc += ",";
                 int pp = percent%100;
                 if ( pp<10 )
-                    pageinfo << "0";
-                pageinfo << fmt::decimal(pp) << "%";
+					pageinfoPerc << "0";
+				pageinfoPerc << fmt::decimal(pp) << "%";
             }
             if ( batteryPercentNormalFont && m_battery_state>=0 ) {
-                pageinfo << "  [" << fmt::decimal(m_battery_state) << "%]";
+                if ( !pageinfoPerc.empty() )
+				    pageinfoPerc << " | ~" << fmt::decimal(m_battery_state) << "";
+                else
+                    pageinfoPerc << " ~" << fmt::decimal(m_battery_state) << "";
             }
+            if ((can2lines) && (PGHDR_CLOCK)) pageinfo = pageinfo1;
+            	else pageinfo += pageinfoPerc;
 		}
 		int piw = 0;
+		int saveRight = info.right;
 		if (!pageinfo.empty()) {
 			piw = m_infoFont->getTextWidth(pageinfo.c_str(), pageinfo.length());
-			m_infoFont->DrawTextString(drawbuf, info.right - piw, iy,
-					pageinfo.c_str(), pageinfo.length(), L' ', NULL, false);
+			if (!can2lines) {
+				m_infoFont->DrawTextString(drawbuf, info.right - piw, iy,
+										   pageinfo.c_str(), pageinfo.length(), L' ', NULL, false);
+			}
+			if (can2lines)
+				m_infoFont->DrawTextString(drawbuf, info.right - piw, iy2 + m_infoFont->getHeight()+2,
+										   pageinfo.c_str(), pageinfo.length(), L' ', NULL, false);
 			info.right -= piw + info.height() / 2;
-		}
+			if (!can2lines) saveRight = info.right;
+			}
 		if (phi & PGHDR_CLOCK) {
 			lString16 clock = getTimeString();
+			if (can2lines) {
+				if (!pageinfoPerc.empty()) {
+					clock += " | ";
+					clock += pageinfoPerc;
+				}
+			}
 			m_last_clock = clock;
 			int w = m_infoFont->getTextWidth(clock.c_str(), clock.length()) + 2;
-			m_infoFont->DrawTextString(drawbuf, info.right - w, iy,
+			if (!can2lines)
+				m_infoFont->DrawTextString(drawbuf, info.right - w, iy,
 					clock.c_str(), clock.length(), L' ', NULL, false);
-			info.right -= w + info.height() / 2;
+			if (can2lines)
+				m_infoFont->DrawTextString(drawbuf, saveRight - w, iy2,
+										   clock.c_str(), clock.length(), L' ', NULL, false);
+			if (!can2lines) info.right -= w + info.height() / 2;
 		}
 		int authorsw = 0;
 		lString16 authors;
@@ -2140,6 +2233,7 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 					authors.length());
 		}
 		int w = info.width() - 10;
+		text2 = "";
 		if (authorsw + titlew + 10 > w) {
 			if ((pageIndex & 1))
 				text = title;
@@ -2151,14 +2245,27 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 		} else {
             text = authors + "  " + title;
 		}
+		if (can2lines) {
+			text = authors;
+			if (!text.empty() && text[text.length() - 1] == '.')
+				text = text.substr(0, text.length() - 1);
+			text2 = title;
+		}
 	}
 	lvRect newcr = headerRc;
 	newcr.right = info.right - 10;
 	drawbuf->SetClipRect(&newcr);
 	text = fitTextWidthWithEllipsis(text, m_infoFont, newcr.width());
-	if (!text.empty()) {
-		m_infoFont->DrawTextString(drawbuf, info.left, iy, text.c_str(),
-				text.length(), L' ', NULL, false);
+	if ((!text.empty())||(!text2.empty())) {
+		if (can2lines) {
+			m_infoFont->DrawTextString(drawbuf, info.left, iy2, text.c_str(),
+									   text.length(), L' ', NULL, false);
+			m_infoFont->DrawTextString(drawbuf, info.left, iy2+m_infoFont->getHeight()+2, text2.c_str(),
+									   text2.length(), L' ', NULL, false);
+		} else {
+			m_infoFont->DrawTextString(drawbuf, info.left, iy, text.c_str(),
+									   text.length(), L' ', NULL, false);
+		}
 	}
 	drawbuf->SetClipRect(&oldcr);
 	//--------------
@@ -2192,18 +2299,21 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
     if (((m_pageHeaderInfo || !m_pageHeaderOverride.empty()) && page.type
             != PAGE_TYPE_COVER) && getViewMode() == DVM_PAGES) {
 		int phi = m_pageHeaderInfo;
+		bool can2lines = isPageHeader2lines();
 		if (getVisiblePageCount() == 2) {
 			if (page.index & 1) {
 				// right
 				phi &= ~PGHDR_AUTHOR;
+				if (can2lines) phi &= ~PGHDR_TITLE;
             } else {
 				// left
-				phi &= ~PGHDR_TITLE;
+				if (!can2lines) phi &= ~PGHDR_TITLE;
                 phi &= ~PGHDR_PERCENT;
                 phi &= ~PGHDR_PAGE_NUMBER;
 				phi &= ~PGHDR_PAGE_COUNT;
 				phi &= ~PGHDR_BATTERY;
 				phi &= ~PGHDR_CLOCK;
+				phi &= ~PGHDR_PAGES_TO_CHAPTER;
 			}
 		}
 		lvRect info;
@@ -6166,7 +6276,8 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->setIntDef(PROP_SHOW_BATTERY, 1);
     props->setIntDef(PROP_SHOW_BATTERY_PERCENT, 0);
     props->setIntDef(PROP_SHOW_PAGE_COUNT, 1);
-    props->setIntDef(PROP_SHOW_PAGE_NUMBER, 1);
+	props->setIntDef(PROP_SHOW_PAGES_TO_CHAPTER, 1);
+	props->setIntDef(PROP_SHOW_PAGE_NUMBER, 1);
     props->setIntDef(PROP_SHOW_POS_PERCENT, 0);
     props->setIntDef(PROP_STATUS_CHAPTER_MARKS, 1);
     props->setIntDef(PROP_FLOATING_PUNCTUATION, 1);
@@ -6208,7 +6319,8 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 #define V_MARGIN 8
 #define ALLOW_BOTTOM_STATUSBAR 0
 void LVDocView::setStatusMode(int newMode, bool showClock, bool showTitle,
-        bool showBattery, bool showChapterMarks, bool showPercent, bool showPageNumber, bool showPageCount) {
+        bool showBattery, bool showChapterMarks, bool showPercent,
+        bool showPageNumber, bool showPageCount, bool showPagesToChapter) {
 	CRLog::debug("LVDocView::setStatusMode(%d, %s %s %s %s)", newMode,
 			showClock ? "clock" : "", showTitle ? "title" : "",
 			showBattery ? "battery" : "", showChapterMarks ? "marks" : "");
@@ -6218,7 +6330,10 @@ void LVDocView::setStatusMode(int newMode, bool showClock, bool showTitle,
 	if (newMode==1)
 	margins.bottom = STANDARD_STATUSBAR_HEIGHT + V_MARGIN/4;
 #endif
-	if (newMode == 0)
+	if (
+	    (newMode == 0)
+	    ||(newMode == 2)
+       )
         setPageHeaderInfo(
                   (showPageNumber ? PGHDR_PAGE_NUMBER : 0)
                 | (showClock ? PGHDR_CLOCK : 0)
@@ -6228,6 +6343,7 @@ void LVDocView::setStatusMode(int newMode, bool showClock, bool showTitle,
 				| (showTitle ? PGHDR_TITLE : 0)
 				| (showChapterMarks ? PGHDR_CHAPTER_MARKS : 0)
                 | (showPercent ? PGHDR_PERCENT : 0)
+				| (showPagesToChapter ? PGHDR_PAGES_TO_CHAPTER : 0)
         //| PGHDR_CLOCK
 		);
 	else
@@ -6358,7 +6474,8 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
         } else if (name == PROP_STATUS_LINE || name == PROP_SHOW_TIME
                    || name	== PROP_SHOW_TITLE || name == PROP_SHOW_BATTERY
                    || name == PROP_STATUS_CHAPTER_MARKS || name == PROP_SHOW_POS_PERCENT
-                   || name == PROP_SHOW_PAGE_COUNT || name == PROP_SHOW_PAGE_NUMBER) {
+                   || name == PROP_SHOW_PAGE_COUNT || name == PROP_SHOW_PAGE_NUMBER
+				   || name == PROP_SHOW_PAGES_TO_CHAPTER) {
             m_props->setString(name.c_str(), value);
             setStatusMode(m_props->getIntDef(PROP_STATUS_LINE, 0),
                           m_props->getBoolDef(PROP_SHOW_TIME, false),
@@ -6367,7 +6484,8 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                           m_props->getBoolDef(PROP_STATUS_CHAPTER_MARKS, true),
                           m_props->getBoolDef(PROP_SHOW_POS_PERCENT, false),
                           m_props->getBoolDef(PROP_SHOW_PAGE_NUMBER, true),
-                          m_props->getBoolDef(PROP_SHOW_PAGE_COUNT, true)
+                          m_props->getBoolDef(PROP_SHOW_PAGE_COUNT, true),
+						  m_props->getBoolDef(PROP_SHOW_PAGES_TO_CHAPTER, true)
                           );
             //} else if ( name==PROP_BOOKMARK_ICONS ) {
             //    enableBookmarkIcons( value==L"1" );

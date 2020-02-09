@@ -25,6 +25,12 @@
 #define PROP_PAGE_MARGIN_LEFT        "crengine.page.margin.left"
 #define PROP_PAGE_MARGIN_RIGHT       "crengine.page.margin.right"
 #define PROP_ROUNDED_CORNERS_MARGIN  "crengine.rounded.corners.margin"
+#define PROP_ROUNDED_CORNERS_MARGIN_POS  "crengine.rounded.corners.margin.pos"
+#define PROP_ROUNDED_CORNERS_MARGIN_MOD  "crengine.rounded.corners.margin.mod"
+#define PROP_ROUNDED_CORNERS_MARGIN_FSCR  "crengine.rounded.corners.margin.fscr"
+#define PROP_APP_FULLSCREEN          "app.fullscreen"
+#define PROP_EXT_FULLSCREEN_MARGIN   "crengine.ext.fullscreen.margin"
+#define PROP_EXT_FULLSCREEN_MOD      "crengine.ext.fullscreen.mod"
 #define PROP_PAGE_VIEW_MODE          "crengine.page.view.mode" // pages/scroll
 #define PROP_INTERLINE_SPACE         "crengine.interline.space"
 #if CR_INTERNAL_PAGE_ORIENTATION==1
@@ -44,6 +50,7 @@
 #define PROP_SHOW_BATTERY            "window.status.battery"
 #define PROP_SHOW_POS_PERCENT        "window.status.pos.percent"
 #define PROP_SHOW_PAGE_COUNT         "window.status.pos.page.count"
+#define PROP_SHOW_PAGES_TO_CHAPTER   "window.status.pos.pages.to.chapter"
 #define PROP_SHOW_PAGE_NUMBER        "window.status.pos.page.number"
 #define PROP_SHOW_BATTERY_PERCENT    "window.status.battery.percent"
 #define PROP_FONT_KERNING_ENABLED    "font.kerning.enabled"

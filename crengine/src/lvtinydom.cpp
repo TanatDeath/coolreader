@@ -5402,6 +5402,9 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         }
         authors += author + addInfo;
     }
+    if (authors == "") {
+        authors = doc->getProps()->getStringDef("AUTHOR", "");
+    }
     return authors;
 }
 

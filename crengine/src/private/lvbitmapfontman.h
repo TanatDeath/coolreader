@@ -49,6 +49,8 @@ public:
     /// returns registered font files
     virtual void getFontFileNameList(lString16Collection &list);
 
+    virtual void getFontFaceAndFileNameList(lString16Collection &list);
+
     virtual bool Init(lString8 path);
 };
 

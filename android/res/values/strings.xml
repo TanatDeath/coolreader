@@ -203,6 +203,7 @@
     <string name="options_color_b">Blue</string>
     <string name="options_page_show_titlebar_percent">Show position percent</string>
     <string name="options_page_show_titlebar_page_count">Page count</string>
+    <string name="options_page_show_titlebar_pages_to_chapter">Pages left in chapter</string>
     <string name="options_show_titlebar_page_number">Page number</string>
     <string name="options_controls_flick_brightness">Brightness control by flick</string>
     <string name="options_controls_flick_brightness_right">Right edge</string>
@@ -577,6 +578,7 @@
     <string name="book_info_rating">Rate</string>
     <string name="options_page_show_titlebar_hidden">None</string>
     <string name="options_page_show_titlebar_page_header">Page header</string>
+    <string name="options_page_show_titlebar_page_header_2lines">Page header, 2 lines</string>
     <string name="options_page_show_titlebar_bottom">Bottom</string>
     <string name="options_page_show_titlebar_top">Top</string>
     <string name="options_view_toolbar_position_short_side">Short side</string>
@@ -998,16 +1000,20 @@
     <string name="ok">Ok</string>
     <string name="third_party_tango_mod_icon_set">High-contrast icons based on Tango Icon Library: http://tango.freedesktop.org/Tango_Icon_Library.</string>
     <string name="rounded_corners_margin_pos_text">Status bar margin position</string>
+    <string name="rounded_corners_margin_mod_text">Status bar margin modifier</string>
+    <string name="rounded_corners_margin_fullscreen_only">Status bar margins in fullscreen only</string>
     <string name="rounded_corners_margin_pos_0">Both sides</string>
-    <string name="rounded_corners_margin_pos_1">Both sides, fullscreen only</string>
-    <string name="rounded_corners_margin_pos_2">Left</string>
-    <string name="rounded_corners_margin_pos_3">Left, fullscreen only</string>
-    <string name="rounded_corners_margin_pos_4">Right</string>
-    <string name="rounded_corners_margin_pos_5">Right, fullscreen only</string>
+    <string name="rounded_corners_margin_pos_1">Left</string>
+    <string name="rounded_corners_margin_pos_2">Right</string>
+    <string name="screen_mod_0">Always</string>
+    <string name="screen_mod_1">Portrait mode</string>
+    <string name="screen_mod_2">Landscape mode</string>
     <string name="ext_fullscreen_margin_text">Extended fullscreen mode</string>
+    <string name="ext_fullscreen_margin_mod">Extended fullscreen mode modifier</string>
     <string name="ext_fullscreen_margin_add_info">For devices with cutout(s) - stretch window to fit whole screen (cutouts may overlap application areas). For Android 9 and higher</string>
     <string name="ext_fullscreen_margin_0">Disabled</string>
     <string name="ext_fullscreen_margin_1">Enabled</string>
     <string name="ext_fullscreen_margin_2">Enabled, read line margin: </string>
     <string name="ext_fullscreen_margin_3">Enabled, 2 text lines in the statusbar</string>
+    <string name="downloaded_from_catalog">Books downloaded:</string>
 </resources>

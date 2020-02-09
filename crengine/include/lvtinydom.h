@@ -2117,6 +2117,7 @@ public:
         ldomNode * node = nodeFromXPath( xPointerStr );
         if ( !node )
             return lString16::empty_str;
+
         return node->getText();
     }
 

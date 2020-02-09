@@ -157,7 +157,7 @@ CRTimerUtil _timeoutControl;
 
 #define DECL_DEF_CR_FONT_SIZES static int cr_font_sizes[] = \
  { 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, \
-   31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 48, 52, 56, 60, 64, 68, 72, 78, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340 }
+   31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 48, 50, 52, 54, 56, 60, 64, 68, 72, 78, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340 }
 
 DECL_DEF_CR_FONT_SIZES;
 
@@ -2137,10 +2137,10 @@ JNIEXPORT jint JNICALL Java_org_coolreader_crengine_DocView_getPageCountInternal
     DocViewNative * p = getNative(_env, _this);
     if (!p) {
         CRLog::error("Cannot get native view");
-        return NULL;
+        return 0; //NULL;
     }
     if ( !p->_docview->isDocumentOpened() )
-        return NULL;
+        return 0; //NULL;
     DocViewCallback callback( _env, p->_docview, _this );
 
     return p->_docview->getPageCount();
@@ -2158,10 +2158,10 @@ JNIEXPORT jint JNICALL Java_org_coolreader_crengine_DocView_getVisiblePageCountI
     DocViewNative * p = getNative(_env, _this);
     if (!p) {
         CRLog::error("Cannot get native view");
-        return NULL;
+        return 0; //NULL;
     }
     if ( !p->_docview->isDocumentOpened() )
-        return NULL;
+        return 0; //NULL;
     DocViewCallback callback( _env, p->_docview, _this );
 
     return p->_docview->getVisiblePageCount();
@@ -2174,10 +2174,10 @@ JNIEXPORT jint JNICALL Java_org_coolreader_crengine_DocView_getCurPageInternal
     DocViewNative * p = getNative(_env, _this);
     if (!p) {
         CRLog::error("Cannot get native view");
-        return NULL;
+        return 0; //NULL;
     }
     if ( !p->_docview->isDocumentOpened() )
-        return NULL;
+        return 0; //NULL;
     DocViewCallback callback( _env, p->_docview, _this );
 
     return p->_docview->getCurPage();

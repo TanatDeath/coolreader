@@ -55,6 +55,8 @@ public:
     }
     /// returns registered font files
     virtual void getFontFileNameList( lString16Collection & list );
+
+    virtual void getFontFaceAndFileNameList( lString16Collection & list );
 };
 
 #endif  // !defined(__SYMBIAN32__) && defined(_WIN32) && USE_FREETYPE!=1

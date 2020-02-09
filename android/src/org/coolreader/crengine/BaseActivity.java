@@ -106,6 +106,9 @@ public class BaseActivity extends Activity implements Settings {
 	protected CRDBServiceAccessor mCRDBService;
 	protected Dictionaries mDictionaries;
 
+	public int sensorPrevRot = -1;
+	public int sensorCurRot = -1;
+
 	public int iCutoutMode = 0; // for cutout screens
 
 	//private volatile SuperActivityToast myToast;
@@ -242,8 +245,23 @@ public class BaseActivity extends Activity implements Settings {
 		setScreenBacklightLevel(backlight);
 		bindCRDBService();
 	}
-	
-    
+
+	protected BaseDialog currentDialog;
+	public void onDialogCreated(BaseDialog dlg) {
+		currentDialog = dlg;
+	}
+	public void onDialogClosed(BaseDialog dlg) {
+    	if (currentDialog == dlg) {
+    		currentDialog = null;
+		}
+	}
+	public BaseDialog getCurrentDialog() {
+    	return currentDialog;
+	}
+	public boolean isDialogActive() {
+    	return currentDialog != null;
+	}
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -1634,10 +1652,38 @@ public class BaseActivity extends Activity implements Settings {
 	public void setCutoutMode(int val) {
 		WindowManager.LayoutParams lp1 = getWindow().getAttributes();
 		if (DeviceInfo.getSDKLevel() >= 28) {
-			if (val == 0)
+			if (val == 0) {
 				lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-			else
+			} else {
+				int iOrnt = settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
+				int iExtFSM = settings().getInt(Settings.PROP_EXT_FULLSCREEN_MOD, 0);
+				int iExtFS = settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
+				if (((iOrnt == 1)||(iOrnt == 3)) && (iExtFSM == 1)) {
+					lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+					getWindow().setAttributes(lp1);
+					return;
+				}
+				if (((iOrnt == 0)||(iOrnt == 2)) && (iExtFSM == 2)) {
+					lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+					getWindow().setAttributes(lp1);
+					return;
+				}
+				if (iOrnt == 4) {
+					int curOrientation = sensorCurRot;
+					boolean isLandscape =
+							(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE) ||
+									(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE_REVERSE);
+					boolean needExtraEdges = false;
+					needExtraEdges = needExtraEdges || (((iExtFSM == 0) || (iExtFSM == 2)) && (iExtFS > 0) && (isLandscape));
+					needExtraEdges = needExtraEdges || (((iExtFSM == 0) || (iExtFSM == 1)) && (iExtFS > 0) && (!isLandscape));
+					if (!needExtraEdges) {
+						lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+						getWindow().setAttributes(lp1);
+						return;
+					}
+				}
 				lp1.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+			}
 			getWindow().setAttributes(lp1);
 		}
 	}
@@ -2162,6 +2208,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_SHOW_BATTERY, "1"); 
 			props.applyDefault(ReaderView.PROP_SHOW_POS_PERCENT, "0"); 
 			props.applyDefault(ReaderView.PROP_SHOW_PAGE_COUNT, "1");
+			props.applyDefault(ReaderView.PROP_SHOW_PAGES_TO_CHAPTER, "1");
 			props.applyDefault(ReaderView.PROP_FONT_KERNING_ENABLED, "0");
 			props.applyDefault(ReaderView.PROP_FONT_LIGATURES_ENABLED, "0");
 			props.applyDefault(ReaderView.PROP_SHOW_TIME, "1");
@@ -2193,7 +2240,10 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_BOTTOM, vmargin);
 			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN, "0");
 			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN_POS, "0");
+			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN_MOD, "0");
+			props.applyDefault(ReaderView.PROP_ROUNDED_CORNERS_MARGIN_FSCR, "0");
 			props.applyDefault(ReaderView.PROP_EXT_FULLSCREEN_MARGIN, "0");
+			props.applyDefault(ReaderView.PROP_EXT_FULLSCREEN_MOD, "0");
 
 			props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_INTERVAL, "10");

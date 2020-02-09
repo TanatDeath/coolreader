@@ -41,6 +41,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	public static final Logger log = L.create("cr");
 
+	public boolean needRefreshOnlineCatalogs = false;
 	private final CoolReader mActivity;
 	private ViewGroup mView;
 	private LinearLayout mRecentBooksScroll;
@@ -369,6 +370,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	}
 
 	public void refreshOnlineCatalogs() {
+		needRefreshOnlineCatalogs = false;
 		mActivity.waitForCRDBService(new Runnable() {
 			@Override
 			public void run() {
@@ -388,21 +390,24 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		bFilesystemHidden = false;
     }
 
-	ArrayList<FileInfo> lastCatalogs = new ArrayList<FileInfo>();
+	public static ArrayList<FileInfo> lastCatalogs = new ArrayList<FileInfo>();
 	private void updateOnlineCatalogs(ArrayList<FileInfo> catalogs) {
 		int colorBlue;
 		int colorGreen;
 		int colorGray;
+		int colorGray2Contrast;
 		int colorIcon;
 		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeBlue,
 						R.attr.colorThemeGreen,
 						R.attr.colorThemeGray,
-						R.attr.colorIcon});
+						R.attr.colorIcon,
+						R.attr.colorThemeGray2Contrast});
 		colorBlue = a.getColor(0, Color.BLUE);
 		colorGreen = a.getColor(1, Color.GREEN);
 		colorGray = a.getColor(2, Color.GRAY);
 		colorIcon = a.getColor(3, Color.GRAY);
+		colorGray2Contrast = a.getColor(4, Color.GRAY);
 		a.recycle();
 		String lang = mActivity.getCurrentLanguage();
 		boolean defEnableLitres = lang.toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
@@ -497,7 +502,11 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			} else {
 				if (label != null) {
 					label.setText(item.getFileNameToDisplay());
-					label.setTextColor(colorIcon);
+					if (item.was_error==1) {
+						label.setTextColor(colorGray2Contrast);
+					}
+					else
+						label.setTextColor(colorIcon);
 					label.setMaxWidth(coverWidth * 3 / 2);
 				}
 

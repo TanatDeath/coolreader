@@ -226,7 +226,8 @@ enum {
     PGHDR_CLOCK=16,
     PGHDR_BATTERY=32,
     PGHDR_CHAPTER_MARKS=64,
-    PGHDR_PERCENT=128
+    PGHDR_PERCENT=128,
+    PGHDR_PAGES_TO_CHAPTER=256
 };
 
 
@@ -407,7 +408,9 @@ public:
     /// get screen rectangle for specified cursor position, returns false if not visible
     bool getCursorRect( ldomXPointer ptr, lvRect & rc, bool scrollToCursor = false );
     /// set status bar and clock mode
-    void setStatusMode( int newMode, bool showClock, bool showTitle, bool showBattery, bool showChapterMarks, bool showPercent, bool showPageNumber, bool showPageCount );
+    void setStatusMode( int newMode, bool showClock, bool showTitle,
+            bool showBattery, bool showChapterMarks, bool showPercent,
+            bool showPageNumber, bool showPageCount, bool showPagesToChapter );
     /// draw to specified buffer by either Y pos or page number (unused param should be -1)
     void Draw( LVDrawBuf & drawbuf, int pageTopPosition, int pageNumber, bool rotate, bool autoresize = true);
     /// ensure current position is set to current bookmark value
@@ -607,6 +610,8 @@ public:
     virtual void getPageHeaderRectangle( int pageIndex, lvRect & headerRc );
     /// calculate page header height
     virtual int getPageHeaderHeight( );
+    /// calculate can page header be 2 lines
+    virtual bool isPageHeader2lines( );
     /// set list of icons to display at left side of header
     void setHeaderIcons( LVRefVec<LVImageSource> icons );
     /// set list of battery icons to display battery state

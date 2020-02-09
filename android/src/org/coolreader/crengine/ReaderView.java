@@ -160,7 +160,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		@Override
 		protected void onSizeChanged(final int w, final int h, int oldw, int oldh) {
-			log.i("onSizeChanged(" + w + ", " + h + ")");
+			log.i("onSizeChanged(" + w + ", " + h + ")" + " activity.isDialogActive=" + getActivity().isDialogActive());
 			super.onSizeChanged(w, h, oldw, oldh);
 			requestResize(w, h);
 		}
@@ -170,6 +170,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (visibility == VISIBLE) {
 				mActivity.einkRefresh();
 				startStats();
+				checkSize();
 			} else
 				stopStats();
 			super.onWindowVisibilityChanged(visibility);
@@ -180,6 +181,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (hasWindowFocus) {
 				mActivity.einkRefresh();
 				startStats();
+				checkSize();
 			} else
 				stopStats();
 			super.onWindowFocusChanged(hasWindowFocus);
@@ -3113,7 +3115,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int backgroundColor = props.getColor(PROP_BACKGROUND_COLOR, 0xFFFFFF);
 		setBackgroundTexture(backgroundImageId, backgroundColor);
 		props.setInt(PROP_STATUS_LINE, props.getInt(PROP_STATUS_LOCATION, VIEWER_STATUS_TOP) == VIEWER_STATUS_PAGE ? 0 : 1);
-
+		if (props.getInt(PROP_STATUS_LOCATION, VIEWER_STATUS_TOP) == VIEWER_STATUS_PAGE_2LINES)
+			props.setInt(PROP_STATUS_LINE, 2);
 		int updMode      = props.getInt(PROP_APP_SCREEN_UPDATE_MODE, 0);
 		int updInterval  = props.getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
 
@@ -4075,6 +4078,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		int curOrientation = getActivity().sensorCurRot;
 		if ((bSwitched)&&(iOrnt==4)) {
 			int iSett = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION, 10);
+			int iExtFS = getSettings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
+			int iExtFSM = getSettings().getInt(Settings.PROP_EXT_FULLSCREEN_MOD, 0);
 			if (orientationToolbarDlg!=null)
 				if (orientationToolbarDlg.mWindow != null)
 					orientationToolbarDlg.mWindow.dismiss();
@@ -4087,6 +4092,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							curOrientation, false);
 				}
 			}
+			boolean isLandscape =
+					(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE) ||
+					(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE_REVERSE);
+			boolean needExtraEdges = false;
+			needExtraEdges = needExtraEdges || (((iExtFSM == 0) || (iExtFSM == 2)) && (iExtFS > 0) && (isLandscape));
+			needExtraEdges = needExtraEdges || (((iExtFSM == 0) || (iExtFSM == 1)) && (iExtFS > 0) && (!isLandscape));
+			mActivity.setCutoutMode(needExtraEdges?1:0);
 		}
 		lastsetOrientation = getActivity().getScreenOrientation();
 		requestedWidth = width;
@@ -4151,7 +4163,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		boolean changed = (requestedWidth != internalDX) || (requestedHeight != internalDY);
 		if (!changed)
 			return;
-
+		//NB: buggins method of active dialog tracking - possibly not needed for me. Disabled
+//		if (getActivity().isDialogActive()) {
+//			log.d("checkSize() : dialog is active, skipping resize");
+//			return;
+//		}
 //		if (mIsOnFront || !mOpened) {
 		log.d("checkSize() : calling resize");
 		resize();

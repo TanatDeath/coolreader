@@ -52,7 +52,8 @@
 		    android:layout_marginTop="4dip"
 		    android:layout_marginBottom="4dip"
 	        android:layout_weight="80"
-	        android:layout_gravity="fill_horizontal"
+			android:textColor="?attr/colorIcon"
+	        android:layout_gravity="center_vertical|fill_horizontal"
 	         />
     <!-- /LinearLayout-->
 	    <TextView android:id="@+id/toc_page"
@@ -66,6 +67,7 @@
 		    android:layout_marginBottom="4dip"
 			android:text="12" 
 	        android:singleLine="true"
-	        android:layout_gravity="right" 
+	        android:layout_gravity="center_vertical|right"
+			android:textColor="?attr/colorIcon"
 	        android:ellipsize="none"/>
 </LinearLayout>

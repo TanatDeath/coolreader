@@ -16,8 +16,8 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class DBXConfig {
-    public static final String DBX_KEY = "r8s8q13icp2fynx"; //"put_yours";
-    public static final String DBX_SECRET = "ascdad2ohiix1em"; //"put_yours";
+    public static final String DBX_KEY = "put_yours";
+    public static final String DBX_SECRET = "put_yours";
     public static final String DBX_REDIRECT_URL = "https://github.com/plotn/coolreader";
     public static DbxRequestConfig mDbxRequestConfig = null;
     public static DbxClientV2 mDbxClient = null;

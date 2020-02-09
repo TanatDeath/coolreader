@@ -1,11 +1,8 @@
 package org.coolreader.crengine;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -57,6 +54,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	HashMap<Long, String> mFileSystemFoldersH;
 	public static HashMap<String, Integer> mListPosCacheOld = new HashMap<String, Integer>();
 	public static HashMap<String, Integer> mListPosCache = new HashMap<String, Integer>();
+	String lastOPDScatalogURL = "";
 
 	public static final int MAX_SUBDIR_LEN = 32;
 
@@ -85,7 +83,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 		return false;
 	}
-	
+
 	private class FileBrowserListView extends BaseListView {
 
 		public FileBrowserListView(Context context) {
@@ -813,6 +811,31 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 	
 	private FileInfo currDirectory;
+	private FileInfo currDirectoryFiltered;
+
+	public void filterUpdated(String text) {
+		if (StrUtils.isEmptyStr(text)) {
+			currDirectoryFiltered = currDirectory;
+		} else {
+			ArrayList<FileInfo> filesN = new ArrayList<FileInfo>();// files
+			ArrayList<FileInfo> dirsN = new ArrayList<FileInfo>(); // directories
+			currDirectoryFiltered = new FileInfo(currDirectory);
+			if (currDirectory.dirs != null)
+				for (FileInfo dir: currDirectory.dirs) {
+					if (dir.contains(text)) dirsN.add(dir);
+				}
+			if (currDirectory.files != null)
+				for (FileInfo file: currDirectory.files) {
+					if (file.contains(text)) filesN.add(file);
+				}
+			log.i("finding: "+text);
+			log.i("dir_cnt "+dirsN.size());
+			log.i("files_cnt "+filesN.size());
+			currDirectoryFiltered.dirs = dirsN;
+			currDirectoryFiltered.files = filesN;
+		}
+		invalidateAdapter(currentListAdapter);
+	}
 
 	public boolean isRootDir()
 	{
@@ -1085,12 +1108,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			});
 			return;
 		}
-		
+
+		for (FileInfo fi: CRRootView.lastCatalogs)
+			if (fileOrDir.getOPDSUrl().equals(fi.getOPDSUrl())) lastOPDScatalogURL = fileOrDir.getOPDSUrl();
+
 		if (currDirectory != null && !currDirectory.isOPDSRoot() && !currDirectory.isOPDSBook() && !currDirectory.isOPDSDir()) {
 			// show empty directory before trying to download catalog
 			showDirectoryInternal(fileOrDir, itemToSelect);
 			// update last usage
-			mActivity.getDB().updateOPDSCatalogLastUsage(fileOrDir.getOPDSUrl());
+			mActivity.getDB().updateOPDSCatalog(fileOrDir.getOPDSUrl(), "last_usage", "max");
 			mActivity.refreshOPDSRootDirectory(false);
 		}
 		
@@ -1267,6 +1293,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
                             selector.notifyScanner(file.getAbsolutePath());
                         }
 						mEngine.hideProgress();
+                        mActivity.getDB().updateOPDSCatalog(lastOPDScatalogURL, "books_downloaded", "max");
 						//fileOrDir.parent.pathname // @opds:http://89.179.127.112/opds/search/books/u/0/
 						FileInfo fi = new FileInfo(file);
 						boolean isArch = isArchive(file);
@@ -1361,7 +1388,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				String defFileName = Utils.transcribeFileName( fileOrDir.title!=null ? fileOrDir.title : fileOrDir.filename );
 				if ( fileOrDir.format!=null )
 					defFileName = defFileName + fileOrDir.format.getExtensions()[0];
-				final OPDSUtil.DownloadTask downloadTask = OPDSUtil.create(mActivity, uri, defFileName, fileOrDir.isDirectory?"application/atom+xml":fileMimeType, 
+				final OPDSUtil.DownloadTask downloadTask = OPDSUtil.create(lastOPDScatalogURL,
+						mActivity, uri, defFileName, fileOrDir.isDirectory?"application/atom+xml":fileMimeType,
 						myCurrDirectory.getOPDSUrl(), callback, fileOrDir.username, fileOrDir.password,
 						fileOrDir.proxy_addr, fileOrDir.proxy_port,
 						fileOrDir.proxy_uname, fileOrDir.proxy_passw,
@@ -1517,6 +1545,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			if (fileOrDir.isQSearchShortcut()) {
 				currDirectory = null;
+				currDirectoryFiltered = null;
 				showFindBookDialog(true, fileOrDir.filename, null);
 				return;
 			}
@@ -1739,21 +1768,21 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 
 		public int getCount() {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return 0;
-			return currDirectory.fileCount() + currDirectory.dirCount();
+			return currDirectoryFiltered.fileCount() + currDirectoryFiltered.dirCount();
 		}
 
 		public Object getItem(int position) {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return null;
 			if ( position<0 )
 				return null;
-			return currDirectory.getItem(position);
+			return currDirectoryFiltered.getItem(position);
 		}
 
 		public long getItemId(int position) {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return 0;
 			return position;
 		}
@@ -1765,14 +1794,14 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		public final int VIEW_TYPE_OPDS_BOOK = 4;
 		public final int VIEW_TYPE_COUNT = 5;
 		public int getItemViewType(int position) {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return 0;
 			if (position < 0)
 				return Adapter.IGNORE_ITEM_VIEW_TYPE;
-			if (position < currDirectory.dirCount())
+			if (position < currDirectoryFiltered.dirCount())
 				return VIEW_TYPE_DIRECTORY;
-			position -= currDirectory.dirCount();
-			if (position < currDirectory.fileCount()) {
+			position -= currDirectoryFiltered.dirCount();
+			if (position < currDirectoryFiltered.fileCount()) {
 				Object itm = getItem(position);
 				if (itm instanceof FileInfo) {
 					FileInfo fi = (FileInfo)itm;
@@ -1851,7 +1880,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 									//mActivity.showToast(item.annotation);
 									//log.v("BOOKNF annotation:"+item.annotation);
                                     BookInfo bi = new BookInfo(item);
-									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectory);
+									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered);
 								}
 							});
 						}
@@ -2211,7 +2240,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 		
 		public View getView(int position, View convertView, ViewGroup parent) {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return null;
 			View view;
 			ViewHolder holder;
@@ -2253,7 +2282,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo parentItem = null;//item!=null ? item.parent : null;
 			if ( vt == VIEW_TYPE_LEVEL_UP ) {
 				item = null;
-				parentItem = currDirectory;
+				parentItem = currDirectoryFiltered;
 			}
 			holder.setItem(item, parentItem);
 //			if ( DeviceInfo.FORCE_HC_THEME ) {
@@ -2263,7 +2292,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 
 		public int getViewTypeCount() {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return 1;
 			return VIEW_TYPE_COUNT;
 		}
@@ -2273,7 +2302,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 
 		public boolean isEmpty() {
-			if (currDirectory == null)
+			if (currDirectoryFiltered == null)
 				return true;
 			return mScanner.mFileList.size()==0;
 		}
@@ -2306,6 +2335,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			mCoverpageManager.unqueue(filesToUqueue);
 		}
 		currDirectory = newCurrDirectory;
+		currDirectoryFiltered = newCurrDirectory;
 	}
 	
 	private void showDirectoryInternal( final FileInfo dir, final FileInfo file )

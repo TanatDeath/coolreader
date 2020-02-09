@@ -19,6 +19,7 @@
 #include "docview.h"
 #include "../../crengine/include/crengine.h"
 #include "../../crengine/include/epubfmt.h"
+#include "../../crengine/include/fb3fmt.h"
 #include "../../crengine/include/pdbfmt.h"
 #include "../../crengine/include/lvstream.h"
 
@@ -30,6 +31,7 @@
 #define XS_IMPLEMENT_SCHEME 1
 #include <../../crengine/include/fb2def.h>
 #include <sys/stat.h>
+#include <lvopc.h>
 
 #if defined(__arm__) || defined(__aarch64__) || defined(__i386__) || defined(__mips__)
 #define USE_COFFEECATCH 1
@@ -152,7 +154,7 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
 {
     LVContainerRef m_arc = LVOpenArchieve( stream );
     if ( m_arc.isNull() )
-        return false; // not a ZIP archive
+        return false; // not a ZIP` archive
 
     // check root media type
     lString16 rootfilePath = EpubGetRootFilePath(m_arc);
@@ -179,10 +181,22 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
     lString16 author = doc->textFromXPath( lString16("package/metadata/creator")).trim();
     lString16 title = doc->textFromXPath( lString16("package/metadata/title")).trim();
     lString16 language = doc->textFromXPath( lString16("package/metadata/language")).trim();
+	lString16 bookdate = doc->textFromXPath( lString16("package/metadata/date")).trim();
+	lString16 annotation = doc->textFromXPath( lString16("package/metadata/description")).trim();
+	lString16 publisher = doc->textFromXPath( lString16("package/metadata/publisher")).trim();
+	lString16 genre = doc->textFromXPath( lString16("package/metadata/subject")).trim();
+	lString16 docsrcurl = doc->textFromXPath( lString16("package/metadata/identifier")).trim();
+	lString16 docsrcocr = doc->textFromXPath( lString16("package/metadata/source")).trim();
 
     pBookProps->author = author;
     pBookProps->title = title;
     pBookProps->language = language;
+	pBookProps->bookdate = bookdate;
+	pBookProps->annotation = annotation;
+ 	pBookProps->publisher = publisher;
+ 	pBookProps->genre = genre;
+ 	pBookProps->docsrcurl = docsrcurl;
+	pBookProps->docsrcocr = docsrcocr;
 
     for ( int i=1; i<20; i++ ) {
         ldomNode * item = doc->nodeFromXPath( lString16("package/metadata/meta[") << fmt::decimal(i) << "]" );
@@ -203,6 +217,110 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
     delete doc;
 
     return true;
+}
+
+static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
+{
+	ldomDocument * descDoc = NULL;
+	descDoc = Fb3GetDescDoc( stream );
+
+	if ( !descDoc )
+		return false;
+
+	lString16 title = descDoc->textFromXPath( lString16("title/main"));
+	lString16 authors;
+	lString16 annotation = descDoc->textFromXPath( lString16("annotation"));
+	lString16 language = descDoc->textFromXPath( lString16("lang"));
+	lString16 translators;
+	lString16 publishers;
+	lString16 genres;
+	lString16 srclang = descDoc->textFromXPath( lString16("written/lang"));
+	lString16 bookdate = descDoc->textFromXPath( lString16("written/date"));
+
+	for ( int i=1; i<30; i++ ) {
+		ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-relations/subject[") << fmt::decimal(i) << "]");
+		if ( !item ) break;
+		lString16 name = item->getAttributeValue("link");
+		if (name == "author") {
+			lString16 author = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+			if ( !authors.empty() ) {
+				authors += " |";
+			}
+			authors += author;
+		}
+		if (name == "translator") {
+			lString16 translator = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+			if ( !translators.empty() ) {
+				translators += " | ";
+			}
+			translators += translator;
+		}
+		if (name == "publisher") {
+			lString16 publisher = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+			if ( !publishers.empty() ) {
+				publishers += " | ";
+			}
+			publishers += publisher;
+		}
+	}
+	for ( int i=1; i<30; i++ ) {
+		ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-classification/subject[") << fmt::decimal(i) << "]");
+		if ( !item ) break;
+		lString16 genre = descDoc->textFromXPath( lString16("fb3-classification/subject[") << fmt::decimal(i) << "]");
+		if ( !genres.empty() ) {
+			genres += " | ";
+		}
+		genres += genre;
+	}
+
+	ldomNode * item = descDoc->nodeFromXPath(lString16("document-info"));
+	lString16 created = item->getAttributeValue("created");
+	lString16 docprogram = item->getAttributeValue("program-used");
+	lString16 docauthor = item->getAttributeValue("editor");
+	lString16 docsrcurl = item->getAttributeValue("src-url");
+	lString16 docsrcocr = item->getAttributeValue("ocr");
+	lString16 series = descDoc->textFromXPath(lString16("fb3-description/sequence/title/main"));
+	ldomNode * item2 = descDoc->nodeFromXPath(lString16("paper-publish-info"));
+	lString16 publisher = item2->getAttributeValue("publisher");
+	lString16 city = item2->getAttributeValue("city");
+	lString16 year = item2->getAttributeValue("year");
+	lString16 publisbn = descDoc->textFromXPath(lString16("paper-publish-info/isbn"));
+	lString16 publsequence = descDoc->textFromXPath(lString16("paper-publish-info/sequence"));
+
+	pBookProps-> title = title;
+	pBookProps-> author = authors;
+	pBookProps-> annotation = annotation;
+	pBookProps-> language = language;
+	pBookProps-> translator = translators;
+	pBookProps-> publisher = publishers;
+	pBookProps-> genre = genres;
+	pBookProps-> srclang = srclang;
+	pBookProps-> bookdate = bookdate;
+	pBookProps-> docdate = created;
+	pBookProps->docprogram = docprogram;
+ 	pBookProps->series = series;
+	pBookProps->publisher = publisher;
+	pBookProps->publcity = city;
+	pBookProps->publyear = year;
+	pBookProps->publisbn = publisbn;
+	pBookProps->publseries = publsequence;
+	pBookProps->docauthor = docauthor;
+	pBookProps->docsrcurl = docsrcurl;
+	pBookProps->docsrcocr = docsrcocr;
+
+	time_t t = (time_t)time(0);
+	struct stat fs;
+	if ( !stat( name, &fs ) ) {
+		t = fs.st_mtime;
+	}
+
+	pBookProps->filesize = (long)stream->GetSize();
+	pBookProps->filename = lString16(name);
+	pBookProps->filedate = getDateTimeString( t );
+
+	delete descDoc;
+
+	return true;
 }
 
 static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
@@ -226,6 +344,11 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
         CRLog::trace("GetBookProperties() : epub format detected");
     	return GetEPUBBookProperties( name, stream, pBookProps );
     }
+
+	if ( DetectFb3Format( stream ) ) {
+		CRLog::trace("GetBookProperties() : fb3 format detected");
+		return GetFB3BookProperties( name, stream, pBookProps );
+	}
 
     time_t t = (time_t)time(0);
 
@@ -259,7 +382,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     doc.setNameSpaceTypes( fb2_ns_table );
     LVXMLParser parser( stream, &writer );
     CRLog::trace( "checking format..." );
-    if ( !parser.CheckFormat() ) {
+	if ( !parser.CheckFormat() ) {
         return false;
     }
     CRLog::trace( "parsing..." );

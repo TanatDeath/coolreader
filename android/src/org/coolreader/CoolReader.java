@@ -186,9 +186,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	DeviceOrientation deviceOrientation;
 	SensorManager mSensorManager;
 
-	public int sensorPrevRot = -1;
-	public int sensorCurRot = -1;
-
 	@Override
 	public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER)
@@ -1555,6 +1552,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				// update recent books
 				mHomeFrame.refreshRecentBooks();
 				mHomeFrame.refreshFileSystemFolders();
+				if (mHomeFrame.needRefreshOnlineCatalogs) refreshOPDSRootDirectory(false);
 				setLastLocationRoot();
 				mCurrentFrame.invalidate();
 			}
@@ -2820,9 +2818,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mHomeFrame != null)
 			mHomeFrame.refreshOnlineCatalogs();
 	}
-	
 
-	
+	public void setNeedRefreshOPDS() {
+		if (mHomeFrame != null)
+			mHomeFrame.needRefreshOnlineCatalogs = true;
+	}
+
     private SharedPreferences mPreferences;
     private final static String BOOK_LOCATION_PREFIX = "@book:";
     private final static String DIRECTORY_LOCATION_PREFIX = "@dir:";

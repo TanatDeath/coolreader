@@ -1,6 +1,8 @@
 package org.coolreader.crengine;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +40,7 @@ import org.xml.sax.helpers.DefaultHandler;
 @SuppressLint("SimpleDateFormat")
 public class OPDSUtil {
 
-	public static final boolean EXTENDED_LOG = false;
+	public static final boolean EXTENDED_LOG = false; // set to false for production
     public static final int CONNECT_TIMEOUT = 60000;
     public static final int READ_TIMEOUT = 60000;
 	/*
@@ -238,6 +240,7 @@ xml:base="http://lib.ololo.cc/opds/">
 		private AuthorInfo authorInfo;
 		private boolean insideFeed;
 		private boolean insideEntry;
+		private boolean insideEntryTitle;
 		//private boolean singleEntry;
 		private int level = 0;
 		//2011-05-31T10:28:22+04:00
@@ -295,15 +298,16 @@ xml:base="http://lib.ololo.cc/opds/">
 					else
 						docInfo.updated = ts;
 				} else if ( "title".equals(currentElement) ) {
-					if ( !insideEntry )
+					if ( !insideEntry ) {
 						docInfo.title = s;
-					else
+					} else {
 						entryInfo.title = entryInfo.title + s;
+					}
 				} else if ( "summary".equals(currentElement) ) {
 					if ( insideEntry )
 						entryInfo.summary = entryInfo.summary + s;
 				} else if ( "name".equals(currentElement) ) {
-					if ( authorInfo!=null )
+					if ( authorInfo != null )
 						authorInfo.name = s;
 				} else if ( "uri".equals(currentElement) ) {
 					if ( authorInfo!=null )
@@ -328,6 +332,10 @@ xml:base="http://lib.ololo.cc/opds/">
 				} else if ( "language".equals(currentElement) ) {
 					if ( !insideEntry )
 						docInfo.language = s;
+				} else if ( insideEntryTitle ) {
+					if (entryInfo.title.length() > 0)
+						entryInfo.title = entryInfo.title + " ";
+					entryInfo.title = entryInfo.title + s;
 				}
 			}
 		}
@@ -383,7 +391,9 @@ xml:base="http://lib.ololo.cc/opds/">
 			} else if ( "updated".equals(localName) ) {
 				
 			} else if ( "title".equals(localName) ) {
-				
+				insideEntryTitle = insideEntry;
+			} else if ( "name".equals(localName) ) {
+
 			} else if ( "link".equals(localName) ) {
 				LinkInfo link = new LinkInfo(url, attributes);
 				if ( link.isValid() && insideFeed ) {
@@ -395,6 +405,11 @@ xml:base="http://lib.ololo.cc/opds/">
 							if ( link.type.startsWith("application/atom+xml") ) {
 								if (entryInfo.link == null || !entryInfo.link.type.startsWith("application/atom+xml"))
 									entryInfo.link = link;
+							} else if ( "http://opds-spec.org/cover".equals(link.rel) && "image/jpeg".equals(link.type)) {
+								entryInfo.icon = link.href;
+							} else if ( "http://opds-spec.org/thumbnail".equals(link.rel) && "image/jpeg".equals(link.type)) {
+								if (entryInfo.icon == null)
+									entryInfo.icon = link.href;
 							} else if (priority>0 && (entryInfo.link==null || entryInfo.link.getPriority()<priority)) {
 								entryInfo.link = link;
 							}
@@ -425,6 +440,8 @@ xml:base="http://lib.ololo.cc/opds/">
 			//String currentElement = elements.peek();
 			if ( insideFeed && "feed".equals(localName) ) {
 				insideFeed = false;
+			} else if ( "title".equals(localName) ) {
+				insideEntryTitle = false;
 			} else if ( "entry".equals(localName) ) {
 				if ( !insideFeed || !insideEntry )
 					throw new SAXException("unexpected element " + localName);
@@ -454,7 +471,8 @@ xml:base="http://lib.ololo.cc/opds/">
 	}
 	
 	public static class DownloadTask {
-		final private CoolReader coolReader; 
+		final private CoolReader coolReader;
+		private String catalogURL;
 		private URL url;
 		private String username;
 		private String password;
@@ -471,12 +489,14 @@ xml:base="http://lib.ololo.cc/opds/">
 		private HttpURLConnection connection;
 		private DelayedProgress delayedProgress;
 		OPDSHandler handler;
-		public DownloadTask(CoolReader coolReader, URL url, String defaultFileName, String expectedType, String referer,
+		public DownloadTask(String catalogURL,
+							CoolReader coolReader, URL url, String defaultFileName, String expectedType, String referer,
 							DownloadCallback callback, String username, String password,
 							String proxy_addr, String proxy_port,
 							String proxy_uname, String proxy_passw,
 							int onion_def_proxy
 							) {
+			this.catalogURL = catalogURL;
 			this.url = url;
 			this.coolReader = coolReader;
 			this.callback = callback; 
@@ -497,16 +517,20 @@ xml:base="http://lib.ololo.cc/opds/">
 			if ( totalSize>0 )
 				progressMessage = progressMessage + " (" + totalSize + ")";
 		}
+		// call in GUI thread only!
+		private void hideProgress() {
+			if ( progressShown && Services.getEngine() != null)
+				Services.getEngine().hideProgress();
+			if ( delayedProgress != null ) {
+				delayedProgress.cancel();
+				delayedProgress.hide();
+			}
+		}
 		private void onError(final String msg) {
 			BackgroundThread.instance().executeGUI(new Runnable() {
 				@Override
 				public void run() {
-					if ( delayedProgress!=null ) {
-						delayedProgress.cancel();
-						delayedProgress.hide();
-					}
-					if (Services.getEngine() != null)
-						Services.getEngine().hideProgress();
+					hideProgress();
 					callback.onError(msg);
 				}
 			});
@@ -721,7 +745,7 @@ xml:base="http://lib.ololo.cc/opds/">
 		public static String encodePassword(String username, String password) {
 			return Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP);
 		}
-		
+
 		public void runInternal() {
 			connection = null;
 			
@@ -734,8 +758,11 @@ xml:base="http://lib.ololo.cc/opds/">
 					setProgressMessage( url.toString(), -1 );
 					visited.add(url.toString());
 					long startTimeStamp = System.currentTimeMillis();
-					if (!partialDownloadCompleted)
+					if (!partialDownloadCompleted) {
+						if (delayedProgress != null)
+							delayedProgress.cancel();
 						delayedProgress = Services.getEngine().showProgressDelayed(0, progressMessage, PROGRESS_DELAY_MILLIS);
+					}
 					URL newURL = url;
 					boolean useOrobotProxy = false;
 					String host = url.getHost();
@@ -843,9 +870,33 @@ xml:base="http://lib.ololo.cc/opds/">
 					response = connection.getResponseCode();
 					L.i("opds: "+connection.getResponseMessage());
 					if (EXTENDED_LOG) L.d("Response: " + response);
-					if ( response!=200 ) {
+					if ( response == 301 || response == 302 || response == 307 || response == 303 ) {
+						// redirects
+						String redirect = connection.getHeaderField("Location");
+						if (null == redirect) {
+							onError("Invalid redirect " + response);
+							return;
+						}
+						L.d("continue with next part: " + url);
+						url = new URL(redirect);
+						if (visited.contains(url.toString())) {
+							onError("Duplicate redirect " + url);
+							return;
+						}
+						loadNext = true;
+						L.d("Response " + response + ": redirect to " + url);
+						continue;
+					}
+					if ( response != 200 ) {
 						onError(url+" - Error " + response + ": " + connection.getResponseMessage());
+						coolReader.getDB().updateOPDSCatalog(catalogURL, "was_error", "1");
+						Log.i("WASERROR", catalogURL+": 1");
+						coolReader.setNeedRefreshOPDS();
 						return;
+					} else {
+						coolReader.getDB().updateOPDSCatalog(catalogURL, "was_error", "0");
+						Log.i("WASERROR", catalogURL+": 0");
+						coolReader.setNeedRefreshOPDS();
 					}
 					
 					if (cancelled)
@@ -873,7 +924,6 @@ xml:base="http://lib.ololo.cc/opds/">
 							return;
 						}
 						is.close();
-						is = null;
 						is = new ByteArrayInputStream(buf);
 						if ( findSubstring(buf, "<?xml version=")>=0 && findSubstring(buf, "<feed")>=0  )
 							contentType = "application/atom+xml"; // override type
@@ -900,8 +950,7 @@ xml:base="http://lib.ololo.cc/opds/">
 							fileName = defaultFileName;
 						L.d("Downloading book: " + contentEncoding);
 						downloadBook( contentType, url.toString(), is, contentLen, fileName, isZip );
-						if ( progressShown )
-							Services.getEngine().hideProgress();
+						hideProgress();
 						loadNext = false;
 						itemsLoadedPartially = false;
 					}
@@ -914,6 +963,9 @@ xml:base="http://lib.ololo.cc/opds/">
 					if (!StrUtils.isEmptyStr(sErr))
 						if (sErr.length()>100) sErr = sErr.substring(0,99);
 					onError("Error occured while reading OPDS catalog: "+sErr);
+					coolReader.getDB().updateOPDSCatalog(catalogURL, "was_error", "1");
+					Log.i("WASERROR", catalogURL+": 1");
+					coolReader.setNeedRefreshOPDS();
 					break;
 				} finally {
 					if ( connection!=null )
@@ -942,17 +994,20 @@ xml:base="http://lib.ololo.cc/opds/">
 					});
 				}
 			} while (loadNext && !cancelled);
-			if ( progressShown )
-				Services.getEngine().hideProgress();
-			if (itemsLoadedPartially && !cancelled)
+			if (delayedProgress != null)
+				delayedProgress.cancel();
+			hideProgress();
+			if (itemsLoadedPartially && !cancelled) {
 				BackgroundThread.instance().executeGUI(new Runnable() {
 					@Override
 					public void run() {
 						L.d("Parsing is finished successfully. " + handler.entries.size() + " entries found");
+						hideProgress();
 						if (!callback.onFinish(handler.docInfo, handler.entries))
 							cancel();
 					}
 				});
+			}
 		}
 
 		public void run() {
@@ -1035,14 +1090,15 @@ xml:base="http://lib.ololo.cc/opds/">
 		
 	}
 	private static DownloadTask currentTask;
-	public static DownloadTask create(CoolReader coolReader, URL uri, String defaultFileName, String expectedType,
+	public static DownloadTask create(String catalogURL,
+			                          CoolReader coolReader, URL uri, String defaultFileName, String expectedType,
 									  String referer, DownloadCallback callback, String username, String password,
 									  String proxy_addr, String proxy_port,
 									  String proxy_uname, String proxy_passw,
 									  int onion_def_proxy) {
 		if (currentTask != null)
 			currentTask.cancel();
-		final DownloadTask task = new DownloadTask(coolReader, uri, defaultFileName, expectedType,
+		final DownloadTask task = new DownloadTask(catalogURL, coolReader, uri, defaultFileName, expectedType,
 				referer, callback, username, password,
 				proxy_addr, proxy_port,
 				proxy_uname, proxy_passw,

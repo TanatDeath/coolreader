@@ -120,6 +120,9 @@ public class FileInfo {
 	public Object tag; // some additional information
 	public boolean askedMarkRead = false; // did we ask to mark book as read
 	public boolean askedMarkReading = false; // did we ask to mark book as reading
+	public Long book_downloaded = 0L;
+	public int was_error = 0;
+
 	public ArrayList<Integer> arrReadBeg = new ArrayList<Integer>();
 	public ArrayList<FileInfo> files;// files
 	public ArrayList<FileInfo> dirs; // directories
@@ -446,6 +449,48 @@ public class FileInfo {
         fileCreateTime = v.fileCreateTime;
         opdsLink = v.opdsLink;
     }
+
+	public boolean contains(String text)
+	{
+		String find = StrUtils.getNonEmptyStr(text,true).toUpperCase();
+		if (StrUtils.getNonEmptyStr(title, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(authors, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(series, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(String.valueOf(seriesNumber), true).toUpperCase().contains(find)) return true;
+		//if (StrUtils.getNonEmptyStr(path, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(filename, true).toUpperCase().contains(find)) return true;
+		//if (StrUtils.getNonEmptyStr(pathname, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(arcname, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(genre, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(genre_list, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(annotation, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(translator, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(docauthor, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(docprogram, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(docsrcurl, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(docsrcocr, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(docversion, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publname, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publisher, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publcity, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publyear, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publisbn, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publseries, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(String.valueOf(publseriesNumber), true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(publisbn, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(lang_from, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(lang_to, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(srclang, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(bookdate, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(docdate, true).toUpperCase().contains(find)) return true;
+		java.util.Date dateTime=new java.util.Date(createTime);
+		android.text.format.DateFormat df = new android.text.format.DateFormat();
+		if (df.format("yyyy-MM-dd hh:mm:ss a", dateTime).toString().toUpperCase().contains(find)) return true;
+		dateTime=new java.util.Date(fileCreateTime);
+		df = new android.text.format.DateFormat();
+		if (df.format("yyyy-MM-dd hh:mm:ss a", dateTime).toString().toUpperCase().contains(find)) return true;
+		return false;
+	}
 	
 	/**
 	 * @return archive file path and name, null if this object is neither archive nor a file inside archive

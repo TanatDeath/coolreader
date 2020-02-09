@@ -290,6 +290,8 @@ public class BaseDialog extends Dialog {
 	
 	protected void onCreate() {
 		// when dialog is created
+		Log.d("DLG","BaseDialog.onCreate()");
+		activity.onDialogCreated(this);
 	}
 	
 	protected void onClose() {
@@ -298,9 +300,11 @@ public class BaseDialog extends Dialog {
 			CoolReader cr = (CoolReader)activity;
 			cr.getmBaseDialog().remove(this.dlgName);
 		}
+		// buggins method of active dialog tracking - i think mine is better :)
+		Log.d("DLG","BaseDialog.onClose()");
+		activity.onDialogClosed(this);
 	}
-	
-	
+
 	
 	/**
 	 * Set View's gesture handlers for LTR and RTL horizontal fling

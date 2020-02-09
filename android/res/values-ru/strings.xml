@@ -192,6 +192,7 @@
     <string name="options_color_b">Синий</string>
     <string name="options_page_show_titlebar_percent">Процент прочитанного</string>
     <string name="options_page_show_titlebar_page_count">Всего страниц</string>
+    <string name="options_page_show_titlebar_pages_to_chapter">Осталось страниц до конца главы</string>
     <string name="options_show_titlebar_page_number">Номер страницы</string>
     <string name="options_controls_flick_brightness">Управление яркостью скольжением по экрану</string>
     <string name="options_controls_flick_brightness_right">Правый край</string>
@@ -564,6 +565,7 @@
     <string name="book_info_rating">Оценка</string>
     <string name="options_page_show_titlebar_hidden">Не показывать</string>
     <string name="options_page_show_titlebar_page_header">В заголовке страницы</string>
+    <string name="options_page_show_titlebar_page_header_2lines">В заголовке страницы, 2 строки</string>
     <string name="options_page_show_titlebar_bottom">Внизу</string>
     <string name="options_page_show_titlebar_top">Вверху</string>
     <string name="options_view_toolbar_position_short_side">По короткому краю</string>
@@ -983,17 +985,21 @@
     <string name="options_app_geo_4">Показывать остановки и метро</string>
     <string name="third_party_tango_mod_icon_set">Высококонтрастные значки основаны на Tango Icon Library: http://tango.freedesktop.org/Tango_Icon_Library</string>
     <string name="rounded_corners_margin_pos_text">Положение отступов статусной строки</string>
+    <string name="rounded_corners_margin_mod_text">Модификация отступов статусной строки</string>
+    <string name="rounded_corners_margin_fullscreen_only">Отступы статусной строки - только в полноэкранном режиме</string>
     <string name="rounded_corners_margin_pos_0">Обе стороны</string>
-    <string name="rounded_corners_margin_pos_1">Обе стороны, только полноэкранный режим</string>
-    <string name="rounded_corners_margin_pos_2">Слева</string>
-    <string name="rounded_corners_margin_pos_3">Слева, только полноэкранный режим</string>
-    <string name="rounded_corners_margin_pos_4">Справа</string>
-    <string name="rounded_corners_margin_pos_5">Справа, только полноэкранный режим</string>
+    <string name="rounded_corners_margin_pos_1">Слева</string>
+    <string name="rounded_corners_margin_pos_2">Справа</string>
+    <string name="screen_mod_0">Всегда</string>
+    <string name="screen_mod_1">В книжном режиме</string>
+    <string name="screen_mod_2">В альбомном режиме</string>
     <string name="ext_fullscreen_margin_text">Расширенный полноэкранный режим</string>
+    <string name="ext_fullscreen_margin_mod">Расширенный полноэкранный режим - модификатор</string>
     <string name="ext_fullscreen_margin_add_info">Для устройств с экранными вырезами - растягивать окно на весь экран (вырезы могут частично закрывать области приложения). Для Android 9 и выше</string>
     <string name="ext_fullscreen_margin_0">Отключен</string>
     <string name="ext_fullscreen_margin_1">Включен</string>
     <string name="ext_fullscreen_margin_2">Включен, отступ линии прочитанного: </string>
     <string name="ext_fullscreen_margin_3">Включен, 2 текстовые строки в статусе</string>
+    <string name="downloaded_from_catalog">Скачано книг:</string>
 </resources>
 

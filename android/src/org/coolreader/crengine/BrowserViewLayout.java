@@ -6,12 +6,16 @@ import org.coolreader.R;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,7 +24,9 @@ public class BrowserViewLayout extends ViewGroup {
 	private BaseActivity activity;
 	private FileBrowser contentView;
 	private View titleView;
+	private View filterView;
 	private CRToolBar toolbarView;
+	private boolean filterIsShown;
 
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
@@ -51,8 +57,45 @@ public class BrowserViewLayout extends ViewGroup {
 	private FileInfo dir = null;
 	private ArrayList<TextView> arrLblPaths = new ArrayList<TextView>();
 
+	private void switchFilter(boolean filt) {
+		final LinearLayout ll_path = titleView.findViewById(R.id.ll_path);
+		LayoutInflater inflater = LayoutInflater.from(activity);
+		if (filt) {
+			filterIsShown = true;
+			ll_path.removeAllViews();
+			filterView = inflater.inflate(R.layout.browser_status_bar_filter, null);
+			ll_path.addView(filterView);
+			filterView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
+					LayoutParams.FILL_PARENT));
+			EditText filter_edit = filterView.findViewById(R.id.filter_edit);
+			filter_edit.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+					contentView.filterUpdated(cs.toString());
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+				@Override
+				public void afterTextChanged(Editable arg0) {}
+			});
+
+			filter_edit.requestFocus();
+		} else {
+			filterIsShown = false;
+			if (filterView!=null) ll_path.removeView(filterView);
+			ll_path.removeAllViews();
+			for (TextView tv : arrLblPaths) {
+				if (tv!=null)
+					ll_path.addView(tv);
+			}
+		}
+	}
+
 	public void setBrowserTitle(String title, FileInfo dir) {
 		this.browserTitle = title;
+		if (filterIsShown) switchFilter(false);
 		if (dir!=null) this.dir = dir;
 		((TextView)titleView.findViewById(R.id.title)).setText(title);
 		arrLblPaths.clear();
@@ -74,24 +117,39 @@ public class BrowserViewLayout extends ViewGroup {
 		int i = 0;
 		FileInfo dir1 = this.dir;
 		FileInfo dir2 = dir1;
-		for (TextView tv : arrLblPaths) {
-			i++;
-			if (dir2!=null) dir2 = dir2.parent;
-			tv.setText(String.valueOf(""));
-			tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-			if ((dir2 != null)&&(!dir2.isRootDir())) {
-				final FileInfo dir3 = dir2;
-				tv.setText(String.valueOf(dir2.filename));
+		if (!filterIsShown)
+			for (TextView tv : arrLblPaths) {
+				i++;
+				if (dir2!=null) dir2 = dir2.parent;
+				tv.setText(String.valueOf(""));
 				tv.setTextColor(colorIcon);
-				tv.setOnClickListener(new OnClickListener() {
+				if ((dir2 != null)&&(!dir2.isRootDir())) {
+					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+					final FileInfo dir3 = dir2;
+					tv.setText(String.valueOf(dir2.filename));
+					tv.setOnClickListener(new OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						((CoolReader)activity).showDirectory(dir3);
+						@Override
+						public void onClick(View v) {
+							((CoolReader)activity).showDirectory(dir3);
+						}
+					});
+				} else
+					if (i==1) {
+						if (this.dir != null)
+							if (this.dir.isOPDSDir()) {
+								tv.setPaintFlags(0);
+								tv.setText(activity.getString(R.string.downloaded_from_catalog) +
+										" " + this.dir.book_downloaded);
+								tv.setOnClickListener(new OnClickListener() {
+
+									@Override
+									public void onClick(View v) {
+									}
+								});
+							}
 					}
-				});
 			}
-		}
 		((ImageButton)titleView.findViewById(R.id.btn_qp_next1)).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -114,6 +172,13 @@ public class BrowserViewLayout extends ViewGroup {
 			}
 		});
 		activity.tintViewIcons(((ImageButton)titleView.findViewById(R.id.btn_qp_prev1)),true);
+		((ImageButton)titleView.findViewById(R.id.btn_filter)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				switchFilter(!filterIsShown);
+			}
+		});
+		activity.tintViewIcons(((ImageButton)titleView.findViewById(R.id.btn_filter)),true);
 	}
 
 	public void onThemeChanged(InterfaceTheme theme) {

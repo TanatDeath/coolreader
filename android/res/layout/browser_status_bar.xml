@@ -60,6 +60,7 @@
                 />
 
             <LinearLayout
+                android:id="@+id/ll_path"
                 android:orientation="horizontal"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|left"
@@ -196,6 +197,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
+            <ImageButton android:id="@+id/btn_filter"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="?attr/attr_icons8_search_history_small"
+                    android:tag="tint"
+                    android:background="@null"
+                    android:layout_marginTop="0dip"
+                    android:layout_marginBottom="0dip"
+                    android:layout_marginLeft="2dip"
+                    android:layout_marginRight="0dip"
+                    />
             <ImageButton android:id="@+id/btn_qp_next1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

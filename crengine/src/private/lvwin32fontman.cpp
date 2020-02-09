@@ -150,6 +150,11 @@ void LVWin32FontManager::getFontFileNameList(lString16Collection &list)
             _cache.getFontFileNameList(list);
 }
 
+void LVWin32FontManager::getFontFaceAndFileNameList(lString16Collection &list)
+{
+    FONT_MAN_GUARD
+            _cache.getFontFaceAndFileNameList(list);
+}
 
 // definition
 int CALLBACK LVWin32FontEnumFontFamExProc(

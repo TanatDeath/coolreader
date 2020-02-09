@@ -43,7 +43,10 @@ public interface Settings {
     public static final String PROP_PAGE_MARGIN_RIGHT       ="crengine.page.margin.right";
     public static final String PROP_ROUNDED_CORNERS_MARGIN  ="crengine.rounded.corners.margin";
 	public static final String PROP_ROUNDED_CORNERS_MARGIN_POS = "crengine.rounded.corners.margin.pos";
+	public static final String PROP_ROUNDED_CORNERS_MARGIN_MOD = "crengine.rounded.corners.margin.mod";
+	public static final String PROP_ROUNDED_CORNERS_MARGIN_FSCR = "crengine.rounded.corners.margin.fscr";
 	public static final String PROP_EXT_FULLSCREEN_MARGIN   ="crengine.ext.fullscreen.margin";
+	public static final String PROP_EXT_FULLSCREEN_MOD   ="crengine.ext.fullscreen.mod";
 	public static final String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
     public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
     public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
@@ -72,7 +75,8 @@ public interface Settings {
     public static final String PROP_SHOW_POS_PERCENT        ="window.status.pos.percent";
     public static final String PROP_SHOW_PAGE_COUNT         ="window.status.pos.page.count";
     public static final String PROP_SHOW_PAGE_NUMBER        ="window.status.pos.page.number";
-    public static final String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
+	public static final String PROP_SHOW_PAGES_TO_CHAPTER   ="window.status.pos.pages.to.chapter";
+	public static final String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
     public static final String PROP_FONT_LIGATURES_ENABLED  ="font.ligatures.enabled";
     public static final String PROP_FLOATING_PUNCTUATION    ="crengine.style.floating.punctuation.enabled";
     public static final String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";
@@ -213,8 +217,9 @@ public interface Settings {
     public static final int VIEWER_STATUS_TOP = 1;
     public static final int VIEWER_STATUS_BOTTOM = 2;
     public static final int VIEWER_STATUS_PAGE = 3;
-    
-    public static final int VIEWER_TOOLBAR_NONE = 0;
+	public static final int VIEWER_STATUS_PAGE_2LINES = 4;
+
+	public static final int VIEWER_TOOLBAR_NONE = 0;
     public static final int VIEWER_TOOLBAR_TOP = 1;
     public static final int VIEWER_TOOLBAR_BOTTOM = 2;
     public static final int VIEWER_TOOLBAR_LEFT = 3;

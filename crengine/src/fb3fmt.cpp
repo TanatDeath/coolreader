@@ -15,6 +15,7 @@ private:
     OpcPackage *m_package;
     OpcPartRef m_bookPart;
     ldomDocument *m_descDoc;
+    ldomDocument *m_descDocProps;
 public:
     fb3ImportContext(OpcPackage *package);
     virtual ~fb3ImportContext();
@@ -28,6 +29,7 @@ public:
         return m_bookPart->open();
     }
     ldomDocument *getDescription();
+    ldomDocument *getDescriptionProps();
 public:
     lString16 m_coverImage;
 };
@@ -42,6 +44,24 @@ bool DetectFb3Format( LVStreamRef stream )
 
     return package.partExist(package.getContentPartName(fb3_BodyContentType));
 }
+
+ldomDocument * Fb3GetDescDoc(LVStreamRef stream)
+{
+    if ( stream.isNull() )
+        return NULL;
+
+    LVContainerRef arc = LVOpenArchieve( stream );
+    if ( !arc.isNull() ) {
+        OpcPackage package(arc);
+        fb3ImportContext context(&package);
+        ldomDocument * descDoc = context.getDescriptionProps();
+        ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-relations/subject[1]"));
+        return descDoc;
+    }
+
+    return NULL;
+}
+
 
 class fb3DomWriter : public LVXMLParserCallback
 {
@@ -94,6 +114,34 @@ bool ImportFb3Document( LVStreamRef stream, ldomDocument * doc, LVDocViewCallbac
     if ( descDoc ) {
         lString16 language = descDoc->textFromXPath( cs16("fb3-description/lang") );
         doc->getProps()->setString(DOC_PROP_LANGUAGE, language);
+        for ( int i=1; i<30; i++ ) {
+            ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-relations/subject[") << fmt::decimal(i) << "]");
+            if ( !item ) break;
+            lString16 name = item->getAttributeValue("link");
+            if (name == "author") {
+                lString16 author = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+                doc->getProps()->setString("AUTHOR", author);
+            }
+        }
+//        ldomNode * node = descDoc->nodeFromXPath( cs16("fb3-relations/subject") );
+//        for (unsigned i=0; i<node->getChildCount(); i++) {
+//            ldomNode * foundItem = node->getChildNode(i);
+//        }
+//        if (node) {
+//            for (int i=0; i<(int)node->getAttrCount(); i++)
+//            {
+//                const lxmlAttribute * attr = node->getAttribute(i);
+//                if (attr)
+//                {
+//                    lString16 attrName = node->getDocument()->getAttrName(attr->id);
+//                    CRLog::error(LCSTR(attrName));
+//                    lString16 nsName = node->getDocument()->getNsName(attr->nsid);
+//                    CRLog::error(LCSTR(nsName));
+//                    lString16 attrValue = node->getDocument()->getAttrValue(attr->index);
+//                    CRLog::error(LCSTR(attrValue));
+//                }
+//            }
+//        }
     } else {
         CRLog::error("Couldn't parse description doc");
     }
@@ -133,7 +181,7 @@ bool ImportFb3Document( LVStreamRef stream, ldomDocument * doc, LVDocViewCallbac
     return ret;
 }
 
-fb3ImportContext::fb3ImportContext(OpcPackage *package) : m_package(package), m_descDoc(NULL)
+fb3ImportContext::fb3ImportContext(OpcPackage *package) : m_package(package), m_descDoc(NULL),  m_descDocProps(NULL)
 {
 }
 
@@ -153,6 +201,18 @@ ldomDocument *fb3ImportContext::getDescription()
         }
     }
     return m_descDoc;
+}
+
+ldomDocument *fb3ImportContext::getDescriptionProps()
+{
+    if( !m_descDocProps ) {
+        LVStreamRef descStream = m_package->openContentPart(fb3_DescriptionContentType);
+
+        if ( !descStream.isNull() ) {
+            m_descDocProps = LVParseXMLStream( descStream );
+        }
+    }
+    return m_descDocProps;
 }
 
 void fb3DomWriter::writeDescription()

@@ -143,6 +143,7 @@ public class TOCDlg extends BaseDialog {
 				marginTextView.setText(buf.toString());
 				titleTextView.setText(item.getName());
 				pageTextView.setText(String.valueOf(item.getPage()+1));
+				activity.tintViewIcons(view);
 				return view;
 			}
 

@@ -266,11 +266,11 @@ public class CRDBService extends Service {
 		});
 	}
 	
-	public void updateOPDSCatalogLastUsage(final String url) {
+	public void updateOPDSCatalog(final String url, final String field, final String value) {
 		execTask(new Task("saveOPDSCatalog") {
 			@Override
 			public void work() {
-				mainDB.updateOPDSCatalogLastUsage(url);
+				mainDB.updateOPDSCatalog(url, field, value);
 			}
 		});
 	}	
@@ -907,8 +907,8 @@ public class CRDBService extends Service {
 					onion_def_proxy);
     	}
 
-    	public void updateOPDSCatalogLastUsage(final String url) {
-    		getService().updateOPDSCatalogLastUsage(url);
+    	public void updateOPDSCatalog(final String url, final String field, final String value) {
+    		getService().updateOPDSCatalog(url, field, value);
     	}
 
     	public void removeOPDSCatalog(final Long id) {

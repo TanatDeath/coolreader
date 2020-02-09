@@ -108,6 +108,7 @@
     <attr name="attr_icons8_bookmark_simple_color" format="reference" />
     <attr name="attr_icons8_me_smb" format="reference" />
     <attr name="attr_icons8_search_history" format="reference" />
+    <attr name="attr_icons8_search_history_small" format="reference" />
     <attr name="attr_icons8_scissors" format="reference" />
     <attr name="attr_icons8_back_key" format="reference" />
     <attr name="attr_icons8_back_key_double" format="reference" />
