@@ -1,2 +1,10 @@
 /build
 .externalNativeBuild
+/.externalNativeBuild
+.cxx
+/.cxx
+/debug
+.idea
+/.idea
+/release
+/release_minsize
