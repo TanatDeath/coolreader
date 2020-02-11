@@ -263,7 +263,9 @@ my %ic_actions_list=(
         'icons8_settings_to_gd.svg' => 'icons8_settings_to_gd.png',
         'icons8_sun.svg' => 'icons8_sun.png',
         'icons8_sun_1.svg' => 'icons8_sun_1.png',
-        'icons8_folder_az.svg' => 'icons8_folder_az.png'
+        'icons8_folder_az.svg' => 'icons8_folder_az.png',
+        'icons8_cloud_storage.svg' => 'icons8_cloud_storage.png',
+        'icons8_send_by_email.svg' => 'icons8_send_by_email.png'
 );
 
 my %ic_menu_list=(

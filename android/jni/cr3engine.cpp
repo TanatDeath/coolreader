@@ -274,16 +274,28 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 	}
 
 	ldomNode * item = descDoc->nodeFromXPath(lString16("document-info"));
-	lString16 created = item->getAttributeValue("created");
-	lString16 docprogram = item->getAttributeValue("program-used");
-	lString16 docauthor = item->getAttributeValue("editor");
-	lString16 docsrcurl = item->getAttributeValue("src-url");
-	lString16 docsrcocr = item->getAttributeValue("ocr");
+    lString16 created = cs16("");
+    lString16 docprogram = cs16("");
+    lString16 docauthor = cs16("");
+    lString16 docsrcurl = cs16("");
+    lString16 docsrcocr = cs16("");
+	if (item) {
+        created = item->getAttributeValue("created");
+        docprogram = item->getAttributeValue("program-used");
+        docauthor = item->getAttributeValue("editor");
+        docsrcurl = item->getAttributeValue("src-url");
+        docsrcocr = item->getAttributeValue("ocr");
+    }
 	lString16 series = descDoc->textFromXPath(lString16("fb3-description/sequence/title/main"));
 	ldomNode * item2 = descDoc->nodeFromXPath(lString16("paper-publish-info"));
-	lString16 publisher = item2->getAttributeValue("publisher");
-	lString16 city = item2->getAttributeValue("city");
-	lString16 year = item2->getAttributeValue("year");
+    lString16 publisher = cs16("");
+    lString16 city = cs16("");
+    lString16 year = cs16("");
+    if ( item2 ) {
+        publisher = item2->getAttributeValue("publisher");
+        city = item2->getAttributeValue("city");
+        year = item2->getAttributeValue("year");
+    }
 	lString16 publisbn = descDoc->textFromXPath(lString16("paper-publish-info/isbn"));
 	lString16 publsequence = descDoc->textFromXPath(lString16("paper-publish-info/sequence"));
 

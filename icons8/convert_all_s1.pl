@@ -11,15 +11,19 @@ my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
 my %ic_smaller_list=(
-        'icons8_star_filled.svg' => 'icons8_fav_star_filled.png'
+        'icons8_search_history.svg' => 'icons8_search_history_small.png',
+        'icons8_toc_item_collapsed.svg' => 'icons8_toc_item_collapsed.png',
+        'icons8_toc_item_expanded.svg' => 'icons8_toc_item_expanded.png',
+        'icons8_toc_item_normal.svg' => 'icons8_toc_item_normal.png'
 );
 
 my %ic_actions_list=(
-        'icons8_level_up_filled.svg' => 'icons8_level_up_filled.png'
+        'icons8_rounded_corners_margin2.svg' => 'icons8_rounded_corners_margin2.png',
+        'icons8_ext_fullscreen.svg' => 'icons8_ext_fullscreen.png'
 );
 
 my %ic_menu_list=(
-        'icons8_star.svg' => 'icons8_star.png'
+        'icons8_css.svg' => 'icons8_css.png'
 
 );
 
