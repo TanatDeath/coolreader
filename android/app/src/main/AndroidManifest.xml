@@ -493,6 +493,7 @@
 
                 <data android:host="*" android:scheme="file" />
                 <data android:host="*" android:scheme="content" />
+                <data android:host="*" android:scheme="http" />
 
                 <data android:pathPattern="/.*\\.txt" />
                 <data android:pathPattern="/.*\\..*\\.txt" />
@@ -516,6 +517,13 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="*" android:scheme="http"/>
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity-alias>
