@@ -279,31 +279,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						//(item.format.name().equals("DOCX"))|| //we have native docx support now
 						(item.format.name().equals("ODT"))
 				   ){
-					final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-					File f = new File(downloadDir.pathname+"/converted/"+item.filename+".html");
-					if (f.exists()) {
-						FileInfo fi = new FileInfo(f);
-						mActivity.showToast(mActivity.getString(R.string.docx_open_converted));
-						mActivity.loadDocument(fi);
-					} else {
-						final FileInfo item1 = item;
-						mActivity.askConfirmation(R.string.docx_convert, new Runnable() {
-							@Override
-							public void run() {
-								try {
-									log.i("Convert odt file");
-									ConvertOdtFormat.convertOdtFile(item1.pathname, downloadDir.pathname + "/converted/");
-									File f = new File(downloadDir.pathname+"/converted/"+item1.filename+".html");
-									if (f.exists()) {
-										FileInfo fi = new FileInfo(f);
-										mActivity.loadDocument(fi);
-									}
-								} catch (Exception e) {
-									mActivity.showToast("exception while converting odt file");
-								}
-							}
-						});
-					}
+					DocConvertDialog dlgConv = new DocConvertDialog(mActivity, item.pathname);
+					dlgConv.show();
 				} else mActivity.loadDocument(item);
 			}
 			return true;
@@ -593,7 +570,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (mActivity.picReceived.bmpReceived!=null) {
 						BookInfo bi = new BookInfo(selectedItem);
 						PictureCameDialog dlg = new PictureCameDialog(mActivity,
-								bi, "");
+								bi, "", "");
 						dlg.show();
 					}
 				} else {
@@ -606,7 +583,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
 					BookInfo bi = new BookInfo(selectedItem);
 					PictureCameDialog dlg = new PictureCameDialog(mActivity,
-								bi, "");
+								bi, "", "");
 					dlg.deleteBookPicture(selectedItem);
 			}
 			return true;

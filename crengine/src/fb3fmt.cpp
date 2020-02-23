@@ -203,6 +203,24 @@ ldomDocument *fb3ImportContext::getDescription()
     return m_descDoc;
 }
 
+lString16 Fb3GetDescriptionFilePath(LVContainerRef arc)
+{
+    if ( arc.isNull() )
+        return lString16(); // not a ZIP archive
+
+    OpcPackage package(arc);
+    return package.getContentPartName(fb3_DescriptionContentType);
+}
+
+LVStreamRef GetFb3Coverpage(LVContainerRef arc)
+{
+    if ( arc.isNull() )
+       return LVStreamRef(); // not a ZIP archive
+
+    OpcPackage package(arc);
+    return package.open(package.getRelatedPartName(fb3_CoverRelationship));
+}
+
 ldomDocument *fb3ImportContext::getDescriptionProps()
 {
     if( !m_descDocProps ) {

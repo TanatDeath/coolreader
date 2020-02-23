@@ -1,6 +1,8 @@
 package org.coolreader.crengine;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -682,5 +684,30 @@ public class Utils {
 		}
 		os.close();
 		is.close();
+	}
+
+	public static void saveStreamToFile(InputStream is, String toPath) throws IOException
+	{
+		byte[] bytesArray = new byte[1000];
+		int bytesRead = 1000;
+		OutputStream os = new FileOutputStream(toPath);
+		while (bytesRead != -1) {
+			bytesRead = is.read(bytesArray, 0, 1000);
+			if (bytesRead != -1) os.write(bytesArray,0,bytesRead);
+		}
+		os.close();
+		is.close();
+	}
+
+	public static ByteArrayOutputStream inputStreamToBaos(InputStream is) throws IOException
+	{
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int len;
+		while ((len = is.read(buffer)) > -1 ) {
+			baos.write(buffer, 0, len);
+		}
+		baos.flush();
+		return baos;
 	}
 }

@@ -401,7 +401,7 @@ public class BookInfoDialog extends BaseDialog {
 				if (((CoolReader)activity).picReceived!=null) {
 					if (((CoolReader)activity).picReceived.bmpReceived!=null) {
 						PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
-								mBookInfo, "");
+								mBookInfo, "", "");
 						dlg.show();
 					}
 				} else {

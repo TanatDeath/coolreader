@@ -623,6 +623,11 @@ jbyteArray scanBookCoverInternal
 					// extract coverpage from epub
 					res = GetEpubCoverpage(arc);
 				}
+				if (DetectFb3Format(stream)) {
+					// FB3
+					// extract coverpage from FB3
+					res = GetFb3Coverpage(arc);
+				}
 			} else {
 				res = GetFB2Coverpage(stream);
 				if (res.isNull()) {
@@ -1103,6 +1108,7 @@ static JNINativeMethod sDocViewMethods[] = {
   {"destroyInternal", "()V", (void*)Java_org_coolreader_crengine_DocView_destroyInternal},
   {"getPageImageInternal", "(Landroid/graphics/Bitmap;I)V", (void*)Java_org_coolreader_crengine_DocView_getPageImageInternal},
   {"loadDocumentInternal", "(Ljava/lang/String;)Z", (void*)Java_org_coolreader_crengine_DocView_loadDocumentInternal},
+  {"loadDocumentFromMemoryInternal", "([BLjava/lang/String;)Z", (void*)Java_org_coolreader_crengine_DocView_loadDocumentFromMemoryInternal},
   {"getSettingsInternal", "()Ljava/util/Properties;", (void*)Java_org_coolreader_crengine_DocView_getSettingsInternal},
   {"applySettingsInternal", "(Ljava/util/Properties;)Z", (void*)Java_org_coolreader_crengine_DocView_applySettingsInternal},
   {"setStylesheetInternal", "(Ljava/lang/String;)V", (void*)Java_org_coolreader_crengine_DocView_setStylesheetInternal},

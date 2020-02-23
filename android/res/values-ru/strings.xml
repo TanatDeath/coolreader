@@ -204,8 +204,11 @@
     <string name="options_app_dictionary2_add_info">Два словаря позволяют быстро переключаться между ними во время чтения - когда нужно перевести слово или фразу в другом словаре</string>
     <string name="options_app_dictionary_not_installed">(не установлен)</string>
     <string name="action_zoom_in">Увеличить шрифт</string>
+    <string name="options_text_shaping">Формировщик текста</string>
+    <string name="options_text_shaping_simple">Простой (быстрый, без лигатур, кернинг может не работать)</string>
+    <string name="options_text_shaping_light">Легкий (без лигатур)</string>
+    <string name="options_text_shaping_full">Полный (с лигатурами)</string>
     <string name="options_font_kerning">Кернинг шрифта</string>
-    <string name="options_font_ligatures">Использовать лигатуры (очень медленно!)</string>
     <string name="action_zoom_out">Уменьшить шрифт</string>
     <string name="options_style_floating_punctuation">Висячая пунктуация</string>
     <string name="options_style_document_embedded_styles">Внутренние стили документа</string>
@@ -238,7 +241,7 @@
     <string name="mi_night_mode_disable">Дневной режим</string>
     <string name="mi_night_mode_enable">Ночной режим</string>
     <string name="book_info_file_format">Формат</string>
-    <string name="book_info_opds_link">OPDS ссылка</string>
+    <string name="book_info_opds_link">Внешняя ссылка</string>
     <string name="book_info_section_book_properties">Свойства книги</string>
     <string name="book_info_section_book_publisher">Информация об издании</string>
     <string name="book_info_book_publname">Опубликованное название</string>
@@ -1001,5 +1004,33 @@
     <string name="ext_fullscreen_margin_2">Включен, отступ линии прочитанного: </string>
     <string name="ext_fullscreen_margin_3">Включен, 2 текстовые строки в статусе</string>
     <string name="downloaded_from_catalog">Скачано книг:</string>
+    <string name="external_doc_option1">Действие - открыть из потока</string>
+    <string name="external_doc_option2">Действие - сохранить на устройство</string>
+    <string name="external_doc_option3">Действие - открыть существующий файл</string>
+    <string name="conv_doc_option1">Действие - преобразовать документ</string>
+    <string name="conv_doc_option2">Действие - открыть ранее преобразованный документ</string>
+    <string name="external_doc_came">Входящий внешний документ</string>
+    <string name="external_path">Внешний путь</string>
+    <string name="doc_type">Тип документа</string>
+    <string name="doc_open_from_stream">Открыть из потока</string>
+    <string name="doc_open_from_stream_addinfo">Документ не будет сохранен на утройство, также он не будет доступен в списке последних книг</string>
+    <string name="download_path">Путь для сохранения</string>
+    <string name="doc_save_to_device">Сохранить на устройство и открыть</string>
+    <string name="already_exists">Файл существует</string>
+    <string name="open_existing">Открыть существующий файл</string>
+    <string name="converted_path">Путь преобразованного документа</string>
+    <string name="convert_odf_and_open">Преобразовать ODF в HTML, открыть</string>
+    <string name="convert_odf_and_open_add_info">Документ ODF будет (пере)преобразован в HTML, после чего он будет открыт</string>
+    <string name="conver_saved_odf">Преобразовать в HTML, открыть</string>
+    <string name="conver_saved_odf_add_info">ODF файл с таким именем уже существует, преобразовать его в HTML, а затем открыть</string>
+    <string name="odf_open_previously_converted">Открыть ранее преобразованный документ</string>
+    <string name="odf_open_previously_converted_add_info">Файл с таким именем уже существует в папке преобразованных файлов, открыть его</string>
+    <string name="convert_to_text_and_open">Преобразовать в текст и открыть</string>
+    <string name="convert_to_text_and_open_add_info">Документ будет скачан, преобразован в текст, сохранен, затем открыт</string>
+    <string name="open_as_html">Открыть как HTML</string>
+    <string name="open_as_text">Открыть как текст</string>
+    <string name="error_open_as_text">Функция \'Открыть как текст\' недоступна</string>
+    <string name="open_as_html_add_info">Если выбрано \'Открыть как текст\' - документ будет преобразован в обычный текст</string>
+    <string name="doc_convert_needed">Необходимо преобразование документа</string>
 </resources>
 

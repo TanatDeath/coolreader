@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class BookInfoEditDialog extends BaseDialog {
 
@@ -82,7 +83,7 @@ public class BookInfoEditDialog extends BaseDialog {
         setCanceledOnTouchOutside(true);
 
         super.onCreate();
-		L.v("OptionsDialog is created");
+		L.v("BookInfoEditDialog is created");
 	}
 	
 	class AuthorItem {
@@ -247,7 +248,8 @@ public class BookInfoEditDialog extends BaseDialog {
 		public void setColorFilter(ColorFilter cf) {
 		}
 	}
-	
+
+	TextView tvFileName;
     EditText edTitle;
     EditText edSeriesName;
     EditText edSeriesNumber;
@@ -330,7 +332,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		        if (mActivity.picReceived!=null) {
 					if (mActivity.picReceived.bmpReceived!=null) {
 						PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
-								mBookInfo, "");
+								mBookInfo, "", "");
 						dlg.show();
 					}
                 } else {
@@ -390,6 +392,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
 		a.recycle();
+		tvFileName = (TextView)view.findViewById(R.id.file_name);
 		edTitle = (EditText)view.findViewById(R.id.book_title);
         edSeriesName = (EditText)view.findViewById(R.id.book_series_name);
         edSeriesNumber = (EditText)view.findViewById(R.id.book_series_number);
@@ -505,7 +508,10 @@ public class BookInfoEditDialog extends BaseDialog {
         	progress.setMaxHeight(0);
         }
         progress.setImageDrawable(new ProgressDrawable(w, 8, percent));
-        
+
+        String sPath = StrUtils.getNonEmptyStr(file.pathname, true)
+				.replace("/storage/emulated", "/s/e");
+        tvFileName.setText(sPath);
         edTitle.setText(file.title);
         //edAuthor.setText(file.authors);
         edSeriesName.setText(file.series);

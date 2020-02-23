@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -46,9 +47,11 @@ import org.coolreader.crengine.CRToolBar.OnActionHandler;
 import org.coolreader.crengine.ConvertOdtFormat;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
+import org.coolreader.crengine.DocConvertDialog;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ErrorDialog;
+import org.coolreader.crengine.ExternalDocCameDialog;
 import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.GenreSAXElem;
@@ -98,6 +101,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -503,17 +507,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mReaderFrame != null)
 			mReaderFrame.updateFullscreen(fullscreen);
 	}
-	
-	private String extractFileName( Uri uri )
-	{
-		if ( uri!=null ) {
-			if ( uri.equals(Uri.parse("file:///")) )
-				return null;
-			else
-				return uri.getPath();
-		}
-		return null;
-	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -525,569 +518,428 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		processIntent(intent);
 	}
 
-	private boolean processIntent(final Intent intent) {
+	public void loadDocumentExt(String fileToOpen, String fileLink) {
+		final String finalFileToOpen = fileToOpen;
+		loadDocument(fileToOpen, fileLink, new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						// if document not loaded show error & then root window
+						ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error), CoolReader.this.getString(R.string.cant_open_file, finalFileToOpen));
+						errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface dialog) {
+								showRootWindow();
+							}
+						});
+						errDialog.show();
+					}
+				}, 500);
+			}
+		});
+	}
+
+	public void loadDocumentExt(final FileInfo fi) {
+		loadDocument(fi, new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						// if document not loaded show error & then root window
+						ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error),
+								CoolReader.this.getString(R.string.cant_open_file, fi.pathname));
+						errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface dialog) {
+								showRootWindow();
+							}
+						});
+						errDialog.show();
+					}
+				}, 500);
+			}
+		});
+	}
+
+	public void loadDocumentFromUriExt(Uri uri, String uriString) {
+		loadDocumentFromUri(uri, new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						// if document not loaded show error & then root window
+						ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error),
+								CoolReader.this.getString(R.string.cant_open_file, uriString));
+						errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface dialog) {
+								showRootWindow();
+							}
+						});
+						errDialog.show();
+					}
+				}, 500);
+			}
+		});
+	}
+
+	public void loadDocumentFromStreamExt(final InputStream is, final String path) {
+		loadDocumentFromStream(is, path, new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						// if document not loaded show error & then root window
+						ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error),
+								CoolReader.this.getString(R.string.cant_open_file, path));
+						errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface dialog) {
+								showRootWindow();
+							}
+						});
+						errDialog.show();
+					}
+				}, 500);
+			}
+		});
+	}
+
+	private boolean checkIntentIsYandex(String sUri) {
+		if (sUri.contains(YNDConfig.YND_REDIRECT_URL)) {
+			String token = "";
+			if (sUri.contains("#access_token=")) {
+				token = sUri.substring(sUri.indexOf("#access_token="));
+				if (token.contains("&")) token=token.split("\\&")[0];
+				token=token.replace("#access_token=","");
+			}
+			if (!StrUtils.isEmptyStr(token)) {
+				YNDConfig.didLogin = true;
+				CoolReader.this.showToast(R.string.ynd_auth_finished_ok);
+				if (yndInputTokenDialog!=null)
+					if (yndInputTokenDialog.isShowing()) {
+						yndInputTokenDialog.tokenEdit.setText(token);
+						yndInputTokenDialog.saveYNDToken();
+						yndInputTokenDialog.onPositiveButtonClick();
+					}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkIntentIsDropbox(Uri uri, String sUri) {
+		if (sUri.contains(DBXConfig.DBX_REDIRECT_URL)) {
+			final String code = uri.getQueryParameter("code");
+			//showToast("code = "+code);
+			if (!StrUtils.isEmptyStr(code)) {
+				new DBXFinishAuthorization(this, uri, new DBXFinishAuthorization.Callback() {
+					@Override
+					public void onComplete(boolean result, String accessToken) {
+						DBXConfig.didLogin = result;
+						CoolReader.this.showToast(R.string.dbx_auth_finished_ok);
+						if (dbxInputTokenDialog!=null)
+							if (dbxInputTokenDialog.isShowing()) {
+								dbxInputTokenDialog.saveDBXToken(accessToken);
+								dbxInputTokenDialog.onPositiveButtonClick();
+							}
+					}
+
+					@Override
+					public void onError(Exception e) {
+						DBXConfig.didLogin = false;
+						CoolReader.this.showToast(getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+					}
+				}).execute(code);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private void processIntentMultipleImages(ArrayList<Uri> imageUris) {
+		showToast("Not implemented yet");
+	}
+
+	private void processIntentContent(String stype, Object obj) {
+		if (stype.startsWith("image/")) {
+			PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, obj, stype, "");
+			dlg.show();
+		} else {
+			ExternalDocCameDialog dlg = new ExternalDocCameDialog(CoolReader.this, stype, obj);
+			dlg.show();
+		}
+	}
+
+//	private boolean checkIntentIsBitmap(String fFName) {
+//		BitmapFactory.Options options = new BitmapFactory.Options();
+//		options.inJustDecodeBounds = true;
+//		Bitmap bitmap = BitmapFactory.decodeFile(fFName, options);
+//		if (options.outWidth != -1 && options.outHeight != -1) {
+//			File f = new File(fFName);
+//			File f2 = new File(fFName.replace(".html", ""));
+//			f.renameTo(f2);
+//			BackgroundThread.instance().postBackground(new Runnable() {
+//				@Override
+//				public void run() {
+//					BackgroundThread.instance().postGUI(new Runnable() {
+//						@Override
+//						public void run() {
+//							PictureCameDialog dlg = new PictureCameDialog(CoolReader.this,
+//									fFName.replace(".html", ""), "", "");
+//							dlg.show();
+//						}
+//					}, 500);
+//				}
+//			});
+//			return true;
+//		}
+//		return false;
+//	}
+
+	private boolean checkIsShortcuts(String fileToOpen) {
+		if (fileToOpen.equals(FileInfo.RECENT_DIR_TAG)) {
+			this.showRecentBooks();
+			return true;
+		}
+		if (fileToOpen.equals(FileInfo.STATE_READING_TAG)) {
+			final FileInfo dir = new FileInfo();
+			dir.isDirectory = true;
+			dir.pathname = fileToOpen;
+			dir.filename = this.getString(R.string.folder_name_books_by_state_reading);
+			dir.isListed = true;
+			dir.isScanned = true;
+			waitForCRDBService(new Runnable() {
+				@Override
+				public void run() {
+					showDirectory(dir);
+				}
+			});
+			return true;
+		}
+		if (fileToOpen.equals(FileInfo.STATE_TO_READ_TAG)) {
+			final FileInfo dir = new FileInfo();
+			dir.isDirectory = true;
+			dir.pathname = fileToOpen;
+			dir.filename = this.getString(R.string.folder_name_books_by_state_to_read);
+			dir.isListed = true;
+			dir.isScanned = true;
+			waitForCRDBService(new Runnable() {
+				@Override
+				public void run() {
+					showDirectory(dir);
+				}
+			});
+			return true;
+		}
+		if (fileToOpen.equals(FileInfo.STATE_FINISHED_TAG)) {
+			final FileInfo dir = new FileInfo();
+			dir.isDirectory = true;
+			dir.pathname = fileToOpen;
+			dir.filename = this.getString(R.string.folder_name_books_by_state_finished);
+			dir.isListed = true;
+			dir.isScanned = true;
+			waitForCRDBService(new Runnable() {
+				@Override
+				public void run() {
+					showDirectory(dir);
+				}
+			});
+			return true;
+		}
+		if (fileToOpen.equals(FileInfo.SEARCH_SHORTCUT_TAG)) {
+			final FileInfo dir = new FileInfo();
+			dir.isDirectory = true;
+			dir.pathname = fileToOpen;
+			dir.filename = this.getString(R.string.dlg_book_search);
+			dir.isListed = true;
+			dir.isScanned = true;
+			waitForCRDBService(new Runnable() {
+				@Override
+				public void run() {
+					showDirectory(dir);
+				}
+			});
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkOpenDocumentFormat(String fileToOpen) {
+		if (
+				(fileToOpen.toUpperCase().endsWith(".ODT"))||
+				(fileToOpen.toUpperCase().endsWith(".ODS"))||
+				(fileToOpen.toUpperCase().endsWith(".ODP"))
+		) {
+			DocConvertDialog dlgConv = new DocConvertDialog(this, fileToOpen);
+			dlgConv.show();
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkPictureExtension(String fileToOpen) {
+		if (
+				(fileToOpen.toLowerCase().endsWith(".jpg"))||
+				(fileToOpen.toLowerCase().endsWith(".jpeg"))||
+				(fileToOpen.toLowerCase().endsWith(".png"))
+		) {
+			pictureCame(fileToOpen);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean processIntent(final Intent intent) {
 		log.d("intent=" + intent);
 		if (intent == null)
 			return false;
 		String fileToOpen = "";
-		String scheme = null;
-		String host = null;
+		Uri uri = null;
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
-		if (Intent.ACTION_VIEW.equals(intentAction)) {
-			Uri uri = intent.getData();
-			String sUri = "";
-			if (uri != null) {
-				scheme = uri.getScheme();
-				host = uri.getHost();
-				sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
-			}
-			if (sUri.contains(YNDConfig.YND_REDIRECT_URL)) {
-				String token = "";
-				if (sUri.contains("#access_token=")) {
-					token = sUri.substring(sUri.indexOf("#access_token="));
-					if (token.contains("&")) token=token.split("\\&")[0];
-					token=token.replace("#access_token=","");
-				}
-				if (!StrUtils.isEmptyStr(token)) {
-					YNDConfig.didLogin = true;
-					CoolReader.this.showToast(R.string.ynd_auth_finished_ok);
-					if (yndInputTokenDialog!=null)
-						if (yndInputTokenDialog.isShowing()) {
-							yndInputTokenDialog.tokenEdit.setText(token);
-							yndInputTokenDialog.saveYNDToken();
-							yndInputTokenDialog.onPositiveButtonClick();
-						}
-				}
-				return true;
-			} else
-				if (sUri.contains(DBXConfig.DBX_REDIRECT_URL)) {
-					final String code = uri.getQueryParameter("code");
-					//showToast("code = "+code);
-					if (!StrUtils.isEmptyStr(code)) {
-						new DBXFinishAuthorization(this, uri, new DBXFinishAuthorization.Callback() {
-							@Override
-							public void onComplete(boolean result, String accessToken) {
-								DBXConfig.didLogin = result;
-								CoolReader.this.showToast(R.string.dbx_auth_finished_ok);
-								if (dbxInputTokenDialog!=null)
-									if (dbxInputTokenDialog.isShowing()) {
-										dbxInputTokenDialog.saveDBXToken(accessToken);
-										dbxInputTokenDialog.onPositiveButtonClick();
-									}
-							}
-
-							@Override
-							public void onError(Exception e) {
-								DBXConfig.didLogin = false;
-								CoolReader.this.showToast(getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
-							}
-						}).execute(code);
-					}
-					return true;
-				}
-		}
 		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
-			Uri uri = intent.getData();
+			uri = intent.getData();
 			String stype = StrUtils.getNonEmptyStr(intent.getType(),false);
+			if (uri != null) uri.getLastPathSegment();
 			intent.setData(null);
-			if (uri != null) {
-				String sLastSeg = uri.getLastPathSegment();
-				fileToOpen = StrUtils.getNonEmptyStr(uri.getPath(),false);
-				if (uri.getEncodedPath().contains("%00"))
-					fileToOpen = StrUtils.getNonEmptyStr(uri.getEncodedPath(),false);
-				else
-					fileToOpen = StrUtils.getNonEmptyStr(uri.getPath(),false);
-				File file = new File(fileToOpen);
-				// try to fix for Onyx Darwin 5 - not needed
-//				if ((!file.exists())&&(fileToOpen.contains("/mnt/sdcard"))) {
-//					File tfile = new File(fileToOpen.replace("/mnt/sdcard", "/storage/emulated/0"));
-//					if (tfile.exists()) {
-//						file = tfile;
-//						fileToOpen = fileToOpen.replace("/mnt/sdcard", "/storage/emulated/0");
-//					}
-//					if (fileToOpen.startsWith("file://")) fileToOpen = fileToOpen.substring(7);
-//				}
-				if ((uri.toString().startsWith("content"))&&(!file.exists())) {
-					String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
-					String fname = sLastSeg;
-					//File nfile = new File(downlDir + "/" +fname);
-					boolean bExists = true;
-					String sExt = DocumentFormat.extByMimeType(stype);
-					String fNameBase = fname;
-					String sResName = downlDir + "/" +fname;
-					int i = 0;
-					while (bExists) {
-						fname = i == 0 ? fname + "." + sExt :
-								fNameBase + " ("+i+")." + sExt;
-						i++;
-						sResName = downlDir + "/" + fname;
-						File f = new File(sResName);
-						bExists = f.exists();
-					}
-					//if (nfile.exists()) fileToOpen = downlDir + "/" +fname;
-					//else
-					{
-						FileOutputStream fos = null;
-						try {
-							if ((sLastSeg.startsWith("enc")||(StrUtils.isEmptyStr(sLastSeg)))) { //need to create filename
-								i = 0;
-								bExists = true;
-								while (bExists) {
-									sLastSeg = i == 0 ? "CoolReader_Downloaded" : "CoolReader_Downloaded ("+i+")";
-									i++;
-									sResName = downlDir+"/"+sLastSeg + "." + sExt;
-									File f = new File(sResName);
-									bExists = f.exists();
-								}
-							}
-							fileToOpen = sResName;
-							if (!StrUtils.isEmptyStr(sExt)) {
-								if (!fileToOpen.toLowerCase().endsWith(sExt)) {
-									if (!fileToOpen.endsWith(".")) fileToOpen = fileToOpen+".";
-									fileToOpen = fileToOpen+sExt;
-								}
-							}
-							fos = new FileOutputStream(fileToOpen);
-							BufferedOutputStream out = new BufferedOutputStream(fos);
-							InputStream in = getApplicationContext().getContentResolver().openInputStream(uri);
-							byte[] buffer = new byte[8192];
-							int len = 0;
-
-							while ((len = in.read(buffer)) >= 0) {
-								out.write(buffer, 0, len);
-							}
-							out.flush();
-							fos.getFD().sync();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				//fileToOpen = FileUtils.getPath(getApplicationContext(), uri);
-                //fileToOpen = FileUtils.getRealPathFromURI(getContentResolver(), uri);
-				//if (fileToOpen == null) fileToOpen = uri.getPath();
-//				if (fileToOpen.startsWith("file://"))
-//					fileToOpen = fileToOpen.substring("file://".length());
+			String sUri = "";
+			if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
+			if (checkIntentIsYandex(sUri)) return true;
+			if (checkIntentIsDropbox(uri, sUri)) return true;
+			if (uri != null) fileToOpen = filePathFromUri(uri);
+			if ((sUri.startsWith("content")) && (StrUtils.isEmptyStr(fileToOpen))) {
+				processIntentContent(stype, uri);
+				return true;
 			}
 		}
 		if (Intent.ACTION_SEND_MULTIPLE.equals(intentAction)) {
 			if (StrUtils.getNonEmptyStr(intent.getType(),false).startsWith("image/")) {
 				ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-				if (imageUris != null) {
-					showToast("Not implemented yet");
-				}
+				if (imageUris != null) processIntentMultipleImages(imageUris);
 			}
+			return true;
 		}
 		if (Intent.ACTION_SEND.equals(intentAction)) {
 			String sText = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_TEXT),false);
 			String stype = StrUtils.getNonEmptyStr(intent.getType(),false);
 			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if (sText.toLowerCase().startsWith("http")) {
-				String sLastSeg = sText;
-				int len1 = sLastSeg.split("/").length;
-				if (len1 > 1) sLastSeg = sLastSeg.split("/")[len1 - 1];
-				sLastSeg = sLastSeg.replace("&", "_").replace("#", "_")
-						.replace("?", "_").replace("%", "_")
-						.replace(":","/")
-						.replace("/","_").replace("\\","")
-						.replace("\\\\","");
-				final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-				if (!((sLastSeg.endsWith(".html"))||(sLastSeg.endsWith(".htm"))))
-					sLastSeg = sLastSeg + ".html";
-				String fName = downloadDir.pathname+"/Downloaded/"+sLastSeg;
-				final File fPath = new File(downloadDir.pathname+"/Downloaded");
-				if (!fPath.exists()) fPath.mkdir();
-				int i = 0;
-				boolean bExists = true;
-				String fNameBase = fName.replace(".html","").replace(".htm","");
-				while (bExists) {
-					fName = i == 0 ? fName :
-							fNameBase + " ("+i+").html";
-					i++;
-					File f = new File(fName);
-					bExists = f.exists();
-				}
-				final String fFName = fName;
-				// do download file
-				if (!StrUtils.isEmptyStr(sText)) {
-					final HttpUrl.Builder urlBuilder = HttpUrl.parse(sText).newBuilder();
-					final String url = urlBuilder.build().toString();
-					Request request = new Request.Builder()
-							.url(url)
-							.build();
-					OkHttpClient client = new OkHttpClient();
-					Call call = client.newCall(request);
-					call.enqueue(new okhttp3.Callback() {
-						public void onResponse(Call call, Response response)
-								throws IOException {
-							String sUrl = response.request().url().toString();
-							if (sUrl.contains("imgurl=")) {
-								sUrl=sUrl.substring(sUrl.indexOf("imgurl=")+7);
-								if (sUrl.contains("?")) sUrl = sUrl.split("\\?")[0];
-								final Intent intent4 = new Intent(android.content.Intent.ACTION_SEND);
-								intent4.setType("text/plain");
-								intent4.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
-								intent4.putExtra(android.content.Intent.EXTRA_TEXT, sUrl);
-								BackgroundThread.instance().postBackground(new Runnable() {
-									@Override
-									public void run() {
-										BackgroundThread.instance().postGUI(new Runnable() {
-											@Override
-											public void run() {
-												processIntent(intent4);
-											}
-										}, 200);
-									}
-								});
-							} else {
-								//https://www.google.com/imgres?imgurl=https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg?auto%3Dcompress%26cs%3Dtinysrgb%26dpr%3D1%26w%3D500&imgrefurl=https://www.pexels.com/search/galaxy%2520wallpaper/&tbnid=ch8IfDIaCMZBvM&vet=1&docid=nvJrYCoGRBCahM&w=500&h=667&q=wallpaper&source=sh/x/im
-								InputStream is = response.body().byteStream();
-								BufferedInputStream input = new BufferedInputStream(is);
-								OutputStream output = new FileOutputStream(fFName);
-								byte[] data = new byte[1024];
-								long total = 0;
-								int count = 0;
-								while ((count = input.read(data)) != -1) {
-									total += count;
-									output.write(data, 0, count);
-								}
-								output.flush();
-								output.close();
-								input.close();
-
-								boolean bIsImage = false;
-								BitmapFactory.Options options = new BitmapFactory.Options();
-								options.inJustDecodeBounds = true;
-								Bitmap bitmap = BitmapFactory.decodeFile(fFName, options);
-								if (options.outWidth != -1 && options.outHeight != -1) {
-									bIsImage = true;
-								}
-
-								if (!bIsImage) {
-									try {
-//								FileInputStream is2 = new FileInputStream(fFName);
-//								Source source = new Source(is2);
-//								source.fullSequentialParse();
-//								TextExtractor extractor = source.getFirstElement(HTMLElementName.BODY).getTextExtractor();
-//								extractor.setConvertNonBreakingSpaces(true);
-//								extractor.setExcludeNonHTMLElements(false);
-//								extractor.setIncludeAttributes(false);
-//								FileWriter fw = new FileWriter(fFName + ".txt");
-//								extractor.writeTo(fw);
-//								fw.close();
-										Document doc = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
-
-										FileWriter fw = new FileWriter(fFName + ".txt");
-										fw.write(doc.body().text().replace((char)0,' '));
-										fw.close();
-									} catch (Exception e) {
-
-									}
-									BackgroundThread.instance().postBackground(new Runnable() {
-										@Override
-										public void run() {
-											BackgroundThread.instance().postGUI(new Runnable() {
-												@Override
-												public void run() {
-													File ftxt = new File(fFName + ".txt");
-													String sMes = "Downloaded successfully, opening";
-													boolean bTxtExists = ftxt.exists();
-													if (bTxtExists)
-														sMes = sMes + ". Converted to text successfully.";
-													CoolReader.this.showToast(sMes);
-													if (bTxtExists) {
-														askConfirmation(R.string.ask_open_as_text, new Runnable() {
-															@Override
-															public void run() {
-																final FileInfo fi = new FileInfo(fFName + ".txt");
-																CoolReader.this.loadDocument(fi);
-															}
-														}, new Runnable() {
-															@Override
-															public void run() {
-																final FileInfo fi = new FileInfo(fFName);
-																CoolReader.this.loadDocument(fi);
-															}
-														});
-													} else {
-														final FileInfo fi = new FileInfo(fFName);
-														CoolReader.this.loadDocument(fi);
-													}
-												}
-											}, 500);
-										}
-									});
-								} else {
-									File f = new File(fFName);
-									File f2 = new File(fFName.replace(".html", ""));
-									f.renameTo(f2);
-									BackgroundThread.instance().postBackground(new Runnable() {
-										@Override
-										public void run() {
-											BackgroundThread.instance().postGUI(new Runnable() {
-												@Override
-												public void run() {
-													PictureCameDialog dlg = new PictureCameDialog(CoolReader.this,
-															fFName.replace(".html", ""), "");
-													dlg.show();
-												}
-											}, 500);
-										}
-									});
-								}
-							}
-						}
-
-						public void onFailure(Call call, IOException e) {
-							final IOException ef = e;
-							BackgroundThread.instance().postBackground(new Runnable() {
-								@Override
-								public void run() {
-									BackgroundThread.instance().postGUI(new Runnable() {
-										@Override
-										public void run() {
-											CoolReader.this.showToast("Download error: "+ef.getMessage()+
-													" ["+ef.getClass().getSimpleName()+"]");
-										}
-									}, 500);
-								}
-							});
-						}
-					});
-				}
+				//processIntentHttp(sText);
+				processIntentContent("", sText);
 				return true;
 			}
-//				String downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
-//				try {
-//					String sExt = DocumentFormat.extByMimeType(stype);
-//					sExt = "jpg";
-//					if ((sLastSeg.startsWith("enc")||(StrUtils.isEmptyStr(sLastSeg)))) { //need to create filename
-//						int i = 0;
-//						boolean bExists = true;
-//						while (bExists) {
-//							sLastSeg = i == 0 ? "CoolReader_Downloaded" : "CoolReader_Downloaded ("+i+")";
-//							i++;
-//							File f = new File(downlDir+"/"+sLastSeg);
-//							bExists = f.exists();
-//						}
-//					}
-//					fileToOpen = downlDir+"/"+sLastSeg;
-//					if (!StrUtils.isEmptyStr(sExt)) {
-//						if (!fileToOpen.toLowerCase().endsWith(sExt)) {
-//							if (!fileToOpen.endsWith(".")) fileToOpen = fileToOpen+".";
-//						}
-//						fileToOpen = fileToOpen+sExt;
-//					}
-//					SimpleDownload sd = new SimpleDownload();
-//					sd.mCoolReader = this;
-//					sd.execute(new String[] { sText, fileToOpen });
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
 			if (StrUtils.getNonEmptyStr(intent.getType(),false).startsWith("image/")) {
 				Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 				if (imageUri != null) {
-					PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, imageUri, intent.getType());
+					PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, imageUri, intent.getType(), "");
 					dlg.show();
+					return true;
 				}
 			} else {
 				fileToOpen = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_SUBJECT),false);
 				if (!StrUtils.isEmptyStr(fileToOpen)) {
-					if (fileToOpen.equals(FileInfo.RECENT_DIR_TAG)) {
-						this.showRecentBooks();
-						return true;
-					}
-					if (fileToOpen.equals(FileInfo.STATE_READING_TAG)) {
-						final FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = fileToOpen;
-						dir.filename = this.getString(R.string.folder_name_books_by_state_reading);
-						dir.isListed = true;
-						dir.isScanned = true;
-						waitForCRDBService(new Runnable() {
-							@Override
-							public void run() {
-								showDirectory(dir);
-							}
-						});
-						return true;
-					}
-					if (fileToOpen.equals(FileInfo.STATE_TO_READ_TAG)) {
-						final FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = fileToOpen;
-						dir.filename = this.getString(R.string.folder_name_books_by_state_to_read);
-						dir.isListed = true;
-						dir.isScanned = true;
-						waitForCRDBService(new Runnable() {
-							@Override
-							public void run() {
-								showDirectory(dir);
-							}
-						});
-						return true;
-					}
-					if (fileToOpen.equals(FileInfo.STATE_FINISHED_TAG)) {
-						final FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = fileToOpen;
-						dir.filename = this.getString(R.string.folder_name_books_by_state_finished);
-						dir.isListed = true;
-						dir.isScanned = true;
-						waitForCRDBService(new Runnable() {
-							@Override
-							public void run() {
-								showDirectory(dir);
-							}
-						});
-						return true;
-					}
-					if (fileToOpen.equals(FileInfo.SEARCH_SHORTCUT_TAG)) {
-						final FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = fileToOpen;
-						dir.filename = this.getString(R.string.dlg_book_search);
-						dir.isListed = true;
-						dir.isScanned = true;
-						waitForCRDBService(new Runnable() {
-							@Override
-							public void run() {
-								showDirectory(dir);
-							}
-						});
-						return true;
-					}
-				}
-				if (StrUtils.isEmptyStr(fileToOpen)) {
-					//showToast(intent.getType());
+					if (checkIsShortcuts(fileToOpen)) return true;
 					String sText1 = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_TEXT),false);
-					if (!StrUtils.isEmptyStr(sText1)) {
-						if (sText1.toLowerCase().startsWith("http"))
-							showToast(R.string.warn_http);
-						else
-							showToast(R.string.warn_empty_file_name);
-					}
-					return true;
+					if (StrUtils.isEmptyStr(sText1)) showToast(R.string.warn_empty_file_name);
 				}
+				return true;
 			}
 		}
-
 		if (StrUtils.isEmptyStr(fileToOpen) && intent.getExtras() != null) {
 			log.d("extras=" + intent.getExtras());
 			fileToOpen = StrUtils.getNonEmptyStr(intent.getExtras().getString(OPEN_FILE_PARAM),false);
 		}
 		if (!StrUtils.isEmptyStr(fileToOpen)) {
-			// parse uri from system filemanager
-			if (fileToOpen.contains("%00")) {
-				// splitter between archive file name and inner file.
-				fileToOpen = fileToOpen.replace("%00", "@/");
-				fileToOpen = Uri.decode(fileToOpen);
-			}
-			if ("content".equals(scheme)) {
-				if ("com.android.externalstorage.documents".equals(host)) {
-					// application "Files" by Google, package="com.android.externalstorage.documents"
-					if (fileToOpen.matches("^/document/.*:.*$")) {
-						// decode special uri form: /document/primary:<somebody>
-						//                          /document/XXXX-XXXX:<somebody>
-						String shortcut = fileToOpen.replaceFirst("^/document/(.*):.*$", "$1");
-						String mountRoot = Engine.getMountRootByShortcut(shortcut);
-						if (mountRoot != null)
-							fileToOpen = fileToOpen.replaceFirst("^/document/.*:(.*)$", mountRoot + "/$1");
-					}
-				} else if ("com.google.android.apps.nbu.files.provider".equals(host)) {
-					// application "Files" by Google, package="com.google.android.apps.nbu.files"
-					if (fileToOpen.startsWith("/1////")) {
-						// skip "/1///"
-						fileToOpen = fileToOpen.substring(5);
-						fileToOpen = Uri.decode(fileToOpen);
-					} else if (fileToOpen.startsWith("/1/file:///")) {
-						// skip "/1/file://"
-						fileToOpen = fileToOpen.substring(10);
-						fileToOpen = Uri.decode(fileToOpen);
-					}
-				}
-			} else if (fileToOpen.startsWith("/1////")) {
-				// scheme="content", host="com.google.android.apps.nbu.files.provider"
-				// caused by "Google Files", package="com.google.android.apps.nbu.files"
-				// skip "/1///"
-				fileToOpen = fileToOpen.substring(5);
-			}
-		}
-		if (!StrUtils.isEmptyStr(fileToOpen)) {
-			// patch for opening of books from ReLaunch (under Nook Simple Touch) 
-			while (fileToOpen.indexOf("%2F") >= 0) {
-				fileToOpen = fileToOpen.replace("%2F", "/");
-			}
-			if (
-				(fileToOpen.toUpperCase().endsWith(".ODT"))||
-				(fileToOpen.toUpperCase().endsWith(".ODS"))||
-				(fileToOpen.toUpperCase().endsWith(".ODP"))
-			   ) {
-				final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-				FileInfo item = new FileInfo(fileToOpen);
-				File f = new File(downloadDir.pathname+"/converted/"+item.filename+".html");
-				if (f.exists()) {
-					FileInfo fi = new FileInfo(f);
-					showToast(getString(R.string.docx_open_converted));
-					loadDocument(fi);
-					return true;
-				} else {
-					final FileInfo item1 = item;
-					askConfirmation(R.string.docx_convert, new Runnable() {
-						@Override
-						public void run() {
-							try {
-								log.i("Convert odt file");
-								ConvertOdtFormat.convertOdtFile(item1.pathname, downloadDir.pathname + "/converted/");
-								File f = new File(downloadDir.pathname+"/converted/"+item1.filename+".html");
-								if (f.exists()) {
-									FileInfo fi = new FileInfo(f);
-									loadDocument(fi);
-								}
-							} catch (Exception e) {
-								showToast("exception while converting odt file");
-							}
-						}
-					});
-					return true;
-				}
-			}
 			log.d("FILE_TO_OPEN = " + fileToOpen);
-			final String finalFileToOpen = fileToOpen;
-			// image handling
-			if (
-					(fileToOpen.toLowerCase().endsWith(".jpg"))||
-							(fileToOpen.toLowerCase().endsWith(".jpeg"))||
-							(fileToOpen.toLowerCase().endsWith(".png"))
-					) pictureCame(fileToOpen);
-			else loadDocument(fileToOpen, new Runnable() {
-				@Override
-				public void run() {
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							// if document not loaded show error & then root window
-							ErrorDialog errDialog = new ErrorDialog(CoolReader.this,
-                                    CoolReader.this.getString(R.string.error),
-                                    CoolReader.this.getString(R.string.cant_open_file, finalFileToOpen));
-							errDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-								@Override
-								public void onDismiss(DialogInterface dialog) {
-									showRootWindow();
-								}
-							});
-							errDialog.show();
-						}
-					}, 500);
-				}
-			});
+			if (checkOpenDocumentFormat(fileToOpen)) return true;
+			if (checkPictureExtension(fileToOpen)) return true;
+			loadDocumentExt(fileToOpen, "");
+			return true;
+		} else if (null != uri) {
+			log.d("URI_TO_OPEN = " + uri);
+			final String uriString = uri.toString();
+			loadDocumentFromUriExt(uri, uriString);
 			return true;
 		} else {
 			log.d("No file to open");
 			return false;
 		}
+	}
+
+	private String filePathFromUri(Uri uri) {
+		if (null == uri)
+			return null;
+		String filePath = null;
+		String scheme = uri.getScheme();
+		String host = uri.getHost();
+		if ("file".equals(scheme)) {
+			filePath = uri.getPath();
+			// patch for opening of books from ReLaunch (under Nook Simple Touch)
+			if (null != filePath) {
+				if (filePath.contains("%2F"))
+					filePath = filePath.replace("%2F", "/");
+			}
+		} else if ("content".equals(scheme)) {
+			if (uri.getEncodedPath().contains("%00"))
+				filePath = uri.getEncodedPath();
+			else
+				filePath = uri.getPath();
+			if (null != filePath) {
+				// parse uri from system filemanager
+				if (filePath.contains("%00")) {
+					// splitter between archive file name and inner file.
+					filePath = filePath.replace("%00", "@/");
+					filePath = Uri.decode(filePath);
+				}
+				if ("com.android.externalstorage.documents".equals(host)) {
+					// application "Files" by Google, package="com.android.externalstorage.documents"
+					if (filePath.matches("^/document/.*:.*$")) {
+						// decode special uri form: /document/primary:<somebody>
+						//                          /document/XXXX-XXXX:<somebody>
+						String shortcut = filePath.replaceFirst("^/document/(.*):.*$", "$1");
+						String mountRoot = Engine.getMountRootByShortcut(shortcut);
+						if (mountRoot != null) {
+							filePath = filePath.replaceFirst("^/document/.*:(.*)$", mountRoot + "/$1");
+						}
+					}
+				} else if ("com.google.android.apps.nbu.files.provider".equals(host)) {
+					// application "Files" by Google, package="com.google.android.apps.nbu.files"
+					if (filePath.startsWith("/1////")) {
+						// skip "/1///"
+						filePath = filePath.substring(5);
+						filePath = Uri.decode(filePath);
+					} else if (filePath.startsWith("/1/file:///")) {
+						// skip "/1/file://"
+						filePath = filePath.substring(10);
+						filePath = Uri.decode(filePath);
+					}
+				} else {
+					// Try some common conversions...
+					if (filePath.startsWith("/file%3A%2F%2F")) {
+						filePath = filePath.substring(14);
+						filePath = Uri.decode(filePath);
+						if (filePath.contains("%20")) {
+							filePath = filePath.replace("%20", " ");
+						}
+					}
+				}
+			}
+		}
+		File file;
+		int pos = filePath.indexOf("@/");
+		if (pos > 0)
+			file = new File(filePath.substring(0, pos));
+		else
+			file = new File(filePath);
+		if (!file.exists())
+			filePath = null;
+		return filePath;
 	}
 
 	@Override
@@ -1723,23 +1575,52 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public void showManual() {
-		loadDocument("@manual", null);
+		loadDocument("@manual", "", null);
 	}
 	
 	public static final String OPEN_FILE_PARAM = "FILE_TO_OPEN";
-	public void loadDocument(final String item, final Runnable callback)
+	public void loadDocument(final String item, final String fileLink, final Runnable callback)
 	{
 		runInReader(new Runnable() {
 			@Override
 			public void run() {
-				mReaderView.loadDocument(item, callback);
+				mReaderView.loadDocument(item, fileLink, callback);
 			}
 		});
 	}
 
 	public void pictureCame(final String item) {
-		PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, item, "");
+		PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, item, "", "");
 		dlg.show();
+	}
+
+	public void loadDocumentFromUri(final Uri uri, final Runnable callback) {
+		runInReader(new Runnable() {
+			@Override
+			public void run() {
+				ContentResolver contentResolver = getContentResolver();
+				InputStream inputStream = null;
+				try {
+					inputStream = contentResolver.openInputStream(uri);
+					mReaderView.loadDocumentFromStream(inputStream, uri.getPath(), callback);
+				} catch (FileNotFoundException e) {
+					callback.run();
+				}
+			}
+		});
+	}
+
+	public void loadDocumentFromStream(final InputStream is, final String path, final Runnable callback) {
+		runInReader(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					mReaderView.loadDocumentFromStream(is, path, callback);
+				} catch (Exception e) {
+					callback.run();
+				}
+			}
+		});
 	}
 
 	public void loadDocument( FileInfo item )
@@ -1750,7 +1631,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void loadDocument( FileInfo item, Runnable callback )
 	{
 		log.d("Activities.loadDocument(" + item.pathname + ")");
-		loadDocument(item.getPathName(), callback);
+		loadDocument(item.getPathName(), item.opdsLink, callback);
 	}
 
 	public void showOpenedBook()
@@ -2950,7 +2831,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (location.startsWith(BOOK_LOCATION_PREFIX)) {
 			location = location.substring(BOOK_LOCATION_PREFIX.length());
 			final String floc = location;
-			loadDocument(location, new Runnable() {
+			loadDocument(location, "", new Runnable() {
 				@Override
 				public void run() {
 					BackgroundThread.instance().postGUI(new Runnable() {

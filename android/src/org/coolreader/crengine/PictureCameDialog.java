@@ -1,6 +1,8 @@
 package org.coolreader.crengine;
 
+import android.content.ContentResolver;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -8,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,7 @@ import org.coolreader.db.CRDBService;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
@@ -65,6 +69,19 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		dismiss();
 	}
 
+	public String getPicExtByMimetype(String smime) {
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/gif")) return ".gif";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/jpeg")) return ".jpeg";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/pjpeg")) return ".jpeg";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/png")) return ".png";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().startsWith("image/svg")) return ".svg";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/tiff")) return ".tiff";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/vnd.microsoft.icon")) return ".ico";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/vnd.wap.wbmp")) return ".wbmp";
+		if (StrUtils.getNonEmptyStr(smime,true).toLowerCase().equals("image/webp")) return ".webp";
+		return ".pic";
+	}
+
 	private String getAvailFName(String path, String fname) {
 		String fname1 = fname;
 		String fname1ext = "";
@@ -93,7 +110,8 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (ibPicTexture!=null) ibPicTexture.setBackgroundColor(colorGrayCT);
+		if (ibPicTexture!=null)
+			ibPicTexture.setBackgroundColor(colorGrayCT);
 		if (ibPicBackground!=null) ibPicBackground.setBackgroundColor(colorGrayCT);
 		if ((ibPicTexture!=null)&&(bThisIsTexture)) ibPicTexture.setBackgroundColor(colorGrayCT2);
 		if ((ibPicBackground!=null)&&(!bThisIsTexture)) ibPicBackground.setBackgroundColor(colorGrayCT2);
@@ -106,12 +124,12 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 			if ((pic.uri!=null)||(!StrUtils.isEmptyStr(pic.fileName))) {
 				String fname = "";
 				if (!StrUtils.isEmptyStr(pic.fileName)) fname=pic.fileName;
-				if (pic.uri!=null) fname=pic.uri.getPath();
+				if ((pic.uri!=null) && (StrUtils.isEmptyStr(fname))) fname=pic.uri.getPath();
 				while (fname.contains("/")) {
 					fname=fname.split("\\/")[fname.split("\\/").length-1];
 				}
 				while (fname.contains(":")) {
-					fname=fname.split("\\/")[fname.split("\\/").length-1];
+					fname=fname.split("\\:")[fname.split("\\:").length-1];
 				}
 				while (fname.contains("\\")) {
 					fname=fname.split("\\\\")[fname.split("\\\\").length-1];
@@ -144,7 +162,9 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 				@Override
 				public void run() {
 					final InputDialog dlg = new InputDialog(mActivity, title,
-							((CoolReader)activity).getString(R.string.pic_filename), fname1,
+							((CoolReader)activity).getString(R.string.pic_filename)+" "+
+							sDir1.replace("/storage/","/s/").replace("/emulated/","/e/")+":"
+							, fname1,
 							new InputDialog.InputHandler() {
 								@Override
 								public boolean validateNoCancel(String s) {
@@ -184,10 +204,6 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 												Properties props = new Properties(mActivity.settings());
 												props.setProperty(PROP_PAGE_BACKGROUND_IMAGE,item.id);
                                                 mActivity.setSettings(props, -1, true);
-//                                                if (((CoolReader)mActivity).getReaderView()!=null) {
-//													(((CoolReader)mActivity).getReaderView().applyAppSetting(props);
-//												}
-                                                //((CoolReader)activity).getReaderView().saveSettings(mSettings);
                                             }
                                         }
 										dismiss();
@@ -209,7 +225,18 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		}
 	}
 
-	public PictureCameDialog(final BaseActivity activity, Object obj, String objMime)
+	private String queryName(ContentResolver resolver, Uri uri) {
+		Cursor returnCursor =
+				resolver.query(uri, null, null, null, null);
+		assert returnCursor != null;
+		int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+		returnCursor.moveToFirst();
+		String name = returnCursor.getString(nameIndex);
+		returnCursor.close();
+		return name;
+	}
+
+	public PictureCameDialog(final BaseActivity activity, Object obj, String objMime, String suggestedName)
 	{
 		super("PictureCameDialog", activity, "", true, false);
 		if (obj instanceof BookInfo) {
@@ -222,6 +249,8 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		if (obj!=null) {
 			if (obj instanceof Uri) {
 				picReceived.uri = (Uri) obj;
+				picReceived.fileName = StrUtils.getNonEmptyStr(queryName(activity.getApplicationContext().getContentResolver(),(Uri)obj),true);
+				if (StrUtils.isEmptyStr(picReceived.fileName)) picReceived.fileName = "texture"+getPicExtByMimetype(picReceived.mimeType);
 				try {
 					picReceived.bmpReceived = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), (Uri)obj);
 				} catch (Exception e) {
@@ -233,6 +262,16 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 				try {
 					picReceived.fileName = (String) obj;
 					picReceived.bmpReceived = BitmapFactory.decodeFile((String)obj);
+				} catch (Exception e) {
+					picReceived.bmpReceived = null;
+					log.e("failed to get image from file", e);
+				}
+			}
+			if (obj instanceof InputStream) {
+				try {
+					// TODO: filename from web URL
+					picReceived.fileName = suggestedName+getPicExtByMimetype(picReceived.mimeType);
+					picReceived.bmpReceived = BitmapFactory.decodeStream((InputStream) obj);
 				} catch (Exception e) {
 					picReceived.bmpReceived = null;
 					log.e("failed to get image from file", e);
@@ -312,12 +351,15 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		ibPicCopy.setBackgroundColor(colorGrayCT);
 		ibPicCopy.setTextColor(colorIcon);
+		ibPicCopy.setBackgroundResource(R.drawable.button_bg_dashed_border);
 		ibPicCopyAct.setBackgroundColor(colorGrayCT);
 		ibPicCopyAct.setTextColor(colorIcon);
+		ibPicCopyAct.setBackgroundResource(R.drawable.button_bg_dashed_border);
 		ibPicTexture.setTextColor(colorIcon);
 		ibPicBackground.setTextColor(colorIcon);
 		ibPicRememberForLater.setBackgroundColor(colorGrayCT);
 		ibPicRememberForLater.setTextColor(colorIcon);
+		ibPicRememberForLater.setBackgroundResource(R.drawable.button_bg_dashed_border);
 		imageCame.setMinimumHeight(h);
 		imageCame.setMaxHeight(h);
 		imageCame.setMinimumWidth(w);
