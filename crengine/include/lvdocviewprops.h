@@ -19,7 +19,6 @@
 #define PROP_LOG_AUTOFLUSH           "crengine.log.autoflush"
 #define PROP_FONT_SIZE               "crengine.font.size"
 #define PROP_FALLBACK_FONT_FACE      "crengine.font.fallback.face"
-    // multiple fallback font faces allowed, separated by '|' (name kept singular for compatibility)
 #define PROP_STATUS_FONT_COLOR       "crengine.page.header.font.color"
 #define PROP_STATUS_FONT_FACE        "crengine.page.header.font.face"
 #define PROP_STATUS_FONT_SIZE        "crengine.page.header.font.size"
@@ -57,22 +56,13 @@
 #define PROP_SHOW_PAGE_NUMBER        "window.status.pos.page.number"
 #define PROP_SHOW_BATTERY_PERCENT    "window.status.battery.percent"
 #define PROP_LANDSCAPE_PAGES         "window.landscape.pages"
-#define PROP_AUTOSAVE_BOOKMARKS      "crengine.autosave.bookmarks"
-
-// Obsolete hyph settings:
-#define PROP_HYPHENATION_DICT        "crengine.hyphenation.directory"
-#define PROP_HYPHENATION_DICT_VALUE_NONE "@none"
-#define PROP_HYPHENATION_DICT_VALUE_ALGORITHM "@algorithm"
-// Still used hyph settings:
 #define PROP_HYPHENATION_LEFT_HYPHEN_MIN "crengine.hyphenation.left.hyphen.min"
 #define PROP_HYPHENATION_RIGHT_HYPHEN_MIN "crengine.hyphenation.right.hyphen.min"
 #define PROP_HYPHENATION_TRUST_SOFT_HYPHENS "crengine.hyphenation.trust.soft.hyphens"
-// New textlang typography settings:
-#define PROP_TEXTLANG_MAIN_LANG              "crengine.textlang.main.lang"
-#define PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED "crengine.textlang.embedded.langs.enabled"
-#define PROP_TEXTLANG_HYPHENATION_ENABLED    "crengine.textlang.hyphenation.enabled"
-#define PROP_TEXTLANG_HYPH_SOFT_HYPHENS_ONLY "crengine.textlang.hyphenation.soft.hyphens.only"
-#define PROP_TEXTLANG_HYPH_FORCE_ALGORITHMIC "crengine.textlang.hyphenation.force.algorithmic"
+#define PROP_HYPHENATION_DICT        "crengine.hyphenation.directory"
+#define PROP_HYPHENATION_DICT_VALUE_NONE "@none"
+#define PROP_HYPHENATION_DICT_VALUE_ALGORITHM "@algorithm"
+#define PROP_AUTOSAVE_BOOKMARKS      "crengine.autosave.bookmarks"
 
 #define PROP_FLOATING_PUNCTUATION    "crengine.style.floating.punctuation.enabled"
 

@@ -26,7 +26,6 @@
 #include "../include/lvimg.h"
 #include "../include/lvtinydom.h"
 #include "../include/lvrend.h"
-#include "../include/textlang.h"
 #endif
 
 #if USE_HARFBUZZ==1
@@ -205,7 +204,6 @@ void lvtextFreeFormatter( formatted_text_fragment_t * pbuffer )
 
 void lvtextAddSourceLine( formatted_text_fragment_t * pbuffer,
    lvfont_handle   font,     /* handle of font to draw string */
-   TextLangCfg *   lang_cfg,
    const lChar16 * text,     /* pointer to unicode text string */
    lUInt32         len,      /* number of chars in text, 0 for auto(strlen) */
    lUInt32         color,    /* color */
@@ -235,9 +233,6 @@ void lvtextAddSourceLine( formatted_text_fragment_t * pbuffer,
 //    if (font == NULL && ((flags & LTEXT_WORD_IS_OBJECT) == 0)) {
 //        CRLog::fatal("No font specified for text");
 //    }
-    if ( !lang_cfg )
-        lang_cfg = TextLangMan::getTextLangCfg(); // use main_lang
-    pline->lang_cfg = lang_cfg;
     if (!len) for (len=0; text[len]; len++) ;
     if (flags & LTEXT_FLAG_OWNTEXT)
     {
@@ -271,7 +266,6 @@ void lvtextAddSourceObject(
    lInt16          valign_dy, /* drift y from baseline */
    lInt16          indent,    /* first line indent (or all but first, when negative) */
    void *          object,    /* pointer to custom object */
-   TextLangCfg *   lang_cfg,
    lInt16          letter_spacing
                          )
 {
@@ -291,9 +285,6 @@ void lvtextAddSourceObject(
     pline->interval = interval;
     pline->valign_dy = valign_dy;
     pline->letter_spacing = letter_spacing;
-    if ( !lang_cfg )
-        lang_cfg = TextLangMan::getTextLangCfg(); // use main_lang
-    pline->lang_cfg = lang_cfg;
 }
 
 
@@ -313,7 +304,6 @@ void LFormattedText::AddSourceObject(
             lInt16          valign_dy, /* drift y from baseline */
             lInt16          indent,    /* first line indent (or all but first, when negative) */
             void *          object,    /* pointer to custom object */
-            TextLangCfg *   lang_cfg,
             lInt16          letter_spacing
      )
 {
@@ -326,7 +316,7 @@ void LFormattedText::AddSourceObject(
     if (flags & LTEXT_SRC_IS_FLOAT) { // not an image but a float:'ing node
         // Nothing much to do with it at this point
         lvtextAddSourceObject(m_pbuffer, 0, 0,
-            flags, interval, valign_dy, indent, object, lang_cfg, letter_spacing );
+            flags, interval, valign_dy, indent, object, letter_spacing );
             // lvtextAddSourceObject will itself add to flags: | LTEXT_SRC_IS_OBJECT
             // (only flags & object parameter will be used, the others are not,
             // but they matter if this float is the first node in a paragraph,
@@ -338,7 +328,7 @@ void LFormattedText::AddSourceObject(
         // get its width & neight, as they might be in % of our main width, that
         // we don't know yet (but only when ->Format() is called).
         lvtextAddSourceObject(m_pbuffer, 0, 0,
-            flags, interval, valign_dy, indent, object, lang_cfg, letter_spacing );
+            flags, interval, valign_dy, indent, object, letter_spacing );
             // lvtextAddSourceObject will itself add to flags: | LTEXT_SRC_IS_OBJECT
         return;
     }
@@ -384,7 +374,7 @@ void LFormattedText::AddSourceObject(
     height = h;
 
     lvtextAddSourceObject(m_pbuffer, width, height,
-        flags, interval, valign_dy, indent, object, lang_cfg, letter_spacing );
+        flags, interval, valign_dy, indent, object, letter_spacing );
 }
 
 class LVFormatter {
@@ -396,9 +386,6 @@ public:
     int       m_size;
     bool      m_staticBufs;
     static bool      m_staticBufs_inUse;
-    #if (USE_LIBUNIBREAK==1)
-    static bool      m_libunibreak_init_done;
-    #endif
     lChar16 * m_text;
     lUInt16 * m_flags;
     src_text_fragment_t * * m_srcs;
@@ -440,13 +427,6 @@ public:
     LVFormatter(formatted_text_fragment_t * pbuffer)
     : m_pbuffer(pbuffer), m_length(0), m_size(0), m_staticBufs(true), m_y(0)
     {
-        #if (USE_LIBUNIBREAK==1)
-        if (!m_libunibreak_init_done) {
-            m_libunibreak_init_done = true;
-            // Have libunibreak build up a few lookup tables for quicker computation
-            init_linebreak();
-        }
-        #endif
         if (m_staticBufs_inUse)
             m_staticBufs = false;
         m_text = NULL;
@@ -928,17 +908,6 @@ public:
     /// copy text of current paragraph to buffers
     void copyText( int start, int end )
     {
-        #if (USE_LIBUNIBREAK==1)
-        struct LineBreakContext lbCtx;
-        // Let's init it before the first char, by adding a leading Zero-Width Joiner
-        // (Word Joiner, non-breakable) which should not change the behaviour with
-        // the real first char coming up. We then can just use lb_process_next_char()
-        // with the real text.
-        // The lang lb_props will be plugged in from the TextLangCfg of the
-        // coming up text node. We provide NULL in the meantime.
-        lb_init_break_context(&lbCtx, 0x200D, NULL); // ZERO WIDTH JOINER
-        #endif
-
         m_has_bidi = false; // will be set if fribidi detects it is bidirectionnal text
         m_para_dir_is_rtl = false;
         bool has_rtl = false; // if no RTL char, no need for expensive bidi processing
@@ -977,7 +946,6 @@ public:
                     // to change what we did for floats to use a new flag.
                 pos++;
                 // No need to update prev_was_space or last_non_space_pos
-                // No need for libunibreak object replacement character
             }
             else if ( src->flags & LTEXT_SRC_IS_INLINE_BOX ) {
                 // Note: we shouldn't meet any EmbeddedBlock inlineBox here (and in
@@ -985,20 +953,7 @@ public:
                 // with specifically in splitParagraphs() by processEmbeddedBlock().
                 m_text[pos] = 0;
                 m_srcs[pos] = src;
-                m_flags[pos] = LCHAR_IS_OBJECT;
-                #if (USE_LIBUNIBREAK==1)
-                    // Let libunibreak know there was an object, for the followup text
-                    // to set LCHAR_ALLOW_WRAP_AFTER on it.
-                    // (it will allow wrap before and after an object, unless it's near
-                    // some punctuation/quote/paren, whose rules will be ensured it seems).
-                    int brk = lb_process_next_char(&lbCtx, (utf32_t)0xFFFC); // OBJECT REPLACEMENT CHARACTER
-                    if (brk == LINEBREAK_ALLOWBREAK)
-                        m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
-                    else
-                        m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
-                #else
-                    m_flags[pos] |= LCHAR_ALLOW_WRAP_AFTER;
-                #endif
+                m_flags[pos] = LCHAR_IS_OBJECT | LCHAR_ALLOW_WRAP_AFTER;
                 m_charindex[pos] = INLINEBOX_CHAR_INDEX; //0xFFFD;
                 last_non_space_pos = pos;
                 prev_was_space = false;
@@ -1007,29 +962,13 @@ public:
             else if ( src->flags & LTEXT_SRC_IS_OBJECT ) {
                 m_text[pos] = 0;
                 m_srcs[pos] = src;
-                m_flags[pos] = LCHAR_IS_OBJECT;
-                #if (USE_LIBUNIBREAK==1)
-                    // Let libunibreak know there was an object
-                    int brk = lb_process_next_char(&lbCtx, (utf32_t)0xFFFC); // OBJECT REPLACEMENT CHARACTER
-                    if (brk == LINEBREAK_ALLOWBREAK)
-                        m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
-                    else
-                        m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
-                #else
-                    m_flags[pos] |= LCHAR_ALLOW_WRAP_AFTER;
-                #endif
+                m_flags[pos] = LCHAR_IS_OBJECT | LCHAR_ALLOW_WRAP_AFTER;
                 m_charindex[pos] = OBJECT_CHAR_INDEX; //0xFFFF;
                 last_non_space_pos = pos;
                 prev_was_space = false;
                 pos++;
             }
             else {
-                #if (USE_LIBUNIBREAK==1)
-                // We hack into lbCtx private member and switch its lbpLang
-                // on-the-fly to the props for a possibly new language.
-                lbCtx.lbpLang = src->lang_cfg->getLBProps();
-                #endif
-
                 int len = src->t.len;
                 lStr_ncpy( m_text+pos, src->t.text, len );
                 if ( i==0 || (src->flags & LTEXT_FLAG_NEWLINE) )
@@ -1095,12 +1034,9 @@ public:
                     lChar16 c = m_text[pos];
 
                     bool is_space = (c == ' ');
-                    if ( is_space && prev_was_space && !preformatted && src->object ) {
+                    if ( is_space && prev_was_space && !preformatted ) {
                         // On non-pre paragraphs, flag spaces following a space
                         // so we can discard them later.
-                        // (But only if the space is from a document text node (it then
-                        // has a non-NULL ->object), to keep those we added for empty
-                        // lines or identation with 'txform->AddSourceLine(L" "...)'.)
                         m_flags[pos] = LCHAR_IS_COLLAPSED_SPACE | LCHAR_ALLOW_WRAP_AFTER;
                         // m_text[pos] = '_'; // uncomment when debugging
                         // (We can replace the char to see it in printf() (m_text is not the
@@ -1168,61 +1104,6 @@ public:
                     else if (uc == HB_UNICODE_GENERAL_CATEGORY_CONTROL)
                         printf("control char %x\n", c);
                     */
-
-                    #if (USE_LIBUNIBREAK==1)
-                    lChar16 ch = m_text[pos];
-                    if ( src->lang_cfg->hasLBCharSubFunc() ) {
-                        // Lang specific function may want to substitute char (for
-                        // libunibreak only) to tweak line breaking around it
-                        ch = src->lang_cfg->getLBCharSubFunc()(m_text, pos, len-1 - k);
-                    }
-                    int brk = lb_process_next_char(&lbCtx, (utf32_t)ch);
-                    if ( pos > 0 ) {
-                        // printf("between <%c%c>: brk %d\n", m_text[pos-1], m_text[pos], brk);
-                        // printf("between <%x.%x>: brk %d\n", m_text[pos-1], m_text[pos], brk);
-                        if (brk != LINEBREAK_ALLOWBREAK) {
-                            m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
-                        }
-                        else {
-                            m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
-                            // brk is set on the last space in a sequence of multiple spaces.
-                            //   between <ne>: brk 2
-                            //   between <ed>: brk 2
-                            //   between <d.>: brk 2
-                            //   between <. >: brk 2
-                            //   between <  >: brk 2
-                            //   between <  >: brk 2
-                            //   between < T>: brk 1
-                            //   between <Th>: brk 2
-                            //   between <he>: brk 2
-                            //   between <ey>: brk 2
-                            //   between <y >: brk 2
-                            //   between <  >: brk 2
-                            //   between < h>: brk 1
-                            //   between <ha>: brk 2
-                            //   between <av>: brk 2
-                            //   between <ve>: brk 2
-                            //   between <e >: brk 2
-                            //   between < a>: brk 1
-                            //   between <as>: brk 2
-                            // Given the algorithm described in addLine(), we want the break
-                            // after the first space, so the following collapsed spaces can
-                            // be at start of next line where they will be ignored.
-                            // (Not certain this is really needed, but let's do it, as the
-                            // code expecting that has been quite well tested and fixed over
-                            // the months, so let's avoid adding uncertainty.)
-                            if ( m_flags[pos-1] & LCHAR_IS_COLLAPSED_SPACE ) {
-                                // We have spaces before, and if we are allowed to break,
-                                // the break is allowed on all preceeding spaces.
-                                int j = pos-2;
-                                while ( j >= 0 && ( (m_flags[j] & LCHAR_IS_COLLAPSED_SPACE) || m_text[j] == ' ' ) ) {
-                                    m_flags[j] |= LCHAR_ALLOW_WRAP_AFTER;
-                                    j--;
-                                }
-                            }
-                        }
-                    }
-                    #endif
 
                     #if (USE_FRIBIDI==1)
                         // Also try to detect if we have RTL chars, so that if we don't have any,
@@ -1474,7 +1355,6 @@ public:
                 widths, flags,
                 0x7FFF,
                 '?',
-                srcline->lang_cfg,
                 srcline->letter_spacing,
                 false,
                 hints );
@@ -1506,8 +1386,6 @@ public:
             lUInt32 prevScript = HB_SCRIPT_COMMON;
             hb_unicode_funcs_t* _hb_unicode_funcs = hb_unicode_funcs_get_default();
         #endif
-        int first_word_len = 0; // set to -1 when done with it (only used to check
-                                // for single char first word, see below)
         for ( i=0; i<=m_length; i++ ) {
             LVFont * newFont = NULL;
             lInt16 newLetterSpacing = 0;
@@ -1623,7 +1501,6 @@ public:
                             widths, flags,
                             0x7FFF, //pbuffer->width,
                             '?',
-                            lastSrc->lang_cfg,
                             lastLetterSpacing,
                             false,
                             hints
@@ -1680,40 +1557,12 @@ public:
                             // We can just account for the space reduction (or increase) in cumulative_width_removed
                             cumulative_width_removed += char_width - scaled_width;
                             widths[k] -= cumulative_width_removed;
-                            if ( first_word_len >= 0 ) { // This is the space (or nbsp) after first word
-                                if ( first_word_len == 1 ) { // Previous word is a single char
-                                    if ( isLeftPunctuation(m_text[k-1]) ) {
-                                        // This space follows one of the common opening quotation marks or
-                                        // dashes used to introduce a quotation or a part of a dialog:
-                                        // https://en.wikipedia.org/wiki/Quotation_mark
-                                        // Don't allow this space to change width, so text justification
-                                        // doesn't move away next word, so that other similar paragraphs
-                                        // get their real first words vertically aligned.
-                                        flags[k] &= ~LCHAR_IS_SPACE;
-                                        // Note: we do this check here, with the text still in logical
-                                        // order, so we get that working with RTL text too (where, in
-                                        // visual order, we'll have lost track of which word is the
-                                        // first word).
-                                    }
-                                }
-                                first_word_len = -1; // We don't need to deal with this anymore
-                            }
                         }
                         else {
                             // remove, from the measured cumulative width, what we previously removed
                             widths[k] -= cumulative_width_removed;
-                            if ( first_word_len >= 0 ) {
-                                // Not a collapsed space and not a space: this will be part of first word
-                                first_word_len++;
-                            }
                         }
                         m_widths[start + k] = lastWidth + widths[k];
-                        #if (USE_LIBUNIBREAK==1)
-                        // Reset these flags if lastFont->measureText() has set them, as we trust
-                        // only libunibreak (which is more clever with hyphens, that our code flag
-                        // with LCHAR_DEPRECATED_WRAP_AFTER).
-                        flags[k] &= ~(LCHAR_ALLOW_WRAP_AFTER|LCHAR_DEPRECATED_WRAP_AFTER);
-                        #endif
                         m_flags[start + k] |= flags[k];
                         // printf("  => w=%d\n", m_widths[start + k]);
                     }
@@ -2732,11 +2581,16 @@ public:
                         // increased if needed (for text justification), so actually
                         // making that space larger or smaller.
                         bool can_adjust_width = true;
-                        // Note: checking if the first word of first line is one of the
-                        // common opening quotation marks or dashes is done in measureText(),
-                        // to have it work also with BiDi/RTL text (checking that here
-                        // would be too late, as reordering has been done).
-                        if ( word->t.len>=2 && i>=2 && m_text[i-1]==UNICODE_NO_BREAK_SPACE
+                        if ( wstart == 0 && word->t.len == 2 && isLeftPunctuation(m_text[0]) ) {
+                            // Single char (with space) at start of line is one of the
+                            // common opening quotation marks or dashes used to introduce
+                            // a quotation or a part of a dialog:
+                            //   https://en.wikipedia.org/wiki/Quotation_mark
+                            // Don't allow the following space to change width, so other
+                            // similar lines get their real first word similarly aligned.
+                            can_adjust_width = false;
+                        }
+                        else if ( word->t.len>=2 && i>=2 && m_text[i-1]==UNICODE_NO_BREAK_SPACE
                                                          && m_text[i-2]==UNICODE_NO_BREAK_SPACE ) {
                             // condition for double nbsp after run-in footnote title
                             can_adjust_width = false;
@@ -3120,9 +2974,7 @@ public:
 
         // split paragraph into lines, export lines
         int pos = 0;
-        #if (USE_LIBUNIBREAK!=1)
         int upSkipPos = -1;
-        #endif
 
         // int minWidth = 0;
         // Not per-specs, but when floats reduce the available width, skip y until
@@ -3283,7 +3135,7 @@ public:
                     // but it should be a candidate for lastNormalWrap (otherwise, the
                     // previous word will be hyphenated and we will get spaces widen for
                     // text justification)
-                    if ( (flags & LCHAR_IS_SPACE) && (flags & LCHAR_ALLOW_WRAP_AFTER) ) // don't break yet
+                    if ( (flags & LCHAR_ALLOW_WRAP_AFTER) && !(flags & LCHAR_IS_OBJECT) ) // don't break yet
                         grabbedExceedingSpace = true;
                     else
                         break;
@@ -3294,12 +3146,6 @@ public:
                 //  || lGetCharProps(m_text[i]) == 0
                 // but this does not look right, as any other unicode char would allow wrap.
                 //
-                #if (USE_LIBUNIBREAK==1)
-                // Note: with libunibreak, we can't assume anymore that LCHAR_ALLOW_WRAP_AFTER is synonym to IS_SPACE.
-                if (flags & LCHAR_ALLOW_WRAP_AFTER) {
-                    lastNormalWrap = i;
-                }
-                #else
                 // A space or a CJK ideograph make a normal allowed wrap
                 if ((flags & LCHAR_ALLOW_WRAP_AFTER) || isCJKIdeograph(m_text[i])) {
                     // Need to check if previous and next non-space char request a wrap on
@@ -3341,13 +3187,12 @@ public:
                     // Note that a wrap can happen AFTER a '-' (that has CH_PROP_AVOID_WRAP_AFTER)
                     // when lastDeprecatedWrap is prefered below.
                 }
-                #endif // not USE_LIBUNIBREAK==1
                 else if ( i==m_length-1 ) // Last char
                     lastNormalWrap = i;
                 else if ( flags & LCHAR_DEPRECATED_WRAP_AFTER ) // Hyphens make a less priority wrap
                     lastDeprecatedWrap = i;
                 else if ( flags & LCHAR_ALLOW_HYPH_WRAP_AFTER ) // can't happen at this point as we haven't
-                    lastHyphWrap = i;                           // gone thru hyphenate()
+                    lastHyphWrap = i;                           // gone thru HyphMan::hyphenate()
                 if ( !grabbedExceedingSpace &&
                         m_pbuffer->min_space_condensing_percent != 100 &&
                         i < m_length-1 &&
@@ -3441,7 +3286,7 @@ public:
                     // We have a valid word to look for hyphenation
                     if ( len > MAX_WORD_SIZE ) // hyphenate() stops/truncates at 64 chars
                         len = MAX_WORD_SIZE;
-                    // ->hyphenate(), which is used by some other parts of the code,
+                    // HyphMan::hyphenate(), which is used by some other parts of the code,
                     // expects a lUInt8 array. We added flagSize=1|2 so it can set the correct
                     // flags on our upgraded (from lUInt8 to lUInt16) m_flags.
                     lUInt8 * flags = (lUInt8*) (m_flags + wstart);
@@ -3464,8 +3309,7 @@ public:
                             break;
                         }
                     }
-                    // Use the hyph method of the source node that contains wordpos
-                    if ( m_srcs[wordpos]->lang_cfg->getHyphMethod()->hyphenate(m_text+wstart, len, widths, flags, _hyphen_width, max_width, 2) ) {
+                    if ( HyphMan::hyphenate(m_text+wstart, len, widths, flags, _hyphen_width, max_width, 2) ) {
                         // We need to reset the flag for the multiple hyphenation
                         // opportunities we will not be using (or they could cause
                         // spurious spaces, as a word here may be multiple words
@@ -3509,7 +3353,6 @@ public:
                     wrapPos = lastNormalWrap;
                 if ( wrapPos<0 )
                     wrapPos = i-1;
-                #if (USE_LIBUNIBREAK!=1)
                 if ( wrapPos<=upSkipPos ) {
                     // Ensure that what, when dealing with previous line, we pushed to
                     // next line (below) is actually on this new line.
@@ -3518,14 +3361,9 @@ public:
                     //CRLog::trace("guard new wrapPos at %d", wrapPos);
                     upSkipPos = -1;
                 }
-                #endif
             }
             bool needReduceSpace = true; // todo: calculate whether space reducing required
             int endp = wrapPos+(lastMandatoryWrap<0 ? 1 : 0);
-
-            // Specific handling of CJK punctuation that should not happen at start or
-            // end of line. When using libunibreak, we trust it to handle them correctly.
-            #if (USE_LIBUNIBREAK!=1)
             // The following looks left (up) and right (down) if there are any chars/punctuation
             // that should be prevented from being at the end of line or start of line, and if
             // yes adjust wrapPos so they are pushed to next line, or brought to this line.
@@ -3572,8 +3410,6 @@ public:
                    //CRLog::trace("finally up skip punctuations %d", upSkipCount);
                 }
             }
-            #endif
-
             // Best position to end this line found.
             // We need to possibly extend the last char width to account for italic
             // right side bearing overflow (but not if we ended the line with some
@@ -3605,16 +3441,6 @@ public:
                 endp = m_length;
             addLine(pos, endp, x + firstCharMargin, para, interval, pos==0, wrapPos>=m_length-1, preFormattedOnly, needReduceSpace, isLastPara);
             pos = wrapPos + 1;
-            #if (USE_LIBUNIBREAK==1)
-            // (Only when using libunibreak, which we trust decisions to wrap on hyphens.)
-            if ( m_srcs[wrapPos]->lang_cfg->duplicateRealHyphenOnNextLine() && pos > 0 && pos < m_length-1 ) {
-                if ( m_text[wrapPos] == '-' || m_text[wrapPos] == UNICODE_HYPHEN ) {
-                    pos--; // Have that last hyphen also at the start of next line
-                           // (small caveat: the duplicated hyphen at start of next
-                           // line won't be part of the highlighted text)
-                }
-            }
-            #endif
         }
     }
 
@@ -3823,9 +3649,6 @@ public:
 };
 
 bool LVFormatter::m_staticBufs_inUse = false;
-#if (USE_LIBUNIBREAK==1)
-bool LVFormatter::m_libunibreak_init_done = false;
-#endif
 
 static void freeFrmLines( formatted_text_fragment_t * m_pbuffer )
 {
@@ -4298,7 +4121,6 @@ void LFormattedText::Draw( LVDrawBuf * buf, int x, int y, ldomMarkedRangeList * 
                         '?',
                         NULL,
                         flgHyphen,
-                        srcline->lang_cfg,
                         drawFlags,
                         srcline->letter_spacing,
                         word->width,

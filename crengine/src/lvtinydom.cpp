@@ -84,9 +84,10 @@ int gDOMVersionRequested     = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.60"
+#define CACHE_FILE_FORMAT_VERSION "3.12.59"
+
 /// increment following value to force re-formatting of old book after load
-#define FORMATTING_VERSION_ID 0x0023
+#define FORMATTING_VERSION_ID 0x0020
 
 #ifndef DOC_DATA_COMPRESSION_LEVEL
 /// data compression level (0=no compression, 1=fast compressions, 3=normal compression)
@@ -388,7 +389,7 @@ lUInt32 calcGlobalSettingsHash(int documentId)
         hash = hash * 75 + 2384761;
     if ( gFlgFloatingPunctuationEnabled )
         hash = hash * 75 + 1761;
-    hash = hash * 31 + TextLangMan::getHash();
+    hash = hash * 31 + (HyphMan::getSelectedDictionary()!=NULL ? HyphMan::getSelectedDictionary()->getHash() : 123 );
     hash = hash * 31 + HyphMan::getLeftHyphenMin();
     hash = hash * 31 + HyphMan::getRightHyphenMin();
     hash = hash * 31 + HyphMan::getTrustSoftHyphens();
@@ -1698,31 +1699,6 @@ void RenderRectAccessor::setListPropNodeIndex( int idx )
     }
     if ( _listprop_node_idx != idx ) {
         _listprop_node_idx = idx;
-        _modified = true;
-    }
-}
-int RenderRectAccessor::getLangNodeIndex()
-{
-    if ( _dirty ) {
-        _dirty = false;
-        _node->getRenderData(*this);
-#ifdef DEBUG_RENDER_RECT_ACCESS
-        rr_lock( _node );
-#endif
-    }
-    return _lang_node_idx;
-}
-void RenderRectAccessor::setLangNodeIndex( int idx )
-{
-    if ( _dirty ) {
-        _dirty = false;
-        _node->getRenderData(*this);
-#ifdef DEBUG_RENDER_RECT_ACCESS
-        rr_lock( _node );
-#endif
-    }
-    if ( _lang_node_idx != idx ) {
-        _lang_node_idx = idx;
         _modified = true;
     }
 }
@@ -3823,10 +3799,8 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                 // We have a valid word to look for hyphenation
                 if ( len > HYPH_MAX_WORD_SIZE ) // hyphenate() stops/truncates at 64 chars
                     len = HYPH_MAX_WORD_SIZE;
-                // Have hyphenate() set flags inside 'flags'
-                // (Fetching the lang_cfg for each text node is not really cheap, but
-                // it's easier than having to pass it to each writeNodeEx())
-                TextLangMan::getTextLangCfg(node)->getHyphMethod()->hyphenate(text16+start, len, widths, flags+start, 0, 0xFFFF, 1);
+                // Have HyphMan set flags inside 'flags'
+                HyphMan::hyphenate(text16+start, len, widths, flags+start, 0, 0xFFFF, 1);
                 // Continue with previous word
                 wordpos = start - 1;
             }
@@ -7762,7 +7736,7 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
 
                 lUInt32 hints = WORD_FLAGS_TO_FNT_FLAGS(word->flags);
                 font->measureText( str.c_str()+word->t.start, word->t.len, width, flg,
-                                    word->width+50, '?', src->lang_cfg, src->letter_spacing, false, hints);
+                                    word->width+50, '?', src->letter_spacing, false, hints);
 
                 bool word_is_rtl = word->flags & LTEXT_WORD_DIRECTION_IS_RTL;
                 if ( word_is_rtl ) {
@@ -8114,7 +8088,6 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                                     flg,
                                     word->width+50,
                                     '?',
-                                    txtform->GetSrcInfo(srcIndex)->lang_cfg,
                                     txtform->GetSrcInfo(srcIndex)->letter_spacing,
                                     false,
                                     hints);
@@ -8283,7 +8256,6 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                             flg,
                             word->width+50,
                             '?',
-                            txtform->GetSrcInfo(srcIndex)->lang_cfg,
                             txtform->GetSrcInfo(srcIndex)->letter_spacing,
                             false,
                             hints );
@@ -9993,10 +9965,9 @@ void ldomXRange::getSegmentRects( LVArray<lvRect> & rects )
         curPos.setOffset(startOffset);
         prevCharRect = nodeStartRect;
         for (int i=startOffset+1; i<=textLen-1; i++) {
-            // skip spaces (but let soft-hyphens in, so they are part of the
-            // highlight when they are shown at end of line)
+            // skip spaces and soft-hyphens
             lChar16 c = nodeText[i];
-            if (c == ' ') // || c == 0x00AD)
+            if (c == ' ' || c == 0x00AD)
                 continue;
             curPos.setOffset(i);
             curCharRect = lvRect(); // reset
@@ -13013,6 +12984,7 @@ lUInt32 tinyNodeCollection::calcStyleHash()
 {
     CRLog::debug("calcStyleHash start");
 //    int maxlog = 20;
+    int count = ((_elemCount+TNC_PART_LEN-1) >> TNC_PART_SHIFT);
     lUInt32 res = 0; //_elemCount;
     lUInt32 globalHash = calcGlobalSettingsHash(getFontContextDocIndex());
     lUInt32 docFlags = getDocFlags();
@@ -13032,7 +13004,6 @@ lUInt32 tinyNodeCollection::calcStyleHash()
         // we should invalidate the cache so a new correct DOM is build on load.
         _nodeDisplayStyleHash = 0;
 
-        int count = ((_elemCount+TNC_PART_LEN-1) >> TNC_PART_SHIFT);
         for ( int i=0; i<count; i++ ) {
             int offs = i*TNC_PART_LEN;
             int sz = TNC_PART_LEN;
@@ -15743,8 +15714,7 @@ bool ldomNode::getNodeListMarker( int & counterValue, lString16 & marker, int & 
     if ( !marker.empty() ) {
         LVFont * font = getFont().get();
         if ( font ) {
-            TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg( this );
-            markerWidth = font->getTextWidth((marker + "  ").c_str(), marker.length()+2, lang_cfg) + font->getSize()/8;
+            markerWidth = font->getTextWidth((marker + "  ").c_str(), marker.length()+2) + font->getSize()/8;
             res = true;
         } else {
             marker.clear();
@@ -16241,18 +16211,7 @@ LVStreamRef ldomDocument::getObjectImageStream( lString16 refName )
     LVStreamRef ref;
     if ( refName.startsWith(lString16(BLOB_NAME_PREFIX)) ) {
         return _blobCache.getBlob(refName);
-    }
-    if ( refName.length() > 10 && refName[4] == ':' && refName.startsWith(lString16("data:image/")) ) {
-        // <img src="data:image/png;base64,iVBORw0KG...>
-        lString16 data = refName.substr(0, 50);
-        int pos = data.pos(L";base64,");
-        if ( pos > 0 ) {
-            lString8 b64data = UnicodeToLocal(refName.substr(pos+8));
-            ref = LVStreamRef(new LVBase64Stream(b64data));
-            return ref;
-        }
-    }
-    if ( refName[0]!='#' ) {
+    } if ( refName[0]!='#' ) {
         if ( !getContainer().isNull() ) {
             lString16 name = refName;
             if ( !getCodeBase().empty() )
@@ -16378,9 +16337,7 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
     /// render whole node content as single formatted object
     int direction = RENDER_RECT_PTR_GET_DIRECTION(fmt);
     int flags = styleToTextFmtFlags( getStyle(), 0, direction );
-    int lang_node_idx = fmt->getLangNodeIndex();
-    TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg(lang_node_idx>0 ? getDocument()->getTinyNode(lang_node_idx) : NULL);
-    ::renderFinalBlock( this, f.get(), fmt, flags, 0, -1, lang_cfg );
+    ::renderFinalBlock( this, f.get(), fmt, flags, 0, -1 );
     cache.set( this, f );
     bool flg=gFlgFloatingPunctuationEnabled;
     if (this->getNodeName()=="th"||this->getNodeName()=="td"||
