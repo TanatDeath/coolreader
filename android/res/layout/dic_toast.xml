@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/geo_toast_ll"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent" android:background="?attr/attr_toast_layout_border"
+              android:orientation="horizontal" android:gravity="center"
+    >
+    <TableLayout
+        android:id="@+id/geo_table"
+        style="@style/TextAppearance.Small"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        android:layout_weight="10"
+        android:layout_margin="2dp"
+        >
+
+    </TableLayout>
+
+</LinearLayout>
