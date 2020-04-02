@@ -545,7 +545,7 @@ public class CRToolBar extends ViewGroup {
 					log.d("options_view_toolbar_position menu item selected");
 					if (activity instanceof CoolReader)
 						((CoolReader)activity).optionsFilter = "";
-					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_LOCATION);
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_TITLE);
 				};
 				break;
 			case R.id.view_toolbar_position_change:
@@ -570,22 +570,6 @@ public class CRToolBar extends ViewGroup {
 					(cr.settings()).setBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, hideToolb);
 					cr.setSettings(cr.settings(), 0, true);
 					calcLayout();
-				};
-				break;
-			case R.id.options_view_toolbar_appearance:
-				if (cr!=null) {
-					log.d("options_view_toolbar_appearance menu item selected");
-					if (activity instanceof CoolReader)
-						((CoolReader)activity).optionsFilter = "";
-					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_APPEARANCE);
-				};
-				break;
-			case R.id.options_reader_toolbar_buttons:
-				if (cr!=null) {
-					log.d("options_reader_toolbar_buttons menu item selected");
-					if (activity instanceof CoolReader)
-						((CoolReader)activity).optionsFilter = "";
-					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_BUTTONS);
 				};
 				break;
 			case R.id.options_app_tapzones_normal:

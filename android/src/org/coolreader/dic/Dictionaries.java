@@ -1,14 +1,22 @@
-package org.coolreader;
+package org.coolreader.dic;
 
+import org.coolreader.BuildConfig;
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
-import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DicSearchHistoryEntry;
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.UserDicEntry;
+import org.coolreader.crengine.StrUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -18,18 +26,27 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 
 import com.abbyy.mobile.lingvo.api.MinicardContract;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import okhttp3.Call;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class Dictionaries {
+
+	public static final String YND_DIC_ONLINE = "https://translate.yandex.net/api/v1.5/tr/translate";
+	public static OkHttpClient client = new OkHttpClient();
 
 	public static class PopupFrameMetric {
 		public final int Height;
@@ -153,6 +170,8 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 4, R.drawable.ytr_ic_launcher, null),
 		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.search.SearchActivity",
 				Intent.ACTION_SEND, 4, R.drawable.wiki, null),
+		new DictInfo("YandexTranslateOnline", "Yandex Translate Online", "", "",
+				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<DictInfo>();
@@ -300,9 +319,20 @@ public class Dictionaries {
 		return curDict;
 	}
 
+	private DictInfo saveCurrentDictionary;
+	private DictInfo saveCurrentDictionary2;
+	private DictInfo saveCurrentDictionary3;
+	private int saveIDic2IsActive;
+
 	@SuppressLint("NewApi")
 	public void findInDictionary(String s) throws DictionaryException {
 		log.d("lookup in dictionary: " + s);
+		// save - if we ask for transl direction
+		saveCurrentDictionary = currentDictionary;
+		saveCurrentDictionary2 = currentDictionary2;
+		saveCurrentDictionary3 = currentDictionary3;
+		saveIDic2IsActive = iDic2IsActive;
+		//
 		DictInfo curDict = currentDictionary;
 		if (iDic2IsActive > 0 && currentDictionary2 != null)
 			curDict = currentDictionary2;
@@ -320,7 +350,9 @@ public class Dictionaries {
 			while (diRecent.size()>5) diRecent.remove(5);
 		boolean isDouble = false;
 		//save to dic search history
+		CoolReader cr = null;
 		if (mActivity instanceof CoolReader) {
+			cr = (CoolReader) mActivity;
 			DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
 			dshe.setId(0L);
 			dshe.setSearch_text(s);
@@ -328,7 +360,6 @@ public class Dictionaries {
 			String sBookFName = "";
 			String sLangFrom = "";
 			String sLangTo = "";
-			CoolReader cr = (CoolReader) mActivity;
 			if (cr.getReaderView()!=null) {
 				if (cr.getReaderView().getBookInfo()!=null)
 					if (cr.getReaderView().getBookInfo().getFileInfo()!=null)
@@ -441,7 +472,6 @@ public class Dictionaries {
 			int selectionX1 = 0;
 			int selectionX2 = 0;
 			if (mActivity instanceof CoolReader) {
-				CoolReader cr = (CoolReader) mActivity;
 				if (cr.getReaderView()!=null) {
 					if (cr.getReaderView().lastSelection != null) {
 						selectionTop = cr.getReaderView().lastSelection.startY;
@@ -451,14 +481,28 @@ public class Dictionaries {
 					}
 					if (cr.getReaderView().getBookInfo()!=null) {
 						BookInfo book = cr.getReaderView().getBookInfo();
-						String lang = book.getFileInfo().lang_to;
-						if (lang==null) lang = "";
-						if (lang.equals("")) lang = "ru";
-						String langf = book.getFileInfo().lang_from;
-						if (langf==null) langf = "";
-						if (langf.equals("")) langf = book.getFileInfo().language;
-						if (langf==null) langf = "";
-						if (lang.equals("")) lang = "en";
+						String lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
+						String langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
+						if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
+						// ask book translation direction
+						if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
+							if (cr.getReaderView().mBookInfo!=null) {
+								FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+								FileInfo dfi = fi.parent;
+								if (dfi == null) {
+									dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+								}
+								if (dfi != null) {
+									currentDictionary = saveCurrentDictionary;
+									currentDictionary2 = saveCurrentDictionary2;
+									currentDictionary3 = saveCurrentDictionary3;
+									iDic2IsActive = saveIDic2IsActive;
+									cr.editBookTransl(dfi, fi, langf, lang, s);
+								}
+							};
+							return;
+						}
+						//if (lang.equals("")) lang = "en";
 						intent5.putExtra(MinicardContract.EXTRA_LANGUAGE_TO, lang);
 						intent5.putExtra(MinicardContract.EXTRA_LANGUAGE_FROM, langf);
 					}
@@ -545,7 +589,6 @@ public class Dictionaries {
 			int selectionX1_2 = 0;
 			int selectionX2_2 = 0;
 			if (mActivity instanceof CoolReader) {
-				CoolReader cr = (CoolReader) mActivity;
 				if (cr.getReaderView()!=null) {
 					if (cr.getReaderView().lastSelection != null) {
 						selectionTop2 = cr.getReaderView().lastSelection.startY;
@@ -601,6 +644,68 @@ public class Dictionaries {
 			} catch ( ActivityNotFoundException e ) {
 				throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
 			}
+			break;
+		case 7:
+			BookInfo book = cr.getReaderView().getBookInfo();
+			String lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
+			String langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
+			if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
+			if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
+				if (cr.getReaderView().mBookInfo!=null) {
+					FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+					FileInfo dfi = fi.parent;
+					if (dfi == null) {
+						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+					}
+					if (dfi != null) {
+						currentDictionary = saveCurrentDictionary;
+						currentDictionary2 = saveCurrentDictionary2;
+						currentDictionary3 = saveCurrentDictionary3;
+						iDic2IsActive = saveIDic2IsActive;
+						cr.editBookTransl(dfi, fi, langf, lang, s);
+					}
+				};
+				return;
+			}
+			HttpUrl.Builder urlBuilder = HttpUrl.parse(YND_DIC_ONLINE).newBuilder();
+			urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
+			urlBuilder.addQueryParameter("text", s);
+			String llang = lang;
+			if (!StrUtils.isEmptyStr(langf)) llang = langf+"-"+lang;
+			urlBuilder.addQueryParameter("lang", llang);
+			urlBuilder.addQueryParameter("format", "plain");
+			String url = urlBuilder.build().toString();
+			Request request = new Request.Builder()
+					.url(url)
+					.build();
+			Call call = client.newCall(request);
+			final CoolReader crf = cr;
+			call.enqueue(new okhttp3.Callback() {
+				public void onResponse(Call call, Response response)
+						throws IOException {
+					String sBody = response.body().string();
+					Document docJsoup = Jsoup.parse(sBody, YND_DIC_ONLINE);
+					Elements results = docJsoup.select("Translation > text");
+					String sTransl = "";
+					if (results.size()>0) sTransl = results.text();
+					final String sTranslF = sTransl;
+					BackgroundThread.instance().postBackground(new Runnable() {
+						@Override
+						public void run() {
+							BackgroundThread.instance().postGUI(new Runnable() {
+								@Override
+								public void run() {
+									crf.showToast(sTranslF);
+								}
+							}, 100);
+						}
+					});
+				}
+
+				public void onFailure(Call call, IOException e) {
+					crf.showToast(e.getMessage());
+				}
+			});
 			break;
 		}
 	}

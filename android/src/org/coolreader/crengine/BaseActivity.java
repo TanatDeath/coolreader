@@ -3,17 +3,19 @@ package org.coolreader.crengine;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.coolreader.CoolReader;
-import org.coolreader.Dictionaries;
-import org.coolreader.Dictionaries.DictInfo;
+import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.Dictionaries.DictInfo;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBServiceAccessor;
@@ -226,7 +228,8 @@ public class BaseActivity extends Activity implements Settings {
 
 		// load settings
 		Properties props = settings();
-		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST1" : "LIGHT");
+		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
+		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) theme = "WHITE";
 		String lang = props.getProperty(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 		setLanguage(lang);
 		setCurrentTheme(theme);
@@ -242,7 +245,7 @@ public class BaseActivity extends Activity implements Settings {
 		int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1);
 		if (backlight < -1 || backlight > 100)
 			backlight = -1;
-		setScreenBacklightLevel(backlight);
+		setScreenBacklightLevel(backlight, true);
 		bindCRDBService();
 	}
 
@@ -272,10 +275,6 @@ public class BaseActivity extends Activity implements Settings {
 	protected void onStart() {
 		super.onStart();
 
-//		Properties props = settings().get();
-//		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.FORCE_HC_THEME ? "WHITE" : "LIGHT");
-//		setCurrentTheme(theme);
-		
 		mIsStarted = true;
 		mPaused = false;
 		onUserActivity();
@@ -384,7 +383,7 @@ public class BaseActivity extends Activity implements Settings {
 	public void setCurrentTheme(String themeCode) {
 		InterfaceTheme theme = InterfaceTheme.findByCode(themeCode);
 		if (null == theme)
-			theme = DeviceInfo.isForceHCTheme(getScreenForceEink()) ? InterfaceTheme.HICONTRAST1 : InterfaceTheme.LIGHT;
+			theme = DeviceInfo.isForceHCTheme(getScreenForceEink()) ? InterfaceTheme.WHITE : InterfaceTheme.LIGHT;
 		if (currentTheme != theme) {
 			setCurrentTheme(theme);
 		}
@@ -999,18 +998,28 @@ public class BaseActivity extends Activity implements Settings {
     	keyBacklightOff = disabled;
     	onUserActivity();
     }
-    
-    public void setScreenBacklightLevel(int percent) {
+
+    boolean setWarmLight = false;
+
+	public void setScreenBacklightLevel(int percent, boolean leftSide) {
+    	setWarmLight = false;
     	if ( percent<-1 )
     		percent = -1;
     	else if ( percent>100 )
     		percent = -1;
-    	screenBacklightBrightness = percent;
+    	if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
+    		if (leftSide) screenBacklightBrightness = percent;
+    		else {
+    			screenBacklightBrightnessWarm = percent;
+				setWarmLight = true;
+			}
+		} else screenBacklightBrightness = percent;
     	onUserActivity();
     }
     
     private int screenBacklightBrightness = -1; // use default
-    //private boolean brightnessHackError = false;
+	private int screenBacklightBrightnessWarm = -1; // use default
+	//private boolean brightnessHackError = false;
     private boolean brightnessHackError = DeviceInfo.SAMSUNG_BUTTONS_HIGHLIGHT_PATCH;
 
     private void turnOffKeyBacklight() {
@@ -1063,29 +1072,44 @@ public class BaseActivity extends Activity implements Settings {
 		//BackgroundThread.instance().postGUI(task, 10);
 	}
 
-	private void updateBacklightBrightness(float b) {
-        Window wnd = getWindow();
-        if (wnd != null) {
-	    	LayoutParams attrs =  wnd.getAttributes();
-	    	boolean changed = false;
-	    	if (b < 0 && b > -0.99999f) {
-	    		//log.d("dimming screen by " + (int)((1 + b)*100) + "%");
-	    		b = -b * attrs.screenBrightness;
-	    		if (b < 0.15)
-	    			return;
-	    	}
-	    	float delta = attrs.screenBrightness - b;
-	    	if (delta < 0)
-	    		delta = -delta;
-	    	if (delta > 0.01) {
-	    		attrs.screenBrightness = b;
-	    		changed = true;
-	    	}
-	    	if ( changed ) {
-	    		log.d("Window attribute changed: " + attrs);
-	    		wnd.setAttributes(attrs);
-	    	}
-        }
+	private void updateBacklightBrightness(float b, boolean warm) {
+        if (DeviceInfo.ONYX_BRIGHTNESS) {
+        	String s = "white";
+        	if (warm) s = "warm";
+        	Float v = b * 255.0F;
+        	int i = v.intValue();
+        	log.i("Setting "+s+" onyx brightness to: "+i);
+        	try {
+				FileWriter writer = new FileWriter("/sys/class/backlight/"+s+"/brightness");
+				writer.write(String.valueOf(i));
+				writer.close();
+			} catch (Exception e) {
+
+			}
+		} else {
+			Window wnd = getWindow();
+			if (wnd != null) {
+				LayoutParams attrs = wnd.getAttributes();
+				boolean changed = false;
+				if (b < 0 && b > -0.99999f) {
+					//log.d("dimming screen by " + (int)((1 + b)*100) + "%");
+					b = -b * attrs.screenBrightness;
+					if (b < 0.15)
+						return;
+				}
+				float delta = attrs.screenBrightness - b;
+				if (delta < 0)
+					delta = -delta;
+				if (delta > 0.01) {
+					attrs.screenBrightness = b;
+					changed = true;
+				}
+				if (changed) {
+					log.d("Window attribute changed: " + attrs);
+					wnd.setAttributes(attrs);
+				}
+			}
+		}
     }
 
     private void updateButtonsBrightness(float buttonBrightness) {
@@ -1139,6 +1163,8 @@ public class BaseActivity extends Activity implements Settings {
       	    backlightControl.onUserActivity();
     	// Hack
     	//if ( backlightControl.isHeld() )
+
+		final boolean warm = setWarmLight;
     	BackgroundThread.instance().executeGUI(new Runnable() {
 			@Override
 			public void run() {
@@ -1146,8 +1172,10 @@ public class BaseActivity extends Activity implements Settings {
 		        	float b;
 		        	int dimmingAlpha = 255;
 		        	// screenBacklightBrightness is 0..100
-		        	if (screenBacklightBrightness >= 0) {
-		        		int percent = screenBacklightBrightness;
+					int sblb = screenBacklightBrightness;
+					if (warm) sblb = screenBacklightBrightnessWarm;
+		        	if (sblb >= 0) {
+		        		int percent = sblb;
 		        		if (!allowLowBrightness() && percent < MIN_BRIGHTNESS_IN_BROWSER)
 		        			percent = MIN_BRIGHTNESS_IN_BROWSER;
 	        			float minb = MIN_BACKLIGHT_LEVEL_PERCENT / 100.0f; 
@@ -1168,9 +1196,9 @@ public class BaseActivity extends Activity implements Settings {
 		        		// system
 		        		b = -1.0f; //BRIGHTNESS_OVERRIDE_NONE
 		        	}
-		        	setDimmingAlpha(dimmingAlpha);
+					if (!DeviceInfo.ONYX_BRIGHTNESS) setDimmingAlpha(dimmingAlpha);
 			    	//log.v("Brightness: " + b + ", dim: " + dimmingAlpha);
-			    	updateBacklightBrightness(b);
+			    	updateBacklightBrightness(b, warm);
 			    	updateButtonsBrightness(keyBacklightOff ? 0.0f : -1.0f);
 				} catch ( Exception e ) {
 					// ignore
@@ -1278,7 +1306,7 @@ public class BaseActivity extends Activity implements Settings {
 				} else {
 					BackgroundThread.instance().postGUI(backlightTimerTask, nextTimerInterval);
 					if (dim) {
-						updateBacklightBrightness(-0.9f); // reduce by 9%
+						updateBacklightBrightness(-0.9f, false); // reduce by 9%
 					}
 				}
 			}
@@ -1611,7 +1639,8 @@ public class BaseActivity extends Activity implements Settings {
         } else if (key.equals(PROP_APP_SCREEN_FORCE_EINK)) {
             setScreenForceEink(stringToInt(value, 0)==0?false:true);
         } else if (key.equals(PROP_APP_THEME)) {
-        	setCurrentTheme(value);
+			if (DeviceInfo.isForceHCTheme(getScreenForceEink())) setCurrentTheme("WHITE");
+			else setCurrentTheme(value);
         } else if (key.equals(PROP_APP_SCREEN_ORIENTATION)) {
         	int orientation = 0;
         	try {
@@ -1622,6 +1651,7 @@ public class BaseActivity extends Activity implements Settings {
         	setScreenOrientation(orientation);
         } else if ( !DeviceInfo.isEinkScreen(getScreenForceEink()) && PROP_APP_SCREEN_BACKLIGHT.equals(key) ) {
         	try {
+        		//TODO: think about onyx backlight
         		final int n = Integer.valueOf(value);
         		// delay before setting brightness
         		BackgroundThread.instance().postGUI(new Runnable() {
@@ -1630,7 +1660,7 @@ public class BaseActivity extends Activity implements Settings {
                 			public void run() {
                         		BackgroundThread.instance().postGUI(new Runnable() {
                         			public void run() {
-        				        		setScreenBacklightLevel(n);
+        				        		setScreenBacklightLevel(n, true);
                         			}
                         		});
                 			}
@@ -1793,10 +1823,14 @@ public class BaseActivity extends Activity implements Settings {
 	}
 	
 	public void showBrowserOptionsDialog() {
-		if (this instanceof CoolReader)
-			((CoolReader)this).optionsFilter = "";
-		OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, null, OptionsDialog.Mode.BROWSER);
-		dlg.show();
+		if (this instanceof CoolReader) {
+			((CoolReader) this).optionsFilter = "";
+			((CoolReader) this).showOptionsDialogExt(OptionsDialog.Mode.READER, PROP_FILEBROWSER_TITLE);
+		} else {
+			// dead code :)
+			OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, null, OptionsDialog.Mode.BROWSER);
+			dlg.show();
+		}
 	}
 
 	private int currentProfile = 0;
@@ -1809,12 +1843,27 @@ public class BaseActivity extends Activity implements Settings {
 		return currentProfile;
 	}
 
+	public String getCurrentProfileName() {
+		return (settings().getProperty(Settings.PROP_PROFILE_NAME + "." + getCurrentProfile(),""));
+	}
+
 	public void setCurrentProfile(int profile) {
 		if (profile == 0 || profile == getCurrentProfile())
 			return;
 		log.i("Switching from profile " + currentProfile + " to " + profile);
 		mSettingsManager.saveSettings(currentProfile, null);
+		// profile names - remember
+		Properties props = new Properties(settings());
+		HashMap<String, String> saveSett = new HashMap<>();
+		for (int i=0; i<7; i++) {
+			String pname = props.getProperty(Settings.PROP_PROFILE_NAME + "." + (i+1), "");
+			if (!StrUtils.isEmptyStr(pname)) saveSett.put(Settings.PROP_PROFILE_NAME + "." + (i+1), pname);
+		}
 		final Properties loadedSettings = mSettingsManager.loadSettings(profile);
+		// profile names - put it back
+		for (Map.Entry<String, String> entry : saveSett.entrySet()) {
+			loadedSettings.setProperty(entry.getKey(), entry.getValue());
+		}
 		try {
 			if (this instanceof CoolReader)
 				if (((CoolReader) this).getmReaderFrame()!=null) {
@@ -2131,9 +2180,9 @@ public class BaseActivity extends Activity implements Settings {
 
 	        props.applyDefault(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 	        
-	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST1" : "LIGHT");
-	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST1" : "LIGHT");
-	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "HICONTRAST2" : "DARK");
+	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
+	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
+	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "BLACK" : "DARK");
 	        props.applyDefault(ReaderView.PROP_APP_SELECTION_PERSIST, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK, "3");
 	        if ("1".equals(props.getProperty(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK)))
@@ -2505,6 +2554,7 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void tintViewIcons(Object o, boolean forceTint) {
         Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
+		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
         int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
         TypedArray a = this.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.isTintedIcons, R.attr.colorIcon});

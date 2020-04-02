@@ -6,15 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.coolreader.CoolReader;
-import org.coolreader.Dictionaries;
+import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
 
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;

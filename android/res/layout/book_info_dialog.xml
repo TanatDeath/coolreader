@@ -15,7 +15,7 @@
 			android:orientation="horizontal"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:minHeight="?android:attr/listPreferredItemHeight"
+			android:layout_margin="5dip"
 			android:gravity="center_vertical"
 			android:background="?attr/tabbarBackground"
 			>
@@ -25,6 +25,7 @@
 				android:layout_centerVertical="true"
 				android:src="?attr/cr3_button_prev_drawable"
 				android:tag="tint"
+				android:layout_margin="5dip"
 				android:focusable="false"
 				android:focusableInTouchMode="false"
 				android:background="@null"
@@ -32,6 +33,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_back"/>
 			<ImageButton android:id="@+id/btn_open_book"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -45,6 +47,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_open_book"/>
 			<ImageButton android:id="@+id/book_folder_open"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -57,6 +60,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_open_folder"/>
 			<ImageButton android:id="@+id/book_create_shortcut"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -70,6 +74,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/mi_book_shortcut"/>
 			<ImageButton android:id="@+id/book_edit"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -83,6 +88,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/mi_book_edit"/>
 			<ImageButton android:id="@+id/save_to_cloud"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -96,6 +102,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/save_current_book_to_cloud_email"/>
 			<ImageButton android:id="@+id/book_delete"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -109,6 +116,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_book_delete"/>
 			<ImageButton android:id="@+id/book_custom_cover"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -122,6 +130,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_book_custom_cover"/>
 			<ImageButton android:id="@+id/btn_find_authors"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -135,6 +144,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@null"/>
 			<ImageButton android:id="@+id/book_download"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -148,6 +158,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@null"/>
 			<Button
+				android:layout_margin="5dip"
 				android:id="@+id/btn_mark_toread"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -158,7 +169,6 @@
 				android:ellipsize="end"
 				android:textColor="?attr/colorIcon"
 				android:contentDescription="@string/book_mark_toread"
-				android:background="@drawable/button_bg_dashed_border"
 				android:text="@string/book_mark_toread" />
 		</LinearLayout>
 
@@ -190,6 +200,16 @@
 				android:layout_marginRight="5dip"
 				/>
 		</uk.co.deanwild.flowtextview.FlowTextView>
+	<TextView
+				android:id="@+id/lbl_profile"
+				android:textStyle="bold"
+				style="@style/TextAppearance.Small"
+				android:singleLine="false"
+				android:maxLines="3"
+				android:text="@string/book_info_file_name"
+				android:textColor="?attr/colorIcon"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
 	<TableLayout
 		android:id="@+id/table"
 		style="@style/TextAppearance.Small"

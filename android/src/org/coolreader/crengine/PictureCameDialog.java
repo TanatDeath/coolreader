@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -25,7 +26,10 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,6 +71,21 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 	protected void onThirdButtonClick() {
 		super.onThirdButtonClick();
 		dismiss();
+	}
+
+	public static boolean isFileIsPicture(String fileName) {
+		boolean bIsImage = false;
+		try {
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inJustDecodeBounds = true;
+			Bitmap bitmap = BitmapFactory.decodeFile(fileName, options);
+			if (options.outWidth != -1 && options.outHeight != -1) {
+				bIsImage = true;
+			}
+		} catch (Exception e) {
+
+		}
+		return bIsImage;
 	}
 
 	public String getPicExtByMimetype(String smime) {
@@ -236,6 +255,14 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		return name;
 	}
 
+	private void setDashedButton(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
 	public PictureCameDialog(final BaseActivity activity, Object obj, String objMime, String suggestedName)
 	{
 		super("PictureCameDialog", activity, "", true, false);
@@ -351,15 +378,15 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		ibPicCopy.setBackgroundColor(colorGrayCT);
 		ibPicCopy.setTextColor(colorIcon);
-		ibPicCopy.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(ibPicCopy);
 		ibPicCopyAct.setBackgroundColor(colorGrayCT);
 		ibPicCopyAct.setTextColor(colorIcon);
-		ibPicCopyAct.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(ibPicCopyAct);
 		ibPicTexture.setTextColor(colorIcon);
 		ibPicBackground.setTextColor(colorIcon);
 		ibPicRememberForLater.setBackgroundColor(colorGrayCT);
 		ibPicRememberForLater.setTextColor(colorIcon);
-		ibPicRememberForLater.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(ibPicRememberForLater);
 		imageCame.setMinimumHeight(h);
 		imageCame.setMaxHeight(h);
 		imageCame.setMinimumWidth(w);

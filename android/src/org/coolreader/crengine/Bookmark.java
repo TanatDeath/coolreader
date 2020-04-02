@@ -18,6 +18,7 @@ public class Bookmark {
 		titleText=v.titleText;
 		posText=v.posText;
 		commentText=v.commentText;
+		addCommentText=v.addCommentText;
 		timeStamp=v.timeStamp;
 		timeElapsed = v.timeElapsed;
 		linkPos=v.linkPos;
@@ -29,6 +30,8 @@ public class Bookmark {
 		int result = 1;
 		result = prime * result
 				+ ((commentText == null) ? 0 : commentText.hashCode());
+		result = prime * result
+				+ ((addCommentText == null) ? 0 : addCommentText.hashCode());
 		result = prime * result + ((endPos == null) ? 0 : endPos.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + percent;
@@ -58,6 +61,11 @@ public class Bookmark {
 			if (other.commentText != null)
 				return false;
 		} else if (!commentText.equals(other.commentText))
+			return false;
+		if (addCommentText == null) {
+			if (other.addCommentText != null)
+				return false;
+		} else if (!addCommentText.equals(other.addCommentText))
 			return false;
 		if (endPos == null) {
 			if (other.endPos != null)
@@ -169,6 +177,9 @@ public class Bookmark {
 	public String getCommentText() {
 		return commentText;
 	}
+	public String getAddCommentText() {
+		return addCommentText;
+	}
 	private boolean changed( String v1, String v2 ) {
 		if ( v1==null && v2==null )
 			return false;
@@ -180,6 +191,12 @@ public class Bookmark {
 		if ( !changed(this.commentText, commentText) )
 			return false;
 		this.commentText = commentText;
+		return true;
+	}
+	public boolean setAddCommentText(String addCommentText) {
+		if ( !changed(this.addCommentText, addCommentText) )
+			return false;
+		this.addCommentText = addCommentText;
 		return true;
 	}
 	public String getTitleText() {
@@ -251,6 +268,7 @@ public class Bookmark {
 	private String titleText;
 	private String posText;
 	private String commentText;
+	private String addCommentText;
 	private long timeStamp = System.currentTimeMillis(); // UTC timestamp
 	private long timeElapsed;
 	private String linkPos;

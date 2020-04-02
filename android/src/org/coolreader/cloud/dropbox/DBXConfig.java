@@ -7,6 +7,7 @@ import com.dropbox.core.DbxSessionStore;
 import com.dropbox.core.DbxWebAuth;
 import com.dropbox.core.v2.DbxClientV2;
 
+import org.coolreader.BuildConfig;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 
@@ -16,16 +17,16 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class DBXConfig {
-    public static final String DBX_KEY = "put_yours";
-    public static final String DBX_SECRET = "put_yours";
-    public static final String DBX_REDIRECT_URL = "https://github.com/plotn/coolreader";
+    public static final String DBX_KEY = BuildConfig.DBX_KEY; //"put_yours";
+    public static final String DBX_SECRET = BuildConfig.DBX_SECRET; //"put_yours";
+    public static final String DBX_REDIRECT_URL = "https://github.com/plotn/coolreader/blob/master/dbx_readme.md";
     public static DbxRequestConfig mDbxRequestConfig = null;
     public static DbxClientV2 mDbxClient = null;
     public static DbxWebAuth webAuth = null;
     public static DbxSessionStore sessionStore = null;
     public static boolean didLogin = false;
 
-    public static boolean init(CoolReader cr) throws DbxException, IOException {
+    public static boolean init(CoolReader cr) throws IOException {
         // Create Dropbox client
         final File fDBX = new File(cr.getSettingsFile(0).getParent() + "/dbx.token");
         if (!fDBX.exists()) {

@@ -40,6 +40,7 @@ public class BookOPDSSearchDialog extends BaseDialog {
 		super.onPositiveButtonClick();
 		FileInfo fi2 = new FileInfo(fInfo);
 		fi2.pathname = fi2.pathname.replace("{searchTerms}", StrUtils.getNonEmptyStr(termsEdit.getText().toString(),true));
+		fi2.filename =  activity.getString( R.string.dlg_book_search) + ": " + StrUtils.getNonEmptyStr(termsEdit.getText().toString(), true);
 		FileInfo[] arrFi = {fi2};
 		callback.done(arrFi);
 	}

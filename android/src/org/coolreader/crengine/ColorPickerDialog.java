@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 // based on color picker from 
 // http://www.anddev.org/announce_color_picker_dialog-t10771.html
 
+import org.coolreader.BuildConfig;
 import org.coolreader.R;
 
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -84,7 +86,11 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 
 		Resources res = activity.getResources();
 		setTitle(title);
-		View root = LayoutInflater.from(activity).inflate(R.layout.color_picker, null);
+		View root = null;
+		if (Build.VERSION.SDK_INT >= 21)
+			root = LayoutInflater.from(activity).inflate(R.layout.color_picker, null);
+		else
+			root = LayoutInflater.from(activity).inflate(R.layout.color_picker_v19, null);
 
 		ViewGroup body = (ViewGroup)root.findViewById(R.id.color_list);
 		mList = new ColorList(activity, false);

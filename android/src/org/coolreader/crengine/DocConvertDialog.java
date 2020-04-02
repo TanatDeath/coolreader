@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -84,6 +85,14 @@ public class DocConvertDialog extends BaseDialog {
 		tl.removeView(trowExists2);
 	}
 
+	private void setDashedButton(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -98,9 +107,9 @@ public class DocConvertDialog extends BaseDialog {
 		int colorIcon = a.getColor(0, Color.GRAY);
 		int colorGrayC = a.getColor(1, Color.GRAY);
 		btnOpenExisting = (Button)view.findViewById(R.id.btn_open_existing);
-		btnOpenExisting.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnOpenExisting);
 		btnConv = (Button)view.findViewById(R.id.btn_conv);
-		btnConv.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnConv);
 		FileInfo item = new FileInfo(fileToOpen);
 		((TextView)view.findViewById(R.id.conv_doc_path)).setText(fileToOpen);
 		final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();

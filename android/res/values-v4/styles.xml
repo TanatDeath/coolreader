@@ -1,6 +1,7 @@
 <resources>
 
     <color name="blueLight">#ff8080ff</color>
+    <color name="greenLighter">#ffaaffaa</color>
     <color name="greenLight">#ff00ffaa</color>
     <color name="grayLight">#ffffdf80</color>
     <color name="grayLight2">#ffAAAAAA</color>

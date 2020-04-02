@@ -15,8 +15,6 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudSyncFolder;
-import org.coolreader.cloud.dropbox.DBXConfig;
-import org.coolreader.cloud.dropbox.DBXPerformAction;
 import org.coolreader.crengine.Engine.HyphDict;
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
@@ -55,12 +53,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.users.FullAccount;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.coolreader.cloud.dropbox.DBXGetCurrentAccountTask;
 
 public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, OnKeyListener, OnTouchListener, OnFocusChangeListener {
 
@@ -421,7 +415,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public long lastDuration;
 	private Bookmark hyplinkBookmark;
 
-	private BookInfo mBookInfo;
+	public BookInfo mBookInfo;
 	private Bookmark lastSavedToGdBookmark;
 
 	private Properties mSettings = new Properties();
@@ -562,10 +556,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		}
 		if (bNeedSave) {
-			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, true);
+			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant > 0)
+				CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader)mActivity),
+						CloudSyncFolder.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1);
 			lastSavedToGdBookmark = bmk;
 		}
 		bookView.onPause();
+		appPaused = true;
 	}
 
 	private long lastAppResumeTs = 0;
@@ -574,6 +572,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		lastAppResumeTs = System.currentTimeMillis();
 		log.i("calling bookView.onResume()");
 		bookView.onResume();
+		appPaused = false;
 	}
 
 	private boolean startTrackingKey(KeyEvent event) {
@@ -1186,7 +1185,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				case STATE_DONE:
 				case STATE_BRIGHTNESS:
 				case STATE_FLIP_TRACKING:
-					stopBrightnessControl(-1, -1);
+					stopBrightnessControl(-1, -1, leftSideBrightness);
 					break;
 			}
 			state = STATE_DONE;
@@ -1434,6 +1433,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return true;
 		}
 
+		boolean leftSideBrightness = true;
+
 		public boolean onTouchEvent(MotionEvent event) {
 			int x = (int)event.getX();
 			int y = (int)event.getY();
@@ -1468,7 +1469,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						state = STATE_DONE;
 						return cancel();
 					case STATE_BRIGHTNESS:
-						stopBrightnessControl(x, y);
+						stopBrightnessControl(x, y, leftSideBrightness);
 						state = STATE_DONE;
 						return cancel();
 					case STATE_SELECTION:
@@ -1532,14 +1533,28 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							return true;
 						if (DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
 							// backlight control enabled
-							if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick == 1
-									|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick == 2) {
-								// brightness
-								state = STATE_BRIGHTNESS;
-								startBrightnessControl(start_x, start_y);
-								return true;
+							if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
+								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick > 0
+										|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick > 0) {
+									// brightness
+									state = STATE_BRIGHTNESS;
+									leftSideBrightness = start_x < dragThreshold * 170 / 100;
+									startBrightnessControl(start_x, start_y, leftSideBrightness);
+									return true;
+								}
+							} else {
+								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick == 1
+										|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick == 2) {
+									// brightness
+									state = STATE_BRIGHTNESS;
+									leftSideBrightness = start_x < dragThreshold * 170 / 100;
+									startBrightnessControl(start_x, start_y, leftSideBrightness);
+									return true;
+								}
 							}
 						}
+
+
 						boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
 						int dir = isPageMode ? x - start_x : y - start_y;
 						if (Math.abs(mGesturePageFlipsPerFullSwipe) == 1) {
@@ -1561,7 +1576,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						updateAnimation(x, y);
 						return true;
 					case STATE_BRIGHTNESS:
-						updateBrightnessControl(x, y);
+						updateBrightnessControl(x, y, leftSideBrightness);
 						return true;
 					case STATE_FLIP_TRACKING:
 						updatePageFlipTracking(x, y);
@@ -2116,6 +2131,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int autoScrollSpeed = 1500; // chars / minute
 	private int autoScrollNotificationId = 0;
 	private AutoScrollAnimation currentAutoScrollAnimation = null;
+	private boolean appPaused = false;
 
 	private boolean isAutoScrollActive() {
 		return currentAutoScrollAnimation != null;
@@ -2775,6 +2791,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		case DCMD_TOGGLE_DAY_NIGHT_MODE:
 			//ExternalDocCameDialog dlgE = new ExternalDocCameDialog(mActivity,"sd","dsf");
 			//dlgE.show();
+//			ArrayList<String[]> vl = new ArrayList<String[]>();
+//			String[] arrS1 = {"val1", "hint1"};
+//			vl.add(arrS1);
+//			String[] arrS2 = {"val2", "hint2"};
+//			vl.add(arrS2);
+//			AskSomeValuesDialog dlgA = new AskSomeValuesDialog(mActivity, "asdf", "asdf 2", vl,null);
+//			dlgA.show();
+			//CloudAction.yndCheckCrFolder(mActivity);
 			toggleDayNightMode();
 //			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
 //					0, true);
@@ -2808,21 +2832,45 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_SAVE_READING_POS:
 			log.i("Save reading pos to CLOUD");
-			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
-			Bookmark bmk = getCurrentPositionBookmark();
-			lastSavedToGdBookmark = bmk;
+			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant == 0) {
+				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+			} else {
+				CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+						CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+				Bookmark bmk = getCurrentPositionBookmark();
+				lastSavedToGdBookmark = bmk;
+			}
 			break;
 		case DCMD_LOAD_READING_POS:
-			log.i("Load reading pos from CLOUD");
-			CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
+			log.i("Load rpos from CLOUD");
+			int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant3 == 0) {
+				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+			} else {
+				CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
+						CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1);
+			}
 			break;
 		case DCMD_SAVE_BOOKMARKS:
 			log.i("Save bookmarks to CLOUD");
-			CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
+			int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant2 == 0) {
+				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+			} else {
+				CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+						CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant2 == 1);
+			};
 			break;
 		case DCMD_LOAD_BOOKMARKS:
 			log.i("Load bookmarks from CLOUD");
-			CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
+			int iSyncVariant4 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant4 == 0) {
+				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+			} else {
+				CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
+						CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1);
+			}
 			break;
 		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD:
 			log.i("Save current book to CLOUD");
@@ -2874,21 +2922,45 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return true;
 					} else if (item == ReaderAction.SAVE_READING_POS) {
 						log.i("Save reading pos to CLOUD");
-						CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
+						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+						} else {
+							CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+									CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+						}
 						Bookmark bmk = getCurrentPositionBookmark();
 						lastSavedToGdBookmark = bmk;
 						return true;
 					} else if (item == ReaderAction.LOAD_READING_POS) {
 						log.i("Load reading pos from CLOUD");
-						CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
+						int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant2 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+						} else {
+							CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
+									CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1);
+						}
 						return true;
 					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
 						log.i("Save bookmarks to CLOUD");
-						CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
+						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+						} else {
+							CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+									CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1);
+						}
 						return true;
 					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
 						log.i("Load bookmarks from CLOUD");
-						CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false);
+						int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant3 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+						} else {
+							CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
+									CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1);
+						}
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD) {
 						log.i("Save current book to CLOUD");
@@ -4498,12 +4570,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	int currentBrightnessValueIndex = -1;
-	private void startBrightnessControl(final int startX, final int startY)
+	private void startBrightnessControl(final int startX, final int startY, final boolean leftSide)
 	{
 		currentBrightnessValueIndex = -1;
-		updateBrightnessControl(startX, startY);
+		updateBrightnessControl(startX, startY, leftSide);
 	}
-	private void updateBrightnessControl(final int x, final int y) {
+	private void updateBrightnessControl(final int x, final int y, final boolean leftSide) {
 		int n = OptionsDialog.mBacklightLevels.length;
 		int index = n - 1 - y * n / surface.getHeight();
 		if ( index<0 )
@@ -4513,14 +4585,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if ( index != currentBrightnessValueIndex ) {
 			currentBrightnessValueIndex = index;
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
-			mActivity.setScreenBacklightLevel(newValue);
+			mActivity.setScreenBacklightLevel(newValue, leftSide);
 		}
 
 	}
-	private void stopBrightnessControl(final int x, final int y) {
+	private void stopBrightnessControl(final int x, final int y, final boolean leftSide) {
 		if ( currentBrightnessValueIndex>=0 ) {
 			if ( x>=0 && y>=0 ) {
-				updateBrightnessControl(x, y);
+				updateBrightnessControl(x, y, leftSide);
 			}
 			mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, OptionsDialog.mBacklightLevels[currentBrightnessValueIndex]);
 			OptionsDialog.mBacklightLevelsTitles[0] = mActivity.getString(R.string.options_app_backlight_screen_default);
@@ -5597,6 +5669,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			//Properties oldSettings = new Properties(mSettings);
 			// TODO: enable storing of profile per book
 			mActivity.setCurrentProfile(profileNumber);
+			if (profileNumber == 0) { // if there is no book profile, then set it to current
+				if (mActivity.getCurrentProfile() != 0)
+					if (mBookInfo != null && mBookInfo.getFileInfo() != null) {
+						mBookInfo.getFileInfo().setProfileId(mActivity.getCurrentProfile());
+						mActivity.getDB().saveBookInfo(mBookInfo);
+					}
+			}
+			log.v("BookProfileNumber : "+ profileNumber);
 			if ( mBookInfo!=null && mBookInfo.getLastPosition()!=null )
 				pos = mBookInfo.getLastPosition().getStartPos();
 			log.v("LoadDocumentTask : book info " + mBookInfo);
@@ -6036,7 +6116,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 									}
 								}
 							}}, delayMillis);
-						boolean bNeedSave = true;
+						boolean bNeedSave = !appPaused;
 						if (lastSavedToGdBookmark!=null) {
 							if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
 								bNeedSave = false;
@@ -6051,10 +6131,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 									public void run() {
 										if (mylastSavePositionCloudTaskId == lastSavePositionCloudTaskId) {
 											if (bookInfo != null) {
-												mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("&");
-												log.i("Save reading pos to CLOUD");
-												lastSavedToGdBookmark = bmk;
-												CloudSyncFolder.saveJsonInfoFile(((CoolReader)mActivity),CloudSyncFolder.CLOUD_SAVE_READING_POS, false);
+												if (!appPaused) {
+													mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("&");
+													log.i("Save reading pos to CLOUD");
+													lastSavedToGdBookmark = bmk;
+													int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+													if (iSyncVariant > 0)
+														CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+																CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+												}
 											}
 										}
 									}
@@ -6568,7 +6653,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private void showSwitchProfileDialog() {
-		SwitchProfileDialog dlg = new SwitchProfileDialog(mActivity, this);
+		SwitchProfileDialog dlg = new SwitchProfileDialog(mActivity, this, null);
 		dlg.show();
 	}
 

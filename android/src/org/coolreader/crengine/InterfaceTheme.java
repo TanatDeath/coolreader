@@ -164,7 +164,7 @@ public class InterfaceTheme {
 
 	
 	public final static InterfaceTheme[] allThemes = {
-		BLACK, WHITE, DARK, LIGHT, GRAY1, GRAY2, HICONTRAST1, HICONTRAST2
+		BLACK, WHITE, DARK, LIGHT, GRAY1, GRAY2 //, HICONTRAST1, HICONTRAST2
 	};
 	
 	public static InterfaceTheme findByCode(String code) {

@@ -1,7 +1,7 @@
 package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
-import org.coolreader.Dictionaries;
+import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
 
 import android.app.SearchManager;

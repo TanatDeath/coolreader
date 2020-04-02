@@ -165,6 +165,7 @@
     <string name="action_repeat">(автоповтор)</string>
     <string name="options_app_scan_book_props">Сканировать свойства книг в директории</string>
     <string name="options_page_titlebar">Настройки колонтитула</string>
+    <string name="options_page_titlebar_new">Настройки колонтитула и полноэкранного режима</string>
     <string name="options_page_show_titlebar_chapter_marks">Метки глав</string>
     <string name="options_page_show_titlebar_battery_percent">Заряд батареи в %</string>
     <string name="options_page_titlebar_font_size">Размер шрифта</string>
@@ -502,6 +503,7 @@
     <string name="dlg_about_donation_platinum">$30: купить Платиновую монету Cool Reader</string>
     <string name="mi_donation">Пожертвовать</string>
     <string name="dlg_about_donation_inapp_purchase">Cool Reader - бесплатная свободная программа, и всегда будет оставаться такой. Вы можете поддержать развитие проекта с помощью Android Market:</string>
+    <string name="dlg_about_donation_inapp_purchase_plotn">Этот форк программы Cool Reader бесплатный и поддерживается мной (plotn). Вы можете поддержать развитие проекта, для этого свяжитесь со мной на форуме 4pda через QMS сообщения.</string>
     <string name="mi_font_next">Следующий шрифт</string>
     <string name="mi_font_size_decrease">Уменьшить шрифт</string>
     <string name="mi_font_size_increase">Увеличить шрифт</string>
@@ -858,7 +860,7 @@
     <string name="options_app_browser_hide_empty_dirs_add_info">Скрывать папки не содержащие книг</string>
     <string name="mi_book_browser_simple_mode_add_info">Данная опция отключает отображение обложек и прочей информации в папках с книгами</string>
     <string name="save_pos_to_cloud_timeout_add_info">Позиция чтения будет сохраняться каждые 1-100 минут в облачное хранилище, изначально выключено (требуется разрешение использования аккаунта)</string>
-    <string name="save_pos_timeout_add_info">Позиция чтения будет сохраняться в на этом устройстве</string>
+    <string name="save_pos_timeout_add_info">Позиция чтения будет сохраняться на этом устройстве</string>
     <string name="options_app_key_actions_add_info">Назначение действий для кнопок и поведения при подключении гарнитуры</string>
     <string name="options_app_tapzones_normal_add_info">Настройка действий программы при нажатии на область экрана (экран разбит на 9 клеток 3x3)</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Настройка дополнительного действия при длинном или коротком нажатии</string>
@@ -866,7 +868,7 @@
     <string name="options_controls_enable_volume_keys_add_info">Листание страниц кнопками громкости</string>
     <string name="options_app_tapzone_hilite_add_info">Выделять место нажатия на экран прямоугольником</string>
     <string name="options_app_trackball_disable_add_info">Отключение трекбола для предотвращения случайного пролистывания (пример: HTC A8181)</string>
-    <string name="options_controls_flick_brightness_add_info">Проведите пальцем вверх или вниз для увеличения или уменьшения яркости (Выключено, Левый край, Правый край)</string>
+    <string name="options_controls_flick_brightness_add_info">Проведите пальцем вверх или вниз для увеличения или уменьшения яркости (Выключено, Левый край, Правый край). Для EINK устройств с двойной подсветкой (теплая и холодная) - будут задействованы обе стороны</string>
     <string name="option_controls_gesture_page_flipping_enabled_add_info">Листать страницы с помощью жестов (Выключено, 1-20 страниц), по умолчанию 1 страница (справа налево)</string>
     <string name="options_selection_action_add_info">Действие, которое запускается при выделении слова</string>
     <string name="options_multi_selection_action_add_info">Действие, которое запускается при выделении нескольких слов</string>
@@ -883,7 +885,7 @@
     <string name="options_color_text_add_info">Выбор цвета текста</string>
     <string name="options_color_background_add_info">Выбор цвета фона</string>
     <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета. Для добавления текстуры - отправьте изображение из программы просмотра изображений в CoolReader</string>
-    <string name="options_page_titlebar_add_info">Параметры отображения информации в колонтитуле</string>
+    <string name="options_page_titlebar_add_info">Параметры отображения информации в колонтитуле, параметры полноэкранного отображения</string>
     <string name="options_page_footnotes_add_info">Отображение сносок (если есть) внизу страницы</string>
     <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
     <string name="options_view_bookmarks_highlight_add_info">Выбор или отключение выделения закладок</string>
@@ -1002,7 +1004,7 @@
     <string name="ext_fullscreen_margin_0">Отключен</string>
     <string name="ext_fullscreen_margin_1">Включен</string>
     <string name="ext_fullscreen_margin_2">Включен, отступ линии прочитанного: </string>
-    <string name="ext_fullscreen_margin_3">Включен, 2 текстовые строки в статусе</string>
+    <string name="ext_fullscreen_margin_3">Включен, (всегда) 2 текстовые строки в колонтитуле</string>
     <string name="downloaded_from_catalog">Скачано книг:</string>
     <string name="external_doc_option1">Действие - открыть из потока</string>
     <string name="external_doc_option2">Действие - сохранить на устройство</string>
@@ -1032,5 +1034,36 @@
     <string name="error_open_as_text">Функция \'Открыть как текст\' недоступна</string>
     <string name="open_as_html_add_info">Если выбрано \'Открыть как текст\' - документ будет преобразован в обычный текст</string>
     <string name="doc_convert_needed">Необходимо преобразование документа</string>
+    <string name="toolbar">Панель инструментов</string>
+    <string name="toolbar_settings">Настройки панели инструментов</string>
+    <string name="cloud_settings">Настройки облачных сервисов</string>
+    <string name="dictionary_settings">Настройки словарей</string>
+    <string name="filebrowser_settings">Настройки файлового браузера</string>
+    <string name="rare_settings">Редкие и экспериментальные настройки</string>
+    <string name="page_color_settings">Настройки цветов и ночного режима</string>
+    <string name="page_margins_settings">Настройки отступов страницы</string>
+    <string name="yandex_settings">Настройки Яндекс диска</string>
+    <string name="yandex_settings_v">Открыть диалог настройки Яндекс диска</string>
+    <string name="dropbox_settings">Настройки Dropbox</string>
+    <string name="dropbox_settings_v">Открыть диалог найстройки dropbox</string>
+    <string name="cloud_sync_variant">Вариант облачной синхронизации</string>
+    <string name="cloud_sync_variant1">Отключена</string>
+    <string name="cloud_sync_variant2">Через файловую систему</string>
+    <string name="cloud_sync_variant3">Через Яндекс диск</string>
+    <string name="cloud_sync_variant1_v">Облачная синхронизация отключена</string>
+    <string name="cloud_sync_variant2_v">Синхронизация будет производиться через локальную файловую систему - необходимо настроить стороннюю утилиту для синхронизации папки cr3e/cloudsync между устройствами</string>
+    <string name="cloud_sync_variant3_v">Синхронизация будет производиться через Яндекс диск (используется папка Coolreader)</string>
+    <string name="switch_profile_note">Переключение профилей доступно только при открытой книге</string>
+    <string name="settings_info">Глобальные настройки выделены курсивом (остальные - зависят от выбранного профиля)</string>
+    <string name="global_margin">Отступ экрана (требуется перезапуск)</string>
+    <string name="global_margin_add_info">Для устройств с тачскрином и бортиками</string>
+    <string name="lang_from">С языка</string>
+    <string name="lang_to">На язык</string>
+    <string name="specify_translation_dir_full">Укажите направление перевода (для книги)</string>
+    <string name="specify_translation_dir">Направление перевода</string>
+    <string name="settings_profile">Профиль</string>
+    <string name="rename_profile">Переименовать профиль</string>
+    <string name="new_profile">Новое наименование</string>
+    <string name="no_bookmarks">В этой книге нет закладок</string>
 </resources>
 

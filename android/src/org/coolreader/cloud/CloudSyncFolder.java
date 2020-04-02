@@ -13,6 +13,7 @@ import org.coolreader.crengine.ChooseConfFileDlg;
 import org.coolreader.crengine.ChooseReadingPosDlg;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ReaderView;
+import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
 
@@ -177,50 +178,23 @@ public class CloudSyncFolder {
         }
     }
 
-    public static void saveJsonInfoFile(CoolReader cr, int iSaveType, boolean bQuiet) {
-        Log.d(TAG, "Starting save json to drive...");
+    //CloudAction.yndCheckCrFolder(mActivity);
 
-        final ReaderView rv = cr.getReaderView();
-        if (rv == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
-            return;
-        }
-        if (rv.getBookInfo() == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
-            return;
-        }
-        if (rv.getBookInfo().getFileInfo() == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
-            return;
-        }
-
-        ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CloudSyncDirs, true);
+    public static void checkOldFiles(ArrayList<String> tDirs, String sCRC, int iSaveType) {
         String sDir = "";
         if (tDirs.size() > 0) sDir = tDirs.get(0);
         if (!StrUtils.isEmptyStr(sDir))
             if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\"))) sDir = sDir + "/";
         if (!StrUtils.isEmptyStr(sDir)) {
-            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String prettyJson = "";
-
-            Bookmark bmk = null;
-            ArrayList<Bookmark> abmk = null;
-            String fileMark = "";
-            String descr = "";
-            final String sBookFName = rv.getBookInfo().getFileInfo().filename;
             if (iSaveType == CLOUD_SAVE_READING_POS) {
-                // delete old files
-                CRC32 crc = new CRC32();
-                crc.update(sBookFName.getBytes());
-                final String sCRC = String.valueOf(crc.getValue());
                 File fDir = new File(sDir);
                 File[] matchingFiles = fDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
-                        return name.contains("_rpos_")&&(name.contains(sCRC));
+                        return name.contains("_rpos_") && (name.contains(sCRC));
                     }
                 });
                 ArrayList<File> mReadingPosList = new ArrayList<File>();
-                for (File f: matchingFiles) mReadingPosList.add(f);
+                for (File f : matchingFiles) mReadingPosList.add(f);
 
                 Comparator<File> compareByDate = new Comparator<File>() {
                     @Override
@@ -229,43 +203,25 @@ public class CloudSyncFolder {
                     }
                 };
                 Collections.sort(mReadingPosList, compareByDate);
-                for (int i=0;i<40;i++) {
-                    if (mReadingPosList.size()>0) mReadingPosList.remove(0);
+                for (int i = 0; i < 40; i++) {
+                    if (mReadingPosList.size() > 0) mReadingPosList.remove(0);
                 }
-                for (File f: mReadingPosList) f.delete();
-                // continue
-                fileMark = "_rpos_";
-                bmk = rv.getCurrentPositionBookmark();
-                if (bmk == null) {
-                    if (!bQuiet)
-                        cr.showToast(cr.getString(R.string.cloud_error) + ": pos was not got");
-                    return;
-                }
-                prettyJson = gson.toJson(bmk);
-                double dPerc = bmk.getPercent();
-                dPerc = dPerc / 100;
-                final String sPerc = String.format("%5.2f", dPerc) + "% of ";
-                descr = sPerc + sBookFName + " ~from " + cr.getModel();
+                for (File f : mReadingPosList) f.delete();
             }
-            if (iSaveType == CLOUD_SAVE_BOOKMARKS) {
-                fileMark = "_bmk_";
-                abmk = rv.getBookInfo().getAllBookmarksWOPos();
-                if (abmk == null) {
-                    if (!bQuiet)
-                        cr.showToast(cr.getString(R.string.cloud_error) + ": bookmarks were not got");
-                    return;
-                }
-                if (abmk.isEmpty()) return;
-                prettyJson = gson.toJson(abmk);
-                descr = String.valueOf(abmk.size()) + " bookmark(s) of " + sBookFName + " ~from " + cr.getModel();
-            }
-            CRC32 crc = new CRC32();
-            crc.update(sBookFName.getBytes());
-            final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
-            final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
+        }
+    }
 
-            final String sFName = sFName0.toString() + fileMark + String.valueOf(crc.getValue()) + "_" + cr.getAndroid_id();
-
+    public static void saveJsonToFile(CoolReader cr, ArrayList<String> tDirs,
+            String sCRC, int iSaveType, String fileMark, String prettyJson,
+                                      String descr, boolean bQuiet) {
+        final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
+        final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
+        final String sFName = sFName0.toString() + fileMark + String.valueOf(sCRC) + "_" + cr.getAndroid_id();
+        String sDir = "";
+        if (tDirs.size() > 0) sDir = tDirs.get(0);
+        if (!StrUtils.isEmptyStr(sDir))
+            if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\"))) sDir = sDir + "/";
+        if (!StrUtils.isEmptyStr(sDir)) {
             boolean bWasErr = false;
             try {
                 File f = new File(sDir + sFName + ".json");
@@ -295,20 +251,87 @@ public class CloudSyncFolder {
         }
     }
 
-    public static void loadFromJsonInfoFileList(CoolReader cr, int iSaveType, boolean bQuiet) {
-        Log.d(TAG, "Starting load json file list from drive...");
+    public static void saveJsonToCloud(CoolReader cr,
+                                      String sCRC, int iSaveType, String fileMark, String prettyJson,
+                                      String descr, boolean bQuiet, String addName) {
+        final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
+        final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
+        String sFName = sFName0.toString() + fileMark + String.valueOf(sCRC) + "_" + cr.getAndroid_id();
+        sFName = sFName + addName + ".json";
+        CloudAction.yndSaveJsonFile(cr, sFName, prettyJson);
+    }
+
+    public static void saveJsonInfoFileOrCloud(CoolReader cr, int iSaveType, boolean bQuiet, boolean toFile) {
+        Log.d(TAG, "Starting save json to drive...");
 
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
             if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
             return;
         }
-
+        if (rv.getBookInfo() == null) {
+            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            return;
+        }
+        if (rv.getBookInfo().getFileInfo() == null) {
+            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            return;
+        }
+        String prettyJson = "";
+        Bookmark bmk = null;
+        ArrayList<Bookmark> abmk = null;
+        String fileMark = "";
+        String descr = "";
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         final String sBookFName = rv.getBookInfo().getFileInfo().filename;
         CRC32 crc = new CRC32();
         crc.update(sBookFName.getBytes());
         final String sCRC = String.valueOf(crc.getValue());
+        String addName = "";
+        if (iSaveType == CLOUD_SAVE_READING_POS) {
+            fileMark = "_rpos_";
+            bmk = rv.getCurrentPositionBookmark();
+            if (bmk == null) {
+                if (!bQuiet)
+                    cr.showToast(cr.getString(R.string.cloud_error) + ": pos was not got");
+                return;
+            }
+            double dPerc = bmk.getPercent();
+            dPerc = dPerc / 100;
+            final String sPerc = String.format("%5.2f", dPerc) + "% of ";
+            addName = "_" + String.format("%5.2f", dPerc).trim();
+            descr = sPerc + sBookFName + " ~from " + cr.getModel();
+            bmk.setAddCommentText(descr);
+            prettyJson = gson.toJson(bmk);
+        }
+        if (iSaveType == CLOUD_SAVE_BOOKMARKS) {
+            fileMark = "_bmk_";
+            abmk = rv.getBookInfo().getAllBookmarksWOPos();
+            if (abmk == null) {
+                if (!bQuiet)
+                    cr.showToast(cr.getString(R.string.cloud_error) + ": bookmarks were not got");
+                return;
+            }
+            if (abmk.isEmpty()) {
+                cr.showToast(cr.getString(R.string.no_bookmarks));
+                return;
+            }
+            descr = String.valueOf(abmk.size()) + " bookmark(s) of " + sBookFName + " ~from " + cr.getModel();
+            addName = "_" + String.valueOf(abmk.size()).trim();
+            for (Bookmark bmk2: abmk) bmk2.setAddCommentText(descr);
+            prettyJson = gson.toJson(abmk);
+        }
+        if (toFile) {
+            ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CloudSyncDirs, true);
+            checkOldFiles(tDirs, sCRC, iSaveType);
+            saveJsonToFile(cr, tDirs, sCRC, iSaveType, fileMark, prettyJson, descr, bQuiet);
+        } else {
+            saveJsonToCloud(cr, sCRC, iSaveType, fileMark, prettyJson, descr, bQuiet, addName);
+        }
 
+    }
+
+    public static void loadFromJsonInfoFileListFS(CoolReader cr, int iSaveType, boolean bQuiet, String sCRC) {
         ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CloudSyncDirs, true);
         String sDir = "";
         if (tDirs.size() > 0) sDir = tDirs.get(0);
@@ -319,7 +342,7 @@ public class CloudSyncFolder {
             if (iSaveType == CLOUD_SAVE_READING_POS) {
                 File[] matchingFiles = fDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
-                        return name.contains("_rpos_")&&(name.endsWith(".json"))&&(name.contains(sCRC));
+                        return name.contains("_rpos_") && (name.endsWith(".json")) && (name.contains(sCRC));
                     }
                 });
                 ChooseReadingPosDlg dlg = new ChooseReadingPosDlg(cr, matchingFiles);
@@ -328,7 +351,7 @@ public class CloudSyncFolder {
             if (iSaveType == CLOUD_SAVE_BOOKMARKS) {
                 File[] matchingFiles = fDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
-                        return name.contains("_bmk_")&&(name.endsWith(".json"))&&(name.contains(sCRC));
+                        return name.contains("_bmk_") && (name.endsWith(".json")) && (name.contains(sCRC));
                     }
                 });
                 ChooseBookmarksDlg dlg = new ChooseBookmarksDlg(cr, matchingFiles);
@@ -337,24 +360,45 @@ public class CloudSyncFolder {
         }
     }
 
-    public static void loadFromJsonInfoFile(CoolReader cr, int iSaveType, String filePath, boolean bQuiet) {
-        final File fSett = cr.getSettingsFile(0);
-        Log.d(TAG, "Starting load json file from drive...");
-
+    public static void loadFromJsonInfoFileList(CoolReader cr, int iSaveType, boolean bQuiet,
+                                                boolean fromFile) {
+        Log.d(TAG, "Starting load json file list from drive...");
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
             if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
             return;
         }
 
-        String sFile = Utils.readFileToString(filePath);
-        if (StrUtils.isEmptyStr(sFile)) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": json file was not found");
+        final String sBookFName = rv.getBookInfo().getFileInfo().filename;
+        CRC32 crc = new CRC32();
+        crc.update(sBookFName.getBytes());
+        final String sCRC = String.valueOf(crc.getValue());
+        if (fromFile) {
+            loadFromJsonInfoFileListFS(cr, iSaveType, bQuiet, sCRC);
+        } else {
+            String fileMark = "_rpos_";
+            if (iSaveType == CLOUD_SAVE_BOOKMARKS) fileMark = "_bmk_";
+            CloudAction.yndLoadJsonFileList(cr, fileMark, sCRC);
+        }
+    }
+
+    public static void applyRPosOrBookmarks(CoolReader cr, int iSaveType, String sContent,
+                                            boolean bQuiet) {
+        final ReaderView rv = cr.getReaderView();
+        if (rv == null) {
+            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
             return;
         }
+
+        if (StrUtils.isEmptyStr(sContent)) {
+            if (!bQuiet)
+                cr.showToast(cr.getString(R.string.cloud_error) + ": json file was not found (or empty)");
+            return;
+        }
+
         if (iSaveType == CLOUD_SAVE_READING_POS) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            Bookmark bmk = gson.fromJson(sFile, Bookmark.class);
+            Bookmark bmk = gson.fromJson(sContent, Bookmark.class);
             if (bmk != null) {
                 bmk.setTimeStamp(System.currentTimeMillis());
                 rv.savePositionBookmark(bmk);
@@ -364,10 +408,11 @@ public class CloudSyncFolder {
                 if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": reading pos updated");
             }
         }
+
         if (iSaveType == CLOUD_SAVE_BOOKMARKS) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             ArrayList<Bookmark> abmkThis = rv.getBookInfo().getAllBookmarks();
-            ArrayList<Bookmark> abmk = new ArrayList<Bookmark>(StrUtils.stringToArray(sFile, Bookmark[].class));
+            ArrayList<Bookmark> abmk = new ArrayList<Bookmark>(StrUtils.stringToArray(sContent, Bookmark[].class));
             int iCreated = 0;
             for (Bookmark bmk: abmk) {
                 boolean bFound = false;
@@ -381,6 +426,25 @@ public class CloudSyncFolder {
             }
             rv.highlightBookmarks();
             if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": " + iCreated + " bookmark(s) created");
+        }
+    }
+
+    public static void loadFromJsonInfoFile(CoolReader cr, int iSaveType, String filePath, boolean bQuiet,
+                                            String name, int cloudMode) {
+        final File fSett = cr.getSettingsFile(0);
+        Log.d(TAG, "Starting load json file from drive...");
+
+        final ReaderView rv = cr.getReaderView();
+        if (rv == null) {
+            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            return;
+        }
+
+        if (cloudMode == Settings.CLOUD_SYNC_VARIANT_YANDEX) {
+            CloudAction.yndLoadJsonFile(cr, iSaveType, filePath, bQuiet, name, cloudMode);
+        } else {
+            String sFile = Utils.readFileToString(filePath);
+            applyRPosOrBookmarks(cr, iSaveType, sFile, bQuiet);
         }
     }
 }

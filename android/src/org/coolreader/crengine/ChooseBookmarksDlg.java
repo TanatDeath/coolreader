@@ -28,6 +28,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	private LayoutInflater mInflater;
 	private BookmarksListView mList;
 
+	public int cloudMode;
+
 	public ArrayList<CloudFileInfo> mBookmarksList;
 
 	public final static int ITEM_POSITION=0;
@@ -150,7 +152,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			if ( mBookmarksList==null )
 				return true;
 			CloudFileInfo m = mBookmarksList.get(position);
-			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, m.path,false);
+			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, m.path,
+					false, m.name, cloudMode);
 			dismiss();
 			return true;
 		}

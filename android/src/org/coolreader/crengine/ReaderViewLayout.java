@@ -5,6 +5,7 @@ import org.coolreader.crengine.CRToolBar.OnActionHandler;
 
 import android.graphics.Rect;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 public class ReaderViewLayout extends ViewGroup implements Settings {
 
@@ -15,6 +16,10 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		private StatusBar statusView;
 		private UserDicPanel userDicView;
 		private CRToolBar toolbarView;
+		private LinearLayout llLeft;
+		private LinearLayout llRight;
+		private LinearLayout llTop;
+		private LinearLayout llBottom;
 		private int statusBarLocation;
 		private int toolbarLocation;
 		private int userDicLocation;
@@ -23,7 +28,11 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		private boolean nightMode;
 		ReaderView.ToolbarBackgroundDrawable toolbarBackground;
 		ReaderView.ToolbarBackgroundDrawable statusBackground;
-	
+		ReaderView.ToolbarBackgroundDrawable llLeftBackground;
+		ReaderView.ToolbarBackgroundDrawable llRightBackground;
+		ReaderView.ToolbarBackgroundDrawable llTopBackground;
+		ReaderView.ToolbarBackgroundDrawable llBottomBackground;
+
 		public CRToolBar getToolBar() {
 			return toolbarView;
 		}
@@ -136,6 +145,30 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			this.addView(contentView.getSurface());
 			this.addView(statusView);
 			this.addView(userDicView);
+			llLeft = new LinearLayout(context);
+			llLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			llLeft.setOrientation(LinearLayout.HORIZONTAL);
+			llLeftBackground = contentView.createToolbarBackgroundDrawable();
+			llLeft.setBackgroundDrawable(llLeftBackground);
+			llRight = new LinearLayout(context);
+			llRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			llRight.setOrientation(LinearLayout.HORIZONTAL);
+			llRightBackground = contentView.createToolbarBackgroundDrawable();
+			llRight.setBackgroundDrawable(llRightBackground);
+			llTop = new LinearLayout(context);
+			llTop.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			llTop.setOrientation(LinearLayout.HORIZONTAL);
+			llTopBackground = contentView.createToolbarBackgroundDrawable();
+			llTop.setBackgroundDrawable(llTopBackground);
+			llBottom = new LinearLayout(context);
+			llBottom.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			llBottom.setOrientation(LinearLayout.HORIZONTAL);
+			llBottomBackground = contentView.createToolbarBackgroundDrawable();
+			llBottom.setBackgroundDrawable(llBottomBackground);
+			this.addView(llLeft);
+			this.addView(llRight);
+			this.addView(llTop);
+			this.addView(llBottom);
 			toolbarView.setFocusable(false);
 			statusView.setFocusable(false);
 			toolbarView.setFocusableInTouchMode(false);
@@ -176,6 +209,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		@Override
 		protected void onLayout(boolean changed, int l, int t, int r, int b) {
 			log.v("onLayout(" + l + ", " + t + ", " + r + ", " + b + ")");
+
 		//	for (StackTraceElement ste: Thread.currentThread().getStackTrace()) {
 		//		log.v(ste.toString());
 		//	};
@@ -183,6 +217,23 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			b -= t;
 			t = 0;
 			l = 0;
+
+			int full_l = l;
+			int full_r = r;
+			int full_t = t;
+			int full_b = b;
+
+			int marg = activity.settings().getInt(PROP_GLOBAL_MARGIN, 0);
+			l = l + marg;
+			r = r - marg;
+			t = t + marg;
+			b = b - marg;
+			if (marg > 0) {
+				llLeft.layout(0, full_t, marg, full_b);
+				llRight.layout(full_r-marg, full_t, full_r, full_b);
+				llTop.layout(full_l, 0, full_r, marg);
+				llBottom.layout(full_l, full_b - marg, full_r, full_b);
+			}
 
 			statusView.setVisibility(isStatusbarVisible() ? VISIBLE : GONE);
 			userDicView.setVisibility(isUserDicVisible() ? VISIBLE : GONE);

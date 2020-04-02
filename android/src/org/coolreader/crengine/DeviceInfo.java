@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 import android.graphics.PixelFormat;
@@ -17,6 +18,8 @@ public class DeviceInfo {
 	public final static boolean SAMSUNG_BUTTONS_HIGHLIGHT_PATCH;
 	private final static boolean EINK_SCREEN;
 	public final static boolean SCREEN_CAN_CONTROL_BRIGHTNESS;
+	public final static boolean ONYX_BRIGHTNESS;
+	public final static boolean ONYX_BRIGHTNESS_WARM;
 	public final static boolean EINK_SCREEN_UPDATE_MODES_SUPPORTED;
 	public final static boolean NOOK_NAVIGATION_KEYS;
 	public final static boolean EINK_NOOK;
@@ -52,7 +55,9 @@ public class DeviceInfo {
 	}
 
 	public static boolean isUseCustomToast(boolean isEinkFromSettings) {
-		return USE_CUSTOM_TOAST || isEinkFromSettings;
+		boolean custToast = USE_CUSTOM_TOAST || isEinkFromSettings;
+		if (getSDKLevel() >= DeviceInfo.KITKAT) return false;
+		return custToast;
 	}
 
 	public static android.graphics.Bitmap.Config getBufferColorFormat(boolean isEinkFromSettings) {
@@ -87,8 +92,10 @@ public class DeviceInfo {
 		// TODO: more devices here
 	};
 
-	public final static int ICE_CREAM_SANDWICH = 14;
 	public final static int HONEYCOMB = 11;
+	public final static int ICE_CREAM_SANDWICH = 14;
+	public final static int KITKAT = 19;
+	public final static int LOLLIPOP_5_0 = 21;
 
 	private static int sdkInt = 0;
 	public static int getSDKLevel() {
@@ -150,9 +157,20 @@ public class DeviceInfo {
 
 		EINK_SCREEN = EINK_SONY || EINK_NOOK || EINK_ONYX || EINK_ENERGYSYSTEM || EINK_DNS || EINK_TOLINO; // TODO: set to true for eink devices like Nook Touch
 
-		SCREEN_CAN_CONTROL_BRIGHTNESS = (!EINK_SCREEN) || (EINK_NOOK && DEVICE.toLowerCase().contentEquals("ntx_6sl") &&
-				MODEL.contentEquals("BNRV510"));
-
+		boolean b1 = false;
+		boolean b2 = false;
+		try {
+			File f1 = new File("/sys/class/backlight/white/brightness");
+			File f2 = new File("/sys/class/backlight/warm/brightness");
+			b1 = f1.exists();
+			b2 = f2.exists();
+		} catch (Exception e){
+		}
+		ONYX_BRIGHTNESS = b1;
+		ONYX_BRIGHTNESS_WARM = b2;
+		SCREEN_CAN_CONTROL_BRIGHTNESS = ((!EINK_SCREEN) || (EINK_NOOK && DEVICE.toLowerCase().contentEquals("ntx_6sl") &&
+				MODEL.contentEquals("BNRV510")))
+				|| ONYX_BRIGHTNESS || ONYX_BRIGHTNESS_WARM;
 		// On Onyx Boox Monte Cristo 3 (and possible Monte Cristo, Monte Cristo 2) long press action on buttons are catch by system and not available for application
 		// TODO: check this on other ONYX BOOX Readers
 		ONYX_BUTTONS_LONG_PRESS_NOT_AVAILABLE = EINK_ONYX && MODEL.toLowerCase().startsWith("mc_kepler");
@@ -163,7 +181,7 @@ public class DeviceInfo {
 		SONY_NAVIGATION_KEYS = EINK_SONY;
 		EINK_SCREEN_UPDATE_MODES_SUPPORTED = EINK_SCREEN && ( EINK_NOOK || EINK_TOLINO || EINK_ONYX ); // TODO: add autodetect
 		FORCE_HC_THEME = EINK_SCREEN || MODEL.equalsIgnoreCase("pocketbook vision");
-		USE_CUSTOM_TOAST = EINK_SCREEN;
+		USE_CUSTOM_TOAST = EINK_SCREEN && (getSDKLevel() < DeviceInfo.KITKAT);
 		NOFLIBUSTA = POCKETBOOK;
 		NAVIGATE_LEFTRIGHT = POCKETBOOK && DEVICE.startsWith("EP10");
 		REVERT_LANDSCAPE_VOLUME_KEYS = POCKETBOOK && DEVICE.startsWith("EP5A");

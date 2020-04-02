@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.text.ClipboardManager;
@@ -121,6 +123,20 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("system.device_model", R.string.book_info_system_device_model);
 		mLabelMap.put("system.device_flags", R.string.book_info_system_device_flags);
 	}
+
+	protected void updateGlobalMargin(ViewGroup v,
+									  boolean left, boolean top, boolean right, boolean bottom) {
+		if (v == null) return;
+		ViewGroup.LayoutParams lp = v.getLayoutParams();
+		int globalMargins = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		if (globalMargins > 0)
+			if (lp instanceof ViewGroup.MarginLayoutParams) {
+				if (top) ((ViewGroup.MarginLayoutParams) lp).topMargin = globalMargins;
+				if (bottom) ((ViewGroup.MarginLayoutParams) lp).bottomMargin = globalMargins;
+				if (left) ((ViewGroup.MarginLayoutParams) lp).leftMargin = globalMargins;
+				if (right) ((ViewGroup.MarginLayoutParams) lp).rightMargin = globalMargins;
+			}
+	}
 	
 	private void addItem(TableLayout table, String item) {
 		int p = item.indexOf("=");
@@ -194,6 +210,14 @@ public class BookInfoDialog extends BaseDialog {
 		table.addView(tableRow);
 	}
 
+	private void setDashedButton(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
 	private void paintMarkButton() {
 		int colorGrayC;
 		int colorBlue;
@@ -204,10 +228,11 @@ public class BookInfoDialog extends BaseDialog {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		//if (bMarkToRead) btnMarkToRead.setBackgroundColor(colorGrayCT2);
-		//	else btnMarkToRead.setBackgroundColor(colorGrayCT);
-		if (bMarkToRead) btnMarkToRead.setBackgroundResource(R.drawable.button_bg_dashed_border);
-			else btnMarkToRead.setBackgroundColor(colorGrayCT);
+		if (bMarkToRead) setDashedButton(btnMarkToRead);
+			else {
+				btnMarkToRead.setBackgroundColor(colorGrayCT);
+				btnMarkToRead.setPaintFlags( btnMarkToRead.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+			}
 		btnMarkToRead.setTextColor(colorBlue);
 	}
 
@@ -488,6 +513,13 @@ public class BookInfoDialog extends BaseDialog {
 				}
 			}
 		});
+		File f = activity.getSettingsFile(activity.getCurrentProfile());
+		String sF = f.getAbsolutePath();
+		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
+		TextView prof = (TextView) view.findViewById(R.id.lbl_profile);
+		String sprof = activity.getCurrentProfileName();
+		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
+		prof.setText(activity.getString(R.string.settings_profile)+": "+sprof + sF);
 		String sss = "";
 		if (mActionType == OPDS_INFO) sss = "["+mCoolReader.getString(R.string.book_info_action_download1)+"]\n";
 		if (mActionType == OPDS_FINAL_INFO) sss = sss = "["+mCoolReader.getString(R.string.book_info_action_download2)+"]\n";
@@ -542,6 +574,8 @@ public class BookInfoDialog extends BaseDialog {
 		for ( String item : items ) {
 			addItem(table, item);
 		}
+		buttonsLayout = (ViewGroup)view.findViewById(R.id.base_dlg_button_panel);
+		updateGlobalMargin(buttonsLayout, true, true, true, false);
 		setView( view );
 	}
 

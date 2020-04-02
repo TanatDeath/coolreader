@@ -33,6 +33,19 @@ public class YNDInputTokenDialog extends BaseDialog {
 	//final Button authManual;
 	final Button authAuto;
 
+	private String extractToken(String sUri) {
+		if (sUri.contains(YNDConfig.YND_REDIRECT_URL)) {
+			String token = "";
+			if (sUri.contains("#access_token=")) {
+				token = sUri.substring(sUri.indexOf("#access_token="));
+				if (token.contains("&")) token = token.split("\\&")[0];
+				token = token.replace("#access_token=", "");
+				return token;
+			}
+		}
+		return sUri;
+	}
+
 	public void saveYNDToken() {
 		if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
 			Log.i("YND","Starting save ynd.token");
@@ -45,7 +58,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 				try {
 					fw = new FileWriter(fYND);
 					bw = new BufferedWriter(fw);
-					bw.write(tokenEdit.getText().toString());
+					bw.write(extractToken(tokenEdit.getText().toString()));
 					bw.close();
 					fw.close();
 				} catch (Exception e) {

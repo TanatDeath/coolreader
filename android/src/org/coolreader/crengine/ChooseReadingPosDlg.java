@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSyncFolder;
+import org.coolreader.cloud.yandex.YNDListFiles;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -24,11 +26,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class ChooseReadingPosDlg extends BaseDialog {
+
 	private CoolReader mCoolReader;
 	private LayoutInflater mInflater;
 	private ReadingPosListView mList;
 
-	public ArrayList<CloudFileInfo> mReadingPosList;
+	public List<CloudFileInfo> mReadingPosList;
+
+	public int cloudMode;
 
 	public final static int ITEM_POSITION=0;
 
@@ -85,8 +90,8 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			String sAdd0 = "";
 			if ( md!=null ) {
 				if ( titleTextView!=null )
-					sTitle0 = md.name;
-					sTitle = md.comment;
+					sTitle0 = StrUtils.getNonEmptyStr(md.name,true);
+					sTitle = StrUtils.getNonEmptyStr(md.comment,true);
 					final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
 					final CharSequence sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", md.created);
 					final String sFName = sFName0.toString();
@@ -95,10 +100,16 @@ public class ChooseReadingPosDlg extends BaseDialog {
 						int ipos = sTitle.indexOf("~from");
 						sAdd = sTitle.substring(ipos+6,sTitle.length()).trim();
 						sTitle = sTitle.substring(0,ipos).trim();
+					} else {
+				    	String[] arrS = sTitle0.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+				    	if (arrS.length>=6) {
+				    		sTitle = arrS[5].replace(".json","")+"%";
+							sAdd =	arrS[4];
+						}
 					}
-					titleTextView.setText(sTitle);
+					titleTextView.setText(sTitle + " at "+sFName);
 				    if (sTitle0.contains("_"+mCoolReader.getAndroid_id())) sAdd0 = " (current)";
-					addTextView.setText("at "+sFName+" from "+sAdd+sAdd0);
+					addTextView.setText(" from "+sAdd+sAdd0);
 			} else {
 				if ( titleTextView!=null )
 					titleTextView.setText("");
@@ -150,7 +161,8 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			if ( mReadingPosList==null )
 				return true;
 			CloudFileInfo m = mReadingPosList.get(position);
-			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_READING_POS, m.path,false);
+			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_READING_POS, m.path,false,
+					m.name, cloudMode);
 			dismiss();
 			return true;
 		}
@@ -160,6 +172,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 	public ChooseReadingPosDlg(CoolReader activity, File[] matchingFiles)
 	{
 		super("ChooseReadingPosDlg", activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
+		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
@@ -180,6 +193,31 @@ public class ChooseReadingPosDlg extends BaseDialog {
 				mReadingPosList.add(yfile);
 			}
 		}
+		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+			@Override
+			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+				return -(o1.created.compareTo(o2.created));
+			}
+		};
+		Collections.sort(mReadingPosList, compareByDate);
+		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
+		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
+		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		mList = new ReadingPosListView(activity, false);
+		body.addView(mList);
+		setView(frame);
+		setFlingHandlers(mList, null, null);
+	}
+
+	public ChooseReadingPosDlg(CoolReader activity, YNDListFiles matchingFiles)
+	{
+		super("ChooseReadingPosDlg", activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
+		cloudMode = Settings.CLOUD_SYNC_VARIANT_YANDEX;
+		//mThis = this; // for inner classes
+		mInflater = LayoutInflater.from(getContext());
+		mCoolReader = activity;
+		mReadingPosList = matchingFiles.fileList;
+
 		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
 			@Override
 			public int compare(CloudFileInfo o1, CloudFileInfo o2) {

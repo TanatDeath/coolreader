@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -57,6 +58,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 	private Document docJsoup = null;
 	private Boolean bThisIsHTML = true;
 	private String sTitle = "";
+
+	public static final Logger log = L.create("edcd");
 
 	public String extractSuggestedName(String sText) {
 		String sLastSeg = sText;
@@ -140,7 +143,17 @@ public class ExternalDocCameDialog extends BaseDialog {
 						return;
 					}
 					stype = StrUtils.getNonEmptyStr(response.body().contentType().toString(),true);
-					tvDocType.setText(stype);
+					BackgroundThread.instance().postBackground(new Runnable() {
+						@Override
+						public void run() {
+							BackgroundThread.instance().postGUI(new Runnable() {
+								@Override
+								public void run() {
+									tvDocType.setText(stype);
+								}
+							}, 100);
+						}
+					});
 					InputStream is = response.body().byteStream();
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					byte[] buffer = new byte[1024];
@@ -173,17 +186,29 @@ public class ExternalDocCameDialog extends BaseDialog {
 									istreamTxt = new ByteArrayInputStream(docJsoup.body().text().replace((char)0,' ').getBytes());
 									Elements resultLinks = docJsoup.select("html > head > title");
 									if (resultLinks.size()>0) sTitle = resultLinks.text();
-									tvExtPath.setText(tvExtPath.getText()+"; "+sTitle);
-									edtFileName.setText(extractSuggestedName(sTitle));
-								} catch (Exception e) {
-									docJsoup = null;
-									btnAsText.setEnabled(false);
 									BackgroundThread.instance().postBackground(new Runnable() {
 										@Override
 										public void run() {
 											BackgroundThread.instance().postGUI(new Runnable() {
 												@Override
 												public void run() {
+													tvExtPath.setText(tvExtPath.getText()+"; "+sTitle);
+													edtFileName.setText(extractSuggestedName(sTitle));
+												}
+											}, 100);
+										}
+									});
+								} catch (Exception e) {
+									docJsoup = null;
+									BackgroundThread.instance().postBackground(new Runnable() {
+										@Override
+										public void run() {
+											BackgroundThread.instance().postGUI(new Runnable() {
+												@Override
+												public void run() {
+													btnAsText.setEnabled(false);
+													log.e(activity.getString(R.string.error_open_as_text)+": "+
+															e.getClass().getSimpleName()+" "+e.getMessage());
 													activity.showToast(activity.getString(R.string.error_open_as_text)+": "+
 															e.getClass().getSimpleName()+" "+e.getMessage());
 												}
@@ -204,6 +229,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 							BackgroundThread.instance().postGUI(new Runnable() {
 								@Override
 								public void run() {
+									log.e("Download error: "+ef.getMessage()+
+											" ["+ef.getClass().getSimpleName()+"]");
 									activity.showToast("Download error: "+ef.getMessage()+
 											" ["+ef.getClass().getSimpleName()+"]");
 									onPositiveButtonClick();
@@ -312,6 +339,14 @@ public class ExternalDocCameDialog extends BaseDialog {
 		}
 	}
 
+	private void setDashedButton(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -367,7 +402,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		edtFileExt.setBackgroundColor(colorGrayCT);
 
 		btnOpenFromStream = (Button)view.findViewById(R.id.btn_open_from_stream);
-		btnOpenFromStream.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnOpenFromStream);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnOpenFromStream.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -388,7 +423,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		// ODF file must be saved for later convert
 		if (stype.contains("opendocument")) hideExistingFromStreamControls(view);
 		btnSave = (Button)view.findViewById(R.id.btn_save);
-		btnSave.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnSave);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnSave.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -428,6 +463,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 											}
 											onPositiveButtonClick();
 										} catch (Exception e) {
+											log.e("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
 											activity.showToast("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
 										}
 									}
@@ -441,7 +477,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		tvExistingPath = (TextView)view.findViewById(R.id.existing_path);
 		tvExistingPath.setText(sExistingName);
 		btnOpenExisting = (Button)view.findViewById(R.id.btn_open_existing);
-		btnOpenExisting.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnOpenExisting);
 		btnOpenExisting.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -451,7 +487,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		});
 		if (StrUtils.isEmptyStr(sExistingName)) hideExistingFileControls(view);
 		btnAsHTML = (Button)view.findViewById(R.id.btn_as_html);
-		btnAsHTML.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnAsHTML);
 		btnAsHTML.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -459,7 +495,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 			}
 		});
 		btnAsText = (Button)view.findViewById(R.id.btn_as_text);
-		btnAsText.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		setDashedButton(btnAsText);
 		btnAsText.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

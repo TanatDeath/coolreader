@@ -1,37 +1,26 @@
 // Main Class
 package org.coolreader;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import org.coolreader.Dictionaries.DictionaryException;
-import org.coolreader.cloud.CloudAction;
+import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
 import org.coolreader.cloud.yandex.YNDConfig;
 import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.AboutDialog;
+import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
@@ -44,11 +33,9 @@ import org.coolreader.crengine.BrowserViewLayout;
 import org.coolreader.crengine.CRRootView;
 import org.coolreader.crengine.CRToolBar;
 import org.coolreader.crengine.CRToolBar.OnActionHandler;
-import org.coolreader.crengine.ConvertOdtFormat;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
 import org.coolreader.crengine.DocConvertDialog;
-import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.ExternalDocCameDialog;
@@ -83,16 +70,7 @@ import org.coolreader.db.MainDB;
 import org.coolreader.donations.CRDonationService;
 import org.coolreader.geo.GeoLastData;
 import org.coolreader.geo.LocationTracker;
-import org.coolreader.geo.MetroLine;
-import org.coolreader.geo.MetroLocation;
-import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.ProviderLocationTracker;
-import org.coolreader.geo.TransportStop;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.koekak.android.ebookdownloader.SonyBookSelector;
 
 import android.Manifest;
@@ -100,7 +78,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -111,7 +88,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -124,7 +100,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.provider.DocumentFile;
@@ -137,12 +112,6 @@ import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import okhttp3.Call;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class CoolReader extends BaseActivity implements SensorEventListener
 {
@@ -173,6 +142,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         return resizeHist;
     }
 
+//	public ArrayList<String> getProfileNames() {
+//		return profileNames;
+//	}
+
 	public ResizeHistory getNewResizeHistory() {
 		ResizeHistory rh = new ResizeHistory();
     	return rh;
@@ -182,7 +155,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		this.resizeHist = resizeHist;
 	}
 
+//	public void setProfileNames(ArrayList<String> profileNames) {
+//		this.profileNames = profileNames;
+//	}
+
 	private ArrayList<ResizeHistory> resizeHist = new ArrayList<ResizeHistory>();
+//	private ArrayList<String> profileNames = new ArrayList<String>();
 
 	Sensor accelerometer;
 	Sensor magnetometer;
@@ -288,7 +266,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public boolean skipFindInDic = false; // skip find in dic when bookmark toast is shown
 
-	public String optionsFilter = "font"; //filter used for options
+	public String optionsFilter = ""; //filter used for options
 
 	/** Called when the activity is first created. */
     @Override
@@ -2034,18 +2012,23 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	
 	public void showOptionsDialog(final OptionsDialog.Mode mode)
 	{
-		BackgroundThread.instance().postBackground(new Runnable() {
-			public void run() {
-				final String[] mFontFaces = Engine.getFontFaceList();
-				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
-				BackgroundThread.instance().executeGUI(new Runnable() {
-					public void run() {
-						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
-						dlg.show();
-					}
-				});
-			}
-		});
+		if (mode == OptionsDialog.Mode.BROWSER) {
+			optionsFilter = "";
+			showOptionsDialogExt(OptionsDialog.Mode.READER, PROP_FILEBROWSER_TITLE);
+		} else
+			BackgroundThread.instance().postBackground(new Runnable() {
+				public void run() {
+					final String[] mFontFaces = Engine.getFontFaceList();
+					final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
+					BackgroundThread.instance().executeGUI(new Runnable() {
+						public void run() {
+							showToast(getString(R.string.settings_info));
+							OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
+							dlg.show();
+						}
+					});
+				}
+			});
 	}
 
 	public void showOptionsDialogExt(final OptionsDialog.Mode mode, final String selectOption)
@@ -2056,6 +2039,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(new Runnable() {
 					public void run() {
+						if (!selectOption.equals(PROP_FILEBROWSER_TITLE)) showToast(getString(R.string.settings_info));
 						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
 						dlg.selectedOption = selectOption;
 						dlg.show();
@@ -2356,6 +2340,62 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						BookInfoEditDialog dlg = new BookInfoEditDialog(CoolReader.this, currDirectory, bookInfo,
 								currDirectory.isRecentDir());
 						dlg.show();
+					}
+				});
+			}
+		});
+	}
+
+	public void editBookTransl(final FileInfo currDirectory, final FileInfo item,
+							   final String lang_from, final String lang_to, final String search_text) {
+		waitForCRDBService(new Runnable() {
+			@Override
+			public void run() {
+				Services.getHistory().getOrCreateBookInfo(getDB(), item, new BookInfoLoadedCallack() {
+					@Override
+					public void onBookInfoLoaded(BookInfo bookInfo) {
+						if (bookInfo == null)
+							bookInfo = new BookInfo(item);
+						ArrayList<String[]> vl = new ArrayList<String[]>();
+						String[] arrS1 = {getString(R.string.lang_from), "", lang_from};
+						vl.add(arrS1);
+						String[] arrS2 =  {getString(R.string.lang_to), "", lang_to};
+						vl.add(arrS2);
+						BookInfo bookInfoF = bookInfo;
+						AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+								CoolReader.this,
+								getString(R.string.specify_translation_dir),
+								getString(R.string.specify_translation_dir_full),
+								vl, new AskSomeValuesDialog.ValuesEnteredCallback() {
+							@Override
+							public void done(ArrayList<String> results) {
+								if (results != null) {
+									FileInfo file = bookInfoF.getFileInfo();
+									if (results.size() >= 1)
+										file.lang_from = results.get(0);
+									if (results.size() >= 2)
+										file.lang_to = results.get(1);
+									getDB().saveBookInfo(bookInfoF);
+									getDB().flush();
+									if (getReaderView()!=null) {
+										if (getReaderView().getBookInfo()!=null) {
+											BookInfo book = getReaderView().getBookInfo();
+											book.getFileInfo().lang_from = file.lang_from;
+											book.getFileInfo().lang_to = file.lang_to;
+										}
+									}
+									BookInfo bi = Services.getHistory().getBookInfo(file);
+									if (bi != null)
+										bi.getFileInfo().setFileProperties(file);
+									if (currDirectory!=null) {
+										currDirectory.setFile(file);
+										directoryUpdated(currDirectory, file);
+									}
+									findInDictionary(search_text);
+								}
+							}
+						});
+						dlgA.show();
 					}
 				});
 			}
@@ -2891,20 +2931,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void readResizeHistory()
 	{
         log.d("Reading rh.json");
-		String rh = "";
+		String rh = Utils.readFileToString(getSettingsFile(0).getParent() + "/rh.json");
 		try {
-			final File fJson = new File(getSettingsFile(0).getParent() + "/rh.json");
-			BufferedReader reader = new BufferedReader(
-					new FileReader(fJson));
-			StringBuilder stringBuilder = new StringBuilder();
-			String line = null;
-			String ls = System.getProperty("line.separator");
-			while ((line = reader.readLine()) != null) {
-				stringBuilder.append(line);
-				stringBuilder.append(ls);
-			}
-			reader.close();
-			rh = stringBuilder.toString();
 			setResizeHist(new ArrayList<ResizeHistory>(StrUtils.stringToArray(rh, ResizeHistory[].class)));
 		} catch (Exception e) {
 		}
@@ -2914,68 +2942,74 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	{
 		log.d("Starting save rh.json");
 		try {
-			final File fJson = new File(getSettingsFile(0).getParent() + "/rh.json");
-
 			final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			final String prettyJson = gson.toJson(getResizeHist());
-
-			BufferedWriter bw = null;
-			FileWriter fw = null;
-			char[] bytesArray = new char[1000];
-			int bytesRead = 1000;
-			try {
-				fw = new FileWriter(fJson);
-				bw = new BufferedWriter(fw);
-				bw.write(prettyJson);
-				bw.close();
-				fw.close();
-			} catch (Exception e) {
-			}
+			Utils.saveStringToFileSafe(prettyJson,getSettingsFile(0).getParent() + "/rh.json");
 		} catch (Exception e) {
 		}
 	}
 
+//	public void readProfileNames()
+//	{
+//		log.d("Reading profileNames.json");
+//		String pn = "";
+//		try {
+//			final File fJson = new File(getSettingsFile(0).getParent() + "/profileNames.json");
+//			BufferedReader reader = new BufferedReader(
+//					new FileReader(fJson));
+//			StringBuilder stringBuilder = new StringBuilder();
+//			String line = null;
+//			String ls = System.getProperty("line.separator");
+//			while ((line = reader.readLine()) != null) {
+//				stringBuilder.append(line);
+//				stringBuilder.append(ls);
+//			}
+//			reader.close();
+//			pn = stringBuilder.toString();
+//			setProfileNames(new ArrayList<String>(StrUtils.stringToArray(pn, String[].class)));
+//		} catch (Exception e) {
+//		}
+//	}
+
+//	public void saveProfileNames()
+//	{
+//		log.d("Starting save profileNames.json");
+//		try {
+//			final File fJson = new File(getSettingsFile(0).getParent() + "/profileNames.json");
+//
+//			final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//			final String prettyJson = gson.toJson(getProfileNames());
+//
+//			BufferedWriter bw = null;
+//			FileWriter fw = null;
+//			char[] bytesArray = new char[1000];
+//			int bytesRead = 1000;
+//			try {
+//				fw = new FileWriter(fJson);
+//				bw = new BufferedWriter(fw);
+//				bw.write(prettyJson);
+//				bw.close();
+//				fw.close();
+//			} catch (Exception e) {
+//			}
+//		} catch (Exception e) {
+//		}
+//	}
+
 	public void saveCurPosFile(String json)
 	{
 		log.d("Starting save cur_pos.json");
-		try {
-			final File fJson = new File(getSettingsFile(0).getParent() + "/cur_pos.json");
-			BufferedWriter bw = null;
-			FileWriter fw = null;
-			char[] bytesArray = new char[1000];
-			int bytesRead = 1000;
-			try {
-				fw = new FileWriter(fJson);
-				bw = new BufferedWriter(fw);
-				bw.write(json);
-				bw.close();
-				fw.close();
-			} catch (Exception e) {
-			}
-		} catch (Exception e) {
-		}
+		Utils.saveStringToFileSafe(json,getSettingsFile(0).getParent() + "/cur_pos.json");
 	}
 
 	public Bookmark readCurPosFile()
 	{
 		log.d("Reading cur_pos.json");
-		String cur_pos = "";
+		String cur_pos = Utils.readFileToString(getSettingsFile(0).getParent() + "/cur_pos.json");
 		try {
 			final File fJson = new File(getSettingsFile(0).getParent() + "/cur_pos.json");
-			if (fJson.exists()) {
-				BufferedReader reader = new BufferedReader(
-						new FileReader(fJson));
-				StringBuilder stringBuilder = new StringBuilder();
-				String line = null;
-				String ls = System.getProperty("line.separator");
-				while ((line = reader.readLine()) != null) {
-					stringBuilder.append(line);
-					stringBuilder.append(ls);
-				}
-				reader.close();
-				cur_pos = stringBuilder.toString();
-				return new Gson().fromJson(cur_pos, Bookmark.class);
-			} else return null;
+			if (!fJson.exists()) return null;
+			return new Gson().fromJson(cur_pos, Bookmark.class);
 		} catch (Exception e) {
 		}
 		return null;

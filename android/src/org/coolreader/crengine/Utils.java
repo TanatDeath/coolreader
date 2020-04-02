@@ -2,11 +2,13 @@ package org.coolreader.crengine;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -464,8 +466,10 @@ public class Utils {
 
 	public static String formatFileInfo(Activity activity, FileInfo item) {
 		int prof = item.getProfileId();
+		String sProf = " {p"+prof+"}";
+		if (prof == 0) sProf = "";
 		return formatSize(item.size) + " " + (item.format!=null ? item.format.name().toLowerCase() : "") + " " +
-				formatDate(activity, item.getCreateTime())+" {p"+prof+"}";
+				formatDate(activity, item.getCreateTime())+sProf;
 	}
 
 	public static String formatLastPosition(Activity activity, Bookmark pos) {
@@ -697,6 +701,26 @@ public class Utils {
 		}
 		os.close();
 		is.close();
+	}
+
+	public static void saveStringToFileSafe(String data, String toPath)
+	{
+		try {
+			final File fJson = new File(toPath);
+			BufferedWriter bw = null;
+			FileWriter fw = null;
+			char[] bytesArray = new char[1000];
+			int bytesRead = 1000;
+			try {
+				fw = new FileWriter(fJson);
+				bw = new BufferedWriter(fw);
+				bw.write(data);
+				bw.close();
+				fw.close();
+			} catch (Exception e) {
+			}
+		} catch (Exception e) {
+		}
 	}
 
 	public static ByteArrayOutputStream inputStreamToBaos(InputStream is) throws IOException

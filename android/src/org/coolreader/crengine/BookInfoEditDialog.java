@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.coolreader.CoolReader;
@@ -61,6 +62,20 @@ public class BookInfoEditDialog extends BaseDialog {
 	private ImageButton btnStar5;
 	private int attrStar;
 	private int attrStarFilled;
+
+	protected void updateGlobalMargin(ViewGroup v,
+									  boolean left, boolean top, boolean right, boolean bottom) {
+		if (v == null) return;
+		ViewGroup.LayoutParams lp = v.getLayoutParams();
+		int globalMargins = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		if (globalMargins > 0)
+			if (lp instanceof ViewGroup.MarginLayoutParams) {
+				if (top) ((ViewGroup.MarginLayoutParams) lp).topMargin = globalMargins;
+				if (bottom) ((ViewGroup.MarginLayoutParams) lp).bottomMargin = globalMargins;
+				if (left) ((ViewGroup.MarginLayoutParams) lp).leftMargin = globalMargins;
+				if (right) ((ViewGroup.MarginLayoutParams) lp).rightMargin = globalMargins;
+			}
+	}
 
 	public BookInfoEditDialog(CoolReader activity, FileInfo baseDir, BookInfo book, boolean isRecentBooksItem)
 	{
@@ -249,6 +264,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		}
 	}
 
+	TextView tvProfile;
 	TextView tvFileName;
     EditText edTitle;
     EditText edSeriesName;
@@ -392,6 +408,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
 		a.recycle();
+		tvProfile = (TextView)view.findViewById(R.id.profile);
 		tvFileName = (TextView)view.findViewById(R.id.file_name);
 		edTitle = (EditText)view.findViewById(R.id.book_title);
         edSeriesName = (EditText)view.findViewById(R.id.book_series_name);
@@ -512,7 +529,14 @@ public class BookInfoEditDialog extends BaseDialog {
         String sPath = StrUtils.getNonEmptyStr(file.pathname, true)
 				.replace("/storage/emulated", "/s/e");
         tvFileName.setText(sPath);
-        edTitle.setText(file.title);
+		File f = activity.getSettingsFile(activity.getCurrentProfile());
+		String sF = f.getAbsolutePath();
+		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
+		TextView prof = (TextView) view.findViewById(R.id.lbl_profile);
+		String sprof = activity.getCurrentProfileName();
+		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
+		tvProfile.setText(sprof + sF);
+		edTitle.setText(file.title);
         //edAuthor.setText(file.authors);
         edSeriesName.setText(file.series);
         if (file.series != null && file.series.trim().length() > 0 && file.seriesNumber > 0)
@@ -573,7 +597,10 @@ public class BookInfoEditDialog extends BaseDialog {
         	parent.removeView(btnRemoveRecent);
         	parent.removeView(btnOpenFolder);
         }
-	   setView(view);
+		buttonsLayout = (ViewGroup)view.findViewById(R.id.base_dlg_button_panel);
+		updateGlobalMargin(buttonsLayout, true, true, true, false);
+
+		setView(view);
 	}
 	
 	private void save() {

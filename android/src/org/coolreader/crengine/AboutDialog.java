@@ -18,9 +18,12 @@ import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 public class AboutDialog extends BaseDialog implements TabContentFactory {
@@ -224,6 +227,21 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 			setupDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_gold), "org.coolreader.donation.gold");
 			setupDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_silver), "org.coolreader.donation.silver");
 			setupDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_bronze), "org.coolreader.donation.bronze");
+		}
+
+		if (isFork) {
+			LinearLayout ll_donate1 = (LinearLayout)mDonationTab.findViewById(R.id.ll_donate1);
+			LinearLayout ll_donate2 = (LinearLayout)mDonationTab.findViewById(R.id.ll_donate2);
+			LinearLayout ll_donate3 = (LinearLayout)mDonationTab.findViewById(R.id.ll_donate3);
+			if (ll_donate1 != null) ((ViewGroup) ll_donate1.getParent()).removeView(ll_donate1);
+			if (ll_donate2 != null) ((ViewGroup) ll_donate2.getParent()).removeView(ll_donate2);
+			if (ll_donate3 != null) ((ViewGroup) ll_donate3.getParent()).removeView(ll_donate3);
+			TableLayout tl_donate1 = (TableLayout)mDonationTab.findViewById(R.id.tl_donate1);
+			if (tl_donate1 != null) ((ViewGroup) tl_donate1.getParent()).removeView(ll_donate3);
+			TextView btn_about_donation_total = (TextView)mDonationTab.findViewById(R.id.btn_about_donation_total);
+			if (btn_about_donation_total != null) ((ViewGroup) btn_about_donation_total.getParent()).removeView(ll_donate3);
+			TextView tv_donate_message = (TextView)mDonationTab.findViewById(R.id.tv_donate_message);
+			if (tv_donate_message != null) tv_donate_message.setText(R.string.dlg_about_donation_inapp_purchase_plotn);
 		}
 		
 		tabs.setup();

@@ -18,15 +18,18 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class BaseDialog extends Dialog {
 
 	View layoutView;
 	ViewGroup buttonsLayout;
+	public ViewGroup upperTextLayout;
 	ViewGroup contentsLayout;
 	BaseActivity activity;
 	String title;
+	String upperText;
 	boolean needCancelButton;
 	String dlgName;
 	int positiveButtonImage;
@@ -236,6 +239,8 @@ public class BaseDialog extends Dialog {
 		}
 		if (title != null)
 			setTitle(title);
+		if (upperText != null)
+			setUpperText(upperText);
 		if (buttonsLayout != null) {
 			buttonsLayout.setOnTouchListener(new OnTouchListener() {
 				@Override
@@ -269,12 +274,40 @@ public class BaseDialog extends Dialog {
 		}
 	}
 
+	public void setUpperText(CharSequence upperText) {
+		this.upperText = String.valueOf(upperText);
+		if (upperTextLayout != null) {
+			TextView lbl = (TextView)upperTextLayout.findViewById(R.id.base_dlg_upper_text);
+			if (lbl != null)
+				lbl.setText(upperText != null ? upperText : "");
+		}
+	}
+
+	protected void updateGlobalMargin(ViewGroup v,
+			boolean left, boolean top, boolean right, boolean bottom) {
+		if (v == null) return;
+		ViewGroup.LayoutParams lp = v.getLayoutParams();
+		int globalMargins = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		if (globalMargins > 0)
+			if (lp instanceof ViewGroup.MarginLayoutParams) {
+				if (top) ((ViewGroup.MarginLayoutParams) lp).topMargin = globalMargins;
+				if (bottom) ((ViewGroup.MarginLayoutParams) lp).bottomMargin = globalMargins;
+				if (left) ((ViewGroup.MarginLayoutParams) lp).leftMargin = globalMargins;
+				if (right) ((ViewGroup.MarginLayoutParams) lp).rightMargin = globalMargins;
+			}
+	}
+
 	protected View createLayout( View view )
 	{
         LayoutInflater mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.base_dialog, null);
-        buttonsLayout = (ViewGroup)layout.findViewById(R.id.base_dlg_button_panel);
-        if (buttonsLayout != null) {
+		upperTextLayout = (ViewGroup)layout.findViewById(R.id.base_dlg_upper_text_panel);
+		buttonsLayout = (ViewGroup)layout.findViewById(R.id.base_dlg_button_panel);
+		if (upperText == null) {
+			layout.removeView(upperTextLayout);
+			updateGlobalMargin(buttonsLayout, true, true, true, false);
+		}
+		if (buttonsLayout != null) {
             if ( needCancelButton || title != null) {
             	createButtonsPane(layout, buttonsLayout);
             } else {
@@ -282,9 +315,15 @@ public class BaseDialog extends Dialog {
                 buttonsLayout = null;
             }
         }
-        contentsLayout =  (ViewGroup)layout.findViewById(R.id.base_dialog_content_view);
+		contentsLayout =  (ViewGroup)layout.findViewById(R.id.base_dialog_content_view);
         contentsLayout.addView(view);
-        setTitle(title);
+
+        updateGlobalMargin(contentsLayout, true, false, true, true);
+		updateGlobalMargin(upperTextLayout, true, true, true, false);
+
+		setTitle(title);
+		setUpperText(upperText);
+
 		return layout;
 	}
 	

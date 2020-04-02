@@ -12,6 +12,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -131,7 +132,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			long duration = Utils.timeInterval(menuDownTs);
 			L.v("CRRootView.onKeyUp(" + keyCode + ") duration = " + duration);
 			if (duration > 700 && duration < 10000)
-				mActivity.showBrowserOptionsDialog();
+				mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
 			else
 				showMenu();
 			return true;
@@ -866,6 +867,18 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private void createViews() {
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		View view = inflater.inflate(R.layout.root_window, null);
+		LinearLayout llMain = (LinearLayout)view.findViewById(R.id.ll_main_rootwindow);
+		LayoutParams lp = ((ViewGroup) llMain).getLayoutParams();
+		int globalMargins = mActivity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		if (globalMargins > 0)
+			if( lp instanceof MarginLayoutParams )
+			{
+				((MarginLayoutParams) lp).topMargin = globalMargins;
+				((MarginLayoutParams) lp).bottomMargin = globalMargins;
+				((MarginLayoutParams) lp).leftMargin = globalMargins;
+				((MarginLayoutParams) lp).rightMargin = globalMargins;
+			}
+
 		mView = (ViewGroup)view;
 		
 		updateDelimiterTheme(R.id.delimiter1);
@@ -1257,7 +1270,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					mActivity.showManual();
 					return true;
 				} else if (item == ReaderAction.OPTIONS) {
-					mActivity.showBrowserOptionsDialog();
+					mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
 					return true;
 				}
 //				else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {

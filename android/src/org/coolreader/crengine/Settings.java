@@ -41,7 +41,8 @@ public interface Settings {
     public static final String PROP_PAGE_MARGIN_BOTTOM      ="crengine.page.margin.bottom";
     public static final String PROP_PAGE_MARGIN_LEFT        ="crengine.page.margin.left";
     public static final String PROP_PAGE_MARGIN_RIGHT       ="crengine.page.margin.right";
-    public static final String PROP_ROUNDED_CORNERS_MARGIN  ="crengine.rounded.corners.margin";
+	public static final String PROP_GLOBAL_MARGIN       	="crengine.global.margin";
+	public static final String PROP_ROUNDED_CORNERS_MARGIN  ="crengine.rounded.corners.margin";
 	public static final String PROP_ROUNDED_CORNERS_MARGIN_POS = "crengine.rounded.corners.margin.pos";
 	public static final String PROP_ROUNDED_CORNERS_MARGIN_MOD = "crengine.rounded.corners.margin.mod";
 	public static final String PROP_ROUNDED_CORNERS_MARGIN_FSCR = "crengine.rounded.corners.margin.fscr";
@@ -84,7 +85,8 @@ public interface Settings {
     public static final String PROP_AUTOSAVE_BOOKMARKS      ="crengine.autosave.bookmarks";
 
     public static final String PROP_PROFILE_NUMBER          ="crengine.profile.number"; // current settings profile number
-    public static final String PROP_APP_SETTINGS_SHOW_ICONS ="app.settings.show.icons";
+	public static final String PROP_PROFILE_NAME            ="crengine.profile.name";
+	public static final String PROP_APP_SETTINGS_SHOW_ICONS ="app.settings.show.icons";
     public static final String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
     public static final String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
     public static final String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
@@ -136,6 +138,7 @@ public interface Settings {
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
     public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
     public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
+	public static final String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
     public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
@@ -183,8 +186,15 @@ public interface Settings {
     public static final String PROP_APP_PLUGIN_ENABLED = "app.plugin.enabled.litres";
 
     public static final String PROP_APP_GEO = "app.geo.locations";
+	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";
+	public static final String PROP_CLOUD_TITLE = "window.cloud.title";
+	public static final String PROP_DICTIONARY_TITLE = "window.dictionary.title";
+	public static final String PROP_FILEBROWSER_TITLE = "window.filebrowser.title";
+	public static final String PROP_RARE_TITLE = "window.rare.title";
+	public static final String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
+	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
 
-    // available options for PROP_APP_SELECTION_ACTION setting
+	// available options for PROP_APP_SELECTION_ACTION setting
     public static final int SELECTION_ACTION_TOOLBAR = 0;
     public static final int SELECTION_ACTION_COPY = 1;
     public static final int SELECTION_ACTION_DICTIONARY = 2;
@@ -236,9 +246,12 @@ public interface Settings {
     public static final int VIEWER_TOOLBAR_50 = 6;
     public static final int VIEWER_TOOLBAR_50_gray = 7;
     public static final int VIEWER_TOOLBAR_50_inv = 8;
-    
-    
-    public enum Lang {
+
+	public static final int CLOUD_SYNC_VARIANT_DISABLED = 0;
+	public static final int CLOUD_SYNC_VARIANT_FILESYSTEM = 1;
+	public static final int CLOUD_SYNC_VARIANT_YANDEX = 2;
+
+	public enum Lang {
     	DEFAULT("system", R.string.options_app_locale_system, R.raw.help_template_en),
     	EN("en", R.string.options_app_locale_en, R.raw.help_template_en),
         DE("de", R.string.options_app_locale_de, 0),
@@ -329,9 +342,11 @@ public interface Settings {
 	    "app.screen.*",
 	    PROP_APP_DICTIONARY,
         PROP_APP_DICTIONARY_2,
+		PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_WORD_CORRECTION,
         PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_LONGTAP_CHANGE,
+		PROP_CLOUD_SYNC_VARIANT,
         PROP_SAVE_POS_TO_CLOUD_TIMEOUT,
 	    PROP_APP_SELECTION_ACTION,
         PROP_APP_SELECTION_ACTION_LONG,
@@ -353,7 +368,8 @@ public interface Settings {
 
 	    "app.ui.theme*",
         PROP_APP_ICONS_IS_CUSTOM_COLOR,
-        PROP_APP_ICONS_CUSTOM_COLOR
+        PROP_APP_ICONS_CUSTOM_COLOR,
+		PROP_GLOBAL_MARGIN
 	};
 
 

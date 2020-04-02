@@ -9,8 +9,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:baselineAligned="false"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:paddingRight="?android:attr/scrollbarSize"
+    android:paddingRight="30dip"
     android:paddingLeft="2dip"
     android:layout_marginTop="1dip"
     android:layout_marginBottom="1dip"
@@ -167,7 +166,7 @@
             />
 
     </LinearLayout>
-           
+
     <LinearLayout android:id="@+id/browser_item_misc_body"
         android:orientation="vertical"
         android:layout_width="wrap_content"

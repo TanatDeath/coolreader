@@ -95,21 +95,52 @@ public class DBXInputTokenDialog extends BaseDialog {
 		ImageButton tokenOk =view.findViewById(R.id.input_token_ok_btn);
 		tokenOk.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
-				new DBXFinishAuthorization(mCoolReader, null, new DBXFinishAuthorization.Callback() {
-					@Override
-					public void onComplete(boolean result, String accessToken) {
-						DBXConfig.didLogin = result;
-						mCoolReader.showToast(R.string.dbx_auth_finished_ok);
-						saveDBXToken(accessToken);
-						dismiss();
-					}
+				if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
+					String sToken = tokenEdit.getText().toString();
+					if (sToken.contains(DBXConfig.DBX_REDIRECT_URL)) {
+						try {
+							Uri uri = Uri.parse(sToken);
+							final String code = uri.getQueryParameter("code");
+							//showToast("code = "+code);
+							if (!StrUtils.isEmptyStr(code)) {
+								new DBXFinishAuthorization(mCoolReader, uri, new DBXFinishAuthorization.Callback() {
+									@Override
+									public void onComplete(boolean result, String accessToken) {
+										DBXConfig.didLogin = result;
+										mCoolReader.showToast(R.string.dbx_auth_finished_ok);
+										saveDBXToken(accessToken);
+										dismiss();
+									}
 
-					@Override
-					public void onError(Exception e) {
-						DBXConfig.didLogin = false;
-						mCoolReader.showToast(mCoolReader.getString(R.string.dbx_auth_finished_error)+": "+e.getMessage());
+									@Override
+									public void onError(Exception e) {
+										DBXConfig.didLogin = false;
+										mCoolReader.showToast(mCoolReader.getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+									}
+								}).execute(code);
+							}
+						} catch (Exception e) {
+							mCoolReader.showToast(mCoolReader.getString(R.string.dbx_auth_finished_error) +
+									": cannot parse URL - " + e.getMessage());
+						}
+					} else {
+						new DBXFinishAuthorization(mCoolReader, null, new DBXFinishAuthorization.Callback() {
+							@Override
+							public void onComplete(boolean result, String accessToken) {
+								DBXConfig.didLogin = result;
+								mCoolReader.showToast(R.string.dbx_auth_finished_ok);
+								saveDBXToken(accessToken);
+								dismiss();
+							}
+
+							@Override
+							public void onError(Exception e) {
+								DBXConfig.didLogin = false;
+								mCoolReader.showToast(mCoolReader.getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+							}
+						}).execute(tokenEdit.getText().toString());
 					}
-				}).execute(tokenEdit.getText().toString());
+				}
 			}
 		});
 		TextView tokenDeleteTxt = (TextView) view.findViewById(R.id.txt_delete_token);

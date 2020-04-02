@@ -24,16 +24,17 @@
             android:orientation="horizontal"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
-	        android:minHeight="?android:attr/listPreferredItemHeight"
-	        android:gravity="center_vertical"
+			android:layout_margin="5dip"
+			android:gravity="center_vertical"
 	        android:background="?attr/tabbarBackground"
 	        >
 	        <ImageButton android:id="@+id/base_dlg_btn_back"
+				android:layout_margin="5dip"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:layout_centerVertical="true"
                 android:src="?attr/cr3_button_prev_drawable"
-                    android:tag="tint"
+                android:tag="tint"
 	            android:focusable="false"
 	            android:focusableInTouchMode="false"
 	            android:background="@null"
@@ -41,6 +42,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_back"/>
 			<ImageButton android:id="@+id/base_dlg_btn_positive"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -54,6 +56,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_ok"/>
 			<ImageButton android:id="@+id/btn_open_book"
+				android:layout_margin="5dip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -67,6 +70,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_open_book"/>
             <ImageButton android:id="@+id/book_folder_open"
+				android:layout_margin="5dip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -79,6 +83,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_open_folder"/>
             <ImageButton android:id="@+id/book_recent_delete"
+				android:layout_margin="5dip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -92,6 +97,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_recent_delete"/>
             <ImageButton android:id="@+id/book_shortcut"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -105,6 +111,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/btn_shortcut"/>
 			<ImageButton android:id="@+id/save_to_cloud"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -118,6 +125,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/save_current_book_to_cloud_email"/>
 			<ImageButton android:id="@+id/book_delete"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -131,6 +139,7 @@
 				android:layout_marginRight="3dip"
 				android:contentDescription="@string/dlg_button_book_delete"/>
 			<ImageButton android:id="@+id/book_custom_cover"
+				android:layout_margin="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
@@ -379,6 +388,47 @@
 						android:layout_weight="1"
 						android:orientation="horizontal">
 					<TextView
+							android:id="@+id/lbl_profile"
+							style="@style/TextAppearance.Small"
+							android:singleLine="false"
+							android:maxLines="3"
+							android:text="@string/settings_profile"
+							android:textColor="?attr/colorIcon"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"/>
+				</LinearLayout>
+				<LinearLayout
+						android:layout_width="0dip"
+						android:layout_height="fill_parent"
+						android:gravity="left"
+						android:layout_weight="3"
+						android:orientation="horizontal">
+					<TextView
+							android:id="@+id/profile"
+							android:layout_width="fill_parent"
+							android:layout_height="wrap_content"
+							android:text="file name"
+							android:maxLines="5"
+							android:ellipsize="middle"
+							style="@style/TextAppearance.Small"
+							android:textColor="?attr/colorIcon"
+							android:singleLine="false"
+							/>
+				</LinearLayout>
+			</TableRow>
+			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+					android:layout_margin="2dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					>
+				<LinearLayout
+						android:layout_width="0dip"
+						android:layout_height="fill_parent"
+						android:gravity="left|center_vertical"
+						android:layout_weight="1"
+						android:orientation="horizontal">
+					<TextView
 							android:id="@+id/lbl_file_name"
 							style="@style/TextAppearance.Small"
 							android:singleLine="false"
@@ -602,6 +652,7 @@
 								style="@style/TextAppearance.Widget.EditText"
 								android:editable="true"
 								android:singleLine="true"
+								android:backgroundTint="@color/greenLighter"
 								/>
 							<TextView
 								android:id="@+id/lbl_lang_to"
@@ -620,6 +671,7 @@
 								android:layout_height="wrap_content"
 								android:layout_weight="3"
 								android:text="ru"
+								android:backgroundTint="@color/greenLighter"
 								style="@style/TextAppearance.Widget.EditText"
 								android:editable="true"
 								android:singleLine="true"

@@ -9,7 +9,6 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:baselineAligned="false"
-    android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingRight="?android:attr/scrollbarSize"
     android:layout_marginTop="3dip"
     android:layout_marginBottom="3dip"
@@ -29,8 +28,8 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dip"
-        android:layout_marginBottom="8dip"
+        android:layout_marginTop="1dip"
+        android:layout_marginBottom="1dip"
         android:layout_weight="1"
         android:layout_gravity="center_vertical|fill_horizontal"
         android:baselineAligned="false">

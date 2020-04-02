@@ -1,5 +1,6 @@
 package org.coolreader.cloud.yandex;
 
+import org.coolreader.BuildConfig;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.StrUtils;
@@ -12,12 +13,13 @@ import java.io.IOException;
 import okhttp3.OkHttpClient;
 
 public class YNDConfig {
-    public static final String YND_ID = "put_yours";
-    public static final String YND_PASSW = "put_yours";
+    public static final String YND_ID = BuildConfig.YND_ID;
+    public static final String YND_PASSW = BuildConfig.YND_PASSW;
     public static final String YND_CALLBACK_URL = "https://yxda6aa587a2924b49b072cd5729fd03e2.oauth.yandex.ru/auth/finish?platform=android";
-    public static final String YND_REDIRECT_URL = "https://github.com/plotn/coolreader/ynd";
+    public static final String YND_REDIRECT_URL = "https://github.com/plotn/coolreader/blob/master/ynd_readme.md";
     public static final String YND_AUTH_URL = "https://oauth.yandex.ru/authorize";
     public static final String YND_DISK_URL = "https://cloud-api.yandex.net:443/v1/disk/resources";
+    public static final String YND_DISK_UPLOAD_URL = "https://cloud-api.yandex.net:443/v1/disk/resources/upload";
     public static final String YND_DISK_URL_LAST_UPL = "https://cloud-api.yandex.net:443/v1/disk/resources/last-uploaded";
     public static final String YND_DOWNLOAD_URL = "https://cloud-api.yandex.net:443/v1/disk/resources/download";
     public static final Integer YND_ITEMS_LIMIT = 20000;

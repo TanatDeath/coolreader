@@ -14,22 +14,35 @@ public class YNDListFiles {
     String path = ""; // path listed
     public List<CloudFileInfo> fileList;
 
-    public YNDListFiles(String json, String findStr) {
+    public YNDListFiles(String json, String fileMark, String sCRC, boolean jsonExt) {
+        this(json, "", fileMark, sCRC, false, true);
+    }
+
+    public YNDListFiles(String json, String findStr, boolean thisObj) {
+        this(json, findStr, "", "", thisObj, false);
+    }
+
+    public YNDListFiles(String json, String findStr, String fileMark, String sCRC,
+                        boolean thisObj, boolean jsonExt) {
         fileList = new ArrayList<CloudFileInfo>();
         try {
             JSONObject jsonObject = new JSONObject(json);
             if (jsonObject.has("path")) path = jsonObject.get("path").toString();
             JSONArray items = null;
-            if (jsonObject.has("_embedded"))
+            if (jsonObject.has("_embedded")) {
                 if (jsonObject.getJSONObject("_embedded").has("items"))
                     items = jsonObject.getJSONObject("_embedded").getJSONArray("items");
+            }
             if (jsonObject.has("items"))
                 items = jsonObject.getJSONArray("items");
 
-            if (items != null) {
+            if ((items != null) || (thisObj)) {
                 int i=0;
-                while (i<items.length()) {
-                    JSONObject jso = (JSONObject) items.get(i);
+                int itSize = 1;
+                if (!thisObj) itSize = items.length();
+                while (i < itSize) {
+                    JSONObject jso;
+                    if (thisObj) jso = jsonObject; else jso = (JSONObject) items.get(i);
                     CloudFileInfo yf = new CloudFileInfo();
                     if (jso.has("name")) yf.name = jso.get("name").toString();
                     if (jso.has("path")) yf.path = jso.get("path").toString();
@@ -38,7 +51,12 @@ public class YNDListFiles {
                     if (jso.has("created")) yf.created = sdf.parse(jso.get("created").toString());
                     if (jso.has("modified")) yf.modified = sdf.parse(jso.get("modified").toString());
                     if (StrUtils.isEmptyStr(findStr)) {
-                        fileList.add(yf);
+                        if (!StrUtils.isEmptyStr(fileMark)) {
+                            boolean ok = yf.name.contains(fileMark);
+                            if (jsonExt) ok = ok && yf.name.contains(".json");
+                            if (!StrUtils.isEmptyStr(sCRC)) ok = ok && yf.name.contains(sCRC);
+                            if (ok) fileList.add(yf);
+                        } else fileList.add(yf);
                     } else {
                        if (yf.name.toUpperCase().matches(".*" + findStr.toUpperCase() + ".*"))
                            fileList.add(yf);
@@ -51,4 +69,5 @@ public class YNDListFiles {
             e.printStackTrace();
         }
     }
+
 }

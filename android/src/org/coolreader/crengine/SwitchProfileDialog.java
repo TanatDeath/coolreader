@@ -14,33 +14,89 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-public class SwitchProfileDialog extends BaseDialog {
+import java.util.ArrayList;
+
+	public class SwitchProfileDialog extends BaseDialog implements Settings {
 	CoolReader mCoolReader;
 	ReaderView mReaderView;
 	ListView mListView;
 	int currentProfile;
-	public SwitchProfileDialog(CoolReader coolReader, ReaderView readerView)
+	OptionsDialog optionsDialog = null;
+
+	private String[] profileNames = {
+			"Profile 1",
+			"Profile 2",
+			"Profile 3",
+			"Profile 4",
+			"Profile 5",
+			"Profile 6",
+			"Profile 7",
+	};
+
+	public SwitchProfileDialog(CoolReader coolReader, ReaderView readerView, OptionsDialog od)
 	{
 		super("SwitchProfileDialog", coolReader, coolReader.getResources().getString(R.string.action_switch_settings_profile), false, false);
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
+		this.optionsDialog = od;
+		Properties props = new Properties(mCoolReader.settings());
+		for (int i=0; i<7; i++) {
+			String pname = props.getProperty(Settings.PROP_PROFILE_NAME + "." + (i+1), "");
+			if (!StrUtils.isEmptyStr(pname)) profileNames[i] = pname;
+		}
 		this.mListView = new BaseListView(getContext(), false);
-		currentProfile = this.mCoolReader.getCurrentProfile(); // TODO: get from settings
+		currentProfile = this.mCoolReader.getCurrentProfile();
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> listview, View view,
 					int position, long id) {
-				mReaderView.setCurrentProfile(position + 1);
+				if (optionsDialog != null) {
+					BackgroundThread.instance().executeGUI(new Runnable() {
+						public void run() {
+							optionsDialog.apply();
+							optionsDialog.dismiss();
+							mReaderView.setCurrentProfile(position + 1);
+							mCoolReader.showOptionsDialog(OptionsDialog.Mode.READER);
+						}
+					});
+				} else mReaderView.setCurrentProfile(position + 1);
 				SwitchProfileDialog.this.dismiss();
 			}
 		});
+
 		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> listview, View view,
 					int position, long id) {
-				// TODO: rename?
-				SwitchProfileDialog.this.dismiss();
+				ArrayList<String[]> vl = new ArrayList<String[]>();
+				String[] arrS1 = {mCoolReader.getString(R.string.new_profile), mCoolReader.getString(R.string.new_profile),
+						profileNames[position]};
+				vl.add(arrS1);
+				AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+						mCoolReader,
+						mCoolReader.getString(R.string.rename_profile),
+						mCoolReader.getString(R.string.rename_profile) + ": " +
+						 profileNames[position],
+						vl, new AskSomeValuesDialog.ValuesEnteredCallback() {
+					@Override
+					public void done(ArrayList<String> results) {
+						if (results != null) {
+							if (results.size() >= 1)
+								if (!StrUtils.isEmptyStr(results.get(0))) {
+									profileNames[position] = results.get(0).trim();
+									Properties props = new Properties(mCoolReader.settings());
+									props.setProperty(Settings.PROP_PROFILE_NAME + "." + (position+1), results.get(0).trim());
+									if (optionsDialog != null)
+										optionsDialog.mProperties.setProperty(Settings.PROP_PROFILE_NAME + "." + (position+1), results.get(0).trim());
+									mCoolReader.setSettings(props, -1, true);
+									profileNames[position] = results.get(0).trim();
+									mListView.invalidateViews();
+								}
+						}
+					}
+				});
+				dlgA.show();
 				return true;
 			}
 		});
@@ -65,17 +121,6 @@ public class SwitchProfileDialog extends BaseDialog {
 		});
 		mListView.setAdapter(new ProfileListAdapter());
 	}
-
-	
-	private String[] profileNames = {
-		"Profile 1",
-		"Profile 2",
-		"Profile 3",
-		"Profile 4",
-		"Profile 5",
-		"Profile 6",
-		"Profile 7",
-	};
 
 	class ProfileListAdapter extends BaseListAdapter {
 		public boolean areAllItemsEnabled() {
@@ -124,7 +169,16 @@ public class SwitchProfileDialog extends BaseDialog {
 			cb.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					mReaderView.setCurrentProfile(position + 1);
+					if (optionsDialog != null) {
+						BackgroundThread.instance().executeGUI(new Runnable() {
+							public void run() {
+								optionsDialog.apply();
+								optionsDialog.dismiss();
+								mReaderView.setCurrentProfile(position + 1);
+								mCoolReader.showOptionsDialog(OptionsDialog.Mode.READER);
+							}
+						});
+					} else mReaderView.setCurrentProfile(position + 1);
 					SwitchProfileDialog.this.dismiss();
 				}
 			});
