@@ -495,6 +495,113 @@ static bool parse_number_value( const char * & str, css_length_t & value,
     return true;
 }
 
+static lString16 parse_nth_value( const lString16 value )
+{
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child
+    // Parse "even", "odd", "5", "5n", "5n+2", "-n"...
+    // Pack 3 numbers, enough to check if match, into another lString16
+    // for quicker checking:
+    // - a tuple of 3 lChar16: (negative, n-step, offset)
+    // - or the empty string when invalid or if it would never match
+    // (Note that we get the input already trimmed and lowercased.)
+    lString16 ret = lString16(); // empty string = never match
+    if ( value == "even" ) { //  = "2n"
+        ret << lChar16(0) <<lChar16(2) << lChar16(0);
+        return ret;
+    }
+    if ( value == "odd" ) {  // = "2n+1"
+        ret << lChar16(0) <<lChar16(2) << lChar16(1);
+        return ret;
+    }
+    int len = value.length();
+    if (len == 0) // empty value
+        return ret; // invalid
+    bool negative = false;
+    int first = 0;
+    int second = 0;
+    int i = 0;
+    lChar16 c;
+    c = value[i];
+    if ( c == '-' ) {
+        negative = true;
+        i++;
+    }
+    if ( i==len ) // no follow up content
+        return ret; // invalid
+    c = value[i];
+    if ( c == 'n' ) { // 'n' or '-n' without a leading number
+        first = 1;
+    }
+    else {
+        // Parse first number
+        if ( c < '0' || c > '9') // not a digit
+            return ret; // invalid
+        while (true) { // grab digit(s)
+            first = first * 10 + ( c - '0' );
+            i++; // pass by this digit
+            if ( i==len ) { // single number seen: this parsed number is actually the offset
+                if ( negative ) // "-4"
+                    return ret; // never match
+                ret << lChar16(0) << lChar16(0) << lChar16(first);
+                return ret;
+            }
+            c = value[i];
+            if ( c < '0' || c > '9') // done grabbing first digits
+                break;
+        }
+        if ( c != 'n' ) // invalid char after first number
+            return ret; // invalid
+    }
+    i++; // pass by that 'n'
+    if ( i==len ) { // ends with that 'n'
+        if ( negative || first == 0) // valid, but would never match anything
+            return ret; // never match
+        ret << lChar16(0) << lChar16(first) << lChar16(0);
+        return ret;
+    }
+    c = value[i];
+    if ( c != '+' ) // follow up content must start with a '+'
+        return ret; // invalid
+    i++; // pass b y that '+'
+    if ( i==len ) // ends with that '+'
+        return ret; // invalid
+    // Parse second number
+    c = value[i];
+    if ( c < '0' || c > '9') // not a digit
+        return ret; // invalid
+    while (true) { // grab digit(s)
+        second = second * 10 + ( c - '0' );
+        i++; // pass by this digit
+        if ( i==len ) // end of string, fully valid
+            break;
+        c = value[i];
+        if ( c < '0' || c > '9') // expected a digit (invalid stuff at end of value)
+            return ret; // invalid
+    }
+    // Valid, and we parsed everything
+    ret << lChar16(negative) << lChar16(first) << lChar16(second);
+    return ret;
+}
+
+static bool match_nth_value( const lString16 value, int n)
+{
+    // Apply packed parsed value (parsed by above function) to n
+    if ( value.empty() ) // invalid, or never match
+        return false;
+    bool negative = value[0];
+    int step = value[1];
+    int offset = value[2];
+    if ( step == 0 )
+        return n == offset;
+    if ( negative )
+        n = offset - n;
+    else
+        n = n - offset;
+    if ( n < 0 )
+        return false;
+    return n % step == 0;
+}
+
 struct standard_color_t
 {
     const char * name;
@@ -528,6 +635,7 @@ standard_color_t standard_color_table[] = {
     {"darkgoldenrod",0xb8860b},
     {"darkgray",0xa9a9a9},
     {"darkgreen",0x006400},
+    {"darkgrey",0xa9a9a9},
     {"darkkhaki",0xbdb76b},
     {"darkmagenta",0x8b008b},
     {"darkolivegreen",0x556b2f},
@@ -538,11 +646,13 @@ standard_color_t standard_color_table[] = {
     {"darkseagreen",0x8fbc8f},
     {"darkslateblue",0x483d8b},
     {"darkslategray",0x2f4f4f},
+    {"darkslategrey",0x2f4f4f},
     {"darkturquoise",0x00ced1},
     {"darkviolet",0x9400d3},
     {"deeppink",0xff1493},
     {"deepskyblue",0x00bfff},
     {"dimgray",0x696969},
+    {"dimgrey",0x696969},
     {"dodgerblue",0x1e90ff},
     {"firebrick",0xb22222},
     {"floralwhite",0xfffaf0},
@@ -554,6 +664,7 @@ standard_color_t standard_color_table[] = {
     {"goldenrod",0xdaa520},
     {"gray",0x808080},
     {"green",0x008000},
+    {"grey",0x808080},
     {"greenyellow",0xadff2f},
     {"honeydew",0xf0fff0},
     {"hotpink",0xff69b4},
@@ -571,11 +682,13 @@ standard_color_t standard_color_table[] = {
     {"lightgoldenrodyellow",0xfafad2},
     {"lightgray",0xd3d3d3},
     {"lightgreen",0x90ee90},
+    {"lightgrey",0xd3d3d3},
     {"lightpink",0xffb6c1},
     {"lightsalmon",0xffa07a},
     {"lightseagreen",0x20b2aa},
     {"lightskyblue",0x87cefa},
     {"lightslategray",0x778899},
+    {"lightslategrey",0x778899},
     {"lightsteelblue",0xb0c4de},
     {"lightyellow",0xffffe0},
     {"lime",0x00ff00},
@@ -629,6 +742,7 @@ standard_color_t standard_color_table[] = {
     {"skyblue",0x87ceeb},
     {"slateblue",0x6a5acd},
     {"slategray",0x708090},
+    {"slategrey",0x708090},
     {"snow",0xfffafa},
     {"springgreen",0x00ff7f},
     {"steelblue",0x4682b4},
@@ -1089,6 +1203,14 @@ static const char * css_cr_hint_names[]={
         "toc-level5",
         "toc-level6",
         "toc-ignore",       // ignore these H1...H6 when building alternate TOC
+
+        // Next one is not really a hint, but might have some active effect on rendering/layout.
+        // It has effect on inline nodes only, while the ones above mostly apply to block
+        // nodes. So, provide it with a lower specificity if those above also need to be used.
+        "strut-confined",   // text and images should not overflow/modify their paragraph strut
+                            // baseline and height (it could have been a non-standard named
+                            // value for line-height:, but we want to be able to not override
+                            // existing line-height: values)
         NULL
 };
 
@@ -1259,7 +1381,7 @@ bool LVCssDeclaration::parse( const char * &decl, bool higher_importance, lxmlDo
             case cssd_hyphenate3:
             case cssd_hyphenate4:
             case cssd_hyphenate5:
-            	prop_code = cssd_hyphenate;
+                prop_code = cssd_hyphenate;
                 n = parse_name( decl, css_hyph_names, -1 );
                 if ( n==-1 )
                     n = parse_name( decl, css_hyph_names2, -1 );
@@ -1368,9 +1490,11 @@ bool LVCssDeclaration::parse( const char * &decl, bool higher_importance, lxmlDo
                         }
                         strValue = joinPropertyValueList( list );
                     }
-                    // default to serif generic font-family
+                    // default to sans-serif generic font-family (the default
+                    // in lvfntman.cpp, as FreeType can't know the family of
+                    // a font)
                     if (n == -1)
-                        n = 1;
+                        n = css_ff_sans_serif;
                 }
                 break;
             case cssd_font_style:
@@ -1384,19 +1508,30 @@ bool LVCssDeclaration::parse( const char * &decl, bool higher_importance, lxmlDo
                     // read length
                     css_length_t len;
                     const char * orig_pos = decl;
-                    bool negative = false;
-                    if ( *decl == '-' ) {
-                        decl++;
-                        negative = true;
-                    }
-                    if ( parse_number_value( decl, len ) ) {
-                        // read optional "hanging" flag
+                    if ( parse_number_value( decl, len, true, true ) ) { // accepts % and negative values
+                        // Read optional "hanging" flag
+                        // Note: "1em hanging" is not the same as "-1em"; the former shifts
+                        // all other but first line by 1em to the right, while the latter
+                        // shifts the first  by 1em to the left. Visually, lines would
+                        // look the same relative to each other, but the whole block would
+                        // appear shifted to the left with the latter.
+                        // Little hack here: to be able to store the presence of "hanging" as
+                        // a flag in the css_length_t, we reset the lowest bit to 0, which
+                        // shouldn't really have a visual impact on the computed value (as
+                        // the parsed number is stored *256 to allow fractional value, so
+                        // we're losing 0.004em, 0.004px, 0.004%...)
+                        len.value &= 0xFFFFFFFE; // set lowest bit to 0
+                            // printf("3: %x -3: %x => %x %x %d\n", (lInt16)(3), (lInt16)(-3),
+                            //    (lInt16)(3&0xFFFFFFFE), (lInt16)((-3)&0xFFFFFFFE), (lInt16)((-3)&0xFFFFFFFE));
+                            // outputs: 3: 3 -3: fffffffd => 2 fffffffc -4
                         skip_spaces( decl );
                         int attr = parse_name( decl, css_ti_attribute_names, -1 );
-                        if ( attr==0 || negative ) {
-                            len.value = -len.value;
+                        if ( attr == 0 ) { // "hanging" found
+                            len.value |= 0x00000001; // set lowest bit to 1
                         }
-                        // save result
+                        // Note: if needed, we could parse the "each-line" keyword to be able
+                        // to bring back the legacy behaviour (where indent was applied after
+                        // a <br>) with CSS, and put this fact in the 2nd lowest bit.
                         buf<<(lUInt32) (prop_code | importance | parse_important(decl));
                         buf<<(lUInt32) len.type;
                         buf<<(lUInt32) len.value;
@@ -2266,6 +2401,20 @@ static bool parse_ident( const char * &str, char * ident )
     return true;
 }
 
+// We are storing specificity/weight in a lUInt32.
+// We also want to include in it the order in which we have
+// seen/parsed the selectors, so we store in the lower bits
+// of this lUInt32 some sequence number to ensure selectors
+// with the same specificity are applied in the order we've
+// seen them when parsing.
+// So, apply the real CSS specificity in higher bits, allowing
+// for the following number of such rules in a single selector
+// (we're not checking for overflow thus...)
+#define WEIGHT_SPECIFICITY_ID       1<<29 // allow for 8 #id (b in comment below)
+#define WEIGHT_SPECIFICITY_ATTRCLS  1<<24 // allow for 32 .class and [attr...] (c)
+#define WEIGHT_SPECIFICITY_ELEMENT  1<<19 // allow for 32 element names div > p span (d)
+#define WEIGHT_SELECTOR_ORDER       1     // allow for counting 524288 selectors
+
 lUInt32 LVCssSelectorRule::getWeight() {
     /* Each LVCssSelectorRule will add its own weight to
        its LVCssSelector container specifity.
@@ -2297,7 +2446,7 @@ lUInt32 LVCssSelectorRule::getWeight() {
     //
     switch (_type) {
         case cssrt_id:            // E#id
-            return 1 << 16;
+            return WEIGHT_SPECIFICITY_ID;
             break;
         case cssrt_attrset:           // E[foo]
         case cssrt_attreq:            // E[foo="value"]
@@ -2314,14 +2463,16 @@ lUInt32 LVCssSelectorRule::getWeight() {
         case cssrt_attrcontains_i:    // E[foo*="value" i]
         case cssrt_class:             // E.class
         case cssrt_pseudoclass:       // E:pseudo-class
-            return 1 << 8;
+            return WEIGHT_SPECIFICITY_ATTRCLS;
             break;
         case cssrt_parent:        // E > F
         case cssrt_ancessor:      // E F
         case cssrt_predecessor:   // E + F
         case cssrt_predsibling:   // E ~ F
-            // But not when they don't have an element (_id=0)
-            return _id != 0 ? 1 : 0;
+            // These don't contribute to specificity. If they
+            // come with an element name, WEIGHT_SPECIFICITY_ELEMENT
+            // has already been added in LVCssSelector::parse().
+            return 0;
             break;
         case cssrt_universal:     // *
             return 0;
@@ -2334,21 +2485,18 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
     if (!node || node->isNull() || node->isRoot())
         return false;
     // For most checks, while navigating nodes, we must ignore sibling text nodes.
-    // We also ignore <autoBoxing>, <floatBox> and <inlineBox> (crengine internal
-    // block elements, inserted for rendering purpose) when looking at parent(s).
-    // TODO: for cssrt_predecessor and cssrt_pseudoclass, we should
-    // also deal with <autoBoxing> nodes when navigating siblings,
-    // by iterating up and down the autoBoxing nodes met on our path while
-    // under real parent. These could take wrong decisions in the meantime...
+    // We also ignore crengine internal boxing elements (inserted for rendering
+    // purpose) by using the getUnboxedParent/Sibling(true) methods (providing
+    // 'true' make them skip text nodes).
+    // Note that if we are returnging 'true', the provided 'node' must stay
+    // or be updated to the node on which next selectors (on the left in the
+    // chain) must be checked against. When returning 'false', we can let
+    // node be in any state, even messy.
     switch (_type)
     {
     case cssrt_parent:        // E > F (child combinator)
         {
-            node = node->getParentNode();
-            while (node && !node->isNull() && (   node->getNodeId() == el_autoBoxing
-                                               || node->getNodeId() == el_floatBox
-                                               || node->getNodeId() == el_inlineBox ))
-                node = node->getParentNode();
+            node = node->getUnboxedParent();
             if (!node || node->isNull())
                 return false;
             // If _id=0, we are the parent and we match
@@ -2359,14 +2507,10 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
         break;
     case cssrt_ancessor:      // E F (descendant combinator)
         {
-            for (;;)
-            {
-                node = node->getParentNode();
+            for (;;) {
+                node = node->getUnboxedParent();
                 if (!node || node->isNull())
                     return false;
-                if ( node->getNodeId() == el_autoBoxing || node->getNodeId() == el_floatBox
-                                            || node->getNodeId() == el_inlineBox )
-                    continue;
                 // cssrt_ancessor is a non-deterministic rule: next rules
                 // could fail when checked against this parent that matches
                 // current rule, but could succeed when checked against
@@ -2392,49 +2536,35 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
         break;
     case cssrt_predecessor:   // E + F (adjacent sibling combinator)
         {
-            int index = node->getNodeIndex();
-            if (index>0) {
-                ldomNode * parent = node->getParentNode();
-                for (int i=index-1; i>=0; i--) {
-                    ldomNode * elem = parent->getChildElementNode(i);
-                    // we get NULL when a child is a text node, that we should ignore
-                    if ( elem ) { // this is the preceeding element node
-                        if (!_id || elem->getNodeId() == _id) {
-                            // No element name to match against, or this element name matches
-                            node = elem;
-                            return true;
-                        }
-                        return false;
-                    }
-                }
+            node = node->getUnboxedPrevSibling(true); // skip text nodes
+            if (!node || node->isNull())
+                return false;
+            if (!_id || node->getNodeId() == _id) {
+                // No element name to match against, or this element name matches
+                return true;
             }
             return false;
         }
         break;
     case cssrt_predsibling:   // E ~ F (preceding sibling / general sibling combinator)
         {
-            int index = node->getNodeIndex();
-            if (index>0) {
-                ldomNode * parent = node->getParentNode();
-                for (int i=index-1; i>=0; i--) {
-                    const ldomNode * elem = parent->getChildElementNode(i);
-                    // we get NULL when a child is a text node, that we should ignore
-                    if ( elem ) { // this is an element node
-                        if ( !_id || elem->getNodeId() == _id ) {
-                            // No element name to match against, or this element name
-                            // matches: check next rules starting from there.
-                            // Same as what is done in cssrt_ancessor above: we may
-                            // have to check next rules on all preceeding siblings.
-                            if (checkNextRules(elem))
-                                // We match all next rules (possibly including other
-                                // cssrt_ancessor or cssrt_predsibling)
-                                return true;
-                            // Next rules didn't match: continue with next parent
-                        }
-                    }
+            for (;;) {
+                node = node->getUnboxedPrevSibling(true); // skip text nodes
+                if (!node || node->isNull())
+                    return false;
+                if ( !_id || node->getNodeId() == _id ) {
+                    // No element name to match against, or this element name
+                    // matches: check next rules starting from there.
+                    // Same as what is done in cssrt_ancessor above: we may have
+                    // to check next rules on all preceeding matching siblings.
+                    const ldomNode * n = node;
+                    if (checkNextRules(n))
+                        // We match all next rules (possibly including other
+                        // cssrt_ancessor or cssrt_predsibling)
+                        return true;
+                    // Next rules didn't match: continue with next prev sibling
                 }
             }
-            return false;
         }
         break;
     case cssrt_attrset:       // E[foo]
@@ -2589,9 +2719,7 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
         return true;
     case cssrt_pseudoclass:   // E:pseudo-class
         {
-            int nodeId = node->getNodeId();
-            int index = node->getNodeIndex();
-            ldomNode * parent = node->getParentNode();
+            int nodeId;
             switch (_attrid) {
                 case csspc_root:
                 {
@@ -2610,6 +2738,7 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
                     // the first <body> or the <html> node, but to avoid applyng the
                     // style twice (to the 2 <body>s), we want to NOT match the first
                     // node.
+                    ldomNode * parent = node->getUnboxedParent();
                     if ( !parent || parent->isRoot() )
                         return false; // we do not want to return true;
                     lUInt16 parentNodeId = parent->getNodeId();
@@ -2625,31 +2754,37 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
                 break;
                 case csspc_dir:
                 {
-		    while (node) {
-			if ( !node->hasAttribute( attr_dir ) ) {
-			    node = node->getParentNode();
-			    continue;
-			}
-			lString16 dir = node->getAttributeValue( attr_dir );
-			dir = dir.lowercase(); // (no need for trim(), it's done by the XMLParser)
-			if ( dir.compare(_value) == 0 )
+                    // We're looking at parents, but we don't want to update 'node'
+                    const ldomNode * elem = node;
+                    while (elem) {
+                        if ( !elem->hasAttribute( attr_dir ) ) {
+                            // No need to use getUnboxedParent(), boxes don't have this attribute
+                            elem = elem->getParentNode();
+                            continue;
+                        }
+                        lString16 dir = elem->getAttributeValue( attr_dir );
+                        dir = dir.lowercase(); // (no need for trim(), it's done by the XMLParser)
+                        if ( dir.compare(_value) == 0 )
                             return true;
                         // We could ignore invalide values, but for now, just stop looking.
-			return false;
-		    }
+                        return false;
+                    }
                     return false;
                 }
                 break;
                 case csspc_first_child:
                 case csspc_first_of_type:
                 {
-                    if (index>0) {
-                        for (int i=index-1; i>=0; i--) {
-                            ldomNode * elem = parent->getChildElementNode(i);
-                            if ( elem ) // child before us
-                                if (_attrid == csspc_first_child || elem->getNodeId() == nodeId)
-                                    return false;
-                        }
+                    if ( _attrid == csspc_first_of_type )
+                        nodeId = node->getNodeId();
+                    const ldomNode * elem = node;
+                    for (;;) {
+                        elem = elem->getUnboxedPrevSibling(true); // skip text nodes
+                        if (!elem)
+                            break;
+                        // We have a previous sibling
+                        if (_attrid == csspc_first_child || elem->getNodeId() == nodeId)
+                            return false;
                     }
                     return true;
                 }
@@ -2657,11 +2792,16 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
                 case csspc_last_child:
                 case csspc_last_of_type:
                 {
-                    for (int i=index+1; i<parent->getChildCount(); i++) {
-                        ldomNode * elem = parent->getChildElementNode(i);
-                        if ( elem ) // child after us
-                            if (_attrid == csspc_last_child || elem->getNodeId() == nodeId)
-                                return false;
+                    if ( _attrid == csspc_last_of_type )
+                        nodeId = node->getNodeId();
+                    const ldomNode * elem = node;
+                    for (;;) {
+                        elem = elem->getUnboxedNextSibling(true); // skip text nodes
+                        if (!elem)
+                            break;
+                        // We have a next sibling
+                        if (_attrid == csspc_last_child || elem->getNodeId() == nodeId)
+                            return false;
                     }
                     return true;
                 }
@@ -2669,56 +2809,50 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
                 case csspc_nth_child:
                 case csspc_nth_of_type:
                 {
-                    int n = 0;
-                    for (int i=0; i<index; i++) {
-                        ldomNode * elem = parent->getChildElementNode(i);
-                        if ( elem )
-                            if (_attrid == csspc_nth_child || elem->getNodeId() == nodeId)
-                                n++;
+                    if ( _attrid == csspc_nth_of_type )
+                        nodeId = node->getNodeId();
+                    const ldomNode * elem = node;
+                    int n = 1;
+                    for (;;) {
+                        elem = elem->getUnboxedPrevSibling(true); // skip text nodes
+                        if (!elem)
+                            break;
+                        if (_attrid == csspc_nth_child || elem->getNodeId() == nodeId)
+                            n++;
                     }
-                    n++; // this is our position
-                    if (_value == "even" && (n & 1)==0)
-                        return true;
-                    if (_value == "odd" && (n & 1)==1)
-                        return true;
-                    // other values ( 5, 5n3...) not supported (yet)
-                    return false;
+                    return match_nth_value(_value, n);
                 }
                 break;
                 case csspc_nth_last_child:
                 case csspc_nth_last_of_type:
                 {
-                    int n = 0;
-                    for (int i=parent->getChildCount()-1; i>index; i--) {
-                        ldomNode * elem = parent->getChildElementNode(i);
-                        if ( elem )
-                            if (_attrid == csspc_nth_last_child || elem->getNodeId() == nodeId)
-                                n++;
+                    if ( _attrid == csspc_nth_last_of_type )
+                        nodeId = node->getNodeId();
+                    const ldomNode * elem = node;
+                    int n = 1;
+                    for (;;) {
+                        elem = elem->getUnboxedNextSibling(true); // skip text nodes
+                        if (!elem)
+                            break;
+                        if (_attrid == csspc_nth_last_child || elem->getNodeId() == nodeId)
+                            n++;
                     }
-                    n++; // this is our position
-                    if (_value == "even" && (n & 1)==0)
-                        return true;
-                    if (_value == "odd" && (n & 1)==1)
-                        return true;
-                    // other values ( 5, 5n3...) not supported (yet)
-                    return false;
+                    return match_nth_value(_value, n);
                 }
                 break;
                 case csspc_only_child:
                 case csspc_only_of_type:
                 {
-                    int n = 0;
-                    for (int i=0; i<parent->getChildCount(); i++) {
-                        ldomNode * elem = parent->getChildElementNode(i);
-                        if ( elem )
-                            if (_attrid == csspc_only_child || elem->getNodeId() == nodeId) {
-                                n++;
-                                if (n > 1)
-                                    break;
-                            }
+                    if ( _attrid == csspc_only_of_type )
+                        nodeId = node->getNodeId();
+                    const ldomNode * elem = node->getUnboxedParent()->getUnboxedFirstChild(true);
+                    while (elem) {
+                        if (elem != node) {
+                            if (_attrid == csspc_only_child || elem->getNodeId() == nodeId)
+                                return false; // we're not alone
+                        }
+                        elem = elem->getUnboxedNextSibling(true);
                     }
-                    if (n > 1)
-                        return false;
                     return true;
                 }
                 break;
@@ -2886,6 +3020,11 @@ LVCssSelectorRule * parse_attr( const char * &str, lxmlDocBase * doc )
         LVCssSelectorRule * rule = new LVCssSelectorRule(cssrt_pseudoclass);
         lString16 s( attrvalue );
         s.trim().lowercase();
+        if ( n == csspc_nth_child || n == csspc_nth_of_type || n == csspc_nth_last_child || n == csspc_nth_last_of_type ) {
+            // Parse "even", "odd", "5", "5n", "5n+2", "-n" into a few
+            // numbers packed into a lString16, for quicker checking.
+            s = parse_nth_value(s);
+        }
         rule->setAttr(n, s);
         // printf("made pseudo class rule %d with %s\n", n, UnicodeToLocal(s).c_str());
         if ( n >= csspc_last_child ) {
@@ -3058,8 +3197,8 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
                 // is shorter than the shortest of them (floatBox)
                 element = element.lowercase();
             }
-            else if (element != "DocFragment" && element != "autoBoxing" && element != "floatBox"
-                                              && element != "inlineBox"  && element != "FictionBook" ) {
+            else if ( element != "DocFragment" && element != "autoBoxing" && element != "tabularBox" &&
+                      element != "floatBox"    && element != "inlineBox"  && element != "FictionBook" ) {
                 element = element.lowercase();
             }
             _id = doc->getElementNameIndex( element.c_str() );
@@ -3067,7 +3206,7 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
                 // selectors (eg: blah {font-style: italic}) may have different values
                 // returned by getElementNameIndex() across book loadings, and cause:
                 // "cached rendering is invalid (style hash mismatch): doing full rendering"
-            _specificity += 1; // we have an element: this adds 1 to specificity
+            _specificity += WEIGHT_SPECIFICITY_ELEMENT; // we have an element: update specificity
             if (*str==' ' || *str=='\t' || *str=='\n' || *str == '\r')
                 check_attribute_rules = false;
             skip_spaces( str );
@@ -3202,6 +3341,7 @@ LVStyleSheet::LVStyleSheet( LVStyleSheet & sheet )
 :   _doc( sheet._doc )
 {
     set( sheet._selectors );
+    _selector_count = sheet._selector_count;
 }
 
 void LVStyleSheet::apply( const ldomNode * node, css_style_rec_t * style )
@@ -3211,6 +3351,15 @@ void LVStyleSheet::apply( const ldomNode * node, css_style_rec_t * style )
         
     lUInt16 id = node->getNodeId();
     
+    // _selectors[0] holds the ordered chain of selectors starting (from
+    // the right of the selector) with a rule with no element name attached
+    // (eg. "div p .quote1", class name .quote1 should be checked against
+    // all elements' classnames before continuing checking for ancestors).
+    // _selectors[element_name_id] holds the ordered chain of selector starting
+    // with that element name (eg. ".body div.chapter > p" should be
+    // first checked agains all <p>).
+    // To see which selectors apply to a <p>, we must iterate thru both chains,
+    // checking and applying them in the order of specificity/parsed position.
     LVCssSelector * selector_0 = _selectors[0];
     LVCssSelector * selector_id = id>0 && id<_selectors.length() ? _selectors[id] : NULL;
 
@@ -3299,7 +3448,11 @@ bool LVStyleSheet::parse( const char * str, bool higher_importance, lString16 co
         for (;*str;)
         {
             // parse selector(s)
-            selector = new LVCssSelector;
+            // Have selector count number make the initial value
+            // of _specificity, so order of selectors is preserved
+            // when applying selectors with the same CSS specificity.
+            selector = new LVCssSelector(_selector_count);
+            _selector_count += 1; // = +WEIGHT_SELECTOR_ORDER
             selector->setNext( prev_selector );
             if ( !selector->parse(str, _doc) )
             {

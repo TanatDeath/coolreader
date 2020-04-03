@@ -51,8 +51,8 @@
 // To be provided via the initial value to renderBlockElement(... int *baseline ...) to
 // have FlowState compute baseline (different rules whether inline-block or inline-table).
 #define REQ_BASELINE_NOT_NEEDED       0
-#define REQ_BASELINE_FOR_INLINE_BLOCK 1
-#define REQ_BASELINE_FOR_INLINE_TABLE 2
+#define REQ_BASELINE_FOR_INLINE_BLOCK 1    // use last baseline fed
+#define REQ_BASELINE_FOR_TABLE        2    // keep first baseline fed
 
 class FlowState;
 
@@ -120,7 +120,7 @@ int initRendMethod( ldomNode * node, bool recurseChildren, bool allowAutoboxing 
 int styleToTextFmtFlags( const css_style_ref_t & style, int oldflags, int direction=REND_DIRECTION_UNSET );
 /// renders block as single text formatter object
 void renderFinalBlock( ldomNode * node, LFormattedText * txform, RenderRectAccessor * fmt, int & flags,
-                       int ident, int line_h, int valign_dy=0, bool * is_link_start=NULL );
+                       int indent, int line_h, int valign_dy=0, bool * is_link_start=NULL );
 /// renders block which contains subblocks (with gRenderBlockRenderingFlags as flags)
 int renderBlockElement( LVRendPageContext & context, ldomNode * enode, int x, int y, int width, int direction=REND_DIRECTION_UNSET, int * baseline=NULL );
 /// renders block which contains subblocks
@@ -207,6 +207,8 @@ extern int gRenderBlockRenderingFlags;
                                                                       // rectangle, allowing text layout staircase-like.
 // Inline block/table
 #define BLOCK_RENDERING_BOX_INLINE_BLOCKS                  0x01000000 // Wrap inline-block in an internal inlineBox element.
+#define BLOCK_RENDERING_COMPLETE_INCOMPLETE_TABLES         0x02000000 // Add anonymous missing elements to a table without proper
+                                                                      // children and table-cells without proper parents
 
 // Enable everything
 #define BLOCK_RENDERING_FULL_FEATURED                      0x7FFFFFFF
@@ -214,7 +216,29 @@ extern int gRenderBlockRenderingFlags;
 #define BLOCK_RENDERING_G(f) ( gRenderBlockRenderingFlags & BLOCK_RENDERING_##f )
 #define BLOCK_RENDERING(v, f) ( v & BLOCK_RENDERING_##f )
 
-#define DEF_RENDER_BLOCK_RENDERING_FLAGS BLOCK_RENDERING_FULL_FEATURED
+// rendering flags presets
+#define BLOCK_RENDERING_FLAGS_LEGACY     0
+#define BLOCK_RENDERING_FLAGS_FLAT       ( BLOCK_RENDERING_ENHANCED | \
+                                           BLOCK_RENDERING_COLLAPSE_VERTICAL_MARGINS | \
+                                           BLOCK_RENDERING_ALLOW_VERTICAL_NEGATIVE_MARGINS | \
+                                           BLOCK_RENDERING_USE_W3C_BOX_MODEL | \
+                                           BLOCK_RENDERING_WRAP_FLOATS | \
+                                           BLOCK_RENDERING_PREPARE_FLOATBOXES | \
+                                           BLOCK_RENDERING_BOX_INLINE_BLOCKS )
+#define BLOCK_RENDERING_FLAGS_BOOK       ( BLOCK_RENDERING_ENHANCED | \
+                                           BLOCK_RENDERING_COLLAPSE_VERTICAL_MARGINS | \
+                                           BLOCK_RENDERING_ALLOW_VERTICAL_NEGATIVE_MARGINS | \
+                                           BLOCK_RENDERING_ENSURE_MARGIN_AUTO_ALIGNMENT | \
+                                           BLOCK_RENDERING_USE_W3C_BOX_MODEL | \
+                                           BLOCK_RENDERING_ENSURE_STYLE_WIDTH | \
+                                           BLOCK_RENDERING_WRAP_FLOATS | \
+                                           BLOCK_RENDERING_PREPARE_FLOATBOXES | \
+                                           BLOCK_RENDERING_FLOAT_FLOATBOXES | \
+                                           BLOCK_RENDERING_DO_NOT_CLEAR_OWN_FLOATS | \
+                                           BLOCK_RENDERING_ALLOW_EXACT_FLOATS_FOOTPRINTS | \
+                                           BLOCK_RENDERING_BOX_INLINE_BLOCKS )
+#define BLOCK_RENDERING_FLAGS_WEB        BLOCK_RENDERING_FULL_FEATURED
+#define BLOCK_RENDERING_FLAGS_DEFAULT    BLOCK_RENDERING_FLAGS_WEB
 
 int validateBlockRenderingFlags( int f );
 

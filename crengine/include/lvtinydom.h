@@ -47,6 +47,8 @@
 extern const int gDOMVersionCurrent;
 extern int gDOMVersionRequested;
 
+// Also defined in src/lvtinydom.cpp
+#define DOM_VERSION_WITH_NORMALIZED_XPOINTERS 20200223
 
 #define LXML_NO_DATA       0 ///< to mark data storage record as empty
 #define LXML_ELEMENT_NODE  1 ///< element node
@@ -107,6 +109,27 @@ extern int gDOMVersionRequested;
 #define DEF_MIN_SPACE_CONDENSING_PERCENT 50
 
 #define NODE_DISPLAY_STYLE_HASH_UNITIALIZED 0xFFFFFFFF
+
+// To be used for 'direction' in ldomNode->elementFromPoint(lvPoint pt, int direction)
+// and ldomDocument->createXPointer(lvPoint pt, int direction...) as a way to
+// self-document what's expected (but the code does > and < comparisons, so
+// don't change these values - some clients may also already use 0/1/-1).
+// Use PT_DIR_EXACT to find the exact node at pt (with y AND x check),
+// which is needed when selecting text or checking if tap is on a link,
+// (necessary in table cells or floats, and in RTL text).
+// Use PT_DIR_SCAN_* when interested only in finding the slice of a page
+// at y (eg. to get the current page top), finding the nearest node in
+// direction if pt.y happens to be in some node margin area.
+// Use PT_DIR_SCAN_BACKWARD_LOGICAL_* when looking a whole page range
+// xpointers, to not miss words on first or last line in bidi/RTL text.
+#define PT_DIR_SCAN_BACKWARD_LOGICAL_LAST   -3
+#define PT_DIR_SCAN_BACKWARD_LOGICAL_FIRST  -2
+#define PT_DIR_SCAN_BACKWARD                -1
+#define PT_DIR_EXACT                         0
+#define PT_DIR_SCAN_FORWARD                  1
+#define PT_DIR_SCAN_FORWARD_LOGICAL_FIRST    2
+#define PT_DIR_SCAN_FORWARD_LOGICAL_LAST     3
+
 
 //#if BUILD_LITE!=1
 /// final block cache
@@ -272,9 +295,9 @@ protected:
     ldomTextStorageChunk * _activeChunk;
     ldomTextStorageChunk * _recentChunk;
     CacheFile * _cache;
-    int _uncompressedSize;
-    int _maxUncompressedSize;
-    int _chunkSize;
+    lUInt32 _uncompressedSize;
+    lUInt32 _maxUncompressedSize;
+    lUInt32 _chunkSize;
     char _type;       /// type, to show in log
     bool _maxSizeReachedWarned;
     ldomTextStorageChunk * getChunk( lUInt32 address );
@@ -289,7 +312,7 @@ public:
     void setCache( CacheFile * cache );
     /// checks buffer sizes, compacts most unused chunks
     void compact( int reservedSpace );
-    int getUncompressedSize() { return _uncompressedSize; }
+    lUInt32 getUncompressedSize() { return _uncompressedSize; }
 #if BUILD_LITE!=1
     /// allocates new text node, return its address inside storage
     lUInt32 allocText( lUInt32 dataIndex, lUInt32 parentIndex, const lString8 & text );
@@ -321,7 +344,7 @@ public:
     /// set element style data item
     void setStyleData( lUInt32 elemDataIndex, const ldomNodeStyleInfo * src );
 
-    ldomDataStorageManager( tinyNodeCollection * owner, char type, int maxUnpackedSize, int chunkSize );
+    ldomDataStorageManager( tinyNodeCollection * owner, char type, lUInt32 maxUnpackedSize, lUInt32 chunkSize );
     ~ldomDataStorageManager();
 };
 
@@ -382,9 +405,9 @@ public:
     /// create empty buffer
     ldomTextStorageChunk(ldomDataStorageManager * manager, lUInt16 index);
     /// create chunk to be read from cache file
-    ldomTextStorageChunk(ldomDataStorageManager * manager, lUInt16 index, int compsize, int uncompsize);
+    ldomTextStorageChunk(ldomDataStorageManager * manager, lUInt16 index, lUInt32 compsize, lUInt32 uncompsize);
     /// create with preallocated buffer, for raw access
-    ldomTextStorageChunk(int preAllocSize, ldomDataStorageManager * manager, lUInt16 index);
+    ldomTextStorageChunk(lUInt32 preAllocSize, ldomDataStorageManager * manager, lUInt16 index);
     ~ldomTextStorageChunk();
 };
 
@@ -464,6 +487,7 @@ protected:
     lUInt32 _nodeDisplayStyleHash;
     lUInt32 _nodeDisplayStyleHashInitial;
     bool _nodeStylesInvalidIfLoading;
+    bool _boxingWishedButPreventedByCache;
 
     int calcFinalBlocks();
     void dropStyles();
@@ -602,6 +626,9 @@ public:
     }
     void setNodeStylesInvalidIfLoading() {
         _nodeStylesInvalidIfLoading = true;
+    }
+    void setBoxingWishedButPreventedByCache() {
+        _boxingWishedButPreventedByCache = true;
     }
 
     /// if a cache file is in use
@@ -793,10 +820,13 @@ private:
     /// returns true if element has inline content (non empty text, images, <BR>)
     bool hasNonEmptyInlineContent( bool ignoreFloats=false );
 
-    lString16 getXPathSegmentUsingNames();
-    lString16 getXPathSegmentUsingIndexes();
 public:
 #if BUILD_LITE!=1
+    // Generic version of autoboxChildren() without any specific inline/block checking,
+    // accepting any element id (from the enum el_*, like el_div, el_tabularBox) as
+    // the wrapping element.
+    ldomNode * boxWrapChildren( int startIndex, int endIndex, lUInt16 elementId );
+
     /// if stylesheet file name is set, and file is found, set stylesheet to its value
     bool applyNodeStylesheet();
 
@@ -1021,6 +1051,21 @@ public:
     /// is node an inlineBox that has not been re-inlined by having
     /// its child no more inline-block/inline-table
     bool isBoxingInlineBox();
+    /// is node an inlineBox that wraps a bogus embedded block (not inline-block/inline-table)
+    /// can be called with inline_box_checks_done=true when isBoxingInlineBox() has already
+    /// been called to avoid rechecking what is known
+    bool isEmbeddedBlockBoxingInlineBox(bool inline_box_checks_done=false);
+
+    /// is node any of our internal boxing element
+    bool isBoxingNode();
+
+    /// return real (as in the original HTML) parent/siblings by skipping any internal
+    /// boxing element up or down (returns NULL when no more sibling)
+    ldomNode * getUnboxedParent() const;
+    ldomNode * getUnboxedFirstChild( bool skip_text_nodes=false ) const;
+    ldomNode * getUnboxedLastChild( bool skip_text_nodes=false ) const;
+    ldomNode * getUnboxedPrevSibling( bool skip_text_nodes=false ) const;
+    ldomNode * getUnboxedNextSibling( bool skip_text_nodes=false ) const;
 };
 
 
@@ -1485,12 +1530,15 @@ public:
     /// converts to string
     lString16 toString( XPointerMode mode = XPATH_USE_NAMES) {
         if( XPATH_USE_NAMES==mode ) {
-            if( gDOMVersionRequested >= 20180528)
-                return toStringUsingNames();
-            return toStringUsingNamesOld();
+            if( gDOMVersionRequested >= DOM_VERSION_WITH_NORMALIZED_XPOINTERS)
+                return toStringV2();
+            return toStringV1();
         }
-        return toStringUsingIndexes();
+        return toStringV2AsIndexes();
     }
+    lString16 toStringV1(); // Using names, old, with boxing elements (non-normalized)
+    lString16 toStringV2(); // Using names, new, without boxing elements, so: normalized
+    lString16 toStringV2AsIndexes(); // Without element names, normalized (not used)
 
     /// returns XPath node text
     lString16 getText(  lChar16 blockDelimiter=0 )
@@ -1518,9 +1566,6 @@ public:
     lString8 getHtml( int wflags=0 ) {
         lString16Collection cssFiles; return getHtml(cssFiles, wflags);
     }
-    lString16 toStringUsingNames();
-    lString16 toStringUsingNamesOld();
-    lString16 toStringUsingIndexes();
 };
 
 #define MAX_DOM_LEVEL 64
@@ -2227,7 +2272,9 @@ private:
     virtual ContinuousOperationResult saveChanges( CRTimerUtil & maxTime, LVDocViewCallback * progressCallback=NULL );
 #endif
 
+    /// create XPointer from a non-normalized string made by toStringV1()
     ldomXPointer createXPointerV1( ldomNode * baseNode, const lString16 & xPointerStr );
+    /// create XPointer from a normalized string made by toStringV2()
     ldomXPointer createXPointerV2( ldomNode * baseNode, const lString16 & xPointerStr );
 protected:
 
@@ -2322,6 +2369,8 @@ public:
     int getFullHeight();
     /// returns page height setting
     int getPageHeight() { return _page_height; }
+    /// returns page width setting
+    int getPageWidth() { return _page_width; }
 #endif
     /// saves document contents as XML to stream with specified encoding
     bool saveToStream( LVStreamRef stream, const char * codepage, bool treeLayout=false );
@@ -2362,14 +2411,14 @@ public:
     /// create xpointer from relative pointer string
     ldomXPointer createXPointer( ldomNode * baseNode, const lString16 & xPointerStr )
     {
-        if( gDOMVersionRequested >= 20180528)
+        if( gDOMVersionRequested >= DOM_VERSION_WITH_NORMALIZED_XPOINTERS)
             return createXPointerV2(baseNode, xPointerStr);
         return createXPointerV1(baseNode, xPointerStr);
     }
 
 #if BUILD_LITE!=1
     /// create xpointer from doc point
-    ldomXPointer createXPointer( lvPoint pt, int direction=0, bool strictBounds=false, ldomNode * from_node=NULL );
+    ldomXPointer createXPointer( lvPoint pt, int direction=PT_DIR_EXACT, bool strictBounds=false, ldomNode * from_node=NULL );
     /// get rendered block cache object
     CVRendBlockCache & getRendBlockCache() { return _renderedBlockCache; }
 

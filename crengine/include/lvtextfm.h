@@ -76,12 +76,14 @@ extern "C" {
 #define LTEXT_SRC_IS_FLOAT_DONE      0x02000000  /**< \brief float:'ing node (already dealt with) */
 #define LTEXT_SRC_IS_INLINE_BOX      0x04000000  /**< \brief inlineBox wrapping node */
 
+#define LTEXT_STRUT_CONFINED         0x08000000  /**< \brief text should not overflow/modify its paragraph strut baseline and height */
+
 /** \brief Source text line
 */
 typedef struct
 {
     void *          object;   /**< \brief pointer to object which represents source */
-    lInt16          margin;   /**< \brief first line margin */
+    lInt16          indent;   /**< \brief first line indent (or all but first, when negative) */
     lInt16          valign_dy; /* drift y from baseline */
     lInt16          interval; /**< \brief line height in screen pixels */
     lInt16          letter_spacing; /**< \brief additional letter spacing, pixels */
@@ -157,6 +159,8 @@ typedef struct
 
 #define LTEXT_WORD_VALIGN_TOP                0x1000 /// word is to be vertical-align: top
 #define LTEXT_WORD_VALIGN_BOTTOM             0x2000 /// word is to be vertical-align: bottom
+#define LTEXT_WORD_STRUT_CONFINED            0x4000 /// word is to be fully contained into strut bounds
+                                                    /// (used only when one of the 2 previous is set)
 
 //#define LTEXT_BACKGROUND_MARK_FLAGS 0xFFFF0000l
 
@@ -254,6 +258,13 @@ typedef struct
 
    // Highlighting
    text_highlight_options_t highlight_options; /**< options for selection/bookmark highlighting */
+
+   // Reusable after it is cached by ldomNode::renderFinalBlock()
+   // (Usually true, except in a single case: first rendering of final block
+   // containing embedded blocks, where we want the first rendering to forward
+   // these embedded blocks individual lines, for page splitting - a second
+   // rendering, with proper inlineBox lines will be needed for drawing.)
+   bool                  is_reusable;
 } formatted_text_fragment_t;
 
 /**  Alloc & init formatted text buffer
@@ -284,7 +295,7 @@ void lvtextAddSourceLine(
    lUInt32         flags,    /* flags */
    lInt16          interval, /* line height in screen pixels */
    lInt16          valign_dy,/* drift y from baseline */
-   lUInt16         margin,   /* first line margin */
+   lInt16          indent,   /* first line indent (or all but first, when negative) */
    void *          object,   /* pointer to custom object */
    lUInt16         offset,    /* offset from node/object start to start of line */
    lInt16          letter_spacing
@@ -301,7 +312,7 @@ void lvtextAddSourceObject(
    lUInt32         flags,     /* flags */
    lInt16          interval,  /* line height in screen pixels */
    lInt16          valign_dy, /* drift y from baseline */
-   lUInt16         margin,    /* first line margin */
+   lInt16          indent,    /* first line indent (or all but first, when negative) */
    void *          object,    /* pointer to custom object */
    lInt16          letter_spacing
                          );
@@ -355,7 +366,7 @@ public:
                 lUInt32         flags,     /* flags */
                 lInt16          interval,  /* line height in screen pixels */
                 lInt16          valign_dy, /* drift y from baseline */
-                lUInt16         margin,    /* first line margin */
+                lInt16          indent,    /* first line indent (or all but first, when negative) */
                 void *          object,    /* pointer to custom object */
                 lInt16          letter_spacing=0
          );
@@ -369,7 +380,7 @@ public:
            lUInt32         flags,       /* (had default =LTEXT_ALIGN_LEFT|LTEXT_FLAG_OWNTEXT) */
            lInt16          interval,    /* line height in screen pixels */
            lInt16          valign_dy=0, /* drift y from baseline */
-           lUInt16         margin=0,    /* first line margin */
+           lInt16          indent=0,    /* first line indent (or all but first, when negative) */
            void *          object=NULL,
            lUInt32         offset=0,
            lInt16          letter_spacing=0
@@ -378,7 +389,7 @@ public:
         lvtextAddSourceLine(m_pbuffer, 
             font,  //font->GetHandle()
             text, len, color, bgcolor, 
-            flags, interval, valign_dy, margin, object, (lUInt16)offset, letter_spacing );
+            flags, interval, valign_dy, indent, object, (lUInt16)offset, letter_spacing );
     }
 
     lUInt32 Format(lUInt16 width, lUInt16 page_height,
@@ -421,6 +432,8 @@ public:
     }
 
     void Draw( LVDrawBuf * buf, int x, int y, ldomMarkedRangeList * marks = NULL,  ldomMarkedRangeList *bookmarks = NULL );
+
+    bool isReusable() { return m_pbuffer->is_reusable; }
 
     LFormattedText() { m_pbuffer = lvtextAllocFormatter( 0 ); }
 

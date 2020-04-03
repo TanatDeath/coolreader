@@ -19,7 +19,7 @@ public class MainDB extends BaseDB {
 	public int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 41;
+	public static final int DB_VERSION = 42;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -195,7 +195,6 @@ public class MainDB extends BaseDB {
 			    execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN username VARCHAR DEFAULT NULL");
 			    execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN password VARCHAR DEFAULT NULL");
 			}
-
 			if (currentVersion < 24) {
 				execSQL("CREATE TABLE IF NOT EXISTS search_history (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -319,6 +318,65 @@ public class MainDB extends BaseDB {
 				addOPDSCatalogs(DEF_OPDS_URLS3);
 				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN books_downloaded INTEGER DEFAULT 0");
 				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN was_error INTEGER DEFAULT 0");
+			}
+			if (currentVersion < 28) {
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN crc32 INTEGER DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN domVersion INTEGER DEFAULT 0");
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN rendFlags INTEGER DEFAULT 0");
+			}
+			if (currentVersion < 29) {
+				// After adding support for the 'fb3' and 'docx' formats in version 3.2.33,
+				// the 'format' field in the 'book' table becomes invalid because the enum DocumentFormat has been changed.
+				// So, after reading this field from the database, we must recheck the format by pathname.
+				// TODO: check format by mime-type or file contents...
+				log.i("Update 'format' field in table 'book'...");
+				Cursor rs = null;
+				HashMap<Long, Long> formatsMap = new HashMap<Long, Long>();
+				try {
+					String sql = "SELECT id, pathname, format FROM book";
+					rs = mDB.rawQuery(sql, null);
+					if ( rs.moveToFirst() ) {
+						do {
+							Long id = rs.getLong(0);
+							String pathname = rs.getString(1);
+							Long old_format = rs.getLong(2);
+							if (old_format > 1) {		// skip 'none', 'fb2' - ordinal is not changed
+								DocumentFormat new_format = DocumentFormat.byExtension(pathname);
+								if (null != new_format && old_format != new_format.ordinal())
+									formatsMap.put(id, (long) new_format.ordinal());
+							}
+						} while (rs.moveToNext());
+					}
+				} catch (Exception e) {
+					Log.e("cr3", "exception while reading format", e);
+				} finally {
+					if ( rs!=null )
+						rs.close();
+				}
+				// Save new format in table 'book'...
+				if (!formatsMap.isEmpty()) {
+					SQLiteStatement stmt = null;
+					int updatedCount = 0;
+					try {
+						mDB.beginTransaction();
+						stmt = mDB.compileStatement("UPDATE book SET format = ? WHERE id = ?");
+						for (Map.Entry<Long, Long> record : formatsMap.entrySet() ) {
+							stmt.clearBindings();
+							stmt.bindLong(1, record.getValue());
+							stmt.bindLong(2, record.getKey());
+							stmt.execute();
+							updatedCount++;
+						}
+						mDB.setTransactionSuccessful();
+						vlog.i("Updated " + updatedCount + " records with invalid format.");
+					} catch (Exception e) {
+						Log.e("cr3", "exception while reading format", e);
+					} finally {
+						if (null != stmt)
+							stmt.close();
+						mDB.endTransaction();
+					}
+				}
 			}
 
 			//==============================================================
@@ -2123,6 +2181,10 @@ public class MainDB extends BaseDB {
 			add("doc_date_n", (long) newValue.docDateN, (long) oldValue.docDateN);
 			add("publ_year_n", (long) newValue.publYearN, (long) oldValue.publYearN);
 			add("opds_link", newValue.opdsLink, oldValue.opdsLink);
+			//plotn: TODO: may perform
+			add("crc32", newValue.crc32, oldValue.crc32);
+			add("domVersion", newValue.domVersion, oldValue.domVersion);
+			add("rendFlags", newValue.blockRenderingFlags, oldValue.blockRenderingFlags);
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
@@ -2158,7 +2220,8 @@ public class MainDB extends BaseDB {
 		"publcity,  publyear, publisbn, "+
 		"sp.name as publseries_name, " +
 		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n, opds_link,  " +
-		"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list "
+		"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list, " +
+		"crc32, domVersion, rendFlags "
 		;
 
 	private static final String READ_FILEINFO_SQL =
@@ -2168,9 +2231,9 @@ public class MainDB extends BaseDB {
 		"LEFT JOIN series s ON s.id=b.series_fk " +
 		"LEFT JOIN series sp ON sp.id=b.publseries_fk " +
 		"LEFT JOIN folder f ON f.id=b.folder_fk ";
-	private void readFileInfoFromCursor( FileInfo fileInfo, Cursor rs )
-	{
-		int i=0;
+
+	private void readFileInfoFromCursor(FileInfo fileInfo, Cursor rs) {
+		int i = 0;
 		fileInfo.id = rs.getLong(i++);
 		String pathName = rs.getString(i++);
 		String[] parts = FileInfo.splitArcName(pathName);
@@ -2219,6 +2282,10 @@ public class MainDB extends BaseDB {
 		fileInfo.opdsLink = rs.getString(i++);
 		fileInfo.isArchive = fileInfo.arcname!=null;
 		fileInfo.genre_list = rs.getString(i++);
+		fileInfo.crc32 = rs.getInt(i++);
+		fileInfo.domVersion = rs.getInt(i++);
+		fileInfo.blockRenderingFlags = rs.getInt(i++);
+		fileInfo.isArchive = fileInfo.arcname != null;
 	}
 
 	private boolean findBooks(String sql, ArrayList<FileInfo> list) {

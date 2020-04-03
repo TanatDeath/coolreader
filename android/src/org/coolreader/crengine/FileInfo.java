@@ -116,6 +116,9 @@ public class FileInfo {
 	public boolean isDirectory;
 	public boolean isListed;
 	public boolean isScanned;
+	public int crc32;
+	public int domVersion;
+	public int blockRenderingFlags;
 	public FileInfo parent; // parent item
 	public Object tag; // some additional information
 	public boolean askedMarkRead = false; // did we ask to mark book as read
@@ -308,20 +311,18 @@ public class FileInfo {
 			pathname = pathName;
 			isDirectory = true;
 		} else {
-			String[] parts = splitArcName(pathName);
-			if (parts[1] != null) {
+			String[] parts = splitArcName( pathName );
+			if ( parts[1]!=null ) {
 				// from archive
 				isArchive = true;
 				arcname = parts[1];
 				pathname = parts[0];
 				File f = new File(pathname);
 				filename = f.getName();
-				fileCreateTime = f.lastModified();
 				path = f.getPath();
 				File arc = new File(arcname);
 				if (arc.isFile() && arc.exists()) {
-					arcsize = (int) arc.length();
-					size = arcsize;
+					arcsize = (int)arc.length();
 					isArchive = true;
 					try {
 						//ZipFile zip = new ZipFile(new File(arcname));
@@ -330,21 +331,26 @@ public class FileInfo {
 						for (ZipEntry entry : entries) {
 							String name = entry.getName();
 
-							if (!entry.isDirectory() && pathname.equals(name)) {
+							if ( !entry.isDirectory() && pathname.equals(name) ) {
 								File itemf = new File(name);
 								filename = itemf.getName();
 								path = itemf.getPath();
 								format = DocumentFormat.byExtension(name);
-								if (format == null) format = DocumentFormat.NONE;
- 								//size = (int)entry.getSize();//plotn - guess this is same as compressed...
-								arcsize = (int) entry.getCompressedSize();
+								size = (int)entry.getSize();
+								arcsize = (int)entry.getCompressedSize();
 								createTime = entry.getTime();
+
+
 								break;
 							}
+
+
 						}
-					} catch (Exception e) {
+					} catch ( Exception e ) {
 						Log.e("cr3", "error while reading contents of " + arcname);
 					}
+
+
 				}
 			} else {
 				fromFile(new File(pathName));
@@ -370,6 +376,8 @@ public class FileInfo {
 			if (format == null) format = DocumentFormat.NONE;
 			createTime = f.lastModified();
 			size = (int)f.length();
+			domVersion = Engine.DOM_VERSION_CURRENT;
+			blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
 		} else {
 			filename = f.getName();
 			path = f.getParent();
@@ -387,6 +395,8 @@ public class FileInfo {
 	public FileInfo()
 	{
 		need_to_update_ver = false;
+		domVersion = Engine.DOM_VERSION_CURRENT;
+		blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
 	}
 
 	/// doesn't copy parent and children
@@ -424,6 +434,9 @@ public class FileInfo {
 		proxy_uname = v.proxy_uname;
 		proxy_passw = v.proxy_passw;
 		onion_def_proxy = v.onion_def_proxy;
+		crc32 = v.crc32;
+		domVersion = v.domVersion;
+		blockRenderingFlags = v.blockRenderingFlags;
 		id = v.id;
 		saved_with_ver = v.saved_with_ver;
 		genre = v.genre;
@@ -1758,6 +1771,17 @@ public class FileInfo {
 		if (docDateN != other.docDateN) return false;
 		if (publYearN != other.publYearN) return false;
 		if (!StrUtils.euqalsIgnoreNulls(opdsLink, other.opdsLink, true)) return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
+			return false;
+		if (crc32 != other.crc32)
+			return false;
+		if (domVersion != other.domVersion)
+			return false;
+		if (blockRenderingFlags != other.blockRenderingFlags)
+			return false;
 		return true;
 	}
 

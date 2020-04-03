@@ -29,8 +29,11 @@
 //=====================================================
 XS_BEGIN_TAGS
 
-// Internal element for block rendering
+// Internal element for block wrapping inline elements (without a proper parent
+// block container) among proper block siblings (would be better named "blockBox")
 XS_TAG1T( autoBoxing )
+// Internal element for tabular elements added to complete incomplete tables
+XS_TAG1T( tabularBox )
 // Internal element for float rendering
 XS_TAG1T( floatBox )
 // Internal element for inline-block and inline-table rendering
@@ -46,6 +49,7 @@ XS_TAG1( html )
 XS_TAG1( head )
 XS_TAG1D( title, true, css_d_block, css_ws_normal )
 XS_TAG1D( style, true, css_d_none, css_ws_normal )
+XS_TAG1D( script, true, css_d_none, css_ws_normal )
 XS_TAG1T( body )
 XS_TAG1( param ) /* quite obsolete, child of <object>... was there, let's keep it */
 
@@ -79,6 +83,7 @@ XS_TAG1T( figure )
 XS_TAG1T( footer )
 XS_TAG1T( header )
 XS_TAG1T( hgroup )
+XS_TAG1T( legend ) // child of fieldset, rendered as block by most browsers
 XS_TAG1T( main )
 XS_TAG1T( nav )
 XS_TAG1T( noscript )

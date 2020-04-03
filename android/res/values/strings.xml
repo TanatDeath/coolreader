@@ -219,7 +219,7 @@
     <string name="options_text_shaping">Text shaping</string>
     <string name="options_text_shaping_simple">Simple (no ligatures, kerning may not work)</string>
     <string name="options_text_shaping_light">Light (no ligatures)</string>
-    <string name="options_text_shaping_full">Full (with ligatures)</string>
+    <string name="options_text_shaping_full">Full (with ligatures, RTL)</string>
     <string name="options_font_kerning">Font kerning</string>
     <string name="action_zoom_out">Decrease font size</string>
     <string name="options_style_floating_punctuation">Floating punctuation</string>
@@ -1080,4 +1080,12 @@
     <string name="rename_profile">Rename profile</string>
     <string name="new_profile">New profile name</string>
     <string name="no_bookmarks">No bookmarks in this book</string>
+    <string name="options_rendering_preset">Rendering preset</string>
+    <string name="options_rendering_preset_legacy">Legacy</string>
+    <string name="options_rendering_preset_flat">Flat</string>
+    <string name="options_rendering_preset_book">Book</string>
+    <string name="options_rendering_preset_web">Web (full)</string>
+    <string name="options_requested_dom_level">DOM version compatibility level</string>
+    <string name="options_requested_dom_level_legacy">Legacy</string>
+    <string name="options_requested_dom_level_newest">Newest</string>
 </resources>

@@ -148,6 +148,14 @@ else()
   SET(USE_UNRAR 0)
 endif(DEFINED USE_UNRAR)
 
+find_path(NANOSVG_INCLUDE_DIR nanosvg.h DOC "Path to NanoSVG include dir")
+if (NOT NANOSVG_INCLUDE_DIR)
+  SET(NANOSVG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/nanosvg/src)
+endif(NOT NANOSVG_INCLUDE_DIR)
+
+ADD_DEFINITIONS(-DUSE_NANOSVG=1)
+INCLUDE_DIRECTORIES(${NANOSVG_INCLUDE_DIR})
+
 if (MAC)
   message("will use zlib, libpng, libjpeg, freetype from Qt static library")
   SET(ZLIB_INCLUDE_DIR ${QT_3RDPARTY_DIR}/zlib)
@@ -245,6 +253,21 @@ else()
 	set(DESKTOP_DEFS ${DESKTOP_DEFS} -DUSE_FONTCONFIG=0)
 endif (FONTCONFIG_FOUND)
 
+if (NOT MSVC)
+	find_package(FriBidi)
+endif(NOT MSVC)
+
+if (NOT FRIBIDI_FOUND)
+  message("System FriBidi not found, will build local one\n")
+  ADD_SUBDIRECTORY(thirdparty/fribidi)
+  SET(FRIBIDI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/fribidi/lib)
+  SET(FRIBIDI_LIBRARY fribidi)
+  set(DESKTOP_DEFS ${DESKTOP_DEFS} -DBUNDLED_FRIBIDI=1 -I${CMAKE_BINARY_DIR}/thirdparty/fribidi)
+endif (NOT FRIBIDI_FOUND)
+
+set(DESKTOP_DEFS ${DESKTOP_DEFS} -DUSE_FRIBIDI=1)
+
+
 endif (NOT MAC)
 
 #if (ENABLE_CHM)
@@ -275,6 +298,7 @@ INCLUDE_DIRECTORIES(
   ${HARFBUZZ_INCLUDE_DIR}
   ${ANTIWORD_INCLUDE_DIR}
   ${CHM_INCLUDE_DIR}
+  ${FRIBIDI_INCLUDE_DIR}
 )
 
 if ( ${GUI} STREQUAL FB2PROPS )
@@ -291,6 +315,8 @@ SET(STD_LIBS
   ${CHM_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${ANTIWORD_LIBRARIES}
+  ${FRIBIDI_LIBRARIES}
+  qimagescale
 )
 if (FONTCONFIG_FOUND)
 	set(STD_LIBS ${STD_LIBS} ${FONTCONFIG_LIBRARIES})

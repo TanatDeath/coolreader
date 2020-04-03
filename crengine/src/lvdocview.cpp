@@ -2737,6 +2737,7 @@ void LVDocView::Draw(LVDrawBuf & drawbuf, int position, int page, bool rotate, b
 		return;
 	if (isScrollMode()) {
 		drawbuf.SetClipRect(NULL);
+        drawbuf.setHidePartialGlyphs(false);
         drawPageBackground(drawbuf, 0, position);
         int cover_height = 0;
 		if (m_pages.length() > 0 && (m_pages[0]->flags & RN_PAGE_TYPE_COVER))
@@ -2925,7 +2926,7 @@ ldomXPointer LVDocView::getNodeByPoint(lvPoint pt, bool strictBounds) {
 	LVLock lock(getMutex());
     CHECK_RENDER("getNodeByPoint()")
 	if (windowToDocPoint(pt) && m_doc) {
-		ldomXPointer ptr = m_doc->createXPointer(pt, 0, strictBounds);
+		ldomXPointer ptr = m_doc->createXPointer(pt, PT_DIR_EXACT, strictBounds);
 		//CRLog::debug("  ptr (%d, %d) node=%08X offset=%d", pt.x, pt.y, (lUInt32)ptr.getNode(), ptr.getOffset() );
 		return ptr;
 	}
@@ -3044,11 +3045,15 @@ LVRef<ldomXRange> LVDocView::getPageDocumentRange(int pageIndex) {
     // With floats, a page may actually show more than one range,
     // not sure how to deal with that (return a range including all
     // subranges, so possibly including stuff not shown on the page?)
+    // We also want to get the xpointer to the first or last node
+    // on a line in "logical order" instead of "visual order", which
+    // is needed with bidi text to not miss some text on the first
+    // or last line of the page.
     ldomXPointer start;
     ldomXPointer end;
     int start_h;
     for (start_h=0; start_h < height; start_h++) {
-        start = m_doc->createXPointer(lvPoint(0, start_y + start_h), 1);
+        start = m_doc->createXPointer(lvPoint(0, start_y + start_h), PT_DIR_SCAN_FORWARD_LOGICAL_FIRST);
         // printf("  start (%d=%d): %s\n", start_h, start_y + start_h, UnicodeToLocal(start.toString()).c_str());
         if (!start.isNull()) {
             // Check what we got is really in current page
@@ -3060,8 +3065,8 @@ LVRef<ldomXRange> LVDocView::getPageDocumentRange(int pageIndex) {
     }
     int end_h;
     for (end_h=height; end_h >= start_h; end_h--) {
-        end = m_doc->createXPointer(lvPoint(GetWidth(), start_y + end_h), -1);
-                                // x=GetWidth() to get XPointer of end of line
+        end = m_doc->createXPointer(lvPoint(GetWidth(), start_y + end_h), PT_DIR_SCAN_BACKWARD_LOGICAL_LAST);
+            // (x=GetWidth() might be redundant with PT_DIR_SCAN_BACKWARD_LOGICAL_LAST, but it might help skiping floats)
         // printf("  end (%d=%d): %s\n", end_h, start_y + end_h, UnicodeToLocal(end.toString()).c_str());
         if (!end.isNull()) {
             // Check what we got is really in current page
@@ -3095,6 +3100,11 @@ int LVDocView::getCurrentPageImageCount()
 {
     CHECK_RENDER("getCurPageImgCount()")
     LVRef<ldomXRange> range = getPageDocumentRange(-1);
+    return getPageImageCount(range);
+}
+
+int LVDocView::getPageImageCount(LVRef<ldomXRange>& range)
+{
     class ImageCounter : public ldomNodeCallback {
         int count;
     public:
@@ -3107,7 +3117,7 @@ int LVDocView::getCurrentPageImageCount()
             lString16 nodeName = ptr->getNode()->getNodeName();
             if (nodeName == "img" || nodeName == "image")
                 count++;
-			return true;
+            return true;
         }
 
     };
@@ -4183,13 +4193,11 @@ static void FileToArcProps(CRPropRef props) {
 static bool needToConvertBookmarks(CRFileHistRecord* historyRecord)
 {
     bool convertBookmarks = false;
-    if(historyRecord) {
-        gDOMVersionRequested = historyRecord->getDOMversion();
-        if(gDOMVersionRequested < 20180528) {
-            convertBookmarks = historyRecord->getBookmarks().length() > 1;
-        }
-    } else
-        gDOMVersionRequested = gDOMVersionCurrent;
+    if (historyRecord && historyRecord->getBookmarks().length() > 1
+        && gDOMVersionRequested >= DOM_VERSION_WITH_NORMALIZED_XPOINTERS
+        && historyRecord->getDOMversion() < DOM_VERSION_WITH_NORMALIZED_XPOINTERS) {
+            convertBookmarks = true;
+    }
     return convertBookmarks;
 }
 
@@ -4210,6 +4218,7 @@ bool LVDocView::LoadDocument(const lChar16 * fname, bool metadataOnly) {
 	bool isArchiveFile = LVSplitArcName(filename16, arcPathName,
 			arcItemPathName);
 
+	int savedRenderFlags = m_props->getIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
 	if (isArchiveFile) {
 		// load from archive, using @/ separated arhive/file pathname
 		CRLog::info("Loading document %s from archive %s", LCSTR(
@@ -4243,23 +4252,26 @@ bool LVDocView::LoadDocument(const lChar16 * fname, bool metadataOnly) {
 		m_doc_props->setString(DOC_PROP_FILE_SIZE, lString16::itoa(
 				(int) stream->GetSize()));
 		m_doc_props->setString(DOC_PROP_FILE_NAME, arcItemPathName);
-        m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
-        CRFileHistRecord* record = m_hist.getRecord( filename16, stream->GetSize() );
-        bool convertBookmarks = needToConvertBookmarks(record) && !metadataOnly;
-        if(convertBookmarks)
-            m_doc_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0);
+		m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
+		CRFileHistRecord* record = m_hist.getRecord( filename16, stream->GetSize() );
+		int newDOMVersion;
+		bool convertBookmarks = needToConvertBookmarks(record) && !metadataOnly;
+		if(convertBookmarks) {
+			newDOMVersion = gDOMVersionRequested;
+			gDOMVersionRequested = record->getDOMversion();
+			m_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
+		}
 
 		// loading document
 		if (loadDocumentInt(stream, metadataOnly)) {
 			m_filename = lString16(fname);
 			m_stream.Clear();
-            if(convertBookmarks) {
-                record->convertBookmarks(m_doc);
-                record->setDOMversion(gDOMVersionCurrent);
-                gDOMVersionRequested = gDOMVersionCurrent;
-                m_doc_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, DEF_RENDER_BLOCK_RENDERING_FLAGS);
-                //FIXME: need to reload file after this
-            }
+			if(convertBookmarks) {
+				record->convertBookmarks(m_doc, newDOMVersion);
+				gDOMVersionRequested = newDOMVersion;
+				m_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, savedRenderFlags);
+				//FIXME: need to reload file after this
+			}
 			return true;
 		}
 		m_stream.Clear();
@@ -4298,27 +4310,30 @@ bool LVDocView::LoadDocument(const lChar16 * fname, bool metadataOnly) {
 	LVStreamRef stream = m_container->OpenStream(fn.c_str(), LVOM_READ);
 	if (!stream)
 		return false;
-    m_doc_props->setString(DOC_PROP_FILE_NAME, fn);
+	m_doc_props->setString(DOC_PROP_FILE_NAME, fn);
 	m_doc_props->setString(DOC_PROP_FILE_SIZE, lString16::itoa(
 			(int) stream->GetSize()));
-    m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
+	m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
 
-    CRFileHistRecord* record = m_hist.getRecord( filename16, stream->GetSize() );
-    bool convertBookmarks = needToConvertBookmarks(record) && !metadataOnly;
-    if(convertBookmarks)
-        m_doc_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0);
+	CRFileHistRecord* record = m_hist.getRecord( filename16, stream->GetSize() );
+	int newDOMVersion;
+	bool convertBookmarks = needToConvertBookmarks(record) && !metadataOnly;
+	if(convertBookmarks) {
+		newDOMVersion = gDOMVersionRequested;
+		gDOMVersionRequested = record->getDOMversion();
+		m_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
+	}
 
 	if (loadDocumentInt(stream, metadataOnly)) {
 		m_filename = lString16(fname);
 		m_stream.Clear();
 
-        if(convertBookmarks) {
-            record->convertBookmarks(m_doc);
-            record->setDOMversion(gDOMVersionCurrent);
-            gDOMVersionRequested = gDOMVersionCurrent;
-            m_doc_props->setIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, DEF_RENDER_BLOCK_RENDERING_FLAGS);
-            //FIXME: need to reload file after this
-        }
+		if(convertBookmarks) {
+			record->convertBookmarks(m_doc, newDOMVersion);
+			gDOMVersionRequested = newDOMVersion;
+			m_props->setIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, savedRenderFlags);
+			//FIXME: need to reload file after this
+		}
 #define DUMP_OPENED_DOCUMENT_SENTENCES 0 // debug XPointer navigation
 #if DUMP_OPENED_DOCUMENT_SENTENCES==1
         LVStreamRef out = LVOpenFileStream("/tmp/sentences.txt", LVOM_WRITE);
@@ -4384,25 +4399,6 @@ bool LVDocView::LoadDocument( LVStreamRef stream, const lChar16 * contentPath, b
 
 	CRLog::info("Loading document %s : fn=%s, dir=%s", LCSTR(contentPath16),
 				LCSTR(fn), LCSTR(dir));
-#if 0
-	int i;
-	int last_slash = -1;
-	lChar16 slash_char = 0;
-	for ( i=0; fname[i]; i++ ) {
-		if ( fname[i]=='\\' || fname[i]=='/' ) {
-			last_slash = i;
-			slash_char = fname[i];
-		}
-	}
-	lString16 dir;
-	if ( last_slash==-1 )
-        dir = ".";
-	else if ( last_slash == 0 )
-        dir << slash_char;
-	else
-        dir = lString16( fname, last_slash );
-	lString16 fn( fname + last_slash + 1 );
-#endif
 
 	m_doc_props->setString(DOC_PROP_FILE_PATH, dir);
 	m_doc_props->setString(DOC_PROP_FILE_NAME, fn);
@@ -4411,62 +4407,24 @@ bool LVDocView::LoadDocument( LVStreamRef stream, const lChar16 * contentPath, b
 	m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
 
 	CRFileHistRecord* record = m_hist.getRecord( contentPath16, stream->GetSize() );
+	int newDOMVersion;
+	int savedRenderFlags = m_props->getIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
 	bool convertBookmarks = needToConvertBookmarks(record) && !metadataOnly;
-	if(convertBookmarks)
-		m_doc_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0);
+	if(convertBookmarks) {
+		newDOMVersion = gDOMVersionRequested;
+		gDOMVersionRequested = record->getDOMversion();
+		m_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
+	}
 
 	if (loadDocumentInt(stream, metadataOnly)) {
 		m_filename = lString16(contentPath);
 
 		if(convertBookmarks) {
-			record->convertBookmarks(m_doc);
-			record->setDOMversion(gDOMVersionCurrent);
-			gDOMVersionRequested = gDOMVersionCurrent;
-			m_doc_props->setIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, DEF_RENDER_BLOCK_RENDERING_FLAGS);
+			record->convertBookmarks(m_doc, newDOMVersion);
+			gDOMVersionRequested = newDOMVersion;
+			m_props->setIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, savedRenderFlags);
 			//FIXME: need to reload file after this
 		}
-#define DUMP_OPENED_DOCUMENT_SENTENCES 0 // debug XPointer navigation
-#if DUMP_OPENED_DOCUMENT_SENTENCES==1
-		LVStreamRef out = LVOpenFileStream("/tmp/sentences.txt", LVOM_WRITE);
-        if ( !out.isNull() ) {
-            checkRender();
-            {
-                ldomXPointerEx ptr( m_doc->getRootNode(), m_doc->getRootNode()->getChildCount());
-                *out << "FORWARD ORDER:\n\n";
-                //ptr.nextVisibleText();
-                ptr.prevVisibleWordEnd();
-                if ( ptr.thisSentenceStart() ) {
-                    while ( 1 ) {
-                        ldomXPointerEx ptr2(ptr);
-                        ptr2.thisSentenceEnd();
-                        ldomXRange range(ptr, ptr2);
-                        lString16 str = range.getRangeText();
-                        *out << ">sentence: " << UnicodeToUtf8(str) << "\n";
-                        if ( !ptr.nextSentenceStart() )
-                            break;
-                    }
-                }
-            }
-            {
-                ldomXPointerEx ptr( m_doc->getRootNode(), 1);
-                *out << "\n\nBACKWARD ORDER:\n\n";
-                while ( ptr.lastChild() )
-                    ;// do nothing
-                if ( ptr.thisSentenceStart() ) {
-                    while ( 1 ) {
-                        ldomXPointerEx ptr2(ptr);
-                        ptr2.thisSentenceEnd();
-                        ldomXRange range(ptr, ptr2);
-                        lString16 str = range.getRangeText();
-                        *out << "<sentence: " << UnicodeToUtf8(str) << "\n";
-                        if ( !ptr.prevSentenceStart() )
-                            break;
-                    }
-                }
-            }
-        }
-#endif
-
 		return true;
 	}
 	m_stream.Clear();
@@ -4890,7 +4848,7 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
 			{
 				Clear();
 				if ( m_callback ) {
-                    m_callback->OnLoadFileError( cs16("File with supported extension not fouind in archive.") );
+                    m_callback->OnLoadFileError( cs16("File with supported extension not found in archive.") );
 				}
 				return false;
 			}
@@ -5419,13 +5377,12 @@ ldomXPointer LVDocView::getBookmark() {
 				// In some edge cases, getting the xpointer for y=m_pages[_page]->start
 				// could resolve back to the previous page. We need to check for that
 				// and increase y until we find a coherent one.
+				// (In the following, we always want to find the first logical word/char.)
 				LVRendPageInfo * page = m_pages[_page];
 				bool found = false;
 				ldomXPointer fallback_ptr;
 				for (int y = page->start; y < page->start + page->height; y++) {
-					// Use direction=1 to avoid any x check (in case there
-					// is some left margin)
-					ptr = m_doc->createXPointer(lvPoint(0, y), 1);
+					ptr = m_doc->createXPointer(lvPoint(0, y), PT_DIR_SCAN_FORWARD_LOGICAL_FIRST);
 					lvPoint pt = ptr.toPoint();
 					if (pt.y >= page->start) {
 						if (!fallback_ptr)
@@ -5439,10 +5396,9 @@ ldomXPointer LVDocView::getBookmark() {
 				}
 				if (!found) {
 					// None looking forward resolved to that same page, we
-					// might find a better one looking backward (eg: when
-					// an element contains some floats that overflow its
-					// height) with direction=-1:
-					ptr = m_doc->createXPointer(lvPoint(0, page->start), -1);
+					// might find a better one looking backward (eg: when an
+					// element contains some floats that overflows its height).
+					ptr = m_doc->createXPointer(lvPoint(0, page->start), PT_DIR_SCAN_BACKWARD_LOGICAL_FIRST);
 					lvPoint pt = ptr.toPoint();
 					if (pt.y >= page->start && pt.y < page->start + page->height ) {
 						found = true;
@@ -5454,7 +5410,7 @@ ldomXPointer LVDocView::getBookmark() {
 					}
 					else {
 						// fallback to the one for page->start, even if not good
-						ptr = m_doc->createXPointer(lvPoint(0, page->start));
+						ptr = m_doc->createXPointer(lvPoint(0, page->start), PT_DIR_SCAN_BACKWARD_LOGICAL_FIRST);
 					}
 				}
 			}
@@ -5469,7 +5425,7 @@ ldomXPointer LVDocView::getBookmark() {
 			// Let's do the same in that case: get the previous text node
 			// position
 			for (int y = _pos; y >= 0; y--) {
-				ptr = m_doc->createXPointer(lvPoint(0, y), -1);
+				ptr = m_doc->createXPointer(lvPoint(0, y), PT_DIR_SCAN_BACKWARD_LOGICAL_FIRST);
 				if (!ptr.isNull())
 					break;
 			}
@@ -6188,6 +6144,18 @@ int LVDocView::doCommand(LVDocCmd cmd, int param) {
         getDocument()->setDocFlag(DOC_FLAG_ENABLE_INTERNAL_STYLES, param!=0);
         REQUEST_RENDER("doCommand-set internal styles")
         break;
+    case DCMD_SET_REQUESTED_DOM_VERSION:
+        CRLog::trace("DCMD_SET_REQUESTED_DOM_VERSION(%d)", param);
+        m_props->setInt(PROP_REQUESTED_DOM_VERSION, param);
+        gDOMVersionRequested = param;
+        REQUEST_RENDER("doCommand-set requested dom version")
+        break;
+    case DCMD_RENDER_BLOCK_RENDERING_FLAGS:
+        CRLog::trace("DCMD_RENDER_BLOCK_RENDERING_FLAGS(%d)", param);
+        m_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, param);
+        gRenderBlockRenderingFlags = param;
+        REQUEST_RENDER("doCommand-set block rendering flags")
+        break;
     case DCMD_REQUEST_RENDER:
         REQUEST_RENDER("doCommand-request render")
 		break;
@@ -6659,7 +6627,7 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 #endif
 	static int int_option_hinting[] = { 0, 1, 2 };
 	props->limitValueList(PROP_FONT_HINTING, int_option_hinting, 3);
-    static int int_option_shaping[] = { 0, 1, 2 };
+    static int int_option_shaping[] = { 1, 0, 2 };
     props->limitValueList(PROP_FONT_SHAPING, int_option_shaping, 3);
     static int int_options_1_2[] = { 2, 1 };
 	props->limitValueList(PROP_LANDSCAPE_PAGES, int_options_1_2, 2);
@@ -6753,9 +6721,11 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
         p = 100;
     props->setInt(PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, p);
 
+#ifndef ANDROID
     props->setIntDef(PROP_RENDER_DPI, DEF_RENDER_DPI); // 96 dpi
     props->setIntDef(PROP_RENDER_SCALE_FONT_WITH_DPI, DEF_RENDER_SCALE_FONT_WITH_DPI); // no scale
-    props->setIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, DEF_RENDER_BLOCK_RENDERING_FLAGS);
+    props->setIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_DEFAULT);
+#endif
 
     props->setIntDef(PROP_FILE_PROPS_FONT_SIZE, 22);
 
@@ -6812,7 +6782,7 @@ bool LVDocView::propApply(lString8 name, lString16 value) {
 CRPropRef LVDocView::propsApply(CRPropRef props) {
     CRLog::trace("LVDocView::propsApply( %d items )", props->getCount());
     CRPropRef unknown = LVCreatePropsContainer();
-	bool needUpdateMargins = false;
+    bool needUpdateMargins = false;
     for (int i = 0; i < props->getCount(); i++) {
         lString8 name(props->getName(i));
         lString16 value = props->getValue(i);
@@ -6848,7 +6818,7 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
             fontMan->SetKerning(kerning);
             REQUEST_RENDER("propsApply - kerning")
         } else if (name == PROP_FONT_SHAPING) {
-            int mode = props->getIntDef(PROP_FONT_SHAPING, (int)SHAPING_MODE_FREETYPE);
+            int mode = props->getIntDef(PROP_FONT_SHAPING, (int)SHAPING_MODE_HARFBUZZ_LIGHT);
             if (mode >= SHAPING_MODE_FREETYPE && mode <= SHAPING_MODE_HARFBUZZ) {
                 fontMan->SetShapingMode((shaping_mode_t)mode);
                 REQUEST_RENDER("Setting shaping mode");
@@ -6923,11 +6893,11 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 rc.right = margin;
             setPageMargins(rc);
 #else
-			needUpdateMargins = true;
+            needUpdateMargins = true;
 #endif
         } else if (name == PROP_FONT_FACE) {
             setDefaultFontFace(UnicodeToUtf8(value));
-			needUpdateMargins = true;
+            needUpdateMargins = true;
         } else if (name == PROP_FALLBACK_FONT_FACE) {
             lString8 oldFace = fontMan->GetFallbackFontFace();
             if ( UnicodeToUtf8(value)!=oldFace )
@@ -7038,9 +7008,15 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 gFlgFloatingPunctuationEnabled = value;
                 REQUEST_RENDER("propsApply floating punct")
             }
-			needUpdateMargins = true;
+            needUpdateMargins = true;
+        } else if (name == PROP_REQUESTED_DOM_VERSION) {
+            int value = props->getIntDef(PROP_REQUESTED_DOM_VERSION, gDOMVersionCurrent);
+            if (gDOMVersionRequested != value) {
+                gDOMVersionRequested = value;
+                REQUEST_RENDER("propsApply requested dom version")
+            }
         } else if (name == PROP_RENDER_BLOCK_RENDERING_FLAGS) {
-            int value = props->getIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, DEF_RENDER_BLOCK_RENDERING_FLAGS);
+            int value = props->getIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_DEFAULT);
             value = validateBlockRenderingFlags(value);
             if ( gRenderBlockRenderingFlags != value ) {
                 gRenderBlockRenderingFlags = value;
@@ -7094,8 +7070,8 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
         m_props->setString(name.c_str(), value);
         //}
     }
-	if (needUpdateMargins)
-		updatePageMargins();
+    if (needUpdateMargins)
+        updatePageMargins();
     return unknown;
 }
 
@@ -7427,3 +7403,4 @@ void LVDrawBookCover(LVDrawBuf & buf, LVImageSourceRef image, lString8 fontFace,
         CRLog::error("Cannot get font for coverpage");
     }
 }
+

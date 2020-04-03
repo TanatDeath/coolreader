@@ -2682,13 +2682,11 @@ static void DecodeWtf8(const char * s,  lChar16 * p, int len)
             *p++ = (char)ch;
             s++;
         } else if ( (ch & 0xE0) == 0xC0 ) {
-            //CRLog::trace("DecodeWtf8 %s", "2");
             matched = true;
             *p++ = ((ch & 0x1F) << 6)
                     | CONT_BYTE(1,0);
             s += 2;
         } else if ( (ch & 0xF0) == 0xE0 ) {
-            //CRLog::trace("DecodeWtf8 %s", "3");
             matched = true;
             *p++ = ((ch & 0x0F) << 12)
                 | CONT_BYTE(1,6)
@@ -2708,7 +2706,6 @@ static void DecodeWtf8(const char * s,  lChar16 * p, int len)
             }
         } else if ( (ch & 0xF8) == 0xF0 ) {
             // Mostly unused
-            //CRLog::trace("DecodeWtf8 %s", "4");
             matched = true;
             *p++ = ((ch & 0x07) << 18)
                 | CONT_BYTE(1,12)

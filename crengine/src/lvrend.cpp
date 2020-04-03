@@ -65,7 +65,7 @@ int scaleForRenderDPI( int value ) {
     return value;
 }
 
-int gRenderBlockRenderingFlags = DEF_RENDER_BLOCK_RENDERING_FLAGS;
+int gRenderBlockRenderingFlags = BLOCK_RENDERING_FLAGS_DEFAULT;
 
 int validateBlockRenderingFlags(int f) {
     // Check coherency and ensure dependancies of flags
@@ -160,6 +160,7 @@ public:
     int direction;
     int width;
     int height;
+    int baseline;
     int percent;
     int max_content_width;
     int min_content_width;
@@ -172,13 +173,14 @@ public:
     , direction(REND_DIRECTION_UNSET)
     , width(0)
     , height(0)
+    , baseline(0)
     , percent(0)
     , max_content_width(0)
     , min_content_width(0)
     , colspan(1)
     , rowspan(1)
-    , halign(0)
-    , valign(0)
+    , halign(0) // default to text-align: left
+    , valign(0) // default to vertical-align: baseline
     , elem(NULL)
     { }
 };
@@ -189,6 +191,7 @@ class CCRTableRow {
 public:
     int index;
     int height;
+    int baseline;
     int bottom_overflow; // extra height from row with rowspan>1
     int y;
     int numcols; // sum of colspan
@@ -197,14 +200,17 @@ public:
     ldomNode * elem;
     LVPtrVector<CCRTableCell> cells;
     CCRTableRowGroup * rowgroup;
+    LVRendPageContext * single_col_context; // we can add cells' lines instead of full rows
     CCRTableRow() : index(0)
     , height(0)
+    , baseline(0)
     , bottom_overflow(0)
     , y(0)
     , numcols(0) // sum of colspan
     , linkindex(-1)
     , elem(NULL)
     , rowgroup(NULL)
+    , single_col_context(NULL)
     { }
 };
 
@@ -375,8 +381,20 @@ public:
                 //CRLog::trace("LookupElem[%d] (%s, %d) %d", i, LCSTR(item->getNodeName()), state, (int)item->getRendMethod() );
                 switch ( rendMethod ) {
                 case erm_invisible:  // invisible: don't render
-                case erm_killed:     // no room to render element
                     // do nothing: invisible
+                    break;
+                case erm_killed:     // no room to render element, or unproper table element
+                    {
+                        // We won't visit this element in PlaceCells() and renderCells(),
+                        // but we'll visit it in DrawDocument() as we walk the DOM tree.
+                        // Give it some width and height so we can draw a symbol so users
+                        // know there is some content missing.
+                        RenderRectAccessor fmt = RenderRectAccessor( item );
+                        fmt.setHeight( 15 ); // not squared, so it does not look
+                        fmt.setWidth( 10 );  // like a list square bullet
+                        fmt.setX( 0 );       // positionned at top left of its container
+                        fmt.setY( 0 );       // (which ought to be a proper table element)
+                    }
                     break;
                 case erm_table:      // table element: render as table
                     // do nothing: impossible
@@ -504,9 +522,9 @@ public:
                         // "valign"
                         lString16 valign = item->getAttributeValue(attr_valign);
                         if (valign == "center")
-                            cell->valign = 1; // center
+                            cell->valign = 2; // middle
                         else if (valign == "bottom")
-                            cell->valign = 2; // bottom
+                            cell->valign = 3; // bottom
                         */
                         // These commented above attributes have been translated to
                         // CSS properties by ldomDocumentWriterFilter::OnAttribute():
@@ -537,12 +555,18 @@ public:
                         else if ( ta == css_ta_right )
                             cell->halign = 2; // right
 
+                        // https://developer.mozilla.org/en-US/docs/Web/CSS/vertical-align
+                        // The default for vertical_align is baseline (cell->valign=0,
+                        // set at CCRTableCell init time), and all other named values
+                        // than top/middle/bottom act as baseline.
                         css_length_t va = style->vertical_align;
                         if ( va.type == css_val_unspecified ) {
-                            if ( va.value == css_va_middle )
-                                cell->valign = 1; // middle
+                            if ( va.value == css_va_top )
+                                cell->valign = 1; // top
+                            else if ( va.value == css_va_middle )
+                                cell->valign = 2; // middle
                             else if ( va.value == css_va_bottom )
-                                cell->valign = 2; // bottom
+                                cell->valign = 3; // bottom
                         }
 
                         cell->direction = item_direction;
@@ -1307,7 +1331,6 @@ public:
         const int table_y0 = rect.top; // absolute y in document for top of table
         int last_y = table_y0; // used as y0 to AddLine(y0, table_y0+table_h)
         int line_flags = 0;
-        bool splitPages = context.getPageList() != NULL;
 
         // Final table height will be added to as we meet table content
         int table_h = 0;
@@ -1363,7 +1386,7 @@ public:
             // Includes half of it here, and the other half when adding the row
             table_h += borderspacing_v_bottom;
         }
-        if (splitPages) {
+        if ( context.wantsLines() ) {
             // Includes table border top + full caption if any + table padding
             // top + half of borderspacing_v.
             // We ask for a split between these and the first row to be avoided,
@@ -1383,10 +1406,56 @@ public:
             last_y = table_y0 + table_h;
         }
 
+        // If table is a single column, we can add to main context
+        // the lines of each cell, instead of full table rows, which
+        // will avoid cell lines to possibly be cut in the middle.
+        // (When multi-columns, because same-row cells' lines may
+        // not align, and because it's easier for the reader to
+        // not have to go back one page to read next cell (from
+        // same row) content, each row is considered a single
+        // line in the matter of page splitting.)
+        bool is_single_column = false;
+        int min_row_height_for_split_by_line;
+        if ( context.wantsLines() && cols.length() == 1 && enhanced_rendering ) {
+            is_single_column = true;
+            // We actually don't know if splitting by line is better
+            // than splitting by row. By-row might be better if it's
+            // a real table where rows really list items, while by-lines
+            // is preferable where the table is just used as a content
+            // wrapper. So, let's follow this simple rule from:
+            // https://www.w3.org/TR/css-tables-3/#fragmentation
+            //   "must attempt to preserve the table rows unfragmented if
+            //   the cells spanning the row do not span any subsequent row,
+            //   and their height is at least twice smaller than both the
+            //   fragmentainer height and width. Other rows are said
+            //   freely fragmentable."
+            // which looks like it applies to multi-columns tables too
+            // (but our lvpagesplitter will manage this as fine) - but
+            // let's just use that rule for single-columns tables.
+            int page_height = elem->getDocument()->getPageHeight();
+            int page_width = elem->getDocument()->getPageWidth();
+            if ( page_width < page_height )
+                min_row_height_for_split_by_line = page_width / 2;
+            else
+                min_row_height_for_split_by_line = page_height / 2;
+            // Looks like cells having rowspan > 1 (which makes no sense
+            // if only own column) shouldn't need any specific tweaks.
+            // Also, as we don't apply cells and row style height, and
+            // vertical-align shouldn't change anything if there are no
+            // other cell that would increase the row height, this too
+            // shouldn't need any check.
+            // (Note that a TD style height will still be applied if rendered
+            // as erm_block (but not if erm_final), but vertical-align won't
+            // be ensured. todo: make that consistent.)
+            // todo: we could also try to do that even if multi columns,
+            // by merging multiple cells' LVRendPageContext.
+        }
+
         int i, j;
         // Calc individual cells dimensions
         for (i=0; i<rows.length(); i++) {
             CCRTableRow * row = rows[i];
+            bool row_has_baseline_aligned_cells = false;
             for (j=0; j<rows[i]->cells.length(); j++) {
                 CCRTableCell * cell = rows[i]->cells[j];
                 //int x = cell->col->index;
@@ -1414,13 +1483,65 @@ public:
                         }
                         fmt.push();
                         int h = cell->elem->renderFinalBlock( txform, &fmt, cell->width - padding_left - padding_right);
-                        cell->height = h + padding_top + padding_bottom;
+                        cell->height = padding_top + h + padding_bottom;
 
-                        // Gather footnotes links, as done in renderBlockElement() when erm_final/flgSplit:
-                        if ( elem->getDocument()->getDocFlag(DOC_FLAG_ENABLE_FOOTNOTES) ) {
+                        // A cell baseline is the baseline of its first line of text (or
+                        // the bottom of content edge of the cell if no line)
+                        if ( cell->valign == 0 ) { // vertical-align: baseline
+                            if ( txform->GetLineCount() > 0 ) // we have a line
+                                cell->baseline = padding_top + txform->GetLineInfo(0)->baseline;
+                            else // no line, no image: bottom of content edge is at padding_top
+                                cell->baseline = padding_top;
+                        }
+                        else { // all other vertical-align: values
+                            // "If a row has no cell box aligned to its baseline,
+                            // the baseline of that row is the bottom content edge
+                            // of the lowest cell in the row."
+                            // So, store that bottom content edge in cell->baseline
+                            cell->baseline += h;
+                        }
+
+                        // Gather footnotes links, as done in renderBlockElement() when erm_final/flgSplit
+                        // and cell lines when is_single_column:
+                        if ( elem->getDocument()->getDocFlag(DOC_FLAG_ENABLE_FOOTNOTES) || is_single_column ) {
+                            int orphans;
+                            int widows;
+                            if ( is_single_column ) {
+                                orphans = (int)(elem_style->orphans) - (int)(css_orphans_widows_1) + 1;
+                                widows = (int)(elem_style->widows) - (int)(css_orphans_widows_1) + 1;
+                                // We use a LVRendPageContext that gathers links by line,
+                                // so we can transfer them line by line to the upper/main context
+                                row->single_col_context = new LVRendPageContext(NULL, context.getPageHeight());
+                                row->single_col_context->AddLine(0, padding_top, RN_SPLIT_AFTER_AVOID);
+                            }
                             int count = txform->GetLineCount();
                             for (int i=0; i<count; i++) {
                                 const formatted_line_t * line = txform->GetLineInfo(i);
+                                int link_insert_pos; // used if is_single_column
+                                if ( is_single_column ) {
+                                    int line_flags = 0;
+                                    // Honor widows and orphans
+                                    if (orphans > 1 && i > 0 && i < orphans)
+                                        line_flags |= RN_SPLIT_BEFORE_AVOID;
+                                    if (widows > 1 && i < count-1 && count-1 - i < widows)
+                                        line_flags |= RN_SPLIT_AFTER_AVOID;
+                                    // Honor line's own flags
+                                    if (line->flags & LTEXT_LINE_SPLIT_AVOID_BEFORE)
+                                        line_flags |= RN_SPLIT_BEFORE_AVOID;
+                                    if (line->flags & LTEXT_LINE_SPLIT_AVOID_AFTER)
+                                        line_flags |= RN_SPLIT_AFTER_AVOID;
+                                    row->single_col_context->AddLine(padding_top + line->y,
+                                                        padding_top + line->y + line->height, line_flags);
+                                    if (i == count-1) // add bottom padding
+                                        row->single_col_context->AddLine(padding_top + line->y + line->height,
+                                            padding_top + line->y + line->height + padding_bottom, RN_SPLIT_BEFORE_AVOID);
+                                    if ( !elem->getDocument()->getDocFlag(DOC_FLAG_ENABLE_FOOTNOTES) )
+                                        continue;
+                                    if ( line->flags & LTEXT_LINE_PARA_IS_RTL )
+                                        link_insert_pos = row->single_col_context->getCurrentLinksCount();
+                                    else
+                                        link_insert_pos = -1; // append
+                                }
                                 for ( int w=0; w<line->word_count; w++ ) { // check link start flag for every word
                                     if ( line->words[w].flags & LTEXT_WORD_IS_LINK_START ) {
                                         const src_text_fragment_t * src = txform->GetSrcInfo( line->words[w].src_text_index );
@@ -1433,7 +1554,10 @@ public:
                                                 lString16 href = parent->getAttributeValue(LXML_NS_ANY, attr_href );
                                                 if ( href.length()>0 && href.at(0)=='#' ) {
                                                     href.erase(0,1);
-                                                    row->links.add( href );
+                                                    if ( is_single_column )
+                                                        row->single_col_context->addLink( href, link_insert_pos );
+                                                    else
+                                                        row->links.add( href );
                                                 }
                                             }
                                         }
@@ -1451,15 +1575,50 @@ public:
                         // sub-renderings (of cells' content) do not add to our
                         // main context. Their heights will already be accounted
                         // in their row's height (added to main context below).
-                        LVRendPageContext emptycontext( NULL, context.getPageHeight() );
-                        int h = renderBlockElement( emptycontext, cell->elem, 0, 0, cell->width, cell->direction);
+                        // Except when table is a single column, and we can just
+                        // transfer lines to the upper context.
+                        LVRendPageContext * cell_context;
+                        int rend_flags = gRenderBlockRenderingFlags; // global flags
+                        if ( is_single_column ) {
+                            row->single_col_context = new LVRendPageContext(NULL, context.getPageHeight());
+                            cell_context = row->single_col_context;
+                            // We want to avoid negative margins (if allowed in global flags) and
+                            // going back the flow y, as the transfered lines would not reflect
+                            // that, and we could get some small mismatches and glitches.
+                            rend_flags &= ~BLOCK_RENDERING_ALLOW_NEGATIVE_COLLAPSED_MARGINS;
+                        }
+                        else {
+                            cell_context = new LVRendPageContext( NULL, context.getPageHeight(), false );
+                        }
+                        // See above about what we'll store in cell->baseline
+                        int baseline = REQ_BASELINE_NOT_NEEDED;
+                        if ( cell->valign == 0 ) { // vertical-align: baseline
+                            baseline = REQ_BASELINE_FOR_TABLE;
+                        }
+                        int h = renderBlockElement( *cell_context, cell->elem, 0, 0, cell->width,
+                                                    cell->direction, &baseline, rend_flags);
                         cell->height = h;
-                        // Gather footnotes links accumulated by emptycontext
-                        lString16Collection * link_ids = emptycontext.getLinkIds();
-                        if (link_ids->length() > 0) {
-                            for ( int n=0; n<link_ids->length(); n++ ) {
-                                row->links.add( link_ids->at(n) );
+                        if ( cell->valign == 0 ) { // vertical-align: baseline
+                            cell->baseline = baseline;
+                        }
+                        else {
+                            // We'd need the bottom content edge of what's been rendered.
+                            // We just need to remove this cell bottom padding (we should
+                            // not remove the inner content bottom margins or paddings).
+                            int em = cell->elem->getFont()->getSize();
+                            css_style_ref_t elem_style = cell->elem->getStyle();
+                            int padding_bottom = lengthToPx( elem_style->padding[3], cell->width, em ) + measureBorder(cell->elem,2);
+                            cell->baseline = h - padding_bottom;
+                        }
+                        if ( !is_single_column ) {
+                            // Gather footnotes links accumulated by cell_context
+                            lString16Collection * link_ids = cell_context->getLinkIds();
+                            if (link_ids->length() > 0) {
+                                for ( int n=0; n<link_ids->length(); n++ ) {
+                                    row->links.add( link_ids->at(n) );
+                                }
                             }
+                            delete cell_context;
                         }
                     }
                     // RenderRectAccessor needs to be updated after the call
@@ -1484,6 +1643,45 @@ public:
                         if ( row->height < cell->height )
                             row->height = cell->height;
                     }
+                    // Set the row baseline from baseline-aligned cells' baselines.
+                    // https://www.w3.org/TR/CSS22/tables.html#height-layout
+                    //   "First the cells that are aligned on their baseline are positioned.
+                    //   This will establish the baseline of the row"
+                    if ( cell->valign == 0 ) { // only cells with vertical-align: baseline
+                        row_has_baseline_aligned_cells = true;
+                        if ( row->baseline < cell->baseline )
+                            row->baseline = cell->baseline;
+                    }
+                }
+            }
+            // Fixup row height and baseline
+            for (j=0; j<rows[i]->cells.length(); j++) {
+                CCRTableCell * cell = rows[i]->cells[j];
+                int y = cell->row->index;
+                if ( i==y ) { // upper left corner of cell
+                    if ( !row_has_baseline_aligned_cells ) {
+                        // "If a row has no cell box aligned to its baseline,
+                        // the baseline of that row is the bottom content edge
+                        // of the lowest cell in the row."
+                        // We have computed cell->baseline that way
+                        // when cell->valign != 0, so just use it:
+                        if ( row->baseline < cell->baseline )
+                            row->baseline = cell->baseline;
+                        // cell->baseline = 0; // (not needed, as not used)
+                    }
+                    else if ( cell->valign == 0 ) {
+                        // Cells with vertical-align: baseline must align with
+                        // the row baseline: this can increase the height of
+                        // a cell, and so the height of the row.
+                        // As we don't need the real cell->baseline after this,
+                        // we store in it the shift-down frop top for this cell,
+                        // that we'll use below when handling cell->valign==0.
+                        int shift_down = row->baseline - cell->baseline;
+                        if ( row->height < cell->height + shift_down )
+                            row->height = cell->height + shift_down;
+                        cell->baseline = shift_down;
+                    }
+                    // else cell->baseline = 0; // (not needed, as not used)
                 }
             }
         }
@@ -1587,13 +1785,65 @@ public:
                 fmt.setY(row->y);
                 fmt.setWidth( table_width - table_border_left - table_padding_left - table_padding_right - table_border_right );
                 fmt.setHeight( row->height );
+                // This baseline will only be useful if we're part of
+                // some flow rendered with REQ_BASELINE_FOR_TABLE
+                fmt.setBaseline( row->baseline );
                 if ( enhanced_rendering ) {
                     fmt.setBottomOverflow( row->bottom_overflow );
                 }
             }
+            if ( context.wantsLines() && is_single_column ) {
+                // Transfer lines from each row->single_col_context to main context
+                // (This has to be done before we update table_h)
+                int cur_y = table_y0 + table_h;
+                int line_flags = 0;
+                if (avoid_pb_inside) {
+                    line_flags = RN_SPLIT_BEFORE_AVOID | RN_SPLIT_AFTER_AVOID;
+                }
+                if (is_rtl)
+                    line_flags |= RN_LINE_IS_RTL;
+                int content_line_flags = line_flags;
+                if ( row->height < min_row_height_for_split_by_line ) {
+                    // Too small row height: stick all line together to prevent split
+                    // inside this row
+                    content_line_flags = RN_SPLIT_BEFORE_AVOID | RN_SPLIT_AFTER_AVOID;
+                }
+                // Add border spacing top
+                int top_line_flags = line_flags | RN_SPLIT_AFTER_AVOID;
+                if (i == 0) // first row (or single row): stick to table top padding/border
+                    top_line_flags |= RN_SPLIT_BEFORE_AVOID;
+                context.AddLine(last_y, cur_y, top_line_flags);
+                // Add cell lines
+                if ( row->single_col_context && row->single_col_context->getLines() ) {
+                    // (It could happen no context was created or no line were added, if
+                    // cell was erm_invisible)
+                    LVPtrVector<LVRendLineInfo> * lines = row->single_col_context->getLines();
+                    for ( int i=0; i < lines->length(); i++ ) {
+                        LVRendLineInfo * line = lines->get(i);
+                        context.AddLine(cur_y, cur_y+line->getHeight(), line->getFlags()|content_line_flags);
+                        LVFootNoteList * links = line->getLinks();
+                        if ( links ) {
+                            for ( int j=0; j < links->length(); j++ ) {
+                                context.addLink( links->get(j)->getId() );
+                            }
+                        }
+                        cur_y += line->getHeight();
+                    }
+                }
+                // Add border spacing bottom
+                int bottom_line_flags = line_flags | RN_SPLIT_BEFORE_AVOID;
+                if (i == nb_rows-1) // last row (or single row): stick to table bottom padding/border
+                    bottom_line_flags |= RN_SPLIT_AFTER_AVOID;
+                context.AddLine(cur_y, cur_y+borderspacing_v_bottom, bottom_line_flags|RN_SPLIT_BEFORE_AVOID);
+                last_y = cur_y + borderspacing_v_bottom;
+                if (last_y != table_y0 + table_h + row->height + borderspacing_v_bottom) {
+                    printf("CRE WARNING: single column table row height error %d =! %d\n",
+                                last_y, table_y0 + table_h + row->height + borderspacing_v_bottom);
+                }
+            }
             table_h += row->height;
             table_h += borderspacing_v_bottom;
-            if (splitPages) {
+            if ( context.wantsLines() && !is_single_column ) {
                 // Includes the row and half of its border_spacing above and half below.
                 if (avoid_pb_inside) {
                     // Avoid any split between rows
@@ -1630,7 +1880,7 @@ public:
                 context.AddLine(last_y, table_y0 + table_h, line_flags);
                 last_y = table_y0 + table_h;
             }
-            // Add links gathered from this row's cells (even if !splitPages
+            // Add links gathered from this row's cells (even if ! context.wantsLines())
             // in case of imbricated tables)
             if (row->links.length() > 0) {
                 for ( int n=0; n<row->links.length(); n++ ) {
@@ -1645,7 +1895,7 @@ public:
             table_h += borderspacing_v_top;
         }
         table_h += table_padding_bottom + table_border_bottom;
-        if (splitPages) {
+        if ( context.wantsLines() ) {
             // Any table->style->page-break-after AVOID or ALWAYS will be taken
             // care of by renderBlockElement(), so we can use AVOID here.
             if ( !enhanced_rendering )
@@ -1679,12 +1929,16 @@ public:
                     // We have to shift down the cell content itself
                     int cell_h = fmt.getHeight(); // original height that fit cell content
                     fmt.setHeight( row_h );
-                    if ( cell->valign && cell_h < row_h ) {
-                        int pad = 0;
-                        if (cell->valign == 1) // center
+                    if ( cell_h < row_h ) {
+                        int pad = 0; // default when cell->valign=1 / top
+                        if (cell->valign == 0) // baseline
+                            pad = cell->baseline; // contains the shift-down to align cell and row baselines
+                        else if (cell->valign == 2) // center
                             pad = (row_h - cell_h)/2;
-                        else if (cell->valign == 2) // bottom
+                        else if (cell->valign == 3) // bottom
                             pad = (row_h - cell_h);
+                        if ( pad == 0 ) // No need to update this cell
+                            continue;
                         if ( cell->elem->getRendMethod() == erm_final ) {
                             if ( enhanced_rendering ) {
                                 // Just shift down the content box
@@ -1756,6 +2010,15 @@ public:
                     if ( max_row_bottom_overflow_y > fmt.getHeight() ) {
                         fmt.setBottomOverflow( max_row_bottom_overflow_y - fmt.getHeight() );
                     }
+                }
+            }
+        }
+
+        if ( is_single_column ) {
+            // Cleanup rows' LVRendPageContext
+            for ( i=0; i<rows.length(); i++ ) {
+                if ( rows[i]->single_col_context ) {
+                    delete rows[i]->single_col_context;
                 }
             }
         }
@@ -2040,28 +2303,22 @@ void SplitLines( const lString16 & str, lString16Collection & lines )
 lString16 renderListItemMarker( ldomNode * enode, int & marker_width, LFormattedText * txform, int line_h, int flags ) {
     lString16 marker;
     marker_width = 0;
-    ldomNode * parent = enode->getParentNode();
-    // The UL > LI parent-child chain may have had a floatBox element
-    // inserted if the LI has some float: style (also handled below
-    // when walking this parent's children).
-    if ( parent->getNodeId() == el_floatBox || parent->getNodeId() == el_inlineBox ) {
-        parent = parent->getParentNode();
-    }
+    // The UL > LI parent-child chain may have had some of our boxing elements inserted
+    ldomNode * parent = enode->getUnboxedParent();
     ListNumberingPropsRef listProps =  enode->getDocument()->getNodeNumberingProps( parent->getDataIndex() );
     if ( listProps.isNull() ) { // no previously cached info: compute and cache it
+        // Scan all our siblings to know the widest marker width
         int counterValue = 0;
         int maxWidth = 0;
-        for ( int i=0; i<parent->getChildCount(); i++ ) {
+        ldomNode * sibling = parent->getUnboxedFirstChild(true);
+        while ( sibling ) {
             lString16 marker;
             int markerWidth = 0;
-            ldomNode * child = parent->getChildElementNode(i);
-            if ( child->getNodeId() == el_floatBox || child->getNodeId() == el_inlineBox ) {
-                child = child->getChildNode(0);
-            }
-            if ( child && child->getNodeListMarker( counterValue, marker, markerWidth ) ) {
-                if ( markerWidth>maxWidth )
+            if ( sibling->getNodeListMarker( counterValue, marker, markerWidth ) ) {
+                if ( markerWidth > maxWidth )
                     maxWidth = markerWidth;
             }
+            sibling = sibling->getUnboxedNextSibling(true); // skip text nodes
         }
         listProps = ListNumberingPropsRef( new ListNumberingProps(counterValue, maxWidth) );
         enode->getDocument()->setNodeNumberingProps( parent->getDataIndex(), listProps );
@@ -2091,11 +2348,18 @@ lString16 renderListItemMarker( ldomNode * enode, int & marker_width, LFormatted
             // Scale it according to gInterlineScaleFactor
             if (style->line_height.type != css_val_screen_px && gInterlineScaleFactor != INTERLINE_SCALE_FACTOR_NO_SCALE)
                 line_h = (line_h * gInterlineScaleFactor) >> INTERLINE_SCALE_FACTOR_SHIFT;
+            if ( style->cr_hint == css_cr_hint_strut_confined )
+                flags |= LTEXT_STRUT_CONFINED;
         }
         marker += "\t";
-        // Not sure what that "\t" was used for, but coincidentally, it acts for fribidi
-        // as a text segment separator (SS) which will bidi-isolate the marker from the
-        // followup text, and will ensure, for example, that:
+        // That "\t" had some purpose in legacy rendering (erm_list_item) to mark the end
+        // of the marker, and by providing the marker_width as negative indent, so that
+        // the following text can have some constant indent by rendering it just like
+        // negative/hanging text-indent. It has no real use if we provide a 0-indent
+        // like we do below.
+        // But coincidentally, this "\t" acts for fribidi as a text segment separator (SS)
+        // which will bidi-isolate the marker from the followup text, and will ensure,
+        // for example, that:
         //   <li style="list-style-type: lower-roman; list-style-type: inside">Some text</li>
         // in a RTL direction context, will be rightly rendered as:
         //   "Some text   xviii"
@@ -2153,9 +2417,9 @@ bool renderAsListStylePositionInside( const css_style_rec_t * style, bool is_rtl
 // to do the actual width-constrained rendering of the AddSource*'ed objects.
 // Note: fmt is the RenderRectAccessor of the final block itself, and is passed
 // as is to the inline children elements: it is only used to get the width of
-// the container, which is only needed to compute ident (text-indent) values in %,
+// the container, which is only needed to compute indent (text-indent) values in %,
 // and to get paragraph direction (LTR/RTL/UNSET).
-void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAccessor * fmt, int & baseflags, int ident, int line_h, int valign_dy, bool * is_link_start )
+void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAccessor * fmt, int & baseflags, int indent, int line_h, int valign_dy, bool * is_link_start )
 {
     if ( enode->isElement() ) {
         lvdom_element_render_method rm = enode->getRendMethod();
@@ -2172,7 +2436,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             // be guessed and renderBlockElement() called to render it
             // and get is height, so LFormattedText knows how to render
             // this erm_final text around it.
-            txform->AddSourceObject(baseflags|LTEXT_SRC_IS_FLOAT, line_h, valign_dy, ident, enode );
+            txform->AddSourceObject(baseflags|LTEXT_SRC_IS_FLOAT, line_h, valign_dy, indent, enode );
             baseflags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
             return;
         }
@@ -2266,11 +2530,35 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
         if (style->line_height.type != css_val_screen_px && gInterlineScaleFactor != INTERLINE_SCALE_FACTOR_NO_SCALE)
             line_h = (line_h * gInterlineScaleFactor) >> INTERLINE_SCALE_FACTOR_SHIFT;
 
-        if ((flags & LTEXT_FLAG_NEWLINE) && rm != erm_inline) {
+        if ((flags & LTEXT_FLAG_NEWLINE) && rm != erm_inline && rm != erm_runin) {
             // Non-inline node in a final block: this is the top and single 'final' node:
-            // get text-indent (mispelled 'ident' here and elsewhere) and line-height
-            // that will apply to the full final block
-            ident = lengthToPx(style->text_indent, width, em);
+            // get text-indent and line-height that will apply to the full final block
+
+            // text-indent should really not have to be handled here: it would be
+            // better handled in ldomNode::renderFinalBlock(), grabbing it from the
+            // final node, and only passed as an arg to LFormattedText->Format(),
+            // like we pass to it the text block width.
+            // Current code passes indent to all txform->AddSource*(.., indent,..), so
+            // it is stored in each src_text_fragment_t->indent, while it's really
+            // a property of the whole paragraph, as it is fetched from the top node,
+            // like we do here. (It is never updated, and as it is not passed by reference,
+            // updates/reset would not apply to sibling or parent nodes.)
+            // There is just one case that sets it to a different value: in the
+            // legacy/obsolete erm_list_item rendering method with lsp_outside, where
+            // it is set to a negative value (the width of the marker), so to handle text
+            // indentation from the outside marker just like regular negative text-indent.
+            // So, sadly, let's keep it that way to not break legacy rendering.
+            indent = lengthToPx(style->text_indent, width, em);
+            // lvstsheet sets the lowest bit to 1 when text-indent has the "hanging" keyword:
+            if ( style->text_indent.value & 0x00000001 ) {
+                // lvtextfm handles negative indent as "indent by the negated (so, then
+                // positive) value all lines but the first"
+                indent = -indent;
+                // We keep real negative values as negative here. They are also handled
+                // in renderBlockElementEnhanced() to possibly have the text block shifted
+                // to the left to properly apply the negative effect ("hanging" text-indent
+                // does not need that).
+            }
 
             // We set the LFormattedText strut_height and strut_baseline
             // with the values from this "final" node. All lines made out from
@@ -2286,6 +2574,12 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             int fb = enode->getFont()->getBaseline();
             int f_half_leading = (line_h - fh) / 2;
             txform->setStrut(line_h, fb + f_half_leading);
+        }
+        else if ( style->cr_hint == css_cr_hint_strut_confined ) {
+            // Previous branch for the top final node has set the strut.
+            // Inline nodes having "-cr-hint: strut-confined" will be confined
+            // inside that strut.
+            flags |= LTEXT_STRUT_CONFINED;
         }
 
         // Now, process styles that may differ between inline nodes, and
@@ -2473,7 +2767,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 // text-indent (but it does when in <SPAN style="float: left"><IMG/></SPAN>).
                 txform->setStrut(0, 0);
                 line_h = 0;
-                ident = 0;
+                indent = 0;
                 valign_dy = 0;
                 // Also, when such a floating image has a width in %, this width
                 // has been used to set the width of the floating box. We need to
@@ -2492,6 +2786,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             // Also, the floating element or inline-block inner element vertical-align drift is dropped
             valign_dy = 0;
             flags &= ~LTEXT_VALIGN_MASK; // also remove any such flag we've set
+            flags &= ~LTEXT_STRUT_CONFINED; // remove this if it's been set above
             // (Looks like nothing special to do with indent or line_h)
         }
 
@@ -2501,17 +2796,19 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             int marker_width = 0;
 
             ListNumberingPropsRef listProps =  enode->getDocument()->getNodeNumberingProps( enode->getParentNode()->getDataIndex() );
-            if ( listProps.isNull() ) {
+            if ( listProps.isNull() ) { // no previously cached info: compute and cache it
+                // Scan all our siblings to know the widest marker width
                 int counterValue = 0;
                 int maxWidth = 0;
-                for ( int i=0; i<parent->getChildCount(); i++ ) {
+                ldomNode * sibling = enode->getUnboxedParent()->getUnboxedFirstChild(true);
+                while ( sibling ) {
                     lString16 marker;
                     int markerWidth = 0;
-                    ldomNode * child = parent->getChildElementNode(i);
-                    if ( child && child->getNodeListMarker( counterValue, marker, markerWidth ) ) {
-                        if ( markerWidth>maxWidth )
+                    if ( sibling->getNodeListMarker( counterValue, marker, markerWidth ) ) {
+                        if ( markerWidth > maxWidth )
                             maxWidth = markerWidth;
                     }
+                    sibling = sibling->getUnboxedNextSibling(true); // skip text nodes
                 }
                 listProps = ListNumberingPropsRef( new ListNumberingProps(counterValue, maxWidth) );
                 enode->getDocument()->setNodeNumberingProps( enode->getParentNode()->getDataIndex(), listProps );
@@ -2526,7 +2823,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
                 int margin = 0;
                 if ( sp==css_lsp_outside )
-                    margin = -marker_width;
+                    margin = -marker_width; // will ensure negative/hanging indent-like rendering
                 marker += "\t";
                 txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy,
                                         margin, NULL );
@@ -2589,7 +2886,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     for ( int i=0; i<lines.length(); i++ )
                         txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
                 }
-                txform->AddSourceObject(flags, line_h, valign_dy, ident, enode );
+                txform->AddSourceObject(flags, line_h, valign_dy, indent, enode );
                 title = enode->getAttributeValue(attr_subtitle);
                 if ( !title.empty() ) {
                     lString16Collection lines;
@@ -2607,7 +2904,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             } else { // inline image
                 // We use the flags computed previously (and not baseflags) as they
                 // carry vertical alignment
-                txform->AddSourceObject(flags, line_h, valign_dy, ident, enode );
+                txform->AddSourceObject(flags, line_h, valign_dy, indent, enode );
                 flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
             }
         }
@@ -2615,10 +2912,61 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             #ifdef DEBUG_DUMP_ENABLED
                 logfile << "+INLINEBOX ";
             #endif
+            bool is_embedded_block = enode->isEmbeddedBlockBoxingInlineBox();
+            if ( is_embedded_block ) {
+                // If embedded-block wrapper: it should not be part of the lines
+                // made by the surrounding text/elements: we should ensure a new
+                // line before and after it.
+                if ( !(flags & LTEXT_FLAG_NEWLINE) ) { // (Keep existing one if not yet consumed)
+                    // The text-align of the paragraph has been inherited by
+                    // all its children, including this inlineBox wrapper.
+                    switch (style->text_align) {
+                    case css_ta_left:
+                        flags |= LTEXT_ALIGN_LEFT;
+                        break;
+                    case css_ta_right:
+                        flags |= LTEXT_ALIGN_RIGHT;
+                        break;
+                    case css_ta_center:
+                        flags |= LTEXT_ALIGN_CENTER;
+                        break;
+                    case css_ta_justify:
+                        flags |= LTEXT_ALIGN_WIDTH;
+                        break;
+                    case css_ta_start:
+                        flags |= (is_rtl ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT);
+                        break;
+                    case css_ta_end:
+                        flags |= (is_rtl ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
+                        break;
+                    case css_ta_inherit:
+                        break;
+                    }
+                }
+                // These might have no effect, but let's explicitely dropped them.
+                valign_dy = 0;
+                indent = 0;
+                // Note: a space just before or just after (because of a newline in
+                // the HTML source) should have been removed or included in the
+                // boxing element - so we shouldn't have any spurious empty line
+                // in this final block (except it that space is included in some
+                // other inline element (<span> </span>) in which case, it is
+                // explicitely expected to generate an empty line.
+                // We also use LTEXT_SRC_IS_INLINE_BOX (no need to waste a bit in
+                // the lUInt32 for LTEXT_SRC_IS_EMBEDDED_BLOCK).
+            }
             // We use the flags computed previously (and not baseflags) as they
             // carry vertical alignment
-            txform->AddSourceObject(flags|LTEXT_SRC_IS_INLINE_BOX, line_h, valign_dy, ident, enode );
-            flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
+            txform->AddSourceObject(flags|LTEXT_SRC_IS_INLINE_BOX, line_h, valign_dy, indent, enode );
+            if ( is_embedded_block ) {
+                // Let flags unchanged, with their newline/alignment flag as if it
+                // hadn't been consumed, so it is reported back into baseflags below
+                // so that the next sibling (or upper followup inline node) starts
+                // on a new line.
+            }
+            else {
+                flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
+            }
         }
         else { // non-IMG element: render children (elements or text nodes)
             int cnt = enode->getChildCount();
@@ -2749,7 +3097,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             for (int i=0; i<cnt; i++)
             {
                 ldomNode * child = enode->getChildNode( i );
-                renderFinalBlock( child, txform, fmt, flags, ident, line_h, valign_dy, is_link_start_p );
+                renderFinalBlock( child, txform, fmt, flags, indent, line_h, valign_dy, is_link_start_p );
             }
 
             if ( addGeneratedContent ) {
@@ -2843,7 +3191,6 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 break;
             case css_ta_justify:
                 baseflags |= LTEXT_ALIGN_WIDTH;
-                ident = 0;
                 break;
             case css_ta_start:
                 baseflags |= (is_rtl ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT);
@@ -2979,7 +3326,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             */
             if ( txt.length()>0 ) {
                 txform->AddSourceLine( txt.c_str(), txt.length(), cl, bgcl, font, baseflags | tflags,
-                    line_h, valign_dy, ident, enode, 0, letter_spacing );
+                    line_h, valign_dy, indent, enode, 0, letter_spacing );
                 baseflags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
             }
         }
@@ -3319,6 +3666,8 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
 // Legacy/original CRE block rendering
 int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int x, int y, int width )
 {
+    if (!enode)
+        return 0;
     if ( enode->isElement() )
     {
         css_style_rec_t * style = enode->getStyle().get();
@@ -3345,6 +3694,12 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
         //   content in the other bodies should be accessible by hyperlinks. Name
         //   attribute should describe the meaning of this body, this is optional
         //   for the main body.
+        /* Don't do that anymore in this hardcoded / not disable'able way: one can
+         * enable in-page footnotes in fb2.css or a style tweak by just using:
+         *     body[name="notes"] section    { -cr-hint: footnote-inpage; }
+         *     body[name="comments"] section { -cr-hint: footnote-inpage; }
+         * which will be hanbled by previous check.
+         *
         if ( enode->getNodeId()==el_section && enode->getDocument()->getDocFlag(DOC_FLAG_ENABLE_FOOTNOTES) ) {
             ldomNode * body = enode->getParentNode();
             while ( body != NULL && body->getNodeId()!=el_body )
@@ -3356,6 +3711,7 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
                         isFootNoteBody = true;
             }
         }
+        */
 //        if ( isFootNoteBody )
 //            CRLog::trace("renderBlockElement() : Footnote body detected! %s", LCSTR(ldomXPointer(enode,0).toString()) );
         //if (!fmt)
@@ -3493,6 +3849,14 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
             int m = enode->getRendMethod();
             switch( m )
             {
+            case erm_killed:
+                {
+                    // DrawDocument will render a small figure in this rect area
+                    fmt.setHeight( 15 ); // not squared, so it does not look
+                    fmt.setWidth( 10 );  // like a list square bullet
+                    return fmt.getHeight();
+                }
+                break;
             case erm_mixed:
                 {
                     // TODO: autoboxing not supported yet
@@ -3652,11 +4016,23 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
                     for (int i=0; i<cnt; i++)
                     {
                         ldomNode * child = enode->getChildNode( i );
-                        //fmt.push();
-                        int h = renderBlockElementLegacy( context, child, padding_left + list_marker_padding, y,
-                            width - padding_left - padding_right - list_marker_padding );
-                        y += h;
-                        block_height += h;
+                        if (child) {
+                            if (child->isText()) {
+                                // We may occasionally let empty text nodes among block elements,
+                                // just skip them
+                                lString16 s = child->getText();
+                                if (IsEmptySpace(s.c_str(), s.length()))
+                                    continue;
+                                crFatalError(144, "Attempting to render non-empty Text node");
+                            }
+                            //fmt.push();
+                            int h = renderBlockElementLegacy(context, child,
+                                                             padding_left + list_marker_padding, y,
+                                                             width - padding_left - padding_right -
+                                                             list_marker_padding);
+                            y += h;
+                            block_height += h;
+                        }
                     }
                     // ensure there's enough height to fully display the list marker
                     if (list_marker_height && list_marker_height > block_height) {
@@ -3754,7 +4130,7 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
             lvRect rect;
             enode->getAbsRect(rect);
             // split pages
-            if ( context.getPageList() != NULL ) { // not to be done if erm_table_cell
+            if ( context.wantsLines() ) {
                 if (margin_top>0) {
                     pb_flag = pagebreakhelper(enode,width);
                     context.AddLine(rect.top - margin_top, rect.top, pb_flag);
@@ -3847,9 +4223,9 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
                         }
                     }
                 }
-            } // has page list
+            } // wantsLines()
             else {
-                // we still need to gather links when an emptycontext is used
+                // we still need to gather links when an alternative context is used
                 // (duplicated part of the code above, as we don't want to consume any page-break)
                 int count = txform->GetLineCount();
                 for (int i=0; i<count; i++) {
@@ -4014,7 +4390,7 @@ private:
     int  in_y_max;    //   that overflow this level height)
     int  x_min;       // current left min x
     int  x_max;       // current right max x
-    int  baseline_req; // baseline type requested (REQ_BASELINE_FOR_INLINE_BLOCK or REQ_BASELINE_FOR_INLINE_TABLE)
+    int  baseline_req; // baseline type requested (REQ_BASELINE_FOR_INLINE_BLOCK or REQ_BASELINE_FOR_TABLE)
     int  baseline_y;   // baseline y relative to formatting context top (computed when rendering inline-block/table)
     bool baseline_set; // (set to true on first baseline met)
     bool is_main_flow;
@@ -4069,6 +4445,13 @@ public:
         vm_active_pb_flag(RN_SPLIT_AUTO)
         {
             is_main_flow = context.getPageList() != NULL;
+            if ( context.wantsLines() ) {
+                // Also behave as is_main_flow when context wants lines (which,
+                // if it is not the main flow, it should want lines only for
+                // transfering them to the real main flow; the only use case
+                // for now is when rendering cells in single-column tables).
+                is_main_flow = true;
+            }
             top_clear_level = is_main_flow ? 1 : 2; // see resetFloatsLevelToTopLevel()
             page_height = context.getPageHeight();
         }
@@ -4128,7 +4511,7 @@ public:
         // Quotes from https://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align
         // Note that our table rendering code has not been updated to use FlowState,
         // so, if top element is a table, we haven't got any baseline.
-        if ( baseline_req == REQ_BASELINE_FOR_INLINE_TABLE ) {
+        if ( baseline_req == REQ_BASELINE_FOR_TABLE ) {
             // "The baseline of an 'inline-table' is the baseline of the first
             //  row of the table.
             // Tests show that this is true even if the element with
@@ -4171,23 +4554,17 @@ public:
                 }
             }
             if ( rowNode ) {
-                // Get this row bottom y related to the top node y
+                // Get this row baseline y related to the top node y
                 RenderRectAccessor fmt( rowNode );
-                int row_bottom = fmt.getY() + fmt.getHeight();
+                int row_baseline = fmt.getY() + fmt.getBaseline();
                 ldomNode * n = rowNode->getParentNode();
                 for (; n && n!=node; n=n->getParentNode()) {
                     RenderRectAccessor fmt(n);
-                    row_bottom += fmt.getY();
+                    row_baseline += fmt.getY();
                 }
-                if ( !baseline_set || (row_bottom < baseline_y) ) {
-                    baseline_y = row_bottom;
+                if ( !baseline_set || (row_baseline < baseline_y) ) {
+                    baseline_y = row_baseline;
                 }
-                // Not implemented: it seems that if any of this row cell has
-                // "vertical-align: baseline", it's no more the bottom of the
-                // row that should be the baseline, but this cell baseline...
-                // See (which has a hidden "#cell-of-first-row {vertical-align: baseline;}"
-                // which makes it behave as advertised:
-                // http://www.gtalbot.org/BrowserBugsSection/Safari3Bugs/baseline-inline-table-vertical-align.html
                 baseline_set = true;
             }
         }
@@ -4340,15 +4717,15 @@ public:
                 // https://stackoverflow.com/questions/19352072/what-is-the-difference-between-inline-block-and-inline-table/56305302#56305302
                 // A tricky thing with inline-table is that the baseline is different if
                 // there is a table of if there's not
-                // - if the first content line is a table row, it should be the bottom
-                //   margin of the row (and not the baseline of the first or last line
+                // - if the first content is a table row, it should be the baseline of
+                //   the row (which might not be the baseline of the first or last line
                 //   of any table cell of that row).
-                // - if the first content line is not a table row (we can have inline-table
+                // - if the first content is not a table row (we can have inline-table
                 //   containing no table-like elements), it is the real baseline of the
-                //   first line.
+                //   first line in that content.
                 // As the rendering table code does not use FlowState, we manage the
                 // first case in getBaselineAbsoluteY() when we're done.
-                if ( baseline_req == REQ_BASELINE_FOR_INLINE_TABLE && baseline_set ) {
+                if ( baseline_req == REQ_BASELINE_FOR_TABLE && baseline_set ) {
                     // inline-table: first baseline already met, it will stay the final baseline
                 }
                 else { // inline-block
@@ -5511,7 +5888,7 @@ void BlockFloatFootprint::store(ldomNode * node)
         RENDER_RECT_UNSET_FLAG(fmt, NO_CLEAR_OWN_FLOATS);
     }
     fmt.push();
-};
+}
 
 void BlockFloatFootprint::restore(ldomNode * node, int final_width)
 {
@@ -5527,11 +5904,13 @@ void BlockFloatFootprint::restore(ldomNode * node, int final_width)
         generateEmbeddedFloatsFromFootprints( final_width );
     }
     no_clear_own_floats = RENDER_RECT_HAS_FLAG(fmt, NO_CLEAR_OWN_FLOATS);
-};
+}
 
 // Enhanced block rendering
 void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int container_width, int flags )
 {
+    if (!enode)
+        return;
     if ( ! enode->isElement() ) {
         crFatalError(111, "Attempting to render Text node");
     }
@@ -5607,6 +5986,12 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
     //   content in the other bodies should be accessible by hyperlinks. Name
     //   attribute should describe the meaning of this body, this is optional
     //   for the main body.
+    /* Don't do that anymore in this hardcoded / not disable'able way: one can
+     * enable in-page footnotes in fb2.css or a style tweak by just using:
+     *     body[name="notes"] section    { -cr-hint: footnote-inpage; }
+     *     body[name="comments"] section { -cr-hint: footnote-inpage; }
+     * which will be hanbled by previous check.
+     *
     if ( enode->getNodeId()==el_section && enode->getDocument()->getDocFlag(DOC_FLAG_ENABLE_FOOTNOTES) ) {
         ldomNode * body = enode->getParentNode();
         while ( body != NULL && body->getNodeId()!=el_body )
@@ -5618,6 +6003,7 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                     isFootNoteBody = true;
         }
     }
+    */
 
     // is this a floating float container (floatBox)?
     bool is_floating = BLOCK_RENDERING(flags, FLOAT_FLOATBOXES) && enode->isFloatingBox();
@@ -5626,6 +6012,17 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
     // is this a inline block container (inlineBox)?
     bool is_inline_box = enode->isBoxingInlineBox();
     bool is_inline_box_child = enode->getParentNode() && enode->getParentNode()->isBoxingInlineBox();
+
+    // In the business of computing width and height, we should handle a bogus
+    // embedded block (<inlineBox type="EmbeddedBlock">) (and its child) just
+    // like any normal block element (taking the full width of its container
+    // if no specified width, without the need to get its rendered width).
+    if ( is_inline_box && enode->isEmbeddedBlockBoxingInlineBox(true) ) {
+        is_inline_box = false;
+    }
+    if ( is_inline_box_child && enode->getParentNode()->isEmbeddedBlockBoxingInlineBox(true) ) {
+        is_inline_box_child = false;
+    }
 
     int em = enode->getFont()->getSize();
 
@@ -5836,8 +6233,9 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                     apply_style_width = true;
                 }
             }
-            else if ( style->display == css_d_table ) {
-                // Table with no style width can shrink.
+            else if ( style->display == css_d_table || m == erm_table ) {
+                // Table with no style width can shrink (and so can inline-table
+                // and anonymous incomplete-but-completed tables).
                 // If we are not ensuring style widths above, tables with
                 // a width will not shrink and will fit container width.
                 // (This should allow our table style tweaks to work
@@ -6109,7 +6507,9 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
         // any table, and we want the user to notice something is missing,
         // we set this element rendering method to erm_killed, and
         // DrawDocument will then render a small figure...
-        if (enode->getRendMethod() >= erm_table) {
+        if ( m >= erm_table && !(is_floatbox_child || is_inline_box_child) ) {
+            // (Avoid this with float or inline tables, that have been measured
+            // and can have a 0-width when they have no content.)
             printf("CRE WARNING: no width to draw %s\n", UnicodeToLocal(ldomXPointer(enode, 0).toString()).c_str());
             enode->setRendMethod( erm_killed );
             fmt.setHeight( 15 ); // not squared, so it does not look
@@ -6280,6 +6680,16 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                 int cnt = enode->getChildCount();
                 for (int i=0; i<cnt; i++) {
                     ldomNode * child = enode->getChildNode( i );
+                    if (!child)
+                        continue;
+                    if ( child->isText() ) {
+                        // We may occasionally let empty text nodes among block elements,
+                        // just skip them
+                        lString16 s = child->getText();
+                        if ( IsEmptySpace(s.c_str(), s.length() ) )
+                            continue;
+                        crFatalError(144, "Attempting to render non-empty Text node");
+                    }
                     css_style_ref_t child_style = child->getStyle();
 
                     // We must deal differently with children that are floating nodes.
@@ -6305,17 +6715,17 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                         // to the page splitting context. The non-floating nodes will,
                         // and if !DO_NOT_CLEAR_OWN_FLOATS, we'll fill the remaining
                         // height taken by floats if any.
-                        LVRendPageContext emptycontext( NULL, flow->getPageHeight() );
+                        LVRendPageContext alt_context( NULL, flow->getPageHeight(), false );
                         // For floats too, the provided x/y must be the padding-left/top of the
                         // parent container of the float (and width must exclude the parent's
                         // padding-left/right) for the flow to correctly position inner floats:
                         // flow->addFloat() will additionally shift its positionning by the
                         // child x/y set by this renderBlockElement().
-                        renderBlockElement( emptycontext, child, (is_rtl ? 0 : list_marker_padding) + padding_left,
+                        renderBlockElement( alt_context, child, (is_rtl ? 0 : list_marker_padding) + padding_left,
                                     padding_top, width - list_marker_padding - padding_left - padding_right, direction );
                         flow->addFloat(child, child_clear, is_right, flt_vertical_margin);
-                        // Gather footnotes links accumulated by emptycontext
-                        lString16Collection * link_ids = emptycontext.getLinkIds();
+                        // Gather footnotes links accumulated by alt_context
+                        lString16Collection * link_ids = alt_context.getLinkIds();
                         if (link_ids->length() > 0) {
                             for ( int n=0; n<link_ids->length(); n++ ) {
                                 flow->getPageContext()->addLink( link_ids->at(n) );
@@ -6494,6 +6904,52 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                         if (!is_rtl)
                             fmt.setX( fmt.getX() + list_marker_padding );
                         fmt.push();
+                    }
+                }
+                // Deal with negative text-indent
+                if ( style->text_indent.value < 0 ) {
+                    int indent = - lengthToPx(style->text_indent, container_width, em);
+                    // We'll need to have text written this positive distance outside
+                    // the nominal text inner_width.
+                    // We can remove it from left padding if indent is smaller than padding.
+                    // If it is larger, we can't remove the excess from left margin, as
+                    // these margin should stay fixed for proper background drawing in their
+                    // limits (the text with negative text-indent should overflow the
+                    // margin and background color).
+                    // But, even if CSS forbids negative padding, the followup code might
+                    // be just fine with negative values for padding_left/_right !
+                    // (Not super sure of that, but it looks like it works, so let's
+                    // go with it - if issues, one can switch to a rendering mode
+                    // without the ALLOW_HORIZONTAL_BLOCK_OVERFLOW flag).
+                    // (Text selection on the overflowing text may not work, but it's
+                    // the same for negative margins.)
+                    if ( !is_rtl ) {
+                        padding_left -= indent;
+                        if ( padding_left < 0 ) {
+                            if ( !BLOCK_RENDERING(flags, ALLOW_HORIZONTAL_BLOCK_OVERFLOW) ) {
+                                padding_left = 0; // be safe, drop excessive part of indent
+                            }
+                            else if ( !BLOCK_RENDERING(flags, ALLOW_HORIZONTAL_PAGE_OVERFLOW) ) {
+                                // Limit to top node (page, float) left margin
+                                int abs_x = flow->getCurrentAbsoluteX();
+                                if ( abs_x + padding_left < 0 )
+                                    padding_left = -abs_x;
+                            }
+                        }
+                    }
+                    else {
+                        padding_right -= indent;
+                        if ( padding_right < 0 ) {
+                            if ( !BLOCK_RENDERING(flags, ALLOW_HORIZONTAL_BLOCK_OVERFLOW) ) {
+                                padding_right = 0;
+                            }
+                            else if ( !BLOCK_RENDERING(flags, ALLOW_HORIZONTAL_PAGE_OVERFLOW) ) {
+                                int o_width = flow->getOriginalContainerWidth();
+                                int abs_x = flow->getCurrentAbsoluteX();
+                                if ( abs_x + width + padding_right < o_width )
+                                    padding_right = o_width - width - abs_x;
+                            }
+                        }
                     }
                 }
 
@@ -6752,6 +7208,16 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                 return;
             }
             break;
+        case erm_killed:
+            {
+                // DrawDocument will render a small figure in this rect area
+                fmt.setHeight( 15 ); // not squared, so it does not look
+                fmt.setWidth( 10 );  // like a list square bullet
+                // Let it be at the x/y decided above
+                flow->addContentLine( fmt.getHeight(), 0, fmt.getHeight() );
+                return;
+            }
+            break;
         default:
             CRLog::error("Unsupported render method %d", m);
             crFatalError(141, "Unsupported render method"); // error
@@ -6781,8 +7247,7 @@ int renderBlockElement( LVRendPageContext & context, ldomNode * enode, int x, in
         }
         // The block height is c_y when we are done
         return flow.getCurrentAbsoluteY();
-    }
-    else {
+    } else {
         // (Legacy rendering does not support direction)
         return renderBlockElementLegacy( context, enode, x, y, width);
     }
@@ -7422,7 +7887,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
         int height = fmt.getHeight();
         int top_overflow = fmt.getTopOverflow();
         int bottom_overflow = fmt.getBottomOverflow();
-        if ( (doc_y + height + bottom_overflow <= 0 || doc_y - top_overflow > 0 + dy) ) {
+        if ( (doc_y + height + bottom_overflow <= 0 || doc_y - top_overflow >= 0 + dy) ) {
             // We don't have to draw this node.
             // Except TR which may have cells with rowspan>1, and even though
             // this TR is out of range, it must draw a rowspan>1 cell, so it
@@ -7585,7 +8050,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
                     lUInt32 h = txform->Format( (lUInt16)list_marker_width, (lUInt16)page_height, direction );
                     lvRect clip;
                     drawbuf.GetClipRect( &clip );
-                    if (doc_y + h <= clip.bottom) { // draw only if marker fully fits on page
+                    if (doc_y + y0 + h <= clip.bottom) { // draw only if marker fully fits on page
                         // In both LTR and RTL, for erm_block, we draw the marker inside 'width',
                         // (only the child elements got their width shrinked by list_marker_width).
                         if ( is_rtl ) {
@@ -7751,7 +8216,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
                     lUInt32 h = txform->Format( (lUInt16)list_marker_width, (lUInt16)page_height, direction );
                     lvRect clip;
                     drawbuf.GetClipRect( &clip );
-                    if (doc_y + h <= clip.bottom) { // draw only if marker fully fits on page
+                    if (doc_y + y0 + h <= clip.bottom) { // draw only if marker fully fits on page
                         // In both LTR and RTL, for erm_final, we draw the marker outside 'width',
                         // as 'width' has already been shrinked by list_marker_width.
                         if ( is_rtl ) {
@@ -7776,6 +8241,20 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
                 {
                     lvRect rc;
                     enode->getAbsRect( rc, true );
+                    if ( !RENDER_RECT_HAS_FLAG(fmt, INNER_FIELDS_SET) ) {
+                        // In legacy mode, getAbsRect( ..., inner=true) did not have
+                        // the inner geometry stored in fmt and computed. We need
+                        // to correct it with paddings:
+                        int em = enode->getFont()->getSize();
+                        int padding_left = measureBorder(enode,3)+lengthToPx(enode->getStyle()->padding[0],rc.width(),em);
+                        int padding_right = measureBorder(enode,1)+lengthToPx(enode->getStyle()->padding[1],rc.width(),em);
+                        int padding_top = measureBorder(enode,0)+lengthToPx(enode->getStyle()->padding[2],rc.height(),em);
+                        int padding_bottom = measureBorder(enode,2)+lengthToPx(enode->getStyle()->padding[3],rc.height(),em);
+                        rc.top += padding_top;
+                        rc.left += padding_left;
+                        rc.right -= padding_right;
+                        rc.bottom -= padding_bottom;
+                    }
                     ldomMarkedRangeList *nbookmarks = NULL;
                     if ( bookmarks && bookmarks->length()) { // internal crengine bookmarked text highlights
                         nbookmarks = new ldomMarkedRangeList( bookmarks, rc );
@@ -7892,8 +8371,9 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
 
     // init default style attribute values
     const css_elem_def_props_t * type_ptr = enode->getElementTypePtr();
-    if (type_ptr)
-    {
+    bool is_object = false;
+    if (type_ptr) {
+        is_object = type_ptr->is_object;
         pstyle->display = type_ptr->display;
         pstyle->white_space = type_ptr->white_space;
 
@@ -7970,13 +8450,9 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
     //////////////////////////////////////////////////////
     enode->getDocument()->applyStyle( enode, pstyle );
 
-    // Ensure any <stylesheet> element (that crengine "added BODY>stylesheet child
-    // element with HEAD>STYLE&LINKS content") stays invisible (it could end up being
-    // made visible when some book stylesheet contains "body > * {display: block;}")
-    if (enode->getNodeId() == el_stylesheet) {
-        pstyle->display = css_d_none;
-    }
-
+    //////////////////////////////////////////////////////
+    // apply node style= attribute
+    //////////////////////////////////////////////////////
     if ( enode->getDocument()->getDocFlag(DOC_FLAG_ENABLE_INTERNAL_STYLES) && enode->hasAttribute( LXML_NS_ANY, attr_style ) ) {
         lString16 nodeStyle = enode->getAttributeValue( LXML_NS_ANY, attr_style );
         if ( !nodeStyle.empty() ) {
@@ -7991,6 +8467,60 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
                 decl.apply( pstyle );
             }
         }
+    }
+
+    // As per-specs (and to avoid checking edge cases in initNodeRendMethod()):
+    // https://www.w3.org/TR/css-tables-3/#table-structure
+    //  "Authors should not assign a display type from the previous
+    //  list [inline-table & table*] to replaced elements (eg: input
+    //  fields or images). When the display property of a replaced
+    //  element computes to one of these values, it is handled
+    //  instead as though the author had declared either block
+    //  (for table display) or inline (for all other values).
+    // Also:
+    //  "This is a breaking change from css 2.1 but matches implementations."
+    // The fallback values was different per-browser, as seen in:
+    //  https://github.com/w3c/csswg-drafts/issues/508
+    // but the discussion resolved it to:
+    // - All internal 'table-*' displays on replaced elements behave as 'inline'.
+    // - 'table' falls back to 'block', 'inline-table' falls back to 'inline'
+    //
+    // Note that with this bogus HTML snippet:
+    //   <table style="border: solid 1px black">
+    //     <img src="some.png" style="display: table-cell"/>
+    //     <tr><img src="some.png" style="display: table-cell"/><td>text</td></tr>
+    //     <tr><td>text in table cell</td><td>text</td></tr>
+    //   </table
+    // Firefox would draw both images before/outside of the table border
+    // (so, making them inline and moving them outside the table),
+    // while we will keep them inline inside the table, and wrapped
+    // into tabularBoxes acting as the missing table elements.
+    if ( is_object ) {
+        switch ( pstyle->display ) {
+            case css_d_table:
+                pstyle->display = css_d_block;
+                break;
+            case css_d_table_row_group:
+            case css_d_table_header_group:
+            case css_d_table_footer_group:
+            case css_d_table_row:
+            case css_d_table_column_group:
+            case css_d_table_column:
+            case css_d_table_cell:
+            case css_d_table_caption:
+            case css_d_inline_table:
+                pstyle->display = css_d_inline;
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Ensure any <stylesheet> element (that crengine "added BODY>stylesheet child
+    // element with HEAD>STYLE&LINKS content") stays invisible (it could end up being
+    // made visible when some book stylesheet contains "body > * {display: block;}")
+    if (enode->getNodeId() == el_stylesheet) {
+        pstyle->display = css_d_none;
     }
 
     if ( BLOCK_RENDERING_G(PREPARE_FLOATBOXES) ) {
@@ -8063,6 +8593,7 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
     if ( BLOCK_RENDERING_G(BOX_INLINE_BLOCKS) ) {
         // See above, same reasoning
         if ( enode->getNodeId() == el_inlineBox ) {
+            // el_inlineBox are "display: inline" by default (defined in fb2def.h)
             if (enode->getChildCount() == 1) {
                 ldomNode * child = enode->getChildNode(0);
                 css_style_ref_t child_style = child->getStyle();
@@ -8071,11 +8602,16 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
                     // We do as in ldomNode::initNodeRendMethod() when the inlineBox
                     // is already there (on re-renderings):
                     // (If this is an inlineBox in the initial XML loading phase,
-                    // child is necessarily css_d_inline_block or css_d_inline_table.
+                    // child is necessarily css_d_inline_block or css_d_inline_table,
+                    // or this node is <inlineBox type=EmbeddedBlock>.
                     // The following 'else's should never trigger.
                     if (child_style->display == css_d_inline_block || child_style->display == css_d_inline_table) {
                         pstyle->display = css_d_inline; // become an inline wrapper
                         pstyle->vertical_align = child_style->vertical_align;
+                    }
+                    else if ( enode->hasAttribute( attr_type ) ) { // type="EmbeddedBlock"
+                                            // (no other possible value yet, no need to compare strings)
+                        pstyle->display = css_d_inline; // wrap bogus "block among inlines" in inline
                     }
                     else if (child_style->display == css_d_inline) {
                         pstyle->display = css_d_inline; // wrap inline in inline
@@ -8175,9 +8711,17 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
     UPDATE_STYLE_FIELD( page_break_after, css_pb_inherit );
     UPDATE_STYLE_FIELD( page_break_inside, css_pb_inherit );
 
-    // vertical_align is not inherited per CSS specs: we fixed its propagation
-    // to children with the use of 'valign_dy'
-    // UPDATE_STYLE_FIELD( vertical_align, css_va_inherit );
+    // vertical_align
+    // Should not be inherited per CSS specs: we fixed its propagation
+    // to children with the use of 'valign_dy'.
+    // But our default value for each node is not "inherit" but "baseline",
+    // so we should be fine allowing an explicite "inherit" to get its parent
+    // value. This is actually required with html5.css where TR,TD,TH are
+    // explicitely set to "vertical-align: inherit", so they can inherit
+    // from "thead, tbody, tfoot, table > tr { vertical-align: middle}"
+    if ( pstyle->vertical_align.type == css_val_unspecified && pstyle->vertical_align.value == css_va_inherit)
+        pstyle->vertical_align = parent_style->vertical_align;
+
     UPDATE_STYLE_FIELD( font_style, css_fs_inherit );
     UPDATE_STYLE_FIELD( font_weight, css_fw_inherit );
     if ( pstyle->font_family == css_ff_inherit ) {
@@ -8480,7 +9024,11 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                     maxWidth = curMaxWidth;
                 if (curWordWidth > minWidth)
                     minWidth = curWordWidth;
-                // Next word on new line has text-indent in its width
+                // First word after a <BR> should not have positive text-indent in its width,
+                // but we did reset 'indent' to 0 after the first word of the final block.
+                // If we get some non-zero indent here, it is actually negated negative indent
+                // that should be applied to all words, including the one after a <BR/>, and
+                // so it should contribute to the new line full width (curMaxWidth).
                 curMaxWidth = indent;
                 curWordWidth = indent;
                 collapseNextSpace = true; // skip leading spaces
@@ -8592,8 +9140,29 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                 // curMaxWidth and curWordWidth are not used in our parents (which
                 // are block-like elements), we can just reset them.
                 // First word will have text-indent has its width
-                curMaxWidth = indent;
-                curWordWidth = indent;
+                if ( style->text_indent.value & 0x00000001 ) {
+                    // lvstsheet sets the lowest bit to 1 when text-indent has the "hanging" keyword,
+                    // which will be handled like negative margins
+                    indent = -indent;
+                }
+                if ( indent >= 0 ) {
+                    // Positive indent applies only on the first line, so account
+                    // for it only on the first word.
+                    curMaxWidth = indent;
+                    curWordWidth = indent;
+                    indent = 0; // but no more on following words in this final node, even after <BR>
+                }
+                else {
+                    // Negative indent does not apply on the first word, but may apply on each
+                    // followup word if a wrap happens before thema so don't reset it.
+                    // To keep things simple and readable here, we only apply it to the first
+                    // word after a <BR> - but it should really apply on each word, everytime
+                    // we reset curWordWidth, which would make the below code quite ugly and
+                    // hard to understand. Hopefully, negative or hanging indents should be
+                    // rare in floats, inline boxes and table cells.
+                    // (We don't handle the shift/overlap with padding that a real negative
+                    // indent can cause - so, we may return excessive widths.)
+                }
                 if (list_marker_width > 0 && !list_marker_width_as_padding) {
                     // with additional list marker if list-style-position: inside
                     curMaxWidth += list_marker_width;
@@ -8624,6 +9193,7 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
         // So, we treat all other erm_* as erm_block (which will obviously be
         // wrong for erm_table* with more than 1 column, but it should give a
         // positive enough width to draw something).
+        //   Update: we use a trick when erm_table_row below.
         else {
             // Process children, which are all block-like nodes:
             // our *Width are the max of our children *Width
@@ -8634,10 +9204,19 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                 ldomNode * child = node->getChildNode(i);
                 getRenderedWidths(child, _maxw, _minw, direction, false, rendFlags,
                     curMaxWidth, curWordWidth, collapseNextSpace, lastSpaceWidth, indent);
-                if (_maxw > _maxWidth)
-                    _maxWidth = _maxw;
-                if (_minw > _minWidth)
-                    _minWidth = _minw;
+                if (m == erm_table_row) {
+                    // For table rows, adding the min/max widths of each children
+                    // (the table cells), instead of taking the largest, gives
+                    // a better estimate of what the table width should be.
+                    _maxWidth += _maxw;
+                    _minWidth += _minw;
+                }
+                else {
+                    if (_maxw > _maxWidth)
+                        _maxWidth = _maxw;
+                    if (_minw > _minWidth)
+                        _minWidth = _minw;
+                }
             }
         }
 
