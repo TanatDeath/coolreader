@@ -7,5 +7,6 @@
 
 bool DetectDocXFormat( LVStreamRef stream );
 bool ImportDocXDocument( LVStreamRef stream, ldomDocument * doc, LVDocViewCallback * progressCallback, CacheLoadingCallback * formatCallback );
+LVStreamRef GetDocxCoverpage(LVContainerRef arc);
 
 #endif // DOCXFMT_H

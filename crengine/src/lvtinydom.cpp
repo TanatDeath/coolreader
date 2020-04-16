@@ -4160,6 +4160,10 @@ public:
 
         lString16 codeBase = cssFile;
         LVExtractLastPathElement(codeBase);
+        //plotn - when no container - dont know what to do, then exiting successfully
+        LVContainerRef cont = _document->getContainer();
+        if (cont.isNull()) return true;
+        //-
         LVStreamRef cssStream = _document->getContainer()->OpenStream(cssFile.c_str(), LVOM_READ);
         if ( !cssStream.isNull() ) {
             lString16 css;
@@ -10839,7 +10843,7 @@ bool ldomXPointerEx::isSentenceStart()
     lChar16 prevNonSpace = 0;
     for ( ;i>0; i-- ) {
         lChar16 ch = text[i-1];
-        if ( !IsUnicodeSpace(ch) ) {
+        if ( !IsWordSeparator(ch) ) {
             prevNonSpace = ch;
             break;
         }
@@ -10852,7 +10856,7 @@ bool ldomXPointerEx::isSentenceStart()
             lString16 prevText = pos.getText();
             for ( int j=prevText.length()-1; j>=0; j-- ) {
                 lChar16 ch = prevText[j];
-                if ( !IsUnicodeSpace(ch) ) {
+                if ( !IsWordSeparator(ch) ) {
                     prevNonSpace = ch;
                     break;
                 }
@@ -10872,7 +10876,7 @@ bool ldomXPointerEx::isSentenceStart()
         }
     }
 
-    if ( !IsUnicodeSpace(currCh) && IsUnicodeSpaceOrNull(prevCh) ) {
+    if ( !IsWordSeparator(currCh) && IsWordSeparatorOrNull(prevCh) ) {
         switch (prevNonSpace) {
         case 0:
         case '.':
@@ -10900,7 +10904,7 @@ bool ldomXPointerEx::isSentenceEnd()
     int i = _data->getOffset();
     lChar16 currCh = i<textLen ? text[i] : 0;
     lChar16 prevCh = i>0 ? text[i-1] : 0;
-    if ( IsUnicodeSpaceOrNull(currCh) ) {
+    if ( IsWordSeparatorOrNull(currCh) ) {
         switch (prevCh) {
         case 0:
         case '.':

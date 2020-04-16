@@ -2391,11 +2391,12 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
 			int fny = clip.top + (page.height ? page.height + footnote_margin
 					: footnote_margin);
             //plotn - for print footnotes at the bottom of page
-			int totHeig = 0;
-			for (int fn = 0; fn < page.footnotes.length(); fn++) {
-				totHeig+=page.footnotes[fn].height;
-			}
-			if (pageRect->bottom>fny+totHeig+m_pageMargins.bottom) fny = pageRect->bottom - totHeig - +m_pageMargins.bottom;
+            // seems that this idea was reimplemented below
+//			int totHeig = 0;
+//			for (int fn = 0; fn < page.footnotes.length(); fn++) {
+//				totHeig+=page.footnotes[fn].height;
+//			}
+//			if (pageRect->bottom>fny+totHeig+m_pageMargins.bottom) fny = pageRect->bottom - totHeig - +m_pageMargins.bottom;
 			//\plotn
 			// Try to push footnotes to the bottom of page if possible
 			int footnotes_height = 0;

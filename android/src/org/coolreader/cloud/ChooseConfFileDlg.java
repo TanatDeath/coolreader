@@ -9,7 +9,7 @@ import java.util.Date;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudFileInfo;
-import org.coolreader.cloud.CloudSyncFolder;
+import org.coolreader.cloud.CloudSync;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -147,7 +147,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 					String findStr = fname.replace("_cr3_ini_","_cr3.ini.*").replace(".info","");
 					if (fi.name.matches(".*"+findStr+".*")) afi.add(fi);
 				}
-				CloudSyncFolder.restoreSettingsFiles(mCoolReader,m, afi,false);
+				CloudSync.restoreSettingsFiles(mCoolReader,m, afi,false);
 				dismiss();
 			}
 			return true;

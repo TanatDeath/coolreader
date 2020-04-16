@@ -399,6 +399,7 @@ public class CloudSyncFolder {
         if (iSaveType == CLOUD_SAVE_READING_POS) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Bookmark bmk = gson.fromJson(sContent, Bookmark.class);
+            //asdf
             if (bmk != null) {
                 bmk.setTimeStamp(System.currentTimeMillis());
                 rv.savePositionBookmark(bmk);
@@ -415,6 +416,7 @@ public class CloudSyncFolder {
             ArrayList<Bookmark> abmk = new ArrayList<Bookmark>(StrUtils.stringToArray(sContent, Bookmark[].class));
             int iCreated = 0;
             for (Bookmark bmk: abmk) {
+                //asdf
                 boolean bFound = false;
                 for (Bookmark bm: abmkThis) {
                     if (bm.getStartPos().equals(bmk.getStartPos())) bFound = true;

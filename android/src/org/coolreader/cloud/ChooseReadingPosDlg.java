@@ -10,7 +10,7 @@ import java.util.List;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudFileInfo;
-import org.coolreader.cloud.CloudSyncFolder;
+import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.yandex.YNDListFiles;
 
 import android.content.Context;
@@ -108,7 +108,8 @@ public class ChooseReadingPosDlg extends BaseDialog {
 						}
 					}
 					titleTextView.setText(sTitle + " at "+sFName);
-				    if (sTitle0.contains("_"+mCoolReader.getAndroid_id())) sAdd0 = " (current)";
+				    if (sAdd.contains(mCoolReader.getAndroid_id()))
+				    	sAdd = sAdd.replace(mCoolReader.getAndroid_id(), "current device");
 					addTextView.setText(" from "+sAdd+sAdd0);
 			} else {
 				if ( titleTextView!=null )
@@ -161,7 +162,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			if ( mReadingPosList==null )
 				return true;
 			CloudFileInfo m = mReadingPosList.get(position);
-			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_READING_POS, m.path,false,
+			CloudSync.loadFromJsonInfoFile(mCoolReader, CloudSync.CLOUD_SAVE_READING_POS, m.path,false,
 					m.name, cloudMode);
 			dismiss();
 			return true;

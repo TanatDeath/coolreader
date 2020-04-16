@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudFileInfo;
-import org.coolreader.cloud.CloudSyncFolder;
+import org.coolreader.cloud.CloudSync;
+import org.coolreader.cloud.yandex.YNDListFiles;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -30,7 +32,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 	public int cloudMode;
 
-	public ArrayList<CloudFileInfo> mBookmarksList;
+	public List<CloudFileInfo> mBookmarksList;
 
 	public final static int ITEM_POSITION=0;
 
@@ -87,8 +89,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			String sAdd0 = "";
 			if ( md!=null ) {
 				if ( titleTextView!=null )
-					sTitle0 = md.name;
-					sTitle = md.comment;
+					sTitle0 = StrUtils.getNonEmptyStr(md.name, true);
+					sTitle = StrUtils.getNonEmptyStr(md.comment, true);
 					final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
 					final CharSequence sFName0 = dfmt.format("yyyy-MM-dd kk:mm:ss", md.created);
 					final String sFName = sFName0.toString();
@@ -97,6 +99,12 @@ public class ChooseBookmarksDlg extends BaseDialog {
 						int ipos = sTitle.indexOf("~from");
 						sAdd = sTitle.substring(ipos+6,sTitle.length()).trim();
 						sTitle = sTitle.substring(0,ipos).trim();
+					} else {
+						String[] arrS = sTitle0.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+						if (arrS.length>=6) {
+							sTitle = arrS[5].replace(".json","")+" bookmark(s)";
+							sAdd =	arrS[4];
+						}
 					}
 					titleTextView.setText(sTitle);
 				    if (sTitle0.contains("_"+mCoolReader.getAndroid_id())) sAdd0 = " (current)";
@@ -152,7 +160,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			if ( mBookmarksList==null )
 				return true;
 			CloudFileInfo m = mBookmarksList.get(position);
-			CloudSyncFolder.loadFromJsonInfoFile(mCoolReader,CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, m.path,
+			CloudSync.loadFromJsonInfoFile(mCoolReader, CloudSync.CLOUD_SAVE_BOOKMARKS, m.path,
 					false, m.name, cloudMode);
 			dismiss();
 			return true;
@@ -164,6 +172,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	public ChooseBookmarksDlg(CoolReader activity, File[] matchingFiles)
 	{
 		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
@@ -184,6 +193,30 @@ public class ChooseBookmarksDlg extends BaseDialog {
 				mBookmarksList.add(yfile);
 			}
 		}
+		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+			@Override
+			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+				return -(o1.created.compareTo(o2.created));
+			}
+		};
+		Collections.sort(mBookmarksList, compareByDate);
+		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
+		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
+		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		mList = new BookmarksListView(activity, false);
+		body.addView(mList);
+		setView(frame);
+		setFlingHandlers(mList, null, null);
+	}
+
+	public ChooseBookmarksDlg(CoolReader activity, YNDListFiles matchingFiles)
+	{
+		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		cloudMode = Settings.CLOUD_SYNC_VARIANT_YANDEX;
+		//mThis = this; // for inner classes
+		mInflater = LayoutInflater.from(getContext());
+		mCoolReader = activity;
+		mBookmarksList = matchingFiles.fileList;
 		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
 			@Override
 			public int compare(CloudFileInfo o1, CloudFileInfo o2) {

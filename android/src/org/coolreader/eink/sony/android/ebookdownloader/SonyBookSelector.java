@@ -2,7 +2,7 @@
 // This program is free software; you can redistribute it and/or modify it any way you want
 //
 
-package org.koekak.android.ebookdownloader;
+package org.sony.android.ebookdownloader;
 
 import java.io.File;
 import java.lang.reflect.*;

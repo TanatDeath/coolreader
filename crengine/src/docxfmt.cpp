@@ -298,6 +298,17 @@ const struct item_def_t numFmt_attr_values[] = {
     DOCX_LAST_ITEM
 };
 
+LVStreamRef GetDocxCoverpage(LVContainerRef arc)
+{
+    if ( arc.isNull() )
+        return LVStreamRef(); // not a ZIP archive
+
+    OpcPackage package(arc);
+    OpcPartRef docPart = package.getContentPart(docx_DocumentContentType);
+    if( !docPart.isNull() )
+        return package.open(docPart->getRelatedPartName(docx_ImageRelationship));
+}
+
 bool DetectDocXFormat( LVStreamRef stream )
 {
     LVContainerRef m_arc = LVOpenArchieve( stream );
