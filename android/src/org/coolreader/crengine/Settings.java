@@ -168,6 +168,8 @@ public interface Settings {
     public static final String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
     public static final String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
     public static final String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
+	public static final String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
+	public static final String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
 
     public static final String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
     public static final String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";

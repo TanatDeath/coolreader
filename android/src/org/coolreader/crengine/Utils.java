@@ -675,6 +675,25 @@ public class Utils {
 		return contentBuilder.toString();
 	}
 
+	public static ArrayList<String> readFileToArrayList(String filePath)
+	{
+		ArrayList<String> resS= new ArrayList<String>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(filePath));
+			String sCurrentLine;
+			while ((sCurrentLine = br.readLine()) != null)
+			{
+				resS.add(sCurrentLine);
+			}
+			br.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return resS;
+	}
+
 	public static void copyFile(String fromPath, String toPath) throws IOException
 	{
 		File f = new File(fromPath);

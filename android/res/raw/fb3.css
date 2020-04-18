@@ -133,4 +133,10 @@ img {
    text-indent: 0em; 
    border-style: solid; 
    border-width: medium; 
-} 
+}
+
+body[name="notes"] section { -cr-hint: footnote-inpage; }
+
+table, td, th {
+   border: 1px solid black
+}

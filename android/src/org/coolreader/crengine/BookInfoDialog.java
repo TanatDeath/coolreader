@@ -23,8 +23,10 @@ import android.text.ClipboardManager;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -67,6 +70,9 @@ public class BookInfoDialog extends BaseDialog {
 	String annot2 = "";
 	ImageButton btnFindAuthors;
 	boolean bMarkToRead;
+	TextView tvWC;
+	TextView tvSC;
+	Button btnCalc;
 
 	public BookInfo getmBookInfo() {
 		return mBookInfo;
@@ -195,6 +201,71 @@ public class BookInfoDialog extends BaseDialog {
 		TextView valueView = (TextView)tableRow.findViewById(R.id.value);
 		nameView.setText(name);
 		valueView.setText(value);
+		if (name.equals(activity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
+		if (name.equals(activity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
+		ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
+		if (
+			(name.equals(activity.getString(R.string.book_info_book_symcount))) &&
+		   (value.equals("0")) && (rv != null)
+		)
+			if (rv.mBookInfo.getFileInfo().filename.equals(mBookInfo.getFileInfo().filename)) {
+				int colorGrayC;
+				int colorIcon;
+				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
+				colorGrayC = a.getColor(0, Color.GRAY);
+				colorIcon = a.getColor(2, Color.BLACK);
+				a.recycle();
+				Button countButton = new Button(mCoolReader);
+				btnCalc = countButton;
+				countButton.setText(activity.getString(R.string.calc_stats));
+				countButton.setTextColor(colorIcon);
+				countButton.setBackgroundColor(colorGrayC);
+				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+						ViewGroup.LayoutParams.MATCH_PARENT,
+						ViewGroup.LayoutParams.WRAP_CONTENT);
+				llp.setMargins(20, 0, 8, 0);
+				countButton.setLayoutParams(llp);
+				countButton.setMaxLines(3);
+				countButton.setEllipsize(TextUtils.TruncateAt.END);
+				final ViewGroup vg = (ViewGroup) valueView.getParent();
+				vg.addView(countButton);
+				countButton.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						int iPageCnt = 0;
+						int iSymCnt = 0;
+						int iWordCnt = 0;
+						ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
+						if (rv != null) {
+							if (rv.getArrAllPages() != null)
+								iPageCnt = rv.getArrAllPages().size();
+							else {
+								rv.CheckAllPagesLoadVisual();
+								iPageCnt = rv.getArrAllPages().size();
+							}
+							for (int i = 0; i < iPageCnt; i++) {
+								String sPage = rv.getArrAllPages().get(i);
+								if (sPage == null) sPage = "";
+								sPage = sPage.replace("\\n", " ");
+								sPage = sPage.replace("\\r", " ");
+								iSymCnt = iSymCnt + sPage.replaceAll("\\s+", " ").length();
+								iWordCnt = iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
+										replaceAll("\\s+", " ").split("\\s").length;
+							}
+							mBookInfo.getFileInfo().symCount = iSymCnt;
+							mBookInfo.getFileInfo().wordCount = iWordCnt;
+							BookInfo bi = new BookInfo(mBookInfo.getFileInfo());
+							bi.getFileInfo().symCount = iSymCnt;
+							bi.getFileInfo().wordCount = iWordCnt;
+							((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
+							((CoolReader) mCoolReader).getDB().flush();
+							vg.removeView(countButton);
+							if (tvSC != null) tvSC.setText(""+iSymCnt);
+							if (tvWC != null) tvWC.setText(""+iWordCnt);
+						}
+					}
+				});
+		}
 		valueView.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				String text = ((TextView) v).getText().toString();

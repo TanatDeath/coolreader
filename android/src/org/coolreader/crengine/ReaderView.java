@@ -14,10 +14,10 @@ import java.util.concurrent.Callable;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.CloudSyncFolder;
+import org.coolreader.cloud.CloudSync;
 import org.coolreader.crengine.Engine.HyphDict;
 import org.coolreader.crengine.InputDialog.InputHandler;
-import org.koekak.android.ebookdownloader.SonyBookSelector;
+import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
 import android.app.SearchManager;
 import android.content.ContentValues;
@@ -558,8 +558,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (bNeedSave) {
 			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant > 0)
-				CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader)mActivity),
-						CloudSyncFolder.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1);
+				CloudSync.saveJsonInfoFileOrCloud(((CoolReader)mActivity),
+						CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1);
 			lastSavedToGdBookmark = bmk;
 		}
 		bookView.onPause();
@@ -2840,7 +2840,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			vl.add(arrS2);
 //			AskSomeValuesDialog dlgA = new AskSomeValuesDialog(mActivity, "asdf", "asdf 2", vl,null);
 //			dlgA.show();
+//			ArrayList<String> sButtons = new ArrayList<String>();
+//			sButtons.add("adfad");
+//			sButtons.add("*adfad2");
+//			sButtons.add("adfad3");
+//			sButtons.add("adfad4");
+//			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, true, "title",
+//					sButtons,null);
 			//CloudAction.yndCheckCrFolder(mActivity);
+			//asdf
+			//final String sF = s;
 			toggleDayNightMode();
 //			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
 //					0, true);
@@ -2866,20 +2875,33 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_SAVE_SETTINGS_TO_CLOUD:
 			log.i("Save settings to CLOUD");
-			CloudSyncFolder.saveSettingsFiles(((CoolReader)mActivity),false);
-			break;
-		case DCMD_LOAD_SETTINGS_FROM_CLOUD:
-			log.i("Load settings from CLOUD");
-			CloudSyncFolder.loadSettingsFiles(((CoolReader)mActivity),false);
-			break;
-		case DCMD_SAVE_READING_POS:
-			log.i("Save reading pos to CLOUD");
 			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 			} else {
-				CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-						CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+				CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
+			}
+			break;
+		case DCMD_LOAD_SETTINGS_FROM_CLOUD:
+			log.i("Load settings from CLOUD");
+			int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant2 == 0) {
+				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+			} else {
+				if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+				else
+					CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+							CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, false);
+			}
+			break;
+		case DCMD_SAVE_READING_POS:
+			log.i("Save reading pos to CLOUD");
+			iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant == 0) {
+				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+			} else {
+				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
 				Bookmark bmk = getCurrentPositionBookmark();
 				lastSavedToGdBookmark = bmk;
 			}
@@ -2890,18 +2912,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (iSyncVariant3 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 			} else {
-				CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1);
+				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, false);
 			}
 			break;
 		case DCMD_SAVE_BOOKMARKS:
 			log.i("Save bookmarks to CLOUD");
-			int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant2 == 0) {
+			int iSyncVariant5 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+			if (iSyncVariant5 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 			} else {
-				CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-						CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant2 == 1);
+				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant5 == 1);
 			};
 			break;
 		case DCMD_LOAD_BOOKMARKS:
@@ -2910,8 +2932,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (iSyncVariant4 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 			} else {
-				CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1);
+				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, false);
 			}
 			break;
 		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD:
@@ -2956,11 +2978,24 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				public boolean onActionSelected(ReaderAction item) {
 					if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
 						log.i("Save settings to CLOUD");
-						CloudSyncFolder.saveSettingsFiles(((CoolReader)mActivity),false);
+						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+						} else {
+							CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
+						}
 						return true;
 					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
 						log.i("Load settings from CLOUD");
-						CloudSyncFolder.loadSettingsFiles(((CoolReader)mActivity),false);
+						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+						} else {
+							if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+							else
+								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false);
+						}
 						return true;
 					} else if (item == ReaderAction.SAVE_READING_POS) {
 						log.i("Save reading pos to CLOUD");
@@ -2968,8 +3003,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (iSyncVariant == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 						} else {
-							CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-									CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
 						}
 						Bookmark bmk = getCurrentPositionBookmark();
 						lastSavedToGdBookmark = bmk;
@@ -2980,8 +3015,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (iSyncVariant2 == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 						} else {
-							CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1);
+							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
@@ -2990,8 +3025,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (iSyncVariant == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 						} else {
-							CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-									CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1);
+							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1);
 						}
 						return true;
 					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
@@ -3000,8 +3035,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (iSyncVariant3 == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
 						} else {
-							CloudSyncFolder.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSyncFolder.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1);
+							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant3 == 1, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD) {
@@ -3096,6 +3131,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
                 boolean newBool = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ).equals("0");
                 String newValue = newBool ? "1" : "0";
                 saveSetting(PROP_PAGE_VIEW_MODE, newValue);
+				break;
+			case DCMD_WHOLE_PAGE_TO_DIC:
+				log.i("Whole page to dic");
+				String s = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText();
+				mActivity.findInDictionary( s );
+				//mActivity.mDictionaries.setiDic2IsActive(2);
 				break;
 			default:
 				// do nothing
@@ -5863,9 +5904,27 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				hideProgress();
 
 				drawPage();
+
 				BackgroundThread.instance().postGUI(new Runnable() {
 					public void run() {
 						mActivity.showReader();
+						final String booknameF = getBookInfo().getFileInfo().filename;
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								String bookname = getBookInfo().getFileInfo().filename;
+								if (bookname.equals(booknameF)) {
+									log.i("Load last rpos from CLOUD");
+									int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+									if (iSyncVariant3 == 0) {
+										mActivity.showCloudToast(mActivity.getString(R.string.cloud_sync_variant1_v), false);
+									} else {
+										CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+												CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
+									}
+								}
+							}
+						}, 5000);
 					}
 				});
 				// Save last opened book ONLY if book opened from real file not stream.
@@ -6199,8 +6258,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 													lastSavedToGdBookmark = bmk;
 													int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 													if (iSyncVariant > 0)
-														CloudSyncFolder.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-																CloudSyncFolder.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+														CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+																CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
 												}
 											}
 										}

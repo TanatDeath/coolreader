@@ -7,10 +7,8 @@ import com.google.gson.GsonBuilder;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.ChooseBookmarksDlg;
-import org.coolreader.crengine.ChooseConfFileDlg;
-import org.coolreader.crengine.ChooseReadingPosDlg;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.Settings;
@@ -20,19 +18,161 @@ import org.coolreader.crengine.Utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.zip.CRC32;
 
-public class CloudSyncFolder {
+public class CloudSync {
 
     public static int CLOUD_SAVE_READING_POS = 1;
     public static int CLOUD_SAVE_BOOKMARKS = 2;
+	public static int CLOUD_SAVE_SETTINGS = 3;
+	public static int MAX_FILES_FROM_ONE_DEVICE = 10;
+    public static long MIN_DELETE_FILES_DELAY = 300000; // 5 mins
+    public static long DELETE_FILES_DELAY = 180000; // 3 mins
+    public static long lastDeleteTime = System.currentTimeMillis();
 
     private static final String TAG = "CloudSyncFolder";
+
+    public static ArrayList<DeviceKnown> devicesKnown = new ArrayList<DeviceKnown>();
+
+    public CloudSync(CoolReader cr) {
+        readKnownDevices(cr);
+    }
+
+    public static void readKnownDevices(CoolReader cr)
+    {
+        Log.i("CLOUD","Reading known_devices.json");
+        String rh = Utils.readFileToString(cr.getSettingsFile(0).getParent() + "/known_devices.json");
+        try {
+            devicesKnown = new ArrayList<DeviceKnown>(StrUtils.stringToArray(rh, DeviceKnown[].class));
+        } catch (Exception e) {
+        }
+    }
+
+    public static void saveKnownDevices(CoolReader cr)
+    {
+        Log.i("CLOUD","Starting save known_devices.json");
+        try {
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            final String prettyJson = gson.toJson(devicesKnown);
+            Utils.saveStringToFileSafe(prettyJson,cr.getSettingsFile(0).getParent() + "/known_devices.json");
+        } catch (Exception e) {
+        }
+    }
+    // filemark, device, booksrc, filepaths
+    public static HashMap<String, HashMap<String, HashMap<String, ArrayList<CloudFileInfo>>>> hashFiles = null;
+
+    public static void checkFileForDeleteInit() {
+        hashFiles = new HashMap<String, HashMap<String, HashMap<String, ArrayList<CloudFileInfo>>>>();
+    }
+
+    public static void checkFileForDelete(CloudFileInfo cfile) {
+        String[] arrS = cfile.name.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+        String fileMark = "";
+        if (cfile.name.contains("_rpos_")) fileMark = "_rpos_";
+        if (cfile.name.contains("_bmk_")) fileMark = "_bmk_";
+        if ((arrS.length>=5)&&(!StrUtils.isEmptyStr(fileMark))) {
+            String sBookCRC = arrS[3];
+            String sDevId = arrS[4].replace(".json","");
+            if ((!StrUtils.isEmptyStr(sBookCRC))&&(!StrUtils.isEmptyStr(sDevId))&&(!StrUtils.isEmptyStr(fileMark))) {
+                HashMap<String, HashMap<String, ArrayList<CloudFileInfo>>> markHash = hashFiles.get(fileMark);
+                if (markHash == null) markHash = new HashMap<String, HashMap<String, ArrayList<CloudFileInfo>>>();
+                HashMap<String, ArrayList<CloudFileInfo>> devHash = markHash.get(sDevId);
+                if (devHash == null) devHash = new HashMap<String, ArrayList<CloudFileInfo>>();
+                ArrayList<CloudFileInfo> bookFiles = devHash.get(sBookCRC);
+                if (bookFiles == null) bookFiles = new ArrayList<CloudFileInfo>();
+                boolean found = false;
+                for (CloudFileInfo cf: bookFiles) {
+                    if (cf.path.equals(cfile.path)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    bookFiles.add(cfile);
+                    devHash.put(sBookCRC,bookFiles);
+                    markHash.put(sDevId,devHash);
+                    hashFiles.put(fileMark, markHash);
+                }
+            }
+        }
+    }
+
+    public static void checkFileForDeleteFinish(CoolReader cr) {
+        Date referenceDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(referenceDate);
+        c.add(Calendar.MONTH, -3);
+        referenceDate = c.getTime();
+        ArrayList<CloudFileInfo> filesToDel = new ArrayList<CloudFileInfo>();
+        String[] fileMarks = {"_rpos_", "_bmk_"};
+        for (String fileMark: fileMarks) {
+            HashMap<String, HashMap<String, ArrayList<CloudFileInfo>>> markHash = hashFiles.get(fileMark);
+            if (markHash != null) {
+                for (Map.Entry<String, HashMap<String, ArrayList<CloudFileInfo>>> entryMark : markHash.entrySet()) {
+                    String devId = entryMark.getKey();
+                    HashMap<String, ArrayList<CloudFileInfo>> devHash = entryMark.getValue();
+                    for (Map.Entry<String, ArrayList<CloudFileInfo>> entryDev : devHash.entrySet()) {
+                        String bookId = entryDev.getKey();
+                        ArrayList<CloudFileInfo> bookList = entryDev.getValue();
+                        Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+                            @Override
+                            public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+                                return -(o1.created.compareTo(o2.created));
+                            }
+                        };
+                        Collections.sort(bookList, compareByDate);
+                        for (int i = 0; i < bookList.size(); i++) {
+                            if ((i>MAX_FILES_FROM_ONE_DEVICE-1)||(bookList.get(i).created.before(referenceDate))) filesToDel.add(bookList.get(i));
+                        }
+                    }
+                }
+            }
+        }
+        if (System.currentTimeMillis()-lastDeleteTime > MIN_DELETE_FILES_DELAY) {
+            lastDeleteTime = System.currentTimeMillis();
+            BackgroundThread.instance().postGUI(new Runnable() {
+                @Override
+                public void run() {
+                    CloudAction.yndDeleteOldCloudFiles(cr, filesToDel);
+                }
+            }, DELETE_FILES_DELAY);
+        }
+    }
+
+    public static void checkKnownDevice(CoolReader cr, String devId, String devTitle)
+    {
+        boolean found = false;
+        for (DeviceKnown dev: devicesKnown) {
+            if (devId.equals(devId)) found = true;
+        }
+        if (!found) {
+            DeviceKnown d = new DeviceKnown(devId, devTitle);
+            devicesKnown.add(d);
+            Log.i("CLOUD", "Starting save known_devices.json");
+            try {
+                final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                final String prettyJson = gson.toJson(devicesKnown);
+                Utils.saveStringToFileSafe(prettyJson, cr.getSettingsFile(0).getParent() + "/known_devices.json");
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public static void saveSettingsToFilesOrCloud(CoolReader cr, boolean bQuiet, boolean toFile) {
+        if (toFile) saveSettingsFiles(cr, bQuiet);
+            else saveSettingsFilesToCloud(cr, bQuiet);
+    }
 
     public static void saveSettingsFiles(CoolReader cr, boolean bQuiet) {
         int iSettClount = 1;
@@ -69,7 +209,7 @@ public class CloudSyncFolder {
                 } catch (Exception e) {
                     bWasErr = true;
                     if (!bQuiet)
-                        cr.showToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")");
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")",true);
                 }
             } //for (File fS : arrSett) {
             try {
@@ -85,14 +225,43 @@ public class CloudSyncFolder {
             } catch (Exception e) {
                 bWasErr = true;
                 if (!bQuiet)
-                    cr.showToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")");
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")",true);
             }
         }
         if (!bWasErr) {
             if (!bQuiet)
-                cr.showToast(cr.getString(R.string.cloud_ok) + ": Settings file(s) were saved");
+                cr.showCloudToast(cr.getString(R.string.cloud_ok) + ": Settings file(s) were saved",true);
 
         }
+    }
+
+    public static void saveSettingsFilesToCloud(CoolReader cr, boolean bQuiet) {
+        int iSettClount = 1;
+        ArrayList<File> arrSett = new ArrayList<File>();
+        File fSett = cr.getSettingsFile(0);
+        while (fSett.exists()) {
+            arrSett.add(fSett);
+            fSett = cr.getSettingsFile(iSettClount);
+            iSettClount++;
+        }
+        boolean bWasErr = false;
+        Log.d(TAG, "Starting save cr3.ini files to drive...");
+        final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
+        final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
+        ArrayList<String> arrSFull = new ArrayList<String>();
+        if (arrSett.size()>0) {
+            String sFName = sFName0.toString() + "_settings_" + cr.getAndroid_id()+'_'+iSettClount;
+            for (File fS : arrSett) {
+                ArrayList<String> arrS = Utils.readFileToArrayList(fS.getPath());
+                arrSFull.add("~~~ settings: " + fS.getName() + "|" + cr.getAndroid_id() + "|" + cr.getModel());
+                for (String s: arrS) arrSFull.add(s);
+            }
+            sFName = sFName + ".txt";
+            String sText = "";
+            for (String s: arrSFull) sText = sText + s + "\n";
+            CloudAction.yndSaveJsonFile(cr, sFName, sText);
+        }
+        cr.showToast(cr.getString(R.string.settings_saved));
     }
 
     public static void loadSettingsFiles(CoolReader cr, boolean bQuiet) {
@@ -140,7 +309,7 @@ public class CloudSyncFolder {
             File file = new File(sFName + ".bk");
             if (file.exists()){
                 if (!file.delete()) {
-                    if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": delete .bk file");
+                    if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": delete .bk file",true);
                     bWasErr = true;
                 };
             }
@@ -149,13 +318,13 @@ public class CloudSyncFolder {
                     Utils.copyFile(sFName, sFName + ".bk");
                 } catch (Exception e) {
                     bWasErr = true;
-                    if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": copy current file to .bk");
+                    if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": copy current file to .bk", true);
                 }
             }
             if (!bWasErr) {
                 if (fSett.exists()) {
                     if (!fSett.delete()) {
-                        if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": delete "+fSett.getName()+" file");
+                        if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": delete "+fSett.getName()+" file", true);
                         bWasErr = true;
                     };
                 }
@@ -165,7 +334,7 @@ public class CloudSyncFolder {
                     Utils.copyFile(fiSett.path, sFName);
                 } catch (Exception e) {
                     bWasErr = true;
-                    if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": copy new file to current");
+                    if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": copy new file to current", true);
                 }
             }
         }
@@ -173,12 +342,58 @@ public class CloudSyncFolder {
             if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": Settings file(s) were restored. Closing app");
             cr.finish();
         } else {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": Some errors occured while restoring setting - you may need to check backup files. Closing app");
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Some errors occured while restoring setting - you may need to check backup files. Closing app", true);
             cr.finish();
         }
     }
 
-    //CloudAction.yndCheckCrFolder(mActivity);
+    public static boolean restoreSettingsFile(CoolReader cr, String fileName, ArrayList<String> content, boolean bQuiet) {
+        Log.d(TAG, "Starting load settings file from drive...");
+        File fDir = cr.getSettingsFile(0).getParentFile();
+        File file = new File(fDir.getAbsolutePath() + "/" + fileName + ".bk");
+        boolean bWasErr = false;
+        if (file.exists()){
+            if (!file.delete()) {
+                if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": delete .bk file",true);
+                bWasErr = true;
+            };
+        }
+        file = new File(fDir.getAbsolutePath() + "/" + fileName);
+        if (file.exists()) {
+            if (!bWasErr) {
+                try {
+                    Utils.copyFile(fDir.getAbsolutePath() + "/" + fileName, fDir.getAbsolutePath() + "/" + fileName + ".bk");
+                } catch (Exception e) {
+                    bWasErr = true;
+                    if (!bQuiet)
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) + ": copy current file to .bk", true);
+                }
+            }
+            if (!bWasErr) {
+                if (!file.delete()) {
+                    if (!bQuiet)
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) + ": delete " + file.getName() + " file", true);
+                    bWasErr = true;
+                }
+            }
+        }
+        try {
+            FileWriter writer = new FileWriter(fDir.getAbsolutePath() + "/" + fileName);
+            for (String str : content) {
+                writer.write(str + "\n");
+            }
+            writer.close();
+        } catch (Exception e) {
+            if (!bQuiet)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + ": create " + fDir.getAbsolutePath() + "/" + fileName + " file", true);
+            bWasErr = true;
+        }
+        if (bWasErr) {
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Some errors occured while restoring setting - you may need to check backup files. Closing app", true);
+            return false;
+        }
+        return true;
+    }
 
     public static void checkOldFiles(ArrayList<String> tDirs, String sCRC, int iSaveType) {
         String sDir = "";
@@ -241,11 +456,11 @@ public class CloudSyncFolder {
             } catch (Exception e) {
                 bWasErr = true;
                 if (!bQuiet)
-                    cr.showToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")");
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")", true);
             }
             if (!bWasErr) {
                 if (!bQuiet)
-                    cr.showToast(cr.getString(R.string.cloud_ok) + ": Successfully saved");
+                    cr.showCloudToast(cr.getString(R.string.cloud_ok) + ": Successfully saved", false);
 
             }
         }
@@ -266,15 +481,15 @@ public class CloudSyncFolder {
 
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found",true);
             return;
         }
         if (rv.getBookInfo() == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found",true);
             return;
         }
         if (rv.getBookInfo().getFileInfo() == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found",true);
             return;
         }
         String prettyJson = "";
@@ -293,13 +508,16 @@ public class CloudSyncFolder {
             bmk = rv.getCurrentPositionBookmark();
             if (bmk == null) {
                 if (!bQuiet)
-                    cr.showToast(cr.getString(R.string.cloud_error) + ": pos was not got");
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": pos was not got",true);
                 return;
             }
             double dPerc = bmk.getPercent();
             dPerc = dPerc / 100;
-            final String sPerc = String.format("%5.2f", dPerc) + "% of ";
-            addName = "_" + String.format("%5.2f", dPerc).trim();
+            Locale l =new Locale("en", "US");
+            String sPerc1 = String.format(l,"%5.2f", dPerc) + "% of ";
+            final String sPerc = sPerc1.replace(",", ".");
+            addName = "_" + String.format(l,"%5.2f", dPerc).trim();
+            addName = addName.replace(",", ".");
             descr = sPerc + sBookFName + " ~from " + cr.getModel();
             bmk.setAddCommentText(descr);
             prettyJson = gson.toJson(bmk);
@@ -309,7 +527,7 @@ public class CloudSyncFolder {
             abmk = rv.getBookInfo().getAllBookmarksWOPos();
             if (abmk == null) {
                 if (!bQuiet)
-                    cr.showToast(cr.getString(R.string.cloud_error) + ": bookmarks were not got");
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": bookmarks were not got",true);
                 return;
             }
             if (abmk.isEmpty()) {
@@ -361,46 +579,79 @@ public class CloudSyncFolder {
     }
 
     public static void loadFromJsonInfoFileList(CoolReader cr, int iSaveType, boolean bQuiet,
-                                                boolean fromFile) {
+                                                boolean fromFile, boolean findingLastPos) {
         Log.d(TAG, "Starting load json file list from drive...");
-        final ReaderView rv = cr.getReaderView();
-        if (rv == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
-            return;
+        String sCRC = "";
+        if (iSaveType != CLOUD_SAVE_SETTINGS) {
+            final ReaderView rv = cr.getReaderView();
+            if (rv == null) {
+                if (!bQuiet)
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found", true);
+                return;
+            }
+            final String sBookFName = rv.getBookInfo().getFileInfo().filename;
+            CRC32 crc = new CRC32();
+            crc.update(sBookFName.getBytes());
+            sCRC = String.valueOf(crc.getValue());
         }
-
-        final String sBookFName = rv.getBookInfo().getFileInfo().filename;
-        CRC32 crc = new CRC32();
-        crc.update(sBookFName.getBytes());
-        final String sCRC = String.valueOf(crc.getValue());
         if (fromFile) {
             loadFromJsonInfoFileListFS(cr, iSaveType, bQuiet, sCRC);
         } else {
             String fileMark = "_rpos_";
             if (iSaveType == CLOUD_SAVE_BOOKMARKS) fileMark = "_bmk_";
-            CloudAction.yndLoadJsonFileList(cr, fileMark, sCRC);
+			if (iSaveType == CLOUD_SAVE_SETTINGS) fileMark = "_settings_";
+            CloudAction.yndLoadJsonFileList(cr, fileMark, sCRC, findingLastPos);
+        }
+    }
+
+    public static void checkKnownDevices(CoolReader cr, String comment, String name) {
+        String sDev = "";
+        if (comment.contains("~from")) {
+            int ipos = comment.indexOf("~from");
+            sDev = comment.substring(ipos+6).trim();
+        }
+        String[] arrS = name.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+        String sDevId ="";
+        if (arrS.length>=5) {
+            sDevId = arrS[4];
+        }
+        if ((!StrUtils.isEmptyStr(sDev))&&(!StrUtils.isEmptyStr(sDevId))) {
+            if (devicesKnown == null) readKnownDevices(cr);
+                else if (devicesKnown.isEmpty()) readKnownDevices(cr);
+            boolean found = false;
+            for (DeviceKnown dev: devicesKnown) {
+                if (dev.deviceId.equals(sDevId)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                DeviceKnown dev = new DeviceKnown(sDevId, sDev);
+                devicesKnown.add(dev);
+                saveKnownDevices(cr);
+            }
         }
     }
 
     public static void applyRPosOrBookmarks(CoolReader cr, int iSaveType, String sContent,
-                                            boolean bQuiet) {
+                                            String name, boolean bQuiet) {
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found",true);
             return;
         }
 
         if (StrUtils.isEmptyStr(sContent)) {
             if (!bQuiet)
-                cr.showToast(cr.getString(R.string.cloud_error) + ": json file was not found (or empty)");
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + ": json file was not found (or empty)",true);
             return;
         }
 
         if (iSaveType == CLOUD_SAVE_READING_POS) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Bookmark bmk = gson.fromJson(sContent, Bookmark.class);
-            //asdf
             if (bmk != null) {
+                checkKnownDevices(cr, StrUtils.getNonEmptyStr(bmk.getAddCommentText(),true), name);
                 bmk.setTimeStamp(System.currentTimeMillis());
                 rv.savePositionBookmark(bmk);
                 if ( rv.getBookInfo()!=null )
@@ -415,8 +666,11 @@ public class CloudSyncFolder {
             ArrayList<Bookmark> abmkThis = rv.getBookInfo().getAllBookmarks();
             ArrayList<Bookmark> abmk = new ArrayList<Bookmark>(StrUtils.stringToArray(sContent, Bookmark[].class));
             int iCreated = 0;
+            boolean devChecked = false;
             for (Bookmark bmk: abmk) {
-                //asdf
+                if (!devChecked)
+                    checkKnownDevices(cr, StrUtils.getNonEmptyStr(bmk.getAddCommentText(),true), name);
+                devChecked = true;
                 boolean bFound = false;
                 for (Bookmark bm: abmkThis) {
                     if (bm.getStartPos().equals(bmk.getStartPos())) bFound = true;
@@ -438,7 +692,7 @@ public class CloudSyncFolder {
 
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_error) + ": book was not found");
+            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found",true);
             return;
         }
 
@@ -446,7 +700,7 @@ public class CloudSyncFolder {
             CloudAction.yndLoadJsonFile(cr, iSaveType, filePath, bQuiet, name, cloudMode);
         } else {
             String sFile = Utils.readFileToString(filePath);
-            applyRPosOrBookmarks(cr, iSaveType, sFile, bQuiet);
+            applyRPosOrBookmarks(cr, iSaveType, sFile, name, bQuiet);
         }
     }
 }

@@ -6,10 +6,7 @@ obj
 *.iml
 .gradle
 /local.properties
-<<<<<<< HEAD
 /.idea
-=======
->>>>>>> upstream/master
 /.idea/workspace.xml
 /.idea/libraries
 /.idea/misc.xml
@@ -17,3 +14,4 @@ obj
 /build
 /captures
 .externalNativeBuild
+apikey.properties

@@ -62,7 +62,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	public static final Logger log = L.create("edcd");
 
 	public String extractSuggestedName(String sText) {
-		String sLastSeg = sText;
+		String sLastSeg = StrUtils.getNonEmptyStr(sText,true);
 		int len1 = sLastSeg.split("/").length;
 		if (len1 > 1) sLastSeg = sLastSeg.split("/")[len1 - 1];
 		sLastSeg = sLastSeg.replace("&", "_").replace("#", "_")
@@ -70,7 +70,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 				.replace(":","/")
 				.replace("/","_").replace("\\","")
 				.replace("\\\\","");
-		return sLastSeg;
+		return sLastSeg.trim();
 	}
 
 	private boolean checkIntentImgUrl(String sUrl) {

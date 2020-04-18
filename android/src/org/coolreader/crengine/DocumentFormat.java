@@ -41,7 +41,7 @@ public enum DocumentFormat {
 	PDB("htm.css", R.raw.htm, R.drawable.icons8_mobi, false, true, 2,
 			new String[] {".pdb", ".prc", ".mobi", ".azw"},
 			new String[] {}),
-	DOCX("docx.css", R.raw.docx, R.drawable.cr3_browser_book_doc, true, false, 4,
+	DOCX("docx.css", R.raw.docx, R.drawable.cr3_browser_book_doc, true, true, 4,
 			new String[] {".docx", ".tmdx"},
 			new String[] {}), // doc_format_docx,
 	ODT("htm.css", R.raw.htm, R.drawable.icons8_odt, false, false, 6,

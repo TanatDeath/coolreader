@@ -243,41 +243,46 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			}, 3000);
 		}
 
-		public void updateUserDicWords() {
-			//PositionProperties currpos = activity.getReaderView().getDoc().getPositionProps(null);
+		public String getCurPageText() {
 			int curPage = activity.getReaderView().getDoc().getCurPage();
 			activity.getReaderView().CheckAllPagesLoad();
-            String sPrevPage = "";
-            String sPageText = "";
+			String sPrevPage = "";
+			String sPageText = "";
 			if ((activity.getReaderView().getArrAllPages().size()>curPage)&&(curPage>=0)) {
-                sPageText = activity.getReaderView().getArrAllPages().get(curPage);
-                if (curPage > 0)
-                    sPrevPage = activity.getReaderView().getArrAllPages().get(curPage - 1);
-            }
+				sPageText = activity.getReaderView().getArrAllPages().get(curPage);
+				if (curPage > 0)
+					sPrevPage = activity.getReaderView().getArrAllPages().get(curPage - 1);
+			}
 			if (sPageText==null) sPageText = "";
-            if (sPrevPage==null) sPrevPage = "";
-            this.wc = 0;
-			this.arrUdeWords.clear();
-			Iterator it = activity.getmUserDic().entrySet().iterator();
+			if (sPrevPage==null) sPrevPage = "";
 			String sCurPage = sPageText.toLowerCase();
 			sPrevPage = sPrevPage.toLowerCase();
-            int cnt = 50;
-            try {
-                if (sPrevPage.length() > 10) {
-                    if (!Character.isWhitespace(sPrevPage.charAt(sPrevPage.length() - 1))) {
-                        for (int i = sPrevPage.length() - 1; i > 0; i--) {
-                            cnt++;
-                            if (Character.isWhitespace(sPrevPage.charAt(i))) {
-                                sCurPage = sPrevPage.substring(i, sPrevPage.length()) + sCurPage;
-                                break;
-                            }
-                            if (cnt>100) break;
-                        }
-                    }
-                }
-            } catch (Exception e) {
+			int cnt = 50;
+			try {
+				if (sPrevPage.length() > 10) {
+					if (!Character.isWhitespace(sPrevPage.charAt(sPrevPage.length() - 1))) {
+						for (int i = sPrevPage.length() - 1; i > 0; i--) {
+							cnt++;
+							if (Character.isWhitespace(sPrevPage.charAt(i))) {
+								sCurPage = sPrevPage.substring(i, sPrevPage.length()) + sCurPage;
+								break;
+							}
+							if (cnt>100) break;
+						}
+					}
+				}
+			} catch (Exception e) {
 
-            }
+			}
+			return sCurPage;
+		}
+
+		public void updateUserDicWords() {
+			//PositionProperties currpos = activity.getReaderView().getDoc().getPositionProps(null);
+			this.wc = 0;
+			this.arrUdeWords.clear();
+			String sCurPage = getCurPageText();
+			Iterator it = activity.getmUserDic().entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry)it.next();
 				String sKey = pair.getKey().toString().toLowerCase();

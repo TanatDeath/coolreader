@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.coolreader.CoolReader;
+import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.Dictionaries.DictInfo;
 import org.coolreader.R;
@@ -478,7 +479,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_folder_scan, R.attr.attr_icons8_alphabetical_sorting,
 						 R.attr.attr_icons8_toggle_page_view_mode, R.attr.attr_icons8_settings_search,
 				         R.attr.cr3_option_font_face_drawable, R.attr.cr3_option_text_bold_drawable,
-						 R.attr.attr_icons8_send_by_email
+						 R.attr.attr_icons8_send_by_email,
+						 R.attr.attr_icons8_whole_page_to_dic
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -556,6 +558,7 @@ public class BaseActivity extends Activity implements Settings {
 		int brFontBold = a.getResourceId(68, 0);
 
 		int brBookmarksToEmailDrawableRes = a.getResourceId(69, 0);
+		int brWholePageToDic = a.getResourceId(70, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -700,6 +703,8 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.FONT_BOLD.setIconId(brFontBold);
 		if (brBookmarksToEmailDrawableRes!=0)
 			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL.setIconId(brBookmarksToEmailDrawableRes);
+		if (brWholePageToDic != 0)
+			ReaderAction.WHOLE_PAGE_TO_DIC.setIconId(brWholePageToDic);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1398,6 +1403,16 @@ public class BaseActivity extends Activity implements Settings {
 		showToast(msg, Toast.LENGTH_LONG);
 	}
 
+	public void showCloudToast(String msg, boolean isErr) {
+		if (isErr) showToast(msg, Toast.LENGTH_LONG);
+		else log.i(msg);
+	}
+
+	public void showCloudToast(int msg, boolean isErr) {
+		if (isErr) showToast(msg, Toast.LENGTH_LONG);
+		else log.i(getString(msg));
+	}
+
 	public void showToast(String msg, int duration) {
 		log.v("showing toast: " + msg);
 		if (DeviceInfo.isUseCustomToast(getScreenForceEink())) {
@@ -1450,6 +1465,26 @@ public class BaseActivity extends Activity implements Settings {
 		if (textSize == 0) textSize1 = 16; //settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		GeoToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, textSize1,
 				ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
+	}
+
+	public void showDicToast(String msg, boolean isYnd, String dicName) {
+		boolean bShown = false;
+		if (this instanceof CoolReader)
+			if (((CoolReader) this).getReaderView() != null)
+				if (((CoolReader) this).getReaderView().getSurface() != null) {
+					bShown = true;
+					showDicToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), isYnd, dicName);
+				}
+		if (!bShown) {
+			showToast(msg);
+		}
+	}
+
+	public void showDicToast(String msg, int duration, View view, boolean isYnd, String dicName) {
+		log.v("showing toast: " + msg);
+		View view1 = view;
+		if (view1 == null) view1 = getContentView();
+		DicToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, isYnd, dicName);
 	}
 
 //	public void hideSToast() {

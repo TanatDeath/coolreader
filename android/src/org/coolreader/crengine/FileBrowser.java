@@ -25,7 +25,7 @@ import org.coolreader.crengine.OPDSUtil.DownloadCallback;
 import org.coolreader.crengine.OPDSUtil.EntryInfo;
 import org.coolreader.db.CRDBService;
 import org.coolreader.plugins.*;
-import org.koekak.android.ebookdownloader.SonyBookSelector;
+import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +71,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 
 	private boolean contains(ArrayList<FileInfo> fiA, String s) {
+		if (fiA == null) return false;
 		for (FileInfo fi: fiA) {
 			if (fi.pathname.contains(s)) return true;
 		}
@@ -78,6 +79,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 
 	private boolean containsEq(ArrayList<FileInfo> fiA, String s) {
+		if (fiA == null) return false;
 		for (FileInfo fi: fiA) {
 			if (fi.pathname.equals(s)) return true;
 		}
@@ -109,13 +111,29 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					//openContextMenu(_this);
 					//mActivity.loadDocument(item);
 					selectedItem = item;
-					
+
+					int longAction = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_LONGTAP_ACTION, 1);
 					boolean bookInfoDialogEnabled = true; // TODO: it's for debug
 					if (!item.isDirectory && !item.isOPDSBook() && bookInfoDialogEnabled && !item.isOnlineCatalogPluginDir()) {
-						mActivity.editBookInfo(currDirectory, item);
-						return true;
+						if(longAction == 0) {
+							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+								@Override
+								public void onBookInfoLoaded(BookInfo bookInfo) {
+									BookInfo bi = new BookInfo(item);
+									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered);
+								}
+							});
+							return true;
+						}
+						if (longAction == 1) {
+							ignoreActionSetting = true;
+							performItemClick(arg1, position, id);
+						}
+						if (longAction == 2)  {
+							mActivity.editBookInfo(currDirectory, item);
+							return true;
+						}
 					}
-					
 					showContextMenu();
 					return true;
 				}
@@ -217,10 +235,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		    }
 		}
 
+		boolean ignoreActionSetting = false;
 
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
 			log.d("performItemClick("+position+")");
+			boolean ignoreActionSettingOnce = ignoreActionSetting;
+			ignoreActionSetting = false;
 			//return super.performItemClick(view, position, id);
 			FileInfo item = (FileInfo) getAdapter().getItem(position);
 			if ( item==null )
@@ -281,7 +302,35 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				   ){
 					DocConvertDialog dlgConv = new DocConvertDialog(mActivity, item.pathname);
 					dlgConv.show();
-				} else mActivity.loadDocument(item);
+				} else {
+					if (ignoreActionSettingOnce) {
+						mActivity.loadDocument(item);
+					} else {
+						int tapAction = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_TAP_ACTION, 0);
+						if(tapAction == 0) {
+							Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallack() {
+								@Override
+								public void onBookInfoLoaded(BookInfo bookInfo) {
+									BookInfo bi = new BookInfo(item);
+									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered);
+								}
+							});
+							return true;
+						}
+						if (tapAction == 1) {
+							ignoreActionSetting = true;
+							mActivity.loadDocument(item);
+						}
+						if (tapAction == 2)  {
+							mActivity.editBookInfo(currDirectory, item);
+							return true;
+						}
+						if (tapAction == 3)  {
+							showContextMenu();
+							return true;
+						}
+					}
+				}
 			}
 			return true;
 		}

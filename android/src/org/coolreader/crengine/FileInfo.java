@@ -461,6 +461,8 @@ public class FileInfo {
         publseriesNumber = v.publseriesNumber;
         fileCreateTime = v.fileCreateTime;
         opdsLink = v.opdsLink;
+        wordCount = v.wordCount;
+		symCount = v.symCount;
     }
 
 	public boolean contains(String text)
@@ -1764,6 +1766,9 @@ public class FileInfo {
 		if (!StrUtils.euqalsIgnoreNulls(publyear, other.publyear, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(publisbn, other.publisbn, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(publseries, other.publseries, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(opdsLink, other.opdsLink, true)) return false;
+		if (wordCount != other.wordCount) return false;
+		if (symCount != other.symCount) return false;
 		if (publseriesNumber != other.publseriesNumber) return false;
 		if (fileCreateTime != other.fileCreateTime) return false;
 		if (seriesNumber != other.seriesNumber) return false;

@@ -13,7 +13,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.Dictionaries.DictInfo;
 import org.coolreader.R;
-import org.coolreader.cloud.CloudSyncFolder;
+import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
 import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.ColorPickerDialog.OnColorChangedListener;
@@ -570,6 +570,18 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			0, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100
 	};
 
+	int[] mBrowserAction = new int[] {
+			0, 1, 2, 4
+	};
+	int[] mBrowserActionTitles = new int[] {
+			R.string.browser_tap_option1, R.string.browser_tap_option2,
+			R.string.browser_tap_option3, R.string.browser_tap_option4
+	};
+	int[] mBrowserActionAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+	};
+
 	int[] mRenderingPresets = new int[] {
 			Engine.BLOCK_RENDERING_FLAGS_LEGACY, Engine.BLOCK_RENDERING_FLAGS_FLAT,
 			Engine.BLOCK_RENDERING_FLAGS_BOOK, Engine.BLOCK_RENDERING_FLAGS_WEB
@@ -1087,7 +1099,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					CloudSyncFolder.saveSettingsFiles(((CoolReader)mActivity),false);
+					CloudSync.saveSettingsFiles(((CoolReader)mActivity),false);
 					return;
 				}
 			});
@@ -1156,7 +1168,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					CloudSyncFolder.loadSettingsFiles(((CoolReader)mActivity),false);
+					CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 					return;
 				}
 			});
@@ -2235,6 +2247,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ListOption(mOwner, getString(R.string.mi_book_browser_max_group_size), PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
 					getString(R.string.mi_book_browser_max_group_size_add_info), this.lastFilteredValue).
 					add(mBrowserMaxGroupItems).setDefaultValue("8").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.browser_tap_option_tap), PROP_APP_FILE_BROWSER_TAP_ACTION,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.browser_tap_option_longtap), PROP_APP_FILE_BROWSER_LONGTAP_ACTION,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("1").noIcon());
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -2254,6 +2272,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.mi_book_browser_simple_mode_add_info));
 			this.updateFilteredMark(getString(R.string.mi_book_browser_max_group_size), PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
 					getString(R.string.mi_book_browser_max_group_size_add_info));
+			this.updateFilteredMark(getString(R.string.browser_tap_option_tap), PROP_APP_FILE_BROWSER_TAP_ACTION,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.browser_tap_option_longtap), PROP_APP_FILE_BROWSER_LONGTAP_ACTION,
+					getString(R.string.option_add_info_empty_text));
 			return this.lastFiltered;
 		}
 
@@ -3781,11 +3803,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			TextView txt1 = (TextView)tableRow.findViewById(R.id.option_value_add_text1);
 			txt1.setText(testPhrase);
 			Typeface tf = null;
-			if (StrUtils.isEmptyStr(addInfo))
-				tf = Typeface.create(item.value.replaceAll("font-family: ",""),Typeface.NORMAL);
-			else
-				tf = Typeface.createFromFile(addInfo);
-			txt1.setTypeface(tf);
+			try {
+				if (StrUtils.isEmptyStr(addInfo))
+					tf = Typeface.create(item.value.replaceAll("font-family: ", ""), Typeface.NORMAL);
+				else
+					tf = Typeface.createFromFile(addInfo);
+				txt1.setTypeface(tf);
+			} catch (Exception e) {
+
+			}
 			table.addView(tableRow);
 		}
 
@@ -3933,14 +3959,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mFilteredProps = filterProfileSettings(mProperties);
 		mOldProperties = new Properties(mProperties);
 		if (mode == Mode.READER) {
-			mProperties.setBool(PROP_TXT_OPTION_PREFORMATTED, mReaderView.isTextAutoformatEnabled());
-			mProperties.setBool(PROP_EMBEDDED_STYLES, mReaderView.getDocumentStylesEnabled());
-			mProperties.setBool(PROP_EMBEDDED_FONTS, mReaderView.getDocumentFontsEnabled());
-			mProperties.setInt(PROP_REQUESTED_DOM_VERSION, mReaderView.getDOMVersion());
-			mProperties.setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, mReaderView.getBlockRenderingFlags());
-			isTextFormat = readerView.isTextFormat();
-			isEpubFormat = readerView.isFormatWithEmbeddedFonts();
-			isHtmlFormat = readerView.isHtmlFormat();
+			if (mReaderView != null) {
+				mProperties.setBool(PROP_TXT_OPTION_PREFORMATTED, mReaderView.isTextAutoformatEnabled());
+				mProperties.setBool(PROP_EMBEDDED_STYLES, mReaderView.getDocumentStylesEnabled());
+				mProperties.setBool(PROP_EMBEDDED_FONTS, mReaderView.getDocumentFontsEnabled());
+				mProperties.setInt(PROP_REQUESTED_DOM_VERSION, mReaderView.getDOMVersion());
+				mProperties.setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, mReaderView.getBlockRenderingFlags());
+				isTextFormat = readerView.isTextFormat();
+				isEpubFormat = readerView.isFormatWithEmbeddedFonts();
+				isHtmlFormat = readerView.isHtmlFormat();
+			}
 		}
 		showIcons = mProperties.getBool(PROP_APP_SETTINGS_SHOW_ICONS, true);
 		this.mode = mode;
@@ -4819,7 +4847,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsApplication.add(new IconsBoolOption(this, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS,
 				getString(R.string.options_app_settings_icons_add_info), filter).setDefaultValue("1").noIcon());
 		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ) {
-			mOptionsApplication.add(new IconsBoolOption(this, getString(R.string.options_app_settings_icons_is_custom_color), PROP_APP_ICONS_IS_CUSTOM_COLOR,
+			mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_settings_icons_is_custom_color), PROP_APP_ICONS_IS_CUSTOM_COLOR,
 					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon());
 			mOptionsApplication.add(new ColorOption(this, getString(R.string.options_app_settings_icons_custom_color), PROP_APP_ICONS_CUSTOM_COLOR, 0x000000,
 					getString(R.string.option_add_info_empty_text), filter).noIcon());
@@ -5073,6 +5101,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	
 	protected void apply() {
 		if (mode == Mode.READER) {
+			int domVersion = mProperties.getInt(PROP_REQUESTED_DOM_VERSION, Engine.DOM_VERSION_CURRENT);
+			int rendFlags = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, Engine.BLOCK_RENDERING_FLAGS_WEB);
 			if (mReaderView != null) {
 				if (mProperties.getBool(PROP_TXT_OPTION_PREFORMATTED, true) != mReaderView.isTextAutoformatEnabled()) {
 					mReaderView.toggleTextFormat();
@@ -5083,14 +5113,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				if (mProperties.getBool(PROP_EMBEDDED_FONTS, true) != mReaderView.getDocumentFontsEnabled()) {
 					mReaderView.toggleEmbeddedFonts();
 				}
-			}
-			int domVersion = mProperties.getInt(PROP_REQUESTED_DOM_VERSION, Engine.DOM_VERSION_CURRENT);
-			if (domVersion != mReaderView.getDOMVersion()) {
-				mReaderView.setDOMVersion(domVersion);
-			}
-			int rendFlags = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, Engine.BLOCK_RENDERING_FLAGS_WEB);
-			if (rendFlags != mReaderView.getBlockRenderingFlags()) {
-				mReaderView.setBlockRenderingFlags(rendFlags);
+				if (domVersion != mReaderView.getDOMVersion()) {
+					mReaderView.setDOMVersion(domVersion);
+				}
+				if (rendFlags != mReaderView.getBlockRenderingFlags()) {
+					mReaderView.setBlockRenderingFlags(rendFlags);
+				}
 			}
 		}
 		mActivity.setSettings(mProperties, 0, true);

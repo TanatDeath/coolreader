@@ -11,7 +11,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.cloud.dropbox.DBXConfig;
 
 /**
- * Async task for finishing auth
+ * Async task for calc book stats
  */
 public class StatisticsTask extends AsyncTask<FileInfo, Void, BookInfo> {
 

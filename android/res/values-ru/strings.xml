@@ -548,7 +548,7 @@
     <string name="dlg_goto_input_page_number">Введите номер страницы для перехода:</string>
     <string name="dlg_goto_input_percent">Введите процент для перехода:</string>
     <string name="book_info_book_language">Язык</string>
-    <string name="book_info_book_translation">Перевод</string>
+    <string name="book_info_book_translation">Перевод (напимер ru или zh-cn)</string>
     <string name="book_info_book_genre">Жанр</string>
     <string name="book_info_book_srclang">Язык оригинала</string>
     <string name="book_info_book_translator">Переводчик</string>
@@ -1059,12 +1059,31 @@
     <string name="global_margin_add_info">Для устройств с тачскрином и бортиками</string>
     <string name="lang_from">С языка</string>
     <string name="lang_to">На язык</string>
-    <string name="specify_translation_dir_full">Укажите направление перевода (для книги)</string>
+    <string name="specify_translation_dir_full">Укажите направление перевода (для книги) - напимер ru или zh-cn</string>
     <string name="specify_translation_dir">Направление перевода</string>
     <string name="settings_profile">Профиль</string>
     <string name="rename_profile">Переименовать профиль</string>
     <string name="new_profile">Новое наименование</string>
     <string name="no_bookmarks">В этой книге нет закладок</string>
     <string name="options_rendering_preset">Опции рендеринга</string>
+    <string name="browser_tap_option_tap">Действие на тап по книге</string>
+    <string name="browser_tap_option_longtap">Действие на длинный тап по книге</string>
+    <string name="browser_tap_option1">Информация о книге</string>
+    <string name="browser_tap_option2">Открыть книгу</string>
+    <string name="browser_tap_option3">Редактировать информацию о книге</string>
+    <string name="browser_tap_option4">Меню</string>
+    <string name="rpos_from">с</string>
+    <string name="rpos_current_device">этого устройства</string>
+    <string name="rpos_found">Найдена сохраненная позиция (в облаке)</string>
+    <string name="rpos_restore">Восстановить</string>
+    <string name="rpos_list">Открыть список сохраненных позиций</string>
+    <string name="rpos_cancel">Отмена</string>
+    <string name="rpos_now_at">сейчас вы на</string>
+    <string name="calc_stats">Рассчитать статистику</string>
+    <string name="translated_with_ynd">Переведено сервисом «Яндекс.Переводчик»</string>
+    <string name="translate_lang_not_set">Язык(и) не задан(ы) (направления перевода)</string>
+    <string name="translate_lang_not_found">Коды языков (языка) не найдены (направления перевода)</string>
+    <string name="whole_page_to_dic">Перевести всю станицу</string>
+    <string name="settings_saved">Настройки сохранены</string>
+    <string name="no_cloud_files">Файл(ы) не найдены</string>
 </resources>
-

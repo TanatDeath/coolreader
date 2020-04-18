@@ -1,10 +1,14 @@
 package org.coolreader.db;
 
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
+
+import org.coolreader.CoolReader;
+import org.coolreader.R;
 import org.coolreader.crengine.*;
 import org.coolreader.crengine.Properties;
 
@@ -19,7 +23,7 @@ public class MainDB extends BaseDB {
 	public int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 42;
+	public static final int DB_VERSION = 43;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -103,7 +107,10 @@ public class MainDB extends BaseDB {
                     "book_date_n INTEGER, " +
 					"doc_date_n INTEGER, " +
                     "publ_year_n INTEGER, " +
-					"opds_link VARCHAR DEFAULT NULL " +
+					"opds_link VARCHAR DEFAULT NULL, " +
+					"crc32 INTEGER DEFAULT NULL ," +
+					"domVersion INTEGER DEFAULT 0, " +
+			        "rendFlags INTEGER DEFAULT 0" +
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
@@ -319,12 +326,12 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN books_downloaded INTEGER DEFAULT 0");
 				execSQLIgnoreErrors("ALTER TABLE opds_catalog ADD COLUMN was_error INTEGER DEFAULT 0");
 			}
-			if (currentVersion < 28) {
+			if (currentVersion < 43) {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN crc32 INTEGER DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN domVersion INTEGER DEFAULT 0");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN rendFlags INTEGER DEFAULT 0");
 			}
-			if (currentVersion < 29) {
+			if (currentVersion < 43) {
 				// After adding support for the 'fb3' and 'docx' formats in version 3.2.33,
 				// the 'format' field in the 'book' table becomes invalid because the enum DocumentFormat has been changed.
 				// So, after reading this field from the database, we must recheck the format by pathname.
@@ -1855,13 +1862,17 @@ public class MainDB extends BaseDB {
 			 if (existing != null) {
 				 bmk.setId(existing.getId());
 				 if (!bmk.equals(existing)) {
-					 save(bmk, bookInfo.getFileInfo().id);
+					 Long id = bookInfo.getFileInfo().id;
+					 if (id == null) return;
+					 save(bmk, id);
 					 changed++;
 				 }
 				 existingBookmarks.remove(bmk.getUniqueKey()); // saved
 			 } else {
 				 // create new
-			 	 save(bmk, bookInfo.getFileInfo().id);
+				 Long id = bookInfo.getFileInfo().id;
+				 if (id == null) return;
+			 	 save(bmk, id);
 			 	 added++;
 			 }
 		}
@@ -2634,7 +2645,8 @@ public class MainDB extends BaseDB {
 		return bookId;
 	}
 	
-	public void correctFilePaths() {
+	public boolean correctFilePaths() {
+		if (mDB == null) return false;
 		Log.i("cr3", "checking data for path correction");
 		beginReading();
 		int rowCount = 0;
@@ -2680,14 +2692,24 @@ public class MainDB extends BaseDB {
 			flush();
 			log.i("Finished. Rows corrected: " + count);
 		}
+		return true;
 	}
 	
 	private MountPathCorrector pathCorrector;
 	public void setPathCorrector(MountPathCorrector corrector) {
 		this.pathCorrector = corrector;
 		if (pathCorrectionRequired) {
-			correctFilePaths();
-			pathCorrectionRequired = false;
+			if (!correctFilePaths()) {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						// if document not loaded show error & then root window
+						correctFilePaths();
+						pathCorrectionRequired = false;
+					}
+				}, 1000);
+			} else
+				pathCorrectionRequired = false;
 		}
 	}
 

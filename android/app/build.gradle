@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+def apikeyPropertiesFile = rootProject.file("apikey.properties")
+def apikeyProperties = new Properties()
+apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
 android {
     compileSdkVersion 28
@@ -19,6 +22,12 @@ android {
                 cppFlags ""
             }
         }
+        buildConfigField("String", "YND_ID", apikeyProperties['YND_ID'])
+        buildConfigField("String", "YND_PASSW", apikeyProperties['YND_PASSW'])
+        buildConfigField("String", "DBX_KEY", apikeyProperties['DBX_KEY'])
+        buildConfigField("String", "DBX_SECRET", apikeyProperties['DBX_SECRET'])
+        buildConfigField("String", "YND_TRANSLATE", apikeyProperties['YND_TRANSLATE'])
+        buildConfigField("String", "LINGVO", apikeyProperties['LINGVO'])
     }
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
@@ -110,6 +119,16 @@ android {
                 // Variant 2: big version code increment for various ABI
                 //output.versionCodeOverride = variant.versionCode + 1000000*baseAbiVersionCode
             }
+            def project = "CoolReader_plotn"
+            def SEP = "_"
+            def buildType = variant.variantData.variantConfiguration.buildType.name
+            def version = variant.versionName
+            def date = new Date();
+            def formattedDate = date.format('yyyyMMdd_HHmm')
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)
+            if (abi == null) abi = "universal"
+            def newApkName = formattedDate + SEP + project + SEP + version + SEP + abi + SEP + buildType + ".apk"
+            output.outputFileName = newApkName
         }
     }
     externalNativeBuild {
@@ -142,7 +161,9 @@ dependencies {
     implementation 'com.github.deano2390:FlowTextView:2.0.5'
     implementation 'com.dropbox.core:dropbox-core-sdk:3.0.11'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
-    api 'com.squareup.okhttp3:okhttp:4.0.1'
+    implementation files('libs/okhttp-3.12.3.jar')
+    implementation files('libs/okio-1.15.0.jar')
+    //api 'com.squareup.okhttp3:okhttp:4.0.1'
     testImplementation 'junit:junit:4.12'
     //implementation 'net.htmlparser.jericho:jericho-html:3.4'
     implementation 'org.jsoup:jsoup:1.12.1'

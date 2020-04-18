@@ -20,6 +20,7 @@
 #include "../../crengine/include/crengine.h"
 #include "../../crengine/include/epubfmt.h"
 #include "../../crengine/include/fb3fmt.h"
+#include "../../crengine/include/docxfmt.h"
 #include "../../crengine/include/pdbfmt.h"
 #include "../../crengine/include/lvstream.h"
 
@@ -627,6 +628,11 @@ jbyteArray scanBookCoverInternal
 					// FB3
 					// extract coverpage from FB3
 					res = GetFb3Coverpage(arc);
+				}
+				if (DetectDocXFormat(stream)) {
+					// Docx
+					// extract coverpage from Docx
+					res = GetDocxCoverpage(arc);
 				}
 			} else {
 				res = GetFB2Coverpage(stream);

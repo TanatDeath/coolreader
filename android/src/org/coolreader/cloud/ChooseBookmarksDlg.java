@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.cloud;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,9 +9,12 @@ import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.cloud.CloudFileInfo;
-import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.yandex.YNDListFiles;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.Settings;
+import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -107,8 +110,16 @@ public class ChooseBookmarksDlg extends BaseDialog {
 						}
 					}
 					titleTextView.setText(sTitle);
-				    if (sTitle0.contains("_"+mCoolReader.getAndroid_id())) sAdd0 = " (current)";
-					addTextView.setText("at "+sFName+" from "+sAdd+sAdd0);
+					if (sAdd.contains(mCoolReader.getAndroid_id())) {
+						sAdd = sAdd.replace(mCoolReader.getAndroid_id(), "current device");
+					} else {
+						if (CloudSync.devicesKnown != null)
+							for (DeviceKnown dev: CloudSync.devicesKnown) {
+								if (sAdd.contains(dev.deviceId))
+									sAdd = sAdd.replace(dev.deviceId, dev.deviceName);
+							}
+					}
+				    addTextView.setText("at "+sFName+" from "+sAdd+sAdd0);
 			} else {
 				if ( titleTextView!=null )
 					titleTextView.setText("");
@@ -173,6 +184,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	{
 		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
+		CloudSync.readKnownDevices(activity);
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
@@ -193,13 +205,13 @@ public class ChooseBookmarksDlg extends BaseDialog {
 				mBookmarksList.add(yfile);
 			}
 		}
-		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
-			@Override
-			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-				return -(o1.created.compareTo(o2.created));
-			}
-		};
-		Collections.sort(mBookmarksList, compareByDate);
+//		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
+//			@Override
+//			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
+//				return -(o1.created.compareTo(o2.created));
+//			}
+//		};
+//		Collections.sort(mBookmarksList, compareByDate);
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);

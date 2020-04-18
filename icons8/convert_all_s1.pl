@@ -18,8 +18,7 @@ my %ic_smaller_list=(
 );
 
 my %ic_actions_list=(
-        'icons8_rounded_corners_margin2.svg' => 'icons8_rounded_corners_margin2.png',
-        'icons8_ext_fullscreen.svg' => 'icons8_ext_fullscreen.png'
+        'icons8_page_to_dic.svg' => 'icons8_page_to_dic.png'
 );
 
 my %ic_menu_list=(

@@ -31,7 +31,7 @@ public class YNDConfig {
         // Create ynd client
         final File fYND = new File(cr.getSettingsFile(0).getParent() + "/ynd.token");
         if (!fYND.exists()) {
-            cr.showToast(R.string.cloud_need_authorization);
+            cr.showCloudToast(R.string.cloud_need_authorization,true);
             cr.yndInputTokenDialog = new YNDInputTokenDialog(cr);
             cr.yndInputTokenDialog.show();
             return false;
@@ -50,7 +50,7 @@ public class YNDConfig {
                 yndToken = stringBuilder.toString().trim();
                 client = new OkHttpClient();
                 didLogin = true;
-                cr.showToast("Using Yandex token: [" + yndToken + "]");
+                cr.showCloudToast("Using Yandex token: [" + yndToken + "]",false);
             }
             return true;
         }

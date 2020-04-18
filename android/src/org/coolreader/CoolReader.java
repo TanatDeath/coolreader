@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
 
+import org.coolreader.cloud.CloudSync;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
@@ -71,7 +72,7 @@ import org.coolreader.donations.CRDonationService;
 import org.coolreader.geo.GeoLastData;
 import org.coolreader.geo.LocationTracker;
 import org.coolreader.geo.ProviderLocationTracker;
-import org.koekak.android.ebookdownloader.SonyBookSelector;
+import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -995,9 +996,23 @@ public class CoolReader extends BaseActivity implements SensorEventListener
                 }
             }
 		}
-		if (getReaderView()!=null)
-			if (getReaderView().ttsToolbar!=null)
+		if (getReaderView()!=null) {
+			if (getReaderView().ttsToolbar != null)
 				getReaderView().ttsToolbar.repaintButtons();
+			BackgroundThread.instance().postGUI(new Runnable() {
+				@Override
+				public void run() {
+					log.i("Load last rpos from CLOUD");
+					int iSyncVariant3 = settings().getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+					if (iSyncVariant3 == 0) {
+						showCloudToast(getString(R.string.cloud_sync_variant1_v),false);
+					} else {
+						CloudSync.loadFromJsonInfoFileList(CoolReader.this,
+								CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
+					}
+				}
+			}, 5000);
+		}
 	}
 
 	@Override
@@ -2520,32 +2535,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 			public void done() {
 				FileInfo fi = bi.getFileInfo();
-				if ((fi!=null)&&(mReaderView!=null))
-					if ((fi.symCount==0)||(fi.wordCount==0)) {
-						int iPageCnt = 0;
-						int iSymCnt = 0;
-						int iWordCnt = 0;
-						if (mReaderView.getArrAllPages()!=null)
-							iPageCnt = mReaderView.getArrAllPages().size();
-						else {
-							mReaderView.CheckAllPagesLoadVisual();
-							iPageCnt = mReaderView.getArrAllPages().size();
-						}
-						for (int i=0;i<iPageCnt;i++) {
-							String sPage = mReaderView.getArrAllPages().get(i);
-							if (sPage == null) sPage = "";
-							sPage = sPage.replace("\\n", " ");
-							sPage = sPage.replace("\\r", " ");
-							iSymCnt=iSymCnt + sPage.replaceAll("\\s+"," ").length();
-							iWordCnt=iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
-									replaceAll("\\s+"," ").split("\\s").length;
-						}
-						fi.symCount = iSymCnt;
-						fi.wordCount = iWordCnt;
-						BookInfo bi = new BookInfo(fi);
-						getDB().saveBookInfo(bi);
-						getDB().flush();
-					}
 				itemsBook.add("section=section.book");
 				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null) {
 					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add("book.authors=" + fi.getAuthors().
@@ -2624,12 +2613,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (!StrUtils.isEmptyStr(fi.translator)) {
 					itemsBook.add("book.translator=" + fi.translator);
 				}
-				if (fi.symCount!=0) {
-					itemsBook.add("book.symcount=" + fi.symCount);
-				}
-				if (fi.symCount!=0) {
-					itemsBook.add("book.wordcount=" + fi.wordCount);
-				}
+				itemsBook.add("book.symcount=" + fi.symCount);
+				itemsBook.add("book.wordcount=" + fi.wordCount);
 				itemsBook.add("section=section.book_document");
 				if (!StrUtils.isEmptyStr(fi.docauthor)) {
 					itemsBook.add("book.docauthor=" + fi.docauthor);

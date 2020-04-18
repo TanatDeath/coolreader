@@ -512,7 +512,7 @@
     <string name="win_title_confirm_history_record_delete">Do you really want to remove this book from recent list?</string>
     <string name="win_title_confirm_book_delete">Do you really want to delete this book / archive ?</string>
     <string name="book_info_book_language">Language</string>
-    <string name="book_info_book_translation">Translation</string>
+    <string name="book_info_book_translation">Translation (e.g. ru or zh-cn)</string>
     <string name="book_info_book_genre">Genre</string>
     <string name="book_info_book_srclang">Source language</string>
     <string name="book_info_book_translator">Translator</string>
@@ -1074,7 +1074,7 @@
     <string name="global_margin_add_info">For touchscreen devices with skirtings</string>
     <string name="lang_from">From language</string>
     <string name="lang_to">To language</string>
-    <string name="specify_translation_dir_full">Specify book\'s translation direction</string>
+    <string name="specify_translation_dir_full">Specify book\'s translation direction, e.g. ru or zh-cn</string>
     <string name="specify_translation_dir">Translation direction</string>
     <string name="settings_profile">Profile</string>
     <string name="rename_profile">Rename profile</string>
@@ -1088,4 +1088,24 @@
     <string name="options_requested_dom_level">DOM version compatibility level</string>
     <string name="options_requested_dom_level_legacy">Legacy</string>
     <string name="options_requested_dom_level_newest">Newest</string>
+    <string name="browser_tap_option_tap">Item tap action</string>
+    <string name="browser_tap_option_longtap">Item long tap action</string>
+    <string name="browser_tap_option1">Book info</string>
+    <string name="browser_tap_option2">Open book</string>
+    <string name="browser_tap_option3">Edit book info</string>
+    <string name="browser_tap_option4">Menu</string>
+    <string name="rpos_from">from</string>
+    <string name="rpos_current_device">current device</string>
+    <string name="rpos_found">Saved position found (in cloud)</string>
+    <string name="rpos_restore">Restore</string>
+    <string name="rpos_list">Open saved position list</string>
+    <string name="rpos_cancel">Cancel</string>
+    <string name="rpos_now_at">now you at</string>
+    <string name="calc_stats">Calculate statistics</string>
+    <string name="translated_with_ynd">Translated with «Yandex.Translate»</string>
+    <string name="translate_lang_not_set">Language(s) not set (translate directions)</string>
+    <string name="translate_lang_not_found">Language(s) codes not found (translate directions)</string>
+    <string name="whole_page_to_dic">Translate whole page</string>
+    <string name="settings_saved">Settings were saved</string>
+    <string name="no_cloud_files">No files found</string>
 </resources>

@@ -16,9 +16,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.HttpUrl;
@@ -59,8 +58,10 @@ public class YNDPerformAction {
                 if (mCurAction.action == CloudAction.YND_CHECK_CR_FOLDER) YndCheckCrFolder(mCurAction);
                 if (mCurAction.action == CloudAction.YND_CREATE_CR_FOLDER) YndCreateCrFolder(mCurAction);
                 if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK) YndSaveToFileGetLink(mCurAction);
+                if (mCurAction.action == CloudAction.YND_DELETE_FILE_ASYNC) YndDeleteFileAsync(mCurAction);
                 if (mCurAction.action == CloudAction.YND_SAVE_STRING_TO_FILE) YndSaveStringToFile(mCurAction);
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES) YndListJsonFiles(mCurAction);
+                if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES_LASTPOS) YndListJsonFiles(mCurAction);
                 if (mCurAction.action == CloudAction.YND_DOWNLOAD_FILE_TO_STRING) YndDownloadFileToString(mCurAction);
             } else Log.i("YND", "End of cloud operation");
         } catch (Exception e) {
@@ -95,7 +96,7 @@ public class YNDPerformAction {
             public void onResponse(Call call, Response response)
                     throws IOException {
                 String sBody = response.body().string();
-                YNDListFiles lf = new YNDListFiles(sBody, findStr, false);
+                YNDListFiles lf = new YNDListFiles(mCoolReader, sBody, findStr, false);
                 mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_LIST_FOLDER_RESULT, lf);
             }
 
@@ -123,7 +124,7 @@ public class YNDPerformAction {
                     throws IOException {
                 String sBody = response.body().string();
                 //Log.i("CLOUD", sBody);
-                YNDListFiles lf = new YNDListFiles(sBody, "", true);
+                YNDListFiles lf = new YNDListFiles(mCoolReader, sBody, "", true);
                 Log.i("CLOUD", "YND: found = " + lf.fileList.size());
                 mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_CHECK_CR_FOLDER, lf);
             }
@@ -194,6 +195,43 @@ public class YNDPerformAction {
                 }
                 Log.i("CLOUD", sBody);
                 mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_SAVE_TO_FILE_GET_LINK, href);
+            }
+
+            public void onFailure(Call call, IOException e) {
+                Log.i("CLOUD Error", e.getMessage());
+                mCallback.onError(YNDPerformAction.this, e.getMessage(), e);
+            }
+        });
+    }
+
+    public void YndDeleteFileAsync(final CloudAction ca) throws IOException {
+        String sFilePath = ca.param;
+        Log.i("CLOUD", "YND: delete file async = " + sFilePath);
+        HttpUrl.Builder urlBuilder = null;
+        urlBuilder = Objects.requireNonNull(HttpUrl.parse(YNDConfig.YND_DISK_URL)).newBuilder();
+        urlBuilder.addQueryParameter("path", sFilePath)
+                .addQueryParameter("force_async", "true")
+                .addQueryParameter("permanently", "true");
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder()
+                .url(url)
+                .delete()
+                .addHeader("Authorization", "OAuth " + YNDConfig.yndToken)
+                .build();
+        Call call = YNDConfig.client.newCall(request);
+        call.enqueue(new okhttp3.Callback() {
+            public void onResponse(Call call, Response response)
+                    throws IOException {
+                String sBody = response.body().string();
+                String href = "";
+                try {
+                    JSONObject jsonObject = new JSONObject(sBody);
+                    if (jsonObject.has("href")) href = jsonObject.get("href").toString();
+                } catch (Exception e) {
+
+                }
+                Log.i("CLOUD", sBody);
+                mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_DELETE_FILE_ASYNC, href);
             }
 
             public void onFailure(Call call, IOException e) {
@@ -352,7 +390,7 @@ public class YNDPerformAction {
         final String bookCRC = ca.bookCRC;
         final String existsMark = ca.param2;
         if (!StrUtils.getNonEmptyStr(existsMark,true).equals("skip")) {
-            YNDListFiles lf = new YNDListFiles("{}", "", false);
+            YNDListFiles lf = new YNDListFiles(mCoolReader, "{}", "", false);
             mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_LIST_FOLDER_RESULT, lf);
         } else {
             Log.i("CLOUD", "YND: list JSON files, mark = " + fileMark + ", crc = " + bookCRC);
@@ -371,7 +409,9 @@ public class YNDPerformAction {
                         throws IOException {
                     String sBody = response.body().string();
                     //Log.i("CLOUD", sBody);
-                    YNDListFiles lf = new YNDListFiles(sBody, fileMark, bookCRC, true);
+                    String sExt = "json";
+                    if (fileMark.equals("_settings_")) sExt = "txt";
+                    YNDListFiles lf = new YNDListFiles(mCoolReader, sBody, fileMark, bookCRC, sExt);
                     //Log.i("CLOUD", "size: " + lf.fileList.size());
                     mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_LIST_JSON_FILES, lf);
                 }

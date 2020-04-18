@@ -1,6 +1,8 @@
 package org.coolreader.cloud.yandex;
 
+import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudFileInfo;
+import org.coolreader.cloud.CloudSync;
 import org.coolreader.crengine.StrUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,17 +15,19 @@ public class YNDListFiles {
 
     String path = ""; // path listed
     public List<CloudFileInfo> fileList;
+    public CoolReader mCoolReader = null;
 
-    public YNDListFiles(String json, String fileMark, String sCRC, boolean jsonExt) {
-        this(json, "", fileMark, sCRC, false, true);
+    public YNDListFiles(CoolReader cr, String json, String fileMark, String sCRC, String sExt) {
+        this(cr, json, "", fileMark, sCRC, false, sExt);
     }
 
-    public YNDListFiles(String json, String findStr, boolean thisObj) {
-        this(json, findStr, "", "", thisObj, false);
+    public YNDListFiles(CoolReader cr, String json, String findStr, boolean thisObj) {
+        this(cr, json, findStr, "", "", thisObj, "");
     }
 
-    public YNDListFiles(String json, String findStr, String fileMark, String sCRC,
-                        boolean thisObj, boolean jsonExt) {
+    public YNDListFiles(CoolReader cr, String json, String findStr, String fileMark, String sCRC,
+                        boolean thisObj, String ext) {
+        mCoolReader = cr;
         fileList = new ArrayList<CloudFileInfo>();
         try {
             JSONObject jsonObject = new JSONObject(json);
@@ -40,20 +44,26 @@ public class YNDListFiles {
                 int i=0;
                 int itSize = 1;
                 if (!thisObj) itSize = items.length();
+                boolean wasInit = false;
                 while (i < itSize) {
                     JSONObject jso;
                     if (thisObj) jso = jsonObject; else jso = (JSONObject) items.get(i);
                     CloudFileInfo yf = new CloudFileInfo();
-                    if (jso.has("name")) yf.name = jso.get("name").toString();
-                    if (jso.has("path")) yf.path = jso.get("path").toString();
+                    if (jso.has("name")) yf.name = jso.get("name").toString(); //2020-03-29_202206_rpos_635942216_36b928e773055c4a.json
+                    if (jso.has("path")) yf.path = jso.get("path").toString(); //"disk:/CoolReader/2020-03-29_202206_rpos_635942216_36b928e773055c4a.json"
                     if (jso.has("type")) yf.type = jso.get("type").toString();
                     SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
                     if (jso.has("created")) yf.created = sdf.parse(jso.get("created").toString());
                     if (jso.has("modified")) yf.modified = sdf.parse(jso.get("modified").toString());
+                    if ((yf.path.contains("disk:/CoolReader/")) && (yf.path.contains(".json"))) {
+                        if (!wasInit) CloudSync.checkFileForDeleteInit();
+                        wasInit = true;
+                        CloudSync.checkFileForDelete(yf);
+                    }
                     if (StrUtils.isEmptyStr(findStr)) {
                         if (!StrUtils.isEmptyStr(fileMark)) {
                             boolean ok = yf.name.contains(fileMark);
-                            if (jsonExt) ok = ok && yf.name.contains(".json");
+                            if (!StrUtils.isEmptyStr(ext)) ok = ok && yf.name.contains("."+ext);
                             if (!StrUtils.isEmptyStr(sCRC)) ok = ok && yf.name.contains(sCRC);
                             if (ok) fileList.add(yf);
                         } else fileList.add(yf);
@@ -63,7 +73,7 @@ public class YNDListFiles {
                     }
                     i++;
                 }
-
+                if (wasInit) CloudSync.checkFileForDeleteFinish(mCoolReader);
             }
         } catch (Exception e) {
             e.printStackTrace();

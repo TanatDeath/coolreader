@@ -84,6 +84,7 @@
         <item name="colorThemeGray2">@color/w_grayDark2</item>
         <item name="colorThemeGray2Contrast">@color/w_grayLight2</item>
         <item name="colorIcon">@color/wdrk_iconColor</item>
+        <item name="colorIconL">@color/wlgt_iconColor</item>
 
         <item name="android:windowBackground">@drawable/background_tiled_light</item>
         <item name="android:colorBackground">#ffe0e0e0</item>
@@ -398,6 +399,7 @@
         <item name="colorThemeGray2">@color/w_grayLight2</item>
         <item name="colorThemeGray2Contrast">@color/w_grayDark2</item>
         <item name="colorIcon">@color/wlgt_iconColor</item>
+        <item name="colorIconL">@color/wdrk_iconColor</item>
 
         <item name="android:windowBackground">@drawable/background_tiled_dark</item>
         <item name="android:colorBackground">#ff302030</item>
@@ -723,6 +725,7 @@
         <item name="colorThemeGray2">@color/grayDark2</item>
         <item name="colorThemeGray2Contrast">@color/grayLight2</item>
         <item name="colorIcon">@color/drk_iconColor</item>
+        <item name="colorIconL">@color/lgt_iconColor</item>
 
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:colorBackground">@android:color/white</item>
@@ -1036,6 +1039,7 @@
         <item name="colorThemeGray2">@color/grayLight2</item>
         <item name="colorThemeGray2Contrast">@color/grayDark2</item>
         <item name="colorIcon">@color/lgt_iconColor</item>
+        <item name="colorIconL">@color/drk_iconColor</item>
 
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>
@@ -1350,6 +1354,7 @@
         <item name="colorThemeGray2">@color/grayLight2</item>
         <item name="colorThemeGray2Contrast">@color/grayDark2</item>
         <item name="colorIcon">@color/lgt_iconColor</item>
+        <item name="colorIconL">@color/drk_iconColor</item>
 
         <item name="android:windowBackground">@color/gray1</item>
         <item name="android:colorBackground">@color/gray1</item>
@@ -1666,6 +1671,7 @@
         <item name="colorThemeGray2">@color/grayDark2</item>
         <item name="colorThemeGray2Contrast">@color/grayLight2</item>
         <item name="colorIcon">@color/drk_iconColor</item>
+        <item name="colorIconL">@color/lgt_iconColor</item>
 
         <item name="android:windowBackground">@color/gray2</item>
         <item name="android:colorBackground">@color/gray2</item>
@@ -1981,6 +1987,7 @@
         <item name="colorThemeGray2">@color/grayDark2</item>
         <item name="colorThemeGray2Contrast">@color/grayLight2</item>
         <item name="colorIcon">@color/drk_iconColor</item>
+        <item name="colorIconL">@color/lgt_iconColor</item>
 
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:colorBackground">@android:color/white</item>
@@ -2296,6 +2303,7 @@
         <item name="colorThemeGray2">@color/grayLight2</item>
         <item name="colorThemeGray2Contrast">@color/grayDark2</item>
         <item name="colorIcon">@color/drk_iconColor</item>
+        <item name="colorIconL">@color/lgt_iconColor</item>
 
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>

@@ -128,6 +128,7 @@ public class ReaderAction {
 	public final static ReaderAction FILE_BROWSER_SORT_ORDER = new ReaderAction("FILE_BROWSER_SORT_ORDER", R.string.mi_book_sort_order, ReaderCommand.DCMD_FILE_BROWSER_SORT_ORDER, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_alphabetical_sorting);
 	public final static ReaderAction TOGGLE_DICT_ONCE = new ReaderAction("TOGGLE_DICT_ONCE", R.string.toggle_dict_once, ReaderCommand.DCMD_TOGGLE_DICT_ONCE, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_2);
 	public final static ReaderAction TOGGLE_DICT = new ReaderAction("TOGGLE_DICT", R.string.toggle_dict, ReaderCommand.DCMD_TOGGLE_DICT, 0, TOGGLE_DICT_ONCE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_switch);
+	public final static ReaderAction WHOLE_PAGE_TO_DIC = new ReaderAction("WHOLE_PAGE_TO_DIC", R.string.whole_page_to_dic, ReaderCommand.DCMD_WHOLE_PAGE_TO_DIC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_page_to_dic);
 
 	public final static ReaderAction FONT_PREVIOUS = new ReaderAction("FONT_PREVIOUS", R.string.mi_font_previous, ReaderCommand.DCMD_FONT_PREVIOUS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_up); //, R.id.cr3_mi_font_previous
 	public final static ReaderAction FONT_NEXT = new ReaderAction("FONT_NEXT", R.string.mi_font_next, ReaderCommand.DCMD_FONT_NEXT, 0, FONT_PREVIOUS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_down); //, R.id.cr3_mi_font_next
@@ -244,7 +245,8 @@ public class ReaderAction {
 		TOGGLE_PAGE_VIEW_MODE,
 		OPTIONS_FILTER,
         FONT_SELECT,
-        FONT_BOLD
+        FONT_BOLD,
+		WHOLE_PAGE_TO_DIC
 	};
 
 	public boolean isNone() {

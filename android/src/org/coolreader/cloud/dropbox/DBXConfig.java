@@ -63,19 +63,19 @@ public class DBXConfig {
                 }
                 reader.close();
                 final String token = stringBuilder.toString().trim();
-                cr.showToast("Using Dropbox token: [" + token + "]");
+                cr.showCloudToast("Using Dropbox token: [" + token + "]",false);
                 final CoolReader crf = cr;
                 new DBXFinishAuthorization(cr, null, new DBXFinishAuthorization.Callback() {
                     @Override
                     public void onComplete(boolean result, String accessToken) {
-                        crf.showToast(R.string.dbx_auth_finished_ok);
+                        crf.showCloudToast(R.string.dbx_auth_finished_ok,false);
                         didLogin = result;
                     }
 
                     @Override
                     public void onError(Exception e) {
                         DBXConfig.didLogin = false;
-                        crf.showToast(crf.getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage());
+                        crf.showCloudToast(crf.getString(R.string.dbx_auth_finished_error) + ": " + e.getMessage(),true);
                     }
                 }).execute(token);
                 return false;
