@@ -1,0 +1,13 @@
+*.*~
+.DS_*
+._*
+qtbuild
+v3build
+v5build
+wxbuild
+qtbuild
+qt-build
+qtcreator-build
+*~
+*.a
+*.so
