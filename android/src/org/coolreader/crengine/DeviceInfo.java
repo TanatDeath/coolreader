@@ -22,6 +22,8 @@ public class DeviceInfo {
 	public final static boolean ONYX_BRIGHTNESS_WARM;
 	public final static boolean EINK_SCREEN_UPDATE_MODES_SUPPORTED;
 	public final static boolean NOOK_NAVIGATION_KEYS;
+	public final static boolean EINK_NOOK1;
+	public final static boolean EINK_NOOK2;
 	public final static boolean EINK_NOOK;
 	public final static boolean EINK_NOOK_120;
 	public final static boolean EINK_ONYX;
@@ -135,10 +137,12 @@ public class DeviceInfo {
 		        (MODEL.contentEquals("GT-S5830") || MODEL.contentEquals("GT-S5660")); // More models?
 		AMOLED_SCREEN = MANUFACTURER.toLowerCase().contentEquals("samsung") &&
         		(MODEL.toLowerCase().startsWith("gt-i")); // AMOLED screens: GT-IXXXX
-		EINK_NOOK = MANUFACTURER.toLowerCase().contentEquals("barnesandnoble") &&
+		EINK_NOOK1 = MANUFACTURER.toLowerCase().contentEquals("barnesandnoble") &&
 				(PRODUCT.contentEquals("NOOK") || MODEL.contentEquals("NOOK") || MODEL.contentEquals("BNRV350") ||
 						MODEL.contentEquals("BNRV300") || MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510")) &&
-				(DEVICE.toLowerCase().contentEquals("zoom2")||DEVICE.toLowerCase().contentEquals("ntx_6sl"));
+				(DEVICE.toLowerCase().contentEquals("zoom2") || DEVICE.toLowerCase().contentEquals("ntx_6sl"));
+		EINK_NOOK2 = DEVICE.toLowerCase().contentEquals("ntx_6sl");
+		EINK_NOOK = EINK_NOOK1 || EINK_NOOK2;
 		EINK_NOOK_120 = EINK_NOOK && (MODEL.contentEquals("BNRV350") || MODEL.contentEquals("BNRV300") ||
 				MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510"));
 		EINK_SONY = MANUFACTURER.toLowerCase().contentEquals("sony") && MODEL.startsWith("PRS-T");

@@ -759,7 +759,8 @@
     <string name="save_bookmarks_to_cloud">Save bookmarks to cloud storage</string>
     <string name="load_bookmarks_from_cloud">Load bookmarks from cloud storage</string>
     <string name="cloud_menu">Cloud storage menu</string>
-    <string name="save_current_book_to_cloud">Save book to cloud storage</string>
+    <string name="save_current_book_to_cloud_ynd">Save book to Yandex disc</string>
+    <string name="save_current_book_to_cloud_ynd2">Save opened book to this folder</string>
     <string name="save_current_book_to_cloud_email">Send book via Email</string>
     <string name="open_book_from_gd">Open book from Google One</string>
     <string name="open_book_from_dbx">Open book from Dropbox</string>
@@ -1108,4 +1109,6 @@
     <string name="whole_page_to_dic">Translate whole page</string>
     <string name="settings_saved">Settings were saved</string>
     <string name="no_cloud_files">No files found</string>
+    <string name="ynd_translate_dics_info">Yandex Translate languages</string>
+    <string name="lingvo_translate_dics_info">Lingvo Online languages</string>
 </resources>

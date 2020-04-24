@@ -672,7 +672,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (brBookmarksFromGdDrawableRes!=0)
 			ReaderAction.LOAD_BOOKMARKS.setIconId(brBookmarksFromGdDrawableRes);
 		if (brBookToGdDrawableRes!=0)
-			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD.setIconId(brBookToGdDrawableRes);
+			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND.setIconId(brBookToGdDrawableRes);
 		//if (brBookFromGdDrawableRes!=0)
 		//	ReaderAction.OPEN_BOOK_FROM_CLOUD.setIconId(brBookFromGdDrawableRes);
 		if (brBookFromYndDrawableRes!=0)

@@ -89,7 +89,6 @@ Greek~el~el~1032~408~1253
 Guarani - Paraguay~gn~gn~1140~474~
 Gujarati~gu~gu~1095~447~
 Hebrew~he~he~1037~~1255
-HID (Human Interface Device)~~~1279~~
 Hindi~hi~hi~1081~439~
 Hungarian~hu~hu~1038~~1250
 Icelandic~is~is~1039~~1252
@@ -176,7 +175,6 @@ Tsonga~ts~ts~1073~431~
 Turkish~tr~tr~1055~~1254
 Turkmen~tk~tk~1090~442~
 Ukrainian~uk~uk~1058~422~1251
-Unicode~~UTF-8~0~~
 Urdu~ur~ur~1056~420~1256
 Uzbek - Cyrillic~uz~uz-uz~2115~843~1251
 Uzbek - Latin~uz~uz-uz~1091~443~1254

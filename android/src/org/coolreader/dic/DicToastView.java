@@ -17,16 +17,20 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.ReaderView;
+import org.coolreader.crengine.Services;
 import org.coolreader.crengine.StrUtils;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -223,8 +227,39 @@ public class DicToastView {
                     }
                 }
             });
+            Button btnTransl = (Button) window.getContentView().findViewById(R.id.btnTransl);
+            TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+                    {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+            int colorGray = a.getColor(0, Color.GRAY);
+            int colorGrayC = a.getColor(1, Color.GRAY);
+            int colorIcon = a.getColor(2, Color.GRAY);
+            a.recycle();
+            int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+            int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+            if (btnTransl!=null) btnTransl.setBackgroundColor(colorGray);
+            final CoolReader cr = (CoolReader)mActivity;
+            btnTransl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (cr.getReaderView().mBookInfo!=null) {
+                        String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
+                        String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
+                        FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+                        FileInfo dfi = fi.parent;
+                        if (dfi == null) {
+                            dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+                        }
+                        if (dfi != null) {
+                            cr.editBookTransl(dfi, fi, langf, lang, "", null);
+                        }
+                    };
+                    window.dismiss();
+                    showing.compareAndSet(true, false);
+                }
+            });
         } else
-            if (!StrUtils.isEmptyStr(mDicName)) {
+            //if (!StrUtils.isEmptyStr(mDicName))
+            {
                 TableRow getSepRow = (TableRow) inflater.inflate(R.layout.geo_sep_item, null);
                 dicTable.addView(getSepRow);
                 View sep = window.getContentView().findViewById(R.id.sepRow);
@@ -251,6 +286,36 @@ public class DicToastView {
                         } catch (Exception e) {
 
                         }
+                    }
+                });
+                Button btnTransl = (Button) window.getContentView().findViewById(R.id.btnTransl);
+                TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+                        {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+                int colorGray = a.getColor(0, Color.GRAY);
+                int colorGrayC = a.getColor(1, Color.GRAY);
+                int colorIcon = a.getColor(2, Color.GRAY);
+                a.recycle();
+                int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+                int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+                if (btnTransl!=null) btnTransl.setBackgroundColor(colorGray);
+                final CoolReader cr = (CoolReader)mActivity;
+                btnTransl.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (cr.getReaderView().mBookInfo!=null) {
+                            String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
+                            String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
+                            FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+                            FileInfo dfi = fi.parent;
+                            if (dfi == null) {
+                                dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+                            }
+                            if (dfi != null) {
+                                cr.editBookTransl(dfi, fi, langf, lang, "", null);
+                            }
+                        };
+                        window.dismiss();
+                        showing.compareAndSet(true, false);
                     }
                 });
             }

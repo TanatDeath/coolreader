@@ -2936,19 +2936,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, false);
 			}
 			break;
-		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD:
-			log.i("Save current book to CLOUD");
-			mActivity.showToast("To come...");
-			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, this);
+		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND:
+			log.i("Save current book to CLOUD_YND");
+			CloudAction.yndOpenBookDialog(mActivity, true);
 			break;
-		case DCMD_OPEN_BOOK_FROM_CLOUD:
-			log.i("Open book from CLOUD");
-			mActivity.showToast("To come...");
+		//case DCMD_OPEN_BOOK_FROM_CLOUD:
+		//	log.i("Open book from CLOUD");
+		//	mActivity.showToast("To come...");
 			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-			break;
+		//	break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_YND:
 			log.i("Open book from CLOUD_YND");
-			CloudAction.yndOpenBookDialog(mActivity);
+			CloudAction.yndOpenBookDialog(mActivity, false);
 			break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
 			log.i("Open book from CLOUD_DBX");
@@ -2969,8 +2968,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					ReaderAction.LOAD_BOOKMARKS,
 					ReaderAction.OPEN_BOOK_FROM_CLOUD_YND,
 					ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX,
-					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL //,
-					//ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD,
+					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL,
+					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND //,
 					//ReaderAction.OPEN_BOOK_FROM_GD
 			};
 			mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
@@ -3039,13 +3038,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 									CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant3 == 1, false);
 						}
 						return true;
-					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD) {
-						log.i("Save current book to CLOUD");
-						mActivity.showToast("To come ....");
+					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
+						log.i("Save current book to YND");
+						CloudAction.yndOpenBookDialog(mActivity, true);
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
 						log.i("Open book from CLOUD_YND");
-						CloudAction.yndOpenBookDialog(mActivity);
+						CloudAction.yndOpenBookDialog(mActivity, false);
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
 						log.i("Open book from CLOUD_DBX");

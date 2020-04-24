@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.coolreader.cloud.CloudSync;
+import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
@@ -21,7 +22,6 @@ import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
 import org.coolreader.cloud.yandex.YNDConfig;
 import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.AboutDialog;
-import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
@@ -2362,7 +2362,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void editBookTransl(final FileInfo currDirectory, final FileInfo item,
-							   final String lang_from, final String lang_to, final String search_text) {
+							   final String lang_from, final String lang_to, final String search_text,
+							   BookInfoEditDialog bied) {
 		waitForCRDBService(new Runnable() {
 			@Override
 			public void run() {
@@ -2377,36 +2378,43 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						String[] arrS2 =  {getString(R.string.lang_to), "", lang_to};
 						vl.add(arrS2);
 						BookInfo bookInfoF = bookInfo;
-						AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+						TranslationDirectionDialog dlgA = new TranslationDirectionDialog(
 								CoolReader.this,
 								getString(R.string.specify_translation_dir),
 								getString(R.string.specify_translation_dir_full),
-								vl, new AskSomeValuesDialog.ValuesEnteredCallback() {
+								vl, new TranslationDirectionDialog.ValuesEnteredCallback() {
 							@Override
 							public void done(ArrayList<String> results) {
 								if (results != null) {
 									FileInfo file = bookInfoF.getFileInfo();
-									if (results.size() >= 1)
-										file.lang_from = results.get(0);
-									if (results.size() >= 2)
-										file.lang_to = results.get(1);
-									getDB().saveBookInfo(bookInfoF);
-									getDB().flush();
-									if (getReaderView()!=null) {
-										if (getReaderView().getBookInfo()!=null) {
-											BookInfo book = getReaderView().getBookInfo();
-											book.getFileInfo().lang_from = file.lang_from;
-											book.getFileInfo().lang_to = file.lang_to;
+									if (results.size() >= 1) {
+										if (bied != null) bied.edLangFrom.setText(results.get(0));
+										else file.lang_from = results.get(0);
+									}
+									if (results.size() >= 2) {
+										if (bied != null) bied.edLangTo.setText(results.get(0));
+										else file.lang_to = results.get(1);
+									}
+									if (bied == null) {
+										getDB().saveBookInfo(bookInfoF);
+										getDB().flush();
+										if (getReaderView() != null) {
+											if (getReaderView().getBookInfo() != null) {
+												BookInfo book = getReaderView().getBookInfo();
+												book.getFileInfo().lang_from = file.lang_from;
+												book.getFileInfo().lang_to = file.lang_to;
+											}
 										}
+										BookInfo bi = Services.getHistory().getBookInfo(file);
+										if (bi != null)
+											bi.getFileInfo().setFileProperties(file);
+										if (currDirectory != null) {
+											currDirectory.setFile(file);
+											directoryUpdated(currDirectory, file);
+										}
+										if (!StrUtils.isEmptyStr(search_text))
+											findInDictionary(search_text);
 									}
-									BookInfo bi = Services.getHistory().getBookInfo(file);
-									if (bi != null)
-										bi.getFileInfo().setFileProperties(file);
-									if (currDirectory!=null) {
-										currDirectory.setFile(file);
-										directoryUpdated(currDirectory, file);
-									}
-									findInDictionary(search_text);
 								}
 							}
 						});

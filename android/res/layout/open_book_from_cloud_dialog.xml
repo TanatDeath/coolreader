@@ -30,23 +30,51 @@
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
-        <TextView
-            android:id="@+id/lbl_find_text"
-            style="@style/TextAppearance.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:singleLine="false"
-            android:text="@string/lbl_find" />
+        <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_margin="2dip"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    >
+                <TextView
+                    android:id="@+id/lbl_find_text"
+                    style="@style/TextAppearance.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="3"
+                    android:singleLine="false"
+                    android:layout_weight="1"
+                    android:textColor="?attr/colorIcon"
+                    android:text="@string/lbl_find" />
 
-        <EditText
-            android:id="@+id/find_text"
-            style="@style/TextAppearance.Widget.EditText"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:singleLine="false"
-            android:text="find text" />
+                <EditText
+                    android:id="@+id/find_text"
+                    style="@style/TextAppearance.Widget.EditText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:singleLine="false"
+                    android:layout_weight="15"
+                    android:text="find text" />
+                <ImageButton android:id="@+id/do_find"
+                        android:layout_weight="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dip"
+                        android:layout_marginBottom="5dip"
+                        android:layout_marginLeft="5dip"
+                        android:layout_marginRight="5dip"
+                        android:src="?attr/cr3_browser_find_drawable"
+                        android:tag="tint"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:background="@null"
+                        android:contentDescription="@string/lbl_find"/>
+            </TableRow>
+        </TableLayout>
     </LinearLayout>
     <RadioGroup
         android:id="@+id/rg_scope"
@@ -93,19 +121,12 @@
             android:checked="false"
             android:layout_weight="1"
             android:text="@string/dlg_folder_drive" />
-        <ImageButton android:id="@+id/do_find"
+        <Button
+            android:id="@+id/btn_save_current_book_to_cloud_ynd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dip"
-            android:layout_marginBottom="5dip"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:src="?attr/cr3_button_ok_drawable"
-            android:tag="tint"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:background="@null"
-            android:contentDescription="@string/lbl_find"/>
+            android:text="@string/save_current_book_to_cloud_ynd2"
+        />
 
     </RadioGroup>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

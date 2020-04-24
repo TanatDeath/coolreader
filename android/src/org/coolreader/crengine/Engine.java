@@ -411,7 +411,7 @@ public class Engine {
 								if (progressIcon != null)
 									mProgress.setIcon(progressIcon);
 								else
-									mProgress.setIcon(R.mipmap.cr3_logo);
+									mProgress.setIcon(R.mipmap.known_reader_logo);
 								mProgress.setMax(10000);
 								mProgress.setCancelable(false);
 								mProgress.setProgress(mainProgress);

@@ -270,8 +270,8 @@ public class BookInfoEditDialog extends BaseDialog {
     EditText edSeriesName;
     EditText edSeriesNumber;
 	AuthorList authors;
-	EditText edLangFrom;
-	EditText edLangTo;
+	public EditText edLangFrom;
+	public EditText edLangTo;
     EditText edGenre;
     EditText edAnnotation;
     EditText edSrclang;
@@ -388,13 +388,15 @@ public class BookInfoEditDialog extends BaseDialog {
 		int colorGreen;
 		int colorGray;
 		int colorIcon;
+		int colorGrayC;
 		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeBlue,
 				 R.attr.colorThemeGreen,
 				 R.attr.colorThemeGray,
 				 R.attr.colorIcon,
 				 R.attr.attr_icons8_rate_star,
-				 R.attr.attr_icons8_rate_star_filled
+				 R.attr.attr_icons8_rate_star_filled,
+				 R.attr.colorThemeGray2Contrast
 				});
 		colorBlue = a.getColor(0, Color.BLUE);
 		colorGreen = a.getColor(1, Color.GREEN);
@@ -402,6 +404,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		colorIcon = a.getColor(3, Color.GRAY);
 		attrStar = a.getResourceId(4, 0);
 		attrStarFilled = a.getResourceId(5, 0);
+		colorGrayC = a.getColor(6, Color.GRAY);
 
 		btnStateNone.setTextColor(colorIcon);
 		btnStateReading.setTextColor(colorGreen);
@@ -597,6 +600,28 @@ public class BookInfoEditDialog extends BaseDialog {
         	parent.removeView(btnRemoveRecent);
         	parent.removeView(btnOpenFolder);
         }
+
+		Button translButton = ((Button)view.findViewById(R.id.transl_button));
+		translButton.setTextColor(colorIcon);
+		translButton.setBackgroundColor(colorGrayC);
+
+		translButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (mBookInfo!=null) {
+					String lang = StrUtils.getNonEmptyStr(edLangTo.getText().toString(),true);
+					String langf = StrUtils.getNonEmptyStr(edLangFrom.getText().toString(), true);
+					FileInfo fi = mBookInfo.getFileInfo();
+					FileInfo dfi = fi.parent;
+					if (dfi == null) {
+						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+					}
+					if (dfi != null) {
+						mActivity.editBookTransl(dfi, fi, langf, lang, "", BookInfoEditDialog.this);
+					}
+				};
+			}
+		});
+
 		buttonsLayout = (ViewGroup)view.findViewById(R.id.base_dlg_button_panel);
 		updateGlobalMargin(buttonsLayout, true, true, true, false);
 

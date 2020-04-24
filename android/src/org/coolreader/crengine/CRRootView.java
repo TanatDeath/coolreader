@@ -628,7 +628,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			viewYandex.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					CloudAction.yndOpenBookDialog(mActivity);
+					CloudAction.yndOpenBookDialog(mActivity, false);
 				}
 			});
 			viewYandex.setOnLongClickListener(new OnLongClickListener() {

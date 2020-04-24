@@ -14,6 +14,7 @@ import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -52,6 +53,7 @@ import okhttp3.Response;
 public class Dictionaries {
 
 	public static final String YND_DIC_ONLINE = "https://translate.yandex.net/api/v1.5/tr/translate";
+	public static final String YND_DIC_GETLANGS = "https://translate.yandex.net/api/v1.5/tr/getLangs";
 	public static final String LINGVO_DIC_ONLINE = "https://developers.lingvolive.com/api";
 	public static OkHttpClient client = new OkHttpClient();
 	public static ArrayList<String> langCodes = new ArrayList<String>();
@@ -182,7 +184,9 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 4, R.drawable.wiki, null),
 		new DictInfo("YandexTranslateOnline", "Yandex Translate Online", "", "",
 				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null),
-			new DictInfo("LingvoOnline", "Lingvo Online", "", "",
+		new DictInfo("LingvoOnline", "Lingvo Online", "", "",
+					Intent.ACTION_SEND, 8, R.drawable.lingvo, null),
+		new DictInfo("LingvoOnline Extended", "Lingvo Online Extended", "", "",
 					Intent.ACTION_SEND, 8, R.drawable.lingvo, null),
 	};
 
@@ -350,7 +354,7 @@ public class Dictionaries {
 		}
 	}
 
-	private void lingvoAuthThenTranslate(String s, String langf, String lang) {
+	private void lingvoAuthThenTranslate(String s, String langf, String lang, boolean extended) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(LINGVO_DIC_ONLINE+"/v1.1/authenticate").newBuilder();
 		String url = urlBuilder.build().toString();
 		RequestBody body = RequestBody.create(
@@ -373,7 +377,7 @@ public class Dictionaries {
 							@Override
 							public void run() {
 								sLingvoToken = sBody;
-								lingvoTranslate(s, langf, lang);
+								lingvoTranslate(s, langf, lang, extended);
 							}
 						}, 100);
 					}
@@ -385,7 +389,7 @@ public class Dictionaries {
 		});
 	};
 
-	private void lingvoTranslate(String s, String langf, String lang) {
+	private void lingvoTranslate(String s, String langf, String lang, boolean extended) {
 		CoolReader cr = (CoolReader) mActivity;
 		if ((StrUtils.isEmptyStr(langf))||(StrUtils.isEmptyStr(lang))) {
 			BackgroundThread.instance().postBackground(new Runnable() {
@@ -459,9 +463,9 @@ public class Dictionaries {
 				}
 			}
 		}
+		final int ilangfF = ilangf;
+		final int ilangF = ilang;
 		if ((ilangf == 0) || (ilang == 0)) {
-			final int ilangfF = ilangf;
-			final int ilangF = ilang;
 			BackgroundThread.instance().postBackground(new Runnable() {
 				@Override
 				public void run() {
@@ -509,7 +513,9 @@ public class Dictionaries {
 											if (!StrUtils.isEmptyStr(sTrans)) {
 												if (!StrUtils.isEmptyStr(sHeading))
 													sTrans = sHeading + ": " + sTrans;
-												cr.showDicToast(sTrans, false, sDic);
+												if (!extended)
+													cr.showDicToast(sTrans, false, sDic);
+												else lingvoExtended(s, ilangfF, ilangF, sTrans, false, sDic);
 											}
 										}
 									}
@@ -526,7 +532,7 @@ public class Dictionaries {
 				sLingvoToken = "";
 				if (unauthCnt == 0) {
 					unauthCnt++;
-					lingvoAuthThenTranslate(s, langf, lang);
+					lingvoAuthThenTranslate(s, langf, lang, extended);
 				} else {
 					cr.showToast(e.getMessage());
 					unauthCnt = 0;
@@ -534,6 +540,68 @@ public class Dictionaries {
 			}
 		});
 	};
+
+	private void lingvoExtended(String s, int ilangf, int ilang,
+								String sTrans, boolean isYnd, String sDic) {
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(LINGVO_DIC_ONLINE+"/v1/Translation").newBuilder();
+		CoolReader cr = (CoolReader) mActivity;
+		urlBuilder.addQueryParameter("text", s);
+		urlBuilder.addQueryParameter("srcLang", String.valueOf(ilangf));
+		urlBuilder.addQueryParameter("dstLang", String.valueOf(ilang));
+		String url = urlBuilder.build().toString();
+		Request request = new Request.Builder()
+				.header("Authorization","Bearer "+sLingvoToken)
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				BackgroundThread.instance().postBackground(new Runnable() {
+					@Override
+					public void run() {
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									String sAdd = "";
+									JSONArray jsa = new JSONArray(sBody);
+									JSONObject jso = null;
+									if (jsa.length()>0)
+										jso = jsa.getJSONObject(0);
+									if (jso.has("Body")) {
+										JSONArray jsa2 = jso.getJSONArray("Body");
+										if (jsa2.length()>0) {
+											jso = jsa2.getJSONObject(0);
+											JSONArray jsa3 = jso.getJSONArray("Markup");
+											for (int i=0; i<jsa3.length(); i++) {
+												jso = jsa3.getJSONObject(i);
+												if ((jso.has("Node"))&&(jso.has("Text"))) {
+													if (StrUtils.getNonEmptyStr(jso.getString("Node"), true).equals("Transcription")) {
+														sAdd = " ["+StrUtils.getNonEmptyStr(jso.getString("Text"), true)+"]";
+														cr.showDicToast(sTrans+sAdd, false, sDic);
+														return;
+													}
+												}
+											}
+										}
+									}
+									cr.showDicToast(sTrans+sAdd, false, sDic);
+								} catch (Exception e) {
+									cr.showDicToast(sTrans, false, sDic);
+								}
+							}
+						}, 100);
+					}
+				});
+			}
+
+			public void onFailure(Call call, IOException e) {
+				cr.showDicToast(sTrans, false, sDic);
+			}
+		});
+	}
 
 	public String get2dig(String s) {
 		if (StrUtils.getNonEmptyStr(s,true).length()>2)
@@ -720,7 +788,7 @@ public class Dictionaries {
 									currentDictionary2 = saveCurrentDictionary2;
 									currentDictionary3 = saveCurrentDictionary3;
 									iDic2IsActive = saveIDic2IsActive;
-									cr.editBookTransl(dfi, fi, langf, lang, s);
+									cr.editBookTransl(dfi, fi, langf, lang, s, null);
 								}
 							};
 							return;
@@ -885,7 +953,7 @@ public class Dictionaries {
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionary3 = saveCurrentDictionary3;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(dfi, fi, langf, lang, s);
+						cr.editBookTransl(dfi, fi, langf, lang, s, null);
 					}
 				};
 				return;
@@ -948,13 +1016,13 @@ public class Dictionaries {
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionary3 = saveCurrentDictionary3;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(dfi, fi, langf, lang, s);
+						cr.editBookTransl(dfi, fi, langf, lang, s, null);
 					}
 				};
 				return;
 			}
-			if (sLingvoToken.equals("")) lingvoAuthThenTranslate(s, langf, lang);
-				else lingvoTranslate(s, langf, lang);
+			if (sLingvoToken.equals("")) lingvoAuthThenTranslate(s, langf, lang, curDict.id.contains("Extended"));
+				else lingvoTranslate(s, langf, lang, curDict.id.contains("Extended"));
 			break;
 		}
 	}

@@ -4,12 +4,14 @@ import android.util.Log;
 
 import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,12 +59,14 @@ public class YNDPerformAction {
                 if (mCurAction.action == CloudAction.YND_DOWNLOAD_FILE) YndDownloadFile(mCurAction);
                 if (mCurAction.action == CloudAction.YND_CHECK_CR_FOLDER) YndCheckCrFolder(mCurAction);
                 if (mCurAction.action == CloudAction.YND_CREATE_CR_FOLDER) YndCreateCrFolder(mCurAction);
-                if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK) YndSaveToFileGetLink(mCurAction);
+                if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK) YndSaveToFileGetLink(mCurAction, "/CoolReader");
                 if (mCurAction.action == CloudAction.YND_DELETE_FILE_ASYNC) YndDeleteFileAsync(mCurAction);
                 if (mCurAction.action == CloudAction.YND_SAVE_STRING_TO_FILE) YndSaveStringToFile(mCurAction);
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES) YndListJsonFiles(mCurAction);
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES_LASTPOS) YndListJsonFiles(mCurAction);
                 if (mCurAction.action == CloudAction.YND_DOWNLOAD_FILE_TO_STRING) YndDownloadFileToString(mCurAction);
+                if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK_W_DIR) YndSaveToFileGetLink(mCurAction, "");
+                if (mCurAction.action == CloudAction.YND_SAVE_CUR_BOOK) YndSaveCurBook(mCurAction);
             } else Log.i("YND", "End of cloud operation");
         } catch (Exception e) {
             mException = e;
@@ -101,6 +105,44 @@ public class YNDPerformAction {
             }
 
             public void onFailure(Call call, IOException e) {
+                mCallback.onError(YNDPerformAction.this, e.getMessage(), e);
+            }
+        });
+    }
+
+    public void YndSaveCurBook(final CloudAction ca) throws IOException {
+        if (mCoolReader.getReaderView()==null) return;
+        if (mCoolReader.getReaderView().getBookInfo()==null) return;
+        if (mCoolReader.getReaderView().getBookInfo().getFileInfo()==null) return;
+        FileInfo fi = mCoolReader.getReaderView().getBookInfo().getFileInfo();
+        String sFName = "";
+        if (!StrUtils.isEmptyStr(fi.arcname)) sFName = fi.arcname;
+            else sFName = fi.pathname;
+        String sContent = ca.param;
+        String sHref = ca.param2;
+        if (StrUtils.isEmptyStr(sHref)) return;
+        Log.i("CLOUD", "YND: save string to file = " + sHref);
+        HttpUrl.Builder urlBuilder = null;
+        urlBuilder = HttpUrl.parse(sHref).newBuilder();
+        MediaType mt = MediaType.parse("application/octet-stream");
+        RequestBody body = RequestBody.create(mt, new File(sFName));
+        String url = urlBuilder.build().toString();
+        Request request = new Request.Builder()
+                .url(url)
+                .put(body)
+                .addHeader("Authorization", "OAuth " + YNDConfig.yndToken)
+                .build();
+        Call call = YNDConfig.client.newCall(request);
+        call.enqueue(new okhttp3.Callback() {
+            public void onResponse(Call call, Response response)
+                    throws IOException {
+                String sBody = response.body().string();
+                Log.i("CLOUD", sBody);
+                mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_SAVE_STRING_TO_FILE, null);
+            }
+
+            public void onFailure(Call call, IOException e) {
+                Log.i("CLOUD Error", e.getMessage());
                 mCallback.onError(YNDPerformAction.this, e.getMessage(), e);
             }
         });
@@ -169,10 +211,20 @@ public class YNDPerformAction {
         }
     }
 
-    public void YndSaveToFileGetLink(final CloudAction ca) throws IOException {
-        String folder = "/CoolReader";
+    public void YndSaveToFileGetLink(final CloudAction ca, String pfolder) throws IOException {
+        String folder = pfolder;
+        if (StrUtils.isEmptyStr(pfolder)) folder = ca.param2;
         String sFileName = ca.param;
+        if (sFileName.contains("/")) {
+            String[] arrFN = sFileName.split("/");
+            sFileName = arrFN[arrFN.length - 1];
+        }
+        if (sFileName.contains("\\")) {
+            String[] arrFN = sFileName.split("\\\\");
+            sFileName = arrFN[arrFN.length - 1];
+        }
         Log.i("CLOUD", "YND: save string to file = " + sFileName);
+        folder = folder.replace("\\", "/");
         HttpUrl.Builder urlBuilder = null;
         urlBuilder = HttpUrl.parse(YNDConfig.YND_DISK_UPLOAD_URL).newBuilder();
         urlBuilder.addQueryParameter("path", folder + "/" + sFileName);
@@ -186,6 +238,11 @@ public class YNDPerformAction {
             public void onResponse(Call call, Response response)
                     throws IOException {
                 String sBody = response.body().string();
+                Log.i("CLOUD", sBody);
+                if (sBody.contains("DiskResourceAlreadyExistsError")) {
+                    mCallback.onError(YNDPerformAction.this, "File already exists", null);
+                    return;
+                }
                 String href = "";
                 try {
                     JSONObject jsonObject = new JSONObject(sBody);
@@ -193,7 +250,10 @@ public class YNDPerformAction {
                 } catch (Exception e) {
 
                 }
-                Log.i("CLOUD", sBody);
+                if (StrUtils.isEmptyStr(href)) {
+                    mCallback.onError(YNDPerformAction.this, "Upload link failed", null);
+                    return;
+                }
                 mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_SAVE_TO_FILE_GET_LINK, href);
             }
 

@@ -105,7 +105,7 @@ public class ReaderAction {
 	public final static ReaderAction DOCUMENT_STYLES = new ReaderAction("DOCUMENT_STYLES", R.string.action_toggle_document_styles, ReaderCommand.DCMD_TOGGLE_DOCUMENT_STYLES, 0, R.id.cr3_mi_toggle_document_styles, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.icons8_css_2);
 	public final static ReaderAction TEXT_AUTOFORMAT = new ReaderAction("TEXT_AUTOFORMAT", R.string.action_toggle_text_autoformat, ReaderCommand.DCMD_TOGGLE_TEXT_AUTOFORMAT, 0, R.id.cr3_mi_toggle_text_autoformat, null, R.string.option_add_info_empty_text );
 	public final static ReaderAction BOOKMARKS = new ReaderAction("BOOKMARKS", R.string.action_bookmarks, ReaderCommand.DCMD_BOOKMARKS, 0, R.id.cr3_mi_bookmarks, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_bookmarks);
-	public final static ReaderAction ABOUT = new ReaderAction("ABOUT", R.string.dlg_about, ReaderCommand.DCMD_ABOUT, 0, R.id.cr3_mi_about, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_logo_button);
+	public final static ReaderAction ABOUT = new ReaderAction("ABOUT", R.string.dlg_about, ReaderCommand.DCMD_ABOUT, 0, R.id.cr3_mi_about, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.known_reader_logo);
 	public final static ReaderAction USER_MANUAL = new ReaderAction("USER_MANUAL", R.string.mi_goto_manual, ReaderCommand.DCMD_USER_MANUAL, 0, R.id.cr3_mi_user_manual , ABOUT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_manual_2);
 	public final static ReaderAction BOOK_INFO = new ReaderAction("BOOK_INFO", R.string.dlg_book_info, ReaderCommand.DCMD_BOOK_INFO, 0, R.id.cr3_mi_book_info , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_info);
 	public final static ReaderAction TOC = new ReaderAction("TOC", R.string.action_toc, ReaderCommand.DCMD_TOC_DIALOG, 0, R.id.cr3_go_toc, BOOKMARKS, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_viewer_toc);
@@ -161,8 +161,8 @@ public class ReaderAction {
 	public final static ReaderAction SAVE_BOOKMARKS = new ReaderAction("SAVE_BOOKMARKS", R.string.save_bookmarks_to_cloud, ReaderCommand.DCMD_SAVE_BOOKMARKS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmarks_to_gd);
 	public final static ReaderAction LOAD_BOOKMARKS = new ReaderAction("LOAD_BOOKMARKS", R.string.load_bookmarks_from_cloud, ReaderCommand.DCMD_LOAD_BOOKMARKS, 0, SAVE_BOOKMARKS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmarks_from_gd);
     public final static ReaderAction CLOUD_MENU = new ReaderAction("CLOUD_MENU", R.string.cloud_menu, ReaderCommand.DCMD_CLOUD_MENU, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_cloud_storage);
-    public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD", R.string.save_current_book_to_cloud, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_book_to_gd);
-	public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL", R.string.save_current_book_to_cloud_email, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL, 0, SAVE_CURRENT_BOOK_TO_CLOUD, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_send_by_email);
+    public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_YND = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_YND", R.string.save_current_book_to_cloud_ynd, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_book_to_gd);
+	public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL", R.string.save_current_book_to_cloud_email, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL, 0, SAVE_CURRENT_BOOK_TO_CLOUD_YND, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_send_by_email);
 	//public final static ReaderAction OPEN_BOOK_FROM_CLOUD = new ReaderAction("OPEN_BOOK_FROM_GD", R.string.open_book_from_gd, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD, 0, SAVE_CURRENT_BOOK_TO_CLOUD, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_book_from_gd);
 	public final static ReaderAction OPEN_BOOK_FROM_CLOUD_YND = new ReaderAction("OPEN_BOOK_FROM_YND", R.string.open_book_from_ynd, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD_YND, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_yandex_logo);
 	public final static ReaderAction OPEN_BOOK_FROM_CLOUD_DBX = new ReaderAction("OPEN_BOOK_FROM_DBX", R.string.open_book_from_dbx, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD_DBX, 0, OPEN_BOOK_FROM_CLOUD_YND, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_dropbox_filled);
@@ -232,7 +232,7 @@ public class ReaderAction {
 		SAVE_BOOKMARKS,
 		LOAD_BOOKMARKS,
 		CLOUD_MENU,
-        SAVE_CURRENT_BOOK_TO_CLOUD,
+        SAVE_CURRENT_BOOK_TO_CLOUD_YND,
 		SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL,
 		//OPEN_BOOK_FROM_CLOUD,
 		OPEN_BOOK_FROM_CLOUD_YND,

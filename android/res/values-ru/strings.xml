@@ -787,7 +787,8 @@
     <string name="save_bookmarks_to_cloud">Сохранить закладки в облачное хранилище</string>
     <string name="load_bookmarks_from_cloud">Загрузить закладки из облачного хранилища</string>
     <string name="cloud_menu">Меню облачного хранилища</string>
-    <string name="save_current_book_to_cloud">Сохранить в облачное хранилище</string>
+    <string name="save_current_book_to_cloud_ynd">Сохранить книгу на Яндекс диск</string>
+    <string name="save_current_book_to_cloud_ynd2">Сохранить открытую книгу в эту папку</string>
     <string name="save_current_book_to_cloud_email">Отправить книгу по Email</string>
     <string name="open_book_from_gd">Открыть книгу с диска Google One</string>
     <string name="open_book_from_dbx">Открыть книгу из DropBox</string>
@@ -1086,4 +1087,6 @@
     <string name="whole_page_to_dic">Перевести всю станицу</string>
     <string name="settings_saved">Настройки сохранены</string>
     <string name="no_cloud_files">Файл(ы) не найдены</string>
+    <string name="ynd_translate_dics_info">Яндекс переводчик - языки</string>
+    <string name="lingvo_translate_dics_info">Лингво онлайн - языки</string>
 </resources>

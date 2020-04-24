@@ -164,7 +164,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		}
 		// Show controls on lock screen even when user hides sensitive content.
 		builder.setVisibility(Notification.VISIBILITY_PUBLIC);
-		builder.setSmallIcon(R.drawable.cr3_logo);
+		builder.setSmallIcon(R.drawable.known_reader_logo);
 		// Add media control buttons that invoke intents in your media service
 		PendingIntent prevPendingIntent = PendingIntent.getBroadcast(mCoolReader, 0,
 				new Intent(ACTION_TTS_PREV), 0);

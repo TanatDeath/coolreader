@@ -1,0 +1,449 @@
+package org.coolreader.dic;
+
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+
+import org.coolreader.BuildConfig;
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.StrUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import okhttp3.Call;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class TranslationDirectionDialog extends BaseDialog {
+
+	public interface ValuesEnteredCallback {
+		public void done(ArrayList<String> results);
+	}
+
+	public static final Logger log = L.create("transldir");
+
+	private final CoolReader mCoolReader;
+	private final LayoutInflater mInflater;
+	private FileInfo fInfo;
+	private ArrayList<TextView> textViews = new ArrayList<TextView>();
+	private ArrayList<EditText> editTexts = new ArrayList<EditText>();
+	public final ValuesEnteredCallback callback;
+	private TranslList mList;
+	private int listType = 0; // 1 - ynd; 2 - lingvo
+	public static OkHttpClient client = new OkHttpClient();
+
+	ArrayList<String[]> mTransl = new ArrayList<String[]>();
+	HashMap<String, String> yndLangs = new HashMap<String, String>();
+
+	class TranslListAdapter extends BaseAdapter {
+
+		public final static int ITEM_POSITION=0;
+
+		public boolean areAllItemsEnabled() {
+			return true;
+		}
+
+		public boolean isEnabled(int arg0) {
+			return true;
+		}
+
+		public int getCount() {
+			return mTransl.size();
+		}
+
+		public Object getItem(int position) {
+			if ( position<0 || position>=mTransl.size() )
+				return null;
+			return mTransl.get(position);
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+
+		public int getItemViewType(int position) {
+			return ITEM_POSITION;
+		}
+
+		public int getViewTypeCount() {
+			return 1;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view;
+			if (listType == 2) {
+				int res = R.layout.transl_item_lingvo;
+				view = mInflater.inflate(res, null);
+				String[] arrS = mTransl.get(position);
+				if (arrS != null) {
+					if (arrS.length > 0) {
+						TextView tv_locale = (TextView) view.findViewById(R.id.transl_item_locale);
+						tv_locale.setText(arrS[0]);
+					}
+					if (arrS.length > 1) {
+						TextView tv_langcode = (TextView) view.findViewById(R.id.transl_item_langcode);
+						tv_langcode.setText(arrS[1]);
+					}
+					if (arrS.length > 2) {
+						TextView tv_lcid_str = (TextView) view.findViewById(R.id.transl_item_lcid_str);
+						tv_lcid_str.setText(arrS[2]);
+					}
+					if (arrS.length > 3) {
+						TextView tv_lcid_dec = (TextView) view.findViewById(R.id.transl_item_lcid_dec);
+						tv_lcid_dec.setText(arrS[3]);
+					}
+					if (arrS.length > 4) {
+						TextView tv_lcid_hex = (TextView) view.findViewById(R.id.transl_item_lcid_hex);
+						tv_lcid_hex.setText(arrS[4]);
+					}
+					if (arrS.length > 5) {
+						TextView tv_lcid_cp = (TextView) view.findViewById(R.id.transl_item_lcid_cp);
+						tv_lcid_cp.setText(arrS[5]);
+					}
+				}
+				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+				int colorGrayC = a.getColor(0, Color.GRAY);
+				int colorIcon = a.getColor(1, Color.GRAY);
+				a.recycle();
+				int colorGrayCT = Color.argb(30, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
+				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
+				Button btnFrom = (Button) view.findViewById(R.id.transl_item_lanf_from);
+				btnFrom.setBackgroundColor(colorGrayCT2);
+				final String[] sArrS = arrS;
+				btnFrom.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						String s = "";
+						if (sArrS.length > 2) s = sArrS[2];
+						if (StrUtils.isEmptyStr(s)) {
+							if (sArrS.length > 3) s = sArrS[3];
+						}
+						if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(sArrS[2]);
+					}
+				});
+				btnFrom.setTextColor(colorIcon);
+				Button btnTo = (Button) view.findViewById(R.id.transl_item_lanf_to);
+				btnTo.setBackgroundColor(colorGrayCT2);
+				btnTo.setTextColor(colorIcon);
+				btnTo.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						String s = "";
+						if (sArrS.length > 2) s = sArrS[2];
+						if (StrUtils.isEmptyStr(s)) {
+							if (sArrS.length > 3) s = sArrS[3];
+						}
+						if (!StrUtils.isEmptyStr(s)) editTexts.get(1).setText(sArrS[2]);
+					}
+				});
+			} else {
+				int res = R.layout.transl_item_ynd;
+				view = mInflater.inflate(res, null);
+				String[] arrS = mTransl.get(position);
+				if (arrS != null) {
+					if (arrS[0].contains("-")) {
+						String[] arrS2 = arrS[0].split("-");
+						String sText = StrUtils.getNonEmptyStr(arrS2[0], true);
+						TextView tv_from = (TextView) view.findViewById(R.id.transl_item_from_lang);
+						if (yndLangs.get(sText) != null) {
+							sText = sText + ": " + yndLangs.get(sText);
+						}
+						tv_from.setText(sText);
+					}
+				}
+				if (arrS != null) {
+					if (arrS[0].contains("-")) {
+						String[] arrS2 = arrS[0].split("-");
+						String sText = StrUtils.getNonEmptyStr(arrS2[1], true);
+						TextView tv_from = (TextView) view.findViewById(R.id.transl_item_to_lang);
+						if (yndLangs.get(sText) != null) {
+							sText = sText + ": " + yndLangs.get(sText);
+						}
+						tv_from.setText(sText);
+					}
+				}
+				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+				int colorGrayC = a.getColor(0, Color.GRAY);
+				int colorIcon = a.getColor(1, Color.GRAY);
+				a.recycle();
+				int colorGrayCT = Color.argb(30, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
+				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
+				Button btnFrom = (Button) view.findViewById(R.id.transl_item_lanf_select);
+				btnFrom.setBackgroundColor(colorGrayCT2);
+				btnFrom.setText("select");
+				if (arrS != null) {
+					if (arrS[0].contains("-")) {
+						btnFrom.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								String[] arrS2 = arrS[0].split("-");
+								String s = "";
+								if (arrS2.length > 0) s = arrS2[0];
+								if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(arrS2[0]);
+								s = "";
+								if (arrS2.length > 0) s = arrS2[1];
+								if (!StrUtils.isEmptyStr(s)) editTexts.get(1).setText(arrS2[1]);
+							}
+						});
+					}
+				}
+			}
+			//TextView titleTextView = (TextView)view.findViewById(R.id.dict_item_title);
+//			if ( s!=null ) {
+//				if ( titleTextView!=null )
+//					titleTextView.setText(s);
+//			} else {
+//				if ( titleTextView!=null )
+//					titleTextView.setText("");
+//			}
+			return view;
+		}
+
+		public boolean hasStableIds() {
+			return true;
+		}
+
+		public boolean isEmpty() {
+			return mTransl.size()==0;
+		}
+
+		private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
+
+		public void registerDataSetObserver(DataSetObserver observer) {
+			observers.add(observer);
+		}
+
+		public void unregisterDataSetObserver(DataSetObserver observer) {
+			observers.remove(observer);
+		}
+	}
+
+	class TranslList extends BaseListView {
+
+		public TranslList(Context context, boolean shortcutMode ) {
+			super(context, true);
+			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+			setLongClickable(true);
+			setAdapter(new TranslationDirectionDialog.TranslListAdapter());
+			setOnItemLongClickListener(new OnItemLongClickListener() {
+				@Override
+				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+											   int position, long arg3) {
+					//mEditView.setText(mTransl.get(position));
+					return true;
+				}
+			});
+		}
+
+		@Override
+		public boolean performItemClick(View view, int position, long id) {
+			//mEditView.setText(mTransl.get(position));
+			return true;
+		}
+	}
+
+	public TranslationDirectionDialog(CoolReader activity, String sTitle, String sSomeText,
+									  ArrayList<String[]> askValues, ValuesEnteredCallback callback)
+	{
+		super("TranslationDirectionDialog", activity, sTitle, true, false);
+		mCoolReader = activity;
+		setTitle(sTitle);
+		this.callback = callback;
+		mInflater = LayoutInflater.from(getContext());
+		View view = mInflater.inflate(R.layout.ask_some_values_dialog, null);
+		TextView someText = (TextView) view.findViewById(R.id.some_text);
+		someText.setText(sSomeText);
+		textViews.clear();
+		editTexts.clear();
+		for (int i = 1; i<10; i++) {
+			if (i == 1) {
+				TableRow tr = (TableRow) view.findViewById(R.id.some_value_tr1);
+				TextView tv = (TextView) view.findViewById(R.id.some_value_label1);
+				EditText et = (EditText) view.findViewById(R.id.some_value_edit1);
+				if (tr != null) {
+					textViews.add(tv);
+					editTexts.add(et);
+					if (askValues.size() >= i) {
+						tv.setText(askValues.get(i-1)[0]);
+						et.setHint(askValues.get(i-1)[1]);
+						if (!StrUtils.isEmptyStr(askValues.get(i-1)[2])) et.setText(askValues.get(i-1)[2]);
+					} else {
+						((ViewGroup) tr.getParent()).removeView(tr);
+					}
+				}
+			}
+			if (i == 2) {
+				TableRow tr = (TableRow) view.findViewById(R.id.some_value_tr2);
+				TextView tv = (TextView) view.findViewById(R.id.some_value_label2);
+				EditText et = (EditText) view.findViewById(R.id.some_value_edit2);
+				if (tr != null) {
+					textViews.add(tv);
+					editTexts.add(et);
+					if (askValues.size() >= i) {
+						tv.setText(askValues.get(i-1)[0]);
+						et.setHint(askValues.get(i-1)[1]);
+						if (!StrUtils.isEmptyStr(askValues.get(i-1)[2])) et.setText(askValues.get(i-1)[2]);
+					} else {
+						((ViewGroup) tr.getParent()).removeView(tr);
+					}
+				}
+			}
+		}
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		int colorIcon = a.getColor(1, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		TableLayout tl = (TableLayout) view;
+		LinearLayout ll = new LinearLayout(mCoolReader);
+		LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+		llp.setMargins(5, 3, 5, 3);
+		ll.setOrientation(LinearLayout.HORIZONTAL);
+		Button yndButton = new Button(mCoolReader);
+		yndButton.setLayoutParams(llp);
+		yndButton.setText(mCoolReader.getString(R.string.ynd_translate_dics_info));
+		yndButton.setBackgroundColor(colorGrayCT2);
+		yndButton.setTextColor(colorIcon);
+		ll.addView(yndButton);
+		yndButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mTransl.clear();
+				yndLangs.clear();
+				listType = 1;
+				HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.YND_DIC_GETLANGS).newBuilder();
+				urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
+				urlBuilder.addQueryParameter("ui", "en");
+				String url = urlBuilder.build().toString();
+				Request request = new Request.Builder()
+						.url(url)
+						.build();
+				Call call = client.newCall(request);
+				final CoolReader crf = mCoolReader;
+				call.enqueue(new okhttp3.Callback() {
+					public void onResponse(Call call, Response response)
+							throws IOException {
+						String sBody = response.body().string();
+						Document docJsoup = Jsoup.parse(sBody, Dictionaries.YND_DIC_GETLANGS);
+						Elements dirs = docJsoup.select("Langs > dirs > string");
+						Elements langs = docJsoup.select("Langs > langs > item");
+						for (Element el: dirs) {
+							mTransl.add(new String[]{el.text()});
+						}
+						for (Element el: langs) {
+							yndLangs.put(el.attr("key"),el.attr("value"));
+						}
+						BackgroundThread.instance().postBackground(new Runnable() {
+							@Override
+							public void run() {
+								BackgroundThread.instance().postGUI(new Runnable() {
+									@Override
+									public void run() {
+										mList.setAdapter(new TranslListAdapter());
+									}
+								}, 100);
+							}
+						});
+					}
+
+					public void onFailure(Call call, IOException e) {
+						crf.showToast(e.getMessage());
+					}
+				});
+			}
+		});
+		Button lingvoButton = new Button(mCoolReader);
+		lingvoButton.setText(mCoolReader.getString(R.string.lingvo_translate_dics_info));
+		lingvoButton.setBackgroundColor(colorGrayCT2);
+		lingvoButton.setTextColor(colorIcon);
+		lingvoButton.setLayoutParams(llp);
+		ll.addView(lingvoButton);
+		lingvoButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mTransl.clear();
+				listType = 2;
+				try {
+					InputStream is = mCoolReader.getResources().openRawResource(R.raw.lang_codes);
+					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+					String str = "";
+					while ((str = reader.readLine()) != null) {
+						String[] arrS = str.split("~");
+						if (arrS.length>0)
+							if (!arrS[0].equals("Locale"))
+								mTransl.add(arrS);
+					}
+					is.close();
+				} catch (Exception e) {
+					log.e("load lang_codes file", e);
+				}
+				mList.setAdapter(new TranslListAdapter());
+			}
+		});
+		tl.addView(ll);
+		mList = new TranslList(activity, false);
+		tl.addView(mList);
+		setView( view );
+	}
+
+	@Override
+	protected void onPositiveButtonClick() {
+		super.onPositiveButtonClick();
+		ArrayList<String> res = new ArrayList<String>();
+		for (int i = 1; i<10; i++) {
+			if (i == 1) {
+				EditText et = (EditText) view.findViewById(R.id.some_value_edit1);
+				if (et != null) res.add(et.getText().toString());
+			}
+			if (i == 2) {
+				EditText et = (EditText) view.findViewById(R.id.some_value_edit2);
+				if (et != null) res.add(et.getText().toString());
+			}
+		}
+		if (callback != null) callback.done(res);
+	}
+
+	@Override
+	protected void onNegativeButtonClick() {
+		super.onNegativeButtonClick();
+		if (callback != null) callback.done(null);
+	}
+}

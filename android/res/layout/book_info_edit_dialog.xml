@@ -676,6 +676,16 @@
 								android:editable="true"
 								android:singleLine="true"
 								/>
+							<Button
+									android:id="@+id/transl_button"
+									android:layout_weight="3"
+									android:layout_width="0dip"
+									android:checked="false"
+									android:tag="tint"
+									android:text="@string/specify_translation_dir"
+									android:layout_margin="2dp"
+									android:textColor="?attr/colorIcon"
+									/>
 						</TableRow>
 					</TableLayout>
 				</LinearLayout>

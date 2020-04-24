@@ -70,7 +70,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 			BackgroundThread.instance().postGUI(new Runnable() {
 				@Override
 				public void run() {
-					CloudAction.yndOpenBookDialog(mCoolReader);
+					CloudAction.yndOpenBookDialog(mCoolReader, false);
 				}
 			}, 500);
 		}

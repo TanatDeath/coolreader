@@ -266,6 +266,48 @@ public class BookInfoDialog extends BaseDialog {
 					}
 				});
 		}
+		if (
+			(name.equals(activity.getString(R.string.book_info_book_translation)))
+		) {
+			int colorGrayC;
+			int colorIcon;
+			TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
+			colorGrayC = a.getColor(0, Color.GRAY);
+			colorIcon = a.getColor(2, Color.BLACK);
+			a.recycle();
+			Button translButton = new Button(mCoolReader);
+			translButton.setText(activity.getString(R.string.specify_translation_dir));
+			translButton.setTextColor(colorIcon);
+			translButton.setBackgroundColor(colorGrayC);
+			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			llp.setMargins(20, 0, 8, 0);
+			translButton.setLayoutParams(llp);
+			translButton.setMaxLines(3);
+			translButton.setEllipsize(TextUtils.TruncateAt.END);
+			final CoolReader cr = (CoolReader) mCoolReader;
+			translButton.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					if (cr.getReaderView().mBookInfo!=null) {
+						String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
+						String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
+						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+						FileInfo dfi = fi.parent;
+						if (dfi == null) {
+							dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+						}
+						if (dfi != null) {
+							cr.editBookTransl(dfi, fi, langf, lang, "", null);
+						}
+					};
+					dismiss();
+				}
+			});
+			final ViewGroup vg = (ViewGroup) valueView.getParent();
+			vg.addView(translButton);
+		}
 		valueView.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				String text = ((TextView) v).getText().toString();

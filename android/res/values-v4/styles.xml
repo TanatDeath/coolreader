@@ -282,7 +282,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -597,7 +597,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -923,7 +923,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1237,7 +1237,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1554,7 +1554,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -1871,7 +1871,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -2018,7 +2018,7 @@
         <item name="cr3_browser_folder_recent_drawable">@drawable/cr3_browser_folder_recent_hc</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/cr3_button_scroll_go_hc</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/cr3_btn_books_swap_hc</item>
-        <item name="cr3_logo_button_drawable">@drawable/cr3_logo_button_hc</item>
+        <item name="cr3_logo_button_drawable">@drawable/known_reader_logo</item>
         <item name="cr3_viewer_exit_drawable">@drawable/cr3_viewer_exit_hc</item>
         <item name="cr3_button_book_open_drawable">@drawable/cr3_button_book_open_hc</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/cr3_browser_folder_current_book_hc</item>
@@ -2187,7 +2187,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>
@@ -2334,7 +2334,7 @@
         <item name="cr3_browser_folder_recent_drawable">@drawable/cr3_browser_folder_recent_hc</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/cr3_button_scroll_go_hc</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/cr3_btn_books_swap_hc</item>
-        <item name="cr3_logo_button_drawable">@drawable/cr3_logo_button_hc</item>
+        <item name="cr3_logo_button_drawable">@drawable/known_reader_logo</item>
         <item name="cr3_viewer_exit_drawable">@drawable/cr3_viewer_exit_hc</item>
         <item name="cr3_button_book_open_drawable">@drawable/cr3_button_book_open_hc</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/cr3_browser_folder_current_book_hc</item>
@@ -2503,7 +2503,7 @@
         <item name="attr_icons8_book_edit">@drawable/icons8_book_edit</item>
         <item name="attr_icons8_book_link">@drawable/icons8_book_link</item>
         <item name="attr_icons8_position">@drawable/icons8_position</item>
-        <item name="attr_cr3_logo">@drawable/cr3_logo_hc</item>
+        <item name="attr_cr3_logo">@drawable/known_reader_logo</item>
         <item name="attr_icons8_folder_star_arrow">@drawable/icons8_folder_star_arrow</item>
         <item name="attr_icons8_book_minus">@drawable/icons8_book_minus</item>
         <item name="attr_cr3_find_prev">@drawable/cr3_find_prev</item>

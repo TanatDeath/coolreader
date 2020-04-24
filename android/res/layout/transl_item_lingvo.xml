@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/transl_item_body"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:baselineAligned="false"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="2dip"
+	android:layout_marginRight="2dip"
+	>
+	<TableLayout
+			android:id="@+id/transl_item_text"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:stretchColumns="1"
+			android:orientation="vertical">
+
+		<TableRow
+				android:layout_weight="1"
+				>
+			<TextView android:id="@+id/transl_item_locale"
+					style="@style/TextAppearance.Small"
+					android:text=""
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:textColor="?attr/colorIcon"
+					android:layout_weight="3"
+					android:layout_gravity="left" />
+			<TextView android:id="@+id/transl_item_langcode"
+					style="@style/TextAppearance.Small"
+					android:text=""
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:textColor="?attr/colorIcon"
+					android:layout_weight="1"
+					android:layout_gravity="left" />
+			<TextView android:id="@+id/transl_item_lcid_str"
+					style="@style/TextAppearance.Small"
+					android:text=""
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:textColor="?attr/colorThemeGreen"
+					android:layout_weight="1"
+					android:layout_gravity="left" />
+			<TextView android:id="@+id/transl_item_lcid_dec"
+					style="@style/TextAppearance.Small"
+					android:text=""
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:textColor="?attr/colorThemeGreen"
+					android:layout_weight="1"
+					android:layout_gravity="left" />
+			<TextView android:id="@+id/transl_item_lcid_hex"
+					style="@style/TextAppearance.Small"
+					android:text=""
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:layout_weight="1"
+					android:textColor="?attr/colorIcon"
+					android:layout_gravity="left" />
+			<TextView android:id="@+id/transl_item_lcid_cp"
+					style="@style/TextAppearance.Small"
+					android:text=""
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:textColor="?attr/colorIcon"
+					android:layout_gravity="left" />
+			<Button
+					android:id="@+id/transl_item_lanf_from"
+					android:layout_width="0dip"
+					android:checked="true"
+					android:layout_weight="1"
+					android:tag="tint"
+					android:text="from"
+					android:layout_margin="2dp"
+					android:textColor="?attr/colorIcon"
+					/>
+			<Button
+					android:id="@+id/transl_item_lanf_to"
+					android:layout_width="0dip"
+					android:checked="false"
+					android:layout_weight="1"
+					android:tag="tint"
+					android:text="to"
+					android:layout_margin="2dp"
+					android:textColor="?attr/colorIcon"
+					/>
+		</TableRow>
+	</TableLayout>
+</LinearLayout>

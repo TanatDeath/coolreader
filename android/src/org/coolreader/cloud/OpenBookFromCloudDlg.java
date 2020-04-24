@@ -1,7 +1,9 @@
 package org.coolreader.cloud;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
+import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.StrUtils;
@@ -45,6 +48,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 	private ImageButton btnRoot;
 	private ImageButton btnUp;
 	private RadioGroup rgScope;
+	private Button btnSaveOpenedBook;
 
 	public boolean mFoundWhole = false;
 
@@ -472,6 +476,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 
 		edtFind = (EditText)frame.findViewById(R.id.find_text);
 		edtFind.setText("");
+		btnSaveOpenedBook = (Button)frame.findViewById(R.id.btn_save_current_book_to_cloud_ynd);
 		return frame;
 	}
 
@@ -520,6 +525,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		lblFolder.setText(mDBXList.getFolderText());
 		rgScope.removeView(btnWhole);
 		rgScope.removeView(btnFolder);
+		rgScope.removeView(btnSaveOpenedBook);
 		return mDBXList;
 	}
 
@@ -568,6 +574,31 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		lblFolder.setText(mYNDList.getFolderText());
 		rgScope.removeView(btnWhole);
 		rgScope.removeView(btnFolder);
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGray = a.getColor(0, Color.GRAY);
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		btnSaveOpenedBook.setBackgroundColor(colorGrayCT2);
+		btnSaveOpenedBook.setTextColor(colorIcon);
+		btnSaveOpenedBook.setOnClickListener(new Button.OnClickListener() {
+			public void onClick(View v) {
+				btnSaveOpenedBook.setVisibility(View.INVISIBLE);
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						btnSaveOpenedBook.setEnabled(true);
+						btnSaveOpenedBook.setVisibility(View.VISIBLE);
+					}
+				}, 5000);
+				listUpdated();
+				String sFolder=mYNDList.getFolderText();
+				CloudAction.yndSaveCurBookThenLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
+			}
+		});
 		return mYNDList;
 	}
 
@@ -585,7 +616,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		btnFind.requestFocus();
 	}
 
-	public OpenBookFromCloudDlg(final CoolReader activity, YNDListFiles lfr)
+	public OpenBookFromCloudDlg(final CoolReader activity, YNDListFiles lfr, boolean withSaveOption)
 	{
 		super("OpenBookFromCloudDlg", activity, activity.getResources().getString(R.string.win_title_open_book_from_cloud)
 				+" - Yandex", false, true);
