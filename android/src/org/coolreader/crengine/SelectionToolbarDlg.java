@@ -279,7 +279,7 @@ public class SelectionToolbarDlg {
 		mPanel.findViewById(R.id.selection_bookmark).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.selection_bookmark).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				mReaderView.showNewBookmarkDialog(selection,Bookmark.TYPE_COMMENT);
+				mReaderView.showNewBookmarkDialog(selection,Bookmark.TYPE_COMMENT, "");
 				closeDialog(true);
 			}
 		});

@@ -379,7 +379,7 @@ public class BookmarksDlg  extends BaseDialog {
 			return true;
 		case R.id.bookmark_edit:
 			if ( bm!=null && (bm.getType()==Bookmark.TYPE_COMMENT || bm.getType()==Bookmark.TYPE_CORRECTION)) {
-				BookmarkEditDialog dlg = new BookmarkEditDialog(mCoolReader, mReaderView, bm, false, Bookmark.TYPE_COMMENT);
+				BookmarkEditDialog dlg = new BookmarkEditDialog(mCoolReader, mReaderView, bm, false, Bookmark.TYPE_COMMENT, "");
 				dlg.show();
 			}
 			dismiss();

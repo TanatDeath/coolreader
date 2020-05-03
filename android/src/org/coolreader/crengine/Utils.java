@@ -468,7 +468,9 @@ public class Utils {
 		int prof = item.getProfileId();
 		String sProf = " {p"+prof+"}";
 		if (prof == 0) sProf = "";
-		return formatSize(item.size) + " " + (item.format!=null ? item.format.name().toLowerCase() : "") + " " +
+		boolean bEmptyF = item.format==null;
+		if (!bEmptyF) bEmptyF = item.format == DocumentFormat.NONE;
+		return formatSize(item.size) + " " + (bEmptyF ? item.format.name().toLowerCase() : "") + " " +
 				formatDate(activity, item.getCreateTime())+sProf;
 	}
 
@@ -720,6 +722,19 @@ public class Utils {
 		}
 		os.close();
 		is.close();
+	}
+
+	public static void saveStreamToFileDontClose(InputStream is, String toPath) throws IOException
+	{
+		byte[] bytesArray = new byte[1000];
+		int bytesRead = 1000;
+		OutputStream os = new FileOutputStream(toPath);
+		while (bytesRead != -1) {
+			bytesRead = is.read(bytesArray, 0, 1000);
+			if (bytesRead != -1) os.write(bytesArray,0,bytesRead);
+		}
+		os.close();
+		//is.close();
 	}
 
 	public static void saveStringToFileSafe(String data, String toPath)

@@ -7,14 +7,15 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        applicationId "org.coolreader.mod.plotn"
+        //applicationId "org.coolreader.knownreader"
+        applicationId "org.knownreader.premium"
         minSdkVersion 14
         targetSdkVersion 28
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 32390
-        versionName "3.2.39-1"
+        versionCode 202006031
+        versionName "2020.06.03.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -119,15 +120,15 @@ android {
                 // Variant 2: big version code increment for various ABI
                 //output.versionCodeOverride = variant.versionCode + 1000000*baseAbiVersionCode
             }
-            def project = "CoolReader_plotn"
+            def project = "KnownReader"
             def SEP = "_"
-            def buildType = variant.variantData.variantConfiguration.buildType.name
+            def buildType = variant.buildType.name
             def version = variant.versionName
             def date = new Date();
             def formattedDate = date.format('yyyyMMdd_HHmm')
             def abi = output.getFilter(com.android.build.OutputFile.ABI)
             if (abi == null) abi = "universal"
-            def newApkName = formattedDate + SEP + project + SEP + version + SEP + abi + SEP + buildType + ".apk"
+            def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + "_FREE.apk"
             output.outputFileName = newApkName
         }
     }
@@ -163,6 +164,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
     implementation files('libs/okhttp-3.12.3.jar')
     implementation files('libs/okio-1.15.0.jar')
+    implementation 'org.jetbrains:annotations:15.0'
     //api 'com.squareup.okhttp3:okhttp:4.0.1'
     testImplementation 'junit:junit:4.12'
     //implementation 'net.htmlparser.jericho:jericho-html:3.4'

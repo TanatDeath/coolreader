@@ -93,6 +93,7 @@
 										android:layout_marginBottom="2dip"
 										android:tag="tint"
 										android:contentDescription="@null"
+										android:drawableLeft="@drawable/icons8_toc_item_normal"
 										android:text="@string/pic_came_texture" />
 									<Button
 										android:id="@+id/ib_background"
@@ -102,6 +103,7 @@
 										android:layout_marginBottom="2dip"
 										android:tag="tint"
 										android:contentDescription="@null"
+										android:drawableLeft="@drawable/icons8_toc_item_normal"
 										android:text="@string/pic_came_background" />
 								</TableRow>
 							</TableLayout>

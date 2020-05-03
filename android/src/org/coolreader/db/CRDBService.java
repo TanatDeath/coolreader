@@ -2,7 +2,9 @@ package org.coolreader.db;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -58,6 +60,11 @@ public class CRDBService extends Service {
     }
 
     private File getDatabaseDir() {
+		if (Build.VERSION.SDK_INT >= 23) {
+			if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+				return getFilesDir();
+			}
+		}
     	//File storage = Environment.getExternalStorageDirectory();
     	File storage = DeviceInfo.EINK_NOOK ? new File("/media/") : Environment.getExternalStorageDirectory();
     	//File cr3dir = new File(storage, ".cr3");

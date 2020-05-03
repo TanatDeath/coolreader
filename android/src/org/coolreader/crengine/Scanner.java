@@ -53,6 +53,8 @@ public class Scanner extends FileInfoChangeSource {
 				item.format = DocumentFormat.byExtension(name);
 				if ( item.format==null )
 					continue;
+				if ( item.format==DocumentFormat.NONE )
+					continue;
 				File f = new File(name);
 				item.filename = f.getName();
 				item.path = f.getPath();
@@ -170,12 +172,14 @@ public class Scanner extends FileInfoChangeSource {
 							}
 							isNew = true;
 						}
-						if ( item.format!=null ) {
-							item.parent = baseDir;
-							baseDir.addFile(item);
-							if ( isNew )
-								mFileList.put(pathName, item);
-						}
+						if ( item.format!=null )
+							if ( item.format!=DocumentFormat.NONE )
+							{
+								item.parent = baseDir;
+								baseDir.addFile(item);
+								if ( isNew )
+									mFileList.put(pathName, item);
+							}
 					}
 				}
 				// process directories 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Rechercher</string>
-    <string name="mi_exit">Quitter Cool Reader</string>
+    <string name="mi_exit">Quitter KnownReader</string>
     <string name="mi_goto">Aller à</string>
     <string name="mi_bookmarks">Signets</string>
     <string name="mi_file_open">Ouvrir un fichier</string>
@@ -12,7 +12,7 @@
     <string name="mi_font_previous">Police précédente</string>
     <string name="mi_font_next">Police suivante</string>
     <string name="progress_please_wait">Un instant S.V.P.</string>
-    <string name="progress_starting_cool_reader">Démarrage de Cool Reader</string>
+    <string name="progress_starting_cool_reader">Démarrage de KnownReader</string>
     <string name="progress_loading">Chargement du livre</string>
     <string name="progress_formatting">Mise en forme du livre</string>
     <string name="progress_scanning">Analyse des répertoires</string>
@@ -111,7 +111,7 @@
     <string name="action_pageup">Page précédente</string>
     <string name="action_search">Rechercher</string>
     <string name="action_recent_books_list">Livres récents</string>
-    <string name="action_exit">Quitter Cool Reader</string>
+    <string name="action_exit">Quitter KnownReader</string>
     <string name="action_pageup_10">Reculer de 10 pages</string>
     <string name="action_bookmarks">Signets</string>
     <string name="action_pagedown_10">Avancer de 10 pages</string>
@@ -416,7 +416,7 @@
     <string name="options_app_locale_tr">Türkçe</string>
     <string name="options_app_locale_uk">Українська</string>
     <string name="options_app_locale_zh_cn">中文</string>
-    <string name="mi_goto_manual">Manuel CoolReader</string>
+    <string name="mi_goto_manual">Manuel KnownReader</string>
     <string name="options_view_bookmarks_highlight_underline">Sousligné</string>
     <string name="options_view_color_selection">Couleur de la sélection</string>
     <string name="options_view_color_bookmark_comment">Couleur des commentaires</string>

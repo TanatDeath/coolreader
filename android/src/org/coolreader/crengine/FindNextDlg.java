@@ -97,6 +97,7 @@ public class FindNextDlg {
 			}
 		});
 		mPanel.findViewById(R.id.search_btn_close).setBackgroundDrawable(c);
+		coolReader.tintViewIcons(mPanel,true);
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener( new OnKeyListener() {
 

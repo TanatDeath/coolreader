@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Пошук</string>
     <string name="mi_exit">Выйсці</string>
     <string name="mi_goto">Перайсці</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Адкрыць файл</string>
     <string name="mi_options">Налады</string>
     <string name="progress_please_wait">Пачакайце, калі ласка</string>
-    <string name="progress_starting_cool_reader">Запуск Cool Reader</string>
+    <string name="progress_starting_cool_reader">Запуск KnownReader</string>
     <string name="progress_loading">Загрузка кнігі</string>
     <string name="progress_formatting">Фарматаванне кнігі</string>
     <string name="progress_scanning">Ідзе пошук кніг...</string>
@@ -390,8 +390,8 @@
     <string name="options_app_ui_theme_white">Белая</string>
     <string name="options_app_ui_theme_dark">Цёмная</string>
     <string name="options_app_ui_theme_black">Чорная</string>
-    <string name="options_app_ui_theme_gray1">Шэрая 1</string>
-    <string name="options_app_ui_theme_gray2">Шэрая 2</string>
+    <string name="options_app_ui_theme_gray1">Шэрая цёмная</string>
+    <string name="options_app_ui_theme_gray2">Шэрая светлая</string>
     <string name="options_app_ui_theme_light">Светлая</string>
     <string name="options_css_text_align_center">Па цэнтры</string>
     <string name="options_css_text_align_justify">Па шырыні</string>

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Template for CoolReader3/Android help file -->
+<!-- Template for KnownReader/Android help file -->
 <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<description>
 		<title-info>
-			<book-title>Cool Reader Felhasználói útmutató</book-title>
+			<book-title>KnownReader Felhasználói útmutató</book-title>
 		</title-info>
 	</description>
 	<body>
 		<section>
             <title>
-                <p>Üdvözli a Cool Reader <!--cr3:setting version--><br/><!--cr3:image cr3_logo--></p>
+                <p>Üdvözli a KnownReader <!--cr3:setting version--><br/><!--cr3:image cr3_logo--></p>
             </title>
             <p>Ez egy<b><i>elektronikus könyvek</i></b> olvasására szolgáló program, mely a következő formátumokat támogatja: EPUB, FB2, RTF, TXT, HTML, CHM, PDB, MOBI, TCR</p>
-            <p>Mentse el könyveit az SD kártyára és nyissa meg őket a beépített <a href="#filebrowser">Fájl böngészővel</a>, vagy töltsön le új könyveket az <a href="#opds">online katalógusokból</a> (OPDS) közvetlenül a CoolReader-be.</p>
+            <p>Mentse el könyveit az SD kártyára és nyissa meg őket a beépített <a href="#filebrowser">Fájl böngészővel</a>, vagy töltsön le új könyveket az <a href="#opds">online katalógusokból</a> (OPDS) közvetlenül a KnownReader-be.</p>
 			<subtitle>Navigáció olvasás közben</subtitle>
 			<p>Különböző módokon lapozhat előre és hátra:</p>
 			<ul>
@@ -73,7 +73,7 @@
     					<li>Előző könyv megnyitása</li>
     					<li>Automatikus lapozás be / ki</li>
     					<li>Kilépés</li>
-    					<li>A Cool Reader-ről</li>
+    					<li>A KnownReader-ről</li>
     					<li>Könyv infó (aktuális könyv))</li>
     					<li>Felhasználói útmutató megjelenítése</li>
     				</ul>
@@ -118,7 +118,7 @@
                 <subtitle id="settings-css">Stílus/CSS beállítások</subtitle>
                 <ul>
                     <li>Dokumentum saját stílusok engedélyezése - be- / kikapcsolja a dokumentumban megadott stílusokat</li>
-                    <li>Beágyazott betűtípusok - engedélyezi / tiltja a dokumentum beágyazott betűtípusait. Tiltás esetén a programban megadott betűtípust használja a CoolReader.</li>
+                    <li>Beágyazott betűtípusok - engedélyezi / tiltja a dokumentum beágyazott betűtípusait. Tiltás esetén a programban megadott betűtípust használja a KnownReader.</li>
                     <li>Szöveg automatikus formázás - automatikus formázás, vagy megjelenítés változatlanul monospace betűtípussal előformázott szövegként</li>
                     <li>Különböző, alapvető stíluselemek beállításai (alapértelmezett bekezdés, cím, alcím, előformázott szöveg, hivatkozás, idézet, stb.). Ezeknél az elemeknél különböző tulajdonságokat adhat meg, úgymint betűtípus, stílus, szín, sorköz, margók, stb. Tulajdonképpen a program egy alapértelmezett CSS stíluslapot generál a megadott adatok alapján.</li>
                 </ul>
@@ -199,7 +199,7 @@
                 <title id="bookmarks">
                     <p>Könyvjelzők</p>
                 </title>
-                <p>A Coolreader háromfajta könyvjelzőt támogat:</p>
+                <p>A KnownReader háromfajta könyvjelzőt támogat:</p>
                 <ul>
                     <li><b>Pozíció</b> könyvjelzőt: ez az aktuális oldal legfelső sorához kötődik</li>
                     <li><b>Megjegyzés</b> könyvjelzőt: a kijelölt szövegrészhez adhat hozzá megjegyzéseket</li>
@@ -262,7 +262,7 @@
                 <title id="dict">
                     <p>Szótár támogatás</p>
                 </title>
-                <p>A CoolReader a kijelölt szavak jelentését le tudja kérdezni külső szótárprogramokból</p>
+                <p>A KnownReader a kijelölt szavak jelentését le tudja kérdezni külső szótárprogramokból</p>
                 <p>Támogatott, a Google Play-ről is letölthető szótár alkalmazások:</p>
                 <ul>
                     <li>Fora</li>
@@ -279,7 +279,7 @@
                 <title id="tts">
                     <p>Felolvasás (TTS)</p>
                 </title>
-                <p>A CoolReader támogatja a szöveg felolvasását a rendszer alapértelmezett Text To Speech (TTS) motorján keeresztül.</p>
+                <p>A KnownReader támogatja a szöveg felolvasását a rendszer alapértelmezett Text To Speech (TTS) motorján keeresztül.</p>
                 <p>A felolvasáshoz válassza a Menü / Tovább / Felolvasás (TTS) menüpontot. A gyorsabb eléréshez ezt a műveletet is hozzárendelheti érintő-zónához, vagy gyorsbillentyűhöz.</p>
                 <p>Felovasás közben megjelenik egy vezérlőpult, ahol állítható a sebesség, hangmagasság, elindítás és leállítás.</p>
             </section>
@@ -309,7 +309,7 @@
             <p>A fájlböngésző segítségével elérheti a fájlrendszert, a legutóbb olvasott könyvek listáját, a szerző/sorozat/cím szerint rendezett listákat, valamint az online OPDS katalógusokat a letöltéshez. A fájlböngésző gyökérmappája mindezeket tartalmazza.</p>
             <p>Bárhol a fájlböngészőn belül használhatja a Menü / Ugrás menüt a gyökérmappához ugráshoz, a <a href="#recent">Legutóbbi könyvek</a> listájához, vagy az Online katalógusokhoz.</p>
             <p>Az olvasáshoz a könyveknek az eszköz belső tárolójában, vagy az SD kártyára mentve kell lenniük.</p>
-            <p>A CoolReader a metaadatokat (szerző, cím, sorozat, fájlnév, stb.), az utolsó olvasási pozíciót, valamint a könyvjelzőket belső adatbázisában tárolja.</p>
+            <p>A KnownReader a metaadatokat (szerző, cím, sorozat, fájlnév, stb.), az utolsó olvasási pozíciót, valamint a könyvjelzőket belső adatbázisában tárolja.</p>
             <p>Könyvek importálásához elegendő a fájlböngészővel a könyv mappájába lépni, vagy a Menü / Mappa frissítése menüpontot használni.</p>
             <p>Fájlböngésző témakörök: 
                 <a href="#filesystem">Fájlrendszer</a> 
@@ -337,7 +337,7 @@
                 <title>
                     <p>Legutóbbi könyvek</p>
                 </title>
-                <p>A CoolReader tárolja a legutóbb megnyitott könyvek listáját.</p>
+                <p>A KnownReader tárolja a legutóbb megnyitott könyvek listáját.</p>
                 <p>Ezt a listát a fájlböngésző gyökérmappájából is elérheti, ahol válassza a "Legutóbbi könyvek" elemet, vagy bárhonnan a <a href="#fbmenu">Menü</a> / Ugrás / Legutóbbi könyvek menüből.</p>
                 <p>A könyvet megérintve az megnyílik és az utolsó olvasási pozícióra ugrik.</p>
                 <p>A könyvet hosszan megérintve egy újabb, hasznos menü jelenik meg, ahonnan megnyithatja a könyvet, törölheti azt, szerkesztheti bizonyos adatait.</p>
@@ -346,7 +346,7 @@
                 <title>
                     <p>OPDS katalógusok</p>
                 </title>
-                <p>A CoolReader lehetővé tesz az online OPDS katalógusok használatát, letöltést ezekből a katalógusokból.</p>
+                <p>A KnownReader lehetővé tesz az online OPDS katalógusok használatát, letöltést ezekből a katalógusokból.</p>
                 <p>Ehhez válassza a fájlböngésző gyökérmappájában az "Online katalógusok" elemet, vagy használja a <a href="#fbmenu">Menü</a> / Ugrás / Online katalógusok menüpontot.</p>
                 <p>Ekkor megjelenik az elérhető katalógusok listája.</p>
                 <p>Egy katalógus-elemet hosszan megérintve hozzáadhat, törölhet és szerkeszthet egy-egy elemet.</p>
@@ -358,10 +358,10 @@
                 <title>
                     <p>Könyvek szerzők/sorozat/cím szerint rendezve</p>
                 </title>
-                <p>A CoolReader lehetővé tesz az adatbázisban szereplő könyvek rendezett elérését szerző, cím és sorozat szerint a fájlböngésző gyökérmappájából.</p>
+                <p>A KnownReader lehetővé tesz az adatbázisban szereplő könyvek rendezett elérését szerző, cím és sorozat szerint a fájlböngésző gyökérmappájából.</p>
                 <p>A megfelelő elemre kattintva (pl. "Könyvek szerző szerint")láthatja az adatbázis rendezett listáját.</p>
                 <p>A listán belül a darabszámától függően pl. a szerzők első betű(i), teljes neve alapján jelennek meg a könyvek, esetleg maga a könyv.</p>
-                <p>A CoolReader automatikusan kezeli ezeket az almappákat (például 10 szerző esetén mindegyik közvetlenül megjelenik a listában, de 100 szerző már kezdőbetűk szerint csoportosítva lesz).</p>
+                <p>A KnownReader automatikusan kezeli ezeket az almappákat (például 10 szerző esetén mindegyik közvetlenül megjelenik a listában, de 100 szerző már kezdőbetűk szerint csoportosítva lesz).</p>
                 <p>Csak az elemzett (importált) )mappák kerülnek az adatbázisba.</p>
                 <p>Könyvek importálásához elegendő a fájlböngészővel a könyv mappájába lépni, vagy a Menü / Mappa frissítése menüpontot használni.</p>
             </section>
@@ -400,7 +400,7 @@
             <subtitle>További betűtípusok</subtitle>
             <p>Saját betűtípusokat az SD kártya "fonts" mappájába másolt .ttf fájlokkal adhat a programhoz.</p>
             <subtitle>Külső stílusok, CSS</subtitle>
-            <p>A stílusok finomhangolásához az SD kártya ".cr3" mappájába másolt, formátumnak megfelelő CSS fájlok (fb2.css, epub.css, htm.css, rtf.css, txt.css, chm.css) használhatóak, melyek felülbírálják a csomagban lévő stílusokat. Kiindulásképpen a CoolReader (crengine) SourceForge projekt GIT tárolójában találhatók ilyen fájlok.</p> 
+            <p>A stílusok finomhangolásához az SD kártya ".cr3" mappájába másolt, formátumnak megfelelő CSS fájlok (fb2.css, epub.css, htm.css, rtf.css, txt.css, chm.css) használhatóak, melyek felülbírálják a csomagban lévő stílusokat. Kiindulásképpen a KnownReader (crengine) SourceForge projekt GIT tárolójában találhatók ilyen fájlok.</p> 
             <subtitle>További háttérképek</subtitle>
             <p>Saját képek (.jpg, .png) mozaikszerű háttérként való használata is lehetséges a képfájlok ".cr3/textures/" mappába másolásával az SD kártyára.</p>
             <p>A ".cr3" (ponttal kezdve) mappa helyett használható a sima "cr3" mappanév is. Külső SD kártya helyett használható a belső tároló, illetve a belső SD tároló is (ha van ilyen). A "."-tal kezdődő mappák esetenként rejtettek a készülék böngészője számára.</p> 
@@ -414,10 +414,10 @@
                 <p>Hasznos linkek</p>
             </title>
             <p>(külső internetböngészőben nyílnak meg)</p>
-            <p><a href="http://sourceforge.net/projects/crengine/">CoolReader projekt a  SourceForge-on</a></p>
+            <p><a href="http://sourceforge.net/projects/crengine/">KnownReader projekt a  SourceForge-on</a></p>
             <p><a href="http://sourceforge.net/apps/mediawiki/crengine/index.php?title=Main_Page">Projekt Wiki</a> a SourceForge-on</p>
             <p><a href="https://sourceforge.net/project/project_donations.php?group_id=191284">A projekt támogatási oldala</a> a SourceForge-on</p>
-            <p>A projektet legegyszerűbben úgy támogathatja, hogy az alkalmazáson belülről (Menü / Tovább / A CoolReader-ről / harmadik fül), vagy közvetlenül a Google Play-ről vásárol VIP, platina, arany, ezüst, bronz, illetve vas támogatási csomagokat.</p>
+            <p>A projektet legegyszerűbben úgy támogathatja, hogy az alkalmazáson belülről (Menü / Tovább / A KnownReader-ről / harmadik fül), vagy közvetlenül a Google Play-ről vásárol VIP, platina, arany, ezüst, bronz, illetve vas támogatási csomagokat.</p>
             <p>Hibajelentéseit, összeomlás esetén lehetőleg az Android System Info app által gyűjtött hibajelentéssel, az eszköz típusával és az Android verzióval kiegészítve küldje a  buggins@fromru.com e-mail címre. Ha egy könyvet nem sikerül megnyitni, míg más könyveket igen, akkor lehetőség szerint csatolja a meg nem nyitható könyvet is a hatékonyabb hibafelderítés érdekében.</p>
         </section>
 	</body>

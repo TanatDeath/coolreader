@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -46,10 +47,11 @@ public class SomeButtonsToolbarDlg {
 
 	public final ButtonPressedCallback callback;
 
-	static public void showDialog( CoolReader coolReader, ReaderView readerView, boolean closeOnTouchOutside,
+	static public void showDialog( CoolReader coolReader, ReaderView readerView,
+		int closeSecTime, boolean closeOnTouchOutside,
 		String sTitle, ArrayList<String> buttonsOrTexts, Object o, ButtonPressedCallback callback)
 	{
-		SomeButtonsToolbarDlg dlg = new SomeButtonsToolbarDlg(coolReader, readerView, closeOnTouchOutside,
+		SomeButtonsToolbarDlg dlg = new SomeButtonsToolbarDlg(coolReader, readerView, closeSecTime, closeOnTouchOutside,
 				sTitle, buttonsOrTexts, o, callback);
 		Log.d("cr3", "question popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 	}
@@ -58,7 +60,8 @@ public class SomeButtonsToolbarDlg {
 		mWindow.dismiss();
 	}
 
-	public SomeButtonsToolbarDlg(CoolReader coolReader, ReaderView readerView, boolean closeOnTouchOutside,
+	public SomeButtonsToolbarDlg(CoolReader coolReader, ReaderView readerView,
+								 int closeSecTime, boolean closeOnTouchOutside,
 			String sTitle, ArrayList<String> buttonsOrTexts, Object o, ButtonPressedCallback callback)
 	{
 		mCoolReader = coolReader;
@@ -216,7 +219,7 @@ public class SomeButtonsToolbarDlg {
 		mWindow.setWidth(WindowManager.LayoutParams.FILL_PARENT);
 		mWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
 
-		mWindow.setFocusable(true);
+		mWindow.setFocusable(false);
 		mWindow.setTouchable(true);
 		mWindow.setOutsideTouchable(true);
 		mWindow.setContentView(panel);
@@ -227,6 +230,18 @@ public class SomeButtonsToolbarDlg {
 
 		int popupY = location[1] + mAnchor.getHeight() - mPanel.getHeight();
 		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+
+		Handler handler = new Handler();
+
+		if (closeSecTime != 0)
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if (mWindow != null) {
+						mWindow.dismiss();
+					}
+				}
+			},  closeSecTime*1000);
 
 		mCoolReader.tintViewIcons(mPanel);
 	}

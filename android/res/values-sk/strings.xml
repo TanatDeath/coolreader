@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Hľadať</string>
     <string name="mi_exit">Zatvoriť</string>
     <string name="mi_goto">Prejsť na</string>
@@ -12,7 +12,7 @@
     <string name="mi_font_previous">Predchádzajúce písmo</string>
     <string name="mi_font_next">Ďalšie písmo</string>
     <string name="progress_please_wait">Prosím, čakajte</string>
-    <string name="progress_starting_cool_reader">Spúšťam Cool Reader</string>
+    <string name="progress_starting_cool_reader">Spúšťam KnownReader</string>
     <string name="progress_loading">Načítavam dokument</string>
     <string name="progress_formatting">Formátujem dokument</string>
     <string name="progress_scanning">Prehľadávam priečinok</string>

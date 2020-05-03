@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import java.util.ArrayList;
 
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 import android.database.DataSetObserver;
@@ -16,6 +17,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class TOCDlg extends BaseDialog {
 	//CoolReader mCoolReader;
@@ -115,6 +117,7 @@ public class TOCDlg extends BaseDialog {
 				} else {
 					view = (View)convertView;
 				}
+				ImageView imgShowPage = (ImageView)view.findViewById(R.id.toc_show_page);
 				TextView pageTextView = (TextView)view.findViewById(R.id.toc_page);
 				TextView titleTextView = (TextView)view.findViewById(R.id.toc_title);
 				TextView marginTextView = (TextView)view.findViewById(R.id.toc_level_margin);
@@ -143,6 +146,18 @@ public class TOCDlg extends BaseDialog {
 				marginTextView.setText(buf.toString());
 				titleTextView.setText(item.getName());
 				pageTextView.setText(String.valueOf(item.getPage()+1));
+				final int pn = item.getPage()+1;
+				imgShowPage.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						//activity.showDicToast("asdf"+pn, false, "");
+						int iPageCnt = ((CoolReader)activity).getReaderView().getDoc().getPageCount();
+						if (pn<=iPageCnt) {
+							String sPage = ((CoolReader)activity).getReaderView().getDoc().getPageText(false, pn - 1);
+							activity.showDicToast(sPage, Toast.LENGTH_LONG, v, false, "[HIDE]");
+						}
+					}
+				});
 				activity.tintViewIcons(view);
 				return view;
 			}

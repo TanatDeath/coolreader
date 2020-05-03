@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Kitap ara</string>
     <string name="mi_exit">Çıkış</string>
     <string name="mi_goto">Git</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Kitap seç</string>
     <string name="mi_options">Seçenekler</string>
     <string name="progress_please_wait">Lütfen bekleyin</string>
-    <string name="progress_starting_cool_reader">Cool Reader Başlıyor</string>
+    <string name="progress_starting_cool_reader">KnownReader Başlıyor</string>
     <string name="progress_loading">Kitabınız yükleniyor</string>
     <string name="progress_formatting">Kitap biçimlendiriliyor</string>
     <string name="progress_scanning">Dizin taranıyor</string>
@@ -174,7 +174,7 @@
     <string name="options_selection_action_dictionary">Sözlükte bul</string>
     <string name="options_selection_action_copy">Panoya kopyala</string>
     <string name="options_app_browser_hide_empty_dirs">Kitap içermeyen dizinleri gizle</string>
-    <string name="dlg_about">CoolReader hakkında</string>
+    <string name="dlg_about">KnownReader hakkında</string>
     <string name="dlg_book_info">Kitap bilgileri</string>
     <string name="mi_book_styles_enable">Belgenin kendi stili etkin </string>
     <string name="mi_book_styles_disable">Belgenin kendi stili devre dışı</string>

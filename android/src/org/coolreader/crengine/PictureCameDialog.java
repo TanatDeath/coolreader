@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -129,11 +130,23 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (ibPicTexture!=null)
+
+		if (ibPicTexture!=null) {
 			ibPicTexture.setBackgroundColor(colorGrayCT);
-		if (ibPicBackground!=null) ibPicBackground.setBackgroundColor(colorGrayCT);
-		if ((ibPicTexture!=null)&&(bThisIsTexture)) ibPicTexture.setBackgroundColor(colorGrayCT2);
-		if ((ibPicBackground!=null)&&(!bThisIsTexture)) ibPicBackground.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(ibPicTexture, PorterDuff.Mode.CLEAR,true);
+		}
+		if (ibPicBackground!=null) {
+			ibPicBackground.setBackgroundColor(colorGrayCT);
+			activity.tintViewIcons(ibPicBackground, PorterDuff.Mode.CLEAR,true);
+		}
+		if ((ibPicTexture!=null)&&(bThisIsTexture)) {
+			ibPicTexture.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(ibPicTexture, true);
+		}
+		if ((ibPicBackground!=null)&&(!bThisIsTexture)) {
+			ibPicBackground.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(ibPicBackground, true);
+		}
 	}
 
 	private void proceedTexture(final boolean needToActivate) {
@@ -337,13 +350,31 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 				switchTexture(true);
 			}
 		});
+		Drawable imgB = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = imgB.getConstantState().newDrawable().mutate();
+		if (ibPicTexture!=null) ibPicTexture.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		activity.tintViewIcons(ibPicTexture, PorterDuff.Mode.CLEAR,true);
 		ibPicBackground=(Button)view.findViewById(R.id.ib_background);
 		ibPicBackground.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				switchTexture(false);
 			}
 		});
+		Drawable img2 = imgB.getConstantState().newDrawable().mutate();
+		if (ibPicBackground!=null) ibPicBackground.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+		activity.tintViewIcons(ibPicBackground, PorterDuff.Mode.CLEAR,true);
 		switchTexture(true);
+		BackgroundThread.instance().postBackground(new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						switchTexture(true);
+					}
+				}, 200);
+			}
+		});
 		final Button ibPicCopy=(Button)view.findViewById(R.id.ib_copy);
 		ibPicCopy.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -358,7 +389,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		});
 		final Button ibPicRememberForLater=(Button)view.findViewById(R.id.ib_save_for_later);
 		int resId = Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_texture, R.drawable.icons8_texture);
-		Drawable img = getContext().getResources().getDrawable( R.drawable.icons8_texture );
+		Drawable img = getContext().getResources().getDrawable( R.drawable.icons8_texture);
 		mActivity.tintViewIcons(img,true);
 		ibPicRememberForLater.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {

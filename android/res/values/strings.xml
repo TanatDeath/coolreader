@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
-    <string name="app_name_fork" translatable="false">Cool Reader (plotn)</string>
+    <string name="app_name">KnownReader</string>
+    <string name="app_name_fork" translatable="false">KnownReader</string>
     <string name="mi_search">Search</string>
     <string name="mi_search_web">Search on web</string>
     <string name="mi_citation">Save citation</string>
     <string name="mi_user_dic">Save to user dictionary</string>
     <string name="mi_exit">Exit</string>
+    <string name="mi_hide">Hide</string>
     <string name="mi_goto">Go to</string>
     <string name="mi_bookmarks">Bookmarks</string>
     <string name="mi_file_open">Open file</string>
@@ -155,6 +156,7 @@
     <string name="action_search">Search</string>
     <string name="action_recent_books_list">Recent books</string>
     <string name="action_exit">Exit</string>
+    <string name="action_hide">Hide</string>
     <string name="action_pageup_10">Back by 10 pages</string>
     <string name="action_bookmarks">Bookmarks</string>
     <string name="action_pagedown_10">Forward by 10 pages</string>
@@ -238,7 +240,7 @@
     <string name="options_selection_action_copy">Copy to clipboard</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="options_app_browser_hide_empty_dirs">Hide directories without books</string>
-    <string name="dlg_about">About CoolReader</string>
+    <string name="dlg_about">About</string>
     <string name="dlg_book_info">Book Info</string>
     <string name="book_info_action_book_info">Book info:</string>
     <string name="book_info_action_opds_info">OPDS entry book info:</string>
@@ -331,7 +333,7 @@
     <string name="dlg_about_textures_dirs">Textures directories:</string>
     <string name="dlg_about_backgrounds_dirs">Backgrounds directories:</string>
     <string name="dlg_about_hyphenations_dirs">Hyphenation dictionaries directories:</string>
-    <string name="dlg_about_copyright">© Vadim Lopatin, 1998–2019</string>
+    <string name="dlg_about_copyright">© KnownReader team, 2020</string>
     <string name="dlg_about_contributors_">and contributors…</string>
     <string name="mi_book_browser_normal_mode">Normal mode</string>
     <string name="mi_book_browser_simple_mode">Simple file list</string>
@@ -364,7 +366,7 @@
     <string name="options_screen_blackpage_duration">Black page paint duration</string>
     <string name="options_screen_blackpage_duration_add_info">Time (in ms) the black filled area will be shown</string>
     <string name="options_screen_force_eink">This device has EINK screen (when not autodetected)</string>
-    <string name="options_screen_force_eink_add_info">You can force set EINK settings, when it was now detected by CoolReader. You must close and reopen options dialog when changing this value - to see these options</string>
+    <string name="options_screen_force_eink_add_info">You can force set EINK settings, when it was now detected by KnownReader. You must close and reopen options dialog when changing this value - to see these options</string>
     <string name="options_render_font_gamma">Font Gamma</string>
     <string name="action_toggle_titlebar">Toggle Title Bar</string>
     <string name="action_show_position_info">Show position popup</string>
@@ -484,8 +486,8 @@
     <string name="options_app_ui_theme_white">White</string>
     <string name="options_app_ui_theme_dark">Dark</string>
     <string name="options_app_ui_theme_black">Black</string>
-    <string name="options_app_ui_theme_gray1">Gray 1</string>
-    <string name="options_app_ui_theme_gray2">Gray 2</string>
+    <string name="options_app_ui_theme_gray1">Gray Dark</string>
+    <string name="options_app_ui_theme_gray2">Gray Light</string>
     <string name="options_app_ui_theme_light">Light</string>
     <string name="options_app_ui_theme_hicontrast1">High Contrast White</string>
     <string name="options_app_ui_theme_hicontrast2">High Contrast Black</string>
@@ -735,9 +737,9 @@
     <string name="force_tts_90sec">"1,5 minutes (after phrase)"</string>
     <string name="force_tts_120sec">"2 minutes (after phrase)"</string>
     <string name="save_settings_to_cloud">Save settings to cloud storage</string>
-    <string name="save_settings_to_cloud_v">Save cr3.ini file to cloud storage at CoolReader settings folder</string>
+    <string name="save_settings_to_cloud_v">Save cr3.ini file to cloud storage at KnownReader settings folder</string>
     <string name="load_settings_from_cloud">Restore settings from cloud storage</string>
-    <string name="load_settings_from_cloud_v">Restore settings from file cr3.ini located in CoolReader settings folder on cloud storage</string>
+    <string name="load_settings_from_cloud_v">Restore settings from file cr3.ini located in KnownReader settings folder on cloud storage</string>
     <string name="switched_to_dic">Switched to dictionary</string>
     <string name="next_dict_will_be_2nd">Next dictionary will be the 2nd for one time</string>
     <string name="cloud_begin">Cloud - begin of operation</string>
@@ -764,7 +766,7 @@
     <string name="save_current_book_to_cloud_email">Send book via Email</string>
     <string name="open_book_from_gd">Open book from Google One</string>
     <string name="open_book_from_dbx">Open book from Dropbox</string>
-    <string name="open_book_from_ynd">Open book from Yandex disc</string>
+    <string name="open_book_from_ynd">Open/Save book from/to Yandex disc</string>
     <string name="open_book_from_gd_short">Google One</string>
     <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="open_book_from_y_short">Yandex</string>
@@ -797,8 +799,9 @@
     <string name="dlg_bookmark_link">Link to bookmark</string>
     <string name="docx_is_not_installed">extension org.coolreader.docx is not installed, install it to open docx format</string>
     <string name="docx_open_converted">Opened previously converted copy of document</string>
-    <string name="docx_convert">CoolReader could try to convert document in html format, then open it. Proceed?</string>
+    <string name="docx_convert">KnownReader could try to convert document in html format, then open it. Proceed?</string>
     <string name="delete_dir_confirm">Selected directory is not empty. Delete content? Files/folders count:</string>
+    <string name="not_a_dir">This is not a file system folder</string>
     <string name="btn_edit_info">Edit book info</string>
     <string name="mark_book_as_read">Mark this book as read?</string>
     <string name="mark_book_as_reading">Set \'reading\' mark to this book?</string>
@@ -896,7 +899,7 @@
     <string name="options_inverse_view_add_info">Selecting the reading mode day or night</string>
     <string name="options_color_text_add_info">Selecting the color of the text</string>
     <string name="options_color_background_add_info">Background color selection</string>
-    <string name="options_background_texture_add_info">Select a texture (picture) instead of a solid color. You can add a texture by sending it to CoolReader from image viewing software.</string>
+    <string name="options_background_texture_add_info">Select a texture (picture) instead of a solid color. You can add a texture by sending it to KnownReader from image viewing software.</string>
     <string name="options_page_titlebar_add_info">Information display options in the header, fullscreen settings</string>
     <string name="options_page_footnotes_add_info">Display footnotes (if any) at the bottom of the page</string>
     <string name="options_page_animation_add_info">Enable or disable the animation while flipping</string>
@@ -921,7 +924,7 @@
     <string name="pic_delete_cover">Delete custom cover for this book?</string>
     <string name="texture_switch_mode">Switch mode (tile/stretch) of the texture?</string>
     <string name="dlg_button_book_custom_cover">Select custom cover</string>
-    <string name="pic_no_pic">No picture remembered. Send a picture to CoolReader from external application (e.g. from gallery)</string>
+    <string name="pic_no_pic">No picture remembered. Send a picture to KnownReader from external application (e.g. from gallery)</string>
     <string name="pic_no_custom_cover">This book have not custom cover assigned</string>
     <string name="warn_empty_file_name">Cannot open file - file name is empty</string>
     <string name="warn_http">Cannot open file from hyperlink</string>
@@ -948,6 +951,7 @@
     </string>
     <string name="third_party_components_used">"Third party components used: zlib, libpng, libjpeg, freetype, harfbuzz, chmlib, antiword, Nook EPD utils by DairyKnight "
     </string>
+    <string name="this_is_fork">KnownReader project is a fork of known reader application - CoolReader. KnownReader offers rich UI and number of unique features.</string>
     <string name="third_party_farm_fresh_icon_set">Farm-Fresh icon set from http://www.fatcow.com/free-icons</string>
     <string name="open_previously_downloaded">Book was already downloaded, open it instead of new download?</string>
     <string name="could_not_find_by_link">Could not find local file, showing OPDS entry</string>
@@ -1014,7 +1018,10 @@
     <string name="screen_mod_0">Always</string>
     <string name="screen_mod_1">Portrait mode</string>
     <string name="screen_mod_2">Landscape mode</string>
+    <string name="ext_fullscreen_margin_text_off">Disable extended fullscreen mode</string>
     <string name="ext_fullscreen_margin_text">Extended fullscreen mode</string>
+    <string name="ext_fullscreen_margin_text1">Extended fullscreen mode - 1 line in the statusbar</string>
+    <string name="ext_fullscreen_margin_text2">Extended fullscreen mode - 2 lines in the statusbar</string>
     <string name="ext_fullscreen_margin_mod">Extended fullscreen mode modifier</string>
     <string name="ext_fullscreen_margin_add_info">For devices with cutout(s) - stretch window to fit whole screen (cutouts may overlap application areas). For Android 9 and higher</string>
     <string name="ext_fullscreen_margin_0">Disabled</string>
@@ -1023,7 +1030,7 @@
     <string name="ext_fullscreen_margin_3">Enabled, 2 text lines in the titlebar</string>
     <string name="downloaded_from_catalog">Books downloaded:</string>
     <string name="external_doc_came">Incoming external document</string>
-    <string name="external_doc_option1">Action - open from stream</string>
+    <string name="external_doc_option1">Action - open from stream (or install fonts)</string>
     <string name="external_doc_option2">Action - save to device</string>
     <string name="external_doc_option3">Action - open existing file</string>
     <string name="conv_doc_option1">Action - convert document</string>
@@ -1031,7 +1038,7 @@
     <string name="external_path">External path</string>
     <string name="doc_type">Document type</string>
     <string name="doc_open_from_stream">Open from stream</string>
-    <string name="doc_open_from_stream_addinfo">Document will not be saved to device, will not be accessible in "last books" list</string>
+    <string name="doc_open_from_stream_addinfo">Document will not be saved to device, will not be accessible in "last books" list. If document archive contains fonts - you could easily install them</string>
     <string name="download_path">Save path</string>
     <string name="doc_save_to_device">Save to device and open</string>
     <string name="already_exists">Already exists</string>
@@ -1068,13 +1075,14 @@
     <string name="cloud_sync_variant3">Via Yandex disc</string>
     <string name="cloud_sync_variant1_v">Cloud syncronization is disabled</string>
     <string name="cloud_sync_variant2_v">Syncronization will be done via local filesystem - you need to use external tool to sync cr3e/cloudsync folder across devices</string>
-    <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex disc (folder Coolreader is used)</string>
+    <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex disc (folder KnownReader is used)</string>
     <string name="switch_profile_note">Profile switching is enabled only when book is open</string>
     <string name="settings_info">Global settings are italic (other - depends on profile)</string>
     <string name="global_margin">Screen margin (restart needed)</string>
     <string name="global_margin_add_info">For touchscreen devices with skirtings</string>
-    <string name="lang_from">From language</string>
-    <string name="lang_to">To language</string>
+    <string name="lang_from">From language (1)</string>
+    <string name="lang_to">To language (2)</string>
+    <string name="sel">Select</string>
     <string name="specify_translation_dir_full">Specify book\'s translation direction, e.g. ru or zh-cn</string>
     <string name="specify_translation_dir">Translation direction</string>
     <string name="settings_profile">Profile</string>
@@ -1111,4 +1119,34 @@
     <string name="no_cloud_files">No files found</string>
     <string name="ynd_translate_dics_info">Yandex Translate languages</string>
     <string name="lingvo_translate_dics_info">Lingvo Online languages</string>
+    <string name="translate_dics_switch">Vice versa</string>
+    <string name="invalid_dic">Current dictionary are invalid! Set up the dictionary</string>
+    <string name="upload_complete">Upload complete!</string>
+    <string name="knownreader_donate_line1">KnownReader - more than just reader. This e-book reading application has grown up from CoolReader project. We put a soul in it and added the important things - for us and for you: changed navigation, UI, extended dictionary, cloud features and much more. We thank CoolReader\'s original author and all the contributors, but now we begin our own way in PlayMarket. If you like our application and you want to support us, you can do this in the following ways:</string>
+    <string name="knownreader_donate_line2">1. Contribute at:</string>
+    <string name="knownreader_donate_line3">https://knownreader.com/contribute</string>
+    <string name="knownreader_donate_line4">2. Write us on 4pda forum:</string>
+    <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
+    <string name="with_the_help">With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook, Koreader</string>
+    <string name="options_choose_texture">Chose background pic / texture</string>
+    <string name="only_in_pro">This feature is availble in Premium version only</string>
+    <string name="only_in_premium">This feature is availble in Premium version only</string>
+    <string name="str_yes">yes</string>
+    <string name="str_no">no</string>
+    <string name="opened_doc_props">Document properties</string>
+    <string name="opened_doc_props_styles">Internal styles (colors, margins, background, etc)</string>
+    <string name="opened_doc_props_styles_ext">(You may need to disable it when night mode is on)</string>
+    <string name="opened_doc_props_fonts">Embedded fonts (which override selected)</string>
+    <string name="opened_doc_props_text">Text autoformat</string>
+    <string name="str_change">Change ...</string>
+    <string name="later_css">You always can do it later - in CSS settings tab</string>
+    <string name="ynd_autolang"># - auto (Yandex online only)</string>
+    <string name="new_fonts">Archive contains new fonts (%1$s). Copy them to fonts folder?</string>
+    <string name="fonts_copied">Fonts copied: %1$s. Restart app to use them (or reboot may needed).</string>
+    <string name="delete_font">Delete font / font family?</string>
+    <string name="non_system_fonts_not_found">(Non-system fonts not found). Cannot delete</string>
+    <string name="fonts_deleted_partial">Font files deleted: %1$s of %2$s</string>
+    <string name="fonts_deleted_full">Font files deleted</string>
+    <string name="delete_texture">Delete background file?</string>
+    <string name="texture_deleted">Background file deleted...</string>
 </resources>

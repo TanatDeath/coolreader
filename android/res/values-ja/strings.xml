@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">検索</string>
     <string name="mi_exit">終了</string>
     <string name="mi_goto">移動</string>
@@ -12,7 +12,7 @@
     <string name="mi_font_previous">前のフォント</string>
     <string name="mi_font_next">次のフォント</string>
     <string name="progress_please_wait">しばらくお待ちください</string>
-    <string name="progress_starting_cool_reader">Cool Reader を開始しています</string>
+    <string name="progress_starting_cool_reader">KnownReader を開始しています</string>
     <string name="progress_loading">ドキュメントを読み込んでいます</string>
     <string name="progress_formatting">ドキュメントを整形しています</string>
     <string name="progress_scanning">ディレクトリを検索しています</string>
@@ -187,7 +187,7 @@
     <string name="options_selection_action_dictionary">辞書で検索</string>
     <string name="options_selection_action_copy">クリップボードにコピー</string>
     <string name="options_app_browser_hide_empty_dirs">ブックのないディレクトリーを非表示にする</string>
-    <string name="dlg_about">CoolReader について</string>
+    <string name="dlg_about">KnownReader について</string>
     <string name="dlg_book_info">ブック情報</string>
     <string name="mi_book_styles_enable">ドキュメント内部のスタイルを有効にする</string>
     <string name="mi_book_styles_disable">ドキュメント内部のスタイルを無効にする</string>

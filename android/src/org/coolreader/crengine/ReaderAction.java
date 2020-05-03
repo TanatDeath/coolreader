@@ -153,6 +153,7 @@ public class ReaderAction {
 	public final static ReaderAction NEXT_CHAPTER = new ReaderAction("NEXT_CHAPTER", R.string.action_chapter_next, ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_down_ch);
 	public final static ReaderAction PREV_CHAPTER = new ReaderAction("PREV_CHAPTER", R.string.action_chapter_prev, ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1, NEXT_CHAPTER, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_up_ch);
 	public final static ReaderAction EXIT = new ReaderAction("EXIT", R.string.action_exit, ReaderCommand.DCMD_EXIT, 0, R.id.cr3_mi_exit, null , R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_viewer_exit);
+	public final static ReaderAction HIDE = new ReaderAction("HIDE", R.string.action_hide, ReaderCommand.DCMD_HIDE, 0, R.id.cr3_mi_hide, EXIT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_hide);
 
 	public final static ReaderAction SAVE_SETTINGS_TO_CLOUD = new ReaderAction("SAVE_SETTINGS_TO_CLOUD", R.string.save_settings_to_cloud, ReaderCommand.DCMD_SAVE_SETTINGS_TO_CLOUD, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_to_gd);
 	public final static ReaderAction LOAD_SETTINGS_FROM_CLOUD = new ReaderAction("LOAD_SETTINGS_FROM_CLOUD", R.string.load_settings_from_cloud, ReaderCommand.DCMD_LOAD_SETTINGS_FROM_CLOUD, 0, SAVE_SETTINGS_TO_CLOUD, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_from_gd);
@@ -174,6 +175,9 @@ public class ReaderAction {
 	public final static ReaderAction TOGGLE_PAGE_VIEW_MODE = new ReaderAction("TOGGLE_PAGE_VIEW_MODE", R.string.options_view_mode,
 			ReaderCommand.DCMD_TOGGLE_PAGE_VIEW_MODE, 0, TOGGLE_AUTOSCROLL,
 			R.string.options_view_mode_add_info).setIconId(R.drawable.cr3_option_view_mode_scroll);
+	public final static ReaderAction CHOOSE_TEXTURE = new ReaderAction("CHOOSE_TEXTURE", R.string.options_choose_texture,
+			ReaderCommand.DCMD_CHOOSE_TEXTURE, 0, FONT_SELECT,
+			R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_texture);
 
 	public final static ReaderAction[] AVAILABLE_ACTIONS = {
 		NONE,
@@ -246,7 +250,9 @@ public class ReaderAction {
 		OPTIONS_FILTER,
         FONT_SELECT,
         FONT_BOLD,
-		WHOLE_PAGE_TO_DIC
+		WHOLE_PAGE_TO_DIC,
+		CHOOSE_TEXTURE,
+		HIDE
 	};
 
 	public boolean isNone() {

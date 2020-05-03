@@ -20,8 +20,7 @@
 	    android:layout_height="wrap_content"
 	    android:baselineAligned="true"
 	    >
-	
-	    <ImageButton android:id="@+id/tts_play_pause"
+		<ImageButton android:id="@+id/tts_play_pause"
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="5dip"
@@ -45,7 +44,19 @@
 			android:focusable="false"
 			android:focusableInTouchMode="false"
 			android:contentDescription="@string/tts_play"/>
-	    <ImageButton android:id="@+id/tts_back"
+		<ImageButton android:id="@+id/tts_play_pause_ell1"
+				android:layout_width="0dip" android:layout_weight="1"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dip"
+				android:layout_marginBottom="5dip"
+				android:layout_marginLeft="2dip"
+				android:layout_marginRight="2dip"
+				android:src="?attr/attr_ic_media_play_ell"
+				android:tag="tint"
+				android:focusable="false"
+				android:focusableInTouchMode="false"
+				android:contentDescription="@string/tts_play"/>
+		<ImageButton android:id="@+id/tts_back"
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="5dip"
@@ -87,7 +98,6 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical">
-		>
 		<TableRow>
 			<LinearLayout
 				android:orientation="horizontal"
@@ -96,6 +106,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
+				android:layout_marginBottom="15dp"
 				>
 				<ImageButton android:id="@+id/btn_vol_down"
 					style="@style/TextAppearance.Small"
@@ -138,6 +149,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
+				android:layout_marginBottom="15dp"
 				>
 				<ImageButton android:id="@+id/btn_freq_down"
 					style="@style/TextAppearance.Small"

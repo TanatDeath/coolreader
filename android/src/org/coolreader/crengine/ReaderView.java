@@ -18,6 +18,8 @@ import org.coolreader.cloud.CloudSync;
 import org.coolreader.crengine.Engine.HyphDict;
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
+import org.coolreader.tts.TTS;
+import org.coolreader.tts.TTSToolbarDlg;
 
 import android.app.SearchManager;
 import android.content.ContentValues;
@@ -39,6 +41,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -49,8 +52,11 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -67,6 +73,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public SurfaceView getSurface() {
 		return surface;
 	}
+
+	public static int backgrNormalizedColor = 0; // color of the background - to decide which icon color use
 
 	private int wasX = 0;
 	private int wasY = 0;
@@ -756,7 +764,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case SELECTION_ACTION_BOOKMARK:
 				clearSelection();
-				showNewBookmarkDialog( sel, Bookmark.TYPE_COMMENT );
+				showNewBookmarkDialog( sel, Bookmark.TYPE_COMMENT, "" );
 				break;
 			case SELECTION_ACTION_FIND:
 				clearSelection();
@@ -771,10 +779,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				sendQuotationInEmail(sel);
 				break;
 			case SELECTION_ACTION_USER_DIC:
-				showNewBookmarkDialog(sel, Bookmark.TYPE_USER_DIC);
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mActivity.showToast(R.string.only_in_pro);
+					break;
+				}
+				showNewBookmarkDialog(sel, Bookmark.TYPE_USER_DIC, "");
 				break;
 			case SELECTION_ACTION_CITATION:
-				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION);
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mActivity.showToast(R.string.only_in_pro);
+					break;
+				}
+				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION, "");
 				break;
             case SELECTION_ACTION_DICTIONARY_LIST:
                 DictsDlg dlg = new DictsDlg(mActivity, this, sel.text);
@@ -789,7 +805,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	}
 
-	public void showNewBookmarkDialog(Selection sel, int chosenType) {
+	public void showNewBookmarkDialog(Selection sel, int chosenType, String commentText) {
 		if ( mBookInfo==null )
 			return;
 		Bookmark bmk = new Bookmark();
@@ -799,7 +815,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		bmk.setEndPos(sel.endPos);
 		bmk.setPercent(sel.percent);
 		bmk.setTitleText(sel.chapter);
-		BookmarkEditDialog dlg = new BookmarkEditDialog(mActivity, this, bmk, true, chosenType);
+		BookmarkEditDialog dlg = new BookmarkEditDialog(mActivity, this, bmk, true, chosenType, commentText);
 		dlg.show();
 	}
 
@@ -820,7 +836,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			ClipboardManager cm = mActivity.getClipboardmanager();
 			cm.setText(text);
 			log.i("Setting clipboard text: " + text);
-			mActivity.showToast(mActivity.getString(R.string.copied_to_cb));
+			//mActivity.showToast(mActivity.getString(R.string.copied_to_cb));
 		}
 	}
 
@@ -1281,7 +1297,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					} else if (image != null) {
 						startImageViewer(image);
 					} else if (bookmark != null) {
-						BookmarkEditDialog dlg = new BookmarkEditDialog(mActivity, ReaderView.this, bookmark, false, Bookmark.TYPE_COMMENT);
+						BookmarkEditDialog dlg = new BookmarkEditDialog(mActivity, ReaderView.this, bookmark, false, Bookmark.TYPE_COMMENT, "");
 						dlg.show();
 					} else if (!link.startsWith("#")) {
 						log.d("external link " + link);
@@ -1361,7 +1377,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 						if ((StrUtils.isEmptyStr(bookmark.getCommentText()))&&(!bMenuShow)&&(StrUtils.isEmptyStr(bookmark.getLinkPos()))) {
 							mActivity.skipFindInDic = true;
-							BookmarkEditDialog dlg = new BookmarkEditDialog(mActivity, ReaderView.this, bookmark, false, Bookmark.TYPE_COMMENT);
+							BookmarkEditDialog dlg = new BookmarkEditDialog(mActivity, ReaderView.this, bookmark, false, Bookmark.TYPE_COMMENT, "");
 							dlg.show();
 						} else {
 							if (!StrUtils.isEmptyStr(bookmark.getCommentText()))
@@ -1835,8 +1851,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		Properties settings = getSettings();
 		OptionsDialog.toggleDayNightMode(settings);
 		//setSettings(settings, mActivity.settings());
-		mActivity.setSettings(settings, 60000, true);
+		mActivity.setSettings(settings, 2000, true);
 		invalidImages = true;
+		if (getBookInfo() != null)
+			if (getBookInfo().getFileInfo() != null)
+			  if (getBookInfo().getFileInfo().askedShownStylesInfo<3) {
+				  getBookInfo().getFileInfo().askedShownStylesInfo++;
+				  checkOpenBookStyles(true);
+			  }
+		if (mActivity.getmReaderFrame() != null)
+			 mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
 	}
 
 	public boolean isNightMode() {
@@ -1878,6 +1902,40 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		bNeedRedrawOnce = true;
 	//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setFullscreen(newBool);
+		BackgroundThread.instance().postGUI(new Runnable() {
+			@Override
+			public void run() {
+				ArrayList<String> sButtons = new ArrayList<String>();
+				int efMode = mActivity.settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
+				if ((newBool) &&(efMode != 0))
+					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text_off));
+				if ((newBool) &&(efMode != 1))
+					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text1));
+				if ((newBool) &&(efMode != 2))
+					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text2));
+				sButtons.add(mActivity.getString(R.string.options_page_titlebar_new));
+				SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, 5,true,
+						"",
+						sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
+							@Override
+							public void done(Object o, String btnPressed) {
+								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text_off))) {
+									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "0", true);
+								}
+								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text1))) {
+									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "1", true);
+								}
+								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text2))) {
+									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "2", true);
+								}
+								if (btnPressed.equals(mActivity.getString(R.string.options_page_titlebar_new))) {
+									mActivity.optionsFilter = "";
+									mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TITLEBAR_NEW);
+								}
+							}
+						});
+			}
+		}, 200);
 	}
 
 	private void initTapZone(final BaseDialog dlg, View view, final int tapZoneId) {
@@ -1974,6 +2032,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							buf.append("\n" + chapterName);
 						if (chapterPos != null && chapterPos.length() > 0)
 							buf.append(chapterPos);
+
+						File f = mActivity.getSettingsFile(mActivity.getCurrentProfile());
+						String sF = f.getAbsolutePath();
+						sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
+						String sprof = mActivity.getCurrentProfileName();
+						if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
+						buf.append("\n" + mActivity.getString(R.string.settings_profile)+": "+sprof + sF);
 					}
 					mActivity.showToast(buf.toString());
 				}
@@ -1998,7 +2063,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						colorIcon = a.getColor(2, Color.GRAY);
 						a.recycle();
 						ColorDrawable c = new ColorDrawable(colorGrayC);
-						c.setAlpha(170);
+						c.setAlpha(220);
 						dlg.getWindow().setBackgroundDrawable(c);
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell1), 1);
 						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell2), 2);
@@ -2024,10 +2089,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
 							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
 						}
-						if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) {
+						if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
 							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
 						}
-						if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) {
+						if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
 							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
 						}
 						dlg.setView(grid);
@@ -2640,6 +2705,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_TTS_PLAY:
 			{
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mActivity.showToast(R.string.only_in_pro);
+					break;
+				}
 				log.i("DCMD_TTS_PLAY: initializing TTS");
 				if ( !mActivity.initTTS(new TTS.OnTTSCreatedListener() {
 					@Override
@@ -2717,6 +2786,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		case DCMD_FONT_PREVIOUS:
 			switchFontFace(-1);
             break;
+		case DCMD_CHOOSE_TEXTURE:
+			mActivity.optionsFilter = "";
+			mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGE_BACKGROUND_IMAGE);
+			break;
 		case DCMD_MOVE_BY_CHAPTER:
 			if (isBookLoaded())
 				doEngineCommand(cmd, param, onFinishHandler);
@@ -2784,6 +2857,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_EXIT:
 			mActivity.finish();
+			break;
+		case DCMD_HIDE:
+			mActivity.onBackPressed();
 			break;
 		case DCMD_BOOKMARKS:
 			if (isBookLoaded())
@@ -2878,6 +2954,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
 			}
@@ -2887,6 +2965,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant2 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 				else
@@ -2899,6 +2979,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
 						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
@@ -2911,6 +2993,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant3 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
 						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, false);
@@ -2921,6 +3005,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int iSyncVariant5 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant5 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
 						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant5 == 1);
@@ -2931,6 +3017,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int iSyncVariant4 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant4 == 0) {
 				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
 						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, false);
@@ -2947,10 +3035,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		//	break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_YND:
 			log.i("Open book from CLOUD_YND");
+			if (!BaseActivity.PREMIUM_FEATURES) {
+				mActivity.showToast(R.string.only_in_premium);
+				break;
+			}
 			CloudAction.yndOpenBookDialog(mActivity, false);
 			break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
 			log.i("Open book from CLOUD_DBX");
+			if (!BaseActivity.PREMIUM_FEATURES) {
+				mActivity.showToast(R.string.only_in_premium);
+				break;
+			}
 			CloudAction.dbxOpenBookDialog(mActivity);
 			break;
 		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL:
@@ -2980,6 +3076,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 						if (iSyncVariant == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
 						}
@@ -2989,6 +3087,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 						if (iSyncVariant == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 							else
@@ -3001,6 +3101,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 						if (iSyncVariant == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
 									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
@@ -3013,6 +3115,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 						if (iSyncVariant2 == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
 									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, false);
@@ -3023,6 +3127,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 						if (iSyncVariant == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
 									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1);
@@ -3033,6 +3139,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 						if (iSyncVariant3 == 0) {
 							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
 									CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant3 == 1, false);
@@ -3044,10 +3152,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
 						log.i("Open book from CLOUD_YND");
+						if (!BaseActivity.PREMIUM_FEATURES) {
+							mActivity.showToast(R.string.only_in_premium);
+							return true;
+						}
 						CloudAction.yndOpenBookDialog(mActivity, false);
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
 						log.i("Open book from CLOUD_DBX");
+						if (!BaseActivity.PREMIUM_FEATURES) {
+							mActivity.showToast(R.string.only_in_premium);
+							return true;
+						}
 						CloudAction.dbxOpenBookDialog(mActivity);
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL) {
@@ -3067,7 +3183,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						ReaderAction.ZOOM_IN,
 						ReaderAction.ZOOM_OUT,
 						ReaderAction.FONT_SELECT,
-						ReaderAction.FONT_BOLD
+						ReaderAction.FONT_BOLD,
+						ReaderAction.CHOOSE_TEXTURE
 				};
 				mActivity.showActionsToolbarMenu(fonts_actions, new CRToolBar.OnActionHandler() {
 					@Override
@@ -3096,6 +3213,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 									props.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
 							mActivity.setSettings(props, -1, true);
 							return true;
+						} else if (item == ReaderAction.CHOOSE_TEXTURE) {
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGE_BACKGROUND_IMAGE);
+							return true;
 						}
 						return false;
 					}
@@ -3105,23 +3226,35 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (lastSelection!=null) {
 					if (!lastSelection.isEmpty()) {
 						clearSelection();
-						showNewBookmarkDialog(lastSelection, Bookmark.TYPE_COMMENT);
+						showNewBookmarkDialog(lastSelection, Bookmark.TYPE_COMMENT, "");
 					}
 				}
 				break;
 			case DCMD_SHOW_USER_DIC:
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mActivity.showToast(R.string.only_in_pro);
+					break;
+				}
 				UserDicDlg dlg = new UserDicDlg(((CoolReader)mActivity),0);
 				dlg.show();
 				break;
 			case DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC:
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mActivity.showToast(R.string.only_in_pro);
+					break;
+				}
 				if (lastSelection!=null) {
 					if (!lastSelection.isEmpty()) {
 						clearSelection();
-						showNewBookmarkDialog(lastSelection, Bookmark.TYPE_USER_DIC);
+						showNewBookmarkDialog(lastSelection, Bookmark.TYPE_USER_DIC, "");
 					}
 				}
 				break;
 			case DCMD_SHOW_CITATIONS:
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mActivity.showToast(R.string.only_in_pro);
+					break;
+				}
 				UserDicDlg dlg2 = new UserDicDlg(((CoolReader)mActivity),1);
 				dlg2.show();
 				break;
@@ -3133,7 +3266,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case DCMD_WHOLE_PAGE_TO_DIC:
 				log.i("Whole page to dic");
-				String s = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText();
+				String s = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText(0, false);
+				//mActivity.showToast(s.substring(0,100));
 				mActivity.findInDictionary( s );
 				//mActivity.mDictionaries.setiDic2IsActive(2);
 				break;
@@ -4654,6 +4788,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	int currentBrightnessValueIndex = -1;
+	PopupWindow windowBrighness = null;
+
 	private void startBrightnessControl(final int startX, final int startY, final boolean leftSide)
 	{
 		currentBrightnessValueIndex = -1;
@@ -4670,6 +4806,32 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			currentBrightnessValueIndex = index;
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				//mActivity.showToast(newValue+"%", Toast.LENGTH_LONG, surface, true, 0);
+				if (windowBrighness == null) windowBrighness = new PopupWindow(surface.getContext());
+				windowBrighness.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+				windowBrighness.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+				windowBrighness.setTouchable(false);
+				windowBrighness.setFocusable(false);
+				windowBrighness.setOutsideTouchable(true);
+				windowBrighness.setBackgroundDrawable(null);
+				int fontSize = 24;
+				LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				windowBrighness.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
+				LinearLayout toast_ll = (LinearLayout) windowBrighness.getContentView().findViewById(R.id.toast_ll_wrap);
+				TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+				int colorGrayC = a.getColor(1, Color.GRAY);
+				int colorIcon = a.getColor(2, Color.GRAY);
+				a.recycle();
+				toast_ll.setBackgroundColor(colorGrayC);
+				TextView tv = (TextView) windowBrighness.getContentView().findViewById(R.id.toast_wrap);
+				tv.setTextColor(colorIcon);
+				tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+				tv.setText(newValue+"%");
+				windowBrighness.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+				scheduleHideBrighnessWindow(500);
+			}
 		}
 
 	}
@@ -5716,6 +5878,65 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return currentProgressPosition > 0;
 	}
 
+	private void checkOpenBookStyles(boolean force) {
+		BackgroundThread.instance().postGUI(new Runnable() {
+			@Override
+			public void run() {
+				if (getBookInfo() != null) {
+					int iCurPage = getDoc().getCurPage();
+					if ((iCurPage<3) || (force)) {
+						ArrayList<String> sButtons = new ArrayList<String>();
+						boolean isTextFormat = isTextFormat();
+						boolean isEpubFormat = isFormatWithEmbeddedFonts();
+						boolean isHtmlFormat = isHtmlFormat();
+						String yes = mActivity.getString(R.string.str_yes).toUpperCase();
+						String no = mActivity.getString(R.string.str_no).toUpperCase();
+						String styles = getDocumentStylesEnabled()? yes:no;
+						sButtons.add("*"+styles+": "+mActivity.getString(R.string.opened_doc_props_styles));
+						if (getDocumentStylesEnabled()) {
+							sButtons.add("*"+mActivity.getString(R.string.opened_doc_props_styles_ext));
+						}
+						if (isEpubFormat) {
+							String fonts = getDocumentFontsEnabled()? yes:no;
+							sButtons.add("*"+fonts+": "+mActivity.getString(R.string.opened_doc_props_fonts));
+						}
+						if (isTextFormat) {
+							String texta = isTextAutoformatEnabled()? yes:no;
+							sButtons.add("*" + texta+ ": "+ mActivity.getString(R.string.opened_doc_props_text));
+						}
+						if (isHtmlFormat) {
+							int preset = getBlockRenderingFlags();
+							int dom = getDOMVersion();
+							String spreset = "?";
+							String sdom = "?";
+							if (preset == Engine.BLOCK_RENDERING_FLAGS_LEGACY) spreset = mActivity.getString(R.string.options_rendering_preset_legacy);
+							if (preset == Engine.BLOCK_RENDERING_FLAGS_FLAT) spreset = mActivity.getString(R.string.options_rendering_preset_flat);
+							if (preset == Engine.BLOCK_RENDERING_FLAGS_BOOK) spreset = mActivity.getString(R.string.options_rendering_preset_book);
+							if (preset == Engine.BLOCK_RENDERING_FLAGS_WEB) spreset = mActivity.getString(R.string.options_rendering_preset_web);
+							if (dom == 0) sdom = mActivity.getString(R.string.options_requested_dom_level_legacy);
+							if (dom != 0) sdom = mActivity.getString(R.string.options_requested_dom_level_newest);
+							sButtons.add("*" + spreset +": " + mActivity.getString(R.string.options_rendering_preset));
+							sButtons.add("*" + sdom +": " + mActivity.getString(R.string.options_requested_dom_level));
+						}
+						sButtons.add(mActivity.getString(R.string.str_change));
+						sButtons.add("*"+mActivity.getString(R.string.later_css));
+						SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, 10, true,
+								mActivity.getString(R.string.opened_doc_props),
+								sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
+									@Override
+									public void done(Object o, String btnPressed) {
+										if (btnPressed.equals(mActivity.getString(R.string.str_change))) {
+											mActivity.optionsFilter = "";
+											mActivity.showOptionsDialogTab(OptionsDialog.Mode.READER, 1);
+										}
+									}
+								});
+					}
+				}
+			}
+		}, 200);
+	}
+
 	private class LoadDocumentTask extends Task
 	{
 		String filename;
@@ -5845,6 +6066,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if ( pos!=null ) {
 					log.i("Restoring position : " + pos);
 					restorePositionBackground(pos);
+				} else {
+					checkOpenBookStyles(false);
 				}
 				CoolReader.dumpHeapAllocation();
 			} else {
@@ -5915,9 +6138,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								if (bookname.equals(booknameF)) {
 									log.i("Load last rpos from CLOUD");
 									int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-									if (iSyncVariant3 == 0) {
-										mActivity.showCloudToast(mActivity.getString(R.string.cloud_sync_variant1_v), false);
-									} else {
+									if (iSyncVariant3 != 0) {
 										CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
 												CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
 									}
@@ -5995,6 +6216,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	protected void drawPageBackground(Canvas canvas, Rect dst, int side, boolean addDarken) {
 		Bitmap bmp = currentBackgroundTextureBitmap;
 		if (bmp != null) {
+			backgrNormalizedColor = CoverpageManager.getDominantColor(bmp);
 			int h = bmp.getHeight();
 			int w = bmp.getWidth();
 			Rect src = new Rect(0, 0, w, h);
@@ -6063,6 +6285,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		} else {
 			canvas.drawColor(currentBackgroundColor | 0xFF000000);
+			backgrNormalizedColor = currentBackgroundColor;
 		}
 	}
 
@@ -6189,11 +6412,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			preparePageImage(0);
 			drawPage();
 			updateCurrentPositionStatus();
+			checkOpenBookStyles(false);
 		}
 	}
 
 	private int lastSavePositionTaskId = 0;
 	private int lastSavePositionCloudTaskId = 0;
+	private int lastHideBrighnessTaskId = 0;
 
 	public int getDefSavePositionInterval() {
 		return
@@ -6284,6 +6509,31 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //				}
 //    		});
 //    	}
+	}
+
+	public void scheduleHideBrighnessWindow(final int delayMillis) {
+		// GUI thread required
+		BackgroundThread.instance().executeGUI(new Runnable() {
+			@Override
+			public void run() {
+				final int mylastHideBrighnessTaskId = ++lastHideBrighnessTaskId;
+				if (delayMillis <= 1) {
+					if (windowBrighness != null) {
+						windowBrighness.dismiss();
+					}
+				} else {
+					BackgroundThread.instance().postGUI(new Runnable() {
+						@Override
+						public void run() {
+							if (mylastHideBrighnessTaskId == lastHideBrighnessTaskId) {
+								if (windowBrighness != null) {
+									windowBrighness.dismiss();
+								}
+							}
+						}}, delayMillis);
+				}
+			}
+		});
 	}
 
 	// Sony T2 update position method - by Jotas
@@ -7326,7 +7576,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		surface.setOnTouchListener(this);
 		surface.setOnKeyListener(this);
 		surface.setOnFocusChangeListener(this);
-		doc = new DocView(Engine.lock);
+		doc = new DocView(Engine.lock, activity);
 		doc.setReaderCallback(readerCallback);
 		SurfaceHolder holder = surface.getHolder();
 		holder.addCallback(this);

@@ -158,7 +158,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		return false;
 	}
 
-	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType)
+	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType, String commentText)
 	{
 		super("BookmarkEditDialog", activity, "", true, false);
 		mCoolReader = activity;
@@ -312,6 +312,10 @@ public class BookmarkEditDialog extends BaseDialog {
 			});
 			btnUserDic.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
+					if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+						mCoolReader.showToast(R.string.only_in_pro);
+						return;
+					}
 					mBookmark.setType(Bookmark.TYPE_USER_DIC);
 					commentLabel.setText(R.string.dlg_bookmark_edit_translation);
 					posEdit.setKeyListener(keyList);
@@ -321,6 +325,10 @@ public class BookmarkEditDialog extends BaseDialog {
 			});
 			btnCitation.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
+					if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+						mCoolReader.showToast(R.string.only_in_pro);
+						return;
+					}
 					mBookmark.setType(Bookmark.TYPE_CITATION);
 					commentLabel.setText(R.string.dlg_bookmark_edit_comment); // : R.string.dlg_bookmark_edit_correction
 					posEdit.setKeyListener(keyList);
@@ -328,6 +336,11 @@ public class BookmarkEditDialog extends BaseDialog {
 					setChecked(btnCitation);
 				}
 			});
+			if (!StrUtils.isEmptyStr(commentText)) {
+				String cText = commentText;
+				if (cText.startsWith(mBookmark.getPosText()+":")) cText = cText.substring((mBookmark.getPosText()+":").length());
+				commentEdit.setText(cText.trim());
+			}
 		} else {
 			btnComment.setClickable(false);
 			btnCorrection.setClickable(false);

@@ -3,9 +3,17 @@ package org.coolreader.crengine;
 
 import android.graphics.Bitmap;
 
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class DocView {
 
@@ -20,9 +28,12 @@ public class DocView {
 	private Bookmark curPageBookmark;
 	private long curPageBmkTime;
 
-	public DocView(Object mutex) {
+	private CoolReader mCoolReader;
+
+	public DocView(Object mutex, CoolReader mCoolReader) {
 		log.i("DocView()");
 		this.mutex = mutex;
+		this.mCoolReader = mCoolReader;
 	}
 	
 	/**
@@ -229,7 +240,8 @@ public class DocView {
 				break;
 			}
 		}
-		synchronized(mutex) {
+		//asdf
+		synchronized (mutex) {
 			return loadDocumentFromMemoryInternal(outputStream.toByteArray(), contentPath);
 		}
 	}

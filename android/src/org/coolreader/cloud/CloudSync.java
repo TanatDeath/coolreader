@@ -595,7 +595,8 @@ public class CloudSync {
             sCRC = String.valueOf(crc.getValue());
         }
         if (fromFile) {
-            loadFromJsonInfoFileListFS(cr, iSaveType, bQuiet, sCRC);
+            if (!findingLastPos)
+                loadFromJsonInfoFileListFS(cr, iSaveType, bQuiet, sCRC);
         } else {
             String fileMark = "_rpos_";
             if (iSaveType == CLOUD_SAVE_BOOKMARKS) fileMark = "_bmk_";

@@ -17,7 +17,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.ClipboardManager;
 import android.text.Html;
@@ -208,63 +210,64 @@ public class BookInfoDialog extends BaseDialog {
 			(name.equals(activity.getString(R.string.book_info_book_symcount))) &&
 		   (value.equals("0")) && (rv != null)
 		)
-			if (rv.mBookInfo.getFileInfo().filename.equals(mBookInfo.getFileInfo().filename)) {
-				int colorGrayC;
-				int colorIcon;
-				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-						{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
-				colorGrayC = a.getColor(0, Color.GRAY);
-				colorIcon = a.getColor(2, Color.BLACK);
-				a.recycle();
-				Button countButton = new Button(mCoolReader);
-				btnCalc = countButton;
-				countButton.setText(activity.getString(R.string.calc_stats));
-				countButton.setTextColor(colorIcon);
-				countButton.setBackgroundColor(colorGrayC);
-				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-						ViewGroup.LayoutParams.MATCH_PARENT,
-						ViewGroup.LayoutParams.WRAP_CONTENT);
-				llp.setMargins(20, 0, 8, 0);
-				countButton.setLayoutParams(llp);
-				countButton.setMaxLines(3);
-				countButton.setEllipsize(TextUtils.TruncateAt.END);
-				final ViewGroup vg = (ViewGroup) valueView.getParent();
-				vg.addView(countButton);
-				countButton.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						int iPageCnt = 0;
-						int iSymCnt = 0;
-						int iWordCnt = 0;
-						ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
-						if (rv != null) {
-							if (rv.getArrAllPages() != null)
-								iPageCnt = rv.getArrAllPages().size();
-							else {
-								rv.CheckAllPagesLoadVisual();
-								iPageCnt = rv.getArrAllPages().size();
+			if ((mBookInfo != null) && (rv.mBookInfo != null))
+				if (rv.mBookInfo.getFileInfo().filename.equals(mBookInfo.getFileInfo().filename)) {
+					int colorGrayC;
+					int colorIcon;
+					TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+							{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
+					colorGrayC = a.getColor(0, Color.GRAY);
+					colorIcon = a.getColor(2, Color.BLACK);
+					a.recycle();
+					Button countButton = new Button(mCoolReader);
+					btnCalc = countButton;
+					countButton.setText(activity.getString(R.string.calc_stats));
+					countButton.setTextColor(colorIcon);
+					countButton.setBackgroundColor(colorGrayC);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.MATCH_PARENT,
+							ViewGroup.LayoutParams.WRAP_CONTENT);
+					llp.setMargins(20, 0, 8, 0);
+					countButton.setLayoutParams(llp);
+					countButton.setMaxLines(3);
+					countButton.setEllipsize(TextUtils.TruncateAt.END);
+					final ViewGroup vg = (ViewGroup) valueView.getParent();
+					vg.addView(countButton);
+					countButton.setOnClickListener(new View.OnClickListener() {
+						public void onClick(View v) {
+							int iPageCnt = 0;
+							int iSymCnt = 0;
+							int iWordCnt = 0;
+							ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
+							if (rv != null) {
+								if (rv.getArrAllPages() != null)
+									iPageCnt = rv.getArrAllPages().size();
+								else {
+									rv.CheckAllPagesLoadVisual();
+									iPageCnt = rv.getArrAllPages().size();
+								}
+								for (int i = 0; i < iPageCnt; i++) {
+									String sPage = rv.getArrAllPages().get(i);
+									if (sPage == null) sPage = "";
+									sPage = sPage.replace("\\n", " ");
+									sPage = sPage.replace("\\r", " ");
+									iSymCnt = iSymCnt + sPage.replaceAll("\\s+", " ").length();
+									iWordCnt = iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
+											replaceAll("\\s+", " ").split("\\s").length;
+								}
+								mBookInfo.getFileInfo().symCount = iSymCnt;
+								mBookInfo.getFileInfo().wordCount = iWordCnt;
+								BookInfo bi = new BookInfo(mBookInfo.getFileInfo());
+								bi.getFileInfo().symCount = iSymCnt;
+								bi.getFileInfo().wordCount = iWordCnt;
+								((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
+								((CoolReader) mCoolReader).getDB().flush();
+								vg.removeView(countButton);
+								if (tvSC != null) tvSC.setText(""+iSymCnt);
+								if (tvWC != null) tvWC.setText(""+iWordCnt);
 							}
-							for (int i = 0; i < iPageCnt; i++) {
-								String sPage = rv.getArrAllPages().get(i);
-								if (sPage == null) sPage = "";
-								sPage = sPage.replace("\\n", " ");
-								sPage = sPage.replace("\\r", " ");
-								iSymCnt = iSymCnt + sPage.replaceAll("\\s+", " ").length();
-								iWordCnt = iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
-										replaceAll("\\s+", " ").split("\\s").length;
-							}
-							mBookInfo.getFileInfo().symCount = iSymCnt;
-							mBookInfo.getFileInfo().wordCount = iWordCnt;
-							BookInfo bi = new BookInfo(mBookInfo.getFileInfo());
-							bi.getFileInfo().symCount = iSymCnt;
-							bi.getFileInfo().wordCount = iWordCnt;
-							((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
-							((CoolReader) mCoolReader).getDB().flush();
-							vg.removeView(countButton);
-							if (tvSC != null) tvSC.setText(""+iSymCnt);
-							if (tvWC != null) tvWC.setText(""+iWordCnt);
 						}
-					}
-				});
+					});
 		}
 		if (
 			(name.equals(activity.getString(R.string.book_info_book_translation)))
@@ -341,11 +344,20 @@ public class BookInfoDialog extends BaseDialog {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (bMarkToRead) setDashedButton(btnMarkToRead);
+		mCoolReader.tintViewIcons(btnMarkToRead, PorterDuff.Mode.CLEAR,true);
+		if (bMarkToRead) {
+			btnMarkToRead.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnMarkToRead, true);
+			btnMarkToRead.setPaintFlags(btnMarkToRead.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+		} else {
+			btnMarkToRead.setBackgroundColor(colorGrayCT);
+			btnMarkToRead.setPaintFlags( btnMarkToRead.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+		}
+		/*if (bMarkToRead) setDashedButton(btnMarkToRead);
 			else {
 				btnMarkToRead.setBackgroundColor(colorGrayCT);
 				btnMarkToRead.setPaintFlags( btnMarkToRead.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
-			}
+			}*/
 		btnMarkToRead.setTextColor(colorBlue);
 	}
 
@@ -385,7 +397,7 @@ public class BookInfoDialog extends BaseDialog {
 		}
 
 		protected void onPostExecute(Bitmap result) {
-			bmImage.setImageBitmap(result);
+			if (result != null) bmImage.setImageBitmap(result);
 		}
 	}
 	
@@ -549,6 +561,10 @@ public class BookInfoDialog extends BaseDialog {
 		});
 
 		btnMarkToRead = ((Button)view.findViewById(R.id.btn_mark_toread));
+
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		if (btnMarkToRead!=null) btnMarkToRead.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		bMarkToRead = activity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false);
 
 		btnMarkToRead.setOnClickListener(new View.OnClickListener() {

@@ -1930,6 +1930,7 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *
                     printf("regular g%d>%d: ", hg, hg2);
                 #endif
                 // Draw glyphs of this same cluster
+                int prev_x = x;
                 for (i = hg; i < hg2; i++) {
                     LVFontGlyphCacheItem *item = getGlyphByIndex(glyph_info[i].codepoint);
                     if (item) {
@@ -1939,7 +1940,7 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *
                                     item->origin_x + FONT_METRIC_TO_PX(glyph_pos[i].x_offset), w);
                         #endif
                         buf->Draw(x + item->origin_x + FONT_METRIC_TO_PX(glyph_pos[i].x_offset),
-                                  y + _baseline - item->origin_y + FONT_METRIC_TO_PX(glyph_pos[i].y_offset),
+                                  y + _baseline - item->origin_y - FONT_METRIC_TO_PX(glyph_pos[i].y_offset),
                                   item->bmp,
                                   item->bmp_width,
                                   item->bmp_height,
@@ -1952,7 +1953,12 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *
                     #endif
                 }
                 // Whole cluster drawn: add letter spacing
-                x += letter_spacing;
+                if ( x > prev_x ) {
+                    // But only if this cluster has some advance
+                    // (e.g. a soft-hyphen makes its own cluster, that
+                    // draws a space glyph, but with no advance)
+                    x += letter_spacing;
+                }
             }
             hg = hg2;
             #ifdef DEBUG_DRAW_TEXT

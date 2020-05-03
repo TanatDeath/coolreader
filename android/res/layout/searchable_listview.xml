@@ -11,6 +11,11 @@
     android:paddingRight="?android:attr/scrollbarSize"
     >
 
+    <LinearLayout android:id="@+id/ll_useful_links"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/page_item_body"
         android:orientation="horizontal"
@@ -42,6 +47,11 @@
             android:background="@null"
             />
     </LinearLayout>
+
+    <LinearLayout android:id="@+id/ll_quick_filters"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/lv_list"

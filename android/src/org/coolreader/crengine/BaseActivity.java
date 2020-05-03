@@ -43,6 +43,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -63,8 +64,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 //import com.github.johnpersano.supertoasts.library.Style;
 //import com.github.johnpersano.supertoasts.library.SuperActivityToast;
@@ -72,6 +77,11 @@ import android.widget.Toast;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
+
+	public static boolean PRO_FEATURES = true;
+	public static boolean PREMIUM_FEATURES = PRO_FEATURES;
+	//public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
+	public static String MAIN_CLASS_NAME = "org.knownreader.premium";
 
 //	@Override
 //	public boolean onCreateOptionsMenu(Menu menu) {
@@ -229,7 +239,7 @@ public class BaseActivity extends Activity implements Settings {
 
 		// load settings
 		Properties props = settings();
-		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
+		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
 		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) theme = "WHITE";
 		String lang = props.getProperty(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 		setLanguage(lang);
@@ -480,7 +490,9 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_toggle_page_view_mode, R.attr.attr_icons8_settings_search,
 				         R.attr.cr3_option_font_face_drawable, R.attr.cr3_option_text_bold_drawable,
 						 R.attr.attr_icons8_send_by_email,
-						 R.attr.attr_icons8_whole_page_to_dic
+						 R.attr.attr_icons8_whole_page_to_dic,
+						 R.attr.attr_icons8_texture,
+						 R.attr.attr_icons8_hide
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -559,6 +571,8 @@ public class BaseActivity extends Activity implements Settings {
 
 		int brBookmarksToEmailDrawableRes = a.getResourceId(69, 0);
 		int brWholePageToDic = a.getResourceId(70, 0);
+		int brChooseTexture = a.getResourceId(71, 0);
+		int brHide = a.getResourceId(72, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -705,6 +719,10 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL.setIconId(brBookmarksToEmailDrawableRes);
 		if (brWholePageToDic != 0)
 			ReaderAction.WHOLE_PAGE_TO_DIC.setIconId(brWholePageToDic);
+		if (brChooseTexture != 0)
+			ReaderAction.CHOOSE_TEXTURE.setIconId(brChooseTexture);
+		if (brHide != 0)
+			ReaderAction.HIDE.setIconId(brHide);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1777,6 +1795,60 @@ public class BaseActivity extends Activity implements Settings {
 		askConfirmation(questionResourceId, action, null);
 	}
 
+	public void tintAlertDialog(AlertDialog adlg) {
+		int colorGrayC;
+		int colorGray;
+		int colorIcon;
+		TypedArray a = getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorGray = a.getColor(1, Color.GRAY);
+		colorIcon = a.getColor(2, Color.BLACK);
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		a.recycle();
+		Button btn0 = adlg.getButton(AlertDialog.BUTTON_POSITIVE);
+		Button btn1 = adlg.getButton(AlertDialog.BUTTON_NEGATIVE);
+		Button btn2 = adlg.getButton(AlertDialog.BUTTON_NEUTRAL);
+		TextView tv = adlg.findViewById(R.id.message);
+		if (tv != null) tv.setTextColor(colorIcon);
+		if (btn0 != null) {
+			btn0.setTextColor(colorIcon);
+			btn0.setBackgroundColor(colorGrayCT2);
+			ViewGroup vg = (ViewGroup) btn0.getParent();
+			if (vg != null) {
+				vg.setBackgroundColor(colorGrayCT);
+				ViewGroup vg2 = (ViewGroup) vg.getParent();
+				if (vg2 != null) {
+					vg2.setBackgroundColor(colorGrayCT);
+					ViewGroup buttonBarStyle = (ViewGroup) vg2.getParent();
+					if (buttonBarStyle != null) {
+						buttonBarStyle.setBackgroundColor(colorGrayCT);
+//						ViewGroup buttonPanel = (ViewGroup) buttonBarStyle.getParent();
+//						if (buttonPanel != null) {
+//							buttonPanel.setBackgroundColor(colorGrayCT);
+//							ViewGroup parentPanel  = (ViewGroup) buttonPanel.getParent();
+//							if (parentPanel != null) {
+//								for (int i = 0; i < parentPanel.getChildCount(); i++) {
+//									View child = parentPanel.getChildAt(i);
+//									child.setBackgroundColor(colorGrayCT);
+//								}
+//							}
+//						}
+					}
+				}
+			}
+		}
+		if (btn1 != null) {
+			btn1.setTextColor(colorIcon);
+			btn1.setBackgroundColor(colorGrayCT2);
+		}
+		if (btn2 != null) {
+			btn2.setTextColor(colorIcon);
+			btn2.setBackgroundColor(colorGrayCT2);
+		}
+	}
+
 	public void askConfirmation(int questionResourceId, final Runnable action, final Runnable cancelAction) {
 		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
 		dlg.setMessage(questionResourceId);
@@ -1791,7 +1863,26 @@ public class BaseActivity extends Activity implements Settings {
 					cancelAction.run();
 			}
 		});
-		dlg.show();
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
+	}
+
+	public void askConfirmation(String question, final Runnable action, final Runnable cancelAction) {
+		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+		dlg.setMessage(question);
+		dlg.setPositiveButton(R.string.dlg_button_ok, new OnClickListener() {
+			public void onClick(DialogInterface arg0, int arg1) {
+				action.run();
+			}
+		});
+		dlg.setNegativeButton(R.string.dlg_button_cancel, new OnClickListener() {
+			public void onClick(DialogInterface arg0, int arg1) {
+				if (cancelAction != null)
+					cancelAction.run();
+			}
+		});
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
 	}
 
 	public void askConfirmation(String question, final Runnable action) {
@@ -1807,7 +1898,8 @@ public class BaseActivity extends Activity implements Settings {
 				// do nothing
 			}
 		});
-		dlg.show();
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
 	}
 
 	public void directoryUpdated(FileInfo dir) {
@@ -2215,7 +2307,7 @@ public class BaseActivity extends Activity implements Settings {
 
 	        props.applyDefault(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 	        
-	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
+	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
 	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
 	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "BLACK" : "DARK");
 	        props.applyDefault(ReaderView.PROP_APP_SELECTION_PERSIST, "0");
@@ -2312,9 +2404,9 @@ public class BaseActivity extends Activity implements Settings {
 			props.setProperty(ReaderView.PROP_RENDER_DPI, Integer.valueOf((int)(96*mActivity.getDensityFactor())).toString());
 
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMOUT_BLOCK_MODE, "1");
-			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE, "1");
+			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE, "0");
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMOUT_INLINE_MODE, "1");
-			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_INLINE_MODE, "1");
+			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_INLINE_MODE, "0");
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMOUT_BLOCK_SCALE, "0");
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_BLOCK_SCALE, "0");
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMOUT_INLINE_SCALE, "0");
@@ -2589,7 +2681,27 @@ public class BaseActivity extends Activity implements Settings {
 		tintViewIcons(v, false);
 	}
 
+	public void tintViewIconsC(View v, int setColor) {
+		tintViewIconsC(v, false, setColor);
+	}
+
 	public void tintViewIcons(Object o, boolean forceTint) {
+		if (o != null)
+			tintViewIcons(o, PorterDuff.Mode.SRC_ATOP, forceTint, false, 0);
+	}
+
+	public void tintViewIconsC(Object o, boolean forceTint, int setColor) {
+		if (o != null)
+			tintViewIcons(o, PorterDuff.Mode.SRC_ATOP, forceTint, true, setColor);
+	}
+
+	public void tintViewIcons(Object o, PorterDuff.Mode mode, boolean forceTint) {
+		if (o != null)
+			tintViewIcons(o, mode, forceTint, false, 0);
+	}
+
+	public void tintViewIcons(Object o, PorterDuff.Mode mode, boolean forceTint, boolean doSetColor, int setColor) {
+		if (o == null) return;
         Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
 		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
         int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
@@ -2598,7 +2710,9 @@ public class BaseActivity extends Activity implements Settings {
 		int isTintedIcons = a.getInt(0, 0);
 		int colorIcon = a.getColor(1, Color.argb(255,128,128,128));
 		if (custIcons) colorIcon = custColor;
+		if (doSetColor) colorIcon = setColor;
 		a.recycle();
+
 		if (isTintedIcons == 1) {
 			if (o instanceof View) {
 				View v = (View) o;
@@ -2611,6 +2725,11 @@ public class BaseActivity extends Activity implements Settings {
 						//int col = Color.argb(200,200,50,50);
 						if (vc instanceof ImageView) ((ImageView) vc).setColorFilter(colorIcon);
 						if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(colorIcon);
+						if (vc instanceof Button) {
+							for (Drawable d: ((Button) vc).getCompoundDrawables()) {
+								if (d instanceof BitmapDrawable) ((BitmapDrawable) d).setColorFilter(colorIcon, mode);
+							}
+						}
 						//if (vc instanceof ImageView) ((ImageView) vc).setColorFilter(col);
 						//if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(col);
 					}

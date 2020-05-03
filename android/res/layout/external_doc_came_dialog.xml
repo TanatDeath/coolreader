@@ -99,6 +99,7 @@
                         android:tag="tint"
                         android:textColor="?attr/colorIcon"
                         android:contentDescription="@null"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
                         android:text="@string/open_as_html" />
                 <Button
                         android:id="@+id/btn_as_text"
@@ -109,6 +110,7 @@
                         android:textColor="?attr/colorIcon"
                         android:tag="tint"
                         android:contentDescription="@null"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
                         android:text="@string/open_as_text" />
 			</TableRow>
             <TableRow android:id="@+id/trow_text_or_html2">

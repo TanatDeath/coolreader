@@ -120,6 +120,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
+				android:layout_marginBottom="15dp"
 				>
 				<ImageButton android:id="@+id/btn_prev1"
 					style="@style/TextAppearance.Small"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Знайти</string>
     <string name="mi_exit">Вийти</string>
     <string name="mi_goto">Перейти</string>
@@ -12,7 +12,7 @@
     <string name="mi_font_previous">Попередній шрифт</string>
     <string name="mi_font_next">Наступний шрифт</string>
     <string name="progress_please_wait">Зачекайте&#8230;</string>
-    <string name="progress_starting_cool_reader">CoolReader запускається</string>
+    <string name="progress_starting_cool_reader">KnownReader запускається</string>
     <string name="progress_loading">Відкриття документу</string>
     <string name="progress_formatting">Форматування документу</string>
     <string name="progress_scanning">Сканування теки</string>

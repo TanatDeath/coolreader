@@ -213,7 +213,7 @@ public class HelpFileGenerator {
 		}
 	}
 	private static final ImageRes[] images = {
-		new ImageRes("cr3_logo", R.mipmap.known_reader_logo),
+		new ImageRes("cr3_logo", R.drawable.known_reader_flogo),
 		new ImageRes("open_file", R.drawable.ic_menu_archive),
 		new ImageRes("goto", R.drawable.ic_menu_goto),
 		new ImageRes("bookmarks", R.drawable.ic_menu_mark),

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">搜索</string>
     <string name="mi_exit">退出</string>
     <string name="mi_goto">转到</string>
@@ -12,7 +12,7 @@
     <string name="mi_font_previous">前一个字体</string>
     <string name="mi_font_next">下一个字体</string>
     <string name="progress_please_wait">请稍候</string>
-    <string name="progress_starting_cool_reader">正在启动CoolReader</string>
+    <string name="progress_starting_cool_reader">正在启动KnownReader</string>
     <string name="progress_loading">正在加载文档</string>
     <string name="progress_formatting">正在进行格式编排</string>
     <string name="progress_scanning">扫描文件夹</string>
@@ -179,7 +179,7 @@
     <string name="options_selection_action_dictionary">查找字典</string>
     <string name="options_selection_action_copy">复制到剪贴板</string>
     <string name="options_app_browser_hide_empty_dirs">隐藏没有书文的文件夹</string>
-    <string name="dlg_about">关于CoolReader</string>
+    <string name="dlg_about">关于KnownReader</string>
     <string name="dlg_book_info">书文信息</string>
     <string name="mi_book_styles_enable">启用文档内部样式</string>
     <string name="mi_book_styles_disable">禁用文档内部样式</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Zoek</string>
     <string name="mi_exit">Sluit</string>
     <string name="mi_goto">Ga Naar</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Bestand openen</string>
     <string name="mi_options">Opties</string>
     <string name="progress_please_wait">Even geduld aub</string>
-    <string name="progress_starting_cool_reader">Aan starten van Cool Reader programma</string>
+    <string name="progress_starting_cool_reader">Aan starten van KnownReader programma</string>
     <string name="progress_loading">Aan het downloaden van boek</string>
     <string name="progress_formatting">Boek aan het opmaak</string>
     <string name="progress_scanning">Het Scaneren van een directory</string>

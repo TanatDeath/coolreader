@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Buscar</string>
     <string name="mi_exit">Salir</string>
     <string name="mi_goto">Ir a</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Abrir archivo</string>
     <string name="mi_options">Opciones</string>
     <string name="progress_please_wait">Por favor espere</string>
-    <string name="progress_starting_cool_reader">Iniciando Cool Reader</string>
+    <string name="progress_starting_cool_reader">Iniciando KnownReader</string>
     <string name="progress_loading">Cargando documento</string>
     <string name="progress_formatting">Formateando documento</string>
     <string name="progress_scanning">Escaneando directorio</string>
@@ -174,7 +174,7 @@
     <string name="options_selection_action_dictionary">Buscar en diccionario</string>
     <string name="options_selection_action_copy">Copiar al portapapeles</string>
     <string name="options_app_browser_hide_empty_dirs">Ocultar directorios sin libros</string>
-    <string name="dlg_about">Sobre Cool Reader</string>
+    <string name="dlg_about">Sobre</string>
     <string name="dlg_book_info">Información sobre el libro</string>
     <string name="mi_book_styles_enable">Activar estilos internos del documento</string>
     <string name="mi_book_styles_disable">Desactivar estilos internos del documento</string>

@@ -119,6 +119,7 @@ public interface Settings {
     public static final String PROP_CONTROLS_ENABLE_VOLUME_KEYS ="app.controls.volume.keys.enabled";
     
     public static final String PROP_APP_FULLSCREEN          ="app.fullscreen";
+	public static final String PROP_APP_TITLEBAR_NEW = "app.titlebar.new";
     public static final String PROP_APP_BOOK_PROPERTY_SCAN_ENABLED ="app.browser.fileprops.scan.enabled";
     public static final String PROP_APP_SHOW_COVERPAGES     ="app.browser.coverpages";
     public static final String PROP_APP_COVERPAGE_SIZE     ="app.browser.coverpage.size"; // 0==small, 2==BIG

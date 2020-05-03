@@ -426,7 +426,7 @@ public class CloudAction {
                                             sButtons.add(cr.getString(R.string.rpos_restore));
                                             sButtons.add(cr.getString(R.string.rpos_list));
                                             sButtons.add(cr.getString(R.string.rpos_cancel));
-                                            SomeButtonsToolbarDlg.showDialog(cr, cr.getReaderView(), true,
+                                            SomeButtonsToolbarDlg.showDialog(cr, cr.getReaderView(), 0, true,
                                                     cr.getString(R.string.rpos_found),
                                                     sButtons, o1, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
                                                         @Override
@@ -711,7 +711,7 @@ public class CloudAction {
             File bookFile = new File(sBookFName);
             //Uri path = Uri.fromFile(bookFile);
             String sPkg = cr.getApplicationContext().getPackageName();
-            Uri path = FileProvider.getUriForFile(cr, "org.coolreader.mod.plotn.fileprovider", bookFile);
+            Uri path = FileProvider.getUriForFile(cr, "org.knownreader.fileprovider", bookFile);
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
             // set the type to 'email'
             emailIntent.setType("vnd.android.cursor.dir/email");

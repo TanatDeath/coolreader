@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.Browser;
 import android.support.annotation.ColorInt;
+import android.text.ClipboardManager;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -18,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TableLayout;
@@ -27,6 +29,7 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.ReaderView;
@@ -207,8 +210,10 @@ public class DicToastView {
             TableRow yndRow = (TableRow) inflater.inflate(R.layout.dic_ynd_item, null);
             dicTable.addView(yndRow);
             TextView tvYnd1 = (TextView) window.getContentView().findViewById(R.id.ynd_tv1);
+            Integer tSizeI = tSize;
+            Double tSizeD = Double.valueOf(tSizeI.doubleValue() *0.8);
             if (tSize > 0) {
-                tvYnd1.setTextSize(TypedValue.COMPLEX_UNIT_PX, tSize);
+                tvYnd1.setTextSize(TypedValue.COMPLEX_UNIT_PX, tSizeD.intValue());
             }
             tvYnd1.setPaintFlags(tvYnd1.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             tvYnd1.setOnClickListener(new View.OnClickListener() {
@@ -227,16 +232,7 @@ public class DicToastView {
                     }
                 }
             });
-            Button btnTransl = (Button) window.getContentView().findViewById(R.id.btnTransl);
-            TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-                    {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-            int colorGray = a.getColor(0, Color.GRAY);
-            int colorGrayC = a.getColor(1, Color.GRAY);
-            int colorIcon = a.getColor(2, Color.GRAY);
-            a.recycle();
-            int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-            int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-            if (btnTransl!=null) btnTransl.setBackgroundColor(colorGray);
+            ImageButton btnTransl = (ImageButton) window.getContentView().findViewById(R.id.btnTransl);
             final CoolReader cr = (CoolReader)mActivity;
             btnTransl.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -257,8 +253,39 @@ public class DicToastView {
                     showing.compareAndSet(true, false);
                 }
             });
+            ImageButton btnToUserDic = (ImageButton) window.getContentView().findViewById(R.id.btn_to_user_dic);
+            btnToUserDic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (cr.getReaderView().mBookInfo!=null) {
+                        if (cr.getReaderView().lastSelection!=null) {
+                            if (!cr.getReaderView().lastSelection.isEmpty()) {
+                                cr.getReaderView().clearSelection();
+                                cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
+                            }
+                        }
+                    };
+                    window.dismiss();
+                    showing.compareAndSet(true, false);
+                }
+            });
+            ImageButton btnCopyToCb = (ImageButton) window.getContentView().findViewById(R.id.btn_copy_to_cb);
+            btnCopyToCb.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager cm = mActivity.getClipboardmanager();
+                    String s = StrUtils.getNonEmptyStr(t.msg,true);
+                    if (cr.getReaderView().lastSelection != null) {
+                        if (s.startsWith(cr.getReaderView().lastSelection.text+":")) s = s.substring(cr.getReaderView().lastSelection.text.length()+1);
+                    }
+                    cm.setText(StrUtils.getNonEmptyStr(s,true));
+                    window.dismiss();
+                    showing.compareAndSet(true, false);
+                }
+            });
+            mActivity.tintViewIcons(yndRow,true);
         } else
-            //if (!StrUtils.isEmptyStr(mDicName))
+            if (!StrUtils.getNonEmptyStr(mDicName,true).equals("[HIDE]"))
             {
                 TableRow getSepRow = (TableRow) inflater.inflate(R.layout.geo_sep_item, null);
                 dicTable.addView(getSepRow);
@@ -268,8 +295,10 @@ public class DicToastView {
                 dicTable.addView(yndRow);
                 TextView tvYnd1 = (TextView) window.getContentView().findViewById(R.id.ynd_tv1);
                 tvYnd1.setText(mDicName);
+                Integer tSizeI = tSize;
+                Double tSizeD = Double.valueOf(tSizeI.doubleValue() *0.8);
                 if (tSize > 0) {
-                    tvYnd1.setTextSize(TypedValue.COMPLEX_UNIT_PX, tSize);
+                    tvYnd1.setTextSize(TypedValue.COMPLEX_UNIT_PX, tSizeD.intValue());
                 }
                 tvYnd1.setPaintFlags(tvYnd1.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
                 tvYnd1.setOnClickListener(new View.OnClickListener() {
@@ -288,16 +317,7 @@ public class DicToastView {
                         }
                     }
                 });
-                Button btnTransl = (Button) window.getContentView().findViewById(R.id.btnTransl);
-                TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-                        {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-                int colorGray = a.getColor(0, Color.GRAY);
-                int colorGrayC = a.getColor(1, Color.GRAY);
-                int colorIcon = a.getColor(2, Color.GRAY);
-                a.recycle();
-                int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-                int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-                if (btnTransl!=null) btnTransl.setBackgroundColor(colorGray);
+                ImageButton btnTransl = (ImageButton) window.getContentView().findViewById(R.id.btnTransl);
                 final CoolReader cr = (CoolReader)mActivity;
                 btnTransl.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -318,6 +338,37 @@ public class DicToastView {
                         showing.compareAndSet(true, false);
                     }
                 });
+                ImageButton btnToUserDic = (ImageButton) window.getContentView().findViewById(R.id.btn_to_user_dic);
+                btnToUserDic.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (cr.getReaderView().mBookInfo!=null) {
+                            if (cr.getReaderView().lastSelection!=null) {
+                                if (!cr.getReaderView().lastSelection.isEmpty()) {
+                                    cr.getReaderView().clearSelection();
+                                    cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
+                                }
+                            }
+                        };
+                        window.dismiss();
+                        showing.compareAndSet(true, false);
+                    }
+                });
+                ImageButton btnCopyToCb = (ImageButton) window.getContentView().findViewById(R.id.btn_copy_to_cb);
+                btnCopyToCb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ClipboardManager cm = mActivity.getClipboardmanager();
+                        String s = StrUtils.getNonEmptyStr(t.msg,true);
+                        if (cr.getReaderView().lastSelection != null) {
+                            if (s.startsWith(cr.getReaderView().lastSelection.text+":")) s = s.substring(cr.getReaderView().lastSelection.text.length()+1);
+                        }
+                        cm.setText(StrUtils.getNonEmptyStr(s,true));
+                        window.dismiss();
+                        showing.compareAndSet(true, false);
+                    }
+                });
+                mActivity.tintViewIcons(yndRow,true);
             }
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);

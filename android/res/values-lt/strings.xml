@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Paieška</string>
     <string name="mi_exit">Išeiti</string>
     <string name="mi_goto">Eiti į</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Atidaryti failą</string>
     <string name="mi_options">Pasirinkimai</string>
     <string name="progress_please_wait">Palaukite</string>
-    <string name="progress_starting_cool_reader">Paleidžiame Cool Reader</string>
+    <string name="progress_starting_cool_reader">Paleidžiame KnownReader</string>
     <string name="progress_loading">Dokumentas įkraunamas</string>
     <string name="progress_formatting">Dokumentas formatuojamas</string>
     <string name="progress_scanning">Skanuojamos direktorijos</string>
@@ -174,7 +174,7 @@
     <string name="options_selection_action_dictionary">Rasti žodyne</string>
     <string name="options_selection_action_copy">Kopijuoti</string>
     <string name="options_app_browser_hide_empty_dirs">Paslėpti aplankus be knygų</string>
-    <string name="dlg_about">Apie CoolReader</string>
+    <string name="dlg_about">Apie KnownReader</string>
     <string name="dlg_book_info">Informacija apie knygą</string>
     <string name="mi_book_styles_enable">Naudoti vidinius dokumento stylius</string>
     <string name="mi_book_styles_disable">Nenaudoti vidinių dokumento stylių</string>

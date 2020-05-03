@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.*;
@@ -262,17 +263,6 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		colorGray = a.getColor(2, Color.GRAY);
 		colorIcon = a.getColor(3, Color.GRAY);
 		a.recycle();
-//		boolean bNotNeeded = false;
-//		if (lastRecentFiles.size()==books.size()) {
-//			bNotNeeded = true;
-//			for (int i=0;i<lastRecentFiles.size();i++) {
-//				if (!lastRecentFiles.get(i).equals(books.get(i).getFileInfo())) {
-//					bNotNeeded = false;
-//				}
-//			}
-//		}
-//		if (bNotNeeded) return;
-
 		lastRecentFiles.clear();
 		for (int i=0;i<books.size();i++) lastRecentFiles.add(books.get(i).getFileInfo());
 		ArrayList<FileInfo> files = new ArrayList<FileInfo>();
@@ -356,15 +346,15 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		mActivity.waitForCRDBService(new Runnable() {
 					@Override
 					public void run() {
-			if (Services.getHistory() != null && mActivity.getDB() != null)
-				Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
+						if (Services.getHistory() != null && mActivity.getDB() != null)
+							Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
 								@Override
 								public void onRecentBooksListLoaded(ArrayList<BookInfo> bookList) {
-						updateCurrentBook(bookList != null && bookList.size() > 0 ? bookList.get(0) : null);
-						updateRecentBooks(bookList);
-					}
-											});
-			}
+										updateCurrentBook(bookList != null && bookList.size() > 0 ? bookList.get(0) : null);
+										updateRecentBooks(bookList);
+									}
+								});
+						}
 				});
 			}
 		});
@@ -603,12 +593,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			viewDBX.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					if (!BaseActivity.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return;
+					}
 					CloudAction.dbxOpenBookDialog(mActivity);
 				}
 			});
 			viewDBX.setOnLongClickListener(new OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
+					if (!BaseActivity.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return true;
+					}
 					mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
 					mActivity.dbxInputTokenDialog.show();
 					return true;
@@ -628,12 +626,20 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			viewYandex.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					if (!BaseActivity.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return;
+					}
 					CloudAction.yndOpenBookDialog(mActivity, false);
 				}
 			});
 			viewYandex.setOnLongClickListener(new OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
+					if (!BaseActivity.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return true;
+					}
 					mActivity.yndInputTokenDialog = new YNDInputTokenDialog(mActivity);
 					mActivity.yndInputTokenDialog.show();
 					return true;
@@ -856,12 +862,21 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (bRecentToRead) btnRecentToRead.setBackgroundColor(colorGrayCT2);
-		else btnRecentToRead.setBackgroundColor(colorGrayCT);
-		if (bRecentReading) btnRecentReading.setBackgroundColor(colorGrayCT2);
-		else btnRecentReading.setBackgroundColor(colorGrayCT);
-		if (bRecentFinished) btnRecentFinished.setBackgroundColor(colorGrayCT2);
-		else btnRecentFinished.setBackgroundColor(colorGrayCT);
+		mActivity.tintViewIcons(btnRecentToRead, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(btnRecentReading, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(btnRecentFinished, PorterDuff.Mode.CLEAR,true);
+		if (bRecentToRead) {
+			btnRecentToRead.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(btnRecentToRead,true);
+		} else btnRecentToRead.setBackgroundColor(colorGrayCT);
+		if (bRecentReading) {
+			btnRecentReading.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(btnRecentReading,true);
+		} else btnRecentReading.setBackgroundColor(colorGrayCT);
+		if (bRecentFinished) {
+			btnRecentFinished.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(btnRecentFinished,true);
+		} else btnRecentFinished.setBackgroundColor(colorGrayCT);
 	}
 	
 	private void createViews() {
@@ -1019,6 +1034,13 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				refreshRecentBooks();
 			}
 		});
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		Drawable img3 = img.getConstantState().newDrawable().mutate();
+		btnRecentToRead.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		btnRecentReading.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+		btnRecentFinished.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
 		ImageButton btnQuickSearch = (ImageButton)view.findViewById(R.id.btn_quick_search);
 		mActivity.tintViewIcons(btnQuickSearch, true);
 		final EditText edQuickSearch = (EditText)view.findViewById(R.id.quick_search);
@@ -1248,7 +1270,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			ReaderAction.RECENT_BOOKS,
 			ReaderAction.USER_MANUAL,
 			ReaderAction.OPTIONS,
-			//ReaderAction.OPEN_BOOK_FROM_GD,
+			ReaderAction.HIDE,
 			ReaderAction.EXIT,	
 		};
 		mActivity.showActionsToolbarMenu(actions, new OnActionHandler() {
@@ -1256,6 +1278,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			public boolean onActionSelected(ReaderAction item) {
 				if (item == ReaderAction.EXIT) {
 					mActivity.finish();
+					return true;
+				} else if (item == ReaderAction.HIDE) {
+					mActivity.onBackPressed();
 					return true;
 				} else if (item == ReaderAction.ABOUT) {
 					mActivity.showAboutDialog();

@@ -167,6 +167,7 @@
 				android:src="@null"
 				android:maxLines="1"
 				android:ellipsize="end"
+				android:drawableLeft="@drawable/icons8_toc_item_normal"
 				android:textColor="?attr/colorIcon"
 				android:contentDescription="@string/book_mark_toread"
 				android:text="@string/book_mark_toread" />

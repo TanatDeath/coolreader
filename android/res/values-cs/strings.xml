@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">"Cool Reader"</string>
+<string name="app_name">"KnownReader"</string>
 <string name="mi_search">"Hledat"</string>
 <string name="mi_exit">"Zavřít"</string>
 <string name="mi_goto">"Přejít"</string>
@@ -8,7 +8,7 @@
 <string name="mi_file_open">"Otevřít soubor"</string>
 <string name="mi_options">"Nastavení"</string>
 <string name="progress_please_wait">"Čekejte, prosím"</string>
-<string name="progress_starting_cool_reader">"Spouští se Cool Reader"</string>
+<string name="progress_starting_cool_reader">"Spouští se KnownReader"</string>
 <string name="progress_loading">"Načítá se dokument"</string>
 <string name="progress_formatting">"Formátuje se dokument"</string>
 <string name="progress_scanning">"Prohledává se složka"</string>

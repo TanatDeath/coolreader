@@ -663,20 +663,9 @@ public class CoverpageManager {
 						try {
 							File f = new File(sDir + sFName);
 							if (f.exists()) {
-								//rc = new Rect(fullrc.left, fullrc.top, fullrc.right, fullrc.bottom);
 								log.d("Image for " + book + " is custom, drawing...");
 								Bitmap bitmap = BitmapFactory.decodeFile(sDir + sFName);
 								Rect dst = getBestCoverSize(rc, bitmap.getWidth(), bitmap.getHeight());
-//								Log.i("ASDF", "draw: "+bitmap.getWidth());
-//								Log.i("ASDF", "draw: "+bitmap.getHeight());
-//								Log.i("ASDF", "draw: "+rc.left);
-//								Log.i("ASDF", "draw: "+rc.top);
-//								Log.i("ASDF", "draw: "+rc.right);
-//								Log.i("ASDF", "draw: "+rc.bottom);
-//								Log.i("ASDF", "draw: "+dst.left);
-//								Log.i("ASDF", "draw: "+dst.top);
-//								Log.i("ASDF", "draw: "+dst.right);
-//								Log.i("ASDF", "draw: "+dst.bottom);
                                 log.d("Image for " + book + " is custom, drawing...");
                                 Paint p = new Paint();
                                 p.setColor(getDominantColor(bitmap));

@@ -111,7 +111,8 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	{
 		super("AboutDialog", activity);
 		mCoolReader = activity;
-		boolean isFork = !mCoolReader.getPackageName().equals(CoolReader.class.getPackage().getName());
+		//boolean isFork = !mCoolReader.getPackageName().equals(CoolReader.class.getPackage().getName());
+		boolean isFork = true;
 		setTitle(R.string.dlg_about);
 		LayoutInflater inflater = LayoutInflater.from(getContext());
 		final TabHost tabs = (TabHost)inflater.inflate(R.layout.about_dialog, null);
@@ -137,10 +138,10 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 
 		mAppTab = (View)inflater.inflate(R.layout.about_dialog_app, null);
 		if (isFork) {
-			((TextView) mAppTab.findViewById(R.id.version)).setText("Cool Reader (plotn mod) " + mCoolReader.getVersion());
-			((TextView) mAppTab.findViewById(R.id.www1)).setText("https://github.com/plotn/coolreader");
+			((TextView) mAppTab.findViewById(R.id.version)).setText("KnownReader " + mCoolReader.getVersion());
+			((TextView) mAppTab.findViewById(R.id.www1)).setText("KnownReader.com");
 		} else {
-			((TextView) mAppTab.findViewById(R.id.version)).setText("Cool Reader " + mCoolReader.getVersion());
+			((TextView) mAppTab.findViewById(R.id.version)).setText("KnownReader " + mCoolReader.getVersion());
 		}
 
 		mDirsTab = (View)inflater.inflate(R.layout.about_dialog_dirs, null);
@@ -241,7 +242,15 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 			TextView btn_about_donation_total = (TextView)mDonationTab.findViewById(R.id.btn_about_donation_total);
 			if (btn_about_donation_total != null) ((ViewGroup) btn_about_donation_total.getParent()).removeView(ll_donate3);
 			TextView tv_donate_message = (TextView)mDonationTab.findViewById(R.id.tv_donate_message);
-			if (tv_donate_message != null) tv_donate_message.setText(R.string.dlg_about_donation_inapp_purchase_plotn);
+			TextView tv_donate_message2 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message2);
+			TextView tv_donate_message3 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message3);
+			TextView tv_donate_message4 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message4);
+			TextView tv_donate_message5 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message5);
+			if (tv_donate_message != null) tv_donate_message.setText(R.string.knownreader_donate_line1);
+			if (tv_donate_message2 != null) tv_donate_message2.setText(R.string.knownreader_donate_line2);
+			if (tv_donate_message3 != null) tv_donate_message3.setText(R.string.knownreader_donate_line3);
+			if (tv_donate_message4 != null) tv_donate_message4.setText(R.string.knownreader_donate_line4);
+			if (tv_donate_message5 != null) tv_donate_message5.setText(R.string.knownreader_donate_line5);
 		}
 		
 		tabs.setup();
@@ -283,6 +292,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		tabs.setCurrentTab(1);
 		tabs.setCurrentTab(0);
 		// 25% chance to show Donations tab
+		rnd = new Random(android.os.SystemClock.uptimeMillis());
 		if ((rnd.nextInt() & 3) == 3)
 			tabs.setCurrentTab(3);
 		

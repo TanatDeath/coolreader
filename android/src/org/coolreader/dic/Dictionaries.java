@@ -11,6 +11,7 @@ import org.coolreader.crengine.DicSearchHistoryEntry;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.OptionsDialog;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
@@ -119,6 +120,7 @@ public class Dictionaries {
 		public final Integer internal;
 		public final int dicIcon;
 		public Drawable icon;
+		public final String httpLink;
 		public String dataKey = SearchManager.QUERY;
 
 		public boolean isInstalled() {
@@ -131,7 +133,7 @@ public class Dictionaries {
 
 		public boolean isInstalled = false;
 		public DictInfo ( String id, String name, String packageName, String className, String action, Integer internal,
-						  int dicIcon, Drawable icon) {
+						  int dicIcon, Drawable icon, String httpLink) {
 			this.id = id;
 			this.name = name;
 			this.packageName = packageName;
@@ -140,54 +142,55 @@ public class Dictionaries {
 			this.internal = internal;
 			this.dicIcon = dicIcon;
 			this.icon = icon;
+			this.httpLink = httpLink;
 		}
 		public DictInfo setDataKey(String key) { this.dataKey = key; return this; }
 	}
 
 	static final DictInfo dicts[] = {
 		new DictInfo("Fora", "Fora Dictionary", "com.ngc.fora", "com.ngc.fora.ForaDictionary",
-				Intent.ACTION_SEARCH, 0, R.drawable.fora, null),
+				Intent.ACTION_SEARCH, 0, R.drawable.fora, null, ""),
 		new DictInfo("ColorDict", "ColorDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 0, R.drawable.colordict, null),
+				Intent.ACTION_SEARCH, 0, R.drawable.colordict, null, ""),
 		new DictInfo("ColorDictApi", "ColorDict new / GoldenDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 1, R.drawable.goldendict, null),
+				Intent.ACTION_SEARCH, 1, R.drawable.goldendict, null, "'"),
 		new DictInfo("ColorDictApi (minicard)", "ColorDict new / GoldenDict (minicard)", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 6, R.drawable.goldendict, null),
+				Intent.ACTION_SEARCH, 6, R.drawable.goldendict, null, ""),
 		new DictInfo("AardDict", "Aard Dictionary", "aarddict.android", "aarddict.android.Article",
-				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null),
+				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, ""),
 		new DictInfo("AardDictLookup", "Aard Dictionary Lookup", "aarddict.android", "aarddict.android.Lookup",
-				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null),
+				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, ""),
 		new DictInfo("Aard2", "Aard 2 Dictionary", "itkach.aard2", "aard2.lookup",
-				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null),
+				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null, ""),
 		new DictInfo("Dictan", "Dictan Dictionary", "info.softex.dictan", null,
-				Intent.ACTION_VIEW, 2, R.drawable.dictan, null),
+				Intent.ACTION_VIEW, 2, R.drawable.dictan, null, ""),
 		new DictInfo("FreeDictionary.org", "Free Dictionary . org", "org.freedictionary", "org.freedictionary.MainActivity",
-				"android.intent.action.VIEW", 0, R.drawable.freedictionary, null),
+				"android.intent.action.VIEW", 0, R.drawable.freedictionary, null, ""),
 		new DictInfo("ABBYYLingvo", "ABBYY Lingvo", "com.abbyy.mobile.lingvo.market", null /*com.abbyy.mobile.lingvo.market.MainActivity*/,
-				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0, R.drawable.lingvo, null).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
+				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0, R.drawable.lingvo, null, "").setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		new DictInfo("ABBYYLingvo (minicard)", "ABBYY Lingvo (minicard)", "com.abbyy.mobile.lingvo.market", null,
-				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 5, R.drawable.lingvo, null).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
+				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 5, R.drawable.lingvo, null, "").setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		//new DictInfo("ABBYYLingvoLive", "ABBYY Lingvo Live", "com.abbyy.mobile.lingvolive", null, "com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		new DictInfo("LingoQuizLite", "Lingo Quiz Lite", "mnm.lite.lingoquiz", "mnm.lite.lingoquiz.ExchangeActivity",
-				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null).setDataKey("EXTRA_WORD"),
+				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null, "").setDataKey("EXTRA_WORD"),
 		new DictInfo("LingoQuiz", "Lingo Quiz", "mnm.lingoquiz", "mnm.lingoquiz.ExchangeActivity",
-				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null).setDataKey("EXTRA_WORD"),
+				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null, "").setDataKey("EXTRA_WORD"),
 		new DictInfo("LEODictionary", "LEO Dictionary", "org.leo.android.dict", "org.leo.android.dict.LeoDict",
-				"android.intent.action.SEARCH", 0, R.drawable.leo, null).setDataKey("query"),
+				"android.intent.action.SEARCH", 0, R.drawable.leo, null, "").setDataKey("query"),
 		new DictInfo("PopupDictionary", "Popup Dictionary", "com.barisatamer.popupdictionary", "com.barisatamer.popupdictionary.MainActivity",
-				"android.intent.action.VIEW", 0,R.drawable.popup, null),
+				"android.intent.action.VIEW", 0,R.drawable.popup, null, ""),
 		new DictInfo("GoogleTranslate", "Google Translate", "com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity",
-				Intent.ACTION_SEND, 4, R.drawable.googledic, null),
+				Intent.ACTION_SEND, 4, R.drawable.googledic, null, ""),
 		new DictInfo("YandexTranslate", "Yandex Translate", "ru.yandex.translate", "ru.yandex.translate.ui.activities.MainActivity",
-				Intent.ACTION_SEND, 4, R.drawable.ytr_ic_launcher, null),
+				Intent.ACTION_SEND, 4, R.drawable.ytr_ic_launcher, null, ""),
 		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.search.SearchActivity",
-				Intent.ACTION_SEND, 4, R.drawable.wiki, null),
+				Intent.ACTION_SEND, 4, R.drawable.wiki, null, ""),
 		new DictInfo("YandexTranslateOnline", "Yandex Translate Online", "", "",
-				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null),
+				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null, YND_DIC_ONLINE),
 		new DictInfo("LingvoOnline", "Lingvo Online", "", "",
-					Intent.ACTION_SEND, 8, R.drawable.lingvo, null),
+					Intent.ACTION_SEND, 8, R.drawable.lingvo, null, LINGVO_DIC_ONLINE),
 		new DictInfo("LingvoOnline Extended", "Lingvo Online Extended", "", "",
-					Intent.ACTION_SEND, 8, R.drawable.lingvo, null),
+					Intent.ACTION_SEND, 8, R.drawable.lingvo, null, LINGVO_DIC_ONLINE),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<DictInfo>();
@@ -239,7 +242,7 @@ public class Dictionaries {
 					DictInfo di = new DictInfo(ri.activityInfo.name,
 							ri.activityInfo.loadLabel(pm).toString(),
 							packageName, ri.activityInfo.name,
-							Intent.ACTION_SEND,4,0, icon);
+							Intent.ACTION_SEND,4,0, icon, "");
 					dictsSendTo.add(di);
 					ldi.add(di);
 				}
@@ -384,13 +387,27 @@ public class Dictionaries {
 				});
 			}
 			public void onFailure(Call call, IOException e) {
-				crf2.showToast(e.getMessage());
+				BackgroundThread.instance().postBackground(new Runnable() {
+					@Override
+					public void run() {
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								crf2.showToast(e.getMessage());
+							}
+						}, 100);
+					}
+				});
 			}
 		});
 	};
 
 	private void lingvoTranslate(String s, String langf, String lang, boolean extended) {
 		CoolReader cr = (CoolReader) mActivity;
+		if (!BaseActivity.PREMIUM_FEATURES) {
+			cr.showToast(R.string.only_in_premium);
+			return;
+		}
 		if ((StrUtils.isEmptyStr(langf))||(StrUtils.isEmptyStr(lang))) {
 			BackgroundThread.instance().postBackground(new Runnable() {
 				@Override
@@ -627,7 +644,9 @@ public class Dictionaries {
 			curDict = currentDictionary3;
 		currentDictionary3 = null;
 		if (null == curDict) {
-			throw new DictionaryException("Current dictionary are invalid!");
+			((CoolReader)mActivity).optionsFilter = "";
+			((CoolReader)mActivity).showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			throw new DictionaryException(mActivity.getString(R.string.invalid_dic));
 		}
 		if (diRecent.contains(curDict)) diRecent.remove(curDict);
 		diRecent.add(0,curDict);
@@ -937,6 +956,10 @@ public class Dictionaries {
 			}
 			break;
 		case 7:
+			if (!BaseActivity.PREMIUM_FEATURES) {
+				cr.showToast(R.string.only_in_premium);
+				return;
+			}
 			BookInfo book = cr.getReaderView().getBookInfo();
 			String lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
 			String langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
@@ -963,6 +986,8 @@ public class Dictionaries {
 			urlBuilder.addQueryParameter("text", s);
 			String llang = get2dig(lang);
 			if (!StrUtils.isEmptyStr(langf)) llang = get2dig(langf)+"-"+get2dig(lang);
+			if (llang.startsWith("#-")) llang = llang.substring(2);
+			if (llang.startsWith("##-")) llang = llang.substring(3);
 			urlBuilder.addQueryParameter("lang", llang);
 			urlBuilder.addQueryParameter("format", "plain");
 			String url = urlBuilder.build().toString();
@@ -994,11 +1019,25 @@ public class Dictionaries {
 				}
 
 				public void onFailure(Call call, IOException e) {
-					crf.showToast(e.getMessage());
+					BackgroundThread.instance().postBackground(new Runnable() {
+						@Override
+						public void run() {
+							BackgroundThread.instance().postGUI(new Runnable() {
+								@Override
+								public void run() {
+									crf.showToast(e.getMessage());
+								}
+							}, 100);
+						}
+					});
 				}
 			});
 			break;
 		case 8:
+			if (!BaseActivity.PREMIUM_FEATURES) {
+				cr.showToast(R.string.only_in_premium);
+				return;
+			}
 			checkLangCodes();
 			book = cr.getReaderView().getBookInfo();
 			lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);

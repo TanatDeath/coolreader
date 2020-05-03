@@ -244,7 +244,11 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		}
 
 		public String getCurPageText() {
-			int curPage = activity.getReaderView().getDoc().getCurPage();
+			return getCurPageText(0, true);
+		}
+
+		public String getCurPageText(int offset, boolean toLower) {
+			int curPage = activity.getReaderView().getDoc().getCurPage() + offset;
 			activity.getReaderView().CheckAllPagesLoad();
 			String sPrevPage = "";
 			String sPageText = "";
@@ -255,24 +259,41 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			}
 			if (sPageText==null) sPageText = "";
 			if (sPrevPage==null) sPrevPage = "";
-			String sCurPage = sPageText.toLowerCase();
-			sPrevPage = sPrevPage.toLowerCase();
-			int cnt = 50;
-			try {
-				if (sPrevPage.length() > 10) {
-					if (!Character.isWhitespace(sPrevPage.charAt(sPrevPage.length() - 1))) {
-						for (int i = sPrevPage.length() - 1; i > 0; i--) {
-							cnt++;
-							if (Character.isWhitespace(sPrevPage.charAt(i))) {
-								sCurPage = sPrevPage.substring(i, sPrevPage.length()) + sCurPage;
-								break;
+			int iLen = 300;
+			if (sPageText.length()<iLen) iLen = sPageText.length();
+			if (sPrevPage.length()<iLen) iLen = sPrevPage.length();
+			String sCurPage = sPageText;
+			if (toLower) {
+				sCurPage = sCurPage.toLowerCase();
+				sPrevPage = sPrevPage.toLowerCase();
+			}
+			// check the text rafting
+			boolean bRafting = false;
+			for (int i = iLen - 1; i > 0; i--) {
+				String s1 = sPrevPage.substring(sPrevPage.length()-i, sPrevPage.length()).trim();
+				String s2 = sPageText.substring(0,i).trim();
+				if (sPrevPage.substring(sPrevPage.length()-i, sPrevPage.length()).trim().equals(
+						sPageText.substring(0,i).trim()
+				)) bRafting = true;
+			}
+			if (!bRafting) {
+				int cnt = 50;
+				try {
+					if (sPrevPage.length() > 10) {
+						if (!Character.isWhitespace(sPrevPage.charAt(sPrevPage.length() - 1))) {
+							for (int i = sPrevPage.length() - 1; i > 0; i--) {
+								cnt++;
+								if (Character.isWhitespace(sPrevPage.charAt(i))) {
+									sCurPage = sPrevPage.substring(i, sPrevPage.length()) + sCurPage;
+									break;
+								}
+								if (cnt > 100) break;
 							}
-							if (cnt>100) break;
 						}
 					}
-				}
-			} catch (Exception e) {
+				} catch (Exception e) {
 
+				}
 			}
 			return sCurPage;
 		}

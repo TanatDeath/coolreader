@@ -6,6 +6,7 @@
     <string name="mi_citation">Сохранить цитату</string>
     <string name="mi_user_dic">Сохранить в пользовательский словарь</string>
     <string name="mi_exit">Закрыть</string>
+    <string name="mi_hide">Свернуть</string>
     <string name="mi_goto">Перейти</string>
     <string name="mi_bookmarks">Закладки</string>
     <string name="mi_file_open">Открыть файл</string>
@@ -144,6 +145,7 @@
     <string name="action_search">Найти</string>
     <string name="action_recent_books_list">Последние книги</string>
     <string name="action_exit">Выход</string>
+    <string name="action_hide">Свернуть</string>
     <string name="action_pageup_10">Назад на 10 страниц</string>
     <string name="action_bookmarks">Закладки</string>
     <string name="action_pagedown_10">Вперед на 10 страниц</string>
@@ -228,6 +230,7 @@
     <string name="options_app_browser_hide_empty_dirs">Прятать директории без книг</string>
     <string name="dlg_about">О программе</string>
     <string name="dlg_book_info">О книге</string>
+    <string name="dlg_about_copyright">© Команда KnownReader, 2020</string>
     <string name="book_info_action_book_info">Информация о книге:</string>
     <string name="book_info_action_opds_info">Информация о книге - в OPDS каталоге:</string>
     <string name="book_info_action_opds_info_final">Книга скачана из OPDS каталога:</string>
@@ -349,7 +352,7 @@
     <string name="options_screen_blackpage_duration">Длительность отрисовки черной страницы</string>
     <string name="options_screen_blackpage_duration_add_info">Время (в мс) на которое будет показана черная заливка области чтения</string>
     <string name="options_screen_force_eink">Это EINK устройство (если не определилось автоматически)</string>
-    <string name="options_screen_force_eink_add_info">Вы можете принудительно указать, что это EINK устройство, в случаях, когда это не определил CoolReader. Если вы меняете эту настройку - закройте и откройте диалог настроек заново, чтобы увидеть настройки для eink</string>
+    <string name="options_screen_force_eink_add_info">Вы можете принудительно указать, что это EINK устройство, в случаях, когда это не определил KnownReader. Если вы меняете эту настройку - закройте и откройте диалог настроек заново, чтобы увидеть настройки для eink</string>
     <string name="options_render_font_gamma">Гамма-коррекция шрифта</string>
     <string name="action_toggle_titlebar">Вкл/выкл колонтитул</string>
     <string name="action_show_position_info">Информация о позиции</string>
@@ -469,8 +472,8 @@
     <string name="options_app_ui_theme_white">Белая</string>
     <string name="options_app_ui_theme_dark">Темная</string>
     <string name="options_app_ui_theme_black">Черная</string>
-    <string name="options_app_ui_theme_gray1">Серая 1</string>
-    <string name="options_app_ui_theme_gray2">Серая 2</string>
+    <string name="options_app_ui_theme_gray1">Серая темная</string>
+    <string name="options_app_ui_theme_gray2">Серая светлая</string>
     <string name="options_app_ui_theme_light">Светлая</string>
     <string name="options_css_text_align_center">По центру</string>
     <string name="options_css_text_align_justify">По ширине</string>
@@ -763,9 +766,9 @@
     <string name="options_app_ui_theme_hicontrast1">Контрастная белая</string>
     <string name="options_app_ui_theme_hicontrast2">Контрастная черная</string>
     <string name="save_settings_to_cloud">Сохранить настройки на облачное хранилище</string>
-    <string name="save_settings_to_cloud_v">Сохранить файл cr3.ini на облачное хранилище в папку CoolReader</string>
+    <string name="save_settings_to_cloud_v">Сохранить файл cr3.ini на облачное хранилище в папку KnownReader</string>
     <string name="load_settings_from_cloud">Восстановить настройки с облачного хранилища</string>
-    <string name="load_settings_from_cloud_v">Восстановить настройки из файла cr3.ini в облачном хранилище (из папки CoolReader)</string>
+    <string name="load_settings_from_cloud_v">Восстановить настройки из файла cr3.ini в облачном хранилище (из папки KnownReader)</string>
     <string name="switched_to_dic">Переключение на словарь</string>
     <string name="next_dict_will_be_2nd">Следующий перевод будет в словаре 2 (однократно)</string>
     <string name="cloud_begin">Работа с облаком - начало операции</string>
@@ -792,7 +795,7 @@
     <string name="save_current_book_to_cloud_email">Отправить книгу по Email</string>
     <string name="open_book_from_gd">Открыть книгу с диска Google One</string>
     <string name="open_book_from_dbx">Открыть книгу из DropBox</string>
-    <string name="open_book_from_ynd">Открыть книгу с Яндекс диска</string>
+    <string name="open_book_from_ynd">Открыть/сохранить книгу с/на Яндекс диска</string>
     <string name="open_book_from_gd_short">Google One</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
@@ -823,8 +826,9 @@
     <string name="dlg_bookmark_link">Ссылка на закладку</string>
     <string name="docx_is_not_installed">Расширение org.coolreader.docx не установлено (установите, чтобы открывать docx формат)</string>
     <string name="docx_open_converted">Открыта предварительно сохраненная преобразованная копия документа</string>
-    <string name="docx_convert">CoolReader может попробовать преобразовать документ в формат html, а затем открыть его. Продолжить?</string>
+    <string name="docx_convert">KnownReader может попробовать преобразовать документ в формат html, а затем открыть его. Продолжить?</string>
     <string name="delete_dir_confirm">Папка не пустая. Очистить? Файлов/папок:</string>
+    <string name="not_a_dir">Элемент не является папкой файловой системы</string>
     <string name="btn_edit_info">Редактировать информацию о книге</string>папок
     <string name="mark_book_as_read">Отметить книгу как прочитанную?</string>
     <string name="mark_book_as_reading">Установить пометку \'читаю\' у этой книги?</string>
@@ -834,7 +838,6 @@
     <string name="search_pages">страницы...</string>
     <string name="btn_shortcut">Создать ярлык книги</string>
     <string name="tab_options_css">CSS</string>
-    <string name="dlg_about_copyright">© Вадим Лопатин, 1998–2018</string>
     <string name="dlg_about_contributors_">и участники…</string>
     <string name="online_store_plugin_name_litres">ЛитРес</string>
     <string name="online_store_plugin_description_litres">книжный онлайн магазин</string>
@@ -885,7 +888,7 @@
     <string name="options_inverse_view_add_info">Выбор режима чтения день или ночь</string>
     <string name="options_color_text_add_info">Выбор цвета текста</string>
     <string name="options_color_background_add_info">Выбор цвета фона</string>
-    <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета. Для добавления текстуры - отправьте изображение из программы просмотра изображений в CoolReader</string>
+    <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета. Для добавления текстуры - отправьте изображение из программы просмотра изображений в KnownReader</string>
     <string name="options_page_titlebar_add_info">Параметры отображения информации в колонтитуле, параметры полноэкранного отображения</string>
     <string name="options_page_footnotes_add_info">Отображение сносок (если есть) внизу страницы</string>
     <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
@@ -910,7 +913,7 @@
     <string name="pic_delete_cover">Удалить обложку для этой книги?</string>
     <string name="texture_switch_mode">Переключить режим отображения текстуры (замостить/растянуть)?</string>
     <string name="dlg_button_book_custom_cover">Выбрать обложку</string>
-    <string name="pic_no_pic">Нет запомненного изображения. Отправьте в CoolReader изображение из другого приложения (например галереи)</string>
+    <string name="pic_no_pic">Нет запомненного изображения. Отправьте в KnownReader изображение из другого приложения (например галереи)</string>
     <string name="pic_no_custom_cover">Этой книге не присвоена обложка</string>
     <string name="warn_empty_file_name">Невозможно открыть файл - пустое имя файла</string>
     <string name="warn_http">Невозможно открыть файл из гиперссылки</string>
@@ -937,6 +940,7 @@
     </string>
     <string name="third_party_components_used">Использованы следующие компоненты третьих сторон: zlib, libpng, libjpeg, freetype, harfbuzz, chmlib, antiword, Nook EPD utils от DairyKnight
     </string>
+    <string name="this_is_fork">KnownReader это форк известного приложения - CoolReader. KnownReader отличается развитым интерфейсом пользователя, а также содержит много уникальных функций.</string>
     <string name="open_previously_downloaded">Книга была скачана ранее, открыть ее?</string>
     <string name="could_not_find_by_link">Книга не найдена на этом устройстве, открытие из OPDS</string>
     <string name="force_tts_koef">Коэффициент перезапуска TTS</string>
@@ -999,6 +1003,9 @@
     <string name="screen_mod_0">Всегда</string>
     <string name="screen_mod_1">В книжном режиме</string>
     <string name="screen_mod_2">В альбомном режиме</string>
+    <string name="ext_fullscreen_margin_text_off">Отключить расширенный полноэкранный режим</string>
+    <string name="ext_fullscreen_margin_text1">Расширенный полноэкранный режим - 1 строка в статусбаре</string>
+    <string name="ext_fullscreen_margin_text2">Расширенный полноэкранный режим - 2 строки в статусбаре</string>
     <string name="ext_fullscreen_margin_text">Расширенный полноэкранный режим</string>
     <string name="ext_fullscreen_margin_mod">Расширенный полноэкранный режим - модификатор</string>
     <string name="ext_fullscreen_margin_add_info">Для устройств с экранными вырезами - растягивать окно на весь экран (вырезы могут частично закрывать области приложения). Для Android 9 и выше</string>
@@ -1007,7 +1014,7 @@
     <string name="ext_fullscreen_margin_2">Включен, отступ линии прочитанного: </string>
     <string name="ext_fullscreen_margin_3">Включен, (всегда) 2 текстовые строки в колонтитуле</string>
     <string name="downloaded_from_catalog">Скачано книг:</string>
-    <string name="external_doc_option1">Действие - открыть из потока</string>
+    <string name="external_doc_option1">Действие - открыть из потока (или установить шрифты)</string>
     <string name="external_doc_option2">Действие - сохранить на устройство</string>
     <string name="external_doc_option3">Действие - открыть существующий файл</string>
     <string name="conv_doc_option1">Действие - преобразовать документ</string>
@@ -1016,7 +1023,7 @@
     <string name="external_path">Внешний путь</string>
     <string name="doc_type">Тип документа</string>
     <string name="doc_open_from_stream">Открыть из потока</string>
-    <string name="doc_open_from_stream_addinfo">Документ не будет сохранен на утройство, также он не будет доступен в списке последних книг</string>
+    <string name="doc_open_from_stream_addinfo">Документ не будет сохранен на утройство, также он не будет доступен в списке последних книг. Если архив содержит шрифты, вы сможете установить их</string>
     <string name="download_path">Путь для сохранения</string>
     <string name="doc_save_to_device">Сохранить на устройство и открыть</string>
     <string name="already_exists">Файл существует</string>
@@ -1053,13 +1060,14 @@
     <string name="cloud_sync_variant3">Через Яндекс диск</string>
     <string name="cloud_sync_variant1_v">Облачная синхронизация отключена</string>
     <string name="cloud_sync_variant2_v">Синхронизация будет производиться через локальную файловую систему - необходимо настроить стороннюю утилиту для синхронизации папки cr3e/cloudsync между устройствами</string>
-    <string name="cloud_sync_variant3_v">Синхронизация будет производиться через Яндекс диск (используется папка Coolreader)</string>
+    <string name="cloud_sync_variant3_v">Синхронизация будет производиться через Яндекс диск (используется папка KnownReader)</string>
     <string name="switch_profile_note">Переключение профилей доступно только при открытой книге</string>
     <string name="settings_info">Глобальные настройки выделены курсивом (остальные - зависят от выбранного профиля)</string>
     <string name="global_margin">Отступ экрана (требуется перезапуск)</string>
     <string name="global_margin_add_info">Для устройств с тачскрином и бортиками</string>
-    <string name="lang_from">С языка</string>
-    <string name="lang_to">На язык</string>
+    <string name="lang_from">С языка (1)</string>
+    <string name="lang_to">На язык (2)</string>
+    <string name="sel">Выбрать</string>
     <string name="specify_translation_dir_full">Укажите направление перевода (для книги) - напимер ru или zh-cn</string>
     <string name="specify_translation_dir">Направление перевода</string>
     <string name="settings_profile">Профиль</string>
@@ -1067,6 +1075,7 @@
     <string name="new_profile">Новое наименование</string>
     <string name="no_bookmarks">В этой книге нет закладок</string>
     <string name="options_rendering_preset">Опции рендеринга</string>
+    <string name="options_requested_dom_level">Уровень совместимости версии DOM</string>
     <string name="browser_tap_option_tap">Действие на тап по книге</string>
     <string name="browser_tap_option_longtap">Действие на длинный тап по книге</string>
     <string name="browser_tap_option1">Информация о книге</string>
@@ -1084,9 +1093,39 @@
     <string name="translated_with_ynd">Переведено сервисом «Яндекс.Переводчик»</string>
     <string name="translate_lang_not_set">Язык(и) не задан(ы) (направления перевода)</string>
     <string name="translate_lang_not_found">Коды языков (языка) не найдены (направления перевода)</string>
-    <string name="whole_page_to_dic">Перевести всю станицу</string>
+    <string name="whole_page_to_dic">Перевести всю страницу</string>
     <string name="settings_saved">Настройки сохранены</string>
     <string name="no_cloud_files">Файл(ы) не найдены</string>
     <string name="ynd_translate_dics_info">Яндекс переводчик - языки</string>
     <string name="lingvo_translate_dics_info">Лингво онлайн - языки</string>
+    <string name="translate_dics_switch">Наоборот</string>
+    <string name="invalid_dic">Не настроен текущий словарь! Настройте словари</string>
+    <string name="upload_complete">Загрузка завершена!</string>
+    <string name="knownreader_donate_line1">KnownReader - больше, чем просто ридер. Это приложение для чтения электронных книг, которое выросло из проекта CoolReader. Мы вложили в него душу и добавили то, что было важно для нас и для вас: изменили навигацию, поменяли оформление, расширили возможности словарей, облачных функций. Этим список не ограничивается. Мы благодарны автору оригинального CoolReader и всем контрибьюторам в кодовую базу, теперь мы начинаем собственное путешествие в PlayMarket. Если вам пришлось по душе наше приложение и вы хотите поддержать нас, вы всегда можете сделать это следующим образом:</string>
+    <string name="knownreader_donate_line2">1. Пожертвуйте любую сумму:</string>
+    <string name="knownreader_donate_line3">https://knownreader.com/contribute</string>
+    <string name="knownreader_donate_line4">2. Свяжитесь с нами на форуме 4pda:</string>
+    <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
+    <string name="with_the_help">Использовались примеры кода из проектов (всплывающие окна, ярлыки, намерения): FBReader, Librera, AlReader, PocketBook, Koreader</string>
+    <string name="options_choose_texture">Выбрать фоновую картинку / текстуру</string>
+    <string name="only_in_pro">Эта функция доступна только в версии Premium</string>
+    <string name="only_in_premium">Эта функция доступна только в версии Premium</string>
+    <string name="str_yes">да</string>
+    <string name="str_no">нет</string>
+    <string name="opened_doc_props">Свойства документа</string>
+    <string name="opened_doc_props_styles">Встроенные стили (цвета, отступы, фон, ...)</string>
+    <string name="opened_doc_props_styles_ext">(Возможно потребуется отключить эту опцию при включенном ночном режиме)</string>
+    <string name="opened_doc_props_fonts">Встроенные шрифты (переопределяют выбранный)</string>
+    <string name="opened_doc_props_text">Автоформатирование текста</string>
+    <string name="str_change">Изменить ...</string>
+    <string name="later_css">Вы всегда можете это сделать потом - на вкладке CSS в настройках</string>
+    <string name="ynd_autolang"># - автовыбор (только Яндекс онлайн)</string>
+    <string name="new_fonts">В архиве содержатся новые шрифты (%1$s). Скопировать их в папку шрифтов?</string>
+    <string name="fonts_copied">Скопировано шрифтов: %1$s. Чтобы их использовать - перезапустите приложение (возможно потребуется перезагрузка)</string>
+    <string name="delete_font">Удалить шрифт / семейство шрифтов?</string>
+    <string name="non_system_fonts_not_found">Не найдены (не системные) шрифты. Удаление невозможно</string>
+    <string name="fonts_deleted_partial">Удалено файлов шрифтов: %1$s из %2$s</string>
+    <string name="fonts_deleted_full">Файлы шрифтов удалены</string>
+    <string name="delete_texture">Удалить файл фона?</string>
+    <string name="texture_deleted">Файл фона удален...</string>
 </resources>

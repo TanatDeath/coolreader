@@ -11,7 +11,7 @@ import android.os.Message;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
-import org.coolreader.crengine.TTSToolbarDlg;
+import org.coolreader.tts.TTSToolbarDlg;
 
 /**
  * Created by s-trace on 13.03.18.

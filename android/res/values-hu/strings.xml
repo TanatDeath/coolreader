@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Keresés</string>
     <string name="mi_exit">Kilépés</string>
     <string name="mi_goto">Ugrás</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Megnyitás</string>
     <string name="mi_options">Beállítások</string>
     <string name="progress_please_wait">Kérem várjon...</string>
-    <string name="progress_starting_cool_reader">A Cool Reader indítása</string>
+    <string name="progress_starting_cool_reader">A KnownReader indítása</string>
     <string name="progress_loading">Dokumentum betöltése...</string>
     <string name="progress_formatting">Dokumentum formázása</string>
     <string name="progress_scanning">Keresés a mappában</string>
@@ -174,7 +174,7 @@
     <string name="options_selection_action_dictionary">Keresés szótárban</string>
     <string name="options_selection_action_copy">Másolás a vágólapra</string>
     <string name="options_app_browser_hide_empty_dirs">Könyv nélküli mappák elrejtése</string>
-    <string name="dlg_about">A CoolReader-ről</string>
+    <string name="dlg_about">A KnownReader-ről</string>
     <string name="dlg_book_info">Könyv infó</string>
     <string name="mi_book_styles_enable">Dok. saját stílusok engedélyezése</string>
     <string name="mi_book_styles_disable">Dok. saját stílusok tiltása</string>

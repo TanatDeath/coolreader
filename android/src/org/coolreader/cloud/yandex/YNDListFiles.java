@@ -50,12 +50,12 @@ public class YNDListFiles {
                     if (thisObj) jso = jsonObject; else jso = (JSONObject) items.get(i);
                     CloudFileInfo yf = new CloudFileInfo();
                     if (jso.has("name")) yf.name = jso.get("name").toString(); //2020-03-29_202206_rpos_635942216_36b928e773055c4a.json
-                    if (jso.has("path")) yf.path = jso.get("path").toString(); //"disk:/CoolReader/2020-03-29_202206_rpos_635942216_36b928e773055c4a.json"
+                    if (jso.has("path")) yf.path = jso.get("path").toString(); //"disk:/KnownReader/2020-03-29_202206_rpos_635942216_36b928e773055c4a.json"
                     if (jso.has("type")) yf.type = jso.get("type").toString();
                     SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
                     if (jso.has("created")) yf.created = sdf.parse(jso.get("created").toString());
                     if (jso.has("modified")) yf.modified = sdf.parse(jso.get("modified").toString());
-                    if ((yf.path.contains("disk:/CoolReader/")) && (yf.path.contains(".json"))) {
+                    if ((yf.path.contains("disk:/KnownReader/")) && (yf.path.contains(".json"))) {
                         if (!wasInit) CloudSync.checkFileForDeleteInit();
                         wasInit = true;
                         CloudSync.checkFileForDelete(yf);

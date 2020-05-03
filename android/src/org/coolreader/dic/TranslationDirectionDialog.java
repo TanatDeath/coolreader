@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +29,10 @@ import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -64,7 +70,30 @@ public class TranslationDirectionDialog extends BaseDialog {
 	public static OkHttpClient client = new OkHttpClient();
 
 	ArrayList<String[]> mTransl = new ArrayList<String[]>();
+	ArrayList<String[]> mTranslFiltered = new ArrayList<String[]>();
 	HashMap<String, String> yndLangs = new HashMap<String, String>();
+
+	private void doFilterList(String filter) {
+		if (listType > 0) {
+			mTranslFiltered.clear();
+			for (String[] arrS: mTransl) {
+				boolean found = false;
+				for (String s: arrS) {
+					if (!StrUtils.isEmptyStr(filter))
+						if (s.toUpperCase().contains(filter.toUpperCase())) found = true;
+					if (!StrUtils.isEmptyStr(editTexts.get(0).getText().toString()))
+						if (s.toUpperCase().contains(editTexts.get(0).getText().toString().toUpperCase())) found = true;
+					if (!StrUtils.isEmptyStr(editTexts.get(1).getText().toString()))
+						if (s.toUpperCase().contains(editTexts.get(1).getText().toString().toUpperCase())) found = true;
+				}
+				if ((StrUtils.isEmptyStr(editTexts.get(0).getText().toString()))&&
+					(StrUtils.isEmptyStr(editTexts.get(1).getText().toString()))&&
+					(StrUtils.isEmptyStr(filter))) found = true;
+				if (found) mTranslFiltered.add(arrS);
+			}
+			mList.setAdapter(new TranslListAdapter());
+		}
+	}
 
 	class TranslListAdapter extends BaseAdapter {
 
@@ -79,13 +108,13 @@ public class TranslationDirectionDialog extends BaseDialog {
 		}
 
 		public int getCount() {
-			return mTransl.size();
+			return mTranslFiltered.size();
 		}
 
 		public Object getItem(int position) {
-			if ( position<0 || position>=mTransl.size() )
+			if ( position<0 || position>=mTranslFiltered.size() )
 				return null;
-			return mTransl.get(position);
+			return mTranslFiltered.get(position);
 		}
 
 		public long getItemId(int position) {
@@ -105,7 +134,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 			if (listType == 2) {
 				int res = R.layout.transl_item_lingvo;
 				view = mInflater.inflate(res, null);
-				String[] arrS = mTransl.get(position);
+				String[] arrS = mTranslFiltered.get(position);
 				if (arrS != null) {
 					if (arrS.length > 0) {
 						TextView tv_locale = (TextView) view.findViewById(R.id.transl_item_locale);
@@ -171,7 +200,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 			} else {
 				int res = R.layout.transl_item_ynd;
 				view = mInflater.inflate(res, null);
-				String[] arrS = mTransl.get(position);
+				String[] arrS = mTranslFiltered.get(position);
 				if (arrS != null) {
 					if (arrS[0].contains("-")) {
 						String[] arrS2 = arrS[0].split("-");
@@ -203,7 +232,6 @@ public class TranslationDirectionDialog extends BaseDialog {
 				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
 				Button btnFrom = (Button) view.findViewById(R.id.transl_item_lanf_select);
 				btnFrom.setBackgroundColor(colorGrayCT2);
-				btnFrom.setText("select");
 				if (arrS != null) {
 					if (arrS[0].contains("-")) {
 						btnFrom.setOnClickListener(new View.OnClickListener() {
@@ -237,7 +265,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 		}
 
 		public boolean isEmpty() {
-			return mTransl.size()==0;
+			return mTranslFiltered.size()==0;
 		}
 
 		private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
@@ -284,6 +312,9 @@ public class TranslationDirectionDialog extends BaseDialog {
 		this.callback = callback;
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.ask_some_values_dialog, null);
+		setAddButtonImage(
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings),
+				R.string.dictionary_settings);
 		TextView someText = (TextView) view.findViewById(R.id.some_text);
 		someText.setText(sSomeText);
 		textViews.clear();
@@ -300,10 +331,42 @@ public class TranslationDirectionDialog extends BaseDialog {
 						tv.setText(askValues.get(i-1)[0]);
 						et.setHint(askValues.get(i-1)[1]);
 						if (!StrUtils.isEmptyStr(askValues.get(i-1)[2])) et.setText(askValues.get(i-1)[2]);
+						TextView tv1 = new TextView(mCoolReader);
+						tv1.setText(R.string.ynd_autolang);
+						((ViewGroup) et.getParent()).addView(tv1);
+						TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+								{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+						int colorGrayC = a.getColor(0, Color.GRAY);
+						int colorIcon = a.getColor(1, Color.GRAY);
+						a.recycle();
+						tv1.setMaxLines(2);
+						tv1.setTextColor(colorIcon);
+						tv1.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								editTexts.get(0).setText("#");
+							}
+						});
+						if (mCoolReader.getReaderView() != null)
+						  if (mCoolReader.getReaderView().getLastsetWidth()>0)
+						    tv1.setMaxWidth(mCoolReader.getReaderView().getLastsetWidth()/2);
 					} else {
 						((ViewGroup) tr.getParent()).removeView(tr);
 					}
 				}
+				//TextView tv_a = (TextView) view.findViewById(R.id.some_value_label_after1);
+				//tv_a.setText(R.string.ynd_autolang);
+				et.addTextChangedListener(new TextWatcher() {
+
+					public void afterTextChanged(Editable s) {
+					}
+
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						doFilterList(s.toString());
+					}
+				});
 			}
 			if (i == 2) {
 				TableRow tr = (TableRow) view.findViewById(R.id.some_value_tr2);
@@ -320,6 +383,17 @@ public class TranslationDirectionDialog extends BaseDialog {
 						((ViewGroup) tr.getParent()).removeView(tr);
 					}
 				}
+				et.addTextChangedListener(new TextWatcher() {
+
+					public void afterTextChanged(Editable s) {
+					}
+
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						doFilterList(s.toString());
+					}
+				});
 			}
 		}
 		int colorGrayC;
@@ -332,11 +406,29 @@ public class TranslationDirectionDialog extends BaseDialog {
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		TableLayout tl = (TableLayout) view;
 		LinearLayout ll = new LinearLayout(mCoolReader);
+		LinearLayout.LayoutParams llp1 = new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+		llp1.setMargins(5, 3, 5, 3);
+		ll.setOrientation(LinearLayout.HORIZONTAL);
+		Button swButton = new Button(mCoolReader);
+		swButton.setLayoutParams(llp1);
+		swButton.setText(mCoolReader.getString(R.string.translate_dics_switch));
+		swButton.setBackgroundColor(colorGrayCT2);
+		swButton.setTextColor(colorIcon);
+		ll.addView(swButton);
+		swButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String s = editTexts.get(0).getText().toString();
+				editTexts.get(0).setText(editTexts.get(1).getText().toString());
+				editTexts.get(1).setText(s);
+			}
+		});
 		LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
 		llp.setMargins(5, 3, 5, 3);
-		ll.setOrientation(LinearLayout.HORIZONTAL);
 		Button yndButton = new Button(mCoolReader);
 		yndButton.setLayoutParams(llp);
 		yndButton.setText(mCoolReader.getString(R.string.ynd_translate_dics_info));
@@ -346,6 +438,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 		yndButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				mTranslFiltered.clear();
 				mTransl.clear();
 				yndLangs.clear();
 				listType = 1;
@@ -367,6 +460,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 						Elements langs = docJsoup.select("Langs > langs > item");
 						for (Element el: dirs) {
 							mTransl.add(new String[]{el.text()});
+							mTranslFiltered.add(new String[]{el.text()});
 						}
 						for (Element el: langs) {
 							yndLangs.put(el.attr("key"),el.attr("value"));
@@ -399,6 +493,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 		lingvoButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				mTranslFiltered.clear();
 				mTransl.clear();
 				listType = 2;
 				try {
@@ -408,8 +503,10 @@ public class TranslationDirectionDialog extends BaseDialog {
 					while ((str = reader.readLine()) != null) {
 						String[] arrS = str.split("~");
 						if (arrS.length>0)
-							if (!arrS[0].equals("Locale"))
+							if (!arrS[0].equals("Locale")) {
 								mTransl.add(arrS);
+								mTranslFiltered.add(arrS);
+							}
 					}
 					is.close();
 				} catch (Exception e) {
@@ -445,5 +542,12 @@ public class TranslationDirectionDialog extends BaseDialog {
 	protected void onNegativeButtonClick() {
 		super.onNegativeButtonClick();
 		if (callback != null) callback.done(null);
+	}
+
+	@Override
+	protected void onAddButtonClick() {
+		mCoolReader.optionsFilter = "";
+		mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+		onPositiveButtonClick();
 	}
 }

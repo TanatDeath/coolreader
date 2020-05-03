@@ -179,10 +179,10 @@
                 android:layout_marginLeft="2dip"
                 android:layout_marginRight="2dip"
                 android:layout_weight="1"
-                android:src="@null"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:contentDescription="@string/book_state_toread"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
                 android:text="@string/book_state_toread" />
             <Button
                 android:id="@+id/book_recent_reading"
@@ -196,6 +196,7 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:contentDescription="@string/book_state_reading"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
                 android:text="@string/book_state_reading" />
             <Button
                 android:id="@+id/book_recent_finished"
@@ -209,6 +210,7 @@
                 android:ellipsize="end"
                 android:src="@null"
                 android:contentDescription="@string/book_state_finished"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
                 android:text="@string/book_state_finished" />
         </TableRow>
     </TableLayout>

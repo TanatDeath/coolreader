@@ -25,22 +25,82 @@
 			/>
 	</LinearLayout>
 	<LinearLayout
-			android:id="@+id/ynd_ll2"
+			android:id="@+id/ynd_ll5"
 			android:layout_width="0dip"
 			android:layout_height="fill_parent"
 			android:gravity="center_vertical|center_horizontal"
-			android:layout_weight="1"
+			android:layout_weight="4"
 			android:orientation="horizontal">
-		<Button
-				android:id="@+id/btnTransl"
-				style="@style/TextAppearance.Small"
-				android:singleLine="false"
-				android:maxLines="15"
-				android:layout_marginRight="5dip"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textColor="?attr/colorIcon"
-				android:text="..."
-				/>
+		<LinearLayout
+				android:id="@+id/ynd_ll4"
+				android:layout_width="0dip"
+				android:minWidth="?android:attr/listPreferredItemHeight"
+				android:layout_height="fill_parent"
+				android:gravity="center_vertical|center_horizontal"
+				android:layout_weight="1"
+				android:orientation="horizontal">
+			<ImageButton android:id="@+id/btn_copy_to_cb"
+					android:layout_margin="5dip"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerVertical="true"
+					android:layout_alignParentRight="true"
+					android:minWidth="?android:attr/listPreferredItemHeight"
+					android:src="?attr/attr_icons8_copy"
+					android:tag="tint"
+					android:focusable="false"
+					android:focusableInTouchMode="false"
+					android:background="@null"
+					android:layout_marginLeft="2dip"
+					android:layout_marginRight="5dip"/>
+		</LinearLayout>
+		<LinearLayout
+				android:id="@+id/ynd_ll2"
+				android:minWidth="?android:attr/listPreferredItemHeight"
+				android:layout_width="0dip"
+				android:layout_height="fill_parent"
+				android:gravity="center_vertical|center_horizontal"
+				android:layout_weight="1"
+				android:orientation="horizontal">
+			<ImageButton android:id="@+id/btn_to_user_dic"
+					android:layout_margin="5dip"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerVertical="true"
+					android:layout_alignParentRight="true"
+					android:minWidth="?android:attr/listPreferredItemHeight"
+					android:src="?attr/attr_icons8_google_translate_save"
+					android:tag="tint"
+					android:focusable="false"
+					android:focusableInTouchMode="false"
+					android:background="@null"
+					android:layout_marginLeft="2dip"
+					android:layout_marginRight="5dip"
+					android:contentDescription="@string/mi_user_dic"/>
+		</LinearLayout>
+		<LinearLayout
+				android:id="@+id/ynd_ll3"
+				android:minWidth="?android:attr/listPreferredItemHeight"
+				android:layout_width="0dip"
+				android:layout_height="fill_parent"
+				android:gravity="center_vertical|center_horizontal"
+				android:layout_weight="1"
+				android:orientation="horizontal">
+			<ImageButton android:id="@+id/btnTransl"
+					android:layout_margin="5dip"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerVertical="true"
+					android:layout_alignParentRight="true"
+					android:minWidth="?android:attr/listPreferredItemHeight"
+					android:src="?attr/attr_icons8_google_translate_switch"
+					android:tag="tint"
+					android:focusable="false"
+					android:focusableInTouchMode="false"
+					android:background="@null"
+					android:layout_marginLeft="2dip"
+					android:layout_marginRight="5dip"
+					/>
+		</LinearLayout>
 	</LinearLayout>
 </TableRow>

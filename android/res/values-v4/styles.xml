@@ -115,6 +115,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/icons8_documents_folder_2</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/icons8_internet_folder_2</item>
@@ -430,6 +431,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/icons8_documents_folder_2</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/icons8_internet_folder_2</item>
@@ -756,6 +758,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/icons8_documents_folder_2</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/icons8_internet_folder_2</item>
@@ -1070,6 +1073,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/icons8_documents_folder_2</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/icons8_internet_folder_2</item>
@@ -1387,6 +1391,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/icons8_documents_folder_2</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/icons8_internet_folder_2</item>
@@ -1704,6 +1709,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/icons8_documents_folder_2</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/icons8_internet_folder_2</item>
@@ -2020,6 +2026,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/cr3_btn_books_swap_hc</item>
         <item name="cr3_logo_button_drawable">@drawable/known_reader_logo</item>
         <item name="cr3_viewer_exit_drawable">@drawable/cr3_viewer_exit_hc</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/cr3_button_book_open_hc</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/cr3_browser_folder_current_book_hc</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/cr3_browser_folder_opds_hc</item>
@@ -2336,6 +2343,7 @@
         <item name="cr3_btn_books_swap_drawable">@drawable/cr3_btn_books_swap_hc</item>
         <item name="cr3_logo_button_drawable">@drawable/known_reader_logo</item>
         <item name="cr3_viewer_exit_drawable">@drawable/cr3_viewer_exit_hc</item>
+        <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/cr3_button_book_open_hc</item>
         <item name="cr3_browser_folder_current_book_drawable">@drawable/cr3_browser_folder_current_book_hc</item>
         <item name="cr3_browser_folder_opds_drawable">@drawable/cr3_browser_folder_opds_hc</item>

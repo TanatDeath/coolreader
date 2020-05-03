@@ -6,6 +6,8 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -31,9 +33,13 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import okhttp3.Call;
 import okhttp3.HttpUrl;
@@ -155,13 +161,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 						}
 					});
 					InputStream is = response.body().byteStream();
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					byte[] buffer = new byte[1024];
-					int len;
-					while ((len = is.read(buffer)) > -1 ) {
-						baos.write(buffer, 0, len);
-					}
-					baos.flush();
+					ByteArrayOutputStream baos = Utils.inputStreamToBaos(is);
 					istream = new ByteArrayInputStream(baos.toByteArray());
 					if (stype.startsWith("image/")) {
 						BackgroundThread.instance().postBackground(new Runnable() {
@@ -327,14 +327,22 @@ public class ExternalDocCameDialog extends BaseDialog {
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (btnAsHTML!=null) btnAsHTML.setBackgroundColor(colorGrayCT);
-		if (btnAsText!=null) btnAsText.setBackgroundColor(colorGrayCT);
+		if (btnAsHTML!=null) {
+			btnAsHTML.setBackgroundColor(colorGrayCT);
+			mActivity.tintViewIcons(btnAsHTML, PorterDuff.Mode.CLEAR,true);
+		}
+		if (btnAsText!=null) {
+			btnAsText.setBackgroundColor(colorGrayCT);
+			mActivity.tintViewIcons(btnAsText, PorterDuff.Mode.CLEAR,true);
+		}
 		if ((btnAsHTML!=null)&&(bThisIsHTML)) {
 			btnAsHTML.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(btnAsHTML, true);
 			edtFileExt.setText(".html");
 		}
 		if ((btnAsText!=null)&&(!bThisIsHTML)) {
 			btnAsText.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(btnAsText, true);
 			edtFileExt.setText(".txt");
 		}
 	}
@@ -346,6 +354,86 @@ public class ExternalDocCameDialog extends BaseDialog {
 		else
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
+
+	private ArrayList<String> getFontNames(InputStream is) {
+		ArrayList<String> fontNames = new ArrayList<String>();
+		try {
+			ZipInputStream zis = new ZipInputStream(is);
+			ZipEntry entry;
+			ArrayList<String> fontDirs = Engine.getFontsDirsReal();
+			while ((entry = zis.getNextEntry()) != null) {
+				if ((entry.getName().toUpperCase().endsWith(".TTF"))||
+						(entry.getName().toUpperCase().endsWith(".OTF"))) {
+					boolean bFound = false;
+					for (String s: fontDirs) {
+						File f = new File (s+"/"+entry.getName());
+						if (f.exists()) {
+							bFound = true;
+							break;
+						}
+					}
+					if (!bFound) fontNames.add(entry.getName());
+				}
+				// consume all the data from this entry
+				//while (zis.available() > 0)
+				//	zis.read();
+				// I could close the entry, but getNextEntry does it automatically
+				// zis.closeEntry()
+			}
+		} catch (Exception e) {
+			log.e("Handling of zip: " + e.getMessage());
+		}
+		return fontNames;
+	};
+
+	private int copyFonts(ArrayList<String> fontNames, InputStream is) {
+		int filesCopied = 0;
+		try {
+			ZipInputStream zis = new ZipInputStream(is);
+			ZipEntry entry;
+			ArrayList<String> fontDirs = Engine.getFontsDirsReal();
+			boolean hasSystemFolder = false;
+			boolean hasNonSystemFolder = false;
+			for (String s: fontDirs) {
+				if (s.toLowerCase().startsWith("/system")) hasSystemFolder = true;
+					else hasNonSystemFolder = true;
+			}
+			// try to create most common folder
+			if ((hasSystemFolder) && (!hasNonSystemFolder)) {
+				File f = new File("/storage/emulated/0/fonts");
+				f.mkdir();
+				fontDirs = Engine.getFontsDirsReal();
+				hasSystemFolder = false;
+				hasNonSystemFolder = false;
+				for (String s: fontDirs) {
+					if (s.toLowerCase().startsWith("/system")) hasSystemFolder = true;
+					else hasNonSystemFolder = true;
+				}
+			}
+			while ((entry = zis.getNextEntry()) != null) {
+				if (fontNames.contains(entry.getName())) {
+					boolean copied = false;
+					for (String s: fontDirs) {
+						if ((hasNonSystemFolder) && (s.toLowerCase().startsWith("/system"))) continue;
+						if (!copied) {
+							try {
+								log.i("try to copy file: "+s + "/" + entry.getName());
+								Utils.saveStreamToFileDontClose(zis, s + "/" + entry.getName());
+								copied = true;
+							} catch (Exception e) {
+								log.e("cannot copy file: "+e.getMessage());
+							}
+						}
+					}
+					if (copied) filesCopied++;
+					zis.closeEntry();
+				}
+			}
+		} catch (Exception e) {
+			log.e("Handling of zip: " + e.getMessage());
+		}
+		return filesCopied;
+	};
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -408,8 +496,49 @@ public class ExternalDocCameDialog extends BaseDialog {
 			@Override
 			public void onClick(View v) {
 				if (uri != null) {
-					((CoolReader) activity).loadDocumentFromUriExt(uri, sUri);
-					onPositiveButtonClick();
+					//asdf
+					if (stype.equals("application/zip")) {
+						ContentResolver contentResolver = mActivity.getContentResolver();
+						InputStream inputStream = null;
+						ArrayList<String> arcFontNames = new ArrayList<String>();
+						try {
+							inputStream = contentResolver.openInputStream(uri);
+							ByteArrayOutputStream baos = Utils.inputStreamToBaos(inputStream);
+							InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+							arcFontNames = getFontNames(is1);
+							if (arcFontNames.size()==0) {
+								InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+								((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
+								onPositiveButtonClick();
+							} else {
+								final ArrayList<String> arcFontNamesF = arcFontNames;
+								mActivity.askConfirmation(mActivity.getString(R.string.new_fonts,
+										String.valueOf(arcFontNames.size())), new Runnable() {
+									@Override
+									public void run() {
+										InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+										int filesCopied = copyFonts(arcFontNamesF, is1);
+										mActivity.showToast(mActivity.getString(R.string.fonts_copied,
+												String.valueOf(filesCopied)));
+										//if (filesCopied>0) {
+										//}
+										onPositiveButtonClick();
+									}
+								}, new Runnable() {
+									@Override
+									public void run() {
+										InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+										((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
+										onPositiveButtonClick();
+									}
+								});
+							}
+						} catch (Exception e) {
+						}
+					} else {
+						((CoolReader) activity).loadDocumentFromUriExt(uri, sUri);
+						onPositiveButtonClick();
+					}
 				}
 				else {
 					if ((istream != null) && (bThisIsHTML))
@@ -486,7 +615,14 @@ public class ExternalDocCameDialog extends BaseDialog {
 			}
 		});
 		if (StrUtils.isEmptyStr(sExistingName)) hideExistingFileControls(view);
+
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+
 		btnAsHTML = (Button)view.findViewById(R.id.btn_as_html);
+		btnAsHTML.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+
 		setDashedButton(btnAsHTML);
 		btnAsHTML.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -495,6 +631,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 			}
 		});
 		btnAsText = (Button)view.findViewById(R.id.btn_as_text);
+		btnAsText.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+
 		setDashedButton(btnAsText);
 		btnAsText.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -502,7 +640,21 @@ public class ExternalDocCameDialog extends BaseDialog {
 				switchHTML(false);
 			}
 		});
-		if (uri != null) hideExistingHttpControls(view); else switchHTML(true);
+		if (uri != null) hideExistingHttpControls(view);
+			else {
+				switchHTML(true);
+				BackgroundThread.instance().postBackground(new Runnable() {
+					@Override
+					public void run() {
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								switchHTML(true);
+							}
+						}, 200);
+					}
+				});
+		}
 		setView(view);
 		// if link is http
 		if (uri==null) doDownloadHttp(sUri);

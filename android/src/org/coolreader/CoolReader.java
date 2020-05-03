@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.coolreader.cloud.CloudSync;
+import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -61,8 +62,8 @@ import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.TTS;
-import org.coolreader.crengine.TTS.OnTTSCreatedListener;
+import org.coolreader.tts.TTS;
+import org.coolreader.tts.TTS.OnTTSCreatedListener;
 import org.coolreader.crengine.UserDicEntry;
 import org.coolreader.crengine.Utils;
 import org.coolreader.db.BaseDB;
@@ -810,6 +811,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if (sText.toLowerCase().startsWith("http")) {
 				//processIntentHttp(sText);
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					showToast(R.string.only_in_premium);
+					return true;
+				}
 				processIntentContent("", sText);
 				return true;
 			}
@@ -1004,9 +1009,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				public void run() {
 					log.i("Load last rpos from CLOUD");
 					int iSyncVariant3 = settings().getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-					if (iSyncVariant3 == 0) {
-						showCloudToast(getString(R.string.cloud_sync_variant1_v),false);
-					} else {
+					if (iSyncVariant3 != 0) {
 						CloudSync.loadFromJsonInfoFileList(CoolReader.this,
 								CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
 					}
@@ -1205,7 +1208,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				// this thread waiting for the user's response! After the user
 				// sees the explanation, try again to request the permission.
 				String[] templ = new String[0];
-				log.i("Some permissions DENIED, requesting from user these permissions: " + needPerms.toString());
+				log.i("Some permissions DENIED, resting from user these permissions: " + needPerms.toString());
 				// request permission from user
 				requestPermissions(needPerms.toArray(templ), PERM_REQUEST_STORAGE_CODE);
 			}
@@ -2037,8 +2040,30 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 					BackgroundThread.instance().executeGUI(new Runnable() {
 						public void run() {
-							showToast(getString(R.string.settings_info));
+							OptionsDialog.toastShowCnt++;
+							if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 							OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
+							dlg.show();
+						}
+					});
+				}
+			});
+	}
+
+	public void showOptionsDialogTab(final OptionsDialog.Mode mode, int tab)
+	{
+		if (mode == OptionsDialog.Mode.BROWSER) {
+			optionsFilter = "";
+			showOptionsDialogExt(OptionsDialog.Mode.READER, PROP_FILEBROWSER_TITLE);
+		} else
+			BackgroundThread.instance().postBackground(new Runnable() {
+				public void run() {
+					final String[] mFontFaces = Engine.getFontFaceList();
+					final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
+					BackgroundThread.instance().executeGUI(new Runnable() {
+						public void run() {
+							OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
+							dlg.selectedTab = tab;
 							dlg.show();
 						}
 					});
@@ -2054,7 +2079,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(new Runnable() {
 					public void run() {
-						if (!selectOption.equals(PROP_FILEBROWSER_TITLE)) showToast(getString(R.string.settings_info));
+						if ((!selectOption.equals(PROP_FILEBROWSER_TITLE))&&(selectOption == null)) {
+							OptionsDialog.toastShowCnt++;
+							if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
+						}
 						OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
 						dlg.selectedOption = selectOption;
 						dlg.show();
@@ -2447,7 +2475,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		final ArrayList<String> itemsAll = new ArrayList<String>();
 		itemsAll.add("section=section.file");
 		String sFormat = "";
-		if (item.format != null) sFormat = item.format.name();
+		if (item.format != null)
+			if (item.format != DocumentFormat.NONE)
+				sFormat = item.format.name();
 		itemsAll.add("file.format=" + sFormat);
 		itemsAll.add("file.name=" + item.pathname);
 		itemsAll.add("section=section.book");
@@ -2466,7 +2496,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		final ArrayList<String> itemsPos = new ArrayList<String>();
 		final ArrayList<String> itemsBook = new ArrayList<String>();
 		itemsSys.add("section=section.system");
-		itemsSys.add("system.version=Cool Reader " + getVersion());
+		itemsSys.add("system.version=KnownReader " + getVersion());
 		if (getReaderView()!=null)
 			itemsSys.add("system.battery=" + getReaderView().getmBatteryState() + "%");
 		itemsSys.add("system.time=" + Utils.formatTime(this, System.currentTimeMillis()));
@@ -2514,7 +2544,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				itemsFile.add("file.arcsize=" + StrUtils.readableFileSize(fi.arcsize));
 			}
 			String sFormat = "";
-			if (fi.format != null) sFormat = fi.format.name();
+			if (fi.format != null)
+				if (fi.format != DocumentFormat.NONE)
+					sFormat = fi.format.name();
 			itemsFile.add("file.format=" + sFormat);
 			if (!StrUtils.isEmptyStr(fi.opdsLink)) {
 				itemsBook.add("file.opds_link=" + fi.opdsLink);
@@ -2809,17 +2841,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	{
 		if (hasHardwareMenuKey())
 			return; // don't show notice if hard key present
-		showNotice(R.string.note1_reader_menu, new Runnable() {
-			@Override
-			public void run() {
-				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
-			}
-		}, new Runnable() {
-			@Override
-			public void run() {
-				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_NONE), false);
-			}
-		});
+		setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
+		setSetting(PROP_TOOLBAR_APPEARANCE, String.valueOf(8), true);
+		return; // KnownReader - decided to remove
+//		showNotice(R.string.note1_reader_menu, new Runnable() {
+//			@Override
+//			public void run() {
+//				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
+//			}
+//		}, new Runnable() {
+//			@Override
+//			public void run() {
+//				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_NONE), false);
+//			}
+//		});
 	}
 
 	public void notificationDB(String sMesg)
@@ -3096,7 +3131,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
 
 				Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader.mod.plotn");
+				intent.setPackage(MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.RECENT_DIR_TAG);
 
@@ -3111,7 +3146,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader.mod.plotn");
+				intent.setPackage(MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_READING_TAG);
 
@@ -3126,7 +3161,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader.mod.plotn");
+				intent.setPackage(MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_TO_READ_TAG);
 
@@ -3141,7 +3176,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader.mod.plotn");
+				intent.setPackage(MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_FINISHED_TAG);
 
@@ -3156,7 +3191,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage("org.coolreader.mod.plotn");
+				intent.setPackage(MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.SEARCH_SHORTCUT_TAG);
 

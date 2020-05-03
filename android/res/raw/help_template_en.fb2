@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Template for CoolReader3/Android help file -->
+<!-- Template for KnownReader/Android help file -->
 <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<description>
 		<title-info>
-			<book-title>Cool Reader Manual</book-title>
+			<book-title>KnownReader Manual</book-title>
 		</title-info>
 	</description>
 	<body>
 		<section>
             <title>
-                <p>Welcome to Cool Reader <!--cr3:setting version--><br/><!--cr3:image cr3_logo--></p>
+                <p>Welcome to KnownReader <!--cr3:setting version--><br/><!--cr3:image cr3_logo--></p>
             </title>
+            <p>KnownReader - more than just reader. This e-book reading application has grown up from CoolReader project.
+            We put a soul in it and added the important things - for us and for you: changed navigation, UI, extended dictionary, cloud features and much more.
+            We thank CoolReader's original author and all the contributors, but now we begin our own way.
+            <p>Unfortunately, this manual remained the same as it was in original project.
+            We understand, that some things can be inactual here. We are working on it.
+            If you have any questions - feel free to contact at <a href="mailo:support@knownreader.com">support@knownreader.com</a>
+            <p>
+            <p>--------------------
+            <p>
             <p>This is a program to read <b><i>electronic books</i></b> in a number of formats: EPUB, FB2, RTF, TXT, HTML, CHM, PDB, MOBI, TCR</p>
-            <p>Save books to read on SD card and open them using internal <a href="#filebrowser">File Browser</a>, or download them from <a href="#opds">online catalogs</a> (OPDS) directly in CoolReader.</p>
+            <p>Save books to read on SD card and open them using internal <a href="#filebrowser">File Browser</a>, or download them from <a href="#opds">online catalogs</a> (OPDS) directly in KnownReader.</p>
 			<subtitle>Navigation while reading</subtitle>
 			<p>You can move to next / previous page using several methods:</p>
 			<ul>
@@ -73,7 +82,7 @@
     					<li>Open previous book</li>
     					<li>Toggle automatic page flipping</li>
     					<li>Exit program</li>
-    					<li>About Cool Reader</li>
+    					<li>About KnownReader</li>
     					<li>About current book</li>
     					<li>Show user manual</li>
     				</ul>
@@ -199,7 +208,7 @@
                 <title id="bookmarks">
                     <p>Bookmarks</p>
                 </title>
-                <p>Coolreader supports 3 types of bookmarks:</p>
+                <p>KnownReader supports 3 types of bookmarks:</p>
                 <ul>
                     <li><b>Position</b> bookmark: when created, anchor is associated with top line of current page</li>
                     <li><b>Comment</b> bookmark: you can add comments for selected text range</li>
@@ -262,7 +271,7 @@
                 <title id="dict">
                     <p>Dictionary support</p>
                 </title>
-                <p>Cool Reader can invoke external dictionaries to translate selected word.</p>
+                <p>KnownReader can invoke external dictionaries to translate selected word.</p>
                 <p>Supported dictionary applications (can be installed from Market):</p>
                 <ul>
                     <li>Fora</li>
@@ -279,7 +288,7 @@
                 <title id="tts">
                     <p>Read Aloud</p>
                 </title>
-                <p>Cool Reader supports reading of text using Text To Speech engine.</p>
+                <p>KnownReader supports reading of text using Text To Speech engine.</p>
                 <p>It uses speech engine and voice set in Android system settings as default.</p>
                 <p>To start reading, use Menu / More / Read Aloud (for faster access, you can assign Read Aloud action to some tap zone or key).</p>
                 <p>Control panel appears which will let you control reading position, start/stop reading, change pitch and speed.</p>
@@ -309,8 +318,8 @@
             <p>You can go to file browser from reading mode using Menu / Open Book. (To return back into reading mode, you can use Menu / Current book or tap on book file)</p>
             <p>File browser allow accessing filesystem tree, list of recent books, books by author/series/title, online OPDS catalogs to download books. Root folder of file browser contains links to all of these sections.</p>
             <p>At any place inside File Browser, you can use Menu / Goto items to navigate to browser root page, <a href="#recent">recent books</a> list, online catalogs.</p>
-            <p>You need to place your books to internal storage or SD card to read them using Cool Reader.</p>
-            <p>Cool Reader stores metadata (author, title, series, filename, etc) for books, last reading positions, and bookmarks using internal database.</p>
+            <p>You need to place your books to internal storage or SD card to read them using KnownReader.</p>
+            <p>KnownReader stores metadata (author, title, series, filename, etc) for books, last reading positions, and bookmarks using internal database.</p>
             <p>To import book into database, you have to either enter book's directory or invoke Menu / Scan directory on some directory.</p>
             <p>File Browser Topics: 
                 <a href="#filesystem">File system</a> 
@@ -338,7 +347,7 @@
                 <title>
                     <p>Recent books list</p>
                 </title>
-                <p>Cool Reader holds list of recently opened books.</p>
+                <p>KnownReader holds list of recently opened books.</p>
                 <p>To enter Recent Books section from File Browser root, choose "Recent Books" item, or use <a href="#fbmenu">Menu</a> / Goto / Recent books from any place.</p>
                 <p>Tap on book in list to reopen it. Last reading position will be restored.</p>
                 <p>By long tapping on recent book item, context menu offers some useful actions: go to book folder in filesystem, remove book from list of recent books, remove book completely, opening of book.</p>
@@ -347,7 +356,7 @@
                 <title>
                     <p>OPDS Catalogs</p>
                 </title>
-                <p>Cool Reader allows downloading of books from OPDS online catalogs.</p>
+                <p>KnownReader allows downloading of books from OPDS online catalogs.</p>
                 <p>To enter Online Catalogs section from File Browser root, choose "Online Catalogs" item, or use <a href="#fbmenu">Menu</a> / Goto / Online catalogs from any place.</p>
                 <p>You will see list of available catalogs.</p>
                 <p>You add, remove, and edit catalog items, by long tap on some item.</p>
@@ -359,10 +368,10 @@
                 <title>
                     <p>Books by Author / Title / Series</p>
                 </title>
-                <p>Cool Reader provides categorised access to books database sorted by book metadata: author, title, series name. You can see corresponding items in file browser root.</p>
+                <p>KnownReader provides categorised access to books database sorted by book metadata: author, title, series name. You can see corresponding items in file browser root.</p>
                 <p>Tap on corresponding category item (e.g. "Books by authors" to divide books by author name).</p>
                 <p>Inside, you can see either category prefix (e.g. first letter(s) of author's name), full category name (e.g. full author name), or book itself.</p>
-                <p>Cool reader can create subfolders by one, two, etc. first letters of category name, if list would be too long otherwise. (E.g. while there are only 10 authors, you will see all of them directly in list. But if there are 100 authors in database, they will be grouped by first letter (s))</p>
+                <p>KnownReader can create subfolders by one, two, etc. first letters of category name, if list would be too long otherwise. (E.g. while there are only 10 authors, you will see all of them directly in list. But if there are 100 authors in database, they will be grouped by first letter (s))</p>
                 <p>Only books from scanned folders are added into database.</p>
                 <p>To import book into database, you have to either enter book's directory or invoke Menu / Scan directory on some directory.</p>
             </section>
@@ -401,7 +410,7 @@
             <subtitle>Additional fonts</subtitle>
             <p>You can add more fonts by placing .ttf files to Fonts directory on SD card.</p>
             <subtitle>External styles, CSS</subtitle>
-            <p>For fine tuning of styles, you can change Cascading Style Sheet definition for format. CSS files for different formats (fb2.css, epub.css, htm.css, rtf.css, txt.css, chm.css) can be placed to /.cr3/ directory of SD card. In this case they override internal style in package. As a base, styles from GIT repository of CoolReader (crengine) SourceForge project can be used.</p> 
+            <p>For fine tuning of styles, you can change Cascading Style Sheet definition for format. CSS files for different formats (fb2.css, epub.css, htm.css, rtf.css, txt.css, chm.css) can be placed to /.cr3/ directory of SD card. In this case they override internal style in package. As a base, styles from GIT repository of KnownReader (crengine) SourceForge project can be used.</p> 
             <subtitle>Additional background images</subtitle>
             <p>To use your own images (.jpg, .png) as page background in tile mode, place them to /.cr3/textures/ directory of SD card.</p>
             <p>Instead of /.cr3/ directory (with period) you can use directory name w/o period (/cr3/) Instead of external SD card, you can use internal storage or internal SD card (if presens in your device)</p> 
@@ -419,7 +428,7 @@
             <p><a href="http://sourceforge.net/projects/crengine/">Project page on SourceForge</a></p>
             <p><a href="http://sourceforge.net/apps/mediawiki/crengine/index.php?title=Main_Page">Project's Wiki</a> on SourceForge</p>
             <p><a href="https://sourceforge.net/project/project_donations.php?group_id=191284">Project's Donations page</a> on SourceForge</p>
-            <p>To support project, you can make donations. Easy way to donate project is to buy donation package on Market ("Cool Reader Gold Donation", "Cool Reader Silver Donation", "Cool Reader Bronze Donation"), or buy donation items directly in CoolReader - on third tab of "About Cool Reader" menu item</p>
+            <p>To support project, you can make donations. Easy way to donate project is to buy donation package on Market ("KnownReader Gold Donation", "KnownReader Silver Donation", "KnownReader Bronze Donation"), or buy donation items directly in KnownReader - on third tab of "About KnownReader" menu item</p>
             <p>Send your bug reports to buggins@fromru.com Don't forget to specify your device model, Android version. In case of crash, system logs may help a lot. You can get system logs using Android System Info app (available on market). If some books is failed to open, but other books are being opened ok, or you see that wrong encoding is used to show your book, you can attach book file to bug report email, to simplify investigation.</p>
         </section>
 	</body>

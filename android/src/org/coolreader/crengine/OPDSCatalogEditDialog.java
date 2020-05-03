@@ -131,8 +131,13 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 												if (el.parentNode() != null) {
 													Element par = (Element) el.parentNode();
 													if (par.tag().getName().equals("feed")) {
-														nameEdit.setText(el.text());
-														activity.showToast(activity.getString(R.string.ok));
+														BackgroundThread.instance().postGUI(new Runnable() {
+															@Override
+															public void run() {
+																nameEdit.setText(el.text());
+																activity.showToast(activity.getString(R.string.ok));
+															}
+														}, 200);
 													}
 												}
 											}
@@ -156,8 +161,13 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 																if (f.exists()) f.delete();
 																new DownloadImageTask(sDir + sFName, imgBtn).execute(el.text());
 															} catch (Exception e) {
-																activity.showToast(activity.getString(R.string.pic_problem) + " " +
-																		e.getMessage());
+																BackgroundThread.instance().postGUI(new Runnable() {
+																	@Override
+																	public void run() {
+																		activity.showToast(activity.getString(R.string.pic_problem) + " " +
+																				e.getMessage());
+																	}
+																}, 200);
 															}
 														}
 													}

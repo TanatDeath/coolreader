@@ -32,7 +32,8 @@ lUInt32 calcHash(font_ref_t & f)
     v = v * 31 + (lUInt32)f->getItalic();
     v = v * 31 + (lUInt32)f->getShapingMode();
     v = v * 31 + (lUInt32)f->getKerning();
-    v = v * 31 + (lUInt32)f->getHintingMode();
+    // No more needed since hinting mode does not change advances
+    //v = v * 31 + (lUInt32)f->getHintingMode();
     v = v * 31 + (lUInt32)f->getBitmapMode();
     v = v * 31 + (lUInt32)f->getTypeFace().getHash();
     v = v * 31 + (lUInt32)f->getBaseline();

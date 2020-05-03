@@ -84,7 +84,7 @@ int gDOMVersionRequested     = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.59"
+#define CACHE_FILE_FORMAT_VERSION "3.12.60"
 
 /// increment following value to force re-formatting of old book after load
 #define FORMATTING_VERSION_ID 0x0022
@@ -384,7 +384,12 @@ lUInt32 calcGlobalSettingsHash(int documentId)
     if (fontMan->GetKerning())
         hash = hash * 75 + 1761;
     hash = hash * 31 + fontMan->GetFontListHash(documentId);
-    hash = hash * 31 + (int)fontMan->GetHintingMode();
+    // Hinting mode change does not need to trigger a re-render, as since
+    // we use FT_LOAD_TARGET_LIGHT, hinting has not effect on the x-axis
+    // and should not change glyph advances, so it should not change line
+    // layout and paragraphs' heights. We just need to _renderedBlockCache.clear()
+    // when hinting mode is changed to reformat paragraphs.
+    //hash = hash * 31 + (int)fontMan->GetHintingMode();
     if ( LVRendGetFontEmbolden() )
         hash = hash * 75 + 2384761;
     if ( gFlgFloatingPunctuationEnabled )
@@ -4477,6 +4482,7 @@ int ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, 
         if ( callback ) {
             callback->OnFormatStart();
         }
+        _renderedBlockCache.reduceSize(1); // Reduce size to save some checking and trashing time
         setCacheFileStale(true); // new rendering: cache file will be updated
         _toc_from_cache_valid = false;
         // force recalculation of page numbers (even if not computed in this
@@ -4505,6 +4511,7 @@ int ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, 
         updateRenderContext();
         _pagesData.reset();
         pages->serialize( _pagesData );
+        _renderedBlockCache.restoreSize(); // Restore original cache size
 
         if ( _nodeDisplayStyleHashInitial == NODE_DISPLAY_STYLE_HASH_UNITIALIZED ) {
             // If _nodeDisplayStyleHashInitial has not been initialized from its
@@ -4805,7 +4812,9 @@ ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUIn
         _element = _parent->getElement()->insertChildElement( (lUInt32)-1, nsid, id );
     else
         _element = _document->getRootNode(); //->insertChildElement( (lUInt32)-1, nsid, id );
-    if ( IS_FIRST_BODY && id==el_body ) {
+    //if ( IS_FIRST_BODY && id==el_body ) { // plotn - it was discussed, that document can have multi-body structure
+    // and TOC can be inside any of then - so it was changed
+    if ( id==el_body ) {
         _tocItem = _document->getToc();
         //_tocItem->clear();
         IS_FIRST_BODY = false;
@@ -10489,10 +10498,25 @@ inline bool IsUnicodeSpaceOrNull( lChar16 ch )
 //  The *Sentence* functions have not beed modified, and have not been
 //  tested against this change to the *VisibleWord* functions that
 //  they use (but KOReader does not use these *Sentence* functions).
+//
+// plotn: KnownReader - *Sentence* functions have beed modified and work almost normally
+// thus the selection became not by sentences, but by indents
 
 // For better accuracy than IsUnicodeSpace for detecting words
 inline bool IsWordSeparator( lChar16 ch )
 {
+    return lStr_isWordSeparator(ch);
+}
+
+inline bool IsWordSeparatorInSentence( lChar16 ch )
+{
+    switch (ch) {
+        case '.':
+        case '?':
+        case '!':
+        case L'\x2026': // horizontal ellypsis
+            return false;
+    }
     return lStr_isWordSeparator(ch);
 }
 
@@ -10501,6 +10525,20 @@ inline bool IsWordSeparatorOrNull( lChar16 ch )
     if (ch==0) return true;
     return IsWordSeparator(ch);
 }
+
+inline bool IsWordSeparatorInSentenceOrNull( lChar16 ch )
+{
+    if (ch==0) return true;
+    switch (ch) {
+        case '.':
+        case '?':
+        case '!':
+        case L'\x2026': // horizontal ellypsis
+            return false;
+    }
+    return IsWordSeparator(ch);
+}
+
 
 inline bool canWrapWordBefore( lChar16 ch ) {
     return ch>=0x2e80 && ch<0x2CEAF;
@@ -10635,6 +10673,12 @@ bool ldomXPointerEx::nextVisibleWordStart( bool thisBlockOnly )
                 moved = true;
             }
         }
+//        int i = _data->getOffset();
+//        lChar16 currCh = i<textLen ? text[i] : 0;
+//        lChar16 prevCh = i>0 ? text[i-1] : 0;
+//        lChar16 nextCh = (i+1)<textLen ? text[i+1] : 0;
+//        lChar16 nextCh2 = (i+2)<textLen ? text[i+2] : 0;
+//        lChar16 nextCh3 = (i+3)<textLen ? text[i+3] : 0;
         // skip spaces
         while ( _data->getOffset()<textLen && IsWordSeparator(text[ _data->getOffset() ]) ) {
             _data->addOffset(1);
@@ -10848,10 +10892,19 @@ bool ldomXPointerEx::isSentenceStart()
     int i = _data->getOffset();
     lChar16 currCh = i<textLen ? text[i] : 0;
     lChar16 prevCh = i>0 ? text[i-1] : 0;
+    //
+    lChar16 prevCh1 = 0;
+    lChar16 prevCh2 = 0;
+    lChar16 prevCh3 = 0;
+
+
     lChar16 prevNonSpace = 0;
     for ( ;i>0; i-- ) {
         lChar16 ch = text[i-1];
-        if ( !IsWordSeparator(ch) ) {
+        prevCh1 = i>1 ? text[i-2] : 0;
+        prevCh2 = i>2 ? text[i-3] : 0;
+        prevCh3 = i>3 ? text[i-4] : 0;
+        if ( !IsWordSeparatorInSentence(ch) ) {
             prevNonSpace = ch;
             break;
         }
@@ -10888,6 +10941,10 @@ bool ldomXPointerEx::isSentenceStart()
         switch (prevNonSpace) {
         case 0:
         case '.':
+            // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
+            if ((prevCh1 == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+            if ((prevCh1 == 'r')  && (prevCh2 == 'M')) return false;
+            if ((prevCh1 == 's')  && (prevCh2 == 'M')) return false;
         case '?':
         case '!':
         case L'\x2026': // horizontal ellypsis
@@ -10910,8 +10967,12 @@ bool ldomXPointerEx::isSentenceEnd()
     lString16 text = node->getText();
     int textLen = text.length();
     int i = _data->getOffset();
+    lChar16 nextCh = (i+1)<textLen ? text[i+1] : 0;
     lChar16 currCh = i<textLen ? text[i] : 0;
     lChar16 prevCh = i>0 ? text[i-1] : 0;
+    lChar16 prevCh2 = i>1 ? text[i-2] : 0;
+    lChar16 prevCh3 = i>2 ? text[i-3] : 0;
+    //lChar16 nextCh = (i+1)<textLen ? text[i+1] : 0;
     if ( IsWordSeparatorOrNull(currCh) ) {
         switch (prevCh) {
         case 0:
@@ -10919,9 +10980,44 @@ bool ldomXPointerEx::isSentenceEnd()
         case '?':
         case '!':
         case L'\x2026': // horizontal ellypsis
+//            if (currCh = ']') _data->addOffset(1);
             return true;
         default:
             break;
+        }
+        //plotn
+        switch (currCh) {
+            case 0:
+            case '.':
+                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
+                if ((prevCh == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+                if ((prevCh == 'r')  && (prevCh2 == 'M')) return false;
+                if ((prevCh == 's')  && (prevCh2 == 'M')) return false;
+            case '?':
+            case '!':
+            case L'\x2026': // horizontal ellypsis
+                _data->addOffset(1);
+ //               if (nextCh = ']') _data->addOffset(1);
+                return true;
+            default:
+                break;
+        }
+        //plotn
+        switch (nextCh) {
+            case 0:
+            case '.':
+                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
+                if ((prevCh == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+                if ((prevCh == 'r')  && (prevCh2 == 'M')) return false;
+                if ((prevCh == 's')  && (prevCh2 == 'M')) return false;
+            case '?':
+            case '!':
+            case L'\x2026': // horizontal ellypsis
+                _data->addOffset(1);
+                _data->addOffset(1);
+                return true;
+            default:
+                break;
         }
     }
     // word is not ended with . ! ?
@@ -11460,7 +11556,6 @@ public:
         case css_d_compact:
         case css_d_marker:
         case css_d_table:
-        case css_d_inline_table:
         case css_d_table_row_group:
         case css_d_table_header_group:
         case css_d_table_footer_group:
@@ -11477,6 +11572,8 @@ public:
             return false;
         case css_d_inline:
         case css_d_run_in:
+        case css_d_inline_block: // Make these behave as inline, in case they don't contain much
+        case css_d_inline_table: // (if they do, some inner block element will give newBlock=true)
             newBlock = false;
             return true;
         }
@@ -12948,15 +13045,26 @@ bool tinyNodeCollection::loadStylesData()
     }
     lUInt32 stHash = 0;
     lInt32 len = 0;
-    lUInt32 myHash = _stylesheet.getHash();
+
+    // lUInt32 myHash = _stylesheet.getHash();
+    // When loading from cache, this stylesheet was built with the
+    // initial element name ids, which may have been replaced by
+    // the one restored from the cache. So, its hash may be different
+    // from the one we're going to load from cache.
+    // This is not a failure, but a sign the stylesheet will have
+    // to be regenerated (later, no need for it currently as we're
+    // loading previously applied style data): this will be checked
+    // in checkRenderContext() when comparing a combo hash
+    // against _hdr.stylesheet_hash fetched from the cache.
 
     //LVArray<css_style_ref_t> * list = _styles.getIndex();
     stylebuf.checkMagic(styles_magic);
     stylebuf >> stHash;
-    if ( stHash != myHash ) {
-        CRLog::info("tinyNodeCollection::loadStylesData() - stylesheet hash is changed: skip loading styles %08x != %08x", stHash, myHash);
-        return false;
-    }
+    // Don't check for this:
+    // if ( stHash != myHash ) {
+    //     CRLog::info("tinyNodeCollection::loadStylesData() - stylesheet hash is changed: skip loading styles");
+    //     return false;
+    // }
     stylebuf >> len; // index
     if ( stylebuf.error() )
         return false;
@@ -16350,6 +16458,8 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
     int direction = RENDER_RECT_PTR_GET_DIRECTION(fmt);
     int flags = styleToTextFmtFlags( getStyle(), 0, direction );
     ::renderFinalBlock( this, f.get(), fmt, flags, 0, -1 );
+    // We need to store this LFormattedTextRef in the cache for it to
+    // survive when leaving this function (some callers do use it).
     cache.set( this, f );
     bool flg=gFlgFloatingPunctuationEnabled;
     if (this->getNodeName()=="th"||this->getNodeName()=="td"||
@@ -16370,6 +16480,13 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
     else { // Restore it from this node's RenderRectAccessor
         float_footprint = &restored_float_footprint;
         float_footprint->restore( this, (lUInt16)width );
+    }
+    if ( !getDocument()->isRendered() ) {
+        // Full rendering in progress: avoid some uneeded work that
+        // is only needed when we'll be drawing the formatted text
+        // (like alignLign()): this will mark it as not reusable, and
+        // one that is on a page to be drawn will be reformatted .
+        f->requestLightFormatting();
     }
     int h = f->Format((lUInt16)width, (lUInt16)page_h, direction, float_footprint);
     gFlgFloatingPunctuationEnabled=flg;

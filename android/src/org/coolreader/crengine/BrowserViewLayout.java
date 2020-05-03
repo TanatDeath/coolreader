@@ -152,28 +152,30 @@ public class BrowserViewLayout extends ViewGroup {
 			}
 		ImageButton btnQpNext = (ImageButton)titleView.findViewById(R.id.btn_qp_next1);
 		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
-			btnQpNext.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
+			if (btnQpNext != null)
+				btnQpNext.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
 
-					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
-					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
-					int diff = lastVisiblePosition - firstVisiblePosition;
-					contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
-				}
-			});
+						int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+						int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+						int diff = lastVisiblePosition - firstVisiblePosition;
+						contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
+					}
+				});
 		activity.tintViewIcons(btnQpNext,true);
 		ImageButton btnQpPrev = (ImageButton)titleView.findViewById(R.id.btn_qp_prev1);
 		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
-			btnQpPrev.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
-					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
-					int diff = lastVisiblePosition - firstVisiblePosition;
-					contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
-				}
-			});
+			if (btnQpPrev != null)
+				btnQpPrev.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+						int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+						int diff = lastVisiblePosition - firstVisiblePosition;
+						contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
+					}
+				});
 		activity.tintViewIcons(btnQpPrev,true);
 		LinearLayout llButtons = (LinearLayout) titleView.findViewById(R.id.llButtons);
 		if (!DeviceInfo.isEinkScreen(activity.getScreenForceEink())) {
@@ -235,15 +237,31 @@ public class BrowserViewLayout extends ViewGroup {
 			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(false));
 		}
 	}
+
+	private static int prevH = 0;
+	private static int prevW = 0;
 	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int w = MeasureSpec.getSize(widthMeasureSpec);
 		int h = MeasureSpec.getSize(heightMeasureSpec);
 
+		boolean v = toolbarView.isVertical();
+		boolean needChange = true;
+
+		if ((prevH!=0) && (prevW!=0)) {
+			if (prevW==w) {
+				needChange = false;
+			}
+		}
+
+		if (needChange) v = w > h;
+
+		prevH = h;
+		prevW = w;
 		
-		toolbarView.setVertical(w > h);
-		if (w > h) {
+		toolbarView.setVertical(v);
+		if (v) {
 			// landscape
 			toolbarView.setVertical(true);
 			toolbarView.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),

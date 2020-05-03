@@ -123,6 +123,7 @@ public class FileInfo {
 	public Object tag; // some additional information
 	public boolean askedMarkRead = false; // did we ask to mark book as read
 	public boolean askedMarkReading = false; // did we ask to mark book as reading
+	public int askedShownStylesInfo = 0; // how much time we've shown styles notification when switched in night mode
 	public Long book_downloaded = 0L;
 	public int was_error = 0;
 
@@ -243,7 +244,7 @@ public class FileInfo {
 	 */
 	public static final String ARC_SEPARATOR = "@/";
 	
-	public static final int PROFILE_ID_SHIFT = 16;
+	public static final int PROFILE_ID_SHIFT = 26;
 	public static final int PROFILE_ID_MASK = 0x0F;
 	
 	
@@ -339,18 +340,13 @@ public class FileInfo {
 								size = (int)entry.getSize();
 								arcsize = (int)entry.getCompressedSize();
 								createTime = entry.getTime();
-
-
 								break;
 							}
-
-
 						}
 					} catch ( Exception e ) {
 						Log.e("cr3", "error while reading contents of " + arcname);
 					}
-
-
+				//if (flags == 0) flags = DONT_USE_DOCUMENT_STYLES_FLAG;
 				}
 			} else {
 				fromFile(new File(pathName));
@@ -378,6 +374,7 @@ public class FileInfo {
 			size = (int)f.length();
 			domVersion = Engine.DOM_VERSION_CURRENT;
 			blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
+			//if (flags == 0) flags = DONT_USE_DOCUMENT_STYLES_FLAG;
 		} else {
 			filename = f.getName();
 			path = f.getParent();

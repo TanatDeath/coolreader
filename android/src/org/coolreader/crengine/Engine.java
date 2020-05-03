@@ -1723,6 +1723,30 @@ public class Engine {
 		return resArray;
 	}
 
+	public static final ArrayList<String> getFontsDirsReal() {
+		HashMap<String, Integer> dirsCapacity = new HashMap<String, Integer>();
+		ArrayList<File> dirs = new ArrayList<File>();
+		File[] dataDirs = getDataDirectories("fonts", false, false);
+		for (File dir : dataDirs)
+			dirs.add(dir);
+		File[] rootDirs = getStorageDirectories(false);
+		for (File dir : rootDirs)
+			dirs.add(new File(dir, "fonts"));
+		dirs.add(new File(Environment.getRootDirectory(), "fonts"));
+		for (File fontDir : dirs) {
+			if (fontDir.isDirectory())
+				dirsCapacity.put(fontDir.getAbsolutePath(), Integer.valueOf(0));
+		}
+		ArrayList<String> resArray = new ArrayList<String>();
+		Map.Entry<String, Integer> entry;
+		Iterator<Map.Entry<String, Integer>> it = dirsCapacity.entrySet().iterator();
+		while (it.hasNext()) {
+			entry = it.next();
+			resArray.add(entry.getKey());
+		}
+		return resArray;
+	}
+
 	private String SO_NAME = "lib" + LIBRARY_NAME + ".so";
 //	private static boolean force_install_library = false;
 
@@ -1847,7 +1871,8 @@ public class Engine {
 					R.drawable.tx_stones),
 			new BackgroundTextureInfo("tx_stones_dark", "Stones (dark)",
 					R.drawable.tx_stones_dark),};
-	public static final String DEF_DAY_BACKGROUND_TEXTURE = "bg_paper1";
+	//public static final String DEF_DAY_BACKGROUND_TEXTURE = "bg_paper1";
+	public static final String DEF_DAY_BACKGROUND_TEXTURE = "tx_fabric";
 	public static final String DEF_NIGHT_BACKGROUND_TEXTURE = "bg_paper1_dark";
 
 	public BackgroundTextureInfo[] getAvailableTextures() {

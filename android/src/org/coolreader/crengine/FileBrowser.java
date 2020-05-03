@@ -128,13 +128,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						if (longAction == 1) {
 							ignoreActionSetting = true;
 							performItemClick(arg1, position, id);
+							return true;
 						}
 						if (longAction == 2)  {
 							mActivity.editBookInfo(currDirectory, item);
 							return true;
 						}
 					}
-					showContextMenu();
+					try {
+						showContextMenu();
+					} catch (Exception e) {
+						mActivity.showToast("Cannot show menu...");
+					}
 					return true;
 				}
 			});
@@ -592,6 +597,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			return true;
 		case R.id.folder_to_favorites:
             log.d("folder_to_favorites menu item selected");
+            if (selectedItem!=null) {
+            	File ff = new File(selectedItem.pathname);
+				if (!ff.exists()) {
+					mActivity.showToast(mActivity.getString(R.string.not_a_dir));
+					return true;
+				}
+			}
             addToFavorites(selectedItem);
             return true;
 		case R.id.book_info:
@@ -912,6 +924,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 		}
 		if (fi2!=null) { // OPDS
+			if (!BaseActivity.PREMIUM_FEATURES) {
+				mActivity.showToast(R.string.only_in_premium);
+				return;
+			}
 			BookOPDSSearchDialog dlg = new BookOPDSSearchDialog(mActivity, sText, fi2, new BookSearchDialog.SearchCallback() {
 				@Override
 				public void done(FileInfo[] results) {
@@ -1956,6 +1972,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
                         mActivity.tintViewIcons(imageFavFolder,true);
 					}
 					if (item.pathname.startsWith(FileInfo.OPDS_DIR_PREFIX+"search:")) imageFavFolder.setVisibility(INVISIBLE);
+					if (!item.pathname.startsWith(FileInfo.OPDS_DIR_PREFIX)) {
+						File f = new File(item.pathname);
+						if (!f.exists()) imageFavFolder.setVisibility(INVISIBLE);
+					}
 					if (!item.isOPDSDir()) item.isFav = false;
 					Long id = -1L;
 					if (!item.isOPDSDir())

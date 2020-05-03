@@ -14,6 +14,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.Gravity;
@@ -66,6 +67,68 @@ public class CRToolBar extends ViewGroup {
 	private float toolbarScale = 1.0f;
 	private boolean grayIcons = false;
 	private boolean invIcons = false;
+	public boolean useBackgrColor = false;
+
+	public boolean isColorDark(int color){
+		double darkness = 1-(0.299*Color.red(color) + 0.587*Color.green(color) + 0.114*Color.blue(color))/255;
+		if(darkness<0.5){
+			return false; // It's a light color
+		}else{
+			return true; // It's a dark color
+		}
+	}
+
+	@ColorInt
+	static int darkenColor(@ColorInt int color) {
+		float[] hsv = new float[3];
+		Color.colorToHSV(color, hsv);
+		hsv[2] *= 0.7f;
+		return Color.HSVToColor(hsv);
+	}
+
+	@ColorInt
+	static int lightenColor(@ColorInt int color) {
+		float[] hsv = new float[3];
+		Color.colorToHSV(color, hsv);
+		hsv[2] *= 1.3f;
+		return Color.HSVToColor(hsv);
+	}
+
+	public void tintViewIconsColor(View v) {
+		if (!useBackgrColor) activity.tintViewIcons(v, true);
+		else {
+			Boolean custIcons = activity.settings().getBool(BaseActivity.PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
+			if (DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink())) custIcons = false;
+			int custColor = activity.settings().getColor(BaseActivity.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
+			if (custIcons) {
+				int colorCur = custColor;
+				if ((isColorDark(ReaderView.backgrNormalizedColor)) && (isColorDark(colorCur))) {
+					while (isColorDark(colorCur)) colorCur = lightenColor(colorCur);
+					colorCur = lightenColor(colorCur);
+					colorCur = lightenColor(colorCur);
+				} else
+					if ((!isColorDark(ReaderView.backgrNormalizedColor)) && (!isColorDark(colorCur))) {
+						while (!isColorDark(colorCur)) colorCur = darkenColor(colorCur);
+						colorCur = darkenColor(colorCur);
+						colorCur = darkenColor(colorCur);
+					}
+				activity.tintViewIconsC(v, true, colorCur);
+			} else {
+				TypedArray a = ((CoolReader) activity).getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorIcon, R.attr.colorIconL});
+				int colorIcon = a.getColor(0, Color.GRAY);
+				int colorIconL = a.getColor(1, Color.GRAY);
+				a.recycle();
+				if (isColorDark(ReaderView.backgrNormalizedColor)) {
+					if (isColorDark(colorIcon)) activity.tintViewIconsC(v, true, colorIconL);
+					else activity.tintViewIconsC(v, true, colorIcon);
+				} else {
+					if (isColorDark(colorIcon)) activity.tintViewIconsC(v, true, colorIcon);
+					else activity.tintViewIconsC(v, true, colorIconL);
+				}
+			}
+		}
+	}
 
 	private void setPopup(PopupWindow popup, int popupLocation) {
 		this.popup = popup;
@@ -163,6 +226,8 @@ public class CRToolBar extends ViewGroup {
 						new ReaderAction[]{
 								ReaderAction.GO_BACK,
 								ReaderAction.TOC,
+								ReaderAction.BOOK_INFO,
+								ReaderAction.FONTS_MENU,
 								ReaderAction.SEARCH,
 								ReaderAction.OPTIONS,
 								ReaderAction.BOOKMARKS,
@@ -178,7 +243,7 @@ public class CRToolBar extends ViewGroup {
 								ReaderAction.OPEN_PREVIOUS_BOOK,
 								ReaderAction.TOGGLE_AUTOSCROLL,
 								ReaderAction.ABOUT,
-								ReaderAction.EXIT
+								ReaderAction.HIDE
 						};
 
 				for (ReaderAction act : ReaderActionDef) {
@@ -522,12 +587,11 @@ public class CRToolBar extends ViewGroup {
 			} else if (this.invIcons) {
 				if (nghtMode) ib.setImageBitmap(bitmap);
 				else ib.setImageBitmap(InverseBitmap(bitmap));
-				//activity.tintViewIcons(ib,true);
 			} else
 				{
 					if (nghtMode) ib.setImageBitmap(InverseBitmap(bitmap));
 					else ib.setImageBitmap(bitmap);
-					activity.tintViewIcons(ib,true);
+					tintViewIconsColor(ib);
 				}
 		}
 	}
@@ -773,7 +837,7 @@ public class CRToolBar extends ViewGroup {
 							showOverflowMenu();
 						}
 					});
-					activity.tintViewIcons(item,true);
+					activity.tintViewIcons(item);
 					item.setOnLongClickListener(new OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
@@ -1034,7 +1098,7 @@ public class CRToolBar extends ViewGroup {
 			popup.showAtLocation(anchor, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 0); //location[0], popupY - anchor.getHeight());
 		else
 			popup.showAtLocation(anchor, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0); //, location[0], popupY);
-        context.tintViewIcons(tb);
+		tb.tintViewIconsColor(tb);
 		return popup;
 	}
 	

@@ -11,7 +11,7 @@
   <string name="mi_font_previous">הגופן הקודם</string>
   <string name="mi_font_next">הגופן הבא</string>
   <string name="progress_please_wait">חכה בבקשה</string>
-  <string name="progress_starting_cool_reader">מתחיל Cool Reader</string>
+  <string name="progress_starting_cool_reader">מתחיל KnownReader</string>
   <string name="progress_loading">טוען מסמך</string>
   <string name="progress_formatting">מעצב מסמך</string>
   <string name="progress_scanning">תיקיית סריקה</string>
@@ -165,7 +165,7 @@
   <string name="options_selection_action_dictionary">מצא במילון</string>
   <string name="options_selection_action_copy">העתק ללוח העתקה</string>
   <string name="options_app_browser_hide_empty_dirs">הסתר תיקיות ללא ספרים</string>
-  <string name="dlg_about">אודות CoolReader</string>
+  <string name="dlg_about">אודות KnownReader</string>
   <string name="dlg_book_info">פרטי ספר</string>
   <string name="mi_book_styles_enable">אפשר סגנונות מסמך פנימיים</string>
   <string name="mi_book_styles_disable">השבת סגנונות מסמך פנימיים</string>
@@ -431,5 +431,5 @@
   <string name="root_item_library">סייר בספרייה</string>
   <string name="root_item_filesystem">עיון במערכת קבצים</string>
   <string name="root_item_online_catalogs">קטלוגים מקוונים</string>
-  <string name="app_name">Cool Reader</string>
+  <string name="app_name">KnownReader</string>
 </resources>

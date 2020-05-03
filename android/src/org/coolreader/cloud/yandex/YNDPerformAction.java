@@ -3,7 +3,9 @@ package org.coolreader.cloud.yandex;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
+import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
@@ -59,7 +61,7 @@ public class YNDPerformAction {
                 if (mCurAction.action == CloudAction.YND_DOWNLOAD_FILE) YndDownloadFile(mCurAction);
                 if (mCurAction.action == CloudAction.YND_CHECK_CR_FOLDER) YndCheckCrFolder(mCurAction);
                 if (mCurAction.action == CloudAction.YND_CREATE_CR_FOLDER) YndCreateCrFolder(mCurAction);
-                if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK) YndSaveToFileGetLink(mCurAction, "/CoolReader");
+                if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK) YndSaveToFileGetLink(mCurAction, "/KnownReader");
                 if (mCurAction.action == CloudAction.YND_DELETE_FILE_ASYNC) YndDeleteFileAsync(mCurAction);
                 if (mCurAction.action == CloudAction.YND_SAVE_STRING_TO_FILE) YndSaveStringToFile(mCurAction);
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES) YndListJsonFiles(mCurAction);
@@ -121,7 +123,7 @@ public class YNDPerformAction {
         String sContent = ca.param;
         String sHref = ca.param2;
         if (StrUtils.isEmptyStr(sHref)) return;
-        Log.i("CLOUD", "YND: save string to file = " + sHref);
+        Log.i("CLOUD", "YND: save book to file = " + sHref);
         HttpUrl.Builder urlBuilder = null;
         urlBuilder = HttpUrl.parse(sHref).newBuilder();
         MediaType mt = MediaType.parse("application/octet-stream");
@@ -138,7 +140,18 @@ public class YNDPerformAction {
                     throws IOException {
                 String sBody = response.body().string();
                 Log.i("CLOUD", sBody);
-                mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_SAVE_STRING_TO_FILE, null);
+                BackgroundThread.instance().postBackground(new Runnable() {
+                    @Override
+                    public void run() {
+                        BackgroundThread.instance().postGUI(new Runnable() {
+                            @Override
+                            public void run() {
+                                mCoolReader.showToast(R.string.upload_complete);
+                            }
+                        }, 200);
+                    }
+                });
+                mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_YND_SAVE_CUR_BOOK, null);
             }
 
             public void onFailure(Call call, IOException e) {
@@ -149,7 +162,7 @@ public class YNDPerformAction {
     }
 
     public void YndCheckCrFolder(final CloudAction ca) throws IOException {
-        String folder = "/CoolReader";
+        String folder = "/KnownReader";
         Log.i("CLOUD", "YND: folder = " + folder);
         if (!YNDConfig.init(mCoolReader)) return;
         HttpUrl.Builder urlBuilder = null;
@@ -178,7 +191,7 @@ public class YNDPerformAction {
     }
 
     public void YndCreateCrFolder(final CloudAction ca) throws IOException {
-        String folder = "/CoolReader";
+        String folder = "/KnownReader";
         Log.i("CLOUD", "YND: create folder = " + folder);
         if (StrUtils.getNonEmptyStr(ca.param2, true).equals("skip")) {
             mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_CREATE_CR_FOLDER, null);
@@ -302,7 +315,7 @@ public class YNDPerformAction {
     }
 
     public void YndSaveStringToFile(final CloudAction ca) throws IOException {
-        String folder = "/CoolReader";
+        String folder = "/KnownReader";
         String sContent = ca.param;
         String sHref = ca.param2;
         Log.i("CLOUD", "YND: save string to file = " + sHref);
@@ -456,7 +469,7 @@ public class YNDPerformAction {
             Log.i("CLOUD", "YND: list JSON files, mark = " + fileMark + ", crc = " + bookCRC);
             HttpUrl.Builder urlBuilder = null;
             urlBuilder = HttpUrl.parse(YNDConfig.YND_DISK_URL).newBuilder();
-            urlBuilder.addQueryParameter("path", "/CoolReader/");
+            urlBuilder.addQueryParameter("path", "/KnownReader/");
             urlBuilder.addQueryParameter("limit", String.valueOf(YNDConfig.YND_ITEMS_LIMIT));
             String url = urlBuilder.build().toString();
             Request request = new Request.Builder()

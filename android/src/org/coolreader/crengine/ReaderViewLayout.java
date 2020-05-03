@@ -121,7 +121,8 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			this.toolbarView = new CRToolBar(context, ReaderAction.createList(new ReaderAction[] {
 				ReaderAction.GO_BACK,
 				ReaderAction.TOC,
-				//ReaderAction.FONTS_MENU,
+				ReaderAction.BOOK_INFO,
+				ReaderAction.FONTS_MENU,
 				ReaderAction.SEARCH,
 				ReaderAction.OPTIONS,
 				ReaderAction.BOOKMARKS,
@@ -137,9 +138,10 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 				ReaderAction.OPEN_PREVIOUS_BOOK,
 				ReaderAction.TOGGLE_AUTOSCROLL,
 				ReaderAction.ABOUT,
-				ReaderAction.EXIT,
+				ReaderAction.HIDE,
 			}), false, false, false, false);
 			this.toolbarView.setBackgroundDrawable(toolbarBackground);
+			this.toolbarView.useBackgrColor = true;
 			this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 			this.addView(toolbarView);
 			this.addView(contentView.getSurface());
@@ -184,6 +186,9 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 
 		public void updateCRToolbar(CoolReader context) {
 			this.toolbarView.createActionsLists(null,false);
+			toolbarView.updateNightMode(nightMode);
+			toolbarView.setButtonAlpha(activity.getCurrentTheme().getToolbarButtonAlpha());
+			toolbarView.onThemeChanged(activity.getCurrentTheme());
 			this.toolbarView.calcLayout();
 		}
 

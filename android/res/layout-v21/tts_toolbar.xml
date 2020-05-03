@@ -96,6 +96,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
+				android:layout_marginBottom="15dp"
 				>
 				<ImageButton android:id="@+id/btn_vol_down"
 					style="@style/TextAppearance.Small"
@@ -140,6 +141,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
+				android:layout_marginBottom="15dp"
 				>
 				<ImageButton android:id="@+id/btn_freq_down"
 					style="@style/TextAppearance.Small"

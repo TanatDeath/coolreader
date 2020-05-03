@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Cool Reader</string>
+    <string name="app_name">KnownReader</string>
     <string name="mi_search">Търсене</string>
     <string name="mi_exit">Изход</string>
     <string name="mi_goto">Навигация</string>
@@ -8,7 +8,7 @@
     <string name="mi_file_open">Отваряне на файл</string>
     <string name="mi_options">Настройки</string>
     <string name="progress_please_wait">Моля, изчакайте</string>
-    <string name="progress_starting_cool_reader">Cool Reader се зарежда</string>
+    <string name="progress_starting_cool_reader">KnownReader се зарежда</string>
     <string name="progress_loading">Зареждане на книгата</string>
     <string name="progress_formatting">Форматиране на книгата</string>
     <string name="progress_scanning">Сканиране на директориите</string>

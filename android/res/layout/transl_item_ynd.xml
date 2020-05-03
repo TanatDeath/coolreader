@@ -47,7 +47,7 @@
 					android:checked="false"
 					android:layout_weight="1"
 					android:tag="tint"
-					android:text="to"
+					android:text="@string/sel"
 					android:layout_margin="2dp"
 					android:textColor="?attr/colorIcon"
 					/>

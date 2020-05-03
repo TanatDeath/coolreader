@@ -252,13 +252,21 @@ public class GeoToastView {
             else
                 tvD.setText("");
             MetroStation prevSt = GeoLastData.getPrevNextStation(t.metroStation,true);
+            MetroStation prevSt2 = GeoLastData.getPrevNextStation(prevSt,true);
+            MetroStation prevSt3 = GeoLastData.getPrevNextStation(prevSt2,true);
+            MetroStation prevSt4 = GeoLastData.getPrevNextStation(prevSt3,true);
             MetroStation nextSt = GeoLastData.getPrevNextStation(t.metroStation,false);
+            MetroStation nextSt2 = GeoLastData.getPrevNextStation(nextSt,false);
+            MetroStation nextSt3 = GeoLastData.getPrevNextStation(nextSt2,false);
+            MetroStation nextSt4 = GeoLastData.getPrevNextStation(nextSt3,false);
             boolean bDetectedRoute = false;
             if (t.msBefore != null) {
-                if (t.msBefore.equals(prevSt)) {
+                if ((t.msBefore.equals(prevSt))||(t.msBefore.equals(prevSt2))||
+                        (t.msBefore.equals(prevSt3))||(t.msBefore.equals(prevSt4))) {
                     bDetectedRoute = true;
                 }
-                if (t.msBefore.equals(nextSt)) {
+                if ((t.msBefore.equals(nextSt))||(t.msBefore.equals(nextSt2))||
+                        (t.msBefore.equals(nextSt3))||(t.msBefore.equals(nextSt4))) {
                     bDetectedRoute = true;
                     MetroStation dummy = prevSt;
                     prevSt = nextSt;

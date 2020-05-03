@@ -307,6 +307,7 @@ LVStreamRef GetDocxCoverpage(LVContainerRef arc)
     OpcPartRef docPart = package.getContentPart(docx_DocumentContentType);
     if( !docPart.isNull() )
         return package.open(docPart->getRelatedPartName(docx_ImageRelationship));
+    return LVStreamRef();
 }
 
 bool DetectDocXFormat( LVStreamRef stream )

@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -379,6 +380,15 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead  = (Button)view.findViewById(R.id.book_state_toread);
 		btnStateReading = (Button)view.findViewById(R.id.book_state_reading);
 		btnStateFinished = (Button)view.findViewById(R.id.book_state_finished);
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		Drawable img3 = img.getConstantState().newDrawable().mutate();
+		Drawable img4 = img.getConstantState().newDrawable().mutate();
+		btnStateNone.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		btnStateToRead.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+		btnStateReading.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
+		btnStateFinished.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
 		btnStar1 = (ImageButton)view.findViewById(R.id.book_star1);
 		btnStar2 = (ImageButton)view.findViewById(R.id.book_star2);
 		btnStar3 = (ImageButton)view.findViewById(R.id.book_star3);
@@ -735,21 +745,24 @@ public class BookInfoEditDialog extends BaseDialog {
 		if (btn == btnStateFinished) {
 			mChosenState = FileInfo.STATE_FINISHED;
 		}
-		int colorGray;
 		int colorGrayC;
-		int colorIcon;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		colorGray = a.getColor(0, Color.GRAY);
-		colorGrayC = a.getColor(1, Color.GRAY);
-		colorIcon = a.getColor(2, Color.GRAY);
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
-		int colorGrayCT=Color.argb(0,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		mActivity.tintViewIcons(btnStateNone, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(btnStateToRead, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(btnStateReading, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(btnStateFinished, PorterDuff.Mode.CLEAR,true);
 		btnStateNone.setBackgroundColor(colorGrayCT);
 		btnStateToRead.setBackgroundColor(colorGrayCT);
 		btnStateReading.setBackgroundColor(colorGrayCT);
 		btnStateFinished.setBackgroundColor(colorGrayCT);
-		btn.setBackgroundColor(colorGray);
+		btn.setBackgroundColor(colorGrayCT2);
+		mActivity.tintViewIcons(btn,true);
 	}
 
 	private void setRate(ImageButton btn) {

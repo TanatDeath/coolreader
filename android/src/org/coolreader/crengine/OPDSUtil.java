@@ -838,7 +838,7 @@ xml:base="http://lib.ololo.cc/opds/">
 						return;
 					}
 					connection = (HttpURLConnection)conn;
-		            connection.setRequestProperty("User-Agent", "CoolReader/3(Android)");
+		            connection.setRequestProperty("User-Agent", "KnownReader (Android)");
 		            if ( referer!=null )
 		            	connection.setRequestProperty("Referer", referer);
 		            connection.setInstanceFollowRedirects(true);

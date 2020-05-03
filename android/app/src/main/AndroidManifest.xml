@@ -29,9 +29,9 @@
     <application
         android:allowBackup="true"
         android:allowClearUserData="true"
-        android:icon="@mipmap/cr3_logo"
+        android:icon="@mipmap/known_reader_logo"
         android:label="@string/app_name_fork"
-        android:process="org.coolreader.mod.plotn"
+        android:process="org.knownreader.premium"
         android:resizeableActivity="true"
         android:usesCleartextTraffic="true"
         >
@@ -173,7 +173,7 @@
         </activity>
 
         <activity-alias
-            android:name=".CoolReaderForFB2"
+            android:name=".KnownReaderForFB2"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -385,7 +385,7 @@
 
         <!-- alias activity to disable EPUB -->
         <activity-alias
-            android:name=".CoolReaderForEPUB"
+            android:name=".KnownReaderForEPUB"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -455,7 +455,7 @@
 
         <!-- alias activity to disable TXT -->
         <activity-alias
-            android:name=".CoolReaderForTXT"
+            android:name=".KnownReaderForTXT"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -529,7 +529,7 @@
         </activity-alias>
         <!-- alias activity to disable HTML -->
         <activity-alias
-            android:name=".CoolReaderForHTML"
+            android:name=".KnownReaderForHTML"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -655,7 +655,7 @@
         </activity-alias>
         <!-- alias activity to disable CHM -->
         <activity-alias
-            android:name=".CoolReaderForCHM"
+            android:name=".KnowmReaderForCHM"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -709,7 +709,7 @@
 
         <!-- alias activity to disable CBZ -->
         <activity-alias
-            android:name=".CoolReaderForCBZ"
+            android:name=".KnownReaderForCBZ"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -852,7 +852,7 @@
         </activity-alias>
         <!-- alias activity to disable RTF -->
         <activity-alias
-            android:name=".CoolReaderForRTF"
+            android:name=".KnownReaderForRTF"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -924,7 +924,7 @@
         </activity-alias>
         <!-- alias activity to disable DOCX -->
         <activity-alias
-            android:name=".CoolReaderForDOCX"
+            android:name=".KnownReaderForDOCX"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -1012,7 +1012,7 @@
         </activity-alias>
         <!-- alias activity to disable DOCX -->
         <activity-alias
-            android:name=".CoolReaderForDOC"
+            android:name=".KnownReaderForDOC"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -1075,7 +1075,7 @@
         </activity-alias>
         <!-- alias activity to disable MOBI -->
         <activity-alias
-            android:name=".CoolReaderForMOBI"
+            android:name=".KnownReaderForMOBI"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -1200,7 +1200,7 @@
 
         <!-- alias activity to disable PIC -->
         <activity-alias
-            android:name=".CoolReaderForPIC"
+            android:name=".KnownReaderForPIC"
             android:targetActivity=".CoolReader" >
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
@@ -1285,6 +1285,7 @@
         <service android:name=".db.CRDBService" />
 
         <!-- Donations support -->
+        <!--
         <service android:name=".donations.BillingService" />
 
         <receiver android:name="org.coolreader.donations.BillingReceiver">
@@ -1294,6 +1295,7 @@
                 <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
             </intent-filter>
         </receiver>
+        -->
         <!-- Stop TTS on incoming call -->
         <receiver android:name="org.coolreader.PhoneStateReceiver">
             <intent-filter>
@@ -1302,7 +1304,7 @@
         </receiver>
         <provider
                 android:name=".GenericFileProvider"
-                android:authorities="org.coolreader.mod.plotn.fileprovider"
+                android:authorities="org.knownreader.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
