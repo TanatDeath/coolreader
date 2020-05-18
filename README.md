@@ -1,4 +1,6 @@
-<b>KnownReader</b> – e-book reading application. Allows to read books <b>(free, no internet connection needed, no ads)</b> in the most popular formats: fb2, fb3, docx, epub (без DRM), txt, odt, doc, rtf, html, chm, tcr, pdb, prc, mobi (без DRM), pml.<br><br>
+KnownReader – e-book reading application
+=======================================================
+Allows to read books <b>(free, no internet connection needed, no ads)</b> in the most popular formats: fb2, fb3, docx, epub (без DRM), txt, odt, doc, rtf, html, chm, tcr, pdb, prc, mobi (без DRM), pml.<br><br>
 
 <b>KnownReader</b> is more than just a reader. Application features:<br>
 <sup>1)</sup> You can open books from external sources: с Yandex.disc, DropBox, from installed applications (e.g. mail app)<br>
@@ -13,7 +15,6 @@
 
 This application is distributed under GNU GPL 2 license<br>
 Want to know more? Visit https://knownreader.com
-=======================================================
 
 (c) KnownReader team, 2020
 
