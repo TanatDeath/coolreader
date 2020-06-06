@@ -1,9 +1,25 @@
-CoolReader 3 - cross platform open source e-book reader
+KnownReader – e-book reading application
 =======================================================
+Allows to read books <b>(free, no internet connection needed, no ads)</b> in the most popular formats: fb2, fb3, docx, epub (без DRM), txt, odt, doc, rtf, html, chm, tcr, pdb, prc, mobi (без DRM), pml.<br><br>
 
-(c) Vadim Lopatin, 1998-2018
+<b>KnownReader</b> is more than just a reader. Application features:<br>
+<sup>1)</sup> You can open books from external sources: с Yandex.disc, DropBox, from installed applications (e.g. mail app)<br>
+<sup>2)</sup> You can easily set up application look and feel - skins, colors, buttons, etc.<br>
+<sup>3)</sup> Fullscreen mode with cutouts (for  modern screens)<br>
+<sup>4)</sup> Ability to support your own dictionary - for cites, new and unknown words and phrases<br>
+<sup>5)</sup> You can use any installed app for text translation (that has ability to receive text - such as Wikipedia, Dictionaties and so on)<br>
+<sup>6)</sup> Comfortable book navigation via library - with dates, genres, searching<br>
+<sup>7)</sup> Onyx boox double light (warm and cold) managing<br>
+<sup>8)</sup> Supports OPDS catalogues with searching and bookmarking<br>
+<sup>9)</sup> Reading aloud with TTS engine<br><br>
 
+This application is distributed under GNU GPL 2 license<br>
+Want to know more? Visit https://knownreader.com
 
+(c) KnownReader team, 2020
+
+KnownReader project is a fork of known reader application - CoolReader. KnownReader offers rich UI andf number of unique features.
+Contents of README.md file below is taken from original CoolReader project.
 
 
 Development is moved to GitHub
