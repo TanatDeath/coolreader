@@ -20,10 +20,10 @@ public class MainDB extends BaseDB {
 
 	public static String currentLanguage = "EN"; // for genres - sets from BaseActivity
 
-	public int iMaxGroupSize = 8;
+	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 43;
+	public static final int DB_VERSION = 47;
 	@Override
 	protected boolean upgradeSchema() {
 		log.i("DB_VERSION "+DB_VERSION);
@@ -33,14 +33,16 @@ public class MainDB extends BaseDB {
 			log.i("DB_VERSION NEED UPGRADE");
 			execSQL("CREATE TABLE IF NOT EXISTS author (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					"name VARCHAR NOT NULL COLLATE NOCASE" +
+					"name VARCHAR NOT NULL COLLATE NOCASE," +
+					"book_cnt INTEGER"+
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"author_name_index ON author (name) ");
 			execSQL("CREATE TABLE IF NOT EXISTS genre (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					"code VARCHAR NOT NULL COLLATE NOCASE, " +
-					"name VARCHAR NOT NULL COLLATE NOCASE" +
+					"name VARCHAR NOT NULL COLLATE NOCASE, " +
+					"book_cnt INTEGER "+
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"genre_code_index ON genre (code) ");
@@ -54,13 +56,15 @@ public class MainDB extends BaseDB {
 					"genre_transl_code_lang_index ON genre_transl (code, lang) ");
 			execSQL("CREATE TABLE IF NOT EXISTS series (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					"name VARCHAR NOT NULL COLLATE NOCASE" +
+					"name VARCHAR NOT NULL COLLATE NOCASE," +
+					"book_cnt INTEGER" +
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 			        "series_name_index ON series (name) ");
 			execSQL("CREATE TABLE IF NOT EXISTS folder (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
-					"name VARCHAR NOT NULL" +
+					"name VARCHAR NOT NULL," +
+					"book_cnt INTEGER "+
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"folder_name_index ON folder (name) ");
@@ -154,6 +158,19 @@ public class MainDB extends BaseDB {
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 			"bookmark_book_index ON bookmark (book_fk) ");
+			execSQL("CREATE TABLE IF NOT EXISTS book_dates_stats (" +
+					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+					"date_field VARCHAR NOT NULL COLLATE NOCASE," +
+					"book_date INTEGER, " +
+					"book_cnt INTEGER"+
+					")");
+			execSQL("CREATE TABLE IF NOT EXISTS book_titles_stats (" +
+					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+					"text_field VARCHAR NOT NULL COLLATE NOCASE," +
+					"stat_level INTEGER," +
+					"text_value VARCHAR NOT NULL COLLATE NOCASE," +
+					"book_cnt INTEGER"+
+					")");
 			int currentVersion = mDB.getVersion();
 			// ====================================================================
 			if ( currentVersion<1 )
@@ -330,8 +347,6 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN crc32 INTEGER DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN domVersion INTEGER DEFAULT 0");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN rendFlags INTEGER DEFAULT 0");
-			}
-			if (currentVersion < 43) {
 				// After adding support for the 'fb3' and 'docx' formats in version 3.2.33,
 				// the 'format' field in the 'book' table becomes invalid because the enum DocumentFormat has been changed.
 				// So, after reading this field from the database, we must recheck the format by pathname.
@@ -384,6 +399,55 @@ public class MainDB extends BaseDB {
 						mDB.endTransaction();
 					}
 				}
+			}
+
+			if (currentVersion < 44) {
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN book_cnt INTEGER");
+				execSQLIgnoreErrors("ALTER TABLE genre ADD COLUMN book_cnt INTEGER");
+				execSQLIgnoreErrors("ALTER TABLE series ADD COLUMN book_cnt INTEGER");
+				execSQLIgnoreErrors("ALTER TABLE folder ADD COLUMN book_cnt INTEGER");
+			}
+
+			if (currentVersion < 45) {
+				execSQLIgnoreErrors("update book set title = filename where title IS NULL or title = ''");
+			}
+			if (currentVersion < 47) {
+				execSQLIgnoreErrors("delete from book_dates_stats");
+				execSQLIgnoreErrors(
+						"insert into book_dates_stats(date_field, book_date, book_cnt) " +
+						"select 'book_date_n', case when coalesce(b.book_date_n,0)=0 then 0 else " +
+						"cast(strftime('%s',datetime(b.book_date_n/1000, 'unixepoch', 'start of month')) as integer) end, " +
+						"count(*) as book_cnt from book b " +
+						"group by 2 " +
+						"union all " +
+						"select 'doc_date_n', case when coalesce(b.doc_date_n,0)=0 then 0 else  " +
+						"cast(strftime('%s',datetime(b.doc_date_n/1000, 'unixepoch', 'start of month')) as integer) end, " +
+						"count(*) as book_cnt from book b " +
+						"group by 2 " +
+						"union all " +
+						"select 'publ_year_n', case when coalesce(b.publ_year_n,0)=0 then 0 else  " +
+						"cast(strftime('%s',datetime(b.publ_year_n/1000, 'unixepoch', 'start of month')) as integer) end, " +
+						"count(*) as book_cnt from book b " +
+						"group by 2 " +
+						"union all " +
+						"select 'file_create_time', case when coalesce(b.file_create_time,0)=0 then 0 else  " +
+						"cast(strftime('%s',datetime(b.file_create_time/1000, 'unixepoch', 'start of month')) as integer) end, " +
+						"count(*) as book_cnt from book b " +
+						"group by 2");
+				execSQLIgnoreErrors("delete from book_titles_stats");
+				execSQLIgnoreErrors(
+						"insert into book_titles_stats(text_field, stat_level, text_value, book_cnt) "+
+								"select 'book_title' text_field, 0 stat_level, substr(b.title,1,1) text_value, count(*) as book_cnt from book b "+
+								"where (not (b.pathname like '@opds%')) and length(b.title)>=1 "+
+								"GROUP BY substr(b.title,1,1) "+
+								"union all "+
+								"select 'book_title' text_field, 1 stat_level, substr(b.title,1,2) text_value, count(*) as book_cnt from book b "+
+								"where (not (b.pathname like '@opds%')) and length(b.title)>=2 "+
+								"GROUP BY substr(b.title,1,2) "+
+								"union all "+
+								"select 'book_title' text_field, 2 stat_level, substr(b.title,1,3) text_value, count(*) as book_cnt from book b "+
+								"where (not (b.pathname like '@opds%')) and length(b.title)>=3 "+
+								"GROUP BY substr(b.title,1,3) ");
 			}
 
 			//==============================================================
@@ -890,7 +954,7 @@ public class MainDB extends BaseDB {
 					FileInfo opds = new FileInfo();
 					opds.isDirectory = true;
 					opds.pathname = FileInfo.OPDS_DIR_PREFIX + url;
-					opds.filename = name;
+					opds.setFilename(name);
 					opds.username = username;
 					opds.password = password;
 					opds.proxy_addr = proxy_addr;
@@ -939,7 +1003,7 @@ public class MainDB extends BaseDB {
                     favorite.seriesNumber = pos;
                     favorite.setType(FileInfo.TYPE_NOT_SET);
                     if (!StrUtils.isEmptyStr(rs.getString(3)))
-                    	favorite.filename = rs.getString(3);
+                    	favorite.setFilename(rs.getString(3));
                     list.add(favorite);
                 } while (rs.moveToNext());
             }
@@ -962,7 +1026,7 @@ public class MainDB extends BaseDB {
             stmt = mDB.compileStatement("UPDATE favorite_folders SET position = ?, path = ?, filename = ? WHERE id = ?");
             stmt.bindLong(1, folder.seriesNumber);
             stmt.bindString(2, folder.pathname);
-			stmt.bindString(3, folder.filename);
+			stmt.bindString(3, folder.getFilename());
             stmt.bindLong(4, folder.id);
             stmt.execute();
         } finally {
@@ -977,12 +1041,12 @@ public class MainDB extends BaseDB {
             stmt = mDB.compileStatement("INSERT INTO favorite_folders (id, path, position, filename) VALUES (NULL, ?, ?, ?)");
             stmt.bindString(1, folder.pathname);
 			stmt.bindLong(2, folder.seriesNumber);
-			String fname = folder.filename;
+			String fname = folder.getFilename();
 			if ((folder.isOPDSDir()) && (folder.parent != null)) {
 				if (folder.parent.parent != null) {
-					fname = fname + " | " + folder.parent.filename;
+					fname = fname + " | " + folder.parent.getFilename();
 					if (folder.parent.parent.parent != null) {
-						fname = fname + " | " + folder.parent.parent.filename;
+						fname = fname + " | " + folder.parent.parent.getFilename();
 					}
 				}
 			}
@@ -1083,11 +1147,14 @@ public class MainDB extends BaseDB {
 	private static void addItems(FileInfo parent, ArrayList<FileInfo> items, int start, int end) {
 		for (int i=start; i<end; i++) {
 			items.get(i).parent = parent;
-			parent.addDir(items.get(i));
+			if (items.get(i).isSpecialDir()) {
+				parent.addDir(items.get(i));
+			} else
+				parent.addFile(items.get(i));
 		}
 	}
 	
-	private static abstract class ItemGroupExtractor {
+	public static abstract class ItemGroupExtractor {
 		public abstract String getComparisionField(FileInfo item);
 		public String getItemFirstLetters(FileInfo item, int level) {
 			try {
@@ -1101,6 +1168,10 @@ public class MainDB extends BaseDB {
 							else sRet = name;
 					} else sRet="[empty]";
 					if (sRet.equals("")) sRet="[empty]";
+					if (sRet.length()>level) {
+						sRet="_______";
+						if (sRet.length()>level) sRet=sRet.substring(0,l);
+					}
 					return sRet;
 				} else {
 					return "_";
@@ -1108,29 +1179,118 @@ public class MainDB extends BaseDB {
 			} catch (Exception e) {
 				vlog.e("getItemFirstLetters error",e);
 			}
-			return "[error]";
+			String sRet="[error]";
+			if (sRet.length()>level) {
+				sRet="_______";
+				if (sRet.length()>level) sRet=sRet.substring(0,level);
+			}
+			return sRet;
 		}
 	}
 
-	private static class ItemGroupFilenameExtractor extends ItemGroupExtractor {
+	public static class ItemGroupFilenameExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
-			return item.filename;
+			return item.getFilename();
 		}
 	}
 
-	private static class ItemGroupTitleExtractor extends ItemGroupExtractor {
+	public static class ItemGroupTitleExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
+			if (StrUtils.isEmptyStr(item.title)) return item.getFilename();
 			return item.title;
 		}
 	}
+
+	public static class ItemGroupAuthorExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if (StrUtils.isEmptyStr(item.getAuthors())) return item.getFilename();
+			return item.getAuthors();
+		}
+	}
+
+	public static class ItemGroupSeriesExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if (StrUtils.isEmptyStr(item.getSeriesName())) return item.getFilename();
+			return item.getSeriesName();
+		}
+	}
+
+	public static class ItemGroupGenresExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if (StrUtils.isEmptyStr(item.getGenres())) return item.getFilename();
+			return item.getGenres();
+		}
+	}
+
+	public static class ItemGroupBookDateNExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if ((StrUtils.isEmptyStr(item.getBookdate()))||
+				StrUtils.isEmptyStr(Utils.formatDateFixed(item.bookDateN))) return item.getFilename();
+			String s = Utils.formatDateFixed(item.bookDateN);
+			return s;
+		}
+	}
+
+	public static class ItemGroupDocDateNExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if ((StrUtils.isEmptyStr(item.getDocdate()))||
+					StrUtils.isEmptyStr(Utils.formatDateFixed(item.docDateN))) return item.getFilename();
+			String s = Utils.formatDateFixed(item.docDateN);
+			return s;
+		}
+	}
+
+	public static class ItemGroupPublYearNExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if ((StrUtils.isEmptyStr(item.getPublyear()))||
+					StrUtils.isEmptyStr(Utils.formatDateFixed(item.publYearN))) return item.getFilename();
+			String s = Utils.formatDateFixed(item.publYearN);
+			return s;
+		}
+	}
+
+	public static class ItemGroupFileCreateTimeExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if (StrUtils.isEmptyStr(Utils.formatDateFixed(item.fileCreateTime))) return item.getFilename();
+			String s = Utils.formatDateFixed(item.fileCreateTime);
+			return s;
+		}
+	}
+
+	public static class ItemGroupRatingExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			String s = ""+item.getRate();
+			return s;
+		}
+	}
+
+	public static class ItemGroupStateExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			int state = item.getReadingState();
+			String s = "[no_state]";
+			if (state == FileInfo.STATE_TO_READ) s = "[to read]";
+			if (state == FileInfo.STATE_READING) s = "[reading]";
+			if (state == FileInfo.STATE_FINISHED) s = "[finished]";
+			return s;
+		}
+	}
 	
-	private FileInfo createItemGroup(String groupPrefix, String groupPrefixTag) {
+	public static FileInfo createItemGroup(String groupPrefix, String groupPrefixTag) {
 		FileInfo groupDir = new FileInfo();
 		groupDir.isDirectory = true;
 		groupDir.pathname = groupPrefixTag + groupPrefix;
-		groupDir.filename = groupPrefix + "...";
+		groupDir.setFilename(groupPrefix + "...");
 		groupDir.isListed = true;
 		groupDir.isScanned = true;
 		groupDir.id = 0l;
@@ -1148,20 +1308,125 @@ public class MainDB extends BaseDB {
 			}
 		});
 	}
+
+	static int MAX_GROUP_LEVEL = 30;
+
+	public static void addGroupedItems2(FileInfo parent, String filter,
+								  ArrayList<FileInfo> items, String groupPrefixTag, final ItemGroupExtractor extractor, int lev) {
+		int iMaxItemsCount = iMaxGroupSize;
+		log.i("iMaxItemsCount "+iMaxItemsCount);
+		if (iMaxItemsCount<8) iMaxItemsCount = 8;
+		if (lev >= MAX_GROUP_LEVEL) {
+			addItems(parent, items, 0, items.size());
+			return;
+		}
+		// if there are already small amount
+		if (items.size()<=iMaxItemsCount) {
+			addItems(parent, items, 0, items.size());
+			return;
+		}
+		int curLevel = 0;
+		int level = 1; // initial level
+		int prevSize = 0;
+		if (!StrUtils.isEmptyStr(filter)) level = filter.length();
+		boolean br = false;
+		HashMap<String, Integer> grouped = null;
+		while ((level <= MAX_GROUP_LEVEL) && (!br)) {
+			HashMap<String, Integer> groupedCur = new HashMap<String, Integer>();
+			for (int i=0; i<items.size(); i++) {
+				String firstLetter = extractor.getItemFirstLetters(items.get(i), level);
+				if ((firstLetter.toUpperCase().startsWith(filter.toUpperCase())) || (StrUtils.isEmptyStr(filter))) {
+					// avoid equality with parent
+					//if (!firstLetter.toUpperCase().equals(parent.getFilename().toUpperCase()+"...")) {
+					Integer cnt = groupedCur.get(firstLetter);
+					if (cnt == null) cnt = 0;
+					groupedCur.put(firstLetter, cnt + 1);
+					//}
+				}
+			}
+			if ((groupedCur.size()<=iMaxItemsCount) || (curLevel == 0)  || (prevSize == 1)) {
+				curLevel = level;
+				grouped = groupedCur;
+				prevSize = grouped.size();
+			}
+			else
+				br = true;
+			level = level + 1;
+		}
+		if (grouped==null) {
+			addItems(parent, items, 0, items.size());
+			return;
+		}
+		if (grouped.size()==1) { // grouping failed :)
+			addItems(parent, items, 0, items.size());
+			return;
+		}
+		// we have found maximum allowable group level
+		int curSize = grouped.size();
+		for ( Map.Entry<String, Integer> entry : grouped.entrySet() ) {
+			String key = (String) entry.getKey();
+			Integer value = (Integer) entry.getValue();
+			if ((curSize-1+value <= iMaxItemsCount)&&(value>1)) { // this group can be "linearized"
+				for (int i=0; i<items.size(); i++) {
+					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
+					if (firstLetter.toUpperCase().equals(key.toUpperCase())) {
+						items.get(i).parent = parent;
+						if (items.get(i).isSpecialDir()) {
+							parent.addDir(items.get(i));
+						} else
+							parent.addFile(items.get(i));
+					}
+				}
+				curSize = curSize-1+value;
+			} else
+			if (value == 1) { // group of one element - adding element
+				for (int i=0; i<items.size(); i++) {
+					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
+					if (firstLetter.toUpperCase().equals(key.toUpperCase())) {
+						items.get(i).parent = parent;
+						if (items.get(i).isSpecialDir()) {
+							parent.addDir(items.get(i));
+						} else
+							parent.addFile(items.get(i));
+					}
+				}
+			} else { // really add group
+				ArrayList<FileInfo> itemsGr = new ArrayList<FileInfo>();
+				for (int i=0; i<items.size(); i++) {
+					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
+					if (firstLetter.toUpperCase().equals(key.toUpperCase())) itemsGr.add(items.get(i));
+				}
+				FileInfo newGroup = createItemGroup(key, groupPrefixTag);
+				newGroup.parent = parent;
+				parent.addDir(newGroup);
+				addGroupedItems2(newGroup, key, itemsGr, groupPrefixTag, extractor, lev + 1);
+			}
+		}
+	}
 	
-	private void addGroupedItems(FileInfo parent, ArrayList<FileInfo> items, int start, int end, String groupPrefixTag, int level, final ItemGroupExtractor extractor) {
+	private void addGroupedItems(FileInfo parent,
+				ArrayList<FileInfo> items, int start, int end, String groupPrefixTag, int level, final ItemGroupExtractor extractor) {
+		boolean bNoGroups = true;
+		if (((parent.pathname.startsWith(FileInfo.TITLE_TAG_LEVEL))&&(level<5))
+				||parent.pathname.startsWith(FileInfo.TITLE_TAG)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.BOOK_DATE_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.DOC_DATE_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.FILE_DATE_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.GENRE_GROUP_PREFIX)) bNoGroups = true;
+		if (level>30) bNoGroups = true; // to prevent infinite loop when list is bad
+
 		int itemCount = end - start;
 		if (itemCount < 1)
 			return;
 		// for nested level (>1), create base subgroup, otherwise use parent 
-		if (level > 1 && itemCount > 1) {
+		if ((level > 1 && itemCount > 1) && (!bNoGroups)) {
 			String baseFirstLetter = extractor.getItemFirstLetters(items.get(start), level - 1);
 			FileInfo newGroup = createItemGroup(baseFirstLetter, groupPrefixTag);
 			newGroup.parent = parent;
 			parent.addDir(newGroup);
 			parent = newGroup;
 		}
-		
 		// check group count
 		int topLevelGroupsCount = 0;
 		String lastFirstLetter = "";
@@ -1172,12 +1437,6 @@ public class MainDB extends BaseDB {
 				lastFirstLetter = firstLetter;
 			}
 		}
-		boolean bNoGroups = false;
-		if (groupPrefixTag.equals(FileInfo.BOOK_DATE_GROUP_PREFIX)) bNoGroups = true;
-		if (groupPrefixTag.equals(FileInfo.DOC_DATE_GROUP_PREFIX)) bNoGroups = true;
-		if (groupPrefixTag.equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) bNoGroups = true;
-		if (groupPrefixTag.equals(FileInfo.FILE_DATE_GROUP_PREFIX)) bNoGroups = true;
-		if (groupPrefixTag.equals(FileInfo.GENRE_GROUP_PREFIX)) bNoGroups = true;
 
 		int iMaxItemsCount = iMaxGroupSize;
 		log.i("iMaxItemsCount "+iMaxItemsCount);
@@ -1220,7 +1479,7 @@ public class MainDB extends BaseDB {
 					FileInfo item = new FileInfo();
 					item.isDirectory = true;
 					item.pathname = groupPrefixTag + id;
-					item.filename = name;
+					item.setFilename(name);
 					item.isListed = true;
 					item.isScanned = true;
 					item.id = id;
@@ -1243,13 +1502,52 @@ public class MainDB extends BaseDB {
 	public boolean loadAuthorsList(FileInfo parent) {
 		Log.i("cr3", "loadAuthorsList()");
 		beginReading();
+		// gather missed stats
+		Cursor rs = null;
+		try {
+			rs = mDB.rawQuery(
+					"select a.id, count(*) as cnt " +
+						"from author a " +
+						"join book_author ba on ba.author_fk = a.id " +
+						"join book b on b.id = ba.book_fk and (not (b.pathname like '@opds%')) " +
+						"where a.book_cnt is null " +
+						"group by a.id", null);
+			if ( rs.moveToFirst() ) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update author set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
+				} while (rs.moveToNext());
+			}
+			if ( rs!=null ) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3", "exception while loading list of authors", e);
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		//\
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
-				" INNER JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
-				" INNER JOIN book_author ON  book_author.author_fk = author.id GROUP BY author.name, author.id ORDER BY author.name";
+		//String sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
+		//		" INNER JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
+		//		" INNER JOIN book_author ON  book_author.author_fk = author.id GROUP BY author.name, author.id ORDER BY author.name";
+		String sql = "SELECT author.id, author.name, book_cnt as book_count FROM author ORDER BY author.name";
 		boolean found = loadItemList(list, sql, FileInfo.AUTHOR_PREFIX, true);
-		addGroupedItems(parent, list, 0, list.size(), FileInfo.AUTHOR_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		//
+		sortItems(list, new ItemGroupFilenameExtractor(), true);
+		// remove duplicate titles
+		for (int i=list.size() - 1; i>0; i--) {
+			String title = list.get(i).getFilename();
+			if (title == null) {
+				list.remove(i);
+				continue;
+			}
+			String prevTitle = list.get(i - 1).getFilename();
+			if (title.equals(prevTitle))
+				list.remove(i);
+		}
+		//addGroupedItems(parent, list, 0, list.size(), FileInfo.AUTHOR_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		addGroupedItems2(parent, "", list, FileInfo.AUTHOR_GROUP_PREFIX, new ItemGroupFilenameExtractor(),1);
 		endReading();
 		return found;
 	}
@@ -1261,16 +1559,57 @@ public class MainDB extends BaseDB {
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 		String lang = currentLanguage;
 		if (!StrUtils.isEmptyStr(lang)) lang = lang.substring(0,2).toUpperCase();
+		// gather missed stats
+		Cursor rs = null;
+		try {
+			rs = mDB.rawQuery(
+				"select g.id, count(*) as cnt "+
+				"from genre g "+
+				"join book_genre bg on bg.genre_fk = g.id "+
+				"join book b on b.id = bg.book_fk and (not (b.pathname like '@opds%')) "+
+				"where g.book_cnt is null "+
+				"group by g.id", null);
+			if ( rs.moveToFirst() ) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update genre set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
+				} while (rs.moveToNext());
+			}
+			if ( rs!=null ) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3", "exception while loading list of genres", e);
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		//\
 		String gname =
 			" trim(coalesce(nullif(coalesce(genre_transl.name,''),''), "+
 			"nullif(coalesce(genre.name,''),''), "+
 			"nullif(coalesce(genre.code,''),''))) ";
-		String sql = "SELECT genre.id, "+gname+" name, count(*) as book_count FROM genre "+
-				" LEFT JOIN  genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"' " +
-				" INNER JOIN book on book.id = book_genre.book_fk and (not (book.pathname like '@opds%')) "+
-				" INNER JOIN book_genre ON book_genre.genre_fk = genre.id GROUP BY "+gname+", genre.id ORDER BY "+gname;
+		//String sql = "SELECT genre.id, "+gname+" name, count(*) as book_count FROM genre "+
+		//		" LEFT JOIN  genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"' " +
+		//		" INNER JOIN book on book.id = book_genre.book_fk and (not (book.pathname like '@opds%')) "+
+		//		" INNER JOIN book_genre ON book_genre.genre_fk = genre.id GROUP BY "+gname+", genre.id ORDER BY "+gname;
+		String sql = "SELECT genre.id, "+gname+" name, book_cnt as book_count FROM genre "+
+				" LEFT JOIN genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"' " +
+				" ORDER BY "+gname;
 		boolean found = loadItemList(list, sql, FileInfo.GENRE_PREFIX, true);
-		addGroupedItems(parent, list, 0, list.size(), FileInfo.GENRE_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		//
+		sortItems(list, new ItemGroupFilenameExtractor(), true);
+		// remove duplicate titles
+		for (int i=list.size() - 1; i>0; i--) {
+			String title = list.get(i).getFilename();
+			if (title == null) {
+				list.remove(i);
+				continue;
+			}
+			String prevTitle = list.get(i - 1).getFilename();
+			if (title.equals(prevTitle))
+				list.remove(i);
+		}
+		//addGroupedItems(parent, list, 0, list.size(), FileInfo.GENRE_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		addGroupedItems2(parent, "", list, FileInfo.GENRE_GROUP_PREFIX, new ItemGroupFilenameExtractor(),1);
 		endReading();
 		return found;
 	}
@@ -1279,12 +1618,54 @@ public class MainDB extends BaseDB {
 		Log.i("cr3", "loadSeriesList()");
 		beginReading();
 		parent.clear();
+		// gather missed stats
+		//execSQLIgnoreErrors("update series set book_cnt = null");
+		Cursor rs = null;
+		try {
+			rs = mDB.rawQuery(
+				"select s.id, count(*) as cnt " +
+				"from series s " +
+				"join book b on s.id = b.series_fk or s.id = b.publseries_fk " +
+				"  and s.book_cnt is null " +
+				"where (not (b.pathname like '@opds%')) " +
+				"group by s.id ", null);
+			if ( rs.moveToFirst() ) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update series set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
+				} while (rs.moveToNext());
+			}
+			if ( rs!=null ) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3", "exception while loading list of series", e);
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		//\
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series "+
-				" INNER JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id "+
-				" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
+//		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series "+
+//				" INNER JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id "+
+//				" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
+		String sql = "SELECT series.id, series.name, book_cnt as book_count FROM series "+
+				" ORDER BY series.name";
 		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX, true);
-		addGroupedItems(parent, list, 0, list.size(), FileInfo.SERIES_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		//
+		sortItems(list, new ItemGroupFilenameExtractor(), true);
+		// remove duplicate titles
+		for (int i=list.size() - 1; i>0; i--) {
+			String title = list.get(i).getFilename();
+			if (title == null) {
+				list.remove(i);
+				continue;
+			}
+			String prevTitle = list.get(i - 1).getFilename();
+			if (title.equals(prevTitle))
+				list.remove(i);
+		}
+		//addGroupedItems(parent, list, 0, list.size(), FileInfo.SERIES_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		//addGroupedItems2(parent, list, 0, list.size(), FileInfo.SERIES_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
+		addGroupedItems2(parent, "", list, FileInfo.SERIES_GROUP_PREFIX, new ItemGroupFilenameExtractor(),1);
 		endReading();
 		return found;
 	}
@@ -1293,14 +1674,49 @@ public class MainDB extends BaseDB {
 		Log.i("cr3", "loadByDateList()");
 		beginReading();
 		parent.clear();
+		// gather missed stats
+		//execSQLIgnoreErrors("update series set book_cnt = null");
+		Cursor rs = null;
+		try {
+			rs = mDB.rawQuery(
+					"select bds.id, count(*) as cnt " +
+					    "from book_dates_stats bds " +
+						"join book b on case when coalesce(b.book_date_n,0)=0 then 0 else " +
+						"  cast(strftime('%s',datetime(b."+field+"/1000, 'unixepoch', 'start of month')) as integer) end " +
+						"  = bds.book_date " +
+						"  and bds.date_field ='"+field+"' " +
+						"  and bds.book_cnt is null " +
+						"where (not (b.pathname like '@opds%')) " +
+						"group by bds.id", null);
+			if ( rs.moveToFirst() ) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update book_dates_stats set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
+				} while (rs.moveToNext());
+			}
+			if ( rs!=null ) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3", "exception while loading list of dates", e);
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		//\
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
-			"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) as integer) end";
-		String f2 = "case when coalesce("+field+",0)=0 then '[empty]' " +
-			" else strftime('%Y-%m', datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) end";
-		String sql = "SELECT "+f1+" as date_n, "+
-			f2 + " as date_s, " +
-			" count(*) as book_count FROM book where (not (book.pathname like '@opds%')) GROUP BY " + f1 + ", " +f2;
+
+//		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
+//			"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch', 'start of month')) as integer) end";
+//		String f2 = "case when coalesce("+field+",0)=0 then '[empty]' " +
+//			" else strftime('%Y-%m', datetime("+field+"/1000, 'unixepoch', 'start of month')) end";
+//		String sql = "SELECT "+f1+" as date_n, "+
+//			f2 + " as date_s, " +
+//			" count(*) as book_count FROM book where (not (book.pathname like '@opds%')) GROUP BY " + f1 + ", " +f2;
+
+		String sql = "select book_date, " +
+				"case when book_date=0 then '[empty]' else strftime('%Y-%m', datetime(book_date, 'unixepoch')) end book_date_text, " +
+				"  book_cnt from book_dates_stats where date_field = '"+field+"' " +
+				"order by 2 desc";
+
 		String prefix = FileInfo.BOOK_DATE_PREFIX;
 		String groupPrefix = FileInfo.BOOK_DATE_GROUP_PREFIX;
 		if (field.equals("doc_date_n")) {
@@ -1316,22 +1732,119 @@ public class MainDB extends BaseDB {
 			groupPrefix = FileInfo.FILE_DATE_GROUP_PREFIX;
 		}
 		boolean found = loadItemList(list, sql, prefix, false);
-		addGroupedItems(parent, list, 0, list.size(), groupPrefix, 1, new ItemGroupFilenameExtractor());
+		// remove duplicate titles
+		for (int i=list.size() - 1; i>0; i--) {
+			String title = list.get(i).getFilename();
+			if (title == null) {
+				list.remove(i);
+				continue;
+			}
+			String prevTitle = list.get(i - 1).getFilename();
+			if (title.equals(prevTitle))
+				list.remove(i);
+		}
+		//addGroupedItems(parent, list, 0, list.size(), groupPrefix, 1, new ItemGroupFilenameExtractor());
+		addGroupedItems2(parent, "", list, groupPrefix, new ItemGroupFilenameExtractor(),1);
 		endReading();
 		return found;
 	}
 	
 	public boolean loadTitleList(FileInfo parent) {
 		Log.i("cr3", "loadTitleList()");
-		beginReading();
+		// gather missed stats
+		Cursor rsCnt = null;
+		Cursor rs = null;
+		try {
+			rs = mDB.rawQuery(
+					"select bts.stat_level, bts.text_value, count(*) as cnt " +
+						"from book b " +
+						"join book_titles_stats bts on " +
+						"  bts.text_field='book_title' and " +
+						"  b.title like bts.text_value || '%' " +
+						"  and substr(b.title,1,length(bts.text_value)) = bts.text_value " +
+						"  and bts.book_cnt is null " +
+						"where (not (b.pathname like '@opds%')) " +
+						"group by bts.stat_level, bts.text_value", null);
+			if ( rs.moveToFirst() ) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update book_titles_stats set book_cnt = " +
+						rs.getLong(2) +
+						" where stat_level = " + rs.getInt(0) +
+						" and text_value = " + quoteSqlString(rs.getString(1)));
+				} while (rs.moveToNext());
+			}
+			if ( rs!=null ) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3", "exception while loading list of series", e);
+		} finally {
+			if ( rs!=null )
+				rs.close();
+		}
+		//\
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		String sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) ORDER BY b.title";
-		boolean found = findBooks(sql, list);
+		ArrayList<FileInfo> listFiles = new ArrayList<FileInfo>();
+		beginReading();
+		int lev = 0;
+		if (StrUtils.getNonEmptyStr(parent.pathname,false).startsWith(FileInfo.TITLE_TAG_LEVEL)) {
+			lev = Integer.valueOf(StrUtils.getNonEmptyStr(parent.pathname,false).replace(FileInfo.TITLE_TAG_LEVEL+":", ""));
+		}
+		int iMaxItemsCount = iMaxGroupSize;
+		if (iMaxItemsCount<8) iMaxItemsCount = 8;
+		//iMaxItemsCount = 2; // for tests
+		String sql = "SELECT bts.id, bts.text_value, bts.book_cnt as book_count FROM book_titles_stats bts "+
+				" where bts.text_field='book_title' and bts.stat_level = " + lev +
+				" and bts.book_cnt > " + iMaxItemsCount;
+		if ((lev >= 1) && (lev <= 2)) {
+			sql = sql + " and bts.text_value like " +quoteSqlString(parent.getFilename().substring(0,lev)+ "%");
+		}
+		sql = sql + " ORDER BY bts.text_value";
+		boolean found = false;
+		boolean found2 = false;
+		if (lev > 2) {
+			sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) "+
+					" and b.title like "+quoteSqlString(parent.getFilename().substring(0,lev)+ "%")+
+					" and substr(b.title,1,length("+quoteSqlString(parent.getFilename().substring(0,lev))+")) = "+
+					quoteSqlString(parent.getFilename().substring(0,lev)) +
+					" ORDER BY b.title";
+			found = findBooks(sql, list);
+		} else {
+			found = loadItemList(list, sql, FileInfo.TITLE_GROUP_PREFIX, true);
+			for (FileInfo fi : list) {
+				fi.pathname = FileInfo.TITLE_TAG_LEVEL +":"+ (lev + 1);
+				fi.setFilename(fi.getFilename() + "...");
+			}
+			// Non grouped filenames
+			String sCond = "";
+			if (lev > 0) sCond = " and b.title like " + quoteSqlString(parent.getFilename().substring(0, lev) + "%") +
+					" and substr(b.title,1,length("+quoteSqlString(parent.getFilename().substring(0, lev))+")) = "+
+					quoteSqlString(parent.getFilename().substring(0, lev));
+			sql = READ_FILEINFO_SQL +
+					" join book_titles_stats bts on bts.text_field='book_title' and bts.stat_level = " + lev +
+					" and b.title like bts.text_value||'%' " +
+					" and substr(b.title,1,length(bts.text_value)) = bts.text_value "+
+					" and bts.book_cnt <= " + iMaxItemsCount +
+					" WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) " +
+					" and length(b.title)>"+lev+sCond+
+					" ORDER BY b.title";
+			found2 = findBooks(sql, listFiles);
+			if (found2) for (FileInfo fi: listFiles) list.add(fi);
+			// Short filenames
+			if (lev > 0) {
+				sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) " +
+						" and length(b.title)="+lev+" and b.title like " + quoteSqlString(parent.getFilename().substring(0, lev) + "%") +
+						" and substr(b.title,1,length(" + quoteSqlString(parent.getFilename().substring(0, lev))+")) = "+
+						quoteSqlString(parent.getFilename().substring(0, lev)) +
+						" ORDER BY b.title";
+				found2 = findBooks(sql, listFiles);
+				if (found2) for (FileInfo fi: listFiles) list.add(fi);
+			}
+		}
 		sortItems(list, new ItemGroupTitleExtractor(), true);
 		// remove duplicate titles
 		for (int i=list.size() - 1; i>0; i--) {
-			String title = list.get(i).title; 
+			String title = list.get(i).title;
 			if (title == null) {
 				list.remove(i);
 				continue;
@@ -1340,7 +1853,8 @@ public class MainDB extends BaseDB {
 			if (title.equals(prevTitle))
 				list.remove(i);
 		}
-		addGroupedItems(parent, list, 0, list.size(), FileInfo.TITLE_GROUP_PREFIX, 1, new ItemGroupTitleExtractor());
+		//addGroupedItems(parent, list, 0, list.size(), FileInfo.TITLE_GROUP_PREFIX, 1+lev+1, new ItemGroupTitleExtractor());
+		addGroupedItems2(parent, parent.getFilename().substring(0,lev), list, FileInfo.TITLE_GROUP_PREFIX, new ItemGroupTitleExtractor(),1);
 		endReading();
 		return found;
 	}
@@ -1377,7 +1891,7 @@ public class MainDB extends BaseDB {
 		if (!isOpened())
 			return false;
 		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
-				"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch','+1 day', 'start of month')) as integer) end";
+				"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch', 'start of month')) as integer) end";
 		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+f1+" = " + bookdateId +
 				" ORDER BY b.title";
 		vlog.i(sql);
@@ -1669,12 +2183,12 @@ public class MainDB extends BaseDB {
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 		FileInfo fi = new FileInfo(path);
 		if (fi.exists()) {
-			if (findAllBy(list, "filename", fi.filename)) {
+			if (findAllBy(list, "filename", fi.getFilename())) {
 				for (FileInfo item : list) {
 					if (item.exists())
 						continue;
 					if (item.size == fi.size) {
-						log.i("Found record for file of the same name and size: treat as moved " + item.filename + " " + item.size);
+						log.i("Found record for file of the same name and size: treat as moved " + item.getFilename() + " " + item.size);
 						// fix and save
 						item.pathname = fi.pathname;
 						item.arcname = fi.arcname;
@@ -1887,9 +2401,93 @@ public class MainDB extends BaseDB {
 			vlog.i("bookmarks added:" + added + ", updated: " + changed + ", removed:" + removed);
 	}
 
+	private void clearBookStats(FileInfo fileInfo,
+			boolean authorsChanged, boolean genresChanged, boolean seriesChanged, boolean titleChanged, boolean folderChanged,
+			boolean bookDateNChanged, boolean docDateNChanged, boolean publYearNChanged, boolean fileCreateTimeChanged)	{
+		if (authorsChanged) {
+			Long[] authorIds = getAuthorIds(fileInfo.getAuthors());
+			if (authorIds != null)
+				for (Long authorId : authorIds) {
+					execSQL("UPDATE author set book_cnt = null WHERE id = " + authorId);
+				}
+		}
+		if (genresChanged) {
+			Long[] genreIds = getGenreIds(fileInfo.getGenres(), currentLanguage);
+			if (genreIds != null)
+				for (Long genreId : genreIds) {
+					execSQL("UPDATE genre set book_cnt = null WHERE id = " + genreId);
+				}
+		}
+		if (seriesChanged) {
+			long s = 0;
+			if (getSeriesId(fileInfo.series) != null) s = getSeriesId(fileInfo.series);
+			execSQL("UPDATE series set book_cnt = null WHERE id = " + s);
+			long s2 = 0;
+			if (getSeriesId(fileInfo.publseries) != null) s2 = getSeriesId(fileInfo.publseries);
+			if (s != s2)
+				execSQL("UPDATE series set book_cnt = null WHERE id = " + s2);
+		}
+		if (folderChanged) {
+			execSQL("UPDATE folder set book_cnt = null WHERE id = " + getFolderId(fileInfo.path));
+		}
+		if (bookDateNChanged) {
+			execSQL("delete from book_dates_stats WHERE date_field = 'book_date_n' and " +
+					"book_date = case when " + fileInfo.bookDateN + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.bookDateN+"/1000, 'unixepoch', 'start of month')) as integer) end");
+			execSQL("insert into book_dates_stats (date_field, book_date, book_cnt) " +
+					"values ('book_date_n', case when " + fileInfo.bookDateN + "=0 then 0 else "+
+				"cast(strftime('%s',datetime("+fileInfo.bookDateN+"/1000, 'unixepoch', 'start of month')) as integer) end, null)");
+		}
+		if (docDateNChanged) {
+			execSQL("delete from book_dates_stats WHERE date_field = 'doc_date_n' and " +
+					"book_date = case when " + fileInfo.docDateN + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.docDateN+"/1000, 'unixepoch', 'start of month')) as integer) end");
+			execSQL("insert into book_dates_stats (date_field, book_date, book_cnt) " +
+					"values ('doc_date_n', case when " + fileInfo.docDateN + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.docDateN+"/1000, 'unixepoch', 'start of month')) as integer) end, null)");
+		}
+		if (publYearNChanged) {
+			execSQL("delete from book_dates_stats WHERE date_field = 'publ_year_n' and " +
+					"book_date = case when " + fileInfo.publYearN + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.publYearN+"/1000, 'unixepoch', 'start of month')) as integer) end");
+			execSQL("insert into book_dates_stats (date_field, book_date, book_cnt) " +
+					"values ('publ_year_n', case when " + fileInfo.publYearN + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.publYearN+"/1000, 'unixepoch', 'start of month')) as integer) end, null)");
+		}
+		if (fileCreateTimeChanged) {
+			execSQL("delete from book_dates_stats WHERE date_field = 'file_create_time' and " +
+					"book_date = case when " + fileInfo.fileCreateTime + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.fileCreateTime+"/1000, 'unixepoch', 'start of month')) as integer) end");
+			execSQL("insert into book_dates_stats (date_field, book_date, book_cnt) " +
+					"values ('file_create_time', case when " + fileInfo.fileCreateTime + "=0 then 0 else "+
+					"cast(strftime('%s',datetime("+fileInfo.fileCreateTime+"/1000, 'unixepoch', 'start of month')) as integer) end, null)");
+
+		}
+		if (titleChanged) {
+			for (int i = 0; i < 3; i++) {
+				if (StrUtils.getNonEmptyStr(fileInfo.title, false).length() > i) {
+					String sText = StrUtils.getNonEmptyStr(fileInfo.title, false);
+					if (sText.length()>i) {
+						execSQL("delete from book_titles_stats WHERE text_field = 'book_title' and " +
+								"stat_level = " + i + " and text_value = " + quoteSqlString(sText.substring(0, i + 1)));
+						execSQL("insert into book_titles_stats (text_field, stat_level, text_value, book_cnt) " +
+								"values ('book_title', " + i + ", " + quoteSqlString(sText.substring(0, i + 1)) + ", null)");
+					}
+				}
+			}
+		}
+	}
+
 	private boolean save(FileInfo fileInfo)	{
 		boolean authorsChanged = true;
 		boolean genresChanged = true;
+		boolean seriesChanged = true;
+		boolean titleChanged = true;
+		boolean folderChanged = true;
+		boolean bookDateNChanged = true;
+		boolean docDateNChanged = true;
+		boolean publYearNChanged = true;
+		boolean fileCreateTimeChanged = true;
 		try {
 			FileInfo oldValue = findFileInfoByPathname(fileInfo.getPathName(), false);
 			if (oldValue == null && fileInfo.id != null)
@@ -1906,6 +2504,14 @@ public class MainDB extends BaseDB {
 				}
 				authorsChanged = !eq(fileInfo.getAuthors(), oldValue.getAuthors());
 				genresChanged = !eq(fileInfo.getGenres(), oldValue.getGenres());
+				seriesChanged = (!eq(fileInfo.series,oldValue.series)) ||
+						(!eq(fileInfo.publseries,oldValue.publseries));
+				titleChanged = !eq(fileInfo.title,oldValue.title);
+				folderChanged = !eq(fileInfo.path,oldValue.path);
+				bookDateNChanged = fileInfo.bookDateN != oldValue.bookDateN;
+				docDateNChanged = fileInfo.docDateN != oldValue.docDateN;;
+				publYearNChanged = fileInfo.publYearN != oldValue.publYearN;
+				fileCreateTimeChanged = fileInfo.fileCreateTime != oldValue.fileCreateTime;
 				if (!genresChanged) {
 					if ((StrUtils.isEmptyStr(fileInfo.genre_list)) &&
 							(!StrUtils.isEmptyStr(fileInfo.genre))) genresChanged = true;
@@ -1920,7 +2526,17 @@ public class MainDB extends BaseDB {
 				fileInfo.id = h.insert();
 				authorsChanged = true;
 				genresChanged = true;
+				seriesChanged = true;
+				titleChanged = true;
+				folderChanged = true;
+				bookDateNChanged = true;
+				docDateNChanged = true;
+				publYearNChanged = true;
+				fileCreateTimeChanged = true;
 			}
+
+			clearBookStats(fileInfo, authorsChanged, genresChanged, seriesChanged, titleChanged, folderChanged,
+					bookDateNChanged, docDateNChanged, publYearNChanged, fileCreateTimeChanged);
 			
 			fileInfoCache.put(fileInfo);
 			if (fileInfo.id != null) {
@@ -2148,7 +2764,7 @@ public class MainDB extends BaseDB {
 			if (!newValue.need_to_update_ver) {
 				add("pathname", newValue.getPathName(), oldValue.getPathName());
 				add("folder_fk", getFolderId(newValue.path), getFolderId(oldValue.path));
-				add("filename", newValue.filename, oldValue.filename);
+				add("filename", newValue.getFilename(), oldValue.getFilename());
 				add("arcname", newValue.arcname, oldValue.arcname);
 				add("title", newValue.title, oldValue.title);
 				add("series_fk", getSeriesId(newValue.series), getSeriesId(oldValue.series));
@@ -2250,7 +2866,7 @@ public class MainDB extends BaseDB {
 		String[] parts = FileInfo.splitArcName(pathName);
 		fileInfo.pathname = parts[0];
 		fileInfo.path = rs.getString(i++);
-		fileInfo.filename = rs.getString(i++);
+		fileInfo.setFilename(rs.getString(i++));
 		fileInfo.arcname = rs.getString(i++);
 		fileInfo.title = rs.getString(i++);
 		fileInfo.setAuthors(rs.getString(i++));

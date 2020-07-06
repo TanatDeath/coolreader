@@ -2130,9 +2130,9 @@ LVFontRef getFont(css_style_rec_t * style, int documentId)
     return fnt;
 }
 
-int styleToTextFmtFlags( const css_style_ref_t & style, int oldflags, int direction )
+lUInt32 styleToTextFmtFlags( const css_style_ref_t & style, lUInt32 oldflags, int direction )
 {
-    int flg = oldflags;
+    lUInt32 flg = oldflags;
     if ( style->display == css_d_run_in ) {
         flg |= LTEXT_RUNIN_FLAG;
     } //else
@@ -2160,6 +2160,7 @@ int styleToTextFmtFlags( const css_style_ref_t & style, int oldflags, int direct
             case css_ta_end:
                 flg |= (direction == REND_DIRECTION_RTL ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
                 break;
+            case css_ta_auto: // shouldn't happen (only accepted with text-align-last)
             case css_ta_inherit:
                 break;
             }
@@ -2175,21 +2176,29 @@ int styleToTextFmtFlags( const css_style_ref_t & style, int oldflags, int direct
                 flg |= LTEXT_LAST_LINE_ALIGN_CENTER;
                 break;
             case css_ta_justify:
-                flg |= LTEXT_LAST_LINE_ALIGN_LEFT;
+                flg |= LTEXT_LAST_LINE_ALIGN_WIDTH;
                 break;
             case css_ta_start:
-                flg |= (direction == REND_DIRECTION_RTL ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT);
+                flg |= (direction == REND_DIRECTION_RTL ? LTEXT_LAST_LINE_ALIGN_RIGHT : LTEXT_LAST_LINE_ALIGN_LEFT);
                 break;
             case css_ta_end:
-                flg |= (direction == REND_DIRECTION_RTL ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
+                flg |= (direction == REND_DIRECTION_RTL ? LTEXT_LAST_LINE_ALIGN_LEFT : LTEXT_LAST_LINE_ALIGN_RIGHT);
                 break;
+            case css_ta_auto: // let flg have none of the above set, which will mean "auto"
             case css_ta_inherit:
                 break;
             }
         }
     }
-    if ( style->white_space == css_ws_pre )
+    // We should clean these flags that we got from the parent node via baseFlags:
+    // CSS white-space inheritance is correctly handled via styles (so, no need
+    // for this alternative way to ensure inheritance with flags), but might have
+    // been cancelled and set to some other value (e.g.: normal inside pre)
+    flg &= ~(LTEXT_FLAG_PREFORMATTED|LTEXT_FLAG_NOWRAP);
+    if ( style->white_space >= css_ws_pre )    // white-space: pre, pre-wrap, break-spaces
         flg |= LTEXT_FLAG_PREFORMATTED;
+    if ( style->white_space == css_ws_nowrap ) // white-space: nowrap
+        flg |= LTEXT_FLAG_NOWRAP;
     //flg |= oldflags & ~LTEXT_FLAG_NEWLINE;
     return flg;
 }
@@ -2300,7 +2309,7 @@ void SplitLines( const lString16 & str, lString16Collection & lines )
 // marker_width is updated and can be used to add indent or padding necessary to make
 // room for the marker (what and how to do it depending of list-style_position (inside/outside)
 // is left to the caller)
-lString16 renderListItemMarker( ldomNode * enode, int & marker_width, LFormattedText * txform, int line_h, int flags ) {
+lString16 renderListItemMarker( ldomNode * enode, int & marker_width, LFormattedText * txform, int line_h, lUInt32 flags ) {
     lString16 marker;
     marker_width = 0;
     // The UL > LI parent-child chain may have had some of our boxing elements inserted
@@ -2419,7 +2428,8 @@ bool renderAsListStylePositionInside( const css_style_rec_t * style, bool is_rtl
 // as is to the inline children elements: it is only used to get the width of
 // the container, which is only needed to compute indent (text-indent) values in %,
 // and to get paragraph direction (LTR/RTL/UNSET).
-void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAccessor * fmt, int & baseflags, int indent, int line_h, int valign_dy, bool * is_link_start )
+void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAccessor * fmt, lUInt32 & baseflags, int indent, int line_h, int valign_dy, bool * is_link_start )
+
 {
     if ( enode->isElement() ) {
         lvdom_element_render_method rm = enode->getRendMethod();
@@ -2452,10 +2462,12 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
         bool is_rtl = direction == REND_DIRECTION_RTL;
 
         // About styleToTextFmtFlags:
-        // - with inline nodes, it only updates LTEXT_FLAG_PREFORMATTED flag when css_ws_pre
-        // - with block nodes (so, only with the first "final" node, and not when
-        // recursing its children which are inline), it will set horitontal alignment flags
-        int flags = styleToTextFmtFlags( enode->getStyle(), baseflags, direction );
+        // - with inline nodes, it only updates LTEXT_FLAG_PREFORMATTED flag
+        //   when css_ws_pre and LTEXT_FLAG_NOWRAP when css_ws_nowrap.
+        // - with block nodes (so, only with the first "final" node, and not
+        //   when recursing its children which are inline), it will also set
+        //   horitontal alignment flags.
+        lUInt32 flags = styleToTextFmtFlags( enode->getStyle(), baseflags, direction );
         // Note:
         // - baseflags (passed by reference) is shared and re-used by this node's siblings
         //   (all inline); it should carry newline/horizontal aligment flag, which should
@@ -2731,6 +2743,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
         }
         switch ( style->text_decoration ) {
             case css_td_underline:
+            case css_td_blink: // (render it underlined)
                 flags |= LTEXT_TD_UNDERLINE;
                 break;
             case css_td_overline:
@@ -2738,9 +2751,6 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 break;
             case css_td_line_through:
                 flags |= LTEXT_TD_LINE_THROUGH;
-                break;
-            case css_td_blink:
-                flags |= LTEXT_TD_BLINK;
                 break;
             default:
                 break;
@@ -2871,7 +2881,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             bool isBlock = style->display == css_d_block;
             if ( isBlock ) {
                 // If block image, forget any current flags and start from baseflags (?)
-                int flags = styleToTextFmtFlags( enode->getStyle(), baseflags, direction );
+                lUInt32 flags = styleToTextFmtFlags( enode->getStyle(), baseflags, direction );
                 //txform->AddSourceLine(L"title", 5, 0x000000, 0xffffff, font, baseflags, interval, margin, NULL, 0, 0);
                 LVFont * font = enode->getFont().get();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
@@ -2940,6 +2950,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                         flags |= (is_rtl ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
                         break;
                     case css_ta_inherit:
+                    case css_ta_auto:
                         break;
                     }
                 }
@@ -3134,7 +3145,9 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
                 lChar16 delimiter[] = {UNICODE_NO_BREAK_SPACE, UNICODE_NO_BREAK_SPACE}; //160
-                txform->AddSourceLine( delimiter, sizeof(delimiter)/sizeof(lChar16), cl, bgcl, font, LTEXT_FLAG_OWNTEXT | LTEXT_RUNIN_FLAG, line_h, valign_dy, 0, NULL );
+                txform->AddSourceLine( delimiter, sizeof(delimiter)/sizeof(lChar16), cl, bgcl, font,
+                                       LTEXT_RUNIN_FLAG | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
+                                       line_h, valign_dy, 0, NULL );
                 flags &= ~LTEXT_RUNIN_FLAG;
             }
         }
@@ -3171,7 +3184,9 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 LVFont * font = enode->getFont().get();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
-                txform->AddSourceLine( L" ", 1, cl, bgcl, font, baseflags | LTEXT_FLAG_OWNTEXT, line_h, valign_dy);
+                txform->AddSourceLine( L" ", 1, cl, bgcl, font,
+                                       baseflags | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
+                                       line_h, valign_dy);
                 // baseflags &= ~LTEXT_FLAG_NEWLINE; // clear newline flag
                 // No need to clear the flag, as we set it just below
                 // (any LTEXT_ALIGN_* set implies LTEXT_FLAG_NEWLINE)
@@ -3199,6 +3214,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 baseflags |= (is_rtl ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
                 break;
             case css_ta_inherit:
+            case css_ta_auto:
                 break;
             }
             // Among inline nodes, only <BR> can carry a "clear: left/right/both".
@@ -3230,7 +3246,9 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             LVFont * font = enode->getFont().get();
             lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
             lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
-            txform->AddSourceLine( L" ", 1, cl, bgcl, font, baseflags|LTEXT_SRC_IS_CLEAR_LAST|LTEXT_FLAG_OWNTEXT, line_h, valign_dy);
+            txform->AddSourceLine( L" ", 1, cl, bgcl, font,
+                                   baseflags | LTEXT_SRC_IS_CLEAR_LAST | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
+                                   line_h, valign_dy);
         }
     }
     else if ( enode->isText() ) {
@@ -3245,7 +3263,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             #endif
 
             ldomNode * parent = enode->getParentNode();
-            int tflags = LTEXT_FLAG_OWNTEXT;
+            lUInt32 tflags = LTEXT_FLAG_OWNTEXT;
             // if ( parent->getNodeId() == el_a ) // "123" in <a href=><sup>123</sup></a> would not be flagged
             if (is_link_start && *is_link_start) { // was propagated from some outer <A>
                 tflags |= LTEXT_IS_LINK; // used to gather in-page footnotes
@@ -4549,8 +4567,8 @@ public:
                     // No more child, get back to parent and have it process our sibling
                     nextChildIndex = n->getNodeIndex() + 1;
                     n = n->getParentNode();
-                    if ( n == node ) // all children done and back to top node
-                        break;
+                    if ( n == node && nextChildIndex >= n->getChildCount() )
+                        break; // back to top node and all its children visited
                 }
             }
             if ( rowNode ) {
@@ -6038,7 +6056,7 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
     bool is_inline_box_child = enode->getParentNode() && enode->getParentNode()->isBoxingInlineBox();
 
     // In the business of computing width and height, we should handle a bogus
-    // embedded block (<inlineBox type="EmbeddedBlock">) (and its child) just
+    // embedded block (<inlineBox T="EmbeddedBlock">) (and its child) just
     // like any normal block element (taking the full width of its container
     // if no specified width, without the need to get its rendered width).
     if ( is_inline_box && enode->isEmbeddedBlockBoxingInlineBox(true) ) {
@@ -8122,7 +8140,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
                     }
                     LFormattedTextRef txform( enode->getDocument()->createFormattedText() );
                     // If RTL, have the marker aligned to the right inside list_marker_width
-                    int txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : 0;
+                    lUInt32 txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : 0;
                     int list_marker_width;
                     lString16 marker = renderListItemMarker( enode, list_marker_width, txform.get(), -1, txt_flags);
                     lUInt32 h = txform->Format( (lUInt16)list_marker_width, (lUInt16)page_height, direction );
@@ -8295,7 +8313,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
                     LFormattedTextRef txform( enode->getDocument()->createFormattedText() );
 
                     // If RTL, have the marker aligned to the right inside list_marker_width
-                    int txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : 0;
+                    lUInt32 txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : 0;
                     int list_marker_width;
                     lString16 marker = renderListItemMarker( enode, list_marker_width, txform.get(), -1, txt_flags);
                     lUInt32 h = txform->Format( (lUInt16)list_marker_width, (lUInt16)page_height, direction );
@@ -8703,13 +8721,13 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
                     // is already there (on re-renderings):
                     // (If this is an inlineBox in the initial XML loading phase,
                     // child is necessarily css_d_inline_block or css_d_inline_table,
-                    // or this node is <inlineBox type=EmbeddedBlock>.
+                    // or this node is <inlineBox T=EmbeddedBlock>.
                     // The following 'else's should never trigger.
                     if (child_style->display == css_d_inline_block || child_style->display == css_d_inline_table) {
                         pstyle->display = css_d_inline; // become an inline wrapper
                         pstyle->vertical_align = child_style->vertical_align;
                     }
-                    else if ( enode->hasAttribute( attr_type ) ) { // type="EmbeddedBlock"
+                    else if ( enode->hasAttribute( attr_T ) ) { // T="EmbeddedBlock"
                                             // (no other possible value yet, no need to compare strings)
                         pstyle->display = css_d_inline; // wrap bogus "block among inlines" in inline
                     }
@@ -8790,6 +8808,7 @@ void setNodeStyle( ldomNode * enode, css_style_ref_t parent_style, LVFontRef par
     }
     UPDATE_STYLE_FIELD( white_space, css_ws_inherit );
     UPDATE_STYLE_FIELD( text_align, css_ta_inherit );
+    UPDATE_STYLE_FIELD( text_align_last, css_ta_inherit );
     UPDATE_STYLE_FIELD( text_decoration, css_td_inherit );
     UPDATE_STYLE_FIELD( text_transform, css_tt_inherit );
     UPDATE_STYLE_FIELD( hyphenate, css_hyph_inherit );
@@ -9124,10 +9143,10 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                     maxWidth = curMaxWidth;
                 if (curWordWidth > minWidth)
                     minWidth = curWordWidth;
-                // First word after a <BR> should not have positive text-indent in its width,
+                // First word after a <BR> should not have text-indent in its width,
                 // but we did reset 'indent' to 0 after the first word of the final block.
-                // If we get some non-zero indent here, it is actually negated negative indent
-                // that should be applied to all words, including the one after a <BR/>, and
+                // If we get some non-zero indent here, it is "hanging" indent, that
+                // should be applied to all words, including the one after a <BR/>, and
                 // so it should contribute to the new line full width (curMaxWidth).
                 curMaxWidth = indent;
                 curWordWidth = indent;
@@ -9225,7 +9244,8 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
             _maxWidth = lengthToPx( style_width, 0, em );
             _minWidth = _maxWidth;
         }
-        else if (m == erm_final) { // Block node that contains only inline or text nodes:
+        else if (m == erm_final || m == erm_table_caption) {
+            // Block node that contains only inline or text nodes
             if ( is_img ) { // img with display: block always become erm_final (never erm_block)
                 if (img_width > 0) { // block img with a fixed width
                     _maxWidth = img_width;
@@ -9233,28 +9253,20 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                 }
             }
             else {
+                // curMaxWidth and curWordWidth are not used in our parents (which
+                // are block-like elements), we can just reset them.
+                curMaxWidth = 0;
+                curWordWidth = 0;
                 // We don't have any width yet to use for text-indent in % units,
                 // but this is very rare - use em as we must use something
                 int em = node->getFont()->getSize();
                 indent = lengthToPx(style->text_indent, em, em);
-                // curMaxWidth and curWordWidth are not used in our parents (which
-                // are block-like elements), we can just reset them.
-                // First word will have text-indent has its width
+                // First word will have text-indent as part of its width
                 if ( style->text_indent.value & 0x00000001 ) {
-                    // lvstsheet sets the lowest bit to 1 when text-indent has the "hanging" keyword,
-                    // which will be handled like negative margins
-                    indent = -indent;
-                }
-                if ( indent >= 0 ) {
-                    // Positive indent applies only on the first line, so account
-                    // for it only on the first word.
-                    curMaxWidth = indent;
-                    curWordWidth = indent;
-                    indent = 0; // but no more on following words in this final node, even after <BR>
-                }
-                else {
-                    // Negative indent does not apply on the first word, but may apply on each
-                    // followup word if a wrap happens before thema so don't reset it.
+                    // lvstsheet sets the lowest bit to 1 when text-indent has the "hanging" keyword.
+                    // "hanging" means it should apply on all line except the first.
+                    // Hanging indent does not apply on the first word, but may apply on each
+                    // followup word if a wrap happens before them so don't reset it.
                     // To keep things simple and readable here, we only apply it to the first
                     // word after a <BR> - but it should really apply on each word, everytime
                     // we reset curWordWidth, which would make the below code quite ugly and
@@ -9262,6 +9274,12 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                     // rare in floats, inline boxes and table cells.
                     // (We don't handle the shift/overlap with padding that a real negative
                     // indent can cause - so, we may return excessive widths.)
+                } else {
+                    // Not-"hanging" positive or negative indent applies only on the first line,
+                    // so account for it only on the first word.
+                    curMaxWidth += indent;
+                    curWordWidth += indent;
+                    indent = 0; // but no more on following words in this final node, even after <BR>
                 }
                 if (list_marker_width > 0 && !list_marker_width_as_padding) {
                     // with additional list marker if list-style-position: inside
@@ -9443,6 +9461,12 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
             case css_tt_inherit:
                 break;
         }
+        // white-space
+        // When getting min width, ensure non free wrap for "white-space: pre" (even if we
+        // don't when rendering). Others like "pre-wrap" and "pre-line" are allowed to wrap.
+        bool nowrap = (parent_style->white_space == css_ws_nowrap) || (parent_style->white_space == css_ws_pre);
+        bool pre = parent_style->white_space >= css_ws_pre;
+        int space_width_scale_percent = pre ? 100 : parent->getDocument()->getSpaceWidthScalePercent();
         // measure text
         const lChar16 * txt = nodeText.c_str();
         #ifdef DEBUG_GETRENDEREDWIDTHS
@@ -9470,8 +9494,16 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                     false); // no hyphenation
                     // todo: provide direction and hints
             for (int i=0; i<chars_measured; i++) {
+                if (pre) {
+                    collapseNextSpace = false; // Reset it if set previously
+                }
                 int w = widths[i] - (i>0 ? widths[i-1] : 0);
+                if ( (flags[i] & LCHAR_IS_SPACE) && (space_width_scale_percent != 100) ) {
+                    w = w * space_width_scale_percent / 100;
+                }
                 lChar16 c = *(txt + start + i);
+                lChar16 next_c = *(txt + start + i + 1); // might be 0 at end of string
+
                 bool is_cjk = (c >= UNICODE_CJK_IDEOGRAPHS_BEGIN && c <= UNICODE_CJK_IDEOGRAPHS_END
                             && ( c<=UNICODE_CJK_PUNCTUATION_HALF_AND_FULL_WIDTH_BEGIN
                                 || c>=UNICODE_CJK_PUNCTUATION_HALF_AND_FULL_WIDTH_END) );
@@ -9486,7 +9518,7 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                     if (collapseNextSpace) // ignore this space
                         continue;
                     collapseNextSpace = true; // ignore next spaces, even if in another node
-                    lastSpaceWidth = w;
+                    lastSpaceWidth = pre ? 0 : w; // Don't remove last space width if 'pre'
                     curMaxWidth += w; // add this space to non-wrap width
                     if (curWordWidth > 0) { // there was a word before this space
                         if (start+i > 0) {

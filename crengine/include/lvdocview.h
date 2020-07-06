@@ -331,6 +331,7 @@ private:
 
     LVArray<int> m_section_bounds;
     bool m_section_bounds_valid;
+    bool m_section_bounds_externally_updated;
 
     LVArray<int> m_section_bounds10;
     bool m_section_bounds_valid10;
@@ -644,7 +645,7 @@ public:
     /// returns true if document is opened
     bool isDocumentOpened();
     /// returns section bounds, in 1/100 of percent
-    LVArray<int> & getSectionBounds( );
+    LVArray<int> & getSectionBounds( bool for_external_update=false );
     /// returns section bounds, in 1/100 of percent * 10
     LVArray<int> & getSectionBounds4Levels( );
     /// returns section bounds, in pages

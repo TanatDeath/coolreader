@@ -455,6 +455,18 @@ public class YNDPerformAction {
                     mCallback.onError(YNDPerformAction.this, e.getMessage(), e);
                 }
             });
+        } else {
+            BackgroundThread.instance().postBackground(new Runnable() {
+                @Override
+                public void run() {
+                    BackgroundThread.instance().postGUI(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+" - "+mCoolReader.getString(R.string.cloud_download_error));
+                        }
+                    }, 200);
+                }
+            });
         }
     }
 

@@ -171,6 +171,7 @@ LVDocView::LVDocView(int bitsPerPixel, bool noDefaultDocument) :
 #if CR_INTERNAL_PAGE_ORIENTATION==1
 			, m_rotateAngle(CR_ROTATE_ANGLE_0)
 #endif
+		    , m_section_bounds_externally_updated(false)
 			, m_section_bounds_valid(false), m_doc_format(doc_format_none),
 			m_callback(NULL), m_swapDone(false), m_drawBufferBits(
 					GRAY_BACKBUFFER_BITS) {
@@ -581,9 +582,6 @@ void LVDocView::clearImageCache() {
 #if CR_ENABLE_PAGE_IMAGE_CACHE==1
 	m_imageCache.clear();
 #endif
-    m_section_bounds_valid = false;
-    m_section_bounds_valid10 = false;
-	m_section_bounds_valid10_pages = false;
     if (m_callback != NULL)
 		m_callback->OnImageCacheClear();
 }
@@ -1766,7 +1764,15 @@ LVArray<int> & LVDocView::getSectionBounds4LevelsPages() {
 }
 
 /// returns section bounds, in 1/100 of percent
-LVArray<int> & LVDocView::getSectionBounds() {
+LVArray<int> & LVDocView::getSectionBounds( bool for_external_update ) {
+	if (for_external_update || m_section_bounds_externally_updated) {
+		// Progress bar markes will be externally updated: we don't care
+		// about m_section_bounds_valid and we never trash it here.
+		// It's the frontend responsability to notice it needs some
+		// update and to update it.
+		m_section_bounds_externally_updated = true;
+		return m_section_bounds;
+	}
     if (m_section_bounds_valid)
         return m_section_bounds;
     m_section_bounds.clear();
@@ -3241,9 +3247,9 @@ void LVDocView::Render(int dx, int dy, LVRendPageList * pages) {
         CRLog::debug("Render(width=%d, height=%d, fontSize=%d, currentFontSize=%d, 0 char width=%d)", dx, dy,
                      m_font_size, m_font->getSize(), m_font->getCharWidth('0'));
 		//CRLog::trace("calling render() for document %08X font=%08X", (unsigned int)m_doc, (unsigned int)m_font.get() );
-		m_doc->render(pages, isDocumentOpened() ? m_callback : NULL, dx, dy,
-                m_showCover, m_showCover ? dy + m_pageMargins.bottom * 4 : 0,
-                m_font, m_def_interline_space, m_props);
+		bool did_rerender = m_doc->render(pages, isDocumentOpened() ? m_callback : NULL, dx, dy,
+										  m_showCover, m_showCover ? dy + m_pageMargins.bottom * 4 : 0,
+										  m_font, m_def_interline_space, m_props);
 
 #if 0
                 // For debugging lvpagesplitter.cpp (small books)
@@ -3263,7 +3269,12 @@ void LVDocView::Render(int dx, int dy, LVRendPageList * pages) {
 			fclose(f);
 		}
 #endif
-		fontMan->gc();
+		if ( did_rerender ) {
+			m_section_bounds_valid = false;
+			m_section_bounds_valid10 = false;
+			m_section_bounds_valid10_pages = false;
+			fontMan->gc();
+		}
 		m_is_rendered = true;
 		//CRLog::debug("Making TOC...");
 		//makeToc();

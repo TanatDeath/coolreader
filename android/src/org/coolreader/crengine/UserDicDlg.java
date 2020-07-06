@@ -335,7 +335,7 @@ public class UserDicDlg extends BaseDialog {
 			}
 		}
 		if (bBookC) {
-			final String sBookFName = mCoolReader.getReaderView().getBookInfo().getFileInfo().filename;
+			final String sBookFName = mCoolReader.getReaderView().getBookInfo().getFileInfo().getFilename();
 			CRC32 crc = new CRC32();
 			crc.update(sBookFName.getBytes());
 			String sCRC = String.valueOf(crc.getValue());

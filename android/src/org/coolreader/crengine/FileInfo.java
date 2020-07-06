@@ -45,10 +45,12 @@ public class FileInfo {
 	public final static String GENRE_GROUP_PREFIX = "@genreGroup:";
 	public final static String GENRE_PREFIX = "@genre:";
 	public final static String RATING_TAG = "@ratingRoot";
+	public final static String STATE_TAG = "@stateRoot";
 	public final static String STATE_TO_READ_TAG = "@stateToReadRoot";
 	public final static String STATE_READING_TAG = "@stateReadingRoot";
 	public final static String STATE_FINISHED_TAG = "@stateFinishedRoot";
 	public final static String TITLE_TAG = "@titlesRoot";
+	public final static String TITLE_TAG_LEVEL = "@titlesLevel";
 	public final static String TITLE_GROUP_PREFIX = "@titleGroup:";
 	public final static String SEARCH_SHORTCUT_TAG = "@search";
 	public final static String QSEARCH_SHORTCUT_TAG = "@qsearch";
@@ -87,7 +89,7 @@ public class FileInfo {
 	public long docDateN;
 	public long publYearN;
 	public String path; // path to directory where file or archive is located
-	public String filename; // file name w/o path for normal file, with optional path for file inside archive 
+	private String filename; // file name w/o path for normal file, with optional path for file inside archive
 	public String pathname; // full path+arcname+filename
 	public String arcname; // archive file name w/o path
 	public String language; // document language
@@ -130,8 +132,19 @@ public class FileInfo {
 	public ArrayList<Integer> arrReadBeg = new ArrayList<Integer>();
 	public ArrayList<FileInfo> files;// files
 	public ArrayList<FileInfo> dirs; // directories
+	public ArrayList<FileInfo> getElements() {
+		ArrayList<FileInfo> res = new ArrayList<FileInfo>();
+		if (dirs!=null) for (FileInfo d: dirs) res.add(d);
+		if (files!=null) for (FileInfo f: files) res.add(f);
+		return res;
+	}; //files + directories
 	public boolean isFav; // only for display star in file browser
 	public ArrayList<OPDSUtil.LinkInfo> links = new ArrayList<OPDSUtil.LinkInfo>(); // for OPDS entries
+
+	//Statistics
+	public long lastTimeSaved = 0;
+	public int lastPageSet = 0;
+	public ArrayList<ReadingStat> stats = new ArrayList<ReadingStat>(); // reading stat
 
 	// 16 lower bits reserved for document flags
 	public static final int DONT_USE_DOCUMENT_STYLES_FLAG = 1;
@@ -359,6 +372,18 @@ public class FileInfo {
 		return isSingleFileArchive
 			? new File(arcname).getName() : filename;
 	}
+
+	public String getFileNameToDisplay2() {
+		String arcn = "";
+		if ((!StrUtils.isEmptyStr(arcname))&&(!StrUtils.isEmptyStr(filename))) {
+			arcn = new File(arcname).getName();
+			if (!arcn.equals(filename)) return filename + " [" + arcn + "]";
+			return filename;
+		}
+		if (!StrUtils.isEmptyStr(filename)) return filename;
+		if (!StrUtils.isEmptyStr(arcn)) return arcn;
+		return "";
+	}
 	
 	private void fromFile( File f )
 	{
@@ -374,6 +399,7 @@ public class FileInfo {
 			size = (int)f.length();
 			domVersion = Engine.DOM_VERSION_CURRENT;
 			blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
+			if (StrUtils.isEmptyStr(title)) title = filename;
 			//if (flags == 0) flags = DONT_USE_DOCUMENT_STYLES_FLAG;
 		} else {
 			filename = f.getName();
@@ -647,6 +673,11 @@ public class FileInfo {
 	public boolean isBooksByTitleRoot()
 	{
 		return TITLE_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByTitleLevel()
+	{
+		return pathname.startsWith(TITLE_TAG_LEVEL);
 	}
 
 	public boolean isBooksByGenreRoot()
@@ -1287,6 +1318,18 @@ public class FileInfo {
 		this.title = title;
 		return true;
 	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public boolean setFilename(String filename) {
+		if (eq(this.filename, filename))
+			return false;
+		this.filename = filename;
+		if (StrUtils.isEmptyStr(this.title)) this.title = filename;
+		return true;
+	}
 	
 	public String getSeriesName() {
 		return series;
@@ -1799,4 +1842,98 @@ public class FileInfo {
 //				&& !isBooksByBookdateDir()&& !isBooksByDocdateDir()&& !isBooksByPublyearDir()
 //				&& !isBooksByFiledateDir();
 	}
+
+	public ReadingStatRes calcStats() {
+		int i = 0;
+		ReadingStatRes sres = new ReadingStatRes();
+		sres.cnt = 0;
+		sres.val = 0.0;
+		ArrayList<Double> arrValues = new ArrayList<Double>();
+		while (i < stats.size() - 5) {
+			ReadingStat rs1 = stats.get(i);
+			ReadingStat rs2 = stats.get(i+1);
+			ReadingStat rs3 = stats.get(i+2);
+			ReadingStat rs4 = stats.get(i+3);
+			ReadingStat rs5 = stats.get(i+4);
+			if (
+				(rs1.speedKoef>0) && (rs2.speedKoef>0) && (rs3.speedKoef>0)
+					&& (rs4.speedKoef>0) && (rs5.speedKoef>0)
+					&& (rs2.pageNumber == rs1.pageNumber + 1)
+					&& (rs3.pageNumber == rs2.pageNumber + 1)
+					&& (rs4.pageNumber == rs3.pageNumber + 1)
+					&& (rs5.pageNumber == rs4.pageNumber + 1)
+			) {
+				// Нашли последовательное чтение пяти страниц, посчитаем
+				double avgValue = (rs1.speedKoef + rs2.speedKoef + rs3.speedKoef + rs4.speedKoef + rs5.speedKoef) / 5;
+				double sigma = Math.sqrt((
+						(rs1.speedKoef - avgValue) * (rs1.speedKoef - avgValue) +
+						(rs2.speedKoef - avgValue) * (rs2.speedKoef - avgValue) +
+						(rs3.speedKoef - avgValue) * (rs3.speedKoef - avgValue) +
+						(rs4.speedKoef - avgValue) * (rs4.speedKoef - avgValue) +
+						(rs5.speedKoef - avgValue) * (rs5.speedKoef - avgValue))/5);
+				i = i + 4;
+				int cnt = 0;
+				double avgValue2 = 0;
+				if ((rs1.speedKoef > avgValue - (2.0 * sigma)) &&
+				   		(rs1.speedKoef < avgValue + (2.0 * sigma))) {
+					cnt ++;
+					avgValue2 = avgValue2 + rs1.speedKoef;
+				}
+				if ((rs2.speedKoef > avgValue - (2.0 * sigma)) &&
+						(rs2.speedKoef < avgValue + (2.0 * sigma))) {
+					cnt ++;
+					avgValue2 = avgValue2 + rs2.speedKoef;
+				}
+				if ((rs3.speedKoef > avgValue - (2.0 * sigma)) &&
+						(rs3.speedKoef < avgValue + (2.0 * sigma))) {
+					cnt ++;
+					avgValue2 = avgValue2 + rs3.speedKoef;
+				}
+				if ((rs4.speedKoef > avgValue - (2.0 * sigma)) &&
+						(rs4.speedKoef < avgValue + (2.0 * sigma))) {
+					cnt ++;
+					avgValue2 = avgValue2 + rs4.speedKoef;
+				}
+				if ((rs5.speedKoef > avgValue - (2.0 * sigma)) &&
+						(rs5.speedKoef < avgValue + (2.0 * sigma))) {
+					cnt ++;
+					avgValue2 = avgValue2 + rs5.speedKoef;
+				}
+				if (cnt == 5) { // Only good measurements
+					avgValue2 = avgValue2 / ((double) cnt);
+					arrValues.add(avgValue2);
+				}
+			}
+			i = i + 1;
+		}
+		if (arrValues.size()>0) {
+			int cnt = 0;
+			double avgValue = 0;
+			for (Double d: arrValues) {
+				cnt++;
+				avgValue+=d;
+			}
+			avgValue = avgValue / ((double) cnt);
+			Double sigma = 0.0;
+			for (Double d: arrValues) {
+				sigma += (d - avgValue) * (d - avgValue);
+			}
+			sigma = Math.sqrt(sigma/ ((double) cnt));
+			cnt = 0;
+			double avgValueC = 0;
+			for (Double d: arrValues) {
+				if (((d > avgValue - (2.0 * sigma)) &&
+					(d < avgValue + (2.0 * sigma)))
+						|| (arrValues.size()<4))  {
+				  cnt ++;
+				  avgValueC += d;
+				}
+			}
+			sres.cnt = cnt;
+			sres.val = avgValueC / ((double) cnt);
+			return sres;
+		}
+		return sres;
+	}
+
 }

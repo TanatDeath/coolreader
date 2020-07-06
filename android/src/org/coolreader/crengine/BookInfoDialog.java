@@ -74,6 +74,7 @@ public class BookInfoDialog extends BaseDialog {
 	boolean bMarkToRead;
 	TextView tvWC;
 	TextView tvSC;
+	TextView tvML;
 	Button btnCalc;
 
 	public BookInfo getmBookInfo() {
@@ -112,6 +113,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.translator", R.string.book_info_book_translator);
 		mLabelMap.put("book.symcount", R.string.book_info_book_symcount);
 		mLabelMap.put("book.wordcount", R.string.book_info_book_wordcount);
+		mLabelMap.put("book.minleft", R.string.book_info_stats_minutes_left);
 		mLabelMap.put("section.book_document", R.string.book_info_section_book_document);
 		mLabelMap.put("book.docauthor", R.string.book_info_book_docauthor);
 		mLabelMap.put("book.docprogram", R.string.book_info_book_docprogram);
@@ -205,13 +207,14 @@ public class BookInfoDialog extends BaseDialog {
 		valueView.setText(value);
 		if (name.equals(activity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
 		if (name.equals(activity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
+		if (name.equals(activity.getString(R.string.book_info_stats_minutes_left))) tvML = valueView;
 		ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
 		if (
 			(name.equals(activity.getString(R.string.book_info_book_symcount))) &&
 		   (value.equals("0")) && (rv != null)
 		)
 			if ((mBookInfo != null) && (rv.mBookInfo != null))
-				if (rv.mBookInfo.getFileInfo().filename.equals(mBookInfo.getFileInfo().filename)) {
+				if (rv.mBookInfo.getFileInfo().getFilename().equals(mBookInfo.getFileInfo().getFilename())) {
 					int colorGrayC;
 					int colorIcon;
 					TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
@@ -239,7 +242,7 @@ public class BookInfoDialog extends BaseDialog {
 							int iSymCnt = 0;
 							int iWordCnt = 0;
 							ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
-							if (rv != null) {
+							if ((rv != null)&&(mBookInfo!=null)) {
 								if (rv.getArrAllPages() != null)
 									iPageCnt = rv.getArrAllPages().size();
 								else {
@@ -265,6 +268,29 @@ public class BookInfoDialog extends BaseDialog {
 								vg.removeView(countButton);
 								if (tvSC != null) tvSC.setText(""+iSymCnt);
 								if (tvWC != null) tvWC.setText(""+iWordCnt);
+								ReadingStatRes sres = ((CoolReader) mCoolReader).getReaderView().getBookInfo().getFileInfo().calcStats();
+								double speedKoef = sres.val;
+								int pagesLeft;
+								double msecLeft;
+								double msecFivePages;
+								PositionProperties currpos = ((CoolReader) mCoolReader).getReaderView().getDoc().getPositionProps(null);
+								if ((bi.getFileInfo().symCount>0) && (speedKoef > 0.000001)) {
+									pagesLeft = ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+									double msecAllPages;
+									msecAllPages = speedKoef * (double) bi.getFileInfo().symCount;
+									msecFivePages = msecAllPages / ((double) ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount()) * 5.0;
+									msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+									String sLeft = " ";
+									int minutes = (int) ((msecLeft / 1000) / 60);
+									int hours = (int) ((msecLeft / 1000) / 60 / 60);
+									if (hours>0) {
+										minutes = minutes - (hours * 60);
+										sLeft = sLeft + hours + "h "+minutes + "min (calc count: "+ sres.cnt +")";
+									} else {
+										sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
+									}
+									if (tvML != null) tvML.setText(sLeft);
+								}
 							}
 						}
 					});
@@ -293,18 +319,19 @@ public class BookInfoDialog extends BaseDialog {
 			final CoolReader cr = (CoolReader) mCoolReader;
 			translButton.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					if (cr.getReaderView().mBookInfo!=null) {
-						String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
-						String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
-						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
-						FileInfo dfi = fi.parent;
-						if (dfi == null) {
-							dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-						}
-						if (dfi != null) {
-							cr.editBookTransl(dfi, fi, langf, lang, "", null);
-						}
-					};
+					if (cr.getReaderView()!=null)
+						if (cr.getReaderView().mBookInfo!=null) {
+							String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
+							String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
+							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+							FileInfo dfi = fi.parent;
+							if (dfi == null) {
+								dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+							}
+							if (dfi != null) {
+								cr.editBookTransl(dfi, fi, langf, lang, "", null);
+							}
+						};
 					dismiss();
 				}
 			});
@@ -373,22 +400,28 @@ public class BookInfoDialog extends BaseDialog {
 			Bitmap mIcon11 = null;
 			Bitmap resizedBitmap = null;
 			try {
-				InputStream in = new java.net.URL(urldisplay).openStream();
+				String redir_url = Utils.getUrlLoc(new java.net.URL(urldisplay));
+				InputStream in = null;
+				if (StrUtils.isEmptyStr(redir_url))
+					in = new java.net.URL(urldisplay).openStream();
+				else
+					in = new java.net.URL(redir_url).openStream();
 				mIcon11 = BitmapFactory.decodeStream(in);
-
 				final int maxSize = 200;
 				int outWidth;
 				int outHeight;
-				int inWidth = mIcon11.getWidth();
-				int inHeight = mIcon11.getHeight();
-				if(inWidth > inHeight){
-					outWidth = maxSize;
-					outHeight = (inHeight * maxSize) / inWidth;
-				} else {
-					outHeight = maxSize;
-					outWidth = (inWidth * maxSize) / inHeight;
+				if (mIcon11 != null) {
+					int inWidth = mIcon11.getWidth();
+					int inHeight = mIcon11.getHeight();
+					if (inWidth > inHeight) {
+						outWidth = maxSize;
+						outHeight = (inHeight * maxSize) / inWidth;
+					} else {
+						outHeight = maxSize;
+						outWidth = (inWidth * maxSize) / inHeight;
+					}
+					resizedBitmap = Bitmap.createScaledBitmap(mIcon11, outWidth, outHeight, false);
 				}
-				resizedBitmap = Bitmap.createScaledBitmap(mIcon11, outWidth, outHeight, false);
 			} catch (Exception e) {
 				Log.e("Error", e.getMessage());
 				e.printStackTrace();
@@ -401,10 +434,20 @@ public class BookInfoDialog extends BaseDialog {
 		}
 	}
 	
-	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, final String annot,
+	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, final String annt,
 						  int actionType, FileInfo fiOPDS, FileBrowser fb, FileInfo currDir)
 	{
 		super("BookInfoDialog", activity, null, false, false);
+		String annot = annt;
+		if (StrUtils.isEmptyStr(annt))
+			if (fiOPDS != null) {
+				if (!StrUtils.isEmptyStr(fiOPDS.annotation)) annot = fiOPDS.annotation;
+				try {
+					annot = android.text.Html.fromHtml(fiOPDS.annotation).toString();
+				} catch (Exception e) {
+					annot = fiOPDS.annotation;
+				}
+			}
 		mCoolReader = activity;
 		mBookInfo = bi;
 		mActionType = actionType;
@@ -489,8 +532,10 @@ public class BookInfoDialog extends BaseDialog {
 			@Override
 			public void onClick(View v) {
 				CoolReader cr = (CoolReader)mCoolReader;
-				cr.showDirectory(mBookInfo.getFileInfo());
-				dismiss();
+				if (mBookInfo != null) {
+					cr.showDirectory(mBookInfo.getFileInfo());
+					dismiss();
+				}
 			}
 		});
 
@@ -608,7 +653,7 @@ public class BookInfoDialog extends BaseDialog {
 				String sTitle = StrUtils.getNonEmptyStr(file.title, true);
 				String sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
 				if (StrUtils.isEmptyStr(sTitle))
-					sTitle = StrUtils.stripExtension(file.filename);
+					sTitle = StrUtils.stripExtension(file.getFilename());
 				Bitmap bmp2 = Services.getCoverpageManager().getBookCoverWithTitleBitmap(sTitle, sAuthors,
 					150, 200);
 				image.setImageBitmap(bmp2);

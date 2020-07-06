@@ -114,7 +114,7 @@ public class DocConvertDialog extends BaseDialog {
 		((TextView)view.findViewById(R.id.conv_doc_path)).setText(fileToOpen);
 		final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
 		final String sConvPath = downloadDir.pathname+"/converted/";
-		sConvFile = sConvPath + item.filename+".html";
+		sConvFile = sConvPath + item.getFilename()+".html";
 		btnOpenExisting.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

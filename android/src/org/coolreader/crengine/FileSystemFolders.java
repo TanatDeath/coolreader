@@ -17,7 +17,7 @@ import static org.coolreader.db.CRDBService.FileInfoLoadingCallback;
 public class FileSystemFolders extends FileInfoChangeSource {
     private static final FileInfoLoadingCallback NOOP = new FileInfoLoadingCallback(){
         @Override
-        public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
+        public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
 
         }
     };
@@ -90,7 +90,7 @@ public class FileSystemFolders extends FileInfoChangeSource {
     public void addFavoriteFolder(final CRDBService.LocalBinder binder, final FileInfo folder){
         loadFavoriteFoldersAndDo(binder, new FileInfoLoadingCallback(){
             @Override
-            public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
+            public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                 if(findFavoriteFolder(folder) != -1)
                     return;
                 FileInfo dbFolder = new FileInfo(folder);
@@ -111,7 +111,7 @@ public class FileSystemFolders extends FileInfoChangeSource {
     public void moveFavoriteFolder(final CRDBService.LocalBinder binder, final FileInfo folder, final boolean left){
         loadFavoriteFoldersAndDo(binder, new FileInfoLoadingCallback(){
             @Override
-            public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
+            public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                 int folderIndex = findFavoriteFolder(folder);
                 if(folderIndex == -1)
                     return;
@@ -140,7 +140,7 @@ public class FileSystemFolders extends FileInfoChangeSource {
     public void removeFavoriteFolder(final CRDBService.LocalBinder binder, final FileInfo folder){
         loadFavoriteFoldersAndDo(binder, new FileInfoLoadingCallback(){
             @Override
-            public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
+            public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                 int folderIndex = findFavoriteFolder(folder);
                 if(folderIndex == -1)
                     return;
@@ -156,14 +156,14 @@ public class FileSystemFolders extends FileInfoChangeSource {
         if(favoriteFolders == null) {
             binder.loadFavoriteFolders(new FileInfoLoadingCallback() {
                 @Override
-                public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
+                public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                     favoriteFolders = new ArrayList<FileInfo>(list);
-                    callback.onFileInfoListLoaded(favoriteFolders);
+                    callback.onFileInfoListLoaded(favoriteFolders, prefix);
                     onChange(null,false);
                 }
             });
         } else {
-            callback.onFileInfoListLoaded(favoriteFolders);
+            callback.onFileInfoListLoaded(favoriteFolders, "");
         }
 
     }

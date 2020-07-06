@@ -446,7 +446,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 	}
 
 	private void setBookPicture(FileInfo item) {
-		final String sBookFName = item.filename;
+		final String sBookFName = item.getFilename();
 		CRC32 crc = new CRC32();
 		crc.update(sBookFName.getBytes());
 		final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
@@ -472,7 +472,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 	}
 
 	public void deleteBookPicture(FileInfo item) {
-		final String sBookFName = item.filename;
+		final String sBookFName = item.getFilename();
 		CRC32 crc = new CRC32();
 		crc.update(sBookFName.getBytes());
 		final String sFName = String.valueOf(crc.getValue()) + "_cover.png";

@@ -78,45 +78,51 @@ public class CloudAction {
     public String param2; // param(s) passed to an action...
     public String param3; // param(s) passed to an action...
     public String bookCRC; // Book's CRC
+    public boolean mQuiet;
     public com.dropbox.core.v2.files.Metadata mDbxMd; // metadata for dropbox
     public CloudFileInfo mYndMd; // metadata for yandex
     public String mFile;
 
     public CoolReader mActivity;
 
-    public CloudAction(CoolReader cr, int a) {
+    public CloudAction(CoolReader cr, int a, boolean bQuiet) {
         action = a;
         param = "";
         mActivity = cr;
+        mQuiet = bQuiet;
     }
 
-    public CloudAction(CoolReader cr, int a, String p) {
+    public CloudAction(CoolReader cr, int a, String p, boolean bQuiet) {
         action = a;
         param = p;
         mActivity = cr;
+        mQuiet = bQuiet;
     }
 
-    public CloudAction(CoolReader cr, int a, String p, String p2) {
+    public CloudAction(CoolReader cr, int a, String p, String p2, boolean bQuiet) {
         action = a;
         param = p;
         mActivity = cr;
         param2 = p2;
+        mQuiet = bQuiet;
     }
 
-    public CloudAction(CoolReader cr, int a, String p, com.dropbox.core.v2.files.Metadata md, String sFile) {
+    public CloudAction(CoolReader cr, int a, String p, com.dropbox.core.v2.files.Metadata md, String sFile, boolean bQuiet) {
         action = a;
         param = p;
         mDbxMd = md;
         mActivity = cr;
         mFile = sFile;
+        mQuiet = bQuiet;
     }
 
-    public CloudAction(CoolReader cr, int a, String p, CloudFileInfo md, String sFile) {
+    public CloudAction(CoolReader cr, int a, String p, CloudFileInfo md, String sFile, boolean bQuiet) {
         action = a;
         param = p;
         mYndMd = md;
         mActivity = cr;
         mFile = sFile;
+        mQuiet = bQuiet;
     }
 
     @SuppressWarnings("unchecked")
@@ -144,7 +150,7 @@ public class CloudAction {
         BackgroundThread.instance().postGUI(new Runnable() {
             @Override
             public void run() {
-                if (crf!=null) crf.showCloudToast("Cloud operation error: "+resf,true);
+                if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf,true);
             }}, 200);
     }
 
@@ -179,9 +185,9 @@ public class CloudAction {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!DBXConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca1 = new CloudAction(cr, CloudAction.DBX_GET_CURRENT_ACCOUNT);
+            CloudAction ca1 = new CloudAction(cr, CloudAction.DBX_GET_CURRENT_ACCOUNT, true);
             al.add(ca1);
-            CloudAction ca2 = new CloudAction(cr, CloudAction.DBX_LIST_FOLDER_THEN_OPEN_DLG);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.DBX_LIST_FOLDER_THEN_OPEN_DLG, true);
             al.add(ca2);
             final DBXPerformAction a = new DBXPerformAction(cr, al, new DBXPerformAction.Callback() {
                 @Override
@@ -257,6 +263,14 @@ public class CloudAction {
                     a.mActionList.get(0).param2 = (String) o;
             }
         }
+        if ((CLOUD_COMPLETE_SAVE_STRING_TO_FILE.equals(res))&&(!a.mCurAction.mQuiet)) {
+            final CoolReader crf = cr;
+            BackgroundThread.instance().postGUI(new Runnable() {
+                 @Override
+                 public void run() {
+                     if (crf!=null) crf.showCloudToast(R.string.cloud_ok, true);
+                 }}, 200);
+        }
         a.DoNextAction();
     }
 
@@ -268,7 +282,7 @@ public class CloudAction {
         BackgroundThread.instance().postGUI(new Runnable() {
             @Override
             public void run() {
-                if (crf!=null) crf.showCloudToast("Cloud operation error: "+resf, true);
+                if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf, true);
             }}, 200);
     }
 
@@ -277,7 +291,7 @@ public class CloudAction {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_THEN_OPEN_DLG);
+            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_THEN_OPEN_DLG, true);
             ca1.param3 = Boolean.toString(withSaveOption);
             al.add(ca1);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
@@ -298,19 +312,19 @@ public class CloudAction {
         }
     }
 
-    public static void yndSaveJsonFile(final CoolReader cr, String sFName, String prettyJson) {
+    public static void yndSaveJsonFile(final CoolReader cr, String sFName, String prettyJson, boolean bQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER);
+            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true);
             al.add(ca1);
-            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_CREATE_CR_FOLDER);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_CREATE_CR_FOLDER, true);
             al.add(ca2);
-            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_SAVE_TO_FILE_GET_LINK);
+            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_SAVE_TO_FILE_GET_LINK, true);
             ca3.param = sFName;
             al.add(ca3);
-            CloudAction ca4 = new CloudAction(cr, CloudAction.YND_SAVE_STRING_TO_FILE);
+            CloudAction ca4 = new CloudAction(cr, CloudAction.YND_SAVE_STRING_TO_FILE, bQuiet);
             ca4.param = prettyJson;
             al.add(ca4);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
@@ -337,13 +351,13 @@ public class CloudAction {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER);
+            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true);
             al.add(ca1);
             CloudAction ca2;
             if (findingLastPos)
-                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES_LASTPOS);
+                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES_LASTPOS, true);
             else
-                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES);
+                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES, true);
             ca2.param = fileMark;
             // ca2.param2 - will contain skip if folder exists. Means "skip create, because exists"
             ca2.bookCRC = sCRC;
@@ -503,7 +517,7 @@ public class CloudAction {
             if (StrUtils.isEmptyStr(sFolder))
                 if (!DBXConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca2 = new CloudAction(cr, CloudAction.DBX_LIST_FOLDER_IN_DLG, sFolder, sFindStr);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.DBX_LIST_FOLDER_IN_DLG, sFolder, sFindStr, true);
             al.add(ca2);
             final DBXPerformAction a = new DBXPerformAction(cr, al, new DBXPerformAction.Callback() {
                 @Override
@@ -524,7 +538,7 @@ public class CloudAction {
     }
 
     public static void dbxDownloadFile(final CoolReader cr, final OpenBookFromCloudDlg dlg,
-            final String sFolder, com.dropbox.core.v2.files.Metadata md) {
+            final String sFolder, com.dropbox.core.v2.files.Metadata md, boolean bQuiet) {
         try {
             final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
             final String fName = downloadDir.pathname+"/Dropbox/"+md.getName();
@@ -534,13 +548,14 @@ public class CloudAction {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca2 = new CloudAction(cr, CloudAction.DBX_DOWNLOAD_FILE,
-                    (sFolder+"/"+md.getName()).replace("//","/"), md, fName);
+                    (sFolder+"/"+md.getName()).replace("//","/"), md, fName, bQuiet);
             al.add(ca2);
             final DBXPerformAction a = new DBXPerformAction(cr, al, new DBXPerformAction.Callback() {
                 @Override
                 public void onComplete(DBXPerformAction a, String res, Object o) {
                     CloudAction.onDBXComplete(cr, a, res, o, dlg);
-                    cr.showToast(cr.getString(R.string.cloud_ok) + ": successfully saved to " + fName);
+                    if (!bQuiet)
+                        cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.successfully_saved_to)+" " + fName);
                     if (PictureCameDialog.isFileIsPicture(fName)) {
                         cr.pictureCame(fName);
                     } else {
@@ -576,7 +591,7 @@ public class CloudAction {
             if (StrUtils.isEmptyStr(sFolder))
                 if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_IN_DLG, sFolder, sFindStr);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_IN_DLG, sFolder, sFindStr, true);
             al.add(ca2);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
                 @Override
@@ -597,7 +612,7 @@ public class CloudAction {
     }
 
     public static void yndSaveCurBookThenLoadFolderContents(final CoolReader cr, final OpenBookFromCloudDlg dlg,
-                                                            final String sFolder, final String sFindStr) {
+                                                            final String sFolder, final String sFindStr, boolean bQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (StrUtils.isEmptyStr(sFolder))
@@ -611,13 +626,13 @@ public class CloudAction {
             if (!StrUtils.isEmptyStr(fi.arcname)) sFName = fi.arcname;
                 else sFName = fi.pathname;
             if (StrUtils.isEmptyStr(sFName)) return;
-            CloudAction ca = new CloudAction(cr, CloudAction.YND_SAVE_TO_FILE_GET_LINK_W_DIR);
+            CloudAction ca = new CloudAction(cr, CloudAction.YND_SAVE_TO_FILE_GET_LINK_W_DIR, true);
             ca.param = sFName;
             ca.param2 = sFolder;
             al.add(ca);
-            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_SAVE_CUR_BOOK, sFolder, sFindStr);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_SAVE_CUR_BOOK, sFolder, sFindStr, bQuiet);
             al.add(ca2);
-            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_IN_DLG, sFolder, sFindStr);
+            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_IN_DLG, sFolder, sFindStr, true);
             al.add(ca3);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
                 @Override
@@ -638,7 +653,7 @@ public class CloudAction {
     }
 
     public static void yndDownloadFile(final CoolReader cr, final OpenBookFromCloudDlg dlg,
-                                       final String sFolder, CloudFileInfo md) {
+                                       final String sFolder, CloudFileInfo md, boolean bQuiet) {
         try {
             final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
             final String fName = downloadDir.pathname+"/YandexDisc/"+md.name;
@@ -648,10 +663,10 @@ public class CloudAction {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca2 = new CloudAction(cr, CloudAction.YND_GET_DOWNLOAD_LINK,
-                    (sFolder+"/"+md.name).replace("//","/"), md, fName);
+                    (sFolder+"/"+md.name).replace("//","/"), md, fName, true);
             al.add(ca2);
             CloudAction ca3 = new CloudAction(cr, CloudAction.YND_DOWNLOAD_FILE,
-                    (sFolder+"/"+md.name).replace("//","/"), md, fName);
+                    (sFolder+"/"+md.name).replace("//","/"), md, fName, bQuiet);
             al.add(ca3);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
                 @Override
@@ -660,7 +675,7 @@ public class CloudAction {
                         BackgroundThread.instance().postGUI(new Runnable() {
                             @Override
                             public void run() {
-                                cr.showToast(cr.getString(R.string.cloud_ok) + ": successfully saved to " + fName);
+                                cr.showToast(cr.getString(R.string.cloud_ok) + ": " +cr.getString(R.string.successfully_saved_to)+" " + fName);
                                 if (PictureCameDialog.isFileIsPicture(fName)) {
                                     cr.pictureCame(fName);
                                 } else {
@@ -720,9 +735,9 @@ public class CloudAction {
             // the mail subject
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, bookinfo.getFileInfo().title + " " +
                 bookinfo.getFileInfo().getAuthors());
-            cr.startActivity(Intent.createChooser(emailIntent, "Send book by email..."));
+            cr.startActivity(Intent.createChooser(emailIntent, cr.getString(R.string.send_book_by_email)+ "..."));
         } catch (Exception e) {
-            cr.showCloudToast("Could not email book: "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.could_not_email_book)+": "+e.getMessage(),true);
             e.printStackTrace();
         }
     }
@@ -732,9 +747,9 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_GET_DOWNLOAD_LINK, filePath);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_GET_DOWNLOAD_LINK, filePath, true);
             al.add(ca2);
-            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_DOWNLOAD_FILE_TO_STRING, filePath);
+            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_DOWNLOAD_FILE_TO_STRING, filePath,false);
             al.add(ca3);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
                 @Override
@@ -746,7 +761,7 @@ public class CloudAction {
 							BackgroundThread.instance().postGUI(new Runnable() {
 								@Override
 								public void run() {
-									cr.showToast(cr.getString(R.string.cloud_ok) + ": successfully loaded");
+									//cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.successfully_loaded)); // not needed
 									int iSaveType = CloudSync.CLOUD_SAVE_READING_POS;
 									if (a.mCurAction.param.contains("_bmk_")) iSaveType = CloudSync.CLOUD_SAVE_BOOKMARKS;
                                     if (a.mCurAction.param.contains("_settings_")) iSaveType = CloudSync.CLOUD_SAVE_SETTINGS;
@@ -784,10 +799,10 @@ public class CloudAction {
                                                 if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
                                         }
                                         if (!bWasErr) {
-                                            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": Settings file(s) were restored. Closing app");
+                                            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.settings_were_restored));
                                             cr.finish();
                                         } else {
-                                            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Some errors occured while restoring setting - you may need to check backup files. Closing app", true);
+                                            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+ cr.getString(R.string.settings_restore_error), true);
                                             cr.finish();
                                         }
                                     }
@@ -810,14 +825,15 @@ public class CloudAction {
         }
     }
 
-    public static void yndDeleteOldCloudFiles(final CoolReader cr, ArrayList<CloudFileInfo> arrCf) {
+    public static void yndDeleteOldCloudFiles(final CoolReader cr, ArrayList<CloudFileInfo> arrCf,
+            boolean bQuiet) {
         try
         {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             for (CloudFileInfo cf: arrCf) {
-                CloudAction ca = new CloudAction(cr, CloudAction.YND_DELETE_FILE_ASYNC);
+                CloudAction ca = new CloudAction(cr, CloudAction.YND_DELETE_FILE_ASYNC, bQuiet);
                 ca.param = cf.path;
                 al.add(ca);
             }

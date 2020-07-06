@@ -71,17 +71,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-//import com.github.johnpersano.supertoasts.library.Style;
-//import com.github.johnpersano.supertoasts.library.SuperActivityToast;
-//import com.github.johnpersano.supertoasts.library.SuperToast;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
 
-	public static boolean PRO_FEATURES = true;
+	public static boolean PRO_FEATURES = false;
 	public static boolean PREMIUM_FEATURES = PRO_FEATURES;
-	//public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
-	public static String MAIN_CLASS_NAME = "org.knownreader.premium";
+	public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
+	//public static String MAIN_CLASS_NAME = "org.knownreader.premium";
 
 //	@Override
 //	public boolean onCreateOptionsMenu(Menu menu) {
@@ -1107,7 +1104,7 @@ public class BaseActivity extends Activity implements Settings {
 				writer.write(String.valueOf(i));
 				writer.close();
 			} catch (Exception e) {
-
+				log.e("Some caused with onyx brightness adjacement: " + e.getMessage());
 			}
 		} else {
 			Window wnd = getWindow();
@@ -1421,13 +1418,13 @@ public class BaseActivity extends Activity implements Settings {
 		showToast(msg, Toast.LENGTH_LONG);
 	}
 
-	public void showCloudToast(String msg, boolean isErr) {
-		if (isErr) showToast(msg, Toast.LENGTH_LONG);
+	public void showCloudToast(String msg, boolean verbose) {
+		if (verbose) showToast(msg, Toast.LENGTH_LONG);
 		else log.i(msg);
 	}
 
-	public void showCloudToast(int msg, boolean isErr) {
-		if (isErr) showToast(msg, Toast.LENGTH_LONG);
+	public void showCloudToast(int msg, boolean verbose) {
+		if (verbose) showToast(msg, Toast.LENGTH_LONG);
 		else log.i(getString(msg));
 	}
 
@@ -2448,6 +2445,14 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_HYPHENATION_DICT, Engine.HyphDict.RUSSIAN.toString());
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SIMPLE_MODE, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE, "8");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_RATING, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_STATE, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_DATES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH, "0");
 
 			props.applyDefault(ReaderView.PROP_STATUS_LOCATION, Settings.VIEWER_STATUS_PAGE);
 			//props.applyDefault(ReaderView.PROP_TOOLBAR_LOCATION, DeviceInfo.getSDKLevel() < DeviceInfo.HONEYCOMB ? Settings.VIEWER_TOOLBAR_NONE : Settings.VIEWER_TOOLBAR_SHORT_SIDE);

@@ -9,6 +9,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.dropbox.core.v1.DbxEntry;
+
 import org.coolreader.crengine.*;
 
 import java.io.File;
@@ -405,7 +408,7 @@ public class CRDBService extends Service {
     }
 
     public interface FileInfoLoadingCallback {
-    	void onFileInfoListLoaded(ArrayList<FileInfo> list);
+    	void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix);
     }
 
 	public interface FileInfo1LoadingCallback {
@@ -513,7 +516,7 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						callback.onFileInfoListLoaded(list, FileInfo.AUTHOR_GROUP_PREFIX);
 					}
 				});
 			}
@@ -529,7 +532,7 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						callback.onFileInfoListLoaded(list, FileInfo.GENRE_GROUP_PREFIX);
 					}
 				});
 			}
@@ -545,7 +548,7 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						callback.onFileInfoListLoaded(list, FileInfo.SERIES_GROUP_PREFIX);
 					}
 				});
 			}
@@ -561,7 +564,12 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						String fld = "";
+						if (field.equals("book_date_n")) fld = FileInfo.BOOK_DATE_GROUP_PREFIX;
+						if (field.equals("doc_date_n")) fld = FileInfo.DOC_DATE_GROUP_PREFIX;
+						if (field.equals("publ_year_n")) fld = FileInfo.PUBL_YEAR_GROUP_PREFIX;
+						if (field.equals("file_create_time")) fld = FileInfo.FILE_DATE_GROUP_PREFIX;
+						callback.onFileInfoListLoaded(list, fld);
 					}
 				});
 			}
@@ -577,7 +585,7 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						callback.onFileInfoListLoaded(list, FileInfo.RATING_TAG);
 					}
 				});
 			}
@@ -593,7 +601,7 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						callback.onFileInfoListLoaded(list, FileInfo.STATE_TAG);
 					}
 				});
 			}
@@ -708,7 +716,7 @@ public class CRDBService extends Service {
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
-						callback.onFileInfoListLoaded(list);
+						callback.onFileInfoListLoaded(list, "");
 					}
 				});
 			}
@@ -786,7 +794,7 @@ public class CRDBService extends Service {
                 sendTask(handler, new Runnable() {
                     @Override
                     public void run() {
-                        callback.onFileInfoListLoaded(favorites);
+                        callback.onFileInfoListLoaded(favorites, "");
                     }
                 });
             }

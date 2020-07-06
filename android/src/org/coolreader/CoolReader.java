@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.coolreader.cloud.CloudSync;
 import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.ReadingStat;
+import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -691,7 +693,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			final FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = fileToOpen;
-			dir.filename = this.getString(R.string.folder_name_books_by_state_reading);
+			dir.setFilename(this.getString(R.string.folder_name_books_by_state_reading));
 			dir.isListed = true;
 			dir.isScanned = true;
 			waitForCRDBService(new Runnable() {
@@ -706,7 +708,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			final FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = fileToOpen;
-			dir.filename = this.getString(R.string.folder_name_books_by_state_to_read);
+			dir.setFilename(this.getString(R.string.folder_name_books_by_state_to_read));
 			dir.isListed = true;
 			dir.isScanned = true;
 			waitForCRDBService(new Runnable() {
@@ -721,7 +723,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			final FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = fileToOpen;
-			dir.filename = this.getString(R.string.folder_name_books_by_state_finished);
+			dir.setFilename( this.getString(R.string.folder_name_books_by_state_finished));
 			dir.isListed = true;
 			dir.isScanned = true;
 			waitForCRDBService(new Runnable() {
@@ -736,7 +738,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			final FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = fileToOpen;
-			dir.filename = this.getString(R.string.dlg_book_search);
+			dir.setFilename(this.getString(R.string.dlg_book_search));
 			dir.isListed = true;
 			dir.isScanned = true;
 			waitForCRDBService(new Runnable() {
@@ -869,7 +871,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (filePath.contains("%2F"))
 					filePath = filePath.replace("%2F", "/");
 			}
-		} else if ("content".equals(scheme)) {
+		} else if (("content".equals(scheme))||("coolreader".equals(scheme))||("knownreader".equals(scheme))) {
 			if (uri.getEncodedPath().contains("%00"))
 				filePath = uri.getEncodedPath();
 			else
@@ -916,14 +918,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		File file;
-		int pos = filePath.indexOf("@/");
-		if (pos > 0)
-			file = new File(filePath.substring(0, pos));
-		else
-			file = new File(filePath);
-		if (!file.exists())
-			filePath = null;
-		return filePath;
+		if (filePath != null) {
+			int pos = filePath.indexOf("@/");
+			if (pos > 0)
+				file = new File(filePath.substring(0, pos));
+			else
+				file = new File(filePath);
+			if (!file.exists())
+				filePath = null;
+			return filePath;
+		}
+		return null;
 	}
 
 	@Override
@@ -1010,8 +1015,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					log.i("Load last rpos from CLOUD");
 					int iSyncVariant3 = settings().getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 					if (iSyncVariant3 != 0) {
-						CloudSync.loadFromJsonInfoFileList(CoolReader.this,
-								CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
+						if (mCurrentFrame == mReaderFrame)
+							CloudSync.loadFromJsonInfoFileList(CoolReader.this,
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
 					}
 				}
 			}, 5000);
@@ -2484,7 +2490,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (!StrUtils.isEmptyStr(item.authors))
 			itemsAll.add("book.authors="+item.getAuthors());
 		itemsAll.add("book.title="+item.title);
-		BookInfoDialog dlg = new BookInfoDialog(this, itemsAll, null, item.filename,
+		BookInfoDialog dlg = new BookInfoDialog(this, itemsAll, null, item.getFilename(),
 				BookInfoDialog.OPDS_INFO, item, fb, currDir);
 		dlg.show();
 	}
@@ -2655,6 +2661,58 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 				itemsBook.add("book.symcount=" + fi.symCount);
 				itemsBook.add("book.wordcount=" + fi.wordCount);
+
+				String sLeft = getString(R.string.not_enough_stat_data);
+				try {
+					ReadingStatRes sres = getReaderView().getBookInfo().getFileInfo().calcStats();
+					double speedKoef = sres.val;
+					int pagesLeft;
+					double msecLeft;
+					double msecFivePages;
+					if (speedKoef > 0.000001) {
+						PositionProperties currpos = getReaderView().getDoc().getPositionProps(null);
+						if (fi.symCount>0) {
+							pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+							double msecAllPages;
+							msecAllPages = speedKoef * (double) fi.symCount;
+							msecFivePages = msecAllPages / ((double) getReaderView().getDoc().getPageCount()) * 5.0;
+							msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+							sLeft = " ";
+							int minutes = (int) ((msecLeft / 1000) / 60);
+							int hours = (int) ((msecLeft / 1000) / 60 / 60);
+							if (hours>0) {
+								minutes = minutes - (hours * 60);
+								sLeft = sLeft + hours + "h "+minutes+"min (calc count: "+ sres.cnt +")";
+							} else {
+								sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
+							}
+						} else {
+							if (currpos.pageNumber > 4) {
+								int fivePages = StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 1), true).length() +
+										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 2), true).length() +
+										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 3), true).length() +
+										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 4), true).length() +
+										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 5), true).length();
+								msecFivePages = speedKoef * (double) fivePages;
+								pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+								msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+								sLeft = " ";
+								int minutes = (int) ((msecLeft / 1000) / 60);
+								int hours = (int) ((msecLeft / 1000) / 60 / 60);
+								if (hours>0) {
+									minutes = minutes - (hours * 60);
+									sLeft = sLeft + hours + "h "+minutes + "min (calc count: "+ sres.cnt +")";
+								} else {
+									sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
+								}
+							}
+						}
+						;
+					}
+				} catch (Exception e) {
+					log.e("Min left error");
+				}
+				itemsBook.add("book.minleft=" + sLeft);
 				itemsBook.add("section=section.book_document");
 				if (!StrUtils.isEmptyStr(fi.docauthor)) {
 					itemsBook.add("book.docauthor=" + fi.docauthor);
@@ -2744,7 +2802,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			opds = new FileInfo();
 			opds.isDirectory = true;
 			opds.pathname = FileInfo.OPDS_DIR_PREFIX + "http://";
-			opds.filename = "New Catalog";
+			opds.setFilename("New Catalog");
 			opds.isListed = true;
 			opds.isScanned = true;
 			opds.parent = Services.getScanner().getOPDSRoot();
@@ -3067,7 +3125,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			e.printStackTrace();
 			res = false;
 		}
-
 		return res;
 	}
 
@@ -3115,8 +3172,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					//R.drawable.cr3_browser_book_hc
 			);
 			if (bmp!=null) icon = Icon.createWithBitmap(bmp);
-			String shTitle = (StrUtils.isEmptyStr(item.title)?item.filename.trim():item.title.trim());
-			return addShortCut(this, shortcutIntent, icon, shTitle);
+			String shTitle = (StrUtils.isEmptyStr(item.title)?item.getFilename().trim():item.title.trim());
+			boolean res = addShortCut(this, shortcutIntent, icon, shTitle);
+			if (res) this.showToast(R.string.shortcut_created);
+			return res;
 		} else {
 			addIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 			this.sendBroadcast(addIntent);

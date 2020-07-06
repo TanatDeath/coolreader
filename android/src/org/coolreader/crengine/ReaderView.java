@@ -2797,6 +2797,30 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_PAGEDOWN:
 			if (isBookLoaded()) {
+				final FileInfo fileInfo = mBookInfo.getFileInfo();
+				if (fileInfo != null) {
+					PositionProperties currpos = doc.getPositionProps(null);
+					if (null != currpos) {
+						fileInfo.lastTimeSaved = System.currentTimeMillis();
+						fileInfo.lastPageSet = currpos.pageNumber;
+						ReadingStat rs = new ReadingStat();
+						rs.pageNumber = currpos.pageNumber;
+						rs.pageCount = doc.getPageCount();
+						rs.pageSymbolCount = StrUtils.getNonEmptyStr(doc.getPageText(false, currpos.pageNumber-1),true).length();
+						rs.readingBeginTS = fileInfo.lastTimeSaved;
+						rs.readingEndTS = 0;
+						rs.speedKoef = 0.0;
+						fileInfo.stats.add(rs);
+						while (fileInfo.stats.size()>100) fileInfo.stats.remove(0);
+						for (ReadingStat rs1: fileInfo.stats) {
+							if ((rs1.pageNumber == rs.pageNumber - 1) && (rs1.readingEndTS == 0)) {
+								rs1.readingEndTS = System.currentTimeMillis();
+								if (rs1.pageSymbolCount > 0)
+									rs1.speedKoef = ((double)(rs1.readingEndTS - rs1.readingBeginTS)) / ((double) rs1.pageSymbolCount);
+							}
+						}
+					}
+				}
 				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 				if (param == 1 && !eink)
 					animatePageFlip(1, onFinishHandler);
@@ -3143,7 +3167,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant3 == 1, false);
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
@@ -3677,6 +3701,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_APP_SELECTION_ACTION.equals(key)
 					|| PROP_APP_FILE_BROWSER_SIMPLE_MODE.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE.equals(key)
+
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_RATING.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_STATE.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_DATES.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH.equals(key)
+
 					|| PROP_APP_GESTURE_PAGE_FLIPPING.equals(key)
 					|| PROP_APP_HIGHLIGHT_BOOKMARKS.equals(key)
 					|| PROP_HIGHLIGHT_SELECTION_COLOR.equals(key)
@@ -6052,7 +6086,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					Bookmark bmk = getActivity().readCurPosFile();
 					if (bmk!=null) {
 						boolean bSameBook=true;
-						if (!bmk.bookFile.equals(mBookInfo.getFileInfo().filename)) bSameBook=false;
+						if (!bmk.bookFile.equals(mBookInfo.getFileInfo().getFilename())) bSameBook=false;
 						if (!bmk.bookPath.equals(mBookInfo.getFileInfo().pathname)) bSameBook=false;
 						if (!StrUtils.isEmptyStr(bmk.bookFileArc))
 							if (!bmk.bookFileArc.equals(mBookInfo.getFileInfo().arcname))
@@ -6130,16 +6164,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				BackgroundThread.instance().postGUI(new Runnable() {
 					public void run() {
 						mActivity.showReader();
-						final String booknameF = getBookInfo().getFileInfo().filename;
+						final String booknameF = getBookInfo().getFileInfo().getFilename();
 						BackgroundThread.instance().postGUI(new Runnable() {
 							@Override
 							public void run() {
-								String bookname = getBookInfo().getFileInfo().filename;
+								String bookname = getBookInfo().getFileInfo().getFilename();
 								if (bookname.equals(booknameF)) {
 									log.i("Load last rpos from CLOUD");
 									int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 									if (iSyncVariant3 != 0) {
-										CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+										if (mActivity.mCurrentFrame == mActivity.getmReaderFrame())
+											CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
 												CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
 									}
 								}
@@ -6615,7 +6650,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (lastSavedBookmark == null || !lastSavedBookmark.getStartPos().equals(bmk.getStartPos())) {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				Bookmark bmk2 = new Bookmark(bmk);
-				bmk2.bookFile=mBookInfo.getFileInfo().filename;
+				bmk2.bookFile=mBookInfo.getFileInfo().getFilename();
 				bmk2.bookPath=mBookInfo.getFileInfo().pathname;
 				bmk2.bookFileArc="";
 				if (mBookInfo.getFileInfo().isArchive)

@@ -3,17 +3,84 @@
    Comment bookmark item
 -->
 
- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/conf_list"
-    android:orientation="vertical"
-    android:layout_weight="8"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:baselineAligned="false"
-    android:layout_marginTop="0dip"
-    android:layout_marginBottom="0dip"
-    android:layout_marginLeft="0dip"
-    android:layout_marginRight="0dip"
-    >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ll_dialog"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:baselineAligned="false"
+        android:layout_marginTop="0dip"
+        android:layout_marginBottom="0dip"
+        android:layout_marginLeft="0dip"
+        android:layout_marginRight="0dip"
+        >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/ll_sortorder"
+             android:orientation="horizontal"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:baselineAligned="false"
+             android:layout_marginTop="4dip"
+             android:layout_marginBottom="4dip"
+             android:layout_marginLeft="4dip"
+             android:layout_marginRight="4dip"
+             >
+        <Button
+                android:id="@+id/btn_this_device"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:contentDescription="@string/pos_this_device"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
+                android:text="@string/pos_this_device" />
+        <Button
+                android:id="@+id/btn_date_sort"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:contentDescription="@string/pos_date_sort"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
+                android:text="@string/pos_date_sort" />
+        <Button
+                android:id="@+id/btn_percent_sort"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:contentDescription="@string/pos_percent_sort"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
+                android:text="@string/pos_percent_sort" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+               android:id="@+id/conf_list"
+               android:orientation="vertical"
+               android:layout_weight="8"
+               android:layout_width="fill_parent"
+               android:layout_height="fill_parent"
+               android:baselineAligned="false"
+               android:layout_marginTop="0dip"
+               android:layout_marginBottom="0dip"
+               android:layout_marginLeft="0dip"
+               android:layout_marginRight="0dip"
+               >
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -7,15 +7,15 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        //applicationId "org.coolreader.knownreader"
-        applicationId "org.knownreader.premium"
+        applicationId "org.coolreader.knownreader"
+        //applicationId "org.knownreader.premium"
         minSdkVersion 14
         targetSdkVersion 28
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202006031
-        versionName "2020.06.03.1"
+        versionCode 202007041
+        versionName "2020.07.04.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -128,6 +128,7 @@ android {
             def formattedDate = date.format('yyyyMMdd_HHmm')
             def abi = output.getFilter(com.android.build.OutputFile.ABI)
             if (abi == null) abi = "universal"
+            //def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + "_PREMIUM.apk"
             def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + "_FREE.apk"
             output.outputFileName = newApkName
         }

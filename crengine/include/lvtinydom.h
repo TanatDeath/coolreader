@@ -543,6 +543,10 @@ protected:
 public:
 
 #if BUILD_LITE!=1
+    int getSpaceWidthScalePercent() {
+        return _spaceWidthScalePercent;
+    }
+
     bool setSpaceWidthScalePercent(int spaceWidthScalePercent) {
         if (spaceWidthScalePercent == _spaceWidthScalePercent)
             return false;
@@ -2474,9 +2478,9 @@ public:
     virtual ~ldomDocument();
 #if BUILD_LITE!=1
     bool isRendered() { return _rendered; }
-    /// renders (formats) document in memory
-    virtual int render( LVRendPageList * pages, LVDocViewCallback * callback, int width, int dy, bool showCover, int y0, font_ref_t def_font, int def_interline_space, CRPropRef props );
-    /// renders (formats) document in memory
+    /// renders (formats) document in memory: returns true if re-rendering needed, false if not
+    virtual bool render( LVRendPageList * pages, LVDocViewCallback * callback, int width, int dy, bool showCover, int y0, font_ref_t def_font, int def_interline_space, CRPropRef props );
+    /// set global rendering properties
     virtual bool setRenderProps( int width, int dy, bool showCover, int y0, font_ref_t def_font, int def_interline_space, CRPropRef props );
 #endif
     /// create xpointer from pointer string
@@ -2545,7 +2549,8 @@ class ldomElementWriter
     void addAttribute( lUInt16 nsid, lUInt16 id, const wchar_t * value );
     //lxmlElementWriter * pop( lUInt16 id );
 
-    ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent);
+    //ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent);
+    ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent, bool isNotes);
     ~ldomElementWriter();
 
     friend class ldomDocumentWriter;

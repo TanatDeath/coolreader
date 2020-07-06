@@ -56,7 +56,7 @@ public class Scanner extends FileInfoChangeSource {
 				if ( item.format==DocumentFormat.NONE )
 					continue;
 				File f = new File(name);
-				item.filename = f.getName();
+				item.setFilename(f.getName());
 				item.path = f.getPath();
 				item.pathname = entry.getName();
 				//item.size = (int)entry.getSize();
@@ -256,7 +256,7 @@ public class Scanner extends FileInfoChangeSource {
 		// load book infos for files
 		db.loadFileInfos(pathNames, new CRDBService.FileInfoLoadingCallback() {
 			@Override
-			public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
+			public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
 				log.v("onFileInfoListLoaded");
 				// GUI thread
 				final ArrayList<FileInfo> filesForParsing = new ArrayList<FileInfo>();
@@ -310,7 +310,7 @@ public class Scanner extends FileInfoChangeSource {
 									break;
 								progress.setProgress(i * 10000 / count);
 								FileInfo item = filesForParsing.get(i);
-								log.v("scanBookProperties for "+item.filename);
+								log.v("scanBookProperties for "+item.getFilename());
 								engine.scanBookProperties(item);
 								filesForSave.add(item);
 							}
@@ -440,7 +440,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = pathname;
-		dir.filename = filename;
+		dir.setFilename(filename);
 		dir.title = filename;
 		if (findRoot(pathname) != null) {
 			log.w("skipping duplicate root " + pathname);
@@ -517,7 +517,7 @@ public class Scanner extends FileInfoChangeSource {
 		final FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.OPDS_LIST_TAG;
-		dir.filename = mActivity.getString(R.string.mi_book_opds_root);
+		dir.setFilename(mActivity.getString(R.string.mi_book_opds_root));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -530,7 +530,7 @@ public class Scanner extends FileInfoChangeSource {
 			dir.pathname = packageName;
 		else
 			dir.pathname = FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + packageName;
-		dir.filename = label;
+		dir.setFilename(label);
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -545,7 +545,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.RECENT_DIR_TAG;
-		dir.filename = mActivity.getString(R.string.dir_recent_books);
+		dir.setFilename(mActivity.getString(R.string.dir_recent_books));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -559,7 +559,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.SEARCH_SHORTCUT_TAG;
-		dir.filename = mActivity.getString(R.string.mi_book_search);
+		dir.setFilename(mActivity.getString(R.string.mi_book_search));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -573,7 +573,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.RESCAN_LIBRARY_TAG;
-		dir.filename = mActivity.getString(R.string.mi_book_rescan);
+		dir.setFilename(mActivity.getString(R.string.mi_book_rescan));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -587,7 +587,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.AUTHORS_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_author);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_author));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -597,7 +597,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.GENRE_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_genre);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_genre));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -619,7 +619,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.SERIES_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_series);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_series));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -629,7 +629,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.BOOK_DATE_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_bookdate);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_bookdate));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -639,7 +639,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.DOC_DATE_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_docdate);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_docdate));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -649,7 +649,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.PUBL_YEAR_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_publyear);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_publyear));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -659,7 +659,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.FILE_DATE_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_filedate);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_filedate));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -669,7 +669,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.RATING_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_rating);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_rating));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -679,7 +679,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.STATE_TO_READ_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_state_to_read);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_to_read));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -689,7 +689,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.STATE_READING_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_state_reading);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_reading));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -699,7 +699,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.STATE_FINISHED_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_state_finished);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_finished));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -713,7 +713,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo dir = new FileInfo();
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.TITLE_TAG;
-		dir.filename = mActivity.getString(R.string.folder_name_books_by_title);
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_title));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;
@@ -845,7 +845,7 @@ public class Scanner extends FileInfoChangeSource {
 			FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = FileInfo.SEARCH_RESULT_DIR_TAG;
-			dir.filename = mActivity.getResources().getString(R.string.dir_search_results);
+			dir.setFilename(mActivity.getResources().getString(R.string.dir_search_results));
 			dir.parent = mRoot;
 			dir.isListed = true;
 			dir.isScanned = true;
@@ -1026,7 +1026,7 @@ public class Scanner extends FileInfoChangeSource {
 		this.mActivity = coolReader;
 		mRoot = new FileInfo();
 		mRoot.path = FileInfo.ROOT_DIR_TAG;	
-		mRoot.filename = "File Manager";
+		mRoot.setFilename("File Manager");
 		mRoot.pathname = FileInfo.ROOT_DIR_TAG;
 		mRoot.isListed = true;
 		mRoot.isScanned = true;

@@ -24,6 +24,7 @@ import org.coolreader.crengine.OPDSUtil.DocInfo;
 import org.coolreader.crengine.OPDSUtil.DownloadCallback;
 import org.coolreader.crengine.OPDSUtil.EntryInfo;
 import org.coolreader.db.CRDBService;
+import org.coolreader.db.MainDB;
 import org.coolreader.plugins.*;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
@@ -666,7 +667,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			return true;
 		case R.id.book_to_gd:
-			log.d("book_to_gd menu item selected");
+			log.d("book_to_cloud menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
 				mActivity.showToast("to come...");
 				//mActivity.mGoogleDriveTools.signInAndDoAnAction(
@@ -904,9 +905,59 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			showDirectory(currDirectory, null);
 	}
 
+	MainDB.ItemGroupExtractor getExtractor(int etype) {
+		if (etype == 0) return new MainDB.ItemGroupAuthorExtractor();
+		if (etype == 1) return new MainDB.ItemGroupSeriesExtractor();
+		if (etype == 2) return new MainDB.ItemGroupGenresExtractor();
+		if (etype == 3) return new MainDB.ItemGroupBookDateNExtractor();
+		if (etype == 4) return new MainDB.ItemGroupDocDateNExtractor();
+		if (etype == 5) return new MainDB.ItemGroupPublYearNExtractor();
+		if (etype == 6) return new MainDB.ItemGroupFileCreateTimeExtractor();
+		if (etype == 7) return new MainDB.ItemGroupRatingExtractor();
+		if (etype == 8) return new MainDB.ItemGroupStateExtractor();
+		return new MainDB.ItemGroupAuthorExtractor();
+	}
+
+	MainDB.ItemGroupExtractor getExtractor2(int etype) {
+		if (etype == 1) return new MainDB.ItemGroupAuthorExtractor();
+		if (etype == 2) return new MainDB.ItemGroupSeriesExtractor();
+		if (etype == 3) return new MainDB.ItemGroupGenresExtractor();
+		if (etype == 4) return new MainDB.ItemGroupBookDateNExtractor();
+		if (etype == 5) return new MainDB.ItemGroupDocDateNExtractor();
+		if (etype == 6) return new MainDB.ItemGroupPublYearNExtractor();
+		if (etype == 7) return new MainDB.ItemGroupFileCreateTimeExtractor();
+		if (etype == 8) return new MainDB.ItemGroupRatingExtractor();
+		if (etype == 9) return new MainDB.ItemGroupStateExtractor();
+		return new MainDB.ItemGroupAuthorExtractor();
+	}
+
+	MainDB.ItemGroupExtractor getExtractor3(int etype, String prefix) {
+		if (etype == 1) return new MainDB.ItemGroupAuthorExtractor();
+		if (etype == 2) return new MainDB.ItemGroupSeriesExtractor();
+		if (etype == 3) return new MainDB.ItemGroupGenresExtractor();
+		if (etype == 4) {
+			if (prefix.equals(FileInfo.BOOK_DATE_GROUP_PREFIX)) return new MainDB.ItemGroupBookDateNExtractor();
+			if (prefix.equals(FileInfo.DOC_DATE_GROUP_PREFIX)) return new MainDB.ItemGroupDocDateNExtractor();
+			if (prefix.equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) return new MainDB.ItemGroupPublYearNExtractor();
+			if (prefix.equals(FileInfo.FILE_DATE_GROUP_PREFIX)) return new MainDB.ItemGroupFileCreateTimeExtractor();
+		};
+		if (etype == 5) return new MainDB.ItemGroupRatingExtractor();
+		if (etype == 6) return new MainDB.ItemGroupStateExtractor();
+		return new MainDB.ItemGroupAuthorExtractor();
+	}
+
 	public void showSearchResult( FileInfo[] books ) {
+		FileInfo newGroup = MainDB.createItemGroup("", FileInfo.TITLE_GROUP_PREFIX);
 		FileInfo dir = mScanner.setSearchResults( books );
-		showDirectory(dir, null);
+		newGroup.setFilename(dir.getFilename());
+		newGroup.title = dir.title;
+		int sett0 = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON, 0);
+		int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH, 0);
+		MainDB.ItemGroupExtractor extractor = getExtractor(sett0);
+		if (sett != 0) extractor = getExtractor2(sett);
+		MainDB.addGroupedItems2(newGroup, "",
+				dir.getElements(), FileInfo.TITLE_GROUP_PREFIX, extractor, 1);
+		showDirectory(newGroup, null);
 	}
 	
 	public void showFindBookDialog(boolean isQuick, String sText, final FileInfo fi)
@@ -1182,7 +1233,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							file.isDirectory = true;
 							file.pathname = FileInfo.OPDS_DIR_PREFIX + "search:"+ doc.searchLink.href;
 							file.title = doc.searchLink.href;
-							file.filename =  mActivity.getString(R.string.opds_search);
+							file.setFilename(mActivity.getString(R.string.opds_search));
 							file.isListed = true;
 							file.isScanned = true;
 							file.tag = doc.searchLink;
@@ -1205,7 +1256,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								final FileInfo file = new FileInfo();
 								file.isDirectory = false;
 								file.pathname = FileInfo.OPDS_DIR_PREFIX + acquisition.href;
-								file.filename = Utils.cleanupHtmlTags(entry.content);
+								file.annotation = entry.summary;
+								file.setFilename(Utils.cleanupHtmlTags(entry.content));
 								file.title = entry.title;
 								file.format = DocumentFormat.byMimeType(acquisition.type);
 								file.setAuthors(entry.getAuthors());
@@ -1236,7 +1288,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								file.isDirectory = true;
 								file.pathname = FileInfo.OPDS_DIR_PREFIX + entry.link.href;
 								file.title = Utils.cleanupHtmlTags(entry.content);
-								file.filename = entry.title;
+								file.setFilename(entry.title);
 								file.isListed = true;
 								file.isScanned = true;
 								file.tag = entry;
@@ -1369,7 +1421,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						fileOrDir.pathnameR = item.pathname;
 						fileOrDir.arcnameR = item.arcname;
 						fileOrDir.pathR = item.path;
-						if (StrUtils.isEmptyStr(fileOrDir.filename)) fileOrDir.filename = item.filename;
+						if (StrUtils.isEmptyStr(fileOrDir.getFilename())) fileOrDir.setFilename(item.getFilename());
 						mActivity.getDB().saveBookInfo(new BookInfo(fileOrDir));
 						mActivity.getDB().flush();
 						if (item.getTitle() == null) {
@@ -1427,7 +1479,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					
 				};
 				String fileMimeType = fileOrDir.format!=null ? fileOrDir.format.getMimeFormat() : null;
-				String defFileName = Utils.transcribeFileName( fileOrDir.title!=null ? fileOrDir.title : fileOrDir.filename );
+				String defFileName = Utils.transcribeFileName( fileOrDir.title!=null ? fileOrDir.title : fileOrDir.getFilename());
 				if ( fileOrDir.format!=null )
 					defFileName = defFileName + fileOrDir.format.getExtensions()[0];
 				final OPDSUtil.DownloadTask downloadTask = OPDSUtil.create(lastOPDScatalogURL,
@@ -1465,9 +1517,44 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			baseDir.sort(mSortOrder);
 			this.baseDir = baseDir;
 		}
+
 		@Override
-		public void onFileInfoListLoaded(ArrayList<FileInfo> list) {
-			baseDir.setItems(list);
+		public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
+			//baseDir.setItems(list);
+			baseDir.clear();
+			int sett0 = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON, 0);
+			MainDB.ItemGroupExtractor extractor = getExtractor(sett0);
+			if (StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.AUTHOR_GROUP_PREFIX)) {
+				int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR, 0);
+				if (sett != 0) extractor = getExtractor2(sett);
+			} else
+				if (StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.SERIES_GROUP_PREFIX)) {
+					int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES, 0);
+					if (sett != 0) extractor = getExtractor2(sett);
+				} else
+					if (StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.GENRE_GROUP_PREFIX)) {
+						int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES, 0);
+						if (sett != 0) extractor = getExtractor2(sett);
+					} else
+						if (StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.RATING_TAG)) {
+							int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_RATING, 0);
+							if (sett != 0) extractor = getExtractor2(sett);
+						} else
+							if (StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.STATE_TAG)) {
+								int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_STATE, 0);
+								if (sett != 0) extractor = getExtractor2(sett);
+							}  else
+								if (
+									(StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.BOOK_DATE_GROUP_PREFIX)) ||
+									(StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.DOC_DATE_GROUP_PREFIX)) ||
+									(StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) ||
+									(StrUtils.getNonEmptyStr(prefix,true).equals(FileInfo.FILE_DATE_GROUP_PREFIX))
+								) {
+									int sett = mActivity.settings().getInt(Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_DATES, 0);
+									if (sett != 0) extractor = getExtractor3(sett, StrUtils.getNonEmptyStr(prefix,true));
+								}
+			if (extractor == null) extractor = new MainDB.ItemGroupAuthorExtractor();
+			MainDB.addGroupedItems2(baseDir, "",list, prefix, extractor, 1);
 			//plotn - very experimental
 			baseDir.sort(mSortOrder);
 			showDirectoryInternal(baseDir, null);
@@ -1588,7 +1675,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (fileOrDir.isQSearchShortcut()) {
 				currDirectory = null;
 				currDirectoryFiltered = null;
-				showFindBookDialog(true, fileOrDir.filename, null);
+				showFindBookDialog(true, fileOrDir.getFilename(), null);
 				return;
 			}
 			if (fileOrDir.isBooksByAuthorRoot()) {
@@ -1648,6 +1735,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				return;
 			}
 			if (fileOrDir.isBooksByTitleRoot()) {
+				// refresh authors list
+				log.d("Updating title list");
+				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				return;
+			}
+			if (fileOrDir.isBooksByTitleLevel()) {
 				// refresh authors list
 				log.d("Updating title list");
 				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
@@ -1713,6 +1806,48 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if ( dir!=null ) {
 			mScanner.scanDirectory(mActivity.getDB(), dir, new Runnable() {
 				public void run() {
+//					plotn: think later
+//					boolean wasGrouped = true;
+//					if (dir.dirs != null) {
+//						for (FileInfo fi: dir.dirs)
+//							if (fi.pathname != null)
+//								if (fi.pathname.startsWith(FileInfo.TITLE_GROUP_PREFIX)) {
+//									wasGrouped = true;
+//									break;
+//								}
+//					}
+//					if ((dir.files != null)&&(!wasGrouped))
+//						if (dir.files.size()>MainDB.iMaxGroupSize) {
+//							FileInfo newGroup = MainDB.createItemGroup("", FileInfo.TITLE_GROUP_PREFIX);
+//							newGroup.setFilename(dir.getFilename());
+//							newGroup.title = dir.title;
+//							MainDB.ItemGroupTitleExtractor extractor = new MainDB.ItemGroupTitleExtractor();
+//							MainDB.addGroupedItems2(newGroup, "",
+//								dir.files, FileInfo.TITLE_GROUP_PREFIX, extractor, 1);
+//							if (newGroup.dirs != null) {
+//								if (newGroup.dirs.size()>0) {
+//									dir.files.clear();
+//									if (newGroup.files != null)
+//										for (FileInfo fi : newGroup.files) {
+//											fi.parent = dir;
+//											dir.files.add(fi);
+//										}
+//									if (dir.dirs == null) dir.dirs = new ArrayList<FileInfo>();
+//									for (FileInfo fi : newGroup.dirs) {
+//										fi.parent = dir;
+//										dir.dirs.add(fi);
+//									}
+//								}
+//							}
+//						}
+//					FileInfo newGroup = MainDB.createItemGroup("", FileInfo.TITLE_GROUP_PREFIX);
+//							newGroup.setFilename(dir.getFilename());
+//							newGroup.title = dir.title;
+//							MainDB.ItemGroupTitleExtractor extractor = new MainDB.ItemGroupTitleExtractor();
+//							MainDB.addGroupedItems2(newGroup, "",
+//								dir.getElements(), FileInfo.TITLE_GROUP_PREFIX, extractor, 1);
+//					newGroup.sort(mSortOrder);
+//					showDirectoryInternal(newGroup, file);
 					if (dir.allowSorting())
 						dir.sort(mSortOrder);
 					showDirectoryInternal(dir, file);
@@ -1900,7 +2035,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					String thisDir = "";
 					if ( parentItem!=null ) {
 						if ( parentItem.pathname.startsWith("@") )
-							thisDir = "/" + parentItem.filename;
+							thisDir = "/" + parentItem.getFilename();
 //						else if ( parentItem.isArchive )
 //							thisDir = parentItem.arcname;
 						else
@@ -2064,31 +2199,24 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					else
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_drawable, R.drawable.cr3_browser_folder));
                     if (doTint) mActivity.tintViewIcons(image,true);
-					String title = item.filename;
+					String title = item.getFilename();
 					
 					if (item.isOnlineCatalogPluginDir())
 						title = translateOnlineStorePluginItem(item);
 					
 					setText(name, title, 0);
 
-					if ( item.isBooksByAuthorDir() || item.isBooksByGenreDir()) {
+					if ( item.isBooksBySeriesDir() || item.isBooksByBookdateDir() || item.isBooksByDocdateDir()
+							|| item.isBooksByPublyearDir() || item.isBooksByFiledateDir() ||
+							item.isBooksByAuthorDir() || item.isBooksByGenreDir() || item.isBooksByTitleLevel()) {
 						int bookCount = 0;
 						if (item.fileCount() > 0)
 							bookCount = item.fileCount();
 						else if (item.tag != null && item.tag instanceof Integer)
 							bookCount = (Integer)item.tag;
 						setText(field1, "books: " + String.valueOf(bookCount), colorIcon);
-						setText(field2, "folders: 0", colorIcon);
-						setText(fieldState, "", colorIcon);
-					} else if ( item.isBooksBySeriesDir() || item.isBooksByBookdateDir() || item.isBooksByDocdateDir()
-							|| item.isBooksByPublyearDir() || item.isBooksByFiledateDir()) {
-						int bookCount = 0;
-						if (item.fileCount() > 0)
-							bookCount = item.fileCount();
-						else if (item.tag != null && item.tag instanceof Integer)
-							bookCount = (Integer)item.tag;
-						setText(field1, "books: " + String.valueOf(bookCount), colorIcon);
-						setText(field2, "folders: 0", colorIcon);
+						//setText(field2, "folders: 0", colorIcon);
+						setText(field2, "", colorIcon);
 						setText(fieldState, "", colorIcon);
 					}  else  if (item.isOPDSDir()) {
 						setText(field1, item.title, colorIcon);
@@ -2098,8 +2226,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
                             && !item.isBooksByAuthorRoot() && !item.isBooksBySeriesRoot() && !item.isBooksByBookdateRoot()
 							&& !item.isBooksByDocdateRoot() && !item.isBooksByPublyearRoot() && !item.isBooksByFiledateRoot()
                             && !item.isBooksByTitleRoot()) || item.dirCount()>0) && !item.isOnlineCatalogPluginDir()) {
-						setText(field1, "books: " + String.valueOf(item.fileCount()), colorIcon);
-						setText(field2, "folders: " + String.valueOf(item.dirCount()), colorIcon);
+						setText(field1,"books: " + String.valueOf(item.fileCount()), colorIcon);
+						if (item.dirCount()>0)
+							setText(field2, "folders: " + String.valueOf(item.dirCount()), colorIcon);
+						else
+							setText(field2, "", colorIcon);
 						setText(fieldState, "", colorIcon);
 					} else {
 						setText(field1, "", colorIcon);
@@ -2116,23 +2247,32 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							);
                             mActivity.tintViewIcons(image,true);
 						} else {
+							log.d("finding svyat bug 1");
 							if (coverPagesEnabled) {
+								log.d("finding svyat bug 2");
 								image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
+								log.d("finding svyat bug 3");
 								if (item.isOPDSBook()) {
+									log.d("finding svyat bug 4");
 									final FileInfo finalItem = item;
+									log.d("finding svyat bug 5");
 									if	(
 											(
 												(!StrUtils.isEmptyStr(item.pathnameR))||
 												(!StrUtils.isEmptyStr(item.arcnameR))
 											) && (!StrUtils.isEmptyStr(item.opdsLinkR))
 									) {
+										log.d("finding svyat bug 6");
 											Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), finalItem.opdsLinkR,
 													new History.FileInfo1LoadedCallack() {
 														@Override
 														public void onFileInfoLoaded(final FileInfo fileInfo) {
+															log.d("finding svyat bug 7");
 															if (fileInfo!=null) {
+																log.d("finding svyat bug 8");
 																image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), fileInfo));
 															} else {
+																log.d("finding svyat bug 9");
 																image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
 															}
 														}
@@ -2166,17 +2306,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						}
 					}
 					if ( isSimple ) {
-						String fn = item.getFileNameToDisplay();
+						String fn = item.getFileNameToDisplay2();
 						setText( filename, fn , 0);
 					} else {
 						setText( author, Utils.formatAuthors(item.getAuthors()), colorIcon );
                         //setText( author, item.authors );
                         String seriesName = Utils.formatSeries(item.series, item.seriesNumber);
-						String title = item.title;
-						String filename1 = item.filename;
-						String filename2 = item.isArchive && item.arcname != null /*&& !item.isDirectory */
-								? new File(item.arcname).getName() : null;
-								
+						String title = StrUtils.getNonEmptyStr(item.title, true);
+						String filename1 = StrUtils.getNonEmptyStr(item.getFilename(),true);
+						String filename2 = StrUtils.getNonEmptyStr(item.isArchive && item.arcname != null /*&& !item.isDirectory */
+								? new File(item.arcname).getName() : null, true);
+						filename2 = StrUtils.getNonEmptyStr(filename2, true).replace(filename1.trim(), "*");
+						filename1 = StrUtils.getNonEmptyStr(filename1, true).replace(title, "*");
 						String onlineBookInfo = "";
 						if (item.getOnlineStoreBookInfo() != null) {
 							OnlineStoreBook book = item.getOnlineStoreBookInfo();
@@ -2187,13 +2328,22 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								onlineBookInfo = onlineBookInfo + "price:" + book.price + "  ";
 							
 						}
+						boolean wasFN1 = false;
+						boolean wasFN2 = false;
 						if ( title==null || title.length()==0 ) {
 							title = filename1;
-							if (seriesName==null)
+							wasFN1 = true;
+							if (seriesName==null) {
 								seriesName = filename2;
-						} else if (seriesName==null) 
+								wasFN2 = true;
+							}
+						} else if (seriesName==null) {
 							seriesName = filename1;
-
+							wasFN1 = true;
+						}
+						if ((!wasFN1)&&(!StrUtils.isEmptyStr(filename1))) seriesName = (StrUtils.getNonEmptyStr(seriesName, true)+ "; "+filename1).trim();
+						if ((!wasFN2)&&(!StrUtils.isEmptyStr(filename2))) seriesName = (StrUtils.getNonEmptyStr(seriesName, true)+ " ["+filename2+"]").trim();
+						if (seriesName.startsWith(";")) seriesName = seriesName.substring(1).trim();
 						String sLangFrom = item.lang_from;
 						String sLangTo = item.lang_to;
 						String sLang = "";
@@ -2370,7 +2520,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			resourceId = R.string.online_store_new;
 		if (resourceId != 0)
 			return mActivity.getString(resourceId);
-		return item.filename;
+		return item.getFilename();
 	}
 	
 	private void setCurrDirectory(FileInfo newCurrDirectory) {
@@ -2404,7 +2554,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		
 		String title = "";
 		if (dir != null) {
-			title = dir.filename;
+			title = dir.getFilename();
 			if (!dir.isSpecialDir())
 				title = dir.getPathName();
 			if (dir.isOnlineCatalogPluginDir())

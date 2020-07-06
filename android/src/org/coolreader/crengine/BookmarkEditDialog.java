@@ -48,7 +48,7 @@ public class BookmarkEditDialog extends BaseDialog {
 			ude.setId(0L);
 			ude.setDic_word(posEdit.getText().toString());
 			ude.setDic_word_translate(commentEdit.getText().toString());
-			final String sBookFName = mBookInfo.getFileInfo().filename;
+			final String sBookFName = mBookInfo.getFileInfo().getFilename();
 			CRC32 crc = new CRC32();
 			crc.update(sBookFName.getBytes());
 			ude.setDic_from_book(String.valueOf(crc.getValue()));

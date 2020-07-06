@@ -22,6 +22,7 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
     private static final int MSG_MOTION_DETECTED  = 0;
     private static final int MSG_MOTION_TIMEOUT   = 1;
     private static final int MSG_HANDLE_STOP_STEP = 2;
+    private static final int MSG_TICK             = 3;
     private static final String TAG = MotionWatchdogHandler.class.getSimpleName();
     private static final long STEP_TIME = 5 * 1000; // 5 seconds
     private final SensorManager mSensorManager;
@@ -37,6 +38,7 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
     private final double[] mLastValues = new double[3];
     private final double[] mDelta = new double[3];
     private final int mTimeout;
+    private int mTimeoutLeft;
 
     public MotionWatchdogHandler(TTSToolbarDlg ttsToolbarDlg, CoolReader coolReader,
                                  com.s_trace.motion_watchdog.HandlerThread handlerThread, int timeout) {
@@ -45,6 +47,7 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
         mTTSToolbarDlg = ttsToolbarDlg;
         mSensorManager = (SensorManager) mCoolReader.getSystemService(Context.SENSOR_SERVICE);
         mTimeout = timeout;
+        mTimeoutLeft = timeout;
 
         // Force first sensor event to always fire MSG_MOTION_DETECTED
         mLastValues[0] = MOTION_THRESHOLD + 1000;
@@ -81,10 +84,15 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
                 }
                 this.removeMessages(MSG_MOTION_TIMEOUT);
                 this.removeMessages(MSG_HANDLE_STOP_STEP);
+                this.removeMessages(MSG_TICK);
 
                 Message message = Message.obtain();
                 message.what = MSG_MOTION_TIMEOUT;
                 this.sendMessageDelayed(message, mTimeout);
+                this.mTimeoutLeft = mTimeout;
+                Message message2 = Message.obtain();
+                message2.what = MSG_TICK;
+                this.sendMessageDelayed(message2, STEP_TIME);
                 break;
             case MSG_MOTION_TIMEOUT:
                 mIsStopping = true;
@@ -94,6 +102,13 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
                 if (mIsStopping) {
                     handleStop();
                 }
+            case MSG_TICK:
+                mTimeoutLeft = mTimeoutLeft - (int) STEP_TIME;
+                if (mTimeoutLeft<0) mTimeoutLeft = 0;
+                Message message3 = Message.obtain();
+                message3.what = MSG_TICK;
+                this.sendMessageDelayed(message3, STEP_TIME);
+                if (mTTSToolbarDlg != null) mTTSToolbarDlg.handleTick(mTimeoutLeft, mCurrentVolume);
                 break;
         }
     }
@@ -138,6 +153,7 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
         }
         handleInterrupt();
         mHandlerThread.interrupt();
+        mTTSToolbarDlg.handleTick(0,0);
     }
 
     private void handleInterrupt() {
@@ -148,6 +164,7 @@ public class MotionWatchdogHandler extends Handler implements SensorEventListene
         }
         removeMessages(MotionWatchdogHandler.MSG_MOTION_TIMEOUT);
         removeMessages(MotionWatchdogHandler.MSG_HANDLE_STOP_STEP);
+        removeMessages(MotionWatchdogHandler.MSG_TICK);
         removeMessages(MotionWatchdogHandler.MSG_MOTION_DETECTED);
         mHandlerThread.quitSafely();
     }

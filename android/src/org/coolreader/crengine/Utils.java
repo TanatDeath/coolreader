@@ -14,6 +14,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -35,6 +39,12 @@ import android.util.Log;
 import android.view.View;
 
 public class Utils {
+
+	private static HttpURLConnection connection;
+
+	public static final int CONNECT_TIMEOUT = 60000;
+	public static final int READ_TIMEOUT = 60000;
+
 	public static long timeStamp() {
 		return android.os.SystemClock.uptimeMillis();
 	}
@@ -394,6 +404,19 @@ public class Utils {
 		Calendar c = Calendar.getInstance(tz);
 		c.setTimeInMillis(timeStamp);
 		return DateFormat.getTimeFormat(activity.getApplicationContext()).format(c.getTime());
+	}
+
+	public static String formatDateFixed( long timeStamp )
+	{
+		//if ( timeStamp<5000*60*60*24*1000 )
+		//	return "";
+		TimeZone tz = java.util.TimeZone.getDefault();
+		Calendar c = Calendar.getInstance(tz);
+		c.setTimeInMillis(timeStamp);
+		int m = c.get(Calendar.MONTH)+1;
+		String mm = m < 10 ? "0"+ m : ""+m;
+		String dd = c.get(Calendar.DAY_OF_MONTH) < 10 ? "0"+c.get(Calendar.DAY_OF_MONTH) : ""+c.get(Calendar.DAY_OF_MONTH);
+		return c.get(Calendar.YEAR)+"-"+mm+"-"+dd;
 	}
 	
 	public static String formatDate( Activity activity, long timeStamp )
@@ -767,5 +790,29 @@ public class Utils {
 		}
 		baos.flush();
 		return baos;
+	}
+
+	public static String getUrlLoc(URL url) {
+		try {
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestProperty("User-Agent", "KnownReader (Android)");
+			connection.setInstanceFollowRedirects(true);
+			connection.setUseCaches(false);
+			connection.setAllowUserInteraction(false);
+			connection.setConnectTimeout(CONNECT_TIMEOUT);
+			connection.setReadTimeout(READ_TIMEOUT);
+			connection.setDoInput(true);
+			int response = -1;
+			response = connection.getResponseCode();
+			L.i("opds: " + connection.getResponseMessage());
+			if (response == 301 || response == 302 || response == 307 || response == 303) {
+				// redirects
+				String redirect = connection.getHeaderField("Location");
+				return redirect;
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		return null;
 	}
 }

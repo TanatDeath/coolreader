@@ -4227,7 +4227,7 @@ bool ldomDocument::setRenderProps( int width, int dy, bool /*showCover*/, int /*
     s->display = css_d_block;
     s->white_space = css_ws_normal;
     s->text_align = css_ta_start;
-    s->text_align_last = css_ta_start;
+    s->text_align_last = css_ta_auto;
     s->text_decoration = css_td_none;
     s->text_transform = css_tt_none;
     s->hyphenate = css_hyph_auto;
@@ -4393,7 +4393,7 @@ bool ldomDocument::parseStyleSheet(lString16 cssFile)
     return parser.Parse(cssFile);
 }
 
-int ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, int width, int dy, bool showCover, int y0, font_ref_t def_font, int def_interline_space, CRPropRef props )
+bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, int width, int dy, bool showCover, int y0, font_ref_t def_font, int def_interline_space, CRPropRef props )
 {
     CRLog::info("Render is called for width %d, pageHeight=%d, fontFace=%s, docFlags=%d", width, dy, def_font->getTypeFace().c_str(), getDocFlags() );
     CRLog::trace("initializing default style...");
@@ -4536,7 +4536,10 @@ int ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, 
 
         //persist();
         dumpStatistics();
-        return height;
+
+        return true; // full (re-)rendering done
+        // return height;
+
     } else {
         CRLog::info("rendering context is not changed - no render!");
         if ( _pagesData.pos() ) {
@@ -4548,7 +4551,8 @@ int ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, 
         if ( was_just_rendered_from_cache && callback )
             callback->OnDocumentReady();
 
-        return getFullHeight();
+        return false; // no (re-)rendering needed
+        // return getFullHeight();
     }
 
 }
@@ -4783,14 +4787,17 @@ bool IsEmptySpace( const lChar16 * text, int len )
 
 static bool IS_FIRST_BODY = false;
 
-ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent)
+ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent, bool isNotes)
     : _parent(parent), _document(document), _tocItem(NULL), _isBlock(true), _isSection(false), _stylesheetIsSet(false), _bodyEnterCalled(false)
 {
     //logfile << "{c";
     _typeDef = _document->getElementTypePtr( id );
     _flags = 0;
-    if ( (_typeDef && _typeDef->white_space==css_ws_pre) || (_parent && _parent->getFlags()&TXTFLG_PRE) )
-        _flags |= TXTFLG_PRE;
+    if ( (_typeDef && _typeDef->white_space >= css_ws_pre_line) || (_parent && _parent->getFlags()&TXTFLG_PRE) )
+        _flags |= TXTFLG_PRE; // Parse as PRE: pre-line, pre, pre-wrap and break-spaces
+    // This will be updated in ldomElementWriter::onBodyEnter() after we have
+    // set styles to this node, so we'll get the real white_space value to use.
+
     _isSection = (id==el_section);
 
     // Default (for elements not specified in fb2def.h) is to allow text
@@ -4812,10 +4819,12 @@ ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUIn
         _element = _parent->getElement()->insertChildElement( (lUInt32)-1, nsid, id );
     else
         _element = _document->getRootNode(); //->insertChildElement( (lUInt32)-1, nsid, id );
+
     //if ( IS_FIRST_BODY && id==el_body ) { // plotn - it was discussed, that document can have multi-body structure
     // and TOC can be inside any of then - so it was changed
     if ( id==el_body ) {
-        _tocItem = _document->getToc();
+        if ((IS_FIRST_BODY) || (!isNotes))
+            _tocItem = _document->getToc();
         //_tocItem->clear();
         IS_FIRST_BODY = false;
     }
@@ -4939,9 +4948,12 @@ void ldomElementWriter::onBodyEnter()
 //            crFatalError();
 //        }
         _isBlock = isBlockNode(_element);
-        // If initNodeStyle() has set "white-space: pre", update _flags
-        if ( _element->getStyle()->white_space == css_ws_pre) {
+        // If initNodeStyle() has set "white-space: pre" or alike, update _flags
+        if ( _element->getStyle()->white_space >= css_ws_pre_line) {
             _flags |= TXTFLG_PRE;
+        }
+        else {
+            _flags &= ~TXTFLG_PRE;
         }
     } else {
     }
@@ -4985,7 +4997,8 @@ void ldomNode::autoboxChildren( int startIndex, int endIndex, bool handleFloatin
     if ( !isElement() )
         return;
     css_style_ref_t style = getStyle();
-    bool pre = ( style->white_space==css_ws_pre );
+    bool pre = ( style->white_space >= css_ws_pre_line );
+    // (css_ws_pre_line might need special care?)
     int firstNonEmpty = startIndex;
     int lastNonEmpty = endIndex;
 
@@ -5138,8 +5151,8 @@ bool ldomNode::cleanIfOnlyEmptyTextInline( bool handleFloating )
     if ( !isElement() )
         return false;
     css_style_ref_t style = getStyle();
-    if ( style->white_space==css_ws_pre )
-        return false; // Don't mess with PRE
+    if ( style->white_space >= css_ws_pre )
+        return false; // Don't mess with PRE (css_ws_pre_line might need special care?)
     // We return false as soon as we find something non text, or text non empty
     int i = getChildCount()-1;
     for ( ; i>=0; i-- ) {
@@ -5584,7 +5597,7 @@ bool ldomNode::isEmbeddedBlockBoxingInlineBox(bool inline_box_checks_done)
             return false; // regular boxing inlineBox
         }
     }
-    if ( hasAttribute( attr_type ) ) { // type="EmbeddedBlock"
+    if ( hasAttribute( attr_T ) ) { // T="EmbeddedBlock"
             // (no other possible value yet, no need to compare strings)
         int cm = getChildNode(0)->getRendMethod();
         if ( cm == erm_inline || cm == erm_runin || cm == erm_invisible || cm == erm_killed )
@@ -5672,7 +5685,7 @@ void ldomNode::initNodeRendMethod()
         }
         else if ( !isNotBoxWrappingNode(this) ) {
             // If this node is already a box wrapping node (active floatBox or inlineBox,
-            // possibly a <inlineBox type="EmbeddedBlock"> created here in a previous
+            // possibly a <inlineBox T="EmbeddedBlock"> created here in a previous
             // rendering), just set it to erm_inline.
             setRendMethod(erm_inline);
         }
@@ -5725,7 +5738,7 @@ void ldomNode::initNodeRendMethod()
                 }
                 if ( do_wrap_blocks ) {
                     // We have a mix of inline nodes or non-empty text, and block elements:
-                    // wrap each block element in a <inlineBox type="EmbeddedBlock">.
+                    // wrap each block element in a <inlineBox T="EmbeddedBlock">.
                     for ( int i=getChildCount()-1; i >=0; i-- ) {
                         ldomNode * child = getChildNode( i );
                         if ( !child->isElement() ) // text node
@@ -5769,7 +5782,7 @@ void ldomNode::initNodeRendMethod()
                             ldomNode * ibox = insertChildElement( i, LXML_NS_NONE, el_inlineBox );
                             moveItemsTo( ibox, i+1, i+1 ); // move this child from 'this' into ibox
                             // Mark this inlineBox so we can handle its pecularities
-                            ibox->setAttributeValue(LXML_NS_NONE, getDocument()->getAttrNameIndex(L"type"), L"EmbeddedBlock");
+                            ibox->setAttributeValue(LXML_NS_NONE, attr_T, L"EmbeddedBlock");
                             setNodeStyle( ibox, getStyle(), getFont() );
                             ibox->setRendMethod( erm_inline );
                         }
@@ -6744,7 +6757,7 @@ void ldomDocumentWriter::OnStart(LVFileFormatParser * parser)
         //CRLog::trace( "ldomDocumentWriter() : header only, tag id=%d", _stopTagId );
     }
     LVXMLParserCallback::OnStart( parser );
-    _currNode = new ldomElementWriter(_document, 0, 0, NULL);
+    _currNode = new ldomElementWriter(_document, 0, 0, NULL, false);
 }
 
 void ldomDocumentWriter::OnStop()
@@ -6831,6 +6844,18 @@ ldomNode * ldomDocumentWriter::OnTagOpen( const lChar16 * nsname, const lChar16 
         _inHeadStyle = true;
     }
 
+    bool isNotesTag = false;
+
+    // this doesnt work - think later more complexly
+    if ( lStr_cmp(tagname, "body") ) {
+        if ( _currNode ) {
+        lString16 sname = _currNode->getElement()->getAttributeValue( "name" );
+            if ( !sname.empty() ) {
+                if (sname == "notes") isNotesTag = true;
+            }
+        }
+    }
+
     // For EPUB, when ldomDocumentWriter is driven by ldomDocumentFragmentWriter:
     // if we see a BODY coming and we are a DocFragment, its time to apply the
     // styles set to the DocFragment before switching to BODY (so the styles can
@@ -6845,7 +6870,7 @@ ldomNode * ldomDocumentWriter::OnTagOpen( const lChar16 * nsname, const lChar16 
         //CRLog::trace("stop tag found, stopping...");
     //    _parser->Stop();
     //}
-    _currNode = new ldomElementWriter( _document, nsid, id, _currNode );
+    _currNode = new ldomElementWriter( _document, nsid, id, _currNode, isNotesTag);
     _flags = _currNode->getFlags();
     //logfile << " !o!\n";
     //return _currNode->getElement();
@@ -11545,8 +11570,21 @@ public:
     {
 #if BUILD_LITE!=1
         ldomNode * elem = (ldomNode *)ptr->getNode();
-        if ( elem->getRendMethod()==erm_invisible )
+        if ( elem->getRendMethod() == erm_invisible )
             return false;
+        // Allow tweaking that with hints
+        css_cr_hint_t hint = elem->getStyle()->cr_hint;
+        if ( hint == css_cr_hint_text_selection_skip ) {
+            return false;
+        }
+        else if ( hint == css_cr_hint_text_selection_inline ) {
+            newBlock = false;
+            return true;
+        }
+        else if ( hint == css_cr_hint_text_selection_block ) {
+            newBlock = true;
+            return true;
+        }
         switch ( elem->getStyle()->display ) {
         /*
         case css_d_inherit:
@@ -12103,7 +12141,7 @@ ldomNode * ldomDocumentWriterFilter::OnTagOpen( const lChar16 * nsname, const lC
     lUInt16 id = _document->getElementNameIndex(tagname);
     lUInt16 nsid = (nsname && nsname[0]) ? _document->getNsNameIndex(nsname) : 0;
     AutoClose( id, true );
-    _currNode = new ldomElementWriter( _document, nsid, id, _currNode );
+    _currNode = new ldomElementWriter( _document, nsid, id, _currNode, false );
     _flags = _currNode->getFlags();
     if ( _libRuDocumentDetected && (_flags & TXTFLG_PRE) )
         _flags |= TXTFLG_PRE_PARA_SPLITTING | TXTFLG_TRIM; // convert preformatted text into paragraphs
@@ -13127,14 +13165,16 @@ lUInt32 tinyNodeCollection::calcStyleHash()
                     res = res * 31 + sh;
                     if (!style.isNull()) {
                         _nodeDisplayStyleHash = _nodeDisplayStyleHash * 31 + style.get()->display;
-                        // Also account in this hash if this node is "white_space: pre"
-                        // If white_space change from/to "pre" to/from any other value,
+                        // Also account in this hash if this node is "white_space: pre" or alike.
+                        // If white_space changes from/to "pre"-like to/from "normal"-like,
                         // the document will need to be reloaded so that the HTML text parts
                         // are parsed according the the PRE/not-PRE rules
-                        if (style.get()->white_space == css_ws_pre) _nodeDisplayStyleHash += 29;
+                        if (style.get()->white_space >= css_ws_pre_line)
+                            _nodeDisplayStyleHash += 29;
                         // Also account for style->float_, as it should create/remove new floatBox
                         // elements wrapping floats when toggling BLOCK_RENDERING_G(ENHANCED)
-                        if (style.get()->float_ > css_f_none) _nodeDisplayStyleHash += 123;
+                        if (style.get()->float_ > css_f_none)
+                            _nodeDisplayStyleHash += 123;
                     }
                     //printf("element %d %d style hash: %x\n", i, j, sh);
                     LVFontRef font = buf[j].getFont();
@@ -15588,8 +15628,8 @@ ldomNode * ldomNode::getUnboxedLastChild( bool skip_text_nodes ) const
             // No more child, get back to parent and have it process our sibling
             index = n->getNodeIndex() + 1;
             n = n->getParentNode();
-            if ( n == topNode ) // all children done and back to top node
-                break;
+            if ( n == topNode && index >= n->getChildCount() )
+                break; // back to top node and all its children visited
         }
     }
 */
@@ -16456,7 +16496,7 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
     //RenderRectAccessor fmt( this );
     /// render whole node content as single formatted object
     int direction = RENDER_RECT_PTR_GET_DIRECTION(fmt);
-    int flags = styleToTextFmtFlags( getStyle(), 0, direction );
+    lUInt32 flags = styleToTextFmtFlags( getStyle(), 0, direction );
     ::renderFinalBlock( this, f.get(), fmt, flags, 0, -1 );
     // We need to store this LFormattedTextRef in the cache for it to
     // survive when leaving this function (some callers do use it).

@@ -891,6 +891,10 @@ static const char * css_ws_names[] =
     "normal",
     "pre",
     "nowrap",
+    "pre-line",
+    "pre",
+    "pre-wrap",
+    "break-spaces",
     NULL
 };
 
@@ -903,6 +907,7 @@ static const char * css_ta_names[] =
     "justify",
     "start",
     "end",
+    "auto",
     NULL
 };
 
@@ -1211,6 +1216,11 @@ static const char * css_cr_hint_names[]={
                             // baseline and height (it could have been a non-standard named
                             // value for line-height:, but we want to be able to not override
                             // existing line-height: values)
+
+        // Tweak text selection when traversing a node with these hints
+        "text-selection-inline", // don't add a '\n' before inner text, even if the node happens to be block
+        "text-selection-block",  // add a '\n' before inner text even if the node happens to be inline
+        "text-selection-skip",   // don't include inner text in text selection
         NULL
 };
 
@@ -1366,6 +1376,8 @@ bool LVCssDeclaration::parse( const char * &decl, bool higher_importance, lxmlDo
                 break;
             case cssd_text_align:
                 n = parse_name( decl, css_ta_names, -1 );
+                if ( n == css_ta_auto ) // only accepted with text-align-last
+                    n = -1;
                 break;
             case cssd_text_align_last:
                 n = parse_name( decl, css_ta_names, -1 );
@@ -3175,6 +3187,10 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
             _id = 0;
         }
         else if ( *str == ':' ) // pseudoclass follows
+        {
+            _id = 0;
+        }
+        else if ( *str == '[' ) // attribute selector follows
         {
             _id = 0;
         }
