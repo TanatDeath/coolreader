@@ -668,7 +668,7 @@ public class Dictionaries {
 				if (cr.getReaderView().getBookInfo()!=null)
 					if (cr.getReaderView().getBookInfo().getFileInfo()!=null)
 					{
-						sBookFName = cr.getReaderView().getBookInfo().getFileInfo().filename;
+						sBookFName = cr.getReaderView().getBookInfo().getFileInfo().getFilename();
 						sLangFrom = cr.getReaderView().getBookInfo().getFileInfo().lang_from;
 						sLangTo = cr.getReaderView().getBookInfo().getFileInfo().lang_to;
 					}

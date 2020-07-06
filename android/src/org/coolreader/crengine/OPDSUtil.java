@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
 import java.util.concurrent.Callable;
@@ -184,7 +185,8 @@ xml:base="http://lib.ololo.cc/opds/">
 		public ArrayList<LinkInfo> links = new ArrayList<LinkInfo>();
 		public String icon;
 		public ArrayList<String> categories = new ArrayList<String>(); 
-		public ArrayList<AuthorInfo> authors = new ArrayList<AuthorInfo>(); 
+		public ArrayList<AuthorInfo> authors = new ArrayList<AuthorInfo>();
+		public HashMap<String, String> otherElements = new HashMap<String, String>();
 		public LinkInfo getBestAcquisitionLink() {
 			LinkInfo best = null;
 			int bestPriority = 0; 
@@ -336,6 +338,9 @@ xml:base="http://lib.ololo.cc/opds/">
 					if (entryInfo.title.length() > 0)
 						entryInfo.title = entryInfo.title + " ";
 					entryInfo.title = entryInfo.title + s;
+				} else if (insideEntry) {
+					entryInfo.otherElements.put(currentElement, s);
+					//asdf //plotn продолжить обработку других элементов
 				}
 			}
 		}

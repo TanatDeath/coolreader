@@ -126,7 +126,7 @@ public class BrowserViewLayout extends ViewGroup {
 				if ((dir2 != null)&&(!dir2.isRootDir())) {
 					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 					final FileInfo dir3 = dir2;
-					tv.setText(String.valueOf(dir2.filename));
+					tv.setText(String.valueOf(dir2.getFilename()));
 					tv.setOnClickListener(new OnClickListener() {
 
 						@Override

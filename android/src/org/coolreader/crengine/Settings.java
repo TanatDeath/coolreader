@@ -152,8 +152,10 @@ public interface Settings {
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
     public static final String PROP_APP_MARK_DOWNLOADED_TO_READ = "app.mark.downloaded.toread";
     public static final String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
+	public static final String PROP_APP_CLOUD_POS_DATE_SORT = "app.cloudpos.date.sort";
+	public static final String PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV = "app.cloudpos.hide.current.dev";
 
-    public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
+	public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
     public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
     public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT = "crengine.highlight.bookmarks.color.comment";
     public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION = "crengine.highlight.bookmarks.color.correction";
@@ -171,6 +173,14 @@ public interface Settings {
     public static final String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
 	public static final String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
 	public static final String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON = "app.browser.sec.group.common";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR = "app.browser.sec.group.author";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES = "app.browser.sec.group.series";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES = "app.browser.sec.group.genres";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH = "app.browser.sec.group.search";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_DATES = "app.browser.sec.group.dates";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_RATING = "app.browser.sec.group.rating";
+	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_STATE = "app.browser.sec.group.state";
 
     public static final String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
     public static final String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";

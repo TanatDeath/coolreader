@@ -649,7 +649,7 @@ public class CoverpageManager {
 				Rect rc = new Rect(fullrc.left, fullrc.top, fullrc.right - shadowW, fullrc.bottom - shadowH);
 				synchronized (mCache) {
 					boolean isCustomCover = false;
-					final String sBookFName = book.file.filename;
+					final String sBookFName = book.file.getFilename();
 					CRC32 crc = new CRC32();
 					crc.update(sBookFName.getBytes());
 					final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
@@ -711,7 +711,7 @@ public class CoverpageManager {
 								sTitle = StrUtils.getNonEmptyStr(book.file.title, true);
 								sAuthors = StrUtils.getNonEmptyStr(book.file.authors, true).replace("\\|", "\n");
 								if (StrUtils.isEmptyStr(sTitle))
-									sTitle = StrUtils.stripExtension(book.file.filename);
+									sTitle = StrUtils.stripExtension(book.file.getFilename());
 							}
 							bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
 									rc.width(), rc.height());
@@ -777,7 +777,7 @@ public class CoverpageManager {
 							@Override
 							public void run() {
 								boolean isCustomCover = false;
-								final String sBookFName = StrUtils.getNonEmptyStr(file.filename, false);
+								final String sBookFName = StrUtils.getNonEmptyStr(file.getFilename(), false);
 								CRC32 crc = new CRC32();
 								crc.update(sBookFName.getBytes());
 								final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
@@ -817,7 +817,7 @@ public class CoverpageManager {
 											sTitle = StrUtils.getNonEmptyStr(file.title, true);
 											sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
 											if (StrUtils.isEmptyStr(sTitle))
-												sTitle = StrUtils.stripExtension(file.filename);
+												sTitle = StrUtils.stripExtension(file.getFilename());
 											Bitmap bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
 													buffer.getWidth(), buffer.getHeight());
 											item = new ImageItem(file, bmp.getWidth(), bmp.getHeight());

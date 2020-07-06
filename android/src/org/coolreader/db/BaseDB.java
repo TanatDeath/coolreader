@@ -227,7 +227,7 @@ public abstract class BaseDB {
 	public void beginReading() {
 		if (mDB != null) {
 			if (!mDB.inTransaction()) {
-				vlog.v("starting readonly transaction");
+				vlog.v("starting transaction");
 				mDB.beginTransaction();
 			}
 		}
@@ -238,7 +238,8 @@ public abstract class BaseDB {
 	 */
 	public void endReading() {
 		if (mDB.inTransaction() && !changed) {
-			vlog.v("ending readonly transaction");
+			vlog.v("ending transaction");
+			mDB.setTransactionSuccessful();
 			mDB.endTransaction();
 		}
 	}

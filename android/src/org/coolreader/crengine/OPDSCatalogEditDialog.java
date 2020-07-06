@@ -197,7 +197,7 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		proxyunameEdit = (EditText) view.findViewById(R.id.edt_proxy_uname);
 		proxypasswEdit = (EditText) view.findViewById(R.id.edt_proxy_passw);
 		onionDefProxyChb = (CheckBox) view.findViewById(R.id.chb_onion_def_proxy);
-		nameEdit.setText(mItem.filename);
+		nameEdit.setText(mItem.getFilename());
 		urlEdit.setText(mItem.getOPDSUrl());
 		usernameEdit.setText(mItem.username);
 		passwordEdit.setText(mItem.password);

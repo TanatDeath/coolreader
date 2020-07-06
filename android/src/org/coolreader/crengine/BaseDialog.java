@@ -119,6 +119,16 @@ public class BaseDialog extends Dialog {
 		if (activity instanceof CoolReader) {
 			CoolReader cr = (CoolReader)activity;
 			cr.getmBaseDialog().put(this.dlgName,this);
+			Window wnd = cr.getWindow();
+			if (wnd != null) {
+				WindowManager.LayoutParams attrs = wnd.getAttributes();
+				Window wnd2 = getWindow();
+				if (wnd2 != null) {
+					WindowManager.LayoutParams attrs2 = wnd2.getAttributes();
+					attrs2.screenBrightness = attrs.screenBrightness;
+					wnd2.setAttributes(attrs2);
+				}
+			}
 		}
 	}
 

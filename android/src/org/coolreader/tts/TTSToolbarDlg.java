@@ -11,6 +11,7 @@ import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
+import org.coolreader.crengine.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReaderView;
@@ -32,14 +33,17 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Browser;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -55,6 +59,7 @@ import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import com.s_trace.motion_watchdog.HandlerThread;
 import com.s_trace.motion_watchdog.MotionWatchdogHandler;
@@ -64,7 +69,7 @@ import static android.media.session.MediaSession.*;
 public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	public PopupWindow mWindow;
 	public View mAnchor;
-	CoolReader mCoolReader;
+	public CoolReader mCoolReader;
 	String mLogFileRoot = "";
 	int mForceTTSKoef = 0;
 	ReaderView mReaderView;
@@ -85,6 +90,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	ImageView ivFreqUp;
 	SeekBar sbSpeed;
 	SeekBar sbVolume;
+	TextView lblMotionWd;
 	private HandlerThread mMotionWatchdog;
 	private HandlerThread mTimerHandler;
 	private static String CHANNEL_ID = "CoolReader_channel";
@@ -452,6 +458,32 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		//dlg.update();
 		return dlg;
 	}
+
+	public void handleTick(int timeLeft, int currentVolume) {
+		BackgroundThread.instance().postBackground(new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						if (lblMotionWd != null) {
+							if (timeLeft>0) {
+								String left = String.valueOf(timeLeft/60000);
+								if (timeLeft<60000) left = "< 1";
+								lblMotionWd.setText(mCoolReader.getString(R.string.wd_time_left, left));
+								return;
+							}
+							if (currentVolume == 0) {
+								mCoolReader.showToast(R.string.wd_still);
+								return;
+							}
+							lblMotionWd.setText(mCoolReader.getString(R.string.wd_decrease_vol, String.valueOf(currentVolume), String.valueOf(currentVolume-1)));
+						}
+					}
+				}, 200);
+			}
+		});
+	}
 	
 	private Runnable onCloseListener;
 	public void setOnCloseListener(Runnable handler) {
@@ -623,7 +655,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			return;
 		}
 		timeout = timeout * 60 * 1000; // Convert minutes to msecs
-
 		mMotionWatchdog = new HandlerThread("MotionWatchdog");
 		mMotionWatchdog.start();
 		new MotionWatchdogHandler(this, mCoolReader, mMotionWatchdog, timeout);
@@ -781,6 +812,15 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		c.setAlpha(130);
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.tts_toolbar, null));
+		lblMotionWd = (TextView) panel.findViewById(R.id.lbl_motion_wd);
+		lblMotionWd.setText(R.string.wd_sett);
+		lblMotionWd.setPaintFlags(lblMotionWd.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+		lblMotionWd.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_MOTION_TIMEOUT);
+			}
+		});
 		playPauseButton = (ImageButton)panel.findViewById(R.id.tts_play_pause);
 		playPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)

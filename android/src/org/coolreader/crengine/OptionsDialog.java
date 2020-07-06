@@ -608,6 +608,88 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_requested_dom_level_legacy, R.string.options_requested_dom_level_newest
 	};
 
+	int[] mSecGroupCommon = new int[] {
+			0, 1, 2, 3, 4, 5, 6, 7, 8
+	};
+
+	int[] mSecGroupCommonTitles = new int[] {
+		R.string.folder_name_books_by_author,
+		R.string.folder_name_books_by_series,
+		R.string.folder_name_books_by_genre,
+		R.string.folder_name_books_by_bookdate,
+		R.string.folder_name_books_by_docdate,
+		R.string.folder_name_books_by_publyear,
+		R.string.folder_name_books_by_filedate,
+		R.string.folder_name_books_by_rating,
+		R.string.folder_name_books_by_state
+	};
+
+	int[] mSecGroupCommonTitlesAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	int[] mSecGroupCommon2 = new int[] {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+	};
+
+	int[] mSecGroupCommonTitles2 = new int[] {
+			R.string.same_as_common,
+			R.string.folder_name_books_by_author,
+			R.string.folder_name_books_by_series,
+			R.string.folder_name_books_by_genre,
+			R.string.folder_name_books_by_bookdate,
+			R.string.folder_name_books_by_docdate,
+			R.string.folder_name_books_by_publyear,
+			R.string.folder_name_books_by_filedate,
+			R.string.folder_name_books_by_rating,
+			R.string.folder_name_books_by_state
+	};
+
+	int[] mSecGroupCommonTitlesAddInfos2 = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	int[] mSecGroupCommon3 = new int[] {
+			0, 1, 2, 3, 4, 5, 6
+	};
+
+	int[] mSecGroupCommonTitles3 = new int[] {
+			R.string.same_as_common,
+			R.string.folder_name_books_by_author,
+			R.string.folder_name_books_by_series,
+			R.string.folder_name_books_by_genre,
+			R.string.folder_name_books_by_date,
+			R.string.folder_name_books_by_rating,
+			R.string.folder_name_books_by_state
+	};
+
+	int[] mSecGroupCommonTitlesAddInfos3 = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -2266,6 +2348,30 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ListOption(mOwner, getString(R.string.browser_tap_option_longtap), PROP_APP_FILE_BROWSER_LONGTAP_ACTION,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("1").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_common), PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon, mSecGroupCommonTitles, mSecGroupCommonTitlesAddInfos).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_author), PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_series), PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_genres), PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_rating), PROP_APP_FILE_BROWSER_SEC_GROUP_RATING,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_state), PROP_APP_FILE_BROWSER_SEC_GROUP_STATE,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_dates), PROP_APP_FILE_BROWSER_SEC_GROUP_DATES,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon3, mSecGroupCommonTitles3, mSecGroupCommonTitlesAddInfos3).setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.sec_group_search), PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -2285,6 +2391,22 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.mi_book_browser_simple_mode_add_info));
 			this.updateFilteredMark(getString(R.string.mi_book_browser_max_group_size), PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
 					getString(R.string.mi_book_browser_max_group_size_add_info));
+			this.updateFilteredMark(getString(R.string.sec_group_common), PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_author), PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_dates), PROP_APP_FILE_BROWSER_SEC_GROUP_DATES,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_genres), PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_rating), PROP_APP_FILE_BROWSER_SEC_GROUP_RATING,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_search), PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_series), PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES,
+					getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(getString(R.string.sec_group_state), PROP_APP_FILE_BROWSER_SEC_GROUP_STATE,
+					getString(R.string.option_add_info_empty_text));
 			this.updateFilteredMark(getString(R.string.browser_tap_option_tap), PROP_APP_FILE_BROWSER_TAP_ACTION,
 					getString(R.string.option_add_info_empty_text));
 			this.updateFilteredMark(getString(R.string.browser_tap_option_longtap), PROP_APP_FILE_BROWSER_LONGTAP_ACTION,

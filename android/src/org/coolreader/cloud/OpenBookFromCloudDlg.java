@@ -354,7 +354,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 					CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
 				} else {
 					String sFolder=getFolderText();
-					CloudAction.dbxDownloadFile(mCoolReader, OpenBookFromCloudDlg.this, sFolder, md);
+					CloudAction.dbxDownloadFile(mCoolReader, OpenBookFromCloudDlg.this, sFolder, md, false);
 					dismiss();
 				}
 			return true;
@@ -430,7 +430,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 					CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
 				} else {
 					String sFolder=getFolderText();
-					CloudAction.yndDownloadFile(mCoolReader, OpenBookFromCloudDlg.this, sFolder, md);
+					CloudAction.yndDownloadFile(mCoolReader, OpenBookFromCloudDlg.this, sFolder, md, false);
 					dismiss();
 				}
 			return true;
@@ -596,7 +596,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 				}, 5000);
 				listUpdated();
 				String sFolder=mYNDList.getFolderText();
-				CloudAction.yndSaveCurBookThenLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
+				CloudAction.yndSaveCurBookThenLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "", false);
 			}
 		});
 		return mYNDList;
