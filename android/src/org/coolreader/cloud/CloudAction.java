@@ -79,6 +79,7 @@ public class CloudAction {
     public String param3; // param(s) passed to an action...
     public String bookCRC; // Book's CRC
     public boolean mQuiet;
+    public boolean mErrorQuiet;
     public com.dropbox.core.v2.files.Metadata mDbxMd; // metadata for dropbox
     public CloudFileInfo mYndMd; // metadata for yandex
     public String mFile;
@@ -90,6 +91,15 @@ public class CloudAction {
         param = "";
         mActivity = cr;
         mQuiet = bQuiet;
+        mErrorQuiet = false;
+    }
+
+    public CloudAction(CoolReader cr, int a, boolean bQuiet, boolean bErrorQuiet) {
+        action = a;
+        param = "";
+        mActivity = cr;
+        mQuiet = bQuiet;
+        mErrorQuiet = bErrorQuiet;
     }
 
     public CloudAction(CoolReader cr, int a, String p, boolean bQuiet) {
@@ -97,6 +107,7 @@ public class CloudAction {
         param = p;
         mActivity = cr;
         mQuiet = bQuiet;
+        mErrorQuiet = false;
     }
 
     public CloudAction(CoolReader cr, int a, String p, String p2, boolean bQuiet) {
@@ -105,6 +116,7 @@ public class CloudAction {
         mActivity = cr;
         param2 = p2;
         mQuiet = bQuiet;
+        mErrorQuiet = false;
     }
 
     public CloudAction(CoolReader cr, int a, String p, com.dropbox.core.v2.files.Metadata md, String sFile, boolean bQuiet) {
@@ -114,6 +126,7 @@ public class CloudAction {
         mActivity = cr;
         mFile = sFile;
         mQuiet = bQuiet;
+        mErrorQuiet = false;
     }
 
     public CloudAction(CoolReader cr, int a, String p, CloudFileInfo md, String sFile, boolean bQuiet) {
@@ -123,6 +136,7 @@ public class CloudAction {
         mActivity = cr;
         mFile = sFile;
         mQuiet = bQuiet;
+        mErrorQuiet = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -279,11 +293,12 @@ public class CloudAction {
             else Log.e(e.getClass().getName(), "Cloud operation error: "+res, e);
         final CoolReader crf = cr;
         final String resf = res;
-        BackgroundThread.instance().postGUI(new Runnable() {
-            @Override
-            public void run() {
-                if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf, true);
-            }}, 200);
+        if (!a.mCurAction.mErrorQuiet)
+            BackgroundThread.instance().postGUI(new Runnable() {
+                @Override
+                public void run() {
+                    if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf, true);
+                }}, 200);
     }
 
     public static void yndOpenBookDialog(final CoolReader cr, boolean withSaveOption) {
@@ -312,19 +327,19 @@ public class CloudAction {
         }
     }
 
-    public static void yndSaveJsonFile(final CoolReader cr, String sFName, String prettyJson, boolean bQuiet) {
+    public static void yndSaveJsonFile(final CoolReader cr, String sFName, String prettyJson, boolean bQuiet, boolean bErrorQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true);
+            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true, bErrorQuiet);
             al.add(ca1);
-            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_CREATE_CR_FOLDER, true);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_CREATE_CR_FOLDER, true, bErrorQuiet);
             al.add(ca2);
-            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_SAVE_TO_FILE_GET_LINK, true);
+            CloudAction ca3 = new CloudAction(cr, CloudAction.YND_SAVE_TO_FILE_GET_LINK, true, bErrorQuiet);
             ca3.param = sFName;
             al.add(ca3);
-            CloudAction ca4 = new CloudAction(cr, CloudAction.YND_SAVE_STRING_TO_FILE, bQuiet);
+            CloudAction ca4 = new CloudAction(cr, CloudAction.YND_SAVE_STRING_TO_FILE, bQuiet, bErrorQuiet);
             ca4.param = prettyJson;
             al.add(ca4);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {

@@ -121,7 +121,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								@Override
 								public void onBookInfoLoaded(BookInfo bookInfo) {
 									BookInfo bi = new BookInfo(item);
-									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered);
+									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered, null);
 								}
 							});
 							return true;
@@ -276,7 +276,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 											@Override
 											public void onFileInfoLoaded(final FileInfo fileInfo) {
 												if (fileInfo!=null) {
-													mActivity.showBookInfo(new BookInfo(fileInfo),BookInfoDialog.BOOK_INFO, currDirectory);
+													mActivity.showBookInfo(new BookInfo(fileInfo),BookInfoDialog.BOOK_INFO, currDirectory, null);
 												} else {
 													mActivity.showToast(R.string.could_not_find_by_link);
 													mActivity.showOPDSBookInfo(finalItem, FileBrowser.this, currDirectory);
@@ -318,7 +318,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								@Override
 								public void onBookInfoLoaded(BookInfo bookInfo) {
 									BookInfo bi = new BookInfo(item);
-									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered);
+									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered, null);
 								}
 							});
 							return true;
@@ -614,7 +614,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					@Override
 					public void onBookInfoLoaded(BookInfo bookInfo) {
 						BookInfo bi = new BookInfo(selectedItem);
-						mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, null);
+						mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, null, null);
 					}
 				});
 			}
@@ -1463,7 +1463,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 											dir2.setFile(bif.getFileInfo());
 											mActivity.directoryUpdated(dir2, bif.getFileInfo());
 										}
-										mActivity.showBookInfo(bif, BookInfoDialog.OPDS_FINAL_INFO, currDirectory);
+										mActivity.showBookInfo(bif, BookInfoDialog.OPDS_FINAL_INFO, currDirectory, fileOrDir);
 									}
 								});
 						}
@@ -2057,7 +2057,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 									//mActivity.showToast(item.annotation);
 									//log.v("BOOKNF annotation:"+item.annotation);
                                     BookInfo bi = new BookInfo(item);
-									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered);
+									mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered, null);
 								}
 							});
 						}

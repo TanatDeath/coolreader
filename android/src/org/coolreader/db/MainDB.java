@@ -1751,6 +1751,7 @@ public class MainDB extends BaseDB {
 	
 	public boolean loadTitleList(FileInfo parent) {
 		Log.i("cr3", "loadTitleList()");
+		execSQLIgnoreErrors("UPDATE book SET title=filename WHERE title is null");
 		// gather missed stats
 		Cursor rsCnt = null;
 		Cursor rs = null;
@@ -2766,7 +2767,9 @@ public class MainDB extends BaseDB {
 				add("folder_fk", getFolderId(newValue.path), getFolderId(oldValue.path));
 				add("filename", newValue.getFilename(), oldValue.getFilename());
 				add("arcname", newValue.arcname, oldValue.arcname);
-				add("title", newValue.title, oldValue.title);
+				String sTitle = newValue.title;
+				if (StrUtils.isEmptyStr(sTitle)) sTitle = newValue.getFilename();
+				add("title", sTitle, oldValue.title);
 				add("series_fk", getSeriesId(newValue.series), getSeriesId(oldValue.series));
 				add("series_number", (long) newValue.seriesNumber, (long) oldValue.seriesNumber);
 				add("format", fromFormat(newValue.format), fromFormat(oldValue.format));

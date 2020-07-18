@@ -15,6 +15,7 @@
 #define __LV_REND_H_INCLUDED__
 
 #include "lvtinydom.h"
+#include "textlang.h"
 
 // Current direction, from dir="ltr" or dir="rtl" element attribute
 // Should map directly to the RENDER_RECT_FLAG_DIRECTION_* below
@@ -97,7 +98,6 @@ public:
     void generateEmbeddedFloatsFromFootprints( int final_width );
     void generateEmbeddedFloatsFromFloatIds( ldomNode * node, int final_width );
     void forwardOverflowingFloat( int x, int y, int w, int h, bool r, ldomNode * node );
-    int getTopShiftX(int final_width, bool get_right_shift=false);
 
     BlockFloatFootprint( FlowState * fl=NULL, int dleft=0, int dtop=0, bool noclearownfloats=false ) :
         flow(fl), d_left(dleft), d_top(dtop), no_clear_own_floats(noclearownfloats),
@@ -118,10 +118,10 @@ void initFormatData( ldomNode * node );
 /// initializes rendering method for node
 int initRendMethod( ldomNode * node, bool recurseChildren, bool allowAutoboxing );
 /// converts style to text formatting API flags
-lUInt32 styleToTextFmtFlags( const css_style_ref_t & style, lUInt32 oldflags, int direction=REND_DIRECTION_UNSET );
+int styleToTextFmtFlags( const css_style_ref_t & style, int oldflags, int direction=REND_DIRECTION_UNSET );
 /// renders block as single text formatter object
-void renderFinalBlock( ldomNode * node, LFormattedText * txform, RenderRectAccessor * fmt, lUInt32 & flags,
-                       int indent, int line_h, int valign_dy=0, bool * is_link_start=NULL );
+void renderFinalBlock( ldomNode * node, LFormattedText * txform, RenderRectAccessor * fmt, int & flags,
+                       int indent, int line_h, TextLangCfg * lang_cfg=NULL, int valign_dy=0, bool * is_link_start=NULL );
 /// renders block which contains subblocks (with gRenderBlockRenderingFlags as flags)
 int renderBlockElement( LVRendPageContext & context, ldomNode * enode, int x, int y, int width, int direction=REND_DIRECTION_UNSET, int * baseline=NULL );
 /// renders block which contains subblocks
@@ -145,7 +145,8 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * node, int x0, int y0, int dx,
 //   minWidth: width with a wrap on all spaces (no hyphenation), so width taken by the longest word
 // full function for recursive use:
 void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direction, bool ignorePadding, int rendFlags,
-            int &curMaxWidth, int &curWordWidth, bool &collapseNextSpace, int &lastSpaceWidth, int indent, bool isStartNode=false);
+            int &curMaxWidth, int &curWordWidth, bool &collapseNextSpace, int &lastSpaceWidth,
+            int indent, TextLangCfg * lang_cfg, bool isStartNode=false);
 // simpler function for first call:
 void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direction=REND_DIRECTION_UNSET, bool ignorePadding=false, int rendFlags=0);
 

@@ -65,20 +65,18 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
 
-	public static boolean PRO_FEATURES = false;
+	public static boolean PRO_FEATURES = true;
 	public static boolean PREMIUM_FEATURES = PRO_FEATURES;
-	public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
-	//public static String MAIN_CLASS_NAME = "org.knownreader.premium";
+	//public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
+	public static String MAIN_CLASS_NAME = "org.knownreader.premium";
 
 //	@Override
 //	public boolean onCreateOptionsMenu(Menu menu) {
@@ -2442,7 +2440,7 @@ public class BaseActivity extends Activity implements Settings {
 			
 			props.setProperty(ReaderView.PROP_MIN_FILE_SIZE_TO_CACHE, "100000");
 			props.setProperty(ReaderView.PROP_FORCED_MIN_FILE_SIZE_TO_CACHE, "32768");
-			props.applyDefault(ReaderView.PROP_HYPHENATION_DICT, Engine.HyphDict.RUSSIAN.toString());
+			props.applyDefault(ReaderView.PROP_HYPHENATION_DICT, Engine.HyphDict.RUSSIAN.name);
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SIMPLE_MODE, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE, "8");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON, "0");
@@ -2453,6 +2451,11 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_STATE, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_DATES, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH, "0");
+
+			props.applyDefault(ReaderView.PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, "0");
+			props.applyDefault(ReaderView.PROP_TEXTLANG_HYPHENATION_ENABLED, "1");
+			props.applyDefault(ReaderView.PROP_TEXTLANG_HYPH_SOFT_HYPHENS_ONLY, "0");
+			props.applyDefault(ReaderView.PROP_TEXTLANG_HYPH_FORCE_ALGORITHMIC, "0");
 
 			props.applyDefault(ReaderView.PROP_STATUS_LOCATION, Settings.VIEWER_STATUS_PAGE);
 			//props.applyDefault(ReaderView.PROP_TOOLBAR_LOCATION, DeviceInfo.getSDKLevel() < DeviceInfo.HONEYCOMB ? Settings.VIEWER_TOOLBAR_NONE : Settings.VIEWER_TOOLBAR_SHORT_SIDE);

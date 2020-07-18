@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -507,8 +508,18 @@ public class ExternalDocCameDialog extends BaseDialog {
 							InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
 							arcFontNames = getFontNames(is1);
 							if (arcFontNames.size()==0) {
-								InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-								((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
+								final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+								BackgroundThread.instance().postBackground(new Runnable() {
+									@Override
+									public void run() {
+										BackgroundThread.instance().postGUI(new Runnable() {
+											@Override
+											public void run() {
+												((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
+											}
+										}, 500);
+									}
+								});
 								onPositiveButtonClick();
 							} else {
 								final ArrayList<String> arcFontNamesF = arcFontNames;
@@ -527,8 +538,18 @@ public class ExternalDocCameDialog extends BaseDialog {
 								}, new Runnable() {
 									@Override
 									public void run() {
-										InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-										((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
+										final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+										BackgroundThread.instance().postBackground(new Runnable() {
+											@Override
+											public void run() {
+												BackgroundThread.instance().postGUI(new Runnable() {
+													@Override
+													public void run() {
+														((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
+													}
+												}, 500);
+											}
+										});
 										onPositiveButtonClick();
 									}
 								});
@@ -536,15 +557,47 @@ public class ExternalDocCameDialog extends BaseDialog {
 						} catch (Exception e) {
 						}
 					} else {
-						((CoolReader) activity).loadDocumentFromUriExt(uri, sUri);
+						BackgroundThread.instance().postBackground(new Runnable() {
+							@Override
+							public void run() {
+								BackgroundThread.instance().postGUI(new Runnable() {
+									@Override
+									public void run() {
+										((CoolReader) activity).loadDocumentFromUriExt(uri, sUri);
+									}
+								}, 500);
+							}
+						});
 						onPositiveButtonClick();
 					}
 				}
 				else {
-					if ((istream != null) && (bThisIsHTML))
-						((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri);
-					if ((istreamTxt != null) && (!bThisIsHTML))
-						((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri);
+					if ((istream != null) && (bThisIsHTML)) {
+						BackgroundThread.instance().postBackground(new Runnable() {
+							@Override
+							public void run() {
+								BackgroundThread.instance().postGUI(new Runnable() {
+									@Override
+									public void run() {
+										((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri);
+									}
+								}, 500);
+							}
+						});
+					}
+					if ((istreamTxt != null) && (!bThisIsHTML)) {
+						BackgroundThread.instance().postBackground(new Runnable() {
+							@Override
+							public void run() {
+								BackgroundThread.instance().postGUI(new Runnable() {
+									@Override
+									public void run() {
+										((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri);
+									}
+								}, 500);
+							}
+						});
+					}
 					onPositiveButtonClick();
 				}
 			}
@@ -588,7 +641,17 @@ public class ExternalDocCameDialog extends BaseDialog {
 												DocConvertDialog dlgConv = new DocConvertDialog((CoolReader)activity, fName);
 												dlgConv.show();
 											} else {
-												((CoolReader) activity).loadDocumentExt(fName, sUri);
+												BackgroundThread.instance().postBackground(new Runnable() {
+													@Override
+													public void run() {
+														BackgroundThread.instance().postGUI(new Runnable() {
+															@Override
+															public void run() {
+																((CoolReader) activity).loadDocumentExt(fName, sUri);
+															}
+														}, 500);
+													}
+												});
 											}
 											onPositiveButtonClick();
 										} catch (Exception e) {
@@ -606,11 +669,23 @@ public class ExternalDocCameDialog extends BaseDialog {
 		tvExistingPath = (TextView)view.findViewById(R.id.existing_path);
 		tvExistingPath.setText(sExistingName);
 		btnOpenExisting = (Button)view.findViewById(R.id.btn_open_existing);
+		Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
+		btnOpenExisting.setTypeface(boldTypeface);
 		setDashedButton(btnOpenExisting);
 		btnOpenExisting.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				((CoolReader) activity).loadDocumentExt(sExistingName, sUri);
+				BackgroundThread.instance().postBackground(new Runnable() {
+					@Override
+					public void run() {
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								((CoolReader) activity).loadDocumentExt(sExistingName, sUri);
+							}
+						}, 500);
+					}
+				});
 				onPositiveButtonClick();
 			}
 		});

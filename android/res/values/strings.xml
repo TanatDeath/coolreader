@@ -1189,4 +1189,11 @@
     <string name="pos_this_device">This device</string>
     <string name="pos_date_sort">By date</string>
     <string name="pos_percent_sort">By value</string>
+    <string name="options_style_multilang">Support for multilingual documents</string>
+    <string name="options_style_enable_hyphenation">Enable hyphenation</string>
+    <string name="vert_margin_control">Top and bottom margins:</string>
+    <string name="horz_margin_control">Left and right margins:</string>
+    <string name="font_size_control">Font size:</string>
+    <string name="link">link</string>
+    <string name="category">category / genre</string>
 </resources>

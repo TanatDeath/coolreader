@@ -399,7 +399,7 @@ public class FileInfo {
 			size = (int)f.length();
 			domVersion = Engine.DOM_VERSION_CURRENT;
 			blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
-			if (StrUtils.isEmptyStr(title)) title = filename;
+			//if (StrUtils.isEmptyStr(title)) title = filename; // Dont work properly, think later
 			//if (flags == 0) flags = DONT_USE_DOCUMENT_STYLES_FLAG;
 		} else {
 			filename = f.getName();
@@ -1327,7 +1327,7 @@ public class FileInfo {
 		if (eq(this.filename, filename))
 			return false;
 		this.filename = filename;
-		if (StrUtils.isEmptyStr(this.title)) this.title = filename;
+		//if (StrUtils.isEmptyStr(this.title)) this.title = filename; // dont work properly, think later
 		return true;
 	}
 	

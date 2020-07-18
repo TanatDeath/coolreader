@@ -19,6 +19,7 @@
 #include "../include/lvstyles.h"
 #include "../include/lvrend.h"
 #include "../include/lvstsheet.h"
+#include "../include/textlang.h"
 
 #include "../include/wolutil.h"
 #include "../include/crtxtenc.h"
@@ -198,7 +199,7 @@ LVDocView::LVDocView(int bitsPerPixel, bool noDefaultDocument) :
 
     if (!noDefaultDocument)
         createDefaultDocument(cs16("No document"), lString16(
-                    L"Welcome to CoolReader! Please select file to open"));
+                    L"Welcome to KnownReader! Please select file to open"));
 
     m_font_size = scaleFontSizeForDPI(m_requested_font_size);
     gRootFontSize = m_font_size; // stored as global (for 'rem' css unit)
@@ -429,7 +430,8 @@ void LVDocView::setPageMargins(lvRect rc) {
     if (floatingPunct) {
         m_font = fontMan->GetFont(m_font_size, 400 + LVRendGetFontEmbolden(),
                 false, DEFAULT_FONT_FAMILY, m_defaultFontFace);
-        align = m_font->getVisualAligmentWidth() / 2;
+        if (!m_font.isNull())
+            align = m_font->getVisualAligmentWidth() / 2;
     }
     if (align > rc.right)
         align = rc.right;
@@ -1098,14 +1100,14 @@ void LVDocView::drawCoverTo(LVDrawBuf * drawBuf, lvRect & rc) {
 	LFormattedText txform;
 	if (!authors.empty())
 		txform.AddSourceLine(authors.c_str(), authors.length(), 0xFFFFFFFF,
-				0xFFFFFFFF, author_fnt.get(), LTEXT_ALIGN_CENTER,
+				0xFFFFFFFF, author_fnt.get(), NULL, LTEXT_ALIGN_CENTER,
 				author_fnt->getHeight() * 18 / 16);
 	txform.AddSourceLine(title.c_str(), title.length(), 0xFFFFFFFF, 0xFFFFFFFF,
-			title_fnt.get(), LTEXT_ALIGN_CENTER,
+			title_fnt.get(), NULL, LTEXT_ALIGN_CENTER,
 			title_fnt->getHeight() * 18 / 16);
 	if (!series.empty())
 		txform.AddSourceLine(series.c_str(), series.length(), 0xFFFFFFFF,
-				0xFFFFFFFF, series_fnt.get(), LTEXT_ALIGN_CENTER,
+				0xFFFFFFFF, series_fnt.get(), NULL, LTEXT_ALIGN_CENTER,
 				series_fnt->getHeight() * 18 / 16);
 	int title_w = rc.width() - rc.width() / 4;
 	int h = txform.Format((lUInt16)title_w, (lUInt16)rc.height());
@@ -4378,6 +4380,8 @@ bool LVDocView::LoadDocument(const lChar16 * fname, bool metadataOnly) {
 		gDOMVersionRequested = record->getDOMversion();
 		m_props->setInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
 	}
+	if (record)
+		gDOMVersionRequested = record->getDOMversion();
 
 	if (loadDocumentInt(stream, metadataOnly)) {
 		m_filename = lString16(fname);
@@ -5280,10 +5284,12 @@ bool LVDocView::ParseDocument() {
 		if (m_doc_props->getStringDef(DOC_PROP_TITLE, "").empty()) {
 			m_doc_props->setString(DOC_PROP_AUTHORS, extractDocAuthors(m_doc));
 			m_doc_props->setString(DOC_PROP_TITLE, extractDocTitle(m_doc));
-			if (txt_autodet_lang.length() > 0)
+			if (txt_autodet_lang.length() > 0)      // true only for doc_format_txt
 				m_doc_props->setString(DOC_PROP_LANGUAGE, txt_autodet_lang);
 			else
 				m_doc_props->setString(DOC_PROP_LANGUAGE, extractDocLanguage(m_doc));
+			m_doc_props->setString(DOC_PROP_KEYWORDS, extractDocKeywords(m_doc));
+			m_doc_props->setString(DOC_PROP_DESCRIPTION, extractDocDescription(m_doc));
             int seriesNumber = -1;
             lString16 seriesName = extractDocSeries(m_doc, &seriesNumber);
             m_doc_props->setString(DOC_PROP_SERIES_NAME, seriesName);
@@ -6718,9 +6724,10 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
     else if (fs > MAX_STATUS_FONT_SIZE)
         fs = MAX_STATUS_FONT_SIZE;
 	props->setIntDef(PROP_STATUS_FONT_SIZE, fs);
+    props->limitValueList(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, bool_options_def_false, 2);
+    props->limitValueList(PROP_TEXTLANG_HYPHENATION_ENABLED, bool_options_def_true, 2);
 	lString16 hyph = props->getStringDef(PROP_HYPHENATION_DICT,
 			DEF_HYPHENATION_DICT);
-#if !defined(ANDROID)
 	HyphDictionaryList * dictlist = HyphMan::getDictList();
 	if (dictlist) {
 		if (dictlist->find(hyph))
@@ -6729,7 +6736,6 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 			props->setStringDef(PROP_HYPHENATION_DICT, lString16(
 					HYPH_DICT_ID_ALGORITHM));
 	}
-#endif
 	props->setIntDef(PROP_STATUS_LINE, 0);
 	props->setIntDef(PROP_SHOW_TITLE, 1);
 	props->setIntDef(PROP_SHOW_TIME, 1);
@@ -6995,21 +7001,22 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 fontSize = MAX_STATUS_FONT_SIZE;
             setStatusFontSize(fontSize);//cr_font_sizes
             value = lString16::itoa(fontSize);
-#if !defined(ANDROID)
         } else if (name == PROP_HYPHENATION_DICT) {
-            // hyphenation dictionary
-            lString16 id = props->getStringDef(PROP_HYPHENATION_DICT,
-                                               DEF_HYPHENATION_DICT);
-            CRLog::debug("PROP_HYPHENATION_DICT = %s", LCSTR(id));
-            HyphDictionaryList * list = HyphMan::getDictList();
-            HyphDictionary * curr = HyphMan::getSelectedDictionary();
-            if (list) {
-                if (!curr || curr->getId() != id) {
-                    //if (
-                    CRLog::debug("Changing hyphenation to %s", LCSTR(id));
-                    list->activate(id);
-                    //)
-                    REQUEST_RENDER("propsApply hyphenation dict")
+            if (!TextLangMan::getEmbeddedLangsEnabled()) {
+                // hyphenation dictionary
+                lString16 id = props->getStringDef(PROP_HYPHENATION_DICT,
+                                                   DEF_HYPHENATION_DICT);
+                CRLog::debug("PROP_HYPHENATION_DICT = %s", LCSTR(id));
+                HyphDictionaryList * list = HyphMan::getDictList();
+                HyphDictionary * curr = HyphMan::getSelectedDictionary();
+                if (list) {
+                    if (!curr || curr->getId() != id) {
+                        //if (
+                        CRLog::debug("Changing hyphenation to %s", LCSTR(id));
+                        list->activate(id);
+                        //)
+                        REQUEST_RENDER("propsApply hyphenation dict")
+                    }
                 }
             }
         } else if (name == PROP_HYPHENATION_LEFT_HYPHEN_MIN) {
@@ -7030,7 +7037,40 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 HyphMan::setTrustSoftHyphens(trustSoftHyphens);
                 REQUEST_RENDER("propsApply hyphenation trust_soft_hyphens")
             }
-#endif
+        } else if (name == PROP_TEXTLANG_MAIN_LANG) {
+            if (TextLangMan::getEmbeddedLangsEnabled()) {
+                lString16 lang = props->getStringDef(PROP_TEXTLANG_MAIN_LANG,
+                                                     TEXTLANG_DEFAULT_MAIN_LANG);
+                if (lang != TextLangMan::getMainLang()) {
+                    TextLangMan::setMainLang(lang);
+                    REQUEST_RENDER("propsApply textlang main_lang")
+                }
+            }
+        } else if (name == PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED) {
+            bool enabled = props->getIntDef(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, TEXTLANG_DEFAULT_EMBEDDED_LANGS_ENABLED);
+            if ( enabled != TextLangMan::getEmbeddedLangsEnabled() ) {
+                TextLangMan::setEmbeddedLangsEnabled( enabled );
+                REQUEST_RENDER("propsApply textlang embedded_langs_enabled")
+            }
+        } else if (name == PROP_TEXTLANG_HYPHENATION_ENABLED) {
+            bool enabled = props->getIntDef(PROP_TEXTLANG_HYPHENATION_ENABLED,
+												TEXTLANG_DEFAULT_HYPHENATION_ENABLED);
+            if (enabled != TextLangMan::getHyphenationEnabled()) {
+                TextLangMan::setHyphenationEnabled(enabled);
+                REQUEST_RENDER("propsApply textlang hyphenation_enabled")
+            }
+        } else if (name == PROP_TEXTLANG_HYPH_SOFT_HYPHENS_ONLY) {
+            bool enabled = props->getIntDef(PROP_TEXTLANG_HYPH_SOFT_HYPHENS_ONLY, TEXTLANG_DEFAULT_HYPH_SOFT_HYPHENS_ONLY);
+            if ( enabled != TextLangMan::getHyphenationSoftHyphensOnly() ) {
+                TextLangMan::setHyphenationSoftHyphensOnly( enabled );
+                REQUEST_RENDER("propsApply textlang hyphenation_soft_hyphens_only")
+            }
+        } else if (name == PROP_TEXTLANG_HYPH_FORCE_ALGORITHMIC) {
+            bool enabled = props->getIntDef(PROP_TEXTLANG_HYPH_FORCE_ALGORITHMIC, TEXTLANG_DEFAULT_HYPH_FORCE_ALGORITHMIC);
+            if ( enabled != TextLangMan::getHyphenationForceAlgorithmic() ) {
+                TextLangMan::setHyphenationForceAlgorithmic( enabled );
+                REQUEST_RENDER("propsApply textlang hyphenation_force_algorithmic")
+            }
         } else if (name == PROP_INTERLINE_SPACE) {
             int interlineSpace = props->getIntDef(PROP_INTERLINE_SPACE,
                                                   cr_interline_spaces[0]);
@@ -7253,7 +7293,7 @@ bool SimpleTitleFormatter::splitLines(const char * delimiter) {
     return measure();
 }
 bool SimpleTitleFormatter::format(int fontSize) {
-    _font = fontMan->GetFont(fontSize, _bold ? 800 : 400, _italic, css_ff_sans_serif, _fontFace, -1);
+    _font = fontMan->GetFont(fontSize, _bold ? 800 : 400, _italic, css_ff_sans_serif, _fontFace, 0, -1);
     _lineHeight = _font->getHeight() * 120 / 100;
     _lines.clear();
     int singleLineWidth = _font->getTextWidth(_text.c_str(), _text.length());
@@ -7407,7 +7447,7 @@ void LVDrawBookCover(LVDrawBuf & buf, LVImageSourceRef image, lString8 fontFace,
     buf.FillRect(rc3, palette->vline);
 
 
-	LVFontRef fnt = fontMan->GetFont(16, 400, false, css_ff_sans_serif, fontFace, -1); // = fontMan
+	LVFontRef fnt = fontMan->GetFont(16, 400, false, css_ff_sans_serif, fontFace, 0, -1); // = fontMan
 	if (!fnt.isNull()) {
 
 		rc.left += rc.width() / 10;

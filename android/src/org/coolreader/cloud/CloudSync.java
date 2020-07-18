@@ -259,7 +259,7 @@ public class CloudSync {
             sFName = sFName + ".txt";
             String sText = "";
             for (String s: arrSFull) sText = sText + s + "\n";
-            CloudAction.yndSaveJsonFile(cr, sFName, sText, bQuiet);
+            CloudAction.yndSaveJsonFile(cr, sFName, sText, bQuiet, false);
         }
     }
 
@@ -471,15 +471,15 @@ public class CloudSync {
 
     public static void saveJsonToCloud(CoolReader cr,
                                       String sCRC, int iSaveType, String fileMark, String prettyJson,
-                                      String descr, boolean bQuiet, String addName) {
+                                      String descr, boolean bQuiet, String addName, boolean bErrorQuiet) {
         final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
         final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
         String sFName = sFName0.toString() + fileMark + String.valueOf(sCRC) + "_" + cr.getAndroid_id();
         sFName = sFName + addName + ".json";
-        CloudAction.yndSaveJsonFile(cr, sFName, prettyJson, bQuiet);
+        CloudAction.yndSaveJsonFile(cr, sFName, prettyJson, bQuiet, bErrorQuiet);
     }
 
-    public static void saveJsonInfoFileOrCloud(CoolReader cr, int iSaveType, boolean bQuiet, boolean toFile) {
+    public static void saveJsonInfoFileOrCloud(CoolReader cr, int iSaveType, boolean bQuiet, boolean toFile, boolean bErrorQuiet) {
         Log.d(TAG, "Starting save json to drive...");
 
         final ReaderView rv = cr.getReaderView();
@@ -547,7 +547,7 @@ public class CloudSync {
             checkOldFiles(tDirs, sCRC, iSaveType);
             saveJsonToFile(cr, tDirs, sCRC, iSaveType, fileMark, prettyJson, descr, bQuiet);
         } else {
-            saveJsonToCloud(cr, sCRC, iSaveType, fileMark, prettyJson, descr, bQuiet, addName);
+            saveJsonToCloud(cr, sCRC, iSaveType, fileMark, prettyJson, descr, bQuiet, addName, bErrorQuiet);
         }
 
     }

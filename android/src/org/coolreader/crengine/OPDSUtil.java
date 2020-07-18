@@ -273,6 +273,15 @@ xml:base="http://lib.ololo.cc/opds/">
 			L.e("cannot parse timestamp " + ts);
 			return 0;
 		}
+
+		boolean isEntryEq(String entry, String cmp) {
+			if (StrUtils.getNonEmptyStr(entry,true).equals(StrUtils.getNonEmptyStr(cmp,true)))
+					return true;
+			// for tags e.g. calibre:language
+			if (StrUtils.getNonEmptyStr(entry,true).endsWith(":"+StrUtils.getNonEmptyStr(cmp,true)))
+				return true;
+			return false;
+		}
 		
 		@Override
 		public void characters(char[] ch, int start, int length)
@@ -288,52 +297,54 @@ xml:base="http://lib.ololo.cc/opds/">
 			if ( currentElement==null )
 				return;
 			if ( insideFeed ) {
-				if ( "id".equals(currentElement) ) {
+				if ( isEntryEq(currentElement, "id") ) {
 					if ( insideEntry )
 						entryInfo.id = s;
 					else
 						docInfo.id = s;
-				} else if ( "updated".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "updated") ) {
 					long ts = parseTimestamp(s);
 					if ( insideEntry )
 						entryInfo.updated = ts;
 					else
 						docInfo.updated = ts;
-				} else if ( "title".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "title") ) {
 					if ( !insideEntry ) {
 						docInfo.title = s;
 					} else {
 						entryInfo.title = entryInfo.title + s;
 					}
-				} else if ( "summary".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "summary") ) {
 					if ( insideEntry )
 						entryInfo.summary = entryInfo.summary + s;
-				} else if ( "name".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "name") ) {
 					if ( authorInfo != null )
 						authorInfo.name = s;
-				} else if ( "uri".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "uri") ) {
 					if ( authorInfo!=null )
 						authorInfo.uri = s;
-				} else if ( "icon".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "icon") ) {
 					if ( !insideEntry )
 						docInfo.icon = s;
 					else
 						entryInfo.icon = s;
-				} else if ( "link".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "link") ) {
 					// rel, type, title, href
 //					if ( !insideEntry )
 //						docInfo.icon = s;
 //					else
 //						entryInfo.icon = s;
-				} else if ( "content".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "content") ) {
 					if ( insideEntry )
 						entryInfo.content = entryInfo.content + s;
-				} else if ( "subtitle".equals(currentElement) ) {
+				} else if ( isEntryEq(currentElement, "subtitle") ) {
 					if ( !insideEntry )
 						docInfo.subtitle = s;
-				} else if ( "language".equals(currentElement) ) {
-					if ( !insideEntry )
+				} else if ( isEntryEq(currentElement, "language") ) {
+					if ( !insideEntry ) {
 						docInfo.language = s;
+						entryInfo.otherElements.put(currentElement, s);
+					}
 				} else if ( insideEntryTitle ) {
 					if (entryInfo.title.length() > 0)
 						entryInfo.title = entryInfo.title + " ";

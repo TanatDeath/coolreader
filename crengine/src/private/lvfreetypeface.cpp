@@ -185,11 +185,13 @@ static LVFontGlyphCacheItem *newItem(LVFontLocalGlyphCache *local_cache, lChar16
             }
         } else {
 #endif
-        if (bitmap->buffer)
-            memcpy(item->bmp, bitmap->buffer, w * h); // buffer can be NULL!!!
-        // correct gamma
-        if ( gammaIndex!=GAMMA_NO_CORRECTION_INDEX )
-            cr_correct_gamma_buf(item->bmp, w * h, gammaIndex);
+        if (bitmap->buffer && w > 0 && h > 0)
+        {
+            memcpy(item->bmp, bitmap->buffer, w * h);
+            // correct gamma
+            if ( gammaIndex!=GAMMA_NO_CORRECTION_INDEX )
+                cr_correct_gamma_buf(item->bmp, w * h, gammaIndex);
+        }
     }
     item->origin_x = (lInt16) slot->bitmap_left;
     item->origin_y = (lInt16) slot->bitmap_top;
@@ -226,10 +228,13 @@ static LVFontGlyphCacheItem *newItem(LVFontLocalGlyphCache *local_cache, lUInt32
             ptr += bitmap->pitch;//rowsize;
         }
     } else {
-        memcpy(item->bmp, bitmap->buffer, w * h);
-        // correct gamma
-        if ( gammaIndex!=GAMMA_NO_CORRECTION_INDEX )
-            cr_correct_gamma_buf(item->bmp, w * h, gammaIndex);
+        if (bitmap->buffer && w > 0 && h > 0)
+        {
+            memcpy(item->bmp, bitmap->buffer, w * h);
+            // correct gamma
+            if ( gammaIndex!=GAMMA_NO_CORRECTION_INDEX )
+                cr_correct_gamma_buf(item->bmp, w * h, gammaIndex);
+        }
     }
     item->origin_x = (lInt16) slot->bitmap_left;
     item->origin_y = (lInt16) slot->bitmap_top;
@@ -323,14 +328,15 @@ LVFreeTypeFace::LVFreeTypeFace(LVMutex &mutex, FT_Library library,
                                LVFontGlobalGlyphCache *globalCache)
         : _mutex(mutex), _fontFamily(css_ff_sans_serif), _library(library), _face(NULL),
           _size(0), _hyphen_width(0), _baseline(0),
-          _weight(400), _italic(0), _embolden(false),
+          _weight(400), _italic(0), _embolden(false), _features(0),
           _glyph_cache(globalCache),
           _drawMonochrome(false),
           _hintingMode(HINTING_MODE_AUTOHINT),
           _shapingMode(SHAPING_MODE_FREETYPE),
           _fallbackFontIsSet(false)
 #if USE_HARFBUZZ == 1
-        , _glyph_cache2(globalCache), _width_cache2(1024)
+        , _glyph_cache2(globalCache),
+          _width_cache2(1024)
 #endif
 {
     _matrix.xx = 0x10000;
@@ -341,49 +347,8 @@ LVFreeTypeFace::LVFreeTypeFace(LVMutex &mutex, FT_Library library,
 #if USE_HARFBUZZ == 1
     _hb_font = 0;
     _hb_buffer = hb_buffer_create();
-    _hb_light_buffer = hb_buffer_create();
-
-    // HarfBuzz features for full text shaping
-    // Update HARFBUZZ_FULL_FEATURES_NB when adding/removing
-    hb_feature_from_string("+kern", -1, &_hb_features[0]);      // font kerning
-    hb_feature_from_string("+liga", -1, &_hb_features[1]);      // ligatures
-
-    // HarfBuzz features for lighweight characters width calculating with caching
-    // Update HARFBUZZ_LIGHT_FEATURES_NB when adding/removing
-    // We need to disable all the features, enabled by default in Harfbuzz, that
-    // may split a char into more glyphs, or merge chars into one glyph.
-    // (see harfbuzz/src/hb-ot-shape.cc hb_ot_shape_collect_features() )
-    //
-    // We can enable these ones:
-    hb_feature_from_string("+kern", -1, &_hb_light_features[0]);  // Kerning: Fine horizontal positioning of one glyph to the next, based on the shapes of the glyphs
-    hb_feature_from_string("+mark", -1, &_hb_light_features[1]);  // Mark Positioning: Fine positioning of a mark glyph to a base character
-    hb_feature_from_string("+mkmk", -1, &_hb_light_features[2]);  // Mark-to-mark Positioning: Fine positioning of a mark glyph to another mark character
-    hb_feature_from_string("+curs", -1, &_hb_light_features[3]);  // Cursive Positioning: Precise positioning of a letter's connection to an adjacent one
-    hb_feature_from_string("+locl", -1, &_hb_light_features[4]);  // Substitutes character with the preferred form based on script language
-    //
-    // We should disable these ones:
-    hb_feature_from_string("-liga", -1, &_hb_light_features[5]);  // Standard Ligatures: replaces (by default) sequence of characters with a single ligature glyph
-    hb_feature_from_string("-rlig", -1, &_hb_light_features[6]);  // Ligatures required for correct text display (any script, but in cursive) - Arabic, semitic
-    hb_feature_from_string("-clig", -1, &_hb_light_features[7]);  // Applies a second ligature feature based on a match of a character pattern within a context of surrounding patterns
-    hb_feature_from_string("-ccmp", -1, &_hb_light_features[8]);  // Glyph composition/decomposition: either calls a ligature replacement on a sequence of characters or replaces a character with a sequence of glyphs
-    // Provides logic that can for example effectively alter the order of input characters
-    hb_feature_from_string("-calt", -1, &_hb_light_features[9]);  // Contextual Alternates: Applies a second substitution feature based on a match of a character pattern within a context of surrounding patterns
-    hb_feature_from_string("-rclt", -1, &_hb_light_features[10]); // Required Contextual Alternates: Contextual alternates required for correct text display which differs from the default join for other letters, required especially important by Arabic
-    hb_feature_from_string("-rvrn", -1, &_hb_light_features[11]); // Required Variation Alternates: Special variants of a single character, which need apply to specific font variation, required by variable fonts
-    hb_feature_from_string("-ltra", -1, &_hb_light_features[12]); // Left-to-right glyph alternates: Replaces characters with forms befitting left-to-right presentation
-    hb_feature_from_string("-ltrm", -1, &_hb_light_features[13]); // Left-to-right mirrored forms: Replaces characters with possibly mirrored forms befitting left-to-right presentation
-    hb_feature_from_string("-rtla", -1, &_hb_light_features[14]); // Right-to-left glyph alternates: Replaces characters with forms befitting right-to-left presentation
-    hb_feature_from_string("-rtlm", -1, &_hb_light_features[15]); // Right-to-left mirrored forms: Replaces characters with possibly mirrored forms befitting right-to-left presentation
-    hb_feature_from_string("-frac", -1, &_hb_light_features[16]); // Fractions: Converts figures separated by slash with diagonal fraction
-    hb_feature_from_string("-numr", -1, &_hb_light_features[17]); // Numerator: Converts to appropriate fraction numerator form, invoked by frac
-    hb_feature_from_string("-dnom", -1, &_hb_light_features[18]); // Denominator: Converts to appropriate fraction denominator form, invoked by frac
-    hb_feature_from_string("-rand", -1, &_hb_light_features[19]); // Replaces character with random forms (meant to simulate handwriting)
-    hb_feature_from_string("-trak", -1, &_hb_light_features[20]); // Tracking (?)
-    hb_feature_from_string("-vert", -1, &_hb_light_features[21]); // Vertical (?)
-    // Especially needed with FreeSerif and french texts: -ccmp
-    // Especially needed with Fedra Serif and "The", "Thuringe": -calt
-    // These tweaks seem fragile (adding here +smcp to experiment with small caps would break FreeSerif again).
-    // So, when tuning these, please check it still behave well with FreeSerif.
+    _hb_features.reserve(22);
+    setupHBFeatures();
 #endif
 }
 
@@ -391,8 +356,6 @@ LVFreeTypeFace::~LVFreeTypeFace() {
 #if USE_HARFBUZZ == 1
     if (_hb_buffer)
         hb_buffer_destroy(_hb_buffer);
-    if (_hb_light_buffer)
-        hb_buffer_destroy(_hb_light_buffer);
 #endif
     Clear();
 }
@@ -420,13 +383,10 @@ void LVFreeTypeFace::setKerning(bool kerningEnabled) {
     _allowKerning = kerningEnabled;
     _hash = 0; // Force lvstyles.cpp calcHash(font_ref_t) to recompute the hash
 #if USE_HARFBUZZ == 1
-    if (_allowKerning) {
-        hb_feature_from_string("+kern", -1, &_hb_features[0]);
-        hb_feature_from_string("+kern", -1, &_hb_light_features[0]);
-    } else {
-        hb_feature_from_string("-kern", -1, &_hb_features[0]);
-        hb_feature_from_string("-kern", -1, &_hb_light_features[0]);
-    }
+    if (_allowKerning)
+        setHBFeatureValue("kern", 1);
+    else
+        setHBFeatureValue("kern", 0);
     // in cache may be found some ligatures, so clear it
     clearCache();
 #endif
@@ -468,6 +428,9 @@ void LVFreeTypeFace::setShapingMode( shaping_mode_t shapingMode )
     _shapingMode = shapingMode;
     _hash = 0; // Force lvstyles.cpp calcHash(font_ref_t) to recompute the hash
 #if USE_HARFBUZZ==1
+    setupHBFeatures();
+    // Reset buffer (to have it shrunk if HB full > light that will need only a 3 slots buffer)
+    hb_buffer_reset(_hb_buffer);
     // in cache may be found some ligatures, so clear it
     clearCache();
 #endif
@@ -478,6 +441,12 @@ void LVFreeTypeFace::setBitmapMode(bool drawBitmap) {
         return;
     _drawMonochrome = drawBitmap;
     clearCache();
+}
+
+void LVFreeTypeFace::setFeatures(int features)
+{
+    _features = features;
+    _hash = 0; // Force lvstyles.cpp calcHash(font_ref_t) to recompute the hash
 }
 
 // Synthetized bold on a font that does not come with a bold variant.
@@ -773,25 +742,25 @@ bool LVFreeTypeFace::hbCalcCharWidth(LVCharPosInfo *posInfo, const LVCharTriplet
         return false;
     unsigned int segLen = 0;
     int cluster;
-    hb_buffer_clear_contents(_hb_light_buffer);
+    hb_buffer_clear_contents(_hb_buffer);
     if (0 != triplet.prevChar) {
-        hb_buffer_add(_hb_light_buffer, (hb_codepoint_t) triplet.prevChar, segLen);
+        hb_buffer_add(_hb_buffer, (hb_codepoint_t) triplet.prevChar, segLen);
         segLen++;
     }
-    hb_buffer_add(_hb_light_buffer, (hb_codepoint_t) triplet.Char, segLen);
+    hb_buffer_add(_hb_buffer, (hb_codepoint_t) triplet.Char, segLen);
     cluster = segLen;
     segLen++;
     if (0 != triplet.nextChar) {
-        hb_buffer_add(_hb_light_buffer, (hb_codepoint_t) triplet.nextChar, segLen);
+        hb_buffer_add(_hb_buffer, (hb_codepoint_t) triplet.nextChar, segLen);
         segLen++;
     }
-    hb_buffer_set_content_type(_hb_light_buffer, HB_BUFFER_CONTENT_TYPE_UNICODE);
-    hb_buffer_guess_segment_properties(_hb_light_buffer);
-    hb_shape(_hb_font, _hb_light_buffer, _hb_light_features, HARFBUZZ_LIGHT_FEATURES_NB);
-    unsigned int glyph_count = hb_buffer_get_length(_hb_light_buffer);
+    hb_buffer_set_content_type(_hb_buffer, HB_BUFFER_CONTENT_TYPE_UNICODE);
+    hb_buffer_guess_segment_properties(_hb_buffer);
+    hb_shape(_hb_font, _hb_buffer, _hb_features.ptr(), _hb_features.length());
+    unsigned int glyph_count = hb_buffer_get_length(_hb_buffer);
     if (segLen == glyph_count) {
-        hb_glyph_info_t *glyph_info = hb_buffer_get_glyph_infos(_hb_light_buffer, &glyph_count);
-        hb_glyph_position_t *glyph_pos = hb_buffer_get_glyph_positions(_hb_light_buffer,
+        hb_glyph_info_t *glyph_info = hb_buffer_get_glyph_infos(_hb_buffer, &glyph_count);
+        hb_glyph_position_t *glyph_pos = hb_buffer_get_glyph_positions(_hb_buffer,
                                                                        &glyph_count);
         // Ignore HB measurements when there is a single glyph not found,
         // as it may be found in a fallback font
@@ -853,6 +822,148 @@ FT_UInt LVFreeTypeFace::getCharIndex(lUInt32 code, lChar16 def_char) {
     }
     return ch_glyph_index;
 }
+
+#if USE_HARFBUZZ == 1
+bool LVFreeTypeFace::setHBFeatureValue(const char *tag, uint32_t value)
+{
+    hb_feature_t hb_feature;
+    if (hb_feature_from_string(tag, -1, &hb_feature)) {
+        int idx = -1;
+        int i;
+        for (i = 0; i < _hb_features.length(); i++) {
+            if (_hb_features[i].tag == hb_feature.tag) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0) {
+            idx = _hb_features.length();
+            _hb_features.add(hb_feature);
+        }
+        _hb_features[idx].value = value;
+        return true;
+    }
+    return false;
+}
+
+bool LVFreeTypeFace::addHBFeature(const char *tag)
+{
+    hb_feature_t hb_feature;
+    if (hb_feature_from_string(tag, -1, &hb_feature)) {
+        for (int i = 0; i < _hb_features.length(); i++) {
+            if (_hb_features[i].tag == hb_feature.tag) {
+                _hb_features[i] = hb_feature;
+                return true;
+            }
+        }
+        _hb_features.add(hb_feature);
+        return true;
+    }
+    return false;
+}
+
+bool LVFreeTypeFace::delHBFeature(const char *tag)
+{
+    hb_feature_t hb_feature;
+    if (hb_feature_from_string(tag, -1, &hb_feature)) {
+        for (int i = 0; i < _hb_features.length(); i++) {
+            if (_hb_features[i].tag == hb_feature.tag) {
+                _hb_features.remove(i);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void LVFreeTypeFace::setupHBFeatures()
+{
+    _hb_features.clear();
+    if ( _shapingMode == SHAPING_MODE_HARFBUZZ ) {
+        setHBFeatureValue("kern", _allowKerning ? 1 : 0);
+        addHBFeature("+liga");
+    }
+    else if ( _shapingMode == SHAPING_MODE_HARFBUZZ_LIGHT ) {
+        // HarfBuzz features for lighweight characters width calculating with caching.
+        // We need to disable all the features, enabled by default in Harfbuzz, that
+        // may split a char into more glyphs, or merge chars into one glyph.
+        // (see harfbuzz/src/hb-ot-shape.cc hb_ot_shape_collect_features() )
+        //
+        // We can enable these ones:
+        setHBFeatureValue("kern", _allowKerning ? 1 : 0);
+        addHBFeature("+mark");          // Mark Positioning: Fine positioning of a mark glyph to a base character
+        addHBFeature("+mkmk");          // Mark-to-mark Positioning: Fine positioning of a mark glyph to another mark character
+        addHBFeature("+curs");          // Cursive Positioning: Precise positioning of a letter's connection to an adjacent one
+        addHBFeature("+locl");          // Substitutes character with the preferred form based on script language
+        //
+        // We should disable these ones:
+        addHBFeature("-liga");          // Standard Ligatures: replaces (by default) sequence of characters with a single ligature glyph
+        addHBFeature("-rlig");          // Ligatures required for correct text display (any script, but in cursive) - Arabic, semitic
+        addHBFeature("-clig");          // Applies a second ligature feature based on a match of a character pattern within a context of surrounding patterns
+        addHBFeature("-ccmp");          // Glyph composition/decomposition: either calls a ligature replacement on a sequence of characters or replaces a character with a sequence of glyphs
+        // Provides logic that can for example effectively alter the order of input characters
+        addHBFeature("-calt");          // Contextual Alternates: Applies a second substitution feature based on a match of a character pattern within a context of surrounding patterns
+        addHBFeature("-rclt");          // Required Contextual Alternates: Contextual alternates required for correct text display which differs from the default join for other letters, required especially important by Arabic
+        addHBFeature("-rvrn");          // Required Variation Alternates: Special variants of a single character, which need apply to specific font variation, required by variable fonts
+        addHBFeature("-ltra");          // Left-to-right glyph alternates: Replaces characters with forms befitting left-to-right presentation
+        addHBFeature("-ltrm");          // Left-to-right mirrored forms: Replaces characters with possibly mirrored forms befitting left-to-right presentation
+        addHBFeature("-rtla");          // Right-to-left glyph alternates: Replaces characters with forms befitting right-to-left presentation
+        addHBFeature("-rtlm");          // Right-to-left mirrored forms: Replaces characters with possibly mirrored forms befitting right-to-left presentation
+        addHBFeature("-frac");          // Fractions: Converts figures separated by slash with diagonal fraction
+        addHBFeature("-numr");          // Numerator: Converts to appropriate fraction numerator form, invoked by frac
+        addHBFeature("-dnom");          // Denominator: Converts to appropriate fraction denominator form, invoked by frac
+        addHBFeature("-rand");          // Replaces character with random forms (meant to simulate handwriting)
+        addHBFeature("-trak");          // Tracking (?)
+        addHBFeature("-vert");          // Vertical (?)
+        // Especially needed with FreeSerif and french texts: -ccmp
+        // Especially needed with Fedra Serif and "The", "Thuringe": -calt
+        // These tweaks seem fragile (adding here +smcp to experiment with small caps would break FreeSerif again).
+        // So, when tuning these, please check it still behave well with FreeSerif.
+        //
+        // The way KERNING_MODE_HARFBUZZ_LIGHT is implemented, we'll be drawing the
+        // original codepoints, so there's no much use allowing additional HB features,
+        // even the one-to-one substitutions like small-cap or oldstyle-nums...
+        return;
+    }
+    else { // text shaping not use HarfBuzz features
+        return;
+    }
+    if ( _features != LFNT_OT_FEATURES_NORMAL ) {
+        // Add requested features
+        if ( _features & LFNT_OT_FEATURES_M_LIGA ) { addHBFeature("-liga"); addHBFeature("-clig"); }
+        if ( _features & LFNT_OT_FEATURES_M_CALT ) { addHBFeature("-calt"); }
+        if ( _features & LFNT_OT_FEATURES_P_DLIG ) { addHBFeature("+dlig"); }
+        if ( _features & LFNT_OT_FEATURES_M_DLIG ) { addHBFeature("-dlig"); }
+        if ( _features & LFNT_OT_FEATURES_P_HLIG ) { addHBFeature("+hlig"); }
+        if ( _features & LFNT_OT_FEATURES_M_HLIG ) { addHBFeature("-hlig"); }
+        if ( _features & LFNT_OT_FEATURES_P_HIST ) { addHBFeature("+hist"); }
+        if ( _features & LFNT_OT_FEATURES_P_RUBY ) { addHBFeature("+ruby"); }
+        if ( _features & LFNT_OT_FEATURES_P_SMCP ) { addHBFeature("+smcp"); }
+        if ( _features & LFNT_OT_FEATURES_P_C2SC ) { addHBFeature("+c2sc"); addHBFeature("+smcp"); }
+        if ( _features & LFNT_OT_FEATURES_P_PCAP ) { addHBFeature("+pcap"); }
+        if ( _features & LFNT_OT_FEATURES_P_C2PC ) { addHBFeature("+c2pc"); addHBFeature("+pcap"); }
+        if ( _features & LFNT_OT_FEATURES_P_UNIC ) { addHBFeature("+unic"); }
+        if ( _features & LFNT_OT_FEATURES_P_TITL ) { addHBFeature("+titl"); }
+        if ( _features & LFNT_OT_FEATURES_P_SUPS ) { addHBFeature("+sups"); }
+        if ( _features & LFNT_OT_FEATURES_P_SUBS ) { addHBFeature("+subs"); }
+        if ( _features & LFNT_OT_FEATURES_P_LNUM ) { addHBFeature("+lnum"); }
+        if ( _features & LFNT_OT_FEATURES_P_ONUM ) { addHBFeature("+onum"); }
+        if ( _features & LFNT_OT_FEATURES_P_PNUM ) { addHBFeature("+pnum"); }
+        if ( _features & LFNT_OT_FEATURES_P_TNUM ) { addHBFeature("+tnum"); }
+        if ( _features & LFNT_OT_FEATURES_P_ZERO ) { addHBFeature("+zero"); }
+        if ( _features & LFNT_OT_FEATURES_P_ORDN ) { addHBFeature("+ordn"); }
+        if ( _features & LFNT_OT_FEATURES_P_FRAC ) { addHBFeature("+frac"); }
+        if ( _features & LFNT_OT_FEATURES_P_AFRC ) { addHBFeature("+afrc"); }
+        if ( _features & LFNT_OT_FEATURES_P_SMPL ) { addHBFeature("+smpl"); }
+        if ( _features & LFNT_OT_FEATURES_P_TRAD ) { addHBFeature("+trad"); }
+        if ( _features & LFNT_OT_FEATURES_P_FWID ) { addHBFeature("+fwid"); }
+        if ( _features & LFNT_OT_FEATURES_P_PWID ) { addHBFeature("+pwid"); }
+        if ( _features & LFNT_OT_FEATURES_P_JP78 ) { addHBFeature("+jp78"); }
+        if ( _features & LFNT_OT_FEATURES_P_JP83 ) { addHBFeature("+jp83"); }
+        if ( _features & LFNT_OT_FEATURES_P_JP04 ) { addHBFeature("+jp04"); }
+    }
+}
+#endif
 
 bool LVFreeTypeFace::getGlyphInfo(lUInt32 code, LVFont::glyph_info_t *glyph, lChar16 def_char) {
     //FONT_GUARD
@@ -1005,7 +1116,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar16 *text,
                                     lUInt16 *widths,
                                     lUInt8 *flags,
                                     int max_width,
-                                    lChar16 def_char,
+                                    lChar16 def_char, TextLangCfg *lang_cfg,
                                     int letter_spacing,
                                     bool allow_hyphenation,
                                     lUInt32 hints) {
@@ -1103,6 +1214,9 @@ lUInt16 LVFreeTypeFace::measureText(const lChar16 *text,
                 hb_flags |= HB_BUFFER_FLAG_EOT;
             hb_buffer_set_flags(_hb_buffer, (hb_buffer_flags_t)hb_flags);
         }
+        if ( lang_cfg ) {
+            hb_buffer_set_language(_hb_buffer, lang_cfg->getHBLanguage());
+        }
         // Let HB guess what's not been set (script, direction, language)
         hb_buffer_guess_segment_properties(_hb_buffer);
 
@@ -1120,7 +1234,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar16 *text,
         // cf in *some* minikin repositories: libs/minikin/Layout.cpp
 
         // Shape
-        hb_shape(_hb_font, _hb_buffer, _hb_features, HARFBUZZ_FULL_FEATURES_NB);
+        hb_shape(_hb_font, _hb_buffer, _hb_features.ptr(), _hb_features.length());
 
         // Harfbuzz has guessed and set a direction even if we did not provide one.
         bool is_rtl = false;
@@ -1225,7 +1339,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar16 *text,
                                     fb_hints &= ~LFNT_HINT_ENDS_PARAGRAPH;
                                 fallback->measureText( text + t_notdef_start, t_notdef_end - t_notdef_start,
                                                 widths + t_notdef_start, flags + t_notdef_start,
-                                                max_width, def_char, letter_spacing, allow_hyphenation,
+                                                max_width, def_char, lang_cfg, letter_spacing, allow_hyphenation,
                                                 fb_hints );
                                 // Fix previous bad measurements
                                 int last_good_width = t_notdef_start > 0 ? widths[t_notdef_start-1] : 0;
@@ -1319,7 +1433,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar16 *text,
                 int chars_measured = fallback->measureText( text + t_notdef_start, // start
                                 t_notdef_end - t_notdef_start, // len
                                 widths + t_notdef_start, flags + t_notdef_start,
-                                max_width, def_char, letter_spacing, allow_hyphenation,
+                                max_width, def_char, lang_cfg, letter_spacing, allow_hyphenation,
                                 fb_hints );
                 lastFitChar = t_notdef_start + chars_measured;
                 int last_good_width = t_notdef_start > 0 ? widths[t_notdef_start-1] : 0;
@@ -1480,15 +1594,17 @@ lUInt16 LVFreeTypeFace::measureText(const lChar16 *text,
             lStr_findWordBounds(text, len, lastFitChar - 1, hwStart, hwEnd);
             if (hwStart < (int) (lastFitChar - 1) && hwEnd > hwStart + 3) {
                 //int maxw = max_width - (hwStart>0 ? widths[hwStart-1] : 0);
-                HyphMan::hyphenate(text + hwStart, hwEnd - hwStart, widths + hwStart,
-                                   flags + hwStart, _hyphen_width, max_width);
+                if ( lang_cfg )
+                    lang_cfg->getHyphMethod()->hyphenate(text+hwStart, hwEnd-hwStart, widths+hwStart, flags+hwStart, _hyphen_width, max_width);
+                else // Use global lang hyph method
+                    HyphMan::hyphenate(text+hwStart, hwEnd-hwStart, widths+hwStart, flags+hwStart, _hyphen_width, max_width);
             }
         }
     }
     return lastFitChar; //i;
 }
 
-lUInt32 LVFreeTypeFace::getTextWidth(const lChar16 *text, int len) {
+lUInt32 LVFreeTypeFace::getTextWidth(const lChar16 *text, int len, TextLangCfg *lang_cfg) {
     static lUInt16 widths[MAX_LINE_CHARS + 1];
     static lUInt8 flags[MAX_LINE_CHARS + 1];
     if (len > MAX_LINE_CHARS)
@@ -1501,6 +1617,7 @@ lUInt32 LVFreeTypeFace::getTextWidth(const lChar16 *text, int len) {
             flags,
             MAX_LINE_WIDTH,
             L' ',  // def_char
+            lang_cfg,
             0
     );
     if (res > 0 && res < MAX_LINE_CHARS)
@@ -1686,7 +1803,7 @@ int LVFreeTypeFace::getRightSideBearing( lChar16 ch, bool negative_only, bool it
 }
 
 int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *text, int len,
-                                    lChar16 def_char, lUInt32 *palette, bool addHyphen,
+                                    lChar16 def_char, lUInt32 *palette, bool addHyphen, TextLangCfg *lang_cfg,
                                     lUInt32 flags, int letter_spacing, int width, int text_decoration_back_gap) {
     FONT_GUARD
     if (len <= 0 || _face == NULL)
@@ -1748,6 +1865,8 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *
                 hb_flags |= HB_BUFFER_FLAG_EOT;
             hb_buffer_set_flags(_hb_buffer, (hb_buffer_flags_t)hb_flags);
         }
+        if ( lang_cfg )
+            hb_buffer_set_language(_hb_buffer, lang_cfg->getHBLanguage());
         // Let HB guess what's not been set (script, direction, language)
         hb_buffer_guess_segment_properties(_hb_buffer);
 
@@ -1760,7 +1879,7 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *
         }
 
         // Shape
-        hb_shape(_hb_font, _hb_buffer, _hb_features, HARFBUZZ_FULL_FEATURES_NB);
+        hb_shape(_hb_font, _hb_buffer, _hb_features.ptr(), _hb_features.length());
 
         // If direction is RTL, hb_shape() has reversed the order of the glyphs, so
         // they are in visual order and ready to be iterated and drawn. So,
@@ -1918,7 +2037,7 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar16 *
                 // text decoration, that we dropped: no update needed)
                 int fb_advance = fallback->DrawTextString( buf, x, fb_y,
                    fb_text, fb_len,
-                   def_char, palette, fb_addHyphen, fb_flags, letter_spacing,
+                   def_char, palette, fb_addHyphen, lang_cfg, fb_flags, letter_spacing,
                    width, text_decoration_back_gap );
                 x += fb_advance;
                 #ifdef DEBUG_DRAW_TEXT

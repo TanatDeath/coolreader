@@ -33,12 +33,15 @@ import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v4.view.MotionEventCompat;
 import android.text.ClipboardManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
@@ -62,7 +65,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties, OnKeyListener, OnTouchListener, OnFocusChangeListener {
+	public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties, OnKeyListener, OnTouchListener, OnFocusChangeListener {
 
 	public static final Logger log = L.create("rv", Log.VERBOSE);
 	public static final Logger alog = L.create("ra", Log.WARN);
@@ -567,7 +570,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			if (iSyncVariant > 0)
 				CloudSync.saveJsonInfoFileOrCloud(((CoolReader)mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1);
+						CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
 			lastSavedToGdBookmark = bmk;
 		}
 		bookView.onPause();
@@ -1157,6 +1160,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		private final static int STATE_DONE = 6; // done: no more tracking
 		private final static int STATE_BRIGHTNESS = 7; // brightness change in progress
 		private final static int STATE_FLIP_TRACKING = 8; // pages flip tracking in progress
+		private final static int STATE_TWO_POINTERS = 9; // two finger events
+		private final static int STATE_TWO_POINTERS_VERT_MARGINS = 10; // Vertical margins control
+		private final static int STATE_TWO_POINTERS_HORZ_MARGINS = 11; // Horizontal margins control
+		private final static int STATE_TWO_POINTERS_FONT_SCALE = 12;  // Font scaling
+		private final static int STATE_TWO_POINTERS_DOWN = 13;  // Two fingers move down - next chapter
+		private final static int STATE_TWO_POINTERS_UP = 14; // Two fingers move down - previous chapter
+		private final static int STATE_THREE_POINTERS = 15; // three finger events
+
+		private final static int PINCH_TRESHOLD_COUNT = 15;
 
 		private final static int EXPIRATION_TIME_MS = 180000;
 
@@ -1164,12 +1176,23 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		int start_x = 0;
 		int start_y = 0;
+		int start_x2 = 0;
+		int start_y2 = 0;
+		int now_x = 0;
+		int now_y = 0;
+		int now_x2 = 0;
+		int now_y2 = 0;
 		int width = 0;
 		int height = 0;
+		int marginBegin = 0;
+		int marginToSet = -1;
+		int fontSizeBegin = 0;
+		int fontSizeToSet = -1;
 		ReaderAction shortTapAction = ReaderAction.NONE;
 		ReaderAction longTapAction = ReaderAction.NONE;
 		ReaderAction doubleTapAction = ReaderAction.NONE;
 		long firstDown;
+		String curPageText = "";
 
 		/// handle unexpected event for state: stop tracking
 		private boolean unexpectedEvent() {
@@ -1452,8 +1475,47 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		boolean leftSideBrightness = true;
 
 		public boolean onTouchEvent(MotionEvent event) {
+			int index = event.getActionIndex();
 			int x = (int)event.getX();
 			int y = (int)event.getY();
+			curPageText = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText(0, false);
+			if ((event.getPointerCount() > 1) && (state == STATE_DOWN_1)) {
+				if (event.getPointerCount() == 3) {
+					state = STATE_THREE_POINTERS;
+				} else {
+					state = STATE_TWO_POINTERS;
+					x = (int) event.getX(index);
+					y = (int) event.getY(index);
+					if (index == 1) {
+						start_x2 = x;
+						start_y2 = y;
+					}
+					int minSize = width;
+					if (height < minSize) minSize = height;
+					int pinchTreshold = minSize / PINCH_TRESHOLD_COUNT;
+					// lets detect pinch type
+					state = STATE_TWO_POINTERS_FONT_SCALE;
+					fontSizeToSet = fontSizeBegin;
+					if (Math.abs(start_x - start_x2) < pinchTreshold * 2) {
+						state = STATE_TWO_POINTERS_VERT_MARGINS;
+						int marg1 = mActivity.settings().getInt(Settings.PROP_PAGE_MARGIN_TOP, 0);
+						int marg2 = mActivity.settings().getInt(Settings.PROP_PAGE_MARGIN_BOTTOM, 0);
+						marginBegin = marg1;
+						if (marginBegin > marg2) marginBegin = marg2;
+						marginToSet = marginBegin;
+					} else if (Math.abs(start_y - start_y2) < pinchTreshold * 2) {
+						state = STATE_TWO_POINTERS_HORZ_MARGINS;
+						int marg1 = mActivity.settings().getInt(Settings.PROP_PAGE_MARGIN_LEFT, 0);
+						int marg2 = mActivity.settings().getInt(Settings.PROP_PAGE_MARGIN_RIGHT, 0);
+						marginBegin = marg1;
+						if (marginBegin > marg2) marginBegin = marg2;
+						marginToSet = marginBegin;
+					} else {
+						fontSizeBegin = mActivity.settings().getInt(Settings.PROP_FONT_SIZE, 0);
+						fontSizeToSet = fontSizeBegin;
+					}
+				}
+			}
 			if ((DeviceInfo.getSDKLevel() >= 19) && mActivity.isFullscreen() && (event.getAction() == MotionEvent.ACTION_DOWN)) {
 				if ((y < 30) || (y > (getSurface().getHeight() - 30)))
 					return unexpectedEvent();
@@ -1504,13 +1566,51 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_FLIP_TRACKING:
 						updatePageFlipTracking(x, y);
 						state = STATE_DONE;
-						return cancel();	
+						return cancel();
+					case STATE_THREE_POINTERS:
+						return performAction(ReaderAction.READER_MENU, false);
+					case STATE_TWO_POINTERS_VERT_MARGINS:
+						if (marginToSet>=0) {
+							state = STATE_DONE;
+							Properties props = new Properties(mActivity.settings());
+							props.setProperty(Settings.PROP_PAGE_MARGIN_TOP, "" + marginToSet);
+							props.setProperty(Settings.PROP_PAGE_MARGIN_BOTTOM, "" + marginToSet);
+							mActivity.setSettings(props, -1, true);
+						}
+						return cancel();
+					case STATE_TWO_POINTERS_HORZ_MARGINS:
+						if (marginToSet>=0) {
+							state = STATE_DONE;
+							Properties props = new Properties(mActivity.settings());
+							props = new Properties(mActivity.settings());
+							props.setProperty(Settings.PROP_PAGE_MARGIN_LEFT, "" + marginToSet);
+							props.setProperty(Settings.PROP_PAGE_MARGIN_RIGHT, "" + marginToSet);
+							mActivity.setSettings(props, -1, true);
+						}
+						return cancel();
+					case STATE_TWO_POINTERS_FONT_SCALE:
+						if (fontSizeToSet >= 0) {
+							state = STATE_DONE;
+							Properties props = new Properties(mActivity.settings());
+							props = new Properties(mActivity.settings());
+							props.setProperty(Settings.PROP_FONT_SIZE, "" + fontSizeToSet);
+							mActivity.setSettings(props, -1, true);
+						}
+						return cancel();
 				}
 			} else if (event.getAction() == MotionEvent.ACTION_DOWN) {
 				switch (state) {
 					case STATE_INITIAL:
 						start_x = x;
 						start_y = y;
+						now_y = 0;
+						now_x = 0;
+						now_x2 = 0;
+						now_y2 = 0;
+						marginToSet = -1;
+						marginBegin = 0;
+						fontSizeBegin = 0;
+						fontSizeToSet = -1;
 						width = surface.getWidth();
 						height = surface.getHeight();
 						int zone = getTapZone(x, y, width, height);
@@ -1537,11 +1637,39 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return performAction(doubleTapAction, true);
 				}
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-				int dx = x - start_x;
-				int dy = y - start_y;
-				int adx = dx > 0 ? dx : -dx;
-				int ady = dy > 0 ? dy : -dy;
-				int distance = adx + ady;
+				int dx = 0;
+				int dy = 0;
+				int adx = 0;
+				int ady = 0;
+				int distance = 0;
+				int dx2 = 0;
+				int dy2 = 0;
+				int adx2 = 0;
+				int ady2 = 0;
+
+				if (event.getPointerCount()>1) {
+					now_x = (int)event.getX(0);
+					now_y = (int)event.getY(0);
+					now_x2 = (int)event.getX(1);
+					now_y2 = (int)event.getY(1);
+				} else {
+					now_x = x;
+					now_y = y;
+				}
+
+				if (now_x != 0)
+					dx = now_x - start_x;
+				if (now_y != 0)
+					dy = now_y - start_y;
+				adx = dx > 0 ? dx : -dx;
+				ady = dy > 0 ? dy : -dy;
+				distance = adx + ady;
+				if (now_x2 != 0)
+					dx2 = now_x2 - start_x2;
+				if (now_y2 != 0)
+					dy2 = now_y2 - start_y2;
+				adx2 = dx2 > 0 ? dx2 : -dx2;
+				ady2 = dy2 > 0 ? dy2 : -dy2;
 				int dragThreshold = mActivity.getPalmTipPixels();
 				switch (state) {
 					case STATE_DOWN_1:
@@ -1600,8 +1728,46 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_WAIT_FOR_DOUBLE_CLICK:
 						return true;
 					case STATE_SELECTION:
-						//log.v("upd4: "+nextUpdateId+" ");
 						updateSelection(start_x, start_y, x, y, false);
+						break;
+					case STATE_TWO_POINTERS_VERT_MARGINS:
+						if (event.getPointerCount()>1) {
+							int distance1 = (int) (Math.sqrt(Math.abs(start_x2 - start_x) * Math.abs(start_x2 - start_x) +
+									Math.abs(start_y2 - start_y) * Math.abs(start_y2 - start_y)));
+							int distance2 = (int) (Math.sqrt(Math.abs(now_x2 - now_x) * Math.abs(now_x2 - now_x) +
+									Math.abs(now_y2 - now_y) * Math.abs(now_y2 - now_y)));
+							int aval = distance1 - distance2;
+							aval = aval / PINCH_TRESHOLD_COUNT;
+							marginToSet = OptionsDialog.getMarginShift(marginBegin, aval);
+							showCenterPopup(mActivity.getString(R.string.vert_margin_control) + " " + marginToSet);
+						}
+						break;
+					case STATE_TWO_POINTERS_HORZ_MARGINS:
+						if (event.getPointerCount()>1) {
+							int distance1 = (int) (Math.sqrt(Math.abs(start_x2 - start_x) * Math.abs(start_x2 - start_x) +
+									Math.abs(start_y2 - start_y) * Math.abs(start_y2 - start_y)));
+							int distance2 = (int) (Math.sqrt(Math.abs(now_x2 - now_x) * Math.abs(now_x2 - now_x) +
+									Math.abs(now_y2 - now_y) * Math.abs(now_y2 - now_y)));
+							int aval = distance1 - distance2;
+							aval = aval / PINCH_TRESHOLD_COUNT;
+							marginToSet = OptionsDialog.getMarginShift(marginBegin, aval);
+							showCenterPopup(mActivity.getString(R.string.horz_margin_control)+" "+marginToSet);
+						}
+						break;
+					case STATE_TWO_POINTERS_FONT_SCALE:
+						if (event.getPointerCount()>1) {
+							int distance1 = (int) (Math.sqrt(Math.abs(start_x2 - start_x) * Math.abs(start_x2 - start_x) +
+									Math.abs(start_y2 - start_y) * Math.abs(start_y2 - start_y)));
+							int distance2 = (int) (Math.sqrt(Math.abs(now_x2 - now_x) * Math.abs(now_x2 - now_x) +
+									Math.abs(now_y2 - now_y) * Math.abs(now_y2 - now_y)));
+							int aval = distance1 - distance2;
+							aval = aval / PINCH_TRESHOLD_COUNT;
+							fontSizeToSet = OptionsDialog.getFontSizeShift(fontSizeBegin, -aval);
+							String s = StrUtils.getNonEmptyStr(curPageText,true);
+							if (s.length()>50) s=s.substring(0,50)+"...";
+							if (StrUtils.isEmptyStr(s)) s = "lorem ipsum";
+							showCenterPopupFont(mActivity.getString(R.string.font_size_control)+" "+fontSizeToSet, s, fontSizeToSet);
+						}
 						break;
 				}
 
@@ -2232,7 +2398,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	static private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
 	public void showBookInfo() {
-		mActivity.showBookInfo(mBookInfo, BookInfoDialog.BOOK_INFO, null);
+		mActivity.showBookInfo(mBookInfo, BookInfoDialog.BOOK_INFO, null, null);
 	}
 
 	private int autoScrollSpeed = 1500; // chars / minute
@@ -3007,7 +3173,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
 				Bookmark bmk = getCurrentPositionBookmark();
 				lastSavedToGdBookmark = bmk;
 			}
@@ -3033,7 +3199,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant5 == 1);
+						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant5 == 1, false);
 			};
 			break;
 		case DCMD_LOAD_BOOKMARKS:
@@ -3129,7 +3295,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
 						}
 						Bookmark bmk = getCurrentPositionBookmark();
 						lastSavedToGdBookmark = bmk;
@@ -3155,7 +3321,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1);
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1, false);
 						}
 						return true;
 					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
@@ -3451,8 +3617,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			final String bookLanguage = fileInfo.getLanguage();
 			final String fontFace = props.getProperty(PROP_FONT_FACE);
 			String fcLangCode = null;
-			if (null != bookLanguage && bookLanguage.length() > 0)
+			if (null != bookLanguage && bookLanguage.length() > 0) {
 				fcLangCode = Engine.findCompatibleFcLangCode(bookLanguage);
+				if (props.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false))
+					props.setProperty(PROP_TEXTLANG_MAIN_LANG, bookLanguage);
+			}
 			if (null != fcLangCode && fcLangCode.length() > 0) {
 				boolean res = Engine.checkFontLanguageCompatibility(fontFace, fcLangCode);
 				log.d("Checking font \"" + fontFace + "\" for compatibility with language \"" + bookLanguage + "\" fcLangCode=" + fcLangCode + ": res=" + res);
@@ -3718,17 +3887,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION.equals(key)
 				// TODO: redesign all this mess!
 					) {
-				newSettings.setProperty(key, value);
-			} else if ( PROP_HYPHENATION_DICT.equals(key) ) {
-				Engine.HyphDict dict = HyphDict.byCode(value);
-				if ( mEngine.setHyphenationDictionary(dict) ) {
-					if ( isBookLoaded() ) {
-						String language = getBookInfo().getFileInfo().getLanguage();
-						mEngine.setHyphenationLanguage(language);
-						doEngineCommand( ReaderCommand.DCMD_REQUEST_RENDER, 0);
-						//drawPage();
-					}
-				}
 				newSettings.setProperty(key, value);
 			}
 		}
@@ -4822,13 +4980,109 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	int currentBrightnessValueIndex = -1;
-	PopupWindow windowBrighness = null;
+	PopupWindow windowCenterPopup = null;
 
 	private void startBrightnessControl(final int startX, final int startY, final boolean leftSide)
 	{
 		currentBrightnessValueIndex = -1;
 		updateBrightnessControl(startX, startY, leftSide);
 	}
+
+	private void showCenterPopup(String val) {
+		if (windowCenterPopup == null) windowCenterPopup = new PopupWindow(surface.getContext());
+		windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+		windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+		windowCenterPopup.setTouchable(false);
+		windowCenterPopup.setFocusable(false);
+		windowCenterPopup.setOutsideTouchable(true);
+		windowCenterPopup.setBackgroundDrawable(null);
+		int fontSize = 24;
+		LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
+		LinearLayout toast_ll = (LinearLayout) windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		toast_ll.setBackgroundColor(colorGrayC);
+		TextView tv = (TextView) windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+		tv.setTextColor(colorIcon);
+		tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+		tv.setText(val);
+		windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+		scheduleHideWindowCenterPopup(500);
+	}
+
+	private void showCenterPopupFont(String val, String val2, int fontSize) {
+		if (windowCenterPopup == null) windowCenterPopup = new PopupWindow(surface.getContext());
+		windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+		windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+		windowCenterPopup.setTouchable(false);
+		windowCenterPopup.setFocusable(false);
+		windowCenterPopup.setOutsideTouchable(true);
+		windowCenterPopup.setBackgroundDrawable(null);
+		LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap_2line, null, true));
+		LinearLayout toast_ll = (LinearLayout) windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		toast_ll.setBackgroundColor(colorGrayC);
+		TextView tv = (TextView) windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+		tv.setTextColor(colorIcon);
+		tv.setTextSize(24); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+		tv.setText(val);
+		TextView tv2 = (TextView) windowCenterPopup.getContentView().findViewById(R.id.toast_2nd_line);
+		tv2.setTextColor(colorIcon);
+		tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+		tv2.setText(val2);
+		String sFace = mActivity.settings().getProperty(ReaderView.PROP_FONT_FACE, "");
+		final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
+		boolean found = false;
+		for (int i=0; i<mFontFacesFiles.length; i++) {
+			String s = mFontFacesFiles[i];
+			if ((s.startsWith(sFace+"~"))&&(!s.toUpperCase().contains("BOLD"))&&(!s.toUpperCase().contains("ITALIC"))) {
+				found = true;
+				String sf = mFontFacesFiles[i];
+				if (sf.contains("~")) {
+					sf = sf.split("~")[1];
+				}
+				try {
+					Typeface tf = null;
+					tf = Typeface.createFromFile(sf);
+					tv2.setTypeface(tf);
+				} catch (Exception e) {
+
+				}
+				break;
+			}
+		}
+		if (!found)
+			for (int i=0; i<mFontFacesFiles.length; i++) {
+				String s = mFontFacesFiles[i];
+				if (s.startsWith(sFace+"~")) {
+					found = true;
+					String sf = mFontFacesFiles[i];
+					if (sf.contains("~")) {
+						sf = sf.split("~")[1];
+					}
+					try {
+						Typeface tf = null;
+						tf = Typeface.createFromFile(sf);
+						tv2.setTypeface(tf);
+					} catch (Exception e) {
+
+					}
+					break;
+				}
+			}
+		windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+		scheduleHideWindowCenterPopup(500);
+	}
+
 	private void updateBrightnessControl(final int x, final int y, final boolean leftSide) {
 		int n = OptionsDialog.mBacklightLevels.length;
 		int index = n - 1 - y * n / surface.getHeight();
@@ -4841,30 +5095,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-				//mActivity.showToast(newValue+"%", Toast.LENGTH_LONG, surface, true, 0);
-				if (windowBrighness == null) windowBrighness = new PopupWindow(surface.getContext());
-				windowBrighness.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-				windowBrighness.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-				windowBrighness.setTouchable(false);
-				windowBrighness.setFocusable(false);
-				windowBrighness.setOutsideTouchable(true);
-				windowBrighness.setBackgroundDrawable(null);
-				int fontSize = 24;
-				LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				windowBrighness.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
-				LinearLayout toast_ll = (LinearLayout) windowBrighness.getContentView().findViewById(R.id.toast_ll_wrap);
-				TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-						{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-				int colorGrayC = a.getColor(1, Color.GRAY);
-				int colorIcon = a.getColor(2, Color.GRAY);
-				a.recycle();
-				toast_ll.setBackgroundColor(colorGrayC);
-				TextView tv = (TextView) windowBrighness.getContentView().findViewById(R.id.toast_wrap);
-				tv.setTextColor(colorIcon);
-				tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-				tv.setText(newValue+"%");
-				windowBrighness.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
-				scheduleHideBrighnessWindow(500);
+				showCenterPopup(newValue+"%");
 			}
 		}
 
@@ -5996,7 +6227,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			String language = fileInfo.getLanguage();
 			log.v("update hyphenation language: " + language + " for " + fileInfo.getTitle());
-			mEngine.setHyphenationLanguage(language);
 			this.filename = fileInfo.getPathName();
 			this.path = fileInfo.arcname != null ? fileInfo.arcname : fileInfo.pathname;
 			this.inputStream = inputStream;
@@ -6518,7 +6748,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 													int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 													if (iSyncVariant > 0)
 														CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-																CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1);
+																CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, true);
 												}
 											}
 										}
@@ -6546,23 +6776,23 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //    	}
 	}
 
-	public void scheduleHideBrighnessWindow(final int delayMillis) {
+	public void scheduleHideWindowCenterPopup(final int delayMillis) {
 		// GUI thread required
 		BackgroundThread.instance().executeGUI(new Runnable() {
 			@Override
 			public void run() {
 				final int mylastHideBrighnessTaskId = ++lastHideBrighnessTaskId;
 				if (delayMillis <= 1) {
-					if (windowBrighness != null) {
-						windowBrighness.dismiss();
+					if (windowCenterPopup != null) {
+						windowCenterPopup.dismiss();
 					}
 				} else {
 					BackgroundThread.instance().postGUI(new Runnable() {
 						@Override
 						public void run() {
 							if (mylastHideBrighnessTaskId == lastHideBrighnessTaskId) {
-								if (windowBrighness != null) {
-									windowBrighness.dismiss();
+								if (windowCenterPopup != null) {
+									windowCenterPopup.dismiss();
 								}
 							}
 						}}, delayMillis);

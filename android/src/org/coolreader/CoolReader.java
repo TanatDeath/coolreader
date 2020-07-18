@@ -14,7 +14,9 @@ import java.util.Date;
 import java.util.Map;
 
 import org.coolreader.cloud.CloudSync;
+import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStat;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -2478,43 +2480,63 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void showOPDSBookInfo(final FileInfo item, final FileBrowser fb, FileInfo currDir) {
-		final ArrayList<String> itemsAll = new ArrayList<String>();
-		itemsAll.add("section=section.file");
+		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<BookInfoEntry>();
+		itemsAll.add(new BookInfoEntry("section","section.file","section"));
 		String sFormat = "";
 		if (item.format != null)
 			if (item.format != DocumentFormat.NONE)
 				sFormat = item.format.name();
-		itemsAll.add("file.format=" + sFormat);
-		itemsAll.add("file.name=" + item.pathname);
-		itemsAll.add("section=section.book");
+		itemsAll.add(new BookInfoEntry("file.format",sFormat,"text"));
+		itemsAll.add(new BookInfoEntry("file.name",item.pathname,"text"));
+		itemsAll.add(new BookInfoEntry("section","section.book","section"));
 		if (!StrUtils.isEmptyStr(item.authors))
-			itemsAll.add("book.authors="+item.getAuthors());
-		itemsAll.add("book.title="+item.title);
+			itemsAll.add(new BookInfoEntry("book.authors", item.getAuthors(),"text"));
+		itemsAll.add(new BookInfoEntry("book.title", item.title,"text"));
+		if (item.tag != null)
+			if (item.tag instanceof OPDSUtil.EntryInfo) {
+				OPDSUtil.EntryInfo ei = (OPDSUtil.EntryInfo) item.tag;
+				if (ei.categories != null)
+					for (String cat:  ei.categories) {
+						itemsAll.add(new BookInfoEntry(getString(R.string.category),cat,"text"));
+						//li.type
+					}
+				if (ei.links != null)
+					for (OPDSUtil.LinkInfo li:  ei.links) {
+						itemsAll.add(new BookInfoEntry((StrUtils.isEmptyStr(li.title)?getString(R.string.link):li.title),
+								li.href, "link:"+StrUtils.getNonEmptyStr(li.type,true)));
+					}
+				if (ei.otherElements != null) {
+					for (Map.Entry<String, String> entry : ei.otherElements.entrySet()) {
+						String key = (String) entry.getKey();
+						final String value = (String) entry.getValue();
+						itemsAll.add(new BookInfoEntry(key, value, "text"));
+					}
+				}
+			}
 		BookInfoDialog dlg = new BookInfoDialog(this, itemsAll, null, item.getFilename(),
 				BookInfoDialog.OPDS_INFO, item, fb, currDir);
 		dlg.show();
 	}
 
-	public void showBookInfo(BookInfo setBI, final int actionType, final FileInfo currDir) {
-		final ArrayList<String> itemsAll = new ArrayList<String>();
-		final ArrayList<String> itemsSys = new ArrayList<String>();
-		final ArrayList<String> itemsFile = new ArrayList<String>();
-		final ArrayList<String> itemsPos = new ArrayList<String>();
-		final ArrayList<String> itemsBook = new ArrayList<String>();
-		itemsSys.add("section=section.system");
-		itemsSys.add("system.version=KnownReader " + getVersion());
+	public void showBookInfo(BookInfo setBI, final int actionType, final FileInfo currDir,  final FileInfo origEntry) {
+		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<BookInfoEntry>();
+		final ArrayList<BookInfoEntry> itemsSys = new ArrayList<BookInfoEntry>();
+		final ArrayList<BookInfoEntry> itemsFile = new ArrayList<BookInfoEntry>();
+		final ArrayList<BookInfoEntry> itemsPos = new ArrayList<BookInfoEntry>();
+		final ArrayList<BookInfoEntry> itemsBook = new ArrayList<BookInfoEntry>();
+		itemsSys.add(new BookInfoEntry("section","section.system","section"));
+		itemsSys.add(new BookInfoEntry("system.version","KnownReader " + getVersion(),"text"));
 		if (getReaderView()!=null)
-			itemsSys.add("system.battery=" + getReaderView().getmBatteryState() + "%");
-		itemsSys.add("system.time=" + Utils.formatTime(this, System.currentTimeMillis()));
+			itemsSys.add(new BookInfoEntry("system.battery",getReaderView().getmBatteryState() + "%","text"));
+		itemsSys.add(new BookInfoEntry("system.time",Utils.formatTime(this, System.currentTimeMillis()),"text"));
 		if ((getReaderView()!=null)&&(getReaderView().getLastsetWidth()!=0)&&(getReaderView().getLastsetHeight()!=0))
-			itemsSys.add("system.resolution="+
-					"last requested ("+
-					Utils.formatTime(this,getReaderView().getRequestedResTime())+"): "+
-						getReaderView().getRequestedWidth()+" x "+getReaderView().getRequestedHeight()+
-					"; last set ("+Utils.formatTime(this,getReaderView().getLastsetResTime())+"): "+
-					+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight());
-		itemsSys.add("system.device_model=" + DeviceInfo.MANUFACTURER + " / "+DeviceInfo.MODEL+" / "+
-				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND);
+			itemsSys.add(new BookInfoEntry("system.resolution","last requested ("+
+							Utils.formatTime(this,getReaderView().getRequestedResTime())+"): "+
+							getReaderView().getRequestedWidth()+" x "+getReaderView().getRequestedHeight()+
+							"; last set ("+Utils.formatTime(this,getReaderView().getLastsetResTime())+"): "+
+							+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight(),"text"));
+		itemsSys.add(new BookInfoEntry("system.device_model",DeviceInfo.MANUFACTURER + " / "+DeviceInfo.MODEL+" / "+
+				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND,"text"));
 		String sDevFlags = "";
 		if (DeviceInfo.AMOLED_SCREEN) sDevFlags = sDevFlags + ", AMOLED screen";
 		if (DeviceInfo.isEinkScreen(false)) sDevFlags = sDevFlags + ", EINK screen";
@@ -2530,32 +2552,36 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (DeviceInfo.NAVIGATE_LEFTRIGHT) sDevFlags = sDevFlags + ", navigate left right";
 		if (DeviceInfo.REVERT_LANDSCAPE_VOLUME_KEYS) sDevFlags = sDevFlags + ", revert landscape volume keys";
 		if (!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) sDevFlags = sDevFlags + ", screen brightness cannot be controlled by swipe";
-
 		if (!sDevFlags.equals("")) sDevFlags=sDevFlags.substring(2);
-		itemsSys.add("system.device_flags=" + sDevFlags);
+		itemsSys.add(new BookInfoEntry("system.device_flags",sDevFlags,"text"));
 
 		final BookInfo bi = setBI;
 		if ( bi!=null ) {
 			FileInfo fi = bi.getFileInfo();
-			itemsFile.add("section=section.file");
+			itemsFile.add(new BookInfoEntry("section","section.file","section"));
 			String fname = new File(fi.pathname).getName();
-			itemsFile.add("file.name=" + fname);
-			if ( new File(fi.pathname).getParent()!=null )
-				itemsFile.add("file.path=" + new File(fi.pathname).getParent());
-			itemsFile.add("file.size=" + StrUtils.readableFileSize(fi.size));
+			itemsFile.add(new BookInfoEntry("file.name",fname,"text"));
+			if ( new File(fi.pathname).getParent()!=null ) {
+				File f = new File(fi.pathname);
+				itemsFile.add(new BookInfoEntry("file.path", f==null ? "" : f.getParent(), "text"));
+			}
+			itemsFile.add(new BookInfoEntry("file.size",StrUtils.readableFileSize(fi.size),"text"));
 			if ( fi.arcname!=null ) {
-				itemsFile.add("file.arcname=" + new File(fi.arcname).getName());
-				if ( new File(fi.arcname).getParent()!=null )
-					itemsFile.add("file.arcpath=" + new File(fi.arcname).getParent());
-				itemsFile.add("file.arcsize=" + StrUtils.readableFileSize(fi.arcsize));
+				File f = new File(fi.arcname);
+				itemsFile.add(new BookInfoEntry("file.arcname",f==null ? "" : f.getName(),"text"));
+				if ( new File(fi.arcname).getParent()!=null ) {
+					File f2 = new File(fi.arcname);
+					itemsFile.add(new BookInfoEntry("file.arcpath", f2==null ? "" : f2.getParent(),"text"));
+				}
+				itemsFile.add(new BookInfoEntry("file.arcsize",StrUtils.readableFileSize(fi.arcsize),"text"));
 			}
 			String sFormat = "";
 			if (fi.format != null)
 				if (fi.format != DocumentFormat.NONE)
 					sFormat = fi.format.name();
-			itemsFile.add("file.format=" + sFormat);
+			itemsFile.add(new BookInfoEntry("file.format", sFormat,"text"));
 			if (!StrUtils.isEmptyStr(fi.opdsLink)) {
-				itemsBook.add("file.opds_link=" + fi.opdsLink);
+				itemsBook.add(new BookInfoEntry("file.opds_link",fi.opdsLink,"text"));
 			}
 		}
 		execute( new Task() {
@@ -2567,35 +2593,35 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						bm =  getReaderView().getDoc().getCurrentPageBookmark();
 				if ( bm!=null ) {
 					PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos());
-					itemsPos.add("section=section.position");
+					itemsPos.add(new BookInfoEntry("section","section.position","section"));
 					if ( prop.pageMode!=0 ) {
-						itemsPos.add("position.page=" + (prop.pageNumber+1) + " / " + prop.pageCount);
+						itemsPos.add(new BookInfoEntry("position.page","" + (prop.pageNumber+1) + " / " + prop.pageCount,"text"));
 					}
 					int percent = (int)(10000 * (long)prop.y / prop.fullHeight);
-					itemsPos.add("position.percent=" + (percent/100) + "." + (percent%100) + "%" );
+					itemsPos.add(new BookInfoEntry("position.percent","" + (percent/100) + "." + (percent%100) + "%","text"));
 					String chapter = bm.getTitleText();
 					if ( chapter!=null && chapter.length()>100 )
 						chapter = chapter.substring(0, 100) + "...";
-					itemsPos.add("position.chapter=" + chapter);
+					itemsPos.add(new BookInfoEntry("position.chapter",chapter,"text"));
 				}
 			}
 			public void done() {
 				FileInfo fi = bi.getFileInfo();
-				itemsBook.add("section=section.book");
+				itemsBook.add(new BookInfoEntry("section","section.book","section"));
 				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null) {
-					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add("book.authors=" + fi.getAuthors().
-							replaceAll("\\|","; "));
-					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add("book.title=" + fi.title);
+					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add(new BookInfoEntry("book.authors",
+							fi.getAuthors().replaceAll("\\|","; "),"text"));
+					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add(new BookInfoEntry("book.title",fi.title,"text"));
 					if ( fi.series!=null ) {
 						String s = fi.series;
 						if ( fi.seriesNumber>0 )
 							s = s + " #" + fi.seriesNumber;
-						itemsBook.add("book.series=" + s);
+						itemsBook.add(new BookInfoEntry("book.series",s,"text"));
 					}
 				}
-				if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add("book.date=" + fi.getBookdate());
+				if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
 				if (!StrUtils.isEmptyStr(fi.language)) {
-					itemsBook.add("book.language=" + fi.language);
+					itemsBook.add(new BookInfoEntry("book.language",fi.language,"text"));
 				}
 				String genreText = "";
 				String genreR = fi.genre_list;
@@ -2647,21 +2673,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						}
 					}
 					if (!StrUtils.isEmptyStr(genreText))
-						itemsBook.add("book.genre=" + genreText);
+						itemsBook.add(new BookInfoEntry("book.genre", genreText,"text"));
 				}
 				String annot = "";
 				if (!StrUtils.isEmptyStr(fi.annotation)) {
 					annot = fi.annotation;
 				}
 				if (!StrUtils.isEmptyStr(fi.srclang)) {
-					itemsBook.add("book.srclang=" + fi.srclang);
+					itemsBook.add(new BookInfoEntry("book.srclang", fi.srclang,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.translator)) {
-					itemsBook.add("book.translator=" + fi.translator);
+					itemsBook.add(new BookInfoEntry("book.translator", fi.translator,"text"));
 				}
-				itemsBook.add("book.symcount=" + fi.symCount);
-				itemsBook.add("book.wordcount=" + fi.wordCount);
-
+				itemsBook.add(new BookInfoEntry("book.symcount", ""+fi.symCount,"text"));
+				itemsBook.add(new BookInfoEntry("book.wordcount", ""+fi.wordCount,"text"));
 				String sLeft = getString(R.string.not_enough_stat_data);
 				try {
 					ReadingStatRes sres = getReaderView().getBookInfo().getFileInfo().calcStats();
@@ -2712,81 +2737,82 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				} catch (Exception e) {
 					log.e("Min left error");
 				}
-				itemsBook.add("book.minleft=" + sLeft);
-				itemsBook.add("section=section.book_document");
+				itemsBook.add(new BookInfoEntry("book.minleft", sLeft,"text"));
+				itemsBook.add(new BookInfoEntry("section", "section.book_document","section"));
 				if (!StrUtils.isEmptyStr(fi.docauthor)) {
-					itemsBook.add("book.docauthor=" + fi.docauthor);
+					itemsBook.add(new BookInfoEntry("book.docauthor", fi.docauthor,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.docprogram)) {
-					itemsBook.add("book.docprogram=" + fi.docprogram);
+					itemsBook.add(new BookInfoEntry("book.docprogram", fi.docprogram,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.getDocdate())) {
-					itemsBook.add("book.docdate=" + fi.getDocdate());
+					itemsBook.add(new BookInfoEntry("book.docdate", fi.getDocdate(),"text"));
 				}
+				//new BookInfoEntry("", ,"text"));
 				if (!StrUtils.isEmptyStr(fi.docsrcurl)) {
-					itemsBook.add("book.docsrcurl=" + fi.docsrcurl);
+					itemsBook.add(new BookInfoEntry("book.docsrcurl", fi.docsrcurl,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.docsrcocr)) {
-					itemsBook.add("book.docsrcocr=" + fi.docsrcocr);
+					itemsBook.add(new BookInfoEntry("book.docsrcocr", fi.docsrcocr,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.docversion)) {
-					itemsBook.add("book.docversion=" + fi.docversion);
+					itemsBook.add(new BookInfoEntry("book.docversion", fi.docversion,"text"));
 				}
-				itemsBook.add("section=section.book_publisher");
+				itemsBook.add(new BookInfoEntry("section", "section.book_publisher","section"));
 				if (!StrUtils.isEmptyStr(fi.publname)) {
-					itemsBook.add("book.publname=" + fi.publname);
+					itemsBook.add(new BookInfoEntry("book.publname", fi.publname,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.publisher)) {
-					itemsBook.add("book.publisher=" + fi.publisher);
+					itemsBook.add(new BookInfoEntry("book.publisher", fi.publisher,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.publcity)) {
-					itemsBook.add("book.publcity=" + fi.publcity);
+					itemsBook.add(new BookInfoEntry("book.publcity", fi.publcity,"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.getPublyear())) {
-					itemsBook.add("book.publyear=" + fi.getPublyear());
+					itemsBook.add(new BookInfoEntry("book.publyear", fi.getPublyear(),"text"));
 				}
 				if (!StrUtils.isEmptyStr(fi.publisbn)) {
-					itemsBook.add("book.publisbn=" + fi.publisbn);
+					itemsBook.add(new BookInfoEntry("book.publisbn", fi.publisbn,"text"));
 				}
 				if ( fi.publseries!=null ) {
 					String s = fi.publseries;
 					if ( fi.publseriesNumber>0 )
 						s = s + " #" + fi.publseriesNumber;
-					itemsBook.add("book.publseries=" + s);
+					itemsBook.add(new BookInfoEntry("book.publseries", s,"text"));
 				}
-				itemsBook.add("section=section.book_translation");
+				itemsBook.add(new BookInfoEntry("section", "section.book_translation","section"));
 				String lfrom = "[empty]";
 				if (!StrUtils.isEmptyStr(fi.lang_from)) lfrom = fi.lang_from;
 				String lto = "[empty]";
 				if (!StrUtils.isEmptyStr(fi.lang_to)) lto = fi.lang_to;
-				itemsBook.add("book.translation=" + lfrom + " -> " + lto);
+				itemsBook.add(new BookInfoEntry("book.translation", lfrom + " -> " + lto,"text"));
 				if (itemsPos.size()==1) itemsPos.clear();
 				if (itemsBook.size()==1) itemsBook.clear();
 				if (itemsFile.size()==1) itemsFile.clear();
 				if (itemsSys.size()==1) itemsSys.clear();
 				boolean bSection = true;
-				for (String s: itemsPos) {
-					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+				for (BookInfoEntry s: itemsPos) {
+					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
 						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.startsWith("section=");
+					bSection=s.infoType.equals("section");
 					itemsAll.add(s);
 				}
-				for (String s: itemsBook) {
-					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+				for (BookInfoEntry s: itemsBook) {
+					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
 						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.startsWith("section=");
+					bSection=s.infoType.equals("section");
 					itemsAll.add(s);
 				}
-				for (String s: itemsFile) {
-					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+				for (BookInfoEntry s: itemsFile) {
+					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
 						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.startsWith("section=");
+					bSection=s.infoType.equals("section");
 					itemsAll.add(s);
 				}
-				for (String s: itemsSys) {
-					if ((bSection)&&(s.startsWith("section="))&&(itemsAll.size()>0))
+				for (BookInfoEntry s: itemsSys) {
+					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
 						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.startsWith("section=");
+					bSection=s.infoType.equals("section");
 					itemsAll.add(s);
 				}
 				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot,

@@ -26,6 +26,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -43,6 +44,8 @@ import android.widget.TextView;
 
 import uk.co.deanwild.flowtextview.FlowTextView;
 
+import static org.coolreader.crengine.FileInfo.OPDS_DIR_PREFIX;
+
 public class BookInfoDialog extends BaseDialog {
 
 	public final static int BOOK_INFO = 0;
@@ -54,6 +57,7 @@ public class BookInfoDialog extends BaseDialog {
 	private int mActionType;
 	private FileInfo mFileInfoOPDS;
 	private FileBrowser mFileBrowser;
+	private FileInfo mCurrDir;
 	private final LayoutInflater mInflater;
 	private FileInfo mFileInfoSearchDir = null;
 	private String mAuthors = "";
@@ -148,13 +152,11 @@ public class BookInfoDialog extends BaseDialog {
 			}
 	}
 	
-	private void addItem(TableLayout table, String item) {
-		int p = item.indexOf("=");
-		if ( p<0 )
-			return;
-		String name = item.substring(0, p).trim();
+	private void addItem(TableLayout table, BookInfoEntry item) {
+		String name = item.infoTitle;
 		String name1 = name;
-		String value = item.substring(p+1).trim();
+		String value = item.infoValue;
+		String typ = item.infoType;
 		if ( name.length()==0 || value.length()==0 )
 			return;
 		boolean isSection = false;
@@ -176,7 +178,7 @@ public class BookInfoDialog extends BaseDialog {
 		TableRow tableRow = (TableRow)mInflater.inflate(isSection ? R.layout.book_info_section : R.layout.book_info_item, null);
 		ImageView btnOptionAddInfo = null;
 		if (isSection) btnOptionAddInfo = (ImageView)tableRow.findViewById(R.id.btn_book_add_info);
-		if ((!item.equals("section=section.book"))||((StrUtils.isEmptyStr(sBookTitle))&&(StrUtils.isEmptyStr(sFileName)))) {
+		if ((!item.infoValue.equals("section.book"))||((StrUtils.isEmptyStr(sBookTitle))&&(StrUtils.isEmptyStr(sFileName)))) {
 		//if (name.equals("section=section.book")) {
 			if (btnOptionAddInfo!=null) btnOptionAddInfo.setVisibility(View.INVISIBLE);
 		} else {
@@ -205,6 +207,7 @@ public class BookInfoDialog extends BaseDialog {
 		TextView valueView = (TextView)tableRow.findViewById(R.id.value);
 		nameView.setText(name);
 		valueView.setText(value);
+		valueView.setTag(name);
 		if (name.equals(activity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
 		if (name.equals(activity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
 		if (name.equals(activity.getString(R.string.book_info_stats_minutes_left))) tvML = valueView;
@@ -338,18 +341,63 @@ public class BookInfoDialog extends BaseDialog {
 			final ViewGroup vg = (ViewGroup) valueView.getParent();
 			vg.addView(translButton);
 		}
-		valueView.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				String text = ((TextView) v).getText().toString();
-				if ( text!=null && text.length()>0 ) {
-					ClipboardManager cm = activity.getClipboardmanager();
-					cm.setText(text);
-					L.i("Setting clipboard text: " + text);
-					activity.showToast(activity.getString(R.string.copied_to_clipboard)+": "+text,v);
-				}
+		if (typ.startsWith("link")) {
+			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			if (typ.contains("application/atom+xml")) {
+				valueView.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						String text = ((TextView) v).getText().toString();
+						if (text != null && text.length() > 0)
+							if (mFileBrowser != null) {
+								FileInfo item = new FileInfo();
+								item.pathname = OPDS_DIR_PREFIX + text;
+								item.parent = mCurrDir;
+								if (((TextView) v).getTag()!=null) {
+									item.title = ((TextView) v).getTag().toString();
+									item.setFilename(item.title);
+								}
+								BackgroundThread.instance().postBackground(new Runnable() {
+									@Override
+									public void run() {
+										BackgroundThread.instance().postGUI(new Runnable() {
+											@Override
+											public void run() {
+												mFileBrowser.showOPDSDir(item, null, "");
+											}
+										}, 200);
+									}
+								});
+								dismiss();
+							}
+						}
+				});
+			} else {
+				Linkify.addLinks(valueView, Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
+				valueView.setLinksClickable(true);
+				int colorGrayC;
+				int colorIcon;
+				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+						{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
+				colorGrayC = a.getColor(0, Color.GRAY);
+				colorIcon = a.getColor(2, Color.BLACK);
+				a.recycle();
+				valueView.setLinkTextColor(colorIcon);
+				valueView.setTextColor(colorIcon);
 			}
-		});
-
+		}
+		if (typ.equals("text")) {
+			valueView.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					String text = ((TextView) v).getText().toString();
+					if (text != null && text.length() > 0) {
+						ClipboardManager cm = activity.getClipboardmanager();
+						cm.setText(text);
+						L.i("Setting clipboard text: " + text);
+						activity.showToast(activity.getString(R.string.copied_to_clipboard) + ": " + text, v);
+					}
+				}
+			});
+		}
 		table.addView(tableRow);
 	}
 
@@ -434,7 +482,7 @@ public class BookInfoDialog extends BaseDialog {
 		}
 	}
 	
-	public BookInfoDialog(final BaseActivity activity, Collection<String> items, BookInfo bi, final String annt,
+	public BookInfoDialog(final BaseActivity activity, Collection<BookInfoEntry> items, BookInfo bi, final String annt,
 						  int actionType, FileInfo fiOPDS, FileBrowser fb, FileInfo currDir)
 	{
 		super("BookInfoDialog", activity, null, false, false);
@@ -453,6 +501,7 @@ public class BookInfoDialog extends BaseDialog {
 		mActionType = actionType;
 		mFileInfoOPDS = fiOPDS;
 		mFileBrowser = fb;
+		mCurrDir = currDir;
 		FileInfo file = null;
 		if (mBookInfo!=null)
 			file = mBookInfo.getFileInfo();
@@ -463,15 +512,15 @@ public class BookInfoDialog extends BaseDialog {
 				FileInfo par = currDir;
 				while (par.parent != null) par=par.parent;
 				for (int i=0; i<par.dirCount(); i++)
-					if (par.getDir(i).pathname.startsWith(FileInfo.OPDS_DIR_PREFIX + "search:")) {
+					if (par.getDir(i).pathname.startsWith(OPDS_DIR_PREFIX + "search:")) {
 						mFileInfoSearchDir = par.getDir(i);
 						break;
 					}
 			}
 		}
-		for (String s: items) {
-			if (s.startsWith("book.authors=")) {
-				mAuthors = s.substring("book.authors=".length()).trim();
+		for (BookInfoEntry s: items) {
+			if (s.infoTitle.equals("book.authors")) {
+				mAuthors = s.infoValue;
 			}
 		}
 		DisplayMetrics outMetrics = new DisplayMetrics();
@@ -735,17 +784,14 @@ public class BookInfoDialog extends BaseDialog {
 			parent.removeView(btnMarkToRead);
 			parent.removeView(btnFindAuthors);
 		}
-		for ( String item : items ) {
-			int p = item.indexOf("=");
-			if ( p>=0 ) {
-				String name = item.substring(0, p).trim();
-				String value = item.substring(p + 1).trim();
-				if (name.equals("file.name")) sFileName = value;
-				if (name.equals("book.authors")) sAuthors = value.replace("|",", ");
-				if (name.equals("book.title")) sBookTitle = value;
-			}
+		for ( BookInfoEntry item : items ) {
+			String name = item.infoTitle;
+			String value = item.infoValue;
+			if (name.equals("file.name")) sFileName = value;
+			if (name.equals("book.authors")) sAuthors = value.replace("|",", ");
+			if (name.equals("book.title")) sBookTitle = value;
 		}
-		for ( String item : items ) {
+		for ( BookInfoEntry item : items ) {
 			addItem(table, item);
 		}
 		buttonsLayout = (ViewGroup)view.findViewById(R.id.base_dlg_button_panel);
