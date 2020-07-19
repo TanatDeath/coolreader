@@ -590,7 +590,7 @@ public class CloudSync {
     }
 
     public static void loadFromJsonInfoFileList(CoolReader cr, int iSaveType, boolean bQuiet,
-                                                boolean fromFile, boolean findingLastPos) {
+                                                boolean fromFile, boolean findingLastPos, boolean bErrorQuiet) {
         Log.d(TAG, "Starting load json file list from drive...");
         String sCRC = "";
         if (iSaveType != CLOUD_SAVE_SETTINGS) {
@@ -612,7 +612,7 @@ public class CloudSync {
             String fileMark = "_rpos_";
             if (iSaveType == CLOUD_SAVE_BOOKMARKS) fileMark = "_bmk_";
 			if (iSaveType == CLOUD_SAVE_SETTINGS) fileMark = "_settings_";
-            CloudAction.yndLoadJsonFileList(cr, fileMark, sCRC, findingLastPos);
+            CloudAction.yndLoadJsonFileList(cr, fileMark, sCRC, findingLastPos, bErrorQuiet);
         }
     }
 

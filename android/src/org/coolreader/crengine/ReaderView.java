@@ -196,6 +196,7 @@ import com.google.gson.GsonBuilder;
 		protected void doDraw(Canvas canvas)
 		{
 			try {
+
 				log.d("doDraw() called");
 				if (isProgressActive()) {
 					log.d("onDraw() -- drawing progress " + (currentProgressPosition / 100));
@@ -2828,6 +2829,14 @@ import com.google.gson.GsonBuilder;
 		});
 	}
 
+	public void setTimeLeft() {
+		String sLeft = "";
+		if (getBookInfo() != null)
+			if (getBookInfo().getFileInfo() != null)
+				sLeft = mActivity.getReadingTimeLeft(getBookInfo().getFileInfo(),false);
+		doc.setTimeLeft(sLeft);
+	}
+
 	public void onCommand(final ReaderCommand cmd, final int param, final Runnable onFinishHandler) {
 		BackgroundThread.ensureGUI();
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
@@ -2959,6 +2968,7 @@ import com.google.gson.GsonBuilder;
 		case DCMD_MOVE_BY_CHAPTER:
 			if (isBookLoaded())
 				doEngineCommand(cmd, param, onFinishHandler);
+			setTimeLeft();
             drawPage();
 			break;
 		case DCMD_PAGEDOWN:
@@ -3008,6 +3018,7 @@ import com.google.gson.GsonBuilder;
 					}
 				}
 			}
+			setTimeLeft();
 			break;
 		case DCMD_PAGEUP:
 			if (isBookLoaded()) {
@@ -3032,11 +3043,14 @@ import com.google.gson.GsonBuilder;
 					}
 				}
 			}
+			setTimeLeft();
 			break;
 		case DCMD_BEGIN:
+			setTimeLeft();
 		case DCMD_END:
 			if (isBookLoaded())
 				doEngineCommand(cmd, param);
+			setTimeLeft();
 			break;
 		case DCMD_RECENT_BOOKS_LIST:
 			mActivity.showRecentBooks();
@@ -3161,7 +3175,7 @@ import com.google.gson.GsonBuilder;
 				if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 				else
 					CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-							CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, false);
+							CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, false, false);
 			}
 			break;
 		case DCMD_SAVE_READING_POS:
@@ -3187,7 +3201,7 @@ import com.google.gson.GsonBuilder;
 				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, false);
+						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, false, false);
 			}
 			break;
 		case DCMD_SAVE_BOOKMARKS:
@@ -3211,7 +3225,7 @@ import com.google.gson.GsonBuilder;
 				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, false);
+						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, false, false);
 			}
 			break;
 		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND:
@@ -3283,7 +3297,7 @@ import com.google.gson.GsonBuilder;
 							if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 							else
 								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false);
+										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_READING_POS) {
@@ -3309,7 +3323,7 @@ import com.google.gson.GsonBuilder;
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, false);
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, false, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
@@ -3333,7 +3347,7 @@ import com.google.gson.GsonBuilder;
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, false);
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, false, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
@@ -3479,6 +3493,7 @@ import com.google.gson.GsonBuilder;
 	{
 		doEngineCommand( cmd, param, null );
 	}
+
 	public void doEngineCommand(final ReaderCommand cmd, final int param, final Runnable doneHandler)
 	{
 		BackgroundThread.ensureGUI();
@@ -6405,7 +6420,7 @@ import com.google.gson.GsonBuilder;
 									if (iSyncVariant3 != 0) {
 										if (mActivity.mCurrentFrame == mActivity.getmReaderFrame())
 											CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-												CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
+												CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, true, true);
 									}
 								}
 							}
@@ -7226,11 +7241,13 @@ import com.google.gson.GsonBuilder;
 				drawPage();
 			}
 		});
+		setTimeLeft();
 	}
 
 	public void goToPage(int pageNumber) {
 		BackgroundThread.ensureGUI();
 		doEngineCommand(ReaderCommand.DCMD_GO_PAGE, pageNumber-1);
+		setTimeLeft();
 	}
 
 	public void goToPercent(final int percent) {
@@ -7245,6 +7262,7 @@ import com.google.gson.GsonBuilder;
 					}
 				}
 			});
+		setTimeLeft();
 	}
 
 	public interface MoveSelectionCallback {

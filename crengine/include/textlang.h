@@ -87,6 +87,8 @@ public:
 
     static HyphMethod * getMainLangHyphMethod(); // For HyphMan::hyphenate()
 
+    static void resetCounters();
+
     // For frontend info about TextLangMan status and seen langs
     static LVPtrVector<TextLangCfg> * getLangCfgList() {
         return &_lang_cfg_list;
@@ -108,6 +110,12 @@ class TextLangCfg
     lString16 _lang_tag;
     HyphMethod * _hyph_method;
 
+    lString16 _open_quote1;
+    lString16 _close_quote1;
+    lString16 _open_quote2;
+    lString16 _close_quote2;
+    int _quote_nesting_level;
+
     #if USE_HARFBUZZ==1
     hb_language_t _hb_language;
     #endif
@@ -118,6 +126,8 @@ class TextLangCfg
     #endif
 
     bool _duplicate_real_hyphen_on_next_line;
+
+    void resetCounters();
 
 public:
     lString16 getLangTag() const { return _lang_tag; }
@@ -137,6 +147,9 @@ public:
     HyphMethod * getDefaultHyphMethod() const {
         return _hyph_method;
     }
+
+    lString16 & getOpeningQuote( bool update_level=true );
+    lString16 & getClosingQuote( bool update_level=true );
 
     #if USE_HARFBUZZ==1
     hb_language_t getHBLanguage() const { return _hb_language; }

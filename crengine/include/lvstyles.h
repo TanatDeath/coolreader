@@ -85,20 +85,27 @@ enum css_style_rec_important_bit {
     imp_bit_float                 = 1ULL << 55,
     imp_bit_clear                 = 1ULL << 56,
     imp_bit_direction             = 1ULL << 57,
-    imp_bit_cr_hint               = 1ULL << 58
+    imp_bit_content               = 1ULL << 58,
+    imp_bit_cr_hint               = 1ULL << 59
 };
+
+// Style handling flags
+#define STYLE_REC_FLAG_MATCHED  0x01 // This style has had some stylesheet declaration matched and applied.
+                                     // Currently only used for a pseudo element style,
+                                     // see LVCssSelector::apply() if more generic usage needed.
 
 /**
     \brief Element style record.
 
     Contains set of style properties.
 */
-typedef struct css_style_rec_tag {
+typedef struct css_style_rec_tag css_style_rec_t;
+struct css_style_rec_tag {
     int                  refCount; // for reference counting
     lUInt32              hash; // cache calculated hash value here
     lUInt64              important;  // bitmap for !important (used only by LVCssDeclaration)
-                                     // we have currently below 59 css properties
-                                     // lvstsheet knows about 81, which are mapped to these 59
+                                     // we have currently below 60 css properties
+                                     // lvstsheet knows about 82, which are mapped to these 60
                                      // update bits above if you add new properties below
     lUInt64              importance; // bitmap for important bit's importance/origin
                                      // (allows for 2 level of !important importance)
@@ -147,7 +154,14 @@ typedef struct css_style_rec_tag {
     css_float_t            float_; // "float" is a C++ keyword...
     css_clear_t            clear;
     css_direction_t        direction;
+    lString16              content;
     css_cr_hint_t          cr_hint;
+    // The following should only be used when applying stylesheets while in lvend.cpp setNodeStyle(),
+    // and cleaned up there, before the style is cached and shared. They are not serialized.
+    lInt8                flags; // bitmap of STYLE_REC_FLAG_*
+    css_style_rec_t *    pseudo_elem_before_style;
+    css_style_rec_t *    pseudo_elem_after_style;
+
     css_style_rec_tag()
     : refCount(0)
     , hash(0)
@@ -192,6 +206,9 @@ typedef struct css_style_rec_tag {
     , clear(css_c_none)
     , direction(css_dir_inherit)
     , cr_hint(css_cr_hint_none)
+    , flags(0)
+    , pseudo_elem_before_style(NULL)
+    , pseudo_elem_after_style(NULL)
     {
         // css_length_t fields are initialized by css_length_tag()
         // to (css_val_screen_px, 0)
@@ -236,7 +253,7 @@ typedef struct css_style_rec_tag {
             if (is_important == 0x3) importance |= bit;
         }
     }
-} css_style_rec_t;
+};
 
 /// style record reference type
 typedef LVFastRef< css_style_rec_t > css_style_ref_t;
@@ -264,18 +281,16 @@ enum lvdom_element_render_method
     erm_block,         ///< render as block element (render as containing other elements)
     erm_final,         ///< final element: render the whole it's content as single render block
     erm_inline,        ///< inline element
-    erm_mixed,         ///< block and inline elements are mixed: autobox inline portions of nodes; TODO
-    erm_list_item,     ///< render as block element as list item
+    erm_runin,         ///< run-in (used as a solution to inline FB2 footnotes)
     erm_table,         ///< table element: render as table
-    erm_table_row_group, ///< table row group
+    erm_table_row_group,    ///< table row group
     erm_table_header_group, ///< table header group
     erm_table_footer_group, ///< table footer group
-    erm_table_row,  ///< table row
+    erm_table_row,          ///< table row
     erm_table_column_group, ///< table column group
-    erm_table_column, ///< table column
-    erm_table_cell, ///< table cell
-    erm_table_caption, ///< table caption
-    erm_runin          ///< run-in
+    erm_table_column,       ///< table column
+    // Note that table cells always become either erm_block or erm_final depending on their content
+    // and that table captions are set erm_final.
 };
 
 /// node format record

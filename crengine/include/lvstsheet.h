@@ -46,6 +46,7 @@
 
 #include "cssdef.h"
 #include "lvstyles.h"
+#include "textlang.h"
 
 class lxmlDocBase;
 struct ldomNode;
@@ -87,48 +88,6 @@ public:
 };
 
 typedef LVRef<LVCssDeclaration> LVCssDeclRef;
-
-// See https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
-enum LVCssSelectorPseudoClass
-{
-    csspc_root,             // :root
-    csspc_dir,              // :dir(rtl), :dir(ltr)
-    csspc_first_child,      // :first-child
-    csspc_first_of_type,    // :first-of-type
-    csspc_nth_child,        // :nth-child(even), :nth-child(3n+4)
-    csspc_nth_of_type,      // :nth-of-type()
-    // Those after this won't be valid when checked in the initial
-    // document loading phase when the XML is being parsed, as at
-    // this point, the checked node is always the last node as we
-    // haven't yet parsed its following siblings. When meeting one,
-    // we'll need to re-render and re-check styles after load with
-    // a fully built DOM.
-    csspc_last_child,       // :last-child
-    csspc_last_of_type,     // :last-of-type
-    csspc_nth_last_child,   // :nth-last-child()
-    csspc_nth_last_of_type, // :nth-last-of-type()
-    csspc_only_child,       // :only-child
-    csspc_only_of_type,     // :only-of-type
-    csspc_empty,            // :empty
-};
-
-static const char * css_pseudo_classes[] =
-{
-    "root",
-    "dir",
-    "first-child",
-    "first-of-type",
-    "nth-child",
-    "nth-of-type",
-    "last-child",
-    "last-of-type",
-    "nth-last-child",
-    "nth-last-of-type",
-    "only-child",
-    "only-of-type",
-    "empty",
-    NULL
-};
 
 enum LVCssSelectorRuleType
 {
@@ -198,22 +157,33 @@ private:
     lUInt16 _id;
     LVCssDeclRef _decl;
     int _specificity;
+    int _pseudo_elem; // from enum LVCssSelectorPseudoElement, or 0
     LVCssSelector * _next;
     LVCssSelectorRule * _rules;
     void insertRuleStart( LVCssSelectorRule * rule );
     void insertRuleAfterStart( LVCssSelectorRule * rule );
 public:
     LVCssSelector( LVCssSelector & v );
-    LVCssSelector() : _id(0), _specificity(0), _next(NULL), _rules(NULL) { }
-    LVCssSelector(int specificity) : _id(0), _specificity(specificity), _next(NULL), _rules(NULL) { }
+    LVCssSelector() : _id(0), _specificity(0), _pseudo_elem(0),  _next(NULL), _rules(NULL) { }
+    LVCssSelector(int specificity) : _id(0), _specificity(specificity), _pseudo_elem(0), _next(NULL), _rules(NULL) { }
     ~LVCssSelector() { if (_next) delete _next; if (_rules) delete _rules; }
     bool parse( const char * &str, lxmlDocBase * doc );
     lUInt16 getElementNameId() { return _id; }
     bool check( const ldomNode * node ) const;
+    void applyToPseudoElement( const ldomNode * node, css_style_rec_t * style ) const;
     void apply( const ldomNode * node, css_style_rec_t * style ) const
     {
-        if (check( node ))
-            _decl->apply(style);
+        if (check( node )) {
+            if ( _pseudo_elem > 0 ) {
+                applyToPseudoElement(node, style);
+            }
+            else {
+                _decl->apply(style);
+            }
+            // style->flags |= STYLE_REC_FLAG_MATCHED;
+            // Done in applyToPseudoElement() as currently only needed there.
+            // Uncomment if more generic usage needed.
+        }
     }
     void setDeclaration( LVCssDeclRef decl ) { _decl = decl; }
     int getSpecificity() { return _specificity; }
@@ -304,6 +274,12 @@ public:
 
 /// parse color value like #334455, #345 or red
 bool parse_color_value( const char * & str, css_length_t & value );
+
+/// update (if needed) a style->content (parsed from the CSS declaration) before
+//  applying to a node's style
+void update_style_content_property( css_style_rec_t * style, ldomNode * node );
+/// get the computed final text value for a node from its style->content
+lString16 get_applied_content_property( ldomNode * node );
 
 /// extract @import filename from beginning of CSS
 bool LVProcessStyleSheetImport( const char * &str, lString8 & import_file );

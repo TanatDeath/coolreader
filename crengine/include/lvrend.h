@@ -36,10 +36,12 @@
 #define RENDER_RECT_FLAG_NO_CLEAR_OWN_FLOATS                0x0020
 #define RENDER_RECT_FLAG_FINAL_FOOTPRINT_AS_SAVED_FLOAT_IDS 0x0040
 #define RENDER_RECT_FLAG_FLOATBOX_IS_RIGHT                  0x0080
+#define RENDER_RECT_FLAG_NO_INTERLINE_SCALE_UP              0x0100 // for ruby elements to not scale up
 
-#define RENDER_RECT_SET_FLAG(r, f)   ( r.setFlags( r.getFlags() | RENDER_RECT_FLAG_##f ) )
-#define RENDER_RECT_UNSET_FLAG(r, f) ( r.setFlags( r.getFlags() & ~RENDER_RECT_FLAG_##f ) )
-#define RENDER_RECT_HAS_FLAG(r, f)   ( (bool)(r.getFlags() & RENDER_RECT_FLAG_##f) )
+#define RENDER_RECT_SET_FLAG(r, f)     ( r.setFlags( r.getFlags() | RENDER_RECT_FLAG_##f ) )
+#define RENDER_RECT_UNSET_FLAG(r, f)   ( r.setFlags( r.getFlags() & ~RENDER_RECT_FLAG_##f ) )
+#define RENDER_RECT_HAS_FLAG(r, f)     ( (bool)(r.getFlags() & RENDER_RECT_FLAG_##f) )
+#define RENDER_RECT_PTR_HAS_FLAG(r, f) ( (bool)(r->getFlags() & RENDER_RECT_FLAG_##f) )
 
 #define RENDER_RECT_FLAG_DIRECTION_MASK                     0x0007
 #define RENDER_RECT_SET_DIRECTION(r, d)   ( r.setFlags( r.getFlags() | d ) )
@@ -98,6 +100,7 @@ public:
     void generateEmbeddedFloatsFromFootprints( int final_width );
     void generateEmbeddedFloatsFromFloatIds( ldomNode * node, int final_width );
     void forwardOverflowingFloat( int x, int y, int w, int h, bool r, ldomNode * node );
+    int getTopShiftX(int final_width, bool get_right_shift=false);
 
     BlockFloatFootprint( FlowState * fl=NULL, int dleft=0, int dtop=0, bool noclearownfloats=false ) :
         flow(fl), d_left(dleft), d_top(dtop), no_clear_own_floats(noclearownfloats),
@@ -118,9 +121,9 @@ void initFormatData( ldomNode * node );
 /// initializes rendering method for node
 int initRendMethod( ldomNode * node, bool recurseChildren, bool allowAutoboxing );
 /// converts style to text formatting API flags
-int styleToTextFmtFlags( const css_style_ref_t & style, int oldflags, int direction=REND_DIRECTION_UNSET );
+lUInt32 styleToTextFmtFlags( bool is_block, const css_style_ref_t & style, lUInt32 oldflags, int direction=REND_DIRECTION_UNSET );
 /// renders block as single text formatter object
-void renderFinalBlock( ldomNode * node, LFormattedText * txform, RenderRectAccessor * fmt, int & flags,
+void renderFinalBlock( ldomNode * node, LFormattedText * txform, RenderRectAccessor * fmt, lUInt32 & flags,
                        int indent, int line_h, TextLangCfg * lang_cfg=NULL, int valign_dy=0, bool * is_link_start=NULL );
 /// renders block which contains subblocks (with gRenderBlockRenderingFlags as flags)
 int renderBlockElement( LVRendPageContext & context, ldomNode * enode, int x, int y, int width, int direction=REND_DIRECTION_UNSET, int * baseline=NULL );
@@ -129,7 +132,7 @@ int renderBlockElement( LVRendPageContext & context, ldomNode * enode, int x, in
 /// renders table element
 int renderTable( LVRendPageContext & context, ldomNode * element, int x, int y, int width,
                  bool shrink_to_fit, int & fitted_width, int direction=REND_DIRECTION_UNSET,
-                 bool pb_inside_avoid=false, bool enhanced_rendering=false );
+                 bool pb_inside_avoid=false, bool enhanced_rendering=false, bool is_ruby_table=false );
 /// sets node style
 void setNodeStyle( ldomNode * node, css_style_ref_t parent_style, LVFontRef parent_font );
 /// copy style
@@ -146,7 +149,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * node, int x0, int y0, int dx,
 // full function for recursive use:
 void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direction, bool ignorePadding, int rendFlags,
             int &curMaxWidth, int &curWordWidth, bool &collapseNextSpace, int &lastSpaceWidth,
-            int indent, TextLangCfg * lang_cfg, bool isStartNode=false);
+            int indent, TextLangCfg * lang_cfg, bool processNodeAsText=false, bool isStartNode=false);
 // simpler function for first call:
 void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direction=REND_DIRECTION_UNSET, bool ignorePadding=false, int rendFlags=0);
 

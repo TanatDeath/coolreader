@@ -341,6 +341,15 @@ JNIEXPORT jint JNICALL Java_org_coolreader_crengine_DocView_swapToCacheInternal
 JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_getPageImageTextureInternal
   (JNIEnv *, jobject, jintArray, jint, jint, jint);
 
+/*
+ * Class:     org_coolreader_crengine_DocView
+ * Method:    setTimeLeftInternal
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftInternal
+        (JNIEnv *, jobject, jstring);
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -1019,7 +1019,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					if (iSyncVariant3 != 0) {
 						if (mCurrentFrame == mReaderFrame)
 							CloudSync.loadFromJsonInfoFileList(CoolReader.this,
-									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, true);
+									CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, true, true);
 					}
 				}
 			}, 5000);
@@ -2518,6 +2518,73 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		dlg.show();
 	}
 
+	public String getReadingTimeLeft(FileInfo fi, boolean defString) {
+		String sLeft = getString(R.string.not_enough_stat_data);
+		if (!defString) sLeft = "";
+		try {
+			ReadingStatRes sres = getReaderView().getBookInfo().getFileInfo().calcStats();
+			double speedKoef = sres.val;
+			int pagesLeft;
+			double msecLeft;
+			double msecFivePages;
+			if (speedKoef > 0.000001) {
+				PositionProperties currpos = getReaderView().getDoc().getPositionProps(null);
+				if (fi.symCount>0) {
+					pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+					double msecAllPages;
+					msecAllPages = speedKoef * (double) fi.symCount;
+					msecFivePages = msecAllPages / ((double) getReaderView().getDoc().getPageCount()) * 5.0;
+					msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+					sLeft = " ";
+					int minutes = (int) ((msecLeft / 1000) / 60);
+					int hours = (int) ((msecLeft / 1000) / 60 / 60);
+					if (hours>0) {
+						minutes = minutes - (hours * 60);
+						if (!defString)
+							sLeft = sLeft + hours + "h "+minutes+"m";
+						else
+							sLeft = sLeft + hours + "h "+minutes+"min (calc count: "+ sres.cnt +")";
+					} else {
+						if (!defString)
+							sLeft = sLeft + minutes + "m";
+						else
+							sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
+					}
+				} else {
+					if (currpos.pageNumber > 4) {
+						int fivePages = StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 1), true).length() +
+								StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 2), true).length() +
+								StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 3), true).length() +
+								StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 4), true).length() +
+								StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 5), true).length();
+						msecFivePages = speedKoef * (double) fivePages;
+						pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+						msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+						sLeft = " ";
+						int minutes = (int) ((msecLeft / 1000) / 60);
+						int hours = (int) ((msecLeft / 1000) / 60 / 60);
+						if (hours>0) {
+							minutes = minutes - (hours * 60);
+							if (!defString)
+								sLeft = sLeft + hours + "h "+minutes + "m";
+							else
+								sLeft = sLeft + hours + "h "+minutes + "min (calc count: "+ sres.cnt +")";
+						} else {
+							if (!defString)
+								sLeft = sLeft + minutes + "m";
+							else
+								sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
+						}
+					}
+				}
+				;
+			}
+		} catch (Exception e) {
+			log.e("Min left error");
+		}
+		return sLeft;
+	}
+
 	public void showBookInfo(BookInfo setBI, final int actionType, final FileInfo currDir,  final FileInfo origEntry) {
 		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<BookInfoEntry>();
 		final ArrayList<BookInfoEntry> itemsSys = new ArrayList<BookInfoEntry>();
@@ -2687,56 +2754,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 				itemsBook.add(new BookInfoEntry("book.symcount", ""+fi.symCount,"text"));
 				itemsBook.add(new BookInfoEntry("book.wordcount", ""+fi.wordCount,"text"));
-				String sLeft = getString(R.string.not_enough_stat_data);
-				try {
-					ReadingStatRes sres = getReaderView().getBookInfo().getFileInfo().calcStats();
-					double speedKoef = sres.val;
-					int pagesLeft;
-					double msecLeft;
-					double msecFivePages;
-					if (speedKoef > 0.000001) {
-						PositionProperties currpos = getReaderView().getDoc().getPositionProps(null);
-						if (fi.symCount>0) {
-							pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
-							double msecAllPages;
-							msecAllPages = speedKoef * (double) fi.symCount;
-							msecFivePages = msecAllPages / ((double) getReaderView().getDoc().getPageCount()) * 5.0;
-							msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
-							sLeft = " ";
-							int minutes = (int) ((msecLeft / 1000) / 60);
-							int hours = (int) ((msecLeft / 1000) / 60 / 60);
-							if (hours>0) {
-								minutes = minutes - (hours * 60);
-								sLeft = sLeft + hours + "h "+minutes+"min (calc count: "+ sres.cnt +")";
-							} else {
-								sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
-							}
-						} else {
-							if (currpos.pageNumber > 4) {
-								int fivePages = StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 1), true).length() +
-										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 2), true).length() +
-										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 3), true).length() +
-										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 4), true).length() +
-										StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 5), true).length();
-								msecFivePages = speedKoef * (double) fivePages;
-								pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
-								msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
-								sLeft = " ";
-								int minutes = (int) ((msecLeft / 1000) / 60);
-								int hours = (int) ((msecLeft / 1000) / 60 / 60);
-								if (hours>0) {
-									minutes = minutes - (hours * 60);
-									sLeft = sLeft + hours + "h "+minutes + "min (calc count: "+ sres.cnt +")";
-								} else {
-									sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
-								}
-							}
-						}
-						;
-					}
-				} catch (Exception e) {
-					log.e("Min left error");
-				}
+				String sLeft = getReadingTimeLeft(fi,true);
 				itemsBook.add(new BookInfoEntry("book.minleft", sLeft,"text"));
 				itemsBook.add(new BookInfoEntry("section", "section.book_document","section"));
 				if (!StrUtils.isEmptyStr(fi.docauthor)) {

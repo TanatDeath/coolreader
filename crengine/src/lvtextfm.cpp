@@ -43,6 +43,8 @@
 
 #define SPACE_WIDTH_SCALE_PERCENT 100
 #define MIN_SPACE_CONDENSING_PERCENT 50
+#define UNUSED_SPACE_THRESHOLD_PERCENT 5
+#define MAX_ADDED_LETTER_SPACING_PERCENT 0
 
 
 // to debug formatter
@@ -69,6 +71,9 @@
 
 #define FRM_ALLOC_SIZE 16
 #define FLT_ALLOC_SIZE 4
+
+// lvfreetypeface.cpp
+extern bool isHBScriptCursive( hb_script_t script );
 
 formatted_line_t * lvtextAllocFormattedLine( )
 {
@@ -150,6 +155,7 @@ formatted_text_fragment_t * lvtextAllocFormatter( lUInt16 width )
     pbuffer->strut_height = 0;
     pbuffer->strut_baseline = 0;
     pbuffer->is_reusable = true;
+    pbuffer->light_formatting = false;
     int defMode = MAX_IMAGE_SCALE_MUL > 1 ? (ARBITRARY_IMAGE_SCALE_ENABLED==1 ? 2 : 1) : 0;
     int defMult = MAX_IMAGE_SCALE_MUL;
     // Notes from thornyreader:
@@ -165,6 +171,8 @@ formatted_text_fragment_t * lvtextAllocFormatter( lUInt16 width )
     pbuffer->img_zoom_out_scale_inline = defMult; /**< max scale for inline images zoom out: 1, 2, 3 */
     pbuffer->space_width_scale_percent = SPACE_WIDTH_SCALE_PERCENT; // 100% (keep original width)
     pbuffer->min_space_condensing_percent = MIN_SPACE_CONDENSING_PERCENT; // 50%
+    pbuffer->unused_space_threshold_percent = UNUSED_SPACE_THRESHOLD_PERCENT; // 5%
+    pbuffer->max_added_letter_spacing_percent = MAX_ADDED_LETTER_SPACING_PERCENT; // 0%
 
     return pbuffer;
 }
@@ -356,16 +364,18 @@ void LFormattedText::AddSourceObject(
     css_style_ref_t style = node->getStyle();
     lInt16 w = 0, h = 0;
     int em = node->getFont()->getSize();
-    lString16 nodename = node->getNodeName();
-    if ((nodename.lowercase().compare("sub")==0
-                || nodename.lowercase().compare("sup")==0)
-            && (style->font_size.type==css_val_percent)) {
-        em = em * 100 * 256 / style->font_size.value ; // value is %*256
-    }
     w = lengthToPx(style->width, 100, em);
     h = lengthToPx(style->height, 100, em);
-    if (style->width.type==css_val_percent) w = -w;
-    if (style->height.type==css_val_percent) h = w*height/width;
+    // width in % will be computed in measureText() as a % of m_pbuffer->width
+    // For height in %, it's more complicated... see:
+    //   https://www.w3.org/TR/CSS2/visudet.html#the-width-property
+    //   https://www.w3.org/TR/CSS2/visudet.html#the-height-property
+    //   https://www.w3.org/TR/CSS2/visudet.html#inline-replaced-height
+    //   https://drafts.csswg.org/css-sizing-3/#extrinsic
+    if (style->width.type == css_val_percent)
+        w = -w;
+    if (style->height.type == css_val_percent)
+        h = w*height/width;
 
     if ( w*h==0 ) {
         if ( w==0 ) {
@@ -962,13 +972,92 @@ public:
         int i;
         bool prev_was_space = true; // start with true, to get rid of all leading spaces
         int last_non_space_pos = -1; // to get rid of all trailing spaces
+        src_text_fragment_t * prev_src = NULL;
+
         for ( i=start; i<end; i++ ) {
             src_text_fragment_t * src = &m_pbuffer->srctext[i];
+
+            // We will compute wrap rules as if there were no "white-space: nowrap", as
+            // we might end up not ensuring nowrap. We just flag all chars (but the last
+            // one) inside a text node with "nowrap" with LCHAR_DEPRECATED_WRAP_AFTER,
+            // and processParagraph() will deal with chars that have both ALLOW_WRAP_AFTER
+            // and DEPRECATED_WRAP_AFTER.
+            bool nowrap = src->flags & LTEXT_FLAG_NOWRAP;
+            if ( nowrap && pos > 0 ) {
+                // We still need to do the right thing at boundaries between 2 nodes
+                // with nowrap - and update flags on the last char of previous node.
+                // If NOWRAP|NOWRAP: wrap after last char of 1st node is permitted
+                // If NOWRAP|WRAP  : wrap after last char of 1st node is permitted
+                // If   WRAP|NOWRAP: wrap after last char of 1st node is permitted
+                // If   WRAP|WRAP  : it depends
+                bool handled = false;
+                if ( prev_src && (prev_src->flags & LTEXT_FLAG_NOWRAP) ) {
+                    // We don't have much context about these text nodes.
+                    // 2 consecutive text nodes might both have "white-space: nowrap",
+                    // but it might be allowed to wrap between them if the node that
+                    // contains them isn't "nowrap".
+                    // So, try to do it that way:
+                    // - if both have it, and not their common parent container (so
+                    //   it's not inherited): a wrap should be allowed between them.
+                    // - if both have it, and their parent container too, a wrap
+                    //   shouldn't be allowed between them
+                    ldomNode * prev_node = (ldomNode *)prev_src->object;
+                    ldomNode * this_node = (ldomNode *)src->object;
+                    if ( prev_node && this_node ) {
+                        ldomXRange r = ldomXRange( ldomXPointer(prev_node,0), ldomXPointer(this_node,0) );
+                        ldomNode * parent = r.getNearestCommonParent();
+                        if ( parent && parent->getStyle()->white_space == css_ws_nowrap ) {
+                            m_flags[pos-1] |= LCHAR_DEPRECATED_WRAP_AFTER;
+                            handled = true;
+                        }
+                    }
+                    else {
+                        // One of the 2 nodes is some generated content (list marker,
+                        // quote char, BDI wrapping chars) that does not map to a
+                        // document node (and we can't reach its parent from here).
+                        // Not sure if this would be always good, but let's assume
+                        // we want nowrap continuity.
+                        m_flags[pos-1] |= LCHAR_DEPRECATED_WRAP_AFTER;
+                        handled = true;
+                    }
+                }
+                if ( !handled && src->flags & (LTEXT_SRC_IS_INLINE_BOX|LTEXT_SRC_IS_OBJECT) ) {
+                    // Not per-spec, but might be handy:
+                    // If an image or our internal inlineBox element has been set
+                    // to "white-space: nowrap", it's most probably that it has
+                    // inherited it from its parent node - as it's quite unprobable
+                    // in real-life that an image was set to "white-space: nowrap"
+                    // itself, as it would have no purpose. As for inlineBox,
+                    // the original element that has "display: inline-block;
+                    // white-space: nowrap" is actually the child of the inlineBox,
+                    // and will have it - but they are not propagated up to the
+                    // inlineBox wrapper.
+                    // So, assume that if such image or inlineBox has it, while
+                    // its parent does not, it's because it has been set via
+                    // a Style tweak, and that we have used that trick in the
+                    // aim to prevent a wrap around it. libunibreak defaults to
+                    // allowing a wrap on both sides of such replaced elements;
+                    // this allows to easily change this when needed.
+                    // (Use-case seen: book with footnotes links that are
+                    // set "display:inline-block", which libunibreak could
+                    // put at start of line - while we'd rather want them
+                    // stuck to the word they follow).
+                    ldomNode * this_node = (ldomNode *)src->object;
+                    if ( this_node ) {
+                        ldomNode * parent = this_node->getParentNode();
+                        if ( parent && parent->getStyle()->white_space != css_ws_nowrap ) {
+                            m_flags[pos-1] |= LCHAR_DEPRECATED_WRAP_AFTER; // avoid wrap before it
+                            m_flags[pos]   |= LCHAR_DEPRECATED_WRAP_AFTER; // avoid wrap after it
+                        }
+                    }
+                }
+            }
+
             if ( src->flags & LTEXT_SRC_IS_FLOAT ) {
                 m_text[pos] = 0;
                 m_srcs[pos] = src;
-                m_flags[pos] = LCHAR_IS_OBJECT;
                 m_charindex[pos] = FLOAT_CHAR_INDEX; //0xFFFE;
+                m_flags[pos] = LCHAR_IS_OBJECT;
                     // Note: m_flags was a lUInt8, and there were already 8 LCHAR_IS_* bits/flags
                     //   so we couldn't add our own. But using LCHAR_IS_OBJECT should not hurt,
                     //   as we do the FLOAT tests before it is used.
@@ -985,6 +1074,7 @@ public:
                 // with specifically in splitParagraphs() by processEmbeddedBlock().
                 m_text[pos] = 0;
                 m_srcs[pos] = src;
+                m_charindex[pos] = INLINEBOX_CHAR_INDEX; //0xFFFD;
                 m_flags[pos] = LCHAR_IS_OBJECT;
                 #if (USE_LIBUNIBREAK==1)
                     // Let libunibreak know there was an object, for the followup text
@@ -992,14 +1082,15 @@ public:
                     // (it will allow wrap before and after an object, unless it's near
                     // some punctuation/quote/paren, whose rules will be ensured it seems).
                     int brk = lb_process_next_char(&lbCtx, (utf32_t)0xFFFC); // OBJECT REPLACEMENT CHARACTER
-                    if (brk == LINEBREAK_ALLOWBREAK)
-                        m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
-                    else
-                        m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
+                    if (pos > 0) {
+                        if (brk == LINEBREAK_ALLOWBREAK)
+                            m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
+                        else
+                            m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
+                    }
                 #else
                     m_flags[pos] |= LCHAR_ALLOW_WRAP_AFTER;
                 #endif
-                m_charindex[pos] = INLINEBOX_CHAR_INDEX; //0xFFFD;
                 last_non_space_pos = pos;
                 prev_was_space = false;
                 pos++;
@@ -1007,18 +1098,20 @@ public:
             else if ( src->flags & LTEXT_SRC_IS_OBJECT ) {
                 m_text[pos] = 0;
                 m_srcs[pos] = src;
+                m_charindex[pos] = OBJECT_CHAR_INDEX; //0xFFFF;
                 m_flags[pos] = LCHAR_IS_OBJECT;
                 #if (USE_LIBUNIBREAK==1)
                     // Let libunibreak know there was an object
                     int brk = lb_process_next_char(&lbCtx, (utf32_t)0xFFFC); // OBJECT REPLACEMENT CHARACTER
-                    if (brk == LINEBREAK_ALLOWBREAK)
-                        m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
-                    else
-                        m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
+                    if (pos > 0) {
+                        if (brk == LINEBREAK_ALLOWBREAK)
+                            m_flags[pos-1] |= LCHAR_ALLOW_WRAP_AFTER;
+                        else
+                            m_flags[pos-1] &= ~LCHAR_ALLOW_WRAP_AFTER;
+                    }
                 #else
                     m_flags[pos] |= LCHAR_ALLOW_WRAP_AFTER;
                 #endif
-                m_charindex[pos] = OBJECT_CHAR_INDEX; //0xFFFF;
                 last_non_space_pos = pos;
                 prev_was_space = false;
                 pos++;
@@ -1095,12 +1188,13 @@ public:
                     lChar16 c = m_text[pos];
 
                     bool is_space = (c == ' ');
-                    if ( is_space && prev_was_space && !preformatted && src->object ) {
+                    if ( is_space && prev_was_space && !preformatted ) {
                         // On non-pre paragraphs, flag spaces following a space
                         // so we can discard them later.
-                        // (But only if the space is from a document text node (it then
-                        // has a non-NULL ->object), to keep those we added for empty
-                        // lines or identation with 'txform->AddSourceLine(L" "...)'.)
+                        // Note: for the empty lines or indentation we might add
+                        // with 'txform->AddSourceLine(L" "...)', we need to
+                        // provide LTEXT_FLAG_PREFORMATTED if we don't want them
+                        // to be collapsed.
                         m_flags[pos] = LCHAR_IS_COLLAPSED_SPACE | LCHAR_ALLOW_WRAP_AFTER;
                         // m_text[pos] = '_'; // uncomment when debugging
                         // (We can replace the char to see it in printf() (m_text is not the
@@ -1112,7 +1206,10 @@ public:
                         last_non_space_pos = pos;
                     if ( !is_space )
                         m_allow_strut_confinning = true;
-                    prev_was_space = is_space;
+                    prev_was_space = is_space || (c == '\n');
+                        // We might meet '\n' in PRE text, which shouldn't make any space
+                        // collapsed - except when "white-space: pre-line". So, have
+                        // a space following a \n be allowed to collapse.
 
                     /* non-optimized implementation of "(a) A sequence of segment breaks
                      * and other white space between two Chinese, Japanese, or Yi characters
@@ -1170,6 +1267,13 @@ public:
                     */
 
                     #if (USE_LIBUNIBREAK==1)
+                    if ( nowrap ) {
+                        // If "white-space: nowrap", we flag everything but the last char
+                        // (So, for a 1 char long text node, no flag.)
+                        if ( k < len-1 ) {
+                            m_flags[pos] |= LCHAR_DEPRECATED_WRAP_AFTER;
+                        }
+                    }
                     lChar16 ch = m_text[pos];
                     if ( src->lang_cfg->hasLBCharSubFunc() ) {
                         // Lang specific function may want to substitute char (for
@@ -1267,6 +1371,7 @@ public:
                     pos++;
                 }
             }
+            prev_src = src;
         }
         // Also flag as collapsed all spaces at the end of text
         pos = pos-1; // get back last pos++
@@ -1505,6 +1610,7 @@ public:
             // Unicode script change (note: hb_script_t is uint32_t)
             lUInt32 prevScript = HB_SCRIPT_COMMON;
             hb_unicode_funcs_t* _hb_unicode_funcs = hb_unicode_funcs_get_default();
+            bool prevSpecificScriptIsCursive = false;
         #endif
         int first_word_len = 0; // set to -1 when done with it (only used to check
                                 // for single char first word, see below)
@@ -1572,18 +1678,27 @@ public:
             bool scriptChanged = false;
             #if (USE_HARFBUZZ==1)
                 if ( usingHarfbuzz && !isObject ) {
+                    // While we have the hb_script here, we'll update m_flags[i]
+                    // with LCHAR_LOCKED_SPACING if the script is cursive
                     hb_script_t script = hb_unicode_script(_hb_unicode_funcs, m_text[i]);
                     if ( script != HB_SCRIPT_COMMON && script != HB_SCRIPT_INHERITED && script != HB_SCRIPT_UNKNOWN ) {
-                        if ( prevScript != HB_SCRIPT_COMMON && script != prevScript ) {
-                            // We previously met a real script, and we're meeting a new one
-                            scriptChanged = true;
-                            m_has_multiple_scripts = true;
-                            // When only a single script found in a paragraph, we don't need
-                            // to do that same kind of work in AddLine() to split on script
-                            // change, as there's only one.
+                        if ( script != prevScript ) {
+                            if ( prevScript != HB_SCRIPT_COMMON ) {
+                                // We previously met a real script, and we're meeting a new one
+                                scriptChanged = true;
+                                m_has_multiple_scripts = true;
+                                // When only a single script found in a paragraph, we don't need
+                                // to do that same kind of work in AddLine() to split on script
+                                // change, as there's only one.
+                            }
+                            prevSpecificScriptIsCursive = isHBScriptCursive(script);
                         }
                         prevScript = script; // Real script met
+                        if ( prevSpecificScriptIsCursive )
+                            m_flags[i] |= LCHAR_LOCKED_SPACING;
                     }
+                    // else: assume HB_SCRIPT_COMMON/INHERITED/UNKNOWN, even among cursive glyphs,
+                    // can be letter_space'd for justification.
                 }
             #endif
             // Note: some additional tweaks (like disabling letter-spacing when
@@ -1674,11 +1789,14 @@ public:
                             widths[k] = k>0 ? widths[k-1] : 0;
                             flags[k] = 0; // remove SPACE/WRAP/... flags
                         }
-                        else if ( scale_space_width && (flags[k] & LCHAR_IS_SPACE) ) {
+                        else if ( flags[k] & LCHAR_IS_SPACE ) {
                             // LCHAR_IS_SPACE has just been guessed, and is available in flags[], not yet in m_flags[]
-                            int scaled_width = char_width * m_pbuffer->space_width_scale_percent / 100;
-                            // We can just account for the space reduction (or increase) in cumulative_width_removed
-                            cumulative_width_removed += char_width - scaled_width;
+                            if ( scale_space_width ) {
+                                int scaled_width = char_width * m_pbuffer->space_width_scale_percent / 100;
+                                // We can just account for the space reduction (or increase) in cumulative_width_removed
+                                cumulative_width_removed += char_width - scaled_width;
+                            }
+                            // remove, from the measured cumulative width, what we just, and previously, removed
                             widths[k] -= cumulative_width_removed;
                             if ( first_word_len >= 0 ) { // This is the space (or nbsp) after first word
                                 if ( first_word_len == 1 ) { // Previous word is a single char
@@ -1689,11 +1807,15 @@ public:
                                         // Don't allow this space to change width, so text justification
                                         // doesn't move away next word, so that other similar paragraphs
                                         // get their real first words vertically aligned.
-                                        flags[k] &= ~LCHAR_IS_SPACE;
+                                        flags[k] |= LCHAR_LOCKED_SPACING;
+                                        // Also prevent that quotation mark or dash from getting
+                                        // additional letter spacing for justification
+                                        flags[k-1] |= LCHAR_LOCKED_SPACING;
+                                        //
                                         // Note: we do this check here, with the text still in logical
                                         // order, so we get that working with RTL text too (where, in
                                         // visual order, we'll have lost track of which word is the
-                                        // first word).
+                                        // first word - untested though).
                                     }
                                 }
                                 first_word_len = -1; // We don't need to deal with this anymore
@@ -1759,8 +1881,17 @@ public:
                             // inline-block and inline-table have a baseline, that renderBlockElement()
                             // will compute and give us back.
                             int baseline = REQ_BASELINE_FOR_INLINE_BLOCK;
-                            if ( node->getChildNode(0)->getStyle()->display == css_d_inline_table )
+                            if ( node->getChildNode(0)->getStyle()->display == css_d_inline_table ) {
                                 baseline = REQ_BASELINE_FOR_TABLE;
+                            }
+                            else if ( node->getParentNode()->getStyle()->display == css_d_ruby
+                                        && node->getChildNode(0)->getRendMethod() == erm_table ) {
+                                // Ruby sub-tables don't carry css_d_inline_table, so check rend method;
+                                // (a table could be in a "display: inline-block" container, and it
+                                // would be erm_table - but we should still use REQ_BASELINE_FOR_INLINE_BLOCK,
+                                // so check that the parent is really css_d_ruby)
+                                baseline = REQ_BASELINE_FOR_TABLE;
+                            }
                             // We render the inlineBox with the specified direction (from upper dir=), even
                             // if UNSET (and not with the direction determined by fribidi from the text).
                             renderBlockElement( alt_context, node, 0, 0, m_pbuffer->width, m_specified_para_dir, &baseline );
@@ -1816,8 +1947,9 @@ public:
                         // assume i==start+1
                         int width = m_srcs[start]->o.width;
                         int height = m_srcs[start]->o.height;
-                        width=width<0?-width*(m_pbuffer->width)/100:width;
-                        height=height<0?-height*(m_pbuffer->width)/100:height;
+                        // Negative width and height mean the value is a % (of our final block width)
+                        width = width<0 ? (-width * (m_pbuffer->width) / 100) : width;
+                        height = height<0 ? (-height * (m_pbuffer->width) / 100) : height;
                         /*
                         printf("measureText img: o.w=%d o.h=%d > w=%d h=%d (max %d %d is_inline=%d) %s\n",
                             m_srcs[start]->o.width, m_srcs[start]->o.height, width, height,
@@ -1825,6 +1957,21 @@ public:
                             UnicodeToLocal(ldomXPointer((ldomNode*)m_srcs[start]->object, 0).toString()).c_str());
                         */
                         resizeImage(width, height, m_pbuffer->width, m_max_img_height, m_length>1);
+                        if ( (m_srcs[start]->flags & LTEXT_STRUT_CONFINED) && m_allow_strut_confinning ) {
+                            // Text with "-cr-hint: strut-confined" might just be vertically shifted,
+                            // but won't change widths. But images who will change height must also
+                            // have their width reduced to keep their aspect ratio.
+                            if ( height > m_pbuffer->strut_height ) {
+                                // Don't make image taller than initial strut height, so adjust width
+                                // to keep aspect ratio.
+                                width = width * m_pbuffer->strut_height / height;
+                                height = m_pbuffer->strut_height;
+                            }
+                        }
+                        // Store the possibly resized dimensions back, so we don't have
+                        // to recompute them later
+                        m_srcs[start]->o.width = width;
+                        m_srcs[start]->o.height = height;
                         lastWidth += width;
                         m_widths[start] = lastWidth;
                     }
@@ -1855,7 +2002,7 @@ public:
             #endif
         }
         if ( tabIndex >= 0 && m_srcs[0]->indent < 0) {
-            // Used by obsolete rendering method erm_list_item when css_lsp_outside,
+            // Used by obsolete rendering of css_d_list_item_legacy when css_lsp_outside,
             // where the marker width is provided as negative/hanging indent.
             int tabPosition = -m_srcs[0]->indent; // has been set to marker_width
             if ( tabPosition>0 && tabPosition > m_widths[tabIndex] ) {
@@ -1883,11 +2030,126 @@ public:
         // printf("alignLine %d+%d < %d\n", frmline->x, frmline->width, width);
 
         // (frmline->x may be different from x_offset when non-zero text-indent)
-        int available_width = x_offset + width - (frmline->x + frmline->width) - rightIndent;
-        if ( available_width < 0 ) {
+        int usable_width = width - (frmline->x - x_offset) - rightIndent; // remove both sides indents
+        int extra_width = usable_width - frmline->width;
+
+        // We might want to prevent this when LangCfg == "de" (in german,
+        // letter spacing is used for emphasis)
+        if ( m_pbuffer->max_added_letter_spacing_percent > 0 // only if allowed
+                        && alignment == LTEXT_ALIGN_WIDTH    // only when justifying
+                        && frmline->word_count > 1           // not if single word (expanded, but not taking the full width is ugly)
+                        && 100 * extra_width > m_pbuffer->unused_space_threshold_percent * usable_width ) {
+            // extra_width is more than 5% of usable_width: we would be added too much spacing.
+            // But we're allowed to add some letter spacing intoto words to reduce spacing
+            // between words.
+            // (We do that only when this line is justified - we could do it too when the
+            // line is left- or right-aligned, but we do not know here if this is not the
+            // last line of a paragraph, left aligned, that would not need to be expanded.)
+            // We loop and increase letter spacing, and we stop as soon as we are
+            // under the unused_space_threshold_percent (5%). If some iteration
+            // brings us below min_extra_width (spaces shrunk too much), we go
+            // back to the previous letter_spacing (which may put us back with
+            // the unused extra space > 5%, but that is preferable).
+            //
+            // First, gather some info
+            int min_extra_width = 0; // negative value (from the allowed spaces condensing)
+            int max_font_size = 0;
+            for ( int i=0; i<(int)frmline->word_count; i++ ) {
+                formatted_word_t * word = &frmline->words[i];
+                if ( word->distinct_glyphs <= 0 ) // image, inline box, cursive word
+                    continue;
+                min_extra_width += word->min_width - word->width;
+                src_text_fragment_t * srcline = &m_pbuffer->srctext[word->src_text_index];
+                LVFont * font = (LVFont *)srcline->t.font;
+                int font_size = font->getSize();
+                if ( font_size > max_font_size )
+                    max_font_size = font_size;
+                // Store this word font size in this temporary slot (that is not used anymore)
+                word->_top_to_baseline = font_size;
+            }
+            int added_spacing = 0;
+            int letter_spacing_ratio = 0;
+            while ( true ) {
+                letter_spacing_ratio++;
+                added_spacing = 0;
+                bool can_try_larger = false;
+                for ( int i=0; i<(int)frmline->word_count; i++ ) {
+                    formatted_word_t * word = &frmline->words[i];
+                    if ( word->distinct_glyphs <= 0 ) // image, inline box, cursive word
+                        continue;
+                    // Store previous value in _baseline_to_bottom (also not used anymore) in case of
+                    // excess and the need to use previous value (so we don't have to recompute it)
+                    word->_baseline_to_bottom = word->added_letter_spacing;
+                    // We apply letter_spacing proportionally to the font size (words
+                    // in a smaller font size won't get any in the loop first steps)
+                    int word_font_size = word->_top_to_baseline;
+                    word->added_letter_spacing = letter_spacing_ratio * word_font_size / max_font_size;
+                    int word_max_letter_spacing = word_font_size * m_pbuffer->max_added_letter_spacing_percent / 100;
+                    if ( word->added_letter_spacing > word_max_letter_spacing  )
+                        word->added_letter_spacing = word_max_letter_spacing;
+                    else
+                        can_try_larger = true;
+                    added_spacing += word->distinct_glyphs * word->added_letter_spacing;
+                }
+                int new_extra_width = extra_width - added_spacing;
+                if ( new_extra_width < min_extra_width ) { // too much added, not enough for spaces
+                    // Get back values from previous step (which was fine)
+                    added_spacing = 0;
+                    for ( int i=0; i<(int)frmline->word_count; i++ ) {
+                        formatted_word_t * word = &frmline->words[i];
+                        if ( word->distinct_glyphs <= 0 ) // image, inline box, cursive word
+                            continue;
+                        word->added_letter_spacing = word->_baseline_to_bottom;
+                        added_spacing += word->distinct_glyphs * word->added_letter_spacing;
+                    }
+                    break;
+                }
+                if ( !can_try_larger ) // all allowed max letter_spacing reached
+                    break;
+                if ( 100 * new_extra_width <= m_pbuffer->unused_space_threshold_percent * usable_width ) {
+                    // < 5%, we're good
+                    break;
+                }
+            }
+            if ( added_spacing ) {
+                // Fix up words positions and widths
+                int shift_x = 0;
+                for ( int i=0; i<(int)frmline->word_count; i++ ) {
+                    formatted_word_t * word = &frmline->words[i];
+                    if ( word->distinct_glyphs > 0 ) {
+                        int added_width = word->distinct_glyphs * word->added_letter_spacing;
+                        if ( i == frmline->word_count-1 ) {
+                            // For the last word on a justified line, we want to not see
+                            // any letter_spacing added after last glyph.
+                            // The font will draw it, but we just want to position this
+                            // word so it's drawn outside: just remove one letter_spacing.
+                            // But not if this last word gets a hyphen, or the hyphen
+                            // (not part of the word but added when drawing) would be
+                            // shifted to the left.
+                            if ( !(word->flags & LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER) ) {
+                                added_width -= word->added_letter_spacing;
+                            }
+                        }
+                        word->width += added_width;
+                        word->min_width += added_width;
+                        word->x += shift_x;
+                        shift_x += added_width;
+                        frmline->width += added_width;
+                        extra_width -= added_width;
+                    }
+                    else {
+                        // Images, inline box, cursive words still need to be shifted
+                        word->x += shift_x;
+                    }
+                }
+            }
+        }
+        extra_width = usable_width - frmline->width;
+
+        if ( extra_width < 0 ) {
             // line is too wide
             // reduce spaces to fit line
-            int extraSpace = -available_width;
+            int extraSpace = -extra_width;
             int totalSpace = 0;
             int i;
             for ( i=0; i<(int)frmline->word_count-1; i++ ) {
@@ -1919,16 +2181,16 @@ public:
             // no additional alignment necessary
         }
         else if ( alignment==LTEXT_ALIGN_CENTER ) {
-            frmline->x += available_width / 2;
+            frmline->x += extra_width / 2;
         }
         else if ( alignment==LTEXT_ALIGN_RIGHT ) {
-            frmline->x += available_width;
+            frmline->x += extra_width;
         }
         else {
             // LTEXT_ALIGN_WIDTH
-            if ( available_width > 0 ) {
+            if ( extra_width > 0 ) {
                 // distribute additional space
-                int extraSpace = available_width;
+                int extraSpace = extra_width;
                 int addSpacePoints = 0;
                 int i;
                 for ( i=0; i<(int)frmline->word_count-1; i++ ) {
@@ -1971,10 +2233,10 @@ public:
     }
 
     /// split line into words, add space for width alignment
-    void addLine( int start, int end, int x, src_text_fragment_t * para, int interval, bool first, bool last, bool preFormattedOnly, bool needReduceSpace, bool isLastPara )
+    void addLine( int start, int end, int x, src_text_fragment_t * para, bool first, bool last, bool preFormattedOnly, bool isLastPara )
     {
-        // Note: provided 'interval' is no more used
         int maxWidth = getCurrentLineWidth();
+        // provided x is left indent
         int rightIndent = 0;
         if ( m_para_dir_is_rtl ) {
             rightIndent = x;
@@ -1984,42 +2246,54 @@ public:
         else {
             x += getCurrentLineX(); // add shift induced by left floats
         }
-        //int w0 = start>0 ? m_widths[start-1] : 0;
+
+        // Find out text alignment to ensure for this line
         int align = para->flags & LTEXT_FLAG_NEWLINE;
+
+        // Note that with Firefox, text-align-last applies to the first line when
+        // it is also the last (so, it is used for a single line paragraph).
+        // Also, when "text-align-last: justify", Firefox does justify the last
+        // (or single) line.
+        if ( last ) { // Last line of paragraph, or single line paragraph
+            // https://drafts.csswg.org/css-text-3/#text-align-last-property
+            //  "If 'auto' is specified, content on the affected line is aligned
+            //  per text-align-all unless text-align-all is set to justify,
+            //  in which case it is start-aligned. All other values are
+            //  interpreted as described for text-align. "
+            int last_align = (para->flags >> LTEXT_LAST_LINE_ALIGN_SHIFT) & LTEXT_FLAG_NEWLINE;
+            if ( last_align ) {
+                // specified (or inherited) to something other than 'auto': use it
+                align = last_align;
+            }
+            else { // text-align-last: auto (inherited default)
+                // Keep using value from text-align, except when it is set to 'justify'
+                if ( align == LTEXT_ALIGN_WIDTH ) {
+                    // Justification is in use, and this line is the last
+                    // (or a single line): align it to the left (or to the
+                    // right if FriBiDi detected this paragraph is RTL)
+                    align = m_para_dir_is_rtl ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT;
+                }
+            }
+        }
+
+        // Override it for PRE lines (or in case align has not been set)
+        if ( preFormattedOnly || !align )
+            align = m_para_dir_is_rtl ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT;
+
         TR("addLine(%d, %d) y=%d  align=%d", start, end, m_y, align);
         // printf("addLine(%d, %d) y=%d  align=%d maxWidth=%d\n", start, end, m_y, align, maxWidth);
 
-        // For some reason, text_align_last inheritance is not ensured in lvrend.cpp,
-        // may be to be able to kill justification for the last (or a single) line as
-        // easily as what follows below.
-        // Here, text_align_last = 0 when it has not explicitely been set by the style
-        // of the erm_final node.
-        int text_align_last = (para->flags >> LTEXT_LAST_LINE_ALIGN_SHIFT) & LTEXT_FLAG_NEWLINE;
-        if ( last && !first && align==LTEXT_ALIGN_WIDTH && text_align_last!=0 )
-            align = text_align_last;
-        else if ( align==LTEXT_ALIGN_WIDTH && last ) {
-            // text-align-last: not specified, justification is in use, and this line
-            // is the last (or a single line): align it to the left.
-            align = LTEXT_ALIGN_LEFT;
-            // Unless fribidi detected this paragraph is RTL: align it to the right
-            if ( m_para_dir_is_rtl )
-                align = LTEXT_ALIGN_RIGHT;
-        }
-        if ( preFormattedOnly || !align )
-            align = LTEXT_ALIGN_LEFT;
-
         // Note: in the code and comments, all these mean the same thing:
         // visual alignment enabled, floating punctuation, hanging punctuation
-        bool visualAlignmentEnabled = gFlgFloatingPunctuationEnabled!=0 && (align == LTEXT_ALIGN_WIDTH || align == LTEXT_ALIGN_RIGHT ||align==LTEXT_ALIGN_LEFT);
+        bool visualAlignmentEnabled = (gFlgFloatingPunctuationEnabled != 0) && (align != LTEXT_ALIGN_CENTER);
 
-        bool splitBySpaces = (align == LTEXT_ALIGN_WIDTH) || needReduceSpace; // always true with current code
+        // Note: parameter needReduceSpace and variable splitBySpaces (which
+        // was always true) have been removed, as we always split by space:
+        // even if we end up not changing spaces' widths, we need to make
+        // individual words (as they may use different fonts, and for many
+        // other reasons).
 
-        if ( last && !first ) {
-            int last_align = (para->flags>>16) & LTEXT_FLAG_NEWLINE;
-            if ( last_align )
-                align = last_align;
-        }
-
+        // If BiDi detected, re-order line from logical order into visual order
         bool trustDirection = false;
         bool lineIsBidi = false;
         #if (USE_FRIBIDI==1)
@@ -2190,16 +2464,15 @@ public:
 
         // Note: not certain why or how useful this lastnonspace (used below) is.
         int lastnonspace = 0;
-        if ( splitBySpaces || align==LTEXT_ALIGN_WIDTH ) { // always true with current code
-            for ( int k=end-1; k>=start; k-- ) {
-                // Also not certain if we should skip floats or LCHAR_IS_OBJECT
-                if ( !(m_flags[k] & LCHAR_IS_SPACE) ) {
-                    lastnonspace = k;
-                    break;
-                }
+        for ( int k=end-1; k>=start; k-- ) {
+            // Also not certain if we should skip floats or LCHAR_IS_OBJECT
+            if ( !(m_flags[k] & LCHAR_IS_SPACE) ) {
+                lastnonspace = k;
+                break;
             }
         }
 
+        // Create/add a new line to buffer
         formatted_line_t * frmline =  lvtextAddFormattedLine( m_pbuffer );
         frmline->y = m_y;
         frmline->x = x;
@@ -2212,6 +2485,16 @@ public:
             // Avoid page split when some float that started on a previous line
             // still spans this line
             frmline->flags |= LTEXT_LINE_SPLIT_AVOID_BEFORE;
+        if ( lineIsBidi ) {
+            // Flag that line, so createXPointer() and getRect() know it's not
+            // a regular one and can't assume words and text nodes are linear.
+            frmline->flags |= LTEXT_LINE_IS_BIDI;
+        }
+        if ( m_para_dir_is_rtl ) {
+            frmline->flags |= LTEXT_LINE_PARA_IS_RTL;
+            // Might be useful (we may have a bidi line in a LTR paragraph).
+            // (Used for ordering in-page footnote links)
+        }
 
         if ( preFormattedOnly && (start == end) ) {
             // Specific for preformatted text when consecutive \n\n:
@@ -2235,7 +2518,6 @@ public:
         }
 
         src_text_fragment_t * lastSrc = m_srcs[start];
-
         // We can just skip FLOATs in addLine(), as they were taken
         // care of in processParagraph() to just reduce the available width
         // So skip floats at start:
@@ -2248,24 +2530,6 @@ public:
             frmline->height = 0;
             return;
         }
-
-        if ( lineIsBidi ) {
-            // Flag that line, so createXPointer() and getRect() know it's not
-            // a regular one and can't assume words and text nodes are linear.
-            frmline->flags |= LTEXT_LINE_IS_BIDI;
-        }
-        if ( m_para_dir_is_rtl ) {
-            frmline->flags |= LTEXT_LINE_PARA_IS_RTL;
-            // Not used yet, but might be useful (we may have a bidi line
-            // in a LTR paragraph).
-        }
-
-        // Some words vertical-align positionning might need to be fixed
-        // only once the whole line has been laid out
-        bool delayed_valign_computation = false;
-        // alignLine() will have more work to do if we have inlineBox elements
-        bool has_inline_boxes = false;
-
         // Ignore space at start of line (this rarely happens, as line
         // splitting discards the space on which a split is made - but it
         // can happen in other rare wrap cases like lastDeprecatedWrap)
@@ -2278,16 +2542,23 @@ public:
                 lastSrc = m_srcs[start];
             }
         }
+
+        // Some words vertical-align positionning might need to be fixed
+        // only once the whole line has been laid out
+        bool delayed_valign_computation = false;
+        // alignLine() will have more work to do if we have inlineBox elements
+        bool has_inline_boxes = false;
+
+        // Make out words, making a new one when some properties change
         int wstart = start;
         bool lastIsSpace = false;
         bool lastWord = false;
-        //bool isObject = false;
         bool isSpace = false;
-        //bool nextIsSpace = false;
         bool space = false;
         // Bidi
         bool lastIsRTL = false;
         bool isRTL = false;
+        bool bidiLogicalIndicesShift = false;
         // Unicode script change
         bool scriptChanged = false;
         #if (USE_HARFBUZZ==1)
@@ -2299,10 +2570,8 @@ public:
         for ( int i=start; i<=end; i++ ) { // loop thru each char
             src_text_fragment_t * newSrc = i<end ? m_srcs[i] : NULL;
             if ( i<end ) {
-                //isObject = (m_flags[i] & LCHAR_IS_OBJECT)!=0;
                 isSpace = (m_flags[i] & LCHAR_IS_SPACE)!=0; // current char is a space
-                //nextIsSpace = i<end-1 && (m_flags[i+1] & LCHAR_IS_SPACE);
-                space = splitBySpaces && lastIsSpace && !isSpace && i<=lastnonspace;
+                space = lastIsSpace && !isSpace && i<=lastnonspace;
                 // /\ previous char was a space, current char is not a space
                 //     Note: last check was initially "&& i<lastnonspace", but with
                 //     this, a line containing "thing inside a " (ending with a
@@ -2324,10 +2593,33 @@ public:
                     }
                 #endif
                 isToIgnore = m_flags[i] & LCHAR_IS_TO_IGNORE;
-            } else {
+                isRTL = m_flags[i] & LCHAR_IS_RTL;
+                bidiLogicalIndicesShift = false;
+                if ( lineIsBidi && isRTL == lastIsRTL && i > 0) {
+                    // The bidi algo may have reordered logical chars, and
+                    // put side by side same-direction chars that where
+                    // not consecutive in the original logical text.
+                    // We need to make a new word when we see these
+                    // reordered indices shifting by more than +/- 1,
+                    // as when drawing the words, we'll use the source
+                    // text nodes' logical text.
+                    if ( isRTL ) { // indices should be decreasing by 1
+                        if ( m_charindex[i] != m_charindex[i-1] - 1 )
+                            bidiLogicalIndicesShift = true;
+                    }
+                    else { // LTR: indices should be increasing by 1
+                        if ( m_charindex[i] != m_charindex[i-1] + 1 )
+                            bidiLogicalIndicesShift = true;
+                    }
+                    // (m_charindex[i-1] might be bad when i-1 is from
+                    // another text node, or an object - but no need
+                    // for checking that as it will have triggered
+                    // another condition for making a word.)
+                }
+            }
+            else {
                 lastWord = true;
             }
-            isRTL = m_flags[i] & LCHAR_IS_RTL;
 
             // This loop goes thru each char, and create a new word when it meets:
             // - a non-space char that follows a space (this non-space char will be
@@ -2379,6 +2671,7 @@ public:
                               || lastWord
                               || isCJKIdeograph(m_text[i])
                               || isRTL != lastIsRTL
+                              || bidiLogicalIndicesShift
                               || scriptChanged
                               || isToIgnore
                              ) ) {
@@ -2407,7 +2700,7 @@ public:
                     // printf("_"); // to see when we remove one, before the TR() below
                     wstart++;
                 }
-                if (wstart == i) { // word is only collapsed spaces
+                if (wstart == i) { // word is only collapsed spaces or ignorable chars
                     // No need to create it.
                     // Except if it is the last word, and we have not yet added any:
                     // we need a word for the line to have a height (frmline->height)
@@ -2448,15 +2741,16 @@ public:
                     }
                 }
 
+                // Create/add a new word to this frmline
                 formatted_word_t * word = lvtextAddFormattedWord(frmline);
-                src_text_fragment_t * srcline = m_srcs[wstart];
+                src_text_fragment_t * srcline = m_srcs[wstart]; // should be identical to lastSrc
+                word->src_text_index = srcline->index;
+
                 // This LTEXT_VALIGN_ flag is now only of use with objects (images)
                 int vertical_align_flag = srcline->flags & LTEXT_VALIGN_MASK;
                 // These will be used later to adjust the main line baseline and height:
                 int top_to_baseline; // distance from this word top to its own baseline (formerly named 'b')
                 int baseline_to_bottom; // descender below baseline for this word (formerly named 'h')
-                word->src_text_index = m_srcs[wstart]->index;
-
                 // For each word, we'll have to check and adjust line height and baseline,
                 // except when LTEXT_VALIGN_TOP and LTEXT_VALIGN_BOTTOM where it has to
                 // be delayed until the full line is laid out. Until that, we store some
@@ -2464,20 +2758,21 @@ public:
                 bool adjust_line_box = true;
                 // We will make sure elements with "-cr-hint: strut-confined"
                 // do not change the strut baseline and height
-                bool strut_confined = (lastSrc->flags & LTEXT_STRUT_CONFINED) && m_allow_strut_confinning;
+                bool strut_confined = (srcline->flags & LTEXT_STRUT_CONFINED) && m_allow_strut_confinning;
 
-                if ( lastSrc->flags & LTEXT_SRC_IS_OBJECT ) {
+                if ( srcline->flags & LTEXT_SRC_IS_OBJECT ) {
                     // object: image or inline-block box (floats have been skipped above)
+                    word->distinct_glyphs = 0;
                     word->x = frmline->width;
-                    word->width = lastSrc->o.width;
+                    word->width = srcline->o.width;
                     word->min_width = word->width;
-                    word->o.height = lastSrc->o.height;
-                    if ( lastSrc->flags & LTEXT_SRC_IS_INLINE_BOX ) { // inline-block
+                    word->o.height = srcline->o.height;
+                    if ( srcline->flags & LTEXT_SRC_IS_INLINE_BOX ) { // inline-block
                         has_inline_boxes = true;
                         word->flags = LTEXT_WORD_IS_INLINE_BOX;
                         // For inline-block boxes, the baseline may not be the bottom; it has
                         // been computed in measureText().
-                        word->o.baseline = lastSrc->o.baseline;
+                        word->o.baseline = srcline->o.baseline;
                         top_to_baseline = word->o.baseline;
                         baseline_to_bottom = word->o.height - word->o.baseline;
                         // We can't really ensure strut_confined with inline-block boxes,
@@ -2485,32 +2780,14 @@ public:
                     }
                     else { // image
                         word->flags = LTEXT_WORD_IS_OBJECT;
-                        word->o.height = lastSrc->o.height;
-                        // Resize image so it fits in our available width
-                        int width = lastSrc->o.width;
-                        int height = lastSrc->o.height;
-                        // Negative width and height mean the value is a % (of our final block width)
-                        width = width<0 ? (-width * (m_pbuffer->width - x) / 100) : width;
-                        height = height<0 ? (-height * (m_pbuffer->width-x) / 100) : height;
-                        if ( strut_confined && height > m_pbuffer->strut_height ) {
-                            // Don't make image taller than initial strut height.
-                            // (We could have checked height against frmline->height (which may
-                            // be larger than m_pbuffer->strut_height if not all elements have
-                            // "-cr-hint: strut-confined"), but in processParagraph() we checked
-                            // against m_pbuffer->strut_height, so keep doing that to not
-                            // have this line width different.
-                            width = width * m_pbuffer->strut_height / height; // keep aspect ratio
-                            height = frmline->height;
-                        }
+                        // The image dimensions have already been resized to fit
+                        // into m_pbuffer->width (and strut confinning if requested.
+                        // Note: it can happen when there is some text-indent than
+                        // the image width exceeds the available width: it might be
+                        // shown overflowing or overrideing other content.
+                        word->width = srcline->o.width;
+                        word->o.height = srcline->o.height;
                         // todo: adjust m_max_img_height with this image valign_dy/vertical_align_flag
-                        resizeImage(width, height, m_pbuffer->width - x, m_max_img_height, m_length>1);
-                            // Note: it can happen with a standalone image in a small container
-                            // where text-indent is greater than width, that 'm_pbuffer->width - x'
-                            // can be negative. We could cap it to zero and resize the image to 0,
-                            // but let it be shown un-resized, possibly overflowing or overriding
-                            // other content.
-                        word->width = width;
-                        word->o.height = height;
                         // Per specs, the baseline is the bottom of the image
                         top_to_baseline = word->o.height;
                         baseline_to_bottom = 0;
@@ -2569,8 +2846,8 @@ public:
                     // it doesn't say we should not, let's ensure them if provided - and
                     // only "avoid" as it may have some purpose to stick a full-width image
                     // or inline-block to the previous or next line).
-                    ldomNode * node = (ldomNode *) lastSrc->object;
-                    if ( node && lastSrc->flags & LTEXT_SRC_IS_INLINE_BOX ) {
+                    ldomNode * node = (ldomNode *) srcline->object;
+                    if ( node && srcline->flags & LTEXT_SRC_IS_INLINE_BOX ) {
                         // We have not propagated page_break styles from the original
                         // inline-block to its inlineBox wrapper
                         node = node->getChildNode(0);
@@ -2588,10 +2865,10 @@ public:
                     // wstart points to the previous first non-space char
                     // i points to a non-space char that will be in next word
                     // i-1 may be a space, or not (when different html tag/text nodes stuck to each other)
-                    src_text_fragment_t * srcline = m_srcs[wstart];
-                    LVFont * font = (LVFont*)srcline->t.font;
                     word->flags = 0;
 
+                    // Handle vertical positionning of this word
+                    LVFont * font = (LVFont*)srcline->t.font;
                     int vertical_align_flag = srcline->flags & LTEXT_VALIGN_MASK;
                     int line_height = srcline->interval;
                     int fh = font->getHeight();
@@ -2650,9 +2927,10 @@ public:
                         word->flags |= LTEXT_WORD_BEGINS_PARAGRAPH;
                     if (last && lastWord) // last line of paragraph + last word of line
                         word->flags |= LTEXT_WORD_ENDS_PARAGRAPH;
-
                     if ( trustDirection)
                         word->flags |= LTEXT_WORD_DIRECTION_KNOWN;
+
+                    // Set word start and end (start+len-1) indices in the source text node
                     if ( !m_has_bidi ) {
                         // No bidi, everything is linear
                         word->t.start = m_charindex[wstart];
@@ -2689,13 +2967,45 @@ public:
                         word->t.len = m_charindex[i-1] + 1 - m_charindex[wstart];
                     }
 
+                    // We need to compute how many glyphs can have letter_spacing added, that
+                    // might be done in alignLine() (or not). We have to do it now even if
+                    // not used, as we won't have that information anymore in alignLine().
+                    word->added_letter_spacing = 0;
+                    word->distinct_glyphs = word->t.len; // start with all chars are distinct glyphs
+                    bool seen_non_space = false;
+                    int tailing_spaces = 0;
+                    for ( int j=i-1; j >= wstart; j-- ) {
+                        if ( m_flags[j] & LCHAR_LOCKED_SPACING ) {
+                            // A single char flagged with this makes the whole word non tweakable
+                            word->distinct_glyphs = 0;
+                            tailing_spaces = 0; // prevent tailing spaces correction
+                            break;
+                        }
+                        if ( !seen_non_space && (m_flags[j] & LCHAR_IS_SPACE) ) {
+                            // We'd rather not include the space that ends most words.
+                            word->distinct_glyphs--;
+                            // But some words can be made of a single space, that we'd rather
+                            // not ignore when adjusting spacing.
+                            tailing_spaces++;
+                            continue;
+                        }
+                        seen_non_space = true;
+                        if ( m_flags[j] & (LCHAR_IS_CLUSTER_TAIL|LCHAR_IS_COLLAPSED_SPACE|LCHAR_IS_TO_IGNORE) ) {
+                            word->distinct_glyphs--;
+                        }
+                    }
+                    if ( !seen_non_space && tailing_spaces ) {
+                        word->distinct_glyphs += tailing_spaces;
+                    }
+
+                    // Word x position on line: for now, we just stack words after each other.
+                    // They will be adjusted if needed in alignLine()
                     word->x = frmline->width;
+
+                    // Set and adjust word natural width (and min_width which might be used in alignLine())
                     word->width = m_widths[i>0 ? i-1 : 0] - (wstart>0 ? m_widths[wstart-1] : 0);
                     word->min_width = word->width;
                     TR("addLine - word(%d, %d) x=%d (%d..%d)[%d] |%s|", wstart, i, frmline->width, wstart>0 ? m_widths[wstart-1] : 0, m_widths[i-1], word->width, LCSTR(lString16(m_text+wstart, i-wstart)));
-//                    lChar16 lastch = m_text[i-1];
-//                    if ( lastch==UNICODE_NO_BREAK_SPACE )
-//                        CRLog::trace("last char is UNICODE_NO_BREAK_SPACE");
                     if ( m_flags[wstart] & LCHAR_IS_CLUSTER_TAIL ) {
                         // The start of this word is part of a ligature that started
                         // in a previous word: some hyphenation wrap happened on
@@ -2736,7 +3046,10 @@ public:
                         // common opening quotation marks or dashes is done in measureText(),
                         // to have it work also with BiDi/RTL text (checking that here
                         // would be too late, as reordering has been done).
-                        if ( word->t.len>=2 && i>=2 && m_text[i-1]==UNICODE_NO_BREAK_SPACE
+                        if ( m_flags[i-1] & LCHAR_LOCKED_SPACING ) {
+                            can_adjust_width = false;
+                        }
+                        else if ( word->t.len>=2 && i>=2 && m_text[i-1]==UNICODE_NO_BREAK_SPACE
                                                          && m_text[i-2]==UNICODE_NO_BREAK_SPACE ) {
                             // condition for double nbsp after run-in footnote title
                             can_adjust_width = false;
@@ -2759,21 +3072,24 @@ public:
                             word->width = m_widths[i>1 ? i-2 : 0] - (wstart>0 ? m_widths[wstart-1] : 0);
                             word->min_width = word->width;
                         }
-                    } else if ( frmline->word_count>1 && m_flags[wstart] & LCHAR_IS_SPACE ) {
+                    }
+                    else if ( frmline->word_count>1 && m_flags[wstart] & LCHAR_IS_SPACE ) {
                         // Current word starts with a space (looks like this should not happen):
                         // we can increase the space between previous word and this one if needed
                         //if ( word->t.len<2 || m_text[i-1]!=UNICODE_NO_BREAK_SPACE || m_text[i-2]!=UNICODE_NO_BREAK_SPACE)
-//                        if ( m_text[wstart]==UNICODE_NO_BREAK_SPACE && m_text[wstart+1]==UNICODE_NO_BREAK_SPACE)
-//                            CRLog::trace("Double nbsp text[-1]=%04x", m_text[wstart-1]);
-//                        else
+                        //if ( m_text[wstart]==UNICODE_NO_BREAK_SPACE && m_text[wstart+1]==UNICODE_NO_BREAK_SPACE)
+                        //    CRLog::trace("Double nbsp text[-1]=%04x", m_text[wstart-1]);
+                        //else
                         frmline->words[frmline->word_count-2].flags |= LTEXT_WORD_CAN_ADD_SPACE_AFTER;
-                    } else if (frmline->word_count>1 && isCJKIdeograph(m_text[i])) {
+                    }
+                    else if (frmline->word_count>1 && isCJKIdeograph(m_text[i])) {
                         // Current word is a CJK char: we can increase the space
                         // between previous word and this one if needed
                         frmline->words[frmline->word_count-2].flags |= LTEXT_WORD_CAN_ADD_SPACE_AFTER;
                     }
-                    if ( m_flags[i-1] & LCHAR_ALLOW_WRAP_AFTER )
-                        word->flags |= LTEXT_WORD_CAN_BREAK_LINE_AFTER; // not used anywhere
+
+                    // if ( m_flags[i-1] & LCHAR_ALLOW_WRAP_AFTER )
+                    //     word->flags |= LTEXT_WORD_CAN_BREAK_LINE_AFTER; // not used anywhere
                     if ( word->t.start==0 && srcline->flags & LTEXT_IS_LINK )
                         word->flags |= LTEXT_WORD_IS_LINK_START; // for in-page footnotes
 
@@ -2871,8 +3187,13 @@ public:
                         }
                         word->min_width = word->width;
                     } // done if floating punctuation enabled
+
+                    // printf("addLine - word(%d, %d) x=%d (%d..%d)[%d>%d %x] |%s|\n", wstart, i,
+                    //      frmline->width, wstart>0 ? m_widths[wstart-1] : 0, m_widths[i-1], word->width,
+                    //      word->min_width, word->flags, LCSTR(lString16(m_text+wstart, i-wstart)));
                 }
 
+                // Word added: adjust frmline height and baseline to account for this word
                 if ( adjust_line_box ) {
                     // Adjust full line box height and baseline if needed:
                     // frmline->height is the current line height
@@ -2889,8 +3210,8 @@ public:
                         // shift the line baseline and height by the amount needed at top
                         int shift_down = needed_baseline - frmline->baseline;
                         // if (frmline->baseline) printf("pushed down +%d\n", shift_down);
-                        // if (frmline->baseline && lastSrc->object)
-                        //     printf("%s\n", UnicodeToLocal(ldomXPointer((ldomNode*)lastSrc->object, 0).toString()).c_str());
+                        // if (frmline->baseline && srcline->object)
+                        //     printf("%s\n", UnicodeToLocal(ldomXPointer((ldomNode*)srcline->object, 0).toString()).c_str());
                         if ( !strut_confined ) {
                             // move line away from the strut baseline
                             frmline->baseline += shift_down;
@@ -2933,6 +3254,8 @@ public:
             lastIsSpace = isSpace;
             lastIsRTL = isRTL;
         }
+        // All words added
+
         if ( delayed_valign_computation ) {
             // Delayed computation and line box adjustment when we have some words
             // (or images, or inline-boxes) with vertical-align: top or bottom.
@@ -2985,7 +3308,20 @@ public:
                 }
             }
         }
-        alignLine( frmline, align, rightIndent, has_inline_boxes );
+
+        // Fix up words position and width to ensure requested alignment and indent
+        // No need to do that if light formatting, as this won't affect the
+        // block height and floats positionning - is_reusable will be unset,
+        // and any attempt at reusing this formatting for drawing will cause
+        // a non-light re-formatting. Except when there are inlineBoxes in the
+        // text: we need to correctly position them to have their x/y saved
+        // in their RenderRectAccessor (so getRect() can work accurately before
+        // the page is drawn).
+        if ( !m_pbuffer->light_formatting || has_inline_boxes ) {
+            alignLine( frmline, align, rightIndent, has_inline_boxes );
+        }
+
+        // Get ready for next line
         m_y += frmline->height;
         m_pbuffer->height = m_y;
         checkOngoingFloat();
@@ -3064,7 +3400,7 @@ public:
         // measure paragraph text
         measureText();
 
-        // run-in detection
+        // run-in detection (mostly only used for FB2 footnotes)
         src_text_fragment_t * para = &m_pbuffer->srctext[start];
         int i;
         for ( i=start; i<end; i++ ) {
@@ -3082,19 +3418,17 @@ public:
                 break;
             }
         }
-        bool lfFound = false;
-        for ( i=0; i<m_length; i++ ) {
-            if ( m_text[i]=='\n' ) {
-                lfFound = true;
-                break;
+        if ( preFormattedOnly ) {
+            bool lfFound = false;
+            for ( i=0; i<m_length; i++ ) {
+                if ( m_text[i]=='\n' ) {
+                    lfFound = true;
+                    break;
+                }
             }
+            preFormattedOnly = preFormattedOnly && lfFound;
         }
-        preFormattedOnly = preFormattedOnly && lfFound;
 
-        int interval = m_srcs[0]->interval; // Note: no more used inside AddLine()
-        int maxWidth = getCurrentLineWidth();
-
-        // reservation of space for floating punctuation
         bool visualAlignmentEnabled = gFlgFloatingPunctuationEnabled!=0;
         int visualAlignmentWidth = 0;
         if ( visualAlignmentEnabled ) {
@@ -3115,8 +3449,12 @@ public:
                     }
                 }
             }
-            maxWidth -= visualAlignmentWidth;
         }
+
+        // Not per-specs, but when floats reduce the available width, skip y until
+        // we have the width to draw at least a few chars on a line.
+        // We use N x strut_height because it's one easily acccessible font metric here.
+        int minWidth = 3 * m_pbuffer->strut_height;
 
         // split paragraph into lines, export lines
         int pos = 0;
@@ -3124,13 +3462,7 @@ public:
         int upSkipPos = -1;
         #endif
 
-        // int minWidth = 0;
-        // Not per-specs, but when floats reduce the available width, skip y until
-        // we have the width to draw at least a few chars on a line.
-        // We use N x strut_height because it's one easily acccessible font metric here.
-        int minWidth = 3 * m_pbuffer->strut_height;
-
-        for (;pos<m_length;) { // each loop makes a line
+        while ( pos<m_length ) { // each loop makes a line
             // x is this line indent. We use it like a x coordinates below, but
             // we'll use it on the right in addLine() if para is RTL.
             int x = m_indent_current;
@@ -3138,33 +3470,17 @@ public:
                 m_indent_first_line_done = true;
                 m_indent_current = m_indent_after_first_line;
             }
-            int w0 = pos>0 ? m_widths[pos-1] : 0;
-            int i;
+            int w0 = pos>0 ? m_widths[pos-1] : 0; // measured cumulative width at start of this line
             int lastNormalWrap = -1;
-            int lastDeprecatedWrap = -1;
+            int lastDeprecatedWrap = -1; // Different usage whether USE_LIBUNIBREAK or not (see below)
             int lastHyphWrap = -1;
             int lastMandatoryWrap = -1;
             int spaceReduceWidth = 0; // max total line width which can be reduced by narrowing of spaces
-            int firstCharMargin = getAdditionalCharWidthOnLeft(pos); // for first italic char with elements below baseline
-            // We might not need to bother with negative left side bearing, as we now
-            // can have them in the margin as we don't clip anymore. So we could just have:
-            // int firstCharMargin = 0;
-            // and italic "J" or "f" would be drawn a bit in the margin.
-            // (But as I don't know about the wanted effect with visualAlignmentEnabled,
-            // and given it's only about italic chars, and that we would need to remove
-            // stuff in getRenderedWidths... letting it as it is.)
+            // first char x adjustment (for italic or floating punctuation) will
+            // be handled after we have passed by leading collapsing spaces
+            int firstCharMargin = 0;
 
-            if ( m_has_bidi ) {
-                // If bidi, our first char may be no more the first char
-                // inside AddLine, so reset firtCharMargin to 0.
-                firstCharMargin = 0;
-                // todo: probably some other things to avoid if bidi or
-                // if m_para_dir_is_rtl, like hyphenation.
-                // Also possible: scan chars as they fit on this line for
-                // bidi level > 1: if none, this line is pure LTR
-            }
-
-            maxWidth = getCurrentLineWidth();
+            int maxWidth = getCurrentLineWidth();
             if (maxWidth <= minWidth) {
                 // Find y with available minWidth
                 int unused_x;
@@ -3180,31 +3496,24 @@ public:
                 maxWidth = getCurrentLineWidth();
             }
 
-            if ( visualAlignmentEnabled ) { // Floating punctuation
-                maxWidth -= visualAlignmentWidth;
-                spaceReduceWidth -= visualAlignmentWidth/2;
-                firstCharMargin += visualAlignmentWidth/2;
-                if (isCJKLeftPunctuation(m_text[pos])) {
-                    // Make that left punctuation left-hanging by reducing firstCharMargin
-                    LVFont * fnt = (LVFont *)m_srcs[pos]->t.font;
-                    if (fnt)
-                        firstCharMargin -= fnt->getCharWidth(m_text[pos]);
-                    firstCharMargin = (x + firstCharMargin) > 0 ? firstCharMargin : 0;
-                }
-            }
-
             // Find candidates where end of line is possible
             bool seen_non_collapsed_space = false;
             bool seen_first_rendered_char = false;
+            int i;
             for ( i=pos; i<m_length; i++ ) {
-                if ( (m_flags[i] & LCHAR_IS_OBJECT) && (m_charindex[i] == FLOAT_CHAR_INDEX) ) { // float
+                if ( m_text[i]=='\n' ) { // might happen in <pre>formatted only (?)
+                    lastMandatoryWrap = i;
+                    break;
+                }
+                lUInt16 flags = m_flags[i];
+                if ( (flags & LCHAR_IS_OBJECT) && (m_charindex[i] == FLOAT_CHAR_INDEX) ) { // float
                     src_text_fragment_t * src = m_srcs[i];
                     // Not sure if we can be called again on the same LVFormatter
                     // object, but the whole code allows for re-formatting and
                     // they should give the same result.
                     // So, use a flag to not re-add already processed floats.
                     if ( !(src->flags & LTEXT_SRC_IS_FLOAT_DONE) ) {
-                        int currentWidth = x + m_widths[i]-w0 - spaceReduceWidth + firstCharMargin;
+                        int currentWidth = x + firstCharMargin + m_widths[i]-w0 - spaceReduceWidth;
                         addFloat( src, currentWidth );
                         src->flags |= LTEXT_SRC_IS_FLOAT_DONE;
                         maxWidth = getCurrentLineWidth();
@@ -3220,7 +3529,6 @@ public:
                     }
                     continue;
                 }
-                lUInt16 flags = m_flags[i];
                 // We would not need to bother with LCHAR_IS_COLLAPSED_SPACE, as they have zero
                 // width and so can be grabbed here. They carry LCHAR_ALLOW_WRAP_AFTER just like
                 // a space, so they will set lastNormalWrap.
@@ -3230,35 +3538,7 @@ public:
                 if (!seen_non_collapsed_space) {
                     if (flags & LCHAR_IS_COLLAPSED_SPACE)
                         continue;
-                    else
-                        seen_non_collapsed_space = true;
-                }
-                if ( m_text[i]=='\n' ) {
-                    lastMandatoryWrap = i;
-                    break;
-                }
-                // Text with "-cr-hint: strut-confined" might just be vertically shifted,
-                // but won't change widths. But images who will change height must also
-                // have their width reduced to keep their aspect ratio.
-                if ( (m_srcs[i]->flags & LTEXT_STRUT_CONFINED) && m_allow_strut_confinning &&
-                        (m_flags[i] & LCHAR_IS_OBJECT) && (m_charindex[i] == OBJECT_CHAR_INDEX) ) {
-                    int width = m_srcs[i]->o.width;
-                    int height = m_srcs[i]->o.height;
-                    // Negative width and height mean the value is a % (of our final block width)
-                    width = width<0 ? (-width * (m_pbuffer->width - x) / 100) : width;
-                    height = height<0 ? (-height * (m_pbuffer->width - x) / 100) : height;
-                    resizeImage(width, height, m_pbuffer->width - x, m_max_img_height, m_length>1);
-                    if ( height > m_pbuffer->strut_height ) {
-                        // Don't make image taller than initial strut height, so adjust width
-                        // to keep aspect ratio.
-                        width = width * m_pbuffer->strut_height / height;
-                        int orig_width = i > 0 ? m_widths[i] - m_widths[i-1] : m_widths[i];
-                        // Coding shortcut: instead of messing with m_widths, or having a
-                        // strutConfinedReclaimedWidth variable to be used everywhere, add the
-                        // reclaimed width to w0 (which holds the cumulative width at start of
-                        // line) as it is already used everywhere to get the width of the line.
-                        w0 += orig_width - width;
-                    }
+                    seen_non_collapsed_space = true;
                 }
                 if ( !seen_first_rendered_char ) {
                     seen_first_rendered_char = true;
@@ -3276,9 +3556,39 @@ public:
                         fillAndMoveToY( new_y );
                         maxWidth = getCurrentLineWidth();
                     }
+                    // Shift first italic glyph whose part below baseline might leak on the left.
+                    // Note: we might not need to bother with negative left side bearing, as we
+                    // now can have them in the margin as we don't clip anymore. So, we could
+                    // just have italic "J" or "f" drawn a bit in the margin.
+                    // But shifting them that way makes for nicer multilines higlighting boxes.
+                    firstCharMargin = getAdditionalCharWidthOnLeft(pos);
+                    if ( visualAlignmentEnabled ) { // Floating punctuation
+                        maxWidth -= visualAlignmentWidth;
+                        spaceReduceWidth -= visualAlignmentWidth/2;
+                        firstCharMargin += visualAlignmentWidth/2;
+                        if (isCJKLeftPunctuation(m_text[pos])) {
+                            // Make that left punctuation left-hanging by reducing firstCharMargin
+                            LVFont * fnt = (LVFont *)m_srcs[pos]->t.font;
+                            if (fnt)
+                                firstCharMargin -= fnt->getCharWidth(m_text[pos]);
+                            firstCharMargin = (x + firstCharMargin) > 0 ? firstCharMargin : 0;
+                        }
+                    }
+                    if ( m_has_bidi ) {
+                        // If bidi, our first char may be no more the first char
+                        // inside AddLine, so reset firtCharMargin to 0.
+                        // (a bit sad to do that if there's a single RTL word
+                        // in the middle of line...)
+                        firstCharMargin = 0;
+                        // todo: probably some other things to avoid if bidi or
+                        // if m_para_dir_is_rtl, like hyphenation.
+                        // Also possible: scan chars as they fit on this line for
+                        // bidi level > 1: if none, this line is pure LTR
+                    }
                 }
+
                 bool grabbedExceedingSpace = false;
-                if ( x + m_widths[i]-w0 > maxWidth + spaceReduceWidth - firstCharMargin) {
+                if ( x + firstCharMargin + m_widths[i]-w0 > maxWidth + spaceReduceWidth ) {
                     // It's possible the char at i is a space whose width exceeds maxWidth,
                     // but it should be a candidate for lastNormalWrap (otherwise, the
                     // previous word will be hyphenated and we will get spaces widen for
@@ -3288,19 +3598,26 @@ public:
                     else
                         break;
                 }
+                #if (USE_LIBUNIBREAK==1)
+                // Note: with libunibreak, we can't assume anymore that LCHAR_ALLOW_WRAP_AFTER is synonym to IS_SPACE.
+                if (flags & LCHAR_ALLOW_WRAP_AFTER) {
+                    if (flags & LCHAR_DEPRECATED_WRAP_AFTER) {
+                        // Allowed by libunibreak, but prevented by "white-space: nowrap" on
+                        // this text node parent. Store this opportunity as lastDeprecatedWrap,
+                        // that we will use only if no lastNormalWrap found.
+                        lastDeprecatedWrap = i;
+                    }
+                    else {
+                        lastNormalWrap = i;
+                    }
+                }
+                #else
+                // A space or a CJK ideograph make a normal allowed wrap
                 // Note: upstream has added in:
                 //   https://github.com/buggins/coolreader/commit/e2a1cf3306b6b083467d77d99dad751dc3aa07d9
                 // to the next if:
                 //  || lGetCharProps(m_text[i]) == 0
                 // but this does not look right, as any other unicode char would allow wrap.
-                //
-                #if (USE_LIBUNIBREAK==1)
-                // Note: with libunibreak, we can't assume anymore that LCHAR_ALLOW_WRAP_AFTER is synonym to IS_SPACE.
-                if (flags & LCHAR_ALLOW_WRAP_AFTER) {
-                    lastNormalWrap = i;
-                }
-                #else
-                // A space or a CJK ideograph make a normal allowed wrap
                 if ((flags & LCHAR_ALLOW_WRAP_AFTER) || isCJKIdeograph(m_text[i])) {
                     // Need to check if previous and next non-space char request a wrap on
                     // this space (or CJK char) to be avoided
@@ -3341,13 +3658,16 @@ public:
                     // Note that a wrap can happen AFTER a '-' (that has CH_PROP_AVOID_WRAP_AFTER)
                     // when lastDeprecatedWrap is prefered below.
                 }
+                else if ( flags & LCHAR_DEPRECATED_WRAP_AFTER ) {
+                    // Different meaning than when USE_LIBUNIBREAK: it is set
+                    // by lastFont->measureText() on some hyphens.
+                    // (To keep this legacy behaviour and not complexify things, we don't
+                    // ensure "white-space: nowrap" when not using libunibreak.)
+                    lastDeprecatedWrap = i; // Hyphens make a less priority wrap
+                }
                 #endif // not USE_LIBUNIBREAK==1
-                else if ( i==m_length-1 ) // Last char
+                if ( i==m_length-1 ) // Last char always provides a normal wrap
                     lastNormalWrap = i;
-                else if ( flags & LCHAR_DEPRECATED_WRAP_AFTER ) // Hyphens make a less priority wrap
-                    lastDeprecatedWrap = i;
-                else if ( flags & LCHAR_ALLOW_HYPH_WRAP_AFTER ) // can't happen at this point as we haven't
-                    lastHyphWrap = i;                           // gone thru hyphenate()
                 if ( !grabbedExceedingSpace &&
                         m_pbuffer->min_space_condensing_percent != 100 &&
                         i < m_length-1 &&
@@ -3361,23 +3681,46 @@ public:
                 if (grabbedExceedingSpace)
                     break; // delayed break
             }
+
+            // Glyph at i exceeds available width, or mandatory break. We have
+            // found a lastNormWrap, and computed spaceReduceWidth.
+
             // It feels there's no need to do anything if there's been one single float
             // that took all the width: we moved i and can wrap.
             if (i<=pos)
                 i = pos + 1; // allow at least one character to be shown on line
-            int wordpos = i-1;
+            int wordpos = i-1; // Last char which fits: hyphenation does not need to check further
+
+            #if (USE_LIBUNIBREAK==1)
+                // If no normal wrap found, and if we have a deprecated wrap (a normal wrap
+                // as determined by libunibreak, but prevented by "white-space: nowrap",
+                // it's because the line has no wrap opportunity outside nodes with
+                // "white-space: nowrap".
+                // We need to wrap, and it's best to do so at a regular opportunity rather
+                // than at some arbitrary point: do as it there were no "nowrap".
+                if ( lastNormalWrap < 0 && lastDeprecatedWrap > 0 ) {
+                    lastNormalWrap = lastDeprecatedWrap;
+                }
+            #endif
             int normalWrapWidth = lastNormalWrap > 0 ? x + m_widths[lastNormalWrap]-w0 : 0;
-            int deprecatedWrapWidth = lastDeprecatedWrap > 0 ? x + m_widths[lastDeprecatedWrap]-w0 : 0;
-            int unusedSpace = maxWidth - normalWrapWidth - 2*visualAlignmentWidth;
-            int unusedPercent = maxWidth > 0 ? unusedSpace * 100 / maxWidth : 0;
-            if ( deprecatedWrapWidth>normalWrapWidth && unusedPercent>3 ) {
-                lastNormalWrap = lastDeprecatedWrap;
+            int unusedSpace = maxWidth - normalWrapWidth;
+            if ( visualAlignmentEnabled ) {
+                unusedSpace -= 2*visualAlignmentWidth;
             }
+            int unusedPercent = maxWidth > 0 ? unusedSpace * 100 / maxWidth : 0;
+            #if (USE_LIBUNIBREAK!=1)
+                // (Different usage of deprecatedWrap than above)
+                int deprecatedWrapWidth = lastDeprecatedWrap > 0 ? x + m_widths[lastDeprecatedWrap]-w0 : 0;
+                if ( deprecatedWrapWidth > normalWrapWidth && unusedPercent > 3 ) { // only 3%
+                    lastNormalWrap = lastDeprecatedWrap;
+                }
+            #endif
+
             // If, with normal wrapping, more than 5% of the line would not be used,
             // try to find a word (from where we stopped back to lastNormalWrap) to
             // hyphenate, if hyphenation is not forbidden by CSS.
             // todo: decide if we should hyphenate if bidi is happening up to now
-            if ( lastMandatoryWrap<0 && lastNormalWrap<m_length-1 && unusedPercent > 5 ) {
+            if ( lastMandatoryWrap<0 && lastNormalWrap<m_length-1 && unusedPercent > m_pbuffer->unused_space_threshold_percent ) {
                 // There may be more than one word between wordpos and lastNormalWrap (or
                 // pos, the start of this line): if hyphenation is not possible with
                 // the right most one, we have to try the previous words.
@@ -3397,7 +3740,7 @@ public:
                             printf("hyph loop #%d checking: %s\n", debug_loop_num,
                                 LCSTR(lString16(m_text+wordpos_min, i-wordpos_min+1)));
                     #endif
-                    if ( !(m_srcs[wordpos]->flags & LTEXT_HYPHENATE) ) {
+                    if ( !(m_srcs[wordpos]->flags & LTEXT_HYPHENATE) || (m_srcs[wordpos]->flags & LTEXT_FLAG_NOWRAP) ) {
                         // The word at worpos can't be hyphenated, but it might be
                         // allowed on some earlier word in another text node.
                         // As this is a rare situation (they are mostly all hyphenat'able,
@@ -3451,7 +3794,7 @@ public:
                     for ( int i=0; i<len; i++ ) {
                         widths[i] = m_widths[wstart+i] - wordStart_w;
                     }
-                    int max_width = maxWidth + spaceReduceWidth - x - (wordStart_w - w0) - firstCharMargin;
+                    int max_width = maxWidth + spaceReduceWidth - (x + firstCharMargin + (wordStart_w - w0));
                     // In some rare cases, a word here can be made with parts from multiple text nodes.
                     // Use the font of the first text node to compute the hyphen width, which
                     // might then be wrong - but that will be smoothed by alignLine().
@@ -3500,17 +3843,17 @@ public:
                 }
             }
 
-            // Find best position to end this line
+            // Decide best position to end this line
             int wrapPos = lastHyphWrap;
             if ( lastMandatoryWrap>=0 )
                 wrapPos = lastMandatoryWrap;
             else {
-                if ( wrapPos<lastNormalWrap )
+                if ( wrapPos < lastNormalWrap )
                     wrapPos = lastNormalWrap;
-                if ( wrapPos<0 )
+                if ( wrapPos < 0 ) // no wrap opportunity (e.g. very long non-hyphenable word)
                     wrapPos = i-1;
                 #if (USE_LIBUNIBREAK!=1)
-                if ( wrapPos<=upSkipPos ) {
+                if ( wrapPos <= upSkipPos ) {
                     // Ensure that what, when dealing with previous line, we pushed to
                     // next line (below) is actually on this new line.
                     //CRLog::trace("guard old wrapPos at %d", wrapPos);
@@ -3520,8 +3863,8 @@ public:
                 }
                 #endif
             }
-            bool needReduceSpace = true; // todo: calculate whether space reducing required
-            int endp = wrapPos+(lastMandatoryWrap<0 ? 1 : 0);
+            // End (not included) of current line
+            int endp = wrapPos + (lastMandatoryWrap<0 ? 1 : 0);
 
             // Specific handling of CJK punctuation that should not happen at start or
             // end of line. When using libunibreak, we trust it to handle them correctly.
@@ -3573,6 +3916,8 @@ public:
                 }
             }
             #endif
+            if (endp > m_length)
+                endp = m_length;
 
             // Best position to end this line found.
             // We need to possibly extend the last char width to account for italic
@@ -3601,10 +3946,10 @@ public:
                     }
                 }
             }
-            if (endp > m_length)
-                endp = m_length;
-            addLine(pos, endp, x + firstCharMargin, para, interval, pos==0, wrapPos>=m_length-1, preFormattedOnly, needReduceSpace, isLastPara);
-            pos = wrapPos + 1;
+
+            addLine(pos, endp, x + firstCharMargin, para, pos==0, wrapPos>=m_length-1, preFormattedOnly, isLastPara);
+            pos = wrapPos + 1; // start of next line
+
             #if (USE_LIBUNIBREAK==1)
             // (Only when using libunibreak, which we trust decisions to wrap on hyphens.)
             if ( m_srcs[wrapPos]->lang_cfg->duplicateRealHyphenOnNextLine() && pos > 0 && pos < m_length-1 ) {
@@ -3690,7 +4035,6 @@ public:
         else {
             RenderRectAccessor fmt( node );
             int height = fmt.getHeight();
-            int baseline = fmt.getBaseline();
             formatted_line_t * frmline = lvtextAddFormattedLine( m_pbuffer );
             frmline->x = block_x;
             frmline->y = cur_y;
@@ -3866,7 +4210,7 @@ lUInt32 LFormattedText::Format(lUInt16 width, lUInt16 page_height, int para_dire
     m_pbuffer->width = width;
     m_pbuffer->height = 0;
     m_pbuffer->page_height = page_height;
-    m_pbuffer->is_reusable = true;
+    m_pbuffer->is_reusable = !m_pbuffer->light_formatting;
     // format text
     LVFormatter formatter( m_pbuffer );
 
@@ -3947,10 +4291,22 @@ void LFormattedText::setSpaceWidthScalePercent(int spaceWidthScalePercent)
         m_pbuffer->space_width_scale_percent = spaceWidthScalePercent;
 }
 
-void LFormattedText::setMinSpaceCondensingPercent(int minSpaceWidthPercent)
+void LFormattedText::setMinSpaceCondensingPercent(int minSpaceCondensingPercent)
 {
-    if (minSpaceWidthPercent>=25 && minSpaceWidthPercent<=100)
-        m_pbuffer->min_space_condensing_percent = minSpaceWidthPercent;
+    if (minSpaceCondensingPercent>=25 && minSpaceCondensingPercent<=100)
+        m_pbuffer->min_space_condensing_percent = minSpaceCondensingPercent;
+}
+
+void LFormattedText::setUnusedSpaceThresholdPercent(int unusedSpaceThresholdPercent)
+{
+    if (unusedSpaceThresholdPercent>=0 && unusedSpaceThresholdPercent<=20)
+        m_pbuffer->unused_space_threshold_percent = unusedSpaceThresholdPercent;
+}
+
+void LFormattedText::setMaxAddedLetterSpacingPercent(int maxAddedLetterSpacingPercent)
+{
+    if (maxAddedLetterSpacingPercent>=0 && maxAddedLetterSpacingPercent<=20)
+        m_pbuffer->max_added_letter_spacing_percent = maxAddedLetterSpacingPercent;
 }
 
 /// set colors for selection and bookmarks
@@ -4030,7 +4386,7 @@ static void getAbsMarksFromMarks(ldomMarkedRangeList * marks, ldomMarkedRangeLis
     ldomNode * final_node = node->getParentNode();
     for ( ; final_node; final_node = final_node->getParentNode() ) {
         int rm = final_node->getRendMethod();
-        if ( rm == erm_final || rm == erm_list_item || rm == erm_table_caption )
+        if ( rm == erm_final )
             break;
     }
     lvRect final_node_rect = lvRect();
@@ -4300,9 +4656,18 @@ void LFormattedText::Draw( LVDrawBuf * buf, int x, int y, ldomMarkedRangeList * 
                         flgHyphen,
                         srcline->lang_cfg,
                         drawFlags,
-                        srcline->letter_spacing,
+                        srcline->letter_spacing + word->added_letter_spacing,
                         word->width,
                         text_decoration_back_gap);
+                    /* To display the added letter spacing % at end of line
+                    if (j == frmline->word_count-1 && word->added_letter_spacing ) {
+                        // lString16 val = lString16::itoa(word->added_letter_spacing);
+                        lString16 val = lString16::itoa(100*word->added_letter_spacing / font->getSize());
+                        font->DrawTextString( buf, x + frmline->x + word->x + word->width + 10,
+                            line_y + (frmline->baseline - font->getBaseline()) + word->y,
+                            val.c_str(), val.length(), '?', NULL, false);
+                    }
+                    */
                     if ( cl!=0xFFFFFFFF )
                         buf->SetTextColor( oldColor );
                     if ( bgcl!=0xFFFFFFFF )

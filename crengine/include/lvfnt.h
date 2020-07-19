@@ -238,7 +238,7 @@ lUInt16 lvfontMeasureText( const lvfont_handle pfont,
 
 // (This one is actually not set by lvfntman)
 #define LCHAR_LOCKED_SPACING         0x0040 ///< flag: forbid any letter spacing tweak on this char
-//         (for cursive scripts like arabic, and special cases)
+                                            //         (for cursive scripts like arabic, and special cases)
 #define LCHAR__AVAILABLE_BIT_08__    0x0080
 
 /// The next ones, not fitting in a lUInt8, should only be set and used by lvtextfm

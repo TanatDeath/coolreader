@@ -113,6 +113,7 @@ enum css_decl_code {
     cssd_float,
     cssd_clear,
     cssd_direction,
+    cssd_content,
     cssd_cr_ignore_if_dom_version_greater_or_equal,
     cssd_cr_hint,
     cssd_cr_only_if,
@@ -205,9 +206,66 @@ static const char * css_decl_name[] = {
     "float",
     "clear",
     "direction",
+    "content",
     "-cr-ignore-if-dom-version-greater-or-equal",
     "-cr-hint",
     "-cr-only-if",
+    NULL
+};
+
+// See https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
+enum LVCssSelectorPseudoClass
+{
+    csspc_root,             // :root
+    csspc_dir,              // :dir(rtl), :dir(ltr)
+    csspc_first_child,      // :first-child
+    csspc_first_of_type,    // :first-of-type
+    csspc_nth_child,        // :nth-child(even), :nth-child(3n+4)
+    csspc_nth_of_type,      // :nth-of-type()
+    // Those after this won't be valid when checked in the initial
+    // document loading phase when the XML is being parsed, as at
+    // this point, the checked node is always the last node as we
+    // haven't yet parsed its following siblings. When meeting one,
+    // we'll need to re-render and re-check styles after load with
+    // a fully built DOM.
+    csspc_last_child,       // :last-child
+    csspc_last_of_type,     // :last-of-type
+    csspc_nth_last_child,   // :nth-last-child()
+    csspc_nth_last_of_type, // :nth-last-of-type()
+    csspc_only_child,       // :only-child
+    csspc_only_of_type,     // :only-of-type
+    csspc_empty,            // :empty
+};
+
+static const char * css_pseudo_classes[] =
+{
+    "root",
+    "dir",
+    "first-child",
+    "first-of-type",
+    "nth-child",
+    "nth-of-type",
+    "last-child",
+    "last-of-type",
+    "nth-last-child",
+    "nth-last-of-type",
+    "only-child",
+    "only-of-type",
+    "empty",
+    NULL
+};
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements
+enum LVCssSelectorPseudoElement
+{
+    csspe_before = 1,   // ::before
+    csspe_after  = 2,   // ::after
+};
+
+static const char * css_pseudo_elements[] =
+{
+    "before",
+    "after",
     NULL
 };
 
@@ -344,11 +402,32 @@ static lUInt32 parse_important( const char *str ) // does not advance the origin
 
 static bool next_property( const char * & str )
 {
+    // todo:
+    // https://www.w3.org/TR/CSS2/syndata.html#parsing-errors
+    // User agents must handle unexpected tokens encountered while
+    // parsing a declaration by reading until the end of the
+    // declaration, while observing the rules for matching pairs
+    // of (), [], {}, "", and '', and correctly handling escapes.
     while (*str && *str !=';' && *str!='}')
         str++;
     if (*str == ';')
         str++;
     return skip_spaces( str );
+}
+
+static bool next_token( const char * & str )
+{
+    // todo: as for next_property()
+    while (*str && *str !=';' && *str!='}' && *str!=' ')
+        str++;
+    if (*str == ' ') {
+        if ( skip_spaces( str ) ) {
+            if (*str && *str !=';' && *str!='}')
+                // Something else before next property or end of declaration
+                return true;
+        }
+    }
+    return false;
 }
 
 static bool parse_integer( const char * & str, int & value)
@@ -851,6 +930,372 @@ bool parse_color_value( const char * & str, css_length_t & value )
     return false;
 }
 
+// Parse a CSS "content:" property into an intermediate format single string.
+bool parse_content_property( const char * & str, lString16 & parsed_content)
+{
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/content
+    // The property may have multiple tokens:
+    //   p::before { content: "[" attr(n) "]"; }
+    //               content: "Qq. " attr(qq)
+    //               content: '\201D\ In: ';
+    // We can meet some bogus values: content: "&#x2219; ";
+    // or values we don't support: Firefox would drop the whole
+    // declaration, but, as we don't support all those from the
+    // specs, we'll just ignore the tokens we don't support.
+    // We parse the original content into a "parsed content" string,
+    // consisting of a first letter, indicating its type, and if
+    // some data: its length and that data.
+    // parsed_content may contain multiple values, in the format
+    //   'X' for 'none' (or 'normal', = none with pseudo elements)
+    //   's' + <len> + string16 (string content) for ""
+    //   'a' + <len> + string16 (attribute name) for attr()
+    //   'Q' for 'open-quote'
+    //   'q' for 'close-quote'
+    //   'N' for 'no-open-quote'
+    //   'n' for 'no-close-quote'
+    //   'u' for 'url()', that we don't support
+    //   'z' for unsupported tokens, like gradient()...
+    //   '$' (at start) this content needs post processing before
+    //       being applied to a node's style (needed with quotes,
+    //       to get the correct char for the current nested level).
+    // Note: this parsing might not be super robust with
+    // convoluted declarations...
+    parsed_content.clear();
+    const char * orig_pos = str;
+    // The presence of a single 'none' or 'normal' among multiple
+    // values make the whole thing 'none'.
+    bool has_none = false;
+    bool needs_processing_when_applying = false;
+    while ( skip_spaces( str ) && *str!=';' && *str!='}' && *str!='!' ) {
+        if ( substr_icompare("none", str) ) {
+            has_none = true;
+            continue; // continue parsing
+        }
+        else if ( substr_icompare("normal", str) ) {
+            // Computes to 'none' for pseudo elements
+            has_none = true;
+            continue; // continue parsing
+        }
+        else if ( substr_icompare("open-quote", str) ) {
+            parsed_content << L'Q';
+            needs_processing_when_applying = true;
+            continue;
+        }
+        else if ( substr_icompare("close-quote", str) ) {
+            parsed_content << L'q';
+            needs_processing_when_applying = true;
+            continue;
+        }
+        else if ( substr_icompare("no-open-quote", str) ) {
+            parsed_content << L'N';
+            needs_processing_when_applying = true;
+            continue;
+        }
+        else if ( substr_icompare("no-close-quote", str) ) {
+            parsed_content << L'n';
+            needs_processing_when_applying = true;
+            continue;
+        }
+        else if ( substr_icompare("attr", str) ) {
+            if ( *str == '(' ) {
+                str++;
+                skip_spaces( str );
+                lString8 attr8;
+                while ( *str && *str!=')' ) {
+                    attr8 << *str;
+                    str++;
+                }
+                if ( *str == ')' ) {
+                    str++;
+                    lString16 attr = Utf8ToUnicode(attr8);
+                    attr.trim();
+                    parsed_content << L'a';
+                    parsed_content << lChar16(attr.length());
+                    parsed_content << attr;
+                    continue;
+                }
+                // No closing ')': invalid
+            }
+        }
+        else if ( substr_icompare("url", str) ) {
+            // Unsupported for now, but parse it
+            if ( *str == '(' ) {
+                str++;
+                skip_spaces( str );
+                lString8 url8;
+                while ( *str && *str!=')' ) {
+                    url8 << *str;
+                    str++;
+                }
+                if ( *str == ')' ) {
+                    str++;
+                    parsed_content << L'u';
+                    continue;
+                }
+                // No closing ')': invalid
+            }
+        }
+        else if ( *str == '"' || *str == '\'' ) {
+            // https://developer.mozilla.org/en-US/docs/Web/CSS/string
+            // https://www.w3.org/TR/CSS2/syndata.html#strings
+            // https://drafts.csswg.org/css-values-3/#strings
+            char quote_ch = *str;
+            str++;
+            lString8 str8; // quoted string content (as UTF8, like original stylesheet)
+            while ( *str && *str != quote_ch ) {
+                if ( *str == '\\' ) {
+                    // https://www.w3.org/TR/CSS2/syndata.html#characters
+                    str++;
+                    if ( hexDigit(*str) >= 0 ) {
+                        lUInt32 codepoint = 0;
+                        int num_digits = 0;
+                        while ( num_digits < 6 ) {
+                            int v = hexDigit(*str);
+                            if ( v >= 0 ) {
+                                codepoint = (codepoint << 4) + v;
+                                num_digits++;
+                                str++;
+                                continue;
+                            }
+                            // Not a hex digit
+                            break;
+                        }
+                        if ( num_digits < 6 && *str == ' ' ) // skip space following a non-6-hex-digits
+                            str++;
+                        if ( codepoint == 0 || codepoint > 0x10FFFF ) {
+                            // zero not allowed, and should be under max valid unicode codepoint
+                            codepoint = 0xFFFD; // replacement character
+                        }
+                        // Serialize it as UTF-8
+                        lString16 c;
+                        c << (lChar16)codepoint;
+                        str8 << UnicodeToLocal(c);
+                    }
+                    else if ( *str == '\r' && *(str+1) == '\n' ) {
+                        // Ignore \ at end of CRLF line
+                        str += 2;
+                    }
+                    else if ( *str == '\n' ) {
+                        // Ignore \ at end of line
+                        str++;
+                    }
+                    else {
+                        // Accept next char as is
+                        str8 << *str;
+                        str++;
+                    }
+                }
+                else {
+                    str8 << *str;
+                    str++;
+                }
+                // todo:
+                // https://www.w3.org/TR/CSS2/syndata.html#parsing-errors
+                // "User agents must close strings upon reaching the end
+                // of a line (i.e., before an unescaped line feed, carriage
+                // return or form feed character), but then drop the construct
+                // (declaration or rule) in which the string was found."
+            }
+            if ( *str == quote_ch ) {
+                lString16 str16 = Utf8ToUnicode(str8);
+                parsed_content << L's';
+                parsed_content << lChar16(str16.length());
+                parsed_content << str16;
+                str++;
+                continue;
+            }
+        }
+        else {
+            // Not supported
+            parsed_content << L'z';
+            next_token(str);
+        }
+    }
+    if ( has_none ) {
+        // Forget all other tokens parsed
+        parsed_content.clear();
+        parsed_content << L'X';
+    }
+    else if ( needs_processing_when_applying ) {
+        parsed_content.insert(0, 1, L'$');
+    }
+    if (*str) // something (;, } or !important) follows
+        return true;
+    // Restore original position if we reach end of CSS string,
+    // as it might just be missing a ')' or closing quote: we'll
+    // be skipping up to next ; or }, and might manage with
+    // the rest of the string.
+    str = orig_pos;
+    return false;
+}
+
+/// Update a style->content, post processed for its node
+void update_style_content_property( css_style_rec_t * style, ldomNode * node ) {
+    // We don't want to update too much: styles are hashed and shared by
+    // multiple nodes. We don't resolve "attr()" here as attributes are
+    // stable (and "attr(id)" would make all style->content different
+    // and prevent styles from being shared, increasing the number
+    // of styles to cache).
+    // But we need to resolve quotes, according to their nesting level,
+    // and transform them into a litteral string 's'.
+
+    if ( style->content.empty() || style->content[0] != L'$' ) {
+        // No update needed
+        return;
+    }
+
+    // We need to know if this node is visible: if not, quotes nested
+    // level should not be updated. We might want to still include
+    // the computed quote (with quote char for level 1) for it to be
+    // displayed by writeNodeEx() when displaying the HTML, even if
+    // the node is invisible.
+    bool visible = style->display != css_d_none;
+    if ( visible ) {
+        ldomNode * n = node->getParentNode();
+        for ( ; !n->isRoot(); n = n->getParentNode() ) {
+            if ( n->getStyle()->display == css_d_none ) {
+                visible = false;
+                break;
+            }
+        }
+    }
+
+    // We do not support specifying quote chars to be used via CSS "quotes":
+    //     :root { quotes: '\201c' '\201d' '\2018' '\2019'; }
+    // We use the ones hardcoded for the node lang tag language (or default
+    // typography language) provided by TextLangCfg.
+    // HTML5 default CSS specifies them with:
+    //   :root:lang(af), :not(:lang(af)) > :lang(af) { quotes: '\201c' '\201d' '\2018' '\2019' }
+    // This might (or not) implies that nested levels are reset when entering
+    // text with another language, so this new language first level quote is used.
+    // We can actually get that same behaviour by having each TextLangCfg manage
+    // its own nesting level (which won't be reset when en>fr>en, though).
+    // But all this is quite rare, so don't bother about it much.
+    TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg( node );
+
+    // Note: some quote char like (U+201C / U+201D) seem to not be mirrored
+    // (when using HarfBuzz) when added to some RTL arabic text. But it
+    // appears that way with Firefox too!
+    // But if we use another char (U+00AB / U+00BB), it gets mirrored correctly.
+    // Might be that HarfBuzz first substitute it with arabic quotes (which
+    // happen to look inverted), and then mirror that?
+
+    lString16 res;
+    lString16 parsed_content = style->content;
+    lString16 quote;
+    int i = 1; // skip initial '$'
+    int parsed_content_len = parsed_content.length();
+    while ( i < parsed_content_len ) {
+        lChar16 ctype = parsed_content[i];
+        if ( ctype == 's' ) { // literal string: copy as-is
+            lChar16 len = parsed_content[i];
+            res.append(parsed_content, i, len+2);
+            i += len+2;
+        }
+        else if ( ctype == 'a' ) { // attribute value: copy as-is
+            lChar16 len = parsed_content[i];
+            res.append(parsed_content, i, len+2);
+            i += len+2;
+        }
+        else if ( ctype == 'Q' ) { // open-quote
+            quote = lang_cfg->getOpeningQuote(visible);
+            res << L's' << quote.length() << quote;
+            i += 1;
+        }
+        else if ( ctype == 'q' ) { // close-quote
+            quote = lang_cfg->getClosingQuote(visible);
+            res << L's' << quote.length() << quote;
+            i += 1;
+        }
+        else if ( ctype == 'N' ) { // no-open-quote
+            // This should just increment nested quote level and output nothing.
+            lang_cfg->getOpeningQuote(visible);
+            i += 1;
+        }
+        else if ( ctype == 'n' ) { // no-close-quote
+            // This should just increment nested quote level and output nothing.
+            lang_cfg->getClosingQuote(visible);
+            i += 1;
+        }
+        else {
+            // All other stuff are single char (u, z, X) or unsupported/bogus char.
+            res.append(parsed_content, i, 1);
+            i += 1;
+        }
+    }
+    // Replace style->content with what we built
+    style->content = res;
+}
+
+/// Returns the computed value for a node from its parsed CSS "content:" value
+lString16 get_applied_content_property( ldomNode * node ) {
+    lString16 res;
+    css_style_ref_t style = node->getStyle();
+    lString16 parsed_content = style->content;
+    if ( parsed_content.empty() )
+        return res;
+    int i = 0;
+    int parsed_content_len = parsed_content.length();
+    while ( i < parsed_content_len ) {
+        lChar16 ctype = parsed_content[i++];
+        if ( ctype == 's' ) { // literal string
+            lChar16 len = parsed_content[i++];
+            res << parsed_content.substr(i, len);
+            i += len;
+        }
+        else if ( ctype == 'a' ) { // attribute value
+            lChar16 len = parsed_content[i++];
+            lString16 attr_name = parsed_content.substr(i, len);
+            i += len;
+            ldomNode * attrNode = node;
+            if ( node->getNodeId() == el_pseudoElem ) {
+                // For attributes, we should pick them from the parent of the added pseudo element
+                attrNode = node->getUnboxedParent();
+            }
+            if ( attrNode )
+                res << attrNode->getAttributeValue(attr_name.c_str());
+        }
+        else if ( ctype == 'u' ) { // url
+            // Url to image: we can't easily support that, as our
+            // image support needs a reference to a node, and we
+            // don't have a node here.
+            // Show a small square so one can see there's something
+            // that is missing, something different enough from the
+            // classic tofu char so we can distinguish it.
+            // res << 0x25FD; // WHITE MEDIUM SMALL SQUARE
+            res << 0x2B26; // WHITE MEDIUM DIAMOND
+        }
+        else if ( ctype == 'X' ) { // 'none'
+            res.clear(); // should be standalone, but let's be sure
+            break;
+        }
+        else if ( ctype == 'z' ) { // unsupported token
+            // Just ignore it, don't show anything
+        }
+        else if ( ctype == 'Q' ) { // open-quote
+            // Shouldn't happen: replaced earlier by update_style_content_property()
+        }
+        else if ( ctype == 'q' ) { // close-quote
+            // Shouldn't happen: replaced earlier by update_style_content_property()
+        }
+        else if ( ctype == 'N' ) { // no-open-quote
+            // Shouldn't happen: replaced earlier by update_style_content_property()
+        }
+        else if ( ctype == 'n' ) { // no-close-quote
+            // Shouldn't happen: replaced earlier by update_style_content_property()
+        }
+        else { // unexpected
+            break;
+        }
+    }
+    if ( style->white_space < css_ws_pre_line ) {
+        // Remove consecutive spaces (although this might be handled well by
+        // lvtextfm) and '\n' - but we should keep leading and trailing spaces.
+        res.trimDoubleSpaces(true, true, false);
+    }
+    return res;
+}
+
 static void resolve_url_path( lString8 & str, lString16 codeBase ) {
     // A URL (path to local or container's file) must be resolved
     // at parsing time, as it is related to this stylesheet file
@@ -879,15 +1324,14 @@ static void resolve_url_path( lString8 & str, lString16 codeBase ) {
 static const char * css_d_names[] = 
 {
     "inherit",
+    "ruby",
+    "run-in",
     "inline",
     "block",
-    "-cr-list-item-final", // non-standard, legacy crengine rendering of list items as final: css_d_list_item
+    "-cr-list-item-final", // non-standard, legacy crengine rendering of list items as final: css_d_list_item_legacy
     "list-item",           // correct rendering of list items as block: css_d_list_item_block
     "inline-block",
     "inline-table",
-    "run-in", 
-    "compact", 
-    "marker", 
     "table", 
     "table-row-group", 
     "table-header-group", 
@@ -905,7 +1349,6 @@ static const char * css_ws_names[] =
 {
     "inherit",
     "normal",
-    "pre",
     "nowrap",
     "pre-line",
     "pre",
@@ -1384,7 +1827,7 @@ bool LVCssDeclaration::parse( const char * &decl, bool higher_importance, lxmlDo
             case cssd_display:
                 n = parse_name( decl, css_d_names, -1 );
                 if (gDOMVersionRequested < 20180524 && n == css_d_list_item_block) {
-                    n = css_d_list_item; // legacy rendering of list-item
+                    n = css_d_list_item_legacy; // legacy rendering of list-item
                 }
                 break;
             case cssd_white_space:
@@ -2216,6 +2659,18 @@ bool LVCssDeclaration::parse( const char * &decl, bool higher_importance, lxmlDo
             case cssd_direction:
                 n = parse_name( decl, css_dir_names, -1 );
                 break;
+            case cssd_content:
+                {
+                    lString16 parsed_content;
+                    if ( parse_content_property( decl, parsed_content) ) {
+                        buf<<(lUInt32) (cssd_content | importance | parsed_important | parse_important(decl));
+                        buf<<(lUInt32) parsed_content.length();
+                        for (int i=0; i < parsed_content.length(); i++) {
+                            buf<<(lUInt32) parsed_content[i];
+                        }
+                    }
+                }
+                break;
             case cssd_stop:
             case cssd_unknown:
             default:
@@ -2464,7 +2919,7 @@ void LVCssDeclaration::apply( css_style_rec_t * style )
             style->Apply( (css_border_style_type_t) *p++, &style->border_style_left, imp_bit_border_style_left, is_important );
             break;
         case cssd_background_image:
-        {
+            {
                 lString8 imagefile;
                 imagefile.reserve(64);
                 int l = *p++;
@@ -2472,7 +2927,7 @@ void LVCssDeclaration::apply( css_style_rec_t * style )
                     imagefile << (lChar8)(*p++);
                 imagefile.pack();
                 style->Apply( imagefile, &style->background_image, imp_bit_background_image, is_important );
-        }
+            }
             break;
         case cssd_background_repeat:
             style->Apply( (css_background_repeat_value_t) *p++, &style->background_repeat, imp_bit_background_repeat, is_important );
@@ -2507,6 +2962,16 @@ void LVCssDeclaration::apply( css_style_rec_t * style )
             break;
         case cssd_cr_hint:
             style->Apply( (css_cr_hint_t) *p++, &style->cr_hint, imp_bit_cr_hint, is_important );
+            break;
+        case cssd_content:
+            {
+                int l = *p++;
+                lString16 content;
+                content.reserve(l);
+                for (int i=0; i<l; i++)
+                    content << (lChar16)(*p++);
+                style->Apply( content, &style->content, imp_bit_content, is_important );
+            }
             break;
         case cssd_stop:
             return;
@@ -2853,7 +3318,7 @@ bool LVCssSelectorRule::check( const ldomNode * & node )
         }
         break;
     case cssrt_universal:     // *
-        return true;
+        return true; // should it be: return !node->isBoxingNode(); ?
     case cssrt_pseudoclass:   // E:pseudo-class
         {
             int nodeId;
@@ -3020,8 +3485,27 @@ bool LVCssSelectorRule::checkNextRules( const ldomNode * node )
 
 bool LVCssSelector::check( const ldomNode * node ) const
 {
+    lUInt16 nodeId = node->getNodeId();
+    if ( nodeId == el_pseudoElem ) {
+        if ( !_pseudo_elem ) { // not a ::before/after rule
+            // Our added pseudoElem element should not match any other rules
+            // (if we added it as a child of a P element, it should not match P > *)
+            return false;
+        }
+        else {
+            // We might be the pseudoElem that was created by this selector.
+            // Start checking the rules starting from the real parent.
+            node = node->getUnboxedParent();
+            nodeId = node->getNodeId();
+        }
+    }
+    else if ( _id==0 && node->isBoxingNode() ) {
+        // Don't apply "... *" or '.classname' selectors to boxing nodes
+        // (but let those with our internal element names ("... autoBoxing") be applied)
+        return false;
+    }
     // check main Id
-    if (_id!=0 && node->getNodeId() != _id)
+    if (_id!=0 && nodeId != _id)
         return false;
     if (!_rules)
         return true;
@@ -3139,11 +3623,17 @@ LVCssSelectorRule * parse_attr( const char * &str, lxmlDocBase * doc )
     } else if ( *str==':' ) {
         // E:pseudo-class (eg: E:first-child)
         str++;
-        if (*str==':')   // pseudo element (double ::, eg: E::first-line) are not supported
+        if (*str==':') {
+            // pseudo element (double ::, eg: E::first-line) are not supported,
+            // except ::before/after which are handled in LVCssSelector::parse()
+            str--;
             return NULL;
+        }
         int n = parse_name( str, css_pseudo_classes, -1 );
-        if (n == -1) // not one of out supported pseudo classes
+        if (n == -1) { // not one of out supported pseudo classes
+            str--; // LVCssSelector::parse() will also check for :before/after with a single ':'
             return NULL;
+        }
         attrvalue[0] = 0;
         if (*str=='(') { // parse () content
             str++;
@@ -3333,13 +3823,14 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
             // a few ones that are added explicitely by crengine): we need
             // to lowercase them here too to expect a match.
             lString16 element(ident);
-            if ( element.length() < 8 ) {
-                // Avoid following string comparisons if element
-                // is shorter than the shortest of them (floatBox)
+            if ( element.length() < 7 ) {
+                // Avoid following string comparisons if element name string
+                // is shorter than the shortest of them (rubyBox)
                 element = element.lowercase();
             }
             else if ( element != "DocFragment" && element != "autoBoxing" && element != "tabularBox" &&
-                      element != "floatBox"    && element != "inlineBox"  && element != "FictionBook" ) {
+                      element != "rubyBox"     && element != "floatBox"   && element != "inlineBox"  &&
+                      element != "pseudoElem"  && element != "FictionBook" ) {
                 element = element.lowercase();
             }
             _id = doc->getElementNameIndex( element.c_str() );
@@ -3364,8 +3855,28 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
             while ( *str == '[' || *str=='.' || *str=='#' || *str==':' )
             {
                 LVCssSelectorRule * rule = parse_attr( str, doc );
-                if (!rule)
+                if (!rule) {
+                    // Might be one of our supported pseudo elements, which should
+                    // start with "::" but might start with a single ":".
+                    // These pseudo element do not add a LVCssSelectorRule.
+                    if ( *str==':' ) {
+                        str++;
+                        if ( *str==':' ) // skip double ::
+                            str++;
+                        int n = parse_name( str, css_pseudo_elements, -1 );
+                        if (n != -1) {
+                            _pseudo_elem = n+1; // starts at 1
+                            _specificity += WEIGHT_SPECIFICITY_ELEMENT;
+                            // Done with this selector: we expect ::before and ::after
+                            // to come always last, and are not followed by other rules.
+                            // ("x::before::before" seems not ensured by Firefox - if we
+                            // stop between them, the 2nd "::before" will make the parsing
+                            // of the declaration invalid, and so this rule.)
+                            return true;
+                        }
+                    }
                     return false;
+                }
                 insertRuleStart( rule ); //insertRuleAfterStart
                 //insertRuleAfterStart( rule ); //insertRuleAfterStart
                 _specificity += rule->getWeight();
@@ -3445,6 +3956,55 @@ static bool skip_until_end_of_rule( const char * &str )
     return *str != 0;
 }
 
+void LVCssSelector::applyToPseudoElement( const ldomNode * node, css_style_rec_t * style ) const
+{
+    // This might be called both on the node that match the selector (we should
+    // not apply to the style of this node), and on the actual pseudo element
+    // once it has been created as a child (to which we should apply).
+    css_style_rec_t * target_style = NULL;
+    if ( node->getNodeId() == el_pseudoElem ) {
+        if (    ( _pseudo_elem == csspe_before && node->hasAttribute(attr_Before) )
+             || ( _pseudo_elem == csspe_after  && node->hasAttribute(attr_After)  ) ) {
+            target_style = style;
+        }
+    }
+    else {
+        // For the matching node, we create two style slots to which we apply
+        // the declaration. This is just to have all styles applied and see
+        // at the end if the pseudo element is display:none or not, and if
+        // it should be skipped or created.
+        // These css_style_rec_t are just temp slots to gather what's applied,
+        // they are not the ones that will be associated to the pseudo element.
+        if ( _pseudo_elem == csspe_before ) {
+            if ( !style->pseudo_elem_before_style ) {
+                style->pseudo_elem_before_style = new css_style_rec_t;
+            }
+            target_style = style->pseudo_elem_before_style;
+        }
+        else if ( _pseudo_elem == csspe_after ) {
+            if ( !style->pseudo_elem_after_style ) {
+                style->pseudo_elem_after_style = new css_style_rec_t;
+            }
+            target_style = style->pseudo_elem_after_style;
+        }
+    }
+
+    if ( target_style ) {
+        if ( !(target_style->flags & STYLE_REC_FLAG_MATCHED ) ) {
+            // pseudoElem starts with "display: none" (in case they were created and
+            // inserted in the DOM by a CSS selector that can later disappear).
+            // Switch them to "display: inline" when we meet such a selector.
+            // (The coming up _decl->apply() may not update ->display, or it may set
+            // it explicitely to css_d_none, that we don't want reset to inline.)
+            target_style->display = css_d_inline;
+            target_style->flags |= STYLE_REC_FLAG_MATCHED;
+        }
+        // And apply this selector styling.
+        _decl->apply(target_style);
+    }
+    return;
+}
+
 LVCssSelectorRule::LVCssSelectorRule( LVCssSelectorRule & v )
 : _type(v._type), _id(v._id), _attrid(v._attrid)
 , _next(NULL)
@@ -3455,7 +4015,7 @@ LVCssSelectorRule::LVCssSelectorRule( LVCssSelectorRule & v )
 }
 
 LVCssSelector::LVCssSelector( LVCssSelector & v )
-: _id(v._id), _decl(v._decl), _specificity(v._specificity), _next(NULL), _rules(NULL)
+: _id(v._id), _decl(v._decl), _specificity(v._specificity), _pseudo_elem(v._pseudo_elem), _next(NULL), _rules(NULL)
 {
     if ( v._next )
         _next = new LVCssSelector( *v._next );
@@ -3491,6 +4051,10 @@ void LVStyleSheet::apply( const ldomNode * node, css_style_rec_t * style )
         return; // no rules!
         
     lUInt16 id = node->getNodeId();
+    if ( id == el_pseudoElem ) { // get the id chain from the parent element
+        // Note that a "div:before {float:left}" will result in: <div><floatBox><pseudoElem>
+        id = node->getUnboxedParent()->getNodeId();
+    }
     
     // _selectors[0] holds the ordered chain of selectors starting (from
     // the right of the selector) with a rule with no element name attached
@@ -3557,6 +4121,7 @@ lUInt32 LVCssSelector::getHash()
     }
     hash = hash * 31 + nextHash;
     hash = hash * 31 + _specificity;
+    hash = hash * 31 + _pseudo_elem;
     if (!_decl.isNull())
         hash = hash * 31 + _decl->getHash();
     //CRLog::trace("selector hash: %8x", hash);

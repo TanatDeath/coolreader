@@ -77,7 +77,8 @@ public interface Settings {
     public static final String PROP_SHOW_PAGE_COUNT         ="window.status.pos.page.count";
     public static final String PROP_SHOW_PAGE_NUMBER        ="window.status.pos.page.number";
 	public static final String PROP_SHOW_PAGES_TO_CHAPTER   ="window.status.pos.pages.to.chapter";
-    public static final String PROP_FONT_SHAPING            ="font.shaping.mode";
+	public static final String PROP_SHOW_TIME_LEFT   		="window.status.pos.time.left";
+	public static final String PROP_FONT_SHAPING            ="font.shaping.mode";
     public static final String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
     public static final String PROP_FLOATING_PUNCTUATION    ="crengine.style.floating.punctuation.enabled";
     public static final String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";

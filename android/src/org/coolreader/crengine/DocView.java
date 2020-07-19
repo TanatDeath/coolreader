@@ -247,6 +247,17 @@ public class DocView {
 	}
 
 	/**
+	 * Set time left
+	 * @param time_left
+	 * @return
+	 */
+	public boolean setTimeLeft(String time_left) {
+		synchronized(mutex) {
+			return setTimeLeftInternal(time_left);
+		}
+	}
+
+	/**
 	 * Get settings from native object.
 	 * @return
 	 */
@@ -584,6 +595,7 @@ public class DocView {
 	private long mNativeObject; // used from JNI
 
 	private ReaderCallback readerCallback;  // used from JNI
-	
+
+	private native boolean setTimeLeftInternal(String time_left);
 
 }

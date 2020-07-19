@@ -2340,3 +2340,29 @@ void DocViewNative::updateBatteryIcons() {
 		//CRLog::debug("Setting list of Battery icon bitmats - done");
 	}
 }
+
+void DocViewNative::setTimeLeft( lString16 time_left )
+{
+	CRLog::info("Set time left %s", LCSTR(time_left));
+	_docview->m_time_left = time_left;
+}
+
+/*
+ * Class:     org_coolreader_crengine_DocView
+ * Method:    setTimeLeft
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftInternal
+		(JNIEnv * _env, jobject _this, jstring s)
+{
+	CRJNIEnv env(_env);
+	DocViewNative * p = getNative(_env, _this);
+	if (!p) {
+		CRLog::error("Cannot get native view");
+		return JNI_FALSE;
+	}
+	DocViewCallback callback( _env, p->_docview, _this );
+	lString16 str = env.fromJavaString(s);
+	p->setTimeLeft(str);
+	return JNI_TRUE;
+}

@@ -227,7 +227,8 @@ enum {
     PGHDR_BATTERY=32,
     PGHDR_CHAPTER_MARKS=64,
     PGHDR_PERCENT=128,
-    PGHDR_PAGES_TO_CHAPTER=256
+    PGHDR_PAGES_TO_CHAPTER=256,
+    PGHDR_TIME_LEFT=512
 };
 
 
@@ -409,6 +410,7 @@ protected:
     /// load document from stream (internal)
     bool loadDocumentInt( LVStreamRef stream, bool metadataOnly = false );
 public:
+    lString16 m_time_left;
     /// get outer (before margins are applied) page rectangle
     virtual void getPageRectangle( int pageIndex, lvRect & pageRect );
     /// get screen rectangle for specified cursor position, returns false if not visible
@@ -416,7 +418,8 @@ public:
     /// set status bar and clock mode
     void setStatusMode( int newMode, bool showClock, bool showTitle,
             bool showBattery, bool showChapterMarks, bool showPercent,
-            bool showPageNumber, bool showPageCount, bool showPagesToChapter );
+            bool showPageNumber, bool showPageCount, bool showPagesToChapter,
+            bool showTimeLeft);
     /// draw to specified buffer by either Y pos or page number (unused param should be -1)
     void Draw( LVDrawBuf & drawbuf, int pageTopPosition, int pageNumber, bool rotate, bool autoresize = true);
     /// ensure current position is set to current bookmark value

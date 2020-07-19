@@ -2160,6 +2160,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
 					R.drawable.icons8_page_num));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_time_left), PROP_SHOW_TIME_LEFT,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
+					R.drawable.icons8_page_num));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_page_show_titlebar_percent), PROP_SHOW_POS_PERCENT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_page_percent,
 					R.drawable.icons8_page_percent));

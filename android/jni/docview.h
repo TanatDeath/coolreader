@@ -45,6 +45,7 @@ public:
     // sets current image to null
     bool closeImage();
     void updateBatteryIcons();
+	void setTimeLeft( lString16 time_left );
 };
 
 extern CRTimerUtil _timeoutControl;

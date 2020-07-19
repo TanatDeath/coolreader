@@ -34,7 +34,7 @@
 // be applied after a <BR>.
 //
 // 20180524: changed default rendering of:
-//   <li> (and css 'display:list-item') from css_d_list_item to css_d_list_item_block
+//   <li> (and css 'display:list-item') from css_d_list_item_legacy to css_d_list_item_block
 //   <cite> from css_d_block to css_d_inline (inline in HTML, block in FB2, ensured by fb2.css)
 //   <style> from css_d_inline to css_d_none (invisible in HTML)
 // Changed also the default display: value for base elements (and so
@@ -84,10 +84,10 @@ int gDOMVersionRequested     = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.61"
+#define CACHE_FILE_FORMAT_VERSION "3.12.64"
 
 /// increment following value to force re-formatting of old book after load
-#define FORMATTING_VERSION_ID 0x0022
+#define FORMATTING_VERSION_ID 0x0024
 
 #ifndef DOC_DATA_COMPRESSION_LEVEL
 /// data compression level (0=no compression, 1=fast compressions, 3=normal compression)
@@ -392,6 +392,7 @@ lUInt32 calcGlobalSettingsHash(int documentId)
     //hash = hash * 31 + (int)fontMan->GetHintingMode();
     if ( LVRendGetFontEmbolden() )
         hash = hash * 75 + 2384761;
+    hash = hash * 31 + fontMan->GetFallbackFontFaces().getHash();
     if ( gFlgFloatingPunctuationEnabled )
         hash = hash * 75 + 1761;
     hash = hash * 31 + TextLangMan::getHash();
@@ -1940,6 +1941,8 @@ tinyNodeCollection::tinyNodeCollection()
 , _mapSavingStage(0)
 , _spaceWidthScalePercent(DEF_SPACE_WIDTH_SCALE_PERCENT)
 , _minSpaceCondensingPercent(DEF_MIN_SPACE_CONDENSING_PERCENT)
+, _unusedSpaceThresholdPercent(DEF_UNUSED_SPACE_THRESHOLD_PERCENT)
+, _maxAddedLetterSpacingPercent(DEF_MAX_ADDED_LETTER_SPACING_PERCENT)
 , _nodeStyleHash(0)
 , _nodeDisplayStyleHash(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
 , _nodeDisplayStyleHashInitial(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
@@ -1977,6 +1980,8 @@ tinyNodeCollection::tinyNodeCollection( tinyNodeCollection & v )
 , _mapSavingStage(0)
 , _spaceWidthScalePercent(DEF_SPACE_WIDTH_SCALE_PERCENT)
 , _minSpaceCondensingPercent(DEF_MIN_SPACE_CONDENSING_PERCENT)
+, _unusedSpaceThresholdPercent(DEF_UNUSED_SPACE_THRESHOLD_PERCENT)
+, _maxAddedLetterSpacingPercent(DEF_MAX_ADDED_LETTER_SPACING_PERCENT)
 , _nodeStyleHash(0)
 , _nodeDisplayStyleHash(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
 , _nodeDisplayStyleHashInitial(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
@@ -3468,6 +3473,8 @@ LFormattedText * lxmlDocBase::createFormattedText()
     p->setImageScalingOptions(&_imgScalingOptions);
     p->setSpaceWidthScalePercent(_spaceWidthScalePercent);
     p->setMinSpaceCondensingPercent(_minSpaceCondensingPercent);
+    p->setUnusedSpaceThresholdPercent(_unusedSpaceThresholdPercent);
+    p->setMaxAddedLetterSpacingPercent(_maxAddedLetterSpacingPercent);
     p->setHighlightOptions(&_highlightOptions);
     return p;
 }
@@ -3653,7 +3660,7 @@ static void writeNode( LVStream * stream, ldomNode * node, bool treeLayout )
 #define WRITENODEEX_NB_SKIPPED_CHARS             0x0100 ///< show number of skipped chars in text nodes: (...43...)
 #define WRITENODEEX_NB_SKIPPED_NODES             0x0200 ///< show number of skipped sibling nodes: [...17...]
 #define WRITENODEEX_SHOW_REND_METHOD             0x0400 ///< show rendering method at end of tag (<div ~F> =Final, <b ~i>=Inline...)
-#define WRITENODEEX_UNUSED_2                     0x0800 ///<
+#define WRITENODEEX_SHOW_MISC_INFO               0x0800 ///< show additional info (depend on context)
 #define WRITENODEEX_ADD_UPPER_DIR_LANG_ATTR      0x1000 ///< add dir= and lang= grabbed from upper nodes
 #define WRITENODEEX_GET_CSS_FILES                0x2000 ///< ensure css files that apply to initial node are returned
                                                         ///  in &cssFiles (needed when not starting from root node)
@@ -3939,6 +3946,18 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
             // rendering method, which gives us a visual hint of it.
             lvdom_element_render_method rm = node->getRendMethod();
             // Text and inline nodes stay stuck together, but not all others
+            if (rm == erm_invisible) {
+                // We don't know how invisible nodes would be displayed if
+                // they were visible. Make the invisible tree like inline
+                // among finals, so they don't take too much height.
+                if (node->getParentNode()) {
+                    rm = node->getParentNode()->getRendMethod();
+                    if (rm == erm_invisible || rm == erm_inline || rm == erm_final)
+                        rm = erm_inline;
+                    else
+                        rm = erm_final;
+                }
+            }
             if ( (rm != erm_inline && rm != erm_runin) || node->isBoxingInlineBox()) {
                 doNewLineBeforeStartTag = true;
                 doNewLineAfterStartTag = true;
@@ -3999,7 +4018,6 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                     }
                 }
             }
-            // Do something specific when erm_invisible ?
         }
 
         if ( containsStart && WNEFLAG(NB_SKIPPED_NODES) ) {
@@ -4044,6 +4062,21 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                 lString8 attrName( UnicodeToUtf8(node->getDocument()->getAttrName(attr->id)) );
                 lString8 nsName( UnicodeToUtf8(node->getDocument()->getNsName(attr->nsid)) );
                 lString8 attrValue( UnicodeToUtf8(node->getDocument()->getAttrValue(attr->index)) );
+                if ( WNEFLAG(SHOW_MISC_INFO) ) {
+                    if ( node->getNodeId() == el_pseudoElem && (attr->id == attr_Before || attr->id == attr_After) ) {
+                        // Show the rendered content as the otherwise empty Before/After attribute value
+                        if ( WNEFLAG(TEXT_SHOW_UNICODE_CODEPOINT) ) {
+                            lString16 content = get_applied_content_property(node);
+                            attrValue.empty();
+                            for ( int i=0; i<content.length(); i++ ) {
+                                attrValue << UnicodeToUtf8(content.substr(i, 1)) << "⟨U+" << lString8().appendHex(content[i]) << "⟩";
+                            }
+                        }
+                        else {
+                            attrValue = UnicodeToUtf8(get_applied_content_property(node));
+                        }
+                    }
+                }
                 *stream << " ";
                 if ( nsName.length() > 0 )
                     *stream << nsName << ":";
@@ -4063,8 +4096,7 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                 case erm_block:              *stream << "B";     break;
                 case erm_final:              *stream << "F";     break;
                 case erm_inline:             *stream << "i";     break;
-                case erm_mixed:              *stream << "M";     break; // not implemented
-                case erm_list_item:          *stream << "L";     break; // no more used
+                case erm_runin:              *stream << "r";     break;
                 case erm_table:              *stream << "T";     break;
                 case erm_table_row_group:    *stream << "TRG";   break;
                 case erm_table_header_group: *stream << "THG";   break;
@@ -4072,9 +4104,6 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                 case erm_table_row:          *stream << "TR";    break;
                 case erm_table_column_group: *stream << "TCG";   break;
                 case erm_table_column:       *stream << "TC";    break;
-                case erm_table_cell:         *stream << "tcell"; break; // never stays erm_table_cell (becomes block or final)
-                case erm_table_caption:      *stream << "tcap";  break;
-                case erm_runin:              *stream << "R";     break;
                 default:                     *stream << "?";     break;
             }
         }
@@ -4511,6 +4540,9 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
         //CRLog::trace("validate 2...");
         //validateDocument();
 
+        // Reset counters (quotes nesting levels...)
+        TextLangMan::resetCounters();
+
         CRLog::trace("Save stylesheet...");
         _stylesheet.push();
         CRLog::trace("Init node styles...");
@@ -4672,6 +4704,16 @@ void lxmlDocBase::dumpUnknownEntities( const char * fname )
     fprintf(f, "-------------------------------\n");
     fclose(f);
 }
+
+lString16Collection lxmlDocBase::getUnknownEntities()
+{
+    lString16Collection unknown_entities;
+    unknown_entities.add( _elementNameTable.getUnknownItems(UNKNOWN_ELEMENT_TYPE_ID) );
+    unknown_entities.add( _attrNameTable.getUnknownItems(UNKNOWN_ATTRIBUTE_TYPE_ID) );
+    unknown_entities.add( _nsNameTable.getUnknownItems(UNKNOWN_NAMESPACE_TYPE_ID) );
+    return unknown_entities;
+}
+
 
 #if BUILD_LITE!=1
 static const char * id_map_list_magic = "MAPS";
@@ -4843,16 +4885,17 @@ bool IsEmptySpace( const lChar16 * text, int len )
 
 static bool IS_FIRST_BODY = false;
 
-ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent, bool isNotes)
-    : _parent(parent), _document(document), _tocItem(NULL), _isBlock(true), _isSection(false), _stylesheetIsSet(false), _bodyEnterCalled(false)
+ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUInt16 id, ldomElementWriter * parent)
+    : _parent(parent), _document(document), _tocItem(NULL), _isBlock(true), _isSection(false),
+      _stylesheetIsSet(false), _bodyEnterCalled(false), _pseudoElementAfterChildIndex(-1)
 {
     //logfile << "{c";
     _typeDef = _document->getElementTypePtr( id );
     _flags = 0;
     if ( (_typeDef && _typeDef->white_space >= css_ws_pre_line) || (_parent && _parent->getFlags()&TXTFLG_PRE) )
         _flags |= TXTFLG_PRE; // Parse as PRE: pre-line, pre, pre-wrap and break-spaces
-    // This will be updated in ldomElementWriter::onBodyEnter() after we have
-    // set styles to this node, so we'll get the real white_space value to use.
+        // This will be updated in ldomElementWriter::onBodyEnter() after we have
+        // set styles to this node, so we'll get the real white_space value to use.
 
     _isSection = (id==el_section);
 
@@ -4878,6 +4921,7 @@ ldomElementWriter::ldomElementWriter(ldomDocument * document, lUInt16 nsid, lUIn
 
     //if ( IS_FIRST_BODY && id==el_body ) { // plotn - it was discussed, that document can have multi-body structure
     // and TOC can be inside any of then - so it was changed
+    bool isNotes = false;
     if ( id==el_body ) {
         if ((IS_FIRST_BODY) || (!isNotes))
             _tocItem = _document->getToc();
@@ -4897,33 +4941,10 @@ static bool isBlockNode( ldomNode * node )
     if ( !node->isElement() )
         return false;
 #if BUILD_LITE!=1
-    switch ( node->getStyle()->display )
-    {
-    case css_d_block:
-    case css_d_inline_block:
-    case css_d_inline_table:
-    case css_d_list_item:
-    case css_d_list_item_block:
-    case css_d_table:
-    case css_d_table_row:
-    case css_d_table_row_group:
-    case css_d_table_header_group:
-    case css_d_table_footer_group:
-    case css_d_table_column_group:
-    case css_d_table_column:
-    case css_d_table_cell:
-    case css_d_table_caption:
-        return true;
-
-    case css_d_inherit:
-    case css_d_inline:
-    case css_d_run_in:
-    case css_d_compact:
-    case css_d_marker:
-    case css_d_none:
-        break;
+    if ( node->getStyle()->display <= css_d_inline || node->getStyle()->display == css_d_none ) {
+        return false;
     }
-    return false;
+    return true;
 #else
     return true;
 #endif
@@ -5003,6 +5024,36 @@ void ldomElementWriter::onBodyEnter()
 //            CRLog::error("error while style initialization of element %x %s", _element->getNodeIndex(), LCSTR(_element->getNodeName()) );
 //            crFatalError();
 //        }
+        int nb_children = _element->getChildCount();
+        if ( nb_children > 0 ) {
+            // The only possibility for this element being built to have children
+            // is if the above initNodeStyle() has applied to this node some
+            // matching selectors that had ::before or ::after, which have then
+            // created one or two pseudoElem children. But let's be sure of that.
+            for ( int i=0; i<nb_children; i++ ) {
+                ldomNode * child = _element->getChildNode(i);
+                if ( child->getNodeId() == el_pseudoElem ) {
+                    if ( child->hasAttribute(attr_Before) ) {
+                        // The "Before" pseudo element (not part of the XML)
+                        // needs to have its style applied. As it has no
+                        // children, we can also init its rend method.
+                        child->initNodeStyle();
+                        child->initNodeRendMethod();
+                    }
+                    else if ( child->hasAttribute(attr_After) ) {
+                        // For the "After" pseudo element, we need to wait
+                        // for all real children to be added, to move it
+                        // as its right position (last), to init its style
+                        // (because of "content:close-quote", whose nested
+                        // level need to have seen all previous nodes to
+                        // be accurate) and its rendering method.
+                        // We'll do that in onBodyExit() when called for
+                        // this node.
+                        _pseudoElementAfterChildIndex = i;
+                    }
+                }
+            }
+        }
         _isBlock = isBlockNode(_element);
         // If initNodeStyle() has set "white-space: pre" or alike, update _flags
         if ( _element->getStyle()->white_space >= css_ws_pre_line) {
@@ -5019,6 +5070,67 @@ void ldomElementWriter::onBodyEnter()
         }
 
     }
+#endif
+}
+
+void ldomNode::ensurePseudoElement( bool is_before ) {
+#if BUILD_LITE!=1
+    // This node should have that pseudoElement, but it might already be there,
+    // so check if there is already one, and if not, create it.
+    // This happens usually in the initial loading phase, but it might in
+    // a re-rendering if the pseudo element is introduced by a change in
+    // styles (we won't be able to create a node if there's a cache file).
+    int insertChildIndex = -1;
+    int nb_children = getChildCount();
+    if ( is_before ) { // ::before
+        insertChildIndex = 0; // always to be inserted first, if not already there
+        if ( nb_children > 0 ) {
+            ldomNode * child = getChildNode(0); // should always be found as the first node
+            // pseudoElem might have been wrapped by a inlineBox, autoBoxing, floatBox...
+            while ( child && child->isBoxingNode() && child->getChildCount()>0 )
+                child = child->getChildNode(0);
+            if ( child && child->getNodeId() == el_pseudoElem && child->hasAttribute(attr_Before) ) {
+                // Already there, no need to create it
+                insertChildIndex = -1;
+            }
+        }
+    }
+    else { // ::after
+        // In the XML loading phase, this one might be either first,
+        // or second if there's already a Before. In the re-rendering
+        // phase, it would have been moved as the last node. In all these
+        // cases, it is always the last at the moment we are checking.
+        insertChildIndex = nb_children; // always to be inserted last, if not already there
+        if ( nb_children > 0 ) {
+            ldomNode * child = getChildNode(nb_children-1); // should always be found as the last node
+            // pseudoElem might have been wrapped by a inlineBox, autoBoxing, floatBox...
+            while ( child && child->isBoxingNode() && child->getChildCount()>0 )
+                child = child->getChildNode(0);
+            if ( child && child->getNodeId() == el_pseudoElem && child->hasAttribute(attr_After) ) {
+                // Already there, no need to create it
+                insertChildIndex = -1;
+            }
+        }
+    }
+    if ( insertChildIndex >= 0 ) {
+        ldomNode * pseudo = insertChildElement( insertChildIndex, LXML_NS_NONE, el_pseudoElem );
+        lUInt16 attribute_id = is_before ? attr_Before : attr_After;
+        pseudo->setAttributeValue(LXML_NS_NONE, attribute_id, L"");
+        // We are called by lvrend.cpp setNodeStyle(), after the parent
+        // style and font have been fully set up. We could set this pseudo
+        // element style with pseudo->initNodeStyle(), as it can inherit
+        // properly, but we should not:
+        // - when re-rendering, initNodeStyleRecursive()/updateStyleDataRecursive()
+        //   will iterate thru this node we just added as a child, and do it.
+        // - when XML loading, we could do it for the "Before" pseudo element,
+        //   but for the "After" one, we need to wait for all real children to be
+        //   added and have their style applied - just because they can change
+        //   open-quote/close-quote nesting levels - to be sure we get the
+        //   proper nesting level quote char for the After node.
+        // So, for the XML loading phase, we do that in onBodyEnter() and
+        // onBodyExit() when called on the parent node.
+    }
+
 #endif
 }
 
@@ -5054,7 +5166,7 @@ void ldomNode::autoboxChildren( int startIndex, int endIndex, bool handleFloatin
         return;
     css_style_ref_t style = getStyle();
     bool pre = ( style->white_space >= css_ws_pre_line );
-    // (css_ws_pre_line might need special care?)
+        // (css_ws_pre_line might need special care?)
     int firstNonEmpty = startIndex;
     int lastNonEmpty = endIndex;
 
@@ -5275,6 +5387,12 @@ static void detectChildTypes( ldomNode * parent, bool & hasBlockItems, bool & ha
     hasBlockItems = false;
     hasInline = false;
     hasFloating = false;
+    if ( parent->getNodeId() == el_pseudoElem ) {
+        // pseudoElem (generated from CSS ::before and ::after), will have
+        // some (possibly empty) plain text content.
+        hasInline = true;
+        return; // and it has no children
+    }
     int len = parent->getChildCount();
     for ( int i=len-1; i>=0; i-- ) {
         ldomNode * node = parent->getChildNode(i);
@@ -5297,8 +5415,7 @@ static void detectChildTypes( ldomNode * parent, bool & hasBlockItems, bool & ha
                 hasBlockItems = true;
                 // (Table internal elements are all block items in the context
                 // where hasBlockItems is used, so account for them in both)
-                if ( ( d > css_d_table && d <= css_d_table_caption ) ||
-                     ( m > erm_table   && m <= erm_table_caption ) ) {
+                if ( ( d > css_d_table && d <= css_d_table_caption ) || ( m > erm_table ) ) {
                     hasInternalTableItems = true;
                 }
             }
@@ -5424,7 +5541,7 @@ int initTableRendMethods( ldomNode * enode, int state )
                 is_proper = true;
             }
             else if ( d==css_d_table_caption ) {
-                child->setRendMethod( erm_table_caption );
+                child->setRendMethod( erm_final );
                 is_proper = true;
             }
             else if ( d==css_d_none ) {
@@ -5463,13 +5580,11 @@ int initTableRendMethods( ldomNode * enode, int state )
         }
         else if ( state==3 ) { // in row
             if ( d==css_d_table_cell ) {
-                child->setRendMethod( erm_table_cell );
+                // This will set the rend method of the cell to either erm_block
+                // or erm_final, depending on its content.
+                child->initNodeRendMethodRecursive();
                 cellCount++;
                 is_proper = true;
-                // This will reset the rend method we just set (erm_table_cell)
-                // to the most appropriate one (erm_final or erm_block) for
-                // rendering, depending on the cell content:
-                child->initNodeRendMethodRecursive();
             }
             else if ( d==css_d_none ) {
                 child->setRendMethod( erm_invisible );
@@ -5480,9 +5595,10 @@ int initTableRendMethods( ldomNode * enode, int state )
                 #ifdef DEBUG_INCOMPLETE_TABLE_COMPLETION
                     printf("initTableRendMethods(3): (reused)wrapping unproper > cell\n");
                 #endif
-                child->setRendMethod( erm_table_cell );
-                cellCount++;
+                // This will set the rend method of the cell to either erm_block
+                // or erm_final, depending on its content.
                 child->initNodeRendMethodRecursive();
+                cellCount++;
                 is_proper = true;
             }
         }
@@ -5531,7 +5647,7 @@ int initTableRendMethods( ldomNode * enode, int state )
                     // be rendered and drawn quite correctly be. But we'll
                     // have the others drawn as erm_killed, showing a small
                     // symbol so users know some content is missing.
-                    if ( d > css_d_table || d == css_d_inline ) {
+                    if ( d > css_d_table || d <= css_d_inline ) {
                         child->setRendMethod( erm_killed );
                     }
                     // Note that there are other situations where some content
@@ -5568,9 +5684,10 @@ int initTableRendMethods( ldomNode * enode, int state )
                 }
                 else if ( state==3 ) {
                     tbox->initNodeStyle();
-                    tbox->setRendMethod( erm_table_cell );
+                    // This will set the rend method of the cell to either erm_block
+                    // or erm_final, depending on its content.
+                    tbox->initNodeRendMethodRecursive();
                     cellCount++;
-                    tbox->initNodeRendMethodRecursive(); // will reset rend method
                 }
                 else if ( state==1 ) { // should not happen, see above
                     tbox->initNodeStyle();
@@ -5601,7 +5718,7 @@ bool hasInvisibleParent( ldomNode * node )
     return false;
 }
 
-bool ldomNode::isFloatingBox()
+bool ldomNode::isFloatingBox() const
 {
     // BLOCK_RENDERING_G(FLOAT_FLOATBOXES) is what triggers rendering
     // the floats floating. They are wrapped in a floatBox, possibly
@@ -5614,7 +5731,7 @@ bool ldomNode::isFloatingBox()
 
 /// is node an inlineBox that has not been re-inlined by having
 /// its child no more inline-block/inline-table
-bool ldomNode::isBoxingInlineBox()
+bool ldomNode::isBoxingInlineBox() const
 {
     // BLOCK_RENDERING_G(BOX_INLINE_BLOCKS) is what ensures inline-block
     // are boxed and rendered as an inline block, but we may have them
@@ -5626,6 +5743,12 @@ bool ldomNode::isBoxingInlineBox()
             if (d == css_d_inline_block || d == css_d_inline_table) {
                 return true;
             }
+            // Also if this box parent is <ruby> and if what this inlineBox
+            // contains (probably a rubyBox) is being rendered as erm_table
+            if ( getChildNode(0)->getRendMethod() == erm_table && getParentNode()
+                        && getParentNode()->getStyle()->display == css_d_ruby ) {
+                return true;
+            }
             return isEmbeddedBlockBoxingInlineBox(true); // avoid rechecking what we just checked
         }
     }
@@ -5635,7 +5758,7 @@ bool ldomNode::isBoxingInlineBox()
 /// is node an inlineBox that wraps a bogus embedded block (not inline-block/inline-table)
 /// can be called with inline_box_checks_done=true when isBoxingInlineBox() has already
 /// been called to avoid rechecking what is known
-bool ldomNode::isEmbeddedBlockBoxingInlineBox(bool inline_box_checks_done)
+bool ldomNode::isEmbeddedBlockBoxingInlineBox(bool inline_box_checks_done) const
 {
     if ( !inline_box_checks_done ) {
         if ( getNodeId() != el_inlineBox || !BLOCK_RENDERING_G(BOX_INLINE_BLOCKS) )
@@ -5645,6 +5768,10 @@ bool ldomNode::isEmbeddedBlockBoxingInlineBox(bool inline_box_checks_done)
         css_display_t d = getChildNode(0)->getStyle()->display;
         if (d == css_d_inline_block || d == css_d_inline_table) {
             return false; // regular boxing inlineBox
+        }
+        if ( getChildNode(0)->getRendMethod() == erm_table && getParentNode()
+                    && getParentNode()->getStyle()->display == css_d_ruby ) {
+            return false; // inlineBox wrapping a rubyBox as a child of <ruby>
         }
     }
     if ( hasAttribute( attr_T ) ) { // T="EmbeddedBlock"
@@ -5825,21 +5952,33 @@ void ldomNode::initNodeRendMethod()
                         ldomNode * ibox = insertChildElement( i, LXML_NS_NONE, el_inlineBox );
                         moveItemsTo( ibox, i+1, i+1 ); // move this child from 'this' into ibox
                         // Mark this inlineBox so we can handle its pecularities
-                        ibox->setAttributeValue(LXML_NS_NONE, getDocument()->getAttrNameIndex(L"type"), L"EmbeddedBlock");
+                        ibox->setAttributeValue(LXML_NS_NONE, attr_T, L"EmbeddedBlock");
                         setNodeStyle( ibox, getStyle(), getFont() );
                         ibox->setRendMethod( erm_inline );
                     }
                 }
             }
         }
+    } else if ( d==css_d_ruby ) {
+        // This will be dealt in a big section below. For now, reset everything
+        // to inline as ruby is only allowed to contain inline content.
+        // We don't support the newer display: values like ruby-base, ruby-text...,
+        // but only "display: ruby" which is just set on the <ruby> element
+        // (which allows us to have it reset back to "display: inline" if we
+        // don't wan't ruby support).
+        //   recurseElements( resetRendMethodToInline );
+        // Or may be not: looks like we can support <ruby> inside <ruby>,
+        // so allow that; and probably anything nested, as we'll handle
+        // that just like a table cell content.
+        setRendMethod(erm_inline);
     } else if ( d==css_d_run_in ) {
         // runin
         //CRLog::trace("switch all children elements of <%s> to inline", LCSTR(getNodeName()));
         recurseElements( resetRendMethodToInline );
         setRendMethod(erm_runin);
-    } else if ( d==css_d_list_item ) {
+    } else if ( d==css_d_list_item_legacy ) {
         // list item (no more used, obsolete rendering method)
-        setRendMethod(erm_list_item);
+        setRendMethod(erm_final);
     } else if ( d==css_d_table ) {
         // table: this will "Generate missing child wrappers" if needed
         initTableRendMethods( this, 0 );
@@ -6324,6 +6463,369 @@ void ldomNode::initNodeRendMethod()
         }
     }
 
+    if ( d == css_d_ruby && BLOCK_RENDERING_G(ENHANCED) ) {
+        // Ruby input can be quite loose and have various tag strategies (mono/group,
+        // interleaved/tabular, double sided). Moreover, the specs have evolved between
+        // 2001 and 2020 (<rbc> tag no more mentionned in 2020; <rtc> being just another
+        // semantic container for Mozilla, and can be preceded by a bunch of <rt> which
+        // are pronunciation containers, that don't have to be in an <rtc>...)
+        // Moreover, various samples on the following pages don't close tags, and expect
+        // the HTML parser to do that. We do that only when parsing .html files, but
+        // we don't when parsing .epub files as they are expected to be balanced XHTML.
+        //
+        // References:
+        //  https://www.w3.org/International/articles/ruby/markup
+        //  https://www.w3.org/TR/ruby-use-cases/ differences between XHTML, HTML5 & HTML Extensions
+        //  https://www.w3.org/TR/ruby/ Ruby Annotation, 2001
+        //  http://darobin.github.io/html-ruby/ HTML Ruby Markup Extensions, 2015
+        //  https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-ruby-element HTML Living standard
+        //  https://drafts.csswg.org/css-ruby/ CSS Ruby Layout, 2020
+        //  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rtc
+        //  https://chenhuijing.com/blog/html-ruby/ All about the HTML <ruby> element (in 2016)
+        //  https://github.com/w3c/html/issues/291 How to handle legacy Ruby content that may use <rbc>?
+        //  https://w3c.github.io/i18n-tests/results/ruby-html Browsers support
+        //
+        // We can handle quite a few of these variations with the following strategy.
+        //
+        // We want a <ruby> (which will stay inline) to only contain inlineBox>rubyBox elements
+        // that will be set up to be rendered just as an inline-table:
+        //   <ruby, "display: ruby", erm_inline>
+        //     <inlineBox, erm_inline>  [1 or more, 1 per ruby segment]
+        //       <rubyBox, erm_table>   [1]
+        //         <rbc or rubyBox, erm_table_row>  [1]
+        //           <rb or rubyBox, erm_final> base text </rb or /rubyBox>  [1 or more]
+        //         </rbc or /rubyBox>
+        //         <rtc or rubyBox, erm_table_row>  [1 or more, usually 1 or 2]
+        //           <rt or rubyBox, erm_final> annotation text </rt or /rubyBox>  [1 or more]
+        //         </rtc or /rubyBox>
+        //       </rubyBox>
+        //     </inlineBox>
+        //     [some possible empty space text nodes between ruby segments]
+        //   </ruby>
+        //
+        // (The re-ordering of the table rows, putting the first "rtc" above the "rbc",
+        // will be done in renderTable(), as it is just needed there in its own internal
+        // table data structures. The DOM will stay in its original order: the "rbc"
+        // staying before followup "rtc", which will give us the correct baseline to use
+        // for the whole structure: the baseline of the "rbc".
+        //
+        // We need to build all this when we meet a simple:
+        //   <ruby>text1<rt>annot1</rt>text2<rt>annot2</rt> </ruby>
+        // The only element we'll nearly always find inside a <ruby> is <rt>,
+        // (but we can find sometimes a single <rtc> with no <rt>).
+        //
+        // One thing we might not handle well is white-space, which, depending on where
+        // it happens, should be dropped or not. We drop some by putting it between table
+        // elements, we keep some by putting it between the inlineBoxes, but not really
+        // according to the complex rules in https://drafts.csswg.org/css-ruby/#box-fixup
+        //
+        // Some other notes:
+        // - We can style some ruby elements, including some of the rubyBox we add, with:
+        //     rt, rubyBox[T=rt] { font-size: 50%; font-variant-east-asian: ruby; }
+        //     rubyBox { border: 1px solid green; }
+        // - Note that on initial loading (HTML parsing, and this boxing here happening,
+        //   the real ruby sub-elements present in the HTML will already be there in the
+        //   DOM and have their style set, possibly inherited from their parent (the <ruby>
+        //   element) *before* this boxing is happening. If we add a rubyBox, and it
+        //   becomes the parent of a rb or rt, these rb or rt won't inherite from the
+        //   rubyBox (that we may style). They also won't get styled by CSS selectors
+        //   like "rubyBox > rt".
+        //   But on a next re-renderings, as the DOM is kept, all this will happen.
+        //   So: avoid such rules, and avoid setting inherit'able properties to
+        //   the rubyBox elements; otherwise we may get different look on initial
+        //   loading and on subsequent re-renderings.
+        // - With some ruby constructs, the behaviour and rendering might be different
+        //   whether we're parsing a HTML file or an EPUB file:
+        //   - the HTML parser is able to auto-close tags, which is needed with most
+        //     of the samples in the above URLs (but may fail on nested ruby with
+        //     unbalanced tags, as auto-closing in one ruby might kill the other).
+        //   - the EPUB XHTML parser expects balanced tags, and may work with nested
+        //     ruby, but will not process ruby with unbalanced tags.
+
+        // To make things easier to follow below (with the amount of nested rubyBoxes...),
+        // we name the variables used to hold each of them:
+        //   ibox1 : the inlineBox wrapping the 1st level rubyBox that will be erm_table (inline-table)
+        //   rbox1 : the 1st level rubyBox that will be erm_table
+        //   rbox2 : the 2nd level rubyBox that will be erm_table_row, like existing <rbc> and <rtc>
+        //   rbox3 : the 3rd level rubyBox that will be a table cell (erm_final or erm_block), like existing <rb> and <rt>
+
+        // Check if we have already wrapped: we should contain only <inlineBox>'ed <rubyBox>es
+        // Note that <ruby style="display: ruby"> is all that is required to trigger this. When
+        // wanting to disable ruby support, it's enough to just set <ruby> to "display: inline":
+        // a change in "display:" value will cause a nodeDisplayStyleHash mismatch, and propose
+        // a full reload with DOM rebuild, which will forget all the rubyBox we added.
+        bool needs_wrapping = true;
+        int len = getChildCount();
+        for ( int i=0; i<len; i++ ) {
+            ldomNode * child = getChildNode(i);
+            if ( child->isElement() && child->getNodeId() == el_inlineBox
+                    && child->getChildCount() > 0 && child->getChildNode(0)->getNodeId() == el_rubyBox ) {
+                // If we find one <inlineBox><rubyBox>, we created that previously and we ensured
+                // there are only rubyBoxes, empty text nodes, or some trailing inline nodes
+                // not followed by a <rt>: no need for more checks and work.
+                needs_wrapping = false;
+                break;
+            }
+        }
+        if ( needs_wrapping ) {
+            // 1) Wrap everything up to (and including consecutive ones) <rt> <rtc> <rp>
+            // into <inlineBox><rubyBox>, and continue doing it after that.
+            int first_to_wrap = -1;
+            int last_to_wrap = -1;
+            for ( int i=0; i<=len; i++ ) {
+                ldomNode * child;
+                lInt16 elemId;
+                bool eoc = i == len; // end of children
+                if ( !eoc ) {
+                    child = getChildNode(i);
+                    if ( child->isElement() ) {
+                        elemId = child->getNodeId();
+                    }
+                    else {
+                        lString16 s = child->getText();
+                        elemId = IsEmptySpace(s.c_str(), s.length()) ? -2 : -1;
+                        // When meeting an empty space (elemId==-2), we'll delay wrapping
+                        // decision to when we process the next node.
+                        // We'll also not start a wrap with it.
+                    }
+                }
+                if ( last_to_wrap >= 0 && (eoc || (elemId != el_rt && elemId != el_rtc && elemId != el_rp && elemId != -2) ) ) {
+                    if ( first_to_wrap < 0 )
+                        first_to_wrap = 0;
+                    ldomNode * rbox1 = boxWrapChildren(first_to_wrap, last_to_wrap, el_rubyBox);
+                    if ( rbox1 && !rbox1->isNull() ) {
+                        // Set an attribute for the kind of container we made (Ruby Segment)
+                        // so we can style it via CSS.
+                        rbox1->setAttributeValue(LXML_NS_NONE, attr_T, L"rseg");
+                        rbox1->initNodeStyle();
+                        // Update loop index and end
+                        int removed = last_to_wrap - first_to_wrap;
+                        i = i - removed;
+                        len = len - removed;
+                        // And wrap this rubyBox in an inlineBox
+                        ldomNode * ibox1 = insertChildElement( first_to_wrap, LXML_NS_NONE, el_inlineBox );
+                        moveItemsTo( ibox1, first_to_wrap+1, first_to_wrap+1 );
+                        ibox1->initNodeStyle();
+                    }
+                    first_to_wrap = -1;
+                    last_to_wrap = -1;
+                    if (eoc)
+                        break;
+                }
+                if ( elemId == -1 ) { // isText(), non empty
+                    if ( first_to_wrap < 0 ) {
+                        first_to_wrap = i;
+                    }
+                }
+                else if ( elemId == -2 ) { // isText(), empty
+                    // Don't start a wrap on it
+                }
+                else {
+                    if ( first_to_wrap < 0 ) {
+                        first_to_wrap = i;
+                    }
+                    if ( elemId == el_rt || elemId == el_rtc || elemId == el_rp ) {
+                        last_to_wrap = i;
+                        // Don't wrap yet: there can be followup other RT/RTC
+                    }
+                }
+            }
+            // 2) Enter each rubyBox we have created (they will be inline-table),
+            // and wrap its content as needed to make rows (of rubyBox, rbc and rtc)
+            // and cells (of rubyBox, rb and rt).
+            len = getChildCount();
+            for ( int i=0; i<len; i++ ) {
+                ldomNode * ibox1 = getChildNode(i);
+                if ( !ibox1->isElement() || ibox1->getNodeId() != el_inlineBox )
+                    continue;
+                ldomNode * rbox1 = ibox1->getChildCount() > 0 ? ibox1->getChildNode(0) : NULL;
+                if ( !rbox1 || !rbox1->isElement() || rbox1->getNodeId() != el_rubyBox )
+                    continue;
+                // (Each rbox1 will be set erm_table)
+                int len1 = rbox1->getChildCount();
+                int first_to_wrap = -1;
+                bool ruby_base_wrap_done = false;
+                bool ruby_base_present = false;
+                for ( int i1=0; i1<=len1; i1++ ) {
+                    ldomNode * child;
+                    lInt16 elemId;
+                    bool eoc = i1 == len1; // end of children
+                    if ( !eoc ) {
+                        child = rbox1->getChildNode(i1);
+                        if ( child->isElement() ) {
+                            elemId = child->getNodeId();
+                        }
+                        else {
+                            lString16 s = child->getText();
+                            elemId = IsEmptySpace(s.c_str(), s.length()) ? -2 : -1;
+                            // When meeting an empty space (elemId==-2), we'll delay wrapping
+                            // decision to when we process the next node.
+                            // We'll also not start a wrap with it.
+                        }
+                    }
+                    if ( first_to_wrap >= 0 && (
+                                    eoc
+                                 || ( !ruby_base_wrap_done && (elemId == el_rtc || elemId == el_rt || elemId == el_rp) )
+                                 || (  ruby_base_wrap_done && elemId == el_rtc )
+                                ) ) {
+                        ldomNode * rbox2 = rbox1->boxWrapChildren(first_to_wrap, i1-1, el_rubyBox);
+                        if ( rbox2 && !rbox2->isNull() ) {
+                            // Set an attribute for the kind of container we made (<rbc> or <rtc>-like),
+                            // so we can style it like real <rbc> and <rtc> via CSS.
+                            rbox2->setAttributeValue(LXML_NS_NONE, attr_T, ruby_base_wrap_done ? L"rtc" : L"rbc");
+                            rbox2->initNodeStyle();
+                            // Update loop index and end
+                            int removed = i1-1 - first_to_wrap;
+                            i1 = i1 - removed;
+                            len1 = len1 - removed;
+                        }
+                        first_to_wrap = -1;
+                        if ( !eoc && !ruby_base_wrap_done ) {
+                            ruby_base_present = true; // We did create it
+                        }
+                        if (eoc)
+                            break;
+                    }
+                    if ( elemId == -1 ) { // isText(), non empty
+                        if ( first_to_wrap < 0 ) {
+                            first_to_wrap = i1;
+                        }
+                    }
+                    else if ( elemId == -2 ) { // isText(), empty
+                        // Don't start a wrap on it
+                    }
+                    else {
+                        if ( elemId == el_rbc || elemId == el_rtc ) {
+                            // These are fine containers at this level.
+                            // (If el_rbc, we shouldn't have found anything before
+                            // it; if we did, just ignore it.)
+                            first_to_wrap = -1;
+                            ruby_base_wrap_done = true;
+                            if ( elemId == el_rbc )
+                                ruby_base_present = true;
+                        }
+                        else if ( first_to_wrap < 0 ) {
+                            first_to_wrap = i1;
+                            if ( elemId == el_rt || elemId == el_rp ) {
+                                ruby_base_wrap_done = true;
+                            }
+                        }
+                    }
+                }
+                if ( !ruby_base_present ) {
+                    // <ruby><rt>annotation</rt></ruby> : add rubyBox for empty base text
+                    ldomNode * rbox2 = rbox1->insertChildElement( 0, LXML_NS_NONE, el_rubyBox );
+                    rbox2->setAttributeValue(LXML_NS_NONE, attr_T, L"rbc");
+                    rbox2->initNodeStyle();
+                }
+                // rbox1 now contains only <rbc>, <rtc> or <rubyBox> (which will be set erm_table_row)
+                // 3) for each, ensure its content is <rb>, <rt>, and if not, wrap it in
+                // a <rubyBox> (these will be all like table cells, set erm_final)
+                len1 = rbox1->getChildCount();
+                bool ruby_base_seen = false;
+                for ( int i1=0; i1<len1; i1++ ) {
+                    ldomNode * rbox2 = rbox1->getChildNode(i1);
+                    if ( !rbox2->isElement() )
+                        continue;
+                    lInt16 elemId = rbox2->getNodeId();
+                    lInt16 expected_child_elem_id;
+                    if ( elemId == el_rbc ) {
+                        expected_child_elem_id = el_rb;
+                    }
+                    else if ( elemId == el_rtc ) {
+                        expected_child_elem_id = el_rt;
+                    }
+                    else if ( elemId == el_rubyBox ) {
+                        expected_child_elem_id = ruby_base_seen ? el_rt : el_rb;
+                    }
+                    else { // unexpected
+                        continue;
+                    }
+                    ruby_base_seen = true; // We're passing by a container, the first one being the base
+                    bool has_expected = false;
+                    int len2 = rbox2->getChildCount();
+                    for ( int i2=0; i2<len2; i2++ ) {
+                        ldomNode * child = rbox2->getChildNode(i2);
+                        lInt16 childElemId = child->isElement() ? child->getNodeId() : -1;
+                        if ( childElemId == expected_child_elem_id ) {
+                            // If a single expected is found, assume everything is fine
+                            // (other badly wrapped elements will just be ignored and invisible)
+                            has_expected = true;
+                            break;
+                        }
+                    }
+                    if ( !has_expected ) {
+                        // Wrap everything into a rubyBox
+                        if ( len2 > 0 ) { // some children to wrap
+                            ldomNode * rbox3 = rbox2->boxWrapChildren(0, len2-1, el_rubyBox);
+                            if ( rbox3 && !rbox3->isNull() ) {
+                                rbox3->setAttributeValue(LXML_NS_NONE, attr_T, expected_child_elem_id == el_rb ? L"rb" : L"rt");
+                                if ( elemId == el_rtc ) {
+                                    // Firefox makes a <rtc>text</rtc> (without any <rt>) span the whole involved base
+                                    rbox3->setAttributeValue(LXML_NS_NONE, attr_rbspan, L"99"); // (our max supported)
+                                }
+                                rbox3->initNodeStyle();
+                            }
+                        } else { // no child to wrap
+                            // We need to insert an empty element to play the role of a <td> for
+                            // the table rendering code to work correctly.
+                            ldomNode * rbox3 = rbox2->insertChildElement( 0, LXML_NS_NONE, el_rubyBox );
+                            rbox3->setAttributeValue(LXML_NS_NONE, attr_T, expected_child_elem_id == el_rb ? L"rb" : L"rt");
+                            rbox3->initNodeStyle();
+                            // We need to add some text for the cell to ensure its height.
+                            // We add a ZERO WIDTH SPACE, which will not collapse into nothing
+                            rbox3->insertChildText(L"\x200B");
+                        }
+                    }
+                }
+            }
+        }
+        // All wrapping done, or assumed to have already been done correctly.
+        // We can set the rendering methods to make all this a table.
+        // All unexpected elements will be erm_invisible
+        len = getChildCount();
+        for ( int i=0; i<len; i++ ) {
+            ldomNode * ibox1 = getChildNode(i);
+            if ( !ibox1->isElement() || ibox1->getNodeId() != el_inlineBox )
+                continue;
+            ibox1->setRendMethod( erm_inline );
+            ldomNode * rbox1 = ibox1->getChildCount() > 0 ? ibox1->getChildNode(0) : NULL;
+            if ( rbox1 && rbox1->isElement() && rbox1->getNodeId() == el_rubyBox ) {
+                // First level rubyBox: each will be an inline table
+                rbox1->setRendMethod( erm_table );
+                int len1 = rbox1->getChildCount();
+                for ( int i1=0; i1<len1; i1++ ) {
+                    ldomNode * rbox2 = rbox1->getChildNode(i1);
+                    if ( rbox2->isElement() ) {
+                        rbox2->setRendMethod( erm_invisible );
+                        lInt16 rb2elemId = rbox2->getNodeId();
+                        if ( rb2elemId == el_rubyBox || rb2elemId == el_rbc || rb2elemId == el_rtc ) {
+                            // Second level rubyBox: each will be a table row
+                            rbox2->setRendMethod( erm_table_row );
+                            int len2 = rbox2->getChildCount();
+                            for ( int i2=0; i2<len2; i2++ ) {
+                                ldomNode * rbox3 = rbox2->getChildNode(i2);
+                                if ( rbox3->isElement() ) {
+                                    rbox3->setRendMethod( erm_invisible );
+                                    lInt16 rb3elemId = rbox3->getNodeId();
+                                    if ( rb3elemId == el_rubyBox || rb3elemId == el_rb || rb3elemId == el_rt ) {
+                                        // Third level rubyBox: each will be a table cell.
+                                        // (As all it content has previously been reset to erm_inline)
+                                        //  /\ This is no more true, but we expect to find inline
+                                        //  content, with possibly some nested ruby.
+                                        // We can have the cell erm_final.
+                                        rbox3->setRendMethod( erm_final );
+                                    }
+                                    // We let <rp> be invisible like other unexpected elements
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     bool handled_as_float = false;
     if (BLOCK_RENDERING_G(WRAP_FLOATS)) {
         // While loading the document, we want to put any element with float:left/right
@@ -6376,7 +6878,7 @@ void ldomNode::initNodeRendMethod()
                 css_style_ref_t my_new_style( new css_style_rec_t );
                 copystyle(my_style, my_new_style);
                 my_new_style->float_ = child_style->float_;
-                if (child_style->display == css_d_inline) { // when !PREPARE_FLOATBOXES
+                if (child_style->display <= css_d_inline) { // when !PREPARE_FLOATBOXES
                     my_new_style->display = css_d_inline; // become an inline wrapper
                 }
                 else if (child_style->display == css_d_none) {
@@ -6517,7 +7019,7 @@ void ldomNode::initNodeRendMethod()
                     my_new_style->display = css_d_inline; // wrap bogus "block among inlines" in inline
                     setRendMethod( erm_inline );
                 }
-                else if (child_style->display == css_d_inline) {
+                else if (child_style->display <= css_d_inline) {
                     my_new_style->display = css_d_inline; // wrap inline in inline
                     setRendMethod( erm_inline );
                 }
@@ -6577,6 +7079,20 @@ void ldomElementWriter::onBodyExit()
         return;
     if ( !_bodyEnterCalled ) {
         onBodyEnter();
+    }
+    if ( _pseudoElementAfterChildIndex >= 0 ) {
+        if ( _pseudoElementAfterChildIndex != _element->getChildCount()-1 ) {
+            // Not the last child: move it there
+            // (moveItemsTo() works just fine when the source node is also the
+            // target node: remove it, and re-add it, so, adding it at the end)
+            _element->moveItemsTo( _element, _pseudoElementAfterChildIndex, _pseudoElementAfterChildIndex);
+        }
+        // Now that all the real children of this node have had their
+        // style set, we can init the style of the "After" pseudo
+        // element, and its rend method as it has no children.
+        ldomNode * child = _element->getChildNode(_element->getChildCount()-1);
+        child->initNodeStyle();
+        child->initNodeRendMethod();
     }
 //    if ( _element->getStyle().isNull() ) {
 //        lString16 path;
@@ -6756,7 +7272,7 @@ void ldomDocumentWriter::OnStart(LVFileFormatParser * parser)
         //CRLog::trace( "ldomDocumentWriter() : header only, tag id=%d", _stopTagId );
     }
     LVXMLParserCallback::OnStart( parser );
-    _currNode = new ldomElementWriter(_document, 0, 0, NULL, false);
+    _currNode = new ldomElementWriter(_document, 0, 0, NULL /*, false*/);
 }
 
 void ldomDocumentWriter::OnStop()
@@ -6869,7 +7385,7 @@ ldomNode * ldomDocumentWriter::OnTagOpen( const lChar16 * nsname, const lChar16 
         //CRLog::trace("stop tag found, stopping...");
     //    _parser->Stop();
     //}
-    _currNode = new ldomElementWriter( _document, nsid, id, _currNode, isNotesTag);
+    _currNode = new ldomElementWriter( _document, nsid, id, _currNode /*, isNotesTag*/);
     _flags = _currNode->getFlags();
     //logfile << " !o!\n";
     //return _currNode->getElement();
@@ -7476,7 +7992,7 @@ ldomNode * ldomXPointer::getFinalNode() const
     for (;;) {
         if ( !node )
             return NULL;
-        if ( node->getRendMethod()==erm_final || node->getRendMethod()==erm_list_item || node->getRendMethod() == erm_table_caption )
+        if ( node->getRendMethod()==erm_final )
             return node;
         node = node->getParentNode();
     }
@@ -7488,7 +8004,7 @@ bool ldomXPointer::isFinalNode() const
     ldomNode * node = getNode();
     if ( !node )
         return false;
-    if ( node->getRendMethod()==erm_final || node->getRendMethod()==erm_list_item || node->getRendMethod() == erm_table_caption )
+    if ( node->getRendMethod()==erm_final )
         return true;
     return false;
 }
@@ -7546,7 +8062,7 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
     // printf("finalNode %s\n", UnicodeToLocal(ldomXPointer(finalNode, 0).toString()).c_str());
 
     lvdom_element_render_method rm = finalNode->getRendMethod();
-    if ( rm != erm_final && rm != erm_list_item && rm != erm_table_caption ) {
+    if ( rm != erm_final ) {
         // Not final, return XPointer to first or last child
         lvRect rc;
         finalNode->getAbsRect( rc );
@@ -7768,8 +8284,8 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
                 }
 
                 lUInt32 hints = WORD_FLAGS_TO_FNT_FLAGS(word->flags);
-                font->measureText( str.c_str()+word->t.start, word->t.len, width, flg,
-                                    word->width+50, '?', src->lang_cfg, src->letter_spacing, false, hints);
+                font->measureText( str.c_str()+word->t.start, word->t.len, width, flg, word->width+50, '?',
+                            src->lang_cfg, src->letter_spacing + word->added_letter_spacing, false, hints);
 
                 bool word_is_rtl = word->flags & LTEXT_WORD_DIRECTION_IS_RTL;
                 if ( word_is_rtl ) {
@@ -7831,21 +8347,23 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
     ldomNode * mainNode = p->getDocument()->getRootNode();
     for ( ; p; p = p->getParentNode() ) {
         int rm = p->getRendMethod();
-        if ( rm == erm_final || rm == erm_table_caption ) {
-            // With floats, we may get multiple erm_final when walking up
-            // to root node: keep the first one met (but go on up to the
-            // root node in case we're in some upper erm_invisible).
-            if (!finalNode)
-                finalNode = p; // found final block
-        }
-        else if (rm == erm_list_item) {
-            // This obsolete rendering method is considered just like erm_final
-            // for many purposes, but can contain real erm_final nodes.
-            // So, if we found an erm_final, and if we find an erm_list_item
-            // when going up, we should use it (unlike in previous case).
-            // (This is needed to correctly display highlights on books opened
-            // with some older DOM_VERSION.)
-            finalNode = p;
+        if ( rm == erm_final ) {
+            if ( gDOMVersionRequested < 20180524 && p->getStyle()->display == css_d_list_item_legacy ) {
+                // This legacy rendering of list item is now erm_final, but
+                // can contain other real erm_final nodes.
+                // So, if we found an erm_final, and if we find this erm_final
+                // when going up, we should use it (unlike in next case).
+                // (This is needed to correctly display highlights on books opened
+                // with some older DOM_VERSION.)
+                finalNode = p;
+            }
+            else {
+                // With floats, we may get multiple erm_final when walking up
+                // to root node: keep the first one met (but go on up to the
+                // root node in case we're in some upper erm_invisible).
+                if (!finalNode)
+                    finalNode = p; // found final block
+            }
         }
         else if ( p->getRendMethod() == erm_invisible ) {
             return false; // invisible !!!
@@ -8122,7 +8640,7 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                                     word->width+50,
                                     '?',
                                     txtform->GetSrcInfo(srcIndex)->lang_cfg,
-                                    txtform->GetSrcInfo(srcIndex)->letter_spacing,
+                                    txtform->GetSrcInfo(srcIndex)->letter_spacing + word->added_letter_spacing,
                                     false,
                                     hints);
                                 rect.top = rc.top + frmline->y;
@@ -8164,10 +8682,22 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                                             // bearing below
                                             hyphen_added = true;
                                         }
-                                        if ( word_is_rtl )
+                                        if ( word_is_rtl ) {
                                             rect.left = rect.right - chw;
-                                        else
+                                            if ( !hyphen_added ) {
+                                                // Also remove our added letter spacing for justification
+                                                // from the left, to have cleaner highlights.
+                                                rect.left += word->added_letter_spacing;
+                                            }
+                                        }
+                                        else {
                                             rect.right = rect.left + chw;
+                                            if ( !hyphen_added ) {
+                                                // Also remove our added letter spacing for justification
+                                                // from the right, to have cleaner highlights.
+                                                rect.right -= word->added_letter_spacing;
+                                            }
+                                        }
                                         if (adjusted) {
                                             // Extend left or right if this glyph overflows its
                                             // origin/advance box (can happen with an italic font,
@@ -8291,7 +8821,7 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                             word->width+50,
                             '?',
                             txtform->GetSrcInfo(srcIndex)->lang_cfg,
-                            txtform->GetSrcInfo(srcIndex)->letter_spacing,
+                            txtform->GetSrcInfo(srcIndex)->letter_spacing + word->added_letter_spacing,
                             false,
                             hints );
                         // chx is the width of previous chars in the word
@@ -8324,6 +8854,11 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                                     hyphen_added = true;
                                 }
                                 rect.right = rect.left + chw;
+                                if ( !hyphen_added ) {
+                                    // Also remove our added letter spacing for justification
+                                    // from the right, to have cleaner highlights.
+                                    rect.right -= word->added_letter_spacing;
+                                }
                                 if (adjusted) {
                                     // Extend left or right if this glyph overflows its
                                     // origin/advance box (can happen with an italic font,
@@ -8392,7 +8927,9 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
 
 static bool isBoxingNode(ldomNode * node)
 {
-    return node->isBoxingNode();
+    // In the context this is used (xpointers), handle pseudoElems (that don't
+    // box anything) just as boxing nodes: ignoring them in XPointers.
+    return node->isBoxingNode(true);
 }
 
 static bool isTextNode(ldomNode * node)
@@ -8734,7 +9271,7 @@ lString16 ldomXPointer::toStringV2()
     ldomNode * node = getNode();
     int offset = getOffset();
     ldomNode * p = node;
-    if ( !node->isBoxingNode() ) {
+    if ( !node->isBoxingNode(true) ) { // (nor pseudoElem)
         if ( offset >= 0 ) {
             path << "." << fmt::decimal(offset);
         }
@@ -8899,7 +9436,7 @@ lString16 extractDocTitle( ldomDocument * doc )
 
 lString16 extractDocLanguage( ldomDocument * doc )
 {
-    return doc->createXPointer(L"/FictionBook/description/title-info/lang").getText();
+    return doc->createXPointer(L"/FictionBook/description/title-info/lang").getText().trim();
 }
 
 lString16 extractDocGenre( ldomDocument * doc, lString16 delimiter)
@@ -9975,8 +10512,7 @@ bool ldomXRange::getRectEx( lvRect & rect, bool & isSingleLine )
     ldomNode * finalNode2 = getEnd().getFinalNode();
     if ( !finalNode1 || !finalNode2 ) {
         // Shouldn't happen, but prevent a segfault in case some other bug
-        // in initNodeRendMethod made some text not having a erm_final-like
-        // ancestor.
+        // in initNodeRendMethod made some text not having an erm_final ancestor.
         if ( !finalNode1 )
             printf("CRE WARNING: no final parent for range start %s\n", UnicodeToLocal(getStart().toString()).c_str());
         if ( !finalNode2 )
@@ -10806,12 +11342,14 @@ bool ldomXPointerEx::prevVisibleWordStart( bool thisBlockOnly )
         }
         bool foundNonSpace = false;
         while ( _data->getOffset() > 0 && IsWordSeparator(text[_data->getOffset()-1]) )
-            _data->addOffset(-1);
+            _data->addOffset(-1); // skip preceeding space if any (we were on a visible word start)
         while ( _data->getOffset()>0 ) {
             if ( IsWordSeparator(text[ _data->getOffset()-1 ]) )
                 break;
             foundNonSpace = true;
             _data->addOffset(-1);
+            if ( canWrapWordBefore( text[_data->getOffset()] ) ) // CJK char
+                break;
         }
         if ( foundNonSpace )
             return true;
@@ -10853,6 +11391,9 @@ bool ldomXPointerEx::prevVisibleWordEnd( bool thisBlockOnly )
         while ( _data->getOffset()>0 ) {
             if ( IsWordSeparator(text[ _data->getOffset()-1 ]) )
                 break;
+            if ( moved && canWrapWordAfter( text[_data->getOffset()] ) ) // We moved to a CJK char
+                return true;
+            moved = true;
             _data->addOffset(-1);
         }
         // skip spaces
@@ -10914,6 +11455,8 @@ bool ldomXPointerEx::nextVisibleWordStart( bool thisBlockOnly )
         while ( _data->getOffset()<textLen ) {
             if ( IsWordSeparator(text[ _data->getOffset() ]) )
                 break;
+            if ( moved && canWrapWordBefore( text[_data->getOffset()] ) ) // We moved to a CJK char
+                return true;
             moved = true;
             _data->addOffset(1);
         }
@@ -10997,6 +11540,8 @@ bool ldomXPointerEx::nextVisibleWordEnd( bool thisBlockOnly )
                 break;
             nonSpaceFound = true;
             _data->addOffset(1);
+            if ( canWrapWordAfter( text[_data->getOffset()] ) ) // We moved to a CJK char
+                return true;
         }
         if ( nonSpaceFound )
             return true;
@@ -11011,6 +11556,8 @@ bool ldomXPointerEx::nextVisibleWordEnd( bool thisBlockOnly )
                 break;
             nonSpaceFound = true;
             _data->addOffset(1);
+            if ( canWrapWordAfter( text[_data->getOffset()] ) ) // We moved to a CJK char
+                return true;
         }
         if ( nonSpaceFound )
             return true;
@@ -11028,10 +11575,21 @@ bool ldomXPointerEx::isVisibleWordStart()
     lString16 text = node->getText();
     int textLen = text.length();
     int i = _data->getOffset();
+    // We're actually testing the boundary between the char at i-1 and
+    // the char at i. So, we return true when [i] is the first letter
+    // of a word.
     lChar16 currCh = i<textLen ? text[i] : 0;
-    lChar16 prevCh = i<textLen && i>0 ? text[i-1] : 0;
-    if (canWrapWordBefore(currCh) || (IsWordSeparatorOrNull(prevCh) && !IsWordSeparator(currCh)))
+    lChar16 prevCh = i<=textLen && i>0 ? text[i-1] : 0;
+    if (canWrapWordBefore(currCh)) {
+        // If [i] is a CJK char (that's what canWrapWordBefore()
+        // checks), this is a visible word start.
         return true;
+    }
+    if (IsWordSeparatorOrNull(prevCh) && !IsWordSeparator(currCh)) {
+        // If [i-1] is a space or punctuation (or [i] is the start of the text
+        // node) and [i] is a letter: this is a visible word start.
+        return true;
+    }
     return false;
  }
 
@@ -11046,10 +11604,21 @@ bool ldomXPointerEx::isVisibleWordEnd()
     lString16 text = node->getText();
     int textLen = text.length();
     int i = _data->getOffset();
+    // We're actually testing the boundary between the char at i-1 and
+    // the char at i. So, we return true when [i-1] is the last letter
+    // of a word.
     lChar16 currCh = i>0 ? text[i-1] : 0;
     lChar16 nextCh = i<textLen ? text[i] : 0;
-    if (canWrapWordAfter(currCh) || (!IsWordSeparator(currCh) && IsWordSeparatorOrNull(nextCh)))
+    if (canWrapWordAfter(currCh)) {
+        // If [i-1] is a CJK char (that's what canWrapWordAfter()
+        // checks), this is a visible word end.
         return true;
+    }
+    if (!IsWordSeparator(currCh) && IsWordSeparatorOrNull(nextCh)) {
+        // If [i-1] is a letter and [i] is a space or punctuation (or [i-1] is
+        // the last letter of a text node): this is a visible word end.
+        return true;
+    }
     return false;
 }
 
@@ -11069,12 +11638,9 @@ ldomNode * ldomXPointerEx::getThisBlockNode()
         case erm_runin: // treat as separate block
         case erm_block:
         case erm_final:
-        case erm_mixed:
-        case erm_list_item: // no more used (obsolete rendering method)
         case erm_table:
         case erm_table_row_group:
         case erm_table_row:
-        case erm_table_caption:
             return node;
         default:
             break; // ignore
@@ -11814,6 +12380,21 @@ public:
             newBlock = false;
             return true;
         }
+        switch ( elem->getStyle()->display ) {
+            case css_d_none:
+                return false;
+            case css_d_inherit:
+            case css_d_ruby:
+            case css_d_run_in:
+            case css_d_inline:
+            case css_d_inline_block: // Make these behave as inline, in case they don't contain much
+            case css_d_inline_table: // (if they do, some inner block element will give newBlock=true)
+                newBlock = false;
+                return true;
+            default:
+                newBlock = true;
+                return true;
+        }
 #else
         newBlock = true;
         return true;
@@ -12340,7 +12921,7 @@ ldomNode * ldomDocumentWriterFilter::OnTagOpen( const lChar16 * nsname, const lC
     lUInt16 id = _document->getElementNameIndex(tagname);
     lUInt16 nsid = (nsname && nsname[0]) ? _document->getNsNameIndex(nsname) : 0;
     AutoClose( id, true );
-    _currNode = new ldomElementWriter( _document, nsid, id, _currNode, false );
+    _currNode = new ldomElementWriter( _document, nsid, id, _currNode/*, false*/ );
     _flags = _currNode->getFlags();
     if ( _libRuDocumentDetected && (_flags & TXTFLG_PRE) )
         _flags |= TXTFLG_PRE_PARA_SPLITTING | TXTFLG_TRIM; // convert preformatted text into paragraphs
@@ -12460,7 +13041,7 @@ void ldomDocumentWriterFilter::OnAttribute( const lChar16 * nsname, const lChar1
     // we translate these deprecated attributes to their style equivalents:
     //
     // HTML valign= => CSS vertical-align: only for TH & TD (as lvrend.cpp
-    // only uses it with erm_table_cell)
+    // only uses it with table cells (erm_final or erm_block))
     if (id == el_th || id == el_td) {
         // Default rendering for cells is valign=top
         // There is no support for valign=baseline.
@@ -12474,7 +13055,7 @@ void ldomDocumentWriterFilter::OnAttribute( const lChar16 * nsname, const lChar1
         }
     }
     // HTML width= => CSS width: only for TH, TD and COL (as lvrend.cpp
-    // only uses it with erm_table_cell and erm_table_column)
+    // only uses it with erm_table_column and table cells)
     // Note: with IMG, lvtextfm LFormattedText::AddSourceObject() only uses
     // style, and not attributes: <img width=100 height=50> would not be used.
     if (id == el_th || id == el_td || id == el_col) {
@@ -13397,6 +13978,11 @@ lUInt32 tinyNodeCollection::calcStyleHash()
     res = res * 31 + _imgScalingOptions.getHash();
     res = res * 31 + _spaceWidthScalePercent;
     res = res * 31 + _minSpaceCondensingPercent;
+    res = res * 31 + _unusedSpaceThresholdPercent;
+    // _maxAddedLetterSpacingPercent does not need to be accounted, as, working
+    // only on a laid out line, it does not need a re-rendering, but just
+    // a _renderedBlockCache.clear() to reformat paragraphs and have the
+    // word re-positionned (the paragraphs width & height do not change)
     res = (res * 31 + globalHash) * 31 + docFlags;
 //    CRLog::info("Calculated style hash = %08x", res);
     CRLog::debug("calcStyleHash done");
@@ -15121,7 +15707,7 @@ void ldomNode::getAbsRect( lvRect & rect, bool inner )
     rect.bottom = fmt.getHeight();
     if ( inner && RENDER_RECT_HAS_FLAG(fmt, INNER_FIELDS_SET) ) {
         // This flag is set only when in enhanced rendering mode, and
-        // only on erm_final-like nodes.
+        // only on erm_final nodes.
         rect.left += fmt.getInnerX();     // add padding left
         rect.top += fmt.getInnerY();      // add padding top
         rect.right = fmt.getInnerWidth(); // replace by inner width
@@ -15500,18 +16086,18 @@ ldomNode * ldomNode::elementFromPoint( lvPoint pt, int direction )
 
         // Styles margins set on <TR>, <THEAD> and the like are ignored
         // by table layout algorithm (as per CSS specs)
-        bool ignore_margins = ( rm == erm_table_row || rm == erm_table_row_group ||
-                                rm == erm_table_header_group || rm == erm_table_footer_group );
+        // (erm_table_row_group, erm_table_header_group, erm_table_footer_group, erm_table_row)
+        bool ignore_margins = rm >= erm_table_row_group && rm <= erm_table_row;
 
         int top_margin = ignore_margins ? 0 : lengthToPx(enode->getStyle()->margin[2], fmt.getWidth(), enode->getFont()->getSize());
         if ( pt.y < fmt.getY() - top_margin) {
-            if ( direction >= PT_DIR_SCAN_FORWARD && (rm == erm_final || rm == erm_list_item || rm == erm_table_caption) )
+            if ( direction >= PT_DIR_SCAN_FORWARD && rm == erm_final )
                 return this;
             return NULL;
         }
         int bottom_margin = ignore_margins ? 0 : lengthToPx(enode->getStyle()->margin[3], fmt.getWidth(), enode->getFont()->getSize());
         if ( pt.y >= fmt.getY() + fmt.getHeight() + bottom_margin ) {
-            if ( direction <= PT_DIR_SCAN_BACKWARD && (rm == erm_final || rm == erm_list_item || rm == erm_table_caption) )
+            if ( direction <= PT_DIR_SCAN_BACKWARD && rm == erm_final )
                 return this;
             return NULL;
         }
@@ -15551,7 +16137,7 @@ ldomNode * ldomNode::elementFromPoint( lvPoint pt, int direction )
         // We could add more conditions (like parentNode->getRendMethod()>=erm_table),
         // but let's just check this in all cases when direction=0.
     }
-    if ( rm == erm_final || rm == erm_list_item || rm == erm_table_caption ) {
+    if ( rm == erm_final ) {
         // Final node, that's what we looked for
         return this;
     }
@@ -15629,7 +16215,7 @@ void ldomNode::setRendMethod( lvdom_element_render_method method )
 
 #if BUILD_LITE!=1
 /// returns element style record
-css_style_ref_t ldomNode::getStyle()
+css_style_ref_t ldomNode::getStyle() const
 {
     ASSERT_NODE_NOT_NULL;
     if ( !isElement() )
@@ -15758,11 +16344,14 @@ void ldomNode::initNodeStyle()
 }
 #endif
 
-bool ldomNode::isBoxingNode()
+bool ldomNode::isBoxingNode( bool orPseudoElem ) const
 {
     if( isElement() ) {
         lUInt16 id = getNodeId();
         if( id >= el_autoBoxing && id <= el_inlineBox ) {
+            return true;
+        }
+        if ( orPseudoElem && id == el_pseudoElem ) {
             return true;
         }
     }
@@ -15777,12 +16366,16 @@ ldomNode * ldomNode::getUnboxedParent() const
     return parent;
 }
 
+// The following 4 methods are mostly used when checking CSS siblings/child
+// rules and counting list items siblings: we have them skip pseudoElems by
+// using isBoxingNode(orPseudoElem=true).
 ldomNode * ldomNode::getUnboxedFirstChild( bool skip_text_nodes ) const
 {
     for ( int i=0; i<getChildCount(); i++ ) {
         ldomNode * child = getChildNode(i);
-        if ( child && child->isBoxingNode() ) {
+        if ( child && child->isBoxingNode(true) ) {
             child = child->getUnboxedFirstChild( skip_text_nodes );
+            // (child will then be NULL if it was a pseudoElem)
         }
         if ( child && (!skip_text_nodes || !child->isText()) )
             return child;
@@ -15794,7 +16387,7 @@ ldomNode * ldomNode::getUnboxedLastChild( bool skip_text_nodes ) const
 {
     for ( int i=getChildCount()-1; i>=0; i-- ) {
         ldomNode * child = getChildNode(i);
-        if ( child && child->isBoxingNode() ) {
+        if ( child && child->isBoxingNode(true) ) {
             child = child->getUnboxedLastChild( skip_text_nodes );
         }
         if ( child && (!skip_text_nodes || !child->isText()) )
@@ -15855,16 +16448,16 @@ ldomNode * ldomNode::getUnboxedNextSibling( bool skip_text_nodes ) const
                 if ( !skip_text_nodes )
                     return n;
             }
-            else if ( !n->isBoxingNode() ) // Not a boxing node
+            else if ( !n->isBoxingNode(true) ) // Not a boxing node nor pseudoElem
                 return n;
-            // Otherwise, this node is a boxing node (or a text node with
-            // no child, and we'll get back to its parent)
+            // Otherwise, this node is a boxing node (or a text node or a pseudoElem
+            // with no child, and we'll get back to its parent)
         }
         // Enter next node, and re-loop to have it checked
         // - if !node_entered : n is the parent and index points to the next child
         //   we want to check
-        // - if n->isBoxingNode() (and node_entered=true, and index=0): enter
-        //   the first child of this boxingNode
+        // - if n->isBoxingNode() (and node_entered=true, and index=0): enter the first
+        //   child of this boxingNode (not if pseudoElem, that doesn't box anything)
         if ( (!node_entered || n->isBoxingNode()) && index < n->getChildCount() ) {
             n = n->getChildNode(index);
             index = 0;
@@ -15898,7 +16491,7 @@ ldomNode * ldomNode::getUnboxedPrevSibling( bool skip_text_nodes ) const
                 if ( !skip_text_nodes )
                     return n;
             }
-            else if ( !n->isBoxingNode() )
+            else if ( !n->isBoxingNode(true) )
                 return n;
         }
         if ( (!node_entered || n->isBoxingNode()) && index >= 0 && index < n->getChildCount() ) {
@@ -15974,7 +16567,7 @@ bool ldomNode::getNodeListMarker( int & counterValue, lString16 & marker, int & 
                     sibling = sibling->getUnboxedNextSibling(true);
                     continue;
                 }
-                if ( cs->display != css_d_list_item_block && cs->display != css_d_list_item) {
+                if ( cs->display != css_d_list_item_block && cs->display != css_d_list_item_legacy) {
                     // Alien element among list item nodes, skip it to not mess numbering
                     if ( sibling == this ) // Should not happen, but let's be sure
                         break;
@@ -16677,7 +17270,7 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
     if ( cache.get( this, f ) ) {
         if ( f->isReusable() ) {
             frmtext = f;
-            if ( rm != erm_final && rm != erm_list_item && rm != erm_table_caption )
+            if ( rm != erm_final )
                 return 0;
             //RenderRectAccessor fmt( this );
             //CRLog::trace("Found existing formatted object for node #%08X", (lUInt32)this);
@@ -16687,15 +17280,17 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
         cache.remove( this );
     }
     f = getDocument()->createFormattedText();
-    if ( (rm != erm_final && rm != erm_list_item && rm != erm_table_caption) )
+    if ( rm != erm_final )
         return 0;
     //RenderRectAccessor fmt( this );
     /// render whole node content as single formatted object
     int direction = RENDER_RECT_PTR_GET_DIRECTION(fmt);
-    int flags = styleToTextFmtFlags( getStyle(), 0, direction );
+    lUInt32 flags = styleToTextFmtFlags( true, getStyle(), 0, direction );
     int lang_node_idx = fmt->getLangNodeIndex();
     TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg(lang_node_idx>0 ? getDocument()->getTinyNode(lang_node_idx) : NULL);
     ::renderFinalBlock( this, f.get(), fmt, flags, 0, -1, lang_cfg );
+    // We need to store this LFormattedTextRef in the cache for it to
+    // survive when leaving this function (some callers do use it).
     cache.set( this, f );
     bool flg=gFlgFloatingPunctuationEnabled;
     if (this->getNodeName()=="th"||this->getNodeName()=="td"||

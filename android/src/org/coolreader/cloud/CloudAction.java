@@ -361,18 +361,18 @@ public class CloudAction {
     }
 
     public static void yndLoadJsonFileList(final CoolReader cr, String fileMark, String sCRC,
-                                           boolean findingLastPos) {
+                                           boolean findingLastPos, boolean bErrorQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true);
+            CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true, bErrorQuiet);
             al.add(ca1);
             CloudAction ca2;
             if (findingLastPos)
-                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES_LASTPOS, true);
+                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES_LASTPOS, true, bErrorQuiet);
             else
-                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES, true);
+                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES, true, bErrorQuiet);
             ca2.param = fileMark;
             // ca2.param2 - will contain skip if folder exists. Means "skip create, because exists"
             ca2.bookCRC = sCRC;
@@ -520,7 +520,8 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            if (!bErrorQuiet)
+                cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
