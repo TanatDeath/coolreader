@@ -250,7 +250,11 @@ void lvtextAddSourceLine( formatted_text_fragment_t * pbuffer,
     if (flags & LTEXT_FLAG_OWNTEXT)
     {
         /* make own copy of text */
-        pline->t.text = (lChar16*)malloc( len * sizeof(lChar16) );
+        // We do a bit ugly to avoid clang-tidy warning "call to 'malloc' has an
+        // allocation size of 0 bytes" without having to add checks for NULL pointer
+        // (in lvrend.cpp, we're normalling not adding empty text with LTEXT_FLAG_OWNTEXT)
+        lUInt32 alloc_len = len > 0 ? len : 1;
+        pline->t.text = (lChar16*)malloc( alloc_len * sizeof(lChar16) );
         memcpy((void*)pline->t.text, text, len * sizeof(lChar16));
     }
     else
@@ -918,7 +922,6 @@ public:
             #endif
         }
         memset( m_flags, 0, sizeof(lUInt16)*m_length ); // start with all flags set to zero
-        pos = 0;
 
         // We set to zero the additional slot that the code may peek at (with
         // the checks against m_length we did, we know this slot is allocated).
@@ -951,6 +954,7 @@ public:
 
         m_has_bidi = false; // will be set if fribidi detects it is bidirectionnal text
         m_para_dir_is_rtl = false;
+        #if (USE_FRIBIDI==1)
         bool has_rtl = false; // if no RTL char, no need for expensive bidi processing
         // todo: according to https://www.w3.org/TR/css-text-3/#bidi-linebox
         // the bidi direction, if determined from the text itself (no dir= from
@@ -963,6 +967,8 @@ public:
         if ( m_specified_para_dir == REND_DIRECTION_RTL ) {
             has_rtl = true;
         }
+        #endif
+
         // Whether any "-cr-hint: strut-confined" should be applied: only when
         // we have non-space-only text in the paragraph - standalone images
         // possibly separated by spaces don't need to be reduced in size.
@@ -1573,7 +1579,7 @@ public:
         if (word->t.len > MAX_MEASURED_WORD_SIZE)
             return false;
         lUInt32 hints = WORD_FLAGS_TO_FNT_FLAGS(word->flags);
-        int chars_measured = srcfont->measureText(
+        srcfont->measureText(
                 str,
                 word->t.len,
                 widths, flags,
@@ -1716,7 +1722,10 @@ public:
                              || (m_flags[i] & LCHAR_IS_TO_IGNORE)
                              || (m_flags[i] & LCHAR_MANDATORY_NEWLINE) ) ) {
                 // measure start..i-1 chars
-                if ( !(m_flags[i-1] & LCHAR_IS_OBJECT) ) { // neither image, float, nor inline box
+                bool measuring_object = m_flags[i-1] & LCHAR_IS_OBJECT;
+                if ( !measuring_object && lastFont ) { // text node
+                        // In our context, we'll always have a non-NULL lastFont, but
+                        // have it checked explicitely to avoid clang-tidy warning.
                     // measure text
                     // Note: we provide text in the logical order, and measureText()
                     // will apply kerning in that order, which might be wrong if some
@@ -1800,7 +1809,7 @@ public:
                             widths[k] -= cumulative_width_removed;
                             if ( first_word_len >= 0 ) { // This is the space (or nbsp) after first word
                                 if ( first_word_len == 1 ) { // Previous word is a single char
-                                    if ( isLeftPunctuation(m_text[k-1]) ) {
+                                    if ( k > 0 && isLeftPunctuation(m_text[k-1]) ) {
                                         // This space follows one of the common opening quotation marks or
                                         // dashes used to introduce a quotation or a part of a dialog:
                                         // https://en.wikipedia.org/wiki/Quotation_mark
@@ -1854,7 +1863,7 @@ public:
                     //m_flags[len] = 0;
                     // TODO: letter spacing letter_spacing
                 }
-                else { // measure object
+                else if ( measuring_object ) {
                     // We have start=i-1 and m_flags[i-1] & LCHAR_IS_OBJECT
                     if (start != i-1) {
                         crFatalError(126, "LCHAR_IS_OBJECT with start!=i-1");
@@ -1975,6 +1984,10 @@ public:
                         lastWidth += width;
                         m_widths[start] = lastWidth;
                     }
+                }
+                else {
+                    // Should not happen
+                    crFatalError(127, "Attempting to measure Text node without a font");
                 }
                 start = i;
                 #if (USE_HARFBUZZ==1)

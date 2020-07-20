@@ -377,7 +377,7 @@ static lUInt32 calcHash(const lUInt8 * s, int len)
 {
 return XXH32(s,len,0);
 }
-lUInt32 calcGlobalSettingsHash(int documentId)
+lUInt32 calcGlobalSettingsHash(int documentId, bool already_rendered)
 {
     lUInt32 hash = FORMATTING_VERSION_ID;
     hash = hash * 31 + (int)fontMan->GetShapingMode();
@@ -395,14 +395,27 @@ lUInt32 calcGlobalSettingsHash(int documentId)
     hash = hash * 31 + fontMan->GetFallbackFontFaces().getHash();
     if ( gFlgFloatingPunctuationEnabled )
         hash = hash * 75 + 1761;
-    hash = hash * 31 + TextLangMan::getHash();
-    hash = hash * 31 + HyphMan::getLeftHyphenMin();
-    hash = hash * 31 + HyphMan::getRightHyphenMin();
-    hash = hash * 31 + HyphMan::getTrustSoftHyphens();
     hash = hash * 31 + gRenderDPI;
     hash = hash * 31 + gRenderBlockRenderingFlags;
     hash = hash * 31 + gRootFontSize;
     hash = hash * 31 + gInterlineScaleFactor;
+    // If not yet rendered (initial loading with XML parsing), we can
+    // ignore some global flags that have not yet produced any effect,
+    // so they can possibly be updated between loading and rendering
+    // without trigerring a drop of all the styles and rend methods
+    // set up in the XML loading phase. This is mostly only needed
+    // for TextLangMan::getHash(), as the lang can be set by frontend
+    // code after the loading phase, once the book language is known
+    // from its metadata, before the rendering that will use the
+    // language set. (We could ignore some of the other settings
+    // above if we ever need to reset them in between these phases;
+    // just be certain they are really not used in the first phase.)
+    if ( already_rendered ) {
+        hash = hash * 31 + TextLangMan::getHash();
+        hash = hash * 31 + HyphMan::getLeftHyphenMin();
+        hash = hash * 31 + HyphMan::getRightHyphenMin();
+        hash = hash * 31 + HyphMan::getTrustSoftHyphens();
+    }
     return hash;
 }
 
@@ -760,6 +773,7 @@ bool CacheFile::writeIndex()
         int sz = sizeof(CacheFileItem) * (count * 2 + 100);
         allocBlock(CBT_INDEX, 0, sz);
         indexItem = findBlock(CBT_INDEX, 0);
+        (void)indexItem; // silences clang warning
         count = _index.length();
     }
     CacheFileItem * index = new CacheFileItem[count]();
@@ -1944,8 +1958,8 @@ tinyNodeCollection::tinyNodeCollection()
 , _unusedSpaceThresholdPercent(DEF_UNUSED_SPACE_THRESHOLD_PERCENT)
 , _maxAddedLetterSpacingPercent(DEF_MAX_ADDED_LETTER_SPACING_PERCENT)
 , _nodeStyleHash(0)
-, _nodeDisplayStyleHash(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
-, _nodeDisplayStyleHashInitial(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
+, _nodeDisplayStyleHash(NODE_DISPLAY_STYLE_HASH_UNINITIALIZED)
+, _nodeDisplayStyleHashInitial(NODE_DISPLAY_STYLE_HASH_UNINITIALIZED)
 , _nodeStylesInvalidIfLoading(false)
 #endif
 , _textStorage(this, 't', (lUInt32)(TEXT_CACHE_UNPACKED_SPACE*_storageMaxUncompressedSizeFactor), TEXT_CACHE_CHUNK_SIZE ) // persistent text node data storage
@@ -1983,8 +1997,8 @@ tinyNodeCollection::tinyNodeCollection( tinyNodeCollection & v )
 , _unusedSpaceThresholdPercent(DEF_UNUSED_SPACE_THRESHOLD_PERCENT)
 , _maxAddedLetterSpacingPercent(DEF_MAX_ADDED_LETTER_SPACING_PERCENT)
 , _nodeStyleHash(0)
-, _nodeDisplayStyleHash(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
-, _nodeDisplayStyleHashInitial(NODE_DISPLAY_STYLE_HASH_UNITIALIZED)
+, _nodeDisplayStyleHash(NODE_DISPLAY_STYLE_HASH_UNINITIALIZED)
+, _nodeDisplayStyleHashInitial(NODE_DISPLAY_STYLE_HASH_UNINITIALIZED)
 , _nodeStylesInvalidIfLoading(false)
 #endif
 , _textStorage(this, 't', (lUInt32)(TEXT_CACHE_UNPACKED_SPACE*_storageMaxUncompressedSizeFactor), TEXT_CACHE_CHUNK_SIZE ) // persistent text node data storage
@@ -2318,6 +2332,10 @@ bool tinyNodeCollection::loadNodeData()
         for ( int i=0; i<TNC_PART_COUNT; i++ )
             if ( textList[i] )
                 free( textList[i] );
+        // Also clean elemList previously successfully loaded, to avoid mem leak
+        for ( int i=0; i<TNC_PART_COUNT; i++ )
+            if ( elemList[i] )
+                free( elemList[i] );
         return false;
     }
     for ( int i=0; i<TNC_PART_COUNT; i++ ) {
@@ -4229,7 +4247,7 @@ ldomDocument::~ldomDocument()
     ldomNode::unregisterDocument(this);
     fontMan->UnregisterDocumentFonts(_docIndex);
 #if BUILD_LITE!=1
-    updateMap();
+    updateMap(); // NOLINT: Call to virtual function during destruction
 #endif
 }
 
@@ -4506,11 +4524,14 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
 
     bool was_just_rendered_from_cache = _just_rendered_from_cache; // cleared by checkRenderContext()
     if ( !checkRenderContext() ) {
-        if ( _nodeDisplayStyleHashInitial == NODE_DISPLAY_STYLE_HASH_UNITIALIZED ) { // happen when just loaded
+        if ( _nodeDisplayStyleHashInitial == NODE_DISPLAY_STYLE_HASH_UNINITIALIZED ) { // happen when just loaded
             // For knowing/debugging cases when node styles set up during loading
             // is invalid (should happen now only when EPUB has embedded fonts
             // or some pseudoclass like :last-child has been met).
             printf("CRE: styles re-init needed after load, re-rendering\n");
+            // We should clear RenderRectAccessor, that may have been used for
+            // caching CSS checks results (i.e. :nth-child(), :last-of-type...)
+            getRootNode()->clearRenderDataRecursive();
         }
         CRLog::info("rendering context is changed - full render required...");
         // Clear LFormattedTextRef cache
@@ -4586,8 +4607,7 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
         context.setCallback(callback, numFinalBlocks);
         //updateStyles();
         CRLog::trace("rendering...");
-        int height = renderBlockElement( context, getRootNode(),
-            0, y0, width ) + y0;
+        renderBlockElement( context, getRootNode(), 0, y0, width );
         _rendered = true;
     #if 0 //def _DEBUG
         LVStreamRef ostream = LVOpenFileStream( "test_save_after_init_rend_method.xml", LVOM_WRITE );
@@ -4601,7 +4621,7 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
         pages->serialize( _pagesData );
         _renderedBlockCache.restoreSize(); // Restore original cache size
 
-        if ( _nodeDisplayStyleHashInitial == NODE_DISPLAY_STYLE_HASH_UNITIALIZED ) {
+        if ( _nodeDisplayStyleHashInitial == NODE_DISPLAY_STYLE_HASH_UNINITIALIZED ) {
             // If _nodeDisplayStyleHashInitial has not been initialized from its
             // former value from the cache file, we use the one computed (just
             // above in updateRenderContext()) after the first full rendering
@@ -4626,7 +4646,6 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
         dumpStatistics();
 
         return true; // full (re-)rendering done
-        // return height;
 
     } else {
         CRLog::info("rendering context is not changed - no render!");
@@ -4640,7 +4659,6 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
             callback->OnDocumentReady();
 
         return false; // no (re-)rendering needed
-        // return getFullHeight();
     }
 
 }
@@ -6554,8 +6572,8 @@ void ldomNode::initNodeRendMethod()
         // wanting to disable ruby support, it's enough to just set <ruby> to "display: inline":
         // a change in "display:" value will cause a nodeDisplayStyleHash mismatch, and propose
         // a full reload with DOM rebuild, which will forget all the rubyBox we added.
-        bool needs_wrapping = true;
         int len = getChildCount();
+        bool needs_wrapping = len > 0;
         for ( int i=0; i<len; i++ ) {
             ldomNode * child = getChildNode(i);
             if ( child->isElement() && child->getNodeId() == el_inlineBox
@@ -6609,9 +6627,9 @@ void ldomNode::initNodeRendMethod()
                     }
                     first_to_wrap = -1;
                     last_to_wrap = -1;
-                    if (eoc)
-                        break;
                 }
+                if (eoc)
+                    break;
                 if ( elemId == -1 ) { // isText(), non empty
                     if ( first_to_wrap < 0 ) {
                         first_to_wrap = i;
@@ -8339,10 +8357,12 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
     ldomNode * finalNode = NULL;
     if ( !p ) {
         //CRLog::trace("ldomXPointer::getRect() - p==NULL");
+        return false;
     }
     //printf("getRect( p=%08X type=%d )\n", (unsigned)p, (int)p->getNodeType() );
     else if ( !p->getDocument() ) {
         //CRLog::trace("ldomXPointer::getRect() - p->getDocument()==NULL");
+        return false;
     }
     ldomNode * mainNode = p->getDocument()->getRootNode();
     for ( ; p; p = p->getParentNode() ) {
@@ -9839,6 +9859,8 @@ bool ldomXPointerEx::sibling( int index )
 /// move to next sibling
 bool ldomXPointerEx::nextSibling()
 {
+    if ( _level <= 1 )
+        return false;
     return sibling( _indexes[_level-1] + 1 );
 }
 
@@ -10611,7 +10633,6 @@ void ldomXRange::getSegmentRects( LVArray<lvRect> & rects )
 
         if (!curPos || curPos.isNull() || curPos.compare(rangeEnd) >= 0) {
             // no more text node, or after end of range: we're done
-            go_on = false;
             break;
         }
 
@@ -10704,7 +10725,6 @@ void ldomXRange::getSegmentRects( LVArray<lvRect> & rects )
                 // (Two offsets in a same text node with the same tops are on the same line)
                 lineStartRect.extend(curCharRect);
                 // lineStartRect will be added after loop exit
-                go_on = false;
                 break; // we're done
             }
         }
@@ -11325,7 +11345,6 @@ bool ldomXPointerEx::prevVisibleWordStart( bool thisBlockOnly )
         return false;
     ldomNode * node = NULL;
     lString16 text;
-    int textLen = 0;
     for ( ;; ) {
         if ( !isText() || !isVisible() || _data->getOffset()==0 ) {
             // move to previous text
@@ -11333,12 +11352,11 @@ bool ldomXPointerEx::prevVisibleWordStart( bool thisBlockOnly )
                 return false;
             node = getNode();
             text = node->getText();
-            textLen = text.length();
+            int textLen = text.length();
             _data->setOffset( textLen );
         } else {
             node = getNode();
             text = node->getText();
-            textLen = text.length();
         }
         bool foundNonSpace = false;
         while ( _data->getOffset() > 0 && IsWordSeparator(text[_data->getOffset()-1]) )
@@ -11363,7 +11381,6 @@ bool ldomXPointerEx::prevVisibleWordEnd( bool thisBlockOnly )
         return false;
     ldomNode * node = NULL;
     lString16 text;
-    int textLen = 0;
     bool moved = false;
     for ( ;; ) {
         if ( !isText() || !isVisible() || _data->getOffset()==0 ) {
@@ -11372,13 +11389,12 @@ bool ldomXPointerEx::prevVisibleWordEnd( bool thisBlockOnly )
                 return false;
             node = getNode();
             text = node->getText();
-            textLen = text.length();
+            int textLen = text.length();
             _data->setOffset( textLen );
             moved = true;
         } else {
             node = getNode();
             text = node->getText();
-            textLen = text.length();
         }
         // skip spaces
         while ( _data->getOffset() > 0 && IsWordSeparator(text[_data->getOffset()-1]) ) {
@@ -13143,12 +13159,13 @@ void ldomDocumentWriterFilter::OnTagClose( const lChar16 * /*nsname*/, const lCh
         }
     }
     //======== START FILTER CODE ============
-    AutoClose( _currNode->_element->getNodeId(), false );
+    if ( _currNode->_element ) // (should always be true, but avoid clang warning)
+        AutoClose( _currNode->_element->getNodeId(), false );
     //======== END FILTER CODE ==============
     //lUInt16 nsid = (nsname && nsname[0]) ? _document->getNsNameIndex(nsname) : 0;
     // save closed element
     ldomNode * closedElement = _currNode->getElement();
-    _errFlag |= (id != closedElement->getNodeId());
+    _errFlag |= (!closedElement || id != closedElement->getNodeId());
     _currNode = pop( _currNode, id );
 
 
@@ -13907,12 +13924,12 @@ bool tinyNodeCollection::loadStylesData()
     return !stylebuf.error();
 }
 
-lUInt32 tinyNodeCollection::calcStyleHash()
+lUInt32 tinyNodeCollection::calcStyleHash(bool already_rendered)
 {
     CRLog::debug("calcStyleHash start");
 //    int maxlog = 20;
     lUInt32 res = 0; //_elemCount;
-    lUInt32 globalHash = calcGlobalSettingsHash(getFontContextDocIndex());
+    lUInt32 globalHash = calcGlobalSettingsHash(getFontContextDocIndex(), already_rendered);
     lUInt32 docFlags = getDocFlags();
     //CRLog::info("Calculating style hash...  elemCount=%d, globalHash=%08x, docFlags=%08x", _elemCount, globalHash, docFlags);
     if (_nodeStyleHash) {
@@ -13938,6 +13955,7 @@ lUInt32 tinyNodeCollection::calcStyleHash()
                 sz = _elemCount+1 - offs;
             }
             ldomNode * buf = _elemList[i];
+            if ( !buf ) continue; // avoid clang-tidy warning
             for ( int j=0; j<sz; j++ ) {
                 if ( buf[j].isElement() ) {
                     css_style_ref_t style = buf[j].getStyle();
@@ -14166,7 +14184,7 @@ ContinuousOperationResult ldomDocument::updateMap(CRTimerUtil & maxTime, LVDocVi
     }
     CRLog::info("Updating cache file");
 
-    ContinuousOperationResult res = saveChanges(maxTime, progressCallback);
+    ContinuousOperationResult res = saveChanges(maxTime, progressCallback); // NOLINT: Call to virtual function during destruction
     if ( res==CR_ERROR )
     {
         CRLog::error("Error while saving changes to cache file");
@@ -14637,7 +14655,7 @@ void ldomDocument::updateRenderContext()
     int dx = _page_width;
     int dy = _page_height;
     _nodeStyleHash = 0; // force recalculation by calcStyleHash()
-    lUInt32 styleHash = calcStyleHash();
+    lUInt32 styleHash = calcStyleHash(_rendered);
     lUInt32 stylesheetHash = (((_stylesheet.getHash() * 31) + calcHash(_def_style))*31 + calcHash(_def_font));
     //calcStyleHash( getRootNode(), styleHash );
     _hdr.render_style_hash = styleHash;
@@ -14665,7 +14683,7 @@ bool ldomDocument::checkRenderContext()
     }
     int dx = _page_width;
     int dy = _page_height;
-    lUInt32 styleHash = calcStyleHash();
+    lUInt32 styleHash = calcStyleHash(_rendered);
     lUInt32 stylesheetHash = (((_stylesheet.getHash() * 31) + calcHash(_def_style))*31 + calcHash(_def_font));
     //calcStyleHash( getRootNode(), styleHash );
     if ( styleHash != _hdr.render_style_hash ) {
@@ -15762,6 +15780,25 @@ void ldomNode::clearRenderData()
     lvdomElementFormatRec rec;
     getDocument()->_rectStorage.setRendRectData(_handle._dataIndex, &rec);
 }
+/// reset node rendering structure pointer for sub-tree
+void ldomNode::clearRenderDataRecursive()
+{
+    ASSERT_NODE_NOT_NULL;
+    if ( !isElement() )
+        return;
+    lvdomElementFormatRec rec;
+    ldomDataStorageManager& rectStorage = getDocument()->_rectStorage;
+    if (rectStorage.getUncompressedSize() > 0) {
+        rectStorage.setRendRectData(_handle._dataIndex, &rec);
+        int cnt = getChildCount();
+        for (int i=0; i<cnt; i++) {
+            ldomNode * child = getChildNode( i );
+            if ( child->isElement() ) {
+                child->clearRenderDataRecursive();
+            }
+        }
+    }
+}
 #endif
 
 /// calls specified function recursively for all elements of DOM tree, children before parent
@@ -16429,6 +16466,8 @@ ldomNode * ldomNode::getUnboxedNextSibling( bool skip_text_nodes ) const
     // tree, and checks to not walk down non-boxing nodes - but still
     // walking up any node (which ought to be a boxing node).
     ldomNode * unboxed_parent = getUnboxedParent(); // don't walk outside of it
+    if ( !unboxed_parent )
+        return NULL;
     ldomNode * n = (ldomNode *) this;
     int index = 0;
     bool node_entered = true; // bootstrap loop
@@ -16481,6 +16520,8 @@ ldomNode * ldomNode::getUnboxedPrevSibling( bool skip_text_nodes ) const
 {
     // Similar to getUnboxedNextSibling(), but walking backward
     ldomNode * unboxed_parent = getUnboxedParent();
+    if ( !unboxed_parent )
+        return NULL;
     ldomNode * n = (ldomNode *) this;
     int index = 0;
     bool node_entered = true; // bootstrap loop
@@ -16649,8 +16690,8 @@ bool ldomNode::getNodeListMarker( int & counterValue, lString16 & marker, int & 
     }
     bool res = false;
     if ( !marker.empty() ) {
-        LVFont * font = getFont().get();
-        if ( font ) {
+        LVFontRef font = getFont();
+        if ( !font.isNull() ) {
             TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg( this );
             markerWidth = font->getTextWidth((marker + "  ").c_str(), marker.length()+2, lang_cfg) + font->getSize()/8;
             res = true;

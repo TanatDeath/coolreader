@@ -353,7 +353,7 @@ public:
             ldomNode * item = el->getChildElementNode(i);
             if ( item ) {
                 // for each child element
-                css_style_rec_t * style = item->getStyle().get();
+                css_style_ref_t style = item->getStyle();
 
                 int item_direction = elem_direction;
                 if ( item->hasAttribute( attr_dir ) ) {
@@ -496,22 +496,16 @@ public:
                         int cs=StrToIntPercent(item->getAttributeValue(attr_colspan).c_str());
                         if (cs>0 && cs<100) { // colspan=0 (span all remaining columns) not supported
                             cell->colspan=cs;
-                        } else {
-                            cs=1;
                         }
                         if ( is_ruby_table ) { // rbspan works just as colspan
                             int cs=StrToIntPercent(item->getAttributeValue(attr_rbspan).c_str());
                             if (cs>0 && cs<100) {
                                 cell->colspan=cs;
-                            } else {
-                                cs=1;
                             }
                         }
                         int rs=StrToIntPercent(item->getAttributeValue(attr_rowspan).c_str());
                         if (rs>0 && rs<100) {
                             cell->rowspan=rs;
-                        } else {
-                            rs=1;
                         }
                         /*
                         // "width"
@@ -1050,23 +1044,21 @@ public:
                         npercent++;
                     }
                 }
-                nwidth = 0;
-                sumwidth = 0;
             }
         }
         // scale percents
         int maxpercent = 100-3*nrest; // 3% (?) for each unsized column
         if (sumpercent>maxpercent && sumpercent>0) {
             // scale percents
-            int newsumpercent = 0;
+            // int newsumpercent = 0;
             for (int i=0; i<cols.length(); i++) {
                 if (cols[i]->percent>0) {
                     cols[i]->percent = cols[i]->percent*maxpercent/sumpercent;
-                    newsumpercent += cols[i]->percent;
+                    // newsumpercent += cols[i]->percent;
                     cols[i]->width = 0;
                 }
             }
-            sumpercent = newsumpercent;
+            // sumpercent = newsumpercent;
         }
         // calc width by percents
         sumwidth = 0;
@@ -1095,7 +1087,7 @@ public:
         // At this point, all columns with specified width or percent has been
         // set accordingly, or reduced to fit table width
         // We need to compute a width for columns with unspecified width.
-        nrest = cols.length() - nwidth;
+        // nrest = cols.length() - nwidth;
         int restwidth = assignable_width - sumwidth;
         int sumMinWidths = 0;
         // new pass: convert text len percent into width
@@ -1190,8 +1182,8 @@ public:
             correction -= lengthToPx(table_style->padding[0], table_width, table_em);
             correction -= lengthToPx(table_style->padding[0], table_width, table_em);
             table_width -= correction;
-            assignable_width -= restw + correction; // (for debug printf() below)
             #ifdef DEBUG_TABLE_RENDERING
+                assignable_width -= restw + correction; // (for debug printf() below)
                 printf("TABLE WIDTHS step5 (fit): reducing table_width %d -%d -%d > %d\n",
                     table_width+restw+correction, restw, correction, table_width);
             #endif
@@ -1305,7 +1297,6 @@ public:
         int table_padding_right = lengthToPx(table_style->padding[1], table_width, em);
         int table_padding_top = lengthToPx(table_style->padding[2], table_width, em);
         int table_padding_bottom = lengthToPx(table_style->padding[3], table_width, em);
-        int borderspacing_h = lengthToPx(table_style->border_spacing[0], 0, em); // does not accept %
         int borderspacing_v = lengthToPx(table_style->border_spacing[1], 0, em);
         bool border_collapse = (table_style->border_collapse==css_border_collapse);
         if (border_collapse) {
@@ -1314,7 +1305,6 @@ public:
             table_padding_left = 0;
             table_padding_right = 0;
             borderspacing_v = 0;
-            borderspacing_h = 0;
         }
         // We want to distribute border spacing on top and bottom of each row,
         // mainly for page splitting to carry half of it on each page.
@@ -1463,9 +1453,9 @@ public:
             bool row_has_baseline_aligned_cells = false;
             for (j=0; j<rows[i]->cells.length(); j++) {
                 CCRTableCell * cell = rows[i]->cells[j];
-                //int x = cell->col->index;
+                // int x = cell->col->index;
                 int y = cell->row->index;
-                int n = rows[i]->cells.length();
+                // int n = rows[i]->cells.length();
                 if ( i==y ) { // upper left corner of cell
                     // We need to render the cell to get its height
                     if ( cell->elem->getRendMethod() == erm_final ) {
@@ -1915,7 +1905,8 @@ public:
             if (is_rtl)
                 line_flags |= RN_LINE_IS_RTL;
             context.AddLine(last_y, table_y0 + table_h, line_flags);
-            last_y = table_y0 + table_h;
+            last_y = table_y0 + table_h; // not read after here
+            (void)last_y; // silences clang warning
         }
 
         // Update each cell height to be its row height, so it can draw its
@@ -2356,8 +2347,8 @@ lString16 renderListItemMarker( ldomNode * enode, int & marker_width, LFormatted
     if ( enode->getNodeListMarker( counterValue, marker, marker_width ) ) {
         if ( !listProps.isNull() )
             marker_width = listProps->maxWidth;
-        css_style_rec_t * style = enode->getStyle().get();
-        LVFont * font = enode->getFont().get();
+        css_style_ref_t style = enode->getStyle();
+        LVFontRef font = enode->getFont();
         lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
         lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
         if (line_h < 0) { // -1, not specified by caller: find it out from the node
@@ -2393,14 +2384,14 @@ lString16 renderListItemMarker( ldomNode * enode, int & marker_width, LFormatted
         // in another LTR segment)
         if ( txform ) {
             TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg( enode );
-            txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, 0, 0);
+            txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, 0, 0);
         }
     }
     return marker;
 }
 
 // (Common condition used at multiple occasions, made as as function for clarity)
-bool renderAsListStylePositionInside( const css_style_rec_t * style, bool is_rtl=false ) {
+bool renderAsListStylePositionInside( const css_style_ref_t style, bool is_rtl=false ) {
     bool render_as_lsp_inside = false;
     if ( style->list_style_position == css_lsp_inside ) {
         return true;
@@ -2500,7 +2491,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
 
         int width = fmt->getWidth();
         int em = enode->getFont()->getSize();
-        css_style_rec_t * style = enode->getStyle().get();
+        css_style_ref_t style = enode->getStyle();
         ldomNode * parent = enode->getParentNode(); // Needed for various checks below
         if (parent && parent->isNull())
             parent = NULL;
@@ -2809,7 +2800,6 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 txform->setStrut(0, 0);
                 line_h = 0;
                 indent = 0;
-                valign_dy = 0;
                 // Also, when such a floating image has a width in %, this width
                 // has been used to set the width of the floating box. We need to
                 // update this % width to be 100%, otherwise the image would be
@@ -2859,14 +2849,14 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 if ( !listProps.isNull() )
                     marker_width = listProps->maxWidth;
                 css_list_style_position_t sp = style->list_style_position;
-                LVFont * font = enode->getFont().get();
+                LVFontRef font = enode->getFont();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
                 int margin = 0;
                 if ( sp==css_lsp_outside )
                     margin = -marker_width; // will ensure negative/hanging indent-like rendering
                 marker += "\t";
-                txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy,
+                txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy,
                                         margin, NULL );
                 flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH;
             }
@@ -2914,7 +2904,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 // If block image, forget any current flags and start from baseflags (?)
                 lUInt32 flags = styleToTextFmtFlags( true, enode->getStyle(), baseflags, direction );
                 //txform->AddSourceLine(L"title", 5, 0x000000, 0xffffff, font, baseflags, interval, margin, NULL, 0, 0);
-                LVFont * font = enode->getFont().get();
+                LVFontRef font = enode->getFont();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
                 lString16 title;
@@ -2925,7 +2915,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     lString16Collection lines;
                     lines.parse(title, cs16("\\n"), true);
                     for ( int i=0; i<lines.length(); i++ )
-                        txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
+                        txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
                 }
                 txform->AddSourceObject(flags, line_h, valign_dy, indent, enode, lang_cfg );
                 title = enode->getAttributeValue(attr_subtitle);
@@ -2933,14 +2923,14 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     lString16Collection lines;
                     lines.parse(title, cs16("\\n"), true);
                     for ( int i=0; i<lines.length(); i++ )
-                        txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
+                        txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
                 }
                 title = enode->getAttributeValue(attr_title);
                 if ( !title.empty() ) {
                     lString16Collection lines;
                     lines.parse(title, cs16("\\n"), true);
                     for ( int i=0; i<lines.length(); i++ )
-                        txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
+                        txform->AddSourceLine( lines[i].c_str(), lines[i].length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
                 }
             } else { // inline image
                 // We use the flags computed previously (and not baseflags) as they
@@ -3037,7 +3027,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 // Note: we need to explicitely clear newline flag after
                 // any txform->AddSourceLine(). If we delay that and add another
                 // char before, this other char would generate a new line.
-                LVFont * font = enode->getFont().get();
+                LVFontRef font = enode->getFont();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
 
@@ -3063,14 +3053,14 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     if ( dir.compare("rtl") == 0 ) {
                         // txform->AddSourceLine( L"\x2068\x202E", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         // closeWithPDFPDI = true;
-                        txform->AddSourceLine( L"\x202E", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                        txform->AddSourceLine( L"\x202E", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         closeWithPDF = true;
                         flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                     }
                     else if ( dir.compare("ltr") == 0 ) {
                         // txform->AddSourceLine( L"\x2068\x202D", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         // closeWithPDFPDI = true;
-                        txform->AddSourceLine( L"\x202D", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                        txform->AddSourceLine( L"\x202D", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         closeWithPDF = true;
                         flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                     }
@@ -3083,17 +3073,17 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     //  dir=auto => FSI     U+2068  FIRST STRONG ISOLATE
                     //  leaving  => PDI     U+2069  POP DIRECTIONAL ISOLATE
                     if ( dir.compare("rtl") == 0 ) {
-                        txform->AddSourceLine( L"\x2067", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                        txform->AddSourceLine( L"\x2067", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         closeWithPDI = true;
                         flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                     }
                     else if ( dir.compare("ltr") == 0 ) {
-                        txform->AddSourceLine( L"\x2066", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                        txform->AddSourceLine( L"\x2066", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         closeWithPDI = true;
                         flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                     }
                     else if ( nodeElementId == el_bdi || dir.compare("auto") == 0 ) {
-                        txform->AddSourceLine( L"\x2068", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                        txform->AddSourceLine( L"\x2068", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                         closeWithPDI = true;
                         flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                     }
@@ -3122,7 +3112,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     if ( !content.empty() ) {
                         int em = font->getSize();
                         int letter_spacing = lengthToPx(style->letter_spacing, em, em);
-                        txform->AddSourceLine( content.c_str(), content.length(), cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent, NULL, 0, letter_spacing);
+                        txform->AddSourceLine( content.c_str(), content.length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent, NULL, 0, letter_spacing);
                         flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                     }
                 }
@@ -3143,20 +3133,20 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             }
 
             if ( addGeneratedContent ) {
-                LVFont * font = enode->getFont().get();
+                LVFontRef font = enode->getFont();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
                 // See comment above: these are the closing counterpart
                 if ( closeWithPDI ) {
-                    txform->AddSourceLine( L"\x2069", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                    txform->AddSourceLine( L"\x2069", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                     flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                 }
                 else if ( closeWithPDFPDI ) {
-                    txform->AddSourceLine( L"\x202C\x2069", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                    txform->AddSourceLine( L"\x202C\x2069", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                     flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                 }
                 else if ( closeWithPDF ) {
-                    txform->AddSourceLine( L"\x202C", 1, cl, bgcl, font, lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
+                    txform->AddSourceLine( L"\x202C", 1, cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy, indent);
                     flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                 }
             }
@@ -3166,12 +3156,12 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             // for crengine internal footnotes displaying, or some FB2 features)
             if ( thisIsRunIn ) {
                 // append space to run-in object
-                LVFont * font = enode->getFont().get();
+                LVFontRef font = enode->getFont();
                 css_style_ref_t style = enode->getStyle();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
                 lChar16 delimiter[] = {UNICODE_NO_BREAK_SPACE, UNICODE_NO_BREAK_SPACE}; //160
-                txform->AddSourceLine( delimiter, sizeof(delimiter)/sizeof(lChar16), cl, bgcl, font, lang_cfg,
+                txform->AddSourceLine( delimiter, sizeof(delimiter)/sizeof(lChar16), cl, bgcl, font.get(), lang_cfg,
                                             LTEXT_RUNIN_FLAG | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
                                             line_h, valign_dy, 0, NULL );
                 flags &= ~LTEXT_RUNIN_FLAG;
@@ -3207,10 +3197,10 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 // Output a single space so that a blank line can be made,
                 // as wanted by a <BR/>.
                 // (This makes consecutive and stuck <br><br><br> work)
-                LVFont * font = enode->getFont().get();
+                LVFontRef font = enode->getFont();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
-                txform->AddSourceLine( L" ", 1, cl, bgcl, font, lang_cfg,
+                txform->AddSourceLine( L" ", 1, cl, bgcl, font.get(), lang_cfg,
                                         baseflags | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
                                         line_h, valign_dy);
                 // baseflags &= ~LTEXT_FLAG_NEWLINE; // clear newline flag
@@ -3269,10 +3259,10 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             // Add an empty source: this should be managed specifically
             // by lvtextfm.cpp splitParagraphs() to not add this empty
             // string to text, and just call floatClearText().
-            LVFont * font = enode->getFont().get();
+            LVFontRef font = enode->getFont();
             lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
             lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
-            txform->AddSourceLine( L" ", 1, cl, bgcl, font, lang_cfg,
+            txform->AddSourceLine( L" ", 1, cl, bgcl, font.get(), lang_cfg,
                             baseflags | LTEXT_SRC_IS_CLEAR_LAST | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
                             line_h, valign_dy);
         }
@@ -3299,7 +3289,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                     // reset to false, so next text nodes in that link are not
                     // flagged, and don't make out duplicate in-page footnotes
             }
-            LVFont * font = parent->getFont().get();
+            LVFontRef font = parent->getFont();
             css_style_ref_t style = parent->getStyle();
             lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
             lUInt32 bgcl = 0xFFFFFFFF;
@@ -3369,7 +3359,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             }
             */
             if ( txt.length()>0 ) {
-                txform->AddSourceLine( txt.c_str(), txt.length(), cl, bgcl, font, lang_cfg, baseflags | tflags,
+                txform->AddSourceLine( txt.c_str(), txt.length(), cl, bgcl, font.get(), lang_cfg, baseflags | tflags,
                     line_h, valign_dy, indent, enode, 0, letter_spacing );
                 baseflags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH; // clear newline flag
                 // To show the lang tag for the lang used for this text node AFTER it:
@@ -3614,7 +3604,7 @@ int measureBorder(ldomNode *enode,int border) {
         // return 0. Later, at drawing time, fmt.getWidth() will return the real
         // width, which could cause rendering of borders over child elements,
         // as these were positionned with a border=0.)
-        css_style_rec_t * style = enode->getStyle().get();
+        css_style_ref_t style = enode->getStyle();
         if (border==0){
                 bool hastopBorder = (style->border_style_top >= css_border_solid &&
                                      style->border_style_top <= css_border_outset);
@@ -3721,7 +3711,7 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
         return 0;
     if ( enode->isElement() )
     {
-        css_style_rec_t * style = enode->getStyle().get();
+        css_style_ref_t style = enode->getStyle();
         bool isFootNoteBody = false;
         lString16 footnoteId;
         // Allow displaying footnote content at the bottom of all pages that contain a link
@@ -5992,7 +5982,7 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
     if (m == erm_invisible) // don't render invisible blocks
         return;
 
-    css_style_rec_t * style = enode->getStyle().get();
+    css_style_ref_t style = enode->getStyle();
     lUInt16 nodeElementId = enode->getNodeId();
 
     // See if dir= attribute or CSS specified direction
@@ -7378,7 +7368,7 @@ int renderBlockElement( LVRendPageContext & context, ldomNode * enode, int x, in
 //draw border lines,support color,width,all styles, not support border-collapse
 void DrawBorder(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int doc_x,int doc_y,RenderRectAccessor fmt)
 {
-    css_style_rec_t * style = enode->getStyle().get();
+    css_style_ref_t style = enode->getStyle();
     bool hastopBorder = (style->border_style_top >=css_border_solid&&style->border_style_top<=css_border_outset);
     bool hasrightBorder = (style->border_style_right >=css_border_solid&&style->border_style_right<=css_border_outset);
     bool hasbottomBorder = (style->border_style_bottom >=css_border_solid&&style->border_style_bottom<=css_border_outset);
@@ -7425,7 +7415,7 @@ void DrawBorder(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int doc_x,int 
             lUInt32 topBordercolor = style->border_color[0].value;
             topBorderwidth=tbw;
             rightBorderwidth=rbw;
-            bottomBorderwidth=bbw;
+            // bottomBorderwidth=bbw; // (not used)
             leftBorderwidth=lbw;
             if (style->border_color[0].type==css_val_color)
             {
@@ -7531,7 +7521,7 @@ void DrawBorder(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int doc_x,int 
             topBorderwidth=tbw;
             rightBorderwidth=rbw;
             bottomBorderwidth=bbw;
-            leftBorderwidth=lbw;
+            // leftBorderwidth=lbw; // (not used)
             if (style->border_color[1].type==css_val_color)
             {
                 lUInt32 r,g,b;
@@ -7635,7 +7625,7 @@ void DrawBorder(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int doc_x,int 
         if (hasbottomBorder) {
             int dot=1,interval=0;//default style
             lUInt32 bottomBordercolor = style->border_color[2].value;
-            topBorderwidth=tbw;
+            // topBorderwidth=tbw; // (not used)
             rightBorderwidth=rbw;
             bottomBorderwidth=bbw;
             leftBorderwidth=lbw;
@@ -7732,7 +7722,7 @@ void DrawBorder(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int doc_x,int 
             int dot=1,interval=0;//default style
             lUInt32 leftBordercolor = style->border_color[3].value;
             topBorderwidth=tbw;
-            rightBorderwidth=rbw;
+            // rightBorderwidth=rbw; // (not used)
             bottomBorderwidth=bbw;
             leftBorderwidth=lbw;
             if (style->border_color[3].type==css_val_color)
@@ -8022,7 +8012,7 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
         int direction = RENDER_RECT_GET_DIRECTION(fmt);
         bool is_rtl = direction == REND_DIRECTION_RTL; // shortcut for followup tests
 
-        css_style_rec_t * style = enode->getStyle().get();
+        css_style_ref_t style = enode->getStyle();
 
         // Check and draw background
         css_length_t bg = style->background_color;
@@ -9182,7 +9172,7 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
             m = erm_block;
         }
 
-        css_style_rec_t * style = node->getStyle().get();
+        css_style_ref_t style = node->getStyle();
 
         // Get image size early
         bool is_img = false;
@@ -9206,17 +9196,11 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
             h = lengthToPx(style->height, 100, em);
             if (style->width.type==css_val_percent) w = -w;
             if (style->height.type==css_val_percent) h = w*height/width;
-            if ( w*h==0 ) {
-                if ( w==0 ) {
-                    if ( h==0 ) { // use image native size
-                        h = height;
-                        w = width;
-                    } else { // use style height, keep aspect ratio
-                        w = width*h/height;
-                    }
-                } else if ( h==0 ) { // use style width, keep aspect ratio
-                    h = w*height/width;
-                    if (h == 0) h = height;
+            if ( w==0 ) {
+                if ( h==0 ) { // use image native size
+                    w = width;
+                } else { // use style height, keep aspect ratio
+                    w = width*h/height;
                 }
             }
             if (w > 0)
@@ -9730,13 +9714,16 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                 lang_cfg = TextLangMan::getTextLangCfg( node ); // Fetch it from node or its parents
             }
         }
+        else {
+            return;
+        }
         len = text.length();
         if ( len == 0 )
             return;
         // letter-spacing
-        LVFont * font = parent->getFont().get();
+        LVFontRef font = parent->getFont();
         int em = font->getSize();
-        css_style_rec_t * parent_style = parent->getStyle().get();
+        css_style_ref_t parent_style = parent->getStyle();
         int letter_spacing = lengthToPx(parent_style->letter_spacing, em, em);
         // text-transform
         switch (parent_style->text_transform) {
@@ -9917,6 +9904,7 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
             }
             #else // not USE_LIBUNIBREAK==1
             // (This has not been updated to handle nowrap & pre)
+            (void)nowrap; // avoid clang warning: value stored is never read
             for (int i=0; i<chars_measured; i++) {
                 int w = widths[i] - (i>0 ? widths[i-1] : 0);
                 lChar16 c = *(txt + start + i);

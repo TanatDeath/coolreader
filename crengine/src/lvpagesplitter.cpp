@@ -98,8 +98,8 @@ void LVRendPageContext::addLink( lString16 id, int pos )
     }
     if ( lines.empty() )
         return;
-    LVFootNote * note = getOrCreateFootNote( id );
-    lines.last()->addLink(note, pos);
+    LVFootNoteRef note = getOrCreateFootNote( id );
+    lines.last()->addLink(note.get(), pos);
 }
 
 /// mark start of foot note
@@ -112,7 +112,7 @@ void LVRendPageContext::enterFootNote( lString16 id )
         CRLog::error("Nested entering note" );
         return;
     }
-    curr_note = getOrCreateFootNote( id );
+    curr_note = getOrCreateFootNote( id ).get();
 }
 
 /// mark end of foot note
@@ -464,6 +464,7 @@ public:
                 // SPLIT_AUTO - but we can't change the past...)
                 lUInt16 flags = line->flags & ~RN_SPLIT_BEFORE_ALWAYS & RN_SPLIT_BEFORE_AVOID;
                 line = new LVRendLineInfo(last->getEnd(), line->getEnd(), flags);
+                own_lines.add( line ); // so we can have it 'delete'd in Finalize()
             }
             unsigned flgSplit = CalcSplitFlag( last->getSplitAfter(), line->getSplitBefore() );
             //bool flgFit = currentHeight( next ? next : line ) <= page_h;
