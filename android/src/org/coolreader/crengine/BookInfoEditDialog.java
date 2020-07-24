@@ -367,12 +367,21 @@ public class BookInfoEditDialog extends BaseDialog {
 			}
 		});
 
-		ImageButton btnSendByEmail = (ImageButton)view.findViewById(R.id.save_to_cloud);
+		ImageButton btnSendByEmail = (ImageButton)view.findViewById(R.id.save_to_email);
 
 		btnSendByEmail.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				CloudAction.emailSendBook(mActivity, mBookInfo);
+			}
+		});
+
+		ImageButton btnSendByYnd = (ImageButton)view.findViewById(R.id.save_to_ynd);
+
+		btnSendByYnd.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				CloudAction.yndOpenBookDialog(mActivity, mBookInfo.getFileInfo(),true);
 			}
 		});
 
@@ -601,7 +610,7 @@ public class BookInfoEditDialog extends BaseDialog {
         	btnOpenFolder.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					mActivity.showDirectory(mBookInfo.getFileInfo());
+					mActivity.showDirectory(mBookInfo.getFileInfo(), "");
 					dismiss();
 				}
 			});

@@ -533,7 +533,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						mActivity.showCatalog(item);
+						mActivity.showCatalog(item, "");
 					}
 				});
 				view.setOnLongClickListener(new OnLongClickListener() {
@@ -638,7 +638,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						mActivity.showToast(R.string.only_in_premium);
 						return;
 					}
-					CloudAction.yndOpenBookDialog(mActivity, false);
+					CloudAction.yndOpenBookDialog(mActivity, null,true);
 				}
 			});
 			viewYandex.setOnLongClickListener(new OnLongClickListener() {
@@ -681,7 +681,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				view.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						mActivity.showDirectory(item);
+						mActivity.showDirectory(item, "");
 					}
 				});
 				String[] arrLab = labText.split("/");
@@ -846,7 +846,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			view.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					mActivity.showDirectory(item);
+					mActivity.showDirectory(item, "");
 				}
 			});
 			mLibraryScroll.addView(view);
@@ -1022,7 +1022,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_to_read));
 				dir.isListed = true;
 				dir.isScanned = true;
-				mActivity.showDirectory(dir);
+				mActivity.showDirectory(dir, "");
 			}
 		});
 		btnStateReading  = (Button)view.findViewById(R.id.book_state_reading);
@@ -1035,7 +1035,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_reading));
 				dir.isListed = true;
 				dir.isScanned = true;
-				mActivity.showDirectory(dir);
+				mActivity.showDirectory(dir, "");
 			}
 		});
 		btnStateFinished  = (Button)view.findViewById(R.id.book_state_finished);
@@ -1048,7 +1048,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_finished));
 				dir.isListed = true;
 				dir.isScanned = true;
-				mActivity.showDirectory(dir);
+				mActivity.showDirectory(dir, "");
 			}
 		});
 		btnRecentToRead  = (Button)view.findViewById(R.id.book_recent_toread);
@@ -1110,7 +1110,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					dir.isListed = true;
 					dir.isScanned = true;
 					edQuickSearch.setText("");
-					mActivity.showDirectory(dir);
+					mActivity.showDirectory(dir, "");
 				}
 			}
 		});

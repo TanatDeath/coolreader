@@ -322,19 +322,16 @@ public class BookInfoDialog extends BaseDialog {
 			final CoolReader cr = (CoolReader) mCoolReader;
 			translButton.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					if (cr.getReaderView()!=null)
-						if (cr.getReaderView().mBookInfo!=null) {
-							String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
-							String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
-							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
-							FileInfo dfi = fi.parent;
-							if (dfi == null) {
-								dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-							}
-							if (dfi != null) {
-								cr.editBookTransl(dfi, fi, langf, lang, "", null);
-							}
-						};
+					String lang = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to,true);
+					String langf = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true);
+					FileInfo fi = mBookInfo.getFileInfo();
+					FileInfo dfi = fi.parent;
+					if (dfi == null) {
+						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+					}
+					if (dfi != null) {
+						cr.editBookTransl(dfi, fi, langf, lang, "", null);
+					}
 					dismiss();
 				}
 			});
@@ -582,7 +579,7 @@ public class BookInfoDialog extends BaseDialog {
 			public void onClick(View v) {
 				CoolReader cr = (CoolReader)mCoolReader;
 				if (mBookInfo != null) {
-					cr.showDirectory(mBookInfo.getFileInfo());
+					cr.showDirectory(mBookInfo.getFileInfo(), "");
 					dismiss();
 				}
 			}
@@ -620,12 +617,21 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
-		ImageButton btnSendByEmail = (ImageButton)view.findViewById(R.id.save_to_cloud);
+		ImageButton btnSendByEmail = (ImageButton)view.findViewById(R.id.save_to_email);
 
 		btnSendByEmail.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 			CloudAction.emailSendBook((CoolReader) mCoolReader, mBookInfo);
+			}
+		});
+
+		ImageButton btnSendByYnd = (ImageButton)view.findViewById(R.id.save_to_ynd);
+
+		btnSendByYnd.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				CloudAction.yndOpenBookDialog((CoolReader) mCoolReader, mBookInfo.getFileInfo(),true);
 			}
 		});
 

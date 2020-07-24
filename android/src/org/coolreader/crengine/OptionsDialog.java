@@ -1318,6 +1318,76 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 	}
 
+	class InfoOption extends OptionBase {
+		private boolean inverse = false;
+		public InfoOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
+			super(owner, label, property, addInfo, filter);
+		}
+		public int getItemViewType() {
+			return OPTION_VIEW_TYPE_NORMAL;
+		}
+		public View getView(View convertView, ViewGroup parent) {
+			View view;
+			convertView = myView;
+			if ( convertView==null ) {
+				view = mInflater.inflate(R.layout.option_item, null);
+				if (view != null) {
+					TextView label = (TextView) view.findViewById(R.id.option_label);
+					if (label != null)
+						if (mOwner instanceof OptionsDialog) {
+							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+								if (!StrUtils.isEmptyStr(property))
+									label.setTypeface(null, Typeface.ITALIC);
+							}
+						}
+				}
+			} else {
+				view = (View)convertView;
+			}
+			myView = view;
+			TextView labelView = (TextView)view.findViewById(R.id.option_label);
+			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			valueView.setTextColor(colorIcon);
+			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			if (addInfo.trim().equals("")) {
+				btnOptionAddInfo.setVisibility(View.INVISIBLE);
+			} else {
+				btnOptionAddInfo.setImageDrawable(
+						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
+								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
+				mActivity.tintViewIcons(btnOptionAddInfo);
+				final View view1 = view;
+				if (btnOptionAddInfo != null)
+					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+						}
+					});
+			}
+			labelView.setText(label);
+			labelView.setEnabled(enabled);
+			String currValue = mProperties.getProperty(property);
+			valueView.setText(currValue);
+			view.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					final View view1 = view;
+					mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+					return;
+				}
+			});
+			setupIconView((ImageView)view.findViewById(R.id.option_icon));
+			return view;
+		}
+	}
+
 	int YANDEX_SETTINGS_OPTION = 1;
 	int DROPBOX_SETTINGS_OPTION = 2;
 
@@ -2290,6 +2360,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.yandex_settings_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 					YANDEX_SETTINGS_OPTION).
 					setIconIdByAttr(R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
+			listView.add(new InfoOption(mOwner, getString(R.string.ynd_home_folder),
+					PROP_CLOUD_YND_HOME_FOLDER, getString(R.string.ynd_home_folder_hint), this.lastFilteredValue).
+					setDefaultValue("/").
+					setIconIdByAttr(R.attr.cr3_browser_folder_root_drawable, R.drawable.cr3_browser_folder_root));
 			listView.add(new CloudSettingsOption(mOwner, getString(R.string.dropbox_settings),
 					getString(R.string.dropbox_settings_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 					DROPBOX_SETTINGS_OPTION).

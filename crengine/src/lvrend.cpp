@@ -581,7 +581,6 @@ public:
                     }
                     break;
                 case erm_inline:
-                case erm_runin:
                     // do nothing
                     break;
                 }
@@ -2141,10 +2140,9 @@ lUInt32 styleToTextFmtFlags( bool is_block, const css_style_ref_t & style, lUInt
     lUInt32 flg = oldflags;
     if ( is_block ) {
         // text alignment flags
-        flg = oldflags & ~LTEXT_FLAG_NEWLINE;
-        if ( !(oldflags & LTEXT_RUNIN_FLAG) ) {
-            switch (style->text_align)
-            {
+        flg = oldflags & ~(LTEXT_FLAG_NEWLINE | (LTEXT_FLAG_NEWLINE<<LTEXT_LAST_LINE_ALIGN_SHIFT) | LTEXT_LAST_LINE_IF_NOT_FIRST);
+        switch (style->text_align)
+        {
             case css_ta_left:
                 flg |= LTEXT_ALIGN_LEFT;
                 break;
@@ -2163,12 +2161,12 @@ lUInt32 styleToTextFmtFlags( bool is_block, const css_style_ref_t & style, lUInt
             case css_ta_end:
                 flg |= (direction == REND_DIRECTION_RTL ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
                 break;
-            case css_ta_auto: // shouldn't happen (only accepted with text-align-last)
             case css_ta_inherit:
+            default: // others values shouldn't happen (only accepted with text-align-last)
                 break;
-            }
-            switch (style->text_align_last)
-            {
+        }
+        switch (style->text_align_last)
+        {
             case css_ta_left:
                 flg |= LTEXT_LAST_LINE_ALIGN_LEFT;
                 break;
@@ -2190,11 +2188,31 @@ lUInt32 styleToTextFmtFlags( bool is_block, const css_style_ref_t & style, lUInt
             case css_ta_auto: // let flg have none of the above set, which will mean "auto"
             case css_ta_inherit:
                 break;
-            }
+            case css_ta_left_if_not_first:     // Private text-align-last keywords
+                flg |= LTEXT_LAST_LINE_ALIGN_LEFT;
+                flg |= LTEXT_LAST_LINE_IF_NOT_FIRST;
+                break;
+            case css_ta_right_if_not_first:
+                flg |= LTEXT_LAST_LINE_ALIGN_RIGHT;
+                flg |= LTEXT_LAST_LINE_IF_NOT_FIRST;
+                break;
+            case css_ta_center_if_not_first:
+                flg |= LTEXT_LAST_LINE_ALIGN_CENTER;
+                flg |= LTEXT_LAST_LINE_IF_NOT_FIRST;
+                break;
+            case css_ta_justify_if_not_first:
+                flg |= LTEXT_LAST_LINE_ALIGN_WIDTH;
+                flg |= LTEXT_LAST_LINE_IF_NOT_FIRST;
+                break;
+            case css_ta_start_if_not_first:
+                flg |= (direction == REND_DIRECTION_RTL ? LTEXT_LAST_LINE_ALIGN_RIGHT : LTEXT_LAST_LINE_ALIGN_LEFT);
+                flg |= LTEXT_LAST_LINE_IF_NOT_FIRST;
+                break;
+            case css_ta_end_if_not_first:
+                flg |= (direction == REND_DIRECTION_RTL ? LTEXT_LAST_LINE_ALIGN_LEFT : LTEXT_LAST_LINE_ALIGN_RIGHT);
+                flg |= LTEXT_LAST_LINE_IF_NOT_FIRST;
+                break;
         }
-    }
-    else if ( style->display == css_d_run_in ) {
-        flg |= LTEXT_RUNIN_FLAG;
     }
     // We should clean these flags that we got from the parent node via baseFlags:
     // CSS white-space inheritance is correctly handled via styles (so, no need
@@ -2463,6 +2481,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             return;
         }
 
+        css_style_ref_t style = enode->getStyle();
         bool is_object = false;
         const css_elem_def_props_t * ntype = enode->getElementTypePtr();
         if ( ntype && ntype->is_object )
@@ -2480,7 +2499,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
         //   when recursing its children which are inline), it will also set
         //   horitontal alignment flags.
         bool is_block = rm == erm_final;
-        lUInt32 flags = styleToTextFmtFlags( is_block, enode->getStyle(), baseflags, direction );
+        lUInt32 flags = styleToTextFmtFlags( is_block, style, baseflags, direction );
         // Note:
         // - baseflags (passed by reference) is shared and re-used by this node's siblings
         //   (all inline); it should carry newline/horizontal aligment flag, which should
@@ -2491,10 +2510,40 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
 
         int width = fmt->getWidth();
         int em = enode->getFont()->getSize();
-        css_style_ref_t style = enode->getStyle();
         ldomNode * parent = enode->getParentNode(); // Needed for various checks below
         if (parent && parent->isNull())
             parent = NULL;
+
+        // Nodes with "display: run-in" are inline nodes brought at start of the final node
+        bool isRunIn = style->display == css_d_run_in;
+        if ( isRunIn ) {
+            // The text alignment of the paragraph should come from the following
+            // sibling node. The one set from the parent final node has probably
+            // not yet been consumed, so update it.
+            if ( baseflags & LTEXT_FLAG_NEWLINE ) {
+                if ( enode->getNodeIndex() == 0 && parent && parent->getChildCount() > 1 ) {
+                    ldomNode * next_sibling = parent->getChildNode(1);
+                    if ( next_sibling && !next_sibling->isNull() ) {
+                        // next_sibling is an original block node that should have
+                        // been erm_final, but has been made erm_inline so it can
+                        // be prepended with the run-in node content.
+                        lUInt32 next_sibling_flags = styleToTextFmtFlags( true, next_sibling->getStyle(), baseflags, direction );
+                        // Grab only the alignment flags
+                        lUInt32 align_flags_mask = LTEXT_FLAG_NEWLINE | (LTEXT_FLAG_NEWLINE<<LTEXT_LAST_LINE_ALIGN_SHIFT) | LTEXT_LAST_LINE_IF_NOT_FIRST;
+                        next_sibling_flags &= align_flags_mask;
+                        // Update both flags and baseflags with the grabbed alignments
+                        flags &= ~align_flags_mask;
+                        flags |= next_sibling_flags;
+                        baseflags &= ~align_flags_mask;
+                        baseflags |= next_sibling_flags;
+                    }
+                }
+            }
+            // Note: for consistency, we should also build the strut below from
+            // this next_sibling node. But let's not bother, display: run-in
+            // is only really used for FB2 footnotes, and this above is just
+            // what's needed for their correct rendering.
+        }
 
         // As seen with Firefox, an inline node line-height: do apply, so we need
         // to compute it for all inline nodes, and not only in the "the top and
@@ -2971,7 +3020,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                         flags |= (is_rtl ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
                         break;
                     case css_ta_inherit:
-                    case css_ta_auto:
+                    default: // others values shouldn't happen (only accepted with text-align-last)
                         break;
                     }
                 }
@@ -3006,9 +3055,6 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 logfile << "+BLOCK [" << cnt << "]";
             #endif
             // Usual elements
-            bool thisIsRunIn = style->display==css_d_run_in;
-            if ( thisIsRunIn )
-                flags |= LTEXT_RUNIN_FLAG;
 
             // Some elements add some generated content
             lUInt16 nodeElementId = enode->getNodeId();
@@ -3151,20 +3197,32 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 }
             }
 
-            // Note: CSS "display: run-in" is no longer used with our epub.css (it is
-            // used with older css files for "body[name="notes"] section title", either
-            // for crengine internal footnotes displaying, or some FB2 features)
-            if ( thisIsRunIn ) {
-                // append space to run-in object
+            if ( isRunIn ) {
+                // Append space to run-in object: both the run-in text node and
+                // the following paragraph first text node might not end or start
+                // with a space. But they might also both do, and we want all spaces
+                // to collapse into one - so, we don't set LTEXT_FLAG_PREFORMATTED,
+                // and we don't use UNICODE_NO_BREAK_SPACE.
                 LVFontRef font = enode->getFont();
                 css_style_ref_t style = enode->getStyle();
                 lUInt32 cl = style->color.type!=css_val_color ? 0xFFFFFFFF : style->color.value;
                 lUInt32 bgcl = style->background_color.type!=css_val_color ? 0xFFFFFFFF : style->background_color.value;
+                txform->AddSourceLine( L" ", 1, cl, bgcl, font.get(), lang_cfg, LTEXT_LOCKED_SPACING|LTEXT_FLAG_OWNTEXT, line_h, valign_dy);
+                /*
+                // We used to specify two UNICODE_NO_BREAK_SPACE (that would not collapse)
+                // mostly so we were able to detect them in lvtextfm.cpp and avoid this
+                // spacing to change width with text justification.
                 lChar16 delimiter[] = {UNICODE_NO_BREAK_SPACE, UNICODE_NO_BREAK_SPACE}; //160
                 txform->AddSourceLine( delimiter, sizeof(delimiter)/sizeof(lChar16), cl, bgcl, font.get(), lang_cfg,
-                                            LTEXT_RUNIN_FLAG | LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT,
-                                            line_h, valign_dy, 0, NULL );
-                flags &= ~LTEXT_RUNIN_FLAG;
+                                            LTEXT_FLAG_PREFORMATTED | LTEXT_FLAG_OWNTEXT, line_h, valign_dy, 0, NULL );
+                // Users who would like more spacing can use:
+                //   body[name="notes"] section title:after,
+                //   body[name="comments"] section title:after {
+                //       content: '\A0'
+                //   }
+                // But the text nodes spaces will then not collapse, and constant spacing
+                // won't be ensured (spacing may vary from one document to another).
+                */
             }
         }
 
@@ -3230,7 +3288,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 baseflags |= (is_rtl ? LTEXT_ALIGN_LEFT : LTEXT_ALIGN_RIGHT);
                 break;
             case css_ta_inherit:
-            case css_ta_auto:
+            default: // others values shouldn't happen (only accepted with text-align-last)
                 break;
             }
             // Among inline nodes, only <BR> can carry a "clear: left/right/both".
@@ -3251,7 +3309,6 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 break;
             }
         }
-        //baseflags &= ~LTEXT_RUNIN_FLAG;
         if ( rm == erm_final && (baseflags & LTEXT_SRC_IS_CLEAR_BOTH) ) {
             // We're leaving the top final node with a clear: not consumed
             // (set by a last or single <br clear=>), with no follow-up
@@ -3465,8 +3522,9 @@ void copystyle( css_style_ref_t source, css_style_ref_t dest )
     dest->border_color[3]=source->border_color[3];
     dest->background_image=source->background_image;
     dest->background_repeat=source->background_repeat;
-    dest->background_attachment=source->background_attachment;
     dest->background_position=source->background_position;
+    dest->background_size[0]=source->background_size[0];
+    dest->background_size[1]=source->background_size[1];
     dest->border_collapse=source->border_collapse;
     dest->border_spacing[0]=source->border_spacing[0];
     dest->border_spacing[1]=source->border_spacing[1];
@@ -7834,8 +7892,79 @@ void DrawBackgroundImage(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int d
         lString16 filepath = lString16(style->background_image.c_str());
         LVImageSourceRef img = enode->getParentNode()->getDocument()->getObjectImageSource(filepath);
         if (!img.isNull()) {
+            // Native image size
             int img_w =img->GetWidth();
             int img_h =img->GetHeight();
+
+            // See if background-size specified and we need to adjust image native size
+            css_length_t bg_w = style->background_size[0];
+            css_length_t bg_h = style->background_size[1];
+            if ( bg_w.type != css_val_unspecified || bg_w.value != 0 || bg_h.type != css_val_unspecified || bg_h.value != 0 ) {
+                int new_w = 0;
+                int new_h = 0;
+                RenderRectAccessor fmt( enode );
+                int container_w = fmt.getWidth();
+                int container_h = fmt.getHeight();
+                bool check_lengths = true;
+                if ( bg_w.type == css_val_unspecified && bg_h.type == css_val_unspecified ) {
+                    if ( bg_w.value == css_generic_contain && bg_h.value == css_generic_contain ) {
+                        // Image should be fully contained in container (no crop)
+                        int scale_w = 1024 * container_w / img_w;
+                        int scale_h = 1024 * container_h / img_h;
+                        if ( scale_w < scale_h ) {
+                            new_w = container_w;
+                            new_h = img_h * scale_w / 1024;
+                        }
+                        else {
+                            new_h = container_h;
+                            new_w = img_w * scale_h / 1024;
+                        }
+                        check_lengths = false;
+                    }
+                    else if ( bg_w.value == css_generic_cover && bg_h.value == css_generic_cover ) {
+                        // Image should fully cover container (crop allowed)
+                        int scale_w = 1024 * container_w / img_w;
+                        int scale_h = 1024 * container_h / img_h;
+                        if ( scale_w > scale_h ) {
+                            new_w = container_w;
+                            new_h = img_h * scale_w / 1024;
+                        }
+                        else {
+                            new_h = container_h;
+                            new_w = img_w * scale_h / 1024;
+                        }
+                        check_lengths = false;
+                    }
+                }
+                if ( check_lengths ) {
+                    int em = enode->getFont()->getSize();
+                    // These will compute to 0 if (css_val_unspecified, 0) when really not specified
+                    new_w = lengthToPx(style->background_size[0], container_w, em);
+                    new_h = lengthToPx(style->background_size[1], container_h, em);
+                    if ( new_w == 0 ) {
+                        if ( new_h == 0 ) { // keep image native size
+                            new_h = img_h;
+                            new_w = img_w;
+                        }
+                        else { // use style height, keep aspect ratio
+                            new_w = img_w * new_h / img_h;
+                        }
+                    }
+                    else if ( new_h == 0 ) { // use style width, keep aspect ratio
+                        new_h = new_w * img_h / img_w;
+                    }
+                }
+                if ( new_w == 0 || new_h == 0 ) {
+                    // width or height computed to 0: nothing to draw
+                    return;
+                }
+                if ( new_w != img_w || new_h != img_h ) {
+                    img = LVCreateStretchFilledTransform(img, new_w, new_h, IMG_TRANSFORM_STRETCH, IMG_TRANSFORM_STRETCH, 0, 0);
+                    img_w = new_w;
+                    img_h = new_h;
+                }
+            }
+
             // We can use some crengine facilities for background repetition and position,
             // which has the advantage that img will be decoded once even if tiling it many
             // times and if the target is many screen-heights long (like <BODY> could be).
@@ -7931,13 +8060,21 @@ void DrawBackgroundImage(ldomNode *enode,LVDrawBuf & drawbuf,int x0,int y0,int d
                 draw_y = 0;
             }
             // Ready to have crengine do all the work.
-            // (Inspired from LVDocView::drawPageBackground(), we have to do it that complex
-            // way to avoid memory leaks; and we have to use a 16bpp LVColorDrawBuf,
-            // 32bpp would mess colors up).
-            LVRef<LVColorDrawBuf> buf = LVRef<LVColorDrawBuf>( new LVColorDrawBuf(img_w, img_h, 16) );
-            buf->Draw(img, 0, 0, img_w, img_h, false); // (dither=false doesn't matter with a color buffer)
-            LVImageSourceRef src = LVCreateDrawBufImageSource(buf.get(), false);
-            LVImageSourceRef transformed = LVCreateStretchFilledTransform(src, transform_w, transform_h,
+            /* Looks like we don't need that:
+
+                // (Inspired from LVDocView::drawPageBackground(), we have to do it that complex
+                // way to avoid memory leaks; and we have to use a 16bpp LVColorDrawBuf,
+                // 32bpp would mess colors up).
+                LVRef<LVColorDrawBuf> buf = LVRef<LVColorDrawBuf>( new LVColorDrawBuf(img_w, img_h, 16) );
+                buf->Draw(img, 0, 0, img_w, img_h, false); // (dither=false doesn't matter with a color buffer)
+                LVImageSourceRef src = LVCreateDrawBufImageSource(buf.get(), false);
+                LVImageSourceRef transformed = LVCreateStretchFilledTransform(src, transform_w, transform_h,
+
+              We can just transform the original image, which will work in its original
+              colorspace/depth, ensure alpha/transparency, and will be converted only
+              at the end to the final drawbuf bit depth.
+            */
+            LVImageSourceRef transformed = LVCreateStretchFilledTransform(img, transform_w, transform_h,
                                                hori_transform, vert_transform, transform_x, transform_y);
             // We use the DrawBuf clip facility to ensure we don't draw outside this node fmt
             lvRect orig_clip;

@@ -35,6 +35,7 @@
     <string name="mi_book_delete_custom_cover">Delete custom cover</string>
     <string name="mi_book_shortcut">Create book shortcut</string>
     <string name="mi_book_to_cloud">Save book to cloud storage</string>
+    <string name="mi_book_to_email">Send book by email</string>
     <string name="mi_book_no_mark">Set no mark</string>
     <string name="mi_book_to_read">Set \'to read\' mark</string>
     <string name="mi_book_reading">Set \'reading\' mark</string>
@@ -73,9 +74,6 @@
     <string name="mi_folder_left">Move left</string>
     <string name="mi_folder_right">Move right</string>
     <string name="mi_folder_remove">Remove</string>
-
-
-
     <string name="dir_recent_books">Recent Books</string>
     <string name="dir_sd_card">SD Card</string>
     <string name="dir_internal_sd_card">Internal SD Card</string>
@@ -768,10 +766,11 @@
     <string name="cloud_menu">Cloud storage menu</string>
     <string name="save_current_book_to_cloud_ynd">Save book to Yandex disc</string>
     <string name="save_current_book_to_cloud_ynd2">Save opened book to this folder</string>
+    <string name="save_current_book_to_cloud_ynd3">Save to this folder:</string>
     <string name="save_current_book_to_cloud_email">Send book via Email</string>
     <string name="open_book_from_gd">Open book from Google One</string>
     <string name="open_book_from_dbx">Open book from Dropbox</string>
-    <string name="open_book_from_ynd">Open/Save book from/to Yandex disc</string>
+    <string name="open_book_from_ynd">Open book from Yandex disc</string>
     <string name="open_book_from_gd_short">Google One</string>
     <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="open_book_from_y_short">Yandex</string>
@@ -1197,4 +1196,14 @@
     <string name="font_size_control">Font size:</string>
     <string name="link">link</string>
     <string name="category">category / genre</string>
+    <string name="ynd_set_def">Set as home folder?</string>
+    <string name="warn_hang">Do you want to open last document?</string>
+    <string name="ynd_home_folder">Yandex disc home folder</string>
+    <string name="ynd_home_folder_hint">To change it - open Yandex disc (from main window), locate the folder, then long-tap \'home\' button</string>
+    <string name="mi_folder_authors_series">All author\'s series</string>
+    <string name="mi_folder_authors_books">All author\'s books</string>
+    <string name="mi_folder_series_authors">All series\' authors</string>
+    <string name="mi_folder_series_books">All series\' books</string>
+    <string name="context_menu_author_folder">Authors folder</string>
+    <string name="context_menu_series_folder">Series folder</string>
 </resources>

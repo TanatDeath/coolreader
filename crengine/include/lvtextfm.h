@@ -40,6 +40,7 @@ extern "C" {
 #define LTEXT_LAST_LINE_ALIGN_RIGHT  0x0020  // last line of justified paragraph should be right-aligned
 #define LTEXT_LAST_LINE_ALIGN_CENTER 0x0030  // last line of justified paragraph should be centered
 #define LTEXT_LAST_LINE_ALIGN_WIDTH  0x0040  // last line of justified paragraph should be justified
+#define LTEXT_LAST_LINE_IF_NOT_FIRST 0x0080  // previous flag doesn't apply if last line is also the first (standalone line)
 
 // Text vertical alignment
 #define LTEXT_VALIGN_MASK            0x0700  // vertical align flags mask
@@ -62,14 +63,13 @@ extern "C" {
 
 // (Don't waste the 4th bit not used in the 4-bits sets above)
 #define LTEXT_FLAG_OWNTEXT           0x0008  // store local copy of text instead of pointer
-#define LTEXT_IS_LINK                0x0080  // source text is a link (to gather in-page footnotes)
-#define LTEXT_RUNIN_FLAG             0x8000  // element display mode is runin (used with FB2 footnotes)
+#define LTEXT_IS_LINK                0x8000  // source text is a link (to gather in-page footnotes)
 
 // Text white-space and hyphenation handling
 #define LTEXT_FLAG_PREFORMATTED      0x00010000  // text is preformatted (white-space: pre, pre-wrap, break-spaces)
 #define LTEXT_FLAG_NOWRAP            0x00020000  // text does not allow wrap (white-space: nowrap)
-#define LTEXT_HYPHENATE              0x00040000  // allow hyphenation
-#define LTEXT__AVAILABLE_BIT_20__    0x00080000
+#define LTEXT_LOCKED_SPACING         0x00040000  // regular spaces should not change width with text justification
+#define LTEXT_HYPHENATE              0x00080000  // allow hyphenation
 
 // Source object type (when source is not a text node)
 #define LTEXT_SRC_IS_OBJECT          0x00100000  // object (image)

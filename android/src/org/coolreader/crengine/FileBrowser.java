@@ -19,6 +19,7 @@ import com.google.android.gms.common.util.IOUtils;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.crengine.OPDSUtil.DocInfo;
 import org.coolreader.crengine.OPDSUtil.DownloadCallback;
@@ -216,6 +217,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		    } else if (selectedItem!=null && selectedItem.isOPDSBook()) {
 			    inflater.inflate(R.menu.cr3_file_browser_opds_book_context_menu, menu);
 			    menu.setHeaderTitle(mActivity.getString(R.string.menu_title_catalog));
+			} else if ((selectedItem!=null) && (selectedItem.pathname.startsWith("@")) && (selectedItem.pathname.contains("Group:"))) {
+				inflater.inflate(R.menu.cr3_file_browser_group_folder_context_menu, menu);
+				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_folder));
+			} else if (selectedItem!=null && (selectedItem.isBooksByAuthorRoot() || selectedItem.isBooksByAuthorDir())) {
+				inflater.inflate(R.menu.cr3_file_browser_author_folder_context_menu, menu);
+				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_author_folder));
+			} else if (selectedItem!=null && (selectedItem.isBooksBySeriesRoot() || selectedItem.isBooksBySeriesDir())) {
+				inflater.inflate(R.menu.cr3_file_browser_series_folder_context_menu, menu);
+				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_series_folder));
             } else if (selectedItem!=null && selectedItem.isDirectory && !selectedItem.isOPDSDir()) {
                 inflater.inflate(R.menu.cr3_file_browser_file_folder_context_menu, menu);
                 menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_folder));
@@ -255,7 +265,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if ( item.isDirectory ) {
 				if (item.isOPDSSearchDir()) {
 					showFindBookDialog(false, "", item);
-				} else showDirectory(item, null);
+				} else showDirectory(item, null, "");
 				return true;
 			}
 			final FileInfo finalItem = item;
@@ -420,7 +430,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		createListView(true);
 		history.addListener(this);
 		scanner.addListener(this);
-		showDirectory( null, null );
+		showDirectory( null, null, "");
 
 	}
 	
@@ -555,7 +565,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			return true;
 		case R.id.book_recent_goto:
 			log.d("book_recent_goto menu item selected");
-			showDirectory(selectedItem, selectedItem);
+			showDirectory(selectedItem, selectedItem, "");
 			return true;
 		case R.id.book_recent_remove:
 			log.d("book_recent_remove menu item selected");
@@ -579,7 +589,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			return true;
         case R.id.folder_open:
             log.d("folder_open menu item selected");
-            showDirectory(selectedItem, null);
+            showDirectory(selectedItem, null, "");
             return true;
 		case R.id.folder_delete:
 			log.d("folder_delete menu item selected");
@@ -669,9 +679,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		case R.id.book_to_gd:
 			log.d("book_to_cloud menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
-				mActivity.showToast("to come...");
-				//mActivity.mGoogleDriveTools.signInAndDoAnAction(
-				//		mActivity.mGoogleDriveTools.REQUEST_CODE_SAVE_CURRENT_BOOK_TO_GD, FileBrowser.this);
+				CloudAction.yndOpenBookDialog(mActivity, selectedItem,true);
+			}
+			return true;
+		case R.id.book_to_email:
+			log.d("book_to_email menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				CloudAction.emailSendBook((CoolReader) mActivity, new BookInfo(selectedItem));
 			}
 			return true;
 		case R.id.book_no_mark:
@@ -774,6 +788,32 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				if (modified) saveBookInfo();
 			}
 			return true;
+		case R.id.folder_series_authors:
+			log.d("folder_series_authors menu item selected");
+			if (selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				String sItem = selectedItem.pathname.replace(FileInfo.SERIES_PREFIX, "");
+				FileInfo dir = new FileInfo();
+				dir.isDirectory = true;
+				dir.pathname = FileInfo.AUTHORS_TAG;
+				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_author));
+				dir.isListed = true;
+				dir.isScanned = true;
+				mActivity.showDirectory(dir, sItem);
+			}
+			return true;
+		case R.id.folder_authors_series:
+			log.d("folder_authors_series menu item selected");
+			if (selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				String sItem = selectedItem.pathname.replace(FileInfo.AUTHOR_PREFIX, "");
+				FileInfo dir = new FileInfo();
+				dir.isDirectory = true;
+				dir.pathname = FileInfo.SERIES_TAG;
+				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_series));
+				dir.isListed = true;
+				dir.isScanned = true;
+				mActivity.showDirectory(dir, sItem);
+			}
+			return true;
 
 		}
 
@@ -794,7 +834,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					for (FileInfo f : catalogs)
 						opdsRoot.addDir(f);
 					if (showInBrowser || (currDirectory!=null && currDirectory.isOPDSRoot()))
-						showDirectory(opdsRoot, null);
+						showDirectory(opdsRoot, null, "");
 				}
 			});
 		}
@@ -806,7 +846,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				refreshOPDSRootDirectory(false);
 		} else {
 			if (dir.pathNameEquals(currDirectory))
-				showDirectory(currDirectory, selected);
+				showDirectory(currDirectory, selected, "");
 		}
 	}
 
@@ -834,7 +874,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if (currDirectory == null || currDirectory.parent == null || currDirectory.parent.isRootDir())
 			mActivity.showRootWindow();
 		else
-			showDirectory(currDirectory.parent, currDirectory);
+			showDirectory(currDirectory.parent, currDirectory, "");
 	}
 	
 	boolean mInitStarted = false;
@@ -888,7 +928,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 	public void showRecentBooks()
 	{
-		showDirectory(mScanner.getRecentDir(), null);
+		showDirectory(mScanner.getRecentDir(), null, "");
 	}
 
 	public boolean isBookShownInRecentList(FileInfo book) {
@@ -902,7 +942,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if ( currDirectory==null || currDirectory==mScanner.getRoot() )
 			showRecentBooks();
 		else
-			showDirectory(currDirectory, null);
+			showDirectory(currDirectory, null, "");
 	}
 
 	MainDB.ItemGroupExtractor getExtractor(int etype) {
@@ -957,7 +997,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if (sett != 0) extractor = getExtractor2(sett);
 		MainDB.addGroupedItems2(newGroup, "",
 				dir.getElements(), FileInfo.TITLE_GROUP_PREFIX, extractor, 1);
-		showDirectory(newGroup, null);
+		showDirectory(newGroup, null, "");
 	}
 	
 	public void showFindBookDialog(boolean isQuick, String sText, final FileInfo fi)
@@ -985,7 +1025,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (results != null) {
 						FileInfo fi3 = results[0];
 						fi3.pathname = fi3.pathname.replace(FileInfo.OPDS_DIR_PREFIX+"search:",FileInfo.OPDS_DIR_PREFIX);
-						showDirectory(fi3,null);
+						showDirectory(fi3,null, "");
 					}
 				}
 			});
@@ -1017,7 +1057,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	public void showRootDirectory()
 	{
 		log.v("showRootDirectory()");
-		showDirectory(mScanner.getRoot(), null);
+		showDirectory(mScanner.getRoot(), null, "");
 	}
 
 	private OnlineStoreWrapper getPlugin(FileInfo dir) {
@@ -1112,7 +1152,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		mSortOrder = order!=null ? order : FileInfo.DEF_SORT_ORDER;
 		if (currDirectory != null && currDirectory.allowSorting()) {
 			currDirectory.sort(mSortOrder);
-			showDirectory(currDirectory, selectedItem);
+			showDirectory(currDirectory, selectedItem, "");
 			mActivity.setSetting(ReaderView.PROP_APP_BOOK_SORT_ORDER, mSortOrder.name(), false);
 		}
 	}
@@ -1574,7 +1614,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			showDirectoryInternal(currDirectory, null);
 	}
 
-	public void showDirectory(FileInfo fileOrDir, FileInfo itemToSelect)
+	public void showDirectory(FileInfo fileOrDir, FileInfo itemToSelect, String addFilter)
 	{
 		BackgroundThread.ensureGUI();
 		if (fileOrDir != null) {
@@ -1681,13 +1721,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (fileOrDir.isBooksByAuthorRoot()) {
 				// refresh authors list
 				log.d("Updating authors list");
-				mActivity.getDB().loadAuthorsList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadAuthorsList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesRoot()) {
 				// refresh authors list
 				log.d("Updating series list");
-				mActivity.getDB().loadSeriesList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadSeriesList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
             if (fileOrDir.isBooksByBookdateRoot()) {
@@ -1926,7 +1966,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				mActivity.saveSetting(ReaderView.PROP_APP_BOOK_SORT_ORDER, mSortOrder.name());
 			}
 			if ( isShown() && currDirectory!=null ) {
-				showDirectory(currDirectory, null);
+				showDirectory(currDirectory, null, "");
 			}
 		}
 	}
@@ -2247,32 +2287,23 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							);
                             mActivity.tintViewIcons(image,true);
 						} else {
-							log.d("finding svyat bug 1");
 							if (coverPagesEnabled) {
-								log.d("finding svyat bug 2");
 								image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
-								log.d("finding svyat bug 3");
 								if (item.isOPDSBook()) {
-									log.d("finding svyat bug 4");
 									final FileInfo finalItem = item;
-									log.d("finding svyat bug 5");
 									if	(
 											(
 												(!StrUtils.isEmptyStr(item.pathnameR))||
 												(!StrUtils.isEmptyStr(item.arcnameR))
 											) && (!StrUtils.isEmptyStr(item.opdsLinkR))
 									) {
-										log.d("finding svyat bug 6");
 											Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), finalItem.opdsLinkR,
 													new History.FileInfo1LoadedCallack() {
 														@Override
 														public void onFileInfoLoaded(final FileInfo fileInfo) {
-															log.d("finding svyat bug 7");
 															if (fileInfo!=null) {
-																log.d("finding svyat bug 8");
 																image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), fileInfo));
 															} else {
-																log.d("finding svyat bug 9");
 																image.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item));
 															}
 														}

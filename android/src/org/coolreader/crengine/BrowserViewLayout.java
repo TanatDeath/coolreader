@@ -131,7 +131,7 @@ public class BrowserViewLayout extends ViewGroup {
 
 						@Override
 						public void onClick(View v) {
-							((CoolReader)activity).showDirectory(dir3);
+							((CoolReader)activity).showDirectory(dir3, "");
 						}
 					});
 				} else

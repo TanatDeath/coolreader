@@ -28,6 +28,7 @@
     <string name="mi_book_delete_custom_cover">Удалить обложку из изображения</string>
     <string name="mi_book_shortcut">Создать ярлык книги</string>
     <string name="mi_book_to_cloud">Сохранить на облачное хранилище</string>
+    <string name="mi_book_to_email">Отправить книгу по email</string>
     <string name="mi_book_no_mark">Убрать пометку</string>
     <string name="mi_book_to_read">Пометка \'к прочтению\'</string>
     <string name="mi_book_reading">Пометка \'читаю\'</string>
@@ -797,10 +798,11 @@
     <string name="cloud_menu">Меню облачного хранилища</string>
     <string name="save_current_book_to_cloud_ynd">Сохранить книгу на Яндекс диск</string>
     <string name="save_current_book_to_cloud_ynd2">Сохранить открытую книгу в эту папку</string>
+    <string name="save_current_book_to_cloud_ynd3">Сохранить в эту папку:</string>
     <string name="save_current_book_to_cloud_email">Отправить книгу по Email</string>
     <string name="open_book_from_gd">Открыть книгу с диска Google One</string>
     <string name="open_book_from_dbx">Открыть книгу из DropBox</string>
-    <string name="open_book_from_ynd">Открыть/сохранить книгу с/на Яндекс диска</string>
+    <string name="open_book_from_ynd">Открыть книгу с Яндекс диска</string>
     <string name="open_book_from_gd_short">Google One</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
@@ -1174,4 +1176,14 @@
     <string name="font_size_control">Размер шрифта:</string>
     <string name="link">ссылка</string>
     <string name="category">категория / жанр</string>
+    <string name="ynd_set_def">Сделать домашней папкой?</string>
+    <string name="warn_hang">Открыть последний документ?</string>
+    <string name="ynd_home_folder">Домашняя папка Яндекс диска</string>
+    <string name="ynd_home_folder_hint">Чтобы изменить - откройте Яндекс диск (с главного экрана), найдите нужную папку, затем нажмите длинным тапом по кнопке \'домой\'</string>
+    <string name="mi_folder_authors_series">Все серии автора</string>
+    <string name="mi_folder_authors_books">Все книги автора</string>
+    <string name="mi_folder_series_authors">Все авторы серии</string>
+    <string name="mi_folder_series_books">Все книги серии</string>
+    <string name="context_menu_author_folder">Авторы</string>
+    <string name="context_menu_series_folder">Серии</string>
 </resources>

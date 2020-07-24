@@ -1499,7 +1499,7 @@ public class MainDB extends BaseDB {
 		return found;
 	}
 	
-	public boolean loadAuthorsList(FileInfo parent) {
+	public boolean loadAuthorsList(FileInfo parent, String filterSeries) {
 		Log.i("cr3", "loadAuthorsList()");
 		beginReading();
 		// gather missed stats
@@ -1528,10 +1528,18 @@ public class MainDB extends BaseDB {
 		//\
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-		//String sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
-		//		" INNER JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
-		//		" INNER JOIN book_author ON  book_author.author_fk = author.id GROUP BY author.name, author.id ORDER BY author.name";
-		String sql = "SELECT author.id, author.name, book_cnt as book_count FROM author ORDER BY author.name";
+
+		String sql = "";
+
+		if (StrUtils.isEmptyStr(filterSeries))
+			sql = "SELECT author.id, author.name, book_cnt as book_count FROM author ORDER BY author.name";
+		else {
+			sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
+					" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
+					"   and (book.series_fk = " + filterSeries + " or book.publseries_fk = " + filterSeries + ") " +
+					" JOIN book_author ON  book_author.author_fk = author.id " +
+					" GROUP BY author.name, author.id ORDER BY author.name";
+		}
 		boolean found = loadItemList(list, sql, FileInfo.AUTHOR_PREFIX, true);
 		//
 		sortItems(list, new ItemGroupFilenameExtractor(), true);
@@ -1614,7 +1622,7 @@ public class MainDB extends BaseDB {
 		return found;
 	}
 
-	public boolean loadSeriesList(FileInfo parent) {
+	public boolean loadSeriesList(FileInfo parent, String filterAuthor) {
 		Log.i("cr3", "loadSeriesList()");
 		beginReading();
 		parent.clear();
@@ -1625,7 +1633,7 @@ public class MainDB extends BaseDB {
 			rs = mDB.rawQuery(
 				"select s.id, count(*) as cnt " +
 				"from series s " +
-				"join book b on s.id = b.series_fk or s.id = b.publseries_fk " +
+				"join book b on (s.id = b.series_fk or s.id = b.publseries_fk) " +
 				"  and s.book_cnt is null " +
 				"where (not (b.pathname like '@opds%')) " +
 				"group by s.id ", null);
@@ -1644,11 +1652,16 @@ public class MainDB extends BaseDB {
 		}
 		//\
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-//		String sql = "SELECT series.id, series.name, count(*) as book_count FROM series "+
-//				" INNER JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id "+
-//				" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
-		String sql = "SELECT series.id, series.name, book_cnt as book_count FROM series "+
-				" ORDER BY series.name";
+		String sql = "";
+
+		if (StrUtils.isEmptyStr(filterAuthor))
+			sql = "SELECT series.id, series.name, book_cnt as book_count FROM series "+
+					" ORDER BY series.name";
+		else
+			sql = "SELECT series.id, series.name, count(*) as book_count FROM series "+
+				" JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id "+
+				" JOIN book_author ON book_author.book_fk = book.id and book_author.author_fk = " + filterAuthor +
+				" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
 		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX, true);
 		//
 		sortItems(list, new ItemGroupFilenameExtractor(), true);

@@ -15,7 +15,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudSync;
-import org.coolreader.crengine.Engine.HyphDict;
+
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 import org.coolreader.tts.TTS;
@@ -2820,7 +2820,7 @@ import com.google.gson.GsonBuilder;
 								if (mActivity.isPreviousFrameHome())
 									mActivity.showRootWindow();
 								else
-									mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null);
+									mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null, "");
 							}
 						}
 					}
@@ -2830,11 +2830,19 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void setTimeLeft() {
-		String sLeft = "";
-		if (getBookInfo() != null)
-			if (getBookInfo().getFileInfo() != null)
-				sLeft = mActivity.getReadingTimeLeft(getBookInfo().getFileInfo(),false);
-		doc.setTimeLeft(sLeft);
+		if (doc != null) {
+			String sLeft = "";
+			if (getBookInfo() != null)
+				if (getBookInfo().getFileInfo() != null)
+					sLeft = mActivity.getReadingTimeLeft(getBookInfo().getFileInfo(), false);
+			doc.setTimeLeft(sLeft);
+			// for safe mode
+			if (doc.getCurPage()>2) {
+				String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
+				File f = new File(sFile);
+				if (f.exists()) f.delete();
+			}
+		}
 	}
 
 	public void onCommand(final ReaderCommand cmd, final int param, final Runnable onFinishHandler) {
@@ -3095,10 +3103,10 @@ import com.google.gson.GsonBuilder;
 				}
 			}
 			if (needBrowser)
-				mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null);
+				mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null, "");
 			break;
 		case DCMD_CURRENT_BOOK_DIRECTORY:
-			mActivity.showBrowser(getOpenedFileInfo());
+			mActivity.showBrowser(getOpenedFileInfo(), "");
 			break;
 		case DCMD_OPTIONS_DIALOG:
 			mActivity.optionsFilter = "";
@@ -3118,7 +3126,7 @@ import com.google.gson.GsonBuilder;
 //			vl.add(arrS1);
 //			String[] arrS2 = {"val2", "hint2"};
 //			vl.add(arrS2);
-//			AskSomeValuesDialog dlgA = new AskSomeValuesDialog(mActivity, "asdf", "asdf 2", vl,null);
+//			AskSomeValuesDialog dlgA = new AskSomeValuesDialog(mActivity, "asd", "asd 2", vl,null);
 //			dlgA.show();
 //			ArrayList<String> sButtons = new ArrayList<String>();
 //			sButtons.add("adfad");
@@ -3128,7 +3136,6 @@ import com.google.gson.GsonBuilder;
 //			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, true, "title",
 //					sButtons,null);
 			//CloudAction.yndCheckCrFolder(mActivity);
-			//asdf
 			//final String sF = s;
 			toggleDayNightMode();
 //			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
@@ -3230,7 +3237,8 @@ import com.google.gson.GsonBuilder;
 			break;
 		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND:
 			log.i("Save current book to CLOUD_YND");
-			CloudAction.yndOpenBookDialog(mActivity, true);
+			FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
+			CloudAction.yndOpenBookDialog(mActivity, fi,true);
 			break;
 		//case DCMD_OPEN_BOOK_FROM_CLOUD:
 		//	log.i("Open book from CLOUD");
@@ -3243,7 +3251,7 @@ import com.google.gson.GsonBuilder;
 				mActivity.showToast(R.string.only_in_premium);
 				break;
 			}
-			CloudAction.yndOpenBookDialog(mActivity, false);
+			CloudAction.yndOpenBookDialog(mActivity, null,true);
 			break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
 			log.i("Open book from CLOUD_DBX");
@@ -3352,7 +3360,8 @@ import com.google.gson.GsonBuilder;
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
 						log.i("Save current book to YND");
-						CloudAction.yndOpenBookDialog(mActivity, true);
+						FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
+						CloudAction.yndOpenBookDialog(mActivity, fi,true);
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
 						log.i("Open book from CLOUD_YND");
@@ -3360,7 +3369,7 @@ import com.google.gson.GsonBuilder;
 							mActivity.showToast(R.string.only_in_premium);
 							return true;
 						}
-						CloudAction.yndOpenBookDialog(mActivity, false);
+						CloudAction.yndOpenBookDialog(mActivity, null,true);
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
 						log.i("Open book from CLOUD_DBX");
@@ -4034,14 +4043,14 @@ import com.google.gson.GsonBuilder;
 		return false;
 	}
 
-	public boolean loadDocument(final FileInfo fileInfo, final Runnable errorHandler)	{
-		log.v("loadDocument(" + fileInfo.getPathName() + ")");
-		if ( this.mBookInfo!=null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened ) {
-			log.d("trying to load already opened document");
-			mActivity.showReader();
-			drawPage();
-			return false;
-		}
+	private void postLoadTask(final FileInfo fileInfo, final Runnable errorHandler) {
+		Bookmark bmk = new Bookmark();
+		bmk.bookFile = StrUtils.getNonEmptyStr(fileInfo.getFilename(),true);
+		bmk.bookPath = StrUtils.getNonEmptyStr(fileInfo.getPathName(),true);
+		bmk.bookFileArc = StrUtils.getNonEmptyStr(fileInfo.getArchiveName(),true);
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		final String prettyJson = gson.toJson(bmk);
+		mActivity.saveCurPosFile(true, prettyJson);
 		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fileInfo, new History.BookInfoLoadedCallack() {
 			@Override
 			public void onBookInfoLoaded(final BookInfo bookInfo) {
@@ -4061,17 +4070,59 @@ import com.google.gson.GsonBuilder;
 				});
 			}
 		});
-		return true;
 	}
 
-	public boolean loadDocumentFromStream(final InputStream inputStream, final FileInfo fileInfo, final Runnable errorHandler) {
+	public boolean loadDocument(final FileInfo fileInfo, final Runnable errorHandler)	{
 		log.v("loadDocument(" + fileInfo.getPathName() + ")");
-		if (this.mBookInfo != null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened) {
+		if ( this.mBookInfo!=null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened ) {
 			log.d("trying to load already opened document");
 			mActivity.showReader();
 			drawPage();
 			return false;
 		}
+		boolean needAsk = false;
+		Bookmark bmk = getActivity().readCurPosFile(true);
+		if (bmk != null) {
+			if (
+					StrUtils.getNonEmptyStr(bmk.bookFile,true).equals(
+							StrUtils.getNonEmptyStr(fileInfo.getFilename(),true)) &&
+					StrUtils.getNonEmptyStr(bmk.bookPath,true).equals(
+							StrUtils.getNonEmptyStr(fileInfo.getPathName(),true)) &&
+					StrUtils.getNonEmptyStr(bmk.bookFileArc,true).equals(
+							StrUtils.getNonEmptyStr(fileInfo.getArchiveName(),true))
+			) {
+				needAsk = true;
+			}
+		}
+		if (needAsk) {
+			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile, new Runnable() {
+				@Override
+				public void run() {
+					postLoadTask(fileInfo, errorHandler);
+				}
+			}, new Runnable() {
+				@Override
+				public void run() {
+					mActivity.showRootWindow();
+					if (doc != null) {
+						String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
+						File f = new File(sFile);
+						if (f.exists()) f.delete();
+					}
+				}
+			});
+		} else postLoadTask(fileInfo, errorHandler);
+		return true;
+	}
+
+	private void postLoadTaskStream(final InputStream inputStream, final FileInfo fileInfo, final Runnable errorHandler) {
+		Bookmark bmk = new Bookmark();
+		bmk.bookFile = "stream";
+		bmk.bookPath = "stream";
+		bmk.bookFileArc = "stream";
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		final String prettyJson = gson.toJson(bmk);
+		mActivity.saveCurPosFile(true, prettyJson);
 		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fileInfo, new History.BookInfoLoadedCallack() {
 			@Override
 			public void onBookInfoLoaded(final BookInfo bookInfo) {
@@ -4091,6 +4142,45 @@ import com.google.gson.GsonBuilder;
 				});
 			}
 		});
+	}
+
+	public boolean loadDocumentFromStream(final InputStream inputStream, final FileInfo fileInfo, final Runnable errorHandler) {
+		log.v("loadDocument(" + fileInfo.getPathName() + ")");
+		if (this.mBookInfo != null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened) {
+			log.d("trying to load already opened document");
+			mActivity.showReader();
+			drawPage();
+			return false;
+		}
+		boolean needAsk = false;
+		Bookmark bmk = getActivity().readCurPosFile(true);
+		if (bmk != null) {
+			if (
+					StrUtils.getNonEmptyStr(bmk.bookFile,true).equals("stream") &&
+					StrUtils.getNonEmptyStr(bmk.bookPath,true).equals("stream") &&
+					StrUtils.getNonEmptyStr(bmk.bookFileArc,true).equals("stream")
+			) {
+				needAsk = true;
+			}
+		}
+		if (needAsk) {
+			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" (stream)", new Runnable() {
+				@Override
+				public void run() {
+					postLoadTaskStream(inputStream, fileInfo, errorHandler);
+				}
+			}, new Runnable() {
+				@Override
+				public void run() {
+					mActivity.showRootWindow();
+					if (doc != null) {
+						String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
+						File f = new File(sFile);
+						if (f.exists()) f.delete();
+					}
+				}
+			});
+		} else postLoadTaskStream(inputStream, fileInfo, errorHandler);
 		return true;
 	}
 
@@ -4187,7 +4277,7 @@ import com.google.gson.GsonBuilder;
 			}
 			if ( fi.isDirectory ) {
 				log.v("loadDocument() : is a directory, opening browser");
-				mActivity.showBrowser(fi);
+				mActivity.showBrowser(fi, "");
 				return true;
 			}
 		} else {
@@ -6328,7 +6418,7 @@ import com.google.gson.GsonBuilder;
 				updateLoadedBookInfo();
 				log.i("Document " + filename + " is loaded successfully");
 				if ( pos==null ) {
-					Bookmark bmk = getActivity().readCurPosFile();
+					Bookmark bmk = getActivity().readCurPosFile(false);
 					if (bmk!=null) {
 						boolean bSameBook=true;
 						if (!bmk.bookFile.equals(mBookInfo.getFileInfo().getFilename())) bSameBook=false;
@@ -6693,6 +6783,12 @@ import com.google.gson.GsonBuilder;
 			drawPage();
 			updateCurrentPositionStatus();
 			checkOpenBookStyles(false);
+			if (doc.getCurPage()>2) {
+				// for safe mode
+				String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
+				File f = new File(sFile);
+				if (f.exists()) f.delete();
+			}
 		}
 	}
 
@@ -6763,7 +6859,7 @@ import com.google.gson.GsonBuilder;
 													int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 													if (iSyncVariant > 0)
 														CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-																CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, true);
+																CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
 												}
 											}
 										}
@@ -6901,7 +6997,7 @@ import com.google.gson.GsonBuilder;
 				if (mBookInfo.getFileInfo().isArchive)
 				  bmk2.bookFileArc=mBookInfo.getFileInfo().arcname;
 				final String prettyJson = gson.toJson(bmk2);
-  			    getActivity().saveCurPosFile(prettyJson);
+  			    getActivity().saveCurPosFile(false, prettyJson);
 				Services.getHistory().updateRecentDir();
 				mActivity.getDB().saveBookInfo(mBookInfo);
 				mActivity.getDB().flush();

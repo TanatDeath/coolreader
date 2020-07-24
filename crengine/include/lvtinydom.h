@@ -334,6 +334,8 @@ public:
     void freeNode( lUInt32 addr );
     /// call to invalidate chunk if content is modified
     void modified( lUInt32 addr );
+    /// return true if some chunks have been allocated
+    bool hasChunks() { return _chunks.length() > 0; }
 #endif
     
     /// get or allocate space for rect data item
@@ -526,6 +528,7 @@ protected:
     bool loadNodeData();
     bool loadNodeData( lUInt16 type, ldomNode ** list, int nodecount );
 
+    bool hasRenderData() { return _rectStorage.hasChunks(); }
 
     bool openCacheFile();
 
@@ -2365,6 +2368,7 @@ private:
     bool _rendered;
     bool _just_rendered_from_cache;
     bool _toc_from_cache_valid;
+    lUInt32 _warnings_seen_bitmap;
     ldomXRangeList _selections;
 #endif
 
@@ -2492,6 +2496,8 @@ public:
 #endif
     /// saves document contents as XML to stream with specified encoding
     bool saveToStream( LVStreamRef stream, const char * codepage, bool treeLayout=false );
+    /// print a warning message (only once if warning_id provided, between 1 and 32)
+    void printWarning(const char * msg, int warning_id=0);
 #if BUILD_LITE!=1
     /// get default font reference
     font_ref_t getDefaultFont() { return _def_font; }

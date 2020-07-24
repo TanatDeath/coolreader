@@ -19,6 +19,7 @@ import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.PictureCameDialog;
+import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
@@ -57,7 +58,7 @@ public class CloudAction {
     public static final int YND_LIST_JSON_FILES_LASTPOS = 20111;
     public static final int YND_DOWNLOAD_FILE_TO_STRING = 20112;
     public static final int YND_DELETE_FILE_ASYNC = 20113;
-    public static final int YND_SAVE_CUR_BOOK = 20114;
+    public static final int YND_SAVE_BOOK = 20114;
     public static final int YND_SAVE_TO_FILE_GET_LINK_W_DIR = 20115;
     public static final String CLOUD_COMPLETE_LIST_FOLDER_RESULT = "ListFolderResult";
     public static final String CLOUD_COMPLETE_FULL_ACCOUNT = "FullAccount";
@@ -71,12 +72,13 @@ public class CloudAction {
     public static final String CLOUD_COMPLETE_LIST_JSON_FILES_LASTPOS = "ListJsonFilesLastpos";
     public static final String CLOUD_COMPLETE_DOWNLOAD_FILE_TO_STRING = "DownloadFileToString";
     public static final String CLOUD_COMPLETE_DELETE_FILE_ASYNC = "DeleteFileAsync";
-    public static final String CLOUD_COMPLETE_YND_SAVE_CUR_BOOK = "SaveCurBook";
+    public static final String CLOUD_COMPLETE_YND_SAVE_BOOK = "SaveBook";
 
     public int action; // action, that will be performed
     public String param; // param(s) passed to an action...
     public String param2; // param(s) passed to an action...
-    public String param3; // param(s) passed to an action...
+    //public String param3; // param(s) passed to an action...
+    public FileInfo fi;
     public String bookCRC; // Book's CRC
     public boolean mQuiet;
     public boolean mErrorQuiet;
@@ -182,8 +184,8 @@ public class CloudAction {
         }
     }
 
-    public static void onYNDListFolderResultThenOpenDlg(CoolReader cr, YNDListFiles lfr, String withSaveOption) {
-        OpenBookFromCloudDlg dlg = new OpenBookFromCloudDlg(cr, lfr, withSaveOption == "true");
+    public static void onYNDListFolderResultThenOpenDlg(CoolReader cr, YNDListFiles lfr, FileInfo bookToSave, String homeFolder) {
+        OpenBookFromCloudDlg dlg = new OpenBookFromCloudDlg(cr, lfr, bookToSave, homeFolder);
         dlg.show();
     }
 
@@ -232,7 +234,7 @@ public class CloudAction {
             BackgroundThread.instance().postGUI(new Runnable() {
                 @Override
                 public void run() {
-                    onYNDListFolderResultThenOpenDlg(crf, l, a.mCurAction.param3);
+                    onYNDListFolderResultThenOpenDlg(crf, l, a.mCurAction.fi, a.mCurAction.param);
                 }}, 200);
         }
         if ((CLOUD_COMPLETE_LIST_FOLDER_RESULT.equals(res))&&(a.mCurAction.action == CloudAction.YND_LIST_FOLDER_IN_DLG)) {
@@ -301,13 +303,18 @@ public class CloudAction {
                 }}, 200);
     }
 
-    public static void yndOpenBookDialog(final CoolReader cr, boolean withSaveOption) {
+    public static void yndOpenBookDialog(final CoolReader cr, FileInfo bookToSave, boolean fromHomeFolder) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (!YNDConfig.init(cr)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca1 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_THEN_OPEN_DLG, true);
-            ca1.param3 = Boolean.toString(withSaveOption);
+            ca1.param = "";
+            if (fromHomeFolder) {
+                Properties props = new Properties(cr.settings());
+                ca1.param = props.getProperty(Settings.PROP_CLOUD_YND_HOME_FOLDER, "");
+            }
+            ca1.fi = bookToSave;
             al.add(ca1);
             final YNDPerformAction a = new YNDPerformAction(cr, al, new YNDPerformAction.Callback() {
                 @Override
@@ -627,16 +634,17 @@ public class CloudAction {
         }
     }
 
-    public static void yndSaveCurBookThenLoadFolderContents(final CoolReader cr, final OpenBookFromCloudDlg dlg,
+    public static void yndSaveBookThenLoadFolderContents(final CoolReader cr, final FileInfo fi, final OpenBookFromCloudDlg dlg,
                                                             final String sFolder, final String sFindStr, boolean bQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (StrUtils.isEmptyStr(sFolder))
                 if (!YNDConfig.init(cr)) return;
-            if (cr.getReaderView()==null) return;
-            if (cr.getReaderView().getBookInfo()==null) return;
-            if (cr.getReaderView().getBookInfo().getFileInfo()==null) return;
-            FileInfo fi = cr.getReaderView().getBookInfo().getFileInfo();
+            if (fi==null) return;
+            //if (cr.getReaderView()==null) return;
+            //if (cr.getReaderView().getBookInfo()==null) return;
+            //if (cr.getReaderView().getBookInfo().getFileInfo()==null) return;
+            //FileInfo fi = cr.getReaderView().getBookInfo().getFileInfo();
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             String sFName = "";
             if (!StrUtils.isEmptyStr(fi.arcname)) sFName = fi.arcname;
@@ -646,7 +654,8 @@ public class CloudAction {
             ca.param = sFName;
             ca.param2 = sFolder;
             al.add(ca);
-            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_SAVE_CUR_BOOK, sFolder, sFindStr, bQuiet);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.YND_SAVE_BOOK, sFolder, sFindStr, bQuiet);
+            ca2.fi = fi;
             al.add(ca2);
             CloudAction ca3 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_IN_DLG, sFolder, sFindStr, true);
             al.add(ca3);

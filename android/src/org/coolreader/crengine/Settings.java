@@ -155,6 +155,7 @@ public interface Settings {
     public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
     public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
 	public static final String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
+	public static final String PROP_CLOUD_YND_HOME_FOLDER = "app.cloud.ynd.home.folder";
     public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
@@ -375,6 +376,7 @@ public interface Settings {
         PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_LONGTAP_CHANGE,
 		PROP_CLOUD_SYNC_VARIANT,
+		PROP_CLOUD_YND_HOME_FOLDER,
         PROP_SAVE_POS_TO_CLOUD_TIMEOUT,
 	    PROP_APP_SELECTION_ACTION,
         PROP_APP_SELECTION_ACTION_LONG,

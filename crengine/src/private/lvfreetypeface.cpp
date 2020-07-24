@@ -328,11 +328,9 @@ LVFont *LVFreeTypeFace::getFallbackFont(lUInt32 fallbackPassMask) {
             LVFontRef font;
             LVFontRef font_prev = _fallbackFont;
             for (int i = 1; i < count; i++) {
-                if (_faceName != fontMan->GetFallbackFontFace(i)) {
-                    font = fontMan->GetFallbackFont(_size, _weight, _italic, i);
-                    font_prev->setFallbackFont(font);
-                    font_prev = font;
-                }
+                font = fontMan->GetFallbackFont(_size, _weight, _italic, i);
+                font_prev->setFallbackFont(font);
+                font_prev = font;
             }
             // to loop fallback fonts chain
             font->setFallbackFont(_fallbackFont);

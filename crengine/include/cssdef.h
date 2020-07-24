@@ -104,7 +104,14 @@ enum css_text_align_t {
     css_ta_justify,
     css_ta_start, // = left if LTR, right if RTL
     css_ta_end,   // = right if LTR, left if LTR
-    css_ta_auto   // only accepted with text-align-last
+    // Next ones are only accepted with text-align-last
+    css_ta_auto,
+    css_ta_left_if_not_first,    // These non standard keywords allow text-align-last
+    css_ta_right_if_not_first,   // to not apply to a single line. The previous normal
+    css_ta_center_if_not_first,  // keywords apply to a single line (which is alone,
+    css_ta_justify_if_not_first, // so the last) according to the specs.
+    css_ta_start_if_not_first,
+    css_ta_end_if_not_first
 };
 
 /// vertical-align property values
@@ -260,14 +267,6 @@ enum css_background_repeat_value_t {
     css_background_r_inherit,
     css_background_r_none
 };
-enum css_background_attachment_value_t {
-    css_background_scroll,
-    css_background_fixed,
-    css_background_local,
-    css_background_a_initial,
-    css_background_a_inherit,
-    css_background_a_none
-};
 enum css_background_position_value_t {
     css_background_left_top,
     css_background_left_center,
@@ -330,9 +329,11 @@ enum css_direction_t {
 };
 
 enum css_generic_value_t {
-    css_generic_auto = -1,   // (css_val_unspecified, css_generic_auto), for "margin: auto"
-    css_generic_normal = -2, // (css_val_unspecified, css_generic_normal), for "line-height: normal"
-    css_generic_transparent = -3  // (css_val_unspecified, css_generic_transparent), for "color: transparent"
+    css_generic_auto = -1,        // (css_val_unspecified, css_generic_auto), for "margin: auto"
+    css_generic_normal = -2,      // (css_val_unspecified, css_generic_normal), for "line-height: normal"
+    css_generic_transparent = -3, // (css_val_unspecified, css_generic_transparent), for "color: transparent"
+    css_generic_contain = -4,     // (css_val_unspecified, css_generic_contain), for "background-size: contain"
+    css_generic_cover = -5        // (css_val_unspecified, css_generic_cover), for "background-size: cover"
 };
 
 // Non standard property for providing hints to crengine via style tweaks

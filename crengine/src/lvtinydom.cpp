@@ -84,10 +84,10 @@ int gDOMVersionRequested     = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.64"
+#define CACHE_FILE_FORMAT_VERSION "3.12.65"
 
 /// increment following value to force re-formatting of old book after load
-#define FORMATTING_VERSION_ID 0x0024
+#define FORMATTING_VERSION_ID 0x0025
 
 #ifndef DOC_DATA_COMPRESSION_LEVEL
 /// data compression level (0=no compression, 1=fast compressions, 3=normal compression)
@@ -3514,6 +3514,7 @@ ldomDocument::ldomDocument()
 , _rendered(false)
 , _just_rendered_from_cache(false)
 , _toc_from_cache_valid(false)
+, _warnings_seen_bitmap(0)
 #endif
 , lists(100)
 {
@@ -3976,7 +3977,7 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                         rm = erm_final;
                 }
             }
-            if ( (rm != erm_inline && rm != erm_runin) || node->isBoxingInlineBox()) {
+            if ( rm != erm_inline || node->isBoxingInlineBox()) {
                 doNewLineBeforeStartTag = true;
                 doNewLineAfterStartTag = true;
                 // doNewLineBeforeEndTag = false; // done by child elements
@@ -4114,7 +4115,6 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                 case erm_block:              *stream << "B";     break;
                 case erm_final:              *stream << "F";     break;
                 case erm_inline:             *stream << "i";     break;
-                case erm_runin:              *stream << "r";     break;
                 case erm_table:              *stream << "T";     break;
                 case erm_table_row_group:    *stream << "TRG";   break;
                 case erm_table_header_group: *stream << "THG";   break;
@@ -4170,6 +4170,16 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString16Collection
                 for ( int i=indentBaseLevel; i<level; i++ )
                     *stream << "  ";
             *stream << "</" << elemName << ">";
+            if ( WNEFLAG(TEXT_HYPHENATE) ) {
+                // Additional minor formatting tweaks for when this is going to be fed
+                // to some other renderer, which is usually when we request HYPHENATE.
+                if ( node->getStyle()->display == css_d_run_in ) {
+                    // For FB2 footnotes, add a space between the number and text,
+                    // as none might be present in the source. If there were some,
+                    // the other renderer will probably collapse them.
+                    *stream << " ";
+                }
+            }
         }
         if (doNewLineAfterEndTag)
             *stream << "\n";
@@ -4240,6 +4250,19 @@ bool ldomDocument::saveToStream( LVStreamRef stream, const char *, bool treeLayo
     *stream.get() << UnicodeToLocal(cs16(L"\xFEFF"));
     writeNode( stream.get(), getRootNode(), treeLayout );
     return true;
+}
+
+void ldomDocument::printWarning(const char * msg, int warning_id) {
+    // Provide a warning_id from 1 to 32 to have this warning emited only once
+    // Provide 0 to have it printed it every time
+    lUInt32 warning_bit = 0;
+    if ( warning_id > 0 && warning_id <= 32 ) {
+        warning_bit = 1 << (warning_id-1);
+    }
+    if ( !( warning_bit & _warnings_seen_bitmap) ) {
+        printf("CRE WARNING: %s\n", msg);
+        _warnings_seen_bitmap |= warning_bit;
+    }
 }
 
 ldomDocument::~ldomDocument()
@@ -4531,7 +4554,12 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
             printf("CRE: styles re-init needed after load, re-rendering\n");
             // We should clear RenderRectAccessor, that may have been used for
             // caching CSS checks results (i.e. :nth-child(), :last-of-type...)
-            getRootNode()->clearRenderDataRecursive();
+            if ( hasRenderData() ) {
+                // (We would crash in the following if no RenderRectAccessor has
+                // been created, which may happen if we're here not because of
+                // CSS checks but because of embedded fonts.)
+                getRootNode()->clearRenderDataRecursive();
+            }
         }
         CRLog::info("rendering context is changed - full render required...");
         // Clear LFormattedTextRef cache
@@ -4975,7 +5003,7 @@ static bool isInlineNode( ldomNode * node )
     //int d = node->getStyle()->display;
     //return ( d==css_d_inline || d==css_d_run_in );
     int m = node->getRendMethod();
-    return m==erm_inline || m==erm_runin;
+    return m == erm_inline;
 }
 
 static bool isFloatingNode( ldomNode * node )
@@ -5427,7 +5455,7 @@ static void detectChildTypes( ldomNode * parent, bool & hasBlockItems, bool & ha
             int m = node->getRendMethod();
             if ( d==css_d_none || m==erm_invisible )
                 continue;
-            if ( m==erm_inline || m==erm_runin) { //d==css_d_inline || d==css_d_run_in
+            if ( m==erm_inline ) { //d==css_d_inline || d==css_d_run_in
                 hasInline = true;
             } else {
                 hasBlockItems = true;
@@ -5795,7 +5823,7 @@ bool ldomNode::isEmbeddedBlockBoxingInlineBox(bool inline_box_checks_done) const
     if ( hasAttribute( attr_T ) ) { // T="EmbeddedBlock"
             // (no other possible value yet, no need to compare strings)
         int cm = getChildNode(0)->getRendMethod();
-        if ( cm == erm_inline || cm == erm_runin || cm == erm_invisible || cm == erm_killed )
+        if ( cm == erm_inline || cm == erm_invisible || cm == erm_killed )
             return false; // child has been reset to inline
         return true;
     }
@@ -5895,7 +5923,7 @@ void ldomNode::initNodeRendMethod()
                 if ( !child->isElement() ) // text node
                     continue;
                 int cm = child->getRendMethod();
-                if ( cm == erm_inline || cm == erm_runin ) {
+                if ( cm == erm_inline ) {
                     has_inline_nodes = true; // We won't be able to make it erm_block
                     continue;
                 }
@@ -5939,7 +5967,7 @@ void ldomNode::initNodeRendMethod()
                         if ( !child->isElement() ) // text node
                             continue;
                         int cm = child->getRendMethod();
-                        if ( cm == erm_inline || cm == erm_runin || cm == erm_invisible || cm == erm_killed )
+                        if ( cm == erm_inline || cm == erm_invisible || cm == erm_killed )
                             continue;
                         if ( !isNotBoxWrappingNode( child ) )
                             continue;
@@ -5993,7 +6021,7 @@ void ldomNode::initNodeRendMethod()
         // runin
         //CRLog::trace("switch all children elements of <%s> to inline", LCSTR(getNodeName()));
         recurseElements( resetRendMethodToInline );
-        setRendMethod(erm_runin);
+        setRendMethod(erm_inline);
     } else if ( d==css_d_list_item_legacy ) {
         // list item (no more used, obsolete rendering method)
         setRendMethod(erm_final);
@@ -6195,7 +6223,7 @@ void ldomNode::initNodeRendMethod()
                             inBetweenTextNode = prev;
                             prev = getChildNode(i-2);
                         }
-                        if ( prev->isElement() && prev->getRendMethod()==erm_runin ) {
+                        if ( prev->isElement() && prev->getStyle()->display == css_d_run_in ) {
                             bool do_autoboxing = true;
                             int run_in_idx = inBetweenTextNode ? i-2 : i-1;
                             int block_idx = i;
@@ -7352,7 +7380,7 @@ void ldomDocumentWriter::OnTagBody()
         _flags = _currNode->getFlags(); // _flags may have been updated (if white-space: pre)
         // And only after this we can add the <stylesheet> as a first child
         // element of this BODY node. It will not be displayed thanks to fb2def.h:
-        //   XS_TAG1D( stylesheet, true, css_d_none, css_ws_normal )
+        //   XS_TAG1D( stylesheet, true, css_d_none, css_ws_inherit )
         OnTagOpen(L"", L"stylesheet");
         OnTagBody();
         OnText(styleText.c_str(), styleText.length(), 0);
@@ -9835,6 +9863,10 @@ void ldomXPointerEx::initIndex()
     while ( p ) {
         m[_level] = p->getNodeIndex();
         _level++;
+        if ( _level == MAX_DOM_LEVEL ) {
+            getDocument()->printWarning("ldomXPointerEx level overflow (too many nested nodes)", 1);
+            break;
+        }
         p = p->getParentNode();
     }
     for ( int i=0; i<_level; i++ ) {
@@ -11651,7 +11683,6 @@ ldomNode * ldomXPointerEx::getThisBlockNode()
             return NULL;
         lvdom_element_render_method rm = node->getRendMethod();
         switch ( rm ) {
-        case erm_runin: // treat as separate block
         case erm_block:
         case erm_final:
         case erm_table:
@@ -12351,8 +12382,6 @@ public:
     {
 #if BUILD_LITE!=1
         ldomNode * elem = (ldomNode *)ptr->getNode();
-        if ( elem->getRendMethod() == erm_invisible )
-            return false;
         // Allow tweaking that with hints
         css_cr_hint_t hint = elem->getStyle()->cr_hint;
         if ( hint == css_cr_hint_text_selection_skip ) {
@@ -12366,51 +12395,28 @@ public:
             newBlock = true;
             return true;
         }
-        switch ( elem->getStyle()->display ) {
-        /*
-        case css_d_inherit:
-        case css_d_block:
-        case css_d_list_item:
-        case css_d_list_item_block:
-        case css_d_compact:
-        case css_d_marker:
-        case css_d_table:
-        case css_d_table_row_group:
-        case css_d_table_header_group:
-        case css_d_table_footer_group:
-        case css_d_table_row:
-        case css_d_table_column_group:
-        case css_d_table_column:
-        case css_d_table_cell:
-        case css_d_table_caption:
-        */
-        default:
-            newBlock = true;
-            return true;
-        case css_d_none:
+        lvdom_element_render_method rm = elem->getRendMethod();
+        if ( rm == erm_invisible )
             return false;
-        case css_d_inline:
-        case css_d_run_in:
-        case css_d_inline_block: // Make these behave as inline, in case they don't contain much
-        case css_d_inline_table: // (if they do, some inner block element will give newBlock=true)
-            newBlock = false;
+        if ( rm == erm_inline ) {
+            // Don't set newBlock if rendering method is erm_inline,
+            // no matter the original CSS display.
+            // (Don't reset any previously set and not consumed newBlock)
             return true;
         }
-        switch ( elem->getStyle()->display ) {
-            case css_d_none:
-                return false;
-            case css_d_inherit:
-            case css_d_ruby:
-            case css_d_run_in:
-            case css_d_inline:
-            case css_d_inline_block: // Make these behave as inline, in case they don't contain much
-            case css_d_inline_table: // (if they do, some inner block element will give newBlock=true)
-                newBlock = false;
-                return true;
-            default:
-                newBlock = true;
-                return true;
+        // For other rendering methods (that would bring newBlock=true),
+        // look at the initial CSS display, as we might have boxed some
+        // inline-like elements for rendering purpose.
+        css_display_t d = elem->getStyle()->display;
+        if ( d <= css_d_inline || d == css_d_inline_block || d == css_d_inline_table ) {
+            // inline, ruby; consider inline-block/-table as inline, in case
+            // they don't contain much (if they do, some inner block element
+            // will set newBlock=true).
+            return true;
         }
+        // Otherwise, it's a block like node, and we want a \n before the next text
+        newBlock = true;
+        return true;
 #else
         newBlock = true;
         return true;
@@ -15787,15 +15793,12 @@ void ldomNode::clearRenderDataRecursive()
     if ( !isElement() )
         return;
     lvdomElementFormatRec rec;
-    ldomDataStorageManager& rectStorage = getDocument()->_rectStorage;
-    if (rectStorage.getUncompressedSize() > 0) {
-        rectStorage.setRendRectData(_handle._dataIndex, &rec);
-        int cnt = getChildCount();
-        for (int i=0; i<cnt; i++) {
-            ldomNode * child = getChildNode( i );
-            if ( child->isElement() ) {
-                child->clearRenderDataRecursive();
-            }
+    getDocument()->_rectStorage.setRendRectData(_handle._dataIndex, &rec);
+    int cnt = getChildCount();
+    for (int i=0; i<cnt; i++) {
+        ldomNode * child = getChildNode( i );
+        if ( child->isElement() ) {
+            child->clearRenderDataRecursive();
         }
     }
 }

@@ -701,7 +701,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			waitForCRDBService(new Runnable() {
 				@Override
 				public void run() {
-					showDirectory(dir);
+					showDirectory(dir, "");
 				}
 			});
 			return true;
@@ -716,7 +716,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			waitForCRDBService(new Runnable() {
 				@Override
 				public void run() {
-					showDirectory(dir);
+					showDirectory(dir, "");
 				}
 			});
 			return true;
@@ -731,7 +731,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			waitForCRDBService(new Runnable() {
 				@Override
 				public void run() {
-					showDirectory(dir);
+					showDirectory(dir, "");
 				}
 			});
 			return true;
@@ -746,7 +746,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			waitForCRDBService(new Runnable() {
 				@Override
 				public void run() {
-					showDirectory(dir);
+					showDirectory(dir, "");
 				}
 			});
 			return true;
@@ -1644,13 +1644,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public static final String OPEN_DIR_PARAM = "DIR_TO_OPEN";
-	public void showBrowser(final FileInfo dir) {
+	public void showBrowser(final FileInfo dir, String addFilter) {
 		String pathname = "";
 		if (dir != null) pathname = dir.pathname;
 		runInBrowser(new Runnable() {
 			@Override
 			public void run() {
-				mBrowser.showDirectory(dir, null);
+				mBrowser.showDirectory(dir, null, addFilter);
 			}
 		}, FileInfo.RESCAN_LIBRARY_TAG.equals(pathname));
 	}
@@ -1659,7 +1659,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		runInBrowser(new Runnable() {
 			@Override
 			public void run() {
-				mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null);
+				mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, "");
 			}
 		}, FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
 	}
@@ -1684,17 +1684,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}, false);
 	}
 
-	public void showDirectory(FileInfo path) {
+	public void showDirectory(FileInfo path, String addFilter) {
 		log.d("Activities.showDirectory(" + path + ") is called");
-		showBrowser(path);
+		showBrowser(path, addFilter);
 	}
 
-	public void showCatalog(final FileInfo path) {
+	public void showCatalog(final FileInfo path, String addFilter) {
 		log.d("Activities.showCatalog(" + path + ") is called");
 		runInBrowser(new Runnable() {
 			@Override
 			public void run() {
-				mBrowser.showDirectory(path, null);
+				mBrowser.showDirectory(path, null, addFilter);
 			}
 		}, false);
 	}
@@ -2169,7 +2169,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								if (bi2 != null)
 									bi2.getFileInfo().setFileProperties(book1);
 								if (openBrowser)
-									showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null);
+									showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null, "");
 							}
 						});
 					}
@@ -2177,7 +2177,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					@Override
 					public void run() {
 						if (openBrowser)
-							showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null);
+							showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null, "");
 					}
 				});
 			}
@@ -2428,7 +2428,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 										else file.lang_from = results.get(0);
 									}
 									if (results.size() >= 2) {
-										if (bied != null) bied.edLangTo.setText(results.get(0));
+										if (bied != null) bied.edLangTo.setText(results.get(1));
 										else file.lang_to = results.get(1);
 									}
 									if (bied == null) {
@@ -2676,8 +2676,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				FileInfo fi = bi.getFileInfo();
 				itemsBook.add(new BookInfoEntry("section","section.book","section"));
 				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null) {
-					if (!StrUtils.isEmptyStr(fi.getAuthors())) itemsBook.add(new BookInfoEntry("book.authors",
-							fi.getAuthors().replaceAll("\\|","; "),"text"));
+					if (!StrUtils.isEmptyStr(fi.getAuthors())) {
+						itemsBook.add(new BookInfoEntry("book.authors",
+								fi.getAuthors().replaceAll("\\|", "; "), "text"));
+						String[] list = fi.getAuthors().split("\\|");
+						if (!StrUtils.isEmptyStr(fi.series)) {
+							itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_authors), "series_authors"));
+							itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_books), "series_books"));
+						}
+						for (String s: list) {
+							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_series), "author_series"));
+							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_books), "author_books"));
+						}
+					}
 					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add(new BookInfoEntry("book.title",fi.title,"text"));
 					if ( fi.series!=null ) {
 						String s = fi.series;
@@ -3126,18 +3137,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //		}
 //	}
 
-	public void saveCurPosFile(String json)
+	public void saveCurPosFile(boolean is0, String json)
 	{
 		log.d("Starting save cur_pos.json");
-		Utils.saveStringToFileSafe(json,getSettingsFile(0).getParent() + "/cur_pos.json");
+		Utils.saveStringToFileSafe(json,getSettingsFile(0).getParent() + "/cur_pos" +
+				(is0? "0":"")+".json");
 	}
 
-	public Bookmark readCurPosFile()
+	public Bookmark readCurPosFile(boolean is0)
 	{
 		log.d("Reading cur_pos.json");
-		String cur_pos = Utils.readFileToString(getSettingsFile(0).getParent() + "/cur_pos.json");
+		String cur_pos = Utils.readFileToString(getSettingsFile(0).getParent() + "/cur_pos"+(is0? "0":"")+".json");
 		try {
-			final File fJson = new File(getSettingsFile(0).getParent() + "/cur_pos.json");
+			final File fJson = new File(getSettingsFile(0).getParent() + "/cur_pos"+(is0? "0":"")+".json");
 			if (!fJson.exists()) return null;
 			return new Gson().fromJson(cur_pos, Bookmark.class);
 		} catch (Exception e) {

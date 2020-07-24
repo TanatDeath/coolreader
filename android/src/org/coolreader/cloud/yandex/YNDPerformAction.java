@@ -68,7 +68,7 @@ public class YNDPerformAction {
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES_LASTPOS) YndListJsonFiles(mCurAction);
                 if (mCurAction.action == CloudAction.YND_DOWNLOAD_FILE_TO_STRING) YndDownloadFileToString(mCurAction);
                 if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK_W_DIR) YndSaveToFileGetLink(mCurAction, "");
-                if (mCurAction.action == CloudAction.YND_SAVE_CUR_BOOK) YndSaveCurBook(mCurAction);
+                if (mCurAction.action == CloudAction.YND_SAVE_BOOK) YndSaveBook(mCurAction);
             } else Log.i("YND", "End of cloud operation");
         } catch (Exception e) {
             mException = e;
@@ -112,11 +112,12 @@ public class YNDPerformAction {
         });
     }
 
-    public void YndSaveCurBook(final CloudAction ca) throws IOException {
-        if (mCoolReader.getReaderView()==null) return;
-        if (mCoolReader.getReaderView().getBookInfo()==null) return;
-        if (mCoolReader.getReaderView().getBookInfo().getFileInfo()==null) return;
-        FileInfo fi = mCoolReader.getReaderView().getBookInfo().getFileInfo();
+    public void YndSaveBook(final CloudAction ca) throws IOException {
+        //if (mCoolReader.getReaderView()==null) return;
+        //if (mCoolReader.getReaderView().getBookInfo()==null) return;
+        //if (mCoolReader.getReaderView().getBookInfo().getFileInfo()==null) return;
+        if (ca.fi==null) return;
+        FileInfo fi = ca.fi;
         String sFName = "";
         if (!StrUtils.isEmptyStr(fi.arcname)) sFName = fi.arcname;
             else sFName = fi.pathname;
@@ -151,7 +152,7 @@ public class YNDPerformAction {
                         }, 200);
                     }
                 });
-                mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_YND_SAVE_CUR_BOOK, null);
+                mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_YND_SAVE_BOOK, null);
             }
 
             public void onFailure(Call call, IOException e) {

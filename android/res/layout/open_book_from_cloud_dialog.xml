@@ -121,14 +121,30 @@
             android:checked="false"
             android:layout_weight="1"
             android:text="@string/dlg_folder_drive" />
-        <Button
-            android:id="@+id/btn_save_current_book_to_cloud_ynd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save_current_book_to_cloud_ynd2"
-        />
-
     </RadioGroup>
+    <LinearLayout
+            android:id="@+id/ll_save_book"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+        <Button
+                android:id="@+id/btn_save_book_to_cloud_ynd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/save_current_book_to_cloud_ynd3"
+                />
+        <TextView
+                android:id="@+id/lbl_save_book"
+                style="@style/TextAppearance.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:layout_marginLeft="3dp"
+                android:textColor="?attr/colorIcon"
+                android:text="_" />
+    </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/layout_clear_hist"
         android:orientation="horizontal"

@@ -427,12 +427,12 @@ public class CRDBService extends Service {
     	void onBooksFound(ArrayList<FileInfo> fileList);
     }
     
-	public void loadAuthorsList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
+	public void loadAuthorsList(FileInfo parent, String filterSeries, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent); 
 		execTask(new Task("loadAuthorsList") {
 			@Override
 			public void work() {
-				mainDB.loadAuthorsList(p);
+				mainDB.loadAuthorsList(p, filterSeries);
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
@@ -459,12 +459,12 @@ public class CRDBService extends Service {
 		});
 	}
 
-	public void loadSeriesList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
+	public void loadSeriesList(FileInfo parent, String filterAuthor, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent); 
 		execTask(new Task("loadSeriesList") {
 			@Override
 			public void work() {
-				mainDB.loadSeriesList(p);
+				mainDB.loadSeriesList(p, filterAuthor);
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
@@ -930,16 +930,16 @@ public class CRDBService extends Service {
     		getService().removeOPDSCatalog(id);
     	}
 
-    	public void loadAuthorsList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
-    		getService().loadAuthorsList(parent, callback, new Handler());
+    	public void loadAuthorsList(FileInfo parent, String filterSeries, final ItemGroupsLoadingCallback callback) {
+    		getService().loadAuthorsList(parent, filterSeries, callback, new Handler());
     	}
 
 		public void loadGenresList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
 			getService().loadGenresList(parent, callback, new Handler());
 		}
 
-    	public void loadSeriesList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
-    		getService().loadSeriesList(parent, callback, new Handler());
+    	public void loadSeriesList(FileInfo parent, String filterAuthor, final ItemGroupsLoadingCallback callback) {
+    		getService().loadSeriesList(parent, filterAuthor, callback, new Handler());
     	}
 
         public void loadByDateList(FileInfo parent, final String field, final ItemGroupsLoadingCallback callback) {
