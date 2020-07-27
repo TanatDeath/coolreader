@@ -673,6 +673,12 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 					public void run() {
 						if (Services.getHistory() != null && mActivity.getDB() != null) {
 							Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
+
+								@Override
+								public void onRecentBooksListLoadBegin() {
+
+								}
+
 								@Override
 								public void onRecentBooksListLoaded(ArrayList<BookInfo> bookList) {
 									if (PictureCameDialog.this.picReceived.book == null)

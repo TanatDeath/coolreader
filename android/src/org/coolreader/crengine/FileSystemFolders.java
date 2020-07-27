@@ -15,7 +15,14 @@ import static org.coolreader.db.CRDBService.FileInfoLoadingCallback;
  * Manages all content of the 'Browse file system' shelf
  */
 public class FileSystemFolders extends FileInfoChangeSource {
+
     private static final FileInfoLoadingCallback NOOP = new FileInfoLoadingCallback(){
+
+        @Override
+        public void onFileInfoListLoadBegin(String prefix) {
+
+        }
+
         @Override
         public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
 
@@ -89,6 +96,12 @@ public class FileSystemFolders extends FileInfoChangeSource {
 
     public void addFavoriteFolder(final CRDBService.LocalBinder binder, final FileInfo folder){
         loadFavoriteFoldersAndDo(binder, new FileInfoLoadingCallback(){
+
+            @Override
+            public void onFileInfoListLoadBegin(String prefix) {
+
+            }
+
             @Override
             public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                 if(findFavoriteFolder(folder) != -1)
@@ -110,6 +123,12 @@ public class FileSystemFolders extends FileInfoChangeSource {
 
     public void moveFavoriteFolder(final CRDBService.LocalBinder binder, final FileInfo folder, final boolean left){
         loadFavoriteFoldersAndDo(binder, new FileInfoLoadingCallback(){
+
+            @Override
+            public void onFileInfoListLoadBegin(String prefix) {
+
+            }
+
             @Override
             public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                 int folderIndex = findFavoriteFolder(folder);
@@ -139,6 +158,12 @@ public class FileSystemFolders extends FileInfoChangeSource {
 
     public void removeFavoriteFolder(final CRDBService.LocalBinder binder, final FileInfo folder){
         loadFavoriteFoldersAndDo(binder, new FileInfoLoadingCallback(){
+
+            @Override
+            public void onFileInfoListLoadBegin(String prefix) {
+
+            }
+
             @Override
             public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                 int folderIndex = findFavoriteFolder(folder);
@@ -155,6 +180,12 @@ public class FileSystemFolders extends FileInfoChangeSource {
     private void loadFavoriteFoldersAndDo(final CRDBService.LocalBinder binder, final FileInfoLoadingCallback callback) {
         if(favoriteFolders == null) {
             binder.loadFavoriteFolders(new FileInfoLoadingCallback() {
+
+                @Override
+                public void onFileInfoListLoadBegin(String prefix) {
+
+                }
+
                 @Override
                 public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
                     favoriteFolders = new ArrayList<FileInfo>(list);

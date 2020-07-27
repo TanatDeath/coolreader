@@ -22,6 +22,8 @@ public class FileInfo {
 	public final static String ROOT_DIR_TAG = "@root";
 	public final static String OPDS_LIST_TAG = "@opds";
 	public final static String OPDS_DIR_PREFIX = "@opds:";
+	public final static String LOADING_STUB_PREFIX = "@loadingstub";
+	public final static String NOT_FOUND_STUB_PREFIX = "@notfoundstub";
 	public final static String ONLINE_CATALOG_PLUGIN_PREFIX = "@plugin:";
 	public final static String AUTHORS_TAG = "@authorsRoot";
 	public final static String AUTHOR_GROUP_PREFIX = "@authorGroup:";
@@ -566,6 +568,16 @@ public class FileInfo {
 	public boolean isSpecialDir()
 	{
 		return pathname!=null && pathname.startsWith("@");
+	}
+
+	public boolean isLoadingStub()
+	{
+		return pathname!=null && pathname.startsWith(LOADING_STUB_PREFIX);
+	}
+
+	public boolean isNotFoundStub()
+	{
+		return pathname!=null && pathname.startsWith(NOT_FOUND_STUB_PREFIX);
 	}
 	
 	public boolean isOnlineCatalogPluginDir()

@@ -408,14 +408,17 @@ public class CRDBService extends Service {
     }
 
     public interface FileInfoLoadingCallback {
+		void onFileInfoListLoadBegin(String prefix);
     	void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix);
     }
 
 	public interface FileInfo1LoadingCallback {
+		void onFileInfoListLoadBegin();
 		void onFileInfoLoaded(FileInfo fi);
 	}
     
     public interface RecentBooksLoadingCallback {
+		void onRecentBooksListLoadBegin();
     	void onRecentBooksListLoaded(ArrayList<BookInfo> bookList);
     }
     
@@ -424,6 +427,7 @@ public class CRDBService extends Service {
     }
     
     public interface BookSearchCallback {
+		void onBooksSearchBegin();
     	void onBooksFound(ArrayList<FileInfo> fileList);
     }
     
@@ -507,12 +511,12 @@ public class CRDBService extends Service {
 		});
 	}
 
-	public void findAuthorBooks(final long authorId, final FileInfoLoadingCallback callback, final Handler handler) {
+	public void findAuthorBooks(final long authorId, final String addFilter, final FileInfoLoadingCallback callback, final Handler handler) {
 		execTask(new Task("findAuthorBooks") {
 			@Override
 			public void work() {
 				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-				mainDB.findAuthorBooks(list, authorId);
+				mainDB.findAuthorBooks(list, authorId, addFilter);
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
@@ -539,12 +543,12 @@ public class CRDBService extends Service {
 		});
 	}
 	
-	public void findSeriesBooks(final long seriesId, final FileInfoLoadingCallback callback, final Handler handler) {
+	public void findSeriesBooks(final long seriesId, final String addFilter, final FileInfoLoadingCallback callback, final Handler handler) {
 		execTask(new Task("findSeriesBooks") {
 			@Override
 			public void work() {
 				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-				mainDB.findSeriesBooks(list, seriesId);
+				mainDB.findSeriesBooks(list, seriesId, addFilter);
 				sendTask(handler, new Runnable() {
 					@Override
 					public void run() {
@@ -641,6 +645,7 @@ public class CRDBService extends Service {
 		execTask(new Task("findByPatterns") {
 			@Override
 			public void work() {
+				callback.onBooksSearchBegin();
 				final ArrayList<FileInfo> list = mainDB.findByPatterns(maxCount, author, title, series, filename);
 				sendTask(handler, new Runnable() {
 					@Override
@@ -950,16 +955,16 @@ public class CRDBService extends Service {
     		getService().loadTitleList(parent, callback, new Handler());
     	}
 
-    	public void loadAuthorBooks(long authorId, FileInfoLoadingCallback callback) {
-    		getService().findAuthorBooks(authorId, callback, new Handler());
+    	public void loadAuthorBooks(long authorId, String addFilter, FileInfoLoadingCallback callback) {
+    		getService().findAuthorBooks(authorId, addFilter, callback, new Handler());
     	}
 
 		public void loadGenreBooks(long genreId, FileInfoLoadingCallback callback) {
 			getService().findGenreBooks(genreId, callback, new Handler());
 		}
     	
-    	public void loadSeriesBooks(long seriesId, FileInfoLoadingCallback callback) {
-    		getService().findSeriesBooks(seriesId, callback, new Handler());
+    	public void loadSeriesBooks(long seriesId, String addFilter, FileInfoLoadingCallback callback) {
+    		getService().findSeriesBooks(seriesId, addFilter, callback, new Handler());
     	}
 
 		public void loadByDateBooks(long bookdateId, final String field, FileInfoLoadingCallback callback) {

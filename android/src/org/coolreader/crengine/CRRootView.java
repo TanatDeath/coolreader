@@ -355,6 +355,12 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					public void run() {
 						if (Services.getHistory() != null && mActivity.getDB() != null)
 							Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
+
+								@Override
+								public void onRecentBooksListLoadBegin() {
+
+								}
+
 								@Override
 								public void onRecentBooksListLoaded(ArrayList<BookInfo> bookList) {
 										updateCurrentBook(bookList != null && bookList.size() > 0 ? bookList.get(0) : null);

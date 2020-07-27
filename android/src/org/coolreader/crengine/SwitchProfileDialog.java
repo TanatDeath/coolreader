@@ -119,7 +119,9 @@ import java.util.ArrayList;
 				SwitchProfileDialog.this.dismiss();
 			}
 		});
-		mListView.setAdapter(new ProfileListAdapter());
+		ProfileListAdapter pla = new ProfileListAdapter();
+		mListView.setAdapter(pla);
+		pla.notifyDataSetChanged();
 	}
 
 	class ProfileListAdapter extends BaseListAdapter {

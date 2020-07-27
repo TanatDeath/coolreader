@@ -59,6 +59,10 @@ public class TranslationDirectionDialog extends BaseDialog {
 
 	public static final Logger log = L.create("transldir");
 
+	public static int FOR_COMMON = 0;
+	public static int FOR_YND = 1;
+	public static int FOR_LINGVO = 2;
+
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
 	private FileInfo fInfo;
@@ -91,7 +95,9 @@ public class TranslationDirectionDialog extends BaseDialog {
 					(StrUtils.isEmptyStr(filter))) found = true;
 				if (found) mTranslFiltered.add(arrS);
 			}
-			mList.setAdapter(new TranslListAdapter());
+			TranslListAdapter tla = new TranslListAdapter();
+			mList.setAdapter(tla);
+			tla.notifyDataSetChanged();
 		}
 	}
 
@@ -303,7 +309,81 @@ public class TranslationDirectionDialog extends BaseDialog {
 		}
 	}
 
-	public TranslationDirectionDialog(CoolReader activity, String sTitle, String sSomeText,
+	public void yndButtonClick() {
+		mTranslFiltered.clear();
+		mTransl.clear();
+		yndLangs.clear();
+		listType = 1;
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.YND_DIC_GETLANGS).newBuilder();
+		urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
+		urlBuilder.addQueryParameter("ui", "en");
+		String url = urlBuilder.build().toString();
+		Request request = new Request.Builder()
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		final CoolReader crf = mCoolReader;
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				Document docJsoup = Jsoup.parse(sBody, Dictionaries.YND_DIC_GETLANGS);
+				Elements dirs = docJsoup.select("Langs > dirs > string");
+				Elements langs = docJsoup.select("Langs > langs > item");
+				for (Element el: dirs) {
+					mTransl.add(new String[]{el.text()});
+					mTranslFiltered.add(new String[]{el.text()});
+				}
+				for (Element el: langs) {
+					yndLangs.put(el.attr("key"),el.attr("value"));
+				}
+				BackgroundThread.instance().postBackground(new Runnable() {
+					@Override
+					public void run() {
+						BackgroundThread.instance().postGUI(new Runnable() {
+							@Override
+							public void run() {
+								TranslListAdapter tla = new TranslListAdapter();
+								mList.setAdapter(tla);
+								tla.notifyDataSetChanged();
+							}
+						}, 100);
+					}
+				});
+			}
+
+			public void onFailure(Call call, IOException e) {
+				crf.showToast(e.getMessage());
+			}
+		});
+	}
+
+	public void lingvoButtonClick() {
+		mTranslFiltered.clear();
+		mTransl.clear();
+		listType = 2;
+		try {
+			InputStream is = mCoolReader.getResources().openRawResource(R.raw.lang_codes);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+			String str = "";
+			while ((str = reader.readLine()) != null) {
+				String[] arrS = str.split("~");
+				if (arrS.length>0)
+					if (!arrS[0].equals("Locale")) {
+						mTransl.add(arrS);
+						mTranslFiltered.add(arrS);
+					}
+			}
+			is.close();
+		} catch (Exception e) {
+			log.e("load lang_codes file", e);
+		}
+		TranslListAdapter tla = new TranslListAdapter();
+		mList.setAdapter(tla);
+		tla.notifyDataSetChanged();
+	}
+
+	public TranslationDirectionDialog(CoolReader activity, String sTitle, String sSomeText, int iType,
 									  ArrayList<String[]> askValues, ValuesEnteredCallback callback)
 	{
 		super("TranslationDirectionDialog", activity, sTitle, true, false);
@@ -438,50 +518,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 		yndButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mTranslFiltered.clear();
-				mTransl.clear();
-				yndLangs.clear();
-				listType = 1;
-				HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.YND_DIC_GETLANGS).newBuilder();
-				urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
-				urlBuilder.addQueryParameter("ui", "en");
-				String url = urlBuilder.build().toString();
-				Request request = new Request.Builder()
-						.url(url)
-						.build();
-				Call call = client.newCall(request);
-				final CoolReader crf = mCoolReader;
-				call.enqueue(new okhttp3.Callback() {
-					public void onResponse(Call call, Response response)
-							throws IOException {
-						String sBody = response.body().string();
-						Document docJsoup = Jsoup.parse(sBody, Dictionaries.YND_DIC_GETLANGS);
-						Elements dirs = docJsoup.select("Langs > dirs > string");
-						Elements langs = docJsoup.select("Langs > langs > item");
-						for (Element el: dirs) {
-							mTransl.add(new String[]{el.text()});
-							mTranslFiltered.add(new String[]{el.text()});
-						}
-						for (Element el: langs) {
-							yndLangs.put(el.attr("key"),el.attr("value"));
-						}
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										mList.setAdapter(new TranslListAdapter());
-									}
-								}, 100);
-							}
-						});
-					}
-
-					public void onFailure(Call call, IOException e) {
-						crf.showToast(e.getMessage());
-					}
-				});
+				yndButtonClick();
 			}
 		});
 		Button lingvoButton = new Button(mCoolReader);
@@ -493,32 +530,25 @@ public class TranslationDirectionDialog extends BaseDialog {
 		lingvoButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mTranslFiltered.clear();
-				mTransl.clear();
-				listType = 2;
-				try {
-					InputStream is = mCoolReader.getResources().openRawResource(R.raw.lang_codes);
-					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-					String str = "";
-					while ((str = reader.readLine()) != null) {
-						String[] arrS = str.split("~");
-						if (arrS.length>0)
-							if (!arrS[0].equals("Locale")) {
-								mTransl.add(arrS);
-								mTranslFiltered.add(arrS);
-							}
-					}
-					is.close();
-				} catch (Exception e) {
-					log.e("load lang_codes file", e);
-				}
-				mList.setAdapter(new TranslListAdapter());
+				lingvoButtonClick();
 			}
 		});
 		tl.addView(ll);
 		mList = new TranslList(activity, false);
 		tl.addView(mList);
 		setView( view );
+		BackgroundThread.instance().postBackground(new Runnable() {
+			@Override
+			public void run() {
+				BackgroundThread.instance().postGUI(new Runnable() {
+					@Override
+					public void run() {
+						if (iType == FOR_YND) yndButtonClick();
+						if (iType == FOR_LINGVO) lingvoButtonClick();
+					}
+				}, 500);
+			}
+		});
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.CoverpageManager.CoverpageBitmapReadyListener;
+import org.coolreader.dic.TranslationDirectionDialog;
 
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -635,7 +636,7 @@ public class BookInfoEditDialog extends BaseDialog {
 						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 					}
 					if (dfi != null) {
-						mActivity.editBookTransl(dfi, fi, langf, lang, "", BookInfoEditDialog.this);
+						mActivity.editBookTransl(dfi, fi, langf, lang, "", BookInfoEditDialog.this, TranslationDirectionDialog.FOR_COMMON);
 					}
 				};
 			}

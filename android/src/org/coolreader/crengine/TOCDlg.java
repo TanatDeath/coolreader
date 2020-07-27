@@ -79,7 +79,7 @@ public class TOCDlg extends BaseDialog {
 	
 	private void refreshList()
 	{
-		mListView.setAdapter(new BaseAdapter() {
+		BaseAdapter ba = new BaseAdapter() {
 			public boolean areAllItemsEnabled() {
 				return true;
 			}
@@ -183,7 +183,9 @@ public class TOCDlg extends BaseDialog {
 			public void unregisterDataSetObserver(DataSetObserver observer) {
 				observers.remove(observer);
 			}
-		});
+		};
+		mListView.setAdapter(ba);
+		ba.notifyDataSetChanged();
 	}
 
 	public TOCDlg(BaseActivity coolReader, ReaderView readerView, TOCItem toc, int currentPage )

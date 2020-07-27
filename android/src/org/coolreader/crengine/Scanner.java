@@ -255,6 +255,12 @@ public class Scanner extends FileInfoChangeSource {
 
 		// load book infos for files
 		db.loadFileInfos(pathNames, new CRDBService.FileInfoLoadingCallback() {
+
+			@Override
+			public void onFileInfoListLoadBegin(String prefix) {
+
+			}
+
 			@Override
 			public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
 				log.v("onFileInfoListLoaded");

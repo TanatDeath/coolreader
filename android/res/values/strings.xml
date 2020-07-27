@@ -1206,4 +1206,6 @@
     <string name="mi_folder_series_books">All series\' books</string>
     <string name="context_menu_author_folder">Authors folder</string>
     <string name="context_menu_series_folder">Series folder</string>
+    <string name="loading_stub">Loading ...</string>
+    <string name="search_not_found">Books were not found</string>
 </resources>

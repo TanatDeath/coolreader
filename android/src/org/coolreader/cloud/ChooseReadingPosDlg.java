@@ -317,7 +317,9 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			};
 			Collections.sort(mReadingPosList, compareByDate);
 		}
-		mList.setAdapter(new ConfFileAdapter());
+		ConfFileAdapter cfa = new ConfFileAdapter();
+		mList.setAdapter(cfa);
+		cfa.notifyDataSetChanged();
 	}
 
 	public void setButtonsState() {

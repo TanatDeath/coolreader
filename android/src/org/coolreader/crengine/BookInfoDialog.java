@@ -9,6 +9,7 @@ import java.util.Map;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.dic.TranslationDirectionDialog;
 
 import android.app.SearchManager;
 import android.content.Intent;
@@ -330,7 +331,7 @@ public class BookInfoDialog extends BaseDialog {
 						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 					}
 					if (dfi != null) {
-						cr.editBookTransl(dfi, fi, langf, lang, "", null);
+						cr.editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
 					}
 					dismiss();
 				}
@@ -381,7 +382,81 @@ public class BookInfoDialog extends BaseDialog {
 				valueView.setLinkTextColor(colorIcon);
 				valueView.setTextColor(colorIcon);
 			}
-		}
+		} else
+		if (typ.startsWith("series_authors")) {
+			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			valueView.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					String text = typ.replace("series_authors:", "").trim();
+					if (!StrUtils.isEmptyStr(text)) {
+						FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = FileInfo.AUTHORS_TAG;
+						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_author));
+						dir.isListed = true;
+						dir.isScanned = true;
+						((CoolReader)mCoolReader).showDirectory(dir, "series:"+text);
+						dismiss();
+					}
+				}
+			});
+		} else
+		if (typ.startsWith("series_books")) {
+			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			valueView.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					String text = typ.replace("series_books:", "").trim();
+					if (!StrUtils.isEmptyStr(text)) {
+						FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = FileInfo.SERIES_PREFIX;
+						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_series));
+						dir.isListed = true;
+						dir.isScanned = true;
+						dir.id = 0L;
+						((CoolReader)mCoolReader).showDirectory(dir, "series:"+text);
+						dismiss();
+					}
+				}
+			});
+		} else
+		if (typ.startsWith("author_series")) {
+			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			valueView.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					String text = typ.replace("author_series:", "").trim();
+					if (!StrUtils.isEmptyStr(text)) {
+						FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = FileInfo.SERIES_TAG;
+						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_series));
+						dir.isListed = true;
+						dir.isScanned = true;
+						((CoolReader)mCoolReader).showDirectory(dir, "author:"+text);
+						dismiss();
+					}
+				}
+			});
+		} else
+		if (typ.startsWith("author_books")) {
+			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			valueView.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					String text = typ.replace("author_books:", "").trim();
+					if (!StrUtils.isEmptyStr(text)) {
+						FileInfo dir = new FileInfo();
+						dir.isDirectory = true;
+						dir.pathname = FileInfo.AUTHOR_PREFIX;
+						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_author));
+						dir.isListed = true;
+						dir.isScanned = true;
+						dir.id = 0L;
+						((CoolReader)mCoolReader).showDirectory(dir, "author:"+text);
+						dismiss();
+					}
+				}
+			});
+		} else
 		if (typ.equals("text")) {
 			valueView.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {

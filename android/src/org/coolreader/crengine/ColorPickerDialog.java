@@ -140,14 +140,18 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 			public void onClick(View v) {
 				tvSearchText.setText("");
 				currentFilter = "";
-				mList.setAdapter(new ColorPickerDialog.ColorListAdapter());
+				ColorPickerDialog.ColorListAdapter cla = new ColorPickerDialog.ColorListAdapter();
+				mList.setAdapter(cla);
+				cla.notifyDataSetChanged();
 			}
 		});
 		tvSearchText.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
 			    currentFilter = cs.toString();
-				mList.setAdapter(new ColorPickerDialog.ColorListAdapter());
+				ColorPickerDialog.ColorListAdapter cla = new ColorPickerDialog.ColorListAdapter();
+				mList.setAdapter(cla);
+				cla.notifyDataSetChanged();
 			}
 
 			@Override

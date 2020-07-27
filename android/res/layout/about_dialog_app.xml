@@ -69,6 +69,7 @@
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="https://icons8.com" android:id="@+id/www_icons8"
 				style="@style/TextAppearance.Small"
+				android:textColor="?attr/colorIcon"
 				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
 			<TextView android:text="@string/with_the_help"
 				android:id="@+id/thirdparty7"

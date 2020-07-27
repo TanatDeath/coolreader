@@ -2399,7 +2399,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void editBookTransl(final FileInfo currDirectory, final FileInfo item,
 							   final String lang_from, final String lang_to, final String search_text,
-							   BookInfoEditDialog bied) {
+							   BookInfoEditDialog bied, int iType) {
 		waitForCRDBService(new Runnable() {
 			@Override
 			public void run() {
@@ -2418,6 +2418,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								CoolReader.this,
 								getString(R.string.specify_translation_dir),
 								getString(R.string.specify_translation_dir_full),
+								iType,
 								vl, new TranslationDirectionDialog.ValuesEnteredCallback() {
 							@Override
 							public void done(ArrayList<String> results) {
@@ -2675,19 +2676,26 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			public void done() {
 				FileInfo fi = bi.getFileInfo();
 				itemsBook.add(new BookInfoEntry("section","section.book","section"));
-				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null) {
+				if ( fi.getAuthors()!=null || fi.title!=null || fi.series!=null || fi.publseries!=null) {
 					if (!StrUtils.isEmptyStr(fi.getAuthors())) {
 						itemsBook.add(new BookInfoEntry("book.authors",
 								fi.getAuthors().replaceAll("\\|", "; "), "text"));
 						String[] list = fi.getAuthors().split("\\|");
-						if (!StrUtils.isEmptyStr(fi.series)) {
-							itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_authors), "series_authors"));
-							itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_books), "series_books"));
-						}
 						for (String s: list) {
-							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_series), "author_series"));
-							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_books), "author_books"));
+							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_series), "author_series:"+s));
+							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_books), "author_books:"+s));
 						}
+					}
+					if (!StrUtils.isEmptyStr(fi.series)) {
+						itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_authors), "series_authors:"+fi.series));
+						itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_books), "series_books:"+fi.series));
+					}
+					if (
+					    (!StrUtils.isEmptyStr(fi.publseries)) &&
+						(!StrUtils.getNonEmptyStr(fi.publseries,true).equals(StrUtils.getNonEmptyStr(fi.series,true)))
+					) {
+						itemsBook.add(new BookInfoEntry(fi.publseries, getString(R.string.mi_folder_series_authors), "series_authors:"+fi.publseries));
+						itemsBook.add(new BookInfoEntry(fi.publseries, getString(R.string.mi_folder_series_books), "series_books:"+fi.publseries));
 					}
 					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add(new BookInfoEntry("book.title",fi.title,"text"));
 					if ( fi.series!=null ) {

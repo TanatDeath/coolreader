@@ -283,6 +283,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							public void run() {
 								Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), finalItem.opdsLinkR,
 										new History.FileInfo1LoadedCallack() {
+
+											@Override
+											public void onFileInfoLoadBegin() {
+
+											}
+
 											@Override
 											public void onFileInfoLoaded(final FileInfo fileInfo) {
 												if (fileInfo!=null) {
@@ -466,6 +472,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if (currentListAdapter == null || recreateAdapter) {
 			currentListAdapter = new FileListAdapter();
 			mListView.setAdapter(currentListAdapter);
+			currentListAdapter.notifyDataSetChanged();
 		} else {
 			currentListAdapter.notifyDataSetChanged();
 		}
@@ -549,6 +556,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			currentListAdapter = new FileListAdapter();
 			mListView.setAdapter(currentListAdapter);
+			currentListAdapter.notifyDataSetChanged();
 			return true;
 		case R.id.book_root:
 			showRootDirectory();
@@ -798,7 +806,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_author));
 				dir.isListed = true;
 				dir.isScanned = true;
-				mActivity.showDirectory(dir, sItem);
+				mActivity.showDirectory(dir, "seriesId:"+sItem);
 			}
 			return true;
 		case R.id.folder_authors_series:
@@ -811,7 +819,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				dir.setFilename(mActivity.getString(R.string.folder_name_books_by_series));
 				dir.isListed = true;
 				dir.isScanned = true;
-				mActivity.showDirectory(dir, sItem);
+				mActivity.showDirectory(dir, "authorId:"+sItem);
 			}
 			return true;
 
@@ -1020,29 +1028,48 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				return;
 			}
 			BookOPDSSearchDialog dlg = new BookOPDSSearchDialog(mActivity, sText, fi2, new BookSearchDialog.SearchCallback() {
+
+				@Override
+				public void start() {
+					showDirectoryLoadingStub();
+				}
+
 				@Override
 				public void done(FileInfo[] results) {
 					if (results != null) {
-						FileInfo fi3 = results[0];
-						fi3.pathname = fi3.pathname.replace(FileInfo.OPDS_DIR_PREFIX+"search:",FileInfo.OPDS_DIR_PREFIX);
-						showDirectory(fi3,null, "");
-					}
+						if (results.length == 0)
+							showDirectoryNotFoundStub();
+						else {
+							FileInfo fi3 = results[0];
+							fi3.pathname = fi3.pathname.replace(FileInfo.OPDS_DIR_PREFIX + "search:", FileInfo.OPDS_DIR_PREFIX);
+							showDirectory(fi3, null, "");
+						}
+					} else showDirectoryNotFoundStub();
 				}
 			});
 			dlg.show();
 		} else {
 			BookSearchDialog dlg = new BookSearchDialog(mActivity, new BookSearchDialog.SearchCallback() {
+
+				@Override
+				public void start() {
+					showDirectoryLoadingStub();
+				}
+
 				@Override
 				public void done(FileInfo[] results) {
 					if (results != null) {
 						if (results.length == 0) {
 							mActivity.showToast(R.string.dlg_book_search_not_found);
+							showDirectoryNotFoundStub();
 						} else {
 							showSearchResult(results);
 						}
 					} else {
 						if (currDirectory == null || currDirectory.isRootDir())
 							mActivity.showRootWindow();
+						else
+							showDirectoryNotFoundStub();
 					}
 				}
 			});
@@ -1310,6 +1337,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								final String sLink = acquisition.href;
 								Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), acquisition.href,
 										new History.FileInfo1LoadedCallack() {
+
+											@Override
+											public void onFileInfoLoadBegin() {
+
+											}
+
 											@Override
 											public void onFileInfoLoaded(final FileInfo fileInfo) {
 												if (fileInfo!=null) {
@@ -1559,6 +1592,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 
 		@Override
+		public void onFileInfoListLoadBegin(String prefix) {
+			showDirectoryLoadingStub();
+		}
+
+		@Override
 		public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
 			//baseDir.setItems(list);
 			baseDir.clear();
@@ -1617,9 +1655,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	public void showDirectory(FileInfo fileOrDir, FileInfo itemToSelect, String addFilter)
 	{
 		BackgroundThread.ensureGUI();
+		showDirectoryLoadingStub();
 		if (fileOrDir != null) {
 			if (fileOrDir.isRootDir()) {
 				mActivity.showRootWindow();
+				return;
+			}
+			if (fileOrDir.isLoadingStub()) {
+				showDirectoryLoadingStub();
+				return;
+			}
+			if (fileOrDir.isNotFoundStub()) {
+				showDirectoryNotFoundStub();
 				return;
 			}
 			if (fileOrDir.isOnlineCatalogPluginDir()) {
@@ -1788,12 +1835,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			if (fileOrDir.isBooksByAuthorDir()) {
 				log.d("Updating author book list");
-				mActivity.getDB().loadAuthorBooks(fileOrDir.getAuthorId(), new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadAuthorBooks(fileOrDir.getAuthorId(), addFilter, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesDir()) {
 				log.d("Updating series book list");
-				mActivity.getDB().loadSeriesBooks(fileOrDir.getSeriesId(), new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadSeriesBooks(fileOrDir.getSeriesId(), addFilter, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByBookdateDir()) {
@@ -2205,6 +2252,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 									}
 									currentListAdapter = new FileListAdapter();
 									mListView.setAdapter(currentListAdapter);
+									currentListAdapter.notifyDataSetChanged();
 								}
 							}
 						}
@@ -2299,6 +2347,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 									) {
 											Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), finalItem.opdsLinkR,
 													new History.FileInfo1LoadedCallack() {
+
+														@Override
+														public void onFileInfoLoadBegin() {
+
+														}
+
 														@Override
 														public void onFileInfoLoaded(final FileInfo fileInfo) {
 															if (fileInfo!=null) {
@@ -2564,7 +2618,51 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		currDirectory = newCurrDirectory;
 		currDirectoryFiltered = newCurrDirectory;
 	}
-	
+
+	private void showDirectoryLoadingStub() {
+		BackgroundThread.ensureGUI();
+		BackgroundThread.instance().executeGUI(new Runnable() {
+			@Override
+			public void run() {
+				FileInfo dir = new FileInfo();
+				dir.id = 0L;
+				dir.isDirectory = true;
+				dir.isListed = true;
+				dir.isScanned = true;
+				dir.pathname = FileInfo.LOADING_STUB_PREFIX;
+				dir.setFilename(mActivity.getString(R.string.loading_stub));
+				dir.title = mActivity.getString(R.string.loading_stub);
+//				FileInfo file = new FileInfo();
+//				file.id = 1L;
+//				file.pathname = FileInfo.LOADING_STUB_PREFIX;
+//				file.setFilename(mActivity.getString(R.string.loading_stub));
+//				file.title = mActivity.getString(R.string.loading_stub);
+//				file.parent = dir;
+//				file.format = DocumentFormat.NONE;
+//				dir.addFile(file);
+				showDirectoryInternal(dir, null);
+			}
+		});
+	}
+
+	private void showDirectoryNotFoundStub() {
+		BackgroundThread.ensureGUI();
+		BackgroundThread.instance().executeGUI(new Runnable() {
+			@Override
+			public void run() {
+				FileInfo dir = new FileInfo();
+				dir.id = 0L;
+				dir.isDirectory = true;
+				dir.isListed = true;
+				dir.isScanned = true;
+				dir.pathname = FileInfo.NOT_FOUND_STUB_PREFIX;
+				dir.setFilename(mActivity.getString(R.string.search_not_found));
+				dir.title = mActivity.getString(R.string.search_not_found);
+				showDirectoryInternal(dir, null);
+			}
+		});
+	}
+
 	private void showDirectoryInternal( final FileInfo dir, final FileInfo file )
 	{
 		BackgroundThread.ensureGUI();

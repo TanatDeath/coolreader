@@ -3231,6 +3231,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if ( selItem<0 )
 				selItem = 0;
 			listView.setAdapter(listAdapter);
+			listAdapter.notifyDataSetChanged();
 			listView.setSelection(selItem);
 		}
 

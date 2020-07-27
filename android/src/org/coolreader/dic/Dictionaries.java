@@ -278,6 +278,7 @@ public class Dictionaries {
 							act.isPackageInstalled("mobi.goldendict.androie") // changed package name - 4pda version 2.0.1b7
 					);
 				}
+				if ((dict.internal == 7)||(dict.internal == 8)) dict.setInstalled(true);
 			}
 		}
 		for (DictInfo dict : dicts) {
@@ -538,6 +539,27 @@ public class Dictionaries {
 									}
 								} catch (Exception e) {
 									cr.showDicToast(sBody, false, "");
+									if ((sBody.contains("for direction"))&&(sBody.contains("not found")))
+										BackgroundThread.instance().postBackground(new Runnable() {
+											@Override
+											public void run() {
+												BackgroundThread.instance().postGUI(new Runnable() {
+													@Override
+													public void run() {
+														if (cr.getReaderView().mBookInfo!=null) {
+															FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+															FileInfo dfi = fi.parent;
+															if (dfi == null) {
+																dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+															}
+															if (dfi != null) {
+																cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+															}
+														};
+													}
+												}, 1000);
+											}
+										});
 								}
 							}
 						}, 100);
@@ -807,7 +829,7 @@ public class Dictionaries {
 									currentDictionary2 = saveCurrentDictionary2;
 									currentDictionary3 = saveCurrentDictionary3;
 									iDic2IsActive = saveIDic2IsActive;
-									cr.editBookTransl(dfi, fi, langf, lang, s, null);
+									cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
 								}
 							};
 							return;
@@ -976,7 +998,7 @@ public class Dictionaries {
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionary3 = saveCurrentDictionary3;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(dfi, fi, langf, lang, s, null);
+						cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_YND);
 					}
 				};
 				return;
@@ -1055,7 +1077,7 @@ public class Dictionaries {
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionary3 = saveCurrentDictionary3;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(dfi, fi, langf, lang, s, null);
+						cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
 					}
 				};
 				return;

@@ -1186,4 +1186,6 @@
     <string name="mi_folder_series_books">Все книги серии</string>
     <string name="context_menu_author_folder">Авторы</string>
     <string name="context_menu_series_folder">Серии</string>
+    <string name="loading_stub">Загружается ...</string>
+    <string name="search_not_found">Книги не найдены</string>
 </resources>

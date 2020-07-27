@@ -505,7 +505,9 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		mDBXList.mLFR = lfr;
 		mDBXList.mDriveStrList = new ArrayList<String>();
 		mDBXList.mDriveStrList1 = new ArrayList<String>();
-		mDBXList.setAdapter(new OpenBookFromDBXAdapter());
+		OpenBookFromDBXAdapter dbxa = new OpenBookFromDBXAdapter();
+		mDBXList.setAdapter(dbxa);
+		dbxa.notifyDataSetChanged();
 
 		System.out.println("initForDBX");
 
@@ -554,7 +556,9 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		mYNDList.mLFR = lfr;
 		mYNDList.mDriveStrList = new ArrayList<String>();
 		mYNDList.mDriveStrList1 = new ArrayList<String>();
-		mYNDList.setAdapter(new OpenBookFromYNDAdapter());
+		OpenBookFromYNDAdapter ynda = new OpenBookFromYNDAdapter();
+		mYNDList.setAdapter(ynda);
+		ynda.notifyDataSetChanged();
 
 		System.out.println("initForYND");
 

@@ -118,9 +118,10 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		final TabHost tabs = (TabHost)inflater.inflate(R.layout.about_dialog, null);
 
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		final int colorGray = a.getColor(0, Color.GRAY);
 		final int colorGrayC = a.getColor(1, Color.GRAY);
+		final int colorIcon = a.getColor(2, Color.GRAY);
 
 		tabs.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			@Override
@@ -143,6 +144,12 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		} else {
 			((TextView) mAppTab.findViewById(R.id.version)).setText("KnownReader " + mCoolReader.getVersion());
 		}
+		TextView tv_icons8 = (TextView)mAppTab.findViewById(R.id.www_icons8);
+		TextView tv_email = (TextView)mAppTab.findViewById(R.id.email);
+		TextView tv_www1 = (TextView)mAppTab.findViewById(R.id.www1);
+		if (tv_icons8 != null) tv_icons8.setLinkTextColor(colorIcon);
+		if (tv_email != null) tv_email.setLinkTextColor(colorIcon);
+		if (tv_www1 != null) tv_www1.setLinkTextColor(colorIcon);
 
 		mDirsTab = (View)inflater.inflate(R.layout.about_dialog_dirs, null);
 		TextView fonts_dir = (TextView)mDirsTab.findViewById(R.id.fonts_dirs);
@@ -248,9 +255,15 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 			TextView tv_donate_message5 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message5);
 			if (tv_donate_message != null) tv_donate_message.setText(R.string.knownreader_donate_line1);
 			if (tv_donate_message2 != null) tv_donate_message2.setText(R.string.knownreader_donate_line2);
-			if (tv_donate_message3 != null) tv_donate_message3.setText(R.string.knownreader_donate_line3);
+			if (tv_donate_message3 != null) {
+				tv_donate_message3.setText(R.string.knownreader_donate_line3);
+				tv_donate_message3.setLinkTextColor(colorIcon);
+			}
 			if (tv_donate_message4 != null) tv_donate_message4.setText(R.string.knownreader_donate_line4);
-			if (tv_donate_message5 != null) tv_donate_message5.setText(R.string.knownreader_donate_line5);
+			if (tv_donate_message5 != null) {
+				tv_donate_message5.setText(R.string.knownreader_donate_line5);
+				tv_donate_message5.setLinkTextColor(colorIcon);
+			}
 		}
 		
 		tabs.setup();

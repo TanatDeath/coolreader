@@ -78,6 +78,12 @@ public class BookSearchDialog extends BaseDialog {
 						return;
 					searchActive = true;
 					find( new SearchCallback() {
+
+						@Override
+						public void start() {
+
+						}
+
 						@Override
 						public void done(FileInfo[] results) {
 							searchActive = false;
@@ -93,6 +99,7 @@ public class BookSearchDialog extends BaseDialog {
 	}
 	
 	public interface SearchCallback {
+		public void start();
 		public void done( FileInfo[] results );
 	}
 
@@ -115,6 +122,12 @@ public class BookSearchDialog extends BaseDialog {
 		if (mCoolReader == null || mCoolReader.getDB() == null)
 			return;
 		mCoolReader.getDB().findByPatterns(MAX_RESULTS, author, title, series, filename, new CRDBService.BookSearchCallback() {
+
+			@Override
+			public void onBooksSearchBegin() {
+				cb.start();
+			}
+
 			@Override
 			public void onBooksFound(ArrayList<FileInfo> fileList) {
 				cb.done(fileList.toArray(new FileInfo[fileList.size()]));
@@ -127,6 +140,12 @@ public class BookSearchDialog extends BaseDialog {
 			return;
 		mCoolReader.getDB().findByPatterns(MAX_RESULTS, sText, "##QUICK_SEARCH##",
 				"", "", new CRDBService.BookSearchCallback() {
+
+			@Override
+			public void onBooksSearchBegin() {
+				cb.start();
+			}
+
 			@Override
 			public void onBooksFound(ArrayList<FileInfo> fileList) {
 				cb.done(fileList.toArray(new FileInfo[fileList.size()]));
