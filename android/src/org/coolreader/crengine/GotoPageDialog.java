@@ -1,8 +1,13 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.method.DigitsKeyListener;
+import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +37,7 @@ public class GotoPageDialog extends BaseDialog {
 	private EditText input;
 	int minValue;
 	int maxValue;
+	int mColorIconL =Color.GRAY;
 	private int mPageCount = 0;
 	private BookPagesList mList;
 
@@ -43,6 +49,7 @@ public class GotoPageDialog extends BaseDialog {
 	private ReaderView mReaderView;
 	private LayoutInflater mInflater;
 	private ArrayList<String[]> arrFound = null;
+	String mFindText = "";
 
 	class BookPagesAdapter extends BaseAdapter {
 		public boolean areAllItemsEnabled() {
@@ -81,6 +88,22 @@ public class GotoPageDialog extends BaseDialog {
 			return ITEM_POSITION;
 		}
 
+		public void setHighLightedText(TextView tv, String textToHighlight) {
+			String tvt = tv.getText().toString();
+			int ofe = tvt.indexOf(textToHighlight, 0);
+			Spannable wordToSpan = new SpannableString(tv.getText());
+			for (int ofs = 0; ofs < tvt.length() && ofe != -1; ofs = ofe + 1) {
+				ofe = tvt.indexOf(textToHighlight, ofs);
+				if (ofe == -1)
+					break;
+				else {
+					// set color here
+					wordToSpan.setSpan(new BackgroundColorSpan(mColorIconL), ofe, ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					tv.setText(wordToSpan, TextView.BufferType.SPANNABLE);
+				}
+			}
+		}
+
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view;
 			int res = R.layout.page_item;
@@ -100,8 +123,11 @@ public class GotoPageDialog extends BaseDialog {
 				labelView.setText(sPos);
 			}
 			if ( s!=null ) {
-				if ( titleTextView!=null )
+				if ( titleTextView!=null ) {
 					titleTextView.setText(s);
+					if (!StrUtils.isEmptyStr(mFindText))
+						setHighLightedText(titleTextView,mFindText);
+				}
 			} else {
 				if ( titleTextView!=null )
 					titleTextView.setText("");
@@ -232,6 +258,11 @@ public class GotoPageDialog extends BaseDialog {
 	{
 		super("GotoPageDialog", activity, title, true, false);
 		arrFound = new ArrayList<String[]>();
+		mFindText = findtext;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorIconL});
+		mColorIconL = a.getColor(0, Color.GRAY);
+		a.recycle();
 		this.handler = handler;
 		this.minValue = minValue;
 		this.maxValue = maxValue;
@@ -241,7 +272,7 @@ public class GotoPageDialog extends BaseDialog {
 		ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_find_dlg, null);
 		TextView promptView = (TextView)layout.findViewById(R.id.lbl_find_text_pages);
 		if (promptView != null) {
-			promptView.setText("search results for: "+findtext);
+			promptView.setText(activity.getString(R.string.search_results_for)+" "+findtext);
 		}
 		ViewGroup body = (ViewGroup)layout.findViewById(R.id.find_pages_list);
 		mList = new GotoPageDialog.BookPagesList(activity, false);
@@ -271,16 +302,18 @@ public class GotoPageDialog extends BaseDialog {
 	}
 	@Override
 	protected void onPositiveButtonClick() {
-        String value = input.getText().toString().trim();
-        try {
-        	if ( handler.validate(value) ) {
-				handler.onOk(value);
+		if (input != null)
+			if (input.getText() != null) {
+				String value = input.getText().toString().trim();
+				try {
+					if (handler.validate(value)) {
+						handler.onOk(value);
+					} else
+						handler.onCancel();
+				} catch (Exception e) {
+					handler.onCancel();
+				}
+				cancel();
 			}
-        	else
-        		handler.onCancel();
-        } catch ( Exception e ) {
-        	handler.onCancel();
-        }
-        cancel();
 	}
 }

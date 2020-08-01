@@ -333,6 +333,38 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					}
 				}
 			}
+			// check recent translates
+			if (this.arrUdeWords.size()<10) {
+				for (DicSearchHistoryEntry dshe: UserDicDlg.mDicSearchHistoryAll) {
+					String sKey = dshe.getSearch_text().toLowerCase();
+					String sValue = dshe.getText_translate().toLowerCase();
+					if ((!StrUtils.isEmptyStr(sKey))&&(!StrUtils.isEmptyStr(sValue))) {
+						try {
+							String[] arrKey = sKey.split("~");
+							boolean bWas = false;
+							for (String sK : arrKey) {
+								//CoolReader.log.i(sK);
+								String sK2 = sK.replaceAll("-", " ");
+								String sK3 = sK.replaceAll("-", "");
+								String[] arrK = sK.split("\\|");
+								String[] arrK2 = sK2.split("\\|");
+								String[] arrK3 = sK3.split("\\|");
+								if ((!bWas)&&
+										(sCurPage.contains(arrK[0]) || sCurPage.contains(arrK2[0]) || sCurPage.contains(arrK3[0]))) {
+									bWas = true;
+									this.wc = this.wc + 1;
+									UserDicEntry ude = new UserDicEntry();
+									ude.setDic_word(sKey);
+									ude.setDic_word_translate(sValue);
+									this.arrUdeWords.add(ude);
+								}
+							}
+						} catch (Exception e) {
+
+						}
+					}
+				}
+			}
 			Collections.sort(arrUdeWords, new Comparator<UserDicEntry>() {
 				@Override
 				public int compare(UserDicEntry lhs, UserDicEntry rhs) {

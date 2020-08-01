@@ -49,6 +49,7 @@ public class UserDicDlg extends BaseDialog {
 	final EditText selEdit;
 
 	private ArrayList<UserDicEntry> mUserDic = new ArrayList<UserDicEntry>();
+	public static ArrayList<DicSearchHistoryEntry> mDicSearchHistoryAll = new ArrayList<DicSearchHistoryEntry>();
 	private ArrayList<DicSearchHistoryEntry> mDicSearchHistory = new ArrayList<DicSearchHistoryEntry>();
 
 	public final static int ITEM_POSITION=0;
@@ -475,17 +476,33 @@ public class UserDicDlg extends BaseDialog {
 				public void onDicSearchHistoryLoaded(List<DicSearchHistoryEntry> list) {
 					ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
 					for (DicSearchHistoryEntry dshe: list1) {
-						if ((dshe.getSearch_from_book().equals(sCRC))||(sCRC.equals("")))
+						if ((dshe.getSearch_from_book().equals(sCRC)) || (sCRC.equals("")))
 							if (
 									(selEdit.getText().toString().trim().equals("")) ||
 											(
 													(dshe.getSearch_text().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim())) ||
 															(dshe.getText_translate().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim()))
 											)
-									)
+							)
 								mDicSearchHistory.add(dshe);
 					};
 					listUpdated();
+				}
+			});
+		}
+	}
+
+	public static void updDicSearchHistoryAll(BaseActivity act) {
+		mDicSearchHistoryAll.clear();
+		if (act instanceof CoolReader) {
+			CoolReader cr = (CoolReader)act;
+			cr.getDB().loadDicSearchHistory(new CRDBService.DicSearchHistoryLoadingCallback() {
+				@Override
+				public void onDicSearchHistoryLoaded(List<DicSearchHistoryEntry> list) {
+					ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
+					for (DicSearchHistoryEntry dshe: list1) {
+						mDicSearchHistoryAll.add(dshe);
+					};
 				}
 			});
 		}

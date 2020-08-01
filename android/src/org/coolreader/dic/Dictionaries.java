@@ -358,7 +358,7 @@ public class Dictionaries {
 		}
 	}
 
-	private void lingvoAuthThenTranslate(String s, String langf, String lang, boolean extended) {
+	private void lingvoAuthThenTranslate(String s, String langf, String lang, boolean extended, DictInfo curDict) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(LINGVO_DIC_ONLINE+"/v1.1/authenticate").newBuilder();
 		String url = urlBuilder.build().toString();
 		RequestBody body = RequestBody.create(
@@ -381,7 +381,7 @@ public class Dictionaries {
 							@Override
 							public void run() {
 								sLingvoToken = sBody;
-								lingvoTranslate(s, langf, lang, extended);
+								lingvoTranslate(s, langf, lang, extended, curDict);
 							}
 						}, 100);
 					}
@@ -403,7 +403,7 @@ public class Dictionaries {
 		});
 	};
 
-	private void lingvoTranslate(String s, String langf, String lang, boolean extended) {
+	private void lingvoTranslate(String s, String langf, String lang, boolean extended, DictInfo curDict) {
 		CoolReader cr = (CoolReader) mActivity;
 		if (!BaseActivity.PREMIUM_FEATURES) {
 			cr.showToast(R.string.only_in_premium);
@@ -531,9 +531,11 @@ public class Dictionaries {
 											if (!StrUtils.isEmptyStr(sTrans)) {
 												if (!StrUtils.isEmptyStr(sHeading))
 													sTrans = sHeading + ": " + sTrans;
-												if (!extended)
+												if (!extended) {
 													cr.showDicToast(sTrans, false, sDic);
-												else lingvoExtended(s, ilangfF, ilangF, sTrans, false, sDic);
+													saveToDicSearchHistory(s, sTrans, curDict);
+												}
+												else lingvoExtended(s, ilangfF, ilangF, sTrans, false, sDic, curDict);
 											}
 										}
 									}
@@ -571,7 +573,7 @@ public class Dictionaries {
 				sLingvoToken = "";
 				if (unauthCnt == 0) {
 					unauthCnt++;
-					lingvoAuthThenTranslate(s, langf, lang, extended);
+					lingvoAuthThenTranslate(s, langf, lang, extended, curDict);
 				} else {
 					cr.showToast(e.getMessage());
 					unauthCnt = 0;
@@ -581,7 +583,7 @@ public class Dictionaries {
 	};
 
 	private void lingvoExtended(String s, int ilangf, int ilang,
-								String sTrans, boolean isYnd, String sDic) {
+								String sTrans, boolean isYnd, String sDic, DictInfo curDict) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(LINGVO_DIC_ONLINE+"/v1/Translation").newBuilder();
 		CoolReader cr = (CoolReader) mActivity;
 		urlBuilder.addQueryParameter("text", s);
@@ -620,6 +622,7 @@ public class Dictionaries {
 													if (StrUtils.getNonEmptyStr(jso.getString("Node"), true).equals("Transcription")) {
 														sAdd = " ["+StrUtils.getNonEmptyStr(jso.getString("Text"), true)+"]";
 														cr.showDicToast(sTrans+sAdd, false, sDic);
+														saveToDicSearchHistory(s, sTrans+sAdd, curDict);
 														return;
 													}
 												}
@@ -646,6 +649,41 @@ public class Dictionaries {
 		if (StrUtils.getNonEmptyStr(s,true).length()>2)
 			return StrUtils.getNonEmptyStr(s,true).substring(0,2);
 		return s;
+	}
+
+	public void saveToDicSearchHistory(String searchText, String translateText, DictInfo curDict) {
+		CoolReader cr = null;
+		if (mActivity instanceof CoolReader) {
+			cr = (CoolReader) mActivity;
+			DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+			dshe.setId(0L);
+			dshe.setSearch_text(searchText);
+			dshe.setText_translate(translateText);
+			String sBookFName = "";
+			String sLangFrom = "";
+			String sLangTo = "";
+			if (cr.getReaderView()!=null) {
+				if (cr.getReaderView().getBookInfo()!=null)
+					if (cr.getReaderView().getBookInfo().getFileInfo()!=null)
+					{
+						sBookFName = cr.getReaderView().getBookInfo().getFileInfo().getFilename();
+						sLangFrom = cr.getReaderView().getBookInfo().getFileInfo().lang_from;
+						sLangTo = cr.getReaderView().getBookInfo().getFileInfo().lang_to;
+					}
+			}
+			CRC32 crc = new CRC32();
+			if (!sBookFName.equals("")) {
+				crc.update(sBookFName.getBytes());
+				dshe.setSearch_from_book(String.valueOf(crc.getValue()));
+			} else dshe.setSearch_from_book("");
+			dshe.setDictionary_used(curDict.id);
+			dshe.setCreate_time(System.currentTimeMillis());
+			dshe.setLast_access_time(System.currentTimeMillis());
+			dshe.setLanguage_from(sLangFrom);
+			dshe.setLanguage_to(sLangTo);
+			dshe.setSeen_count(1L);
+			cr.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_SAVE, cr);
+		}
 	}
 
 	@SuppressLint("NewApi")
@@ -677,36 +715,10 @@ public class Dictionaries {
 		boolean isDouble = false;
 		//save to dic search history
 		CoolReader cr = null;
+		if (!((curDict.internal == 7) || (curDict.internal == 8)))
+			saveToDicSearchHistory(s, "", curDict);
 		if (mActivity instanceof CoolReader) {
 			cr = (CoolReader) mActivity;
-			DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
-			dshe.setId(0L);
-			dshe.setSearch_text(s);
-			dshe.setText_translate("");
-			String sBookFName = "";
-			String sLangFrom = "";
-			String sLangTo = "";
-			if (cr.getReaderView()!=null) {
-				if (cr.getReaderView().getBookInfo()!=null)
-					if (cr.getReaderView().getBookInfo().getFileInfo()!=null)
-					{
-						sBookFName = cr.getReaderView().getBookInfo().getFileInfo().getFilename();
-						sLangFrom = cr.getReaderView().getBookInfo().getFileInfo().lang_from;
-						sLangTo = cr.getReaderView().getBookInfo().getFileInfo().lang_to;
-					}
-			}
-			CRC32 crc = new CRC32();
-			if (!sBookFName.equals("")) {
-				crc.update(sBookFName.getBytes());
-				dshe.setSearch_from_book(String.valueOf(crc.getValue()));
-			} else dshe.setSearch_from_book("");
-			dshe.setDictionary_used(curDict.id);
-			dshe.setCreate_time(System.currentTimeMillis());
-			dshe.setLast_access_time(System.currentTimeMillis());
-			dshe.setLanguage_from(sLangFrom);
-			dshe.setLanguage_to(sLangTo);
-			dshe.setSeen_count(1L);
-			cr.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_SAVE);
 			isDouble = (cr.getReaderView().getSettings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2) &&
 					(cr.getReaderView().getSettings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2);
 		}
@@ -1018,6 +1030,7 @@ public class Dictionaries {
 					.build();
 			Call call = client.newCall(request);
 			final CoolReader crf = cr;
+			final DictInfo curDictF = curDict;
 			call.enqueue(new okhttp3.Callback() {
 				public void onResponse(Call call, Response response)
 						throws IOException {
@@ -1034,6 +1047,7 @@ public class Dictionaries {
 								@Override
 								public void run() {
 									crf.showDicToast(sTranslF, true, "");
+									saveToDicSearchHistory(s, sTranslF, curDictF);
 								}
 							}, 100);
 						}
@@ -1082,8 +1096,8 @@ public class Dictionaries {
 				};
 				return;
 			}
-			if (sLingvoToken.equals("")) lingvoAuthThenTranslate(s, langf, lang, curDict.id.contains("Extended"));
-				else lingvoTranslate(s, langf, lang, curDict.id.contains("Extended"));
+			if (sLingvoToken.equals("")) lingvoAuthThenTranslate(s, langf, lang, curDict.id.contains("Extended"), curDict);
+				else lingvoTranslate(s, langf, lang, curDict.id.contains("Extended"), curDict);
 			break;
 		}
 	}

@@ -387,7 +387,7 @@
     <string name="dlg_catalog_edit_proxy_uname">Proxy login</string>
     <string name="dlg_catalog_edit_proxy_passw">Proxy password</string>
     <string name="dlg_catalog_edit_onion_def_proxy">Set proxy to 127.0.0.1:8118 for onion links</string>
-    <string formatted="false" name="options_format_min_space_width_percent">Min space width %</string>
+    <string name="options_format_min_space_width_percent" formatted="false">Min space width %</string>
     <string name="options_selection_keep_selection_after_dictionary">Keep selection after dictionary</string>
     <string name="action_toggle_autoscroll">Autoscroll</string>
     <string name="lbl_autoscroll_speed">Speed: $1 chars/minute</string>
@@ -456,18 +456,18 @@
     <string name="options_css_text_indent_big_outdent">Big outdent</string>
     <string name="options_css_font_face_sans_serif">[Default sans-serif font]</string>
     <string name="options_css_margin_05em">0.5 of line height</string>
-    <string formatted="false" name="options_css_margin_10p">10% of line width</string>
-    <string formatted="false" name="options_css_margin_20p">20% of line width</string>
-    <string formatted="false" name="options_css_margin_30p">30% of line width</string>
+    <string name="options_css_margin_10p" formatted="false">10% of line width</string>
+    <string name="options_css_margin_20p" formatted="false">20% of line width</string>
+    <string name="options_css_margin_30p" formatted="false">30% of line width</string>
     <string name="options_css_margin_0">0</string>
     <string name="options_css_margin_03em">0.3 of line height</string>
-    <string formatted="false" name="options_css_margin_15p">15% of line width</string>
+    <string name="options_css_margin_15p" formatted="false">15% of line width</string>
     <string name="options_css_margin_02em">0.2 of line height</string>
     <string name="options_css_margin_4em">4 of line height</string>
     <string name="options_css_margin_1em">1 line height</string>
     <string name="options_css_margin_2em">2 of line height</string>
     <string name="options_css_margin_15em">1.5 of line height</string>
-    <string formatted="false" name="options_css_margin_5p">5% of line width</string>
+    <string name="options_css_margin_5p" formatted="false">5% of line width</string>
     <string name="options_css_font_size_130p">Bigger (130%)</string>
     <string name="options_css_font_size_120p">Bigger (120%)</string>
     <string name="options_css_font_size_110p">Bigger (110%)</string>
@@ -1208,4 +1208,7 @@
     <string name="context_menu_series_folder">Series folder</string>
     <string name="loading_stub">Loading ...</string>
     <string name="search_not_found">Books were not found</string>
+    <string name="search_results_for">Search results for: </string>
+    <string name="disable_two_pointer_gestures">Disable two finger gestures</string>
+    <string name="two_pointer_gestures_add_info">Two finger gestures allow to control page margins and font size</string>
 </resources>

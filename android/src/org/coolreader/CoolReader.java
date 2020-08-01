@@ -19,6 +19,7 @@ import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStat;
 import org.coolreader.crengine.ReadingStatRes;
+import org.coolreader.crengine.UserDicDlg;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -786,6 +787,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		String fileToOpen = "";
 		Uri uri = null;
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
+		String processText = intent.getStringExtra("PROCESS_TEXT");
+		if (!StrUtils.isEmptyStr(processText)) {
+			if (getReaderView() != null)
+				if (getReaderView().getBookInfo() != null)
+					if (getReaderView().lastSelection!=null)
+						if (!getReaderView().lastSelection.isEmpty()) {
+							getReaderView().showNewBookmarkDialog(getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, processText);
+				}
+			return true;
+		}
 		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
 		if (Intent.ACTION_VIEW.equals(intentAction)) {
 			uri = intent.getData();

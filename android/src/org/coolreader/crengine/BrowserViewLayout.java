@@ -27,6 +27,7 @@ public class BrowserViewLayout extends ViewGroup {
 	private View filterView;
 	private CRToolBar toolbarView;
 	private boolean filterIsShown;
+	private LinearLayout bottomBar;
 
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
@@ -39,6 +40,22 @@ public class BrowserViewLayout extends ViewGroup {
 		this.addView(titleView);
 		this.addView(toolbarView);
 		this.addView(contentView);
+		LayoutInflater inflater = LayoutInflater.from(activity);
+		bottomBar = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar, null);
+		ImageButton btnMenu = (ImageButton) bottomBar.findViewById(R.id.btn_show_menu);
+		btnMenu.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				toolbarView.showOverflowMenu();
+			}
+		});
+		bottomBar.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				toolbarView.showOverflowMenu();
+			}
+		});
+		this.addView(bottomBar);
 		this.onThemeChanged(context.getCurrentTheme());
 		titleView.setFocusable(false);
 		titleView.setFocusableInTouchMode(false);
@@ -51,6 +68,7 @@ public class BrowserViewLayout extends ViewGroup {
 		activity.tintViewIcons(contentView);
 		activity.tintViewIcons(toolbarView);
 		activity.tintViewIcons(titleView);
+		activity.tintViewIcons(bottomBar);
 	}
 	
 	private String browserTitle = "";
@@ -223,17 +241,20 @@ public class BrowserViewLayout extends ViewGroup {
 		b = b - marg;
 
 		int titleHeight = titleView.getMeasuredHeight();
+		int contentHeight = contentView.getMeasuredHeight();
 		if (toolbarView.isVertical()) {
 			int tbWidth = toolbarView.getMeasuredWidth();
 			titleView.layout(l + tbWidth, t, r, t + titleHeight);
 			toolbarView.layout(l, t, l + tbWidth, b);
 			contentView.layout(l + tbWidth, t + titleHeight, r, b);
+			bottomBar.layout(l + tbWidth, t + titleHeight + contentHeight, r, b);
 			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(true));
 		} else {
 			int tbHeight = toolbarView.getMeasuredHeight();
 			toolbarView.layout(l, t, r, t + tbHeight);
 			titleView.layout(l, t + tbHeight, r, t + titleHeight + tbHeight);
 			contentView.layout(l, t + titleHeight + tbHeight, r, b);
+			bottomBar.layout(l, t + titleHeight + tbHeight + contentHeight, r, b);
 			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(false));
 		}
 	}
@@ -270,8 +291,11 @@ public class BrowserViewLayout extends ViewGroup {
 			titleView.measure(MeasureSpec.makeMeasureSpec(w - tbWidth, MeasureSpec.AT_MOST),
 					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 			int titleHeight = titleView.getMeasuredHeight();
+			bottomBar.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),
+					MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
+			int bottomHeight = bottomBar.getMeasuredHeight();
 			contentView.measure(MeasureSpec.makeMeasureSpec(w - tbWidth, MeasureSpec.AT_MOST),
-					MeasureSpec.makeMeasureSpec(h - titleHeight, MeasureSpec.AT_MOST));
+					MeasureSpec.makeMeasureSpec(h - titleHeight - bottomHeight, MeasureSpec.AT_MOST));
 		} else {
 			// portrait
 			toolbarView.setVertical(false);
@@ -281,8 +305,11 @@ public class BrowserViewLayout extends ViewGroup {
 			titleView.measure(widthMeasureSpec, 
 					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 			int titleHeight = titleView.getMeasuredHeight();
+			bottomBar.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),
+					MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
+			int bottomHeight = bottomBar.getMeasuredHeight();
 			contentView.measure(widthMeasureSpec, 
-					MeasureSpec.makeMeasureSpec(h - titleHeight - tbHeight, MeasureSpec.AT_MOST));
+					MeasureSpec.makeMeasureSpec(h - titleHeight - tbHeight - bottomHeight, MeasureSpec.AT_MOST));
 		}
         setMeasuredDimension(w, h);
 	}

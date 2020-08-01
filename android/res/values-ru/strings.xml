@@ -1188,4 +1188,7 @@
     <string name="context_menu_series_folder">Серии</string>
     <string name="loading_stub">Загружается ...</string>
     <string name="search_not_found">Книги не найдены</string>
+    <string name="search_results_for">Результаты поиска для: </string>
+    <string name="disable_two_pointer_gestures">Отключить жесты двумя пальцами</string>
+    <string name="two_pointer_gestures_add_info">Жесты двумя пальцами позволяют контролировать поля страницы и размер шрифта</string>
 </resources>

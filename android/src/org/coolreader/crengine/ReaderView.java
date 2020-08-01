@@ -867,6 +867,7 @@ import com.google.gson.GsonBuilder;
 	private boolean doubleTapSelectionEnabled = false;
 	private int mGesturePageFlipsPerFullSwipe;
 	private boolean mIsPageMode;
+	private boolean mDisableTwoPointerGestures;
 	private int secondaryTapActionType = TAP_ACTION_TYPE_LONGPRESS;
 	private boolean selectionModeActive = false;
 
@@ -1480,7 +1481,7 @@ import com.google.gson.GsonBuilder;
 			int x = (int)event.getX();
 			int y = (int)event.getY();
 			curPageText = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText(0, false);
-			if ((event.getPointerCount() > 1) && (state == STATE_DOWN_1)) {
+			if ((event.getPointerCount() > 1) && (state == STATE_DOWN_1) && (!mDisableTwoPointerGestures)) {
 				if (event.getPointerCount() == 3) {
 					state = STATE_THREE_POINTERS;
 				} else {
@@ -3781,7 +3782,9 @@ import com.google.gson.GsonBuilder;
 			doubleTapSelectionEnabled = flg;
 		} else if ( key.equals(PROP_APP_GESTURE_PAGE_FLIPPING) ) {
 			mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
-		} else if ( key.equals(PROP_APP_SECONDARY_TAP_ACTION_TYPE) ) {
+		} else if ( key.equals(PROP_APP_DISABLE_TWO_POINTER_GESTURES) ) {
+			mDisableTwoPointerGestures = "1".equals(value);
+		}else if ( key.equals(PROP_APP_SECONDARY_TAP_ACTION_TYPE) ) {
 			secondaryTapActionType = flg ? TAP_ACTION_TYPE_DOUBLE : TAP_ACTION_TYPE_LONGPRESS;
 		} else if ( key.equals(PROP_APP_FLICK_BACKLIGHT_CONTROL) ) {
 			isBacklightControlFlick = "1".equals(value) ? 1 : ("2".equals(value) ? 2 : 0);
@@ -3905,6 +3908,7 @@ import com.google.gson.GsonBuilder;
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH.equals(key)
 
 					|| PROP_APP_GESTURE_PAGE_FLIPPING.equals(key)
+					|| PROP_APP_DISABLE_TWO_POINTER_GESTURES.equals(key)
 					|| PROP_APP_HIGHLIGHT_BOOKMARKS.equals(key)
 					|| PROP_HIGHLIGHT_SELECTION_COLOR.equals(key)
 					|| PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT.equals(key)
@@ -6520,6 +6524,7 @@ import com.google.gson.GsonBuilder;
 				// Save last opened book ONLY if book opened from real file not stream.
 				if (null == inputStream)
 					mActivity.setLastBook(filename);
+				UserDicDlg.updDicSearchHistoryAll(mActivity);
 			}
 		}
 		public void fail( Exception e )

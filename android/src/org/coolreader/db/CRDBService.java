@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.dropbox.core.v1.DbxEntry;
 
+import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
 
 import java.io.File;
@@ -1027,7 +1028,18 @@ public class CRDBService extends Service {
 			getService().saveUserDic(ude, action);
 		}
 
-		public void updateDicSearchHistory(final DicSearchHistoryEntry dshe, final int action) {
+		public void updateDicSearchHistory(final DicSearchHistoryEntry dshe, final int action, CoolReader act) {
+        	UserDicDlg.mDicSearchHistoryAll.add(0,dshe);
+        	int idx = -1;
+        	if (UserDicDlg.mDicSearchHistoryAll.size()>0)
+        		for (int i=1; i < UserDicDlg.mDicSearchHistoryAll.size(); i++) {
+					if (StrUtils.getNonEmptyStr(UserDicDlg.mDicSearchHistoryAll.get(i).getSearch_text(),true).equals(dshe.getSearch_text()))
+						idx = i;
+				}
+        	if (idx > 0) UserDicDlg.mDicSearchHistoryAll.remove(idx);
+        	if (act.getmReaderFrame() != null)
+        		if (act.getmReaderFrame().getUserDicPanel()!=null)
+					act.getmReaderFrame().getUserDicPanel().updateUserDicWords();
 			getService().updateDicSearchHistory(dshe, action);
 		}
 

@@ -1,536 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="org.coolreader"
-          android:installLocation="auto">
+        xmlns:tools="http://schemas.android.com/tools"
+        package="org.coolreader"
+        android:installLocation="auto">
 
     <supports-screens
-        android:xlargeScreens="true"
-        android:largeScreens="true"
-        android:normalScreens="true"
-        android:resizeable="true"
-        android:smallScreens="true"
-        android:anyDensity="true"
-        />
+            android:anyDensity="true"
+            android:largeScreens="true"
+            android:normalScreens="true"
+            android:resizeable="true"
+            android:smallScreens="true"
+            android:xlargeScreens="true" />
 
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <!-- uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/-->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <!-- Stop TTS on incoming call -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <!-- Hide Android3 soft buttons on Archos -->
-    <!--uses-permission android:name="archos.permission.FULLSCREEN.FULL"/-->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/ -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Stop TTS on incoming call -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Hide Android3 soft buttons on Archos -->
+    <!-- uses-permission android:name="archos.permission.FULLSCREEN.FULL"/ -->
     <!-- Required permission to use in-app billing. -->
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
-        android:allowBackup="true"
-        android:allowClearUserData="true"
-        android:icon="@mipmap/known_reader_logo"
-        android:label="@string/app_name_fork"
-        android:process="org.knownreader.premium"
-        android:resizeableActivity="true"
-        android:usesCleartextTraffic="true"
-        >
-
-        <meta-data android:name="android.max_aspect" android:value="2.1" />
-
-        <!--
-                   android:configChanges="orientation|keyboardHidden|locale|screenSize"
-        -->
-        <meta-data android:name="android.max_aspect" android:value="2.1" />
-        <activity android:name=".CoolReader"
+            android:allowBackup="true"
+            android:allowClearUserData="true"
+            android:icon="@mipmap/known_reader_logo"
             android:label="@string/app_name_fork"
-            android:configChanges="orientation|keyboardHidden|locale|screenSize|screenLayout|layoutDirection"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:launchMode="singleInstance"
-            android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="sensor">
+            android:process="org.knownreader.premium"
+            android:resizeableActivity="true"
+            android:usesCleartextTraffic="true">
+
+        <meta-data
+                android:name="android.max_aspect"
+                android:value="2.1" />
+        <!--                    android:configChanges="orientation|keyboardHidden|locale|screenSize" -->
+        <meta-data
+                android:name="android.max_aspect"
+                android:value="2.1" />
+
+        <activity
+                android:name=".CoolReader"
+                android:configChanges="orientation|keyboardHidden|locale|screenSize|screenLayout|layoutDirection"
+                android:label="@string/app_name_fork"
+                android:launchMode="singleInstance"
+                android:screenOrientation="sensor"
+                android:theme="@android:style/Theme.NoTitleBar"
+                android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                    android:host="github.com"
-                    android:pathPrefix="/plotn/coolreader"
-                    android:pathPattern=".*code=.*"/>
+
+                <data
+                        android:host="github.com"
+                        android:pathPattern=".*code=.*"
+                        android:pathPrefix="/plotn/coolreader"
+                        android:scheme="https" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER"/>
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.GET_CONTENT" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:host="*" android:scheme="file" />
+
+                <data
+                        android:host="*"
+                        android:scheme="file" />
                 <data android:mimeType="*/*" />
-                <data android:pathPattern="/.*\\.pml"/>
-                <data android:pathPattern="/.*\\.azw"/>
-                <data android:pathPattern="/.*\\.tcr"/>
+                <data android:pathPattern="/.*\\.pml" />
+                <data android:pathPattern="/.*\\.azw" />
+                <data android:pathPattern="/.*\\.tcr" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:host="*" android:scheme="file" android:mimeType="text/plain"/>
-                <data android:pathPattern=".*\\.pml"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\.tcr"/>
-                <data android:pathPattern="/.*\\.AZW"/>
-                <data android:pathPattern=".*\\.AZW"/>
-                <data android:pathPattern="/.*\\.azw"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.azw"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:host="*" android:scheme="file" android:mimeType="text/plain"/>
-                <data android:pathPattern=".*\\.pml"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\.tcr"/>
-                <data android:pathPattern="/.*\\.AZW"/>
-                <data android:pathPattern=".*\\.AZW"/>
-                <data android:pathPattern="/.*\\.azw"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.azw"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="*" android:scheme="http"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\.tcr"/>
-                <data android:pathPattern=".*\\.pml"/>
-                <data android:pathPattern="/.*\\.AZW"/>
-                <data android:pathPattern=".*\\.AZW"/>
-                <data android:pathPattern="/.*\\.azw"/>
-                <data android:pathPattern=".*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw"/>
-                <data android:pathPattern=".*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.azw"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.azw"/>
+
+                <data
+                        android:host="*"
+                        android:mimeType="text/plain"
+                        android:scheme="file" />
+                <data android:pathPattern=".*\\.pml" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\.tcr" />
+                <data android:pathPattern="/.*\\.AZW" />
+                <data android:pathPattern=".*\\.AZW" />
+                <data android:pathPattern="/.*\\.azw" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*..*\\.azw" />
+                <data android:pathPattern=".*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.azw" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="*" android:scheme="file" />
-                <data android:mimeType="application/x-pilot-prc"/>
+
+                <data
+                        android:host="*"
+                        android:mimeType="text/plain"
+                        android:scheme="file" />
+                <data android:pathPattern=".*\\.pml" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\.tcr" />
+                <data android:pathPattern="/.*\\.AZW" />
+                <data android:pathPattern=".*\\.AZW" />
+                <data android:pathPattern="/.*\\.azw" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*..*\\.azw" />
+                <data android:pathPattern=".*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.azw" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\.tcr" />
+                <data android:pathPattern=".*\\.pml" />
+                <data android:pathPattern="/.*\\.AZW" />
+                <data android:pathPattern=".*\\.AZW" />
+                <data android:pathPattern="/.*\\.azw" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.azw" />
+                <data android:pathPattern=".*..*\\.azw" />
+                <data android:pathPattern=".*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.azw" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.azw" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data android:mimeType="application/x-pilot-prc" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain"/>
-            </intent-filter>
-        </activity>
-
-        <activity-alias
-            android:name=".KnownReaderForFB2"
-            android:targetActivity=".CoolReader" >
-            <!-- intent-filter with recognized extensions and */* mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.fb2" />
-                <data android:pathPattern="/.*\\..*\\.fb2" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
-                <data android:pathPattern="/.*\\.fb3" />
-                <data android:pathPattern="/.*\\..*\\.fb3" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fb3" />
-                <data android:pathPattern="/.*\\.fb2\\.zip" />
-                <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
-                <data android:pathPattern="/.*\\.fbz" />
-                <data android:pathPattern="/.*\\..*\\.fbz" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
-                <data android:pathPattern="/.*\\.zip" />
-                <data android:pathPattern="/.*\\..*\\.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.zip" />
-                <data android:pathPattern=".*\\.fb2\\.zip"/>
-                <data android:pathPattern="/.*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\.fb2.zip"/>
-                <data android:pathPattern="/.*\\.fb2.zip"/>
-                <data android:pathPattern=".*\\.zip"/>
-                <data android:pathPattern="/.*\\.zip"/>
-                <data android:pathPattern="/.*\\.FBZ"/>
-                <data android:pathPattern=".*\\.FBZ"/>
-                <data android:pathPattern="/.*\\.fbz"/>
-                <data android:pathPattern=".*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern="/.*\\.FB2"/>
-                <data android:pathPattern=".*\\.FB2"/>
-                <data android:pathPattern="/.*\\.fb2"/>
-                <data android:pathPattern=".*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern="/.*\\.FB3"/>
-                <data android:pathPattern=".*\\.FB3"/>
-                <data android:pathPattern="/.*\\.fb3"/>
-                <data android:pathPattern=".*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb3"/>
-            </intent-filter>
-            <!-- intent-filter with recognized extensions and null mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.fb2" />
-                <data android:pathPattern="/.*\\..*\\.fb2" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
-                <data android:pathPattern="/.*\\.fb3" />
-                <data android:pathPattern="/.*\\..*\\.fb3" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fb3" />
-                <data android:pathPattern="/.*\\.fb2\\.zip" />
-                <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
-                <data android:pathPattern="/.*\\.fbz" />
-                <data android:pathPattern="/.*\\..*\\.fbz" />
-                <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
-                <data android:pathPattern="/.*\\.zip" />
-                <data android:pathPattern="/.*\\..*\\.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.zip" />
-                <data android:pathPattern=".*\\.fb2\\.zip"/>
-                <data android:pathPattern="/.*\\.fb2\\.zip"/>
-                <data android:pathPattern=".*\\.fb2.zip"/>
-                <data android:pathPattern="/.*\\.fb2.zip"/>
-                <data android:pathPattern=".*\\.zip"/>
-                <data android:pathPattern="/.*\\.zip"/>
-                <data android:pathPattern="/.*\\.FBZ"/>
-                <data android:pathPattern=".*\\.FBZ"/>
-                <data android:pathPattern="/.*\\.fbz"/>
-                <data android:pathPattern=".*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz"/>
-                <data android:pathPattern=".*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fbz"/>
-                <data android:pathPattern="/.*\\.FB2"/>
-                <data android:pathPattern=".*\\.FB2"/>
-                <data android:pathPattern="/.*\\.fb2"/>
-                <data android:pathPattern=".*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2"/>
-                <data android:pathPattern=".*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb2"/>
-                <data android:pathPattern="/.*\\.FB3"/>
-                <data android:pathPattern=".*\\.FB3"/>
-                <data android:pathPattern="/.*\\.fb3"/>
-                <data android:pathPattern=".*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3"/>
-                <data android:pathPattern=".*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb3"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb3"/>
-            </intent-filter>
-            <!-- intent-filter with no extensions and recognized mime-types -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="application/x-fictionbook+xml" />
-                <data android:mimeType="application/x-fictionbook" />
-                <data android:mimeType="application/x-fb2" />
-                <data android:mimeType="application/fb2"/>
-                <data android:mimeType="application/fb3"/>
-                <data android:mimeType="application/fb2.zip"/>
-                <data android:mimeType="application/zip"/>
-                <data android:mimeType="text/fb2+xml"/>
-                <data android:mimeType="application/fb2"/>
-                <data android:mimeType="application/fb3"/>
-                <data android:mimeType="application/fb2+zip"/>
-                <data android:mimeType="application/x-zip-compressed-fb2"/>
-                <data android:mimeType="application/x-fictionbook-ebook"/>
-                <data android:mimeType="application/x-fictionbook+zip"/>
-            </intent-filter>
-        </activity-alias>
-
-        <!-- alias activity to disable EPUB -->
-        <activity-alias
-            android:name=".KnownReaderForEPUB"
-            android:targetActivity=".CoolReader" >
-            <!-- intent-filter with recognized extensions and */* mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.epub" />
-                <data android:pathPattern="/.*\\..*\\.epub" />
-                <data android:pathPattern="/.*\\..*\\..*\\.epub" />
-                <data android:pathPattern=".*\\.epub\\.zip"/>
-                <data android:pathPattern="/.*\\.epub\\.zip"/>
-                <data android:pathPattern=".*\\.epub"/>
-                <data android:pathPattern=".*\\.EPUB"/>
-                <data android:pathPattern="/.*\\.epub"/>
-                <data android:pathPattern="/.*\\.EPUB"/>
-                <data android:pathPattern=".*\\.epub\\.zip"/>
-                <data android:pathPattern="/.*\\.epub\\.zip"/>
-            </intent-filter>
-            <!-- intent-filter with recognized extensions and null mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.epub" />
-                <data android:pathPattern="/.*\\..*\\.epub" />
-                <data android:pathPattern="/.*\\..*\\..*\\.epub" />
-                <data android:pathPattern=".*\\.epub\\.zip"/>
-                <data android:pathPattern="/.*\\.epub\\.zip"/>
-                <data android:pathPattern=".*\\.epub"/>
-                <data android:pathPattern=".*\\.EPUB"/>
-                <data android:pathPattern="/.*\\.epub"/>
-                <data android:pathPattern="/.*\\.EPUB"/>
-                <data android:pathPattern=".*\\.epub\\.zip"/>
-                <data android:pathPattern="/.*\\.epub\\.zip"/>
-            </intent-filter>
-            <!-- intent-filter with no extensions and recognized mime-types -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="application/epub+zip" />
-                <data android:mimeType="application/epub" />
-            </intent-filter>
-        </activity-alias>
-
-        <!-- alias activity to disable TXT -->
-        <activity-alias
-            android:name=".KnownReaderForTXT"
-            android:targetActivity=".CoolReader" >
-            <!-- intent-filter with recognized extensions and */* mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.txt" />
-                <data android:pathPattern="/.*\\..*\\.txt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.txt" />
-                <data android:pathPattern="/.*\\.txt\\.zip" />
-                <data android:pathPattern="/.*\\..*\\.txt\\.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.zip" />
-                <data android:pathPattern=".*\\.TXT"/>
-                <data android:pathPattern="/.*\\.TXT"/>
-                <data android:pathPattern=".*\\.txt"/>
-                <data android:pathPattern="/.*\\.txt"/>
-            </intent-filter>
-            <!-- intent-filter with recognized extensions and null mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-                <data android:host="*" android:scheme="http" />
-
-                <data android:pathPattern="/.*\\.txt" />
-                <data android:pathPattern="/.*\\..*\\.txt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.txt" />
-                <data android:pathPattern="/.*\\.txt\\.zip" />
-                <data android:pathPattern="/.*\\..*\\.txt\\.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.zip" />
-                <data android:pathPattern=".*\\.TXT"/>
-                <data android:pathPattern="/.*\\.TXT"/>
-                <data android:pathPattern=".*\\.txt"/>
-                <data android:pathPattern="/.*\\.txt"/>
-            </intent-filter>
-            <!-- intent-filter with no extensions and recognized mime-types -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="file" />
-                <data android:scheme="content" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" android:scheme="http"/>
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity-alias>
-        <!-- alias activity to disable HTML -->
+        </activity> <!-- alias activity to disable PIC -->
         <activity-alias
-            android:name=".KnownReaderForHTML"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnownReaderForPIC"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -544,45 +214,15 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.html" />
-                <data android:pathPattern="/.*\\..*\\.html" />
-                <data android:pathPattern="/.*\\..*\\..*\\.html" />
-                <data android:pathPattern="/.*\\.odt" />
-                <data android:pathPattern="/.*\\..*\\.odt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.odt" />
-                <data android:pathPattern="/.*\\.ods" />
-                <data android:pathPattern="/.*\\..*\\.ods" />
-                <data android:pathPattern="/.*\\..*\\..*\\.ods" />
-                <data android:pathPattern="/.*\\.odp" />
-                <data android:pathPattern="/.*\\..*\\.odp" />
-                <data android:pathPattern="/.*\\..*\\..*\\.odp" />
-                <data android:pathPattern="/.*\\.txt\\.htm" />
-                <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
-                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
-                <data android:pathPattern="/.*\\.xhtml" />
-                <data android:pathPattern="/.*\\..*\\.xhtml" />
-                <data android:pathPattern="/.*\\..*\\..*\\.xhtml" />
-                <data android:pathPattern=".*\\.html"/>
-                <data android:pathPattern="/.*\\.html"/>
-                <data android:pathPattern=".*\\.HTML"/>
-                <data android:pathPattern="/.*\\.HTML"/>
-                <data android:pathPattern=".*\\.odt"/>
-                <data android:pathPattern="/.*\\.odt"/>
-                <data android:pathPattern=".*\\.ODT"/>
-                <data android:pathPattern="/.*\\.ODT"/>
-                <data android:pathPattern=".*\\.ods"/>
-                <data android:pathPattern="/.*\\.ods"/>
-                <data android:pathPattern=".*\\.ODS"/>
-                <data android:pathPattern="/.*\\.ODS"/>
-                <data android:pathPattern=".*\\.odp"/>
-                <data android:pathPattern="/.*\\.odp"/>
-                <data android:pathPattern=".*\\.ODP"/>
-                <data android:pathPattern="/.*\\.ODP"/>
-                <data android:pathPattern=".*\\.htm"/>
-                <data android:pathPattern="/.*\\.htm"/>
-                <data android:pathPattern=".*\\.HTM"/>
-                <data android:pathPattern="/.*\\.HTM"/>
+                <data android:pathPattern="/.*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\.png" />
+                <data android:pathPattern="/.*\\..*\\.png" />
+                <data android:pathPattern="/.*\\..*\\..*\\.png" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -593,47 +233,21 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.html" />
-                <data android:pathPattern="/.*\\..*\\.html" />
-                <data android:pathPattern="/.*\\..*\\..*\\.html" />
-                <data android:pathPattern="/.*\\.odt" />
-                <data android:pathPattern="/.*\\..*\\.odt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.odt" />
-                <data android:pathPattern="/.*\\.ods" />
-                <data android:pathPattern="/.*\\..*\\.ods" />
-                <data android:pathPattern="/.*\\..*\\..*\\.ods" />
-                <data android:pathPattern="/.*\\.odp" />
-                <data android:pathPattern="/.*\\..*\\.odp" />
-                <data android:pathPattern="/.*\\..*\\..*\\.odp" />
-                <data android:pathPattern="/.*\\.txt\\.htm" />
-                <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
-                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
-                <data android:pathPattern="/.*\\.xhtml" />
-                <data android:pathPattern="/.*\\..*\\.xhtml" />
-                <data android:pathPattern="/.*\\..*\\..*\\.xhtml" />
-                <data android:pathPattern=".*\\.html"/>
-                <data android:pathPattern="/.*\\.html"/>
-                <data android:pathPattern=".*\\.HTML"/>
-                <data android:pathPattern="/.*\\.HTML"/>
-                <data android:pathPattern=".*\\.odt"/>
-                <data android:pathPattern="/.*\\.odt"/>
-                <data android:pathPattern=".*\\.ODT"/>
-                <data android:pathPattern="/.*\\.ODT"/>
-                <data android:pathPattern=".*\\.ods"/>
-                <data android:pathPattern="/.*\\.ods"/>
-                <data android:pathPattern=".*\\.ODS"/>
-                <data android:pathPattern="/.*\\.ODS"/>
-                <data android:pathPattern=".*\\.odp"/>
-                <data android:pathPattern="/.*\\.odp"/>
-                <data android:pathPattern=".*\\.ODP"/>
-                <data android:pathPattern="/.*\\.ODP"/>
-                <data android:pathPattern=".*\\.htm"/>
-                <data android:pathPattern="/.*\\.htm"/>
-                <data android:pathPattern=".*\\.HTM"/>
-                <data android:pathPattern="/.*\\.HTM"/>
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
+                <data android:pathPattern="/.*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
+                <data android:pathPattern="/.*\\.png" />
+                <data android:pathPattern="/.*\\..*\\.png" />
+                <data android:pathPattern="/.*\\..*\\..*\\.png" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -646,17 +260,33 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="text/html" />
-                <data android:mimeType="application/xhtml+xml" />
-                <data android:mimeType="application/vnd.oasis.opendocument.text" />
-                <data android:mimeType="application/vnd.oasis.opendocument.spreadsheet" />
-                <data android:mimeType="application/vnd.oasis.opendocument.presentation" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
             </intent-filter>
-        </activity-alias>
-        <!-- alias activity to disable CHM -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MUTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity-alias> <!-- alias activity to disable MOBI -->
         <activity-alias
-            android:name=".KnowmReaderForCHM"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnownReaderForMOBI"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -670,10 +300,42 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.chm" />
-                <data android:pathPattern="/.*\\..*\\.chm" />
-                <data android:pathPattern="/.*\\..*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\..*\\.pdb" />
+                <data android:pathPattern="/.*\\.MOBI" />
+                <data android:pathPattern=".*\\.MOBI" />
+                <data android:pathPattern="/.*\\.mobi" />
+                <data android:pathPattern=".*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*\\.PDB" />
+                <data android:pathPattern="/.*\\.PDB" />
+                <data android:pathPattern=".*\\.pdb" />
+                <data android:pathPattern="/.*\\.pdb" />
+                <data android:pathPattern=".*\\.PRC" />
+                <data android:pathPattern="/.*\\.PRC" />
+                <data android:pathPattern=".*\\.prc" />
+                <data android:pathPattern="/.*\\.prc" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -684,12 +346,48 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.chm" />
-                <data android:pathPattern="/.*\\..*\\.chm" />
-                <data android:pathPattern="/.*\\..*\\..*\\.chm" />
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
+                <data android:pathPattern="/.*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.prc" />
+                <data android:pathPattern="/.*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\.pdb" />
+                <data android:pathPattern="/.*\\..*\\..*\\.pdb" />
+                <data android:pathPattern="/.*\\.MOBI" />
+                <data android:pathPattern=".*\\.MOBI" />
+                <data android:pathPattern="/.*\\.mobi" />
+                <data android:pathPattern=".*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi" />
+                <data android:pathPattern=".*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.mobi" />
+                <data android:pathPattern=".*\\.PDB" />
+                <data android:pathPattern="/.*\\.PDB" />
+                <data android:pathPattern=".*\\.pdb" />
+                <data android:pathPattern="/.*\\.pdb" />
+                <data android:pathPattern=".*\\.PRC" />
+                <data android:pathPattern="/.*\\.PRC" />
+                <data android:pathPattern=".*\\.prc" />
+                <data android:pathPattern="/.*\\.prc" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -702,15 +400,19 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="application/vnd.ms-htmlhelp" />
-                <data android:mimeType="application/x-chm"/>
+                <data android:mimeType="application/x-mobipocket-ebook" />
+                <data android:mimeType="application/x-pdb-plucker-ebook" />
+                <data android:mimeType="application/x-pdb-textread-ebook" />
+                <data android:mimeType="application/x-pdb-peanutpress-ebook" />
+                <data android:mimeType="application/x-pdb-ztxt-ebook" />
+                <data android:mimeType="application/vnd.palm" />
+                <data android:mimeType="application/x-pdb-plucker-ebook" />
             </intent-filter>
-        </activity-alias>
-
-        <!-- alias activity to disable CBZ -->
+        </activity-alias> <!-- alias activity to disable DOCX -->
         <activity-alias
-            android:name=".KnownReaderForCBZ"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnownReaderForDOC"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -724,54 +426,9 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\.CBZ"/>
-                <data android:pathPattern=".*\\.CBZ"/>
-                <data android:pathPattern="/.*\\.cbz"/>
-                <data android:pathPattern=".*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern="/.*\\.CBR"/>
-                <data android:pathPattern=".*\\.CBR"/>
-                <data android:pathPattern="/.*\\.cbr"/>
-                <data android:pathPattern=".*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbr"/>
+                <data android:pathPattern="/.*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.doc" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -782,56 +439,15 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\.CBZ"/>
-                <data android:pathPattern=".*\\.CBZ"/>
-                <data android:pathPattern="/.*\\.cbz"/>
-                <data android:pathPattern=".*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz"/>
-                <data android:pathPattern=".*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbz"/>
-                <data android:pathPattern="/.*\\.CBR"/>
-                <data android:pathPattern=".*\\.CBR"/>
-                <data android:pathPattern="/.*\\.cbr"/>
-                <data android:pathPattern=".*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr"/>
-                <data android:pathPattern=".*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbr"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbr"/>
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\.doc" />
+                <data android:pathPattern="/.*\\..*\\..*\\.doc" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -844,16 +460,24 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="application/x-cdisplay" />
-                <data android:mimeType="application/x-cbz" />
-                <data android:mimeType="application/x-cbr" />
-                <data android:mimeType="application/x-cbt" />
+                <data android:mimeType="application/msword" />
+                <data android:mimeType="application/doc" />
+                <data android:mimeType="application/vnd.msword" />
+                <data android:mimeType="application/vnd.ms-word" />
+                <data android:mimeType="application/winword" />
+                <data android:mimeType="application/word" />
+                <data android:mimeType="application/x-msw6" />
+                <data android:mimeType="application/x-msword" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <data android:mimeType="application/textmaker.wordprocessingml.document" />
+                <data android:mimeType="application/doc+zip" />
+                <data android:mimeType="application/doc.zip" />
             </intent-filter>
-        </activity-alias>
-        <!-- alias activity to disable RTF -->
+        </activity-alias> <!-- alias activity to disable DOCX -->
         <activity-alias
-            android:name=".KnownReaderForRTF"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnownReaderForDOCX"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -867,79 +491,6 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.rtf" />
-                <data android:pathPattern="/.*\\..*\\.rtf" />
-                <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
-                <data android:pathPattern="/.*\\.rtf.zip" />
-                <data android:pathPattern="/.*\\..*\\.rtf.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.rtf.zip" />
-                <data android:pathPattern=".*\\.RTF"/>
-                <data android:pathPattern="/.*\\.RTF"/>
-                <data android:pathPattern=".*\\.rtf"/>
-                <data android:pathPattern="/.*\\.rtf"/>
-            </intent-filter>
-            <!-- intent-filter with recognized extensions and null mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.rtf" />
-                <data android:pathPattern="/.*\\..*\\.rtf" />
-                <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
-                <data android:pathPattern="/.*\\.rtf.zip" />
-                <data android:pathPattern="/.*\\..*\\.rtf.zip" />
-                <data android:pathPattern="/.*\\..*\\..*\\.rtf.zip" />
-                <data android:pathPattern=".*\\.RTF"/>
-                <data android:pathPattern="/.*\\.RTF"/>
-                <data android:pathPattern=".*\\.rtf"/>
-                <data android:pathPattern="/.*\\.rtf"/>
-            </intent-filter>
-            <!-- intent-filter with no extensions and recognized mime-types -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="text/rtf" />
-                <data android:mimeType="application/rtf" />
-                <data android:mimeType="application/rtf+zip" />
-                <data android:mimeType="application/x-rtf"/>
-                <data android:mimeType="text/richtext"/>
-                <data android:mimeType="text/rtf"/>
-                <data android:mimeType="application/rtf.zip"/>
-            </intent-filter>
-        </activity-alias>
-        <!-- alias activity to disable DOCX -->
-        <activity-alias
-            android:name=".KnownReaderForDOCX"
-            android:targetActivity=".CoolReader" >
-            <!-- intent-filter with recognized extensions and */* mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-
                 <data android:pathPattern="/.*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docx" />
@@ -949,12 +500,12 @@
                 <data android:pathPattern="/.*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docm" />
-                <data android:pathPattern=".*\\.docx"/>
-                <data android:pathPattern="/.*\\.docx"/>
-                <data android:pathPattern=".*\\.tmdx"/>
-                <data android:pathPattern="/.*\\.tmdx"/>
-                <data android:pathPattern=".*\\.docm"/>
-                <data android:pathPattern="/.*\\.docm"/>
+                <data android:pathPattern=".*\\.docx" />
+                <data android:pathPattern="/.*\\.docx" />
+                <data android:pathPattern=".*\\.tmdx" />
+                <data android:pathPattern="/.*\\.tmdx" />
+                <data android:pathPattern=".*\\.docm" />
+                <data android:pathPattern="/.*\\.docm" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -965,9 +516,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
                 <data android:pathPattern="/.*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docx" />
@@ -977,12 +531,12 @@
                 <data android:pathPattern="/.*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\.docm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docm" />
-                <data android:pathPattern=".*\\.docx"/>
-                <data android:pathPattern="/.*\\.docx"/>
-                <data android:pathPattern=".*\\.tmdx"/>
-                <data android:pathPattern="/.*\\.tmdx"/>
-                <data android:pathPattern=".*\\.docm"/>
-                <data android:pathPattern="/.*\\.docm"/>
+                <data android:pathPattern=".*\\.docx" />
+                <data android:pathPattern="/.*\\.docx" />
+                <data android:pathPattern=".*\\.tmdx" />
+                <data android:pathPattern="/.*\\.tmdx" />
+                <data android:pathPattern=".*\\.docm" />
+                <data android:pathPattern="/.*\\.docm" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -1009,11 +563,11 @@
                 <data android:scheme="content" />
                 <data android:mimeType="application/textmaker.wordprocessingml.document" />
             </intent-filter>
-        </activity-alias>
-        <!-- alias activity to disable DOCX -->
+        </activity-alias> <!-- alias activity to disable RTF -->
         <activity-alias
-            android:name=".KnownReaderForDOC"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnownReaderForRTF"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1027,10 +581,16 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.doc" />
-                <data android:pathPattern="/.*\\..*\\.doc" />
-                <data android:pathPattern="/.*\\..*\\..*\\.doc" />
+                <data android:pathPattern="/.*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf.zip" />
+                <data android:pathPattern=".*\\.RTF" />
+                <data android:pathPattern="/.*\\.RTF" />
+                <data android:pathPattern=".*\\.rtf" />
+                <data android:pathPattern="/.*\\.rtf" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -1041,12 +601,22 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.doc" />
-                <data android:pathPattern="/.*\\..*\\.doc" />
-                <data android:pathPattern="/.*\\..*\\..*\\.doc" />
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
+                <data android:pathPattern="/.*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\.rtf.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.rtf.zip" />
+                <data android:pathPattern=".*\\.RTF" />
+                <data android:pathPattern="/.*\\.RTF" />
+                <data android:pathPattern=".*\\.rtf" />
+                <data android:pathPattern="/.*\\.rtf" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -1059,24 +629,19 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="application/msword"/>
-                <data android:mimeType="application/doc"/>
-                <data android:mimeType="application/vnd.msword"/>
-                <data android:mimeType="application/vnd.ms-word"/>
-                <data android:mimeType="application/winword"/>
-                <data android:mimeType="application/word"/>
-                <data android:mimeType="application/x-msw6"/>
-                <data android:mimeType="application/x-msword"/>
-                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
-                <data android:mimeType="application/textmaker.wordprocessingml.document"/>
-                <data android:mimeType="application/doc+zip"/>
-                <data android:mimeType="application/doc.zip"/>
+                <data android:mimeType="text/rtf" />
+                <data android:mimeType="application/rtf" />
+                <data android:mimeType="application/rtf+zip" />
+                <data android:mimeType="application/x-rtf" />
+                <data android:mimeType="text/richtext" />
+                <data android:mimeType="text/rtf" />
+                <data android:mimeType="application/rtf.zip" />
             </intent-filter>
-        </activity-alias>
-        <!-- alias activity to disable MOBI -->
+        </activity-alias> <!-- alias activity to disable CBZ -->
         <activity-alias
-            android:name=".KnownReaderForMOBI"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnownReaderForCBZ"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1090,43 +655,53 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.mobi" />
-                <data android:pathPattern="/.*\\..*\\.mobi" />
-                <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
-                <data android:pathPattern="/.*\\.prc" />
-                <data android:pathPattern="/.*\\..*\\.prc" />
-                <data android:pathPattern="/.*\\..*\\..*\\.prc" />
-                <data android:pathPattern="/.*\\.pdb" />
-                <data android:pathPattern="/.*\\..*\\.pdb" />
-                <data android:pathPattern="/.*\\..*\\..*\\.pdb" />
-                <data android:pathPattern="/.*\\.MOBI"/>
-                <data android:pathPattern=".*\\.MOBI"/>
-                <data android:pathPattern="/.*\\.mobi"/>
-                <data android:pathPattern=".*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*\\.PDB"/>
-                <data android:pathPattern="/.*\\.PDB"/>
-                <data android:pathPattern=".*\\.pdb"/>
-                <data android:pathPattern="/.*\\.pdb"/>
-                <data android:pathPattern=".*\\.PRC"/>
-                <data android:pathPattern="/.*\\.PRC"/>
-                <data android:pathPattern=".*\\.prc"/>
-                <data android:pathPattern="/.*\\.prc"/>
+                <data android:pathPattern="/.*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
+                <data android:pathPattern="/.*\\.CBZ" />
+                <data android:pathPattern=".*\\.CBZ" />
+                <data android:pathPattern="/.*\\.cbz" />
+                <data android:pathPattern=".*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbz" />
+                <data android:pathPattern="/.*\\.CBR" />
+                <data android:pathPattern=".*\\.CBR" />
+                <data android:pathPattern="/.*\\.cbr" />
+                <data android:pathPattern=".*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbr" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -1137,45 +712,59 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.mobi" />
-                <data android:pathPattern="/.*\\..*\\.mobi" />
-                <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
-                <data android:pathPattern="/.*\\.prc" />
-                <data android:pathPattern="/.*\\..*\\.prc" />
-                <data android:pathPattern="/.*\\..*\\..*\\.prc" />
-                <data android:pathPattern="/.*\\.pdb" />
-                <data android:pathPattern="/.*\\..*\\.pdb" />
-                <data android:pathPattern="/.*\\..*\\..*\\.pdb" />
-                <data android:pathPattern="/.*\\.MOBI"/>
-                <data android:pathPattern=".*\\.MOBI"/>
-                <data android:pathPattern="/.*\\.mobi"/>
-                <data android:pathPattern=".*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.mobi"/>
-                <data android:pathPattern=".*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.mobi"/>
-                <data android:pathPattern=".*\\.PDB"/>
-                <data android:pathPattern="/.*\\.PDB"/>
-                <data android:pathPattern=".*\\.pdb"/>
-                <data android:pathPattern="/.*\\.pdb"/>
-                <data android:pathPattern=".*\\.PRC"/>
-                <data android:pathPattern="/.*\\.PRC"/>
-                <data android:pathPattern=".*\\.prc"/>
-                <data android:pathPattern="/.*\\.prc"/>
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
+                <data android:pathPattern="/.*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
+                <data android:pathPattern="/.*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\.cbt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
+                <data android:pathPattern="/.*\\.CBZ" />
+                <data android:pathPattern=".*\\.CBZ" />
+                <data android:pathPattern="/.*\\.cbz" />
+                <data android:pathPattern=".*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
+                <data android:pathPattern=".*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbz" />
+                <data android:pathPattern="/.*\\.CBR" />
+                <data android:pathPattern=".*\\.CBR" />
+                <data android:pathPattern="/.*\\.cbr" />
+                <data android:pathPattern=".*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
+                <data android:pathPattern=".*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbr" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbr" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -1188,20 +777,16 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="application/x-mobipocket-ebook" />
-                <data android:mimeType="application/x-pdb-plucker-ebook" />
-                <data android:mimeType="application/x-pdb-textread-ebook" />
-                <data android:mimeType="application/x-pdb-peanutpress-ebook" />
-                <data android:mimeType="application/x-pdb-ztxt-ebook" />
-                <data android:mimeType="application/vnd.palm" />
-                <data android:mimeType="application/x-pdb-plucker-ebook" />
+                <data android:mimeType="application/x-cdisplay" />
+                <data android:mimeType="application/x-cbz" />
+                <data android:mimeType="application/x-cbr" />
+                <data android:mimeType="application/x-cbt" />
             </intent-filter>
-        </activity-alias>
-
-        <!-- alias activity to disable PIC -->
+        </activity-alias> <!-- alias activity to disable CHM -->
         <activity-alias
-            android:name=".KnownReaderForPIC"
-            android:targetActivity=".CoolReader" >
+                android:name=".KnowmReaderForCHM"
+                android:targetActivity=".CoolReader">
+
             <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1215,16 +800,9 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-
-                <data android:pathPattern="/.*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\.png" />
-                <data android:pathPattern="/.*\\..*\\.png" />
-                <data android:pathPattern="/.*\\..*\\..*\\.png" />
+                <data android:pathPattern="/.*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.chm" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -1235,18 +813,15 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:scheme="content" />
-
-                <data android:pathPattern="/.*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
-                <data android:pathPattern="/.*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\..*\\..*\\.jpeg" />
-                <data android:pathPattern="/.*\\.png" />
-                <data android:pathPattern="/.*\\..*\\.png" />
-                <data android:pathPattern="/.*\\..*\\..*\\.png" />
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.chm" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>
@@ -1259,32 +834,518 @@
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-                <data android:mimeType="image/*" />
+                <data android:mimeType="application/vnd.ms-htmlhelp" />
+                <data android:mimeType="application/x-chm" />
+            </intent-filter>
+        </activity-alias> <!-- alias activity to disable HTML -->
+        <activity-alias
+                android:name=".KnownReaderForHTML"
+                android:targetActivity=".CoolReader">
+
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*\\.html" />
+                <data android:pathPattern="/.*\\..*\\.html" />
+                <data android:pathPattern="/.*\\..*\\..*\\.html" />
+                <data android:pathPattern="/.*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odp" />
+                <data android:pathPattern="/.*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\..*\\.xhtml" />
+                <data android:pathPattern=".*\\.html" />
+                <data android:pathPattern="/.*\\.html" />
+                <data android:pathPattern=".*\\.HTML" />
+                <data android:pathPattern="/.*\\.HTML" />
+                <data android:pathPattern=".*\\.odt" />
+                <data android:pathPattern="/.*\\.odt" />
+                <data android:pathPattern=".*\\.ODT" />
+                <data android:pathPattern="/.*\\.ODT" />
+                <data android:pathPattern=".*\\.ods" />
+                <data android:pathPattern="/.*\\.ods" />
+                <data android:pathPattern=".*\\.ODS" />
+                <data android:pathPattern="/.*\\.ODS" />
+                <data android:pathPattern=".*\\.odp" />
+                <data android:pathPattern="/.*\\.odp" />
+                <data android:pathPattern=".*\\.ODP" />
+                <data android:pathPattern="/.*\\.ODP" />
+                <data android:pathPattern=".*\\.htm" />
+                <data android:pathPattern="/.*\\.htm" />
+                <data android:pathPattern=".*\\.HTM" />
+                <data android:pathPattern="/.*\\.HTM" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.html" />
+                <data android:pathPattern="/.*\\..*\\.html" />
+                <data android:pathPattern="/.*\\..*\\..*\\.html" />
+                <data android:pathPattern="/.*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\..*\\..*\\.ods" />
+                <data android:pathPattern="/.*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\.odp" />
+                <data android:pathPattern="/.*\\..*\\..*\\.odp" />
+                <data android:pathPattern="/.*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.htm" />
+                <data android:pathPattern="/.*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\.xhtml" />
+                <data android:pathPattern="/.*\\..*\\..*\\.xhtml" />
+                <data android:pathPattern=".*\\.html" />
+                <data android:pathPattern="/.*\\.html" />
+                <data android:pathPattern=".*\\.HTML" />
+                <data android:pathPattern="/.*\\.HTML" />
+                <data android:pathPattern=".*\\.odt" />
+                <data android:pathPattern="/.*\\.odt" />
+                <data android:pathPattern=".*\\.ODT" />
+                <data android:pathPattern="/.*\\.ODT" />
+                <data android:pathPattern=".*\\.ods" />
+                <data android:pathPattern="/.*\\.ods" />
+                <data android:pathPattern=".*\\.ODS" />
+                <data android:pathPattern="/.*\\.ODS" />
+                <data android:pathPattern=".*\\.odp" />
+                <data android:pathPattern="/.*\\.odp" />
+                <data android:pathPattern=".*\\.ODP" />
+                <data android:pathPattern="/.*\\.ODP" />
+                <data android:pathPattern=".*\\.htm" />
+                <data android:pathPattern="/.*\\.htm" />
+                <data android:pathPattern=".*\\.HTM" />
+                <data android:pathPattern="/.*\\.HTM" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="text/html" />
+                <data android:mimeType="application/xhtml+xml" />
+                <data android:mimeType="application/vnd.oasis.opendocument.text" />
+                <data android:mimeType="application/vnd.oasis.opendocument.spreadsheet" />
+                <data android:mimeType="application/vnd.oasis.opendocument.presentation" />
+            </intent-filter>
+        </activity-alias> <!-- alias activity to disable TXT -->
+        <activity-alias
+                android:name=".KnownReaderForTXT"
+                android:targetActivity=".CoolReader">
+
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.zip" />
+                <data android:pathPattern=".*\\.TXT" />
+                <data android:pathPattern="/.*\\.TXT" />
+                <data android:pathPattern=".*\\.txt" />
+                <data android:pathPattern="/.*\\.txt" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+                <data android:pathPattern="/.*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt" />
+                <data android:pathPattern="/.*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.txt\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.txt\\.zip" />
+                <data android:pathPattern=".*\\.TXT" />
+                <data android:pathPattern="/.*\\.TXT" />
+                <data android:pathPattern=".*\\.txt" />
+                <data android:pathPattern="/.*\\.txt" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-                <data android:mimeType="image/*" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
+        </activity-alias> <!-- alias activity to disable EPUB -->
+        <activity-alias
+                android:name=".KnownReaderForEPUB"
+                android:targetActivity=".CoolReader">
+
+            <!-- intent-filter with recognized extensions and */* mimeType -->
             <intent-filter>
-                <action android:name="android.intent.action.SEND_MUTIPLE" />
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/png" />
-                <data android:mimeType="image/*" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\..*\\.epub" />
+                <data android:pathPattern=".*\\.epub\\.zip" />
+                <data android:pathPattern="/.*\\.epub\\.zip" />
+                <data android:pathPattern=".*\\.epub" />
+                <data android:pathPattern=".*\\.EPUB" />
+                <data android:pathPattern="/.*\\.epub" />
+                <data android:pathPattern="/.*\\.EPUB" />
+                <data android:pathPattern=".*\\.epub\\.zip" />
+                <data android:pathPattern="/.*\\.epub\\.zip" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\.epub" />
+                <data android:pathPattern="/.*\\..*\\..*\\.epub" />
+                <data android:pathPattern=".*\\.epub\\.zip" />
+                <data android:pathPattern="/.*\\.epub\\.zip" />
+                <data android:pathPattern=".*\\.epub" />
+                <data android:pathPattern=".*\\.EPUB" />
+                <data android:pathPattern="/.*\\.epub" />
+                <data android:pathPattern="/.*\\.EPUB" />
+                <data android:pathPattern=".*\\.epub\\.zip" />
+                <data android:pathPattern="/.*\\.epub\\.zip" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/epub+zip" />
+                <data android:mimeType="application/epub" />
             </intent-filter>
         </activity-alias>
+        <activity-alias
+                android:name=".KnownReaderForFB2"
+                android:targetActivity=".CoolReader">
 
-        <!-- Sync support -->
-        <service android:name=".sync.SyncService" />
+            <!-- intent-filter with recognized extensions and */* mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="/.*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb3" />
+                <data android:pathPattern="/.*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.zip" />
+                <data android:pathPattern=".*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\.fb2\\.zip" />
+                <data android:pathPattern=".*\\.fb2.zip" />
+                <data android:pathPattern="/.*\\.fb2.zip" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:pathPattern="/.*\\.zip" />
+                <data android:pathPattern="/.*\\.FBZ" />
+                <data android:pathPattern=".*\\.FBZ" />
+                <data android:pathPattern="/.*\\.fbz" />
+                <data android:pathPattern=".*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fbz" />
+                <data android:pathPattern="/.*\\.FB2" />
+                <data android:pathPattern=".*\\.FB2" />
+                <data android:pathPattern="/.*\\.fb2" />
+                <data android:pathPattern=".*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb2" />
+                <data android:pathPattern="/.*\\.FB3" />
+                <data android:pathPattern=".*\\.FB3" />
+                <data android:pathPattern="/.*\\.fb3" />
+                <data android:pathPattern=".*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb3" />
+            </intent-filter>
+            <!-- intent-filter with recognized extensions and null mimeType -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                        android:host="*"
+                        android:scheme="file" />
+                <data
+                        android:host="*"
+                        android:scheme="content" />
+                <data android:pathPattern="/.*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
+                <data android:pathPattern="/.*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\.fb3" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb3" />
+                <data android:pathPattern="/.*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\..*\\..*\\.fbz" />
+                <data android:pathPattern="/.*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\.zip" />
+                <data android:pathPattern="/.*\\..*\\..*\\.zip" />
+                <data android:pathPattern=".*\\.fb2\\.zip" />
+                <data android:pathPattern="/.*\\.fb2\\.zip" />
+                <data android:pathPattern=".*\\.fb2.zip" />
+                <data android:pathPattern="/.*\\.fb2.zip" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:pathPattern="/.*\\.zip" />
+                <data android:pathPattern="/.*\\.FBZ" />
+                <data android:pathPattern=".*\\.FBZ" />
+                <data android:pathPattern="/.*\\.fbz" />
+                <data android:pathPattern=".*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fbz" />
+                <data android:pathPattern=".*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fbz" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fbz" />
+                <data android:pathPattern="/.*\\.FB2" />
+                <data android:pathPattern=".*\\.FB2" />
+                <data android:pathPattern="/.*\\.fb2" />
+                <data android:pathPattern=".*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb2" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb2" />
+                <data android:pathPattern="/.*\\.FB3" />
+                <data android:pathPattern=".*\\.FB3" />
+                <data android:pathPattern="/.*\\.fb3" />
+                <data android:pathPattern=".*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.fb3" />
+                <data android:pathPattern=".*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*..*..*\\.fb3" />
+                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.fb3" />
+            </intent-filter>
+            <!-- intent-filter with no extensions and recognized mime-types -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/x-fictionbook+xml" />
+                <data android:mimeType="application/x-fictionbook" />
+                <data android:mimeType="application/x-fb2" />
+                <data android:mimeType="application/fb2" />
+                <data android:mimeType="application/fb3" />
+                <data android:mimeType="application/fb2.zip" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="text/fb2+xml" />
+                <data android:mimeType="application/fb2" />
+                <data android:mimeType="application/fb3" />
+                <data android:mimeType="application/fb2+zip" />
+                <data android:mimeType="application/x-zip-compressed-fb2" />
+                <data android:mimeType="application/x-fictionbook-ebook" />
+                <data android:mimeType="application/x-fictionbook+zip" />
+            </intent-filter>
+        </activity-alias> <!-- Sync support -->
+
+        <activity
+                android:name=".ProcessTextAct"
+                android:label="@string/app_name_fork"
+                >
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <data android:mimeType="text/plain"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!-- <service android:name=".sync.SyncService" /> -->
         <!-- Database service -->
-        <service android:name=".db.CRDBService" />
-
-        <!-- Donations support -->
+        <service android:name=".db.CRDBService" /> <!-- Donations support -->
         <!--
         <service android:name=".donations.BillingService" />
 
@@ -1297,11 +1358,12 @@
         </receiver>
         -->
         <!-- Stop TTS on incoming call -->
-        <receiver android:name="org.coolreader.PhoneStateReceiver">
+        <receiver android:name=".PhoneStateReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
+
         <provider
                 android:name=".GenericFileProvider"
                 android:authorities="org.knownreader.fileprovider"
@@ -1309,7 +1371,7 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/provider_paths"/>
+                    android:resource="@xml/provider_paths" />
         </provider>
     </application>
 

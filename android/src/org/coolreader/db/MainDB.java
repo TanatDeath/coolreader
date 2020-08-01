@@ -894,9 +894,18 @@ public class MainDB extends BaseDB {
 		ArrayList<DicSearchHistoryEntry> arrlDshe = new ArrayList<DicSearchHistoryEntry>();
 		Cursor rs = null;
 		try {
-			String sql = "SELECT id, search_text, text_translate, search_from_book, dictionary_used, " +
-					"create_time, last_access_time, language_from, language_to, seen_count "+
-					" FROM dic_search_history order by last_access_time DESC ";
+			String sql =
+					"SELECT h.id, h.search_text, h.text_translate, h.search_from_book, h.dictionary_used, " +
+					"  h.create_time, h.last_access_time, h.language_from, h.language_to, h.seen_count " +
+					"  FROM dic_search_history h where COALESCE(text_translate,'') != '' " +
+					" union all " +
+					"SELECT h.id, h.search_text, ud.dic_word_translate, ud.dic_from_book, h.dictionary_used, " +
+					"  h.create_time, h.last_access_time, h.language_from, h.language_to, h.seen_count " +
+					"  FROM dic_search_history h" +
+					"  left join user_dic ud on trim(ud.dic_word) = trim(h.search_text) " +
+					"  where COALESCE(text_translate,'') = '' " +
+					"order by last_access_time DESC "+
+					"  LIMIT 5000 ";
 			rs = mDB.rawQuery(sql, null);
 			if ( rs.moveToFirst() ) {
 				do {
