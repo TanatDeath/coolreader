@@ -84,7 +84,7 @@ int gDOMVersionRequested     = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.66"
+#define CACHE_FILE_FORMAT_VERSION "3.12.67"
 
 /// increment following value to force re-formatting of old book after load
 #define FORMATTING_VERSION_ID 0x0025
@@ -393,8 +393,11 @@ lUInt32 calcGlobalSettingsHash(int documentId, bool already_rendered)
     if ( LVRendGetFontEmbolden() )
         hash = hash * 75 + 2384761;
     hash = hash * 31 + fontMan->GetFallbackFontFaces().getHash();
-    if ( gFlgFloatingPunctuationEnabled )
-        hash = hash * 75 + 1761;
+    // Hanging punctuation does not need to trigger a re-render, as
+    // it's now ensured by alignLine() and won't change paragraphs height.
+    // We just need to _renderedBlockCache.clear() when it changes.
+    //if ( gHangingPunctuationEnabled )
+    //    hash = hash * 75 + 1761;
     hash = hash * 31 + gRenderDPI;
     hash = hash * 31 + gRenderBlockRenderingFlags;
     hash = hash * 31 + gRootFontSize;
@@ -1620,6 +1623,58 @@ int RenderRectAccessor::getInnerWidth()
     }
     return _inner_width;
 }
+int RenderRectAccessor::getUsableLeftOverflow()
+{
+    if ( _dirty ) {
+        _dirty = false;
+        _node->getRenderData(*this);
+#ifdef DEBUG_RENDER_RECT_ACCESS
+        rr_lock( _node );
+#endif
+    }
+    return _usable_left_overflow;
+}
+int RenderRectAccessor::getUsableRightOverflow()
+{
+    if ( _dirty ) {
+        _dirty = false;
+        _node->getRenderData(*this);
+#ifdef DEBUG_RENDER_RECT_ACCESS
+        rr_lock( _node );
+#endif
+    }
+    return _usable_right_overflow;
+}
+void RenderRectAccessor::setUsableLeftOverflow( int dx )
+{
+    if ( _dirty ) {
+        _dirty = false;
+        _node->getRenderData(*this);
+#ifdef DEBUG_RENDER_RECT_ACCESS
+        rr_lock( _node );
+#endif
+    }
+    if ( dx < 0 ) dx = 0; // don't allow a negative value
+    if ( _usable_left_overflow != dx ) {
+        _usable_left_overflow = dx;
+        _modified = true;
+    }
+}
+void RenderRectAccessor::setUsableRightOverflow( int dx )
+{
+    if ( _dirty ) {
+        _dirty = false;
+        _node->getRenderData(*this);
+#ifdef DEBUG_RENDER_RECT_ACCESS
+        rr_lock( _node );
+#endif
+    }
+    if ( dx < 0 ) dx = 0; // don't allow a negative value
+    if ( _usable_right_overflow != dx ) {
+        _usable_right_overflow = dx;
+        _modified = true;
+    }
+}
 int RenderRectAccessor::getTopOverflow()
 {
     if ( _dirty ) {
@@ -2673,7 +2728,7 @@ void ldomDataStorageManager::setStyleData( lUInt32 elemDataIndex, const ldomNode
     // assume storage has raw data chunks
     int index = elemDataIndex>>4; // element sequential index
     int chunkIndex = index >> STYLE_DATA_CHUNK_ITEMS_SHIFT;
-    while ( _chunks.length() < chunkIndex ) {
+    while ( _chunks.length() <= chunkIndex ) {
         //if ( _chunks.length()>0 )
         //    _chunks[_chunks.length()-1]->compact();
         _chunks.add( new ldomTextStorageChunk(STYLE_DATA_CHUNK_SIZE, this, _chunks.length()) );
@@ -2710,7 +2765,7 @@ void ldomDataStorageManager::setRendRectData( lUInt32 elemDataIndex, const lvdom
     // assume storage has raw data chunks
     int index = elemDataIndex>>4; // element sequential index
     int chunkIndex = index >> RECT_DATA_CHUNK_ITEMS_SHIFT;
-    while ( _chunks.length() < chunkIndex ) {
+    while ( _chunks.length() <= chunkIndex ) {
         //if ( _chunks.length()>0 )
         //    _chunks[_chunks.length()-1]->compact();
         _chunks.add( new ldomTextStorageChunk(RECT_DATA_CHUNK_SIZE, this, _chunks.length()) );
@@ -4297,17 +4352,16 @@ public:
 
         lString16 codeBase = cssFile;
         LVExtractLastPathElement(codeBase);
-        //plotn - when no container - dont know what to do, then exiting successfully
-        LVContainerRef cont = _document->getContainer();
-        if (cont.isNull()) return true;
-        //-
-        LVStreamRef cssStream = _document->getContainer()->OpenStream(cssFile.c_str(), LVOM_READ);
-        if ( !cssStream.isNull() ) {
-            lString16 css;
-            css << LVReadTextFile( cssStream );
-            int offset = _inProgress.add(cssFile);
-            ret = Parse(codeBase, css) || ret;
-            _inProgress.erase(offset, 1);
+        LVContainerRef container = _document->getContainer();
+        if (!container.isNull()) {
+            LVStreamRef cssStream = container->OpenStream(cssFile.c_str(), LVOM_READ);
+            if (!cssStream.isNull()) {
+                lString16 css;
+                css << LVReadTextFile(cssStream);
+                int offset = _inProgress.add(cssFile);
+                ret = Parse(codeBase, css) || ret;
+                _inProgress.erase(offset, 1);
+            }
         }
         return ret;
     }
@@ -4524,7 +4578,9 @@ bool ldomDocument::parseStyleSheet(lString16 cssFile)
     return parser.Parse(cssFile);
 }
 
-bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, int width, int dy, bool showCover, int y0, font_ref_t def_font, int def_interline_space, CRPropRef props )
+bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback, int width, int dy,
+                           bool showCover, int y0, font_ref_t def_font, int def_interline_space,
+                           CRPropRef props, int usable_left_overflow, int usable_right_overflow )
 {
     CRLog::info("Render is called for width %d, pageHeight=%d, fontFace=%s, docFlags=%d", width, dy, def_font->getTypeFace().c_str(), getDocFlags() );
     CRLog::trace("initializing default style...");
@@ -4553,14 +4609,6 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
             // is invalid (should happen now only when EPUB has embedded fonts
             // or some pseudoclass like :last-child has been met).
             printf("CRE: styles re-init needed after load, re-rendering\n");
-            // We should clear RenderRectAccessor, that may have been used for
-            // caching CSS checks results (i.e. :nth-child(), :last-of-type...)
-            if ( hasRenderData() ) {
-                // (We would crash in the following if no RenderRectAccessor has
-                // been created, which may happen if we're here not because of
-                // CSS checks but because of embedded fonts.)
-                getRootNode()->clearRenderDataRecursive();
-            }
         }
         CRLog::info("rendering context is changed - full render required...");
         // Clear LFormattedTextRef cache
@@ -4636,7 +4684,7 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
         context.setCallback(callback, numFinalBlocks);
         //updateStyles();
         CRLog::trace("rendering...");
-        renderBlockElement( context, getRootNode(), 0, y0, width );
+        renderBlockElement( context, getRootNode(), 0, y0, width, usable_left_overflow, usable_right_overflow );
         _rendered = true;
     #if 0 //def _DEBUG
         LVStreamRef ostream = LVOpenFileStream( "test_save_after_init_rend_method.xml", LVOM_WRITE );
@@ -7462,6 +7510,14 @@ ldomDocumentWriter::~ldomDocumentWriter()
             printf("CRE: document loaded, but styles re-init needed (cause: peculiar CSS pseudoclasses met)\n");
             _document->forceReinitStyles();
         }
+        if ( _document->hasRenderData() ) {
+            // We have created some RenderRectAccessors, to cache some CSS check results
+            // (i.e. :nth-child(), :last-of-type...): we should clean them.
+            // (We do that here for after the initial loading phase - on re-renderings,
+            // this is done in updateRendMethod() called by initNodeRendMethodRecursive()
+            // on all nodes.)
+            _document->getRootNode()->clearRenderDataRecursive();
+        }
     }
 
 #endif
@@ -7507,6 +7563,7 @@ void ldomDocumentWriter::OnTagClose( const lChar16 *, const lChar16 * tagname )
         }
     }
     */
+    bool isStyleSheetTag = tagname[0] == 's' && !lStr_cmp(tagname, "stylesheet");
 
     lUInt16 id = _document->getElementNameIndex(tagname);
     //lUInt16 nsid = (nsname && nsname[0]) ? _document->getNsNameIndex(nsname) : 0;
@@ -7521,11 +7578,25 @@ void ldomDocumentWriter::OnTagClose( const lChar16 *, const lChar16 * tagname )
         _parser->Stop();
     }
 
-    /* This is now dealt with in :OnTagBody(), just before creating this <stylesheet> tag
-    if ( isStyleSheetTag ) {
+    // For EPUB/HTML, this is now dealt with in :OnTagBody(), just before creating this <stylesheet> tag.
+    // But for FB2, where we have:
+    //   <FictionBook>
+    //     <stylesheet type="text/css">
+    //       some css
+    //     </stylesheet>
+    //     <p>...
+    //     other content
+    //   </FictionBook>
+    // we need to apply the <stylesheet> content we have just left, so it applies
+    // to the coming up content.
+    // We check the parent we have just pop'ed is a <FictionBook>.
+    // Caveat: any style set on the <FictionBook> element itself won't be applied now
+    // in this loading phase (as we have already set its style) - but it will apply
+    // on re-renderings.
+    if ( isStyleSheetTag && _currNode && _currNode->getElement()->getNodeId() == el_FictionBook ) {
         //CRLog::trace("</stylesheet> found");
 #if BUILD_LITE!=1
-        if ( !_popStyleOnFinish ) {
+        if ( !_popStyleOnFinish && _document->getDocFlag(DOC_FLAG_ENABLE_INTERNAL_STYLES) ) {
             //CRLog::trace("saving current stylesheet before applying of document stylesheet");
             _document->getStyleSheet()->push();
             _popStyleOnFinish = true;
@@ -7533,7 +7604,6 @@ void ldomDocumentWriter::OnTagClose( const lChar16 *, const lChar16 * tagname )
         }
 #endif
     }
-    */
 
     //logfile << " !c!\n";
 }
@@ -8719,13 +8789,9 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                                         int chw = w[ offset - word->t.start ] - chx;
                                         bool hyphen_added = false;
                                         if ( offset == word->t.start + word->t.len - 1
-                                                && (word->flags & LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER)
-                                                && !gFlgFloatingPunctuationEnabled ) {
+                                                && (word->flags & LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER) ) {
                                             // if offset is the end of word, and this word has
                                             // been hyphenated, includes the hyphen width
-                                            // (but not when floating punctuation is enabled,
-                                            // to keep nice looking rectangles on multi lines
-                                            // text selection)
                                             chw += font->getHyphenWidth();
                                             // We then should not account for the right side
                                             // bearing below
@@ -8890,13 +8956,9 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                                 int chw = w[ offset - word->t.start ] - chx;
                                 bool hyphen_added = false;
                                 if ( offset == word->t.start + word->t.len - 1
-                                        && (word->flags & LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER)
-                                        && !gFlgFloatingPunctuationEnabled ) {
+                                        && (word->flags & LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER) ) {
                                     // if offset is the end of word, and this word has
                                     // been hyphenated, includes the hyphen width
-                                    // (but not when floating punctuation is enabled,
-                                    // to keep nice looking rectangles on multi lines
-                                    // text selection)
                                     chw += font->getHyphenWidth();
                                     // We then should not account for the right side
                                     // bearing below
@@ -17327,22 +17389,26 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
     f = getDocument()->createFormattedText();
     if ( rm != erm_final )
         return 0;
-    //RenderRectAccessor fmt( this );
-    /// render whole node content as single formatted object
+
+    /// Render whole node content as single formatted object
+
+    // Get some properties cached in this node's RenderRectAccessor
+    // and set the initial flags and lang_cfg (for/from the final node
+    // itself) for renderFinalBlock(),
     int direction = RENDER_RECT_PTR_GET_DIRECTION(fmt);
     lUInt32 flags = styleToTextFmtFlags( true, getStyle(), 0, direction );
     int lang_node_idx = fmt->getLangNodeIndex();
     TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg(lang_node_idx>0 ? getDocument()->getTinyNode(lang_node_idx) : NULL);
+
+    // Add this node's inner content (text and children nodes) as source text
+    // and image fragments into the empty LFormattedText object
     ::renderFinalBlock( this, f.get(), fmt, flags, 0, -1, lang_cfg );
     // We need to store this LFormattedTextRef in the cache for it to
     // survive when leaving this function (some callers do use it).
     cache.set( this, f );
-    bool flg=gFlgFloatingPunctuationEnabled;
-    if (this->getNodeName()=="th"||this->getNodeName()=="td"||
-            (!this->getParentNode()->isNull()&&this->getParentNode()->getNodeName()=="td")||
-            (!this->getParentNode()->isNull()&&this->getParentNode()->getNodeName()=="th")) {
-        gFlgFloatingPunctuationEnabled=false;
-    }
+
+    // Gather some outer properties and context, so we can format (render)
+    // the inner content in that context.
     // This page_h we provide to f->Format() is only used to enforce a max height to images
     int page_h = getDocument()->getPageHeight();
     // Save or restore outer floats footprint (it is only provided
@@ -17364,8 +17430,22 @@ int ldomNode::renderFinalBlock(  LFormattedTextRef & frmtext, RenderRectAccessor
         // one that is on a page to be drawn will be reformatted .
         f->requestLightFormatting();
     }
-    int h = f->Format((lUInt16)width, (lUInt16)page_h, direction, float_footprint);
-    gFlgFloatingPunctuationEnabled=flg;
+    int usable_left_overflow = fmt->getUsableLeftOverflow();
+    int usable_right_overflow = fmt->getUsableRightOverflow();
+
+    // Note: some properties are set into LFormattedText by lvrend.cpp's renderFinalBlock(),
+    // while some others are only passed below as parameters to LFormattedText->Format().
+    // The former should logically be source inner content properties (strut, text indent)
+    // while the latter should be formatting and outer context properties (block width,
+    // page height...).
+    // There might be a few drifts from that logic, or duplicates ('direction' is
+    // passed both ways), that could need a little rework.
+
+    // Format/render inner content: this makes lines and words, which are
+    // cached into the LFormattedText and ready to be used for drawing
+    // and text selection.
+    int h = f->Format((lUInt16)width, (lUInt16)page_h, direction, usable_left_overflow, usable_right_overflow,
+                            gHangingPunctuationEnabled, float_footprint);
     frmtext = f;
     //CRLog::trace("Created new formatted object for node #%08X", (lUInt32)this);
     return h;

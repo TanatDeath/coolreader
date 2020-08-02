@@ -1,4 +1,4 @@
-/*******************************************************
+	/*******************************************************
 
  CoolReader Engine
 
@@ -427,18 +427,6 @@ void LVDocView::updatePageMargins() {
 
 /// sets page margins
 void LVDocView::setPageMargins(lvRect rc) {
-    bool floatingPunct = m_props->getBoolDef(PROP_FLOATING_PUNCTUATION, true);
-    int align = 0;
-    if (floatingPunct) {
-        m_font = fontMan->GetFont(m_font_size, 400 + LVRendGetFontEmbolden(),
-                false, DEFAULT_FONT_FAMILY, m_defaultFontFace);
-        if (!m_font.isNull())
-            align = m_font->getVisualAligmentWidth() / 2;
-    }
-    if (align > rc.right)
-        align = rc.right;
-    //rc.left += align;
-    rc.right -= align;
     if (m_pageMargins.left + m_pageMargins.right != rc.left + rc.right
             || m_pageMargins.top + m_pageMargins.bottom != rc.top + rc.bottom) {
 
@@ -3256,7 +3244,8 @@ void LVDocView::Render(int dx, int dy, LVRendPageList * pages) {
 		//CRLog::trace("calling render() for document %08X font=%08X", (unsigned int)m_doc, (unsigned int)m_font.get() );
 		bool did_rerender = m_doc->render(pages, isDocumentOpened() ? m_callback : NULL, dx, dy,
 					m_showCover, m_showCover ? dy + m_pageMargins.bottom * 4 : 0,
-					m_font, m_def_interline_space, m_props);
+					m_font, m_def_interline_space, m_props,
+					m_pageMargins.left, m_pageMargins.right);
 
 #if 0
                 // For debugging lvpagesplitter.cpp (small books)
@@ -5054,10 +5043,10 @@ void LVDocView::createEmptyDocument() {
 			PROP_EMBEDDED_STYLES, true));
     m_doc->setDocFlag(DOC_FLAG_ENABLE_DOC_FONTS, m_props->getBoolDef(
             PROP_EMBEDDED_FONTS, true));
-    m_doc->setSpaceWidthScalePercent(m_props->getIntDef(PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT, 100));
-    m_doc->setMinSpaceCondensingPercent(m_props->getIntDef(PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, 50));
-    m_doc->setUnusedSpaceThresholdPercent(m_props->getIntDef(PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT, 5));
-    m_doc->setMaxAddedLetterSpacingPercent(m_props->getIntDef(PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT, 0));
+    m_doc->setSpaceWidthScalePercent(m_props->getIntDef(PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT, DEF_SPACE_WIDTH_SCALE_PERCENT));
+    m_doc->setMinSpaceCondensingPercent(m_props->getIntDef(PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, DEF_MIN_SPACE_CONDENSING_PERCENT));
+    m_doc->setUnusedSpaceThresholdPercent(m_props->getIntDef(PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT, DEF_UNUSED_SPACE_THRESHOLD_PERCENT));
+    m_doc->setMaxAddedLetterSpacingPercent(m_props->getIntDef(PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT, DEF_MAX_ADDED_LETTER_SPACING_PERCENT));
 
     m_doc->setContainer(m_container);
     // This sets the element names default style (display, whitespace)
@@ -6792,10 +6781,10 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
     props->setInt(PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT, p);
 
     p = props->getIntDef(PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, DEF_MIN_SPACE_CONDENSING_PERCENT);
-    if (p<0)
-        p = 0;
-    if (p>20)
-        p = 20;
+    if (p<25)
+        p = 25;
+    if (p>100)
+        p = 100;
     props->setInt(PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, p);
 
     p = props->getIntDef(PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT, DEF_UNUSED_SPACE_THRESHOLD_PERCENT);
@@ -6806,10 +6795,10 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
     props->setInt(PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT, p);
 
     p = props->getIntDef(PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT, DEF_MAX_ADDED_LETTER_SPACING_PERCENT);
-    if (p<25)
-        p = 25;
-    if (p>100)
-        p = 100;
+    if (p<0)
+        p = 0;
+    if (p>20)
+        p = 20;
     props->setInt(PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT, p);
 
 #ifndef ANDROID
@@ -6899,7 +6888,9 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
             if (mode >= HINTING_MODE_DISABLED && mode <= HINTING_MODE_AUTOHINT) {
                 //CRLog::debug("Setting hinting mode to %d", mode);
                 fontMan->SetHintingMode((hinting_mode_t)mode);
-                requestRender(); // does m_doc->clearRendBlockCache(), which is needed on hinting mode change
+                REQUEST_RENDER("propsApply - font hinting")
+                    // requestRender() does m_doc->clearRendBlockCache(), which is needed
+                    // on hinting mode change
             }
         } else if (name == PROP_HIGHLIGHT_SELECTION_COLOR || name == PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT || name == PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT) {
             REQUEST_RENDER("propsApply - highlight")
@@ -7125,11 +7116,12 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
             REQUEST_RENDER("propsApply footnotes")
         } else if (name == PROP_FLOATING_PUNCTUATION) {
             bool value = props->getBoolDef(PROP_FLOATING_PUNCTUATION, true);
-            if ( gFlgFloatingPunctuationEnabled != value ) {
-                gFlgFloatingPunctuationEnabled = value;
-                REQUEST_RENDER("propsApply floating punct")
+            if ( gHangingPunctuationEnabled != value ) {
+                gHangingPunctuationEnabled = value;
+                REQUEST_RENDER("propsApply - hanging punctuation")
+                // requestRender() does m_doc->clearRendBlockCache(), which is needed
+                // on hanging punctuation change
             }
-            needUpdateMargins = true;
         } else if (name == PROP_REQUESTED_DOM_VERSION) {
             int value = props->getIntDef(PROP_REQUESTED_DOM_VERSION, gDOMVersionCurrent);
             if (gDOMVersionRequested != value) {
