@@ -234,11 +234,9 @@ public:
             m_callback->OnTagClose(NULL, L"strong");
         }
     }
-
     virtual void OnBlob(const lUInt8*, int)
     {
     }
-
     virtual void OnAction( int action )
     {
         if ( action==RA_PARA || action==RA_SECTION ) {
