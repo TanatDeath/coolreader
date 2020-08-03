@@ -6482,12 +6482,17 @@ import com.google.gson.GsonBuilder;
 						mActivity.getDB().saveBookInfo(mBookInfo);
 					}
 				});
-				if (coverPageBytes!=null && mBookInfo!=null && mBookInfo.getFileInfo()!=null) {
-					if (mBookInfo.getFileInfo().format.needCoverPageCaching()) {
-						// TODO: fix it
-//		        		if (mActivity.getBrowser() != null)
-//		        			mActivity.getBrowser().setCoverpageData(new FileInfo(mBookInfo.getFileInfo()), coverPageBytes);
-				}
+				if (coverPageBytes != null && mBookInfo != null && mBookInfo.getFileInfo() != null) {
+					// TODO: fix it
+					/*
+					DocumentFormat format = mBookInfo.getFileInfo().format;
+					if (null != format) {
+						if (format.needCoverPageCaching()) {
+//		        			if (mActivity.getBrowser() != null)
+//		        				mActivity.getBrowser().setCoverpageData(new FileInfo(mBookInfo.getFileInfo()), coverPageBytes);
+						}
+					}
+					*/
 					if (DeviceInfo.EINK_NOOK)
 						updateNookTouchCoverpage(mBookInfo.getFileInfo().getPathName(), coverPageBytes);
 					//mEngine.setProgressDrawable(coverPageDrawable);
