@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -113,7 +114,7 @@ public class ToastView {
                 if (mActivity instanceof CoolReader) {
                     tv.setOnClickListener(new View.OnClickListener() {
                         public void onClick(View v) {
-                            DictsDlg dlg = new DictsDlg((CoolReader) mActivity, ((CoolReader) mActivity).getReaderView(), msg1);
+                            DictsDlg dlg = new DictsDlg((CoolReader) mActivity, ((CoolReader) mActivity).getReaderView(), msg1, null);
                             dlg.show();
                         }
                     });
@@ -127,8 +128,14 @@ public class ToastView {
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);
         int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
-        window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
-       // window.showAtLocation(t.anchor, Gravity.NO_GRAVITY, 0, 0);
-        mHandler.postDelayed(handleDismiss, t.duration == 0 ? 2000 : 3000);
+        if (window != null) {
+            try {
+                window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+            } catch (Exception e) {
+                Log.e("TOAST", e.getMessage());
+            }
+            // window.showAtLocation(t.anchor, Gravity.NO_GRAVITY, 0, 0);
+            mHandler.postDelayed(handleDismiss, t.duration == 0 ? 2000 : 3000);
+        }
     }
 }

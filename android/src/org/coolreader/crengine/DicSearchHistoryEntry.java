@@ -4,6 +4,7 @@ public class DicSearchHistoryEntry {
 
     public static int ACTION_SAVE = 0;
     public static int ACTION_CLEAR_ALL = 1;
+    public static int ACTION_DELETE = 2;
 
     public DicSearchHistoryEntry()
     {

@@ -153,6 +153,7 @@ void LVWin32FontManager::getFontFileNameList(lString16Collection &list)
             _cache.getFontFileNameList(list);
 }
 
+//plotn - for use in Android
 void LVWin32FontManager::getFontFaceAndFileNameList(lString16Collection &list)
 {
     FONT_MAN_GUARD

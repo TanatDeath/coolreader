@@ -106,7 +106,7 @@ public:
         list.sort();
     }
 
-    //plotn
+    //plotn - for use in Android
     virtual void getFontFaceAndFileNameList(lString16Collection &list)
     {
         list.clear();

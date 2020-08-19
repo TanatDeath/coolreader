@@ -115,6 +115,7 @@ void LVBitmapFontManager::getFontFileNameList(lString16Collection &list) {
     _cache.getFontFileNameList(list);
 }
 
+//plotn - for use in Android
 void LVBitmapFontManager::getFontFaceAndFileNameList(lString16Collection &list) {
     FONT_MAN_GUARD
     _cache.getFontFaceAndFileNameList(list);

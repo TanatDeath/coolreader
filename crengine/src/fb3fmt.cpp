@@ -4,6 +4,8 @@
 #include "../include/lvopc.h"
 #include "../include/crlog.h"
 
+// plotn - book metadata extract added
+
 static const lChar16 * const fb3_BodyContentType = L"application/fb3-body+xml";
 static const lChar16 * const fb3_DescriptionContentType = L"application/fb3-description+xml";
 static const lChar16 * const fb3_CoverRelationship = L"http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";

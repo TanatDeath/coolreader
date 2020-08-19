@@ -8,6 +8,8 @@
     This source code is distributed under the terms of
     GNU General Public License.
     See LICENSE file for details.
+
+    // plotn - status bar changes and more
 */
 
 #ifndef __LV_TEXT_VIEW_H_INCLUDED__

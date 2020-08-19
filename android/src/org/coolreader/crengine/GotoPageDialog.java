@@ -89,11 +89,13 @@ public class GotoPageDialog extends BaseDialog {
 		}
 
 		public void setHighLightedText(TextView tv, String textToHighlight) {
+			if (StrUtils.isEmptyStr(textToHighlight)) return;
 			String tvt = tv.getText().toString();
-			int ofe = tvt.indexOf(textToHighlight, 0);
+			if (StrUtils.isEmptyStr(tvt)) return;
+			int ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), 0);
 			Spannable wordToSpan = new SpannableString(tv.getText());
 			for (int ofs = 0; ofs < tvt.length() && ofe != -1; ofs = ofe + 1) {
-				ofe = tvt.indexOf(textToHighlight, ofs);
+				ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), ofs);
 				if (ofe == -1)
 					break;
 				else {

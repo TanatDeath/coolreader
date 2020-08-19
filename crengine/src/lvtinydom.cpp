@@ -384,12 +384,7 @@ lUInt32 calcGlobalSettingsHash(int documentId, bool already_rendered)
     if (fontMan->GetKerning())
         hash = hash * 75 + 1761;
     hash = hash * 31 + fontMan->GetFontListHash(documentId);
-    // Hinting mode change does not need to trigger a re-render, as since
-    // we use FT_LOAD_TARGET_LIGHT, hinting has not effect on the x-axis
-    // and should not change glyph advances, so it should not change line
-    // layout and paragraphs' heights. We just need to _renderedBlockCache.clear()
-    // when hinting mode is changed to reformat paragraphs.
-    //hash = hash * 31 + (int)fontMan->GetHintingMode();
+    hash = hash * 31 + (int)fontMan->GetHintingMode();
     if ( LVRendGetFontEmbolden() )
         hash = hash * 75 + 2384761;
     hash = hash * 31 + fontMan->GetFallbackFontFaces().getHash();

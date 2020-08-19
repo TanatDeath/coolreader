@@ -16,7 +16,10 @@ import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,6 +35,11 @@ public class ChooseConfFileDlg extends BaseDialog {
 	private CoolReader mCoolReader;
 	private LayoutInflater mInflater;
 	private ConfFileList mList;
+	private Button btnThisDevice;
+	private Button btnDateSort;
+	private Button btnPercentSort;
+	private boolean bHideThisDevice = false;
+	private boolean bDateSort = true;
 
 	public ArrayList<CloudFileInfo> mSettingsList;
 	public ArrayList<CloudFileInfo> mSettingsFile;
@@ -183,6 +192,42 @@ public class ChooseConfFileDlg extends BaseDialog {
 		
 	}
 
+	private void paintButtons() {
+		int colorGrayC;
+		int colorBlue;
+		int colorIcon;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue, R.attr.colorIcon});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorBlue = a.getColor(1, Color.BLUE);
+		colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnDateSort, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnPercentSort, PorterDuff.Mode.CLEAR,true);
+		if (!bHideThisDevice) {
+			btnThisDevice.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnThisDevice, true);
+		} else {
+			btnThisDevice.setBackgroundColor(colorGrayCT);
+		}
+		if (bDateSort) {
+			btnDateSort.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnDateSort, true);
+			btnPercentSort.setBackgroundColor(colorGrayCT);
+		} else {
+			btnPercentSort.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnPercentSort, true);
+			btnDateSort.setBackgroundColor(colorGrayCT);
+		}
+		btnThisDevice.setTextColor(colorIcon);
+		btnDateSort.setTextColor(colorIcon);
+		btnPercentSort.setTextColor(colorIcon);
+	}
+
+
 	public ChooseConfFileDlg(CoolReader activity, File[] matchingFilesInfo, File[] matchingFiles)
 	{
 		super("ChooseConfFileDlg", activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
@@ -225,10 +270,16 @@ public class ChooseConfFileDlg extends BaseDialog {
 		}
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
+		btnThisDevice = ((Button)frame.findViewById(R.id.btn_this_device));
+		btnDateSort = ((Button)frame.findViewById(R.id.btn_date_sort));
+		btnPercentSort = ((Button)frame.findViewById(R.id.btn_percent_sort));
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		mCoolReader.tintViewIcons(frame);
 		mList = new ConfFileList(activity, false);
 		body.addView(mList);
 		setView(frame);
+		//setButtonsState();
+		paintButtons();
 		setFlingHandlers(mList, null, null);
 	}
 
@@ -254,10 +305,15 @@ public class ChooseConfFileDlg extends BaseDialog {
 		mSettingsFile = new ArrayList<CloudFileInfo>();
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
+		btnThisDevice = ((Button)frame.findViewById(R.id.btn_this_device));
+		btnDateSort = ((Button)frame.findViewById(R.id.btn_date_sort));
+		btnPercentSort = ((Button)frame.findViewById(R.id.btn_percent_sort));
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
 		mList = new ConfFileList(activity, false);
 		body.addView(mList);
 		setView(frame);
+		//setButtonsState();
+		paintButtons();
 		setFlingHandlers(mList, null, null);
 	}
 

@@ -31,6 +31,7 @@ import android.widget.TextView;
 public class DictsDlg extends BaseDialog {
 	private CoolReader mCoolReader;
 	private ReaderView mReaderView;
+	private View  mCallerView;
 	private LayoutInflater mInflater;
 	private DictList mList;
 	private String mSearchText;
@@ -148,7 +149,7 @@ public class DictsDlg extends BaseDialog {
 			mCoolReader.mDictionaries.setAdHocDict(Dictionaries.getDictListExt(mCoolReader,true).get(position));
 			String sSText = mSearchText.trim();
 			if (selEdit!=null) sSText = selEdit.getText().toString().trim();
-			mCoolReader.findInDictionary(sSText);
+			mCoolReader.findInDictionary(sSText, mCallerView);
 			if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 				mReaderView.clearSelection();
 			dismiss();
@@ -158,13 +159,14 @@ public class DictsDlg extends BaseDialog {
 		
 	}
 
-	public DictsDlg( CoolReader activity, ReaderView readerView, String search_text )
+	public DictsDlg( CoolReader activity, ReaderView readerView, String search_text, View view )
 	{
 		super("DictsDlg", activity, activity.getResources().getString(R.string.win_title_dicts), true, true);
 		mInflater = LayoutInflater.from(getContext());
 		mSearchText = StrUtils.updateText(search_text.trim(),false);
 		mCoolReader = activity;
 		mReaderView = readerView;
+		mCallerView = view;
 		View frame = mInflater.inflate(R.layout.dict_dialog, null);
 		ImageButton btnMinus1 = (ImageButton)frame.findViewById(R.id.dict_dlg_minus1_btn);
 		ImageButton btnMinus2 = (ImageButton)frame.findViewById(R.id.dict_dlg_minus2_btn);

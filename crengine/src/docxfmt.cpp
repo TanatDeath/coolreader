@@ -298,6 +298,7 @@ const struct item_def_t numFmt_attr_values[] = {
     DOCX_LAST_ITEM
 };
 
+//plotn - "coverpage" was added - first image in document
 LVStreamRef GetDocxCoverpage(LVContainerRef arc)
 {
     if ( arc.isNull() )

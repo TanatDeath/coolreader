@@ -136,6 +136,7 @@ public class ReaderAction {
 	public final static ReaderAction TOGGLE_ORIENTATION = new ReaderAction("TOGGLE_ORIENTATION", R.string.action_toggle_screen_orientation, ReaderCommand.DCMD_TOGGLE_ORIENTATION, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_orientation);
 	public final static ReaderAction TOGGLE_FULLSCREEN = new ReaderAction("TOGGLE_FULLSCREEN", R.string.action_toggle_fullscreen, ReaderCommand.DCMD_TOGGLE_FULLSCREEN, 0 , TOGGLE_ORIENTATION, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_fullscreen);
 	public final static ReaderAction TOGGLE_SELECTION_MODE = new ReaderAction("TOGGLE_SELECTION_MODE", R.string.action_toggle_selection_mode, ReaderCommand.DCMD_TOGGLE_SELECTION_MODE, 0, R.id.cr3_mi_select_text, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_option_touch);
+	public final static ReaderAction TOGGLE_INSPECTOR_MODE = new ReaderAction("TOGGLE_INSPECTOR_MODE", R.string.action_toggle_inspector_mode, ReaderCommand.DCMD_TOGGLE_INSPECTOR_MODE, 0, TOGGLE_SELECTION_MODE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_night_vision);
 	public final static ReaderAction HOME_SCREEN = new ReaderAction("HOME_SCREEN", R.string.action_exit_home_screen, ReaderCommand.DCMD_SHOW_HOME_SCREEN, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_touchscreen);
 	public final static ReaderAction GO_BACK = new ReaderAction("GO_BACK", R.string.action_go_back, ReaderCommand.DCMD_LINK_BACK, 0, R.id.cr3_go_back, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_prev);
 	public final static ReaderAction GO_FORWARD = new ReaderAction("GO_FORWARD", R.string.action_go_forward, ReaderCommand.DCMD_LINK_FORWARD, 0, R.id.cr3_go_forward, GO_BACK, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_next);
@@ -204,6 +205,7 @@ public class ReaderAction {
 		READER_MENU,
 		TOGGLE_TOUCH_SCREEN_LOCK,
 		TOGGLE_SELECTION_MODE,
+		TOGGLE_INSPECTOR_MODE,
 		TOGGLE_ORIENTATION,
 		TOGGLE_FULLSCREEN,
 		GO_BACK,

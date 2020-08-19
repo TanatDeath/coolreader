@@ -1923,7 +1923,7 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_updateSelectionInter
         r.sort();
 		if ( !r.getStart().isVisibleWordStart() )
 			r.getStart().prevVisibleWordStart();
-		lString16 start = r.getStart().toString();
+		//lString16 start = r.getStart().toString(); // plotn - NB: this line iscommented out in upstream but nor in mine. Maybe this is "Hemingway" fix, maybe not
 		if ( !r.getEnd().isVisibleWordEnd() )
 			r.getEnd().nextVisibleWordEnd();
         if ( r.isNull() )
