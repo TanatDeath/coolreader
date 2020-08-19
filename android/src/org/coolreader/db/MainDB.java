@@ -764,8 +764,24 @@ public class MainDB extends BaseDB {
 		Cursor rs = null;
 		try {
 			if (action==DicSearchHistoryEntry.ACTION_CLEAR_ALL) {
+				if (!isOpened())
+					return false;
 				execSQL("DELETE FROM dic_search_history");
 				return true;
+			} if (action==DicSearchHistoryEntry.ACTION_DELETE) {
+				if (!isOpened())
+					return false;
+				if (dshe == null) return false;
+				String sSearchText = dshe.getSearch_text();
+				if (!isOpened())
+					return false;
+				if (sSearchText == null)
+					return false;
+				sSearchText = sSearchText.trim();
+				if (sSearchText.length()==0)
+					return false;
+				String sql = "DELETE FROM dic_search_history where search_text=" + quoteSqlString(sSearchText);
+				execSQL(sql);
 			} else {
 				if (dshe == null) return false;
 				String sSearchText = dshe.getSearch_text();
@@ -780,7 +796,18 @@ public class MainDB extends BaseDB {
 				rs = mDB.rawQuery(sql, null);
 				if (rs.moveToFirst()) {
 					// need update
-					execSQL("UPDATE dic_search_history SET " +
+					if (StrUtils.isEmptyStr(dshe.getText_translate()))
+						execSQL("UPDATE dic_search_history SET " +
+										" search_from_book = " + quoteSqlString(String.valueOf(dshe.getSearch_from_book())) + ", " +
+										" dictionary_used = " + quoteSqlString(dshe.getDictionary_used()) + ", " +
+										" last_access_time = " + System.currentTimeMillis() + ", " +
+										" language_from = " + quoteSqlString(dshe.getLanguage_from()) + ", " +
+										" language_to = " + quoteSqlString(dshe.getLanguage_to()) + ", " +
+										" seen_count = coalesce(seen_count,0) + 1 " +
+										" WHERE id = " + rs.getInt(0)
+						);
+					else
+						execSQL("UPDATE dic_search_history SET " +
 							" text_translate = " + quoteSqlString(dshe.getText_translate()) + ", " +
 							" search_from_book = " + quoteSqlString(String.valueOf(dshe.getSearch_from_book())) + ", " +
 							" dictionary_used = " + quoteSqlString(dshe.getDictionary_used()) + ", " +
@@ -1287,10 +1314,10 @@ public class MainDB extends BaseDB {
 		@Override
 		public String getComparisionField(FileInfo item) {
 			int state = item.getReadingState();
-			String s = "[no_state]";
-			if (state == FileInfo.STATE_TO_READ) s = "[to read]";
-			if (state == FileInfo.STATE_READING) s = "[reading]";
-			if (state == FileInfo.STATE_FINISHED) s = "[finished]";
+			String s = CoolReader.BOOK_READING_STATE_NO_STATE;
+			if (state == FileInfo.STATE_TO_READ) s = CoolReader.BOOK_READING_STATE_TO_READ;
+			if (state == FileInfo.STATE_READING) s = CoolReader.BOOK_READING_STATE_READING;
+			if (state == FileInfo.STATE_FINISHED) s = CoolReader.BOOK_READING_STATE_FINISHED;
 			return s;
 		}
 	}

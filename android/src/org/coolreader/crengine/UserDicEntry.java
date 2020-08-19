@@ -17,6 +17,7 @@ public class UserDicEntry {
     private long create_time = System.currentTimeMillis(); // UTC timestamp
     private long last_access_time = System.currentTimeMillis(); // UTC timestamp
     private String language;
+    private boolean thisIsDSHE = false;
     private Long seen_count;
     private int is_citation;
 
@@ -82,6 +83,14 @@ public class UserDicEntry {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public void setThisIsDSHE(boolean b) {
+        this.thisIsDSHE = true;
+    }
+
+    public boolean getThisIsDSHE() {
+        return thisIsDSHE;
     }
 
     public Long getSeen_count() {

@@ -383,6 +383,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -699,6 +705,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1026,6 +1038,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1341,6 +1359,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1659,6 +1683,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1977,6 +2007,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2294,6 +2330,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2607,6 +2649,12 @@
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
+        <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
+        <item name="attr_icons8_wiki1">@drawable/icons8_wiki1</item>
+        <item name="attr_icons8_wiki2">@drawable/icons8_wiki2</item>
+        <item name="attr_icons8_two_fingers">@drawable/icons8_two_fingers</item>
+        <item name="attr_icons8_page_animation">@drawable/icons8_page_animation</item>
+        <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

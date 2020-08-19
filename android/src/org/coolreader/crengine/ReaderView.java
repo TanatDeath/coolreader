@@ -17,7 +17,9 @@ import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudSync;
 
 import org.coolreader.crengine.InputDialog.InputHandler;
+import org.coolreader.dic.Dictionaries;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
+import org.coolreader.graphics.FastBlur;
 import org.coolreader.tts.TTS;
 import org.coolreader.tts.TTSToolbarDlg;
 
@@ -37,6 +39,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.view.MotionEventCompat;
 import android.text.ClipboardManager;
 import android.util.Log;
@@ -114,13 +117,20 @@ import com.google.gson.GsonBuilder;
 			if (arrAllPages.size()>0)
 				return;
 		arrAllPages = new ArrayList<String>();
+		if (getDoc() == null) return;
 		int iPageCnt = getDoc().getPageCount();
 		for (int i = 0; i < iPageCnt; i++) {
-			String sPage = doc.getPageText(false, i);
+			String sPage = getDoc().getPageText(false, i);
 			if (sPage == null) sPage = "";
 			arrAllPages.add(sPage);
 		}
 		//getActivity().showToast("load page cnt " + iPageCnt);
+	}
+
+	public String getPageTextFromEngine(int page) {
+		int iPageCnt = getDoc().getPageCount();
+		if (page < iPageCnt) return StrUtils.getNonEmptyStr(getDoc().getPageText(false, page),false);
+		return "";
 	}
 
 	public class ReaderSurface extends SurfaceView implements BookView {
@@ -247,6 +257,11 @@ import com.google.gson.GsonBuilder;
 					int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
 					Utils.drawFrame2(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4);
 				}
+				if (inspectorModeActive) {
+					Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+					int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
+					Utils.drawFrame3(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4);
+				}
 			} catch ( Exception e ) {
 				log.e("exception while drawing", e);
 			}
@@ -351,7 +366,12 @@ import com.google.gson.GsonBuilder;
 	public static final int PAGE_ANIMATION_PAPER = 1;
 	public static final int PAGE_ANIMATION_SLIDE = 2;
 	public static final int PAGE_ANIMATION_SLIDE2 = 3;
-	public static final int PAGE_ANIMATION_MAX = 3;
+	public static final int PAGE_ANIMATION_BLUR = 4;
+	public static final int PAGE_ANIMATION_DIM = 5;
+	public static final int PAGE_ANIMATION_BLUR_DIM = 6;
+	public static final int PAGE_ANIMATION_MAG = 7;
+	public static final int PAGE_ANIMATION_MAG_DIM = 8;
+	public static final int PAGE_ANIMATION_MAX = 8;
 
 	public static final int SEL_CMD_SELECT_FIRST_SENTENCE_ON_PAGE = 1;
 	public static final int SEL_CMD_NEXT_SENTENCE = 2;
@@ -655,7 +675,7 @@ import com.google.gson.GsonBuilder;
 		sel.startY = startY;
 		sel.endX = endX;
 		sel.endY = endY;
-		final boolean selMode = selectionModeActive;
+		final boolean selMode = selectionModeActive || inspectorModeActive;
 		mEngine.execute(new Task() {
 			@Override
 			public void work() throws Exception {
@@ -700,6 +720,30 @@ import com.google.gson.GsonBuilder;
 	private int mSelectionAction = SELECTION_ACTION_TOOLBAR;
 	private int mSelectionActionLong = SELECTION_ACTION_TOOLBAR;
 	private int mMultiSelectionAction = SELECTION_ACTION_TOOLBAR;
+	private int mSelection2Action = SELECTION_ACTION_SAME_AS_COMMON;
+	private int mSelection2ActionLong = SELECTION_ACTION_SAME_AS_COMMON;
+	private int mMultiSelection2Action = SELECTION_ACTION_SAME_AS_COMMON;
+	private int mSelection3Action = SELECTION_ACTION_SAME_AS_COMMON;
+	private int mSelection3ActionLong = SELECTION_ACTION_SAME_AS_COMMON;
+	private int mMultiSelection3Action = SELECTION_ACTION_SAME_AS_COMMON;
+
+	private void showDic(Selection sel, boolean bSkipDic, Dictionaries.DictInfo dict) {
+		getActivity().mDictionaries.setAdHocDict(dict);
+		if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
+			if (!bSkipDic)
+				mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text), null);
+		} else {
+			if (
+					((!isMultiSelection(sel))&&(!bSkipDic))
+							||
+							(isMultiSelection(sel))
+			)
+				mActivity.findInDictionary(sel.text, null);
+		}
+		if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
+			clearSelection();
+	}
+
 	private void onSelectionComplete(Selection sel, boolean selMode) {
 
 		//mActivity.showToast("startPos: "+sel.startPos+"; endPos: "+sel.endPos+
@@ -707,64 +751,62 @@ import com.google.gson.GsonBuilder;
 		boolean bSkipDic = mActivity.skipFindInDic;
 		mActivity.skipFindInDic = false;
 		lastSelection = sel;
+		int shortAction = mSelectionAction;
+		if ((selectionModeWasActive || selMode) && (mSelection2Action != SELECTION_ACTION_SAME_AS_COMMON)) shortAction = mSelection2Action;
+		if ((inspectorModeActive) && (mSelection3Action != SELECTION_ACTION_SAME_AS_COMMON)) shortAction = mSelection3Action;
+		int longAction = mSelectionActionLong;
+		if ((selectionModeWasActive || selMode) && (mSelection2ActionLong != SELECTION_ACTION_SAME_AS_COMMON)) longAction = mSelection2ActionLong;
+		if ((inspectorModeActive) && (mSelection3ActionLong != SELECTION_ACTION_SAME_AS_COMMON)) longAction = mSelection3ActionLong;
+		int multiAction = mMultiSelectionAction;
+		if ((selectionModeWasActive || selMode) && (mMultiSelection2Action != SELECTION_ACTION_SAME_AS_COMMON)) multiAction = mMultiSelection2Action;
+		if ((inspectorModeActive) && (mMultiSelection3Action != SELECTION_ACTION_SAME_AS_COMMON)) multiAction = mMultiSelection3Action;
 		int iSelectionAction;
-		int iSelectionAction1 = (lastDuration > DOUBLE_CLICK_INTERVAL) ? mSelectionActionLong : mSelectionAction;
-		iSelectionAction = isMultiSelection(sel) ? mMultiSelectionAction : iSelectionAction1;
-		if (selMode) iSelectionAction = mMultiSelectionAction;
+		int iSelectionAction1 = (lastDuration > DOUBLE_CLICK_INTERVAL) ? longAction : shortAction;
+		iSelectionAction = isMultiSelection(sel) ? multiAction : iSelectionAction1;
+		//if (selMode) iSelectionAction = mMultiSelectionAction;
 		switch (iSelectionAction) {
 			case SELECTION_ACTION_TOOLBAR:
 				SelectionToolbarDlg.showDialog(mActivity, ReaderView.this, sel);
 				break;
 			case SELECTION_ACTION_COPY:
-				copyToClipboard(sel.text);
+				copyToClipboardAndToast(sel.text);
 				clearSelection();
 				break;
 			case SELECTION_ACTION_DICTIONARY:
 				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
 					if (!bSkipDic)
-						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text));
+						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text), null);
 				} else {
 					if (
 							((!isMultiSelection(sel))&&(!bSkipDic))
 							||
 							(isMultiSelection(sel))
 						)
-						mActivity.findInDictionary(sel.text);
+						mActivity.findInDictionary(sel.text, null);
 				}
 				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
 					clearSelection();
 				break;
 			case SELECTION_ACTION_DICTIONARY_1:
-				getActivity().mDictionaries.setAdHocDict(getActivity().mDictionaries.currentDictionary);
-				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
-					if (!bSkipDic)
-						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text));
-				} else {
-					if (
-							((!isMultiSelection(sel))&&(!bSkipDic))
-									||
-									(isMultiSelection(sel))
-							)
-						mActivity.findInDictionary(sel.text);
-				}
-				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
-					clearSelection();
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary);
 				break;
 			case SELECTION_ACTION_DICTIONARY_2:
-				getActivity().mDictionaries.setAdHocDict(getActivity().mDictionaries.currentDictionary2);
-				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
-					if (!bSkipDic)
-						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text));
-				} else {
-					if (
-							((!isMultiSelection(sel))&&(!bSkipDic))
-									||
-									(isMultiSelection(sel))
-							)
-						mActivity.findInDictionary(sel.text);
-				}
-				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
-					clearSelection();
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary2);
+				break;
+			case SELECTION_ACTION_DICTIONARY_3:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary3);
+				break;
+			case SELECTION_ACTION_DICTIONARY_4:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary4);
+				break;
+			case SELECTION_ACTION_DICTIONARY_5:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary6);
+				break;
+			case SELECTION_ACTION_DICTIONARY_6:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary6);
+				break;
+			case SELECTION_ACTION_DICTIONARY_7:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary7);
 				break;
 			case SELECTION_ACTION_BOOKMARK:
 				clearSelection();
@@ -797,7 +839,7 @@ import com.google.gson.GsonBuilder;
 				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION, "");
 				break;
             case SELECTION_ACTION_DICTIONARY_LIST:
-                DictsDlg dlg = new DictsDlg(mActivity, this, sel.text);
+                DictsDlg dlg = new DictsDlg(mActivity, this, sel.text, null);
                 dlg.show();
                 if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
                     clearSelection();
@@ -844,6 +886,15 @@ import com.google.gson.GsonBuilder;
 		}
 	}
 
+	public void copyToClipboardAndToast(String text) {
+		if ( text!=null && text.length()>0 ) {
+			ClipboardManager cm = mActivity.getClipboardmanager();
+			cm.setText(text);
+			log.i("Setting clipboard text: " + text);
+			mActivity.showToast(mActivity.getString(R.string.copied_to_cb));
+		}
+	}
+
 //	private void cancelSelection() {
 //		//
 //		selectionInProgress = false;
@@ -870,15 +921,29 @@ import com.google.gson.GsonBuilder;
 	private boolean mDisableTwoPointerGestures;
 	private int secondaryTapActionType = TAP_ACTION_TYPE_LONGPRESS;
 	private boolean selectionModeActive = false;
+	private boolean selectionModeWasActive = false;
+	private boolean inspectorModeActive = false;
 
 	public void toggleSelectionMode() {
 		selectionModeActive = !selectionModeActive;
+		inspectorModeActive = false;
 		if (mActivity.getmReaderFrame()!=null)
 			if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
 				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(
 						mActivity.getString(selectionModeActive ?
 								R.string.action_toggle_selection_mode_on : R.string.action_toggle_selection_mode_off));
                 bookView.draw(false);
+	}
+
+	public void toggleInspectorMode() {
+		inspectorModeActive = !inspectorModeActive;
+		selectionModeActive = false;
+		if (mActivity.getmReaderFrame()!=null)
+			if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
+				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(
+						mActivity.getString(inspectorModeActive ?
+								R.string.action_toggle_inspector_mode_on : R.string.action_toggle_inspector_mode_off));
+		bookView.draw(false);
 	}
 
 	private ImageViewer currentImageViewer;
@@ -1175,6 +1240,7 @@ import com.google.gson.GsonBuilder;
 		private final static int EXPIRATION_TIME_MS = 180000;
 
 		int state = STATE_INITIAL;
+		int stateInsp = STATE_INITIAL;
 
 		int start_x = 0;
 		int start_y = 0;
@@ -1459,6 +1525,17 @@ import com.google.gson.GsonBuilder;
 			return true;
 		}
 
+		private boolean trackDoubleTapInsp() {
+			stateInsp = STATE_WAIT_FOR_DOUBLE_CLICK;
+			BackgroundThread.instance().postGUI(new Runnable() {
+				@Override
+				public void run() {
+					stateInsp = STATE_INITIAL;
+				}
+			}, DOUBLE_CLICK_INTERVAL);
+			return true;
+		}
+
 		private boolean trackLongTap() {
 			BackgroundThread.instance().postGUI(new Runnable() {
 				@Override
@@ -1549,7 +1626,7 @@ import com.google.gson.GsonBuilder;
 						state = STATE_DONE;
 						return cancel();
 					case STATE_BRIGHTNESS:
-						stopBrightnessControl(x, y, leftSideBrightness);
+						stopBrightnessControl(start_y, now_y, leftSideBrightness);
 						state = STATE_DONE;
 						return cancel();
 					case STATE_SELECTION:
@@ -1562,9 +1639,16 @@ import com.google.gson.GsonBuilder;
 							//log.v("upd3: "+nextUpdateId+" ");
 							updateSelection(start_x, start_y, x, y, true);
 						}
+						selectionModeWasActive = selectionModeActive;
 						selectionModeActive = false;
-						state = STATE_DONE;
-						return cancel();
+						if (inspectorModeActive) {
+							boolean res = cancel();
+							currentTapHandler.trackDoubleTapInsp();
+							return res;
+						} else {
+							state = STATE_DONE;
+							return cancel();
+						}
 					case STATE_FLIP_TRACKING:
 						updatePageFlipTracking(x, y);
 						state = STATE_DONE;
@@ -1601,6 +1685,10 @@ import com.google.gson.GsonBuilder;
 						return cancel();
 				}
 			} else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if ((inspectorModeActive) && (stateInsp == STATE_WAIT_FOR_DOUBLE_CLICK)) {
+					toggleInspectorMode();
+					return cancel();
+				}
 				switch (state) {
 					case STATE_INITIAL:
 						start_x = x;
@@ -1620,7 +1708,7 @@ import com.google.gson.GsonBuilder;
 						longTapAction = findTapZoneAction(zone, TAP_ACTION_TYPE_LONGPRESS);
 						doubleTapAction = findTapZoneAction(zone, TAP_ACTION_TYPE_DOUBLE);
 						firstDown = Utils.timeStamp();
-						if (selectionModeActive) {
+						if (selectionModeActive || inspectorModeActive) {
 							startSelection();
 						} else {
 							state = STATE_DOWN_1;
@@ -1634,9 +1722,15 @@ import com.google.gson.GsonBuilder;
 					case STATE_FLIP_TRACKING:
 						return unexpectedEvent();
 					case STATE_WAIT_FOR_DOUBLE_CLICK:
-						if (doubleTapAction == ReaderAction.START_SELECTION)
-							return startSelection();
-						return performAction(doubleTapAction, true);
+						if (inspectorModeActive) {
+							toggleInspectorMode();
+							return true;
+						}
+						else {
+							if (doubleTapAction == ReaderAction.START_SELECTION)
+								return startSelection();
+							return performAction(doubleTapAction, true);
+						}
 				}
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
 				int dx = 0;
@@ -1685,7 +1779,7 @@ import com.google.gson.GsonBuilder;
 									// brightness
 									state = STATE_BRIGHTNESS;
 									leftSideBrightness = start_x < dragThreshold * 170 / 100;
-									startBrightnessControl(start_x, start_y, leftSideBrightness);
+									startBrightnessControl(start_y, leftSideBrightness);
 									return true;
 								}
 							} else {
@@ -1694,7 +1788,7 @@ import com.google.gson.GsonBuilder;
 									// brightness
 									state = STATE_BRIGHTNESS;
 									leftSideBrightness = start_x < dragThreshold * 170 / 100;
-									startBrightnessControl(start_x, start_y, leftSideBrightness);
+									startBrightnessControl(start_y, leftSideBrightness);
 									return true;
 								}
 							}
@@ -1705,7 +1799,7 @@ import com.google.gson.GsonBuilder;
 						int dir = isPageMode ? x - start_x : y - start_y;
 						if (Math.abs(mGesturePageFlipsPerFullSwipe) == 1) {
 							dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
-							if (pageFlipAnimationSpeedMs == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+							if (getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 								// no animation
 								return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
 							}
@@ -1722,7 +1816,7 @@ import com.google.gson.GsonBuilder;
 						updateAnimation(x, y);
 						return true;
 					case STATE_BRIGHTNESS:
-						updateBrightnessControl(x, y, leftSideBrightness);
+						updateBrightnessControl(start_y, now_y, leftSideBrightness);
 						return true;
 					case STATE_FLIP_TRACKING:
 						updatePageFlipTracking(x, y);
@@ -2943,6 +3037,10 @@ import com.google.gson.GsonBuilder;
 			if (isBookLoaded())
 				toggleSelectionMode();
 			break;
+		case DCMD_TOGGLE_INSPECTOR_MODE:
+			if (isBookLoaded())
+				toggleInspectorMode();
+			break;
 		case DCMD_TOGGLE_TOUCH_SCREEN_LOCK:
 			isTouchScreenEnabled = !isTouchScreenEnabled;
 			if ( isTouchScreenEnabled )
@@ -3490,7 +3588,7 @@ import com.google.gson.GsonBuilder;
 				log.i("Whole page to dic");
 				String s = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText(0, false);
 				//mActivity.showToast(s.substring(0,100));
-				mActivity.findInDictionary( s );
+				mActivity.findInDictionary( s , null);
 				//mActivity.mDictionaries.setiDic2IsActive(2);
 				break;
 			default:
@@ -3766,6 +3864,10 @@ import com.google.gson.GsonBuilder;
 		return manual;
 	}
 
+	private int getPageFlipAnimationSpeedMs() {
+		return pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? pageFlipAnimationSpeed : 0;
+	}
+
 	/**
 	 * Generate help file (if necessary) and show it.
 	 * @return true if opened successfully
@@ -3820,7 +3922,15 @@ import com.google.gson.GsonBuilder;
 			} catch ( Exception e ) {
 				// ignore
 			}
-			pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
+			//pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
+		} else if ( PROP_PAGE_ANIMATION_SPEED.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				pageFlipAnimationSpeed = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+			//pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
 		} else if ( PROP_CONTROLS_ENABLE_VOLUME_KEYS.equals(key) ) {
 			enableVolumeKeys = flg;
 		} else if ( PROP_APP_SELECTION_ACTION.equals(key) ) {
@@ -3841,6 +3951,48 @@ import com.google.gson.GsonBuilder;
 			try {
 				int n = Integer.valueOf(value);
 				mSelectionActionLong = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		}  else if ( PROP_APP_SELECTION2_ACTION.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mSelection2Action = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		} else if ( PROP_APP_MULTI_SELECTION2_ACTION.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mMultiSelection2Action = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		} else if ( PROP_APP_SELECTION2_ACTION_LONG.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mSelection2ActionLong = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		}  else if ( PROP_APP_SELECTION3_ACTION.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mSelection3Action = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		} else if ( PROP_APP_MULTI_SELECTION3_ACTION.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mMultiSelection3Action = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		} else if ( PROP_APP_SELECTION3_ACTION_LONG.equals(key) ) {
+			try {
+				int n = Integer.valueOf(value);
+				mSelection3ActionLong = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
@@ -4944,8 +5096,9 @@ import com.google.gson.GsonBuilder;
 
 	private ViewAnimationControl currentAnimation = null;
 
-	private int pageFlipAnimationSpeedMs = DEF_PAGE_FLIP_MS; // if 0 : no animation
+	//private int pageFlipAnimationSpeedMs = DEF_PAGE_FLIP_MS; // if 0 : no animation
 	private int pageFlipAnimationMode = PAGE_ANIMATION_SLIDE2; //PAGE_ANIMATION_PAPER; // if 0 : no animation
+	private int pageFlipAnimationSpeed = DEF_PAGE_FLIP_MS;
 	//	private void animatePageFlip( final int dir ) {
 //		animatePageFlip(dir, null);
 //	}
@@ -4970,9 +5123,9 @@ import com.google.gson.GsonBuilder;
 //							dir2 = 2;
 //						else if ( dir2==-1 ) 
 //							dir2 = -2;
-					int speed = pageFlipAnimationSpeedMs;
+					int speed = getPageFlipAnimationSpeedMs();
 					if ( onFinishHandler!=null )
-						speed = pageFlipAnimationSpeedMs / 2;
+						speed = getPageFlipAnimationSpeedMs() / 2;
 					if ( currPos.pageMode!=0 ) {
 						int fromX = dir2>0 ? w : 0;
 						int toX = dir2>0 ? 0 : w;
@@ -5097,12 +5250,21 @@ import com.google.gson.GsonBuilder;
 	}
 
 	int currentBrightnessValueIndex = -1;
+	int lastBrightnessValueIndexLeft = -1;
+	int lastBrightnessValueIndexRight = -1;
 	PopupWindow windowCenterPopup = null;
 
-	private void startBrightnessControl(final int startX, final int startY, final boolean leftSide)
+	private void startBrightnessControl(final int startY, final boolean leftSide)
 	{
 		currentBrightnessValueIndex = -1;
-		updateBrightnessControl(startX, startY, leftSide);
+		int n = OptionsDialog.mBacklightLevels.length;
+		if (leftSide)
+			if (lastBrightnessValueIndexLeft == -1)
+				lastBrightnessValueIndexLeft = n - 1 - n * (surface.getHeight() / 2) / surface.getHeight();
+		if (!leftSide)
+			if (lastBrightnessValueIndexRight == -1)
+				lastBrightnessValueIndexRight = n - 1 - n * (surface.getHeight() / 2) / surface.getHeight();
+		updateBrightnessControl(startY, startY, leftSide);
 	}
 
 	private void showCenterPopup(String val) {
@@ -5200,7 +5362,7 @@ import com.google.gson.GsonBuilder;
 		scheduleHideWindowCenterPopup(500);
 	}
 
-	private void updateBrightnessControl(final int x, final int y, final boolean leftSide) {
+	private void updateBrightnessControl_old(final int y_start, final int y, final boolean leftSide) {
 		int n = OptionsDialog.mBacklightLevels.length;
 		int index = n - 1 - y * n / surface.getHeight();
 		if ( index<0 )
@@ -5211,16 +5373,45 @@ import com.google.gson.GsonBuilder;
 			currentBrightnessValueIndex = index;
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
+			if (newValue < 0) newValue = 0;
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				showCenterPopup(newValue+"%");
+			}
+		}
+	}
+
+	private void updateBrightnessControl(final int y_start, final int y, final boolean leftSide) {
+		int n = OptionsDialog.mBacklightLevels.length;
+		int index1 = n - 1 - y * n / surface.getHeight();
+		int index2 = n - 1 - y_start * n / surface.getHeight();
+		//index1 = index1 / 4 * 3;
+		//index2 = index2 / 4 * 3;
+		int index = 0;
+		if (leftSide)
+			index = index1 - index2 + lastBrightnessValueIndexLeft;
+		if (!leftSide)
+			index = index1 - index2 + lastBrightnessValueIndexRight;
+		//int index = currentBrightnessValueIndex + (currentBrightnessValueIndex * aval) / 100;
+		if ( index<0 )
+			index = 0;
+		else if ( index>=n )
+			index = n-1;
+		if ( index != currentBrightnessValueIndex ) {
+			currentBrightnessValueIndex = index;
+			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
+			mActivity.setScreenBacklightLevel(newValue, leftSide);
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				if (newValue < 0) newValue = 0;
 				showCenterPopup(newValue+"%");
 			}
 		}
 
 	}
-	private void stopBrightnessControl(final int x, final int y, final boolean leftSide) {
+
+	private void stopBrightnessControl(final int y_start, final int y, final boolean leftSide) {
 		if ( currentBrightnessValueIndex>=0 ) {
-			if ( x>=0 && y>=0 ) {
-				updateBrightnessControl(x, y, leftSide);
+			if ( y_start>=0 && y>=0 ) {
+				updateBrightnessControl(y_start, y, leftSide);
 			}
 			mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, OptionsDialog.mBacklightLevels[currentBrightnessValueIndex]);
 			OptionsDialog.mBacklightLevelsTitles[0] = mActivity.getString(R.string.options_app_backlight_screen_default);
@@ -5229,9 +5420,14 @@ import com.google.gson.GsonBuilder;
 				mActivity.showToast(s);
 			}
 			saveSettings(mSettings);
+			if (leftSide)
+				lastBrightnessValueIndexLeft = currentBrightnessValueIndex;
+			if (!leftSide)
+				lastBrightnessValueIndexRight = currentBrightnessValueIndex;
 			currentBrightnessValueIndex = -1;
 		}
 	}
+
 	private static final boolean showBrightnessFlickToast = false;
 
 
@@ -5525,7 +5721,7 @@ import com.google.gson.GsonBuilder;
 
 		@Override
 		public void move(int duration, boolean accelerated) {
-			if ( duration>0  && pageFlipAnimationSpeedMs!=0 ) {
+			if ( duration>0  && getPageFlipAnimationSpeedMs()!=0 ) {
 				int steps = (int)(duration / getAvgAnimationDrawDuration()) + 2;
 				int x0 = pointerCurrPos;
 				int x1 = pointerDestPos;
@@ -5547,13 +5743,14 @@ import com.google.gson.GsonBuilder;
 			pointerDestPos = pointerStartPos + delta;
 		}
 
+		@Override
 		public void animate()
 		{
 			//log.d("animate() is called");
 			if ( pointerDestPos != pointerCurrPos ) {
 				if ( !started )
 					started = true;
-				if ( pageFlipAnimationSpeedMs==0 )
+				if ( getPageFlipAnimationSpeedMs()==0 )
 					pointerCurrPos = pointerDestPos;
 				else {
 					int delta = pointerCurrPos-pointerDestPos;
@@ -5561,7 +5758,7 @@ import com.google.gson.GsonBuilder;
 						delta = -delta;
 					long avgDraw = getAvgAnimationDrawDuration();
 					//int maxStep = (int)(maxY * PAGE_ANIMATION_DURATION / avgDraw);
-					int maxStep = pageFlipAnimationSpeedMs > 0 ? (int)(maxY * 1000 / avgDraw / pageFlipAnimationSpeedMs) : maxY;
+					int maxStep = getPageFlipAnimationSpeedMs() > 0 ? (int)(maxY * 1000 / avgDraw / getPageFlipAnimationSpeedMs()) : maxY;
 					int step;
 					if ( delta > maxStep * 2 )
 						step = maxStep;
@@ -5655,11 +5852,12 @@ import com.google.gson.GsonBuilder;
 		Paint divPaint;
 		Paint[] shadePaints;
 		Paint[] hilitePaints;
-		private final boolean naturalPageFlip;
-		private final boolean flipTwoPages;
+		int pageFlipAnimationM;
 
 		BitmapInfo image1;
 		BitmapInfo image2;
+		Bitmap image1scaled;
+		Bitmap image2scaled;
 
 		PageViewAnimation(int startX, int maxX, int direction) {
 			super();
@@ -5668,8 +5866,7 @@ import com.google.gson.GsonBuilder;
 			this.direction = direction;
 			this.currShift = 0;
 			this.destShift = 0;
-			this.naturalPageFlip = (pageFlipAnimationMode==PAGE_ANIMATION_PAPER);
-			this.flipTwoPages = (pageFlipAnimationMode==PAGE_ANIMATION_SLIDE2);
+			this.pageFlipAnimationM = pageFlipAnimationMode;
 
 			long start = android.os.SystemClock.uptimeMillis();
 			log.v("PageViewAnimation -- creating: drawing two pages to buffer");
@@ -5685,7 +5882,15 @@ import com.google.gson.GsonBuilder;
 			}
 			this.pageCount = currPos.pageMode;
 			image1 = preparePageImage(0);
+			image1scaled = null;
+			if (image1!=null)
+				image1scaled = Bitmap.createScaledBitmap(
+					image1.bitmap, image1.bitmap.getWidth()/4, image1.bitmap.getHeight()/4, false);
 			image2 = preparePageImage(direction);
+			image2scaled = null;
+			if (image2!=null)
+				image2scaled = Bitmap.createScaledBitmap(
+					image2.bitmap, image2.bitmap.getWidth()/4, image2.bitmap.getHeight()/4, false);
 			if ( image1==null || image2==null ) {
 				log.v("PageViewAnimation -- cannot start animation: page image is null");
 				return;
@@ -5855,7 +6060,7 @@ import com.google.gson.GsonBuilder;
 
 		@Override
 		public void move(int duration, boolean accelerated) {
-			if ( duration > 0 && pageFlipAnimationSpeedMs!=0 ) {
+			if ( duration > 0 && getPageFlipAnimationSpeedMs()!=0 ) {
 				int steps = (int)(duration / getAvgAnimationDrawDuration()) + 2;
 				int x0 = currShift;
 				int x1 = destShift;
@@ -5929,18 +6134,18 @@ import com.google.gson.GsonBuilder;
 
 		public void animate()
 		{
-			alog.v("PageViewAnimation.animate("+currShift + " => " + destShift + ") speed=" + pageFlipAnimationSpeedMs);
+			alog.v("PageViewAnimation.animate("+currShift + " => " + destShift + ") speed=" + getPageFlipAnimationSpeedMs());
 			//log.d("animate() is called");
 			if ( currShift != destShift ) {
 				started = true;
-				if ( pageFlipAnimationSpeedMs==0 )
+				if ( getPageFlipAnimationSpeedMs()==0 )
 					currShift = destShift;
 				else {
 					int delta = currShift - destShift;
 					if ( delta<0 )
 						delta = -delta;
 					long avgDraw = getAvgAnimationDrawDuration();
-					int maxStep = pageFlipAnimationSpeedMs > 0 ? (int)(maxX * 1000 / avgDraw / pageFlipAnimationSpeedMs) : maxX;
+					int maxStep = getPageFlipAnimationSpeedMs() > 0 ? (int)(maxX * 1000 / avgDraw / getPageFlipAnimationSpeedMs()) : maxX;
 					int step;
 					if ( delta > maxStep * 2 )
 						step = maxStep;
@@ -5974,7 +6179,7 @@ import com.google.gson.GsonBuilder;
 				// FORWARD
 				div = w-currShift;
 				Rect shadowRect = new Rect(div, 0, div+w/10, h);
-				if ( naturalPageFlip ) {
+				if ( pageFlipAnimationM ==  PAGE_ANIMATION_PAPER) {
 					if ( this.pageCount==2 ) {
 						int w2 = w/2;
 						if ( div<w2 ) {
@@ -6025,31 +6230,136 @@ import com.google.gson.GsonBuilder;
 							drawShadow( canvas, shadowRect );
 					}
 				} else {
-					if ( flipTwoPages ) {
-						Rect src1 = new Rect(currShift, 0, w, h);
-						Rect dst1 = new Rect(0, 0, w-currShift, h);
-						//log.v("drawing " + image1);
-						drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
-						Rect src2 = new Rect(0, 0, currShift, h);
-						Rect dst2 = new Rect(w-currShift, 0, w, h);
-						//log.v("drawing " + image1);
-						drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
-					} else {
-						Rect src1 = new Rect(currShift, 0, w, h);
-						Rect dst1 = new Rect(0, 0, w-currShift, h);
-						//log.v("drawing " + image1);
-						drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
-						Rect src2 = new Rect(w-currShift, 0, w, h);
-						Rect dst2 = new Rect(w-currShift, 0, w, h);
-						//log.v("drawing " + image1);
-						drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+					if ( pageFlipAnimationM == PAGE_ANIMATION_BLUR ) {
+						int defRadius = 20;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int radius = (diff * defRadius) / w2;
+						if (div < w2) {
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image2scaled != null)
+									blurredBmp = FastBlur.doBlur(image2scaled, defRadius - radius, false);
+							drawDimmedBitmap(canvas, blurredBmp == null ? image2.bitmap : blurredBmp, null, dst1);
+						} else {
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image1scaled != null)
+									blurredBmp = FastBlur.doBlur(image1scaled, defRadius - radius, false);
+							drawDimmedBitmap(canvas, blurredBmp == null ? image1.bitmap : blurredBmp, null, dst2);
+						}
+					}
+					else if ( pageFlipAnimationM == PAGE_ANIMATION_BLUR_DIM ) {
+						int defDim = dimmingAlpha;
+						int defRadius = 20;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int dim = (diff * defDim) / w2;
+						int radius = (diff * defRadius) / w2;
+						if (div < w2) {
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image2scaled != null)
+									blurredBmp = FastBlur.doBlur(image2scaled, defRadius - radius, false);
+							drawDimmedBitmapAlpha(canvas, blurredBmp == null ? image2.bitmap : blurredBmp, null, dst1, dim);
+						} else {
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image1scaled != null)
+									blurredBmp = FastBlur.doBlur(image1scaled, defRadius - radius, false);
+							drawDimmedBitmapAlpha(canvas, blurredBmp == null ? image1.bitmap : blurredBmp, null, dst2, dim);
+						}
+					}
+					else if ( pageFlipAnimationM == PAGE_ANIMATION_DIM ) {
+						int defDim = dimmingAlpha;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int dim = (diff * defDim) / w2;
+						if (div < w2) {
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmapAlpha(canvas, image2.bitmap, null, dst1, dim);
+						} else {
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmapAlpha(canvas, image1.bitmap, null, dst2,  dim);
+						}
+					}
+					else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG ) {
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int defMaxW = w/4;
+						int defMaxH = h/4;
+						int curW = defMaxW - (diff * defMaxW) / w2;
+						int curH = defMaxH - (diff * defMaxH) / w2;
+						if (div < w2) {
+							Rect src1 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmap(canvas, image2.bitmap, src1, dst1);
+						} else {
+							Rect src2 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmap(canvas, image1.bitmap, src2, dst2);
+						}
+					}
+					else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG_DIM ) {
+						int defDim = dimmingAlpha;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int dim = (diff * defDim) / w2;
+						int defMaxW = w/4;
+						int defMaxH = h/4;
+						int curW = defMaxW - (diff * defMaxW) / w2;
+						int curH = defMaxH - (diff * defMaxH) / w2;
+						if (div < w2) {
+							Rect src1 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmapAlpha(canvas, image2.bitmap, src1, dst1, dim);
+						} else {
+							Rect src2 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmapAlpha(canvas, image1.bitmap, src2, dst2,  dim);
+						}
+					}
+					else {
+						if (pageFlipAnimationM == PAGE_ANIMATION_SLIDE2) {
+							Rect src1 = new Rect(currShift, 0, w, h);
+							Rect dst1 = new Rect(0, 0, w-currShift, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
+							Rect src2 = new Rect(0, 0, currShift, h);
+							Rect dst2 = new Rect(w-currShift, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+						} else {
+							Rect src1 = new Rect(currShift, 0, w, h);
+							Rect dst1 = new Rect(0, 0, w - currShift, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
+							Rect src2 = new Rect(w - currShift, 0, w, h);
+							Rect dst2 = new Rect(w - currShift, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+						}
 					}
 				}
 			} else {
 				// BACK
 				div = currShift;
 				Rect shadowRect = new Rect(div, 0, div+10, h);
-				if ( naturalPageFlip ) {
+				if ( pageFlipAnimationM ==  PAGE_ANIMATION_PAPER ) {
 					if ( this.pageCount==2 ) {
 						int w2 = w/2;
 						if ( div<w2 ) {
@@ -6097,20 +6407,125 @@ import com.google.gson.GsonBuilder;
 							drawShadow( canvas, shadowRect );
 					}
 				} else {
-					if ( flipTwoPages ) {
-						Rect src1 = new Rect(0, 0, w-currShift, h);
-						Rect dst1 = new Rect(currShift, 0, w, h);
-						drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
-						Rect src2 = new Rect(w-currShift, 0, w, h);
-						Rect dst2 = new Rect(0, 0, currShift, h);
-						drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+					if ( pageFlipAnimationM ==  PAGE_ANIMATION_BLUR ) {
+						int defRadius = 20;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int radius = (diff * defRadius) / w2;
+						if (div < w2) {
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image1scaled != null)
+									blurredBmp = FastBlur.doBlur(image1scaled, defRadius - radius, false);
+							drawDimmedBitmap(canvas, blurredBmp == null ? image1.bitmap : blurredBmp, null, dst1);
+						} else {
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image2scaled != null)
+									blurredBmp = FastBlur.doBlur(image2scaled, defRadius - radius, false);
+							drawDimmedBitmap(canvas, blurredBmp == null ? image2.bitmap : blurredBmp, null, dst2);
+						}
+					}
+					else if ( pageFlipAnimationM == PAGE_ANIMATION_BLUR_DIM ) {
+						int defDim = dimmingAlpha;
+						int defRadius = 20;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int dim = (diff * defDim) / w2;
+						int radius = (diff * defRadius) / w2;
+						if (div < w2) {
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image2scaled != null)
+									blurredBmp = FastBlur.doBlur(image1scaled, defRadius - radius, false);
+							drawDimmedBitmapAlpha(canvas, blurredBmp == null ? image1.bitmap : blurredBmp, null, dst1, dim);
+						} else {
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							Bitmap blurredBmp = null;
+							if (defRadius - radius > 0)
+								if (image1scaled != null)
+									blurredBmp = FastBlur.doBlur(image2scaled, defRadius - radius, false);
+							drawDimmedBitmapAlpha(canvas, blurredBmp == null ? image2.bitmap : blurredBmp, null, dst2, dim);
+						}
+					}
+					else if ( pageFlipAnimationM == PAGE_ANIMATION_DIM ) {
+						int defDim = dimmingAlpha;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int dim = (diff * defDim) / w2;
+						if (div < w2) {
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmapAlpha(canvas, image1.bitmap, null, dst1, dim);
+						} else {
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmapAlpha(canvas, image2.bitmap, null, dst2,  dim);
+						}
+
+					} else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG ) {
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int defMaxW = w/4;
+						int defMaxH = h/4;
+						int curW = defMaxW - (diff * defMaxW) / w2;
+						int curH = defMaxH - (diff * defMaxH) / w2;
+						if (div < w2) {
+							Rect src1 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
+						} else {
+							//asdf
+							Rect src2 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+						}
+					}  else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG_DIM ) {
+						int defDim = dimmingAlpha;
+						int w2 = w / 2;
+						int diff = Math.abs(div - w2);
+						int dim = (diff * defDim) / w2;
+						int defMaxW = w/4;
+						int defMaxH = h/4;
+						int curW = defMaxW - (diff * defMaxW) / w2;
+						int curH = defMaxH - (diff * defMaxH) / w2;
+						if (div < w2) {
+							Rect src1 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst1 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image1);
+							drawDimmedBitmapAlpha(canvas, image1.bitmap, src1, dst1, dim);
+						} else {
+							//asdf
+							Rect src2 = new Rect(curW, curH, w - curW,  h - curH);
+							Rect dst2 = new Rect(0, 0, w, h);
+							//log.v("drawing " + image2);
+							drawDimmedBitmapAlpha(canvas, image2.bitmap, src2, dst2, dim);
+						}
 					} else {
-						Rect src1 = new Rect(currShift, 0, w, h);
-						Rect dst1 = new Rect(currShift, 0, w, h);
-						drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
-						Rect src2 = new Rect(w-currShift, 0, w, h);
-						Rect dst2 = new Rect(0, 0, currShift, h);
-						drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+						if (pageFlipAnimationM ==  PAGE_ANIMATION_SLIDE2) {
+							Rect src1 = new Rect(0, 0, w - currShift, h);
+							Rect dst1 = new Rect(currShift, 0, w, h);
+							drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
+							Rect src2 = new Rect(w - currShift, 0, w, h);
+							Rect dst2 = new Rect(0, 0, currShift, h);
+							drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+						} else {
+							Rect src1 = new Rect(currShift, 0, w, h);
+							Rect dst1 = new Rect(currShift, 0, w, h);
+							drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
+							Rect src2 = new Rect(w - currShift, 0, w, h);
+							Rect dst2 = new Rect(0, 0, currShift, h);
+							drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
+						}
 					}
 				}
 			}
@@ -6261,7 +6676,9 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private void checkOpenBookStyles(boolean force) {
-		BackgroundThread.instance().postGUI(new Runnable() {
+		boolean bDontAsk = mActivity.settings().getBool(Settings.PROP_APP_HIDE_CSS_WARNING, false);
+		if (!bDontAsk)
+			BackgroundThread.instance().postGUI(new Runnable() {
 			@Override
 			public void run() {
 				if (getBookInfo() != null) {
@@ -6511,6 +6928,10 @@ import com.google.gson.GsonBuilder;
 
 				hideProgress();
 
+				selectionModeActive = false;
+				selectionModeWasActive = false;
+				inspectorModeActive = false;
+
 				drawPage();
 
 				BackgroundThread.instance().postGUI(new Runnable() {
@@ -6534,6 +6955,7 @@ import com.google.gson.GsonBuilder;
 						}, 5000);
 					}
 				});
+
 				// Save last opened book ONLY if book opened from real file not stream.
 				if (null == inputStream)
 					mActivity.setLastBook(filename);
@@ -6587,9 +7009,24 @@ import com.google.gson.GsonBuilder;
 		}
 	}
 
+	private void dimRectAlpha( Canvas canvas, Rect dst, int alpha ) {
+		if ((DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))&&(!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS))
+			return; // no backlight
+		if ( alpha!=255 ) {
+			Paint p = new Paint();
+			p.setColor((255-alpha)<<24);
+			canvas.drawRect(dst, p);
+		}
+	}
+
 	private void drawDimmedBitmap( Canvas canvas, Bitmap bmp, Rect src, Rect dst ) {
 		canvas.drawBitmap(bmp, src, dst, null);
 		dimRect( canvas, dst );
+	}
+
+	private void drawDimmedBitmapAlpha( Canvas canvas, Bitmap bmp, Rect src, Rect dst, int alpha ) {
+		canvas.drawBitmap(bmp, src, dst, null);
+		dimRectAlpha( canvas, dst, alpha );
 	}
 
 	private void drawDimmedBitmap2( Canvas canvas, Bitmap bmp, Rect src, Rect dst ) {
@@ -6605,6 +7042,9 @@ import com.google.gson.GsonBuilder;
 		Bitmap bmp = currentBackgroundTextureBitmap;
 		if (bmp != null) {
 			backgrNormalizedColor = CoverpageManager.getDominantColor(bmp);
+			if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				mActivity.getWindow().setNavigationBarColor(backgrNormalizedColor);
+			}
 			int h = bmp.getHeight();
 			int w = bmp.getWidth();
 			Rect src = new Rect(0, 0, w, h);
@@ -6674,6 +7114,9 @@ import com.google.gson.GsonBuilder;
 		} else {
 			canvas.drawColor(currentBackgroundColor | 0xFF000000);
 			backgrNormalizedColor = currentBackgroundColor;
+			if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				mActivity.getWindow().setNavigationBarColor(backgrNormalizedColor);
+			}
 		}
 	}
 

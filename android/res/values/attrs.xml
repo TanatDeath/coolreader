@@ -304,6 +304,12 @@
     <attr name="attr_icons8_ext_fullscreen" format="reference" />
     <attr name="attr_icons8_rounded_corners_margin2" format="reference" />
     <attr name="attr_icons8_whole_page_to_dic" format="reference" />
+    <attr name="attr_icons8_night_vision" format="reference" />
+    <attr name="attr_icons8_wiki1" format="reference" />
+    <attr name="attr_icons8_wiki2" format="reference" />
+    <attr name="attr_icons8_two_fingers" format="reference" />
+    <attr name="attr_icons8_page_animation" format="reference" />
+    <attr name="attr_icons8_page_animation_speed" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />
@@ -335,4 +341,9 @@
         <attr name="layout_breakLine" format="boolean" />
         <attr name="layout_horizontalSpacing" format="dimension" />
     </declare-styleable>
+
+    <declare-styleable name="MaxHeightScrollView">
+        <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+
 </resources>

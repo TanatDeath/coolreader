@@ -1029,15 +1029,23 @@ public class CRDBService extends Service {
 		}
 
 		public void updateDicSearchHistory(final DicSearchHistoryEntry dshe, final int action, CoolReader act) {
-        	UserDicDlg.mDicSearchHistoryAll.add(0,dshe);
-        	int idx = -1;
-        	if (UserDicDlg.mDicSearchHistoryAll.size()>0)
-        		for (int i=1; i < UserDicDlg.mDicSearchHistoryAll.size(); i++) {
-					if (StrUtils.getNonEmptyStr(UserDicDlg.mDicSearchHistoryAll.get(i).getSearch_text(),true).equals(dshe.getSearch_text()))
+			int idx = -1;
+			if (action == DicSearchHistoryEntry.ACTION_CLEAR_ALL) UserDicDlg.mDicSearchHistoryAll.clear();
+			if (UserDicDlg.mDicSearchHistoryAll.size() > 0)
+				for (int i = 0; i < UserDicDlg.mDicSearchHistoryAll.size(); i++) {
+					if (StrUtils.getNonEmptyStr(UserDicDlg.mDicSearchHistoryAll.get(i).getSearch_text(), true).toLowerCase().equals(
+							StrUtils.getNonEmptyStr(dshe.getSearch_text(),true).toLowerCase()))
 						idx = i;
+					break;
 				}
-        	if (idx > 0) UserDicDlg.mDicSearchHistoryAll.remove(idx);
-        	if (act.getmReaderFrame() != null)
+			if (idx >= 0) {
+				UserDicDlg.mDicSearchHistoryAll.remove(idx);
+				//act.showToast("deleteed:" + StrUtils.getNonEmptyStr(dshe.getSearch_text(),true));
+			}
+        	if (action == DicSearchHistoryEntry.ACTION_SAVE) {
+				UserDicDlg.mDicSearchHistoryAll.add(0, dshe);
+			}
+			if (act.getmReaderFrame() != null)
         		if (act.getmReaderFrame().getUserDicPanel()!=null)
 					act.getmReaderFrame().getUserDicPanel().updateUserDicWords();
 			getService().updateDicSearchHistory(dshe, action);

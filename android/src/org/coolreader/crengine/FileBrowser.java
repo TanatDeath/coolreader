@@ -963,6 +963,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if (etype == 6) return new MainDB.ItemGroupFileCreateTimeExtractor();
 		if (etype == 7) return new MainDB.ItemGroupRatingExtractor();
 		if (etype == 8) return new MainDB.ItemGroupStateExtractor();
+		if (etype == 9) return new MainDB.ItemGroupTitleExtractor();
 		return new MainDB.ItemGroupAuthorExtractor();
 	}
 
@@ -976,6 +977,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if (etype == 7) return new MainDB.ItemGroupFileCreateTimeExtractor();
 		if (etype == 8) return new MainDB.ItemGroupRatingExtractor();
 		if (etype == 9) return new MainDB.ItemGroupStateExtractor();
+		if (etype == 10) return new MainDB.ItemGroupTitleExtractor();
 		return new MainDB.ItemGroupAuthorExtractor();
 	}
 
@@ -991,6 +993,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		};
 		if (etype == 5) return new MainDB.ItemGroupRatingExtractor();
 		if (etype == 6) return new MainDB.ItemGroupStateExtractor();
+		if (etype == 7) return new MainDB.ItemGroupTitleExtractor();
 		return new MainDB.ItemGroupAuthorExtractor();
 	}
 
@@ -1655,7 +1658,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	public void showDirectory(FileInfo fileOrDir, FileInfo itemToSelect, String addFilter)
 	{
 		BackgroundThread.ensureGUI();
-		showDirectoryLoadingStub();
 		if (fileOrDir != null) {
 			if (fileOrDir.isRootDir()) {
 				mActivity.showRootWindow();
@@ -1672,6 +1674,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (fileOrDir.isOnlineCatalogPluginDir()) {
 				if (fileOrDir.getOnlineCatalogPluginPath() == null) {
 					// root
+					showDirectoryLoadingStub();
 					OnlineStoreWrapper plugin = OnlineStorePluginManager.getPlugin(mActivity, fileOrDir.getOnlineCatalogPluginPackage());
 					if (plugin != null) {
 						String login = plugin.getLogin();
@@ -1694,14 +1697,17 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						}
 					}
 				}
+				showDirectoryLoadingStub();
 				showOnlineStoreDirectory(fileOrDir);
 				return;
 			}
 			if (fileOrDir.isOPDSRoot()) {
+				showDirectoryLoadingStub();
 				showOPDSRootDirectory();
 				return;
 			}
 			if (fileOrDir.isOPDSDir()) {
+				showDirectoryLoadingStub();
 				showOPDSDir(fileOrDir, itemToSelect, "");
 				return;
 			}
@@ -1766,110 +1772,130 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				return;
 			}
 			if (fileOrDir.isBooksByAuthorRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating authors list");
 				mActivity.getDB().loadAuthorsList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating series list");
 				mActivity.getDB().loadSeriesList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
             if (fileOrDir.isBooksByBookdateRoot()) {
-                // refresh authors list
+				showDirectoryLoadingStub();
+				// refresh authors list
                 log.d("Updating bookdate list");
                 mActivity.getDB().loadByDateList(fileOrDir, "book_date_n", new ItemGroupsLoadingCallback(fileOrDir));
                 return;
             }
 			if (fileOrDir.isBooksByDocdateRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating docdate list");
 				mActivity.getDB().loadByDateList(fileOrDir, "doc_date_n", new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByPublyearRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating publyear list");
 				mActivity.getDB().loadByDateList(fileOrDir, "publ_year_n", new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByFiledateRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating filedate list");
 				mActivity.getDB().loadByDateList(fileOrDir, "file_create_time", new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByRatingRoot()) {
+				showDirectoryLoadingStub();
 				log.d("Updating rated books list");
 				mActivity.getDB().loadBooksByRating(1, 10, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByStateFinishedRoot()) {
+				showDirectoryLoadingStub();
 				log.d("Updating books by state=finished");
 				mActivity.getDB().loadBooksByState(FileInfo.STATE_FINISHED, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByStateReadingRoot()) {
+				showDirectoryLoadingStub();
 				log.d("Updating books by state=reading");
 				mActivity.getDB().loadBooksByState(FileInfo.STATE_READING, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByStateToReadRoot()) {
+				showDirectoryLoadingStub();
 				log.d("Updating books by state=toRead");
 				mActivity.getDB().loadBooksByState(FileInfo.STATE_TO_READ, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByTitleRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating title list");
 				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByTitleLevel()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating title list");
 				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByAuthorDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating author book list");
 				mActivity.getDB().loadAuthorBooks(fileOrDir.getAuthorId(), addFilter, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating series book list");
 				mActivity.getDB().loadSeriesBooks(fileOrDir.getSeriesId(), addFilter, new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByBookdateDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating bookdate book list");
 				mActivity.getDB().loadByDateBooks(fileOrDir.getBookdateId(), "book_date_n", new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByDocdateDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating docdate book list");
 				mActivity.getDB().loadByDateBooks(fileOrDir.getDocdateId(), "doc_date_n", new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByPublyearDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating publyear book list");
 				mActivity.getDB().loadByDateBooks(fileOrDir.getPublyearId(), "publ_year_n", new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByFiledateDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating filedate book list");
 				mActivity.getDB().loadByDateBooks(fileOrDir.getFiledateId(), "file_create_time",  new FileInfoLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByGenreRoot()) {
+				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating genre list");
 				mActivity.getDB().loadGenresList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksByGenreDir()) {
+				showDirectoryLoadingStub();
 				log.d("Updating genre book list");
 				mActivity.getDB().loadGenreBooks(fileOrDir.getGenreId(), new FileInfoLoadingCallback(fileOrDir));
 				return;
@@ -1891,6 +1917,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		final FileInfo file = fileOrDir==null || fileOrDir.isDirectory ? itemToSelect : fileOrDir;
 		final FileInfo dir = fileOrDir!=null && !fileOrDir.isDirectory ? mScanner.findParent(file, mScanner.getRoot()) : fileOrDir;
 		if ( dir!=null ) {
+			showDirectoryLoadingStub();
 			mScanner.scanDirectory(mActivity.getDB(), dir, new Runnable() {
 				public void run() {
 //					plotn: think later

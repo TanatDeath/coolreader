@@ -153,7 +153,7 @@ static LVFontGlyphCacheItem *newItem(LVFontLocalGlyphCache *local_cache, lChar16
     int h = bitmap->rows;
     LVFontGlyphCacheItem *item = LVFontGlyphCacheItem::newItem(local_cache, ch, w, h);
     if (!item)
-        return nullptr;
+        return 0;
     if (bitmap->pixel_mode == FT_PIXEL_MODE_MONO) { //drawMonochrome
         lUInt8 mask = 0x80;
         const lUInt8 *ptr = (const lUInt8 *) bitmap->buffer;
@@ -213,7 +213,7 @@ static LVFontGlyphCacheItem *newItem(LVFontLocalGlyphCache *local_cache, lUInt32
     int h = bitmap->rows;
     LVFontGlyphCacheItem *item = LVFontGlyphCacheItem::newItem(local_cache, index, w, h);
     if (!item)
-        return nullptr;
+        return 0;
     if (bitmap->pixel_mode == FT_PIXEL_MODE_MONO) { //drawMonochrome
         lUInt8 mask = 0x80;
         const lUInt8 *ptr = (const lUInt8 *) bitmap->buffer;

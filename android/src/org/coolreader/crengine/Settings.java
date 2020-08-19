@@ -51,7 +51,8 @@ public interface Settings {
 	public static final String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
     public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
     public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
-    public static final String PROP_INTERLINE_SPACE         ="crengine.interline.space";
+	public static final String PROP_PAGE_ANIMATION_SPEED    ="crengine.page.animation.speed";
+	public static final String PROP_INTERLINE_SPACE         ="crengine.interline.space";
     public static final String PROP_ROTATE_ANGLE            ="window.rotate.angle";
     public static final String PROP_EMBEDDED_STYLES         ="crengine.doc.embedded.styles.enabled";
     public static final String PROP_EMBEDDED_FONTS          ="crengine.doc.embedded.fonts.enabled";
@@ -84,6 +85,9 @@ public interface Settings {
     public static final String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";
     //public static final String PROP_HYPHENATION_DICT        ="crengine.hyphenation.dictionary.code"; // non-crengine (old)
 	public static final String PROP_HYPHENATION_DICT        = "crengine.hyphenation.directory";
+	public static final String PROP_WORD_EXPANSION          = "crengine.style.max.added.letter.spacing.percent";
+	public static final String PROP_WORD_SPACE_WIDTH_SCALE_PERCENT = "crengine.style.space.width.scale.percent";
+	public static final String PROP_WORD_SPACE_CONDENSING_PERCENT = "crengine.style.space.condensing.percent";
 	public static final String PROP_AUTOSAVE_BOOKMARKS      ="crengine.autosave.bookmarks";
 	// New textlang typography settings:
 	public static final String PROP_TEXTLANG_MAIN_LANG      = "crengine.textlang.main.lang";
@@ -147,22 +151,42 @@ public interface Settings {
     public static final String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
     public static final String PROP_APP_DICTIONARY = "app.dictionary.current";
     public static final String PROP_APP_DICTIONARY_2 = "app.dictionary2.current";
+	public static final String PROP_APP_DICTIONARY_3 = "app.dictionary3.current";
+	public static final String PROP_APP_DICTIONARY_4 = "app.dictionary4.current";
+	public static final String PROP_APP_DICTIONARY_5 = "app.dictionary5.current";
+	public static final String PROP_APP_DICTIONARY_6 = "app.dictionary6.current";
+	public static final String PROP_APP_DICTIONARY_7 = "app.dictionary7.current";
     public static final String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
     public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
     public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
-    public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
+	public static final String PROP_APP_SELECTION2_ACTION = "app.selection2.action";
+	public static final String PROP_APP_SELECTION2_ACTION_LONG = "app.selection2.action.long";
+	public static final String PROP_APP_MULTI_SELECTION2_ACTION = "app.multiselection2.action";
+	public static final String PROP_APP_SELECTION3_ACTION = "app.selection3.action";
+	public static final String PROP_APP_SELECTION3_ACTION_LONG = "app.selection3.action.long";
+	public static final String PROP_APP_MULTI_SELECTION3_ACTION = "app.multiselection3.action";
+	public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
 	public static final String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
 	public static final String PROP_CLOUD_YND_HOME_FOLDER = "app.cloud.ynd.home.folder";
-    public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
+	public static final String PROP_CLOUD_WIKI1_ADDR = "app.cloud.wiki1";
+	public static final String PROP_CLOUD_WIKI2_ADDR = "app.cloud.wiki2";
+	public static final String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
+	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
     public static final String PROP_APP_MARK_DOWNLOADED_TO_READ = "app.mark.downloaded.toread";
     public static final String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
 	public static final String PROP_APP_CLOUD_POS_DATE_SORT = "app.cloudpos.date.sort";
 	public static final String PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV = "app.cloudpos.hide.current.dev";
+	public static final String PROP_APP_ROOT_VIEW_FS_SECTION_HIDE = "app.rootview.fs_section.hide";
+	public static final String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
+	public static final String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
+
+	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
+	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
 
 	public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
     public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
@@ -225,6 +249,7 @@ public interface Settings {
 	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
 
 	// available options for PROP_APP_SELECTION_ACTION setting
+	public static final int SELECTION_ACTION_SAME_AS_COMMON = -1;
     public static final int SELECTION_ACTION_TOOLBAR = 0;
     public static final int SELECTION_ACTION_COPY = 1;
     public static final int SELECTION_ACTION_DICTIONARY = 2;
@@ -237,8 +262,13 @@ public interface Settings {
     public static final int SELECTION_ACTION_USER_DIC = 9;
     public static final int SELECTION_ACTION_CITATION = 10;
     public static final int SELECTION_ACTION_DICTIONARY_LIST = 11;
+	public static final int SELECTION_ACTION_DICTIONARY_3 = 12;
+	public static final int SELECTION_ACTION_DICTIONARY_4 = 13;
+	public static final int SELECTION_ACTION_DICTIONARY_5 = 14;
+	public static final int SELECTION_ACTION_DICTIONARY_6 = 15;
+	public static final int SELECTION_ACTION_DICTIONARY_7 = 16;
 
-    // available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
+	// available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     public static final int TAP_ACTION_TYPE_LONGPRESS = 0;
     public static final int TAP_ACTION_TYPE_DOUBLE = 1;
     public static final int TAP_ACTION_TYPE_SHORT = 2;
@@ -366,6 +396,10 @@ public interface Settings {
 	    PROP_FLOATING_PUNCTUATION,
 	    PROP_LANDSCAPE_PAGES,
 	    PROP_HYPHENATION_DICT,
+		PROP_WORD_EXPANSION,
+	    PROP_WORD_SPACE_WIDTH_SCALE_PERCENT,
+	    PROP_WORD_SPACE_CONDENSING_PERCENT,
+
 	    "crengine.image.*",
 	    PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT,
 	    PROP_APP_FULLSCREEN,
@@ -377,12 +411,21 @@ public interface Settings {
         PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_LONGTAP_CHANGE,
 		PROP_CLOUD_SYNC_VARIANT,
+		PROP_CLOUD_WIKI1_ADDR,
+		PROP_CLOUD_WIKI2_ADDR,
+		PROP_CLOUD_WIKI_SAVE_HISTORY,
 		PROP_CLOUD_YND_HOME_FOLDER,
         PROP_SAVE_POS_TO_CLOUD_TIMEOUT,
 	    PROP_APP_SELECTION_ACTION,
         PROP_APP_SELECTION_ACTION_LONG,
         PROP_APP_MULTI_SELECTION_ACTION,
-	    PROP_APP_SELECTION_PERSIST,
+		PROP_APP_SELECTION2_ACTION,
+		PROP_APP_SELECTION2_ACTION_LONG,
+		PROP_APP_MULTI_SELECTION2_ACTION,
+		PROP_APP_SELECTION3_ACTION,
+		PROP_APP_SELECTION3_ACTION_LONG,
+		PROP_APP_MULTI_SELECTION3_ACTION,
+		PROP_APP_SELECTION_PERSIST,
 	    PROP_APP_HIGHLIGHT_BOOKMARKS + "*",
 	    PROP_HIGHLIGHT_SELECTION_COLOR + "*",
 	    PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT + "*",
@@ -400,8 +443,12 @@ public interface Settings {
 	    "app.ui.theme*",
         PROP_APP_ICONS_IS_CUSTOM_COLOR,
         PROP_APP_ICONS_CUSTOM_COLOR,
-		PROP_GLOBAL_MARGIN
-	};
+		PROP_GLOBAL_MARGIN,
+
+		PROP_APP_HIDE_STATE_DIALOGS,
+	    PROP_APP_HIDE_CSS_WARNING
+
+};
 
 
 }

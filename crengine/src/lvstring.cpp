@@ -12,7 +12,6 @@
 *******************************************************/
 
 #include "../include/lvstring.h"
-#include "../include/crlog.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -101,7 +100,7 @@ const lString16 & cs16(const char * str) {
         const void * p = const_ptrs_16[index];
         if (p == str) {
             return values_16[index];
-        } else if (p == nullptr) {
+        } else if (p == NULL) {
 #if DEBUG_STATIC_STRING_ALLOC == 1
             CRLog::trace("allocating static string16 %s", str);
 #endif
@@ -121,7 +120,7 @@ const lString16 & cs16(const char * str) {
 
 /// get reference to atomic constant wide string for string literal e.g. cs16(L"abc") -- fast and memory effective
 const lString16 & cs16(const lChar16 * str) {
-    size_t index = ((static_cast<size_t>((ptrdiff_t)str)) * CONST_STRING_BUFFER_HASH_MULT) & CONST_STRING_BUFFER_MASK;
+    int index = (((int)((ptrdiff_t)str)) * CONST_STRING_BUFFER_HASH_MULT) & CONST_STRING_BUFFER_MASK;
     for (;;) {
         const void * p = const_ptrs_16[index];
         if (p == str) {
@@ -2671,7 +2670,6 @@ static void DecodeUtf8(const char * s,  lChar16 * p, int len)
 
 static void DecodeWtf8(const char * s,  lChar16 * p, int len)
 {
-    //CRLog::trace("DecodeWtf8 %s", "1");
     lChar16 * endp = p + len;
     lUInt32 ch;
     while (p < endp) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -108,6 +110,44 @@ public class UserDicDlg extends BaseDialog {
 			view = mInflater.inflate(res, null);
 			TextView wordView = (TextView)view.findViewById(R.id.userdic_word);
 			TextView wordTranslateView = (TextView)view.findViewById(R.id.userdic_word_translate);
+			ImageView userdicDel = (ImageView)view.findViewById(R.id.userdic_value_del);
+			userdicDel.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if ((openPage==0)||(openPage==1)) {
+						if (mUserDic == null) return;
+						final UserDicEntry ude = mUserDic.get(position);
+						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
+							@Override
+							public void run() {
+								if (ude.getThisIsDSHE()) {
+									DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+									dshe.setSearch_text(ude.getDic_word());
+									activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+								} else
+									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+								mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
+								mUserDic.remove(ude);
+								listUpdated();
+								mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+							}
+						});
+					}
+					if (openPage==2) {
+						final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
+						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
+							@Override
+							public void run() {
+								activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+								mDicSearchHistory.remove(dshe);
+								listUpdated();
+								mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+							}
+						});
+					}
+				}
+			});
+			mCoolReader.tintViewIcons(view,true);
 			if ((openPage==0)||(openPage==1)) {
 				UserDicEntry ude = null;
 				if (mUserDic != null) ude = mUserDic.get(position);
@@ -119,8 +159,11 @@ public class UserDicDlg extends BaseDialog {
 					String word = StrUtils.textShrinkLines(ude.getDic_word(), true);
 					if (!StrUtils.isEmptyStr(ude.getLanguage()))
 						word = word + " [" + ude.getLanguage() + "]";
-					if (wordView != null)
+					if (wordView != null) {
 						wordView.setText(word);
+						if (ude.getThisIsDSHE()) wordView.setTypeface(null, Typeface.BOLD_ITALIC);
+						else wordView.setTypeface(null, Typeface.BOLD);
+					}
 					wordTranslateView.setText(StrUtils.textShrinkLines(ude.getDic_word_translate(), true));
 				} else {
 					if (wordView != null)
@@ -201,7 +244,7 @@ public class UserDicDlg extends BaseDialog {
 				@Override
 				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 						int position, long arg3) {
-					if ((openPage==0)||(openPage==1)) {
+					if (openPage==0) {
 						if (mUserDic == null)
 							return true;
 						final UserDicEntry ude = mUserDic.get(position);
@@ -209,7 +252,12 @@ public class UserDicDlg extends BaseDialog {
 						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
 							@Override
 							public void run() {
-								activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+								if (ude.getThisIsDSHE()) {
+									DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+									dshe.setSearch_text(ude.getDic_word());
+									activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+								} else
+									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
 								mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
 								mUserDic.remove(ude);
 								if (thisDlg != null)
@@ -218,10 +266,16 @@ public class UserDicDlg extends BaseDialog {
 							}
 						});
 					}
+					if ((openPage==1)) {
+						if (mCoolReader.getReaderView()==null) return false;
+						final UserDicEntry ude = mUserDic.get(position);
+						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), ude.getDic_word(), arg1);
+						dlg.show();
+					}
 					if ((openPage==2)) {
 						if (mCoolReader.getReaderView()==null) return false;
 						final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
-						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), dshe.getSearch_text());
+						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), dshe.getSearch_text(), arg1);
 						dlg.show();
 					}
 					return true;
@@ -234,18 +288,18 @@ public class UserDicDlg extends BaseDialog {
 			if (mCoolReader.getReaderView()==null) return false;
 			if (openPage==0) {
 				openContextMenu(UserDicList.this);
-				DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), mUserDic.get(position).getDic_word());
+				DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), mUserDic.get(position).getDic_word(), null);
 				dlg.show();
 				dismiss();
 			}
 			if (openPage==1) {
-				mCoolReader.getReaderView().copyToClipboard(
+				mCoolReader.getReaderView().copyToClipboardAndToast(
 					mUserDic.get(position).getDic_word()+" \n"+
 						mUserDic.get(position).getDic_word_translate()
 				);
 			}
 			if (openPage==2) {
-				mCoolReader.findInDictionary( mDicSearchHistory.get(position).getSearch_text());
+				mCoolReader.findInDictionary( mDicSearchHistory.get(position).getSearch_text() , view);
 			}
 			return true;
 		}
@@ -258,8 +312,18 @@ public class UserDicDlg extends BaseDialog {
 	}
 
 	private void setChecked(ImageButton btn) {
+		int colorIcon;
+		int colorIconL;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorIcon, R.attr.colorIconL, R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
+		colorIcon = a.getColor(0, Color.GRAY);
+		colorIconL = a.getColor(1, Color.GRAY);
+		int colorGray = a.getColor(2, Color.GRAY);
+		int colorGrayC = a.getColor(3, Color.GRAY);
+		a.recycle();
 		rb_descr.setText(btn.getContentDescription()+" ");
 		btnPage.setEnabled(true);
+		btnPage.setTextColor(colorIcon);
 		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_bookmark_user_dic))) {
 			openPage = 0;
 		}
@@ -270,6 +334,7 @@ public class UserDicDlg extends BaseDialog {
 				}
 			}
 			btnPage.setEnabled(false);
+			btnPage.setTextColor(colorIconL);
 			openPage = 1;
 		}
 
@@ -280,15 +345,10 @@ public class UserDicDlg extends BaseDialog {
 				}
 			}
 			btnPage.setEnabled(false);
+			btnPage.setTextColor(colorIconL);
 			openPage = 2;
 		}
-		int colorGray;
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
-		colorGray = a.getColor(0, Color.GRAY);
-		colorGrayC = a.getColor(1, Color.GRAY);
-        int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
         rb_descr.setBackgroundColor(colorGrayCT);
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnUserDic.setBackgroundColor(colorGrayCT);
@@ -333,6 +393,7 @@ public class UserDicDlg extends BaseDialog {
 								)
 							mUserDic.add(ude);
 				}
+				listUpdated();
 			}
 		}
 		if (bBookC) {
@@ -461,7 +522,11 @@ public class UserDicDlg extends BaseDialog {
 			@Override
 			public int compare(UserDicEntry lhs, UserDicEntry rhs) {
 				// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+				// here we need alphabetical sort!!! - not for page
 				return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());
+				//if (lhs.getLast_access_time() > rhs.getLast_access_time()) return -1;
+				//if (lhs.getLast_access_time() < rhs.getLast_access_time()) return 1;
+				//return 0;
 			}
 		});
 		listUpdated();

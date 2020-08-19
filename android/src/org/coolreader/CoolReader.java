@@ -17,9 +17,7 @@ import org.coolreader.cloud.CloudSync;
 import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.OPDSUtil;
-import org.coolreader.crengine.ReadingStat;
 import org.coolreader.crengine.ReadingStatRes;
-import org.coolreader.crengine.UserDicDlg;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -110,6 +108,7 @@ import android.os.Debug;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.provider.DocumentFile;
+import android.support.v7.app.AppCompatDelegate;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -148,6 +147,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     public ArrayList<ResizeHistory> getResizeHist() {
         return resizeHist;
     }
+
+    public static String BOOK_READING_STATE_NO_STATE = "[no_state]";
+	public static String BOOK_READING_STATE_TO_READ = "[to read]";
+	public static String BOOK_READING_STATE_READING = "[reading]";
+	public static String BOOK_READING_STATE_FINISHED = "[finished]";
 
 //	public ArrayList<String> getProfileNames() {
 //		return profileNames;
@@ -282,6 +286,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     	startServices();
 		log.i("CoolReader.onCreate() entered");
 		super.onCreate(savedInstanceState);
+
+		//AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); -- к сожалению не работает ((
 
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
@@ -446,6 +452,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         	setDict(value);
         } else if ( key.equals(PROP_APP_DICTIONARY_2) ) {
 			setDict2(value);
+		} else if ( key.equals(PROP_APP_DICTIONARY_3) ) {
+			setDict3(value);
+		} else if ( key.equals(PROP_APP_DICTIONARY_4) ) {
+			setDict4(value);
+		} else if ( key.equals(PROP_APP_DICTIONARY_5) ) {
+			setDict5(value);
+		} else if ( key.equals(PROP_APP_DICTIONARY_6) ) {
+			setDict6(value);
+		} else if ( key.equals(PROP_APP_DICTIONARY_7) ) {
+			setDict7(value);
 		} else if ( key.equals(PROP_APP_DICT_WORD_CORRECTION) ) {
 			setDictWordCorrection(value);
 		} else if ( key.equals(PROP_APP_SHOW_USER_DIC_PANEL) ) {
@@ -789,12 +805,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 		String processText = intent.getStringExtra("PROCESS_TEXT");
 		if (!StrUtils.isEmptyStr(processText)) {
+			boolean allOk = false;
 			if (getReaderView() != null)
 				if (getReaderView().getBookInfo() != null)
 					if (getReaderView().lastSelection!=null)
 						if (!getReaderView().lastSelection.isEmpty()) {
+							allOk = true;
 							getReaderView().showNewBookmarkDialog(getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, processText);
 				}
+			if (!allOk) showToast(R.string.no_selection);
 			return true;
 		}
 		if (Intent.ACTION_MAIN.equals(intentAction)) intentAction = Intent.ACTION_VIEW; //hack for Onyx
@@ -1344,7 +1363,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void directoryUpdated(FileInfo dir, FileInfo selected) {
 		if (dir!=null) {
 			if (dir.isOPDSRoot())
-				mHomeFrame.refreshOnlineCatalogs();
+				mHomeFrame.refreshOnlineCatalogs(true);
 			else if (dir.isRecentDir())
 				mHomeFrame.refreshRecentBooks();
 			if (mBrowser != null)
@@ -1359,7 +1378,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void onSettingsChanged(Properties props, Properties oldProps) {
 		Properties changedProps = oldProps != null ? props.diff(oldProps) : props;
 		if (mHomeFrame != null) {
-			mHomeFrame.refreshOnlineCatalogs();
+			mHomeFrame.refreshOnlineCatalogs(true);
 		}
 		if (mReaderFrame != null) {
 			mReaderFrame.updateSettings(props);
@@ -1380,6 +1399,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				});
 			}
         }
+		BOOK_READING_STATE_NO_STATE = "["+getString(R.string.book_state_none)+"]";
+		BOOK_READING_STATE_TO_READ = "["+getString(R.string.book_state_toread)+"]";
+		BOOK_READING_STATE_READING = "["+getString(R.string.book_state_reading)+"]";
+		BOOK_READING_STATE_FINISHED = "["+getString(R.string.book_state_finished)+"]";
         // Show/Hide soft navbar after OptionDialog is closed.
 		applyFullscreen(getWindow());
 	}
@@ -1418,7 +1441,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mCurrentFrame == mHomeFrame) {
 				// update recent books
 				mHomeFrame.refreshRecentBooks();
-				mHomeFrame.refreshFileSystemFolders();
+				mHomeFrame.refreshFileSystemFolders(true);
 				if (mHomeFrame.needRefreshOnlineCatalogs) refreshOPDSRootDirectory(false);
 				setLastLocationRoot();
 				mCurrentFrame.invalidate();
@@ -1722,7 +1745,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	// Dictionary support
 	
 	
-	public void findInDictionary( String s ) {
+	public void findInDictionary( String s, View view ) {
 		if ( s!=null && s.length()!=0 ) {
 			int start,end;
 			
@@ -1743,7 +1766,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						BackgroundThread.instance().postGUI(new Runnable() {
 							@Override
 							public void run() {
-								findInDictionaryInternal(pattern);
+								findInDictionaryInternal(pattern, view);
 							}
 						}, 100);
 					}
@@ -1752,17 +1775,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 	
-	private void findInDictionaryInternal(String s) {
+	private void findInDictionaryInternal(String s, View view) {
 		log.d("lookup in dictionary: " + s);
 		try {
-			mDictionaries.findInDictionary(s);
+			mDictionaries.findInDictionary(s, view);
 		} catch (DictionaryException e) {
 			showToast(e.getMessage());
 		}
 	}
 
 	public void showDictionary() {
-		findInDictionaryInternal(null);
+		findInDictionaryInternal(null, null);
 	}
 	
 	@Override
@@ -1810,6 +1833,26 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void setDict2( String id ) {
 		mDictionaries.setDict2(id, this);
+	}
+
+	public void setDict3( String id ) {
+		mDictionaries.setDict3(id, this);
+	}
+
+	public void setDict4( String id ) {
+		mDictionaries.setDict4(id, this);
+	}
+
+	public void setDict5( String id ) {
+		mDictionaries.setDict5(id, this);
+	}
+
+	public void setDict6( String id ) {
+		mDictionaries.setDict6(id, this);
+	}
+
+	public void setDict7( String id ) {
+		mDictionaries.setDict7(id, this);
 	}
 
 	public void setDictWordCorrection (String id) {
@@ -2116,7 +2159,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mReaderFrame.getUserDicPanel().updateCurrentPositionStatus(book, position, props);
 		//showToast("sd "+props.pageNumber);
 		//showToast("sdc "+props.pageCount);
-		if ((!book.askedMarkRead)&&(book.getReadingState()!=FileInfo.STATE_FINISHED) && (props.pageNumber+1==props.pageCount)) {
+		boolean bDontAsk = settings().getBool(Settings.PROP_APP_HIDE_STATE_DIALOGS, false);
+		if (
+			(!bDontAsk) &&
+			((!book.askedMarkRead)&&(book.getReadingState()!=FileInfo.STATE_FINISHED) && (props.pageNumber+1==props.pageCount))
+		) {
 			book.askedMarkRead = true;
 			final FileInfo book1=book;
 			askConfirmation(R.string.mark_book_as_read, new Runnable() {
@@ -2158,7 +2205,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void checkAskReading(FileInfo book, PositionProperties props, int pagesCnt, final boolean openBrowser) {
 		if ((!book.askedMarkReading)&&(book.getReadingState()!=FileInfo.STATE_READING) && (props.pageNumber+1<15)) {
 			if (!book.arrReadBeg.contains(props.pageNumber)) book.arrReadBeg.add(props.pageNumber);
-			if (book.arrReadBeg.size()>pagesCnt) {
+			boolean bDontAsk = settings().getBool(Settings.PROP_APP_HIDE_STATE_DIALOGS, false);
+			if ((book.arrReadBeg.size()>pagesCnt) && (!bDontAsk)) {
 				book.askedMarkReading = true;
 				final FileInfo book1=book;
 				askConfirmation(R.string.mark_book_as_reading, new Runnable() {
@@ -2461,7 +2509,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 											directoryUpdated(currDirectory, file);
 										}
 										if (!StrUtils.isEmptyStr(search_text))
-											findInDictionary(search_text);
+											findInDictionary(search_text, null);
 									}
 								}
 							}
@@ -2894,7 +2942,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mBrowser != null)
 			mBrowser.refreshOPDSRootDirectory(showInBrowser);
 		if (mHomeFrame != null)
-			mHomeFrame.refreshOnlineCatalogs();
+			mHomeFrame.refreshOnlineCatalogs(true);
 	}
 
 	public void setNeedRefreshOPDS() {

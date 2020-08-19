@@ -43,18 +43,20 @@ public class BrowserViewLayout extends ViewGroup {
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		bottomBar = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar, null);
 		ImageButton btnMenu = (ImageButton) bottomBar.findViewById(R.id.btn_show_menu);
-		btnMenu.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				toolbarView.showOverflowMenu();
-			}
-		});
-		bottomBar.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				toolbarView.showOverflowMenu();
-			}
-		});
+		if (btnMenu != null)
+			btnMenu.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					toolbarView.showOverflowMenu();
+				}
+			});
+		if (bottomBar != null)
+			bottomBar.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					toolbarView.showOverflowMenu();
+				}
+			});
 		this.addView(bottomBar);
 		this.onThemeChanged(context.getCurrentTheme());
 		titleView.setFocusable(false);
@@ -200,13 +202,15 @@ public class BrowserViewLayout extends ViewGroup {
 			llButtons.removeView(btnQpNext);
 			llButtons.removeView(btnQpPrev);
 		}
-		((ImageButton)titleView.findViewById(R.id.btn_filter)).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				switchFilter(!filterIsShown);
-			}
-		});
-		activity.tintViewIcons(((ImageButton)titleView.findViewById(R.id.btn_filter)),true);
+		if (titleView.findViewById(R.id.btn_filter) != null) {
+			((ImageButton) titleView.findViewById(R.id.btn_filter)).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					switchFilter(!filterIsShown);
+				}
+			});
+			activity.tintViewIcons(((ImageButton) titleView.findViewById(R.id.btn_filter)), true);
+		}
 	}
 
 	public void onThemeChanged(InterfaceTheme theme) {
@@ -242,19 +246,22 @@ public class BrowserViewLayout extends ViewGroup {
 
 		int titleHeight = titleView.getMeasuredHeight();
 		int contentHeight = contentView.getMeasuredHeight();
+		int bottomHeight = bottomBar.getMeasuredHeight();
 		if (toolbarView.isVertical()) {
 			int tbWidth = toolbarView.getMeasuredWidth();
 			titleView.layout(l + tbWidth, t, r, t + titleHeight);
 			toolbarView.layout(l, t, l + tbWidth, b);
 			contentView.layout(l + tbWidth, t + titleHeight, r, b);
-			bottomBar.layout(l + tbWidth, t + titleHeight + contentHeight, r, b);
+			//bottomBar.layout(l + tbWidth, t + titleHeight + contentHeight, r, b);
+			bottomBar.layout(l + tbWidth, b - bottomHeight, r, b);
 			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(true));
 		} else {
 			int tbHeight = toolbarView.getMeasuredHeight();
 			toolbarView.layout(l, t, r, t + tbHeight);
 			titleView.layout(l, t + tbHeight, r, t + titleHeight + tbHeight);
 			contentView.layout(l, t + titleHeight + tbHeight, r, b);
-			bottomBar.layout(l, t + titleHeight + tbHeight + contentHeight, r, b);
+			//bottomBar.layout(l, t + titleHeight + tbHeight + contentHeight, r, b);
+			bottomBar.layout(l, b - bottomHeight, r, b);
 			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(false));
 		}
 	}

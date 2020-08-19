@@ -21,6 +21,7 @@ import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBServiceAccessor;
 import org.coolreader.db.MainDB;
+import org.coolreader.dic.WikiArticle;
 import org.coolreader.geo.GeoToastView;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
@@ -1480,24 +1481,42 @@ public class BaseActivity extends Activity implements Settings {
 				ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
 	}
 
-	public void showDicToast(String msg, boolean isYnd, String dicName) {
+	public void showDicToast(String s, String msg, int dicT, String dicName) {
 		boolean bShown = false;
 		if (this instanceof CoolReader)
 			if (((CoolReader) this).getReaderView() != null)
 				if (((CoolReader) this).getReaderView().getSurface() != null) {
 					bShown = true;
-					showDicToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), isYnd, dicName);
+					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), dicT, dicName);
 				}
 		if (!bShown) {
 			showToast(msg);
 		}
 	}
 
-	public void showDicToast(String msg, int duration, View view, boolean isYnd, String dicName) {
+	public void showDicToast(String s, String msg, int duration, View view, int dicT, String dicName) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
-		DicToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, isYnd, dicName);
+		DicToastView.showToast(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName);
+	}
+
+	public void showDicToastWiki(String s, String msg, int duration, View view, int dicT, String dicName,
+								 DictInfo curDict, String link, String link2, int curAction) {
+		log.v("showing toast: " + msg);
+		View view1 = view;
+		if (view1 == null) view1 = getContentView();
+		DicToastView.showToastWiki(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
+				curDict, link, link2, curAction);
+	}
+
+	public void showWikiListToast(String s, String msg, View view, int dicT, String dicName, ArrayList<WikiArticle> arrWA,
+								  DictInfo curDict, String link, String link2, int curAction, int listSkipCount) {
+		log.v("showing toast: " + msg);
+		View view1 = view;
+		if (view1 == null) view1 = getContentView();
+		DicToastView.showWikiListToast(this, view1, s, msg, dicT, dicName, arrWA,
+				curDict, link, link2, curAction, listSkipCount);
 	}
 
 //	public void hideSToast() {
@@ -2017,7 +2036,7 @@ public class BaseActivity extends Activity implements Settings {
 			if (cr.mHomeFrame != null) {
 				if (cr.mHomeFrame.lastRecentFiles != null) cr.mHomeFrame.lastRecentFiles.clear();
 				cr.mHomeFrame.refreshRecentBooks();
-				cr.mHomeFrame.refreshFileSystemFolders();
+				cr.mHomeFrame.refreshFileSystemFolders(true);
 			}
 
 		}
@@ -2299,6 +2318,7 @@ public class BaseActivity extends Activity implements Settings {
 	        } else {
 	    		props.applyDefault(ReaderView.PROP_PAGE_ANIMATION, ReaderView.PAGE_ANIMATION_SLIDE2);
 	        }
+			props.applyDefault(ReaderView.PROP_PAGE_ANIMATION_SPEED, 300);
 
 	        props.applyDefault(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 	        
@@ -2395,8 +2415,17 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_BOOK_SORT_ORDER, FileInfo.DEF_SORT_ORDER.name());
 			props.applyDefault(ReaderView.PROP_APP_DICTIONARY, Dictionaries.DEFAULT_DICTIONARY_ID);
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS, "0");
-			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION, "0");
+			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION, "2");
 			props.applyDefault(ReaderView.PROP_APP_MULTI_SELECTION_ACTION, "0");
+			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION_LONG, "11");
+			props.applyDefault(ReaderView.PROP_APP_SELECTION2_ACTION, "-1");
+			props.applyDefault(ReaderView.PROP_APP_MULTI_SELECTION2_ACTION, "-1");
+			props.applyDefault(ReaderView.PROP_APP_SELECTION2_ACTION_LONG, "-1");
+			props.applyDefault(ReaderView.PROP_APP_SELECTION3_ACTION, "-1");
+			props.applyDefault(ReaderView.PROP_APP_MULTI_SELECTION3_ACTION, "-1");
+			props.applyDefault(ReaderView.PROP_APP_SELECTION3_ACTION_LONG, "-1");
+
+			props.applyDefault(ReaderView.PROP_CLOUD_WIKI_SAVE_HISTORY, "0");
 
 			props.setProperty(ReaderView.PROP_RENDER_DPI, Integer.valueOf((int)(96*mActivity.getDensityFactor())).toString());
 

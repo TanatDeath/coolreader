@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/page_item_body"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:baselineAligned="false"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="2dip"
+	android:layout_marginRight="2dip"
+	>
+
+	<LinearLayout android:id="@+id/page_item_text"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical|fill_horizontal"
+		android:baselineAligned="false">
+
+
+		<TextView android:id="@+id/page_item_title"
+				style="@style/TextAppearance.Small"
+				android:text="10% Title Text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:singleLine="false"
+				android:ellipsize="end"
+				android:textColor="?attr/colorIcon"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textStyle="bold"
+				android:maxLines="2"
+				android:layout_gravity="left" />
+
+		<TextView android:id="@+id/page_item_snippet"
+			style="@style/TextAppearance.Small"
+			android:text="10% Title Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:singleLine="false"
+			android:ellipsize="end"
+			android:textColor="?attr/colorIcon"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:maxLines="6"
+			android:layout_gravity="left" />
+	</LinearLayout>
+</LinearLayout>

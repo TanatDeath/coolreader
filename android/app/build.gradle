@@ -4,18 +4,18 @@ def apikeyProperties = new Properties()
 apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 28
 
     defaultConfig {
         //applicationId "org.coolreader.knownreader"
         applicationId "org.knownreader.premium"
         minSdkVersion 14
-        targetSdkVersion 29
+        targetSdkVersion 28
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202007251
-        versionName "2020.07.25.1"
+        versionCode 202008191
+        versionName "2020.08.19.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

@@ -57,6 +57,7 @@ public:
     /// returns registered font files
     virtual void getFontFileNameList( lString16Collection & list );
 
+    //plotn - for use in Android
     virtual void getFontFaceAndFileNameList( lString16Collection & list );
 };
 

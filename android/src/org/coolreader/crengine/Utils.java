@@ -52,8 +52,9 @@ public class Utils {
 	public static long timeInterval(long startTime) {
 		return android.os.SystemClock.uptimeMillis() - startTime;
 	}
-	
-	public static String cleanupHtmlTags(String src) {
+
+	//NB: this method does not converts &qout; &amp; etc.
+	public static String cleanupHtmlTags2(String src) {
 		StringBuilder buf = new StringBuilder();
 		boolean insideTag = false;
 		for (char ch : src.toCharArray()) {
@@ -67,6 +68,10 @@ public class Utils {
 			}
 		}
 		return buf.toString();
+	}
+
+	public static String cleanupHtmlTags(String src) {
+		return android.text.Html.fromHtml(src).toString();
 	}
 	
 	public static String authorNameFileAs(String name) {
@@ -550,6 +555,25 @@ public class Utils {
 			canvas.drawRect(new Rect(l, t + thick, l + thick, b), paint);
 			canvas.drawRect(new Rect(r - thick, t + thick, r, b), paint);
 			canvas.drawRect(new Rect(l + thick, b - thick, r - thick, b), paint);
+		}
+	}
+	public static void drawFrame3(Canvas canvas, Rect rect, Paint paint, int thick) {
+		for (int i = 1; i<=thick; i++) {
+			int marg = 2;
+			int l = rect.left+marg;
+			int r = rect.right-marg;
+			int t = rect.top+marg;
+			int b = rect.bottom-marg;
+			int div10w = (r - l) / 10;
+			int div10h = (b - t) / 10;
+			for (int ii=0; ii < div10w; ii++) {
+				canvas.drawRect(new Rect(l + (ii * 20), t, l + (ii * 20) + 10, t + thick), paint);
+				canvas.drawRect(new Rect(l + (ii * 20), b - thick, l + (ii * 20) + 10, b), paint);
+			}
+			for (int ii=0; ii < div10h; ii++) {
+				canvas.drawRect(new Rect(l, t  + (ii * 20), l + thick, t + (ii * 20) + 10), paint);
+				canvas.drawRect(new Rect(r - thick, t + (ii * 20), r, t + (ii * 20) + 10), paint);
+			}
 		}
 	}
 	

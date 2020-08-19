@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.dic.DicToastView;
 
 import android.database.DataSetObserver;
 import android.os.Bundle;
@@ -154,7 +155,7 @@ public class TOCDlg extends BaseDialog {
 						int iPageCnt = ((CoolReader)activity).getReaderView().getDoc().getPageCount();
 						if (pn<=iPageCnt) {
 							String sPage = ((CoolReader)activity).getReaderView().getDoc().getPageText(false, pn - 1);
-							activity.showDicToast(sPage, Toast.LENGTH_LONG, v, false, "[HIDE]");
+							activity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO, "[HIDE]");
 						}
 					}
 				});

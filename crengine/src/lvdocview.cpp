@@ -9,6 +9,8 @@
  GNU General Public License
  See LICENSE file for details
 
+ plotn - status bar changes
+
  *******************************************************/
 
 #include "../include/crsetup.h"

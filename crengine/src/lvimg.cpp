@@ -1451,6 +1451,7 @@ public:
                         // (giflib/lib/dgif_lib.c is fine with this image too, but its algo is too different
                         // to have an idea how it handles this situation.)
 
+
                 } else {
                     // write  old + old[0]
                     if (!WriteOutString(oldcode))

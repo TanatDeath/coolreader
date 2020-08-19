@@ -373,7 +373,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		});
 	}
 
-	public void refreshOnlineCatalogs() {
+	public void refreshOnlineCatalogs(boolean readSetting) {
 		needRefreshOnlineCatalogs = false;
 		mActivity.waitForCRDBService(new Runnable() {
 			@Override
@@ -381,37 +381,40 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				mActivity.getDB().loadOPDSCatalogs(new OPDSCatalogsLoadingCallback() {
 					@Override
 					public void onOPDSCatalogsLoaded(ArrayList<FileInfo> catalogs) {
-						updateOnlineCatalogs(catalogs);
+						updateOnlineCatalogs(catalogs, readSetting);
 					}
 				});
 			}
 		});
+		bOnlineCatalogsHidden = false;
 	}
 
-    public void refreshFileSystemFolders() {
+    public void refreshFileSystemFolders(boolean readSetting) {
         ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
         updateFilesystems(folders);
 		bFilesystemHidden = false;
+		if (readSetting) bFilesystemHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_FS_SECTION_HIDE, false);
+		if (bFilesystemHidden) {
+			mFilesystemScroll.removeAllViews();
+			Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
+			mImgFilesystem.setImageDrawable(d);
+			mActivity.tintViewIcons(mImgFilesystem);
+		}
     }
 
 	public static ArrayList<FileInfo> lastCatalogs = new ArrayList<FileInfo>();
-	private void updateOnlineCatalogs(ArrayList<FileInfo> catalogs) {
-		int colorBlue;
-		int colorGreen;
-		int colorGray;
-		int colorGray2Contrast;
+	private void updateOnlineCatalogs(ArrayList<FileInfo> catalogs, boolean readSetting) {
 		int colorIcon;
+		int colorIconL;
 		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeBlue,
 						R.attr.colorThemeGreen,
 						R.attr.colorThemeGray,
 						R.attr.colorIcon,
-						R.attr.colorThemeGray2Contrast});
-		colorBlue = a.getColor(0, Color.BLUE);
-		colorGreen = a.getColor(1, Color.GREEN);
-		colorGray = a.getColor(2, Color.GRAY);
+						R.attr.colorThemeGray2Contrast,
+						R.attr.colorIconL});
 		colorIcon = a.getColor(3, Color.GRAY);
-		colorGray2Contrast = a.getColor(4, Color.GRAY);
+		colorIconL = a.getColor(5, Color.GRAY);
 		a.recycle();
 		String lang = mActivity.getCurrentLanguage();
 		boolean defEnableLitres = lang.toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
@@ -507,7 +510,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				if (label != null) {
 					label.setText(item.getFileNameToDisplay());
 					if (item.was_error==1) {
-						label.setTextColor(colorGray2Contrast);
+						label.setTextColor(colorIconL);
 					}
 					else
 						label.setTextColor(colorIcon);
@@ -554,6 +557,13 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			if (!item.isOnlineCatalogPluginDir()) mOnlineCatalogsScroll.addView(view);
 		}
 		mOnlineCatalogsScroll.invalidate();
+		if (readSetting) bOnlineCatalogsHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE, false);
+		if (bOnlineCatalogsHidden) {
+			mOnlineCatalogsScroll.removeAllViews();
+			Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
+			mImgOnlineCatalogs.setImageDrawable(d);
+			mActivity.tintViewIcons(mImgOnlineCatalogs);
+		}
 	}
 
 	private void updateFilesystems(List<FileInfo> dirs) {
@@ -803,19 +813,13 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	}
 
-	private void updateLibraryItems(ArrayList<FileInfo> dirs) {
-		int colorBlue;
-		int colorGreen;
-		int colorGray;
+	private void updateLibraryItems(ArrayList<FileInfo> dirs, boolean readSetting) {
 		int colorIcon;
 		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeBlue,
 						R.attr.colorThemeGreen,
 						R.attr.colorThemeGray,
 						R.attr.colorIcon});
-		colorBlue = a.getColor(0, Color.BLUE);
-		colorGreen = a.getColor(1, Color.GREEN);
-		colorGray = a.getColor(2, Color.GRAY);
 		colorIcon = a.getColor(3, Color.GRAY);
 		a.recycle();
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
@@ -858,6 +862,14 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			mLibraryScroll.addView(view);
 		}
 		mLibraryScroll.invalidate();
+		bLibraryHidden = false;
+		if (readSetting) bLibraryHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE, false);
+		if (bLibraryHidden) {
+			mLibraryScroll.removeAllViews();
+			Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
+			mImgLibrary.setImageDrawable(d);
+			mActivity.tintViewIcons(mImgLibrary);
+		}
 	}
 	
 	private void updateDelimiterTheme(int viewId) {
@@ -931,14 +943,18 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					mFilesystemScroll.removeAllViews();
 					Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
 					mImgFilesystem.setImageDrawable(d);
+					//boolean bVis = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_FS_SECTION_HIDE, false);
 					mActivity.tintViewIcons(mImgFilesystem);
 				} else {
 					mFilesystemScroll.removeAllViews();
-					refreshFileSystemFolders();
+					refreshFileSystemFolders(false);
 					Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_expanded);
 					mImgFilesystem.setImageDrawable(d);
 					mActivity.tintViewIcons(mImgFilesystem);
 				}
+				Properties props = new Properties(mActivity.settings());
+				props.setProperty(Settings.PROP_APP_ROOT_VIEW_FS_SECTION_HIDE, bFilesystemHidden?"1":"0");
+				mActivity.setSettings(props, -1, false);
 			}
 		};
 		mTextFilesystem.setOnClickListener(lstnr3);
@@ -966,7 +982,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						@Override
 						public void run() {
 							if (Services.getScanner() != null)
-								updateLibraryItems(Services.getScanner().getLibraryItems());
+								updateLibraryItems(Services.getScanner().getLibraryItems(), false);
 							bLibraryHidden = false;
 							Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_expanded);
 							mImgLibrary.setImageDrawable(d);
@@ -974,6 +990,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						}
 					});
 				}
+				Properties props = new Properties(mActivity.settings());
+				props.setProperty(Settings.PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE, bLibraryHidden?"1":"0");
+				mActivity.setSettings(props, -1, false);
 			}
 		};
 		mTextLibrary.setOnClickListener(lstnr);
@@ -989,6 +1008,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			@Override
 			public void onClick(View v) {
 				bOnlineCatalogsHidden = !bOnlineCatalogsHidden;
+				Properties props = new Properties(mActivity.settings());
+				props.setProperty(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE, bOnlineCatalogsHidden?"1":"0");
+				mActivity.setSettings(props, -1, false);
 				if (bOnlineCatalogsHidden) {
 					mOnlineCatalogsScroll.removeAllViews();
 					Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
@@ -1002,7 +1024,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 							mActivity.getDB().loadOPDSCatalogs(new OPDSCatalogsLoadingCallback() {
 								@Override
 								public void onOPDSCatalogsLoaded(ArrayList<FileInfo> catalogs) {
-									updateOnlineCatalogs(catalogs);
+									updateOnlineCatalogs(catalogs, false);
 									bOnlineCatalogsHidden = false;
 									Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_expanded);
 									mImgOnlineCatalogs.setImageDrawable(d);
@@ -1196,7 +1218,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
                 BackgroundThread.instance().postGUI(new Runnable() {
               			@Override
               			public void run() {
-              				refreshFileSystemFolders();
+              				refreshFileSystemFolders(true);
               			}
               		});
             }
@@ -1205,7 +1227,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		BackgroundThread.instance().postGUI(new Runnable() {
 			@Override
 			public void run() {
-				refreshOnlineCatalogs();
+				refreshOnlineCatalogs(true);
 			}
 		});
 
@@ -1213,7 +1235,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			@Override
 			public void run() {
 				if (Services.getScanner() != null)
-					updateLibraryItems(Services.getScanner().getLibraryItems());
+					updateLibraryItems(Services.getScanner().getLibraryItems(), true);
 			}
 		});
 
@@ -1252,16 +1274,16 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		BackgroundThread.instance().postGUI(new Runnable() {
 			@Override
 			public void run() {
-				refreshFileSystemFolders();
+				refreshFileSystemFolders(true);
 			}
 		});
 
 		BackgroundThread.instance().postGUI(new Runnable() {
 			@Override
 			public void run() {
-				refreshOnlineCatalogs();
+				refreshOnlineCatalogs(true);
 				if (Services.getScanner() != null)
-					updateLibraryItems(Services.getScanner().getLibraryItems());
+					updateLibraryItems(Services.getScanner().getLibraryItems(), true);
 			}
 		});
 	}

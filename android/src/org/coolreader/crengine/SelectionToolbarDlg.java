@@ -227,7 +227,7 @@ public class SelectionToolbarDlg {
 						public void onClick(View v) {
 							mCoolReader.mDictionaries.setAdHocDict(di);
 							String sSText = selection.text;
-							mCoolReader.findInDictionary(sSText);
+							mCoolReader.findInDictionary(sSText, null);
 							if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 								mReaderView.clearSelection();
 							closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
@@ -251,11 +251,11 @@ public class SelectionToolbarDlg {
 				//PositionProperties currpos = mReaderView.getDoc().getPositionProps(null);
 				//Log.e("CURPOS", currpos.pageText);
 				if (mCoolReader.ismDictLongtapChange()) {
-					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text);
+					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null);
 					dlg.show();
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				} else {
-					mCoolReader.findInDictionary( selection.text );
+					mCoolReader.findInDictionary( selection.text , null);
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				}
 			}
@@ -264,11 +264,11 @@ public class SelectionToolbarDlg {
 		mPanel.findViewById(R.id.selection_dict).setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
 				if (!mCoolReader.ismDictLongtapChange()) {
-					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text);
+					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null);
 					dlg.show();
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				} else {
-					mCoolReader.findInDictionary( selection.text );
+					mCoolReader.findInDictionary( selection.text , null);
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				}
 				return true;

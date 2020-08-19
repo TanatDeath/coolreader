@@ -1,7 +1,6 @@
 #ifndef __TEXTLANG_H_INCLUDED__
 #define __TEXTLANG_H_INCLUDED__
 
-
 #include "crsetup.h"
 #include "lvptrvec.h"
 #include "lvstring.h"
