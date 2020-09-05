@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
@@ -94,6 +95,7 @@ public class Dictionaries {
 	}
 
 	public void setiDic2IsActive(Integer iDic2IsActive) {
+		log.i( "setiDic2IsActive: " + iDic2IsActive);
 		this.iDic2IsActive = iDic2IsActive;
 	}
 
@@ -427,38 +429,21 @@ public class Dictionaries {
 			public void onResponse(Call call, Response response)
 					throws IOException {
 				String sBody = response.body().string();
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								sLingvoToken = sBody;
-								lingvoTranslate(s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), extended, curDict ,view);
-							}
-						}, 100);
-					}
-				});
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					sLingvoToken = sBody;
+					lingvoTranslate(s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), extended, curDict ,view);
+				}, 100));
 			}
 			public void onFailure(Call call, IOException e) {
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								crf2.showToast(e.getMessage());
-							}
-						}, 100);
-					}
-				});
+				BackgroundThread.instance().postBackground(() ->
+						BackgroundThread.instance().postGUI(() -> crf2.showToast(e.getMessage()), 100));
 			}
 		});
 	};
 
-	public HttpUrl.Builder wikiUrlBuilder(String s, String link, int curAction, int listSkipCount) {
+	public HttpUrl.Builder wikiUrlBuilder(String s, String link, int curAction, int listSkipCount, int prevAction) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(link).newBuilder();
-		if ((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_LINK_2)) {
+		if (curAction == WIKI_FIND_TITLE) {
 			urlBuilder.addQueryParameter("action", "query");
 			urlBuilder.addQueryParameter("format", "xml");
 			urlBuilder.addQueryParameter("prop", "extracts");
@@ -466,14 +451,14 @@ public class Dictionaries {
 			urlBuilder.addQueryParameter("exintro", "1");
 			urlBuilder.addQueryParameter("explaintext", "1");
 		}
-		if ((curAction == WIKI_FIND_TITLE_FULL) || (curAction == WIKI_FIND_TITLE_FULL_LINK_2)) {
+		if (curAction == WIKI_FIND_TITLE_FULL) {
 			urlBuilder.addQueryParameter("action", "query");
 			urlBuilder.addQueryParameter("format", "xml");
 			urlBuilder.addQueryParameter("prop", "extracts");
 			urlBuilder.addQueryParameter("titles", s);
 			urlBuilder.addQueryParameter("explaintext", "1");
 		}
-		if ((curAction == WIKI_FIND_LIST) || (curAction == WIKI_FIND_LIST_2)) {
+		if (curAction == WIKI_FIND_LIST) {
 			urlBuilder.addQueryParameter("action", "query");
 			urlBuilder.addQueryParameter("format", "xml");
 			urlBuilder.addQueryParameter("list", "search");
@@ -483,7 +468,7 @@ public class Dictionaries {
 				urlBuilder.addQueryParameter("sroffset", "" + listSkipCount);
 			}
 		}
-		if ((curAction == WIKI_SHOW_PAGE_ID) || (curAction == WIKI_SHOW_PAGE_ID_2)) {
+		if (curAction == WIKI_SHOW_PAGE_ID) {
 			String ss = s;
 			if (ss.contains("~")) ss=s.split("~")[0];
 			urlBuilder.addQueryParameter("action", "query");
@@ -493,7 +478,7 @@ public class Dictionaries {
 			urlBuilder.addQueryParameter("explaintext", "1");
 			urlBuilder.addQueryParameter("exintro", "1");
 		}
-		if ((curAction == WIKI_SHOW_PAGE_FULL_ID) || (curAction == WIKI_SHOW_PAGE_FULL_ID_2)) {
+		if (curAction == WIKI_SHOW_PAGE_FULL_ID) {
 			String ss = s;
 			if (ss.contains("~")) ss=s.split("~")[0];
 			urlBuilder.addQueryParameter("action", "query");
@@ -502,37 +487,68 @@ public class Dictionaries {
 			urlBuilder.addQueryParameter("pageids", ss);
 			urlBuilder.addQueryParameter("explaintext", "1");
 		}
+		if ((curAction == WIKI_FIND_PIC_INFO)
+				&& ((prevAction == WIKI_FIND_TITLE)||(prevAction == WIKI_FIND_TITLE_FULL))) {
+			urlBuilder.addQueryParameter("action", "query");
+			urlBuilder.addQueryParameter("format", "xml");
+			urlBuilder.addQueryParameter("prop", "pageimages");
+			urlBuilder.addQueryParameter("titles", s);
+			int i = 200;
+			CoolReader cr = (CoolReader)mActivity;
+			if (cr.getReaderView() != null)
+				if (cr.getReaderView().getSurface() != null)
+					i = Math.min(cr.getReaderView().getSurface().getWidth(),cr.getReaderView().getSurface().getHeight()) / 3;
+			urlBuilder.addQueryParameter("pithumbsize", String.valueOf(i));
+		}
+		if ((curAction == WIKI_FIND_PIC_INFO)
+				&& ((prevAction == WIKI_SHOW_PAGE_ID)||(prevAction == WIKI_SHOW_PAGE_FULL_ID))) {
+			String ss = s;
+			if (ss.contains("~")) ss=s.split("~")[0];
+			urlBuilder.addQueryParameter("action", "query");
+			urlBuilder.addQueryParameter("format", "xml");
+			urlBuilder.addQueryParameter("prop", "pageimages");
+			urlBuilder.addQueryParameter("pageids", ss);
+			int i = 200;
+			CoolReader cr = (CoolReader)mActivity;
+			if (cr.getReaderView() != null)
+				if (cr.getReaderView().getSurface() != null)
+					i = Math.min(cr.getReaderView().getSurface().getWidth(),cr.getReaderView().getSurface().getHeight()) / 5 * 2;
+			urlBuilder.addQueryParameter("pithumbsize", String.valueOf(i));
+		}
 		return urlBuilder;
 	}
 
 	public static int WIKI_FIND_TITLE = 1;
-	public static int WIKI_FIND_TITLE_LINK_2 = 2;
-	public static int WIKI_FIND_LIST = 3;
-	public static int WIKI_FIND_LIST_2 = 4;
-	public static int WIKI_SHOW_PAGE_ID = 5;
-	public static int WIKI_SHOW_PAGE_ID_2 = 6;
-	public static int WIKI_SHOW_PAGE_FULL_ID = 7;
-	public static int WIKI_SHOW_PAGE_FULL_ID_2 = 8;
-	public static int WIKI_FIND_TITLE_FULL = 9;
-	public static int WIKI_FIND_TITLE_FULL_LINK_2 = 10;
+	public static int WIKI_FIND_LIST = 2;
+	public static int WIKI_SHOW_PAGE_ID = 3;
+	public static int WIKI_SHOW_PAGE_FULL_ID = 4;
+	public static int WIKI_FIND_TITLE_FULL = 5;
+	public static int WIKI_FIND_PIC_INFO = 6;
 
 	private String wikiTitleText = "";
 	private String wikiLink = "";
 
-	public void wikiTranslate(CoolReader cr, DictInfo curDict, View view, String s, String link, String link2, int curAction) {
-		wikiTranslate(cr, curDict, view, s, link, link2, curAction, 0);
+	public void wikiTranslate(CoolReader cr, DictInfo curDict, View view, String s, String link, String link2,
+							  int curAction, boolean useFirstLink) {
+		wikiTranslate(cr, curDict, view, s, link, link2, curAction, 0, useFirstLink, 0, "");
 	}
-	public void wikiTranslate(CoolReader cr, DictInfo curDict, View view, String s, String link, String link2, int curAction, int listSkipCount) {
+
+	public void wikiTranslate(CoolReader cr, DictInfo curDict, View view, String s, String link, String link2,
+							  int curAction, boolean useFirstLink, int prevAction, String articleText) {
+		wikiTranslate(cr, curDict, view, s, link, link2, curAction, 0, useFirstLink, prevAction, articleText);
+	}
+
+	public void wikiTranslate(CoolReader cr, DictInfo curDict, View view, String s, String link, String link2,
+							  int curAction, int listSkipCount, boolean useFirstLink,
+							  int prevAction, String articleText) {
 		if (StrUtils.isEmptyStr(link)) return;
 		boolean saveHist = cr.getReaderView().getSettings().getBool(Settings.PROP_CLOUD_WIKI_SAVE_HISTORY,false);
 		final String sLinkF = link;
 		final String sLinkF2 = link2;
 		String sLink = link + "/w/api.php";
 		String sLink2 = link2 + "/w/api.php";
-		HttpUrl.Builder urlBuilder = wikiUrlBuilder(s, ((curAction == WIKI_FIND_TITLE) ||
-				(curAction == WIKI_FIND_LIST) || (curAction == WIKI_SHOW_PAGE_ID) ||
-				(curAction == WIKI_SHOW_PAGE_FULL_ID) || (curAction == WIKI_FIND_TITLE_FULL)) ? sLink : sLink2, curAction,
-				listSkipCount);
+		HttpUrl.Builder urlBuilder = wikiUrlBuilder(s, useFirstLink ? sLink : sLink2, curAction,
+				listSkipCount, prevAction);
 		String url = urlBuilder.build().toString();
 		Request request = new Request.Builder()
 				.url(url)
@@ -546,10 +562,10 @@ public class Dictionaries {
 				String sBody = response.body().string();
 				Document docJsoup = Jsoup.parse(sBody, sLinkF);
 				wikiTitleText = "";
-				if ((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_LINK_2)
-						|| (curAction == WIKI_SHOW_PAGE_ID) || (curAction == WIKI_SHOW_PAGE_ID_2)
-						|| (curAction == WIKI_SHOW_PAGE_FULL_ID) || (curAction == WIKI_SHOW_PAGE_FULL_ID_2)
-						|| (curAction == WIKI_FIND_TITLE_FULL) || (curAction == WIKI_FIND_TITLE_FULL_LINK_2)
+				if ((curAction == WIKI_FIND_TITLE)
+						|| (curAction == WIKI_SHOW_PAGE_ID)
+						|| (curAction == WIKI_SHOW_PAGE_FULL_ID)
+						|| (curAction == WIKI_FIND_TITLE_FULL)
 				) {
 					Elements results = docJsoup.select("api > query > pages > page > extract");
 					if (results.size() > 0) wikiTitleText = results.text();
@@ -557,62 +573,37 @@ public class Dictionaries {
 				final String sTranslF = wikiTitleText;
 				// if found article
 				if ((!StrUtils.isEmptyStr(wikiTitleText)) &&
-						((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_LINK_2) ||
-						 (curAction == WIKI_FIND_TITLE_FULL) || (curAction == WIKI_FIND_TITLE_FULL_LINK_2))) {
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									wikiLink = ((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL)) ? sLinkF : sLinkF2;
-									crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-											curDict, link, link2, curAction);
-									if (saveHist) saveToDicSearchHistory(s, sTranslF, curDict);
-
-								}
-							}, 100);
-						}
-					});
+						(curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL)
+				) {
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						wikiLink = ((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL)) ? sLinkF : sLinkF2;
+//						crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+//								curDict, link, link2, curAction, useFirstLink);
+						if (saveHist) saveToDicSearchHistory(s, sTranslF, curDict);
+						wikiTranslate(cr, curDict, view, s, link, link2,
+								WIKI_FIND_PIC_INFO, useFirstLink, curAction, sTranslF);
+					}, 100));
 					return;
 				}
 				// not found in first link - try in 2nd
 				if ((StrUtils.isEmptyStr(wikiTitleText)) && ((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL)) &&
-						(!StrUtils.isEmptyStr(sLink2))) {
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									wikiLink = link2;
-									wikiTranslate(cr, curDict, view, s, link, link2,
-											(curAction == WIKI_FIND_TITLE) ? WIKI_FIND_TITLE_LINK_2 : WIKI_FIND_TITLE_FULL_LINK_2);
-								}
-							}, 100);
-						}
-					});
+						(!StrUtils.isEmptyStr(sLink2)) && (useFirstLink)) {
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						wikiLink = link2;
+						wikiTranslate(cr, curDict, view, s, link, link2,
+								(curAction == WIKI_FIND_TITLE) ? WIKI_FIND_TITLE : WIKI_FIND_TITLE_FULL, false);
+					}, 100));
 					return;
 				}
 				// not found - try to show list
 				if ((StrUtils.isEmptyStr(wikiTitleText)) &&
-						((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_LINK_2) ||
-						  (curAction == WIKI_FIND_TITLE_FULL) || (curAction == WIKI_FIND_TITLE_FULL_LINK_2))) {
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									wikiTranslate(cr, curDict, view, s, link, link2, WIKI_FIND_LIST);
-
-								}
-							}, 100);
-						}
-					});
+						((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL))
+				) {
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+							wikiTranslate(cr, curDict, view, s, link, link2, WIKI_FIND_LIST, true), 100));
 					return;
 				}
-				if ((curAction == WIKI_FIND_LIST)||(curAction == WIKI_FIND_LIST_2)) {
+				if (curAction == WIKI_FIND_LIST) {
 					Elements results = docJsoup.select("api > query > search > p");
 					ArrayList<WikiArticle> arrWA = new ArrayList<>();
 					for (Element el: results) {
@@ -620,85 +611,75 @@ public class Dictionaries {
 						arrWA.add(wa);
 					}
 					if (arrWA.size() > 0) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										crf2.showWikiListToast(s, sTranslF, view, DicToastView.IS_WIKI, wikiLink,
-												arrWA, curDict, link, link2, curAction, listSkipCount);
-									}
-								}, 100);
-							}
-						});
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+								crf2.showWikiListToast(s, sTranslF, view, DicToastView.IS_WIKI, wikiLink,
+								arrWA, curDict, link, link2, curAction, listSkipCount, useFirstLink), 100));
 						return;
 					} else {
-						if (curAction == WIKI_FIND_LIST) {
-							BackgroundThread.instance().postBackground(new Runnable() {
-								@Override
-								public void run() {
-									BackgroundThread.instance().postGUI(new Runnable() {
-										@Override
-										public void run() {
-											wikiTranslate(cr, curDict, view, s, link, link2, WIKI_FIND_LIST_2);
-
-										}
-									}, 100);
-								}
-							});
+						if ((curAction == WIKI_FIND_LIST) && (useFirstLink)) {
+							BackgroundThread.instance().postBackground(
+									() -> BackgroundThread.instance().postGUI(() ->
+											wikiTranslate(cr, curDict, view, s, link, link2, WIKI_FIND_LIST, false), 100)
+							);
 							return;
 						} else
-							BackgroundThread.instance().postBackground(new Runnable() {
-								@Override
-								public void run() {
-									BackgroundThread.instance().postGUI(new Runnable() {
-										@Override
-										public void run() {
-											crf2.showToast(mActivity.getString(R.string.not_found));
-										}
-									}, 100);
-								}
-							});
+							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
+									() -> crf2.showToast(mActivity.getString(R.string.not_found)), 100)
+							);
 					}
 				}
 				if ((!StrUtils.isEmptyStr(wikiTitleText)) &&
 						(
-								(curAction == WIKI_SHOW_PAGE_ID) || (curAction == WIKI_SHOW_PAGE_ID_2) ||
-								(curAction == WIKI_SHOW_PAGE_FULL_ID) || (curAction == WIKI_SHOW_PAGE_FULL_ID_2)
+								(curAction == WIKI_SHOW_PAGE_ID) ||
+								(curAction == WIKI_SHOW_PAGE_FULL_ID)
 						)
 				) {
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									wikiLink = ((curAction == WIKI_SHOW_PAGE_ID) || (curAction == WIKI_SHOW_PAGE_FULL_ID)) ? sLinkF : sLinkF2;
-									crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-											curDict, link, link2, curAction);
-									//saveToDicSearchHistory(s, sTranslF, curDict);
-
-								}
-							}, 100);
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						wikiLink = useFirstLink ? sLinkF : sLinkF2;
+						//crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+						//		curDict, link, link2, curAction, useFirstLink);
+						if (s.contains("~")) {
+							if (saveHist) saveToDicSearchHistory(s.split("~")[1], sTranslF, curDict);
 						}
-					});
+						wikiTranslate(cr, curDict, view, s, link, link2,
+								WIKI_FIND_PIC_INFO, useFirstLink, curAction, sTranslF);
+					}, 100));
 					return;
+				}
+				if ((curAction == WIKI_FIND_PIC_INFO)
+				) {
+					Elements results = docJsoup.select("api > query > pages > page > thumbnail");
+					if (results.size() > 0) {
+						Element el = results.get(0);
+						String addr = el.attr("source");
+						// showing with pic
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+							crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+									curDict, link, link2, prevAction, useFirstLink, addr);
+						}, 100));
+					} else {
+						// showing with no pic
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+							crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+									curDict, link, link2, prevAction, useFirstLink, "");
+						}, 100));
+					};
 				}
 			}
 
 			public void onFailure(Call call, IOException e) {
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								crf2.showToast(e.getMessage());
-							}
-						}, 100);
-					}
-				});
+				// showing with no pic
+				if (curAction == WIKI_FIND_PIC_INFO)
+					// showing with no pic
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+								curDict, link, link2, prevAction, useFirstLink, "");
+					}, 100));
+				else
+					// nothing to show - article did not load
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+						crf2.showToast(e.getMessage()), 100)
+				);
 			}
 		});
 	}
@@ -725,18 +706,9 @@ public class Dictionaries {
 			return;
 		}
 		if ((StrUtils.isEmptyStr(langf))||(StrUtils.isEmptyStr(lang))) {
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							cr.showToast(cr.getString(R.string.translate_lang_not_set)+": ["
-								+langf+"] -> ["+lang + "]");
-						}
-					}, 100);
-				}
-			});
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					cr.showToast(cr.getString(R.string.translate_lang_not_set)+": ["
+				+langf+"] -> ["+lang + "]"), 100));
 			return;
 		}
 		int ilangf = 0;
@@ -799,18 +771,9 @@ public class Dictionaries {
 		final int ilangfF = ilangf;
 		final int ilangF = ilang;
 		if ((ilangf == 0) || (ilang == 0)) {
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							cr.showToast(cr.getString(R.string.translate_lang_not_found)+": ["
-									+langf+ " {" + ilangfF + "}" + "] -> ["+lang + " {" + ilangF + "}]");
-						}
-					}, 100);
-				}
-			});
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					cr.showToast(cr.getString(R.string.translate_lang_not_found)+": ["
+					+langf+ " {" + ilangfF + "}" + "] -> ["+lang + " {" + ilangF + "}]"), 100));
 			return;
 		}
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(LINGVO_DIC_ONLINE+"/v1/Minicard").newBuilder();
@@ -827,61 +790,45 @@ public class Dictionaries {
 			public void onResponse(Call call, Response response)
 					throws IOException {
 				String sBody = response.body().string();
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									JSONObject jso = new JSONObject(sBody);
-									if (jso.has("Translation")) {
-										JSONObject jsoT = jso.getJSONObject("Translation");
-										if (jsoT.has("Translation")) {
-											String sHeading = jsoT.getString("Heading");
-											String sTrans = jsoT.getString("Translation");
-											String sDic = "";
-											if (jsoT.has("DictionaryName"))
-												sDic = jsoT.getString("DictionaryName");
-											if (!StrUtils.isEmptyStr(sTrans)) {
-												if (!StrUtils.isEmptyStr(sHeading))
-													sTrans = sHeading + ": " + sTrans;
-												if (!extended) {
-													cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
-													saveToDicSearchHistory(s, sTrans, curDict);
-												}
-												else lingvoExtended(s, ilangfF, ilangF, sTrans, false, sDic, curDict, view);
-											}
-										}
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					try {
+						JSONObject jso = new JSONObject(sBody);
+						if (jso.has("Translation")) {
+							JSONObject jsoT = jso.getJSONObject("Translation");
+							if (jsoT.has("Translation")) {
+								String sHeading = jsoT.getString("Heading");
+								String sTrans = jsoT.getString("Translation");
+								String sDic = "";
+								if (jsoT.has("DictionaryName"))
+									sDic = jsoT.getString("DictionaryName");
+								if (!StrUtils.isEmptyStr(sTrans)) {
+									if (!StrUtils.isEmptyStr(sHeading))
+										sTrans = sHeading + ": " + sTrans;
+									if (!extended) {
+										cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+										saveToDicSearchHistory(s, sTrans, curDict);
 									}
-								} catch (Exception e) {
-									cr.showDicToast(s, sBody, DicToastView.IS_LINGVO, "");
-									if ((sBody.contains("for direction"))&&(sBody.contains("not found")))
-										BackgroundThread.instance().postBackground(new Runnable() {
-											@Override
-											public void run() {
-												BackgroundThread.instance().postGUI(new Runnable() {
-													@Override
-													public void run() {
-														if (cr.getReaderView().mBookInfo!=null) {
-															FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
-															FileInfo dfi = fi.parent;
-															if (dfi == null) {
-																dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-															}
-															if (dfi != null) {
-																cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
-															}
-														};
-													}
-												}, 1000);
-											}
-										});
+									else lingvoExtended(s, ilangfF, ilangF, sTrans, false, sDic, curDict, view);
 								}
 							}
-						}, 100);
+						}
+					} catch (Exception e) {
+						cr.showDicToast(s, sBody, DicToastView.IS_LINGVO, "");
+						if ((sBody.contains("for direction"))&&(sBody.contains("not found")))
+							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+								if (cr.getReaderView().mBookInfo!=null) {
+									FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+									FileInfo dfi = fi.parent;
+									if (dfi == null) {
+										dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+									}
+									if (dfi != null) {
+										cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+									}
+								};
+							}, 1000));
 					}
-				});
+				}, 100));
 			}
 
 			public void onFailure(Call call, IOException e) {
@@ -914,46 +861,38 @@ public class Dictionaries {
 			public void onResponse(Call call, Response response)
 					throws IOException {
 				String sBody = response.body().string();
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									String sAdd = "";
-									JSONArray jsa = new JSONArray(sBody);
-									JSONObject jso = null;
-									if (jsa.length()>0)
-										jso = jsa.getJSONObject(0);
-									if (jso.has("Body")) {
-										JSONArray jsa2 = jso.getJSONArray("Body");
-										if (jsa2.length()>0) {
-											jso = jsa2.getJSONObject(0);
-											JSONArray jsa3 = jso.getJSONArray("Markup");
-											for (int i=0; i<jsa3.length(); i++) {
-												jso = jsa3.getJSONObject(i);
-												if ((jso.has("Node"))&&(jso.has("Text"))) {
-													if (StrUtils.getNonEmptyStr(jso.getString("Node"), true).equals("Transcription")) {
-														sAdd = " ["+StrUtils.getNonEmptyStr(jso.getString("Text"), true)+"]";
-														cr.showDicToast(s, sTrans+sAdd, Toast.LENGTH_LONG, view,  DicToastView.IS_LINGVO, sDic);
-														saveToDicSearchHistory(s, sTrans+sAdd, curDict);
-														return;
-													}
-												}
-											}
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					try {
+						String sAdd = "";
+						JSONArray jsa = new JSONArray(sBody);
+						JSONObject jso = null;
+						if (jsa.length()>0)
+							jso = jsa.getJSONObject(0);
+						if (jso.has("Body")) {
+							JSONArray jsa2 = jso.getJSONArray("Body");
+							if (jsa2.length()>0) {
+								jso = jsa2.getJSONObject(0);
+								JSONArray jsa3 = jso.getJSONArray("Markup");
+								for (int i=0; i<jsa3.length(); i++) {
+									jso = jsa3.getJSONObject(i);
+									if ((jso.has("Node"))&&(jso.has("Text"))) {
+										if (StrUtils.getNonEmptyStr(jso.getString("Node"), true).equals("Transcription")) {
+											sAdd = " ["+StrUtils.getNonEmptyStr(jso.getString("Text"), true)+"]";
+											cr.showDicToast(s, sTrans+sAdd, Toast.LENGTH_LONG, view,  DicToastView.IS_LINGVO, sDic);
+											saveToDicSearchHistory(s, sTrans+sAdd, curDict);
+											return;
 										}
 									}
-									cr.showDicToast(s, sTrans+sAdd, DicToastView.IS_LINGVO, sDic);
-									saveToDicSearchHistory(s, sTrans+sAdd, curDict);
-								} catch (Exception e) {
-									cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
-									saveToDicSearchHistory(s, sTrans, curDict);
 								}
 							}
-						}, 100);
+						}
+						cr.showDicToast(s, sTrans+sAdd, DicToastView.IS_LINGVO, sDic);
+						saveToDicSearchHistory(s, sTrans+sAdd, curDict);
+					} catch (Exception e) {
+						cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+						saveToDicSearchHistory(s, sTrans, curDict);
 					}
-				});
+				}, 100));
 			}
 
 			public void onFailure(Call call, IOException e) {
@@ -1360,34 +1299,23 @@ public class Dictionaries {
 					Document docJsoup = Jsoup.parse(sBody, YND_DIC_ONLINE);
 					Elements results = docJsoup.select("Translation > text");
 					String sTransl = "";
-					if (results.size()>0) sTransl = results.text(); else sTransl = sBody;
+					if (results.size()>0) sTransl = results.text(); else {
+						if ((StrUtils.getNonEmptyStr(sBody,true).contains("408"))
+							&&
+						(StrUtils.getNonEmptyStr(sBody,true).contains("exceeded")))
+						sTransl = mActivity.getString(R.string.online_dic_exceeded);
+						else sTransl = sBody;
+					}
 					final String sTranslF = sTransl;
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									crf.showDicToast(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_YANDEX, "");
-									saveToDicSearchHistory(s, sTranslF, curDictF);
-								}
-							}, 100);
-						}
-					});
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						crf.showDicToast(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_YANDEX, "");
+						saveToDicSearchHistory(s, sTranslF, curDictF);
+					}, 100));
 				}
 
 				public void onFailure(Call call, IOException e) {
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									crf.showToast(e.getMessage());
-								}
-							}, 100);
-						}
-					});
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+							crf.showToast(e.getMessage()), 100));
 				}
 			});
 			break;
@@ -1439,7 +1367,7 @@ public class Dictionaries {
 					sLink2 = cr.getReaderView().getSettings().getProperty(Settings.PROP_CLOUD_WIKI1_ADDR, "https://en.wikipedia.org");
 				}
 			}
-			wikiTranslate(cr, curDict, view, s, sLink, sLink2, WIKI_FIND_TITLE);
+			wikiTranslate(cr, curDict, view, s, sLink, sLink2, WIKI_FIND_TITLE, true);
 			break;
 		}
 	}

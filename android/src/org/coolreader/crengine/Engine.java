@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -138,10 +139,27 @@ public class Engine {
 	public static File[] getDataDirectories(String subdir,
 											boolean createIfNotExists, boolean writableOnly) {
 		File[] roots = getStorageDirectories(writableOnly);
-		ArrayList<File> res = new ArrayList<File>(roots.length);
+		ArrayList<File> res = new ArrayList<>(roots.length);
 		for (File dir : roots) {
 			//File dataDir = getSubdir(dir, ".cr3", createIfNotExists,
 			File dataDir = getSubdir(dir, "cr3e", createIfNotExists,
+					writableOnly);
+			if (subdir != null)
+				dataDir = getSubdir(dataDir, subdir, createIfNotExists,
+						writableOnly);
+			if (dataDir != null)
+				res.add(dataDir);
+		}
+		return res.toArray(new File[]{});
+	}
+
+	public static File[] getDataDirectoriesExt(String cr3Dir, String subdir,
+											boolean createIfNotExists, boolean writableOnly) {
+		File[] roots = getStorageDirectories(writableOnly);
+		ArrayList<File> res = new ArrayList<>(roots.length);
+		for (File dir : roots) {
+			//File dataDir = getSubdir(dir, ".cr3", createIfNotExists,
+			File dataDir = getSubdir(dir, cr3Dir, createIfNotExists,
 					writableOnly);
 			if (subdir != null)
 				dataDir = getSubdir(dataDir, subdir, createIfNotExists,
@@ -184,14 +202,12 @@ public class Engine {
 					log.i("exited task.work() "
 							+ task.getClass().getName());
 				// post success callback
-				BackgroundThread.instance().postGUI(new Runnable() {
-					public void run() {
-						if (LOG_ENGINE_TASKS)
-							log.i("running task.done() "
-									+ task.getClass().getName()
-									+ " in gui thread");
-						task.done();
-					}
+				BackgroundThread.instance().postGUI(() -> {
+					if (LOG_ENGINE_TASKS)
+						log.i("running task.done() "
+								+ task.getClass().getName()
+								+ " in gui thread");
+					task.done();
 				});
 				// } catch ( final FatalError e ) {
 				// TODO:
@@ -215,13 +231,11 @@ public class Engine {
 				log.e("exception while running task "
 						+ task.getClass().getName(), e);
 				// post error callback
-				BackgroundThread.instance().postGUI(new Runnable() {
-					public void run() {
-						log.e("running task.fail(" + e.getMessage()
-								+ ") " + task.getClass().getSimpleName()
-								+ " in gui thread ");
-						task.fail(e);
-					}
+				BackgroundThread.instance().postGUI(() -> {
+					log.e("running task.fail(" + e.getMessage()
+							+ ") " + task.getClass().getSimpleName()
+							+ " in gui thread ");
+					task.fail(e);
 				});
 			}
 		}
@@ -335,28 +349,20 @@ public class Engine {
 		 */
 		public void hide() {
 			this.cancelled = true;
-			BackgroundThread.instance().executeGUI(new Runnable() {
-				@Override
-				public void run() {
-					if (shown)
-						hideProgress();
-					shown = false;
-				}
-
+			BackgroundThread.instance().executeGUI(() -> {
+				if (shown)
+					hideProgress();
+				shown = false;
 			});
 		}
 
 		DelayedProgress(final int percent, final String msg, final int delayMillis) {
 			this.cancelled = false;
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					if (!cancelled) {
-						showProgress(percent, msg);
-						shown = true;
-					}
+			BackgroundThread.instance().postGUI(() -> {
+				if (!cancelled) {
+					showProgress(percent, msg);
+					shown = true;
 				}
-
 			}, delayMillis);
 		}
 	}
@@ -393,51 +399,49 @@ public class Engine {
 		log.v("showProgress(" + mainProgress + ", \"" + msg
 				+ "\") is called : " + Thread.currentThread().getName());
 		if (enable_progress) {
-			BackgroundThread.instance().executeGUI(new Runnable() {
-				public void run() {
-					// show progress
-					//log.v("showProgress() - in GUI thread");
-					if (progressId != nextProgressId) {
-						//log.v("showProgress() - skipping duplicate progress event");
-						return;
-					}
-					if (mProgress == null) {
-						//log.v("showProgress() - creating progress window");
-						try {
-							if (mActivity != null && mActivity.isStarted()) {
-								mProgress = new ProgressDialog(mActivity);
-								mProgress
-										.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-								if (progressIcon != null)
-									mProgress.setIcon(progressIcon);
-								else
-									mProgress.setIcon(R.mipmap.known_reader_logo);
-								mProgress.setMax(10000);
-								mProgress.setCancelable(false);
-								mProgress.setProgress(mainProgress);
-								mProgress
-										.setTitle(mActivity
-												.getResources()
-												.getString(
-														R.string.progress_please_wait));
-								mProgress.setMessage(msg);
-								mProgress.show();
-								progressShown = true;
-							}
-						} catch (Exception e) {
-							Log.e("cr3",
-									"Exception while trying to show progress dialog",
-									e);
-							progressShown = false;
-							mProgress = null;
-						}
-					} else {
-						mProgress.setProgress(mainProgress);
-						mProgress.setMessage(msg);
-						if (!mProgress.isShowing()) {
+			BackgroundThread.instance().executeGUI(() -> {
+				// show progress
+				//log.v("showProgress() - in GUI thread");
+				if (progressId != nextProgressId) {
+					//log.v("showProgress() - skipping duplicate progress event");
+					return;
+				}
+				if (mProgress == null) {
+					//log.v("showProgress() - creating progress window");
+					try {
+						if (mActivity != null && mActivity.isStarted()) {
+							mProgress = new ProgressDialog(mActivity);
+							mProgress
+									.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+							if (progressIcon != null)
+								mProgress.setIcon(progressIcon);
+							else
+								mProgress.setIcon(R.mipmap.known_reader_logo);
+							mProgress.setMax(10000);
+							mProgress.setCancelable(false);
+							mProgress.setProgress(mainProgress);
+							mProgress
+									.setTitle(mActivity
+											.getResources()
+											.getString(
+													R.string.progress_please_wait));
+							mProgress.setMessage(msg);
 							mProgress.show();
 							progressShown = true;
 						}
+					} catch (Exception e) {
+						Log.e("cr3",
+								"Exception while trying to show progress dialog",
+								e);
+						progressShown = false;
+						mProgress = null;
+					}
+				} else {
+					mProgress.setProgress(mainProgress);
+					mProgress.setMessage(msg);
+					if (!mProgress.isShowing()) {
+						mProgress.show();
+						progressShown = true;
 					}
 				}
 			});
@@ -453,25 +457,23 @@ public class Engine {
 		log.v("hideProgress() - is called : "
 				+ Thread.currentThread().getName());
 		// log.v("hideProgress() is called");
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			public void run() {
-				// hide progress
+		BackgroundThread.instance().executeGUI(() -> {
+			// hide progress
 //				log.v("hideProgress() - in GUI thread");
-				if (progressId != nextProgressId) {
+			if (progressId != nextProgressId) {
 //					Log.v("cr3",
 //							"hideProgress() - skipping duplicate progress event");
-					return;
-				}
-				if (mProgress != null) {
-					// if ( mProgress.isShowing() )
-					// mProgress.hide();
-					progressShown = false;
-					progressIcon = null;
-					if (mProgress.isShowing())
-						mProgress.dismiss();
-					mProgress = null;
+				return;
+			}
+			if (mProgress != null) {
+				// if ( mProgress.isShowing() )
+				// mProgress.hide();
+				progressShown = false;
+				progressIcon = null;
+				if (mProgress.isShowing())
+					mProgress.dismiss();
+				mProgress = null;
 //					log.v("hideProgress() - in GUI thread, finished");
-				}
 			}
 		});
 	}
@@ -481,8 +483,8 @@ public class Engine {
 	}
 
 	public static String loadFileUtf8(File file) {
-		try {
-			InputStream is = new FileInputStream(file);
+		try (InputStream is = new FileInputStream(file)) {
+
 			return loadResourceUtf8(is);
 		} catch (Exception e) {
 			log.w("cannot load resource from file " + file);
@@ -492,8 +494,8 @@ public class Engine {
 
 	public String loadResourceUtf8(int id) {
 		try {
-			InputStream is = this.mActivity.getResources().openRawResource(id);
-			return loadResourceUtf8(is);
+			return loadResourceUtf8(mActivity.getResources().openRawResource(id));
+
 		} catch (Exception e) {
 			log.e("cannot load resource " + id);
 			return null;
@@ -501,16 +503,16 @@ public class Engine {
 	}
 
 	public static String loadResourceUtf8(InputStream is) {
-		try {
-			int available = is.available();
+		try (InputStream inputStream = is) {
+			int available = inputStream.available();
 			if (available <= 0)
 				return null;
-			byte buf[] = new byte[available];
-			if (is.read(buf) != available)
+			byte[] buf = new byte[available];
+			if (inputStream.read(buf) != available)
 				throw new IOException("Resource not read fully");
-			is.close();
-			String utf8 = new String(buf, 0, available, "UTF8");
-			return utf8;
+			return new String(buf, 0, available, "UTF8");
+
+
 		} catch (Exception e) {
 			log.e("cannot load resource");
 			return null;
@@ -519,8 +521,8 @@ public class Engine {
 
 	public byte[] loadResourceBytes(int id) {
 		try {
-			InputStream is = this.mActivity.getResources().openRawResource(id);
-			return loadResourceBytes(is);
+			return loadResourceBytes(mActivity.getResources().openRawResource(id));
+
 		} catch (Exception e) {
 			log.e("cannot load resource");
 			return null;
@@ -530,11 +532,11 @@ public class Engine {
 	public static byte[] loadResourceBytes(File f) {
 		if (f == null || !f.isFile() || !f.exists())
 			return null;
-		FileInputStream is = null;
-		try {
-			is = new FileInputStream(f);
-			byte[] res = loadResourceBytes(is);
-			return res;
+		try (FileInputStream is = new FileInputStream(f)) {
+			return loadResourceBytes(is);
+
+
+
 		} catch (IOException e) {
 			log.e("Cannot open file " + f);
 		}
@@ -542,14 +544,14 @@ public class Engine {
 	}
 
 	public static byte[] loadResourceBytes(InputStream is) {
-		try {
-			int available = is.available();
+		try (InputStream inputStream = is) {
+			int available = inputStream.available();
 			if (available <= 0)
 				return null;
-			byte buf[] = new byte[available];
-			if (is.read(buf) != available)
+			byte[] buf = new byte[available];
+			if (inputStream.read(buf) != available)
 				throw new IOException("Resource not read fully");
-			is.close();
+
 			return buf;
 		} catch (Exception e) {
 			log.e("cannot load resource");
@@ -1121,38 +1123,26 @@ public class Engine {
 			log.e("File " + oldPlace.getAbsolutePath() + " does not exist!");
 			return false;
 		}
-		FileOutputStream os = null;
-		FileInputStream is = null;
-		try {
+		try (FileInputStream is = new FileInputStream(oldPlace)) {
 			if (!newPlace.createNewFile())
 				return false; // cannot create file
-			os = new FileOutputStream(newPlace);
-			is = new FileInputStream(oldPlace);
-			byte[] buf = new byte[0x10000];
-			for (; ; ) {
-				int bytesRead = is.read(buf);
-				if (bytesRead <= 0)
-					break;
-				os.write(buf, 0, bytesRead);
+			try (FileOutputStream os = new FileOutputStream(newPlace)) {
+				byte[] buf = new byte[0x10000];
+				for (; ; ) {
+					int bytesRead = is.read(buf);
+					if (bytesRead <= 0)
+						break;
+					os.write(buf, 0, bytesRead);
+				}
+				removeNewFile = false;
+				oldPlace.delete();
+				return true;
+			} catch (IOException e) {
+				return false;
 			}
-			removeNewFile = false;
-			oldPlace.delete();
-			return true;
 		} catch (IOException e) {
 			return false;
 		} finally {
-			try {
-				if (os != null)
-					os.close();
-			} catch (IOException ee) {
-				// ignore
-			}
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException ee) {
-				// ignore
-			}
 			if (removeNewFile)
 				newPlace.delete();
 		}
@@ -1310,7 +1300,7 @@ public class Engine {
 		try {
 			String reg = "(?i).*vold.*(vfat|ntfs|exfat|fat32|ext3|ext4).*rw.*";
 			String reg2 = "(?i).*fuse.*(vfat|ntfs|exfat|fat32|ext3|ext4).*rw.*";
-			String s = "";
+			StringBuilder s = new StringBuilder();
 			try {
 				final Process process = new ProcessBuilder().command("mount")
 						.redirectErrorStream(true).start();
@@ -1323,18 +1313,18 @@ public class Engine {
 					process.destroy();
 					return out;
 				}
-				final InputStream is = process.getInputStream();
-				final byte[] buffer = new byte[1024];
-				while (is.read(buffer) != -1) {
-					s = s + new String(buffer);
+				try (InputStream is = process.getInputStream()) {
+					final byte[] buffer = new byte[1024];
+					while (is.read(buffer) != -1) {
+						s.append(new String(buffer));
+					}
 				}
-				is.close();
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
 			// parse output
-			final String[] lines = s.split("\n");
+			final String[] lines = s.toString().split("\n");
 			for (String line : lines) {
 				if (!line.toLowerCase(Locale.US).contains("asec")) {
 					log.d("mount entry: " + line);
@@ -1517,10 +1507,8 @@ public class Engine {
 			"/mnt/sdcard", //Onyx Darwin 5
 		};
 		// collect mount points from all possible sources
-		HashSet<String> mountPointsToAdd = new HashSet<String>();
-		for (String point : knownMountPoints) {
-			mountPointsToAdd.add(point);
-		}
+		HashSet<String> mountPointsToAdd = new HashSet<>();
+		mountPointsToAdd.addAll(Arrays.asList(knownMountPoints));
 		mountPointsToAdd.addAll(mountedPathsFromMountCmd);
 		mountPointsToAdd.addAll(mountedPathsFromMountFile);
 		mountPointsToAdd.addAll(mountedPathsStorageDir);
@@ -1652,24 +1640,24 @@ public class Engine {
 		for (File dir : rootDirs)
 			dirs.add(new File(dir, "fonts"));
 		dirs.add(new File(Environment.getRootDirectory(), "fonts"));
-		ArrayList<String> fontPaths = new ArrayList<String>();
+		ArrayList<String> fontPaths = new ArrayList<>();
 		for (File fontDir : dirs) {
 			if (fontDir.isDirectory()) {
 				log.v("Scanning directory " + fontDir.getAbsolutePath()
 						+ " for font files");
 				// get font names
-				String[] fileList = fontDir.list(new FilenameFilter() {
-					public boolean accept(File dir, String filename) {
-						String lc = filename.toLowerCase();
-						return (lc.endsWith(".ttf") || lc.endsWith(".otf")
-								|| lc.endsWith(".pfb") || lc.endsWith(".pfa"))
+				String[] fileList = fontDir.list((dir, filename) -> {
+					String lc = filename.toLowerCase();
+					return (lc.endsWith(".ttf") || lc.endsWith(".otf")
+							|| lc.endsWith(".pfb") || lc.endsWith(".pfa"))
+
 //								&& !filename.endsWith("Fallback.ttf")
-								;
-					}
+							;
+
 				});
 				// append path
-				for (int i = 0; i < fileList.length; i++) {
-					String pathName = new File(fontDir, fileList[i])
+				for (String s : fileList) {
+					String pathName = new File(fontDir, s)
 							.getAbsolutePath();
 					fontPaths.add(pathName);
 					log.v("found font: " + pathName);
@@ -1681,8 +1669,8 @@ public class Engine {
 	}
 
 	public static final ArrayList<String> getFontsDirs() {
-		HashMap<String, Integer> dirsCapacity = new HashMap<String, Integer>();
-		ArrayList<File> dirs = new ArrayList<File>();
+		HashMap<String, Integer> dirsCapacity = new HashMap<>();
+		ArrayList<File> dirs = new ArrayList<>();
 		File[] dataDirs = getDataDirectories("fonts", false, false);
 		for (File dir : dataDirs)
 			dirs.add(dir);
@@ -1706,7 +1694,7 @@ public class Engine {
 				}
 			}
 		}
-		ArrayList<String> resArray = new ArrayList<String>();
+		ArrayList<String> resArray = new ArrayList<>();
 		Map.Entry<String, Integer> entry;
 		Iterator<Map.Entry<String, Integer>> it = dirsCapacity.entrySet().iterator();
 		while (it.hasNext()) {
@@ -1717,7 +1705,7 @@ public class Engine {
 	}
 
 	public static final ArrayList<String> getFontsDirsReal() {
-		HashMap<String, Integer> dirsCapacity = new HashMap<String, Integer>();
+		HashMap<String, Integer> dirsCapacity = new HashMap<>();
 		ArrayList<File> dirs = new ArrayList<File>();
 		File[] dataDirs = getDataDirectories("fonts", false, false);
 		for (File dir : dataDirs)
@@ -1730,7 +1718,7 @@ public class Engine {
 			if (fontDir.isDirectory())
 				dirsCapacity.put(fontDir.getAbsolutePath(), Integer.valueOf(0));
 		}
-		ArrayList<String> resArray = new ArrayList<String>();
+		ArrayList<String> resArray = new ArrayList<>();
 		Map.Entry<String, Integer> entry;
 		Iterator<Map.Entry<String, Integer>> it = dirsCapacity.entrySet().iterator();
 		while (it.hasNext()) {

@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -18,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,15 +25,11 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.zip.CRC32;
 
 public class PictureCameDialog extends BaseDialog implements Settings {
@@ -190,67 +184,63 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 			filename = getAvailFName(sDir,filename);
 			final String fname1 = filename;
 			final String sDir1 = sDir;
-			BackgroundThread.instance().executeGUI(new Runnable() {
-				@Override
-				public void run() {
-					final InputDialog dlg = new InputDialog(mActivity, title,
-							((CoolReader)activity).getString(R.string.pic_filename)+" "+
-							sDir1.replace("/storage/","/s/").replace("/emulated/","/e/")+":"
-							, fname1,
-							new InputDialog.InputHandler() {
-								@Override
-								public boolean validateNoCancel(String s) {
-									File f = new File(sDir1+s);
-									if (f.exists()) {
-										((CoolReader)activity).showToast(R.string.pic_file_exists);
-										return false;
-									}
-									return true;
+			BackgroundThread.instance().executeGUI((Runnable) () -> {
+				final InputDialog dlg = new InputDialog(mActivity, title,
+						((CoolReader)activity).getString(R.string.pic_filename)+" "+
+						sDir1.replace("/storage/","/s/").replace("/emulated/","/e/")+":"
+						, fname1,
+						new InputDialog.InputHandler() {
+							@Override
+							public boolean validateNoCancel(String s) {
+								File f = new File(sDir1+s);
+								if (f.exists()) {
+									((CoolReader)activity).showToast(R.string.pic_file_exists);
+									return false;
 								}
-								@Override
-								public boolean validate(String s) {
-									return true;
+								return true;
+							}
+							@Override
+							public boolean validate(String s) {
+								return true;
+							}
+							@Override
+							public void onOk(String s) {
+								try {
+									String s1 = s;
+									if (!((s.toLowerCase().endsWith(".png")) ||
+										(s.toLowerCase().endsWith(".jpg")) ||
+										(s.toLowerCase().endsWith(".jpeg")))) s1 = s+".png";
+									File file = new File(sDir1 + s1);
+									OutputStream fOut = new FileOutputStream(file);
+									if ((s.toLowerCase().endsWith(".jpg")) ||
+											(s.toLowerCase().endsWith(".jpeg")))
+										((CoolReader) activity).picReceived.bmpReceived.
+											compress(Bitmap.CompressFormat.JPEG,100,fOut);
+									else ((CoolReader) activity).picReceived.bmpReceived.
+											compress(Bitmap.CompressFormat.PNG,100,fOut);
+									fOut.flush();
+									fOut.close();
+									if (needToActivate) {
+File file1 = new File(sDir1 + s1);
+if (file1.exists()) {
+BackgroundTextureInfo item = BackgroundTextureInfo.fromFile(file1
+.getAbsolutePath());
+											Properties props = new Properties(mActivity.settings());
+											props.setProperty(PROP_PAGE_BACKGROUND_IMAGE,item.id);
+mActivity.setSettings(props, -1, true);
+}
+}
+									dismiss();
+								} catch (Exception e) {
+									((CoolReader)activity).showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
+											e.getMessage());
 								}
-								@Override
-								public void onOk(String s) {
-									try {
-										String s1 = s;
-										if (!((s.toLowerCase().endsWith(".png")) ||
-											(s.toLowerCase().endsWith(".jpg")) ||
-											(s.toLowerCase().endsWith(".jpeg")))) s1 = s+".png";
-										File file = new File(sDir1 + s1);
-										OutputStream fOut = new FileOutputStream(file);
-										if ((s.toLowerCase().endsWith(".jpg")) ||
-												(s.toLowerCase().endsWith(".jpeg")))
-											((CoolReader) activity).picReceived.bmpReceived.
-												compress(Bitmap.CompressFormat.JPEG,100,fOut);
-										else ((CoolReader) activity).picReceived.bmpReceived.
-												compress(Bitmap.CompressFormat.PNG,100,fOut);
-										fOut.flush();
-										fOut.close();
-										if (needToActivate) {
-                                            File file1 = new File(sDir1 + s1);
-                                            if (file1.exists()) {
-                                                BackgroundTextureInfo item = BackgroundTextureInfo.fromFile(file1
-                                                        .getAbsolutePath());
-												Properties props = new Properties(mActivity.settings());
-												props.setProperty(PROP_PAGE_BACKGROUND_IMAGE,item.id);
-                                                mActivity.setSettings(props, -1, true);
-                                            }
-                                        }
-										dismiss();
-									} catch (Exception e) {
-										((CoolReader)activity).showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
-												e.getMessage());
-									}
-								}
-								@Override
-								public void onCancel() {
-								}
-							});
-					dlg.show();
-				}
-
+							}
+							@Override
+							public void onCancel() {
+							}
+						});
+				dlg.show();
 			});
 		} else {
 			((CoolReader)activity).showToast(R.string.pic_problem);
@@ -345,57 +335,29 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 				imageCame.setImageBitmap(((CoolReader)activity).picReceived.bmpReceived);
 
 		ibPicTexture=(Button)view.findViewById(R.id.ib_texture);
-		ibPicTexture.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				switchTexture(true);
-			}
-		});
+		ibPicTexture.setOnClickListener(v -> switchTexture(true));
 		Drawable imgB = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = imgB.getConstantState().newDrawable().mutate();
 		if (ibPicTexture!=null) ibPicTexture.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		activity.tintViewIcons(ibPicTexture, PorterDuff.Mode.CLEAR,true);
-		ibPicBackground=(Button)view.findViewById(R.id.ib_background);
-		ibPicBackground.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				switchTexture(false);
-			}
-		});
+		ibPicBackground= view.findViewById(R.id.ib_background);
+		ibPicBackground.setOnClickListener(v -> switchTexture(false));
 		Drawable img2 = imgB.getConstantState().newDrawable().mutate();
 		if (ibPicBackground!=null) ibPicBackground.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		activity.tintViewIcons(ibPicBackground, PorterDuff.Mode.CLEAR,true);
 		switchTexture(true);
-		BackgroundThread.instance().postBackground(new Runnable() {
-			@Override
-			public void run() {
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						switchTexture(true);
-					}
-				}, 200);
-			}
-		});
-		final Button ibPicCopy=(Button)view.findViewById(R.id.ib_copy);
-		ibPicCopy.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				proceedTexture(false);
-			}
-		});
-		final Button ibPicCopyAct=(Button)view.findViewById(R.id.ib_copy_activate);
-		ibPicCopyAct.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				proceedTexture(true);
-			}
-		});
-		final Button ibPicRememberForLater=(Button)view.findViewById(R.id.ib_save_for_later);
+		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> switchTexture(true), 200));
+		final Button ibPicCopy= view.findViewById(R.id.ib_copy);
+		ibPicCopy.setOnClickListener(v -> proceedTexture(false));
+		final Button ibPicCopyAct= view.findViewById(R.id.ib_copy_activate);
+		ibPicCopyAct.setOnClickListener(v -> proceedTexture(true));
+		final Button ibPicRememberForLater= view.findViewById(R.id.ib_save_for_later);
 		int resId = Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_texture, R.drawable.icons8_texture);
 		Drawable img = getContext().getResources().getDrawable( R.drawable.icons8_texture);
 		mActivity.tintViewIcons(img,true);
-		ibPicRememberForLater.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				activity.showToast(R.string.pic_image_was_remembered);
-				dismiss();
-			}
+		ibPicRememberForLater.setOnClickListener(v -> {
+			activity.showToast(R.string.pic_image_was_remembered);
+			dismiss();
 		});
 		int colorGray;
 		int colorGrayC;
@@ -485,15 +447,10 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 			try {
 				final File f = new File(sDir + sFName);
 				if (f.exists())
-					((CoolReader)activity).askConfirmation(R.string.pic_delete_cover, new Runnable() {
-						@Override
-						public void run() {
-							f.delete();
-						}
-					});
-				else ((CoolReader)activity).showToast( ((CoolReader)activity).getString(R.string.pic_no_custom_cover));
+					activity.askConfirmation(R.string.pic_delete_cover, (Runnable) () -> f.delete());
+				else activity.showToast( ((CoolReader)activity).getString(R.string.pic_no_custom_cover));
 			} catch (Exception e) {
-				((CoolReader)activity).showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
+				activity.showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
 					e.getMessage());
 			}
 		}
@@ -503,7 +460,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		currentBook = book;
 
 		// set current book cover page
-		ImageView cover = (ImageView)mView.findViewById(R.id.book_cover);
+		ImageView cover = mView.findViewById(R.id.book_cover);
 		if (currentBook != null) {
 			final FileInfo item = currentBook.getFileInfo();
 			cover.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item, coverWidth, coverHeight));
@@ -512,18 +469,13 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 			cover.setMaxHeight(coverHeight);
 			cover.setMaxWidth(coverWidth);
 			cover.setTag(new CoverpageManager.ImageItem(item, coverWidth, coverHeight));
-			cover.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					setBookPicture(item);
-					dismiss();
-				}
+			cover.setOnClickListener(v -> {
+				setBookPicture(item);
+				dismiss();
 			});
-			cover.setOnLongClickListener(new View.OnLongClickListener() {
-				@Override
-				public boolean onLongClick(View v) {
-					deleteBookPicture(item);
-					return true;
-				}
+			cover.setOnLongClickListener(v -> {
+				deleteBookPicture(item);
+				return true;
 			});
 			setBookInfoItem(mView, R.id.lbl_book_author, Utils.formatAuthors(item.getAuthors()));
 			setBookInfoItem(mView, R.id.lbl_book_title, currentBook.getFileInfo().title);
@@ -613,12 +565,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 					label.setText("More...");
 					label.setTextColor(colorIcon);
 				}
-				view.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						((CoolReader)mActivity).showRecentBooks();
-					}
-				});
+				view.setOnClickListener(v -> ((CoolReader)mActivity).showRecentBooks());
 			} else {
 				cover.setMinimumWidth(coverWidth);
 				cover.setTag(new CoverpageManager.ImageItem(item, coverWidth, coverHeight));
@@ -644,19 +591,13 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 						label.setTextColor(colorGray);
 					label.setMaxWidth(coverWidth);
 				}
-				view.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						setBookPicture(item);
-						dismiss();
-					}
+				view.setOnClickListener(v -> {
+					setBookPicture(item);
+					dismiss();
 				});
-				view.setOnLongClickListener(new View.OnLongClickListener() {
-					@Override
-					public boolean onLongClick(View v) {
-						deleteBookPicture(item);
-						return true;
-					}
+				view.setOnLongClickListener(v -> {
+					deleteBookPicture(item);
+					return true;
 				});
 			}
 			mRecentBooksScroll.addView(view);
@@ -665,32 +606,24 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 	}
 
 	public void refreshRecentBooks() {
-		activity.waitForCRDBService(new Runnable() {
-			@Override
-			public void run() {
-				BackgroundThread.instance().postGUI(new Runnable() {
+		activity.waitForCRDBService(() -> BackgroundThread.instance().postGUI(() -> {
+			if (Services.getHistory() != null && mActivity.getDB() != null) {
+				Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
+
 					@Override
-					public void run() {
-						if (Services.getHistory() != null && mActivity.getDB() != null) {
-							Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
+					public void onRecentBooksListLoadBegin() {
 
-								@Override
-								public void onRecentBooksListLoadBegin() {
+					}
 
-								}
-
-								@Override
-								public void onRecentBooksListLoaded(ArrayList<BookInfo> bookList) {
-									if (PictureCameDialog.this.picReceived.book == null)
-										updateCurrentBook(bookList != null && bookList.size() > 0 ? bookList.get(0) : null);
-									updateRecentBooks(bookList);
-								}
-							});
-						}
+					@Override
+					public void onRecentBooksListLoaded(ArrayList<BookInfo> bookList) {
+						if (PictureCameDialog.this.picReceived.book == null)
+							updateCurrentBook(bookList != null && bookList.size() > 0 ? bookList.get(0) : null);
+						updateRecentBooks(bookList);
 					}
 				});
 			}
-		});
+		}));
 	}
 
 	private void createViews(ViewGroup view1) {
@@ -708,23 +641,17 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 		else
 			updateCurrentBook(Services.getHistory().getLastBook());
 
-		mView.findViewById(R.id.current_book).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (currentBook != null) {
-				//	mActivity.loadDocument(currentBook.getFileInfo());
-				}
-
+		mView.findViewById(R.id.current_book).setOnClickListener(v -> {
+			if (currentBook != null) {
+			//	mActivity.loadDocument(currentBook.getFileInfo());
 			}
+
 		});
 
-		mView.findViewById(R.id.current_book).setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				//if (currentBook != null)
-				//	mActivity.editBookInfo(Services.getScanner().createRecentRoot(), currentBook.getFileInfo());
-				return true;
-			}
+		mView.findViewById(R.id.current_book).setOnLongClickListener(v -> {
+			//if (currentBook != null)
+			//	mActivity.editBookInfo(Services.getScanner().createRecentRoot(), currentBook.getFileInfo());
+			return true;
 		});
 
 		refreshRecentBooks();

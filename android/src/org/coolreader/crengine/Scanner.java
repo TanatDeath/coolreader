@@ -15,7 +15,7 @@ public class Scanner extends FileInfoChangeSource {
 	
 	public static final Logger log = L.create("sc");
 	
-	HashMap<String, FileInfo> mFileList = new HashMap<String, FileInfo>();
+	HashMap<String, FileInfo> mFileList = new HashMap<>();
 //	ArrayList<FileInfo> mFilesForParsing = new ArrayList<FileInfo>();
 	FileInfo mRoot;
 	
@@ -46,14 +46,14 @@ public class Scanner extends FileInfoChangeSource {
 			ArrayList<FileInfo> items = new ArrayList<FileInfo>();
 			//for ( Enumeration<?> e = file.entries(); e.hasMoreElements(); ) {
 			for ( ZipEntry entry : entries ) {
-				if ( entry.isDirectory() )
+				if (entry.isDirectory())
 					continue;
 				String name = entry.getName();
 				FileInfo item = new FileInfo();
 				item.format = DocumentFormat.byExtension(name);
-				if ( item.format==null )
+				if (item.format==null)
 					continue;
-				if ( item.format==DocumentFormat.NONE )
+				if (item.format == DocumentFormat.NONE)
 					continue;
 				File f = new File(name);
 				item.setFilename(f.getName());
@@ -69,10 +69,10 @@ public class Scanner extends FileInfoChangeSource {
 				item.isArchive = true;
 				items.add(item);
 			}
-			if ( items.size()==0 ) {
+			if (items.size() == 0) {
 				L.i("Supported files not found in " + zip.pathname);
 				return null;
-			} else if ( items.size()==1 ) {
+			} else if (items.size() == 1) {
 				// single supported file in archive
 				FileInfo item = items.get(0);
 				item.isArchive = true;
@@ -102,11 +102,11 @@ public class Scanner extends FileInfoChangeSource {
 	public boolean listDirectory(FileInfo baseDir)
 	{
 		Set<String> knownItems = null;
-		if ( baseDir.isListed ) {
+		if (baseDir.isListed) {
 			knownItems = new HashSet<String>();
 			for ( int i=baseDir.itemCount()-1; i>=0; i-- ) {
 				FileInfo item = baseDir.getItem(i);
-				if ( !item.exists() ) {
+				if (!item.exists()) {
 					// remove item from list
 					baseDir.removeChild(item);
 				} else {
@@ -126,7 +126,7 @@ public class Scanner extends FileInfoChangeSource {
 			// TODO: replace other occurrences of the method File.listFiles().
 			File[] items = Engine.listFiles(dir);
 			// process normal files
-			if ( items!=null ) {
+			if (items != null) {
 				for ( File f : items ) {
 					// check whether file is a link
 					if (Engine.isLink(f.getAbsolutePath()) != null) {
@@ -140,7 +140,7 @@ public class Scanner extends FileInfoChangeSource {
 						if (f.getName().equalsIgnoreCase("LOST.DIR"))
 							continue; // system directory
 						String pathName = f.getAbsolutePath();
-						if ( knownItems!=null && knownItems.contains(pathName) )
+						if (knownItems != null && knownItems.contains(pathName))
 							continue;
 						if (engine.isRootsMountPoint(pathName)) {
 							// skip mount root
@@ -149,13 +149,13 @@ public class Scanner extends FileInfoChangeSource {
 						boolean isZip = pathName.toLowerCase().endsWith(".zip");
 						FileInfo item = mFileList.get(pathName);
 						boolean isNew = false;
-						if ( item==null ) {
+						if (item == null) {
 							item = new FileInfo( f );
-							if ( isZip ) {
+							if (isZip) {
 								item = scanZip( item );
-								if ( item==null )
+								if (item == null)
 									continue;
-								if ( item.isDirectory ) {
+								if (item.isDirectory) {
 									// many supported files in ZIP
 									item.parent = baseDir;
 									baseDir.addDir(item);
@@ -172,23 +172,23 @@ public class Scanner extends FileInfoChangeSource {
 							}
 							isNew = true;
 						}
-						if ( item.format!=null )
-							if ( item.format!=DocumentFormat.NONE )
+						if (item.format != null)
+							if (item.format != DocumentFormat.NONE)
 							{
 								item.parent = baseDir;
 								baseDir.addFile(item);
-								if ( isNew )
+								if (isNew)
 									mFileList.put(pathName, item);
 							}
 					}
 				}
 				// process directories 
 				for ( File f : items ) {
-					if ( f.isDirectory() ) {
-						if ( f.getName().startsWith(".") )
+					if (f.isDirectory()) {
+						if (f.getName().startsWith("."))
 							continue; // treat dirs beginning with '.' as hidden
 						FileInfo item = new FileInfo( f );
-						if ( knownItems!=null && knownItems.contains(item.getPathName()) )
+						if (knownItems != null && knownItems.contains(item.getPathName()))
 							continue;
 						item.parent = baseDir;
 						baseDir.addDir(item);					
@@ -236,7 +236,7 @@ public class Scanner extends FileInfoChangeSource {
 		log.d("scanDirectoryFiles(" + baseDir.getPathName() + ") ");
 		
 		// store list of files to scan
-		ArrayList<String> pathNames = new ArrayList<String>();
+		ArrayList<String> pathNames = new ArrayList<>();
 		for (int i=0; i < baseDir.fileCount(); i++) {
 			pathNames.add(baseDir.getFile(i).getPathName());
 		}
@@ -265,9 +265,9 @@ public class Scanner extends FileInfoChangeSource {
 			public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
 				log.v("onFileInfoListLoaded");
 				// GUI thread
-				final ArrayList<FileInfo> filesForParsing = new ArrayList<FileInfo>();
-				ArrayList<FileInfo> filesForSave = new ArrayList<FileInfo>();
-				Map<String, FileInfo> mapOfFilesFoundInDb = new HashMap<String, FileInfo>();
+				final ArrayList<FileInfo> filesForParsing = new ArrayList<>();
+				ArrayList<FileInfo> filesForSave = new ArrayList<>();
+				Map<String, FileInfo> mapOfFilesFoundInDb = new HashMap<>();
 				for (FileInfo f : list)
 					mapOfFilesFoundInDb.put(f.getPathName(), f);
 				for (int i=0; i<baseDir.fileCount(); i++) {
@@ -304,46 +304,39 @@ public class Scanner extends FileInfoChangeSource {
 					return;
 				}
                 // scan files in Background thread
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						// Background thread
-						final ArrayList<FileInfo> filesForSave = new ArrayList<FileInfo>();
+				BackgroundThread.instance().postBackground(() -> {
+					// Background thread
+					final ArrayList<FileInfo> filesForSave1 = new ArrayList<>();
+					try {
+						int count = filesForParsing.size();
+						for ( int i=0; i<count; i++ ) {
+							if (control.isStopped())
+								break;
+							progress.setProgress(i * 10000 / count);
+							FileInfo item = filesForParsing.get(i);
+							log.v("scanBookProperties for "+item.getFilename());
+							engine.scanBookProperties(item);
+							filesForSave1.add(item);
+						}
+					} catch (Exception e) {
+						L.e("Exception while scanning", e);
+					}
+					progress.hide();
+					// jump to GUI thread
+					BackgroundThread.instance().postGUI(() -> {
+						// GUI thread
 						try {
-							int count = filesForParsing.size();
-							for ( int i=0; i<count; i++ ) {
-								if (control.isStopped())
-									break;
-								progress.setProgress(i * 10000 / count);
-								FileInfo item = filesForParsing.get(i);
-								log.v("scanBookProperties for "+item.getFilename());
-								engine.scanBookProperties(item);
-								filesForSave.add(item);
+							if (filesForSave1.size() > 0) {
+								db.saveFileInfos(filesForSave1);
 							}
-						} catch (Exception e) {
+							for (FileInfo file : filesForSave1)
+								baseDir.setFile(file);
+						} catch (Exception e ) {
 							L.e("Exception while scanning", e);
 						}
-						progress.hide();
-						// jump to GUI thread
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								// GUI thread
-								try {
-									if (filesForSave.size() > 0) {
-										db.saveFileInfos(filesForSave);
-									}
-									for (FileInfo file : filesForSave)
-										baseDir.setFile(file);
-								} catch (Exception e ) {
-									L.e("Exception while scanning", e);
-								}
-								// call finish handler
-								readyCallback.run();
-							}
-						});
-					}
-					
+						// call finish handler
+						readyCallback.run();
+					});
 				});
 			}
 		});
@@ -364,7 +357,7 @@ public class Scanner extends FileInfoChangeSource {
 		
 		listDirectory(baseDir);
 		listSubtree( baseDir, 5, android.os.SystemClock.uptimeMillis() + 700 );
-		if ( (!getDirScanEnabled() || baseDir.isScanned) && !recursiveScan ) {
+		if ((!getDirScanEnabled() || baseDir.isScanned) && !recursiveScan) {
 			readyCallback.run();
 			return;
 		}
@@ -379,18 +372,17 @@ public class Scanner extends FileInfoChangeSource {
 					if (scanControl.isStopped()) {
 						// scan is stopped
 						readyCallback.run();
-						return;
 					} else {
 						baseDir.isScanned = true;
 
-						if ( recursiveScan ) {
+						if (recursiveScan) {
 							if (scanControl.isStopped()) {
 								// scan is stopped
 								readyCallback.run();
 								return;
 							}
 							// make list of subdirectories to scan
-							final ArrayList<FileInfo> dirsToScan = new ArrayList<FileInfo>(); 
+							final ArrayList<FileInfo> dirsToScan = new ArrayList<>();
 							for ( int i=baseDir.dirCount()-1; i>=0; i-- ) {
 								File dir = new File(baseDir.getDir(i).getPathName());
 								if (!engine.getPathCorrector().isRecursivePath(dir))
@@ -407,12 +399,7 @@ public class Scanner extends FileInfoChangeSource {
 									final FileInfo dir = dirsToScan.get(0);
 									dirsToScan.remove(0);
 									final Runnable callback = this;
-									BackgroundThread.instance().postGUI(new Runnable() {
-										@Override
-										public void run() {
-											scanDirectory(db, dir, callback, true, scanControl);
-										}
-									});
+									BackgroundThread.instance().postGUI(() -> scanDirectory(db, dir, callback, true, scanControl));
 								}
 							};
 							dirIterator.run();
@@ -617,8 +604,7 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo opds = mRoot.findItemByPathName(FileInfo.OPDS_LIST_TAG);
 		if (opds == null)
 			return null;
-		FileInfo repository = opds.findItemByPathName(path);
-		return repository;
+		return opds.findItemByPathName(path);
 	}
 	
 	public FileInfo createSeriesRoot() {
@@ -736,26 +722,26 @@ public class Scanner extends FileInfoChangeSource {
 	 * @return
 	 */
 	private FileInfo findParentInternal(FileInfo file, FileInfo root)	{
-		if ( root==null || file==null || root.isRecentDir() )
+		if (root == null || file == null || root.isRecentDir())
 			return null;
 		if (!root.isRootDir() &&
 				!(file.getPathName().startsWith(root.getPathName()) ||
 						root.isOnSDCard() && file.getPathName().toLowerCase().startsWith( root.getPathName().toLowerCase() ) ) )
 			return null;
 		// to list all directories starting root dir
-		if ( root.isDirectory && !root.isSpecialDir() )
+		if (root.isDirectory && !root.isSpecialDir())
 				listDirectory(root);
 		for ( int i=0; i<root.dirCount(); i++ ) {
 			FileInfo found = findParentInternal( file, root.getDir(i));
-			if ( found!=null )
+			if (found != null)
 				return found;
 		}
 		for ( int i=0; i<root.fileCount(); i++ ) {
-			if ( root.getFile(i).getPathName().equals(file.getPathName()) ||
-					root.isOnSDCard() && root.getFile(i).getPathName().equalsIgnoreCase(file.getPathName()) )
+			if (root.getFile(i).getPathName().equals(file.getPathName()) ||
+					root.isOnSDCard() && root.getFile(i).getPathName().equalsIgnoreCase(file.getPathName()))
 				return root;
-			if ( root.getFile(i).getPathName().startsWith(file.getPathName() + "@/") ||
-					root.isOnSDCard() && root.getFile(i).getPathName().toLowerCase().startsWith(file.getPathName().toLowerCase() + "@/") )
+			if (root.getFile(i).getPathName().startsWith(file.getPathName() + "@/") ||
+					root.isOnSDCard() && root.getFile(i).getPathName().toLowerCase().startsWith(file.getPathName().toLowerCase() + "@/"))
 				return root;
 		}
 		return null;
@@ -771,10 +757,10 @@ public class Scanner extends FileInfoChangeSource {
 	 */
 	public FileInfo findParent(FileInfo file, FileInfo root) {
 		FileInfo parent = findParentInternal(file, root);
-		if ( parent==null ) {
-			autoAddRootForFile(new File(file.pathname) );
+		if (parent == null) {
+			autoAddRootForFile(new File(file.pathname));
 			parent = findParentInternal(file, root);
-			if ( parent==null ) {
+			if (parent == null) {
 				L.e("Cannot find root directory for file " + file.pathname);
 				return null;
 			}
@@ -801,18 +787,18 @@ public class Scanner extends FileInfoChangeSource {
 	 */
 	private boolean listSubtree(FileInfo root, int maxDepth, long limitTs) {
 		long ts = android.os.SystemClock.uptimeMillis();
-		if ( ts>limitTs || maxDepth<=0 )
+		if (ts > limitTs || maxDepth <= 0)
 			return false;
 		boolean fullDepthScan = true;
 		listDirectory(root);
 		for ( int i=root.dirCount()-1; i>=-0; i-- ) {
 			boolean res = listSubtree(root.getDir(i), maxDepth-1, limitTs);
-			if ( !res ) {
+			if (!res) {
 				fullDepthScan = false;
 				break;
 			}
 		}
-		if ( fullDepthScan && mHideEmptyDirs )
+		if (fullDepthScan && mHideEmptyDirs)
 			root.removeEmptyDirs();
 		return true;
 	}
@@ -827,10 +813,10 @@ public class Scanner extends FileInfoChangeSource {
 	public boolean listSubtrees(FileInfo root, int maxDepth, long limitTs) {
 		for ( int depth = 1; depth<=maxDepth; depth++ ) {
 			boolean res = listSubtree( root, depth, limitTs );
-			if ( res )
+			if (res)
 				return true;
 			long ts = android.os.SystemClock.uptimeMillis();
-			if ( ts>limitTs )
+			if (ts > limitTs)
 				return false; // limited by time
 			// iterate deeper
 		}
@@ -841,13 +827,13 @@ public class Scanner extends FileInfoChangeSource {
 		FileInfo existingResults = null;
 		for ( int i=0; i<mRoot.dirCount(); i++ ) {
 			FileInfo dir = mRoot.getDir(i);
-			if ( dir.isSearchDir() ) {
+			if (dir.isSearchDir()) {
 				existingResults = dir;
 				dir.clear();
 				break;
 			}
 		}
-		if ( existingResults==null ) {
+		if (existingResults == null) {
 			FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = FileInfo.SEARCH_RESULT_DIR_TAG;
@@ -890,11 +876,11 @@ public class Scanner extends FileInfoChangeSource {
 	public boolean autoAddRootForFile( File f ) {
 		File p = f.getParentFile();
 		while ( p!=null ) {
-			if ( p.getParentFile()==null || p.getParentFile().getParentFile()==null )
+			if (p.getParentFile() == null || p.getParentFile().getParentFile() == null)
 				break;
 			p = p.getParentFile();
 		}
-		if ( p!=null ) {
+		if (p != null) {
 			L.i("Found possible mount point " + p.getAbsolutePath());
 			return addRoot(p.getAbsolutePath(), p.getAbsolutePath(), true);
 		}
@@ -952,7 +938,7 @@ public class Scanner extends FileInfoChangeSource {
 			FileInfo item = mRoot.getDir(i);
 			if (!item.isWritableDirectory())
 				continue;
-			if ( !item.isSpecialDir() && !item.isArchive ) {
+			if (!item.isSpecialDir() && !item.isArchive) {
 				if (!item.isListed)
 					listDirectory(item);
 				FileInfo books = item.findItemByPathName(item.pathname + "/Books");
@@ -965,7 +951,7 @@ public class Scanner extends FileInfoChangeSource {
 					if (!dir.canWrite())
 						Log.w("cr3", "Directory " + dir + " is readonly");
 					File f = new File( dir, "Books" );
-					if ( f.mkdirs() || f.isDirectory() ) {
+					if (f.mkdirs() || f.isDirectory()) {
 						books = new FileInfo(f);
 						books.parent = item;
 						item.addDir(books);
@@ -1009,7 +995,7 @@ public class Scanner extends FileInfoChangeSource {
 	public FileInfo getOPDSRoot() 
 	{
 		for ( int i=0; i<mRoot.dirCount(); i++ ) {
-			if ( mRoot.getDir(i).isOPDSRoot() )
+			if (mRoot.getDir(i).isOPDSRoot())
 				return mRoot.getDir(i);
 		}
 		L.w("OPDS root directory not found!");
@@ -1019,7 +1005,7 @@ public class Scanner extends FileInfoChangeSource {
 	public FileInfo getRecentDir() 
 	{
 		for ( int i=0; i<mRoot.dirCount(); i++ ) {
-			if ( mRoot.getDir(i).isRecentDir())
+			if (mRoot.getDir(i).isRecentDir())
 				return mRoot.getDir(i);
 		}
 		L.w("Recent books directory not found!");

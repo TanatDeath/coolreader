@@ -483,7 +483,93 @@ static quotes_spec _quotes_spec_table[] = {
 static quotes_spec _quotes_spec_default = { "", L"\x201c", L"\x201d", L"\x2018", L"\x2019" };
 
 #if USE_LIBUNIBREAK==1
-lChar16 lb_char_sub_func_polish(const lChar16 * text, int pos, int next_usable) {
+#if KO_LIBUNIBREAK_PATCH==1
+lChar16 lb_char_sub_func_english(struct LineBreakContext *lbpCtx, const lChar16 * text, int pos, int next_usable) {
+    // https://github.com/koreader/crengine/issues/364
+    // Normally, line breaks are allowed at both sides of an em-dash.
+    // When an em-dash is at the "end of a word" (or beginning), we want to avoid separating it from its word,
+    // this is detected by looking for letters/numbers at both sides of the dash, if on any side a space
+    // is closer than any letter/number, treat it as a non-breakable dash.
+    // The current implementation does not allow examining the following characters beyond the current node,
+    // so the detection is not perfect and we replace the dash with "opening" or "closing" characters
+    // (or "ambiguous), to play safer (note that "}" allows a break after, while ")" doesn't).
+    //
+    // The intent is the following:
+    //   blah—blah                     ->  —  (break before or after)
+    //   blah “—blah , <p>—blah        ->  {  (do not break after)
+    //   blah—” Blah , blah—”</p>      ->  }  (do not break before)
+    //   blah — blah , blah —<em>blah  ->  "  (break only at spaces)
+    switch ( text[pos] ) {
+        case 0x2014:  // em dash
+        case 0x2E3A:  // two-em dash
+        case 0x2E3B:  // three-em dash
+            {
+                // The variable "replacement" will be the output char,
+                // we start by setting it to the actual input char.
+                // It will be '{' if no-break on right,
+                //            '}' if no-break on left,
+                //            '"' if no-break on both.
+                lChar16 replacement = text[pos];
+                int new_pos;
+                enum LineBreakClass new_lbc;
+                // 1. Detect no-break on right (scan left of dash)
+                //
+                // already at the beginning of text
+                if ( pos == 0 ) {
+                    replacement = '{';
+                }
+                else {
+                    // inspect preceding characters
+                    new_pos = pos;
+                    while ( new_pos > 0) {
+                        new_pos--;
+                        new_lbc = lb_get_char_class(lbpCtx, text[new_pos]);
+                        if ( new_lbc == LBP_AL || new_lbc == LBP_NU ) {
+                            // found word / number
+                            break;
+                        }
+                        else if ( new_lbc == LBP_SP || new_pos == 0 ) {
+                            // found space or beginning
+                            replacement = '{';
+                            break;
+                        }
+                    }
+                }
+                // 2. Detect no-break on left (scan right of dash)
+                //    If already no-break on right, replacement will be '"'
+                //
+                // already at the end of text
+                if ( next_usable == 0 ) {
+                    replacement = ( replacement == '{' ) ? '"' : '}';
+                }
+                else {
+                    // inspect following characters
+                    new_pos = pos;
+                    while ( new_pos < pos+next_usable ) {
+                        new_pos++;
+                        new_lbc = lb_get_char_class(lbpCtx, text[new_pos]);
+                        if ( new_lbc == LBP_AL || new_lbc == LBP_NU ) {
+                            // found word / number
+                            break;
+                        }
+                        else if ( new_lbc == LBP_SP || new_pos == pos+next_usable ) {
+                            // found space or end (of the current text node, there could be letters beyond)
+                            replacement = ( replacement == '{' ) ? '"' : '}';
+                            break;
+                        }
+                    }
+                }
+                return replacement;
+            }
+            break;
+        default:
+            break;
+    }
+    return text[pos];
+}
+#endif      // KO_LIBUNIBREAK_PATCH==1
+
+lChar16 lb_char_sub_func_polish(struct LineBreakContext *lbpCtx, const lChar16 * text, int pos, int next_usable) {
     // https://github.com/koreader/koreader/issues/5645#issuecomment-559193057
     // Letters aiouwzAIOUWS are prepositions that should not be left at the
     // end of a line.
@@ -513,7 +599,7 @@ lChar16 lb_char_sub_func_polish(const lChar16 * text, int pos, int next_usable) 
     return text[pos];
 }
 
-lChar16 lb_char_sub_func_czech_slovak(const lChar16 * text, int pos, int next_usable) {
+lChar16 lb_char_sub_func_czech_slovak(struct LineBreakContext *lbpCtx, const lChar16 * text, int pos, int next_usable) {
     // Same for Czech and Slovak : AIiVvOoUuSsZzKk
     // https://tex.stackexchange.com/questions/27780/one-letter-word-at-the-end-of-line
     // https://github.com/michal-h21/luavlna
@@ -629,6 +715,10 @@ TextLangCfg::TextLangCfg( lString16 lang_tag ) {
     bool has_left_double_angle_quotation_mark_closing = false;
     bool has_right_double_angle_quotation_mark_opening = false;  // U+00BB »
     bool has_right_double_angle_quotation_mark_closing = false;
+    // Additional rule for treating em-dashes as e.g. "horizontal bar"
+    // This is appropriate for languages that typically have a space at a
+    // breakable side of the dash
+    bool has_em_dash_alphabetic = false; // U+2014 —, U+2E3A ⸺, U+2E3B ⸻
 
     // Note: these macros use 'lang_tag'.
     if ( LANG_STARTS_WITH(("en")) ) { // English
@@ -644,6 +734,7 @@ TextLangCfg::TextLangCfg( lString16 lang_tag ) {
         has_right_single_angle_quotation_mark_closing = true;
         has_left_double_angle_quotation_mark_opening = true;
         has_right_double_angle_quotation_mark_closing = true;
+        has_em_dash_alphabetic = true;
     }
     else if ( LANG_STARTS_WITH(("de")) ) { // German
         has_left_single_quotation_mark_closing = true;
@@ -678,6 +769,7 @@ TextLangCfg::TextLangCfg( lString16 lang_tag ) {
     _lb_props[n++] = { 0x00AD, 0x00AD, LBP_ZWJ };
     if ( has_right_double_angle_quotation_mark_opening ) _lb_props[n++] = { 0x00BB, 0x00BB, LBP_OP };
     if ( has_right_double_angle_quotation_mark_closing ) _lb_props[n++] = { 0x00BB, 0x00BB, LBP_CL };
+    if ( has_em_dash_alphabetic )                        _lb_props[n++] = { 0x2014, 0x2014, LBP_AL };
     if ( has_left_single_quotation_mark_opening )        _lb_props[n++] = { 0x2018, 0x2018, LBP_OP };
     if ( has_left_single_quotation_mark_closing )        _lb_props[n++] = { 0x2018, 0x2018, LBP_CL };
     if ( has_right_single_quotation_mark_opening )       _lb_props[n++] = { 0x2019, 0x2019, LBP_OP };
@@ -691,20 +783,29 @@ TextLangCfg::TextLangCfg( lString16 lang_tag ) {
     if ( has_left_single_angle_quotation_mark_closing )  _lb_props[n++] = { 0x2039, 0x2039, LBP_CL };
     if ( has_right_single_angle_quotation_mark_opening ) _lb_props[n++] = { 0x203A, 0x203A, LBP_OP };
     if ( has_right_single_angle_quotation_mark_closing ) _lb_props[n++] = { 0x203A, 0x203A, LBP_CL };
+    if ( has_em_dash_alphabetic )                        _lb_props[n++] = { 0x2E3A, 0x2E3B, LBP_AL };
     // End of list
     _lb_props[n++] = { 0, 0, LBP_Undefined };
+        // When adding properties, be sure combinations for all languages
+        // do fit in _lb_props[MAX_NB_LB_PROPS_ITEMS] (MAX_NB_LB_PROPS_ITEMS
+        // is defined in textlang.h, currently at 20).
     // Done with libunibreak per-language LineBreakProperties extensions
 
     // Other line breaking and text layout tweaks
     _lb_char_sub_func = NULL;
+#if KO_LIBUNIBREAK_PATCH==1
+    if ( LANG_STARTS_WITH(("en")) ) { // English
+        _lb_char_sub_func = &lb_char_sub_func_english;
+    } else
+#endif
     if ( LANG_STARTS_WITH(("pl")) ) { // Polish
         _lb_char_sub_func = &lb_char_sub_func_polish;
         _duplicate_real_hyphen_on_next_line = true;
     }
-    if ( LANG_STARTS_WITH(("cs") ("sk")) ) { // Czech, Slovak
+    else if ( LANG_STARTS_WITH(("cs") ("sk")) ) { // Czech, Slovak
         _lb_char_sub_func = &lb_char_sub_func_czech_slovak;
     }
-    if ( LANG_STARTS_WITH(("pt")) ) { // Portuguese
+    else if ( LANG_STARTS_WITH(("pt")) ) { // Portuguese
         _duplicate_real_hyphen_on_next_line = true;
     }
 #endif
@@ -786,16 +887,18 @@ int TextLangCfg::getHangingPercent( bool right_hanging, bool & check_font, const
     // In French, there's usually a space before and after guillemets,
     // or before a quotation mark. Having them hanging, and then a
     // space, looks like there's a hole in the margin.
-    // So, avoid hanging if the next/prev char is a space char.
+    // So, for some chars, we'll avoid hanging or reduce the hanging
+    // ratio if the next/prev char is a space char.
     // This might not happen in other languages, so let's do that
     // prevention generically. If needed, make that dependant on
     // a boolean member, set to true if LANG_STARTS_WITH(("fr")).
+    bool space_alongside = false;
     if ( right_hanging ) {
         if ( pos > 0 ) {
             lChar16 prev_ch = text[pos-1];
             if ( prev_ch == 0x0020 || prev_ch == 0x00A0 || (prev_ch >= 0x2000 && prev_ch <= 0x200A ) ) {
                 // Normal space, no-break space, and other unicode spaces (except zero-width ones)
-                return 0;
+                space_alongside = true;
             }
         }
     }
@@ -804,7 +907,7 @@ int TextLangCfg::getHangingPercent( bool right_hanging, bool & check_font, const
             lChar16 next_ch = text[pos+1];
             if ( next_ch == 0x0020 || next_ch == 0x00A0 || (next_ch >= 0x2000 && next_ch <= 0x200A ) ) {
                 // Normal space, no-break space, and other unicode spaces (except zero-width ones)
-                return 0;
+                space_alongside = true;
             }
         }
     }
@@ -840,15 +943,17 @@ int TextLangCfg::getHangingPercent( bool right_hanging, bool & check_font, const
         case 0x2019: // ’ right single quotation mark
         case 0x201A: // ‚ single low-9 quotation mark
         case 0x201B: // ‛ single high-reversed-9 quotation mark
+            ratio = 70;
+            break;
         case 0x2039: // ‹ left single guillemet
         case 0x203A: // › right single guillemet
-            ratio = 70;
+            // These are wider than the previous ones, and hanging by 70% with a space
+            // alongside can give a feeling of bad justification. So, hang less.
+            ratio = space_alongside ? 20 : 70;
             break;
         case 0x0022: // " double quote
         case 0x003A: // : colon
         case 0x003B: // ; semicolon
-        case 0x00AB: // « left guillemet
-        case 0x00BB: // » right guillemet
         case 0x061B: // ؛ arabic semicolon
         case 0x201C: // “ left double quotation mark
         case 0x201D: // ” right double quotation mark
@@ -856,7 +961,14 @@ int TextLangCfg::getHangingPercent( bool right_hanging, bool & check_font, const
         case 0x201F: // ‟ double high-reversed-9 quotation mark
             ratio = 50;
             break;
+        case 0x00AB: // « left guillemet
+        case 0x00BB: // » right guillemet
+            // These are wider than the previous ones, and hanging by 50% with a space
+            // alongside can give a feeling of bad justification. So, hang less.
+            ratio = space_alongside ? 20 : 50;
+            break;
         case 0x2013: // – endash
+            // Should have enough body inside (with only 30% hanging)
             ratio = 30;
             break;
         case 0x0021: // !
@@ -866,6 +978,8 @@ int TextLangCfg::getHangingPercent( bool right_hanging, bool & check_font, const
         case 0x061F: // ؟
         case 0x2014: // — emdash
         case 0x2026: // … ellipsis
+            // These will have enough body inside (with only 20% hanging),
+            // so they shouldn't hurt when space_alongside.
             ratio = 20;
             break;
         case 0x0028: // (
@@ -886,6 +1000,7 @@ int TextLangCfg::getHangingPercent( bool right_hanging, bool & check_font, const
     // Other are non punctuation but slight adjustment for some letters,
     // that might be ignored if the font already include some negative
     // left side bearing.
+    // The hanging ratio is small, so no need to correct if space_alongside.
     check_font = true;
     if ( right_hanging ) {
         switch (ch) {

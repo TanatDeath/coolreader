@@ -117,13 +117,13 @@ public class BookmarksDlg  extends BaseDialog {
 			colorIcon = a.getColor(0, Color.GRAY);
 			a.recycle();
 
-			TextView labelView = (TextView)view.findViewById(R.id.bookmark_item_shortcut);
+			TextView labelView = view.findViewById(R.id.bookmark_item_shortcut);
 			if (labelView!=null) labelView.setTextColor(colorIcon);
-			TextView posTextView = (TextView)view.findViewById(R.id.bookmark_item_pos_text);
+			TextView posTextView = view.findViewById(R.id.bookmark_item_pos_text);
 			if (posTextView!=null) posTextView.setTextColor(colorIcon);
-			TextView titleTextView = (TextView)view.findViewById(R.id.bookmark_item_title);
+			TextView titleTextView = view.findViewById(R.id.bookmark_item_title);
 			if (titleTextView!=null) titleTextView.setTextColor(colorIcon);
-			TextView commentTextView = (TextView)view.findViewById(R.id.bookmark_item_comment_text);
+			TextView commentTextView = view.findViewById(R.id.bookmark_item_comment_text);
 			if (commentTextView!=null) commentTextView.setTextColor(colorIcon);
 			if ( type==ITEM_CORRECTION && posTextView!=null )
 				posTextView.setPaintFlags(posTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG );
@@ -226,15 +226,11 @@ public class BookmarksDlg  extends BaseDialog {
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setShortcutMode(shortcutMode);
 			setLongClickable(!mOnlyChoose);
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-						int position, long arg3) {
-					selectedItem = position;
-					selectedItemLong = position;
-					openContextMenu(BookmarkList.this);
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				selectedItem = position;
+				selectedItemLong = position;
+				openContextMenu(BookmarkList.this);
+				return true;
 			});
 		}
 
@@ -289,7 +285,7 @@ public class BookmarksDlg  extends BaseDialog {
 		mObj = obj;
 		setPositiveButtonImage(Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_add_drawable, R.drawable.cr3_button_add), R.string.mi_bookmark_add);
 		View frame = mInflater.inflate(R.layout.bookmark_list_dialog, null);
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.bookmark_list);
+		ViewGroup body = frame.findViewById(R.id.bookmark_list);
 		mList = new BookmarkList(activity, false);
 		body.addView(mList);
 		setView(frame);
@@ -436,11 +432,9 @@ public class BookmarksDlg  extends BaseDialog {
 	    		menuItem.setEnabled(bm!=null);
 	    	if ( menuItem.getItemId()==R.id.bookmark_edit )
 	    		menuItem.setEnabled(bm!=null && (bm.getType()==Bookmark.TYPE_COMMENT || bm.getType()==Bookmark.TYPE_CORRECTION));
-	    	menuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-				public boolean onMenuItemClick(MenuItem item) {
-					onContextItemSelected(item);
-					return true;
-				}
+	    	menuItem.setOnMenuItemClickListener(item -> {
+				onContextItemSelected(item);
+				return true;
 			});
 	    }
 	}

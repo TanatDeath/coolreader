@@ -2,7 +2,7 @@ package org.coolreader.crengine;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.provider.DocumentFile;
+import  androidx.documentfile.provider.DocumentFile;
 
 import android.util.Log;
 import org.coolreader.R;
@@ -178,6 +178,10 @@ public class FileInfo {
     public static final int TYPE_FS_ROOT = 1;
     public static final int TYPE_DOWNLOAD_DIR = 2;
 
+	// bits 26..29 - profile id (0..15 max)
+	public static final int PROFILE_ID_SHIFT = 26;
+	public static final int PROFILE_ID_MASK = 0x0F;
+
 	public long getCreateTime() {
 		return createTime;
 	}
@@ -258,11 +262,7 @@ public class FileInfo {
 	 * To separate archive name from file name inside archive.
 	 */
 	public static final String ARC_SEPARATOR = "@/";
-	
-	public static final int PROFILE_ID_SHIFT = 26;
-	public static final int PROFILE_ID_MASK = 0x0F;
-	
-	
+
 	public void setFlag( int flag, boolean value ) {
 		flags = flags & (~flag) | (value? flag : 0);
 	}

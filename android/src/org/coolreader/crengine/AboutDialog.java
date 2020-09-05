@@ -67,12 +67,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		} else {
 			btn.setBackgroundColor(colorGrayC);
 			btn.setTextColor(colorIcon);
-			btn.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					installPackage(packageName);
-				}
-			});
+			btn.setOnClickListener(v -> installPackage(packageName));
 		}
 	}
 	
@@ -84,12 +79,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		int colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		btn.setText("$" + amount);
-		btn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mCoolReader.makeDonation(amount);
-			}
-		});
+		btn.setOnClickListener(v -> mCoolReader.makeDonation(amount));
 		btn.setBackgroundColor(colorGrayC);
 		btn.setTextColor(colorIcon);
 	}
@@ -123,18 +113,14 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		final int colorGrayC = a.getColor(1, Color.GRAY);
 		final int colorIcon = a.getColor(2, Color.GRAY);
 
-		tabs.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-			@Override
-			public void onTabChanged(String tabId) {
-				for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
-					tabs.getTabWidget().getChildAt(i)
-							.setBackgroundColor(colorGrayC); // unselected
-				}
-
-				tabs.getTabWidget().getChildAt(tabs.getCurrentTab())
-						.setBackgroundColor(colorGray); // selected
-
+		tabs.setOnTabChangedListener(tabId -> {
+			for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
+				tabs.getTabWidget().getChildAt(i)
+						.setBackgroundColor(colorGrayC); // unselected
 			}
+
+			tabs.getTabWidget().getChildAt(tabs.getCurrentTab())
+					.setBackgroundColor(colorGray); // selected
 		});
 
 		mAppTab = (View)inflater.inflate(R.layout.about_dialog_app, null);
@@ -144,15 +130,15 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		} else {
 			((TextView) mAppTab.findViewById(R.id.version)).setText("KnownReader " + mCoolReader.getVersion());
 		}
-		TextView tv_icons8 = (TextView)mAppTab.findViewById(R.id.www_icons8);
-		TextView tv_email = (TextView)mAppTab.findViewById(R.id.email);
-		TextView tv_www1 = (TextView)mAppTab.findViewById(R.id.www1);
+		TextView tv_icons8 = mAppTab.findViewById(R.id.www_icons8);
+		TextView tv_email = mAppTab.findViewById(R.id.email);
+		TextView tv_www1 = mAppTab.findViewById(R.id.www1);
 		if (tv_icons8 != null) tv_icons8.setLinkTextColor(colorIcon);
 		if (tv_email != null) tv_email.setLinkTextColor(colorIcon);
 		if (tv_www1 != null) tv_www1.setLinkTextColor(colorIcon);
 
 		mDirsTab = (View)inflater.inflate(R.layout.about_dialog_dirs, null);
-		TextView fonts_dir = (TextView)mDirsTab.findViewById(R.id.fonts_dirs);
+		TextView fonts_dir = mDirsTab.findViewById(R.id.fonts_dirs);
 
 		ArrayList<String> fontsDirs = Engine.getFontsDirs();
 		StringBuilder sbuf = new StringBuilder();
@@ -202,57 +188,47 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 				sbuf.append("\n");
 			}
 		}
-		TextView hyph_dir = (TextView)mDirsTab.findViewById(R.id.hyph_dirs);
+		TextView hyph_dir = mDirsTab.findViewById(R.id.hyph_dirs);
 		hyph_dir.setText(sbuf.toString());
 
-		mLicenseTab = (View)inflater.inflate(R.layout.about_dialog_license, null);
+		mLicenseTab = inflater.inflate(R.layout.about_dialog_license, null);
 		String license = Engine.getInstance(mCoolReader).loadResourceUtf8(R.raw.license);
 		((TextView)mLicenseTab.findViewById(R.id.license)).setText(license);
         boolean billingSupported = mCoolReader.isDonationSupported() && !isFork;
-		mDonationTab = (View)inflater.inflate(billingSupported ? R.layout.about_dialog_donation2 : R.layout.about_dialog_donation, null);
+		mDonationTab = inflater.inflate(billingSupported ? R.layout.about_dialog_donation2 : R.layout.about_dialog_donation, null);
 
 		if (billingSupported) {
-			setupInAppDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_vip), 100);
-			setupInAppDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_platinum), 30);
-			setupInAppDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_gold), 10);
-			setupInAppDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_silver), 3);
-			setupInAppDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_bronze), 1);
-			setupInAppDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_iron), 0.3);
+			setupInAppDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_vip), 100);
+			setupInAppDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_platinum), 30);
+			setupInAppDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_gold), 10);
+			setupInAppDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_silver), 3);
+			setupInAppDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_bronze), 1);
+			setupInAppDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_iron), 0.3);
 			updateTotalDonations();
-			mCoolReader.setDonationListener(new DonationListener() {
-				@Override
-		    	public void onDonationTotalChanged(double total) {
-		    		updateTotalDonations();
-		    	}
-		    });
-			setOnDismissListener(new OnDismissListener() {
-				@Override
-				public void onDismiss(DialogInterface dialog) {
-					mCoolReader.setDonationListener(null);
-				}
-			});
+			mCoolReader.setDonationListener(total -> updateTotalDonations());
+			setOnDismissListener(dialog -> mCoolReader.setDonationListener(null));
 		} else {
-			setupDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_gold), "org.coolreader.donation.gold");
-			setupDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_silver), "org.coolreader.donation.silver");
-			setupDonationButton( (Button)mDonationTab.findViewById(R.id.btn_about_donation_install_bronze), "org.coolreader.donation.bronze");
+			setupDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_gold), "org.coolreader.donation.gold");
+			setupDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_silver), "org.coolreader.donation.silver");
+			setupDonationButton(mDonationTab.findViewById(R.id.btn_about_donation_install_bronze), "org.coolreader.donation.bronze");
 		}
 
 		if (isFork) {
-			LinearLayout ll_donate1 = (LinearLayout)mDonationTab.findViewById(R.id.ll_donate1);
-			LinearLayout ll_donate2 = (LinearLayout)mDonationTab.findViewById(R.id.ll_donate2);
-			LinearLayout ll_donate3 = (LinearLayout)mDonationTab.findViewById(R.id.ll_donate3);
+			LinearLayout ll_donate1 = mDonationTab.findViewById(R.id.ll_donate1);
+			LinearLayout ll_donate2 = mDonationTab.findViewById(R.id.ll_donate2);
+			LinearLayout ll_donate3 = mDonationTab.findViewById(R.id.ll_donate3);
 			if (ll_donate1 != null) ((ViewGroup) ll_donate1.getParent()).removeView(ll_donate1);
 			if (ll_donate2 != null) ((ViewGroup) ll_donate2.getParent()).removeView(ll_donate2);
 			if (ll_donate3 != null) ((ViewGroup) ll_donate3.getParent()).removeView(ll_donate3);
-			TableLayout tl_donate1 = (TableLayout)mDonationTab.findViewById(R.id.tl_donate1);
+			TableLayout tl_donate1 = mDonationTab.findViewById(R.id.tl_donate1);
 			if (tl_donate1 != null) ((ViewGroup) tl_donate1.getParent()).removeView(ll_donate3);
-			TextView btn_about_donation_total = (TextView)mDonationTab.findViewById(R.id.btn_about_donation_total);
+			TextView btn_about_donation_total = mDonationTab.findViewById(R.id.btn_about_donation_total);
 			if (btn_about_donation_total != null) ((ViewGroup) btn_about_donation_total.getParent()).removeView(ll_donate3);
-			TextView tv_donate_message = (TextView)mDonationTab.findViewById(R.id.tv_donate_message);
-			TextView tv_donate_message2 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message2);
-			TextView tv_donate_message3 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message3);
-			TextView tv_donate_message4 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message4);
-			TextView tv_donate_message5 = (TextView)mDonationTab.findViewById(R.id.tv_donate_message5);
+			TextView tv_donate_message = mDonationTab.findViewById(R.id.tv_donate_message);
+			TextView tv_donate_message2 = mDonationTab.findViewById(R.id.tv_donate_message2);
+			TextView tv_donate_message3 = mDonationTab.findViewById(R.id.tv_donate_message3);
+			TextView tv_donate_message4 = mDonationTab.findViewById(R.id.tv_donate_message4);
+			TextView tv_donate_message5 = mDonationTab.findViewById(R.id.tv_donate_message5);
 			if (tv_donate_message != null) tv_donate_message.setText(R.string.knownreader_donate_line1);
 			if (tv_donate_message2 != null) tv_donate_message2.setText(R.string.knownreader_donate_line2);
 			if (tv_donate_message3 != null) {

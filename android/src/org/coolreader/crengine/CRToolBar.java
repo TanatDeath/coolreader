@@ -14,7 +14,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.Gravity;
@@ -35,14 +35,13 @@ import android.widget.TextView;
 
 public class CRToolBar extends ViewGroup {
 
-
 	private static final Logger log = L.create("tb");
 	
 	final private BaseActivity activity;
-	private ArrayList<ReaderAction> actions = new ArrayList<ReaderAction>();
-	private ArrayList<ReaderAction> actionsToolbar = new ArrayList<ReaderAction>();
-	private ArrayList<ReaderAction> actionsMore = new ArrayList<ReaderAction>();
-	private ArrayList<ReaderAction> iconActions = new ArrayList<ReaderAction>();
+	private ArrayList<ReaderAction> actions = new ArrayList<>();
+	private ArrayList<ReaderAction> actionsToolbar = new ArrayList<>();
+	private ArrayList<ReaderAction> actionsMore = new ArrayList<>();
+	private ArrayList<ReaderAction> iconActions = new ArrayList<>();
 	private boolean showLabels;
 	private boolean ignoreInv;
 	private int buttonHeight;
@@ -135,7 +134,7 @@ public class CRToolBar extends ViewGroup {
 		this.popupLocation = popupLocation;
 	}
 
-	private ArrayList<ReaderAction> itemsOverflow = new ArrayList<ReaderAction>();
+	private ArrayList<ReaderAction> itemsOverflow = new ArrayList<>();
 	
 	public void setButtonAlpha(int alpha) {
 		this.buttonAlpha = alpha;
@@ -167,11 +166,11 @@ public class CRToolBar extends ViewGroup {
 
 	private LinearLayout inflateItem(ReaderAction action) {
 		final LinearLayout view = (LinearLayout)inflater.inflate(R.layout.popup_toolbar_item, null);
-		ImageView icon = (ImageView)view.findViewById(R.id.action_icon);
-		TextView label = (TextView)view.findViewById(R.id.action_label);
+		ImageView icon = view.findViewById(R.id.action_icon);
+		TextView label = view.findViewById(R.id.action_label);
 		int colorIcon;
 		if (activity instanceof CoolReader) {
-			TypedArray a = ((CoolReader) activity).getTheme().obtainStyledAttributes(new int[]
+			TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
 					{R.attr.colorIcon});
 			colorIcon = a.getColor(0, Color.GRAY);
 			a.recycle();
@@ -268,7 +267,6 @@ public class CRToolBar extends ViewGroup {
 		//this.actions = actions;
 		createActionsLists(actions, ignoreSett);
 		if (useActionsMore) this.actionsToolbar = this.actionsMore;
-		this.showLabels = multiline;
 		this.isMultiline = multiline;
 		this.preferredItemHeight = activity.getPreferredItemHeight(); //context.getPreferredItemHeight();
 		this.inflater = LayoutInflater.from(activity);
@@ -290,20 +288,16 @@ public class CRToolBar extends ViewGroup {
 		if (activity instanceof CoolReader) {
 			//Properties settings = ((CoolReader)activity).getReaderView().getSettings();
 			//this.optionAppearance = settings.getInt(ReaderView.PROP_TOOLBAR_APPEARANCE, 0);
-			optionAppearance = Integer.valueOf(((CoolReader)activity).getToolbarAppearance());
+			optionAppearance = Integer.parseInt(((CoolReader)activity).getToolbarAppearance());
 			toolbarScale = 1.0f;
 			grayIcons = false;
 			invIcons = false;
 			switch (optionAppearance) {
 				case Settings.VIEWER_TOOLBAR_100:           // 0
-					toolbarScale = 1.0f;
-					break;
 				case Settings.VIEWER_TOOLBAR_100_gray:      // 1
-					toolbarScale = 1.0f;
 					grayIcons = true;
 					break;
 				case Settings.VIEWER_TOOLBAR_100_inv:      // 2
-					toolbarScale = 1.0f;
 					invIcons = true;
 					break;
 				case Settings.VIEWER_TOOLBAR_75:            // 3
@@ -336,7 +330,6 @@ public class CRToolBar extends ViewGroup {
 		buttonWidth = buttonHeight = sz - BUTTON_SPACING;
 		if (isMultiline)
 			buttonHeight = sz / 2;
-		int dpi = activity.getDensityDpi();
 		for (int i=0; i<actions.size(); i++) {
 			ReaderAction item = actions.get(i);
 			int iconId = item.iconId;
@@ -444,6 +437,16 @@ public class CRToolBar extends ViewGroup {
 		ArrayList<ReaderAction> act = new ArrayList<ReaderAction>();
 		for (ReaderAction ra: actions) act.add(ra);
 		showPopup(activity, activity.getContentView(), act,
+				onActionHandler, onOverflowHandler, act.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
+	}
+
+	public void showPopupMenu(final ReaderAction[] actions, View anchor, View parentAnchor, final OnActionHandler onActionHandler) {
+		if (popup != null)
+			popup.dismiss();
+		ArrayList<ReaderAction> act = new ArrayList<ReaderAction>();
+		for (ReaderAction ra: actions) act.add(ra);
+		showPopup(activity, anchor == null? activity.getContentView(): anchor,
+				parentAnchor == null? activity.getContentView(): parentAnchor, (anchor == null), act,
 				onActionHandler, onOverflowHandler, act.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
 	}
 //	private void onMoreButtonClick() {
@@ -745,14 +748,11 @@ public class CRToolBar extends ViewGroup {
 		ib.layout(rc.left, rc.top, rc.right, rc.bottom);
 		if (item == null)
 			overflowButton = ib;
-		ib.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (item != null)
-					onButtonClick(item);
-				else
-					showOverflowMenu();
-			}
+		ib.setOnClickListener(v -> {
+			if (item != null)
+				onButtonClick(item);
+			else
+				showOverflowMenu();
 		});
 		ib.setAlpha(nightMode ? 0x60 : buttonAlpha);
 		addView(ib);
@@ -828,23 +828,17 @@ public class CRToolBar extends ViewGroup {
         			//item.forceLayout();
         			addView(item);
         			// this is overflow panel
-        			item.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-						if (action != null)
-							onButtonClick(action);
-						else
-							showOverflowMenu();
-						}
+        			item.setOnClickListener(v -> {
+					if (action != null)
+						onButtonClick(action);
+					else
+						showOverflowMenu();
 					});
 					activity.tintViewIcons(item);
-					item.setOnLongClickListener(new OnLongClickListener() {
-						@Override
-						public boolean onLongClick(View v) {
-							ReaderAction ram = action.getMirrorAction();
-							if (ram != null) onButtonClick(ram);
-							return true;
-						}
+					item.setOnLongClickListener(v -> {
+						ReaderAction ram = action.getMirrorAction();
+						if (ram != null) onButtonClick(ram);
+						return true;
 					});
         		}
 //        		addView(scroll);
@@ -998,13 +992,19 @@ public class CRToolBar extends ViewGroup {
 	}
 
 	public static PopupWindow showPopup(BaseActivity context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
+		return showPopup(context, anchor, anchor, true, actions, onActionHandler, onOverflowHandler, maxLines, popupLocationDummy);
+	}
+
+	public static PopupWindow showPopup(BaseActivity context, View anchor, View parentAnchor, boolean isRootAnchor,
+										ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler,
+										final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
 	    int popupLocation = Settings.VIEWER_TOOLBAR_BOTTOM; // plotn - костыль, а то когда панель сверху, то половина ее закрашивается светлее
 		final ScrollView scroll = new ScrollView(context);
 		final CRToolBar tb = new CRToolBar(context, actions, true, true, true, false);
 		tb.setMaxLines(maxLines);
 		tb.setOnActionHandler(onActionHandler);
 		tb.setVertical(false);
-		tb.measure(MeasureSpec.makeMeasureSpec(anchor.getWidth(), MeasureSpec.EXACTLY), ViewGroup.LayoutParams.WRAP_CONTENT);
+		tb.measure(MeasureSpec.makeMeasureSpec(parentAnchor.getWidth(), MeasureSpec.EXACTLY), ViewGroup.LayoutParams.WRAP_CONTENT);
 		int w = tb.getMeasuredWidth();
 		int h = tb.getMeasuredHeight();
 		scroll.addView(tb);
@@ -1020,64 +1020,54 @@ public class CRToolBar extends ViewGroup {
 		}
 		final ReaderAction foundLongMenuAction = longMenuAction;
 		
-		popup.setTouchInterceptor(new OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
-					popup.dismiss();
-					return true;
-				}
-				return false;
-			}
-		});
-		tb.setOnActionHandler(new OnActionHandler() {
-			@Override
-			public boolean onActionSelected(ReaderAction item) {
+		popup.setTouchInterceptor((v, event) -> {
+			if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
 				popup.dismiss();
-				if (onActionHandler==null) log.v("EMPTY!!!"); else
-				return onActionHandler.onActionSelected(item);
-				return false;
+				return true;
 			}
+			return false;
+		});
+		tb.setOnActionHandler(item -> {
+			popup.dismiss();
+			if (onActionHandler==null) log.v("EMPTY!!!");
+			else
+				return onActionHandler.onActionSelected(item);
+			return false;
 		});
 		if (onOverflowHandler != null)
-			tb.setOnOverflowHandler(new OnOverflowHandler() {
-				@Override
-				public boolean onOverflowActions(ArrayList<ReaderAction> actions) {
-					popup.dismiss();
-					return onOverflowHandler.onOverflowActions(actions);
-				}
+			tb.setOnOverflowHandler(actions1 -> {
+				popup.dismiss();
+				return onOverflowHandler.onOverflowActions(actions1);
 			});
 		// close on menu or back keys
 		tb.setFocusable(true);
 		tb.setFocusableInTouchMode(true);
-		tb.setOnKeyListener(new OnKeyListener() {
-			@Override
-			public boolean onKey(View view, int keyCode, KeyEvent event) {
-				if (event.getAction() == KeyEvent.ACTION_DOWN) {
-					if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BACK) {
-						//popup.dismiss();
-						return true;
-					}
-				} else if (event.getAction() == KeyEvent.ACTION_UP) {
-					if (keyCode == KeyEvent.KEYCODE_MENU && foundLongMenuAction != null && event.getDownTime() >= 500) {
-						popup.dismiss();
-						return onActionHandler.onActionSelected(foundLongMenuAction);
-					}
-					if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BACK) {
-						popup.dismiss();
-						return true;
-					}
+		tb.setOnKeyListener((view, keyCode, event) -> {
+			if (event.getAction() == KeyEvent.ACTION_DOWN) {
+				if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BACK) {
+					//popup.dismiss();
+					return true;
 				}
-				return false;
+			} else if (event.getAction() == KeyEvent.ACTION_UP) {
+				if (keyCode == KeyEvent.KEYCODE_MENU && foundLongMenuAction != null && event.getDownTime() >= 500) {
+					popup.dismiss();
+					return onActionHandler.onActionSelected(foundLongMenuAction);
+				}
+				if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BACK) {
+					popup.dismiss();
+					return true;
+				}
 			}
+			return false;
 		});
 		//popup.setBackgroundDrawable(new BitmapDrawable());
 		popup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
 		int hh = h;
-		int maxh = anchor.getHeight();
-		if (hh > maxh - context.getPreferredItemHeight())
-			hh = maxh - context.getPreferredItemHeight() * 3 / 2;
+		if (isRootAnchor) {
+			int maxh = parentAnchor.getHeight();
+			if (hh > maxh - context.getPreferredItemHeight())
+				hh = maxh - context.getPreferredItemHeight() * 3 / 2;
+		}
 		popup.setHeight(hh);
 		popup.setFocusable(true);
 		popup.setFocusable(true);
@@ -1093,12 +1083,17 @@ public class CRToolBar extends ViewGroup {
 		popup.setBackgroundDrawable(bg);
 		int [] location = new int[2];
 		anchor.getLocationOnScreen(location);
-		int popupY = location[1];
-		if (popupLocation == Settings.VIEWER_TOOLBAR_BOTTOM)
-			popup.showAtLocation(anchor, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 0); //location[0], popupY - anchor.getHeight());
-		else
-			popup.showAtLocation(anchor, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0); //, location[0], popupY);
+		if (!isRootAnchor) {
+			int popupY = location[1] + anchor.getHeight();
+			popup.showAtLocation(anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, popupY);
+		} else {
+			if (popupLocation == Settings.VIEWER_TOOLBAR_BOTTOM)
+				popup.showAtLocation(anchor, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 0); //location[0], popupY - anchor.getHeight());
+			else
+				popup.showAtLocation(anchor, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0); //, location[0], popupY);
+		}
 		tb.tintViewIconsColor(tb);
+		//Utils.drawFrame2(popup, new Rect(0,0,popup.getWidth(), popup.getHeight()), Utils.createSolidPaint(0xC0000000), 4);
 		return popup;
 	}
 	

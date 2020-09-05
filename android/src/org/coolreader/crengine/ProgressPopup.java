@@ -31,19 +31,11 @@ public class ProgressPopup {
 	        popup.setOutsideTouchable(true);
 	        popup.showAtLocation(parent, Gravity.CENTER, 0, 0);
 	        popup.setTouchable(true);
-	        popup.setTouchInterceptor(new OnTouchListener() {
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					// process & ignore all touch events
-					return true;
-				}
+	        popup.setTouchInterceptor((v, event) -> {
+				// process & ignore all touch events
+				return true;
 			});
-	        popup.setOnDismissListener(new OnDismissListener() {
-				@Override
-				public void onDismiss() {
-					popup = null;
-				}
-			});
+	        popup.setOnDismissListener(() -> popup = null);
 		}
 	}
 	public void hide() {

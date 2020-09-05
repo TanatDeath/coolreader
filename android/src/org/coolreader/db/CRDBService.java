@@ -292,12 +292,7 @@ public class CRDBService extends Service {
 			public void work() {
 				final ArrayList<FileInfo> list = new ArrayList<FileInfo>(); 
 				mainDB.loadOPDSCatalogs(list);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onOPDSCatalogsLoaded(list);
-					}
-				});
+				sendTask(handler, () -> callback.onOPDSCatalogsLoaded(list));
 			}
 		});
 	}
@@ -307,12 +302,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final ArrayList<String> list = mainDB.loadSearchHistory(book);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onSearchHistoryLoaded(list);
-					}
-				});
+				sendTask(handler, () -> callback.onSearchHistoryLoaded(list));
 			}
 		});
 	}
@@ -322,12 +312,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final HashMap<String, UserDicEntry> list = mainDB.loadUserDic();
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onUserDicLoaded(list);
-					}
-				});
+				sendTask(handler, () -> callback.onUserDicLoaded(list));
 			}
 		});
 	}
@@ -337,12 +322,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final List<DicSearchHistoryEntry> list = mainDB.loadDicSearchHistory();
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onDicSearchHistoryLoaded(list);
-					}
-				});
+				sendTask(handler, () -> callback.onDicSearchHistoryLoaded(list));
 			}
 		});
 	}
@@ -381,12 +361,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final byte[] data = coverDB.loadBookCoverpage(fileInfo.getPathName());
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onCoverpageLoaded(fileInfo, data);
-					}
-				});
+				sendTask(handler, () -> callback.onCoverpageLoaded(fileInfo, data));
 			}
 		});
 	}
@@ -438,12 +413,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				mainDB.loadAuthorsList(p, filterSeries);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onItemGroupsLoaded(p);
-					}
-				});
+				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
 			}
 		});
 	}
@@ -454,12 +424,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				mainDB.loadGenresList(p);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onItemGroupsLoaded(p);
-					}
-				});
+				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
 			}
 		});
 	}
@@ -470,12 +435,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				mainDB.loadSeriesList(p, filterAuthor);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onItemGroupsLoaded(p);
-					}
-				});
+				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
 			}
 		});
 	}
@@ -486,12 +446,7 @@ public class CRDBService extends Service {
             @Override
             public void work() {
                 mainDB.loadByDateList(p, field);
-                sendTask(handler, new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onItemGroupsLoaded(p);
-                    }
-                });
+                sendTask(handler, () -> callback.onItemGroupsLoaded(p));
             }
         });
     }
@@ -502,12 +457,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				mainDB.loadTitleList(p);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onItemGroupsLoaded(p);
-					}
-				});
+				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
 			}
 		});
 	}
@@ -516,14 +466,9 @@ public class CRDBService extends Service {
 		execTask(new Task("findAuthorBooks") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findAuthorBooks(list, authorId, addFilter);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onFileInfoListLoaded(list, FileInfo.AUTHOR_GROUP_PREFIX);
-					}
-				});
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.AUTHOR_GROUP_PREFIX));
 			}
 		});
 	}
@@ -532,14 +477,9 @@ public class CRDBService extends Service {
 		execTask(new Task("findGenreBooks") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findGenreBooks(list, genreId);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onFileInfoListLoaded(list, FileInfo.GENRE_GROUP_PREFIX);
-					}
-				});
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.GENRE_GROUP_PREFIX));
 			}
 		});
 	}
@@ -548,14 +488,9 @@ public class CRDBService extends Service {
 		execTask(new Task("findSeriesBooks") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findSeriesBooks(list, seriesId, addFilter);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onFileInfoListLoaded(list, FileInfo.SERIES_GROUP_PREFIX);
-					}
-				});
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.SERIES_GROUP_PREFIX));
 			}
 		});
 	}
@@ -564,18 +499,15 @@ public class CRDBService extends Service {
 		execTask(new Task("findByDateBooks") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findByDateBooks(list, field, bookdateId);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						String fld = "";
-						if (field.equals("book_date_n")) fld = FileInfo.BOOK_DATE_GROUP_PREFIX;
-						if (field.equals("doc_date_n")) fld = FileInfo.DOC_DATE_GROUP_PREFIX;
-						if (field.equals("publ_year_n")) fld = FileInfo.PUBL_YEAR_GROUP_PREFIX;
-						if (field.equals("file_create_time")) fld = FileInfo.FILE_DATE_GROUP_PREFIX;
-						callback.onFileInfoListLoaded(list, fld);
-					}
+				sendTask(handler, () -> {
+					String fld = "";
+					if (field.equals("book_date_n")) fld = FileInfo.BOOK_DATE_GROUP_PREFIX;
+					if (field.equals("doc_date_n")) fld = FileInfo.DOC_DATE_GROUP_PREFIX;
+					if (field.equals("publ_year_n")) fld = FileInfo.PUBL_YEAR_GROUP_PREFIX;
+					if (field.equals("file_create_time")) fld = FileInfo.FILE_DATE_GROUP_PREFIX;
+					callback.onFileInfoListLoaded(list, fld);
 				});
 			}
 		});
@@ -585,14 +517,9 @@ public class CRDBService extends Service {
 		execTask(new Task("findBooksByRating") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findBooksByRating(list, minRate, maxRate);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onFileInfoListLoaded(list, FileInfo.RATING_TAG);
-					}
-				});
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.RATING_TAG));
 			}
 		});
 	}
@@ -601,14 +528,9 @@ public class CRDBService extends Service {
 		execTask(new Task("findBooksByState") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findBooksByState(list, state);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onFileInfoListLoaded(list, FileInfo.STATE_TAG);
-					}
-				});
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.STATE_TAG));
 			}
 		});
 	}
@@ -618,12 +540,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final ArrayList<BookInfo> list = mainDB.loadRecentBooks(maxCount);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onRecentBooksListLoaded(list);
-					}
-				});
+				sendTask(handler, () -> callback.onRecentBooksListLoaded(list));
 			}
 		});
 	}
@@ -632,12 +549,7 @@ public class CRDBService extends Service {
 		execTask(new Task("sync") {
 			@Override
 			public void work() {
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.run();
-					}
-				});
+				sendTask(handler, () -> callback.run());
 			}
 		});
 	}
@@ -648,18 +560,25 @@ public class CRDBService extends Service {
 			public void work() {
 				callback.onBooksSearchBegin();
 				final ArrayList<FileInfo> list = mainDB.findByPatterns(maxCount, author, title, series, filename);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onBooksFound(list);
-					}
-				});
+				sendTask(handler, () -> callback.onBooksFound(list));
 			}
 		});
 	}
 
+	/*
+	public void findByFingerprint(final int maxCount, final String filename, int crc32, final BookSearchCallback callback, final Handler handler) {
+		execTask(new Task("findByFingerprint") {
+			@Override
+			public void work() {
+				final ArrayList<FileInfo> list = mainDB.findByFingerprint(maxCount, filename, crc32);
+				sendTask(handler, () -> callback.onBooksFound(list));
+			}
+		});
+	}
+	*/
+
 	private ArrayList<FileInfo> deepCopyFileInfos(final Collection<FileInfo> src) {
-		final ArrayList<FileInfo> list = new ArrayList<FileInfo>(src.size());
+		final ArrayList<FileInfo> list = new ArrayList<>(src.size());
 		for (FileInfo fi : src)
 			list.add(new FileInfo(fi));
 		return list;
@@ -680,12 +599,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final BookInfo bookInfo = mainDB.loadBookInfo(fileInfo);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onBooksInfoLoaded(bookInfo);
-					}
-				});
+				sendTask(handler, () -> callback.onBooksInfoLoaded(bookInfo));
 			}
 		});
 	}
@@ -695,20 +609,10 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				if (StrUtils.isEmptyStr(opdsLink)) {
-					sendTask(handler, new Runnable() {
-						@Override
-						public void run() {
-							callback.onFileInfoLoaded(null);
-						}
-					});
+					sendTask(handler, () -> callback.onFileInfoLoaded(null));
 				} else {
 					final FileInfo fileInfo = mainDB.loadFileInfoByOPDSLink(opdsLink);
-					sendTask(handler, new Runnable() {
-						@Override
-						public void run() {
-							callback.onFileInfoLoaded(fileInfo);
-						}
-					});
+					sendTask(handler, () -> callback.onFileInfoLoaded(fileInfo));
 				}
 			}
 		});
@@ -719,12 +623,7 @@ public class CRDBService extends Service {
 			@Override
 			public void work() {
 				final ArrayList<FileInfo> list = mainDB.loadFileInfos(pathNames);
-				sendTask(handler, new Runnable() {
-					@Override
-					public void run() {
-						callback.onFileInfoListLoaded(list, "");
-					}
-				});
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, ""));
 			}
 		});
 	}
@@ -797,12 +696,7 @@ public class CRDBService extends Service {
             @Override
             public void work() {
                 final ArrayList<FileInfo> favorites = mainDB.loadFavoriteFolders();
-                sendTask(handler, new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onFileInfoListLoaded(favorites, "");
-                    }
-                });
+                sendTask(handler, () -> callback.onFileInfoListLoaded(favorites, ""));
             }
         });
    	}
@@ -1003,8 +897,14 @@ public class CRDBService extends Service {
     	public void saveFileInfos(final Collection<FileInfo> list) {
     		getService().saveFileInfos(deepCopyFileInfos(list));
     	}
-    	
-    	public void findByPatterns(final int maxCount, final String author, final String title, final String series, final String filename, final BookSearchCallback callback) {
+
+    	/*
+    	public void findByFingerprint(final int maxCount, final String filename, int crc32, final BookSearchCallback callback) {
+    		getService().findByFingerprint(maxCount, filename, crc32, callback, new Handler());
+    	}
+    	*/
+
+		public void findByPatterns(final int maxCount, final String author, final String title, final String series, final String filename, final BookSearchCallback callback) {
     		getService().findByPatterns(maxCount, author, title, series, filename, callback, new Handler());
     	}
     	

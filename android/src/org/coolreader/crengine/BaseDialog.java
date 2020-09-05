@@ -99,18 +99,8 @@ public class BaseDialog extends Dialog {
 		}
 		Log.i("cr3", "BaseDialog.window=" + getWindow());
         setCancelable(true);
-        setOnDismissListener(new OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				onClose();
-			}
-        });
-		setOnShowListener(new OnShowListener() {
-			@Override
-			public void onShow(DialogInterface dialog) {
-				whenShow();
-			}
-		});
+        setOnDismissListener(dialog -> onClose());
+		setOnShowListener(dialog -> whenShow());
         onCreate();
 	}
 
@@ -171,10 +161,10 @@ public class BaseDialog extends Dialog {
 	protected void createButtonsPane( ViewGroup parent, ViewGroup layout )
 	{
 		//getWindow().getDecorView().getWidth()
-		ImageButton positiveButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_positive);
-		ImageButton negativeButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_negative);
-		ImageButton backButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_back);
-		ImageButton addButton = (ImageButton)layout.findViewById(R.id.base_dlg_btn_add);
+		ImageButton positiveButton = layout.findViewById(R.id.base_dlg_btn_positive);
+		ImageButton negativeButton = layout.findViewById(R.id.base_dlg_btn_negative);
+		ImageButton backButton = layout.findViewById(R.id.base_dlg_btn_back);
+		ImageButton addButton = layout.findViewById(R.id.base_dlg_btn_add);
 		activity.tintViewIcons(layout);
 		if (positiveButtonImage != 0) {
 			positiveButton.setImageResource(positiveButtonImage);
@@ -216,32 +206,16 @@ public class BaseDialog extends Dialog {
 			if (thirdButtonImage == 0) {
 				layout.removeView(negativeButton);
 			} else {
-				negativeButton.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						onThirdButtonClick();
-					}
-				});
+				negativeButton.setOnClickListener(v -> onThirdButtonClick());
 			}
-			positiveButton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					onPositiveButtonClick();
-				}
-			});
+			positiveButton.setOnClickListener(v -> onPositiveButtonClick());
 			//negativeButton.setOnClickListener(new View.OnClickListener() {
-			backButton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					onNegativeButtonClick();
-				}
-			});
+			backButton.setOnClickListener(v -> onNegativeButtonClick());
 		} else {
 			layout.removeView(positiveButton);
 			layout.removeView(negativeButton);
 			if (title != null) {
-				backButton.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						onPositiveButtonClick();
-					}
-				});
+				backButton.setOnClickListener(v -> onPositiveButtonClick());
 			} else {
 				parent.removeView(layout);
                 buttonsLayout = null;
@@ -252,24 +226,21 @@ public class BaseDialog extends Dialog {
 		if (upperText != null)
 			setUpperText(upperText);
 		if (buttonsLayout != null) {
-			buttonsLayout.setOnTouchListener(new OnTouchListener() {
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					if (event.getAction() == MotionEvent.ACTION_DOWN) {
-						int x = (int)event.getX();
-						int dx = v.getWidth();
-						if (x < dx / 3) {
-							if (needCancelButton)
-								onNegativeButtonClick();
-							else
-								onPositiveButtonClick();
-						} else if (x > dx * 2 / 3) {
+			buttonsLayout.setOnTouchListener((v, event) -> {
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					int x = (int)event.getX();
+					int dx = v.getWidth();
+					if (x < dx / 3) {
+						if (needCancelButton)
+							onNegativeButtonClick();
+						else
 							onPositiveButtonClick();
-						}
-						return true;
+					} else if (x > dx * 2 / 3) {
+						onPositiveButtonClick();
 					}
-					return false;
+					return true;
 				}
+				return false;
 			});
 		}
 	}
@@ -278,7 +249,7 @@ public class BaseDialog extends Dialog {
 	public void setTitle(CharSequence title) {
 		this.title = String.valueOf(title);
 		if (buttonsLayout != null) {
-	        TextView lbl = (TextView)buttonsLayout.findViewById(R.id.base_dlg_title);
+	        TextView lbl = buttonsLayout.findViewById(R.id.base_dlg_title);
 	        if (lbl != null)
 	        	lbl.setText(title != null ? title : "");
 		}
@@ -287,7 +258,7 @@ public class BaseDialog extends Dialog {
 	public void setUpperText(CharSequence upperText) {
 		this.upperText = String.valueOf(upperText);
 		if (upperTextLayout != null) {
-			TextView lbl = (TextView)upperTextLayout.findViewById(R.id.base_dlg_upper_text);
+			TextView lbl = upperTextLayout.findViewById(R.id.base_dlg_upper_text);
 			if (lbl != null)
 				lbl.setText(upperText != null ? upperText : "");
 		}
@@ -311,8 +282,8 @@ public class BaseDialog extends Dialog {
 	{
         LayoutInflater mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.base_dialog, null);
-		upperTextLayout = (ViewGroup)layout.findViewById(R.id.base_dlg_upper_text_panel);
-		buttonsLayout = (ViewGroup)layout.findViewById(R.id.base_dlg_button_panel);
+		upperTextLayout = layout.findViewById(R.id.base_dlg_upper_text_panel);
+		buttonsLayout = layout.findViewById(R.id.base_dlg_button_panel);
 		if (upperText == null) {
 			layout.removeView(upperTextLayout);
 			updateGlobalMargin(buttonsLayout, true, true, true, false);
@@ -325,7 +296,7 @@ public class BaseDialog extends Dialog {
                 buttonsLayout = null;
             }
         }
-		contentsLayout =  (ViewGroup)layout.findViewById(R.id.base_dialog_content_view);
+		contentsLayout = layout.findViewById(R.id.base_dialog_content_view);
         contentsLayout.addView(view);
 
         updateGlobalMargin(contentsLayout, true, false, true, true);
@@ -363,28 +334,17 @@ public class BaseDialog extends Dialog {
 	 */
 	public void setFlingHandlers(View view, Runnable ltrHandler, Runnable rtlHandler) {
 		if (ltrHandler == null)
-			ltrHandler = new Runnable() {
-				@Override
-				public void run() {
-					// cancel
-					onNegativeButtonClick();
-				}
+			ltrHandler = () -> {
+				// cancel
+				onNegativeButtonClick();
 			};
 		if (rtlHandler == null)
-			rtlHandler = new Runnable() {
-				@Override
-				public void run() {
-					// ok
-					onPositiveButtonClick();
-				}
+			rtlHandler = () -> {
+				// ok
+				onPositiveButtonClick();
 			};
 		final GestureDetector detector = new GestureDetector(new MyGestureListener(ltrHandler, rtlHandler));
-		view.setOnTouchListener(new OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				return detector.onTouchEvent(event);
-			}
-		});
+		view.setOnTouchListener((v, event) -> detector.onTouchEvent(event));
 	}
 
 	private class MyGestureListener extends SimpleOnGestureListener {

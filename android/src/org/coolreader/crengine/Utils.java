@@ -117,32 +117,20 @@ public class Utils {
 			Log.i("cr3", "File " + oldPlace.getAbsolutePath() + " does not exist!");
 			return false;
 		}
-		FileOutputStream os = null;
-		FileInputStream is = null;
-		try {
+		try (FileOutputStream os = new FileOutputStream(newPlace)) {
 			if (!newPlace.createNewFile())
 				return false; // cannot create file
-			os = new FileOutputStream(newPlace);
-			is = new FileInputStream(oldPlace);
-			copyStreamContent(os, is);
-			removeNewFile = false;
-			oldPlace.delete();
-			return true;
+			try (FileInputStream is = new FileInputStream(oldPlace)) {
+				copyStreamContent(os, is);
+				removeNewFile = false;
+				oldPlace.delete();
+				return true;
+			} catch ( IOException e ) {
+				return false;
+			}
 		} catch ( IOException e ) {
 			return false;
 		} finally {
-			try {
-				if (os != null)
-					os.close();
-			} catch (IOException ee) {
-				// ignore
-			}
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException ee) {
-				// ignore
-			}
 			if ( removeNewFile )
 				newPlace.delete();
 		}

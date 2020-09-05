@@ -29,7 +29,7 @@ public class YNDConfig {
 
     public static boolean init(CoolReader cr) throws IOException {
         // Create ynd client
-        final File fYND = new File(cr.getSettingsFile(0).getParent() + "/ynd.token");
+        final File fYND = new File(cr.getSettingsFileF(0).getParent() + "/ynd.token");
         if (!fYND.exists()) {
             cr.showCloudToast(R.string.cloud_need_authorization,true);
             cr.yndInputTokenDialog = new YNDInputTokenDialog(cr);

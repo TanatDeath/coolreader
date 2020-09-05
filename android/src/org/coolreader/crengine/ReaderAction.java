@@ -180,6 +180,9 @@ public class ReaderAction {
 			ReaderCommand.DCMD_CHOOSE_TEXTURE, 0, FONT_SELECT,
 			R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_texture);
 
+	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
+	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
+
 	public final static ReaderAction[] AVAILABLE_ACTIONS = {
 		NONE,
 		PAGE_DOWN,
@@ -254,7 +257,9 @@ public class ReaderAction {
         FONT_BOLD,
 		WHOLE_PAGE_TO_DIC,
 		CHOOSE_TEXTURE,
-		HIDE
+		HIDE,
+		GDRIVE_SYNCTO,
+		GDRIVE_SYNCFROM
 	};
 
 	public boolean isNone() {

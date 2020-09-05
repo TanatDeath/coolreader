@@ -90,17 +90,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 			intent.setType("text/plain");
 			intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
 			intent.putExtra(android.content.Intent.EXTRA_TEXT, sUrl);
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							((CoolReader)activity).processIntent(intent);
-						}
-					}, 200);
-				}
-			});
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					((CoolReader)activity).processIntent(intent), 200));
 			return true;
 		}
 		return false;
@@ -110,18 +101,10 @@ public class ExternalDocCameDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(sLink)) {
 			HttpUrl hurl = HttpUrl.parse(sLink);
 			if (hurl == null) {
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								activity.showToast("Download error - cannot parse link");
-								onPositiveButtonClick();
-							}
-						}, 100);
-					}
-				});
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					activity.showToast("Download error - cannot parse link");
+					onPositiveButtonClick();
+				}, 100));
 				return;
 			}
 			final HttpUrl.Builder urlBuilder = hurl.newBuilder();
@@ -136,87 +119,44 @@ public class ExternalDocCameDialog extends BaseDialog {
 						throws IOException {
 					String sUrl = response.request().url().toString();
 					if (checkIntentImgUrl(sUrl)) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										onPositiveButtonClick();
-									}
-								}, 100);
-							}
-						});
+						BackgroundThread.instance().postBackground(() ->
+								BackgroundThread.instance().postGUI(() -> onPositiveButtonClick(), 100));
 						return;
 					}
 					stype = StrUtils.getNonEmptyStr(response.body().contentType().toString(),true);
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									tvDocType.setText(stype);
-								}
-							}, 100);
-						}
-					});
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> tvDocType.setText(stype), 100));
 					InputStream is = response.body().byteStream();
 					ByteArrayOutputStream baos = Utils.inputStreamToBaos(is);
 					istream = new ByteArrayInputStream(baos.toByteArray());
 					if (stype.startsWith("image/")) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										onPositiveButtonClick();
-										PictureCameDialog dlg = new PictureCameDialog(activity, istream, stype, extractSuggestedName(sLink));
-										dlg.show();
-									}
-								}, 100);
-							}
-						});
+						BackgroundThread.instance().postBackground(() ->
+								BackgroundThread.instance().postGUI(() -> {
+							onPositiveButtonClick();
+							PictureCameDialog dlg = new PictureCameDialog(activity, istream, stype, extractSuggestedName(sLink));
+							dlg.show();
+						}, 100));
 					} else {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
-									istreamTxt = new ByteArrayInputStream(docJsoup.body().text().replace((char)0,' ').getBytes());
-									Elements resultLinks = docJsoup.select("html > head > title");
-									if (resultLinks.size()>0) sTitle = resultLinks.text();
-									BackgroundThread.instance().postBackground(new Runnable() {
-										@Override
-										public void run() {
-											BackgroundThread.instance().postGUI(new Runnable() {
-												@Override
-												public void run() {
-													tvExtPath.setText(tvExtPath.getText()+"; "+sTitle);
-													edtFileName.setText(extractSuggestedName(sTitle));
-												}
-											}, 100);
-										}
-									});
-								} catch (Exception e) {
-									docJsoup = null;
-									BackgroundThread.instance().postBackground(new Runnable() {
-										@Override
-										public void run() {
-											BackgroundThread.instance().postGUI(new Runnable() {
-												@Override
-												public void run() {
-													btnAsText.setEnabled(false);
-													log.e(activity.getString(R.string.error_open_as_text)+": "+
-															e.getClass().getSimpleName()+" "+e.getMessage());
-													activity.showToast(activity.getString(R.string.error_open_as_text)+": "+
-															e.getClass().getSimpleName()+" "+e.getMessage());
-												}
-											}, 100);
-										}
-									});
-								}
+						BackgroundThread.instance().postBackground(() -> {
+							try {
+								docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
+								istreamTxt = new ByteArrayInputStream(docJsoup.body().text().replace((char)0,' ').getBytes());
+								Elements resultLinks = docJsoup.select("html > head > title");
+								if (resultLinks.size()>0) sTitle = resultLinks.text();
+								BackgroundThread.instance().postBackground(() ->
+										BackgroundThread.instance().postGUI(() -> {
+									tvExtPath.setText(tvExtPath.getText()+"; "+sTitle);
+									edtFileName.setText(extractSuggestedName(sTitle));
+								}, 100));
+							} catch (Exception e) {
+								docJsoup = null;
+								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+									btnAsText.setEnabled(false);
+									log.e(activity.getString(R.string.error_open_as_text)+": "+
+											e.getClass().getSimpleName()+" "+e.getMessage());
+									activity.showToast(activity.getString(R.string.error_open_as_text)+": "+
+											e.getClass().getSimpleName()+" "+e.getMessage());
+								}, 100));
 							}
 						});
 					}
@@ -224,21 +164,13 @@ public class ExternalDocCameDialog extends BaseDialog {
 
 				public void onFailure(Call call, IOException e) {
 					final IOException ef = e;
-					BackgroundThread.instance().postBackground(new Runnable() {
-						@Override
-						public void run() {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									log.e("Download error: "+ef.getMessage()+
-											" ["+ef.getClass().getSimpleName()+"]");
-									activity.showToast("Download error: "+ef.getMessage()+
-											" ["+ef.getClass().getSimpleName()+"]");
-									onPositiveButtonClick();
-								}
-							}, 200);
-						}
-					});
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						log.e("Download error: "+ef.getMessage()+
+								" ["+ef.getClass().getSimpleName()+"]");
+						activity.showToast("Download error: "+ef.getMessage()+
+								" ["+ef.getClass().getSimpleName()+"]");
+						onPositiveButtonClick();
+					}, 200));
 				}
 			});
 		}
@@ -509,94 +441,43 @@ public class ExternalDocCameDialog extends BaseDialog {
 							arcFontNames = getFontNames(is1);
 							if (arcFontNames.size()==0) {
 								final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-								BackgroundThread.instance().postBackground(new Runnable() {
-									@Override
-									public void run() {
-										BackgroundThread.instance().postGUI(new Runnable() {
-											@Override
-											public void run() {
-												((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
-											}
-										}, 500);
-									}
-								});
+								BackgroundThread.instance().postBackground(() ->
+										BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
 								onPositiveButtonClick();
 							} else {
 								final ArrayList<String> arcFontNamesF = arcFontNames;
 								mActivity.askConfirmation(mActivity.getString(R.string.new_fonts,
-										String.valueOf(arcFontNames.size())), new Runnable() {
-									@Override
-									public void run() {
-										InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
-										int filesCopied = copyFonts(arcFontNamesF, is1);
-										mActivity.showToast(mActivity.getString(R.string.fonts_copied,
-												String.valueOf(filesCopied)));
-										//if (filesCopied>0) {
-										//}
-										onPositiveButtonClick();
-									}
-								}, new Runnable() {
-									@Override
-									public void run() {
-										final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-										BackgroundThread.instance().postBackground(new Runnable() {
-											@Override
-											public void run() {
-												BackgroundThread.instance().postGUI(new Runnable() {
-													@Override
-													public void run() {
-														((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri);
-													}
-												}, 500);
-											}
+										String.valueOf(arcFontNames.size())), () -> {
+											InputStream is11 = new ByteArrayInputStream(baos.toByteArray());
+											int filesCopied = copyFonts(arcFontNamesF, is11);
+											mActivity.showToast(mActivity.getString(R.string.fonts_copied,
+													String.valueOf(filesCopied)));
+											//if (filesCopied>0) {
+											//}
+											onPositiveButtonClick();
+										}, () -> {
+											final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+											BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+													((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
+											onPositiveButtonClick();
 										});
-										onPositiveButtonClick();
-									}
-								});
 							}
 						} catch (Exception e) {
 						}
 					} else {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										((CoolReader) activity).loadDocumentFromUriExt(uri, sUri);
-									}
-								}, 500);
-							}
-						});
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+								((CoolReader) activity).loadDocumentFromUriExt(uri, sUri), 500));
 						onPositiveButtonClick();
 					}
 				}
 				else {
 					if ((istream != null) && (bThisIsHTML)) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri);
-									}
-								}, 500);
-							}
-						});
+						BackgroundThread.instance().postBackground(() ->
+								BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri), 500));
 					}
 					if ((istreamTxt != null) && (!bThisIsHTML)) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri);
-									}
-								}, 500);
-							}
-						});
+						BackgroundThread.instance().postBackground(() ->
+								BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri), 500));
 					}
 					onPositiveButtonClick();
 				}
@@ -620,48 +501,31 @@ public class ExternalDocCameDialog extends BaseDialog {
 					    ((istream != null) && (bThisIsHTML)) ||
 					    ((istreamTxt != null) && (!bThisIsHTML))
 					) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										FileOutputStream fos = null;
-										try {
-											fos = new FileOutputStream(fName);
-											BufferedOutputStream out = new BufferedOutputStream(fos);
-											InputStream in = null;
-											if (uri != null) in = activity.getApplicationContext().getContentResolver().openInputStream(uri);
-											if ((istream != null) && (bThisIsHTML)) in = istream;
-											if ((istreamTxt != null) && (!bThisIsHTML)) in = istreamTxt;
-											Utils.copyStreamContent(out, in);
-											out.flush();
-											fos.getFD().sync();
-											if (stype.contains("opendocument")) {
-												DocConvertDialog dlgConv = new DocConvertDialog((CoolReader)activity, fName);
-												dlgConv.show();
-											} else {
-												BackgroundThread.instance().postBackground(new Runnable() {
-													@Override
-													public void run() {
-														BackgroundThread.instance().postGUI(new Runnable() {
-															@Override
-															public void run() {
-																((CoolReader) activity).loadDocumentExt(fName, sUri);
-															}
-														}, 500);
-													}
-												});
-											}
-											onPositiveButtonClick();
-										} catch (Exception e) {
-											log.e("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
-											activity.showToast("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
-										}
-									}
-								}, 200);
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+							FileOutputStream fos = null;
+							try {
+								fos = new FileOutputStream(fName);
+								BufferedOutputStream out = new BufferedOutputStream(fos);
+								InputStream in = null;
+								if (uri != null) in = activity.getApplicationContext().getContentResolver().openInputStream(uri);
+								if ((istream != null) && (bThisIsHTML)) in = istream;
+								if ((istreamTxt != null) && (!bThisIsHTML)) in = istreamTxt;
+								Utils.copyStreamContent(out, in);
+								out.flush();
+								fos.getFD().sync();
+								if (stype.contains("opendocument")) {
+									DocConvertDialog dlgConv = new DocConvertDialog((CoolReader)activity, fName);
+									dlgConv.show();
+								} else {
+									BackgroundThread.instance().postBackground(() ->
+											BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500));
+								}
+								onPositiveButtonClick();
+							} catch (Exception e) {
+								log.e("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
+								activity.showToast("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
 							}
-						});
+						}, 200));
 					}
 				}
 			}
@@ -675,17 +539,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnOpenExisting.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								((CoolReader) activity).loadDocumentExt(sExistingName, sUri);
-							}
-						}, 500);
-					}
-				});
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+						((CoolReader) activity).loadDocumentExt(sExistingName, sUri), 500));
 				onPositiveButtonClick();
 			}
 		});
@@ -718,17 +573,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 		if (uri != null) hideExistingHttpControls(view);
 			else {
 				switchHTML(true);
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								switchHTML(true);
-							}
-						}, 200);
-					}
-				});
+				BackgroundThread.instance().postBackground(() ->
+						BackgroundThread.instance().postGUI(() -> switchHTML(true), 200));
 		}
 		setView(view);
 		// if link is http

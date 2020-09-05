@@ -20,7 +20,6 @@ import org.coolreader.crengine.InputDialog.InputHandler;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 import org.coolreader.graphics.FastBlur;
-import org.coolreader.tts.TTS;
 import org.coolreader.tts.TTSToolbarDlg;
 
 import android.app.SearchManager;
@@ -40,7 +39,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.view.MotionEventCompat;
 import android.text.ClipboardManager;
 import android.util.Log;
 import android.util.SparseArray;
@@ -227,16 +225,16 @@ import com.google.gson.GsonBuilder;
 
 					Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
 					Rect src = new Rect(0, 0, mCurrentPageInfo.bitmap.getWidth(), mCurrentPageInfo.bitmap.getHeight());
-					if ( dontStretchWhileDrawing ) {
-						if ( dst.right>src.right )
+					if (dontStretchWhileDrawing) {
+						if (dst.right > src.right)
 							dst.right = src.right;
-						if ( dst.bottom>src.bottom )
+						if (dst.bottom > src.bottom)
 							dst.bottom = src.bottom;
-						if ( src.right>dst.right )
+						if (src.right > dst.right)
 							src.right = dst.right;
-						if ( src.bottom>dst.bottom )
+						if (src.bottom > dst.bottom)
 							src.bottom = dst.bottom;
-						if ( centerPageInsteadOfResizing ) {
+						if (centerPageInsteadOfResizing) {
 							int ddx = (canvas.getWidth() - dst.width()) / 2;
 							int ddy = (canvas.getHeight() - dst.height()) / 2;
 							dst.left += ddx;
@@ -245,7 +243,7 @@ import com.google.gson.GsonBuilder;
 							dst.bottom += ddy;
 						}
 					}
-					if ( dst.width()!=canvas.getWidth() || dst.height()!=canvas.getHeight() )
+					if (dst.width() != canvas.getWidth() || dst.height() != canvas.getHeight())
 						canvas.drawColor(Color.rgb(32, 32, 32));
 					drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, src, dst);
 				} else {
@@ -304,22 +302,12 @@ import com.google.gson.GsonBuilder;
 		}
 		@Override
 		public void draw(boolean isPartially) {
-			drawCallback(new DrawCanvasCallback() {
-				@Override
-				public void drawTo(Canvas c) {
-					doDraw(c);
-				}
-			}, null, isPartially);
+			drawCallback(this::doDraw, null, isPartially);
 		}
 
 		@Override
 		public void draw(boolean isPartially, boolean isBlack) {
-			drawCallback(new DrawCanvasCallback() {
-				@Override
-				public void drawTo(Canvas c) {
-					doDrawBlack(c);
-				}
-			}, null, isPartially);
+			drawCallback(this::doDrawBlack, null, isPartially);
 		}
 
 		@Override
@@ -423,7 +411,7 @@ import com.google.gson.GsonBuilder;
 				try {
 					log.d("sync.get() before wait " + Thread.currentThread().getName());
 					synchronized(this) {
-						if ( !completed )
+						if (!completed)
 							wait();
 					}
 					log.d("sync.get() after wait wait " + Thread.currentThread().getName());
@@ -488,23 +476,23 @@ import com.google.gson.GsonBuilder;
 		int y2 = dy * 2 / 3;
 		int zone = 0;
 		if (y < y1) {
-			if ( x<x1 )
+			if (x < x1)
 				zone = 1;
-			else if ( x<x2 )
+			else if (x < x2)
 				zone = 2;
 			else
 				zone = 3;
-		} else if ( y<y2 ) {
+		} else if (y < y2) {
 			if (x < x1)
 				zone = 4;
-			else if ( x<x2 )
+			else if (x < x2)
 				zone = 5;
 			else
 				zone = 6;
 		} else {
 			if (x < x1)
 				zone = 7;
-			else if ( x<x2 )
+			else if (x < x2)
 				zone = 8;
 			else
 				zone = 9;
@@ -527,7 +515,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public FileInfo getOpenedFileInfo() {
-		if ( isBookLoaded() && mBookInfo!=null )
+		if (isBookLoaded() && mBookInfo != null)
 			return mBookInfo.getFileInfo();
 		return null;
 	}
@@ -608,7 +596,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private boolean startTrackingKey(KeyEvent event) {
-		if ( event.getRepeatCount()==0 ) {
+		if (event.getRepeatCount() == 0) {
 			stopTracking();
 			trackedKeyEvent = event;
 			return true;
@@ -625,7 +613,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private boolean isTracked(KeyEvent event) {
-		if ( trackedKeyEvent!=null) {
+		if (trackedKeyEvent != null) {
 			int tkeKc = trackedKeyEvent.getKeyCode();
 			int eKc = event.getKeyCode();
 			// check if tracked key and current key are the same
@@ -682,10 +670,10 @@ import com.google.gson.GsonBuilder;
 				if (myId != nextUpdateId && !isUpdateEnd)
 					return;
 				doc.updateSelection(sel);
-				if ( !sel.isEmpty() ) {
+				if (!sel.isEmpty()) {
 					invalidImages = true;
 					BitmapInfo bi = preparePageImage(0);
-					if ( bi!=null ) {
+					if (bi != null) {
 						bookView.draw(true);
 					}
 				}
@@ -695,7 +683,7 @@ import com.google.gson.GsonBuilder;
 			public void done() {
 				if (isUpdateEnd) {
 					String text = sel.text;
-					if ( text!=null && text.length()>0 ) {
+					if (text != null && text.length() > 0) {
 						onSelectionComplete( sel, selMode );
 					} else {
 						clearSelection();
@@ -852,7 +840,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void showNewBookmarkDialog(Selection sel, int chosenType, String commentText) {
-		if ( mBookInfo==null )
+		if (mBookInfo == null)
 			return;
 		Bookmark bmk = new Bookmark();
 		bmk.setType(Bookmark.TYPE_COMMENT);
@@ -878,7 +866,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void copyToClipboard(String text) {
-		if ( text!=null && text.length()>0 ) {
+		if (text != null && text.length() > 0) {
 			ClipboardManager cm = mActivity.getClipboardmanager();
 			cm.setText(text);
 			log.i("Setting clipboard text: " + text);
@@ -887,7 +875,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void copyToClipboardAndToast(String text) {
-		if ( text!=null && text.length()>0 ) {
+		if (text != null && text.length() > 0) {
 			ClipboardManager cm = mActivity.getClipboardmanager();
 			cm.setText(text);
 			log.i("Setting clipboard text: " + text);
@@ -1170,12 +1158,7 @@ import com.google.gson.GsonBuilder;
 				return;
 			currentImageViewer = null;
 			unlockOrientation();
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					doc.closeImage();
-				}
-			});
+			BackgroundThread.instance().postBackground(() -> doc.closeImage());
 			drawPage();
 		}
 
@@ -1368,8 +1351,8 @@ import com.google.gson.GsonBuilder;
 					}
 					image = null;
 					link = doc.checkLink(start_x, start_y, mActivity.getPalmTipPixels() / 2 );
-					if ( link!=null ) {
-						if ( link.startsWith("#") ) {
+					if (link != null) {
+						if (link.startsWith("#")) {
 							log.d("go to " + link);
 							doc.goLink(link);
 							drawPage();
@@ -1398,7 +1381,7 @@ import com.google.gson.GsonBuilder;
 							// absolute path to file
 							FileInfo fi = new FileInfo(link);
 							if (fi.exists()) {
-								mActivity.loadDocument(fi);
+								mActivity.loadDocument(fi, true);
 								return;
 							}
 							File baseDir = null;
@@ -1415,7 +1398,7 @@ import com.google.gson.GsonBuilder;
 									if (baseDir!=null && url!=null && url.length()>0) {
 										fi = new FileInfo(baseDir.getAbsolutePath()+"/"+url);
 										if (fi.exists()) {
-											mActivity.loadDocument(fi);
+											mActivity.loadDocument(fi, true);
 											return;
 										}
 									}
@@ -1423,7 +1406,7 @@ import com.google.gson.GsonBuilder;
 									// from archive
 									fi = new FileInfo(mBookInfo.getFileInfo().getArchiveName() + FileInfo.ARC_SEPARATOR + link);
 									if (fi.exists()) {
-										mActivity.loadDocument(fi);
+										mActivity.loadDocument(fi, true);
 										return;
 									}
 								}
@@ -1515,37 +1498,26 @@ import com.google.gson.GsonBuilder;
 
 		private boolean trackDoubleTap() {
 			state = STATE_WAIT_FOR_DOUBLE_CLICK;
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					if (currentTapHandler == TapHandler.this && state == STATE_WAIT_FOR_DOUBLE_CLICK)
-						performAction(shortTapAction, false);
-				}
+			BackgroundThread.instance().postGUI(() -> {
+				if (currentTapHandler == TapHandler.this && state == STATE_WAIT_FOR_DOUBLE_CLICK)
+					performAction(shortTapAction, false);
 			}, DOUBLE_CLICK_INTERVAL);
 			return true;
 		}
 
 		private boolean trackDoubleTapInsp() {
 			stateInsp = STATE_WAIT_FOR_DOUBLE_CLICK;
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					stateInsp = STATE_INITIAL;
-				}
-			}, DOUBLE_CLICK_INTERVAL);
+			BackgroundThread.instance().postGUI(() -> stateInsp = STATE_INITIAL, DOUBLE_CLICK_INTERVAL);
 			return true;
 		}
 
 		private boolean trackLongTap() {
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					if (currentTapHandler == TapHandler.this && state == STATE_DOWN_1) {
-						if (longTapAction == ReaderAction.START_SELECTION)
-							startSelection();
-						else
-							performAction(longTapAction, true);
-					}
+			BackgroundThread.instance().postGUI(() -> {
+				if (currentTapHandler == TapHandler.this && state == STATE_DOWN_1) {
+					if (longTapAction == ReaderAction.START_SELECTION)
+						startSelection();
+					else
+						performAction(longTapAction, true);
 				}
 			}, LONG_KEYPRESS_TIME);
 			return true;
@@ -1608,7 +1580,7 @@ import com.google.gson.GsonBuilder;
 				lastDuration = duration;
 				switch (state) {
 					case STATE_DOWN_1:
-						if ( hiliteTapZoneOnTap ) {
+						if (hiliteTapZoneOnTap) {
 							hiliteTapZone( true, x, y, width, height );
 							scheduleUnhilite( LONG_KEYPRESS_TIME );
 						}
@@ -1631,7 +1603,7 @@ import com.google.gson.GsonBuilder;
 						return cancel();
 					case STATE_SELECTION:
 						// If the second tap is within a radius of the first tap point, assume the user is trying to double tap on the same point
-						if ( start_x-x <= DOUBLE_TAP_RADIUS && x-start_x <= DOUBLE_TAP_RADIUS && y-start_y <= DOUBLE_TAP_RADIUS && start_y-y <= DOUBLE_TAP_RADIUS ) {
+						if (start_x-x <= DOUBLE_TAP_RADIUS && x-start_x <= DOUBLE_TAP_RADIUS && y-start_y <= DOUBLE_TAP_RADIUS && start_y-y <= DOUBLE_TAP_RADIUS) {
 							//log.v("upd2: "+nextUpdateId+" ");
 							updateSelection(start_x, start_y, start_x, start_y, true);
 						}
@@ -1889,7 +1861,7 @@ import com.google.gson.GsonBuilder;
 			}
 			public void done() {
 				BackgroundThread.ensureGUI();
-				if ( toc!=null && pos!=null ) {
+				if (toc != null && pos != null) {
 					TOCDlg dlg = new TOCDlg(mActivity, view, toc, pos.pageNumber);
 					dlg.show();
 				} else {
@@ -1919,9 +1891,9 @@ import com.google.gson.GsonBuilder;
 			public void work() throws Exception {
 				BackgroundThread.ensureBackground();
 				boolean res = doc.findText( pattern, 1, reverse?1:0, caseInsensitive?1:0);
-				if ( !res )
+				if (!res)
 					res = doc.findText( pattern, -1, reverse?1:0, caseInsensitive?1:0);
-				if ( !res ) {
+				if (!res) {
 					doc.clearSelection();
 					throw new Exception("pattern not found");
 				}
@@ -1946,9 +1918,9 @@ import com.google.gson.GsonBuilder;
 			public void work() throws Exception {
 				BackgroundThread.ensureBackground();
 				boolean res = doc.findText( pattern, 1, reverse?1:0, caseInsensitive?1:0);
-				if ( !res )
+				if (!res)
 					res = doc.findText( pattern, -1, reverse?1:0, caseInsensitive?1:0);
-				if ( !res ) {
+				if (!res) {
 					doc.clearSelection();
 					throw new Exception("pattern not found");
 				}
@@ -2016,9 +1988,9 @@ import com.google.gson.GsonBuilder;
 
 	public boolean goToBookmark(final int shortcut) {
 		BackgroundThread.ensureGUI();
-		if ( mBookInfo!=null ) {
+		if (mBookInfo != null) {
 			Bookmark bm = mBookInfo.findShortcutBookmark(shortcut);
-			if ( bm==null ) {
+			if (bm == null) {
 				addBookmark(shortcut);
 				return true;
 			} else {
@@ -2033,7 +2005,7 @@ import com.google.gson.GsonBuilder;
 	public Bookmark removeBookmark(final Bookmark bookmark) {
 		Bookmark removed = mBookInfo.removeBookmark(bookmark);
 		if (removed != null) {
-			if ( removed.getId()!=null ) {
+			if (removed.getId() != null) {
 				mActivity.getDB().deleteBookmark(removed);
 			}
 			highlightBookmarks();
@@ -2063,20 +2035,20 @@ import com.google.gson.GsonBuilder;
 			Bookmark bm;
 			public void work() {
 				BackgroundThread.ensureBackground();
-				if ( mBookInfo!=null ) {
+				if (mBookInfo != null) {
 					bm = doc.getCurrentPageBookmark();
 					bm.setShortcut(shortcut);
 				}
 			}
 			public void done() {
-				if ( mBookInfo!=null && bm!=null ) {
-					if ( shortcut==0 )
+				if (mBookInfo != null && bm != null) {
+					if (shortcut == 0)
 						mBookInfo.addBookmark(bm);
 					else
 						mBookInfo.setShortcutBookmark(shortcut, bm);
 					mActivity.getDB().saveBookInfo(mBookInfo);
 					String s;
-					if ( shortcut==0 )
+					if (shortcut == 0)
 						s = mActivity.getString(R.string.toast_position_bookmark_is_set);
 					else {
 						s = mActivity.getString(R.string.toast_shortcut_bookmark_is_set);
@@ -2093,7 +2065,7 @@ import com.google.gson.GsonBuilder;
 	public boolean onMenuItem(final int itemId) {
 		BackgroundThread.ensureGUI();
 		ReaderAction action = ReaderAction.findByMenuId(itemId);
-		if ( action.isNone() )
+		if (action.isNone())
 			return false;
 		onAction(action);
 		return true;
@@ -2105,7 +2077,7 @@ import com.google.gson.GsonBuilder;
 
 	public void onAction(final ReaderAction action, final Runnable onFinishHandler)	{
 		BackgroundThread.ensureGUI();
-		if ( action.cmd!=ReaderCommand.DCMD_NONE )
+		if (action.cmd != ReaderCommand.DCMD_NONE)
 			onCommand( action.cmd, action.param, onFinishHandler );
 	}
 
@@ -2164,48 +2136,45 @@ import com.google.gson.GsonBuilder;
 		bNeedRedrawOnce = true;
 	//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setFullscreen(newBool);
-		BackgroundThread.instance().postGUI(new Runnable() {
-			@Override
-			public void run() {
-				ArrayList<String> sButtons = new ArrayList<String>();
-				int efMode = mActivity.settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
-				if ((newBool) &&(efMode != 0))
-					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text_off));
-				if ((newBool) &&(efMode != 1))
-					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text1));
-				if ((newBool) &&(efMode != 2))
-					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text2));
-				sButtons.add(mActivity.getString(R.string.options_page_titlebar_new));
-				SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, 5,true,
-						"",
-						sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
-							@Override
-							public void done(Object o, String btnPressed) {
-								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text_off))) {
-									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "0", true);
-								}
-								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text1))) {
-									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "1", true);
-								}
-								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text2))) {
-									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "2", true);
-								}
-								if (btnPressed.equals(mActivity.getString(R.string.options_page_titlebar_new))) {
-									mActivity.optionsFilter = "";
-									mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TITLEBAR_NEW);
-								}
+		BackgroundThread.instance().postGUI(() -> {
+			ArrayList<String> sButtons = new ArrayList<String>();
+			int efMode = mActivity.settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
+			if ((newBool) &&(efMode != 0))
+				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text_off));
+			if ((newBool) &&(efMode != 1))
+				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text1));
+			if ((newBool) &&(efMode != 2))
+				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text2));
+			sButtons.add(mActivity.getString(R.string.options_page_titlebar_new));
+			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, 5,true,
+					"",
+					sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
+						@Override
+						public void done(Object o, String btnPressed) {
+							if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text_off))) {
+								mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "0", true);
 							}
-						});
-			}
+							if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text1))) {
+								mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "1", true);
+							}
+							if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text2))) {
+								mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "2", true);
+							}
+							if (btnPressed.equals(mActivity.getString(R.string.options_page_titlebar_new))) {
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TITLEBAR_NEW);
+							}
+						}
+					});
 		}, 200);
 	}
 
 	private void initTapZone(final BaseDialog dlg, View view, final int tapZoneId) {
-		if ( view==null )
+		if (view == null)
 			return;
-		final TextView text = (TextView)view.findViewById(R.id.tap_zone_action_text_short);
-		final TextView longtext = (TextView)view.findViewById(R.id.tap_zone_action_text_long);
-		final ImageView iv = (ImageView)view.findViewById(R.id.zone_icon);
+		final TextView text = view.findViewById(R.id.tap_zone_action_text_short);
+		final TextView longtext = view.findViewById(R.id.tap_zone_action_text_long);
+		final ImageView iv = view.findViewById(R.id.zone_icon);
 		final String propName = PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + tapZoneId;
 		final String longPropName = PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + tapZoneId;
 		Properties mProperties = new Properties(mActivity.settings());
@@ -2219,7 +2188,7 @@ import com.google.gson.GsonBuilder;
 			iv.setImageDrawable(d);
 		}
 		final ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
-		final ImageView ivl = (ImageView)view.findViewById(R.id.zone_icon_long);
+		final ImageView ivl = view.findViewById(R.id.zone_icon_long);
 		if ((ivl != null)&&(longAction != null)) {
 			int iconId = longAction.iconId;
 			if (iconId == 0) {
@@ -2261,9 +2230,9 @@ import com.google.gson.GsonBuilder;
 			@Override
 			public void work() {
 				bm = doc.getCurrentPageBookmark();
-				if ( bm!=null ) {
+				if (bm != null) {
 					PositionProperties prop = doc.getPositionProps(bm.getStartPos());
-					if ( prop.pageMode!=0 ) {
+					if (prop.pageMode != 0) {
 						buf.append("" + (prop.pageNumber+1) + " / " + prop.pageCount + "   ");
 					}
 					int percent = (int)(10000 * (long)prop.y / prop.fullHeight);
@@ -2271,7 +2240,7 @@ import com.google.gson.GsonBuilder;
 
 					// Show chapter details if book has more than one chapter
 					TOCItem toc = doc.getTOC();
-					if ( toc!=null && toc.getChildCount() > 1) {
+					if (toc != null && toc.getChildCount() > 1) {
 						TOCItem chapter = toc.getChapterAtPage(prop.pageNumber);
 
 						String chapterName = chapter.getName();
@@ -2282,7 +2251,7 @@ import com.google.gson.GsonBuilder;
 						int iChapterEnd = (nextChapter != null) ? nextChapter.getPage() : prop.pageCount;
 
 						String chapterPos = null;
-						if ( prop.pageMode!=0 ) {
+						if (prop.pageMode != 0) {
 							int iChapterStart = chapter.getPage();
 							int iChapterLen = iChapterEnd - iChapterStart;
 							int iChapterPage = prop.pageNumber - iChapterStart + 1;
@@ -2295,7 +2264,7 @@ import com.google.gson.GsonBuilder;
 						if (chapterPos != null && chapterPos.length() > 0)
 							buf.append(chapterPos);
 
-						File f = mActivity.getSettingsFile(mActivity.getCurrentProfile());
+						File f = mActivity.getSettingsFileF(mActivity.getCurrentProfile());
 						String sF = f.getAbsolutePath();
 						sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
 						String sprof = mActivity.getCurrentProfileName();
@@ -2306,60 +2275,58 @@ import com.google.gson.GsonBuilder;
 				}
 			}
 			public void done() {
-				BackgroundThread.instance().executeGUI(new Runnable() {
-					public void run() {
-						BaseDialog dlg = new BaseDialog("ReadingPositionPopup",
-								mActivity, "", false, false);
-						dlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
-						//ColorDrawable c = new ColorDrawable(android.graphics.Color.TRANSPARENT);
-						final String[] mFontFaces = Engine.getFontFaceList();
-						LayoutInflater li = LayoutInflater.from(mActivity.getApplicationContext());
-						View grid = (View)li.inflate(R.layout.options_tap_zone_grid_show, null);
-						int colorGray;
-						int colorGrayC;
-						int colorIcon;
-						TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-								{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-						colorGray = a.getColor(0, Color.GRAY);
-						colorGrayC = a.getColor(1, Color.GRAY);
-						colorIcon = a.getColor(2, Color.GRAY);
-						a.recycle();
-						ColorDrawable c = new ColorDrawable(colorGrayC);
-						c.setAlpha(220);
-						dlg.getWindow().setBackgroundDrawable(c);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell1), 1);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell2), 2);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell3), 3);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell4), 4);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell5), 5);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell6), 6);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell7), 7);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell8), 8);
-						initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell9), 9);
-						mActivity.tintViewIcons(grid,true);
-						TextView tvLabel = (TextView) grid.findViewById(R.id.lbl_selection_text);
-						tvLabel.setText(buf);
-						tvLabel.setTextColor(colorIcon);
-						final BaseDialog dlg1 = dlg;
-						grid.findViewById(R.id.lay_bottom_text).setOnClickListener(new View.OnClickListener () {
-							@Override
-							public void onClick(View v) {
-								dlg1.cancel();
-							}
-						});
-						if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_NONE) {
-							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
-							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
+				BackgroundThread.instance().executeGUI((Runnable) () -> {
+					BaseDialog dlg = new BaseDialog("ReadingPositionPopup",
+							mActivity, "", false, false);
+					dlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+					//ColorDrawable c = new ColorDrawable(android.graphics.Color.TRANSPARENT);
+					final String[] mFontFaces = Engine.getFontFaceList();
+					LayoutInflater li = LayoutInflater.from(mActivity.getApplicationContext());
+					View grid = (View)li.inflate(R.layout.options_tap_zone_grid_show, null);
+					int colorGray;
+					int colorGrayC;
+					int colorIcon;
+					TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+							{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+					colorGray = a.getColor(0, Color.GRAY);
+					colorGrayC = a.getColor(1, Color.GRAY);
+					colorIcon = a.getColor(2, Color.GRAY);
+					a.recycle();
+					ColorDrawable c = new ColorDrawable(colorGrayC);
+					c.setAlpha(220);
+					dlg.getWindow().setBackgroundDrawable(c);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell1), 1);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell2), 2);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell3), 3);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell4), 4);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell5), 5);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell6), 6);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell7), 7);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell8), 8);
+					initTapZone(dlg, grid.findViewById(R.id.tap_zone_grid_cell9), 9);
+					mActivity.tintViewIcons(grid,true);
+					TextView tvLabel = (TextView) grid.findViewById(R.id.lbl_selection_text);
+					tvLabel.setText(buf);
+					tvLabel.setTextColor(colorIcon);
+					final BaseDialog dlg1 = dlg;
+					grid.findViewById(R.id.lay_bottom_text).setOnClickListener(new View.OnClickListener () {
+						@Override
+						public void onClick(View v) {
+							dlg1.cancel();
 						}
-						if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
-							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
-						}
-						if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
-							((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
-						}
-						dlg.setView(grid);
-						dlg.show();
+					});
+					if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_NONE) {
+						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
+						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
 					}
+					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
+						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
+					}
+					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
+						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
+					}
+					dlg.setView(grid);
+					dlg.show();
 				});
 				//mActivity.showToast(buf.toString());
 			}
@@ -2373,7 +2340,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void toggleDocumentStyles() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			log.d("toggleDocumentStyles()");
 			boolean disableInternalStyles = mBookInfo.getFileInfo().getFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG);
 			disableInternalStyles = !disableInternalStyles;
@@ -2385,7 +2352,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void toggleEmbeddedFonts() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			log.d("toggleEmbeddedFonts()");
 			boolean enableInternalFonts = mBookInfo.getFileInfo().getFlag(FileInfo.USE_DOCUMENT_FONTS_FLAG);
 			enableInternalFonts = !enableInternalFonts;
@@ -2397,7 +2364,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public boolean isTextAutoformatEnabled() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			boolean disableTextReflow = mBookInfo.getFileInfo().getFlag(FileInfo.DONT_REFLOW_TXT_FILES_FLAG);
 			return !disableTextReflow;
 		}
@@ -2405,7 +2372,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public boolean isTextFormat() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			DocumentFormat fmt = mBookInfo.getFileInfo().format;
 			return fmt == DocumentFormat.TXT || fmt == DocumentFormat.HTML || fmt == DocumentFormat.PDB;
 		}
@@ -2413,7 +2380,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public boolean isFormatWithEmbeddedFonts() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			DocumentFormat fmt = mBookInfo.getFileInfo().format;
 			return fmt == DocumentFormat.EPUB;
 		}
@@ -2471,7 +2438,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void toggleTextFormat() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			log.d("toggleDocumentStyles()");
 			if (!isTextFormat())
 				return;
@@ -2484,7 +2451,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public boolean getDocumentStylesEnabled() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			boolean flg = !mBookInfo.getFileInfo().getFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG);
 			return flg;
 		}
@@ -2492,7 +2459,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public boolean getDocumentFontsEnabled() {
-		if ( mOpened && mBookInfo!=null ) {
+		if (mOpened && mBookInfo != null) {
 			boolean flg = mBookInfo.getFileInfo().getFlag(FileInfo.USE_DOCUMENT_FONTS_FLAG);
 			return flg;
 		}
@@ -2546,12 +2513,10 @@ import com.google.gson.GsonBuilder;
 			return; // disable toast for eink
 		if (AUTOSCROLL_SPEED_NOTIFICATION_ENABLED) {
 			final int myId = ++autoScrollNotificationId;
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					if (myId == autoScrollNotificationId)
-						mActivity.showSToast(msg);
-				}}, 1000);
+			BackgroundThread.instance().postGUI(() -> {
+				if (myId == autoScrollNotificationId)
+					mActivity.showSToast(msg);
+			}, 1000);
 		}
 	}
 
@@ -2617,7 +2582,7 @@ import com.google.gson.GsonBuilder;
 				hilitePaints[i] = new Paint();
 				hilitePaints[i].setStyle(Paint.Style.FILL);
 				shadePaints[i].setStyle(Paint.Style.FILL);
-				if ( mActivity.isNightMode() ) {
+				if (mActivity.isNightMode()) {
 					shadePaints[i].setColor(Color.argb((i+1)*128 / numPaints, 0, 0, 0));
 					hilitePaints[i].setColor(Color.argb((i+1)*128 / numPaints, 128, 128, 128));
 				} else {
@@ -2626,16 +2591,13 @@ import com.google.gson.GsonBuilder;
 				}
 			}
 
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					if (initPageTurn(startProgress)) {
-						log.d("AutoScrollAnimation: starting autoscroll timer");
-						timerInterval = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? ANIMATION_INTERVAL_EINK : ANIMATION_INTERVAL_NORMAL;
-						startTimer(timerInterval);
-					} else {
-						currentAutoScrollAnimation = null;
-					}
+			BackgroundThread.instance().postBackground(() -> {
+				if (initPageTurn(startProgress)) {
+					log.d("AutoScrollAnimation: starting autoscroll timer");
+					timerInterval = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? ANIMATION_INTERVAL_EINK : ANIMATION_INTERVAL_NORMAL;
+					startTimer(timerInterval);
+				} else {
+					currentAutoScrollAnimation = null;
 				}
 			});
 		}
@@ -2690,18 +2652,15 @@ import com.google.gson.GsonBuilder;
 					log.v("timer is cancelled - GUI");
 					return;
 				}
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						if (currentAutoScrollAnimation != AutoScrollAnimation.this) {
-							log.v("timer is cancelled - BackgroundThread");
-							return;
-						}
-						if (onTimer())
-							BackgroundThread.instance().postGUI(AutoscrollTimerTask.this, interval);
-						else
-							log.v("timer is cancelled - onTimer returned false");
+				BackgroundThread.instance().postBackground(() -> {
+					if (currentAutoScrollAnimation != AutoScrollAnimation.this) {
+						log.v("timer is cancelled - BackgroundThread");
+						return;
 					}
+					if (onTimer())
+						BackgroundThread.instance().postGUI(AutoscrollTimerTask.this, interval);
+					else
+						log.v("timer is cancelled - onTimer returned false");
 				});
 			}
 		}
@@ -2743,17 +2702,17 @@ import com.google.gson.GsonBuilder;
 			} else {
 				int page1 = currPos.pageNumber;
 				int page2 = currPos.pageNumber + 1;
-				if ( page2<0 || page2>=currPos.pageCount) {
+				if (page2 < 0 || page2 >= currPos.pageCount) {
 					currentAnimation = null;
 					return false;
 				}
 				image1 = preparePageImage(0);
 				image2 = preparePageImage(1);
-				if ( page1==page2 ) {
+				if (page1 == page2) {
 					log.v("PageViewAnimation -- cannot start animation: not moved");
 					return false;
 				}
-				if ( image1==null || image2==null ) {
+				if (image1 == null || image2 == null) {
 					log.v("PageViewAnimation -- cannot start animation: page image is null");
 					return false;
 				}
@@ -2787,25 +2746,17 @@ import com.google.gson.GsonBuilder;
 
 		public void draw(boolean isPartially)
 		{
-			drawCallback( new DrawCanvasCallback() {
-				@Override
-				public void drawTo(Canvas c) {
-					//	long startTs = android.os.SystemClock.uptimeMillis();
-					draw(c);
-				}
-			}, null, isPartially);
+			//	long startTs = android.os.SystemClock.uptimeMillis();
+			drawCallback(this::draw, null, isPartially);
 		}
 
 		public void stop() {
 			currentAutoScrollAnimation = null;
-			BackgroundThread.instance().executeBackground(new Runnable() {
-				@Override
-				public void run() {
-					donePageTurn(wantPageTurn());
-					//redraw();
-					drawPage(null, false);
-					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
-				}
+			BackgroundThread.instance().executeBackground(() -> {
+				donePageTurn(wantPageTurn());
+				//redraw();
+				drawPage(null, false);
+				scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 			});
 			scheduleGc();
 		}
@@ -2830,7 +2781,7 @@ import com.google.gson.GsonBuilder;
 					x2 = canvas.getHeight();
 				rect.top = x1;
 				rect.bottom = x2;
-				if ( x2>x1 ) {
+				if (x2 > x1) {
 					//log.v("drawShadow : " + x1 + ", " + x2 + ", " + index);
 					canvas.drawRect(rect, paints[index]);
 				}
@@ -2846,7 +2797,7 @@ import com.google.gson.GsonBuilder;
 			int h = dst.height();
 			int div = (h + shadowHeight) * scrollPercent / 10000 - shadowHeight;
 			//log.v("drawPageProgress() div = " + div + ", percent = " + scrollPercent);
-			int d = div >= 0 ? div : 0;
+			int d = Math.max(div, 0);
 			if (d > 0) {
 				Rect src1 = new Rect(src.left, src.top, src.right, src.top + d);
 				Rect dst1 = new Rect(dst.left, dst.top, dst.right, dst.top + d);
@@ -2896,9 +2847,7 @@ import com.google.gson.GsonBuilder;
 					drawPageProgress(canvas, scrollPercent, new Rect(0, 0, w, h), new Rect(0, 0, w, h));
 				}
 			}
-
 		}
-
 	}
 
 	public void onCommand(final ReaderCommand cmd, final int param) {
@@ -2906,29 +2855,23 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private void navigateByHistory(final ReaderCommand cmd) {
-		BackgroundThread.instance().postBackground(new Runnable() {
-			@Override
-			public void run() {
-				final boolean res = doc.doCommand(cmd.nativeId, 0);
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						if (res) {
-							// successful
-							drawPage();
-						} else {
-							// cannot navigate - no data on stack
-							if (cmd == ReaderCommand.DCMD_LINK_BACK) {
-								// TODO: exit from activity in some cases?
-								if (mActivity.isPreviousFrameHome())
-									mActivity.showRootWindow();
-								else
-									mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null, "");
-							}
-						}
+		BackgroundThread.instance().postBackground(() -> {
+			final boolean res = doc.doCommand(cmd.nativeId, 0);
+			BackgroundThread.instance().postGUI(() -> {
+				if (res) {
+					// successful
+					drawPage();
+				} else {
+					// cannot navigate - no data on stack
+					if (cmd == ReaderCommand.DCMD_LINK_BACK) {
+						// TODO: exit from activity in some cases?
+						if (mActivity.isPreviousFrameHome())
+							mActivity.showRootWindow();
+						else
+							mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null, "");
 					}
-				});
-			}
+				}
+			});
 		});
 	}
 
@@ -2941,7 +2884,7 @@ import com.google.gson.GsonBuilder;
 			doc.setTimeLeft(sLeft);
 			// for safe mode
 			if (doc.getCurPage()>2) {
-				String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
+				String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
 				File f = new File(sFile);
 				if (f.exists()) f.delete();
 			}
@@ -2975,11 +2918,8 @@ import com.google.gson.GsonBuilder;
 			mActivity.showDictionary();
 			break;
 		case DCMD_OPEN_PREVIOUS_BOOK:
-			loadPreviousDocument(new Runnable() {
-				@Override
-				public void run() {
-					// do nothing
-				}
+			loadPreviousDocument(() -> {
+				// do nothing
 			});
 			break;
 		case DCMD_BOOK_INFO:
@@ -2996,19 +2936,11 @@ import com.google.gson.GsonBuilder;
 					break;
 				}
 				log.i("DCMD_TTS_PLAY: initializing TTS");
-				if ( !mActivity.initTTS(new TTS.OnTTSCreatedListener() {
-					@Override
-					public void onCreated(TTS tts) {
-						log.i("TTS created: opening TTS toolbar");
-						ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, tts);
-						ttsToolbar.setOnCloseListener(new Runnable() {
-							@Override
-							public void run() {
-								ttsToolbar = null;
-							}
-						});
-					}
-				}) ) {
+				if (!mActivity.initTTS(tts -> {
+					log.i("TTS created: opening TTS toolbar");
+					ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, tts);
+					ttsToolbar.setOnCloseListener(() -> ttsToolbar = null);
+				})) {
 					log.e("Cannot initilize TTS");
 				}
 			}
@@ -3043,7 +2975,7 @@ import com.google.gson.GsonBuilder;
 			break;
 		case DCMD_TOGGLE_TOUCH_SCREEN_LOCK:
 			isTouchScreenEnabled = !isTouchScreenEnabled;
-			if ( isTouchScreenEnabled )
+			if (isTouchScreenEnabled)
 				mActivity.showToast(R.string.action_touch_screen_enabled_toast);
 			else
 				mActivity.showToast(R.string.action_touch_screen_disabled_toast);
@@ -3120,12 +3052,9 @@ import com.google.gson.GsonBuilder;
 							(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
 						curBlackpageInterval = 0;
 						bookView.draw(false, true);
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								//drawPage();
-								doEngineCommand(cmd, param, onFinishHandler);
-							}
+						BackgroundThread.instance().postGUI(() -> {
+							//drawPage();
+							doEngineCommand(cmd, param, onFinishHandler);
 						}, blackpageDuration);
 					} else {
 						if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
@@ -3145,12 +3074,9 @@ import com.google.gson.GsonBuilder;
 							(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
 						curBlackpageInterval = 0;
 						bookView.draw(false, true);
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								//drawPage();
-								doEngineCommand(cmd, param, onFinishHandler);
-							}
+						BackgroundThread.instance().postGUI(() -> {
+							//drawPage();
+							doEngineCommand(cmd, param, onFinishHandler);
 						}, blackpageDuration);
 					} else {
 						if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
@@ -3591,6 +3517,13 @@ import com.google.gson.GsonBuilder;
 				mActivity.findInDictionary( s , null);
 				//mActivity.mDictionaries.setiDic2IsActive(2);
 				break;
+			case DCMD_GOOGLEDRIVE_SYNC:
+				if (0 == param) {							// sync to
+					mActivity.forceSyncToGoogleDrive();
+				} else if (1 == param) {					// sync from
+					mActivity.forceSyncFromGoogleDrive();
+				}
+				break;
 			default:
 				// do nothing
 				break;
@@ -3668,15 +3601,12 @@ import com.google.gson.GsonBuilder;
 			return;
 		final Bookmark bmk = doc != null ? doc.getCurrentPageBookmark() : null;
 		final PositionProperties props = bmk != null ? doc.getPositionProps(bmk.getStartPos()) : null;
-		if (props != null) BackgroundThread.instance().postGUI(new Runnable() {
-			@Override
-			public void run() {
-				mActivity.updateCurrentPositionStatus(fileInfo, bmk, props);
+		if (props != null) BackgroundThread.instance().postGUI(() -> {
+			mActivity.updateCurrentPositionStatus(fileInfo, bmk, props);
 
-				String fname = mBookInfo.getFileInfo().getBasePath();
-				if (fname != null && fname.length() > 0)
-					setBookPositionForExternalShell(fname, props.pageNumber, props.pageCount);
-			}
+			String fname = mBookInfo.getFileInfo().getBasePath();
+			if (fname != null && fname.length() > 0)
+				setBookPositionForExternalShell(fname, props.pageNumber, props.pageCount);
 		});
 	}
 
@@ -3685,12 +3615,8 @@ import com.google.gson.GsonBuilder;
 		log.d("doCommandFromBackgroundThread("+cmd + ", " + param +")");
 		BackgroundThread.ensureBackground();
 		boolean res = doc.doCommand(cmd.nativeId, param);
-		if ( res ) {
-			BackgroundThread.instance().executeGUI(new Runnable() {
-				public void run() {
-					drawPage();
-				}
-			});
+		if (res) {
+			BackgroundThread.instance().executeGUI(this::drawPage);
 		}
 	}
 
@@ -3757,12 +3683,7 @@ import com.google.gson.GsonBuilder;
 				boolean res = Engine.checkFontLanguageCompatibility(fontFace, fcLangCode);
 				log.d("Checking font \"" + fontFace + "\" for compatibility with language \"" + bookLanguage + "\" fcLangCode=" + fcLangCode + ": res=" + res);
 				if (!res) {
-					BackgroundThread.instance().executeGUI(new Runnable() {
-						@Override
-						public void run() {
-							mActivity.showToast(R.string.font_not_compat_with_language, fontFace, bookLanguage);
-						}
-					});
+					BackgroundThread.instance().executeGUI(() -> mActivity.showToast(R.string.font_not_compat_with_language, fontFace, bookLanguage));
 				}
 			} else {
 				if (null != bookLanguage)
@@ -3776,9 +3697,9 @@ import com.google.gson.GsonBuilder;
 
 	public static boolean eq(Object obj1, Object obj2)
 	{
-		if ( obj1==null && obj2==null )
+		if (obj1 == null && obj2 == null)
 			return true;
-		if ( obj1==null || obj2==null )
+		if (obj1 == null || obj2 == null)
 			return false;
 		return obj1.equals(obj2);
 	}
@@ -3805,7 +3726,7 @@ import com.google.gson.GsonBuilder;
 					currSettings.setProperty((String)entry.getKey(), (String)entry.getValue());
 				}
 				mSettings = currSettings;
-				if ( save ) {
+				if (save) {
 					mActivity.setSettings(mSettings, saveDelayed ? 5000 : 0, false);
 				} else {
 					mActivity.setSettings(mSettings, -1, false);
@@ -3820,7 +3741,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	static public int stringToInt(String value, int defValue) {
-		if ( value==null )
+		if (value == null)
 			return defValue;
 		try {
 			return Integer.valueOf(value);
@@ -3873,12 +3794,7 @@ import com.google.gson.GsonBuilder;
 	 * @return true if opened successfully
 	 */
 	public boolean showManual() {
-		return loadDocument(getManualFileName(), "", new Runnable() {
-			@Override
-			public void run() {
-				mActivity.showToast("Error while opening manual");
-			}
-		});
+		return loadDocument(getManualFileName(), "", null, () -> mActivity.showToast(R.string.manual_open_error));
 	}
 
 	private boolean hiliteTapZoneOnTap = false;
@@ -3886,17 +3802,17 @@ import com.google.gson.GsonBuilder;
 	static private final int DEF_PAGE_FLIP_MS = 300;
 	public void applyAppSetting(String key, String value) {
 		boolean flg = "1".equals(value);
-		if ( key.equals(PROP_APP_TAP_ZONE_HILIGHT) ) {
+		if (key.equals(PROP_APP_TAP_ZONE_HILIGHT)) {
 			hiliteTapZoneOnTap = flg;
-		} else if ( key.equals(PROP_APP_DOUBLE_TAP_SELECTION) ) {
+		} else if (key.equals(PROP_APP_DOUBLE_TAP_SELECTION)) {
 			doubleTapSelectionEnabled = flg;
-		} else if ( key.equals(PROP_APP_GESTURE_PAGE_FLIPPING) ) {
+		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING)) {
 			mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
-		} else if ( key.equals(PROP_APP_DISABLE_TWO_POINTER_GESTURES) ) {
+		} else if (key.equals(PROP_APP_DISABLE_TWO_POINTER_GESTURES)) {
 			mDisableTwoPointerGestures = "1".equals(value);
-		}else if ( key.equals(PROP_APP_SECONDARY_TAP_ACTION_TYPE) ) {
+		}else if (key.equals(PROP_APP_SECONDARY_TAP_ACTION_TYPE)) {
 			secondaryTapActionType = flg ? TAP_ACTION_TYPE_DOUBLE : TAP_ACTION_TYPE_LONGPRESS;
-		} else if ( key.equals(PROP_APP_FLICK_BACKLIGHT_CONTROL) ) {
+		} else if (key.equals(PROP_APP_FLICK_BACKLIGHT_CONTROL)) {
 			isBacklightControlFlick = "1".equals(value) ? 1 : ("2".equals(value) ? 2 : 0);
 		} else if (PROP_APP_HIGHLIGHT_BOOKMARKS.equals(key)) {
 			flgHighlightBookmarks = !"0".equals(value);
@@ -3913,17 +3829,17 @@ import com.google.gson.GsonBuilder;
 			if (n > 10000)
 				n = 10000;
 			autoScrollSpeed = n;
-		} else if ( PROP_PAGE_ANIMATION.equals(key) ) {
+		} else if (PROP_PAGE_ANIMATION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
-				if ( n<0 || n>PAGE_ANIMATION_MAX )
+				if (n < 0 || n > PAGE_ANIMATION_MAX)
 					n = PAGE_ANIMATION_SLIDE2;
 				pageFlipAnimationMode = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
 			//pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
-		} else if ( PROP_PAGE_ANIMATION_SPEED.equals(key) ) {
+		} else if (PROP_PAGE_ANIMATION_SPEED.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				pageFlipAnimationSpeed = n;
@@ -3931,65 +3847,65 @@ import com.google.gson.GsonBuilder;
 				// ignore
 			}
 			//pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
-		} else if ( PROP_CONTROLS_ENABLE_VOLUME_KEYS.equals(key) ) {
+		} else if (PROP_CONTROLS_ENABLE_VOLUME_KEYS.equals(key)) {
 			enableVolumeKeys = flg;
-		} else if ( PROP_APP_SELECTION_ACTION.equals(key) ) {
+		} else if (PROP_APP_SELECTION_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelectionAction = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		} else if ( PROP_APP_MULTI_SELECTION_ACTION.equals(key) ) {
+		} else if (PROP_APP_MULTI_SELECTION_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mMultiSelectionAction = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		} else if ( PROP_APP_SELECTION_ACTION_LONG.equals(key) ) {
+		} else if (PROP_APP_SELECTION_ACTION_LONG.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelectionActionLong = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		}  else if ( PROP_APP_SELECTION2_ACTION.equals(key) ) {
+		}  else if (PROP_APP_SELECTION2_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelection2Action = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		} else if ( PROP_APP_MULTI_SELECTION2_ACTION.equals(key) ) {
+		} else if (PROP_APP_MULTI_SELECTION2_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mMultiSelection2Action = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		} else if ( PROP_APP_SELECTION2_ACTION_LONG.equals(key) ) {
+		} else if (PROP_APP_SELECTION2_ACTION_LONG.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelection2ActionLong = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		}  else if ( PROP_APP_SELECTION3_ACTION.equals(key) ) {
+		}  else if (PROP_APP_SELECTION3_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelection3Action = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		} else if ( PROP_APP_MULTI_SELECTION3_ACTION.equals(key) ) {
+		} else if (PROP_APP_MULTI_SELECTION3_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mMultiSelection3Action = n;
 			} catch ( Exception e ) {
 				// ignore
 			}
-		} else if ( PROP_APP_SELECTION3_ACTION_LONG.equals(key) ) {
+		} else if (PROP_APP_SELECTION3_ACTION_LONG.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelection3ActionLong = n;
@@ -4006,42 +3922,40 @@ import com.google.gson.GsonBuilder;
 	{
 		log.v("setAppSettings()"); //|| keyCode == KeyEvent.KEYCODE_DPAD_LEFT 
 		BackgroundThread.ensureGUI();
-		if ( oldSettings==null )
+		if (oldSettings == null)
 			oldSettings = mSettings;
 		Properties changedSettings = newSettings.diff(oldSettings);
 		boolean viewModeAutoChanged = false;
         for ( Map.Entry<Object, Object> entry : changedSettings.entrySet() ) {
             String key = (String)entry.getKey();
             String value = (String)entry.getValue();
-            if ( PROP_PAGE_VIEW_MODE_AUTOCHANGED.equals(key) ) {
+            if (PROP_PAGE_VIEW_MODE_AUTOCHANGED.equals(key)) {
                 viewModeAutoChanged = "1".equals(value);
                 newSettings.setBool(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, false);
                 break;
             }
         }
-		for ( Map.Entry<Object, Object> entry : changedSettings.entrySet() ) {
+		for (Map.Entry<Object, Object> entry : changedSettings.entrySet()) {
 			String key = (String)entry.getKey();
 			String value = (String)entry.getValue();
 			applyAppSetting( key, value );
-			if ( PROP_APP_FULLSCREEN.equals(key) ) {
+			if (PROP_APP_FULLSCREEN.equals(key)) {
 				boolean flg = mSettings.getBool(PROP_APP_FULLSCREEN, false);
 				newSettings.setBool(PROP_SHOW_BATTERY, flg);
 				newSettings.setBool(PROP_SHOW_TIME, flg);
-			} else if ( PROP_PAGE_VIEW_MODE.equals(key) ) {
+			} else if (PROP_PAGE_VIEW_MODE.equals(key)) {
 				boolean flg = "1".equals(value);
 				if (viewModeAutoChanged)
                     viewMode = (!flg) ? ViewMode.PAGES : ViewMode.SCROLL;
 				    else viewMode = flg ? ViewMode.PAGES : ViewMode.SCROLL;
 				if (viewModeAutoChanged) {
 					final String sVal = (viewMode == ViewMode.PAGES) ? "1" : "0";
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							saveSetting(PROP_PAGE_VIEW_MODE, sVal);
-							saveSetting(PROP_PAGE_VIEW_MODE_AUTOCHANGED, "0");
-						}}, 2000);
+					BackgroundThread.instance().postGUI(() -> {
+						saveSetting(PROP_PAGE_VIEW_MODE, sVal);
+						saveSetting(PROP_PAGE_VIEW_MODE_AUTOCHANGED, "0");
+					}, 2000);
 				}
-			} else if ( PROP_APP_SCREEN_ORIENTATION.equals(key)
+			} else if (PROP_APP_SCREEN_ORIENTATION.equals(key)
 					|| PROP_PAGE_ANIMATION.equals(key)
 					|| PROP_CONTROLS_ENABLE_VOLUME_KEYS.equals(key)
 					|| PROP_APP_SHOW_COVERPAGES.equals(key)
@@ -4099,17 +4013,13 @@ import com.google.gson.GsonBuilder;
 		Properties changedSettings = newSettings.diff(currSettings);
 		currSettings.setAll(changedSettings);
 		mSettings = currSettings;
-		BackgroundThread.instance().postBackground(new Runnable() {
-			public void run() {
-				applySettings(currSettings);
-			}
-		});
+		BackgroundThread.instance().postBackground(() -> applySettings(currSettings));
 	}
 
 	private void setBackgroundTexture(String textureId, int color) {
 		BackgroundTextureInfo[] textures = mEngine.getAvailableTextures();
 		for ( BackgroundTextureInfo item : textures ) {
-			if ( item.id.equals(textureId) ) {
+			if (item.id.equals(textureId)) {
 				setBackgroundTexture(item, color);
 				return;
 			}
@@ -4174,7 +4084,7 @@ import com.google.gson.GsonBuilder;
 			//readHistoryInternal(historyFile.getAbsolutePath());
 			//}
 			String css = mEngine.loadResourceUtf8(R.raw.fb2);
-			if ( css!=null && css.length()>0 )
+			if (css != null && css.length()>0)
 				doc.setStylesheet(css);
 			applySettings(props);
 			mInitialized = true;
@@ -4193,7 +4103,7 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void closeIfOpened(final FileInfo fileInfo) {
-		if ( this.mBookInfo!=null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened ) {
+		if (this.mBookInfo != null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened) {
 			close();
 		}
 	}
@@ -4201,13 +4111,13 @@ import com.google.gson.GsonBuilder;
 	public boolean reloadDocument() {
 		if (this.mBookInfo!=null && this.mBookInfo.getFileInfo() != null) {
 			save(); // save current position
-			post(new LoadDocumentTask(this.mBookInfo, null, null));
+			post(new LoadDocumentTask(this.mBookInfo, null, null, null));
 			return true;
 		}
 		return false;
 	}
 
-	private void postLoadTask(final FileInfo fileInfo, final Runnable errorHandler) {
+	private void postLoadTask(final FileInfo fileInfo, final Runnable doneHandler, final Runnable errorHandler) {
 		Bookmark bmk = new Bookmark();
 		bmk.bookFile = StrUtils.getNonEmptyStr(fileInfo.getFilename(),true);
 		bmk.bookPath = StrUtils.getNonEmptyStr(fileInfo.getPathName(),true);
@@ -4215,32 +4125,25 @@ import com.google.gson.GsonBuilder;
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		final String prettyJson = gson.toJson(bmk);
 		mActivity.saveCurPosFile(true, prettyJson);
-		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fileInfo, new History.BookInfoLoadedCallack() {
-			@Override
-			public void onBookInfoLoaded(final BookInfo bookInfo) {
-				log.v("posting LoadDocument task to background thread");
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						log.v("posting LoadDocument task to GUI thread");
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								log.v("synced posting LoadDocument task to GUI thread");
-								post(new LoadDocumentTask(bookInfo, null, errorHandler));
-							}
-						});
-					}
+		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fileInfo, bookInfo -> {
+			log.v("posting LoadDocument task to background thread");
+			BackgroundThread.instance().postBackground(() -> {
+				log.v("posting LoadDocument task to GUI thread");
+				BackgroundThread.instance().postGUI(() -> {
+					log.v("synced posting LoadDocument task to GUI thread");
+					post(new LoadDocumentTask(bookInfo, null, doneHandler, errorHandler));
 				});
-			}
+			});
 		});
 	}
 
-	public boolean loadDocument(final FileInfo fileInfo, final Runnable errorHandler)	{
+	public boolean loadDocument(final FileInfo fileInfo, final Runnable doneHandler, final Runnable errorHandler) {
 		log.v("loadDocument(" + fileInfo.getPathName() + ")");
-		if ( this.mBookInfo!=null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened ) {
+		if (this.mBookInfo != null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened) {
 			log.d("trying to load already opened document");
 			mActivity.showReader();
+			if (null != doneHandler)
+				doneHandler.run();
 			drawPage();
 			return false;
 		}
@@ -4259,27 +4162,21 @@ import com.google.gson.GsonBuilder;
 			}
 		}
 		if (needAsk) {
-			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile, new Runnable() {
-				@Override
-				public void run() {
-					postLoadTask(fileInfo, errorHandler);
-				}
-			}, new Runnable() {
-				@Override
-				public void run() {
-					mActivity.showRootWindow();
-					if (doc != null) {
-						String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
-						File f = new File(sFile);
-						if (f.exists()) f.delete();
-					}
+			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile,
+					() -> postLoadTask(fileInfo, doneHandler, errorHandler), () -> {
+				mActivity.showRootWindow();
+				if (doc != null) {
+					String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
+					File f = new File(sFile);
+					if (f.exists()) f.delete();
 				}
 			});
-		} else postLoadTask(fileInfo, errorHandler);
+		} else postLoadTask(fileInfo, doneHandler, errorHandler);
 		return true;
 	}
 
-	private void postLoadTaskStream(final InputStream inputStream, final FileInfo fileInfo, final Runnable errorHandler) {
+	private void postLoadTaskStream(final InputStream inputStream, final FileInfo fileInfo,
+									final Runnable doneHandler, final Runnable errorHandler) {
 		Bookmark bmk = new Bookmark();
 		bmk.bookFile = "stream";
 		bmk.bookPath = "stream";
@@ -4287,32 +4184,25 @@ import com.google.gson.GsonBuilder;
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		final String prettyJson = gson.toJson(bmk);
 		mActivity.saveCurPosFile(true, prettyJson);
-		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fileInfo, new History.BookInfoLoadedCallack() {
-			@Override
-			public void onBookInfoLoaded(final BookInfo bookInfo) {
-				log.v("posting LoadDocument task to background thread");
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						log.v("posting LoadDocument task to GUI thread");
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								log.v("synced posting LoadDocument task to GUI thread");
-								post(new LoadDocumentTask(bookInfo, inputStream, errorHandler));
-							}
-						});
-					}
+		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fileInfo, bookInfo -> {
+			log.v("posting LoadDocument task to background thread");
+			BackgroundThread.instance().postBackground(() -> {
+				log.v("posting LoadDocument task to GUI thread");
+				BackgroundThread.instance().postGUI(() -> {
+					log.v("synced posting LoadDocument task to GUI thread");
+					post(new LoadDocumentTask(bookInfo, inputStream, doneHandler, errorHandler));
 				});
-			}
+			});
 		});
 	}
 
-	public boolean loadDocumentFromStream(final InputStream inputStream, final FileInfo fileInfo, final Runnable errorHandler) {
+	public boolean loadDocumentFromStream(final InputStream inputStream, final FileInfo fileInfo, final Runnable doneHandler, final Runnable errorHandler) {
 		log.v("loadDocument(" + fileInfo.getPathName() + ")");
 		if (this.mBookInfo != null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened) {
 			log.d("trying to load already opened document");
 			mActivity.showReader();
+			if (null != doneHandler)
+				doneHandler.run();
 			drawPage();
 			return false;
 		}
@@ -4328,23 +4218,16 @@ import com.google.gson.GsonBuilder;
 			}
 		}
 		if (needAsk) {
-			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" (stream)", new Runnable() {
-				@Override
-				public void run() {
-					postLoadTaskStream(inputStream, fileInfo, errorHandler);
-				}
-			}, new Runnable() {
-				@Override
-				public void run() {
-					mActivity.showRootWindow();
-					if (doc != null) {
-						String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
-						File f = new File(sFile);
-						if (f.exists()) f.delete();
-					}
-				}
-			});
-		} else postLoadTaskStream(inputStream, fileInfo, errorHandler);
+			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" (stream)",
+					() -> postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler), () -> {
+						mActivity.showRootWindow();
+						if (doc != null) {
+							String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
+							File f = new File(sFile);
+							if (f.exists()) f.delete();
+						}
+					});
+		} else postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler);
 		return true;
 	}
 
@@ -4359,13 +4242,13 @@ import com.google.gson.GsonBuilder;
 		if (bi!=null && bi.getFileInfo()!=null) {
 			save();
 			log.i("loadPreviousDocument() is called, prevBookName = " + bi.getFileInfo().getPathName());
-			return loadDocument( bi.getFileInfo().getPathName(), "", errorHandler );
+			return loadDocument(bi.getFileInfo().getPathName(), "", null, errorHandler);
 		}
 		errorHandler.run();
 		return false;
 	}
 
-	public boolean loadDocument(String fileName, String fileLink, final Runnable errorHandler) {
+	public boolean loadDocument(String fileName, String fileLink, final Runnable doneHandler, final Runnable errorHandler) {
 		lastSelection = null;
 		hyplinkBookmark = null;
 		lastSavedToGdBookmark = null;
@@ -4415,15 +4298,15 @@ import com.google.gson.GsonBuilder;
 			}
 		}
 		BookInfo book = Services.getHistory().getBookInfo(fileName);
-		if ( book!=null )
+		if (book != null)
 			log.v("loadDocument() : found book in history : " + book);
-		FileInfo fi = null;
-		if ( book==null ) {
+		FileInfo fi;
+		if (book == null) {
 			log.v("loadDocument() : book not found in history, looking for location directory");
 			FileInfo dir = Services.getScanner().findParent(new FileInfo(fileName), Services.getScanner().getRoot());
-			if (dir!=null) log.v("loadDocument() : parent dir is: "+dir.pathname);
-			if (dir==null) log.v("loadDocument() : parent dir is NULL");
-			if ( dir!=null ) {
+			if (dir != null) log.v("loadDocument() : parent dir is: "+dir.pathname);
+			if (dir == null) log.v("loadDocument() : parent dir is NULL");
+			if (dir != null) {
 				log.v("loadDocument() : document location found : " + dir);
 				fi = dir.findItemByPathName(fileName);
 				log.v("loadDocument() : item inside location : " + fi);
@@ -4434,12 +4317,12 @@ import com.google.gson.GsonBuilder;
 				log.v("loadDocument() : dir == null, BUT : " + fileName);
 				fi = new FileInfo(fileName);
 			}
-			if ( fi==null ) {
+			if (fi == null) {
 				log.v("loadDocument() : no file item " + fileName + " found inside " + dir);
 				if (errorHandler != null) errorHandler.run();
 				return false;
 			}
-			if ( fi.isDirectory ) {
+			if (fi.isDirectory) {
 				log.v("loadDocument() : is a directory, opening browser");
 				mActivity.showBrowser(fi, "");
 				return true;
@@ -4454,10 +4337,10 @@ import com.google.gson.GsonBuilder;
 			mActivity.getDB().saveBookInfo(new BookInfo(fi));
 			mActivity.getDB().flush();
 		}
-		return loadDocument(fi, errorHandler);
+		return loadDocument(fi, doneHandler, errorHandler);
 	}
 
-	public boolean loadDocumentFromStream(InputStream inputStream, String contentPath, final Runnable errorHandler) {
+	public boolean loadDocumentFromStream(InputStream inputStream, String contentPath, final Runnable doneHandler, final Runnable errorHandler) {
 		BackgroundThread.ensureGUI();
 		save();
 		log.i("loadDocument(" + contentPath + ")");
@@ -4478,7 +4361,7 @@ import com.google.gson.GsonBuilder;
 			fi = book.getFileInfo();
 			log.v("loadDocument() : item from history : " + fi);
 		}
-		return loadDocumentFromStream(inputStream, fi, errorHandler);
+		return loadDocumentFromStream(inputStream, fi, doneHandler, errorHandler);
 	}
 
 	public BookInfo getBookInfo() {
@@ -4486,6 +4369,13 @@ import com.google.gson.GsonBuilder;
 		return mBookInfo;
 	}
 
+	public void showCloudSyncProgress(int progress) {
+		showProgress(progress, R.string.cloud_synchronization_);
+	}
+
+	public void hideSyncProgress() {
+		hideProgress();
+	}
 
 	public int getmBatteryState() {
 		return mBatteryState;
@@ -4493,7 +4383,7 @@ import com.google.gson.GsonBuilder;
 
 	private int mBatteryState = 100;
 	public void setBatteryState(int state) {
-		if ( state!=mBatteryState ) {
+		if (state != mBatteryState) {
 			log.i("Battery state changed: " + state);
 			mBatteryState = state;
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) && !isAutoScrollActive()) {
@@ -4515,7 +4405,7 @@ import com.google.gson.GsonBuilder;
 		public synchronized Bitmap get(int dx, int dy) {
 			for (int i=0; i<freeList.size(); i++) {
 				Bitmap bmp = freeList.get(i);
-				if ( bmp.getWidth()==dx && bmp.getHeight()==dy ) {
+				if (bmp.getWidth() == dx && bmp.getHeight() == dy) {
 					// found bitmap of proper size
 					freeList.remove(i);
 					usedList.add(bmp);
@@ -4545,7 +4435,7 @@ import com.google.gson.GsonBuilder;
 		}
 		public synchronized void release(Bitmap bmp) {
 			for (int i=0; i<usedList.size(); i++) {
-				if ( usedList.get(i)==bmp ) {
+				if (usedList.get(i) == bmp) {
 					freeList.add(bmp);
 					usedList.remove(i);
 					while ( freeList.size()>MAX_FREE_LIST_SIZE ) {
@@ -4609,11 +4499,11 @@ import com.google.gson.GsonBuilder;
 //				Log.d("cr3", "stack trace", e);
 //			}
 		//}
-		if ( invalidImages ) {
-			if ( mCurrentPageInfo!=null )
+		if (invalidImages) {
+			if (mCurrentPageInfo != null)
 				mCurrentPageInfo.recycle();
 			mCurrentPageInfo = null;
-			if ( mNextPageInfo!=null )
+			if (mNextPageInfo != null)
 				mNextPageInfo.recycle();
 			mNextPageInfo = null;
 			invalidImages = false;
@@ -4655,14 +4545,14 @@ import com.google.gson.GsonBuilder;
 		boolean isPageView = currpos.pageMode!=0;
 
 		BitmapInfo currposBitmap = null;
-		if ( mCurrentPageInfo!=null && mCurrentPageInfo.position.equals(currpos) && mCurrentPageInfo.imageInfo == null)
+		if (mCurrentPageInfo != null && mCurrentPageInfo.position.equals(currpos) && mCurrentPageInfo.imageInfo == null)
 			currposBitmap = mCurrentPageInfo;
-		else if ( mNextPageInfo!=null && mNextPageInfo.position.equals(currpos) && mNextPageInfo.imageInfo == null )
+		else if (mNextPageInfo != null && mNextPageInfo.position.equals(currpos) && mNextPageInfo.imageInfo == null)
 			currposBitmap = mNextPageInfo;
-		if ( offset==0 ) {
+		if (offset == 0) {
 			// Current page requested
-			if ( currposBitmap!=null ) {
-				if ( mNextPageInfo==currposBitmap ) {
+			if (currposBitmap != null) {
+				if (mNextPageInfo == currposBitmap) {
 					// reorder pages
 					BitmapInfo tmp = mNextPageInfo;
 					mNextPageInfo = mCurrentPageInfo;
@@ -4671,7 +4561,7 @@ import com.google.gson.GsonBuilder;
 				// found ready page image
 				return mCurrentPageInfo;
 			}
-			if ( mCurrentPageInfo!=null ) {
+			if (mCurrentPageInfo != null) {
 				mCurrentPageInfo.recycle();
 				mCurrentPageInfo = null;
 			}
@@ -4685,23 +4575,23 @@ import com.google.gson.GsonBuilder;
 			//log.v("Prepared new current page image " + mCurrentPageInfo);
 			return mCurrentPageInfo;
 		}
-		if ( isPageView ) {
+		if (isPageView) {
 			// PAGES: one of next or prev pages requested, offset is specified as param 
 			int cmd1 = offset > 0 ? ReaderCommand.DCMD_PAGEDOWN.nativeId : ReaderCommand.DCMD_PAGEUP.nativeId;
 			int cmd2 = offset > 0 ? ReaderCommand.DCMD_PAGEUP.nativeId : ReaderCommand.DCMD_PAGEDOWN.nativeId;
-			if ( offset<0 )
+			if (offset < 0)
 				offset = -offset;
-			if ( doc.doCommand(cmd1, offset) ) {
+			if (doc.doCommand(cmd1, offset)) {
 				// can move to next page
 				PositionProperties nextpos = doc.getPositionProps(null);
 				BitmapInfo nextposBitmap = null;
-				if ( mCurrentPageInfo!=null && mCurrentPageInfo.position.equals(nextpos) )
+				if (mCurrentPageInfo != null && mCurrentPageInfo.position.equals(nextpos))
 					nextposBitmap = mCurrentPageInfo;
-				else if ( mNextPageInfo!=null && mNextPageInfo.position.equals(nextpos) )
+				else if (mNextPageInfo != null && mNextPageInfo.position.equals(nextpos))
 					nextposBitmap = mNextPageInfo;
-				if ( nextposBitmap==null ) {
+				if (nextposBitmap == null) {
 					// existing image not found in cache, overriding mNextPageInfo
-					if ( mNextPageInfo!=null )
+					if (mNextPageInfo != null)
 						mNextPageInfo.recycle();
 					mNextPageInfo = null;
 					BitmapInfo bi = new BitmapInfo();
@@ -4723,16 +4613,16 @@ import com.google.gson.GsonBuilder;
 		} else {
 			// SCROLL next or prev page requested, with pixel offset specified
 			int y = currpos.y + offset;
-			if ( doc.doCommand(ReaderCommand.DCMD_GO_POS.nativeId, y) ) {
+			if (doc.doCommand(ReaderCommand.DCMD_GO_POS.nativeId, y)) {
 				PositionProperties nextpos = doc.getPositionProps(null);
 				BitmapInfo nextposBitmap = null;
-				if ( mCurrentPageInfo!=null && mCurrentPageInfo.position.equals(nextpos) )
+				if (mCurrentPageInfo != null && mCurrentPageInfo.position.equals(nextpos))
 					nextposBitmap = mCurrentPageInfo;
-				else if ( mNextPageInfo!=null && mNextPageInfo.position.equals(nextpos) )
+				else if (mNextPageInfo != null && mNextPageInfo.position.equals(nextpos))
 					nextposBitmap = mNextPageInfo;
-				if ( nextposBitmap==null ) {
+				if (nextposBitmap == null) {
 					// existing image not found in cache, overriding mNextPageInfo
-					if ( mNextPageInfo!=null )
+					if (mNextPageInfo != null)
 						mNextPageInfo.recycle();
 					mNextPageInfo = null;
 					BitmapInfo bi = new BitmapInfo();
@@ -4774,18 +4664,18 @@ import com.google.gson.GsonBuilder;
 		}
 		public void work() {
 			BackgroundThread.ensureBackground();
-			if ( this.id!=lastDrawTaskId ) {
+			if (this.id != lastDrawTaskId) {
 				log.d("skipping duplicate drawPage request");
 				return;
 			}
 			nextHiliteId++;
-			if ( currentAnimation!=null ) {
+			if (currentAnimation != null) {
 				log.d("skipping drawPage request while scroll animation is in progress");
 				return;
 			}
 			log.e("DrawPageTask.work("+internalDX+","+internalDY+")");
 			bi = preparePageImage(0);
-			if ( bi!=null ) {
+			if (bi != null) {
 				bookView.draw(isPartially);
 			}
 		}
@@ -4794,13 +4684,13 @@ import com.google.gson.GsonBuilder;
 		{
 			BackgroundThread.ensureGUI();
 //			log.d("drawPage : bitmap is ready, invalidating view to draw new bitmap");
-//			if ( bi!=null ) {
+//			if (bi != null) {
 //				setBitmap( bi.bitmap );
 //				invalidate();
 //			}
 //    		if (mOpened)
 			//hideProgress();
-			if ( doneHandler!=null )
+			if (doneHandler != null)
 				doneHandler.run();
 			scheduleGc();
 		}
@@ -5002,36 +4892,34 @@ import com.google.gson.GsonBuilder;
 //		}
 		// update size with delay: chance to avoid extra unnecessary resizing
 
-		Runnable task = new Runnable() {
-			public void run() {
-				if ( thisId != lastResizeTaskId ) {
-					log.d("skipping duplicate resize request in GUI thread");
-					return;
-				}
-				post(new Task() {
-					public void work() {
-						BackgroundThread.ensureBackground();
-						if ( thisId != lastResizeTaskId ) {
-							log.d("skipping duplicate resize request");
-							return;
-						}
-						internalDX = requestedWidth;
-						internalDY = requestedHeight;
-						log.d("ResizeTask: resizeInternal(" + internalDX + "," + internalDY + ")");
-						//if (checkNeedRedraw(internalDX, internalDY))
-							doc.resize(internalDX, internalDY);
-//	    		        if ( mOpened ) {
+		Runnable task = () -> {
+			if (thisId != lastResizeTaskId) {
+				log.d("skipping duplicate resize request in GUI thread");
+				return;
+			}
+			post(new Task() {
+				public void work() {
+					BackgroundThread.ensureBackground();
+					if (thisId != lastResizeTaskId) {
+						log.d("skipping duplicate resize request");
+						return;
+					}
+					internalDX = requestedWidth;
+					internalDY = requestedHeight;
+					log.d("ResizeTask: resizeInternal(" + internalDX + "," + internalDY + ")");
+					//if (checkNeedRedraw(internalDX, internalDY))
+						doc.resize(internalDX, internalDY);
+//	    		        if (mOpened) {
 //	    					log.d("ResizeTask: done, drawing page");
 //	    			        drawPage();
 //	    		        }
-					}
-					public void done() {
-						clearImageCache();
-						drawPage(null, false);
-						//redraw();
-					}
-				});
-			}
+				}
+				public void done() {
+					clearImageCache();
+					drawPage(null, false);
+					//redraw();
+				}
+			});
 		};
 
 		long timeSinceLastResume = System.currentTimeMillis() - lastAppResumeTs;
@@ -5040,7 +4928,7 @@ import com.google.gson.GsonBuilder;
 		if (timeSinceLastResume < 1000)
 			delay = 1000;
 
-		if ( mOpened ) {
+		if (mOpened) {
 			log.d("scheduling delayed resize task id=" + thisId + " for " + delay + " ms");
 			BackgroundThread.instance().postGUI(task, delay);
 		} else {
@@ -5105,58 +4993,55 @@ import com.google.gson.GsonBuilder;
 	private void animatePageFlip(final int dir, final Runnable onFinishHandler) {
 		if (!mOpened)
 			return;
-		BackgroundThread.instance().executeBackground(new Runnable() {
-			@Override
-			public void run() {
-				BackgroundThread.ensureBackground();
-				if ( currentAnimation==null ) {
-					PositionProperties currPos = doc.getPositionProps(null);
-					if ( currPos==null )
-						return;
-					if (mCurrentPageInfo == null)
-						return;
-					int w = currPos.pageWidth;
-					int h = currPos.pageHeight;
-					int dir2 = dir;
-//					if ( currPos.pageMode==2 )
+		BackgroundThread.instance().executeBackground(() -> {
+			BackgroundThread.ensureBackground();
+			if (currentAnimation == null) {
+				PositionProperties currPos = doc.getPositionProps(null);
+				if (currPos == null)
+					return;
+				if (mCurrentPageInfo == null)
+					return;
+				int w = currPos.pageWidth;
+				int h = currPos.pageHeight;
+				int dir2 = dir;
+//					if (currPos.pageMode == 2)
 //						if ( dir2==1 )
 //							dir2 = 2;
-//						else if ( dir2==-1 ) 
+//						else if ( dir2==-1 )
 //							dir2 = -2;
-					int speed = getPageFlipAnimationSpeedMs();
-					if ( onFinishHandler!=null )
-						speed = getPageFlipAnimationSpeedMs() / 2;
-					if ( currPos.pageMode!=0 ) {
-						int fromX = dir2>0 ? w : 0;
-						int toX = dir2>0 ? 0 : w;
-						new PageViewAnimation(fromX, w, dir2);
+				int speed = getPageFlipAnimationSpeedMs();
+				if (onFinishHandler != null)
+					speed = getPageFlipAnimationSpeedMs() / 2;
+				if (currPos.pageMode != 0) {
+					int fromX = dir2>0 ? w : 0;
+					int toX = dir2>0 ? 0 : w;
+					new PageViewAnimation(fromX, w, dir2);
+					if (currentAnimation != null) {
 						if (currentAnimation != null) {
-							if (currentAnimation != null) {
-								nextHiliteId++;
-								hiliteRect = null;
-								currentAnimation.update(toX, h/2);
-								currentAnimation.move(speed, true);
-								currentAnimation.stop(-1, -1);
-							}
-							if ( onFinishHandler!=null )
-								BackgroundThread.instance().executeGUI(onFinishHandler);
+							nextHiliteId++;
+							hiliteRect = null;
+							currentAnimation.update(toX, h/2);
+							currentAnimation.move(speed, true);
+							currentAnimation.stop(-1, -1);
 						}
-					} else {
-						//new ScrollViewAnimation(startY, maxY);
-						int fromY = dir>0 ? h*7/8 : 0;
-						int toY = dir>0 ? 0 : h*7/8;
-						new ScrollViewAnimation(fromY, h);
+						if (onFinishHandler != null)
+							BackgroundThread.instance().executeGUI(onFinishHandler);
+					}
+				} else {
+					//new ScrollViewAnimation(startY, maxY);
+					int fromY = dir>0 ? h*7/8 : 0;
+					int toY = dir>0 ? 0 : h*7/8;
+					new ScrollViewAnimation(fromY, h);
+					if (currentAnimation != null) {
 						if (currentAnimation != null) {
-							if (currentAnimation != null) {
-								nextHiliteId++;
-								hiliteRect = null;
-								currentAnimation.update(w/2, toY);
-								currentAnimation.move(speed, true);
-								currentAnimation.stop(-1, -1);
-							}
-							if ( onFinishHandler!=null )
-								BackgroundThread.instance().executeGUI(onFinishHandler);
+							nextHiliteId++;
+							hiliteRect = null;
+							currentAnimation.update(w/2, toY);
+							currentAnimation.move(speed, true);
+							currentAnimation.stop(-1, -1);
 						}
+						if (onFinishHandler!=null)
+							BackgroundThread.instance().executeGUI(onFinishHandler);
 					}
 				}
 			}
@@ -5164,13 +5049,13 @@ import com.google.gson.GsonBuilder;
 	}
 
 	static private Rect tapZoneBounds(int startX, int startY, int maxX, int maxY) {
-		if ( startX<0 )
+		if (startX < 0)
 			startX=0;
-		if ( startY<0 )
+		if (startY < 0)
 			startY = 0;
-		if ( startX>maxX )
+		if (startX > maxX)
 			startX = maxX;
-		if ( startY>maxY)
+		if (startY > maxY)
 			startY = maxY;
 		int dx = (maxX + 2) / 3;
 		int dy = (maxY + 2) / 3;
@@ -5190,62 +5075,51 @@ import com.google.gson.GsonBuilder;
 		final int myHiliteId = ++nextHiliteId;
 		int txcolor = mSettings.getColor(PROP_FONT_COLOR, Color.BLACK);
 		final int color = (txcolor & 0xFFFFFF) | (HILITE_RECT_ALPHA<<24);
-		BackgroundThread.instance().executeBackground(new Runnable() {
-			@Override
-			public void run() {
-				if ( myHiliteId != nextHiliteId || (!hilite && hiliteRect==null) )
-					return;
+		BackgroundThread.instance().executeBackground(() -> {
+			if (myHiliteId != nextHiliteId || (!hilite && hiliteRect == null))
+				return;
 
-				if (currentAutoScrollAnimation!=null) {
+			if (currentAutoScrollAnimation!=null) {
+				hiliteRect = null;
+				return;
+			}
+
+			BackgroundThread.ensureBackground();
+			final BitmapInfo pageImage = preparePageImage(0);
+			if (pageImage != null && pageImage.bitmap != null && pageImage.position != null) {
+				//PositionProperties currPos = pageImage.position;
+				final Rect rc = hilite ? tapZoneBounds( startX, startY, maxX, maxY ) : hiliteRect;
+				if (hilite)
+					hiliteRect = rc;
+				else
 					hiliteRect = null;
-					return;
-				}
-
-				BackgroundThread.ensureBackground();
-				final BitmapInfo pageImage = preparePageImage(0);
-				if ( pageImage!=null && pageImage.bitmap!=null && pageImage.position!=null ) {
-					//PositionProperties currPos = pageImage.position;
-					final Rect rc = hilite ? tapZoneBounds( startX, startY, maxX, maxY ) : hiliteRect;
-					if ( hilite )
-						hiliteRect = rc;
-					else
-						hiliteRect = null;
-					if ( rc!=null )
-						drawCallback( new DrawCanvasCallback() {
-							@Override
-							public void drawTo(Canvas canvas) {
-								if ( mInitialized && mCurrentPageInfo!=null ) {
-									log.d("onDraw() -- drawing page image");
-									drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, rc, rc);
-									if ( hilite ) {
-										Paint p = new Paint();
-										p.setColor(color);
+				if (rc != null)
+					drawCallback(canvas -> {
+						if (mInitialized && mCurrentPageInfo != null) {
+							log.d("onDraw() -- drawing page image");
+							drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, rc, rc);
+							if (hilite) {
+								Paint p = new Paint();
+								p.setColor(color);
 //					    			if ( true ) {
-										canvas.drawRect(new Rect(rc.left, rc.top, rc.right-2, rc.top+2), p);
-										canvas.drawRect(new Rect(rc.left, rc.top+2, rc.left+2, rc.bottom-2), p);
-										canvas.drawRect(new Rect(rc.right-2-2, rc.top+2, rc.right-2, rc.bottom-2), p);
-										canvas.drawRect(new Rect(rc.left+2, rc.bottom-2-2, rc.right-2-2, rc.bottom-2), p);
+								canvas.drawRect(new Rect(rc.left, rc.top, rc.right-2, rc.top+2), p);
+								canvas.drawRect(new Rect(rc.left, rc.top+2, rc.left+2, rc.bottom-2), p);
+								canvas.drawRect(new Rect(rc.right-2-2, rc.top+2, rc.right-2, rc.bottom-2), p);
+								canvas.drawRect(new Rect(rc.left+2, rc.bottom-2-2, rc.right-2-2, rc.bottom-2), p);
 //					    			} else {
 //					    				canvas.drawRect(rc, p);
 //					    			}
-									}
-								}
 							}
-
-						}, rc, false);
-				}
+						}
+					}, rc, false);
 			}
-
 		});
 	}
 	private void scheduleUnhilite(int delay) {
 		final int myHiliteId = nextHiliteId;
-		BackgroundThread.instance().postGUI(new Runnable() {
-			@Override
-			public void run() {
-				if ( myHiliteId == nextHiliteId && hiliteRect!=null )
-					unhiliteTapZone();
-			}
+		BackgroundThread.instance().postGUI(() -> {
+			if (myHiliteId == nextHiliteId && hiliteRect != null)
+				unhiliteTapZone();
 		}, delay);
 	}
 
@@ -5365,11 +5239,11 @@ import com.google.gson.GsonBuilder;
 	private void updateBrightnessControl_old(final int y_start, final int y, final boolean leftSide) {
 		int n = OptionsDialog.mBacklightLevels.length;
 		int index = n - 1 - y * n / surface.getHeight();
-		if ( index<0 )
+		if (index < 0)
 			index = 0;
-		else if ( index>=n )
+		else if (index >= n)
 			index = n-1;
-		if ( index != currentBrightnessValueIndex ) {
+		if (index != currentBrightnessValueIndex) {
 			currentBrightnessValueIndex = index;
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
@@ -5392,16 +5266,16 @@ import com.google.gson.GsonBuilder;
 		if (!leftSide)
 			index = index1 - index2 + lastBrightnessValueIndexRight;
 		//int index = currentBrightnessValueIndex + (currentBrightnessValueIndex * aval) / 100;
-		if ( index<0 )
+		if (index < 0)
 			index = 0;
-		else if ( index>=n )
+		else if (index >= n)
 			index = n-1;
-		if ( index != currentBrightnessValueIndex ) {
+		if (index != currentBrightnessValueIndex) {
 			currentBrightnessValueIndex = index;
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-				if (newValue < 0) newValue = 0;
+				if (newValue < 1) newValue = 1;
 				showCenterPopup(newValue+"%");
 			}
 		}
@@ -5409,13 +5283,13 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private void stopBrightnessControl(final int y_start, final int y, final boolean leftSide) {
-		if ( currentBrightnessValueIndex>=0 ) {
-			if ( y_start>=0 && y>=0 ) {
+		if (currentBrightnessValueIndex >= 0) {
+			if (y_start >= 0 && y >= 0) {
 				updateBrightnessControl(y_start, y, leftSide);
 			}
 			mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, OptionsDialog.mBacklightLevels[currentBrightnessValueIndex]);
 			OptionsDialog.mBacklightLevelsTitles[0] = mActivity.getString(R.string.options_app_backlight_screen_default);
-			if ( showBrightnessFlickToast ) {
+			if (showBrightnessFlickToast) {
 				String s = OptionsDialog.mBacklightLevelsTitles[currentBrightnessValueIndex];
 				mActivity.showToast(s);
 			}
@@ -5435,26 +5309,23 @@ import com.google.gson.GsonBuilder;
 		if (!mOpened)
 			return;
 		alog.d("startAnimation("+startX + ", " + startY+")");
-		BackgroundThread.instance().executeBackground(new Runnable() {
-			@Override
-			public void run() {
-				BackgroundThread.ensureBackground();
-				PositionProperties currPos = doc.getPositionProps(null);
-				if ( currPos!=null && currPos.pageMode!=0 ) {
-					//int dir = startX > maxX/2 ? currPos.pageMode : -currPos.pageMode;
-					//int dir = startX > maxX/2 ? 1 : -1;
-					int dir = newX - startX < 0 ? 1 : -1;
-					int sx = startX;
+		BackgroundThread.instance().executeBackground(() -> {
+			BackgroundThread.ensureBackground();
+			PositionProperties currPos = doc.getPositionProps(null);
+			if (currPos != null && currPos.pageMode != 0) {
+				//int dir = startX > maxX/2 ? currPos.pageMode : -currPos.pageMode;
+				//int dir = startX > maxX/2 ? 1 : -1;
+				int dir = newX - startX < 0 ? 1 : -1;
+				int sx = startX;
 //					if ( dir<0 )
 //						sx = 0;
-					new PageViewAnimation(sx, maxX, dir);
-				} else {
-					new ScrollViewAnimation(startY, maxY);
-				}
-				if ( currentAnimation!=null ) {
-					nextHiliteId++;
-					hiliteRect = null;
-				}
+				new PageViewAnimation(sx, maxX, dir);
+			} else {
+				new ScrollViewAnimation(startY, maxY);
+			}
+			if (currentAnimation != null) {
+				nextHiliteId++;
+				hiliteRect = null;
 			}
 		});
 	}
@@ -5475,22 +5346,19 @@ import com.google.gson.GsonBuilder;
 			scheduleUpdate();
 		}
 		private void scheduleUpdate() {
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					alog.d("updating("+x + ", " + y+")");
-					boolean animate = false;
-					synchronized (AnimationUpdate.class) {
+			BackgroundThread.instance().postBackground(() -> {
+				alog.d("updating("+x + ", " + y+")");
+				boolean animate = false;
+				synchronized (AnimationUpdate.class) {
 
-						if (currentAnimation != null && currentAnimationUpdate == AnimationUpdate.this) {
-							currentAnimationUpdate = null;
-							currentAnimation.update(x, y);
-							animate = true;
-						}
+					if (currentAnimation != null && currentAnimationUpdate == AnimationUpdate.this) {
+						currentAnimationUpdate = null;
+						currentAnimation.update(x, y);
+						animate = true;
 					}
-					if (animate)
-						currentAnimation.animate();
 				}
+				if (animate)
+					currentAnimation.animate();
 			});
 		}
 
@@ -5518,14 +5386,10 @@ import com.google.gson.GsonBuilder;
 		if (!mOpened)
 			return;
 		alog.d("stopAnimation("+x+", "+y+")");
-		BackgroundThread.instance().executeBackground(new Runnable() {
-			@Override
-			public void run() {
-				if ( currentAnimation!=null ) {
-					currentAnimation.stop(x, y);
-				}
+		BackgroundThread.instance().executeBackground(() -> {
+			if (currentAnimation != null) {
+				currentAnimation.stop(x, y);
 			}
-
 		});
 	}
 
@@ -5533,12 +5397,9 @@ import com.google.gson.GsonBuilder;
 	private void scheduleAnimation() {
 		if (!mOpened)
 			return;
-		animationScheduler.post(new Runnable() {
-			@Override
-			public void run() {
-				if (currentAnimation != null) {
-					currentAnimation.animate();
-				}
+		animationScheduler.post(() -> {
+			if (currentAnimation != null) {
+				currentAnimation.animate();
 			}
 		});
 	}
@@ -5558,9 +5419,9 @@ import com.google.gson.GsonBuilder;
 			0, 6, 24, 54, 95, 146, 206, 273, 345, 421, 500, 578, 654, 726, 793, 853, 904, 945, 975, 993, 1000
 	};
 	static public int accelerate(int x0, int x1, int x) {
-		if ( x<x0 )
+		if (x < x0)
 			x = x0;
-		if (x>x1)
+		if (x > x1)
 			x = x1;
 		int intervals = accelerationShape.length - 1;
 		int pos = x1 > x0 ? 100 * intervals * (x - x0) / (x1-x0) : x1;
@@ -5575,17 +5436,17 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private interface DrawCanvasCallback {
-		public void drawTo( Canvas c );
+		void drawTo(Canvas c);
 	}
 	private void drawCallback( DrawCanvasCallback callback, Rect rc, boolean isPartially )
 	{
-		if ( !mSurfaceCreated )
+		if (!mSurfaceCreated)
 			return;
 		//synchronized(surfaceLock) { }
 		//log.v("draw() - in thread " + Thread.currentThread().getName());
 		final SurfaceHolder holder = surface.getHolder();
 		//log.v("before synchronized(surfaceLock)");
-		if ( holder!=null )
+		if (holder != null)
 		//synchronized(surfaceLock) 
 		{
 			Canvas canvas = null;
@@ -5593,7 +5454,7 @@ import com.google.gson.GsonBuilder;
 			try {
 				canvas = holder.lockCanvas(rc);
 				//log.v("before draw(canvas)");
-				if ( canvas!=null ) {
+				if (canvas != null) {
 					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())){
 						EinkScreen.PrepareController(surface, isPartially);
 					}
@@ -5604,9 +5465,9 @@ import com.google.gson.GsonBuilder;
 				}
 			} finally {
 				//log.v("exiting finally");
-				if ( canvas!=null && surface.getHolder()!=null ) {
+				if (canvas != null && surface.getHolder() != null) {
 					//log.v("before unlockCanvasAndPost");
-					if ( canvas!=null && holder!=null ) {
+					if (canvas != null && holder != null) {
 						holder.unlockCanvasAndPost(canvas);
 						//if ( rc==null ) {
 						long endTs = android.os.SystemClock.uptimeMillis();
@@ -5680,7 +5541,7 @@ import com.google.gson.GsonBuilder;
 			PositionProperties currPos = doc.getPositionProps(null);
 			int pos = currPos.y;
 			int pos0 = pos - (maxY - startY);
-			if ( pos0<0 )
+			if (pos0 < 0)
 				pos0 = 0;
 			pointerStartPos = pos;
 			pointerCurrPos = pos;
@@ -5707,7 +5568,7 @@ import com.google.gson.GsonBuilder;
 			if (currentAnimation == null)
 				return;
 			//if ( started ) {
-			if ( y!=-1 ) {
+			if (y != -1) {
 				int delta = startY - y;
 				pointerCurrPos = pointerStartPos + delta;
 			}
@@ -5721,13 +5582,13 @@ import com.google.gson.GsonBuilder;
 
 		@Override
 		public void move(int duration, boolean accelerated) {
-			if ( duration>0  && getPageFlipAnimationSpeedMs()!=0 ) {
+			if (duration > 0  && getPageFlipAnimationSpeedMs() != 0) {
 				int steps = (int)(duration / getAvgAnimationDrawDuration()) + 2;
 				int x0 = pointerCurrPos;
 				int x1 = pointerDestPos;
-				if ( (x0-x1)<10 && (x0-x1)>-10 )
+				if ((x0 - x1) < 10 && (x0 - x1) > -10)
 					steps = 2;
-				for (int i=1; i<steps; i++) {
+				for (int i = 1; i < steps; i++) {
 					int x = x0 + (x1-x0) * i / steps;
 					pointerCurrPos = accelerated ? accelerate( x0, x1, x ) : x;
 					draw();
@@ -5747,33 +5608,33 @@ import com.google.gson.GsonBuilder;
 		public void animate()
 		{
 			//log.d("animate() is called");
-			if ( pointerDestPos != pointerCurrPos ) {
-				if ( !started )
+			if (pointerDestPos != pointerCurrPos) {
+				if (!started)
 					started = true;
-				if ( getPageFlipAnimationSpeedMs()==0 )
+				if (getPageFlipAnimationSpeedMs() == 0)
 					pointerCurrPos = pointerDestPos;
 				else {
 					int delta = pointerCurrPos-pointerDestPos;
-					if ( delta<0 )
+					if (delta < 0)
 						delta = -delta;
 					long avgDraw = getAvgAnimationDrawDuration();
 					//int maxStep = (int)(maxY * PAGE_ANIMATION_DURATION / avgDraw);
 					int maxStep = getPageFlipAnimationSpeedMs() > 0 ? (int)(maxY * 1000 / avgDraw / getPageFlipAnimationSpeedMs()) : maxY;
 					int step;
-					if ( delta > maxStep * 2 )
+					if (delta > maxStep * 2)
 						step = maxStep;
 					else
 						step = (delta + 3) / 4;
 					//int step = delta<3 ? 1 : (delta<5 ? 2 : (delta<10 ? 3 : (delta<15 ? 6 : (delta<25 ? 10 : (delta<50 ? 15 : 30))))); 
-					if ( pointerCurrPos<pointerDestPos )
-						pointerCurrPos+=step;
-					else if ( pointerCurrPos>pointerDestPos )
-						pointerCurrPos-=step;
+					if (pointerCurrPos < pointerDestPos)
+						pointerCurrPos += step;
+					else
+						pointerCurrPos -= step;
 					log.d("animate("+pointerCurrPos + " => " + pointerDestPos + "  step=" + step + ")");
 				}
 				//pointerCurrPos = pointerDestPos;
 				draw();
-				if ( pointerDestPos != pointerCurrPos )
+				if (pointerDestPos != pointerCurrPos)
 					scheduleAnimation();
 			}
 		}
@@ -5817,7 +5678,7 @@ import com.google.gson.GsonBuilder;
 		for (int i=0; i<15; i++) {
 			c = (a + b) / 2;
 			double cq = c - Math.sin(c);
-			if ( cq < dx )
+			if (cq < dx)
 				a = c;
 			else
 				b = c;
@@ -5872,11 +5733,11 @@ import com.google.gson.GsonBuilder;
 			log.v("PageViewAnimation -- creating: drawing two pages to buffer");
 
 			PositionProperties currPos = mCurrentPageInfo == null ? null : mCurrentPageInfo.position;
-			if ( currPos==null )
+			if (currPos == null)
 				currPos = doc.getPositionProps(null);
 			page1 = currPos.pageNumber;
 			page2 = currPos.pageNumber + direction;
-			if ( page2<0 || page2>=currPos.pageCount) {
+			if (page2 < 0 || page2 >= currPos.pageCount) {
 				currentAnimation = null;
 				return;
 			}
@@ -5891,11 +5752,11 @@ import com.google.gson.GsonBuilder;
 			if (image2!=null)
 				image2scaled = Bitmap.createScaledBitmap(
 					image2.bitmap, image2.bitmap.getWidth()/4, image2.bitmap.getHeight()/4, false);
-			if ( image1==null || image2==null ) {
+			if (image1 == null || image2 == null) {
 				log.v("PageViewAnimation -- cannot start animation: page image is null");
 				return;
 			}
-			if ( page1==page2 ) {
+			if (page1 == page2) {
 				log.v("PageViewAnimation -- cannot start animation: not moved");
 				return;
 			}
@@ -5912,7 +5773,7 @@ import com.google.gson.GsonBuilder;
 				hilitePaints[i] = new Paint();
 				hilitePaints[i].setStyle(Paint.Style.FILL);
 				shadePaints[i].setStyle(Paint.Style.FILL);
-				if ( mActivity.isNightMode() ) {
+				if (mActivity.isNightMode()) {
 					shadePaints[i].setColor(Color.argb((i+1)*96 / numPaints, 0, 0, 0));
 					hilitePaints[i].setColor(Color.argb((i+1)*96 / numPaints, 64, 64, 64));
 				} else {
@@ -5935,11 +5796,11 @@ import com.google.gson.GsonBuilder;
 				int index = startIndex + i*dir;
 				int x1 = rc.left + dx*i/n;
 				int x2 = rc.left + dx*(i+1)/n;
-				if ( x2>rc.right )
+				if (x2 > rc.right)
 					x2 = rc.right;
 				rect.left = x1;
 				rect.right = x2;
-				if ( x2>x1 ) {
+				if (x2 > x1) {
 					canvas.drawRect(rect, paints[index]);
 				}
 			}
@@ -5970,7 +5831,7 @@ import com.google.gson.GsonBuilder;
 			int normaldststart = -1;
 			int normaldstend = -1;
 
-			if ( dx < maxdx ) {
+			if (dx < maxdx) {
 				// start
 				int index = dx>=0 ? dx * SIN_TABLE_SIZE / maxdx : 0;
 				if (index > DST_TABLE.length)
@@ -6011,8 +5872,8 @@ import com.google.gson.GsonBuilder;
 
 			Rect srcrc = new Rect(src);
 			Rect dstrc = new Rect(dst);
-			if ( normalsrcstart<normalsrcend ) {
-				if ( dir>0 ) {
+			if (normalsrcstart < normalsrcend) {
+				if (dir > 0) {
 					srcrc.left = src.left + normalsrcstart;
 					srcrc.right = src.left + normalsrcend;
 					dstrc.left = dst.left + normaldststart;
@@ -6025,7 +5886,7 @@ import com.google.gson.GsonBuilder;
 				}
 				drawDimmedBitmap(canvas, bmp, srcrc, dstrc);
 			}
-			if ( distortdststart<distortdstend ) {
+			if (distortdststart < distortdstend) {
 				int n = distortdx / 5 + 1;
 				int dst0 = SIN_TABLE[distortanglestart * SIN_TABLE_SIZE / PI_DIV_2] * maxdistortdx / SIN_TABLE_SCALE;
 				int src0 = distortanglestart * maxdistortdx / SIN_TABLE_SCALE;
@@ -6039,7 +5900,7 @@ import com.google.gson.GsonBuilder;
 					int dst2 = SIN_TABLE[endangle * SIN_TABLE_SIZE / PI_DIV_2] * maxdistortdx / SIN_TABLE_SCALE - dst0;
 					int hiliteIndex = startangle * hilitePaints.length / PI_DIV_2;
 					Paint[] paints;
-					if ( dir>0 ) {
+					if (dir > 0) {
 						dstrc.left = dst.left + distortdststart + dst1;
 						dstrc.right = dst.left + distortdststart + dst2;
 						srcrc.left = src.left + distortsrcstart + src1;
@@ -6060,13 +5921,13 @@ import com.google.gson.GsonBuilder;
 
 		@Override
 		public void move(int duration, boolean accelerated) {
-			if ( duration > 0 && getPageFlipAnimationSpeedMs()!=0 ) {
+			if (duration > 0 && getPageFlipAnimationSpeedMs() != 0) {
 				int steps = (int)(duration / getAvgAnimationDrawDuration()) + 2;
 				int x0 = currShift;
 				int x1 = destShift;
-				if ( (x0 - x1) < 10 && (x0 - x1) > -10 )
+				if ((x0 - x1) < 10 && (x0 - x1) > -10)
 					steps = 2;
-				for (int i=1; i < steps; i++) {
+				for (int i = 1; i < steps; i++) {
 					int x = x0 + (x1 - x0) * i / steps;
 					currShift = accelerated ? accelerate( x0, x1, x ) : x;
 					draw();
@@ -6083,21 +5944,21 @@ import com.google.gson.GsonBuilder;
 			alog.v("PageViewAnimation.stop(" + x + ", " + y + ")");
 			//if ( started ) {
 			boolean moved = false;
-			if ( x!=-1 ) {
+			if (x != -1) {
 				int threshold = mActivity.getPalmTipPixels() * 7/8;
-				if ( direction > 0 ) {
+				if (direction > 0) {
 					// |  <=====  |
 					int dx = startX - x;
-					if ( dx>threshold )
+					if (dx > threshold)
 						moved = true;
 				} else {
 					// |  =====>  |
 					int dx = x - startX;
-					if ( dx>threshold )
+					if (dx > threshold)
 						moved = true;
 				}
 				int duration;
-				if ( moved ) {
+				if (moved) {
 					destShift = maxX;
 					duration = 300; // 500 ms forward
 				} else {
@@ -6124,9 +5985,9 @@ import com.google.gson.GsonBuilder;
 		public void update(int x, int y) {
 			alog.v("PageViewAnimation.update(" + x + ", " + y + ")");
 			int delta = direction>0 ? startX - x : x - startX;
-			if ( delta<=0 )
+			if (delta <= 0)
 				destShift = 0;
-			else if ( delta<maxX )
+			else if (delta < maxX)
 				destShift = delta;
 			else
 				destShift = maxX;
@@ -6136,31 +5997,31 @@ import com.google.gson.GsonBuilder;
 		{
 			alog.v("PageViewAnimation.animate("+currShift + " => " + destShift + ") speed=" + getPageFlipAnimationSpeedMs());
 			//log.d("animate() is called");
-			if ( currShift != destShift ) {
+			if (currShift != destShift) {
 				started = true;
-				if ( getPageFlipAnimationSpeedMs()==0 )
+				if (getPageFlipAnimationSpeedMs() == 0)
 					currShift = destShift;
 				else {
 					int delta = currShift - destShift;
-					if ( delta<0 )
+					if (delta < 0)
 						delta = -delta;
 					long avgDraw = getAvgAnimationDrawDuration();
 					int maxStep = getPageFlipAnimationSpeedMs() > 0 ? (int)(maxX * 1000 / avgDraw / getPageFlipAnimationSpeedMs()) : maxX;
 					int step;
-					if ( delta > maxStep * 2 )
+					if (delta > maxStep * 2)
 						step = maxStep;
 					else
 						step = (delta + 3) / 4;
 					//int step = delta<3 ? 1 : (delta<5 ? 2 : (delta<10 ? 3 : (delta<15 ? 6 : (delta<25 ? 10 : (delta<50 ? 15 : 30))))); 
-					if ( currShift < destShift )
+					if (currShift < destShift)
 						currShift+=step;
-					else if ( currShift > destShift )
+					else if (currShift > destShift)
 						currShift-=step;
 					alog.v("PageViewAnimation.animate("+currShift + " => " + destShift + "  step=" + step + ")");
 				}
 				//pointerCurrPos = pointerDestPos;
 				draw();
-				if ( currShift != destShift )
+				if (currShift != destShift)
 					scheduleAnimation();
 			}
 		}
@@ -6175,14 +6036,14 @@ import com.google.gson.GsonBuilder;
 			int w = image1.bitmap.getWidth();
 			int h = image1.bitmap.getHeight();
 			int div;
-			if ( direction > 0 ) {
+			if (direction > 0) {
 				// FORWARD
 				div = w-currShift;
 				Rect shadowRect = new Rect(div, 0, div+w/10, h);
-				if ( pageFlipAnimationM ==  PAGE_ANIMATION_PAPER) {
-					if ( this.pageCount==2 ) {
+				if (pageFlipAnimationM ==  PAGE_ANIMATION_PAPER) {
+					if (this.pageCount == 2) {
 						int w2 = w/2;
-						if ( div<w2 ) {
+						if (div < w2) {
 							// left - part of old page
 							Rect src1 = new Rect(0, 0, div, h);
 							Rect dst1 = new Rect(0, 0, div, h);
@@ -6212,8 +6073,8 @@ import com.google.gson.GsonBuilder;
 							Rect dst3 = new Rect(div, 0, w, h);
 							drawDimmedBitmap(canvas, image2.bitmap, src3, dst3);
 
-							if ( div>0 && div<w )
-								drawShadow( canvas, shadowRect );
+							if (div > 0 && div < w)
+								drawShadow(canvas, shadowRect);
 						}
 					} else {
 						Rect src1 = new Rect(0, 0, w, h);
@@ -6226,11 +6087,11 @@ import com.google.gson.GsonBuilder;
 						//log.v("drawing " + image1);
 						drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
 
-						if ( div>0 && div<w )
-							drawShadow( canvas, shadowRect );
+						if (div > 0 && div < w)
+							drawShadow(canvas, shadowRect);
 					}
 				} else {
-					if ( pageFlipAnimationM == PAGE_ANIMATION_BLUR ) {
+					if (pageFlipAnimationM == PAGE_ANIMATION_BLUR) {
 						int defRadius = 20;
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
@@ -6253,7 +6114,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmap(canvas, blurredBmp == null ? image1.bitmap : blurredBmp, null, dst2);
 						}
 					}
-					else if ( pageFlipAnimationM == PAGE_ANIMATION_BLUR_DIM ) {
+					else if (pageFlipAnimationM == PAGE_ANIMATION_BLUR_DIM) {
 						int defDim = dimmingAlpha;
 						int defRadius = 20;
 						int w2 = w / 2;
@@ -6278,7 +6139,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmapAlpha(canvas, blurredBmp == null ? image1.bitmap : blurredBmp, null, dst2, dim);
 						}
 					}
-					else if ( pageFlipAnimationM == PAGE_ANIMATION_DIM ) {
+					else if (pageFlipAnimationM == PAGE_ANIMATION_DIM) {
 						int defDim = dimmingAlpha;
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
@@ -6293,7 +6154,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmapAlpha(canvas, image1.bitmap, null, dst2,  dim);
 						}
 					}
-					else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG ) {
+					else if (pageFlipAnimationM == PAGE_ANIMATION_MAG) {
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
 						int defMaxW = w/4;
@@ -6312,7 +6173,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmap(canvas, image1.bitmap, src2, dst2);
 						}
 					}
-					else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG_DIM ) {
+					else if (pageFlipAnimationM == PAGE_ANIMATION_MAG_DIM) {
 						int defDim = dimmingAlpha;
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
@@ -6359,10 +6220,10 @@ import com.google.gson.GsonBuilder;
 				// BACK
 				div = currShift;
 				Rect shadowRect = new Rect(div, 0, div+10, h);
-				if ( pageFlipAnimationM ==  PAGE_ANIMATION_PAPER ) {
-					if ( this.pageCount==2 ) {
+				if (pageFlipAnimationM ==  PAGE_ANIMATION_PAPER) {
+					if (this.pageCount == 2) {
 						int w2 = w/2;
-						if ( div<w2 ) {
+						if (div < w2) {
 							// left - part of old page
 							Rect src1 = new Rect(0, 0, div, h);
 							Rect dst1 = new Rect(0, 0, div, h);
@@ -6391,8 +6252,8 @@ import com.google.gson.GsonBuilder;
 							Rect dst3 = new Rect(div, 0, w, h);
 							drawDimmedBitmap(canvas, image1.bitmap, src3, dst3);
 
-							if ( div>0 && div<w )
-								drawShadow( canvas, shadowRect );
+							if (div > 0 && div < w)
+								drawShadow(canvas, shadowRect);
 						}
 					} else {
 						Rect src1 = new Rect(currShift, 0, w, h);
@@ -6403,11 +6264,11 @@ import com.google.gson.GsonBuilder;
 						//canvas.drawBitmap(image2.bitmap, src2, dst2, null);
 						drawDistorted(canvas, image2.bitmap, src2, dst2, 1);
 
-						if ( div>0 && div<w )
-							drawShadow( canvas, shadowRect );
+						if (div > 0 && div < w)
+							drawShadow(canvas, shadowRect);
 					}
 				} else {
-					if ( pageFlipAnimationM ==  PAGE_ANIMATION_BLUR ) {
+					if (pageFlipAnimationM ==  PAGE_ANIMATION_BLUR) {
 						int defRadius = 20;
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
@@ -6430,7 +6291,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmap(canvas, blurredBmp == null ? image2.bitmap : blurredBmp, null, dst2);
 						}
 					}
-					else if ( pageFlipAnimationM == PAGE_ANIMATION_BLUR_DIM ) {
+					else if (pageFlipAnimationM == PAGE_ANIMATION_BLUR_DIM) {
 						int defDim = dimmingAlpha;
 						int defRadius = 20;
 						int w2 = w / 2;
@@ -6455,7 +6316,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmapAlpha(canvas, blurredBmp == null ? image2.bitmap : blurredBmp, null, dst2, dim);
 						}
 					}
-					else if ( pageFlipAnimationM == PAGE_ANIMATION_DIM ) {
+					else if (pageFlipAnimationM == PAGE_ANIMATION_DIM) {
 						int defDim = dimmingAlpha;
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
@@ -6470,7 +6331,7 @@ import com.google.gson.GsonBuilder;
 							drawDimmedBitmapAlpha(canvas, image2.bitmap, null, dst2,  dim);
 						}
 
-					} else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG ) {
+					} else if (pageFlipAnimationM == PAGE_ANIMATION_MAG) {
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
 						int defMaxW = w/4;
@@ -6483,13 +6344,12 @@ import com.google.gson.GsonBuilder;
 							//log.v("drawing " + image1);
 							drawDimmedBitmap(canvas, image1.bitmap, src1, dst1);
 						} else {
-							//asdf
 							Rect src2 = new Rect(curW, curH, w - curW,  h - curH);
 							Rect dst2 = new Rect(0, 0, w, h);
 							//log.v("drawing " + image2);
 							drawDimmedBitmap(canvas, image2.bitmap, src2, dst2);
 						}
-					}  else if ( pageFlipAnimationM == PAGE_ANIMATION_MAG_DIM ) {
+					}  else if (pageFlipAnimationM == PAGE_ANIMATION_MAG_DIM) {
 						int defDim = dimmingAlpha;
 						int w2 = w / 2;
 						int diff = Math.abs(div - w2);
@@ -6504,7 +6364,6 @@ import com.google.gson.GsonBuilder;
 							//log.v("drawing " + image1);
 							drawDimmedBitmapAlpha(canvas, image1.bitmap, src1, dst1, dim);
 						} else {
-							//asdf
 							Rect src2 = new Rect(curW, curH, w - curW,  h - curH);
 							Rect dst2 = new Rect(0, 0, w, h);
 							//log.v("drawing " + image2);
@@ -6529,7 +6388,7 @@ import com.google.gson.GsonBuilder;
 					}
 				}
 			}
-			if ( div>0 && div<w ) {
+			if (div > 0 && div < w) {
 				canvas.drawLine(div, 0, div, h, divPaint);
 			}
 		}
@@ -6545,9 +6404,9 @@ import com.google.gson.GsonBuilder;
 
 	private void updateAnimationDurationStats( long duration )
 	{
-		if ( duration<=0 )
+		if (duration <= 0)
 			duration = 1;
-		else if ( duration>1000 )
+		else if (duration > 1000)
 			return;
 		int pos = drawAnimationPos + 1;
 		if (pos >= drawAnimationStats.length)
@@ -6627,11 +6486,11 @@ import com.google.gson.GsonBuilder;
 	}
 	private void drawPage( Runnable doneHandler, boolean isPartially )
 	{
-		if ( !mInitialized )
+		if (!mInitialized)
 			return;
 		log.v("drawPage() : submitting DrawPageTask");
 		// evaluate if we need to redraw page on this resolution
-		if ( mOpened )
+		if (mOpened)
 			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 		post( new DrawPageTask(doneHandler, isPartially) );
 	}
@@ -6644,7 +6503,7 @@ import com.google.gson.GsonBuilder;
 	{
 		log.d("document is loaded succesfull, checking coverpage data");
 		byte[] coverpageBytes = doc.getCoverPageData();
-		if ( coverpageBytes!=null ) {
+		if (coverpageBytes != null) {
 			log.d("Found cover page data: " + coverpageBytes.length + " bytes");
 			coverPageBytes = coverpageBytes;
 		}
@@ -6678,9 +6537,7 @@ import com.google.gson.GsonBuilder;
 	private void checkOpenBookStyles(boolean force) {
 		boolean bDontAsk = mActivity.settings().getBool(Settings.PROP_APP_HIDE_CSS_WARNING, false);
 		if (!bDontAsk)
-			BackgroundThread.instance().postGUI(new Runnable() {
-			@Override
-			public void run() {
+			BackgroundThread.instance().postGUI(() -> {
 				if (getBookInfo() != null) {
 					int iCurPage = getDoc().getCurPage();
 					if ((iCurPage<3) || (force)) {
@@ -6732,8 +6589,7 @@ import com.google.gson.GsonBuilder;
 								});
 					}
 				}
-			}
-		}, 200);
+			}, 200);
 	}
 
 	private class LoadDocumentTask extends Task
@@ -6741,12 +6597,13 @@ import com.google.gson.GsonBuilder;
 		String filename;
 		String path;
 		InputStream inputStream;
+		Runnable doneHandler;
 		Runnable errorHandler;
 		String pos;
 		int profileNumber;
 		boolean disableInternalStyles;
 		boolean disableTextAutoformat;
-		LoadDocumentTask(BookInfo bookInfo, InputStream inputStream, Runnable errorHandler) {
+		LoadDocumentTask(BookInfo bookInfo, InputStream inputStream, Runnable doneHandler, Runnable errorHandler) {
 			BackgroundThread.ensureGUI();
 			mBookInfo = bookInfo;
 			FileInfo fileInfo = bookInfo.getFileInfo();
@@ -6764,6 +6621,7 @@ import com.google.gson.GsonBuilder;
 			this.filename = fileInfo.getPathName();
 			this.path = fileInfo.arcname != null ? fileInfo.arcname : fileInfo.pathname;
 			this.inputStream = inputStream;
+			this.doneHandler = doneHandler;
 			this.errorHandler = errorHandler;
 			//FileInfo fileInfo = new FileInfo(filename);
 			disableInternalStyles = mBookInfo.getFileInfo().getFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG);
@@ -6780,7 +6638,7 @@ import com.google.gson.GsonBuilder;
 					}
 			}
 			log.v("BookProfileNumber : "+ profileNumber);
-			if ( mBookInfo!=null && mBookInfo.getLastPosition()!=null )
+			if (mBookInfo!=null && mBookInfo.getLastPosition()!=null)
 				pos = mBookInfo.getLastPosition().getStartPos();
 			log.v("LoadDocumentTask : book info " + mBookInfo);
 			log.v("LoadDocumentTask : last position = " + pos);
@@ -6789,25 +6647,17 @@ import com.google.gson.GsonBuilder;
 			//mBitmap = null;
 			//showProgress(1000, R.string.progress_loading);
 			//draw();
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					bookView.draw(false);
-				}
-			});
+			BackgroundThread.instance().postGUI(() -> bookView.draw(false));
 			//init();
 			// close existing document
 			log.v("LoadDocumentTask : closing current book");
 	        close();
 			final Properties currSettings = new Properties(mSettings);
 			//setAppSettings(props, oldSettings);
-			BackgroundThread.instance().postBackground(new Runnable() {
-				@Override
-				public void run() {
-					log.v("LoadDocumentTask : switching current profile");
-					applySettings(currSettings); //enforce settings reload
-					log.i("Switching done");
-				}
+			BackgroundThread.instance().postBackground(() -> {
+				log.v("LoadDocumentTask : switching current profile");
+				applySettings(currSettings); //enforce settings reload
+				log.i("Switching done");
 			});
 		}
 
@@ -6846,7 +6696,7 @@ import com.google.gson.GsonBuilder;
 				log.v("updating loaded book info");
 				updateLoadedBookInfo();
 				log.i("Document " + filename + " is loaded successfully");
-				if ( pos==null ) {
+				if (pos == null) {
 					Bookmark bmk = getActivity().readCurPosFile(false);
 					if (bmk!=null) {
 						boolean bSameBook=true;
@@ -6861,7 +6711,7 @@ import com.google.gson.GsonBuilder;
 						}
 					}
 				}
-				if ( pos!=null ) {
+				if (pos != null) {
 					log.i("Restoring position : " + pos);
 					restorePositionBackground(pos);
 				} else {
@@ -6893,12 +6743,7 @@ import com.google.gson.GsonBuilder;
 					}
 				} else
 					mBookInfo.getFileInfo().crc32 = 0;
-				mActivity.waitForCRDBService(new Runnable() {
-					@Override
-					public void run() {
-						mActivity.getDB().saveBookInfo(mBookInfo);
-					}
-				});
+				mActivity.waitForCRDBService(() -> mActivity.getDB().saveBookInfo(mBookInfo));
 				if (coverPageBytes != null && mBookInfo != null && mBookInfo.getFileInfo() != null) {
 					// TODO: fix it
 					/*
@@ -6934,26 +6779,23 @@ import com.google.gson.GsonBuilder;
 
 				drawPage();
 
-				BackgroundThread.instance().postGUI(new Runnable() {
-					public void run() {
-						mActivity.showReader();
-						final String booknameF = getBookInfo().getFileInfo().getFilename();
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								String bookname = getBookInfo().getFileInfo().getFilename();
-								if (bookname.equals(booknameF)) {
-									log.i("Load last rpos from CLOUD");
-									int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-									if (iSyncVariant3 != 0) {
-										if (mActivity.mCurrentFrame == mActivity.getmReaderFrame())
-											CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-												CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, true, true);
-									}
-								}
+				BackgroundThread.instance().postGUI(() -> {
+					mActivity.showReader();
+					if (null != doneHandler)
+						doneHandler.run();
+					final String booknameF = getBookInfo().getFileInfo().getFilename();
+					BackgroundThread.instance().postGUI(() -> {
+						String bookname = getBookInfo().getFileInfo().getFilename();
+						if (bookname.equals(booknameF)) {
+							log.i("Load last rpos from CLOUD");
+							int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant3 != 0) {
+								if (mActivity.mCurrentFrame == mActivity.getmReaderFrame())
+									CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+										CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, true, true);
 							}
-						}, 5000);
-					}
+						}
+					}, 5000);
 				});
 
 				// Save last opened book ONLY if book opened from real file not stream.
@@ -6967,28 +6809,22 @@ import com.google.gson.GsonBuilder;
 			BackgroundThread.ensureGUI();
 			close();
 			log.v("LoadDocumentTask failed for " + mBookInfo, e);
-			mActivity.waitForCRDBService(new Runnable() {
-				@Override
-				public void run() {
-					if (Services.getHistory() != null)
-						Services.getHistory().removeBookInfo(mActivity.getDB(), mBookInfo.getFileInfo(), true, false);
-				}
+			mActivity.waitForCRDBService(() -> {
+				if (Services.getHistory() != null)
+					Services.getHistory().removeBookInfo(mActivity.getDB(), mBookInfo.getFileInfo(), true, false);
 			});
 			mBookInfo = null;
 			log.d("LoadDocumentTask is finished with exception " + e.getMessage());
 	        mOpened = false;
-	        BackgroundThread.instance().executeBackground(new Runnable() {
-		        @Override
-		        public void run() {
-			        doc.createDefaultDocument(mActivity.getString(R.string.error), mActivity.getString(R.string.error_while_opening, filename));
-			        doc.requestRender();
-			        preparePageImage(0);
-			        drawPage();
-		        }
-	        });
+	        BackgroundThread.instance().executeBackground(() -> {
+				doc.createDefaultDocument(mActivity.getString(R.string.error), mActivity.getString(R.string.error_while_opening, filename));
+				doc.requestRender();
+				preparePageImage(0);
+				drawPage();
+			});
 			hideProgress();
 			mActivity.showToast("Error while loading document");
-			if ( errorHandler!=null ) {
+			if (errorHandler != null) {
 				log.e("LoadDocumentTask: Calling error handler");
 				errorHandler.run();
 			}
@@ -7002,7 +6838,7 @@ import com.google.gson.GsonBuilder;
 		if ((DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))&&(!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS))
 			return; // no backlight
 		int alpha = dimmingAlpha;
-		if ( alpha!=255 ) {
+		if (alpha != 255) {
 			Paint p = new Paint();
 			p.setColor((255-alpha)<<24);
 			canvas.drawRect(dst, p);
@@ -7012,7 +6848,7 @@ import com.google.gson.GsonBuilder;
 	private void dimRectAlpha( Canvas canvas, Rect dst, int alpha ) {
 		if ((DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))&&(!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS))
 			return; // no backlight
-		if ( alpha!=255 ) {
+		if (alpha != 255) {
 			Paint p = new Paint();
 			p.setColor((255-alpha)<<24);
 			canvas.drawRect(dst, p);
@@ -7189,7 +7025,7 @@ import com.google.gson.GsonBuilder;
 			return;
 		int w = canvas.getWidth();
 		int h = canvas.getHeight();
-		int mins = (w < h ? w : h) * 7 / 10;
+		int mins = Math.min(w, h) * 7 / 10;
 		int ph = mins / 20;
 		int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
 		float factor = mActivity.getDensityFactor();
@@ -7219,11 +7055,11 @@ import com.google.gson.GsonBuilder;
 
 	private int dimmingAlpha = 255; // no dimming
 	public void setDimmingAlpha(int alpha) {
-		if ( alpha>255 )
+		if (alpha > 255)
 			alpha = 255;
-		if ( alpha<32 )
+		if (alpha < 32)
 			alpha = 32;
-		if ( dimmingAlpha!=alpha ) {
+		if (dimmingAlpha != alpha) {
 			dimmingAlpha = alpha;
 			mEngine.execute(new Task() {
 				@Override
@@ -7246,7 +7082,7 @@ import com.google.gson.GsonBuilder;
 			checkOpenBookStyles(false);
 			if (doc.getCurPage()>2) {
 				// for safe mode
-				String sFile = mActivity.getSettingsFile(0).getParent() + "/cur_pos0.json";
+				String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
 				File f = new File(sFile);
 				if (f.exists()) f.delete();
 			}
@@ -7258,8 +7094,8 @@ import com.google.gson.GsonBuilder;
 	private int lastHideBrighnessTaskId = 0;
 
 	public int getDefSavePositionInterval() {
-		return
-		  (getSettings().getInt(ReaderView.PROP_SAVE_POS_TIMEOUT, 0))*1000*60;
+		int i = getSettings().getInt(ReaderView.PROP_SAVE_POS_TIMEOUT, 0);
+		return (i>=1000) ?i : i*1000*60;
 	}
 
 	public int getDefSavePositionIntervalSpeak() {
@@ -7269,64 +7105,56 @@ import com.google.gson.GsonBuilder;
 
 	public void scheduleSaveCurrentPositionBookmark(final int delayMillis) {
 		// GUI thread required
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			@Override
-			public void run() {
-				final int mylastSavePositionTaskId = ++lastSavePositionTaskId;
-				if (isBookLoaded() && mBookInfo != null) {
-					final Bookmark bmk = getCurrentPositionBookmark();
-					if (bmk == null)
-						return;
-					final BookInfo bookInfo = mBookInfo;
-					if (delayMillis <= 1) {
-						if (bookInfo != null && mActivity.getDB() != null) {
-							log.v("saving last position immediately");
-							savePositionBookmark(bmk);
-							Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+		BackgroundThread.instance().executeGUI(() -> {
+			final int mylastSavePositionTaskId = ++lastSavePositionTaskId;
+			if (isBookLoaded() && mBookInfo != null) {
+				final Bookmark bmk = getCurrentPositionBookmark();
+				if (bmk == null)
+					return;
+				final BookInfo bookInfo = mBookInfo;
+				if (delayMillis <= 1) {
+					if (bookInfo != null && mActivity.getDB() != null) {
+						log.v("saving last position immediately");
+						savePositionBookmark(bmk);
+						Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+					}
+				} else {
+					BackgroundThread.instance().postGUI(() -> {
+						if (mylastSavePositionTaskId == lastSavePositionTaskId) {
+							if (bookInfo != null) {
+								log.v("saving last position");
+								if (Services.getHistory() != null) {
+									savePositionBookmark(bmk);
+									Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+								}
+							}
 						}
-					} else {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								if (mylastSavePositionTaskId == lastSavePositionTaskId) {
+					}, delayMillis);
+					boolean bNeedSave = !appPaused;
+					if (lastSavedToGdBookmark!=null) {
+						if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+							bNeedSave = false;
+						}
+					}
+					if (bNeedSave) {
+						final int mylastSavePositionCloudTaskId = ++lastSavePositionCloudTaskId;
+						int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_CLOUD_TIMEOUT, 0)) * 1000 * 60;
+						if (autosaveInterval > 0)
+							BackgroundThread.instance().postGUI((Runnable) () -> {
+								if (mylastSavePositionCloudTaskId == lastSavePositionCloudTaskId) {
 									if (bookInfo != null) {
-										log.v("saving last position");
-										if (Services.getHistory() != null) {
-											savePositionBookmark(bmk);
-											Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+										if (!appPaused) {
+											mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("&");
+											log.i("Save reading pos to CLOUD");
+											lastSavedToGdBookmark = bmk;
+											int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+											if (iSyncVariant > 0)
+												CloudSync.saveJsonInfoFileOrCloud(mActivity,
+														CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
 										}
 									}
 								}
-							}}, delayMillis);
-						boolean bNeedSave = !appPaused;
-						if (lastSavedToGdBookmark!=null) {
-							if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
-								bNeedSave = false;
-							}
-						}
-						if (bNeedSave) {
-							final int mylastSavePositionCloudTaskId = ++lastSavePositionCloudTaskId;
-							int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_CLOUD_TIMEOUT, 0)) * 1000 * 60;
-							if (autosaveInterval > 0)
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										if (mylastSavePositionCloudTaskId == lastSavePositionCloudTaskId) {
-											if (bookInfo != null) {
-												if (!appPaused) {
-													mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("&");
-													log.i("Save reading pos to CLOUD");
-													lastSavedToGdBookmark = bmk;
-													int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-													if (iSyncVariant > 0)
-														CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-																CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
-												}
-											}
-										}
-									}
-								}, autosaveInterval);
-						}
+							}, autosaveInterval);
 					}
 				}
 			}
@@ -7350,25 +7178,20 @@ import com.google.gson.GsonBuilder;
 
 	public void scheduleHideWindowCenterPopup(final int delayMillis) {
 		// GUI thread required
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			@Override
-			public void run() {
-				final int mylastHideBrighnessTaskId = ++lastHideBrighnessTaskId;
-				if (delayMillis <= 1) {
-					if (windowCenterPopup != null) {
-						windowCenterPopup.dismiss();
-					}
-				} else {
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							if (mylastHideBrighnessTaskId == lastHideBrighnessTaskId) {
-								if (windowCenterPopup != null) {
-									windowCenterPopup.dismiss();
-								}
-							}
-						}}, delayMillis);
+		BackgroundThread.instance().executeGUI(() -> {
+			final int mylastHideBrighnessTaskId = ++lastHideBrighnessTaskId;
+			if (delayMillis <= 1) {
+				if (windowCenterPopup != null) {
+					windowCenterPopup.dismiss();
 				}
+			} else {
+				BackgroundThread.instance().postGUI(() -> {
+					if (mylastHideBrighnessTaskId == lastHideBrighnessTaskId) {
+						if (windowCenterPopup != null) {
+							windowCenterPopup.dismiss();
+						}
+					}
+				}, delayMillis);
 			}
 		});
 	}
@@ -7390,9 +7213,9 @@ import com.google.gson.GsonBuilder;
 					Uri uri = Uri.parse("content://com.sony.drbd.ebook.internal.provider/continuereading");
 					ContentValues contentvalues = new ContentValues();
 					contentvalues.put("file_path" , file_path);
-					contentvalues.put("current_page" , Long.valueOf(current_page));
-					contentvalues.put("total_pages" , Long.valueOf(total_pages));
-					if ( mActivity.getContentResolver().insert(uri, contentvalues) != null)
+					contentvalues.put("current_page" , current_page);
+					contentvalues.put("total_pages" , total_pages);
+					if (mActivity.getContentResolver().insert(uri, contentvalues) != null)
 						Log.d("cr3Sony" , "setBookPosition: filename = " + filename + "start=" + current_page + "end=" + total_pages);
 					else
 						Log.d("crsony" , "setBookPosition : error inserting in database!");
@@ -7409,24 +7232,18 @@ import com.google.gson.GsonBuilder;
 		void onPositionProperties(PositionProperties props, String positionText);
 	}
 	public void getCurrentPositionProperties(final PositionPropertiesCallback callback) {
-		BackgroundThread.instance().postBackground(new Runnable() {
-			@Override
-			public void run() {
-				final Bookmark bmk = (doc != null) ? doc.getCurrentPageBookmarkNoRender() : null;
-				final PositionProperties props = (bmk != null) ? doc.getPositionProps(bmk.getStartPos()) : null;
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						String posText = null;
-						if (props != null) {
-							int percent = (int)(10000 * (long)props.y / props.fullHeight);
-							String percentText = "" + (percent/100) + "." + (percent%10) + "%";
-							posText = "" + props.pageNumber + " / " + props.pageCount + " (" + percentText + ")";
-						}
-						callback.onPositionProperties(props, posText);
-					}
-				});
-			}
+		BackgroundThread.instance().postBackground(() -> {
+			final Bookmark bmk = (doc != null) ? doc.getCurrentPageBookmarkNoRender() : null;
+			final PositionProperties props = (bmk != null) ? doc.getPositionProps(bmk.getStartPos()) : null;
+			BackgroundThread.instance().postBackground(() -> {
+				String posText = null;
+				if (props != null) {
+					int percent = (int)(10000 * (long)props.y / props.fullHeight);
+					String percentText = "" + (percent/100) + "." + (percent%10) + "%";
+					posText = "" + props.pageNumber + " / " + props.pageCount + " (" + percentText + ")";
+				}
+				callback.onPositionProperties(props, posText);
+			});
 		});
 	}
 
@@ -7473,18 +7290,18 @@ import com.google.gson.GsonBuilder;
 		Bookmark bmk = BackgroundThread.instance().callBackground(new Callable<Bookmark>() {
 			@Override
 			public Bookmark call() throws Exception {
-				if ( !mOpened )
+				if (!mOpened)
 					return null;
 				return doc.getCurrentPageBookmark();
 			}
 		});
-		if ( bmk!=null ) {
+		if (bmk != null) {
 			//setBookPosition();
 			bmk.setTimeStamp(System.currentTimeMillis());
 			bmk.setType(Bookmark.TYPE_LAST_POSITION);
-			if ( mBookInfo!=null )
+			if (mBookInfo != null)
 				mBookInfo.setLastPosition(bmk);
-			if ( saveToDB ) {
+			if (saveToDB) {
 				Services.getHistory().updateRecentDir();
 				mActivity.getDB().saveBookInfo(mBookInfo);
 				mActivity.getDB().flush();
@@ -7514,7 +7331,7 @@ import com.google.gson.GsonBuilder;
 	{
 		BackgroundThread.ensureGUI();
 		log.i("ReaderView.close() is called");
-		if ( !mOpened )
+		if (!mOpened)
 			return;
 		cancelSwapTask();
 		stopImageViewer();
@@ -7524,7 +7341,7 @@ import com.google.gson.GsonBuilder;
 		post( new Task() {
 			public void work() {
 				BackgroundThread.ensureBackground();
-				if ( mOpened ) {
+				if (mOpened) {
 					mOpened = false;
 					log.i("ReaderView().close() : closing current document");
 					doc.doCommand(ReaderCommand.DCMD_CLOSE_BOOK.nativeId, 0);
@@ -7532,12 +7349,12 @@ import com.google.gson.GsonBuilder;
 			}
 			public void done() {
 				BackgroundThread.ensureGUI();
-				if ( currentAnimation==null ) {
-					if (  mCurrentPageInfo!=null ) {
+				if (currentAnimation == null) {
+					if (mCurrentPageInfo != null) {
 						mCurrentPageInfo.recycle();
 						mCurrentPageInfo = null;
 					}
-					if (  mNextPageInfo!=null ) {
+					if (mNextPageInfo != null) {
 						mNextPageInfo.recycle();
 						mNextPageInfo = null;
 					}
@@ -7554,15 +7371,13 @@ import com.google.gson.GsonBuilder;
 		log.i("ReaderView.destroy() is called");
 		if (mInitialized) {
 			//close();
-			BackgroundThread.instance().postBackground(new Runnable() {
-				public void run() {
-					BackgroundThread.ensureBackground();
-					if ( mInitialized ) {
-						log.i("ReaderView.destroyInternal() calling");
-						doc.destroy();
-						mInitialized = false;
-						currentBackgroundTexture = Engine.NO_TEXTURE;
-					}
+			BackgroundThread.instance().postBackground(() -> {
+				BackgroundThread.ensureBackground();
+				if (mInitialized) {
+					log.i("ReaderView.destroyInternal() calling");
+					doc.destroy();
+					mInitialized = false;
+					currentBackgroundTexture = Engine.NO_TEXTURE;
 				}
 			});
 			//engine.waitTasksCompletion();
@@ -7571,17 +7386,17 @@ import com.google.gson.GsonBuilder;
 
 	private String getCSSForFormat( DocumentFormat fileFormat )
 	{
-		if ( fileFormat==null )
+		if (fileFormat == null)
 			fileFormat = DocumentFormat.FB2;
 		File[] dataDirs = Engine.getDataDirectories(null, false, false);
 		String defaultCss = mEngine.loadResourceUtf8(fileFormat.getCSSResourceId());
 		for ( File dir : dataDirs ) {
 			File file = new File( dir, fileFormat.getCssName() );
-			if ( file.exists() ) {
+			if (file.exists()) {
 				String css = Engine.loadFileUtf8(file);
-				if ( css!=null ) {
+				if (css != null) {
 					int p1 = css.indexOf("@import");
-					if ( p1<0 )
+					if (p1 < 0)
 						p1 = css.indexOf("@include");
 					int p2 = css.indexOf("\";");
 					if (p1 >= 0 && p2 >= 0 && p1 < p2 ) {
@@ -7612,7 +7427,7 @@ import com.google.gson.GsonBuilder;
 			scheduleSwapTask();
 		}
 		public boolean OnFormatProgress(final int percent) {
-			if ( enable_progress_callback ) {
+			if (enable_progress_callback) {
 				log.d("readerCallback.OnFormatProgress " + percent);
 				showProgress( percent*4/10 + 5000, R.string.progress_formatting);
 			}
@@ -7651,8 +7466,7 @@ import com.google.gson.GsonBuilder;
 		public String OnLoadFileFormatDetected(final DocumentFormat fileFormat) {
 			log.i("readerCallback.OnLoadFileFormatDetected " + fileFormat);
 			if (fileFormat != null) {
-				String s = getCSSForFormat(fileFormat);
-				return s;
+				return getCSSForFormat(fileFormat);
 			}
 			return null;
 //
@@ -7676,7 +7490,7 @@ import com.google.gson.GsonBuilder;
 		}
 		public boolean OnLoadFileProgress(final int percent) {
 			BackgroundThread.ensureBackground();
-			if ( enable_progress_callback ) {
+			if (enable_progress_callback) {
 				log.d("readerCallback.OnLoadFileProgress " + percent);
 				showProgress( percent*4/10 + 1000, R.string.progress_loading);
 			}
@@ -7730,23 +7544,18 @@ import com.google.gson.GsonBuilder;
 			startTime = System.currentTimeMillis();
 		}
 		public void reschedule() {
-			if ( this!=currentSwapTask )
+			if (this != currentSwapTask)
 				return;
-			BackgroundThread.instance().postGUI( new Runnable() {
-				@Override
-				public void run() {
-					post(SwapToCacheTask.this);
-				}
-			}, 2000);
+			BackgroundThread.instance().postGUI(() -> post(SwapToCacheTask.this), 2000);
 		}
 		@Override
 		public void work() throws Exception {
-			if ( this!=currentSwapTask )
+			if (this != currentSwapTask)
 				return;
 			int res = doc.swapToCache();
 			isTimeout = res==DocView.SWAP_TIMEOUT;
 			long duration = System.currentTimeMillis() - startTime;
-			if ( !isTimeout ) {
+			if (!isTimeout) {
 				log.i("swapToCacheInternal is finished with result " + res + " in " + duration + " ms");
 			} else {
 				log.d("swapToCacheInternal exited by TIMEOUT in " + duration + " ms: rescheduling");
@@ -7754,7 +7563,7 @@ import com.google.gson.GsonBuilder;
 		}
 		@Override
 		public void done() {
-			if ( isTimeout )
+			if (isTimeout)
 				reschedule();
 		}
 
@@ -7762,16 +7571,12 @@ import com.google.gson.GsonBuilder;
 
 	private boolean invalidImages = true;
 	public void clearImageCache() {
-		BackgroundThread.instance().postBackground( new Runnable() {
-			public void run() {
-				invalidImages = true;
-			}
-		});
+		BackgroundThread.instance().postBackground(() -> invalidImages = true);
 	}
 
 	public void setStyleSheet(final String css) {
 		BackgroundThread.ensureGUI();
-		if ( css!=null && css.length()>0 ) {
+		if (css != null && css.length() > 0) {
 			post(new Task() {
 				public void work() {
 					doc.setStylesheet(css);
@@ -7809,11 +7614,11 @@ import com.google.gson.GsonBuilder;
 
 	public void goToPercent(final int percent) {
 		BackgroundThread.ensureGUI();
-		if ( percent>=0 && percent<=100 )
+		if (percent >= 0 && percent <= 100)
 			post( new Task() {
 				public void work() {
 					PositionProperties pos = doc.getPositionProps(null);
-					if ( pos!=null && pos.pageCount>0) {
+					if (pos != null && pos.pageCount > 0) {
 						int pageNumber = pos.pageCount * percent / 100;
 						doCommandFromBackgroundThread(ReaderCommand.DCMD_GO_PAGE, pageNumber);
 					}
@@ -7840,11 +7645,11 @@ import com.google.gson.GsonBuilder;
 
 			@Override
 			public void done() {
-				if ( callback!=null ) {
+				if (callback != null) {
 					clearImageCache();
 					surface.invalidate();
 					drawPage();
-					if ( res )
+					if (res)
 						callback.onNewSelection(selection);
 					else
 						callback.onFail();
@@ -7853,7 +7658,7 @@ import com.google.gson.GsonBuilder;
 
 			@Override
 			public void fail(Exception e) {
-				if ( callback!=null )
+				if (callback != null)
 					callback.onFail();
 			}
 
@@ -7958,12 +7763,9 @@ import com.google.gson.GsonBuilder;
 	DelayedExecutor gcTask = DelayedExecutor.createGUI("gc");
 	public void scheduleGc() {
 		try {
-			gcTask.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					log.v("Initiating garbage collection");
-					System.gc();
-				}
+			gcTask.postDelayed(() -> {
+				log.v("Initiating garbage collection");
+				System.gc();
 			}, GC_INTERVAL);
 		} catch (Exception e) {
 			// ignore
@@ -7998,13 +7800,9 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void showInputDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final InputHandler handler) {
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			@Override
-			public void run() {
-				final InputDialog dlg = new InputDialog(mActivity, title, prompt, isNumberEdit, minValue, maxValue, lastValue, handler);
-				dlg.show();
-			}
-
+		BackgroundThread.instance().executeGUI(() -> {
+			final InputDialog dlg = new InputDialog(mActivity, title, prompt, isNumberEdit, minValue, maxValue, lastValue, handler);
+			dlg.show();
 		});
 	}
 
@@ -8033,82 +7831,72 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void showGoToPageDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final GotoPageDialog.GotoPageHandler handler) {
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			@Override
-			public void run() {
-				final GotoPageDialog dlg = new GotoPageDialog(mActivity, title, prompt, isNumberEdit, minValue, maxValue, lastValue, handler);
-				dlg.show();
-			}
-
+		BackgroundThread.instance().executeGUI(() -> {
+			final GotoPageDialog dlg = new GotoPageDialog(mActivity, title, prompt, isNumberEdit, minValue, maxValue, lastValue, handler);
+			dlg.show();
 		});
 	}
 
 	public void showGoToPageDialog() {
-		getCurrentPositionProperties(new PositionPropertiesCallback() {
-			@Override
-			public void onPositionProperties(final PositionProperties props, final String positionText) {
-				if (props == null)
-					return;
-				String pos = mActivity.getString(R.string.dlg_goto_current_position) + " " + positionText;
-				String prompt = mActivity.getString(R.string.dlg_goto_input_page_number);
-				showGoToPageDialog(mActivity.getString(R.string.mi_goto_page), pos + "\n" + prompt, true,
-						1, props.pageCount, props.pageNumber,
-						new GotoPageDialog.GotoPageHandler() {
-							int pageNumber = 0;
-							@Override
-							public boolean validate(String s) {
-								pageNumber = Integer.valueOf(s);
-								return pageNumber>0 && pageNumber <= props.pageCount;
-							}
-							@Override
-							public void onOk(String s) {
-								goToPage(pageNumber);
-							}
-							@Override
-							public void onOkPage(String s) {
-								goToPage(pageNumber);
-							}
-							@Override
-							public void onCancel() {
-							}
-						});
-			}
+		getCurrentPositionProperties((props, positionText) -> {
+			if (props == null)
+				return;
+			String pos = mActivity.getString(R.string.dlg_goto_current_position) + " " + positionText;
+			String prompt = mActivity.getString(R.string.dlg_goto_input_page_number);
+			showGoToPageDialog(mActivity.getString(R.string.mi_goto_page), pos + "\n" + prompt, true,
+					1, props.pageCount, props.pageNumber,
+					new GotoPageDialog.GotoPageHandler() {
+						int pageNumber = 0;
+						@Override
+						public boolean validate(String s) {
+							pageNumber = Integer.parseInt(s);
+							return pageNumber>0 && pageNumber <= props.pageCount;
+						}
+						@Override
+						public void onOk(String s) {
+							goToPage(pageNumber);
+						}
+						@Override
+						public void onOkPage(String s) {
+							goToPage(pageNumber);
+						}
+						@Override
+						public void onCancel() {
+						}
+					});
 		});
 	}
 
 
 	public void showGoToPercentDialog() {
-		getCurrentPositionProperties(new PositionPropertiesCallback() {
-			@Override
-			public void onPositionProperties(PositionProperties props, String positionText) {
-				if (props == null)
-					return;
-				String pos = mActivity.getString(R.string.dlg_goto_current_position) + " " + positionText;
-				String prompt = mActivity.getString(R.string.dlg_goto_input_percent);
-				showGoToPageDialog(mActivity.getString(R.string.mi_goto_percent), pos + "\n" + prompt, true,
-						0, 100, props.y * 100 / props.fullHeight,
-						new GotoPageDialog.GotoPageHandler() {
-							int percent = 0;
-							@Override
-							public boolean validate(String s) {
-								percent = Integer.valueOf(s);
-								//return percent>=0 && percent<=100;
-								return percent>=0;
-							}
-							@Override
-							public void onOk(String s) {
-								if (percent>=0 && percent<=100)
-								goToPercent(percent);
-							}
-							@Override
-							public void onOkPage(String s) {
-								goToPage(percent);
-							}
-							@Override
-							public void onCancel() {
-							}
-						});
-			}
+		getCurrentPositionProperties((props, positionText) -> {
+			if (props == null)
+				return;
+			String pos = mActivity.getString(R.string.dlg_goto_current_position) + " " + positionText;
+			String prompt = mActivity.getString(R.string.dlg_goto_input_percent);
+			showGoToPageDialog(mActivity.getString(R.string.mi_goto_percent), pos + "\n" + prompt, true,
+					0, 100, props.y * 100 / props.fullHeight,
+					new GotoPageDialog.GotoPageHandler() {
+						int percent = 0;
+						@Override
+						public boolean validate(String s) {
+							percent = Integer.valueOf(s);
+							//return percent>=0 && percent<=100;
+							return percent>=0;
+						}
+						@Override
+						public void onOk(String s) {
+							if (percent>=0 && percent<=100)
+							goToPercent(percent);
+						}
+						@Override
+						public void onOkPage(String s) {
+							goToPage(percent);
+						}
+						@Override
+						public void onCancel() {
+						}
+					});
 		});
 	}
 
@@ -8139,7 +7927,7 @@ import com.google.gson.GsonBuilder;
 			return currentImageViewer.onKeyDown(keyCode, event);
 
 //		backKeyDownHere = false;
-		if ( event.getRepeatCount()==0 ) {
+		if (event.getRepeatCount() == 0) {
 			log.v("onKeyDown("+keyCode + ", " + event +")");
 			keyDownTimestampMap.put(keyCode, System.currentTimeMillis());
 
@@ -8148,12 +7936,12 @@ import com.google.gson.GsonBuilder;
 				scheduleSaveCurrentPositionBookmark(1);
 			}
 		}
-		if ( keyCode==KeyEvent.KEYCODE_POWER || keyCode==KeyEvent.KEYCODE_ENDCALL ) {
+		if (keyCode == KeyEvent.KEYCODE_POWER || keyCode == KeyEvent.KEYCODE_ENDCALL) {
 			mActivity.releaseBacklightControl();
 			return false;
 		}
 
-		if ( keyCode==KeyEvent.KEYCODE_VOLUME_UP || keyCode==KeyEvent.KEYCODE_VOLUME_DOWN ) {
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			if (isAutoScrollActive()) {
 				if (keyCode==KeyEvent.KEYCODE_VOLUME_UP)
 					changeAutoScrollSpeed(1);
@@ -8174,9 +7962,9 @@ import com.google.gson.GsonBuilder;
 		ReaderAction longAction = ReaderAction.findForLongKey( keyCode, mSettings );
 		//ReaderAction dblAction = ReaderAction.findForDoubleKey( keyCode, mSettings );
 
-		if ( event.getRepeatCount()==0 ) {
-			if ( keyCode==currentDoubleClickActionKeyCode && currentDoubleClickActionStart + DOUBLE_CLICK_INTERVAL > android.os.SystemClock.uptimeMillis() ) {
-				if ( currentDoubleClickAction!=null ) {
+		if (event.getRepeatCount() == 0) {
+			if (keyCode == currentDoubleClickActionKeyCode && currentDoubleClickActionStart + DOUBLE_CLICK_INTERVAL > android.os.SystemClock.uptimeMillis()) {
+				if (currentDoubleClickAction != null) {
 					log.d("executing doubleclick action " + currentDoubleClickAction);
 					onAction(currentDoubleClickAction);
 				}
@@ -8186,7 +7974,7 @@ import com.google.gson.GsonBuilder;
 				currentSingleClickAction = null;
 				return true;
 			} else {
-				if ( currentSingleClickAction!=null ) {
+				if (currentSingleClickAction != null) {
 					onAction(currentSingleClickAction);
 				}
 				currentDoubleClickActionStart = 0;
@@ -8194,26 +7982,22 @@ import com.google.gson.GsonBuilder;
 				currentDoubleClickAction = null;
 				currentSingleClickAction = null;
 			}
-
 		}
 
-
-		if ( event.getRepeatCount()>0 ) {
-			if ( !isTracked(event) )
+		if (event.getRepeatCount() > 0) {
+			if (!isTracked(event))
 				return true; // ignore
 			// repeating key down
 			boolean isLongPress = (event.getEventTime()-event.getDownTime())>=AUTOREPEAT_KEYPRESS_TIME;
-			if ( isLongPress ) {
-				if ( actionToRepeat!=null ) {
-					if ( !repeatActionActive ) {
+			if (isLongPress) {
+				if (actionToRepeat != null) {
+					if (!repeatActionActive) {
 						log.v("autorepeating action : " + actionToRepeat );
 						repeatActionActive = true;
-						onAction(actionToRepeat, new Runnable() {
-							public void run() {
-								if ( trackedKeyEvent!=null && trackedKeyEvent.getDownTime()==event.getDownTime() ) {
-									log.v("action is completed : " + actionToRepeat );
-									repeatActionActive = false;
-								}
+						onAction(actionToRepeat, () -> {
+							if (trackedKeyEvent != null && trackedKeyEvent.getDownTime()==event.getDownTime()) {
+								log.v("action is completed : " + actionToRepeat );
+								repeatActionActive = false;
 							}
 						});
 					}
@@ -8226,18 +8010,16 @@ import com.google.gson.GsonBuilder;
 			return true;
 		}
 
-		if ( !action.isNone() && action.canRepeat() && longAction.isRepeat() ) {
+		if (!action.isNone() && action.canRepeat() && longAction.isRepeat()) {
 			// start tracking repeat
 			startTrackingKey(event);
 			actionToRepeat = action;
 			log.v("running action with scheduled autorepeat : " + actionToRepeat );
 			repeatActionActive = true;
-			onAction(actionToRepeat, new Runnable() {
-				public void run() {
-					if ( trackedKeyEvent==event ) {
-						log.v("action is completed : " + actionToRepeat );
-						repeatActionActive = false;
-					}
+			onAction(actionToRepeat, () -> {
+				if (trackedKeyEvent == event) {
+					log.v("action is completed : " + actionToRepeat );
+					repeatActionActive = false;
 				}
 			});
 			return true;
@@ -8250,7 +8032,7 @@ import com.google.gson.GsonBuilder;
 			startTrackingKey(event);
 			return true;
 		}*/
-		if ( action.isNone() && longAction.isNone() )
+		if (action.isNone() && longAction.isNone())
 			return false;
 		startTrackingKey(event);
 		return true;
@@ -8263,17 +8045,17 @@ import com.google.gson.GsonBuilder;
 		keyCode = translateKeyCode(keyCode);
 		if (currentImageViewer != null)
 			return currentImageViewer.onKeyUp(keyCode, event);
-		if ( keyCode==KeyEvent.KEYCODE_VOLUME_DOWN || keyCode==KeyEvent.KEYCODE_VOLUME_UP ) {
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			if (isAutoScrollActive())
 				return true;
-			if ( !enableVolumeKeys )
+			if (!enableVolumeKeys)
 				return false;
 		}
 		if (isAutoScrollActive()) {
 			stopAutoScroll();
 			return true;
 		}
-		if ( keyCode==KeyEvent.KEYCODE_POWER || keyCode==KeyEvent.KEYCODE_ENDCALL ) {
+		if (keyCode == KeyEvent.KEYCODE_POWER || keyCode == KeyEvent.KEYCODE_ENDCALL) {
 			mActivity.releaseBacklightControl();
 			return false;
 		}
@@ -8281,7 +8063,7 @@ import com.google.gson.GsonBuilder;
 //		if ( keyCode!=KeyEvent.KEYCODE_BACK )
 //			backKeyDownHere = false;
 
-		if ( keyCode==KeyEvent.KEYCODE_BACK && !tracked )
+		if (keyCode == KeyEvent.KEYCODE_BACK && !tracked)
 			return true;
 		//backKeyDownHere = false;
 
@@ -8289,7 +8071,7 @@ import com.google.gson.GsonBuilder;
 		keyCode = overrideKey( keyCode );
 		boolean isLongPress = false;
 		Long keyDownTs = keyDownTimestampMap.get(keyCode);
-		if ( keyDownTs!=null && System.currentTimeMillis()-keyDownTs>=LONG_KEYPRESS_TIME )
+		if (keyDownTs != null && System.currentTimeMillis()-keyDownTs >= LONG_KEYPRESS_TIME)
 			isLongPress = true;
 		ReaderAction action = ReaderAction.findForKey( keyCode, mSettings );
 		ReaderAction longAction = ReaderAction.findForLongKey( keyCode, mSettings );
@@ -8307,46 +8089,43 @@ import com.google.gson.GsonBuilder;
 				goToBookmark(shortcut);
 			return true;
 		}*/
-		if ( action.isNone() || !tracked ) {
+		if (action.isNone() || !tracked) {
 			return false;
 		}
-		if ( !action.isNone() && action.canRepeat() && longAction.isRepeat() ) {
+		if (!action.isNone() && action.canRepeat() && longAction.isRepeat()) {
 			// already processed by onKeyDown()
 			return true;
 		}
 
-		if ( isLongPress ) {
+		if (isLongPress) {
 			action = longAction;
 		} else {
-			if ( !dblAction.isNone() ) {
+			if (!dblAction.isNone()) {
 				// wait for possible double click
 				currentDoubleClickActionStart = android.os.SystemClock.uptimeMillis();
 				currentDoubleClickAction = dblAction;
 				currentSingleClickAction = action;
 				currentDoubleClickActionKeyCode = keyCode;
 				final int myKeyCode = keyCode;
-				BackgroundThread.instance().postGUI(new Runnable() {
-					public void run() {
-						if ( currentSingleClickAction!=null && currentDoubleClickActionKeyCode==myKeyCode ) {
-							log.d("onKeyUp: single click action " + currentSingleClickAction.id + " found for key " + myKeyCode + " single click");
-							onAction( currentSingleClickAction );
-						}
-						currentDoubleClickActionStart = 0;
-						currentDoubleClickActionKeyCode = 0;
-						currentDoubleClickAction = null;
-						currentSingleClickAction = null;
+				BackgroundThread.instance().postGUI(() -> {
+					if (currentSingleClickAction != null && currentDoubleClickActionKeyCode == myKeyCode) {
+						log.d("onKeyUp: single click action " + currentSingleClickAction.id + " found for key " + myKeyCode + " single click");
+						onAction( currentSingleClickAction );
 					}
+					currentDoubleClickActionStart = 0;
+					currentDoubleClickActionKeyCode = 0;
+					currentDoubleClickAction = null;
+					currentSingleClickAction = null;
 				}, DOUBLE_CLICK_INTERVAL);
 				// posted
 				return true;
 			}
 		}
-		if ( !action.isNone() ) {
+		if (!action.isNone()) {
 			log.d("onKeyUp: action " + action.id + " found for key " + keyCode + (isLongPress?" (long)" : "") );
 			onAction( action );
 			return true;
 		}
-
 
 		// not processed
 		return false;
@@ -8354,7 +8133,7 @@ import com.google.gson.GsonBuilder;
 
 	public boolean onTouchEvent(MotionEvent event) {
 
-		if ( !isTouchScreenEnabled ) {
+		if (!isTouchScreenEnabled) {
 			return true;
 		}
 		if (event.getX()==0 && event.getY()==0)
@@ -8395,14 +8174,11 @@ import com.google.gson.GsonBuilder;
 
 	public void redraw() {
 		//BackgroundThread.instance().executeBackground(new Runnable() {
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			@Override
-			public void run() {
-				surface.invalidate();
-				invalidImages = true;
-				//preparePageImage(0);
-				bookView.draw();
-			}
+		BackgroundThread.instance().executeGUI(() -> {
+			surface.invalidate();
+			invalidImages = true;
+			//preparePageImage(0);
+			bookView.draw();
 		});
 	}
 
@@ -8432,15 +8208,10 @@ import com.google.gson.GsonBuilder;
 		requestedWidth = 100;
 		requestedHeight = 100;
 
-        BackgroundThread.instance().postBackground(new Runnable() {
-
-			@Override
-			public void run() {
-				log.d("ReaderView - in background thread: calling createInternal()");
-				doc.create();
-				mInitialized = true;
-			}
-
+        BackgroundThread.instance().postBackground(() -> {
+			log.d("ReaderView - in background thread: calling createInternal()");
+			doc.create();
+			mInitialized = true;
 		});
 
 		log.i("Posting create view task");

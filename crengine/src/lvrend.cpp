@@ -2533,7 +2533,13 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             if ( baseflags & LTEXT_FLAG_NEWLINE ) {
                 if ( enode->getNodeIndex() == 0 && parent && parent->getChildCount() > 1 ) {
                     ldomNode * next_sibling = parent->getChildNode(1);
-                    if ( next_sibling && !next_sibling->isNull() ) {
+                    if ( next_sibling && !next_sibling->isNull() && !next_sibling->isElement() ) {
+                        // The next sibling might be a text node, so get the next one
+                        if ( parent->getChildCount() > 2 ) {
+                            next_sibling = parent->getChildNode(2);
+                        }
+                    }
+                    if ( next_sibling && !next_sibling->isNull() && next_sibling->isElement() ) {
                         // next_sibling is an original block node that should have
                         // been erm_final, but has been made erm_inline so it can
                         // be prepended with the run-in node content.
@@ -10089,7 +10095,7 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
                 lChar16 c = *(txt + start + i);
                 lChar16 next_c = *(txt + start + i + 1); // might be 0 at end of string
                 if ( lang_cfg->hasLBCharSubFunc() ) {
-                    next_c = lang_cfg->getLBCharSubFunc()(txt+start, i+1, len-1 - (i+1));
+                    next_c = lang_cfg->getLBCharSubFunc()(&lbCtx, txt+start, i+1, len-1 - (i+1));
                 }
                 int brk = lb_process_next_char(&lbCtx, (utf32_t)next_c);
                     // We don't really need to bother with consecutive spaces (that

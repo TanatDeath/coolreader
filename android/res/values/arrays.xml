@@ -2,6 +2,8 @@
 <resources>
     <string-array name="motion_timeout_titles">
         <item>@string/motion_timeout_off</item>
+        <item>@string/motion_timeout_10sec</item>
+        <item>@string/motion_timeout_30sec</item>
         <item>@string/motion_timeout_1min</item>
         <item>@string/motion_timeout_2min</item>
         <item>@string/motion_timeout_3min</item>
@@ -35,6 +37,8 @@
 
     <integer-array name="motion_timeout_values">
         <item>0</item>
+        <item>10000</item>
+        <item>30000</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
@@ -67,6 +71,8 @@
     </integer-array>
 
     <integer-array name="motion_timeout_add_infos">
+        <item>0</item>
+        <item>0</item>
         <item>0</item>
         <item>0</item>
         <item>0</item>

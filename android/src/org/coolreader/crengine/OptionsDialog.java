@@ -1,13 +1,10 @@
-	package org.coolreader.crengine;
+package org.coolreader.crengine;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +18,6 @@ import org.coolreader.R;
 import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
 import org.coolreader.cloud.yandex.YNDInputTokenDialog;
-import org.coolreader.crengine.ColorPickerDialog.OnColorChangedListener;
 import org.coolreader.geo.MetroLocation;
 import org.coolreader.geo.TransportStop;
 import org.coolreader.plugins.OnlineStorePluginManager;
@@ -31,7 +27,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -43,11 +38,11 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -59,8 +54,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -70,7 +63,6 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
-import android.widget.TabWidget;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -105,9 +97,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		};
 		
 	int[] filterFontSizes(int[] fontSizes) {
-	    ArrayList<Integer> list = new ArrayList<Integer>();
-	    for (int i = 0; i < fontSizes.length; i++) {
-	        int sz = fontSizes[i];
+	    ArrayList<Integer> list = new ArrayList<>();
+		for (int sz : fontSizes) {
 	        if (sz >= mActivity.getMinFontSize() && sz <= mActivity.getMaxFontSize())
     	        list.add(sz);
 	    }
@@ -137,14 +128,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		return curSize;
 	}
 	
-	public static int findBacklightSettingIndex( int value ) {
+	public static int findBacklightSettingIndex(int value) {
 		int bestIndex = 0;
 		int bestDiff = -1;
 		for ( int i=0; i<mBacklightLevels.length; i++ ) {
 			int diff = mBacklightLevels[i] - value;
 			if (diff<0)
 				diff = -diff;
-			if ( bestDiff==-1 || diff < bestDiff ) {
+			if (bestDiff == -1 || diff < bestDiff) {
 				bestDiff = diff;
 				bestIndex = i;
 			}
@@ -816,12 +807,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	OptionsListView mOptionsApplication;
 	OptionsListView mOptionsControls;
 	OptionsListView mOptionsBrowser;
+	OptionsListView mOptionsCloudSync;
+
 	// Disable options
 	OptionBase mHyphDictOption;
 	OptionBase mEmbedFontsOptions;
 	OptionBase mFootNotesOption;
 	OptionBase mEnableMultiLangOption;
 	OptionBase mEnableHyphOption;
+	OptionBase mGoogleDriveEnableSettingsOption;
+	OptionBase mGoogleDriveEnableBookmarksOption;
+	OptionBase mGoogleDriveEnableCurrentBookOption;
 
 	public final static int OPTION_VIEW_TYPE_NORMAL = 0;
 	public final static int OPTION_VIEW_TYPE_BOOLEAN = 1;
@@ -924,7 +920,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		public OptionBase setDefaultValue(String value) {
 			this.defaultValue = value;
-			if ( mProperties.getProperty(property)==null )
+			if (mProperties.getProperty(property) == null)
 				mProperties.setProperty(property, value);
 			return this;
 		}
@@ -952,7 +948,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void refreshList()
 		{
 			getView(null, null).invalidate();
-			if ( optionsListView!=null )
+			if (optionsListView != null)
 				optionsListView.refresh();
 		}
 
@@ -1015,7 +1011,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				//view = new TextView(getContext());
 				view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
@@ -1103,19 +1099,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		{
 			if (!enabled)
 				return;
-			ColorPickerDialog dlg = new ColorPickerDialog(mActivity, new OnColorChangedListener() {
-				public void colorChanged(int color) {
-					mProperties.setColor(property, color);
-					if ( property.equals(PROP_BACKGROUND_COLOR) ) {
-						String texture = mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE, Engine.NO_TEXTURE.id);
-						if ( texture!=null && !texture.equals(Engine.NO_TEXTURE.id) ) {
-							// reset background image
-							mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE, Engine.NO_TEXTURE.id);
-							// TODO: show notification?
-						}
+			ColorPickerDialog dlg = new ColorPickerDialog(mActivity, color -> {
+				mProperties.setColor(property, color);
+				if (property.equals(PROP_BACKGROUND_COLOR)) {
+					String texture = mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE, Engine.NO_TEXTURE.id);
+					if (texture != null && !texture.equals(Engine.NO_TEXTURE.id)) {
+						// reset background image
+						mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE, Engine.NO_TEXTURE.id);
+						// TODO: show notification?
 					}
-					refreshList();
 				}
+				refreshList();
 			}, mProperties.getColor(property, defColor), label);
 			dlg.show();
 		}
@@ -1125,7 +1119,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				//view = new TextView(getContext());
 				view = mInflater.inflate(R.layout.option_item_color, null);
 				if (view != null) {
@@ -1139,12 +1133,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						}
 				}
 			} else {
-				view = (View)convertView;
+				view = convertView;
 			}
 			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			ImageView valueView = (ImageView)view.findViewById(R.id.option_value_color);
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			TextView labelView = view.findViewById(R.id.option_label);
+			ImageView valueView = view.findViewById(R.id.option_value_color);
+			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
 			} else {
@@ -1154,21 +1148,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-						//	Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-						//	toast.show();
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+					//	Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
+					//	toast.show();
+						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
 			int cl = mProperties.getColor(property, defColor);
 			valueView.setBackgroundColor(cl);
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
+			setupIconView(view.findViewById(R.id.option_icon));
 			view.setEnabled(enabled);
 			return view;
 		}
@@ -1195,6 +1185,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsPage.refresh();
 			mOptionsApplication.refresh();
 			mOptionsControls.refresh();
+			if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				mOptionsCloudSync.refresh();
+			}
 		}
 	}
 	class BoolOption extends OptionBase {
@@ -1219,11 +1212,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				//view = new TextView(getContext());
 				view = mInflater.inflate(R.layout.option_item_boolean, null);
 				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
+					TextView label = view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
 							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
@@ -1233,12 +1226,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						}
 				}
 			} else {
-				view = (View)convertView;
+				view = convertView;
 			}
 			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			CheckBox valueView = (CheckBox)view.findViewById(R.id.option_value_cb);
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			TextView labelView = view.findViewById(R.id.option_label);
+			CheckBox valueView = view.findViewById(R.id.option_value_cb);
+			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
 			} else {
@@ -1248,14 +1241,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
+						//toast.show();
+						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 
@@ -1264,14 +1253,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
 			valueView.setChecked(getValueBoolean());
-			valueView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-					@Override
-					public void onCheckedChanged(CompoundButton arg0,
-							boolean checked) {
+			valueView.setOnCheckedChangeListener((arg0, checked) -> {
 //						mProperties.setBool(property, checked);
 //						refreshList();
-					}
-				});
+			});
 			setupIconView((ImageView)view.findViewById(R.id.option_icon));
 //			view.setClickable(true);
 //			view.setFocusable(true);
@@ -1291,7 +1276,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
 					TextView label = (TextView) view.findViewById(R.id.option_label);
@@ -1325,30 +1310,23 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
+						//toast.show();
+						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
 			valueView.setText(property);
-			view.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					int iSyncVariant = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-					if (iSyncVariant == 0) {
-						mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-					} else {
-						CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
-					}
-					return;
+			view.setOnClickListener(v -> {
+				int iSyncVariant = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+				} else {
+					CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
 				}
+				return;
 			});
 			setupIconView((ImageView)view.findViewById(R.id.option_icon));
 			return view;
@@ -1366,10 +1344,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
+					TextView label = view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
 							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
@@ -1444,7 +1422,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
 					TextView label = (TextView) view.findViewById(R.id.option_label);
@@ -1478,25 +1456,78 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
-					});
+					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
 			}
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
 			String currValue = mProperties.getProperty(property);
 			valueView.setText(currValue);
-			view.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					final View view1 = view;
-					mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-					return;
+			view.setOnClickListener(v -> {
+				final View view1 = view;
+				mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+				return;
+			});
+			setupIconView((ImageView)view.findViewById(R.id.option_icon));
+			return view;
+		}
+	}
+
+	//asdf - refactor to info option
+	class YndTranslateTokenOption extends OptionBase {
+		private boolean inverse = false;
+		public YndTranslateTokenOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
+			super(owner, label, property, addInfo, filter);
+		}
+		public int getItemViewType() {
+			return OPTION_VIEW_TYPE_NORMAL;
+		}
+		public View getView(View convertView, ViewGroup parent) {
+			View view;
+			convertView = myView;
+			if (convertView == null) {
+				view = mInflater.inflate(R.layout.option_item, null);
+				if (view != null) {
+					TextView label = (TextView) view.findViewById(R.id.option_label);
+					if (label != null)
+						if (mOwner instanceof OptionsDialog) {
+							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+								if (!StrUtils.isEmptyStr(property))
+									label.setTypeface(null, Typeface.ITALIC);
+							}
+						}
 				}
+			} else {
+				view = (View)convertView;
+			}
+			myView = view;
+			TextView labelView = (TextView)view.findViewById(R.id.option_label);
+			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			int colorIcon;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorIcon});
+			colorIcon = a.getColor(0, Color.GRAY);
+			a.recycle();
+			valueView.setTextColor(colorIcon);
+			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			if (addInfo.trim().equals("")) {
+				btnOptionAddInfo.setVisibility(View.INVISIBLE);
+			} else {
+				btnOptionAddInfo.setImageDrawable(
+						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
+								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
+				mActivity.tintViewIcons(btnOptionAddInfo);
+				final View view1 = view;
+				if (btnOptionAddInfo != null)
+					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
+			}
+			labelView.setText(label);
+			labelView.setEnabled(enabled);
+			String currValue = mProperties.getProperty(property);
+			valueView.setText(currValue);
+			view.setOnClickListener(v -> {
+				final View view1 = view;
+				mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+				return;
 			});
 			setupIconView((ImageView)view.findViewById(R.id.option_icon));
 			return view;
@@ -1521,7 +1552,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
 					TextView label = (TextView) view.findViewById(R.id.option_label);
@@ -1586,7 +1617,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	static public void saveColor( Properties mProperties, boolean night )
 	{
-		if ( night ) {
+		if (night) {
 			mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE_NIGHT, mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE, "(NONE)"));
 			mProperties.setColor(PROP_BACKGROUND_COLOR_NIGHT, mProperties.getColor(PROP_BACKGROUND_COLOR, 0x000000));
 			mProperties.setColor(PROP_FONT_COLOR_NIGHT, mProperties.getColor(PROP_FONT_COLOR, 0xFFFFFF));
@@ -1615,7 +1646,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			String styleName = "styles." + code + ".color";
 			String v = mProperties.getProperty(styleName); 
 			if (v != null) {
-				if ( night )
+				if (night)
 					mProperties.setProperty(styleName + ".night", v);
 				else
 					mProperties.setProperty(styleName + ".day", v);
@@ -1625,7 +1656,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	static public void restoreColor( Properties mProperties,  boolean night )
 	{
-		if ( night ) {
+		if (night) {
 			mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE, mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE_NIGHT, "(NONE)"));
 			mProperties.setColor(PROP_BACKGROUND_COLOR, mProperties.getColor(PROP_BACKGROUND_COLOR_NIGHT, 0x000000));
 			mProperties.setColor(PROP_FONT_COLOR, mProperties.getColor(PROP_FONT_COLOR_NIGHT, 0xFFFFFF));
@@ -1689,7 +1720,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				if (l!=null) s = lang.getLocale().getDisplayName();
 				add(lang.code, getString(lang.nameId), s);
 			}
-			if ( mProperties.getProperty(property)==null )
+			if (mProperties.getProperty(property) == null)
 				mProperties.setProperty(property, Lang.DEFAULT.code);
 			this.updateFilteredMark(Lang.DEFAULT.code);
 		}
@@ -1745,7 +1776,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 									ViewGroup parent) {
 					ViewGroup layout;
 					final Three item = listFiltered.get(position);
-					if ( convertView==null ) {
+					if (convertView == null) {
 						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
 						//view = new TextView(getContext());
 					} else {
@@ -1779,7 +1810,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			};
 			int selItem = getSelectedItemIndex();
-			if ( selItem<0 )
+			if (selItem < 0)
 				selItem = 0;
 			listView.setAdapter(listAdapter);
 			listAdapter.notifyDataSetChanged();
@@ -1789,73 +1820,44 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		@Override
 		public void whenOnSelect(){
 			if (wikiLangs.isEmpty())
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							HttpUrl hurl = HttpUrl.parse(WIKI_ADRESSES);
-							if (hurl == null) {
-								BackgroundThread.instance().postBackground(new Runnable() {
-									@Override
-									public void run() {
-										BackgroundThread.instance().postGUI(new Runnable() {
-											@Override
-											public void run() {
-												activity.showToast(activity.getString(R.string.wiki_list_error) + " - cannot parse link");
-											}
-										}, 100);
-									}
-								});
-								return;
-							}
-							final HttpUrl.Builder urlBuilder = hurl.newBuilder();
-							final String url = urlBuilder.build().toString();
-							docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
-							Elements resultLinks = docJsoup.select(".extiw");
-							if (resultLinks.size()>0) {
-								ArrayList<String> t = new ArrayList<String>();
-								for (Element el: resultLinks) {
-									String elHref = StrUtils.getNonEmptyStr(el.attr("href"),false); // "https://ru.wikipedia.org/wiki/"
-									String elTitle = StrUtils.getNonEmptyStr(el.attr("title"), true);
-									if (!StrUtils.isEmptyStr(elHref)) {
-										if (elHref.endsWith("/wiki/")) {
-											if (!t.contains(elHref)) {
-												wikiLangs.add(new String[]{elTitle.replace(":", ""), elHref.replace("/wiki/","")});
-												t.add(elHref);
-											}
-										}
-									}
-								}
-								Collections.sort(wikiLangs, new Comparator<String[]>() {
-									@Override
-									public int compare(String[] lhs, String[] rhs) {
-										//if (lhs[0].equals("ru")) return -1;
-										return lhs[1].compareTo(rhs[1]);
-									}
-								});
-								wikiLangs.add(0, new String[]{"en", "https://en.wikipedia.org"});
-								BackgroundThread.instance().postGUI(new Runnable() {
-									@Override
-									public void run() {
-										fillList();
-									}
-								}, 100);
-							}
-						} catch (Exception e) {
-							docJsoup = null;
-							BackgroundThread.instance().postBackground(new Runnable() {
-								@Override
-								public void run() {
-									BackgroundThread.instance().postGUI(new Runnable() {
-										@Override
-										public void run() {
-											activity.showToast(activity.getString(R.string.wiki_list_error) + " - "+
-													e.getClass().getSimpleName()+" "+e.getMessage());
-										}
-									}, 100);
-								}
-							});
+				BackgroundThread.instance().postBackground(() -> {
+					try {
+						HttpUrl hurl = HttpUrl.parse(WIKI_ADRESSES);
+						if (hurl == null) {
+							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
+									() -> activity.showToast(activity.getString(R.string.wiki_list_error) + " - cannot parse link"), 100));
+							return;
 						}
+						final HttpUrl.Builder urlBuilder = hurl.newBuilder();
+						final String url = urlBuilder.build().toString();
+						docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
+						Elements resultLinks = docJsoup.select(".extiw");
+						if (resultLinks.size()>0) {
+							ArrayList<String> t = new ArrayList<String>();
+							for (Element el: resultLinks) {
+								String elHref = StrUtils.getNonEmptyStr(el.attr("href"),false); // "https://ru.wikipedia.org/wiki/"
+								String elTitle = StrUtils.getNonEmptyStr(el.attr("title"), true);
+								if (!StrUtils.isEmptyStr(elHref)) {
+									if (elHref.endsWith("/wiki/")) {
+										if (!t.contains(elHref)) {
+											wikiLangs.add(new String[]{elTitle.replace(":", ""), elHref.replace("/wiki/","")});
+											t.add(elHref);
+										}
+									}
+								}
+							}
+							Collections.sort(wikiLangs, (lhs, rhs) -> {
+								//if (lhs[0].equals("ru")) return -1;
+								return lhs[1].compareTo(rhs[1]);
+							});
+							wikiLangs.add(0, new String[]{"en", "https://en.wikipedia.org"});
+							BackgroundThread.instance().postGUI(() -> fillList(), 100);
+						}
+					} catch (Exception e) {
+						docJsoup = null;
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
+								() -> activity.showToast(activity.getString(R.string.wiki_list_error) + " - "+
+								e.getClass().getSimpleName()+" "+e.getMessage()), 100));
 					}
 				});
 		}
@@ -1869,7 +1871,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			add("2", getString(R.string.options_app_geo_2),getString(R.string.options_app_geo_2_add_info));
 			add("3", getString(R.string.options_app_geo_3),getString(R.string.options_app_geo_3_add_info));
 			add("4", getString(R.string.options_app_geo_4),"");
-			if ( mProperties.getProperty(property)==null )
+			if (mProperties.getProperty(property) == null)
 				mProperties.setProperty(property, "1");
 		}
 
@@ -1910,11 +1912,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			super(owner, label, property, addInfo, filter);
 			ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
 			for ( ReaderAction a : actions )
-				if ( !isTap || a.mayAssignOnTap() )
+				if (!isTap || a.mayAssignOnTap())
 					add(a.id, getString(a.nameId), getString(a.addInfoR));
-			if ( allowRepeat )
+			if (allowRepeat)
 				add(ReaderAction.REPEAT.id, getString(ReaderAction.REPEAT.nameId), getString(ReaderAction.REPEAT.addInfoR));
-			if ( mProperties.getProperty(property)==null )
+			if (mProperties.getProperty(property) == null)
 				mProperties.setProperty(property, ReaderAction.NONE.id);
 		}
 
@@ -1928,7 +1930,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ImageView imgAddInfo = (ImageView) layout.findViewById(R.id.btn_option_add_info);
 			ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
 			for ( ReaderAction a : actions )
-				if ( item.value.equals(a.id) ) {
+				if (item.value.equals(a.id)) {
 					if (a.getIconId()!=0) {
 						img.setImageDrawable(mActivity.getResources().getDrawable(
 								a.getIconId()));
@@ -2031,7 +2033,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public void afterTextChanged(Editable arg0) {}
 			});
 
-			if ( DeviceInfo.NOOK_NAVIGATION_KEYS ) {
+			if (DeviceInfo.NOOK_NAVIGATION_KEYS) {
 				addKey(listView, ReaderView.KEYCODE_PAGE_TOPLEFT, "Top left navigation button");
 				addKey(listView, ReaderView.KEYCODE_PAGE_BOTTOMLEFT, "Bottom left navigation button");
 				addKey(listView, ReaderView.KEYCODE_PAGE_TOPRIGHT, "Top right navigation button");
@@ -2064,7 +2066,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						R.attr.attr_icons8_down_key, R.drawable.icons8_down_key,
 						R.attr.attr_icons8_down_key_long, R.drawable.icons8_down_key_long,
 						R.attr.attr_icons8_down_key_double, R.drawable.icons8_down_key_double);
-			} else if ( DeviceInfo.SONY_NAVIGATION_KEYS ) {
+			} else if (DeviceInfo.SONY_NAVIGATION_KEYS) {
 //				addKey(listView, KeyEvent.KEYCODE_DPAD_UP, "Prev button");
 //				addKey(listView, KeyEvent.KEYCODE_DPAD_DOWN, "Next button");
 				addKey(listView, ReaderView.SONY_DPAD_UP_SCANCODE, "Prev button");
@@ -2229,7 +2231,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 
 		public boolean updateFilterEnd() {
-			if ( DeviceInfo.NOOK_NAVIGATION_KEYS ) {
+			if (DeviceInfo.NOOK_NAVIGATION_KEYS) {
 				this.updateFilteredMark("Top left navigation button");
 				this.updateFilteredMark("Bottom left navigation button");
 				this.updateFilteredMark("Top right navigation button");
@@ -2242,7 +2244,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				this.updateFilteredMark("Home");
 				this.updateFilteredMark( "Up");
 				this.updateFilteredMark("Down");
-			} else if ( DeviceInfo.SONY_NAVIGATION_KEYS ) {
+			} else if (DeviceInfo.SONY_NAVIGATION_KEYS) {
 				this.updateFilteredMark("Prev button");
 				this.updateFilteredMark("Next button");
 				this.updateFilteredMark("Left button");
@@ -2672,13 +2674,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					PROP_CLOUD_SYNC_VARIANT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					add(mCloudSyncVariants, mCloudSyncVariantsTitles, mCloudSyncVariantsAddInfos).setDefaultValue(Integer.toString(mCloudSyncVariants[0])).
 					setIconIdByAttr(R.attr.attr_icons8_cloud_storage, R.drawable.icons8_cloud_storage).
-					setOnChangeHandler(new Runnable() {
-						@Override
-						public void run() {
-							int value = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							optSaveToCloud.setEnabled(value != 0);
-							optLoadFromCloud.setEnabled(value != 0);
-						}
+					setOnChangeHandler(() -> {
+						int value = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						optSaveToCloud.setEnabled(value != 0);
+						optLoadFromCloud.setEnabled(value != 0);
 					}));
 			listView.add(optSaveToCloud);
 			listView.add(optLoadFromCloud);
@@ -2915,7 +2914,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_tapzone_hilite), PROP_APP_TAP_ZONE_HILIGHT,
 					getString(R.string.options_app_tapzone_hilite_add_info), this.lastFilteredValue).setDefaultValue("0").
 					setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
-			if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) )
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 				listView.add(new BoolOption(mOwner, getString(R.string.options_app_trackball_disable), PROP_APP_TRACKBALL_DISABLED,
 						getString(R.string.options_app_trackball_disable_add_info), this.lastFilteredValue).setDefaultValue("0").
 						setIconIdByAttr(R.attr.attr_icons8_computer_mouse,R.drawable.icons8_computer_mouse));
@@ -2960,7 +2959,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ColorOption(mOwner, getString(R.string.options_color_background), PROP_BACKGROUND_COLOR, 0xFFFFFF,
 					getString(R.string.options_color_background_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_paint_palette1, R.drawable.icons8_paint_palette1));
-			if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ) {
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 				listView.add(new ColorOption(mOwner, getString(R.string.options_view_color_selection), PROP_HIGHLIGHT_SELECTION_COLOR,
 						0xCCCCCC, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).noIcon());
 				listView.add(new ColorOption(mOwner, getString(R.string.options_view_color_bookmark_comment), PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT,
@@ -3118,13 +3117,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					this.updateFilteredMark(a.id, getString(a.nameId), getString(a.addInfoR));
 		}
 		View grid;
-		private void initTapZone( View view, final int tapZoneId )
+		private void initTapZone(View view, final int tapZoneId)
 		{
-			if ( view==null )
+			if (view == null)
 				return;
-			final TextView text = (TextView)view.findViewById(R.id.tap_zone_action_text_short);
-			final TextView longtext = (TextView)view.findViewById(R.id.tap_zone_action_text_long);
-			final  ImageView iv = (ImageView)view.findViewById(R.id.zone_icon);
+			final TextView text = view.findViewById(R.id.tap_zone_action_text_short);
+			final TextView longtext = view.findViewById(R.id.tap_zone_action_text_long);
+			final  ImageView iv = view.findViewById(R.id.zone_icon);
 			final String propName = property + "." + tapZoneId;
 			final String longPropName = property + ".long." + tapZoneId;
 			final ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
@@ -3137,7 +3136,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				iv.setImageDrawable(d);
 				mActivity.tintViewIcons(iv,true);
 			}
-			final ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
+			final ReaderAction longAction = ReaderAction.findById(mProperties.getProperty(longPropName));
 			final ImageView ivl = (ImageView)view.findViewById(R.id.zone_icon_long);
 			if ((ivl != null)&&(longAction != null)) {
 				int iconId = longAction.iconId;
@@ -3161,52 +3160,42 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			view.setLongClickable(true);
 			final String filt = this.lastFilteredValue;
-			view.setOnClickListener(new View.OnClickListener () {
-				@Override
-				public void onClick(View v) {
-					// TODO: i18n
-					ActionOption option = new ActionOption(mOwner, getString(R.string.options_app_tap_action_short), propName, true,
-							false, getString(action.addInfoR), filt);
-					option.setIconId(action.getIconId());
-					option.setOnChangeHandler(new Runnable() {
-						public void run() {
-							ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
-							text.setText(getString(action.nameId));
-							int iconId = action.iconId;
-							if (iconId == 0) {
-								iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
-							}
-							Drawable d = activity.getResources().getDrawable(action.getIconIdWithDef(activity));
-							iv.setImageDrawable(d);
-							mActivity.tintViewIcons(iv,true);
-						}
-					});
-					option.onSelect();
-				}
+			view.setOnClickListener(v -> {
+				// TODO: i18n
+				ActionOption option = new ActionOption(mOwner, getString(R.string.options_app_tap_action_short), propName, true,
+						false, getString(action.addInfoR), filt);
+				option.setIconId(action.getIconId());
+				option.setOnChangeHandler(() -> {
+					ReaderAction action1 = ReaderAction.findById( mProperties.getProperty(propName) );
+					text.setText(getString(action1.nameId));
+					int iconId = action1.iconId;
+					if (iconId == 0) {
+						iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+					}
+					Drawable d = activity.getResources().getDrawable(action1.getIconIdWithDef(activity));
+					iv.setImageDrawable(d);
+					mActivity.tintViewIcons(iv,true);
+				});
+				option.onSelect();
 			});
-			view.setOnLongClickListener(new View.OnLongClickListener () {
-				@Override
-				public boolean onLongClick(View v) {
-					// TODO: i18n
-					ActionOption option = new ActionOption(mOwner, getString(R.string.options_app_tap_action_long), longPropName, true,
-							true, getString(longAction.addInfoR), filt);
-					option.setIconId(action.getIconId());
-					option.setOnChangeHandler(new Runnable() {
-						public void run() {
-							ReaderAction longAction = ReaderAction.findById( mProperties.getProperty(longPropName) );
-							longtext.setText(getString(longAction.nameId));
-							int iconId = longAction.iconId;
-							if (iconId == 0) {
-								iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
-							}
-							Drawable d = activity.getResources().getDrawable(longAction.getIconIdWithDef(activity));
-							ivl.setImageDrawable(d);
-							mActivity.tintViewIcons(ivl, true);
-						}
-					});
-					option.onSelect();
-					return true;
-				}
+			view.setOnLongClickListener(v -> {
+				// TODO: i18n
+				ActionOption option = new ActionOption(mOwner, getString(R.string.options_app_tap_action_long), longPropName, true,
+						true, getString(longAction.addInfoR), filt);
+				option.setIconId(action.getIconId());
+				option.setOnChangeHandler(() -> {
+					ReaderAction longAction1 = ReaderAction.findById( mProperties.getProperty(longPropName) );
+					longtext.setText(getString(longAction1.nameId));
+					int iconId = longAction1.iconId;
+					if (iconId == 0) {
+						iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+					}
+					Drawable d = activity.getResources().getDrawable(longAction1.getIconIdWithDef(activity));
+					ivl.setImageDrawable(d);
+					mActivity.tintViewIcons(ivl, true);
+				});
+				option.onSelect();
+				return true;
 			});
 		}
 
@@ -3260,19 +3249,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				//view = new TextView(getContext());
 				view = mInflater.inflate(R.layout.option_item_submenu, null);
 				mActivity.tintViewIcons(view);
 			} else {
-				view = (View)convertView;
+				view = convertView;
 			}
 			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
+			TextView labelView = view.findViewById(R.id.option_label);
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			setupIconView(view.findViewById(R.id.option_icon));
+			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
 			} else {
@@ -3282,21 +3271,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
-					});
+					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
 			}
 			return view;
 		}
 	}
 	
 	public static class ListOption extends OptionBase {
-		protected ArrayList<Three> list = new ArrayList<Three>();
-		protected ArrayList<Three> listFiltered = new ArrayList<Three>();
+		protected ArrayList<Three> list = new ArrayList<>();
+		protected ArrayList<Three> listFiltered = new ArrayList<>();
 		protected BaseAdapter listAdapter;
 		protected ListView listView;
 
@@ -3427,17 +3410,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		public String findValueLabel( String value ) {
 			for ( Three three: list ) {
-				if ( value!=null && three.value.equals(value) )
+				if (three.value.equals(value))
 					return updateValue(three.label);
 			}
 			return updateValue(value); // for delayed loading list ...
 			//return null;
 		}
 		public int findValue( String value ) {
-			if ( value==null )
+			if (value == null)
 				return -1;
 			for ( int i=0; i<list.size(); i++ ) {
-				if ( value.equals(list.get(i).value) )
+				if (value.equals(list.get(i).value))
 					return i;
 			}
 			return -1;
@@ -3458,13 +3441,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return value;
 		}
 		
-		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
+		protected void updateItemContents(final View layout, final Three item, final ListView listView, final int position) {
 			TextView view;
 			RadioButton cb;
 			//iv = (ImageView) = layout.findViewById(R.id.option_value_text);
-			view = (TextView)layout.findViewById(R.id.option_value_text);
-			cb = (RadioButton)layout.findViewById(R.id.option_value_check);
-			ImageView btnOptionAddInfo = (ImageView)layout.findViewById(R.id.btn_option_add_info);
+			view = layout.findViewById(R.id.option_value_text);
+			cb = layout.findViewById(R.id.option_value_check);
+			ImageView btnOptionAddInfo = layout.findViewById(R.id.btn_option_add_info);
 
 			if (item.addInfo.trim().equals("")) {
 				if (btnOptionAddInfo!=null)
@@ -3478,28 +3461,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 				final View view1 = layout;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, item.addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(item.addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						//Toast toast = Toast.makeText(mActivity, item.addInfo, Toast.LENGTH_LONG);
+						//toast.show();
+						mActivity.showToast(item.addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 			view.setText(updateValue(item.label));
 			String currValue = mProperties.getProperty(property);
 			boolean isSelected = item.value!=null && currValue!=null && item.value.equals(currValue) ;//getSelectedItemIndex()==position;
 			cb.setChecked(isSelected);
-			cb.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					listView.getOnItemClickListener().onItemClick(listView, listView, position, 0);
+			cb.setOnClickListener(v -> {
+				listView.getOnItemClickListener().onItemClick(listView, listView, position, 0);
 //					mProperties.setProperty(property, item.value);
 //					dismiss();
 //					optionsListView.refresh();
-				}
 			});
 		}
 		
@@ -3548,7 +3524,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 									ViewGroup parent) {
 					ViewGroup layout;
 					final Three item = listFiltered.get(position);
-					if ( convertView==null ) {
+					if (convertView == null) {
 						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
 						//view = new TextView(getContext());
 					} else {
@@ -3577,7 +3553,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					return listFiltered.size()==0;
 				}
 
-				private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
+				private ArrayList<DataSetObserver> observers = new ArrayList<>();
 
 				public void registerDataSetObserver(DataSetObserver observer) {
 					observers.add(observer);
@@ -3589,7 +3565,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			};
 			int selItem = getSelectedItemIndex();
-			if ( selItem<0 )
+			if (selItem < 0)
 				selItem = 0;
 			listView.setAdapter(listAdapter);
 			listAdapter.notifyDataSetChanged();
@@ -3602,8 +3578,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			whenOnSelect();
 			final BaseDialog dlg = new BaseDialog("ListOptionDialog", mActivity, label, false, false);
 			View view = mInflater.inflate(R.layout.searchable_listview, null);
-			LinearLayout viewList = (LinearLayout)view.findViewById(R.id.lv_list);
-			final EditText tvSearchText = (EditText)view.findViewById(R.id.search_text);
+			LinearLayout viewList = view.findViewById(R.id.lv_list);
+			final EditText tvSearchText = view.findViewById(R.id.search_text);
 			tvSearchText.addTextChangedListener(new TextWatcher() {
 
 				@Override
@@ -3630,9 +3606,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			colorGray = a.getColor(1, Color.GRAY);
 			colorIcon = a.getColor(2, Color.BLACK);
 			a.recycle();
-			int newTextSize = ((CoolReader)mActivity).settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+			int newTextSize = mActivity.settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 
-			LinearLayout llUL = (LinearLayout)view.findViewById(R.id.ll_useful_links);
+			LinearLayout llUL = view.findViewById(R.id.ll_useful_links);
 
 			if (usefulLinks.size()>0) {
 				for (Map.Entry<String, String> entry : usefulLinks.entrySet()) {
@@ -3642,12 +3618,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					ulText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					ulText.setTextColor(colorIcon);
 					ulText.setPaintFlags(ulText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-					ulText.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View view) {
-							Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(entry.getValue()));
-							mActivity.startActivity(myIntent);
-						}
+					ulText.setOnClickListener(view1 -> {
+						Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(entry.getValue()));
+						mActivity.startActivity(myIntent);
 					});
 					llUL.addView(ulText);
 				}
@@ -3655,7 +3628,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				((ViewGroup)llUL.getParent()).removeView(llUL);
 			}
 
-			LinearLayout llQF = (LinearLayout)view.findViewById(R.id.ll_quick_filters);
+			LinearLayout llQF = view.findViewById(R.id.ll_quick_filters);
 
 			if (quickFilters.size()>0) {
 				for (String s: quickFilters) {
@@ -3683,34 +3656,24 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				((ViewGroup)llQF.getParent()).removeView(llQF);
 			}
 			viewList.addView(listView);
-			ibSearch.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					tvSearchText.setText("");
-					listUpdated("");
-				}
+			ibSearch.setOnClickListener(v -> {
+				tvSearchText.setText("");
+				listUpdated("");
 			});
 			dlg.setView(view);
 			ibSearch.requestFocus();
 			//final AlertDialog d = dlg.create();
-			listView.setOnItemClickListener(new OnItemClickListener() {
-
-				public void onItemClick(AdapterView<?> adapter, View listview,
-						int position, long id) {
-					Three item = listFiltered.get(position);
-					onClick(item);
-					dlg.dismiss();
-					closed();
-				}
+			listView.setOnItemClickListener((adapter, listview, position, id) -> {
+				Three item = listFiltered.get(position);
+				onClick(item);
+				dlg.dismiss();
+				closed();
 			});
-			dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
-				@Override
-
-				public void onDismiss(DialogInterface dialog) {
-					String sOldProp = StrUtils.getNonEmptyStr(mProperties.getProperty(property),false);
-					String sNewProp = StrUtils.getNonEmptyStr(onSelectDismiss(sOldProp),false);
-					if (!sNewProp.equals(sOldProp))
-						mProperties.setProperty(property, sNewProp);
-				}
+			dlg.setOnDismissListener(dialog -> {
+				String sOldProp = StrUtils.getNonEmptyStr(mProperties.getProperty(property),false);
+				String sNewProp = StrUtils.getNonEmptyStr(onSelectDismiss(sOldProp),false);
+				if (!sNewProp.equals(sOldProp))
+					mProperties.setProperty(property, sNewProp);
 			});
 			dlg.show();
 		}
@@ -3726,9 +3689,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public void onClick( Three item ) {
 			mProperties.setProperty(property, OnPreClick(item).value);
 			refreshList();
-			if ( onChangeHandler!=null )
+			if (onChangeHandler != null)
 				onChangeHandler.run();
-			if ( optionsListView!=null )
+			if (optionsListView != null)
 				optionsListView.refresh();
 		}
 	}
@@ -3849,16 +3812,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		public String findValueLabel( String value ) {
 			for ( Three three : list ) {
-				if ( value!=null && three.value.equals(value) )
+				if (value != null && three.value.equals(value))
 					return three.label;
 			}
 			return null;
 		}
 		public int findValue( String value ) {
-			if ( value==null )
+			if (value == null)
 				return -1;
 			for ( int i=0; i<list.size(); i++ ) {
-				if ( value.equals(list.get(i).value) )
+				if (value.equals(list.get(i).value))
 					return i;
 			}
 			return -1;
@@ -3880,7 +3843,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public View getView(View convertView, ViewGroup parent) {
 			View view;
 			convertView = myView;
-			if ( convertView==null ) {
+			if (convertView == null) {
 				//view = new TextView(getContext());
 				if (label.contains("~"))
 					view = mInflater.inflate(R.layout.option_item_2text, null);
@@ -4036,7 +3999,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 									ViewGroup parent) {
 					ViewGroup layout;
 					final Three item = list.get(position);
-					if ( convertView==null ) {
+					if (convertView == null) {
 						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
 						//view = new TextView(getContext());
 					} else {
@@ -4077,7 +4040,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			};
 			int selItem = getSelectedItemIndex();
-			if ( selItem<0 )
+			if (selItem < 0)
 				selItem = 0;
 			listView.setAdapter(listAdapter);
 			listView.setSelection(selItem);
@@ -4099,9 +4062,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public void onClick( Three item ) {
 			mProperties.setProperty(property, item.value);
 			refreshList();
-			if ( onChangeHandler!=null )
+			if (onChangeHandler != null)
 				onChangeHandler.run();
-			if ( optionsListView!=null )
+			if (optionsListView != null)
 				optionsListView.refresh();
 		}
 	}
@@ -4208,15 +4171,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			String path;
 			int id;
 			public void clear() {
-				if ( bmp!=null ) {
+				if (bmp !=null) {
 					//bmp.recycle();
 					bmp = null;
 				}
-				if ( drawable!=null )
+				if (drawable != null)
 					drawable = null;
 			}
 		}
-		ArrayList<Item> list = new ArrayList<Item>(); 
+		ArrayList<Item> list = new ArrayList<>();
 		public ThumbnailCache( int dx, int dy, int maxcount ) {
 			this.dx = dx;
 			this.dy = dy;
@@ -4230,11 +4193,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		private Drawable createDrawable( String path ) {
 			File f = new File(path);
-			if ( !f.isFile() || !f.exists() )
+			if (!f.isFile() || !f.exists())
 				return null;
 			try { 
 				BitmapDrawable drawable = (BitmapDrawable)BitmapDrawable.createFromPath(path);
-				if ( drawable==null )
+				if (drawable == null)
 					return null;
 				Bitmap src = drawable.getBitmap();
 				Bitmap bmp = Bitmap.createScaledBitmap(src, dx, dy, true);
@@ -4256,7 +4219,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			try { 
 				//Drawable drawable = mReaderView.getActivity().getResources().getDrawable(resourceId);
 				InputStream is = getContext().getResources().openRawResource(resourceId);
-				if ( is==null )
+				if (is == null)
 					return null;
 				BitmapDrawable src = new BitmapDrawable(is);
 				Item item = new Item();
@@ -4273,11 +4236,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 		}
 		public Drawable getImage( String path ) {
-			if ( path==null || !path.startsWith("/"))
+			if (path == null || !path.startsWith("/"))
 				return null;
 			// find existing
 			for ( int i=0; i<list.size(); i++ ) {
-				if ( list.get(i).path!=null && path.equals(list.get(i).path) ) {
+				if (path.equals(list.get(i).path)) {
 					Item item = list.remove(i);
 					list.add(item);
 					return item.drawable;
@@ -4286,11 +4249,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return createDrawable( path ); 
 		}
 		public Drawable getImage( int resourceId ) {
-			if ( resourceId==0 )
+			if (resourceId == 0)
 				return null;
 			// find existing
 			for ( int i=0; i<list.size(); i++ ) {
-				if ( list.get(i).id == resourceId ) {
+				if (list.get(i).id == resourceId) {
 					Item item = list.remove(i);
 					list.add(item);
 					return item.drawable;
@@ -4360,11 +4323,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			super.updateItemContents(layout, item, listView, position);
-			ImageView img = (ImageView)layout.findViewById(R.id.option_value_image);
-            ImageView imgT = (ImageView)layout.findViewById(R.id.option_value_type);
-			ImageView imgAddInfo = (ImageView)layout.findViewById(R.id.btn_option_add_info);
-			ImageView imgDel = (ImageView)layout.findViewById(R.id.option_value_del);
-			RadioButton cb = (RadioButton)layout.findViewById(R.id.option_value_check);
+			ImageView img = layout.findViewById(R.id.option_value_image);
+            ImageView imgT = layout.findViewById(R.id.option_value_type);
+			ImageView imgAddInfo = layout.findViewById(R.id.btn_option_add_info);
+			ImageView imgDel = layout.findViewById(R.id.option_value_del);
+			RadioButton cb = layout.findViewById(R.id.option_value_check);
 			if (StrUtils.isEmptyStr(item.addInfo)) {
 				imgAddInfo.setVisibility(View.INVISIBLE);
 				imgDel.setVisibility(View.INVISIBLE);
@@ -4389,21 +4352,18 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					String sfile = item.addInfo;
 					File f = new File(sfile);
 					if (!f.exists()) return;
-					mActivity.askConfirmation(R.string.delete_texture, new Runnable() {
-						@Override
-						public void run() {
-							if (f.delete()) {
-								mActivity.showToast(R.string.texture_deleted);
-								Three forRemove = null;
-								for (Three t: list)
-									if (t.addInfo.equals(item.addInfo)) forRemove = t;
-								if (forRemove != null) list.remove(forRemove);
-								forRemove = null;
-								for (Three t: listFiltered)
-									if (t.addInfo.equals(item.addInfo)) forRemove = t;
-								if (forRemove != null) listFiltered.remove(forRemove);
-								listUpdated("");
-							}
+					mActivity.askConfirmation(R.string.delete_texture, () -> {
+						if (f.delete()) {
+							mActivity.showToast(R.string.texture_deleted);
+							Three forRemove = null;
+							for (Three t: list)
+								if (t.addInfo.equals(item.addInfo)) forRemove = t;
+							if (forRemove != null) list.remove(forRemove);
+							forRemove = null;
+							for (Three t: listFiltered)
+								if (t.addInfo.equals(item.addInfo)) forRemove = t;
+							if (forRemove != null) listFiltered.remove(forRemove);
+							listUpdated("");
 						}
 					});
 				}
@@ -4424,53 +4384,50 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				public void onClick(final View v) {
 					final BackgroundTextureInfo texture = Services.getEngine().getTextureInfoById(item.value);
 					if ((texture.resourceId == 0)&&(!texture.id.equals(BackgroundTextureInfo.NO_TEXTURE_ID))) {
-						activity.askConfirmation(R.string.texture_switch_mode, new Runnable() {
-							@Override
-							public void run() {
-								ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.TexturesDirs, true);
-								tDirs = Engine.getDataDirsExt(Engine.DataDirType.BackgroundsDirs, true);
-								File f = new File(texture.id);
-								String sNewName = texture.id;
-								if (texture.id.contains("/textures/"))
-									sNewName = sNewName.replace("/textures/", "/backgrounds/");
-								else
-									sNewName = sNewName.replace("/backgrounds/", "/textures/");
-								File fTo = new File(sNewName);
-								if (!f.renameTo(fTo))
-									activity.showToast(activity.getString(R.string.pic_problem));
-								else {
-									BackgroundTextureInfo[] textures = Services.getEngine().getAvailableTextures();
-									ArrayList<Three> listTemp = new ArrayList<Three>();
-									for (Three th : list) {
-										if (th.value.equals(texture.id))
-											th.value=sNewName;
-										listTemp.add(th);
-									}
-									list=listTemp;
-									listTemp = new ArrayList<Three>();
-									for (Three th : listFiltered) {
-										if (th.value.equals(texture.id))
-											th.value=sNewName;
-										listTemp.add(th);
-									}
-									listFiltered = listTemp;
-									if (!texture.tiled) ((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
-											R.attr.attr_icons8_texture, R.drawable.icons8_texture));
-									else
-										((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
-												R.attr.attr_icons8_fullscreen, R.drawable.icons8_fullscreen));
-									mActivity.tintViewIcons(v);
-									listAdapter.notifyDataSetChanged();
-									listAdapter.notifyDataSetInvalidated();
+						activity.askConfirmation(R.string.texture_switch_mode, () -> {
+							ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.TexturesDirs, true);
+							tDirs = Engine.getDataDirsExt(Engine.DataDirType.BackgroundsDirs, true);
+							File f = new File(texture.id);
+							String sNewName = texture.id;
+							if (texture.id.contains("/textures/"))
+								sNewName = sNewName.replace("/textures/", "/backgrounds/");
+							else
+								sNewName = sNewName.replace("/backgrounds/", "/textures/");
+							File fTo = new File(sNewName);
+							if (!f.renameTo(fTo))
+								activity.showToast(activity.getString(R.string.pic_problem));
+							else {
+								BackgroundTextureInfo[] textures = Services.getEngine().getAvailableTextures();
+								ArrayList<Three> listTemp = new ArrayList<Three>();
+								for (Three th : list) {
+									if (th.value.equals(texture.id))
+										th.value=sNewName;
+									listTemp.add(th);
 								}
+								list=listTemp;
+								listTemp = new ArrayList<Three>();
+								for (Three th : listFiltered) {
+									if (th.value.equals(texture.id))
+										th.value=sNewName;
+									listTemp.add(th);
+								}
+								listFiltered = listTemp;
+								if (!texture.tiled) ((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
+										R.attr.attr_icons8_texture, R.drawable.icons8_texture));
+								else
+									((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
+											R.attr.attr_icons8_fullscreen, R.drawable.icons8_fullscreen));
+								mActivity.tintViewIcons(v);
+								listAdapter.notifyDataSetChanged();
+								listAdapter.notifyDataSetInvalidated();
 							}
 						});
 					}
 				}
 			});
-			if ( texture.resourceId!=0 ) {
+			if (texture.resourceId != 0) {
 				Drawable drawable = textureSampleCache.getImage(texture.resourceId);
-				if ( drawable!=null ) {
+				if (drawable != null) {
 					img.setImageResource(0);
 					img.setImageDrawable(drawable);
 					img.setBackgroundColor(Color.TRANSPARENT);
@@ -4482,7 +4439,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			} else {
 				// load image from file
 				Drawable drawable = textureSampleCache.getImage(texture.id);
-				if ( drawable!=null ) {
+				if (drawable != null) {
 					img.setImageResource(0);
 					img.setImageDrawable(drawable);
 					img.setBackgroundColor(Color.TRANSPARENT);
@@ -4497,8 +4454,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	class FontsOptions extends ListOption
 	{
-		ArrayList<String> faces = new ArrayList<String>();
-		ArrayList<String> faceValues = new ArrayList<String>();
+		ArrayList<String> faces = new ArrayList<>();
+		ArrayList<String> faceValues = new ArrayList<>();
 
 		public FontsOptions( OptionOwner owner, String label, String property, String addInfo, boolean bForCSS, String filter )
 		{
@@ -4639,32 +4596,29 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					}
 					if (iFilesCnt>0) {
 						final int iFilesCntF = iFilesCnt;
-						mActivity.askConfirmation(R.string.delete_font, new Runnable() {
-							@Override
-							public void run() {
-								int iFilesDeleted = 0;
-								for (String s: arrFonts) {
-									if (!s.startsWith("/system")) {
-										File f = new File(s);
-										if (f.exists())
-											if (f.delete()) iFilesDeleted++;
-									}
+						mActivity.askConfirmation(R.string.delete_font, () -> {
+							int iFilesDeleted = 0;
+							for (String s: arrFonts) {
+								if (!s.startsWith("/system")) {
+									File f = new File(s);
+									if (f.exists())
+										if (f.delete()) iFilesDeleted++;
 								}
-								if (iFilesDeleted != iFilesCntF) {
-									mActivity.showToast(mActivity.getString(R.string.fonts_deleted_partial,
-											String.valueOf(iFilesDeleted),String.valueOf(iFilesCntF)));
-								} else {
-									mActivity.showToast(R.string.fonts_deleted_full);
-									Three forRemove = null;
-									for (Three t: list)
-										if (t.label.equals(item.label)) forRemove = t;
-									if (forRemove != null) list.remove(forRemove);
-									forRemove = null;
-									for (Three t: listFiltered)
-										if (t.label.equals(item.label)) forRemove = t;
-									if (forRemove != null) listFiltered.remove(forRemove);
-									listUpdated("");
-								}
+							}
+							if (iFilesDeleted != iFilesCntF) {
+								mActivity.showToast(mActivity.getString(R.string.fonts_deleted_partial,
+										String.valueOf(iFilesDeleted),String.valueOf(iFilesCntF)));
+							} else {
+								mActivity.showToast(R.string.fonts_deleted_full);
+								Three forRemove = null;
+								for (Three t: list)
+									if (t.label.equals(item.label)) forRemove = t;
+								if (forRemove != null) list.remove(forRemove);
+								forRemove = null;
+								for (Three t: listFiltered)
+									if (t.label.equals(item.label)) forRemove = t;
+								if (forRemove != null) listFiltered.remove(forRemove);
+								listUpdated("");
 							}
 						});
 					} else {
@@ -4799,7 +4753,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		super("OptionsDialog", activity, null, false, false);
 		String filter = "";
 		if (activity instanceof CoolReader) filter = ((CoolReader)activity).optionsFilter;
-		File f = activity.getSettingsFile(activity.getCurrentProfile());
+		File f = activity.getSettingsFileF(activity.getCurrentProfile());
 		String sF = f.getAbsolutePath();
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
 		if (!filter.trim().equals("")) sF = sF + "\n"+getString(R.string.mi_filter_option) + ": "+filter;
@@ -4831,8 +4785,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 	
 	class OptionsListView extends BaseListView {
-		public ArrayList<OptionBase> mOptions = new ArrayList<OptionBase>();
-		public ArrayList<OptionBase> mOptionsFiltered = new ArrayList<OptionBase>();
+		public ArrayList<OptionBase> mOptions = new ArrayList<>();
+		public ArrayList<OptionBase> mOptionsFiltered = new ArrayList<>();
 		public ArrayList<OptionBase> mOptionsThis;
 		private ListAdapter mAdapter;
 		private OptionBase root;
@@ -4925,7 +4879,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					return mOptionsThis.size()==0;
 				}
 
-				private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
+				private ArrayList<DataSetObserver> observers = new ArrayList<>();
 
 				public void registerDataSetObserver(DataSetObserver observer) {
 					observers.add(observer);
@@ -4960,16 +4914,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 	
 	public View createTabContent(String tag) {
-		if ( "App".equals(tag) )
+		if ("App".equals(tag) )
 			return mOptionsApplication;
-		else if ( "Styles".equals(tag) )
+		else if ("Styles".equals(tag) )
 			return mOptionsStyles;
-		else if ( "CSS".equals(tag) )
+		else if ("CSS".equals(tag) )
 			return mOptionsCSS;
-		else if ( "Controls".equals(tag) )
+		else if ("Controls".equals(tag) )
 			return mOptionsControls;
-		else if ( "Page".equals(tag))
+		else if ("Page".equals(tag))
 			return mOptionsPage;
+		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if ("Clouds".equals(tag))
+				return mOptionsCloudSync;
+		}
 		return null;
 	}
 
@@ -5434,13 +5392,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		if (mReaderView != null) {
 			mOptionsCSS.add(new BoolOption(this, getString(R.string.mi_book_styles_enable), PROP_EMBEDDED_STYLES,
 					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon()
-					.setOnChangeHandler(new Runnable() {
-				@Override
-				public void run() {
-					boolean value = mProperties.getBool(PROP_EMBEDDED_STYLES, false);
-					mEmbedFontsOptions.setEnabled(isEpubFormat && value);
-				}
-			}) );
+					.setOnChangeHandler(() -> {
+						boolean value = mProperties.getBool(PROP_EMBEDDED_STYLES, false);
+						mEmbedFontsOptions.setEnabled(isEpubFormat && value);
+					}) );
 
 			mEmbedFontsOptions = new BoolOption(this, getString(R.string.options_font_embedded_document_font_enabled), PROP_EMBEDDED_FONTS,
 				getString(R.string.option_add_info_empty_text), filter).setDefaultValue("1").noIcon();
@@ -5453,20 +5408,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						getString(R.string.option_add_info_empty_text), filter).setDefaultValue("1").noIcon());
 			}
 			if (/*isHtmlFormat*/ isFormatWithEmbeddedStyle) {
-				Runnable renderindChangeListsner = new Runnable() {
-					@Override
-					public void run() {
-						boolean legacyRender = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
-								mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
-						mEnableMultiLangOption.setEnabled(!legacyRender);
-						if (legacyRender) {
-							mHyphDictOption.setEnabled(true);
-							mEnableHyphOption.setEnabled(false);
-						} else {
-							boolean embeddedLang = mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
-							mHyphDictOption.setEnabled(!embeddedLang);
-							mEnableHyphOption.setEnabled(embeddedLang);
-						}
+				Runnable renderindChangeListsner = () -> {
+					boolean legacyRender = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
+							mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
+					mEnableMultiLangOption.setEnabled(!legacyRender);
+					if (legacyRender) {
+						mHyphDictOption.setEnabled(true);
+						mEnableHyphOption.setEnabled(false);
+					} else {
+						boolean embeddedLang = mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
+						mHyphDictOption.setEnabled(!embeddedLang);
+						mEnableHyphOption.setEnabled(embeddedLang);
 					}
 				};
 				if (optRenderingPreset == null)
@@ -5486,19 +5438,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				);
 			}
 		}
-		mOptionsCSS.add(new ListOption(this, getString(R.string.options_word_expanion), PROP_WORD_EXPANSION,
+		mOptionsCSS.add(new ListOption(this, getString(R.string.options_word_expanion), PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT,
 				getString(R.string.options_word_expanion_add_info), filter).
 				add(mWordExpansion, mWordExpansionTitles, mWordExpansionAddInfos)
 				.setDefaultValue("0")
 				.noIcon()
 		);
-		mOptionsCSS.add(new ListOption(this, getString(R.string.options_word_spacing_scaling), PROP_WORD_SPACE_WIDTH_SCALE_PERCENT,
+		mOptionsCSS.add(new ListOption(this, getString(R.string.options_word_spacing_scaling), PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT,
 				getString(R.string.options_word_spacing_scaling_add_info), filter).
 				add(mSpaceWidthScalePercent)
 				.setDefaultValue("95")
 				.noIcon()
 		);
-		mOptionsCSS.add(new ListOption(this, getString(R.string.options_word_spacing_condensing), PROP_WORD_SPACE_CONDENSING_PERCENT,
+		mOptionsCSS.add(new ListOption(this, getString(R.string.options_word_spacing_condensing), PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT,
 				getString(R.string.options_word_spacing_condensing_add_info), filter).
 				add(mSpaceCondensingPercent)
 				.setDefaultValue("75")
@@ -5515,7 +5467,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	{
         mInflater = LayoutInflater.from(getContext());
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.options_browser, null);
-        ViewGroup body = (ViewGroup)view.findViewById(R.id.body);
+        ViewGroup body = view.findViewById(R.id.body);
         
         
         mOptionsBrowser = new OptionsListView(getContext(), null);
@@ -5532,11 +5484,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		//mOptionsBrowser.add(new PluginsOption(this, getString(R.string.options_app_plugins), getString(R.string.option_add_info_empty_text), filter).noIcon());
 		mOptionsBrowser.add(new BoolOption(this, getString(R.string.options_app_fullscreen), PROP_APP_FULLSCREEN,
 				getString(R.string.options_app_fullscreen_add_info), filter).setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
-		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ) {
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			mOptionsBrowser.add(new NightModeOption(this, getString(R.string.options_inverse_view), PROP_NIGHT_MODE,
 					getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_night_drawable, R.drawable.cr3_option_night));
 		}
-		if ( !DeviceInfo.isForceHCTheme(false)) {
+		if (!DeviceInfo.isForceHCTheme(false)) {
 		//plotn - when setting EINK manually, hc doesnt work ... still dont know why
 			mOptionsBrowser.add(new ThemeOptions(this, getString(R.string.options_app_ui_theme),
 					getString(R.string.options_app_ui_theme_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
@@ -5556,18 +5508,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		final int colorGray = a.getColor(0, Color.GRAY);
 		final int colorGrayC = a.getColor(1, Color.GRAY);
 
-		mTabs.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-			@Override
-			public void onTabChanged(String tabId) {
-				for (int i = 0; i < mTabs.getTabWidget().getChildCount(); i++) {
-					mTabs.getTabWidget().getChildAt(i)
-							.setBackgroundColor(colorGrayC); // unselected
-				}
-
-				mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
-						.setBackgroundColor(colorGray); // selected
-
+		mTabs.setOnTabChangedListener(tabId -> {
+			for (int i = 0; i < mTabs.getTabWidget().getChildCount(); i++) {
+				mTabs.getTabWidget().getChildAt(i)
+						.setBackgroundColor(colorGrayC); // unselected
 			}
+
+			mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
+					.setBackgroundColor(colorGray); // selected
+
 		});
 		// setup tabs
 		//setView(R.layout.options);
@@ -5575,7 +5524,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		//mTabs = (TabHost)findViewById(android.R.id.tabhost); 
 		mTabs.setup();
 		
-		TabWidget tabWidget = (TabWidget)mTabs.findViewById(android.R.id.tabs);
 		//tabWidget.
 		//new TabHost(getContext());
 
@@ -5601,20 +5549,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).add(mAntialias, mAntialiasTitles, mAntialiasAddInfos).setDefaultValue("2").setIconIdByAttr(R.attr.cr3_option_text_antialias_drawable, R.drawable.cr3_option_text_antialias));
 		mOptionsStyles.add(new ListOption(this, getString(R.string.options_interline_space), PROP_INTERLINE_SPACE,
 				getString(R.string.option_add_info_empty_text), filter).addPercents(mInterlineSpaces).setDefaultValue("100").setIconIdByAttr(R.attr.cr3_option_line_spacing_drawable, R.drawable.cr3_option_line_spacing));
-		Runnable renderindChangeListsner = new Runnable() {
-			@Override
-			public void run() {
-				boolean legacyRender = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
-						mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
-				mEnableMultiLangOption.setEnabled(!legacyRender);
-				if (legacyRender) {
-					mHyphDictOption.setEnabled(true);
-					mEnableHyphOption.setEnabled(false);
-				} else {
-					boolean embeddedLang = mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
-					mHyphDictOption.setEnabled(!embeddedLang);
-					mEnableHyphOption.setEnabled(embeddedLang);
-				}
+		Runnable renderindChangeListsner = () -> {
+			boolean legacyRender1 = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
+					mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
+			mEnableMultiLangOption.setEnabled(!legacyRender1);
+			if (legacyRender1) {
+				mHyphDictOption.setEnabled(true);
+				mEnableHyphOption.setEnabled(false);
+			} else {
+				boolean embeddedLang = mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
+				mHyphDictOption.setEnabled(!embeddedLang);
+				mEnableHyphOption.setEnabled(embeddedLang);
 			}
 		};
 		if (optRenderingPreset == null)
@@ -5628,14 +5573,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mEnableMultiLangOption = new BoolOption(this, getString(R.string.options_style_multilang), PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED,
 				getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_text_multilang_drawable,
 				R.drawable.cr3_option_text_multilang).
-				setOnChangeHandler(new Runnable() {
-			@Override
-			public void run() {
-				boolean value = mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
-				mHyphDictOption.setEnabled(!value);
-				mEnableHyphOption.setEnabled(value);
-			}
-		});
+				setOnChangeHandler(() -> {
+					boolean value = mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
+					mHyphDictOption.setEnabled(!value);
+					mEnableHyphOption.setEnabled(value);
+				});
 		mEnableMultiLangOption.enabled = !legacyRender;
 		mOptionsStyles.add(mEnableMultiLangOption);
 		mEnableHyphOption = new BoolOption(this, getString(R.string.options_style_enable_hyphenation), PROP_TEXTLANG_HYPHENATION_ENABLED,
@@ -5675,13 +5617,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_view_mode), PROP_PAGE_VIEW_MODE,
 				getString(R.string.options_view_mode_add_info), filter).add(mViewModes, mViewModeTitles, mViewModeAddInfos).
 				setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll).
-				setOnChangeHandler(new Runnable() {
-			@Override
-			public void run() {
-				int value = mProperties.getInt(PROP_PAGE_VIEW_MODE, 1);
-				mFootNotesOption.setEnabled(value == 1);
-			}
-		}));
+				setOnChangeHandler(() -> {
+					int value = mProperties.getInt(PROP_PAGE_VIEW_MODE, 1);
+					mFootNotesOption.setEnabled(value == 1);
+				}));
 		//mOptionsPage.add(new ListOption(getString(R.string.options_page_orientation), PROP_ROTATE_ANGLE).add(mOrientations, mOrientationsTitles).setDefaultValue("0"));
 		if (DeviceInfo.getSDKLevel() >= 9) {
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION,
@@ -5696,11 +5635,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_page_orientation_add_info), filter).add(mOrientations, mOrientationsTitles, mOrientationsAddInfos).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
 		mOptionsPage.add(new ListOption(this, getString(R.string.options_page_landscape_pages), PROP_LANDSCAPE_PAGES,
 				getString(R.string.options_page_landscape_pages_add_info), filter).add(mLandscapePages, mLandscapePagesTitles, mLandscapePagesAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_pages_two_drawable, R.drawable.cr3_option_pages_two));
-		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) )
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			mOptionsPage.add(new TextureOptions(this, getString(R.string.options_background_texture),
 					getString(R.string.options_background_texture_add_info), filter).
 					setIconIdByAttr(R.attr.attr_icons8_texture, R.drawable.icons8_texture));
-		if ( DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED ) {
+		if (DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED) {
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE, getString(R.string.option_add_info_empty_text), filter).add(mScreenUpdateModes, mScreenUpdateModesTitles, mScreenUpdateModesAddInfos).setDefaultValue("0"));
 			mOptionsPage.add(new ListOption(this, getString(R.string.options_screen_update_interval), PROP_APP_SCREEN_UPDATE_INTERVAL, getString(R.string.option_add_info_empty_text), filter).add(mScreenFullUpdateInterval).setDefaultValue("10"));
 		}
@@ -5725,7 +5664,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mFootNotesOption.enabled = value == 1;
 		mOptionsPage.add(mFootNotesOption);
 
-		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ) {
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			mOptionsPage.add(new ListOption(this, getString(R.string.page_animation_speed), PROP_PAGE_ANIMATION_SPEED,
 					getString(R.string.option_add_info_empty_text), filter).
 					add(mPageAnimationSpeed, mPageAnimationSpeedTitles, mPageAnimationSpeedAddInfos).setDefaultValue("300").
@@ -5762,7 +5701,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.attr_icons8_double_tap, R.drawable.icons8_double_tap));
 		mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_double_tap_selection), PROP_APP_DOUBLE_TAP_SELECTION,
 				getString(R.string.options_app_double_tap_selection_add_info), filter).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
-		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) )
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			mOptionsControls.add(new BoolOption(this, getString(R.string.options_controls_enable_volume_keys), PROP_CONTROLS_ENABLE_VOLUME_KEYS,
 					getString(R.string.options_controls_enable_volume_keys_add_info), filter).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
@@ -5804,7 +5743,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.attr_icons8_document_selection1_long, R.drawable.icons8_document_selection1_long));
 		mOptionsApplication = new OptionsListView(getContext(), null);
 		mOptionsApplication.add(new LangOption(this, filter).noIcon());
-		if ( !DeviceInfo.isForceHCTheme(false)) {
+		if (!DeviceInfo.isForceHCTheme(false)) {
 		//plotn - when setting EINK manually, hc doesnt work ... still dont know why
 			mOptionsApplication.add(new ThemeOptions(this, getString(R.string.options_app_ui_theme), getString(R.string.options_app_ui_theme_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
 					R.drawable.icons8_change_theme_1));
@@ -5817,7 +5756,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.options_screen_force_eink_add_info), filter).
 				setIconIdByAttr(R.attr.attr_icons8_eink, R.drawable.icons8_eink).
 				setDefaultValue("0"));
-		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ) {
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			mOptionsApplication.add(new ListOption(this, getString(R.string.options_app_backlight_timeout), PROP_APP_SCREEN_BACKLIGHT_LOCK,
 					getString(R.string.options_app_backlight_timeout_add_info), filter).
 					add(mBacklightTimeout, mBacklightTimeoutTitles, mBacklightLevelsAddInfos).setDefaultValue("3").setIconIdByAttr(R.attr.attr_icons8_sun_1, R.drawable.icons8_sun_1));
@@ -5834,7 +5773,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.options_app_key_backlight_off_add_info), filter).setDefaultValue("1").noIcon());
 		mOptionsApplication.add(new IconsBoolOption(this, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS,
 				getString(R.string.options_app_settings_icons_add_info), filter).setDefaultValue("1").noIcon());
-		if ( !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ) {
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			mOptionsApplication.add(new BoolOption(this, getString(R.string.options_app_settings_icons_is_custom_color), PROP_APP_ICONS_IS_CUSTOM_COLOR,
 					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon());
 			mOptionsApplication.add(new ColorOption(this, getString(R.string.options_app_settings_icons_custom_color), PROP_APP_ICONS_CUSTOM_COLOR, 0x000000,
@@ -5860,33 +5799,56 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_other_drawable, R.drawable.icons8_more);
 		((RareOption)sbO6).updateFilterEnd();
 		mOptionsApplication.add(sbO6);
+
+		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			boolean gdriveSyncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+			mOptionsCloudSync = new OptionsListView(getContext(), null);
+			mOptionsCloudSync.add(new BoolOption(this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED,
+					getString(R.string.option_add_info_empty_text), filter
+					).setDefaultValue("0").noIcon()
+					.setOnChangeHandler(() -> {
+						boolean syncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+						mGoogleDriveEnableSettingsOption.setEnabled(syncEnabled);
+						mGoogleDriveEnableBookmarksOption.setEnabled(syncEnabled);
+						mGoogleDriveEnableCurrentBookOption.setEnabled(syncEnabled);
+					}));
+			mGoogleDriveEnableSettingsOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_settings), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS,
+					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
+			mGoogleDriveEnableSettingsOption.enabled = gdriveSyncEnabled;
+			mGoogleDriveEnableBookmarksOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_bookmarks), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS,
+					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
+			mGoogleDriveEnableBookmarksOption.enabled = gdriveSyncEnabled;
+			mGoogleDriveEnableCurrentBookOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK,
+					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
+			mGoogleDriveEnableCurrentBookOption.enabled = gdriveSyncEnabled;
+			mOptionsCloudSync.add(mGoogleDriveEnableSettingsOption);
+			mOptionsCloudSync.add(mGoogleDriveEnableBookmarksOption);
+			mOptionsCloudSync.add(mGoogleDriveEnableCurrentBookOption);
+		}
+
 		fillStyleEditorOptions(filter);
 
 		mOptionsStyles.refresh();
 		mOptionsCSS.refresh();
 		mOptionsPage.refresh();
 		mOptionsApplication.refresh();
-		
+		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			mOptionsCloudSync.refresh();
+		}
+
 		addTab("Styles",
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_type_filled, R.drawable.icons8_type_filled),
-				//R.drawable.icons8_type_filled,
-				R.string.tab_options_styles);
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_type_filled, R.drawable.icons8_type_filled));
 		addTab("CSS",
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_css, R.drawable.icons8_css),
-				//R.drawable.icons8_css,
-				R.string.tab_options_css);
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_css, R.drawable.icons8_css));
 		addTab("Page",
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_page, R.drawable.icons8_page),
-				//R.drawable.icons8_page,
-				R.string.tab_options_page);
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_page, R.drawable.icons8_page));
 		addTab("Controls",
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_cursor, R.drawable.icons8_cursor),
-				//R.drawable.icons8_cursor,
-				R.string.tab_options_controls);
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_cursor, R.drawable.icons8_cursor));
 		addTab("App",
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings),
-				//R.drawable.icons8_settings,
-				R.string.tab_options_app);
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings));
+		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			addTab("Clouds", R.drawable.cr3_tab_clouds);
+		}
 		setView(mTabs);
 		((CoolReader)activity).tintViewIcons(mTabs);
 		mTabs.invalidate();
@@ -5902,7 +5864,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	}
 	
-	private void addTab(String name, int imageDrawable, int contentDescription) {
+	private void addTab(String name, int imageDrawable) {
 		TabHost.TabSpec ts = mTabs.newTabSpec(name);
 		Drawable icon = getContext().getResources().getDrawable(imageDrawable);
 		activity.tintViewIcons(icon,true);
@@ -5925,56 +5887,50 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	@Override
 	protected void onStart() {
 		if (!StrUtils.isEmptyStr(selectedOption)) {
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					OptionBase selOpt = null;
-					if (mOptionsStyles != null)
-						for (OptionBase opt : mOptionsStyles.mOptions) {
-							if (opt.property.equals(selectedOption)) selOpt = opt;
-						}
-					if (mOptionsCSS != null)
-						for (OptionBase opt : mOptionsCSS.mOptions) {
-							if (opt.property.equals(selectedOption)) selOpt = opt;
-						}
-					if (mOptionsPage != null)
-						for (OptionBase opt : mOptionsPage.mOptions) {
-							if (opt.property.equals(selectedOption)) selOpt = opt;
-						}
-					if (mOptionsApplication != null)
-						for (OptionBase opt : mOptionsApplication.mOptions) {
-							if (opt.property.equals(selectedOption)) selOpt = opt;
-						}
-					if (mOptionsControls != null)
-						for (OptionBase opt : mOptionsControls.mOptions) {
-							if (opt.property.equals(selectedOption)) selOpt = opt;
-						}
-					if (mOptionsBrowser != null)
-						for (OptionBase opt : mOptionsBrowser.mOptions) {
-							if (opt.property.equals(selectedOption)) selOpt = opt;
-						}
-					if (selOpt != null) {
-						selOpt.onSelect();
-						if (selOpt.optionsListView != null) {
-							if (selOpt.optionsListView == mOptionsStyles) mTabs.setCurrentTab(0);
-							if (selOpt.optionsListView == mOptionsCSS) mTabs.setCurrentTab(1);
-							if (selOpt.optionsListView == mOptionsPage) mTabs.setCurrentTab(2);
-							if (selOpt.optionsListView == mOptionsControls) mTabs.setCurrentTab(3);
-							if (selOpt.optionsListView == mOptionsApplication)
-								mTabs.setCurrentTab(4);
-						}
+			BackgroundThread.instance().postGUI(() -> {
+				OptionBase selOpt = null;
+				if (mOptionsStyles != null)
+					for (OptionBase opt : mOptionsStyles.mOptions) {
+						if (opt.property.equals(selectedOption)) selOpt = opt;
 					}
-					selectedOption = "";
+				if (mOptionsCSS != null)
+					for (OptionBase opt : mOptionsCSS.mOptions) {
+						if (opt.property.equals(selectedOption)) selOpt = opt;
+					}
+				if (mOptionsPage != null)
+					for (OptionBase opt : mOptionsPage.mOptions) {
+						if (opt.property.equals(selectedOption)) selOpt = opt;
+					}
+				if (mOptionsApplication != null)
+					for (OptionBase opt : mOptionsApplication.mOptions) {
+						if (opt.property.equals(selectedOption)) selOpt = opt;
+					}
+				if (mOptionsControls != null)
+					for (OptionBase opt : mOptionsControls.mOptions) {
+						if (opt.property.equals(selectedOption)) selOpt = opt;
+					}
+				if (mOptionsBrowser != null)
+					for (OptionBase opt : mOptionsBrowser.mOptions) {
+						if (opt.property.equals(selectedOption)) selOpt = opt;
+					}
+				if (selOpt != null) {
+					selOpt.onSelect();
+					if (selOpt.optionsListView != null) {
+						if (selOpt.optionsListView == mOptionsStyles) mTabs.setCurrentTab(0);
+						if (selOpt.optionsListView == mOptionsCSS) mTabs.setCurrentTab(1);
+						if (selOpt.optionsListView == mOptionsPage) mTabs.setCurrentTab(2);
+						if (selOpt.optionsListView == mOptionsControls) mTabs.setCurrentTab(3);
+						if (selOpt.optionsListView == mOptionsApplication)
+							mTabs.setCurrentTab(4);
+					}
 				}
+				selectedOption = "";
 			}, 100);
 		} else {
 			if (selectedTab != -1) {
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						mTabs.setCurrentTab(selectedTab);
-						selectedTab = -1;
-					}
+				BackgroundThread.instance().postGUI(() -> {
+					mTabs.setCurrentTab(selectedTab);
+					selectedTab = -1;
 				}, 100);
 			}
 		}
@@ -6029,19 +5985,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
         else if (mode == Mode.BROWSER)
         	setupBrowserOptions("");
         
-		setOnCancelListener(new OnCancelListener() {
+		setOnCancelListener(dialog -> onPositiveButtonClick());
 
-			public void onCancel(DialogInterface dialog) {
-				onPositiveButtonClick();
-			}
-		});
-
-		ImageButton positiveButton = (ImageButton)view.findViewById(R.id.options_btn_back);
-		positiveButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				onPositiveButtonClick();
-			}
-		});
+		ImageButton positiveButton = view.findViewById(R.id.options_btn_back);
+		positiveButton.setOnClickListener(v -> onPositiveButtonClick());
 		
 //		ImageButton negativeButton = (ImageButton)mTabs.findViewById(R.id.options_btn_cancel);
 //		negativeButton.setOnClickListener(new View.OnClickListener() {
@@ -6059,16 +6006,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					if (lbl != null) {
 						if (cr.getReaderView()!=null)
 							lbl.setPaintFlags(lbl.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-						lbl.setOnClickListener(new View.OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								if (cr.getReaderView()!=null) {
-									SwitchProfileDialog dlg = new SwitchProfileDialog(cr, cr.getReaderView(), OptionsDialog.this);
-									dlg.show();
-								} else {
-									cr.showToast(cr.getString(R.string.switch_profile_note));
-								}
+						lbl.setOnClickListener(v -> {
+							if (cr.getReaderView()!=null) {
+								SwitchProfileDialog dlg = new SwitchProfileDialog(cr, cr.getReaderView(), OptionsDialog.this);
+								dlg.show();
+							} else {
+								cr.showToast(cr.getString(R.string.switch_profile_note));
 							}
 						});
 					}
@@ -6137,6 +6080,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	@Override
 	protected void onPositiveButtonClick() {
 		apply();
+		((CoolReader)mActivity).backupSettings();
         dismiss();
 	}
 
@@ -6155,7 +6099,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	@Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (mode == Mode.READER) {
-	        if (((OptionsListView)mTabs.getCurrentView()).onKeyDown(keyCode, event))
+	        if (mTabs.getCurrentView().onKeyDown(keyCode, event))
 	        	return true;
 		} else {
 	        if (view.onKeyDown(keyCode, event))

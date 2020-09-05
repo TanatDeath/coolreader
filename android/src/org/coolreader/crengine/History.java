@@ -8,7 +8,7 @@ import org.coolreader.db.CRDBService;
 import android.util.Log;
 
 public class History extends FileInfoChangeSource {
-	private ArrayList<BookInfo> mBooks = new ArrayList<BookInfo>();
+	private ArrayList<BookInfo> mBooks = new ArrayList<>();
 	private FileInfo mRecentBooksFolder;
 
 	public History(Scanner scanner)
@@ -30,35 +30,32 @@ public class History extends FileInfoChangeSource {
 		return mBooks.get(1);
 	}
 
-	public interface BookInfoLoadedCallack {
+	public interface BookInfoLoadedCallback {
 		void onBookInfoLoaded(BookInfo bookInfo);
 	}
 
-	public interface FileInfo1LoadedCallack {
+	public interface FileInfo1LoadedCallback {
 		void onFileInfoLoaded(FileInfo fileInfo);
 		void onFileInfoLoadBegin();
 	}
 	
-	public void getOrCreateBookInfo(final CRDBService.LocalBinder db, final FileInfo file, final BookInfoLoadedCallack callback)
+	public void getOrCreateBookInfo(final CRDBService.LocalBinder db, final FileInfo file, final BookInfoLoadedCallback callback)
 	{
 		BookInfo res = getBookInfo(file);
 		if (res != null) {
 			callback.onBookInfoLoaded(res);
 			return;
 		}
-		db.loadBookInfo(file, new CRDBService.BookInfoLoadingCallback() {
-			@Override
-			public void onBooksInfoLoaded(BookInfo bookInfo) {
-				if (bookInfo == null) {
-					bookInfo = new BookInfo(file);
-					mBooks.add(0, bookInfo);
-				}
-				callback.onBookInfoLoaded(bookInfo);
+		db.loadBookInfo(file, bookInfo -> {
+			if (bookInfo == null) {
+				bookInfo = new BookInfo(file);
+				mBooks.add(0, bookInfo);
 			}
+			callback.onBookInfoLoaded(bookInfo);
 		});
 	}
 
-	public void getFileInfoByOPDSLink(final CRDBService.LocalBinder db, final String opdsLink, final FileInfo1LoadedCallack callback)
+	public void getFileInfoByOPDSLink(final CRDBService.LocalBinder db, final String opdsLink, final FileInfo1LoadedCallback callback)
 	{
 		db.loadFileInfoByOPDSLink(opdsLink, new CRDBService.FileInfo1LoadingCallback() {
 			@Override
@@ -100,7 +97,24 @@ public class History extends FileInfoChangeSource {
 			db.deleteRecentPosition(fileInfo);
 		updateRecentDir();
 	}
-	
+
+	public void updateBookInfo(BookInfo bookInfo)
+	{
+		Log.v("cr3", "History.updateBookInfo() for " + bookInfo.getFileInfo().getPathName());
+		bookInfo.updateAccess();
+		int index = findBookInfo(bookInfo.getFileInfo());
+		if ( index>=0 ) {
+			BookInfo info = mBooks.get(index);
+			if ( index>0 ) {
+				mBooks.remove(index);
+				mBooks.add(0, info);
+			}
+			info.setBookmarks(bookInfo.getAllBookmarks());
+		} else {
+			mBooks.add(0, bookInfo);
+		}
+	}
+
 	public void updateBookAccess(BookInfo bookInfo, long timeElapsed)
 	{
 		Log.v("cr3", "History.updateBookAccess() for " + bookInfo.getFileInfo().getPathName());
@@ -163,16 +177,10 @@ public class History extends FileInfoChangeSource {
 			callback.onRecentBooksListLoaded(mBooks);
 		} else {
 			// not yet loaded. Wait until ready: sync with DB thread.
-			db.sync(new Runnable() {
-				@Override
-				public void run() {
-					callback.onRecentBooksListLoaded(mBooks);
-				}
-			});
+			db.sync(() -> callback.onRecentBooksListLoaded(mBooks));
 		}
-			
 	}
-	
+
 	public boolean loadFromDB(final CRDBService.LocalBinder db, int maxItems )
 	{
 		Log.v("cr3", "History.loadFromDB()");

@@ -50,7 +50,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
 			Log.i("YND","Starting save ynd.token");
 			try {
-				final File fYND = new File(mCoolReader.getSettingsFile(0).getParent() + "/ynd.token");
+				final File fYND = new File(mCoolReader.getSettingsFileF(0).getParent() + "/ynd.token");
 				BufferedWriter bw = null;
 				FileWriter fw = null;
 				char[] bytesArray = new char[1000];
@@ -67,12 +67,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 			}
 			YNDConfig.didLogin = true;
 			mCoolReader.showToast(R.string.ynd_auth_finished_ok);
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					CloudAction.yndOpenBookDialog(mCoolReader, null,true);
-				}
-			}, 500);
+			BackgroundThread.instance().postGUI(() -> CloudAction.yndOpenBookDialog(mCoolReader, null,true), 500);
 		}
 	}
 
@@ -95,7 +90,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 			}
 		});
 		TextView tokenDeleteTxt = (TextView) view.findViewById(R.id.ynd_txt_delete_token);
-        final File fYND = new File(mCoolReader.getSettingsFile(0).getParent() + "/ynd.token");
+        final File fYND = new File(mCoolReader.getSettingsFileF(0).getParent() + "/ynd.token");
         if (!fYND.exists()) {
         	tokenDelete.setVisibility(View.INVISIBLE);
 			tokenDeleteTxt.setVisibility(View.INVISIBLE);

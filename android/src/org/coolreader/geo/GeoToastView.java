@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -76,13 +76,10 @@ public class GeoToastView {
     private static int colorIcon;
     private static BaseActivity mActivity;
 
-    private static Runnable handleDismiss = new Runnable() {
-        @Override
-        public void run() {
-            if (window != null) {
-                window.dismiss();
-                show();
-            }
+    private static Runnable handleDismiss = () -> {
+        if (window != null) {
+            window.dismiss();
+            show();
         }
     };
 

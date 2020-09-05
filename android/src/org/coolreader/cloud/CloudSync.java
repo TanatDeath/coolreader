@@ -52,7 +52,7 @@ public class CloudSync {
     public static void readKnownDevices(CoolReader cr)
     {
         Log.i("CLOUD","Reading known_devices.json");
-        String rh = Utils.readFileToString(cr.getSettingsFile(0).getParent() + "/known_devices.json");
+        String rh = Utils.readFileToString(cr.getSettingsFileF(0).getParent() + "/known_devices.json");
         try {
             devicesKnown = new ArrayList<DeviceKnown>(StrUtils.stringToArray(rh, DeviceKnown[].class));
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class CloudSync {
         try {
             final Gson gson = new GsonBuilder().setPrettyPrinting().create();
             final String prettyJson = gson.toJson(devicesKnown);
-            Utils.saveStringToFileSafe(prettyJson,cr.getSettingsFile(0).getParent() + "/known_devices.json");
+            Utils.saveStringToFileSafe(prettyJson,cr.getSettingsFileF(0).getParent() + "/known_devices.json");
         } catch (Exception e) {
         }
     }
@@ -163,7 +163,7 @@ public class CloudSync {
             try {
                 final Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 final String prettyJson = gson.toJson(devicesKnown);
-                Utils.saveStringToFileSafe(prettyJson, cr.getSettingsFile(0).getParent() + "/known_devices.json");
+                Utils.saveStringToFileSafe(prettyJson, cr.getSettingsFileF(0).getParent() + "/known_devices.json");
             } catch (Exception e) {
             }
         }
@@ -177,10 +177,10 @@ public class CloudSync {
     public static void saveSettingsFiles(CoolReader cr, boolean bQuiet) {
         int iSettClount = 1;
         ArrayList<File> arrSett = new ArrayList<File>();
-        File fSett = cr.getSettingsFile(0);
+        File fSett = cr.getSettingsFileF(0);
         while (fSett.exists()) {
             arrSett.add(fSett);
-            fSett = cr.getSettingsFile(iSettClount);
+            fSett = cr.getSettingsFileF(iSettClount);
             iSettClount++;
         }
         ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CloudSyncDirs, true);
@@ -238,10 +238,10 @@ public class CloudSync {
     public static void saveSettingsFilesToCloud(CoolReader cr, boolean bQuiet) {
         int iSettClount = 1;
         ArrayList<File> arrSett = new ArrayList<File>();
-        File fSett = cr.getSettingsFile(0);
+        File fSett = cr.getSettingsFileF(0);
         while (fSett.exists()) {
             arrSett.add(fSett);
-            fSett = cr.getSettingsFile(iSettClount);
+            fSett = cr.getSettingsFileF(iSettClount);
             iSettClount++;
         }
         boolean bWasErr = false;
@@ -264,7 +264,7 @@ public class CloudSync {
     }
 
     public static void loadSettingsFiles(CoolReader cr, boolean bQuiet) {
-        final File fSett = cr.getSettingsFile(0);
+        final File fSett = cr.getSettingsFileF(0);
         Log.d(TAG, "Starting load settings files from drive...");
         ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CloudSyncDirs, true);
         String sDir = "";
@@ -307,7 +307,7 @@ public class CloudSync {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            File fSett = cr.getSettingsFile(profileNum);
+            File fSett = cr.getSettingsFileF(profileNum);
             String sFName = fSett.getPath();
             File file = new File(sFName + ".bk");
             if (file.exists()){
@@ -352,7 +352,7 @@ public class CloudSync {
 
     public static boolean restoreSettingsFile(CoolReader cr, String fileName, ArrayList<String> content, boolean bQuiet) {
         Log.d(TAG, "Starting load settings file from drive...");
-        File fDir = cr.getSettingsFile(0).getParentFile();
+        File fDir = cr.getSettingsFileF(0).getParentFile();
         File file = new File(fDir.getAbsolutePath() + "/" + fileName + ".bk");
         boolean bWasErr = false;
         if (file.exists()){
@@ -699,7 +699,7 @@ public class CloudSync {
 
     public static void loadFromJsonInfoFile(CoolReader cr, int iSaveType, String filePath, boolean bQuiet,
                                             String name, int cloudMode) {
-        final File fSett = cr.getSettingsFile(0);
+        final File fSett = cr.getSettingsFileF(0);
         Log.d(TAG, "Starting load json file from drive...");
 
         final ReaderView rv = cr.getReaderView();

@@ -67,12 +67,7 @@ public class DBXFinishAuthorization extends AsyncTask<String, Void, Boolean> {
             }
             DBXConfig.mDbxClient = new DbxClientV2(DBXConfig.mDbxRequestConfig, access_token);
             DBXConfig.didLogin = true;
-            BackgroundThread.instance().postGUI(new Runnable() {
-                @Override
-                public void run() {
-                    CloudAction.dbxOpenBookDialog(mCoolReader);
-                }
-            }, 500);
+            BackgroundThread.instance().postGUI(() -> CloudAction.dbxOpenBookDialog(mCoolReader), 500);
         } catch (Exception e) {
             System.err.println("Error in DbxWebAuth.authorize: " + e.getMessage());
             mException = e;

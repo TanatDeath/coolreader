@@ -156,7 +156,6 @@ public class CoverpageManager {
 	
 	/**
 	 * Constructor.
-	 * @param activity is CoolReader main activity.
 	 */
 	public CoverpageManager () {
 	}
@@ -326,7 +325,7 @@ public class CoverpageManager {
 	private FileInfoQueue mReadyQueue = new FileInfoQueue();
 	
 	private static class FileInfoQueue {
-		ArrayList<ImageItem> list = new ArrayList<ImageItem>();
+		ArrayList<ImageItem> list = new ArrayList<>();
 		public int indexOf(ImageItem file) {
 			for (int i = list.size() - 1; i >= 0; i--) {
 				if (file.matches(list.get(i))) {
@@ -406,30 +405,27 @@ public class CoverpageManager {
 				firstReadyTimestamp = Utils.timeStamp();
 			mReadyQueue.add(file);
 		}
-		Runnable task = new Runnable() {
-			@Override
-			public void run() {
+		Runnable task = () -> {
 //				if (lastReadyNotifyTask != this && Utils.timeInterval(firstReadyTimestamp) < COVERPAGE_MAX_UPDATE_DELAY) {
 //					log.v("skipping update, " + Utils.timeInterval(firstReadyTimestamp));
 //					return;
 //				}
-				ArrayList<ImageItem> list = new ArrayList<ImageItem>();
-				synchronized(LOCK) {
-					for (;;) {
-						ImageItem f = mReadyQueue.next();
-						if (f == null)
-							break;
-						list.add(f);
-					}
-					mReadyQueue.clear();
-					if (list.size() > 0)
-						log.v("ready coverpages: " + list.size());
+			ArrayList<ImageItem> list = new ArrayList<>();
+			synchronized(LOCK) {
+				for (;;) {
+					ImageItem f = mReadyQueue.next();
+					if (f == null)
+						break;
+					list.add(f);
 				}
-				if (list.size() > 0) {
-					for (CoverpageReadyListener listener : listeners)
-						listener.onCoverpagesReady(list);
-					firstReadyTimestamp = Utils.timeStamp();
-				}
+				mReadyQueue.clear();
+				if (list.size() > 0)
+					log.v("ready coverpages: " + list.size());
+			}
+			if (list.size() > 0) {
+				for (CoverpageReadyListener listener : listeners)
+					listener.onCoverpagesReady(list);
+				firstReadyTimestamp = Utils.timeStamp();
 			}
 		};
 		lastReadyNotifyTask = task;
@@ -437,7 +433,7 @@ public class CoverpageManager {
 	}
 
 	private void draw(ImageItem file, byte[] data) {
-		BitmapCacheItem item = null;
+		BitmapCacheItem item;
 		synchronized(LOCK) {
 			item = mCache.getItem(file);
 			if (item == null)
@@ -459,12 +455,7 @@ public class CoverpageManager {
 	private void coverpageLoaded(final ImageItem file, final byte[] data) {
 		log.v("coverpage data is loaded for " + file);
 		setItemState(file, State.IMAGE_DRAW_SCHEDULED);
-		BackgroundThread.instance().postBackground(new Runnable() {
-			@Override
-			public void run() {
-				draw(file, data);
-			}
-		});
+		BackgroundThread.instance().postBackground(() -> draw(file, data));
 	}
 	private void scheduleCheckCache(final CRDBService.LocalBinder db) {
 		// cache lookup
@@ -479,16 +470,13 @@ public class CoverpageManager {
 				}
 				if (file != null) {
 					final ImageItem request = file;
-					db.loadBookCoverpage(file.file, new CRDBService.CoverpageLoadingCallback() {
-						@Override
-						public void onCoverpageLoaded(FileInfo fileInfo, byte[] data) {
-							if (data == null) {
-								log.v("cover not found in DB for " + fileInfo + ", scheduling scan");
-								mScanFileQueue.addOnTop(request);
-								scheduleScanFile(db);
-							} else {
-								coverpageLoaded(request, data);
-							}
+					db.loadBookCoverpage(file.file, (fileInfo, data) -> {
+						if (data == null) {
+							log.v("cover not found in DB for " + fileInfo + ", scheduling scan");
+							mScanFileQueue.addOnTop(request);
+							scheduleScanFile(db);
+						} else {
+							coverpageLoaded(request, data);
 						}
 					});
 					scheduleCheckCache(db);
@@ -511,16 +499,13 @@ public class CoverpageManager {
 				if (file != null) {
 					final ImageItem fileInfo = file;
 					if (fileInfo.file.format.canParseCoverpages) {
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								byte[] data = Services.getEngine().scanBookCover(fileInfo.file.getPathName());
-								if (data == null)
-									data = new byte[] {};
-								if (fileInfo.file.format.needCoverPageCaching())
-									db.saveBookCoverpage(fileInfo.file, data);
-								coverpageLoaded(fileInfo, data);
-							}
+						BackgroundThread.instance().postBackground(() -> {
+							byte[] data = Services.getEngine().scanBookCover(fileInfo.file.getPathName());
+							if (data == null)
+								data = new byte[] {};
+							if (fileInfo.file.format.needCoverPageCaching())
+								db.saveBookCoverpage(fileInfo.file, data);
+							coverpageLoaded(fileInfo, data);
 						});
 					} else {
 						coverpageLoaded(fileInfo, new byte[] {});
@@ -755,85 +740,77 @@ public class CoverpageManager {
 	}
 
 	public void drawCoverpageFor(final CRDBService.LocalBinder db, final FileInfo file, final Bitmap buffer, final CoverpageBitmapReadyListener callback) {
-		db.loadBookCoverpage(file, new CRDBService.CoverpageLoadingCallback() {
+		db.loadBookCoverpage(file, (fileInfo, data) -> BackgroundThread.instance().postBackground(new Runnable() {
 			@Override
-			public void onCoverpageLoaded(FileInfo fileInfo, final byte[] data) {
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						byte[] imageData = data;
-						boolean bCan = false;
-						if (file.format!=null) bCan = file.format.canParseCoverpages;
-						if (data == null && bCan) {
-							imageData = Services.getEngine().scanBookCover(file.getPathName());
-							if (imageData == null)
-								imageData = new byte[] {};
-							if (file.format.needCoverPageCaching())
-								db.saveBookCoverpage(file, imageData);
-						}
-						Services.getEngine().drawBookCover(buffer, imageData, fontFace, file.getTitleOrFileName(),
-								file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 16);
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								boolean isCustomCover = false;
-								final String sBookFName = StrUtils.getNonEmptyStr(file.getFilename(), false);
-								CRC32 crc = new CRC32();
-								crc.update(sBookFName.getBytes());
-								final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
-								String sDir = "";
-								ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CustomCoversDirs, true);
-								if (tDirs.size()>0) sDir=tDirs.get(0);
-								if (!StrUtils.isEmptyStr(sDir))
-									if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
-								ImageItem item = null;
-								if (!StrUtils.isEmptyStr(sDir)) {
-									//getmCoolReader().showToast(sDir + sFName);
-									try {
-										File f = new File(sDir + sFName);
-										if (f.exists()) {
-											Bitmap bmp = BitmapFactory.decodeFile(sDir + sFName);
-											Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp,
-													buffer.getWidth(), buffer.getHeight(), true);
-											isCustomCover = true;
-											item = new ImageItem(file, resizedbitmap.getWidth(), resizedbitmap.getHeight());
-											callback.onCoverpageReady(item, resizedbitmap);
-										}
-									} catch (Exception e) {
-
-									}
-								}
-								if (!isCustomCover) {
-									boolean isDefCover = false;
-									if (buffer != null) {
-										Bitmap emptyBitmap = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), buffer.getConfig());
-										emptyBitmap.eraseColor(Color.rgb(0, 0, 0));
-										if (buffer.sameAs(emptyBitmap)) isDefCover = true;
-									}
-									if ((buffer != null) && (isDefCover)) {
-										String sTitle = "";
-										String sAuthors = "";
-										if (file != null) {
-											sTitle = StrUtils.getNonEmptyStr(file.title, true);
-											sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
-											if (StrUtils.isEmptyStr(sTitle))
-												sTitle = StrUtils.stripExtension(file.getFilename());
-											Bitmap bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
-													buffer.getWidth(), buffer.getHeight());
-											item = new ImageItem(file, bmp.getWidth(), bmp.getHeight());
-											callback.onCoverpageReady(item, bmp);
-										}
-									} else {
-										item = new ImageItem(file, buffer.getWidth(), buffer.getHeight());
-										callback.onCoverpageReady(item, buffer);
-									}
-								}
+			public void run() {
+				byte[] imageData = data;
+				boolean bCan = false;
+				if (file.format!=null) bCan = file.format.canParseCoverpages;
+				if (data == null && bCan) {
+					imageData = Services.getEngine().scanBookCover(file.getPathName());
+					if (imageData == null)
+						imageData = new byte[] {};
+					if (file.format.needCoverPageCaching())
+						db.saveBookCoverpage(file, imageData);
+				}
+				Services.getEngine().drawBookCover(buffer, imageData, fontFace, file.getTitleOrFileName(),
+						file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 16);
+				BackgroundThread.instance().postGUI(() -> {
+					boolean isCustomCover = false;
+					final String sBookFName = StrUtils.getNonEmptyStr(file.getFilename(), false);
+					CRC32 crc = new CRC32();
+					crc.update(sBookFName.getBytes());
+					final String sFName = crc.getValue() + "_cover.png";
+					String sDir = "";
+					ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CustomCoversDirs, true);
+					if (tDirs.size()>0) sDir=tDirs.get(0);
+					if (!StrUtils.isEmptyStr(sDir))
+						if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
+					ImageItem item = null;
+					if (!StrUtils.isEmptyStr(sDir)) {
+						//getmCoolReader().showToast(sDir + sFName);
+						try {
+							File f = new File(sDir + sFName);
+							if (f.exists()) {
+								Bitmap bmp = BitmapFactory.decodeFile(sDir + sFName);
+								Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp,
+										buffer.getWidth(), buffer.getHeight(), true);
+								isCustomCover = true;
+								item = new ImageItem(file, resizedbitmap.getWidth(), resizedbitmap.getHeight());
+								callback.onCoverpageReady(item, resizedbitmap);
 							}
-						});
+						} catch (Exception e) {
+							Log.e("cpm", e.getMessage());
+						}
+					}
+					if (!isCustomCover) {
+						boolean isDefCover = false;
+						if (buffer != null) {
+							Bitmap emptyBitmap = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), buffer.getConfig());
+							emptyBitmap.eraseColor(Color.rgb(0, 0, 0));
+							if (buffer.sameAs(emptyBitmap)) isDefCover = true;
+						}
+						if ((buffer != null) && (isDefCover)) {
+							String sTitle = "";
+							String sAuthors = "";
+							if (file != null) {
+								sTitle = StrUtils.getNonEmptyStr(file.title, true);
+								sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
+								if (StrUtils.isEmptyStr(sTitle))
+									sTitle = StrUtils.stripExtension(file.getFilename());
+								Bitmap bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
+										buffer.getWidth(), buffer.getHeight());
+								item = new ImageItem(file, bmp.getWidth(), bmp.getHeight());
+								callback.onCoverpageReady(item, bmp);
+							}
+						} else {
+							item = new ImageItem(file, buffer.getWidth(), buffer.getHeight());
+							callback.onCoverpageReady(item, buffer);
+						}
 					}
 				});
 			}
-		});
+		}));
 	}
 	
 	private Rect getBestCoverSize(Rect dst, int srcWidth, int srcHeight) {
@@ -886,7 +863,7 @@ public class CoverpageManager {
 		}
 	}
 
-	private ArrayList<CoverpageReadyListener> listeners = new ArrayList<CoverpageReadyListener>();
+	private ArrayList<CoverpageReadyListener> listeners = new ArrayList<>();
 
 
 	public static void invalidateChildImages(View view, ArrayList<CoverpageManager.ImageItem> files) {

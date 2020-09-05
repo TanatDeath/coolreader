@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class NoticeDialog extends Dialog {
@@ -19,22 +20,16 @@ public class NoticeDialog extends Dialog {
         LayoutInflater mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.notice_dialog, null);
         setTitle(R.string.app_name);
-        Button button1 = (Button)layout.findViewById(R.id.base_dlg_btn_positive);
-        button1.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-        		onOkButton.run();
-        		dismiss();
-			}
+        Button button1 = layout.findViewById(R.id.base_dlg_btn_positive);
+        button1.setOnClickListener(v -> {
+			onOkButton.run();
+			dismiss();
 		});
-        Button button2 = (Button)layout.findViewById(R.id.base_dlg_btn_negative);
+		Button button2 = layout.findViewById(R.id.base_dlg_btn_negative);
         if (onCancelButton != null)
-	        button2.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-	        		onCancelButton.run();
-	        		dismiss();
-				}
+	        button2.setOnClickListener(v -> {
+				onCancelButton.run();
+				dismiss();
 			});
         else
         	button2.setVisibility(View.GONE);
@@ -52,5 +47,4 @@ public class NoticeDialog extends Dialog {
 
 		setContentView(layout);
 	}
-
 }

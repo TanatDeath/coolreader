@@ -97,8 +97,8 @@ public class SearchDlg extends BaseDialog {
 			View view;
 			int res = R.layout.dict_item;
 			view = mInflater.inflate(res, null);
-			TextView labelView = (TextView)view.findViewById(R.id.dict_item_shortcut);
-			TextView titleTextView = (TextView)view.findViewById(R.id.dict_item_title);
+			TextView labelView = view.findViewById(R.id.dict_item_shortcut);
+			TextView titleTextView = view.findViewById(R.id.dict_item_title);
 			String s = (String)getItem(position);
 			if ( labelView!=null ) {
 				labelView.setText(String.valueOf(position+1));
@@ -203,35 +203,26 @@ public class SearchDlg extends BaseDialog {
 				R.string.action_search);
         mInflater = LayoutInflater.from(getContext());
         mDialogView = mInflater.inflate(R.layout.search_dialog, null);
-    	mEditView = (EditText)mDialogView.findViewById(R.id.search_text);
+    	mEditView = mDialogView.findViewById(R.id.search_text);
     	if (initialText != null)
     		mEditView.setText(initialText);
-    	mCaseSensitive = (CheckBox)mDialogView.findViewById(R.id.search_case_sensitive);
-    	mReverse = (CheckBox)mDialogView.findViewById(R.id.search_reverse);
-    	mSearchPages = (ImageButton)mDialogView.findViewById(R.id.btn_search_pages);
-    	mSearchPages.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				searchPagesClick();
-			}
-		});
-		ImageButton btnMinus1 = (ImageButton)mDialogView.findViewById(R.id.search_dlg_clear_hist_btn);
+    	mCaseSensitive = mDialogView.findViewById(R.id.search_case_sensitive);
+    	mReverse = mDialogView.findViewById(R.id.search_reverse);
+    	mSearchPages = mDialogView.findViewById(R.id.btn_search_pages);
+    	mSearchPages.setOnClickListener(v -> searchPagesClick());
+		ImageButton btnMinus1 = mDialogView.findViewById(R.id.search_dlg_clear_hist_btn);
 
-		btnMinus1.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				activity.getDB().clearSearchHistory(mBookInfo);
-				mCoolReader.showToast(mCoolReader.getString(R.string.search_hist_will_be_cleared));
-				dismiss();
-			}
+		btnMinus1.setOnClickListener(v -> {
+			activity.getDB().clearSearchHistory(mBookInfo);
+			mCoolReader.showToast(mCoolReader.getString(R.string.search_hist_will_be_cleared));
+			dismiss();
 		});
 
-		activity.getDB().loadSearchHistory(this.mBookInfo, new CRDBService.SearchHistoryLoadingCallback() {
-			@Override
-			public void onSearchHistoryLoaded(ArrayList<String> searches) {
-				mSearches = searches;
-				ViewGroup body = (ViewGroup)mDialogView.findViewById(R.id.history_list);
-				mList = new SearchDlg.SearchList(activity, false);
-				body.addView(mList);
-			}
+		activity.getDB().loadSearchHistory(this.mBookInfo, searches -> {
+			mSearches = searches;
+			ViewGroup body = mDialogView.findViewById(R.id.history_list);
+			mList = new SearchList(activity, false);
+			body.addView(mList);
 		});
 		mCoolReader.tintViewIcons(mDialogView);
 		//setView(mDialogView);

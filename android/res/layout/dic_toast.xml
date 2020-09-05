@@ -31,7 +31,7 @@
                     android:minHeight="?android:attr/listPreferredItemHeightSmall"
                     android:maxHeight="?android:attr/listPreferredItemHeightSmall"
                     android:orientation="horizontal">
-                <TextView
+                <Button
                         android:id="@+id/upper_row_tv_more"
                         style="@style/TextAppearance.Small"
                         android:singleLine="true"
@@ -41,7 +41,7 @@
                         android:textColor="?attr/colorIcon"
                         android:text="@string/more"
                         />
-                <TextView
+                <Button
                         android:id="@+id/upper_row_tv_full"
                         style="@style/TextAppearance.Small"
                         android:singleLine="true"
@@ -51,7 +51,17 @@
                         android:textColor="?attr/colorIcon"
                         android:text="@string/full_article"
                         />
-                <TextView
+                <Button
+                        android:id="@+id/upper_row_tv_full_web"
+                        style="@style/TextAppearance.Small"
+                        android:singleLine="true"
+                        android:layout_marginRight="5dip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/colorIcon"
+                        android:text="@string/full_article_web"
+                        />
+                <Button
                         android:id="@+id/upper_row_tv_close"
                         style="@style/TextAppearance.Small"
                         android:singleLine="true"

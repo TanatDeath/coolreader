@@ -85,7 +85,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		this.mParentDir = baseDir;
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
+		this.mWindowSize = Math.min(outMetrics.widthPixels, outMetrics.heightPixels);
 		this.mActivity = activity;
 		this.mBookInfo = book;
 		this.mIsRecentBooksItem = isRecentBooksItem;
@@ -109,7 +109,7 @@ public class BookInfoEditDialog extends BaseDialog {
 	}
 	class AuthorList {
 		String oldValue;
-		ArrayList<AuthorItem> authorItems = new ArrayList<AuthorItem>();
+		ArrayList<AuthorItem> authorItems = new ArrayList<>();
 		ViewGroup parent;
 		void adjustEditors(AuthorItem item, boolean empty) {
 			int index = authorItems.indexOf(item);
@@ -300,96 +300,52 @@ public class BookInfoEditDialog extends BaseDialog {
         FileInfo file = mBookInfo.getFileInfo();
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.book_info_edit_dialog, null);
         
-        ImageButton btnBack = (ImageButton)view.findViewById(R.id.base_dlg_btn_back);
-		btnBack.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onNegativeButtonClick();
-			}
+        ImageButton btnBack = view.findViewById(R.id.base_dlg_btn_back);
+		btnBack.setOnClickListener(v -> onNegativeButtonClick());
+		ImageButton btnBack1 = view.findViewById(R.id.base_dlg_btn_back1);
+		btnBack1.setOnClickListener(v -> onNegativeButtonClick());
+		ImageButton btnOk = view.findViewById(R.id.base_dlg_btn_positive);
+		btnOk.setOnClickListener(v -> onOkButtonClick());
+		ImageButton btnOk1 = view.findViewById(R.id.base_dlg_btn_positive1);
+		btnOk1.setOnClickListener(v -> onOkButtonClick());
+		ImageButton btnOpenBook = view.findViewById(R.id.btn_open_book);
+        btnOpenBook.setOnClickListener(v -> onPositiveButtonClick());
+        ImageButton btnDeleteBook = view.findViewById(R.id.book_delete);
+        btnDeleteBook.setOnClickListener(v -> {
+		mActivity.askDeleteBook(mBookInfo.getFileInfo());
+		dismiss();
 		});
-		ImageButton btnBack1 = (ImageButton)view.findViewById(R.id.base_dlg_btn_back1);
-		btnBack1.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onNegativeButtonClick();
-			}
-		});
-		ImageButton btnOk = (ImageButton)view.findViewById(R.id.base_dlg_btn_positive);
-		btnOk.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onOkButtonClick();
-			}
-		});
-		ImageButton btnOk1 = (ImageButton)view.findViewById(R.id.base_dlg_btn_positive1);
-		btnOk1.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onOkButtonClick();
-			}
-		});
-		ImageButton btnOpenBook = (ImageButton)view.findViewById(R.id.btn_open_book);
-        btnOpenBook.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onPositiveButtonClick();
-			}
-		});
-        ImageButton btnDeleteBook = (ImageButton)view.findViewById(R.id.book_delete);
-        btnDeleteBook.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-			mActivity.askDeleteBook(mBookInfo.getFileInfo());
-			dismiss();
-			}
-		});
-        ImageButton btnCustomCover = (ImageButton)view.findViewById(R.id.book_custom_cover);
-		btnCustomCover.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-		        if (mActivity.picReceived!=null) {
-					if (mActivity.picReceived.bmpReceived!=null) {
-						PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
-								mBookInfo, "", "");
-						dlg.show();
-					}
-                } else {
-                    ((CoolReader)activity).showToast(R.string.pic_no_pic);
-                }
-            }
-        });
-
-		ImageButton btnShortcutBook = (ImageButton)view.findViewById(R.id.book_shortcut);
-		btnShortcutBook.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-			mActivity.createBookShortcut(mBookInfo.getFileInfo(),mBookCover);
-			dismiss();
+        ImageButton btnCustomCover = view.findViewById(R.id.book_custom_cover);
+		btnCustomCover.setOnClickListener(v -> {
+			if (mActivity.picReceived!=null) {
+				if (mActivity.picReceived.bmpReceived!=null) {
+					PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
+							mBookInfo, "", "");
+					dlg.show();
+				}
+			} else {
+				activity.showToast(R.string.pic_no_pic);
 			}
 		});
 
-		ImageButton btnSendByEmail = (ImageButton)view.findViewById(R.id.save_to_email);
-
-		btnSendByEmail.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				CloudAction.emailSendBook(mActivity, mBookInfo);
-			}
+		ImageButton btnShortcutBook = view.findViewById(R.id.book_shortcut);
+		btnShortcutBook.setOnClickListener(v -> {
+		mActivity.createBookShortcut(mBookInfo.getFileInfo(),mBookCover);
+		dismiss();
 		});
 
-		ImageButton btnSendByYnd = (ImageButton)view.findViewById(R.id.save_to_ynd);
+		ImageButton btnSendByEmail = view.findViewById(R.id.save_to_email);
 
-		btnSendByYnd.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				CloudAction.yndOpenBookDialog(mActivity, mBookInfo.getFileInfo(),true);
-			}
-		});
+		btnSendByEmail.setOnClickListener(v -> CloudAction.emailSendBook(mActivity, mBookInfo));
 
-		btnStateNone = (Button)view.findViewById(R.id.book_state_new);
-		btnStateToRead  = (Button)view.findViewById(R.id.book_state_toread);
-		btnStateReading = (Button)view.findViewById(R.id.book_state_reading);
-		btnStateFinished = (Button)view.findViewById(R.id.book_state_finished);
+		ImageButton btnSendByYnd = view.findViewById(R.id.save_to_ynd);
+
+		btnSendByYnd.setOnClickListener(v -> CloudAction.yndOpenBookDialog(mActivity, mBookInfo.getFileInfo(),true));
+
+		btnStateNone = view.findViewById(R.id.book_state_new);
+		btnStateToRead  = view.findViewById(R.id.book_state_toread);
+		btnStateReading = view.findViewById(R.id.book_state_reading);
+		btnStateFinished = view.findViewById(R.id.book_state_finished);
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
@@ -399,11 +355,11 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		btnStateReading.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
 		btnStateFinished.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
-		btnStar1 = (ImageButton)view.findViewById(R.id.book_star1);
-		btnStar2 = (ImageButton)view.findViewById(R.id.book_star2);
-		btnStar3 = (ImageButton)view.findViewById(R.id.book_star3);
-		btnStar4 = (ImageButton)view.findViewById(R.id.book_star4);
-		btnStar5 = (ImageButton)view.findViewById(R.id.book_star5);
+		btnStar1 = view.findViewById(R.id.book_star1);
+		btnStar2 = view.findViewById(R.id.book_star2);
+		btnStar3 = view.findViewById(R.id.book_star3);
+		btnStar4 = view.findViewById(R.id.book_star4);
+		btnStar5 = view.findViewById(R.id.book_star5);
 		int colorBlue;
 		int colorGreen;
 		int colorGray;
@@ -431,89 +387,50 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
 		a.recycle();
-		tvProfile = (TextView)view.findViewById(R.id.profile);
-		tvFileName = (TextView)view.findViewById(R.id.file_name);
-		edTitle = (EditText)view.findViewById(R.id.book_title);
-        edSeriesName = (EditText)view.findViewById(R.id.book_series_name);
-        edSeriesNumber = (EditText)view.findViewById(R.id.book_series_number);
-   		edLangFrom = (EditText)view.findViewById(R.id.book_lang_from);
-		edLangTo = (EditText)view.findViewById(R.id.book_lang_to);
-        edGenre = (EditText)view.findViewById(R.id.genre);
-        edAnnotation = (EditText)view.findViewById(R.id.annotation);
-        edSrclang = (EditText)view.findViewById(R.id.srclang);
-        edBookdate = (EditText)view.findViewById(R.id.bookdate);
-        edTranslator = (EditText)view.findViewById(R.id.translator);
-        edDocauthor = (EditText)view.findViewById(R.id.docauthor);
-        edDocprogram = (EditText)view.findViewById(R.id.docprogram);
-        edDocdate = (EditText)view.findViewById(R.id.docdate);
-        edDocsrcurl = (EditText)view.findViewById(R.id.docsrcurl);
-        edDocsrcocr = (EditText)view.findViewById(R.id.docsrcocr);
-        edDocversion = (EditText)view.findViewById(R.id.docversion);
-        edPublname = (EditText)view.findViewById(R.id.publname);
-        edPublisher = (EditText)view.findViewById(R.id.publisher);
-        edPublcity = (EditText)view.findViewById(R.id.publcity);
-        edPublyear = (EditText)view.findViewById(R.id.publyear);
-        edPublisbn = (EditText)view.findViewById(R.id.publisbn);
-        edPublseriesName = (EditText)view.findViewById(R.id.book_publseries_name);
-        edPublseriesNumber = (EditText)view.findViewById(R.id.book_publseries_number);
+		tvProfile = view.findViewById(R.id.profile);
+		tvFileName = view.findViewById(R.id.file_name);
+		edTitle = view.findViewById(R.id.book_title);
+        edSeriesName = view.findViewById(R.id.book_series_name);
+        edSeriesNumber = view.findViewById(R.id.book_series_number);
+   		edLangFrom = view.findViewById(R.id.book_lang_from);
+		edLangTo = view.findViewById(R.id.book_lang_to);
+        edGenre = view.findViewById(R.id.genre);
+        edAnnotation = view.findViewById(R.id.annotation);
+        edSrclang = view.findViewById(R.id.srclang);
+        edBookdate = view.findViewById(R.id.bookdate);
+        edTranslator = view.findViewById(R.id.translator);
+        edDocauthor = view.findViewById(R.id.docauthor);
+        edDocprogram = view.findViewById(R.id.docprogram);
+        edDocdate = view.findViewById(R.id.docdate);
+        edDocsrcurl = view.findViewById(R.id.docsrcurl);
+        edDocsrcocr = view.findViewById(R.id.docsrcocr);
+        edDocversion = view.findViewById(R.id.docversion);
+        edPublname = view.findViewById(R.id.publname);
+        edPublisher = view.findViewById(R.id.publisher);
+        edPublcity = view.findViewById(R.id.publcity);
+        edPublyear = view.findViewById(R.id.publyear);
+        edPublisbn = view.findViewById(R.id.publisbn);
+        edPublseriesName = view.findViewById(R.id.book_publseries_name);
+        edPublseriesNumber = view.findViewById(R.id.book_publseries_number);
 		int state = file.getReadingState();
  		setChecked(btnStateNone);
 		if (state == FileInfo.STATE_TO_READ) setChecked(btnStateToRead);
 		if (state == FileInfo.STATE_READING) setChecked(btnStateReading);
 		if (state == FileInfo.STATE_FINISHED) setChecked(btnStateFinished);
 		mChosenState = state;
-		btnStateNone.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnStateNone);
-			}
-		});
-		btnStateToRead.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnStateToRead);
-			}
-		});
-		btnStateReading.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnStateReading);
-			}
-		});
-		btnStateFinished.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnStateFinished);
-			}
-		});
-		btnStar1.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setRate(btnStar1);
-			}
-		});
-		btnStar2.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setRate(btnStar2);
-			}
-		});
-		btnStar3.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setRate(btnStar3);
-			}
-		});
-		btnStar4.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setRate(btnStar4);
-			}
-		});
-		btnStar5.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setRate(btnStar5);
-			}
-		});
-		final ImageView image = (ImageView)view.findViewById(R.id.book_cover);
-        image.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// open book
-				onPositiveButtonClick();
-			}
+		btnStateNone.setOnClickListener(v -> setChecked(btnStateNone));
+		btnStateToRead.setOnClickListener(v -> setChecked(btnStateToRead));
+		btnStateReading.setOnClickListener(v -> setChecked(btnStateReading));
+		btnStateFinished.setOnClickListener(v -> setChecked(btnStateFinished));
+		btnStar1.setOnClickListener(v -> setRate(btnStar1));
+		btnStar2.setOnClickListener(v -> setRate(btnStar2));
+		btnStar3.setOnClickListener(v -> setRate(btnStar3));
+		btnStar4.setOnClickListener(v -> setRate(btnStar4));
+		btnStar5.setOnClickListener(v -> setRate(btnStar5));
+		final ImageView image = view.findViewById(R.id.book_cover);
+        image.setOnClickListener(v -> {
+			// open book
+			onPositiveButtonClick();
 		});
         int w = mWindowSize * 4 / 10;
         int h = w * 4 / 3;
@@ -522,16 +439,13 @@ public class BookInfoEditDialog extends BaseDialog {
         image.setMinimumWidth(w);
         image.setMaxWidth(w);
         Bitmap bmp = Bitmap.createBitmap(w, h, Config.RGB_565);
-        Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), file, bmp, new CoverpageBitmapReadyListener() {
-			@Override
-			public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
-		        BitmapDrawable drawable = new BitmapDrawable(bitmap);
-				mBookCover = bitmap;
-				image.setImageDrawable(drawable);
-			}
-		}); 
+        Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), file, bmp, (file1, bitmap) -> {
+			BitmapDrawable drawable = new BitmapDrawable(bitmap);
+			mBookCover = bitmap;
+			image.setImageDrawable(drawable);
+		});
 
-        final ImageView progress = (ImageView)view.findViewById(R.id.book_progress);
+        final ImageView progress = view.findViewById(R.id.book_progress);
         int percent = -1;
         Bookmark bmk = mBookInfo.getLastPosition();
         if (bmk != null)
@@ -552,7 +466,7 @@ public class BookInfoEditDialog extends BaseDialog {
         String sPath = StrUtils.getNonEmptyStr(file.pathname, true)
 				.replace("/storage/emulated", "/s/e");
         tvFileName.setText(sPath);
-		File f = activity.getSettingsFile(activity.getCurrentProfile());
+		File f = activity.getSettingsFileF(activity.getCurrentProfile());
 		String sF = f.getAbsolutePath();
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
 		TextView prof = (TextView) view.findViewById(R.id.lbl_profile);
@@ -598,22 +512,16 @@ public class BookInfoEditDialog extends BaseDialog {
 		if (mChosenRate1 == 4) setRate(btnStar4);
 		if (mChosenRate1 == 5) setRate(btnStar5);
         
-    	ImageButton btnRemoveRecent = ((ImageButton)view.findViewById(R.id.book_recent_delete));
-    	ImageButton btnOpenFolder = ((ImageButton)view.findViewById(R.id.book_folder_open));
+    	ImageButton btnRemoveRecent = view.findViewById(R.id.book_recent_delete);
+    	ImageButton btnOpenFolder = view.findViewById(R.id.book_folder_open);
         if (mIsRecentBooksItem) {
-        	btnRemoveRecent.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mActivity.askDeleteRecent(mBookInfo.getFileInfo());
-					dismiss();
-				}
+        	btnRemoveRecent.setOnClickListener(v -> {
+				mActivity.askDeleteRecent(mBookInfo.getFileInfo());
+				dismiss();
 			});
-        	btnOpenFolder.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mActivity.showDirectory(mBookInfo.getFileInfo(), "");
-					dismiss();
-				}
+        	btnOpenFolder.setOnClickListener(v -> {
+				mActivity.showDirectory(mBookInfo.getFileInfo(), "");
+				dismiss();
 			});
         } else {
         	ViewGroup parent = ((ViewGroup)btnRemoveRecent.getParent());
@@ -621,28 +529,26 @@ public class BookInfoEditDialog extends BaseDialog {
         	parent.removeView(btnOpenFolder);
         }
 
-		Button translButton = ((Button)view.findViewById(R.id.transl_button));
+		Button translButton = view.findViewById(R.id.transl_button);
 		translButton.setTextColor(colorIcon);
 		translButton.setBackgroundColor(colorGrayC);
 
-		translButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				if (mBookInfo!=null) {
-					String lang = StrUtils.getNonEmptyStr(edLangTo.getText().toString(),true);
-					String langf = StrUtils.getNonEmptyStr(edLangFrom.getText().toString(), true);
-					FileInfo fi = mBookInfo.getFileInfo();
-					FileInfo dfi = fi.parent;
-					if (dfi == null) {
-						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-					}
-					if (dfi != null) {
-						mActivity.editBookTransl(dfi, fi, langf, lang, "", BookInfoEditDialog.this, TranslationDirectionDialog.FOR_COMMON);
-					}
-				};
-			}
+		translButton.setOnClickListener(v -> {
+			if (mBookInfo!=null) {
+				String lang = StrUtils.getNonEmptyStr(edLangTo.getText().toString(),true);
+				String langf = StrUtils.getNonEmptyStr(edLangFrom.getText().toString(), true);
+				FileInfo fi = mBookInfo.getFileInfo();
+				FileInfo dfi = fi.parent;
+				if (dfi == null) {
+					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+				}
+				if (dfi != null) {
+					mActivity.editBookTransl(dfi, fi, langf, lang, "", BookInfoEditDialog.this, TranslationDirectionDialog.FOR_COMMON);
+				}
+			};
 		});
 
-		buttonsLayout = (ViewGroup)view.findViewById(R.id.base_dlg_button_panel);
+		buttonsLayout = view.findViewById(R.id.base_dlg_button_panel);
 		updateGlobalMargin(buttonsLayout, true, true, true, false);
 
 		setView(view);
@@ -686,7 +592,7 @@ public class BookInfoEditDialog extends BaseDialog {
         if (file.series != null && file.series.length() > 0) {
     	    String numberString = edSeriesNumber.getText().toString().trim();
     	    try {
-    	    	number = Integer.valueOf(numberString);
+				number = Integer.parseInt(numberString);
     	    } catch (NumberFormatException e) {
     	    	// ignore
     	    }
@@ -696,7 +602,7 @@ public class BookInfoEditDialog extends BaseDialog {
         if (file.publseries != null && file.publseries.length() > 0) {
             String numberString = edPublseriesNumber.getText().toString().trim();
             try {
-                number = Integer.valueOf(numberString);
+				number = Integer.parseInt(numberString);
             } catch (NumberFormatException e) {
                 // ignore
             }
@@ -721,13 +627,10 @@ public class BookInfoEditDialog extends BaseDialog {
 	@Override
 	protected void onPositiveButtonClick() {
 		save();
-		mActivity.loadDocument(mBookInfo.getFileInfo(), new Runnable() {
-			@Override
-			public void run() {
-				// error occured
-				// ignoring
-			}
-		});
+		mActivity.loadDocument(mBookInfo.getFileInfo(), null, () -> {
+			// error occured
+			// ignoring
+		}, true);
 		super.onPositiveButtonClick();
 	}
 

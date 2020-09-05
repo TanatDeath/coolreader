@@ -498,18 +498,15 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			return;
 		isSpeaking = false;
 		closed = true;
-		BackgroundThread.instance().executeGUI(new Runnable() {
-			@Override
-			public void run() {
-				stop();
-				restoreReaderMode();
-				mReaderView.clearSelection();
-				if (onCloseListener != null)
-					onCloseListener.run();
-				if ( mWindow.isShowing() )
-					mWindow.dismiss();
-				mReaderView.save();
-			}
+		BackgroundThread.instance().executeGUI(() -> {
+			stop();
+			restoreReaderMode();
+			mReaderView.clearSelection();
+			if (onCloseListener != null)
+				onCloseListener.run();
+			if ( mWindow.isShowing() )
+				mWindow.dismiss();
+			mReaderView.save();
 		});
 		mCoolReader.unregisterReceiver(mTtsControlReceiver);
 		if (mNotificationManager != null) {
@@ -784,7 +781,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	public TTSToolbarDlg( CoolReader coolReader, ReaderView readerView, TTS tts )
 	{
 		mCoolReader = coolReader;
-        mLogFileRoot = mCoolReader.getSettingsFile(0).getParent() + "/";
+        mLogFileRoot = mCoolReader.getSettingsFileF(0).getParent() + "/";
         mForceTTSKoef = readerView.getSettings().getInt(Settings.PROP_APP_TTS_FORCE_KOEF, 0);
         mReaderView = readerView;
 		mAnchor = readerView.getSurface();
@@ -821,13 +818,13 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_MOTION_TIMEOUT);
 			}
 		});
-		playPauseButton = (ImageButton)panel.findViewById(R.id.tts_play_pause);
+		playPauseButton = panel.findViewById(R.id.tts_play_pause);
 		playPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
 				//R.drawable.ic_media_play
 		);
 		playPauseButton.setBackgroundDrawable(c);
-		playPauseButtonEll = (ImageButton)panel.findViewById(R.id.tts_play_pause_ell);
+		playPauseButtonEll = panel.findViewById(R.id.tts_play_pause_ell);
 		playPauseButtonEll.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
 				//R.drawable.ic_media_play
@@ -839,44 +836,24 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 		mPanel = panel;
 		mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.tts_play_pause).setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				toggleStartStopExt(false);
-			}
+		mPanel.findViewById(R.id.tts_play_pause).setOnClickListener(v -> toggleStartStopExt(false));
+		mPanel.findViewById(R.id.tts_play_pause_ell).setOnClickListener(v -> toggleStartStopExt(true));
+		mPanel.findViewById(R.id.tts_play_pause).setOnLongClickListener(v -> {
+			mCoolReader.tts = null;
+			mCoolReader.ttsInitialized = false;
+			mCoolReader.showToast("Re-initializing TTS");
+			return true;
 		});
-		mPanel.findViewById(R.id.tts_play_pause_ell).setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				toggleStartStopExt(true);
-			}
-		});
-		mPanel.findViewById(R.id.tts_play_pause).setOnLongClickListener(new View.OnLongClickListener() {
-			public boolean onLongClick(View v) {
-				mCoolReader.tts = null;
-				mCoolReader.ttsInitialized = false;
-				mCoolReader.showToast("Re-initializing TTS");
-				return true;
-			}
-		});
-		mPanel.findViewById(R.id.tts_play_pause_ell).setOnLongClickListener(new View.OnLongClickListener() {
-			public boolean onLongClick(View v) {
-				mCoolReader.tts = null;
-				mCoolReader.ttsInitialized = false;
-				mCoolReader.showToast("Re-initializing TTS");
-				return true;
-			}
+		mPanel.findViewById(R.id.tts_play_pause_ell).setOnLongClickListener(v -> {
+			mCoolReader.tts = null;
+			mCoolReader.ttsInitialized = false;
+			mCoolReader.showToast("Re-initializing TTS");
+			return true;
 		});
 		mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.tts_back).setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				jumpToSentence( ReaderCommand.DCMD_SELECT_PREV_SENTENCE );
-			}
-		});
+		mPanel.findViewById(R.id.tts_back).setOnClickListener(v -> jumpToSentence( ReaderCommand.DCMD_SELECT_PREV_SENTENCE ));
 		mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.tts_forward).setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				jumpToSentence( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
-			}
-		});
+		mPanel.findViewById(R.id.tts_forward).setOnClickListener(v -> jumpToSentence( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE ));
 		mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.tts_stop).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -885,49 +862,42 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		});
 		mPanel.setFocusable(true);
 		mPanel.setEnabled(true);
-		mPanel.setOnKeyListener( new OnKeyListener() {
-
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if ( event.getAction()==KeyEvent.ACTION_UP ) {
-					switch ( keyCode ) {
-					case KeyEvent.KEYCODE_VOLUME_DOWN:
-					case KeyEvent.KEYCODE_VOLUME_UP:
-						return true;
-					case KeyEvent.KEYCODE_BACK:
-						stopAndClose();
-						return true;
-					}
-				} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
-					switch ( keyCode ) {
-					case KeyEvent.KEYCODE_VOLUME_DOWN: {
-						int p = sbVolume.getProgress() - 5;
-						if ( p<0 )
-							p = 0;
-						sbVolume.setProgress(p);
-						return true;
-					}
-					case KeyEvent.KEYCODE_VOLUME_UP:
-						int p = sbVolume.getProgress() + 5;
-						if ( p>100 )
-							p = 100;
-						sbVolume.setProgress(p);
-						return true;
-					}
-					if ( keyCode == KeyEvent.KEYCODE_BACK) {
-						return true;
-					}
+		mPanel.setOnKeyListener((v, keyCode, event) -> {
+			if ( event.getAction()==KeyEvent.ACTION_UP ) {
+				switch ( keyCode ) {
+				case KeyEvent.KEYCODE_VOLUME_DOWN:
+				case KeyEvent.KEYCODE_VOLUME_UP:
+					return true;
+				case KeyEvent.KEYCODE_BACK:
+					stopAndClose();
+					return true;
 				}
-				return false;
+			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
+				switch ( keyCode ) {
+				case KeyEvent.KEYCODE_VOLUME_DOWN: {
+					int p = sbVolume.getProgress() - 5;
+					if ( p<0 )
+						p = 0;
+					sbVolume.setProgress(p);
+					return true;
+				}
+				case KeyEvent.KEYCODE_VOLUME_UP:
+					int p = sbVolume.getProgress() + 5;
+					if ( p>100 )
+						p = 100;
+					sbVolume.setProgress(p);
+					return true;
+				}
+				if ( keyCode == KeyEvent.KEYCODE_BACK) {
+					return true;
+				}
 			}
-			
+			return false;
 		});
 
-		mWindow.setOnDismissListener(new OnDismissListener() {
-			@Override
-			public void onDismiss() {
-				if ( !closed )
-					stopAndClose();
-			}
+		mWindow.setOnDismissListener(() -> {
+			if ( !closed )
+				stopAndClose();
 		});
 		
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
@@ -949,13 +919,13 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		setReaderMode();
 
 		// setup speed && volume seek bars
-		sbSpeed = (SeekBar)mPanel.findViewById(R.id.tts_sb_speed);
-		sbVolume = (SeekBar)mPanel.findViewById(R.id.tts_sb_volume);
+		sbSpeed = mPanel.findViewById(R.id.tts_sb_speed);
+		sbVolume = mPanel.findViewById(R.id.tts_sb_volume);
 
-		ivVolDown = (ImageView)mPanel.findViewById(R.id.btn_vol_down);
-		ivVolUp = (ImageView)mPanel.findViewById(R.id.btn_vol_up);
-		ivFreqDown = (ImageView)mPanel.findViewById(R.id.btn_freq_down);
-		ivFreqUp = (ImageView)mPanel.findViewById(R.id.btn_freq_up);
+		ivVolDown = mPanel.findViewById(R.id.btn_vol_down);
+		ivVolUp = mPanel.findViewById(R.id.btn_vol_up);
+		ivFreqDown = mPanel.findViewById(R.id.btn_freq_down);
+		ivFreqUp = mPanel.findViewById(R.id.btn_freq_up);
 		ivVolDown.setBackgroundDrawable(c);
 		ivVolUp.setBackgroundDrawable(c);
 		ivFreqDown.setBackgroundDrawable(c);
@@ -966,31 +936,27 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		sbVolume.setMax(100);
 		sbVolume.setProgress(mCoolReader.getVolume());
 
-		ivFreqDown.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				int progress = sbSpeed.getProgress();
-				if (progress>10) progress=progress-10; else progress = 0;
-				sbSpeed.setProgress(progress);
-				float rate = 1.0f;
-				if ( progress<50 )
-					rate = 0.3f + 0.7f * progress / 50f;
-				else
-					rate = 1.0f + 2.5f * (progress-50) / 50f;
-				mTTS.setSpeechRate(rate);
-			}
+		ivFreqDown.setOnClickListener(v -> {
+			int progress = sbSpeed.getProgress();
+			if (progress>10) progress=progress-10; else progress = 0;
+			sbSpeed.setProgress(progress);
+			float rate = 1.0f;
+			if ( progress<50 )
+				rate = 0.3f + 0.7f * progress / 50f;
+			else
+				rate = 1.0f + 2.5f * (progress-50) / 50f;
+			mTTS.setSpeechRate(rate);
 		});
-		ivFreqUp.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				int progress = sbSpeed.getProgress();
-				if (progress<100) progress=progress+10; else progress = 100;
-				sbSpeed.setProgress(progress);
-				float rate = 1.0f;
-				if ( progress<50 )
-					rate = 0.3f + 0.7f * progress / 50f;
-				else
-					rate = 1.0f + 2.5f * (progress-50) / 50f;
-				mTTS.setSpeechRate(rate);
-			}
+		ivFreqUp.setOnClickListener(v -> {
+			int progress = sbSpeed.getProgress();
+			if (progress<100) progress=progress+10; else progress = 100;
+			sbSpeed.setProgress(progress);
+			float rate = 1.0f;
+			if ( progress<50 )
+				rate = 0.3f + 0.7f * progress / 50f;
+			else
+				rate = 1.0f + 2.5f * (progress-50) / 50f;
+			mTTS.setSpeechRate(rate);
 		});
 
 		sbSpeed.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
@@ -1014,21 +980,17 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			}
 		});
 
-		ivVolDown.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				int progress = sbVolume.getProgress();
-				if (progress>10) progress=progress-10; else progress = 0;
-				sbVolume.setProgress(progress);
-				mCoolReader.setVolume(progress);
-			}
+		ivVolDown.setOnClickListener(v -> {
+			int progress = sbVolume.getProgress();
+			if (progress>10) progress=progress-10; else progress = 0;
+			sbVolume.setProgress(progress);
+			mCoolReader.setVolume(progress);
 		});
-		ivVolUp.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				int progress = sbVolume.getProgress();
-				if (progress<100) progress=progress+10; else progress = 100;
-				sbVolume.setProgress(progress);
-				mCoolReader.setVolume(progress);
-			}
+		ivVolUp.setOnClickListener(v -> {
+			int progress = sbVolume.getProgress();
+			if (progress<100) progress=progress+10; else progress = 100;
+			sbVolume.setProgress(progress);
+			mCoolReader.setVolume(progress);
 		});
 
 		sbVolume.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {

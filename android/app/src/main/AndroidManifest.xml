@@ -12,6 +12,37 @@
             android:smallScreens="true"
             android:xlargeScreens="true" />
 
+    <uses-sdk tools:overrideLibrary="com.google.android.gms.auth.api,
+                                    com.google.android.gms.auth.api.phone,
+                                    com.google.android.gms.auth,
+                                    com.google.android.gms.base,
+                                    com.google.android.gms.tasks,
+                                    com.google.android.gms.common,
+                                    androidx.arch.core,
+                                    androidx.core,
+                                    androidx.fragment,
+                                    androidx.legacy.coreui,
+                                    androidx.legacy.coreutils,
+                                    androidx.loader,
+                                    androidx.viewpager,
+                                    androidx.coordinatorlayout,
+                                    androidx.drawerlayout,
+                                    androidx.slidingpanelayout,
+                                    androidx.customview,
+                                    androidx.swiperefreshlayout,
+                                    androidx.asynclayoutinflater,
+                                    androidx.versionedparcelable,
+                                    androidx.lifecycle,
+                                    androidx.lifecycle.viewmodel,
+                                    androidx.lifecycle.livedata,
+                                    androidx.lifecycle.livedata.core,
+                                    androidx.interpolator,
+                                    androidx.cursoradapter,
+                                    androidx.documentfile,
+                                    androidx.localbroadcastmanager,
+                                    androidx.print"
+            />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/ -->
@@ -631,152 +662,8 @@
                 <data android:mimeType="text/rtf" />
                 <data android:mimeType="application/rtf.zip" />
             </intent-filter>
-        </activity-alias> <!-- alias activity to disable CBZ -->
-        <activity-alias
-                android:name=".KnownReaderForCBZ"
-                android:targetActivity=".CoolReader">
-
-            <!-- intent-filter with recognized extensions and */* mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern="/.*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\.CBZ" />
-                <data android:pathPattern=".*\\.CBZ" />
-                <data android:pathPattern="/.*\\.cbz" />
-                <data android:pathPattern=".*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbz" />
-                <data android:pathPattern="/.*\\.CBR" />
-                <data android:pathPattern=".*\\.CBR" />
-                <data android:pathPattern="/.*\\.cbr" />
-                <data android:pathPattern=".*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbr" />
-            </intent-filter>
-            <!-- intent-filter with recognized extensions and null mimeType -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data
-                        android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
-                <data android:pathPattern="/.*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbz" />
-                <data android:pathPattern="/.*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbr" />
-                <data android:pathPattern="/.*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\..*\\..*\\.cbt" />
-                <data android:pathPattern="/.*\\.CBZ" />
-                <data android:pathPattern=".*\\.CBZ" />
-                <data android:pathPattern="/.*\\.cbz" />
-                <data android:pathPattern=".*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbz" />
-                <data android:pathPattern=".*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbz" />
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbz" />
-                <data android:pathPattern="/.*\\.CBR" />
-                <data android:pathPattern=".*\\.CBR" />
-                <data android:pathPattern="/.*\\.cbr" />
-                <data android:pathPattern=".*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.cbr" />
-                <data android:pathPattern=".*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*..*..*\\.cbr" />
-                <data android:pathPattern=".*..*..*..*..*..*..*..*\\.cbr" />
-            </intent-filter>
-            <!-- intent-filter with no extensions and recognized mime-types -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="application/x-cdisplay" />
-                <data android:mimeType="application/x-cbz" />
-                <data android:mimeType="application/x-cbr" />
-                <data android:mimeType="application/x-cbt" />
-            </intent-filter>
-        </activity-alias> <!-- alias activity to disable CHM -->
+        </activity-alias>
+        <!-- alias activity to CHM -->
         <activity-alias
                 android:name=".KnowmReaderForCHM"
                 android:targetActivity=".CoolReader">
@@ -797,6 +684,11 @@
                 <data android:pathPattern="/.*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\..*\\..*\\.chm" />
+                <data android:pathPattern=".*\\.chm" />
+                <data android:pathPattern=".*\\..*\\.chm" />
+                <data android:pathPattern=".*\\..*\\..*\\.chm" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.chm" />
             </intent-filter>
             <!-- intent-filter with recognized extensions and null mimeType -->
             <intent-filter>
@@ -816,6 +708,11 @@
                 <data android:pathPattern="/.*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.chm" />
+                <data android:pathPattern="/.*\\..*\\..\\..*\\.chm" />
+                <data android:pathPattern=".*\\.chm" />
+                <data android:pathPattern=".*\\..*\\.chm" />
+                <data android:pathPattern=".*\\..*\\..*\\.chm" />
+                <data android:pathPattern=".*\\..*\\..\\..*\\.chm" />
             </intent-filter>
             <!-- intent-filter with no extensions and recognized mime-types -->
             <intent-filter>

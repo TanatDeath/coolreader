@@ -61,12 +61,7 @@ public class BookmarkEditDialog extends BaseDialog {
 			activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
 			if (activity instanceof CoolReader) {
 				((CoolReader) activity).getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						((CoolReader) activity).getmReaderFrame().getUserDicPanel().updateUserDicWords();
-					}
-				}, 1000);
+				BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).getmReaderFrame().getUserDicPanel().updateUserDicWords(), 1000);
 			}
 		} else {
 			if (mIsNew) {
@@ -183,16 +178,16 @@ public class BookmarkEditDialog extends BaseDialog {
 		setTitle(mCoolReader.getString( mIsNew ? R.string.dlg_bookmark_create : R.string.dlg_bookmark_edit));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.bookmark_edit_dialog, null);
-		btnComment = (ImageButton)view.findViewById(R.id.rb_comment);
-		btnCorrection = (ImageButton)view.findViewById(R.id.rb_correction);
-		btnUserDic = (ImageButton)view.findViewById(R.id.rb_user_dic);
-		btnInternalLink = (ImageButton)view.findViewById(R.id.rb_internal_link);
-		btnCitation = (ImageButton)view.findViewById(R.id.rb_citation);
-		ImageButton btnFake = (ImageButton)view.findViewById(R.id.btn_fake);
-		rb_descr = (TextView)view.findViewById(R.id.lbl_rb_descr);
-		tr_descr = (TableRow)view.findViewById(R.id.tr_rb_descr);
-		final TextView posLabel = (TextView)view.findViewById(R.id.lbl_position);
-		final TextView commentLabel = (TextView)view.findViewById(R.id.lbl_comment_text);
+		btnComment = view.findViewById(R.id.rb_comment);
+		btnCorrection = view.findViewById(R.id.rb_correction);
+		btnUserDic = view.findViewById(R.id.rb_user_dic);
+		btnInternalLink = view.findViewById(R.id.rb_internal_link);
+		btnCitation = view.findViewById(R.id.rb_citation);
+		ImageButton btnFake = view.findViewById(R.id.btn_fake);
+		rb_descr = view.findViewById(R.id.lbl_rb_descr);
+		tr_descr = view.findViewById(R.id.tr_rb_descr);
+		final TextView posLabel = view.findViewById(R.id.lbl_position);
+		final TextView commentLabel = view.findViewById(R.id.lbl_comment_text);
 
 		final CoolReader cr = activity;
 
@@ -211,8 +206,8 @@ public class BookmarkEditDialog extends BaseDialog {
 		posEdit.setKeyListener(null);
 
 		final ImageButton btnSetComment = (ImageButton)view.findViewById(R.id.base_dlg_btn_add);
-		lblSetComment = (TextView)view.findViewById(R.id.lbl_comment_from_cb);
-		lblBookmarkLink = (TextView)view.findViewById(R.id.lbl_bookmark_link);
+		lblSetComment = view.findViewById(R.id.lbl_comment_from_cb);
+		lblBookmarkLink = view.findViewById(R.id.lbl_bookmark_link);
 		String sL = mBookmark.getLinkPos();
 		if (StrUtils.isEmptyStr(sL)) lblBookmarkLink.setText(""); else
 			lblBookmarkLink.setText(activity.getString(R.string.dlg_bookmark_link) +": " +sL);
@@ -278,63 +273,53 @@ public class BookmarkEditDialog extends BaseDialog {
 		if ( isNew ) {
 			if (isComment) setChecked(btnComment);
 			if (!isComment) setChecked(btnCorrection);
-			btnComment.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					mBookmark.setType(Bookmark.TYPE_COMMENT);
-					commentLabel.setText(R.string.dlg_bookmark_edit_comment); // : R.string.dlg_bookmark_edit_correction
-					posEdit.setKeyListener(null);
-					posEdit.setText(mBookmark.getPosText());
-					setChecked(btnComment);
-				}
+			btnComment.setOnClickListener(v -> {
+				mBookmark.setType(Bookmark.TYPE_COMMENT);
+				commentLabel.setText(R.string.dlg_bookmark_edit_comment); // : R.string.dlg_bookmark_edit_correction
+				posEdit.setKeyListener(null);
+				posEdit.setText(mBookmark.getPosText());
+				setChecked(btnComment);
 			});
-			btnCorrection.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					mBookmark.setType(Bookmark.TYPE_CORRECTION);
-					commentLabel.setText(R.string.dlg_bookmark_edit_correction);
-					String oldText = commentEdit.getText().toString();
-					if ( oldText==null || oldText.length()==0 )
-						commentEdit.setText(mBookmark.getPosText());
-					posEdit.setKeyListener(null);
-					posEdit.setText(mBookmark.getPosText());
-					setChecked(btnCorrection);
-				}
+			btnCorrection.setOnClickListener(v -> {
+				mBookmark.setType(Bookmark.TYPE_CORRECTION);
+				commentLabel.setText(R.string.dlg_bookmark_edit_correction);
+				String oldText = commentEdit.getText().toString();
+				if ( oldText==null || oldText.length()==0 )
+					commentEdit.setText(mBookmark.getPosText());
+				posEdit.setKeyListener(null);
+				posEdit.setText(mBookmark.getPosText());
+				setChecked(btnCorrection);
 			});
-			btnInternalLink.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					mBookmark.setType(Bookmark.TYPE_INTERNAL_LINK);
-					commentLabel.setText(R.string.dlg_bookmark_edit_comment);
-					posEdit.setKeyListener(null);
-					posEdit.setText(mBookmark.getPosText());
-					setChecked(btnInternalLink);
-					if (mIsNew)
-						activity.showBookmarksDialog(true, BookmarkEditDialog.this);
-				}
+			btnInternalLink.setOnClickListener(v -> {
+				mBookmark.setType(Bookmark.TYPE_INTERNAL_LINK);
+				commentLabel.setText(R.string.dlg_bookmark_edit_comment);
+				posEdit.setKeyListener(null);
+				posEdit.setText(mBookmark.getPosText());
+				setChecked(btnInternalLink);
+				if (mIsNew)
+					activity.showBookmarksDialog(true, BookmarkEditDialog.this);
 			});
-			btnUserDic.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
-						mCoolReader.showToast(R.string.only_in_pro);
-						return;
-					}
-					mBookmark.setType(Bookmark.TYPE_USER_DIC);
-					commentLabel.setText(R.string.dlg_bookmark_edit_translation);
-					posEdit.setKeyListener(keyList);
-					posEdit.setText(StrUtils.updateText(mBookmark.getPosText(),true));
-					setChecked(btnUserDic);
+			btnUserDic.setOnClickListener(v -> {
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mCoolReader.showToast(R.string.only_in_pro);
+					return;
 				}
+				mBookmark.setType(Bookmark.TYPE_USER_DIC);
+				commentLabel.setText(R.string.dlg_bookmark_edit_translation);
+				posEdit.setKeyListener(keyList);
+				posEdit.setText(StrUtils.updateText(mBookmark.getPosText(),true));
+				setChecked(btnUserDic);
 			});
-			btnCitation.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
-						mCoolReader.showToast(R.string.only_in_pro);
-						return;
-					}
-					mBookmark.setType(Bookmark.TYPE_CITATION);
-					commentLabel.setText(R.string.dlg_bookmark_edit_comment); // : R.string.dlg_bookmark_edit_correction
-					posEdit.setKeyListener(keyList);
-					posEdit.setText(mBookmark.getPosText());
-					setChecked(btnCitation);
+			btnCitation.setOnClickListener(v -> {
+				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+					mCoolReader.showToast(R.string.only_in_pro);
+					return;
 				}
+				mBookmark.setType(Bookmark.TYPE_CITATION);
+				commentLabel.setText(R.string.dlg_bookmark_edit_comment); // : R.string.dlg_bookmark_edit_correction
+				posEdit.setKeyListener(keyList);
+				posEdit.setText(mBookmark.getPosText());
+				setChecked(btnCitation);
 			});
 			if (!StrUtils.isEmptyStr(commentText)) {
 				String cText = commentText;

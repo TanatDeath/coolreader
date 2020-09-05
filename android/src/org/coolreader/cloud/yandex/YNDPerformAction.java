@@ -141,17 +141,7 @@ public class YNDPerformAction {
                     throws IOException {
                 String sBody = response.body().string();
                 Log.i("CLOUD", sBody);
-                BackgroundThread.instance().postBackground(new Runnable() {
-                    @Override
-                    public void run() {
-                        BackgroundThread.instance().postGUI(new Runnable() {
-                            @Override
-                            public void run() {
-                                mCoolReader.showToast(R.string.upload_complete);
-                            }
-                        }, 200);
-                    }
-                });
+                BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> mCoolReader.showToast(R.string.upload_complete), 200));
                 mCallback.onComplete(YNDPerformAction.this, CloudAction.CLOUD_COMPLETE_YND_SAVE_BOOK, null);
             }
 
@@ -457,17 +447,8 @@ public class YNDPerformAction {
                 }
             });
         } else {
-            BackgroundThread.instance().postBackground(new Runnable() {
-                @Override
-                public void run() {
-                    BackgroundThread.instance().postGUI(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+" - "+mCoolReader.getString(R.string.cloud_download_error));
-                        }
-                    }, 200);
-                }
-            });
+            BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+" - "+mCoolReader.getString(R.string.cloud_download_error)), 200));
         }
     }
 

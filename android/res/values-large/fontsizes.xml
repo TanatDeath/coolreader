@@ -12,6 +12,10 @@
         <!--item name="android:textColor">?textColorSecondary</item-->
     </style>
 
+    <style name="TextAppearance.MediumLarge" parent="@android:style/TextAppearance.Large">
+        <item name="android:textSize">22sp</item>
+    </style>
+
     <style name="TextAppearance.Small2" parent="@android:style/TextAppearance.Small">
         <item name="android:textSize">18sp</item>
         <!--item name="android:textColor">?textColorSecondary</item-->

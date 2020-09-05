@@ -27,7 +27,7 @@ public class TOCDlg extends BaseDialog {
 	ListView mListView;
 	int mCurrentPage;
 	TOCItem mCurrentPageItem;
-	ArrayList<TOCItem> mItems = new ArrayList<TOCItem>(); 
+	ArrayList<TOCItem> mItems = new ArrayList<>();
 	private LayoutInflater mInflater;
 	
 	private void initItems( TOCItem toc, boolean expanded )
@@ -118,11 +118,11 @@ public class TOCDlg extends BaseDialog {
 				} else {
 					view = (View)convertView;
 				}
-				ImageView imgShowPage = (ImageView)view.findViewById(R.id.toc_show_page);
-				TextView pageTextView = (TextView)view.findViewById(R.id.toc_page);
-				TextView titleTextView = (TextView)view.findViewById(R.id.toc_title);
-				TextView marginTextView = (TextView)view.findViewById(R.id.toc_level_margin);
-				ImageView expandImageView = (ImageView)view.findViewById(R.id.toc_expand_icon);
+				ImageView imgShowPage = view.findViewById(R.id.toc_show_page);
+				TextView pageTextView = view.findViewById(R.id.toc_page);
+				TextView titleTextView = view.findViewById(R.id.toc_title);
+				TextView marginTextView = view.findViewById(R.id.toc_level_margin);
+				ImageView expandImageView = view.findViewById(R.id.toc_expand_icon);
 				StringBuilder buf = new StringBuilder(item.getLevel()*2);
 				for ( int i=1; i<item.getLevel(); i++ )
 					buf.append("  ");
@@ -148,15 +148,12 @@ public class TOCDlg extends BaseDialog {
 				titleTextView.setText(item.getName());
 				pageTextView.setText(String.valueOf(item.getPage()+1));
 				final int pn = item.getPage()+1;
-				imgShowPage.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						//activity.showDicToast("asdf"+pn, false, "");
-						int iPageCnt = ((CoolReader)activity).getReaderView().getDoc().getPageCount();
-						if (pn<=iPageCnt) {
-							String sPage = ((CoolReader)activity).getReaderView().getDoc().getPageText(false, pn - 1);
-							activity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO, "[HIDE]");
-						}
+				imgShowPage.setOnClickListener(v -> {
+					//activity.showDicToast("asdf"+pn, false, "");
+					int iPageCnt = ((CoolReader)activity).getReaderView().getDoc().getPageCount();
+					if (pn<=iPageCnt) {
+						String sPage = ((CoolReader)activity).getReaderView().getDoc().getPageText(false, pn - 1);
+						activity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO, "[HIDE]");
 					}
 				});
 				activity.tintViewIcons(view);
@@ -198,37 +195,27 @@ public class TOCDlg extends BaseDialog {
 		this.mTOC = toc;
 		this.mCurrentPage = currentPage;
 		this.mListView = new BaseListView(getContext(), true);
-		mListView.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> listview, View view,
-					int position, long id) {
-				TOCItem item = mItems.get(position);
-				if ( item.getChildCount()==0 || item.getExpanded() ) {
-					mReaderView.goToPage(item.getPage()+1);
-					dismiss();
-				} else {
-					expand(item);
-				}
+		mListView.setOnItemClickListener((listview, view, position, id) -> {
+			TOCItem item = mItems.get(position);
+			if ( item.getChildCount()==0 || item.getExpanded() ) {
+				mReaderView.goToPage(item.getPage()+1);
+				dismiss();
+			} else {
+				expand(item);
 			}
 		});
-		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-			@Override
-			public boolean onItemLongClick(AdapterView<?> listview, View view,
-					int position, long id) {
-				TOCItem item = mItems.get(position);
-				if ( item.getChildCount()==0 ) {
-					mReaderView.goToPage(item.getPage()+1);
-					dismiss();
-				} else {
-					if ( item.getExpanded() )
-						collapse(item);
-					else
-						expand(item);
-				}
-				return true;
+		mListView.setOnItemLongClickListener((listview, view, position, id) -> {
+			TOCItem item = mItems.get(position);
+			if ( item.getChildCount()==0 ) {
+				mReaderView.goToPage(item.getPage()+1);
+				dismiss();
+			} else {
+				if ( item.getExpanded() )
+					collapse(item);
+				else
+					expand(item);
 			}
+			return true;
 		});
 		mListView.setLongClickable(true);
 		mListView.setClickable(true);
@@ -236,19 +223,7 @@ public class TOCDlg extends BaseDialog {
 		mListView.setFocusableInTouchMode(true);
 		mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		setView(mListView);
-		setFlingHandlers(mListView, new Runnable() {
-			@Override
-			public void run() {
-				// cancel
-				TOCDlg.this.dismiss();
-			}
-		}, new Runnable() {
-			@Override
-			public void run() {
-				// 
-				TOCDlg.this.dismiss();
-			}
-		});
+		setFlingHandlers(mListView, TOCDlg.this::dismiss, TOCDlg.this::dismiss);
 	}
 
 	@Override

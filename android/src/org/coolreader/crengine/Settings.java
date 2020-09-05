@@ -31,7 +31,8 @@ public interface Settings {
     public static final String PROP_LOG_AUTOFLUSH           ="crengine.log.autoflush";
     public static final String PROP_FONT_SIZE               ="crengine.font.size";
     public static final String PROP_FALLBACK_FONT_FACE      ="crengine.font.fallback.face";
-    public static final String PROP_STATUS_FONT_COLOR       ="crengine.page.header.font.color";
+	public static final String PROP_FALLBACK_FONT_FACES     ="crengine.font.fallback.faces";
+	public static final String PROP_STATUS_FONT_COLOR       ="crengine.page.header.font.color";
     public static final String PROP_STATUS_FONT_COLOR_DAY   ="crengine.page.header.font.color.day";
     public static final String PROP_STATUS_FONT_COLOR_NIGHT ="crengine.page.header.font.color.night";
     public static final String PROP_STATUS_FONT_FACE        ="crengine.page.header.font.face";
@@ -85,9 +86,7 @@ public interface Settings {
     public static final String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";
     //public static final String PROP_HYPHENATION_DICT        ="crengine.hyphenation.dictionary.code"; // non-crengine (old)
 	public static final String PROP_HYPHENATION_DICT        = "crengine.hyphenation.directory";
-	public static final String PROP_WORD_EXPANSION          = "crengine.style.max.added.letter.spacing.percent";
-	public static final String PROP_WORD_SPACE_WIDTH_SCALE_PERCENT = "crengine.style.space.width.scale.percent";
-	public static final String PROP_WORD_SPACE_CONDENSING_PERCENT = "crengine.style.space.condensing.percent";
+
 	public static final String PROP_AUTOSAVE_BOOKMARKS      ="crengine.autosave.bookmarks";
 	// New textlang typography settings:
 	public static final String PROP_TEXTLANG_MAIN_LANG      = "crengine.textlang.main.lang";
@@ -116,6 +115,9 @@ public interface Settings {
     public static final String PROP_IMG_SCALING_ZOOMOUT_BLOCK_SCALE = "crengine.image.scaling.zoomout.block.scale";
     
     public static final String PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT = "crengine.style.space.condensing.percent";
+	public static final String PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT = "crengine.style.unused.space.threshold.percent";
+	public static final String PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT = "crengine.style.max.added.letter.spacing.percent";
+	public static final String PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT = "crengine.style.space.width.scale.percent";
 
 	// default is 96 (1 css px = 1 screen px)
 	// use 0 for old crengine behaviour (no support for absolute units and 1css px = 1 screen px)
@@ -239,7 +241,12 @@ public interface Settings {
 
     public static final String PROP_APP_PLUGIN_ENABLED = "app.plugin.enabled.litres";
 
-    public static final String PROP_APP_GEO = "app.geo.locations";
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED = "app.cloudsync.googledrive.enabled";
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS = "app.cloudsync.googledrive.settings";
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS = "app.cloudsync.googledrive.bookmarks";
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK = "app.cloudsync.googledrive.currentbook";
+
+	public static final String PROP_APP_GEO = "app.geo.locations";
 	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";
 	public static final String PROP_CLOUD_TITLE = "window.cloud.title";
 	public static final String PROP_DICTIONARY_TITLE = "window.dictionary.title";
@@ -396,16 +403,21 @@ public interface Settings {
 	    PROP_FLOATING_PUNCTUATION,
 	    PROP_LANDSCAPE_PAGES,
 	    PROP_HYPHENATION_DICT,
-		PROP_WORD_EXPANSION,
-	    PROP_WORD_SPACE_WIDTH_SCALE_PERCENT,
-	    PROP_WORD_SPACE_CONDENSING_PERCENT,
 
 	    "crengine.image.*",
 	    PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT,
-	    PROP_APP_FULLSCREEN,
+		PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT,
+		PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT,
+		PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT,
+		PROP_APP_FULLSCREEN,
 	    "app.screen.*",
 	    PROP_APP_DICTIONARY,
         PROP_APP_DICTIONARY_2,
+		PROP_APP_DICTIONARY_3,
+		PROP_APP_DICTIONARY_4,
+		PROP_APP_DICTIONARY_5,
+		PROP_APP_DICTIONARY_6,
+		PROP_APP_DICTIONARY_7,
 		PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_WORD_CORRECTION,
         PROP_APP_SHOW_USER_DIC_PANEL,

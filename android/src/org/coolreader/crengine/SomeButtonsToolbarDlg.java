@@ -234,12 +234,9 @@ public class SomeButtonsToolbarDlg {
 		Handler handler = new Handler();
 
 		if (closeSecTime != 0)
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					if (mWindow != null) {
-						mWindow.dismiss();
-					}
+			handler.postDelayed(() -> {
+				if (mWindow != null) {
+					mWindow.dismiss();
 				}
 			},  closeSecTime*1000);
 

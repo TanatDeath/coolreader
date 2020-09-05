@@ -129,18 +129,14 @@ public class DictsDlg extends BaseDialog {
 	
 	class DictList extends BaseListView {
 
-		public DictList( Context context, boolean shortcutMode ) {
+		public DictList(Context context) {
 			super(context, true);
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
 			setAdapter(new DictListAdapter());
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-						int position, long arg3) {
-					openContextMenu(DictList.this);
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				openContextMenu(DictList.this);
+				return true;
 			});
 		}
 
@@ -168,8 +164,8 @@ public class DictsDlg extends BaseDialog {
 		mReaderView = readerView;
 		mCallerView = view;
 		View frame = mInflater.inflate(R.layout.dict_dialog, null);
-		ImageButton btnMinus1 = (ImageButton)frame.findViewById(R.id.dict_dlg_minus1_btn);
-		ImageButton btnMinus2 = (ImageButton)frame.findViewById(R.id.dict_dlg_minus2_btn);
+		ImageButton btnMinus1 = frame.findViewById(R.id.dict_dlg_minus1_btn);
+		ImageButton btnMinus2 = frame.findViewById(R.id.dict_dlg_minus2_btn);
 		selEdit = (EditText)frame.findViewById(R.id.selection_text);
 		selEdit.setText(mSearchText);
 		setPositiveButtonImage(0,0);
@@ -200,30 +196,28 @@ public class DictsDlg extends BaseDialog {
 				selEdit.setText(res.trim());
 			}
 		});
-		btnMinus2.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				String s = StrUtils.replacePuncts(selEdit.getText().toString(),true);
-				String res = "";
-				String [] arrS = s.split(" ");
-				List<String> list = Arrays.asList(arrS);
-				Collections.reverse(list);
-				arrS = (String[]) list.toArray();
-				boolean bFirst = true;
-				for (String ss: arrS) {
-					String repl = StrUtils.replacePuncts(ss.trim().toLowerCase(),false);
-					if (!repl.trim().equals("")) {
-						if (bFirst) {
-							bFirst = false;
-						} else {
-							res=ss.trim()+" "+res.trim();
-						}
+		btnMinus2.setOnClickListener(v -> {
+			String s = StrUtils.replacePuncts(selEdit.getText().toString(),true);
+			String res = "";
+			String [] arrS = s.split(" ");
+			List<String> list = Arrays.asList(arrS);
+			Collections.reverse(list);
+			arrS = (String[]) list.toArray();
+			boolean bFirst = true;
+			for (String ss: arrS) {
+				String repl = StrUtils.replacePuncts(ss.trim().toLowerCase(),false);
+				if (!repl.trim().equals("")) {
+					if (bFirst) {
+						bFirst = false;
+					} else {
+						res=ss.trim()+" "+res.trim();
 					}
 				}
-				selEdit.setText(res.trim());
 			}
+			selEdit.setText(res.trim());
 		});
 		ViewGroup body = (ViewGroup)frame.findViewById(R.id.dict_list);
-		mList = new DictList(activity, false);
+		mList = new DictList(activity);
 		body.addView(mList);
 		setView(frame);
 		selEdit.clearFocus();

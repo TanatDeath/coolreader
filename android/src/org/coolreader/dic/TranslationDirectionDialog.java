@@ -337,19 +337,11 @@ public class TranslationDirectionDialog extends BaseDialog {
 				for (Element el: langs) {
 					yndLangs.put(el.attr("key"),el.attr("value"));
 				}
-				BackgroundThread.instance().postBackground(new Runnable() {
-					@Override
-					public void run() {
-						BackgroundThread.instance().postGUI(new Runnable() {
-							@Override
-							public void run() {
-								TranslListAdapter tla = new TranslListAdapter();
-								mList.setAdapter(tla);
-								tla.notifyDataSetChanged();
-							}
-						}, 100);
-					}
-				});
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					TranslListAdapter tla = new TranslListAdapter();
+					mList.setAdapter(tla);
+					tla.notifyDataSetChanged();
+				}, 100));
 			}
 
 			public void onFailure(Call call, IOException e) {
@@ -537,18 +529,10 @@ public class TranslationDirectionDialog extends BaseDialog {
 		mList = new TranslList(activity, false);
 		tl.addView(mList);
 		setView( view );
-		BackgroundThread.instance().postBackground(new Runnable() {
-			@Override
-			public void run() {
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						if (iType == FOR_YND) yndButtonClick();
-						if (iType == FOR_LINGVO) lingvoButtonClick();
-					}
-				}, 500);
-			}
-		});
+		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+			if (iType == FOR_YND) yndButtonClick();
+			if (iType == FOR_LINGVO) lingvoButtonClick();
+		}, 500));
 	}
 
 	@Override

@@ -1,11 +1,10 @@
 package org.coolreader.crengine;
 
-import org.coolreader.CoolReader;
-import org.coolreader.crengine.CRToolBar.OnActionHandler;
-
 import android.graphics.Rect;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import org.coolreader.CoolReader;
 
 public class ReaderViewLayout extends ViewGroup implements Settings {
 
@@ -85,12 +84,9 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			if (isToolbarVisible())
 				toolbarView.showOverflowMenu();
 			else
-				toolbarView.showAsPopup(this, new OnActionHandler() {
-					@Override
-					public boolean onActionSelected(ReaderAction item) {
-						activity.getReaderView().onAction(item);
-						return true;
-					}
+				toolbarView.showAsPopup(this, item -> {
+					activity.getReaderView().onAction(item);
+					return true;
 				}, null);
 //			new OnOverflowHandler() {
 //					@Override
@@ -137,6 +133,9 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 				ReaderAction.RECENT_BOOKS,
 				ReaderAction.OPEN_PREVIOUS_BOOK,
 				ReaderAction.TOGGLE_AUTOSCROLL,
+				//plotn - commented out so we will use our logic to create toolbars
+				//ReaderAction.GDRIVE_SYNCTO,
+				//ReaderAction.GDRIVE_SYNCFROM,
 				ReaderAction.ABOUT,
 				ReaderAction.HIDE,
 			}), false, false, false, false);
@@ -305,14 +304,11 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			userDicView.layout(userDicRc.left, userDicRc.top, userDicRc.right, userDicRc.bottom);
 			
 			if (activity.isFullscreen()) {
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						log.v("Invalidating toolbar ++++++++++");
-						toolbarView.forceLayout();
-						contentView.getSurface().invalidate();
-						toolbarView.invalidate();
-					}
+				BackgroundThread.instance().postGUI(() -> {
+					log.v("Invalidating toolbar ++++++++++");
+					toolbarView.forceLayout();
+					contentView.getSurface().invalidate();
+					toolbarView.invalidate();
 				}, 100);
 			}
 			

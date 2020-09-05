@@ -2,7 +2,7 @@ package org.coolreader.cloud;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.content.FileProvider;
+import androidx.core.content.FileProvider;
 import android.util.Log;
 
 import com.dropbox.core.v2.users.FullAccount;
@@ -163,11 +163,9 @@ public class CloudAction {
         Log.e(e.getClass().getName(), "Cloud operation error: "+res, e);
         final CoolReader crf = cr;
         final String resf = res;
-        BackgroundThread.instance().postGUI(new Runnable() {
-            @Override
-            public void run() {
-                if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf,true);
-            }}, 200);
+        BackgroundThread.instance().postGUI(() -> {
+            if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf,true);
+        }, 200);
     }
 
     public static void onDBXListFolderResultThenOpenDlg(CoolReader cr,
@@ -231,21 +229,13 @@ public class CloudAction {
             final YNDListFiles l = (YNDListFiles) o;
             Log.i("YND","ynd files = "+ l.fileList.size());
             final CoolReader crf = cr;
-            BackgroundThread.instance().postGUI(new Runnable() {
-                @Override
-                public void run() {
-                    onYNDListFolderResultThenOpenDlg(crf, l, a.mCurAction.fi, a.mCurAction.param);
-                }}, 200);
+            BackgroundThread.instance().postGUI(() -> onYNDListFolderResultThenOpenDlg(crf, l, a.mCurAction.fi, a.mCurAction.param), 200);
         }
         if ((CLOUD_COMPLETE_LIST_FOLDER_RESULT.equals(res))&&(a.mCurAction.action == CloudAction.YND_LIST_FOLDER_IN_DLG)) {
             final YNDListFiles l = (YNDListFiles) o;
             final CoolReader crf = cr;
             final OpenBookFromCloudDlg dlgf = (OpenBookFromCloudDlg) dlg;
-            BackgroundThread.instance().postGUI(new Runnable() {
-                @Override
-                public void run() {
-                    onYNDListFolderResultInDlg(crf, l, dlgf);
-                }}, 200);
+            BackgroundThread.instance().postGUI(() -> onYNDListFolderResultInDlg(crf, l, dlgf), 200);
         }
         if ((CLOUD_COMPLETE_GET_DOWNLOAD_LINK.equals(res))&&(a.mCurAction.action == CloudAction.YND_GET_DOWNLOAD_LINK)) {
             if (a.mActionList.size()>0) {
@@ -281,11 +271,9 @@ public class CloudAction {
         }
         if ((CLOUD_COMPLETE_SAVE_STRING_TO_FILE.equals(res))&&(!a.mCurAction.mQuiet)) {
             final CoolReader crf = cr;
-            BackgroundThread.instance().postGUI(new Runnable() {
-                 @Override
-                 public void run() {
-                     if (crf!=null) crf.showCloudToast(R.string.cloud_ok, true);
-                 }}, 200);
+            BackgroundThread.instance().postGUI(() -> {
+                if (crf!=null) crf.showCloudToast(R.string.cloud_ok, true);
+            }, 200);
         }
         a.DoNextAction();
     }
@@ -296,11 +284,9 @@ public class CloudAction {
         final CoolReader crf = cr;
         final String resf = res;
         if (!a.mCurAction.mErrorQuiet)
-            BackgroundThread.instance().postGUI(new Runnable() {
-                @Override
-                public void run() {
-                    if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf, true);
-                }}, 200);
+            BackgroundThread.instance().postGUI(() -> {
+                if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf, true);
+            }, 200);
     }
 
     public static void yndOpenBookDialog(final CoolReader cr, FileInfo bookToSave, boolean fromHomeFolder) {
@@ -390,20 +376,12 @@ public class CloudAction {
 					if (o instanceof YNDListFiles) {
 						YNDListFiles o1 = (YNDListFiles) o;
 						if (o1.fileList.size() == 0) {
-                            BackgroundThread.instance().postGUI(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (!findingLastPos) cr.showToast(cr.getString(R.string.no_cloud_files));
-                                }
+                            BackgroundThread.instance().postGUI(() -> {
+                                if (!findingLastPos) cr.showToast(cr.getString(R.string.no_cloud_files));
                             },200);
 						    return;
                         }
-						Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
-							@Override
-							public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-								return -(o1.created.compareTo(o2.created));
-							}
-						};
+						Comparator<CloudFileInfo> compareByDate = (o11, o2) -> -(o11.created.compareTo(o2.created));
 						Collections.sort(o1.fileList, compareByDate);
 						int iPos = -1;
 						for (int i = 0; i < o1.fileList.size(); i++) {
@@ -453,9 +431,7 @@ public class CloudAction {
                                     final String sPercCur1 = String.format(l, "%5.2f", dPerc) + "%";
                                     final String sPercCur = sPercCur1.replace(",", ".");
                                     if (iCurPos > bmk.getPercent())
-                                        BackgroundThread.instance().postGUI(new Runnable() {
-                                        @Override
-                                        public void run() {
+                                        BackgroundThread.instance().postGUI(() -> {
                                             ArrayList<String> sButtons = new ArrayList<String>();
                                             sButtons.add("*"+sPercF+"% "+cr.getString(R.string.rpos_from)+" "+
                                                     sAddF+" ("+cr.getString(R.string.rpos_now_at)+" "+sPercCur+")");
@@ -466,55 +442,44 @@ public class CloudAction {
                                                     cr.getString(R.string.rpos_found),
                                                     sButtons, o1, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
                                                         @Override
-                                                        public void done(Object o, String btnPressed) {
-                                                            YNDListFiles o1 = (YNDListFiles) o;
-                                                            if (o1.fileList.size()>0) {
-                                                                CloudFileInfo cfi = o1.fileList.get(0);
+                                                        public void done(Object o22, String btnPressed) {
+                                                            YNDListFiles o112 = (YNDListFiles) o22;
+                                                            if (o112.fileList.size()>0) {
+                                                                CloudFileInfo cfi1 = o112.fileList.get(0);
                                                                 if (btnPressed.equals(cr.getString(R.string.rpos_restore))) {
-                                                                    CloudSync.loadFromJsonInfoFile(cr, CloudSync.CLOUD_SAVE_READING_POS, cfi.path, false,
-                                                                            cfi.name, Settings.CLOUD_SYNC_VARIANT_YANDEX);
+                                                                    CloudSync.loadFromJsonInfoFile(cr, CloudSync.CLOUD_SAVE_READING_POS, cfi1.path, false,
+                                                                            cfi1.name, Settings.CLOUD_SYNC_VARIANT_YANDEX);
                                                                 }
                                                                 if (btnPressed.equals(cr.getString(R.string.rpos_list))) {
-                                                                    BackgroundThread.instance().postGUI(new Runnable() {
-                                                                        @Override
-                                                                        public void run() {
-                                                                            ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o1);
-                                                                            dlg2.show();
-                                                                        }
+                                                                    BackgroundThread.instance().postGUI(() -> {
+                                                                        ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o112);
+                                                                        dlg2.show();
                                                                     }, 200);
                                                                 }
                                                             }
                                                         }
                                                     });
-                                        }
-                                    }, 200);
+                                        }, 200);
                                 }
                             }
 							else {
-                                BackgroundThread.instance().postGUI(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o1);
-                                        dlg2.show();
-                                    }
+                                BackgroundThread.instance().postGUI(() -> {
+                                    ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o1);
+                                    dlg2.show();
                                 }, 200);
                             }
 						}
 						if (StrUtils.getNonEmptyStr(a.mCurAction.param,true).equals("_bmk_")) {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									ChooseBookmarksDlg dlg2 = new ChooseBookmarksDlg(cr, o1);
-									dlg2.show();
-								}}, 200);
+							BackgroundThread.instance().postGUI(() -> {
+                                ChooseBookmarksDlg dlg2 = new ChooseBookmarksDlg(cr, o1);
+                                dlg2.show();
+                            }, 200);
 						}
                         if (StrUtils.getNonEmptyStr(a.mCurAction.param,true).equals("_settings_")) {
-                            BackgroundThread.instance().postGUI(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ChooseConfFileDlg dlg = new ChooseConfFileDlg(cr, o1);
-                                    dlg.show();
-                                }}, 200);
+                            BackgroundThread.instance().postGUI(() -> {
+                                ChooseConfFileDlg dlg = new ChooseConfFileDlg(cr, o1);
+                                dlg.show();
+                            }, 200);
                         }
 					}
                     CloudAction.onYNDComplete(cr, a, res, o, null);
@@ -589,9 +554,9 @@ public class CloudAction {
                         Services.getScanner().listDirectory(dir);
                         FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
                         if (item != null)
-                            cr.loadDocument(item);
+                            cr.loadDocument(item, true);
                         else
-                            cr.loadDocument(fi);
+                            cr.loadDocument(fi, true);
                     }
                 }
 
@@ -697,24 +662,21 @@ public class CloudAction {
                 @Override
                 public void onComplete(YNDPerformAction a, String res, Object o) {
                     if (a.mCurAction.action == YND_DOWNLOAD_FILE) {
-                        BackgroundThread.instance().postGUI(new Runnable() {
-                            @Override
-                            public void run() {
-                                cr.showToast(cr.getString(R.string.cloud_ok) + ": " +cr.getString(R.string.successfully_saved_to)+" " + fName);
-                                if (PictureCameDialog.isFileIsPicture(fName)) {
-                                    cr.pictureCame(fName);
-                                } else {
-                                    FileInfo fi = new FileInfo(fBook);
-                                    FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
-                                    if (dir == null)
-                                        dir = downloadDir;
-                                    Services.getScanner().listDirectory(dir);
-                                    FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
-                                    if (item != null)
-                                        cr.loadDocument(item);
-                                    else
-                                        cr.loadDocument(fi);
-                                }
+                        BackgroundThread.instance().postGUI(() -> {
+                            cr.showToast(cr.getString(R.string.cloud_ok) + ": " +cr.getString(R.string.successfully_saved_to)+" " + fName);
+                            if (PictureCameDialog.isFileIsPicture(fName)) {
+                                cr.pictureCame(fName);
+                            } else {
+                                FileInfo fi = new FileInfo(fBook);
+                                FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
+                                if (dir == null)
+                                    dir = downloadDir;
+                                Services.getScanner().listDirectory(dir);
+                                FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
+                                if (item != null)
+                                    cr.loadDocument(item, true);
+                                else
+                                    cr.loadDocument(fi, true);
                             }
                         }, 200);
                     }
@@ -783,55 +745,53 @@ public class CloudAction {
 						final String sContent = (String) o;
 						Log.i("CLOUD", "Complete action: "+ a.mCurAction.action);
 						if (a.mCurAction.action == YND_DOWNLOAD_FILE_TO_STRING) {
-							BackgroundThread.instance().postGUI(new Runnable() {
-								@Override
-								public void run() {
-									//cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.successfully_loaded)); // not needed
-									int iSaveType = CloudSync.CLOUD_SAVE_READING_POS;
-									if (a.mCurAction.param.contains("_bmk_")) iSaveType = CloudSync.CLOUD_SAVE_BOOKMARKS;
-                                    if (a.mCurAction.param.contains("_settings_")) iSaveType = CloudSync.CLOUD_SAVE_SETTINGS;
-                                    if (iSaveType != CloudSync.CLOUD_SAVE_SETTINGS) {
-                                        CloudSync.applyRPosOrBookmarks(cr, iSaveType, ((String) o), a.mCurAction.param, false);
-                                    } else {
-                                        String[] lines = ((String) o).split("\\r?\\n");
-                                        boolean fileBegun = false;
-                                        ArrayList<String> arrCurFile = new ArrayList<String>();
-                                        String sFName = "";
-                                        boolean bWasErr = false;
-                                        for (String line : lines) {
-                                            if (line.startsWith("~~~ settings: ")) {
-                                                if (fileBegun) {
-                                                    if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
-                                                        if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
-                                                    arrCurFile.clear();
+							BackgroundThread.instance().postGUI(() -> {
+                                //cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.successfully_loaded)); // not needed
+                                int iSaveType = CloudSync.CLOUD_SAVE_READING_POS;
+                                if (a.mCurAction.param.contains("_bmk_")) iSaveType = CloudSync.CLOUD_SAVE_BOOKMARKS;
+                                if (a.mCurAction.param.contains("_settings_")) iSaveType = CloudSync.CLOUD_SAVE_SETTINGS;
+                                if (iSaveType != CloudSync.CLOUD_SAVE_SETTINGS) {
+                                    CloudSync.applyRPosOrBookmarks(cr, iSaveType, ((String) o), a.mCurAction.param, false);
+                                } else {
+                                    String[] lines = ((String) o).split("\\r?\\n");
+                                    boolean fileBegun = false;
+                                    ArrayList<String> arrCurFile = new ArrayList<String>();
+                                    String sFName = "";
+                                    boolean bWasErr = false;
+                                    for (String line : lines) {
+                                        if (line.startsWith("~~~ settings: ")) {
+                                            if (fileBegun) {
+                                                if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
+                                                    if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
+                                                arrCurFile.clear();
+                                            }
+                                            fileBegun = true;
+                                            String s = line.replace("~~~ settings: ","");
+                                            if (s.split("\\|").length>2) {
+                                                String[] arrS = s.split("\\|");
+                                                String sKnownId = arrS[1];
+                                                String sKnownDesc = arrS[2];
+                                                s = arrS[0];
+                                                if (CloudSync.devicesKnown != null) {
+                                                    CloudSync.checkKnownDevice(cr, sKnownId, sKnownDesc);
                                                 }
-                                                fileBegun = true;
-                                                String s = line.replace("~~~ settings: ","");
-                                                if (s.split("\\|").length>2) {
-                                                    String[] arrS = s.split("\\|");
-                                                    String sKnownId = arrS[1];
-                                                    String sKnownDesc = arrS[2];
-                                                    s = arrS[0];
-                                                    if (CloudSync.devicesKnown != null) {
-                                                        CloudSync.checkKnownDevice(cr, sKnownId, sKnownDesc);
-                                                    }
-                                                }
-                                                sFName = s;
-                                            } else arrCurFile.add(line);
-                                        }
-                                        if (fileBegun) {
-                                            if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
-                                                if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
-                                        }
-                                        if (!bWasErr) {
-                                            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.settings_were_restored));
-                                            cr.finish();
-                                        } else {
-                                            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+ cr.getString(R.string.settings_restore_error), true);
-                                            cr.finish();
-                                        }
+                                            }
+                                            sFName = s;
+                                        } else arrCurFile.add(line);
                                     }
-								}}, 200);
+                                    if (fileBegun) {
+                                        if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
+                                            if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
+                                    }
+                                    if (!bWasErr) {
+                                        if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.settings_were_restored));
+                                        cr.finish();
+                                    } else {
+                                        if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+ cr.getString(R.string.settings_restore_error), true);
+                                        cr.finish();
+                                    }
+                                }
+                            }, 200);
 						}
 
 					}

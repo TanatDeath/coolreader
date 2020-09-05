@@ -228,7 +228,7 @@ public class BookInfo {
 			if ( ps.length()<2 )
 				ps = "0" + ps;
 			ps = String.valueOf(percent/100) + "." + ps  + "%";
-			buf.append("## " + ps + " - " + (bm.getType()!=Bookmark.TYPE_COMMENT ? "comment" : "correction")  + "\n");
+			buf.append("## " + ps + " - " + (bm.getType()==Bookmark.TYPE_COMMENT ? "comment" : "correction")  + "\n");
 			if ( bm.getTitleText()!=null )
 				buf.append("## " + bm.getTitleText() + "\n");
 			if ( bm.getPosText()!=null )
@@ -242,9 +242,8 @@ public class BookInfo {
 
 	synchronized public boolean exportBookmarks( String fileName ) {
 		Log.i("cr3", "Exporting bookmarks to file " + fileName);
-		try { 
-			FileOutputStream stream = new FileOutputStream(new File(fileName));
-			OutputStreamWriter writer = new OutputStreamWriter(stream, "UTF-8"); 
+		try (FileOutputStream stream = new FileOutputStream(new File(fileName));
+			 OutputStreamWriter writer = new OutputStreamWriter(stream, "UTF-8")) {
 			writer.write(0xfeff);
 			writer.write("# Cool Reader 3 - exported bookmarks\r\n");
 			File pathname = new File(fileInfo.getPathName());
@@ -261,7 +260,7 @@ public class BookInfo {
 				String ps = String.valueOf(percent%100);
 				if ( ps.length()<2 )
 					ps = "0" + ps;
-				ps = String.valueOf(percent/100) + "." + ps  + "%";
+				ps = percent / 100 + "." + ps  + "%";
 				writer.write("## " + ps + " - " + (bm.getType()==Bookmark.TYPE_COMMENT ? "comment" : "correction")  + "\r\n");
 				if ( bm.getTitleText()!=null )
 					writer.write("## " + bm.getTitleText() + "\r\n");
@@ -271,14 +270,12 @@ public class BookInfo {
 					writer.write(">> " + bm.getCommentText() + "\r\n");
 				writer.write("\r\n");
 			}
-			writer.close();
 			return true;
 		} catch ( IOException e ) {
 			Log.e("cr3", "Cannot write bookmark file " + fileName);
 			return false;
 		}
 	}
-	
 	
 	synchronized public Bookmark removeBookmark( int index )
 	{

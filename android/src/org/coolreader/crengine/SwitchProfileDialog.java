@@ -47,58 +47,45 @@ import java.util.ArrayList;
 		}
 		this.mListView = new BaseListView(getContext(), false);
 		currentProfile = this.mCoolReader.getCurrentProfile();
-		mListView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> listview, View view,
-					int position, long id) {
-				if (optionsDialog != null) {
-					BackgroundThread.instance().executeGUI(new Runnable() {
-						public void run() {
-							optionsDialog.apply();
-							optionsDialog.dismiss();
-							mReaderView.setCurrentProfile(position + 1);
-							mCoolReader.showOptionsDialog(OptionsDialog.Mode.READER);
-						}
-					});
-				} else mReaderView.setCurrentProfile(position + 1);
-				SwitchProfileDialog.this.dismiss();
-			}
+		mListView.setOnItemClickListener((listview, view, position, id) -> {
+			if (optionsDialog != null) {
+				BackgroundThread.instance().executeGUI(() -> {
+					optionsDialog.apply();
+					optionsDialog.dismiss();
+					mReaderView.setCurrentProfile(position + 1);
+					mCoolReader.showOptionsDialog(OptionsDialog.Mode.READER);
+				});
+			} else mReaderView.setCurrentProfile(position + 1);
+			SwitchProfileDialog.this.dismiss();
 		});
 
-		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> listview, View view,
-					int position, long id) {
-				ArrayList<String[]> vl = new ArrayList<String[]>();
-				String[] arrS1 = {mCoolReader.getString(R.string.new_profile), mCoolReader.getString(R.string.new_profile),
-						profileNames[position]};
-				vl.add(arrS1);
-				AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
-						mCoolReader,
-						mCoolReader.getString(R.string.rename_profile),
-						mCoolReader.getString(R.string.rename_profile) + ": " +
-						 profileNames[position],
-						vl, new AskSomeValuesDialog.ValuesEnteredCallback() {
-					@Override
-					public void done(ArrayList<String> results) {
+		mListView.setOnItemLongClickListener((listview, view, position, id) -> {
+			ArrayList<String[]> vl = new ArrayList<String[]>();
+			String[] arrS1 = {mCoolReader.getString(R.string.new_profile), mCoolReader.getString(R.string.new_profile),
+					profileNames[position]};
+			vl.add(arrS1);
+			AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+					mCoolReader,
+					mCoolReader.getString(R.string.rename_profile),
+					mCoolReader.getString(R.string.rename_profile) + ": " +
+					 profileNames[position],
+					vl, results -> {
 						if (results != null) {
 							if (results.size() >= 1)
 								if (!StrUtils.isEmptyStr(results.get(0))) {
 									profileNames[position] = results.get(0).trim();
-									Properties props = new Properties(mCoolReader.settings());
-									props.setProperty(Settings.PROP_PROFILE_NAME + "." + (position+1), results.get(0).trim());
+									Properties props1 = new Properties(mCoolReader.settings());
+									props1.setProperty(Settings.PROP_PROFILE_NAME + "." + (position+1), results.get(0).trim());
 									if (optionsDialog != null)
 										optionsDialog.mProperties.setProperty(Settings.PROP_PROFILE_NAME + "." + (position+1), results.get(0).trim());
-									mCoolReader.setSettings(props, -1, true);
+									mCoolReader.setSettings(props1, -1, true);
 									profileNames[position] = results.get(0).trim();
 									mListView.invalidateViews();
 								}
 						}
-					}
-				});
-				dlgA.show();
-				return true;
-			}
+					});
+			dlgA.show();
+			return true;
 		});
 		mListView.setLongClickable(true);
 		mListView.setClickable(true);
@@ -106,19 +93,7 @@ import java.util.ArrayList;
 		mListView.setFocusableInTouchMode(true);
 		mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		setView(mListView);
-		setFlingHandlers(mListView, new Runnable() {
-			@Override
-			public void run() {
-				// cancel
-				SwitchProfileDialog.this.dismiss();
-			}
-		}, new Runnable() {
-			@Override
-			public void run() {
-				// 
-				SwitchProfileDialog.this.dismiss();
-			}
-		});
+		setFlingHandlers(mListView, SwitchProfileDialog.this::dismiss, SwitchProfileDialog.this::dismiss);
 		ProfileListAdapter pla = new ProfileListAdapter();
 		mListView.setAdapter(pla);
 		pla.notifyDataSetChanged();
@@ -158,31 +133,28 @@ import java.util.ArrayList;
 				LayoutInflater inflater = LayoutInflater.from(getContext());
 				view = inflater.inflate(R.layout.profile_item, null);
 			} else {
-				view = (View)convertView;
+				view = convertView;
 			}
-			RadioButton cb = (RadioButton)view.findViewById(R.id.option_value_check);
-			TextView title = (TextView)view.findViewById(R.id.option_value_text);
-			ImageView iv = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			RadioButton cb = view.findViewById(R.id.option_value_check);
+			TextView title = view.findViewById(R.id.option_value_text);
+			ImageView iv = view.findViewById(R.id.btn_option_add_info);
 			iv.setVisibility(view.INVISIBLE);
 			cb.setChecked(isCurrentItem);
 			cb.setFocusable(false);
 			cb.setFocusableInTouchMode(false);
 			title.setText(profileNames[position]);
-			cb.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (optionsDialog != null) {
-						BackgroundThread.instance().executeGUI(new Runnable() {
-							public void run() {
-								optionsDialog.apply();
-								optionsDialog.dismiss();
-								mReaderView.setCurrentProfile(position + 1);
-								mCoolReader.showOptionsDialog(OptionsDialog.Mode.READER);
-							}
-						});
-					} else mReaderView.setCurrentProfile(position + 1);
-					SwitchProfileDialog.this.dismiss();
-				}
+			cb.setOnClickListener(v -> {
+				if (optionsDialog != null) {
+					BackgroundThread.instance().executeGUI(new Runnable() {
+						public void run() {
+							optionsDialog.apply();
+							optionsDialog.dismiss();
+							mReaderView.setCurrentProfile(position + 1);
+							mCoolReader.showOptionsDialog(OptionsDialog.Mode.READER);
+						}
+					});
+				} else mReaderView.setCurrentProfile(position + 1);
+				SwitchProfileDialog.this.dismiss();
 			});
 			return view;
 		}
