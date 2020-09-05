@@ -270,7 +270,7 @@ public class BookInfoDialog extends BaseDialog {
 								int pagesLeft;
 								double msecLeft;
 								double msecFivePages;
-								PositionProperties currpos = ((CoolReader) mCoolReader).getReaderView().getDoc().getPositionProps(null);
+								PositionProperties currpos = ((CoolReader) mCoolReader).getReaderView().getDoc().getPositionProps(null, true);
 								if ((bi.getFileInfo().symCount>0) && (speedKoef > 0.000001)) {
 									pagesLeft = ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount() - currpos.pageNumber;
 									double msecAllPages;

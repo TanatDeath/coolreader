@@ -1,10 +1,13 @@
 package org.coolreader.crengine;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.coolreader.CoolReader;
+
+import java.util.ArrayList;
 
 public class ReaderViewLayout extends ViewGroup implements Settings {
 
@@ -114,7 +117,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			this.userDicView = new UserDicPanel(context);
 			this.userDicView.setBackgroundDrawable(statusBackground);
 			toolbarBackground = contentView.createToolbarBackgroundDrawable();
-			this.toolbarView = new CRToolBar(context, ReaderAction.createList(new ReaderAction[] {
+			ArrayList<ReaderAction> actionsList = ReaderAction.createList(
 				ReaderAction.GO_BACK,
 				ReaderAction.TOC,
 				ReaderAction.BOOK_INFO,
@@ -132,13 +135,15 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 				ReaderAction.GO_FORWARD,
 				ReaderAction.RECENT_BOOKS,
 				ReaderAction.OPEN_PREVIOUS_BOOK,
-				ReaderAction.TOGGLE_AUTOSCROLL,
-				//plotn - commented out so we will use our logic to create toolbars
-				//ReaderAction.GDRIVE_SYNCTO,
-				//ReaderAction.GDRIVE_SYNCFROM,
-				ReaderAction.ABOUT,
-				ReaderAction.HIDE,
-			}), false, false, false, false);
+				ReaderAction.TOGGLE_AUTOSCROLL
+			);
+			if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				actionsList.add(ReaderAction.GDRIVE_SYNCTO);
+				actionsList.add(ReaderAction.GDRIVE_SYNCFROM);
+			}
+			actionsList.add(ReaderAction.ABOUT);
+			actionsList.add(ReaderAction.HIDE);
+			this.toolbarView = new CRToolBar(context, actionsList, false, false, false, false);
 			this.toolbarView.setBackgroundDrawable(toolbarBackground);
 			this.toolbarView.useBackgrColor = true;
 			this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));

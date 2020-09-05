@@ -23,13 +23,24 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 47;
+	public static final int DB_VERSION = 48;
 	@Override
 	protected boolean upgradeSchema() {
+		// When the database is just created, its version is 0.
+		int currentVersion = mDB.getVersion();
+		// TODO: check database structure consistency regardless of its version.
+		if (currentVersion > DB_VERSION) {
+			// trying to update the structure of a database that has been modified by some kind of <s>inconsistent</s> fork of the program.
+			// upd: do not do anything, because only very old fork's (some kind of the best fork in the world :))
+			// db live in the same folder, the modern - in its own
+			///log.v("MainDB: incompatible database version found (" + currentVersion + "), forced setting to 26.");
+			///currentVersion = 26;
+		}
+
 		log.i("DB_VERSION "+DB_VERSION);
 		log.i("DB_VERSION INSTALLED "+mDB.getVersion());
 		//execSQL("update book set saved_with_ver = 0 ");
-		if (mDB.needUpgrade(DB_VERSION)) {
+		if (mDB.needUpgrade(DB_VERSION) || currentVersion < DB_VERSION) {
 			log.i("DB_VERSION NEED UPGRADE");
 			execSQL("CREATE TABLE IF NOT EXISTS author (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -171,7 +182,6 @@ public class MainDB extends BaseDB {
 					"text_value VARCHAR NOT NULL COLLATE NOCASE," +
 					"book_cnt INTEGER"+
 					")");
-			int currentVersion = mDB.getVersion();
 			// ====================================================================
 			if ( currentVersion<1 )
 				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN shortcut INTEGER DEFAULT 0");
@@ -386,6 +396,10 @@ public class MainDB extends BaseDB {
 					}
 				}
 			}
+			if (currentVersion < 30) {
+				// Forced update DOM version from previous latest (20200223) to current (20200824).
+				execSQLIgnoreErrors("UPDATE book SET domVersion=20200824 WHERE domVersion=20200223");
+			}
 
 			if (currentVersion < 44) {
 				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN book_cnt INTEGER");
@@ -440,8 +454,7 @@ public class MainDB extends BaseDB {
 			// add more updates above this line
 				
 			// set current version
-			if (currentVersion < DB_VERSION)
-				mDB.setVersion(DB_VERSION);
+			mDB.setVersion(DB_VERSION);
 		}
 
 		dumpStatistics();

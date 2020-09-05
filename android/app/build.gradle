@@ -16,7 +16,7 @@ android {
         // for compatibility with ABI versioning of split apk (see below).
         versionCode 202008191
         versionName "2020.08.19.1"
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_STL=c++_static"

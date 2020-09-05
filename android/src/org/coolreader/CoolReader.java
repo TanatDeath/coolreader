@@ -257,7 +257,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private String mOptionAppearance = "0";
 
 	private String fileToLoadOnStart = null;
-	
+	private String mFileToOpenFromExt = null;
+
 	private boolean isFirstStart = true;
 	private int settingsCanBeMigratedLastInd = -1;
 	private int reserveSettingsLastInd = -1;
@@ -557,13 +558,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 				@Override
 				public void OnSyncProgress(Synchronizer.SyncDirection direction, int current, int total) {
-					runInReader(() -> {
+					log.v("sync progress: current=" + current + "; total=" + total);
+					if (null != mReaderView) {
 						int total_ = total;
-						log.v("sync progress: current=" + current + "; total=" + total);
 						if (current > total_)
 							total_ = current;
 						mReaderView.showCloudSyncProgress(10000 * current / total_);
-					});
+					};
 				}
 
 				@Override
@@ -571,13 +572,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					log.d("Google Drive SyncTo successfully completed");
 					showToast(R.string.googledrive_sync_completed);
 					// Hide sync indicator
-					runInReader(() -> mReaderView.hideSyncProgress());
+					if (null != mReaderView)
+						mReaderView.hideSyncProgress();
 				}
 
 				@Override
 				public void onSyncError(Synchronizer.SyncDirection direction, String errorString) {
 					// Hide sync indicator
-					runInReader(() -> mReaderView.hideSyncProgress());
+					if (null != mReaderView)
+						mReaderView.hideSyncProgress();
 					if (null != errorString)
 						showToast(R.string.googledrive_sync_failed_with, errorString);
 					else
@@ -587,7 +590,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				@Override
 				public void onAborted(Synchronizer.SyncDirection direction) {
 					// Hide sync indicator
-					runInReader(() -> mReaderView.hideSyncProgress());
+					if (null != mReaderView)
+						mReaderView.hideSyncProgress();
 					showToast(R.string.googledrive_sync_aborted);
 				}
 
@@ -608,7 +612,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							if (null != currentBook) {
 								FileInfo currentFileInfo = currentBook.getFileInfo();
 								if (null != currentFileInfo) {
-									if (currentFileInfo.equals(bookInfo.getFileInfo())) {
+									if (currentFileInfo.mainEquals((bookInfo.getFileInfo()))) {
 										// if the book indicated by the bookInfo is currently open.
 										Bookmark lastPos = bookInfo.getLastPosition();
 										if (null != lastPos) {
@@ -716,16 +720,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			errDialog.setOnDismissListener(dialog -> showRootWindow());
 			errDialog.show();
 		}, 500), true);
-	}
-
-	public void loadDocumentFromUriExt(Uri uri, String uriString) {
-		loadDocumentFromUri(uri, null, () -> BackgroundThread.instance().postGUI(() -> {
-			// if document not loaded show error & then root window
-			ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error),
-					CoolReader.this.getString(R.string.cant_open_file, uriString));
-			errDialog.setOnDismissListener(dialog -> showRootWindow());
-			errDialog.show();
-		}, 500));
 	}
 
 	public void loadDocumentFromStreamExt(final InputStream is, final String path) {
@@ -907,7 +901,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.d("intent=" + intent);
 		if (intent == null)
 			return false;
-		String fileToOpen = "";
+		String fileToOpen = null;
+		mFileToOpenFromExt = null;
 		Uri uri = null;
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 		String processText = intent.getStringExtra("PROCESS_TEXT");
@@ -981,6 +976,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			fileToOpen = StrUtils.getNonEmptyStr(intent.getExtras().getString(OPEN_FILE_PARAM),false);
 		}
 		if (!StrUtils.isEmptyStr(fileToOpen)) {
+			mFileToOpenFromExt = fileToOpen;
 			log.d("FILE_TO_OPEN = " + fileToOpen);
 			if (checkOpenDocumentFormat(fileToOpen)) return true;
 			if (checkPictureExtension(fileToOpen)) return true;
@@ -989,6 +985,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} else if (null != uri) {
 			log.d("URI_TO_OPEN = " + uri);
 			final String uriString = uri.toString();
+			mFileToOpenFromExt = uriString;
 			loadDocumentFromUriExt(uri, uriString);
 			return true;
 		} else {
@@ -1121,7 +1118,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	@Override
 	protected void onResume() {
-		log.i("CoolReader.onResume()");
+		if (null == mFileToOpenFromExt)
+			log.i("CoolReader.onResume()");
+		else
+			log.i("CoolReader.onResume(), mFileToOpenFromExt=" + mFileToOpenFromExt);
 		super.onResume();
 
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), accelerometer, SensorManager.SENSOR_DELAY_UI);
@@ -1161,7 +1161,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null && !mGoogleDriveSync.isBusy()) {
 				// when the program starts, the local settings file is already updated, so the local file is always newer than the remote one
 				// Therefore, the synchronization mode is quiet, i.e. without comparing modification times and without prompting the user for action.
-				mGoogleDriveSync.startSyncFrom(true, true, false);
+				// If the file is opened from an external file manager, we must disable the "currently reading book" sync operation with google drive.
+				if (null == mFileToOpenFromExt)
+					mGoogleDriveSync.startSyncFrom(true, true, false);
+				else
+					mGoogleDriveSync.startSyncFromOnly(true, Synchronizer.SyncTarget.SETTINGS, Synchronizer.SyncTarget.BOOKMARKS);
 			}
 		}
 		if (getReaderView()!=null) {
@@ -1603,7 +1607,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						} else if (!mGoogleDriveSync.isBusy()) {
 							// After setting changed in OptionsDialog
 							log.d("Some settings is changed, uploading to cloud...");
-							mGoogleDriveSync.startSyncToOnly(Synchronizer.SyncTarget.SETTINGS, false);
+							mGoogleDriveSync.startSyncToOnly(false, Synchronizer.SyncTarget.SETTINGS);
 						}
 					}
 				}
@@ -1809,7 +1813,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				// Save last opened document on cloud
 				if (mSyncGoogleDriveEnabled && mSyncGoogleDriveEnabledCurrentBooks && null != mGoogleDriveSync && !mGoogleDriveSync.isBusy())
-					mGoogleDriveSync.startSyncToOnly(Synchronizer.SyncTarget.CURRENTBOOKINFO, false);
+					mGoogleDriveSync.startSyncToOnly(false, Synchronizer.SyncTarget.CURRENTBOOKINFO);
 			}
 		} : doneCallback, errorCallback));
 	}
@@ -1829,6 +1833,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				errorCallback.run();
 			}
 		});
+	}
+
+	public void loadDocumentFromUriExt(Uri uri, String uriString) {
+		loadDocumentFromUri(uri, null, () -> BackgroundThread.instance().postGUI(() -> {
+			// if document not loaded show error & then root window
+			ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error),
+					CoolReader.this.getString(R.string.cant_open_file, uriString));
+			errDialog.setOnDismissListener(dialog -> showRootWindow());
+			errDialog.show();
+		}, 500));
 	}
 
 	public void loadDocumentFromStream(final InputStream is, final String path, Runnable doneCallback, Runnable errorCallback) {
@@ -2603,7 +2617,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			double msecLeft;
 			double msecFivePages;
 			if (speedKoef > 0.000001) {
-				PositionProperties currpos = getReaderView().getDoc().getPositionProps(null);
+				PositionProperties currpos = getReaderView().getDoc().getPositionProps(null, true);
 				if (fi.symCount>0) {
 					pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
 					double msecAllPages;
@@ -2734,7 +2748,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					if (getReaderView().getDoc()!=null)
 						bm =  getReaderView().getDoc().getCurrentPageBookmark();
 				if (bm != null) {
-					PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos());
+					PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos(), true);
 					itemsPos.add(new BookInfoEntry("section","section.position","section"));
 					if (prop.pageMode != 0) {
 						itemsPos.add(new BookInfoEntry("position.page","" + (prop.pageNumber+1) + " / " + prop.pageCount,"text"));
