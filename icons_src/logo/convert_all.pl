@@ -13,19 +13,19 @@ my %ic_ad_full_sizes  = (ldpi=>81, mdpi=>108, hdpi=>162, xhdpi=>216, xxhdpi=>324
 my %ic_ad_inner_sizes = (ldpi=>42, mdpi=>56,  hdpi=>84,  xhdpi=>112, xxhdpi=>168, xxxhdpi=>224);
 
 my %ic_legacy_list=(
-	'cr3_logo-base-300x300-unsharp.png' => 'cr3_logo.png'
+	'KnownReader_small1_v2.png' => 'cr3_logo.png'
 );
 
 my %ic_ad_foreground_list=(
-	'cr3_logo-inner-290x290.png' => 'cr3_logo_foreground.png'
+	'KnownReader_small1_v2.png' => 'cr3_logo_foreground.png'
 );
 
 my %ic_ad_foreground_background_list=(
-	'cr3_logo-inner-290x290.png' => 'cr3_logo_background2-432x432.png'
+	'KnownReader_small1_v2.png' => 'cr3_logo_background2-432x432.png'
 );
 
 my %ic_logo_button_list=(
-	'cr3_logo-base-300x300-unsharp.png' => 'cr3_logo_button.png'
+	'KnownReader_small1_v2.png' => 'cr3_logo_button.png'
 );
 
 my ($srcfile, $dstfile);
