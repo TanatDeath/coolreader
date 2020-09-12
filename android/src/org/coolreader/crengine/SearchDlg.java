@@ -139,15 +139,11 @@ public class SearchDlg extends BaseDialog {
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
 			setAdapter(new SearchDlg.SearchListAdapter());
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-											   int position, long arg3) {
-					//openContextMenu(SearchDlg.SearchList.this);
-					mEditView.setText(mSearches.get(position));
-					searchPagesClick();
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				//openContextMenu(SearchDlg.SearchList.this);
+				mEditView.setText(mSearches.get(position));
+				searchPagesClick();
+				return true;
 			});
 		}
 

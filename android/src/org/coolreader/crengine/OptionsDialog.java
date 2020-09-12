@@ -408,7 +408,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
 	};
-	int[] mSelectionAction = new int[] {
+	static int[] mSelectionAction = new int[] {
 			ReaderView.SELECTION_ACTION_SAME_AS_COMMON,
 			ReaderView.SELECTION_ACTION_TOOLBAR,
 			ReaderView.SELECTION_ACTION_COPY, 
@@ -429,7 +429,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_DICTIONARY_7
 	};
 
-	int[] mSelectionActionTitles = new int[] {
+	public static int getSelectionActionTitle(int v) {
+		for (int i = 0; i < mSelectionAction.length; i++)
+		if (v == mSelectionAction[i]) return mSelectionActionTitles[i];
+		return 0;
+	}
+
+	static int[] mSelectionActionTitles = new int[] {
 			R.string.options_selection_action_same_as_common,
 			R.string.options_selection_action_toolbar, 
 			R.string.options_selection_action_copy, 
@@ -449,6 +455,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_selection_action_dictionary_6,
 			R.string.options_selection_action_dictionary_7
 		};
+
 	int[] mSelectionActionAddInfos = new int[] {
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -469,6 +476,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 	};
+
 	int[] mMultiSelectionAction = new int[] {
 			ReaderView.SELECTION_ACTION_SAME_AS_COMMON,
 			ReaderView.SELECTION_ACTION_TOOLBAR,
@@ -831,6 +839,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	OptionBase mTitleBarFontColor = null;
 
+
+
 	public abstract static class OptionBase {
 		protected View myView;
 		Properties mProperties;
@@ -924,6 +934,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mProperties.setProperty(property, value);
 			return this;
 		}
+
 		public OptionBase setOnChangeHandler( Runnable handler ) {
 			onChangeHandler = handler;
 			return this;
@@ -1046,18 +1057,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//mActivity.showToast("to come...");
-							//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-							//ToastView.showToast(
-							//	view1, addInfo, Toast.LENGTH_LONG);
-							//	Toast.LENGTH_LONG, 20);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						//mActivity.showToast("to come...");
+						//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
+						//toast.show();
+						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+						//ToastView.showToast(
+						//	view1, addInfo, Toast.LENGTH_LONG);
+						//	Toast.LENGTH_LONG, 20);
 					});
 			}
 			labelView.setText(label);
@@ -1185,9 +1192,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsPage.refresh();
 			mOptionsApplication.refresh();
 			mOptionsControls.refresh();
-			if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mOptionsCloudSync.refresh();
-			}
+//			if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//				mOptionsCloudSync.refresh();
+//			}
 		}
 	}
 	class BoolOption extends OptionBase {
@@ -1265,79 +1272,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 	}
 
-	class SaveOptionsToGDOption extends OptionBase {
-		private boolean inverse = false;
-		public SaveOptionsToGDOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
-			super(owner, label, property, addInfo, filter);
-		}
-		public int getItemViewType() {
-			return OPTION_VIEW_TYPE_NORMAL;
-		}
-		public View getView(View convertView, ViewGroup parent) {
-			View view;
-			convertView = myView;
-			if (convertView == null) {
-				view = mInflater.inflate(R.layout.option_item, null);
-				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
-					if (label != null)
-						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
-								if (!StrUtils.isEmptyStr(property))
-									label.setTypeface(null, Typeface.ITALIC);
-							}
-						}
-				}
-			} else {
-				view = (View)convertView;
-			}
-			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			TextView valueView = (TextView)view.findViewById(R.id.option_value);
-			int colorIcon;
-			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorIcon});
-			colorIcon = a.getColor(0, Color.GRAY);
-			a.recycle();
-			valueView.setTextColor(colorIcon);
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
-			if (addInfo.trim().equals("")) {
-				btnOptionAddInfo.setVisibility(View.INVISIBLE);
-			} else {
-				btnOptionAddInfo.setImageDrawable(
-						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
-								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
-				mActivity.tintViewIcons(btnOptionAddInfo);
-				final View view1 = view;
-				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(v -> {
-						//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-						//toast.show();
-						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-					});
-			}
-			labelView.setText(label);
-			labelView.setEnabled(enabled);
-			valueView.setText(property);
-			view.setOnClickListener(v -> {
-				int iSyncVariant = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-				if (iSyncVariant == 0) {
-					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				} else {
-					CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
-				}
-				return;
-			});
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
-			return view;
-		}
+	public interface ClickCallback {
+		void click(View view);
 	}
 
-	class LoadOptionsFromGDOption extends OptionBase {
+	class ClickOption extends OptionBase {
 		private boolean inverse = false;
-		public LoadOptionsFromGDOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
+		private ClickCallback ccb;
+
+		public ClickOption( OptionOwner owner, String label, String property, String addInfo, String filter,
+							ClickCallback ccb) {
 			super(owner, label, property, addInfo, filter);
+			this.ccb = ccb;
 		}
+
 		public int getItemViewType() {
 			return OPTION_VIEW_TYPE_NORMAL;
 		}
@@ -1357,18 +1305,18 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						}
 				}
 			} else {
-				view = (View)convertView;
+				view = convertView;
 			}
 			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			TextView labelView = view.findViewById(R.id.option_label);
+			TextView valueView = view.findViewById(R.id.option_value);
 			int colorIcon;
 			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 					{R.attr.colorIcon});
 			colorIcon = a.getColor(0, Color.GRAY);
 			a.recycle();
 			valueView.setTextColor(colorIcon);
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
+			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
 			} else {
@@ -1378,158 +1326,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
-					});
+					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
 			}
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
-			valueView.setText(property);
-			view.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					int iSyncVariant = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-					if (iSyncVariant == 0) {
-						mActivity.showToast(R.string.cloud_sync_variant1_v);
-					} else {
-						if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
-						else
-							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false, false);
-					}
+			String currValue = mProperties.getProperty(property);
+			valueView.setText(currValue);
+			if (ccb != null)
+				view.setOnClickListener(v -> {
+					ccb.click(view);
+					refreshList();
+					//final View view1 = view;
+					//mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					return;
-				}
-			});
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
-			return view;
-		}
-	}
-
-	class InfoOption extends OptionBase {
-		private boolean inverse = false;
-		public InfoOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
-			super(owner, label, property, addInfo, filter);
-		}
-		public int getItemViewType() {
-			return OPTION_VIEW_TYPE_NORMAL;
-		}
-		public View getView(View convertView, ViewGroup parent) {
-			View view;
-			convertView = myView;
-			if (convertView == null) {
-				view = mInflater.inflate(R.layout.option_item, null);
-				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
-					if (label != null)
-						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
-								if (!StrUtils.isEmptyStr(property))
-									label.setTypeface(null, Typeface.ITALIC);
-							}
-						}
-				}
-			} else {
-				view = (View)convertView;
-			}
-			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			TextView valueView = (TextView)view.findViewById(R.id.option_value);
-			int colorIcon;
-			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorIcon});
-			colorIcon = a.getColor(0, Color.GRAY);
-			a.recycle();
-			valueView.setTextColor(colorIcon);
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
-			if (addInfo.trim().equals("")) {
-				btnOptionAddInfo.setVisibility(View.INVISIBLE);
-			} else {
-				btnOptionAddInfo.setImageDrawable(
-						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
-								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
-				mActivity.tintViewIcons(btnOptionAddInfo);
-				final View view1 = view;
-				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
-			}
-			labelView.setText(label);
-			labelView.setEnabled(enabled);
-			String currValue = mProperties.getProperty(property);
-			valueView.setText(currValue);
-			view.setOnClickListener(v -> {
-				final View view1 = view;
-				mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-				return;
-			});
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
-			return view;
-		}
-	}
-
-	//asdf - refactor to info option
-	class YndTranslateTokenOption extends OptionBase {
-		private boolean inverse = false;
-		public YndTranslateTokenOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
-			super(owner, label, property, addInfo, filter);
-		}
-		public int getItemViewType() {
-			return OPTION_VIEW_TYPE_NORMAL;
-		}
-		public View getView(View convertView, ViewGroup parent) {
-			View view;
-			convertView = myView;
-			if (convertView == null) {
-				view = mInflater.inflate(R.layout.option_item, null);
-				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
-					if (label != null)
-						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
-								if (!StrUtils.isEmptyStr(property))
-									label.setTypeface(null, Typeface.ITALIC);
-							}
-						}
-				}
-			} else {
-				view = (View)convertView;
-			}
-			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			TextView valueView = (TextView)view.findViewById(R.id.option_value);
-			int colorIcon;
-			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorIcon});
-			colorIcon = a.getColor(0, Color.GRAY);
-			a.recycle();
-			valueView.setTextColor(colorIcon);
-			ImageView btnOptionAddInfo = (ImageView)view.findViewById(R.id.btn_option_add_info);
-			if (addInfo.trim().equals("")) {
-				btnOptionAddInfo.setVisibility(View.INVISIBLE);
-			} else {
-				btnOptionAddInfo.setImageDrawable(
-						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
-								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
-				mActivity.tintViewIcons(btnOptionAddInfo);
-				final View view1 = view;
-				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
-			}
-			labelView.setText(label);
-			labelView.setEnabled(enabled);
-			String currValue = mProperties.getProperty(property);
-			valueView.setText(currValue);
-			view.setOnClickListener(v -> {
-				final View view1 = view;
-				mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-				return;
-			});
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
+				});
+			setupIconView(view.findViewById(R.id.option_icon));
 			return view;
 		}
 	}
@@ -1555,7 +1366,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if (convertView == null) {
 				view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
+					TextView label = view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
 							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
@@ -1565,11 +1376,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						}
 				}
 			} else {
-				view = (View)convertView;
+				view = convertView;
 			}
 			myView = view;
-			TextView labelView = (TextView)view.findViewById(R.id.option_label);
-			TextView valueView = (TextView)view.findViewById(R.id.option_value);
+			TextView labelView = view.findViewById(R.id.option_label);
+			TextView valueView = view.findViewById(R.id.option_value);
 			int colorIcon;
 			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 					{R.attr.colorIcon});
@@ -1586,31 +1397,23 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
-					});
+					btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0));
 			}
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
 			valueView.setText(property);
-			view.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (whichCloud == YANDEX_SETTINGS_OPTION) {
-						((CoolReader) mActivity).yndInputTokenDialog = new YNDInputTokenDialog(((CoolReader) mActivity));
-						((CoolReader) mActivity).yndInputTokenDialog.show();
-					}
-					if (whichCloud == DROPBOX_SETTINGS_OPTION) {
-						((CoolReader) mActivity).dbxInputTokenDialog = new DBXInputTokenDialog(((CoolReader) mActivity));
-						((CoolReader) mActivity).dbxInputTokenDialog.show();
-					}
-					return;
+			view.setOnClickListener(v -> {
+				if (whichCloud == YANDEX_SETTINGS_OPTION) {
+					((CoolReader) mActivity).yndInputTokenDialog = new YNDInputTokenDialog(((CoolReader) mActivity));
+					((CoolReader) mActivity).yndInputTokenDialog.show();
 				}
+				if (whichCloud == DROPBOX_SETTINGS_OPTION) {
+					((CoolReader) mActivity).dbxInputTokenDialog = new DBXInputTokenDialog(((CoolReader) mActivity));
+					((CoolReader) mActivity).dbxInputTokenDialog.show();
+				}
+				return;
 			});
-			setupIconView((ImageView)view.findViewById(R.id.option_icon));
+			setupIconView(view.findViewById(R.id.option_icon));
 			return view;
 		}
 	}
@@ -1943,13 +1746,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 										R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
 						mActivity.tintViewIcons(imgAddInfo);
 						imgAddInfo.setVisibility(View.VISIBLE);
-						imgAddInfo.setOnClickListener(new View.OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								mActivity.showToast(addInfo, Toast.LENGTH_LONG, layout, true, 0);
-							}
-						});
+						imgAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, layout, true, 0));
 					}
 				}
 		}
@@ -2218,11 +2015,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 
 			viewList.addView(listView);
-			ibSearch.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					tvSearchText.setText("");
-					listView.listUpdated("");
-				}
+			ibSearch.setOnClickListener(v -> {
+				tvSearchText.setText("");
+				listView.listUpdated("");
 			});
 			dlg.setView(view);
 			ibSearch.requestFocus();
@@ -2382,11 +2177,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					addAction(listView, a);
 
 			viewList.addView(listView);
-			ibSearch.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					tvSearchText.setText("");
-					listView.listUpdated("");
-				}
+			ibSearch.setOnClickListener(v -> {
+				tvSearchText.setText("");
+				listView.listUpdated("");
 			});
 			dlg.setView(view);
 			ibSearch.requestFocus();
@@ -2454,11 +2247,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						setIconId(0));
 			}
 			viewList.addView(listView);
-			ibSearch.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					tvSearchText.setText("");
-					listView.listUpdated("");
-				}
+			ibSearch.setOnClickListener(v -> {
+				tvSearchText.setText("");
+				listView.listUpdated("");
 			});
 			dlg.setView(view);
 			ibSearch.requestFocus();
@@ -2656,19 +2447,41 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.yandex_settings_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 					YANDEX_SETTINGS_OPTION).
 					setIconIdByAttr(R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
-			listView.add(new InfoOption(mOwner, getString(R.string.ynd_home_folder),
-					PROP_CLOUD_YND_HOME_FOLDER, getString(R.string.ynd_home_folder_hint), this.lastFilteredValue).
+			listView.add(new ClickOption(mOwner, getString(R.string.ynd_home_folder),
+					PROP_CLOUD_YND_HOME_FOLDER, getString(R.string.ynd_home_folder_hint), this.lastFilteredValue,
+					view -> mActivity.showToast(getString(R.string.ynd_home_folder_hint), Toast.LENGTH_LONG, view, true, 0)).
 					setDefaultValue("/").
 					setIconIdByAttr(R.attr.cr3_browser_folder_root_drawable, R.drawable.cr3_browser_folder_root));
 			listView.add(new CloudSettingsOption(mOwner, getString(R.string.dropbox_settings),
 					getString(R.string.dropbox_settings_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 					DROPBOX_SETTINGS_OPTION).
 					setIconIdByAttr(R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
-			OptionBase optSaveToCloud = new SaveOptionsToGDOption(mOwner, getString(R.string.save_settings_to_cloud),
-					getString(R.string.save_settings_to_cloud_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+			OptionBase optSaveToCloud = new ClickOption(mOwner, getString(R.string.save_settings_to_cloud),
+					getString(R.string.save_settings_to_cloud_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
+						view -> {
+							int iSyncVariant = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							} else {
+								CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
+							}
+							return;
+						}).
 					setIconIdByAttr(R.attr.attr_icons8_settings_to_gd, R.drawable.icons8_settings_to_gd);
-			OptionBase optLoadFromCloud = new LoadOptionsFromGDOption(mOwner, getString(R.string.load_settings_from_cloud),
-					getString(R.string.load_settings_from_cloud_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+			OptionBase optLoadFromCloud = new ClickOption(mOwner, getString(R.string.load_settings_from_cloud),
+					getString(R.string.load_settings_from_cloud_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
+						view -> {
+							int iSyncVariant = mProperties.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant == 0) {
+								mActivity.showToast(R.string.cloud_sync_variant1_v);
+							} else {
+								if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+								else
+									CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+											CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false, false);
+							}
+							return;
+						}).
 					setIconIdByAttr(R.attr.attr_icons8_settings_from_gd, R.drawable.icons8_settings_from_gd);
 			listView.add(new ListOption(mOwner, getString(R.string.cloud_sync_variant),
 					PROP_CLOUD_SYNC_VARIANT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
@@ -2761,6 +2574,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					setIconIdByAttr(R.attr.attr_icons8_wiki2, R.drawable.icons8_wiki2));
 			listView.add(new BoolOption(mOwner, getString(R.string.wiki_save_history),
 					PROP_CLOUD_WIKI_SAVE_HISTORY, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					noIcon());
+			listView.add(new ClickOption(mOwner, getString(R.string.ynd_translate_settings),
+					PROP_CLOUD_YND_TRANSLATE_OPTIONS, getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
+						view -> {
+
+						}).
 					noIcon());
 			dlg.setView(listView);
 			dlg.show();
@@ -2921,7 +2740,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_hide_state_dialogs), PROP_APP_HIDE_STATE_DIALOGS,
 					getString(R.string.options_app_hide_state_dialogs_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_hide_css_warning), PROP_APP_HIDE_CSS_WARNING,
-					getString(R.string.options_app_hide_css_warning_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.options_app_hide_css_warning_add_info), this.lastFilteredValue).setDefaultValue(
+					(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) ? "1": "0").noIcon());
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3646,11 +3466,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					qfButton.setMaxLines(1);
 					qfButton.setEllipsize(TextUtils.TruncateAt.END);
 					llQF.addView(qfButton);
-					qfButton.setOnClickListener(new View.OnClickListener() {
-						public void onClick(View v) {
-							tvSearchText.setText(qfButton.getText());
-						}
-					});
+					qfButton.setOnClickListener(v -> tvSearchText.setText(qfButton.getText()));
 				}
 			} else {
 				((ViewGroup)llQF.getParent()).removeView(llQF);
@@ -3696,6 +3512,45 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 	}
 
+	public static String updDicValue(String value, Properties mProperties, BaseActivity mActivity, boolean isShort) {
+		String sfind = mActivity.getString(R.string.options_selection_action_dictionary);
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_1))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_2))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_2, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_3))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_3, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_4))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_4, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_5))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_5, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_6))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_6, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_7))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_7, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+		}
+		if (isShort) value = StrUtils.getNonEmptyStr(value,true).replace(sfind+":","").trim();
+		if (isShort) value = StrUtils.getNonEmptyStr(value,true).replace(sfind,"").trim();
+		return value;
+	}
+
 	public static class ListOptionAction extends ListOption {
 		public ListOptionAction( OptionOwner owner, String label, String property, String addInfo, String filter ) {
 			super(owner, label, property, addInfo, filter);
@@ -3703,39 +3558,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		@Override
 		protected String updateValue(String value) {
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_1))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_2))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY_2, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_3))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY_3, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_4))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY_4, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_5))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY_5, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_6))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY_6, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_7))) {
-				String val = mProperties.getProperty(PROP_APP_DICTIONARY_7, "");
-				if (!StrUtils.isEmptyStr(val)) return value + ": " + val;
-			}
-			return value;
+			return updDicValue(value, mProperties, mActivity, false);
 		}
 	}
 
@@ -3888,14 +3711,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
+						//toast.show();
+						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 			String lab1 = label;
@@ -3937,26 +3756,17 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = layout;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							//Toast toast = Toast.makeText(mActivity, item.addInfo, Toast.LENGTH_LONG);
-							//toast.show();
-							mActivity.showToast(item.addInfo, Toast.LENGTH_LONG, view1, true, 0);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						//Toast toast = Toast.makeText(mActivity, item.addInfo, Toast.LENGTH_LONG);
+						//toast.show();
+						mActivity.showToast(item.addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 			view.setText(item.label);
 			String currValue = mProperties.getProperty(property);
 			boolean isSelected = item.value!=null && currValue!=null && item.value.equals(currValue) ;//getSelectedItemIndex()==position;
 			cb.setChecked(isSelected);
-			cb.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					listView.getOnItemClickListener().onItemClick(listView, listView, position, 0);
-				}
-			});
+			cb.setOnClickListener(v -> listView.getOnItemClickListener().onItemClick(listView, listView, position, 0));
 		}
 
 		public String getValueLabel() { return findValueLabel(mProperties.getProperty(property)); }
@@ -4344,29 +4154,27 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 			}
 			if (cb.isChecked()) imgDel.setVisibility(View.INVISIBLE);
-			imgDel.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					if (cb.isChecked()) {
-						return;
-					}
-					String sfile = item.addInfo;
-					File f = new File(sfile);
-					if (!f.exists()) return;
-					mActivity.askConfirmation(R.string.delete_texture, () -> {
-						if (f.delete()) {
-							mActivity.showToast(R.string.texture_deleted);
-							Three forRemove = null;
-							for (Three t: list)
-								if (t.addInfo.equals(item.addInfo)) forRemove = t;
-							if (forRemove != null) list.remove(forRemove);
-							forRemove = null;
-							for (Three t: listFiltered)
-								if (t.addInfo.equals(item.addInfo)) forRemove = t;
-							if (forRemove != null) listFiltered.remove(forRemove);
-							listUpdated("");
-						}
-					});
+			imgDel.setOnClickListener(v -> {
+				if (cb.isChecked()) {
+					return;
 				}
+				String sfile = item.addInfo;
+				File f = new File(sfile);
+				if (!f.exists()) return;
+				mActivity.askConfirmation(R.string.delete_texture, () -> {
+					if (f.delete()) {
+						mActivity.showToast(R.string.texture_deleted);
+						Three forRemove = null;
+						for (Three t: list)
+							if (t.addInfo.equals(item.addInfo)) forRemove = t;
+						if (forRemove != null) list.remove(forRemove);
+						forRemove = null;
+						for (Three t: listFiltered)
+							if (t.addInfo.equals(item.addInfo)) forRemove = t;
+						if (forRemove != null) listFiltered.remove(forRemove);
+						listUpdated("");
+					}
+				});
 			});
 			int cl = mProperties.getColor(PROP_BACKGROUND_COLOR, Color.WHITE);
 			final BackgroundTextureInfo texture = Services.getEngine().getTextureInfoById(item.value);
@@ -4379,50 +4187,47 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			activity.tintViewIcons(imgT,true);
 			if (imgAddInfo != null) activity.tintViewIcons(imgAddInfo,true);
 			if (imgDel != null) activity.tintViewIcons(imgDel,true);
-			imgT.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					final BackgroundTextureInfo texture = Services.getEngine().getTextureInfoById(item.value);
-					if ((texture.resourceId == 0)&&(!texture.id.equals(BackgroundTextureInfo.NO_TEXTURE_ID))) {
-						activity.askConfirmation(R.string.texture_switch_mode, () -> {
-							ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.TexturesDirs, true);
-							tDirs = Engine.getDataDirsExt(Engine.DataDirType.BackgroundsDirs, true);
-							File f = new File(texture.id);
-							String sNewName = texture.id;
-							if (texture.id.contains("/textures/"))
-								sNewName = sNewName.replace("/textures/", "/backgrounds/");
-							else
-								sNewName = sNewName.replace("/backgrounds/", "/textures/");
-							File fTo = new File(sNewName);
-							if (!f.renameTo(fTo))
-								activity.showToast(activity.getString(R.string.pic_problem));
-							else {
-								BackgroundTextureInfo[] textures = Services.getEngine().getAvailableTextures();
-								ArrayList<Three> listTemp = new ArrayList<Three>();
-								for (Three th : list) {
-									if (th.value.equals(texture.id))
-										th.value=sNewName;
-									listTemp.add(th);
-								}
-								list=listTemp;
-								listTemp = new ArrayList<Three>();
-								for (Three th : listFiltered) {
-									if (th.value.equals(texture.id))
-										th.value=sNewName;
-									listTemp.add(th);
-								}
-								listFiltered = listTemp;
-								if (!texture.tiled) ((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
-										R.attr.attr_icons8_texture, R.drawable.icons8_texture));
-								else
-									((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
-											R.attr.attr_icons8_fullscreen, R.drawable.icons8_fullscreen));
-								mActivity.tintViewIcons(v);
-								listAdapter.notifyDataSetChanged();
-								listAdapter.notifyDataSetInvalidated();
+			imgT.setOnClickListener(v -> {
+				final BackgroundTextureInfo texture1 = Services.getEngine().getTextureInfoById(item.value);
+				if ((texture1.resourceId == 0)&&(!texture1.id.equals(BackgroundTextureInfo.NO_TEXTURE_ID))) {
+					activity.askConfirmation(R.string.texture_switch_mode, () -> {
+						ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.TexturesDirs, true);
+						tDirs = Engine.getDataDirsExt(Engine.DataDirType.BackgroundsDirs, true);
+						File f = new File(texture1.id);
+						String sNewName = texture1.id;
+						if (texture1.id.contains("/textures/"))
+							sNewName = sNewName.replace("/textures/", "/backgrounds/");
+						else
+							sNewName = sNewName.replace("/backgrounds/", "/textures/");
+						File fTo = new File(sNewName);
+						if (!f.renameTo(fTo))
+							activity.showToast(activity.getString(R.string.pic_problem));
+						else {
+							BackgroundTextureInfo[] textures = Services.getEngine().getAvailableTextures();
+							ArrayList<Three> listTemp = new ArrayList<Three>();
+							for (Three th : list) {
+								if (th.value.equals(texture1.id))
+									th.value=sNewName;
+								listTemp.add(th);
 							}
-						});
-					}
+							list=listTemp;
+							listTemp = new ArrayList<Three>();
+							for (Three th : listFiltered) {
+								if (th.value.equals(texture1.id))
+									th.value=sNewName;
+								listTemp.add(th);
+							}
+							listFiltered = listTemp;
+							if (!texture1.tiled) ((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
+									R.attr.attr_icons8_texture, R.drawable.icons8_texture));
+							else
+								((ImageView)v).setImageResource(Utils.resolveResourceIdByAttr(activity,
+										R.attr.attr_icons8_fullscreen, R.drawable.icons8_fullscreen));
+							mActivity.tintViewIcons(v);
+							listAdapter.notifyDataSetChanged();
+							listAdapter.notifyDataSetInvalidated();
+						}
+					});
 				}
 			});
 			if (texture.resourceId != 0) {
@@ -4543,12 +4348,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
 			mActivity.tintViewIcons(btnOptionAddInfo);
 			if (btnOptionAddInfo != null) {
-				btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						mActivity.showToast(addInfo, Toast.LENGTH_LONG, v, true, 0);
-					}
-				});
+				btnOptionAddInfo.setOnClickListener(v -> mActivity.showToast(addInfo, Toast.LENGTH_LONG, v, true, 0));
 			}
 			TextView txt1 = (TextView)tableRow.findViewById(R.id.option_value_add_text1);
 			txt1.setText(testPhrase);
@@ -4581,49 +4381,47 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 				if (iFilesCnt == 0) iv.setVisibility(View.INVISIBLE);
 			};
-			iv.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					if (cb.isChecked()) {
-						return;
+			iv.setOnClickListener(v -> {
+				if (cb.isChecked()) {
+					return;
+				}
+				String[] arrFonts = item.addInfo.split("~");
+				int iFilesCnt = 0;
+				for (String s: arrFonts) {
+					if ((!s.startsWith("/system"))&&(!StrUtils.isEmptyStr(s))) {
+						File f = new File(s);
+						if (f.exists()) iFilesCnt++;
 					}
-					String[] arrFonts = item.addInfo.split("~");
-					int iFilesCnt = 0;
-					for (String s: arrFonts) {
-						if ((!s.startsWith("/system"))&&(!StrUtils.isEmptyStr(s))) {
-							File f = new File(s);
-							if (f.exists()) iFilesCnt++;
+				}
+				if (iFilesCnt>0) {
+					final int iFilesCntF = iFilesCnt;
+					mActivity.askConfirmation(R.string.delete_font, () -> {
+						int iFilesDeleted = 0;
+						for (String s: arrFonts) {
+							if (!s.startsWith("/system")) {
+								File f = new File(s);
+								if (f.exists())
+									if (f.delete()) iFilesDeleted++;
+							}
 						}
-					}
-					if (iFilesCnt>0) {
-						final int iFilesCntF = iFilesCnt;
-						mActivity.askConfirmation(R.string.delete_font, () -> {
-							int iFilesDeleted = 0;
-							for (String s: arrFonts) {
-								if (!s.startsWith("/system")) {
-									File f = new File(s);
-									if (f.exists())
-										if (f.delete()) iFilesDeleted++;
-								}
-							}
-							if (iFilesDeleted != iFilesCntF) {
-								mActivity.showToast(mActivity.getString(R.string.fonts_deleted_partial,
-										String.valueOf(iFilesDeleted),String.valueOf(iFilesCntF)));
-							} else {
-								mActivity.showToast(R.string.fonts_deleted_full);
-								Three forRemove = null;
-								for (Three t: list)
-									if (t.label.equals(item.label)) forRemove = t;
-								if (forRemove != null) list.remove(forRemove);
-								forRemove = null;
-								for (Three t: listFiltered)
-									if (t.label.equals(item.label)) forRemove = t;
-								if (forRemove != null) listFiltered.remove(forRemove);
-								listUpdated("");
-							}
-						});
-					} else {
-						mActivity.showToast(R.string.non_system_fonts_not_found);
-					}
+						if (iFilesDeleted != iFilesCntF) {
+							mActivity.showToast(mActivity.getString(R.string.fonts_deleted_partial,
+									String.valueOf(iFilesDeleted),String.valueOf(iFilesCntF)));
+						} else {
+							mActivity.showToast(R.string.fonts_deleted_full);
+							Three forRemove = null;
+							for (Three t: list)
+								if (t.label.equals(item.label)) forRemove = t;
+							if (forRemove != null) list.remove(forRemove);
+							forRemove = null;
+							for (Three t: listFiltered)
+								if (t.label.equals(item.label)) forRemove = t;
+							if (forRemove != null) listFiltered.remove(forRemove);
+							listUpdated("");
+						}
+					});
+				} else {
+					mActivity.showToast(R.string.non_system_fonts_not_found);
 				}
 			});
 			mActivity.tintViewIcons(iv,true);
@@ -4924,10 +4722,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return mOptionsControls;
 		else if ("Page".equals(tag))
 			return mOptionsPage;
-		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			if ("Clouds".equals(tag))
-				return mOptionsCloudSync;
-		}
+//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//			if ("Clouds".equals(tag))
+//				return mOptionsCloudSync;
+//		}
 		return null;
 	}
 
@@ -5800,31 +5598,31 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		((RareOption)sbO6).updateFilterEnd();
 		mOptionsApplication.add(sbO6);
 
-		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			boolean gdriveSyncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
-			mOptionsCloudSync = new OptionsListView(getContext(), null);
-			mOptionsCloudSync.add(new BoolOption(this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED,
-					getString(R.string.option_add_info_empty_text), filter
-					).setDefaultValue("0").noIcon()
-					.setOnChangeHandler(() -> {
-						boolean syncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
-						mGoogleDriveEnableSettingsOption.setEnabled(syncEnabled);
-						mGoogleDriveEnableBookmarksOption.setEnabled(syncEnabled);
-						mGoogleDriveEnableCurrentBookOption.setEnabled(syncEnabled);
-					}));
-			mGoogleDriveEnableSettingsOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_settings), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS,
-					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
-			mGoogleDriveEnableSettingsOption.enabled = gdriveSyncEnabled;
-			mGoogleDriveEnableBookmarksOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_bookmarks), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS,
-					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
-			mGoogleDriveEnableBookmarksOption.enabled = gdriveSyncEnabled;
-			mGoogleDriveEnableCurrentBookOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK,
-					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
-			mGoogleDriveEnableCurrentBookOption.enabled = gdriveSyncEnabled;
-			mOptionsCloudSync.add(mGoogleDriveEnableSettingsOption);
-			mOptionsCloudSync.add(mGoogleDriveEnableBookmarksOption);
-			mOptionsCloudSync.add(mGoogleDriveEnableCurrentBookOption);
-		}
+//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//			boolean gdriveSyncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+//			mOptionsCloudSync = new OptionsListView(getContext(), null);
+//			mOptionsCloudSync.add(new BoolOption(this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED,
+//					getString(R.string.option_add_info_empty_text), filter
+//					).setDefaultValue("0").noIcon()
+//					.setOnChangeHandler(() -> {
+//						boolean syncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+//						mGoogleDriveEnableSettingsOption.setEnabled(syncEnabled);
+//						mGoogleDriveEnableBookmarksOption.setEnabled(syncEnabled);
+//						mGoogleDriveEnableCurrentBookOption.setEnabled(syncEnabled);
+//					}));
+//			mGoogleDriveEnableSettingsOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_settings), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS,
+//					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
+//			mGoogleDriveEnableSettingsOption.enabled = gdriveSyncEnabled;
+//			mGoogleDriveEnableBookmarksOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_bookmarks), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS,
+//					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
+//			mGoogleDriveEnableBookmarksOption.enabled = gdriveSyncEnabled;
+//			mGoogleDriveEnableCurrentBookOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK,
+//					getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").noIcon();
+//			mGoogleDriveEnableCurrentBookOption.enabled = gdriveSyncEnabled;
+//			mOptionsCloudSync.add(mGoogleDriveEnableSettingsOption);
+//			mOptionsCloudSync.add(mGoogleDriveEnableBookmarksOption);
+//			mOptionsCloudSync.add(mGoogleDriveEnableCurrentBookOption);
+//		}
 
 		fillStyleEditorOptions(filter);
 
@@ -5832,9 +5630,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsCSS.refresh();
 		mOptionsPage.refresh();
 		mOptionsApplication.refresh();
-		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			mOptionsCloudSync.refresh();
-		}
+//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//			mOptionsCloudSync.refresh();
+//		}
 
 		addTab("Styles",
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_type_filled, R.drawable.icons8_type_filled));
@@ -5846,9 +5644,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_cursor, R.drawable.icons8_cursor));
 		addTab("App",
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings));
-		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			addTab("Clouds", R.drawable.cr3_tab_clouds);
-		}
+//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//			addTab("Clouds", R.drawable.cr3_tab_clouds);
+//		}
 		setView(mTabs);
 		((CoolReader)activity).tintViewIcons(mTabs);
 		mTabs.invalidate();

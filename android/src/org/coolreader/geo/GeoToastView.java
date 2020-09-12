@@ -153,15 +153,12 @@ public class GeoToastView {
         }
         Toast t = queue.poll();
         window = new PopupWindow(t.anchor.getContext());
-        window.setTouchInterceptor(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
-                    window.dismiss();
-                    return true;
-                }
-                return false;
+        window.setTouchInterceptor((v, event) -> {
+            if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
+                window.dismiss();
+                return true;
             }
+            return false;
         });
         window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
         window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
@@ -182,23 +179,19 @@ public class GeoToastView {
             int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
             Button btnGeoSett = (Button) window.getContentView().findViewById(R.id.btn_geo_sett);
             btnGeoSett.setText(mActivity.getString(R.string.options_app_geo_sett));
-            btnGeoSett.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    ((CoolReader) mActivity).optionsFilter = "";
-                    ((CoolReader) mActivity).showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_GEO);
-                    window.dismiss();
-                }
+            btnGeoSett.setOnClickListener(v -> {
+                ((CoolReader) mActivity).optionsFilter = "";
+                ((CoolReader) mActivity).showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_GEO);
+                window.dismiss();
             });
-            Button btnGeoOff = (Button) window.getContentView().findViewById(R.id.btn_geo_off);
-            btnGeoOff.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    if (DeviceInfo.getSDKLevel() >= 9) {
-                        int iSett = mActivity.settings().getInt(Settings.PROP_APP_GEO, 1);
-                        Properties props1 = new Properties(mActivity.settings());
-                        props1.setProperty(Settings.PROP_APP_GEO, "1");
-                        mActivity.setSettings(props1, -1, true);
-                        window.dismiss();
-                    }
+            Button btnGeoOff = window.getContentView().findViewById(R.id.btn_geo_off);
+            btnGeoOff.setOnClickListener(v -> {
+                if (DeviceInfo.getSDKLevel() >= 9) {
+                    int iSett = mActivity.settings().getInt(Settings.PROP_APP_GEO, 1);
+                    Properties props1 = new Properties(mActivity.settings());
+                    props1.setProperty(Settings.PROP_APP_GEO, "1");
+                    mActivity.setSettings(props1, -1, true);
+                    window.dismiss();
                 }
             });
             btnGeoOff.setText(mActivity.getString(R.string.options_app_geo_off));
@@ -294,7 +287,7 @@ public class GeoToastView {
             if (interchangeColors.size()>0) {
                 TableRow getInterchangesTRow = (TableRow) inflater.inflate(R.layout.geo_metro_interchange_item, null);
                 geoTable.addView(getInterchangesTRow);
-                LinearLayout llInter = (LinearLayout) window.getContentView().findViewById(R.id.interchanges_ll);
+                LinearLayout llInter = window.getContentView().findViewById(R.id.interchanges_ll);
                 for (String sCol: interchangeColors) {
                     View v = new View(mActivity);
                     v.setBackgroundColor(Color.parseColor("#"+sCol));
@@ -311,7 +304,7 @@ public class GeoToastView {
             sep.setBackgroundColor(updColor(colorIcon));
             TableRow getStopTRow = (TableRow) inflater.inflate(R.layout.geo_stop_item, null);
             geoTable.addView(getStopTRow);
-            TextView tv = (TextView) window.getContentView().findViewById(R.id.center_stop_name);
+            TextView tv = window.getContentView().findViewById(R.id.center_stop_name);
             String s = t.transportStop.name;
             s = s.replaceAll("\\([0-9]*\\)","").trim();
             tv.setTextSize(fontSize-2);
@@ -321,7 +314,7 @@ public class GeoToastView {
                 tv.setTextColor(updColor(colorIcon));
             tv.setGravity(Gravity.CENTER);
             tv.setText(s);
-            TextView tvD = (TextView) window.getContentView().findViewById(R.id.center_stop_dist);
+            TextView tvD = window.getContentView().findViewById(R.id.center_stop_dist);
             tvD.setTextSize(fontSize-4);
             tvD.setTextColor(updColor(colorIcon));
             tvD.setGravity(Gravity.CENTER);

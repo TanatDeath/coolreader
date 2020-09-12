@@ -385,7 +385,15 @@ public class Dictionaries {
 		}
 	}
 
+	public String getCDinfo(DictInfo cd) {
+		if (cd == null) return "null";
+		return cd.name;
+	}
+
 	public DictInfo getCurDictionary() {
+		log.i("getCurDictionary, currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
+				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
+				", currentDictionaryTmp = " + getCDinfo(currentDictionaryTmp));
 		DictInfo curDict = currentDictionary;
 		if (iDic2IsActive > 0 && currentDictionary2 != null)
 			curDict = currentDictionary2;
@@ -945,6 +953,13 @@ public class Dictionaries {
 	@SuppressLint("NewApi")
 	public void findInDictionary(String s, View view) throws DictionaryException {
 		log.d("lookup in dictionary: " + s);
+		log.i("currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
+				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
+				", currentDictionaryTmp = " + getCDinfo(currentDictionaryTmp) +
+				", saveCurrentDictionary = " + getCDinfo(saveCurrentDictionary) +
+				", saveCurrentDictionary2 = " + getCDinfo(saveCurrentDictionary2) +
+				", saveCurrentDictionaryTmp = " + getCDinfo(saveCurrentDictionaryTmp) +
+				", saveIDic2IsActive = " + saveIDic2IsActive);
 		// save - if we ask for transl direction
 		saveCurrentDictionary = currentDictionary;
 		saveCurrentDictionary2 = currentDictionary2;
@@ -959,6 +974,7 @@ public class Dictionaries {
 		if (currentDictionaryTmp != null)
 			curDict = currentDictionaryTmp;
 		currentDictionaryTmp = null;
+		log.i("Chosen dic = "+getCDinfo(curDict));
 		if (null == curDict) {
 			((CoolReader)mActivity).optionsFilter = "";
 			((CoolReader)mActivity).showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);

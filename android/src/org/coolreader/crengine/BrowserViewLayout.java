@@ -42,21 +42,11 @@ public class BrowserViewLayout extends ViewGroup {
 		this.addView(contentView);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		bottomBar = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar, null);
-		ImageButton btnMenu = (ImageButton) bottomBar.findViewById(R.id.btn_show_menu);
+		ImageButton btnMenu = bottomBar.findViewById(R.id.btn_show_menu);
 		if (btnMenu != null)
-			btnMenu.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					toolbarView.showOverflowMenu();
-				}
-			});
+			btnMenu.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		if (bottomBar != null)
-			bottomBar.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					toolbarView.showOverflowMenu();
-				}
-			});
+			bottomBar.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		this.addView(bottomBar);
 		this.onThemeChanged(context.getCurrentTheme());
 		titleView.setFocusable(false);
@@ -147,13 +137,7 @@ public class BrowserViewLayout extends ViewGroup {
 					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 					final FileInfo dir3 = dir2;
 					tv.setText(String.valueOf(dir2.getFilename()));
-					tv.setOnClickListener(new OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							((CoolReader)activity).showDirectory(dir3, "");
-						}
-					});
+					tv.setOnClickListener(v -> ((CoolReader)activity).showDirectory(dir3, ""));
 				} else
 					if (i==1) {
 						if (this.dir != null)
@@ -161,11 +145,7 @@ public class BrowserViewLayout extends ViewGroup {
 								tv.setPaintFlags(0);
 								tv.setText(activity.getString(R.string.downloaded_from_catalog) +
 										" " + this.dir.book_downloaded);
-								tv.setOnClickListener(new OnClickListener() {
-
-									@Override
-									public void onClick(View v) {
-									}
+								tv.setOnClickListener(v -> {
 								});
 							}
 					}
@@ -173,43 +153,32 @@ public class BrowserViewLayout extends ViewGroup {
 		ImageButton btnQpNext = (ImageButton)titleView.findViewById(R.id.btn_qp_next1);
 		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
 			if (btnQpNext != null)
-				btnQpNext.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
+				btnQpNext.setOnClickListener(v -> {
 
-						int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
-						int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
-						int diff = lastVisiblePosition - firstVisiblePosition;
-						contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
-					}
+					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+					int diff = lastVisiblePosition - firstVisiblePosition;
+					contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
 				});
 		activity.tintViewIcons(btnQpNext,true);
 		ImageButton btnQpPrev = (ImageButton)titleView.findViewById(R.id.btn_qp_prev1);
 		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
 			if (btnQpPrev != null)
-				btnQpPrev.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
-						int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
-						int diff = lastVisiblePosition - firstVisiblePosition;
-						contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
-					}
+				btnQpPrev.setOnClickListener(v -> {
+					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+					int diff = lastVisiblePosition - firstVisiblePosition;
+					contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
 				});
 		activity.tintViewIcons(btnQpPrev,true);
-		LinearLayout llButtons = (LinearLayout) titleView.findViewById(R.id.llButtons);
+		LinearLayout llButtons = titleView.findViewById(R.id.llButtons);
 		if (!DeviceInfo.isEinkScreen(activity.getScreenForceEink())) {
 			llButtons.removeView(btnQpNext);
 			llButtons.removeView(btnQpPrev);
 		}
 		if (titleView.findViewById(R.id.btn_filter) != null) {
-			((ImageButton) titleView.findViewById(R.id.btn_filter)).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					switchFilter(!filterIsShown);
-				}
-			});
-			activity.tintViewIcons(((ImageButton) titleView.findViewById(R.id.btn_filter)), true);
+			((ImageButton) titleView.findViewById(R.id.btn_filter)).setOnClickListener(v -> switchFilter(!filterIsShown));
+			activity.tintViewIcons(titleView.findViewById(R.id.btn_filter), true);
 		}
 	}
 

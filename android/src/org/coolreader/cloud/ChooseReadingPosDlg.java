@@ -176,13 +176,9 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
 			setAdapter(new ConfFileAdapter());
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-						int position, long arg3) {
-					//openContextMenu(DictList.this);
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				//openContextMenu(DictList.this);
+				return true;
 			});
 		}
 
@@ -327,16 +323,13 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		if (btnThisDevice!=null) {
 			btnThisDevice.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
-			btnThisDevice.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					bHideThisDevice = !bHideThisDevice;
-					Properties props = new Properties(mCoolReader.settings());
-					props.setProperty(Settings.PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV, bHideThisDevice?"1":"0");
-					mCoolReader.setSettings(props, -1, true);
-					paintButtons();
-					sortAndFilterList();
-				}
+			btnThisDevice.setOnClickListener(v -> {
+				bHideThisDevice = !bHideThisDevice;
+				Properties props = new Properties(mCoolReader.settings());
+				props.setProperty(Settings.PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV, bHideThisDevice?"1":"0");
+				mCoolReader.setSettings(props, -1, true);
+				paintButtons();
+				sortAndFilterList();
 			});
 		}
 		bHideThisDevice = mCoolReader.settings().getBool(Settings.PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV, false);
@@ -344,16 +337,13 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		Drawable img3 = img2.getConstantState().newDrawable().mutate();
 		if (btnDateSort!=null) {
 			btnDateSort.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
-			btnDateSort.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					bDateSort = true;
-					Properties props = new Properties(mCoolReader.settings());
-					props.setProperty(Settings.PROP_APP_CLOUD_POS_DATE_SORT, bDateSort?"1":"0");
-					mCoolReader.setSettings(props, -1, true);
-					paintButtons();
-					sortAndFilterList();
-				}
+			btnDateSort.setOnClickListener(v -> {
+				bDateSort = true;
+				Properties props = new Properties(mCoolReader.settings());
+				props.setProperty(Settings.PROP_APP_CLOUD_POS_DATE_SORT, bDateSort?"1":"0");
+				mCoolReader.setSettings(props, -1, true);
+				paintButtons();
+				sortAndFilterList();
 			});
 		}
 		bDateSort  = mCoolReader.settings().getBool(Settings.PROP_APP_CLOUD_POS_DATE_SORT, true);
@@ -361,16 +351,13 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		Drawable img5 = img4.getConstantState().newDrawable().mutate();
 		if (btnPercentSort!=null) {
 			btnPercentSort.setCompoundDrawablesWithIntrinsicBounds(img5, null, null, null);
-			btnPercentSort.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					bDateSort = false;
-					Properties props = new Properties(mCoolReader.settings());
-					props.setProperty(Settings.PROP_APP_CLOUD_POS_DATE_SORT, bDateSort?"1":"0");
-					mCoolReader.setSettings(props, -1, true);
-					paintButtons();
-					sortAndFilterList();
-				}
+			btnPercentSort.setOnClickListener(v -> {
+				bDateSort = false;
+				Properties props = new Properties(mCoolReader.settings());
+				props.setProperty(Settings.PROP_APP_CLOUD_POS_DATE_SORT, bDateSort?"1":"0");
+				mCoolReader.setSettings(props, -1, true);
+				paintButtons();
+				sortAndFilterList();
 			});
 		}
 		paintButtons();

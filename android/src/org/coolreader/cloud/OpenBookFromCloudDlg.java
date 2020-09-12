@@ -338,13 +338,9 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 			uDDlg = udd;
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-											   int position, long arg3) {
-					openContextMenu(OpenBookFromDBXList.this);
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				openContextMenu(OpenBookFromDBXList.this);
+				return true;
 			});
 		}
 
@@ -414,13 +410,9 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 			uDDlg = udd;
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-											   int position, long arg3) {
-					openContextMenu(OpenBookFromYNDList.this);
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				openContextMenu(OpenBookFromYNDList.this);
+				return true;
 			});
 		}
 

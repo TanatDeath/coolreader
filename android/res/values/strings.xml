@@ -1290,4 +1290,5 @@
     <string name="online_dic_exceeded">Sorry, online ditionary limit exceeded. Try again later</string>
     <string name="choose_root_sd">Could not delete file, if the file is on External SD, choose ExtSD root in the dialog</string>
     <string name="manual_open_error">Error while opening manual</string>
+    <string name="ynd_translate_settings">Yandex translate settings</string>
 </resources>

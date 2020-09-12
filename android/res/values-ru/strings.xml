@@ -1265,4 +1265,5 @@
     <string name="online_dic_exceeded">К сожалению лимит перевода в онлайн словаре исчерпан. Попробуйте позже</string>
     <string name="choose_root_sd">Невозможно удалить файл, если файл находится на внешней SD карте, выберите корень внешней SD карты в диалоге</string>
     <string name="manual_open_error">Ошибка открытия руководства пользователя</string>
+    <string name="ynd_translate_settings">Настройки Yandex translate</string>
 </resources>

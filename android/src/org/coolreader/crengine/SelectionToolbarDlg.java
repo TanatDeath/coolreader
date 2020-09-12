@@ -261,13 +261,11 @@ public class SelectionToolbarDlg {
 			closeDialog(true);
 		});
 
-		mPanel.findViewById(R.id.selection_bookmark).setOnLongClickListener(new View.OnLongClickListener() {
-			public boolean onLongClick(View v) {
-				BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
-				dlg.show();
-				closeDialog(true);
-				return true;
-			}
+		mPanel.findViewById(R.id.selection_bookmark).setOnLongClickListener(v -> {
+			BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
+			dlg.show();
+			closeDialog(true);
+			return true;
 		});
 
 		mPanel.findViewById(R.id.selection_email).setBackgroundDrawable(c);

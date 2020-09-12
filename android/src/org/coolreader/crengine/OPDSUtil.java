@@ -88,7 +88,7 @@ xml:base="http://lib.ololo.cc/opds/">
 		/**
 		 * Before download: request filename to save as.
 		 */
-		public File onDownloadStart( String type, String url );
+		public File onDownloadStart( String type, String initial_url, String url );
 		/**
 		 * Download progress
 		 */
@@ -96,7 +96,7 @@ xml:base="http://lib.ololo.cc/opds/">
 		/**
 		 * Book is downloaded.
 		 */
-		public void onDownloadEnd( String type, String url, File file );
+		public void onDownloadEnd( String type, String initial_url, String url, File file );
 		/**
 		 * Error occured
 		 */
@@ -489,6 +489,7 @@ xml:base="http://lib.ololo.cc/opds/">
 	public static class DownloadTask {
 		final private CoolReader coolReader;
 		private String catalogURL;
+		private URL initial_url;
 		private URL url;
 		private String username;
 		private String password;
@@ -514,6 +515,7 @@ xml:base="http://lib.ololo.cc/opds/">
 							) {
 			this.catalogURL = catalogURL;
 			this.url = url;
+			this.initial_url = url;
 			this.coolReader = coolReader;
 			this.callback = callback; 
 			this.referer = referer;
@@ -667,19 +669,14 @@ xml:base="http://lib.ololo.cc/opds/">
 			}
 			return null;
 		}
-		private void downloadBook( final String type, final String url, InputStream is, int contentLength, final String fileName, final boolean isZip ) throws Exception {
+		private void downloadBook( final String type, final String initial_url, final String url, InputStream is, int contentLength, final String fileName, final boolean isZip ) throws Exception {
 			L.d("Download requested: " + type + " " + url + " " + contentLength);
 			DocumentFormat fmt = DocumentFormat.byMimeType(type);
 			if ( fmt==null ) {
 				L.d("Download: unknown type " + type);
 				throw new Exception("Unknown file type " + type);
 			}
-			final File outDir = BackgroundThread.instance().callGUI(new Callable<File>() {
-				@Override
-				public File call() throws Exception {
-					return callback.onDownloadStart(type, url);
-				}
-			});
+			final File outDir = BackgroundThread.instance().callGUI(() -> callback.onDownloadStart(type, initial_url, url));
 			if ( outDir==null ) {
 				L.d("Cannot find writable location for downloaded file " + url);
 				throw new Exception("Cannot save file " + url);
@@ -730,7 +727,7 @@ xml:base="http://lib.ololo.cc/opds/">
 				}
 			}
 			L.d("Download finished");
-			BackgroundThread.instance().executeGUI(() -> callback.onDownloadEnd(type, url, outFile));
+			BackgroundThread.instance().executeGUI(() -> callback.onDownloadEnd(type, initial_url, url, outFile));
 		}
 		public static int findSubstring( byte[]buf, String str ) {
 			for ( int i=0; i<buf.length-str.length(); i++ ) {
@@ -948,7 +945,7 @@ xml:base="http://lib.ololo.cc/opds/">
 						if ( fileName==null )
 							fileName = defaultFileName;
 						L.d("Downloading book: " + contentEncoding);
-						downloadBook( contentType, url.toString(), is, contentLen, fileName, isZip );
+						downloadBook( contentType, initial_url.toString(), url.toString(), is, contentLen, fileName, isZip );
 						hideProgress();
 						loadNext = false;
 						itemsLoadedPartially = false;

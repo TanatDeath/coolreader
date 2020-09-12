@@ -34,7 +34,6 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import org.coolreader.crengine.DownloadImageTask;
 
 import uk.co.deanwild.flowtextview.FlowTextView;
 
@@ -151,22 +150,22 @@ public class BookInfoDialog extends BaseDialog {
 		String name1 = name;
 		String value = item.infoValue;
 		String typ = item.infoType;
-		if ( name.length()==0 || value.length()==0 )
+		if (name.length() == 0 || value.length() == 0)
 			return;
 		boolean isSection = false;
-		if ( "section".equals(name) ) {
+		if ("section".equals(name)) {
 			name = "";
 			Integer id = mLabelMap.get(value);
-			if ( id==null )
+			if (id == null)
 				return;
 			String section = getContext().getString(id);
-			if ( section!=null )
+			if (section != null)
 				value = section;
 			isSection = true;
 		} else {
 			Integer id = mLabelMap.get(name);
 			String title = id!=null ? getContext().getString(id) : name;
-			if ( title!=null )
+			if (title != null)
 				name = title;
 		}
 		TableRow tableRow = (TableRow)mInflater.inflate(isSection ? R.layout.book_info_section : R.layout.book_info_item, null);
@@ -186,14 +185,10 @@ public class BookInfoDialog extends BaseDialog {
 				final View view1 = view;
 				final String sFind1 = sFind;
 				if (btnOptionAddInfo != null)
-					btnOptionAddInfo.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-							emailIntent.putExtra(SearchManager.QUERY, sFind1.trim());
-							mCoolReader.startActivity(emailIntent);
-						}
+					btnOptionAddInfo.setOnClickListener(v -> {
+						final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+						emailIntent.putExtra(SearchManager.QUERY, sFind1.trim());
+						mCoolReader.startActivity(emailIntent);
 					});
 			}
 		}
@@ -233,61 +228,59 @@ public class BookInfoDialog extends BaseDialog {
 					countButton.setEllipsize(TextUtils.TruncateAt.END);
 					final ViewGroup vg = (ViewGroup) valueView.getParent();
 					vg.addView(countButton);
-					countButton.setOnClickListener(new View.OnClickListener() {
-						public void onClick(View v) {
-							int iPageCnt = 0;
-							int iSymCnt = 0;
-							int iWordCnt = 0;
-							ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
-							if ((rv != null)&&(mBookInfo!=null)) {
-								if (rv.getArrAllPages() != null)
-									iPageCnt = rv.getArrAllPages().size();
-								else {
-									rv.CheckAllPagesLoadVisual();
-									iPageCnt = rv.getArrAllPages().size();
+					countButton.setOnClickListener((View.OnClickListener) v -> {
+						int iPageCnt = 0;
+						int iSymCnt = 0;
+						int iWordCnt = 0;
+						ReaderView rv1 = ((CoolReader) mCoolReader).getReaderView();
+						if ((rv1 != null)&&(mBookInfo!=null)) {
+							if (rv1.getArrAllPages() != null)
+								iPageCnt = rv1.getArrAllPages().size();
+							else {
+								rv1.CheckAllPagesLoadVisual();
+								iPageCnt = rv1.getArrAllPages().size();
+							}
+							for (int i = 0; i < iPageCnt; i++) {
+								String sPage = rv1.getArrAllPages().get(i);
+								if (sPage == null) sPage = "";
+								sPage = sPage.replace("\\n", " ");
+								sPage = sPage.replace("\\r", " ");
+								iSymCnt = iSymCnt + sPage.replaceAll("\\s+", " ").length();
+								iWordCnt = iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
+										replaceAll("\\s+", " ").split("\\s").length;
+							}
+							mBookInfo.getFileInfo().symCount = iSymCnt;
+							mBookInfo.getFileInfo().wordCount = iWordCnt;
+							BookInfo bi = new BookInfo(mBookInfo.getFileInfo());
+							bi.getFileInfo().symCount = iSymCnt;
+							bi.getFileInfo().wordCount = iWordCnt;
+							((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
+							((CoolReader) mCoolReader).getDB().flush();
+							vg.removeView(countButton);
+							if (tvSC != null) tvSC.setText(""+iSymCnt);
+							if (tvWC != null) tvWC.setText(""+iWordCnt);
+							ReadingStatRes sres = ((CoolReader) mCoolReader).getReaderView().getBookInfo().getFileInfo().calcStats();
+							double speedKoef = sres.val;
+							int pagesLeft;
+							double msecLeft;
+							double msecFivePages;
+							PositionProperties currpos = ((CoolReader) mCoolReader).getReaderView().getDoc().getPositionProps(null, true);
+							if ((bi.getFileInfo().symCount>0) && (speedKoef > 0.000001)) {
+								pagesLeft = ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+								double msecAllPages;
+								msecAllPages = speedKoef * (double) bi.getFileInfo().symCount;
+								msecFivePages = msecAllPages / ((double) ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount()) * 5.0;
+								msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+								String sLeft = " ";
+								int minutes = (int) ((msecLeft / 1000) / 60);
+								int hours = (int) ((msecLeft / 1000) / 60 / 60);
+								if (hours>0) {
+									minutes = minutes - (hours * 60);
+									sLeft = sLeft + hours + "h "+minutes + "min (calc count: "+ sres.cnt +")";
+								} else {
+									sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
 								}
-								for (int i = 0; i < iPageCnt; i++) {
-									String sPage = rv.getArrAllPages().get(i);
-									if (sPage == null) sPage = "";
-									sPage = sPage.replace("\\n", " ");
-									sPage = sPage.replace("\\r", " ");
-									iSymCnt = iSymCnt + sPage.replaceAll("\\s+", " ").length();
-									iWordCnt = iWordCnt + sPage.replaceAll("\\p{Punct}", " ").
-											replaceAll("\\s+", " ").split("\\s").length;
-								}
-								mBookInfo.getFileInfo().symCount = iSymCnt;
-								mBookInfo.getFileInfo().wordCount = iWordCnt;
-								BookInfo bi = new BookInfo(mBookInfo.getFileInfo());
-								bi.getFileInfo().symCount = iSymCnt;
-								bi.getFileInfo().wordCount = iWordCnt;
-								((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
-								((CoolReader) mCoolReader).getDB().flush();
-								vg.removeView(countButton);
-								if (tvSC != null) tvSC.setText(""+iSymCnt);
-								if (tvWC != null) tvWC.setText(""+iWordCnt);
-								ReadingStatRes sres = ((CoolReader) mCoolReader).getReaderView().getBookInfo().getFileInfo().calcStats();
-								double speedKoef = sres.val;
-								int pagesLeft;
-								double msecLeft;
-								double msecFivePages;
-								PositionProperties currpos = ((CoolReader) mCoolReader).getReaderView().getDoc().getPositionProps(null, true);
-								if ((bi.getFileInfo().symCount>0) && (speedKoef > 0.000001)) {
-									pagesLeft = ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount() - currpos.pageNumber;
-									double msecAllPages;
-									msecAllPages = speedKoef * (double) bi.getFileInfo().symCount;
-									msecFivePages = msecAllPages / ((double) ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount()) * 5.0;
-									msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
-									String sLeft = " ";
-									int minutes = (int) ((msecLeft / 1000) / 60);
-									int hours = (int) ((msecLeft / 1000) / 60 / 60);
-									if (hours>0) {
-										minutes = minutes - (hours * 60);
-										sLeft = sLeft + hours + "h "+minutes + "min (calc count: "+ sres.cnt +")";
-									} else {
-										sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
-									}
-									if (tvML != null) tvML.setText(sLeft);
-								}
+								if (tvML != null) tvML.setText(sLeft);
 							}
 						}
 					});
@@ -314,20 +307,18 @@ public class BookInfoDialog extends BaseDialog {
 			translButton.setMaxLines(3);
 			translButton.setEllipsize(TextUtils.TruncateAt.END);
 			final CoolReader cr = (CoolReader) mCoolReader;
-			translButton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					String lang = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to,true);
-					String langf = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true);
-					FileInfo fi = mBookInfo.getFileInfo();
-					FileInfo dfi = fi.parent;
-					if (dfi == null) {
-						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-					}
-					if (dfi != null) {
-						cr.editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
-					}
-					dismiss();
+			translButton.setOnClickListener(v -> {
+				String lang = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to,true);
+				String langf = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true);
+				FileInfo fi = mBookInfo.getFileInfo();
+				FileInfo dfi = fi.parent;
+				if (dfi == null) {
+					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 				}
+				if (dfi != null) {
+					cr.editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+				}
+				dismiss();
 			});
 			final ViewGroup vg = (ViewGroup) valueView.getParent();
 			vg.addView(translButton);
@@ -335,33 +326,22 @@ public class BookInfoDialog extends BaseDialog {
 		if (typ.startsWith("link")) {
 			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 			if (typ.contains("application/atom+xml")) {
-				valueView.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						String text = ((TextView) v).getText().toString();
-						if (text != null && text.length() > 0)
-							if (mFileBrowser != null) {
-								FileInfo item = new FileInfo();
-								item.pathname = OPDS_DIR_PREFIX + text;
-								item.parent = mCurrDir;
-								if (((TextView) v).getTag()!=null) {
-									item.title = ((TextView) v).getTag().toString();
-									item.setFilename(item.title);
-								}
-								BackgroundThread.instance().postBackground(new Runnable() {
-									@Override
-									public void run() {
-										BackgroundThread.instance().postGUI(new Runnable() {
-											@Override
-											public void run() {
-												mFileBrowser.showOPDSDir(item, null, "");
-											}
-										}, 200);
-									}
-								});
-								dismiss();
+				valueView.setOnClickListener((View.OnClickListener) v -> {
+					String text = ((TextView) v).getText().toString();
+					if (text != null && text.length() > 0)
+						if (mFileBrowser != null) {
+							FileInfo item1 = new FileInfo();
+							item1.pathname = OPDS_DIR_PREFIX + text;
+							item1.parent = mCurrDir;
+							if (((TextView) v).getTag()!=null) {
+								item1.title = ((TextView) v).getTag().toString();
+								item1.setFilename(item1.title);
 							}
+							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
+									() -> mFileBrowser.showOPDSDir(item1, null, ""), 200));
+							dismiss();
 						}
-				});
+					});
 			} else {
 				Linkify.addLinks(valueView, Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
 				valueView.setLinksClickable(true);
@@ -378,88 +358,78 @@ public class BookInfoDialog extends BaseDialog {
 		} else
 		if (typ.startsWith("series_authors")) {
 			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-			valueView.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					String text = typ.replace("series_authors:", "").trim();
-					if (!StrUtils.isEmptyStr(text)) {
-						FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = FileInfo.AUTHORS_TAG;
-						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_author));
-						dir.isListed = true;
-						dir.isScanned = true;
-						((CoolReader)mCoolReader).showDirectory(dir, "series:"+text);
-						dismiss();
-					}
+			valueView.setOnClickListener(v -> {
+				String text = typ.replace("series_authors:", "").trim();
+				if (!StrUtils.isEmptyStr(text)) {
+					FileInfo dir = new FileInfo();
+					dir.isDirectory = true;
+					dir.pathname = FileInfo.AUTHORS_TAG;
+					dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_author));
+					dir.isListed = true;
+					dir.isScanned = true;
+					((CoolReader)mCoolReader).showDirectory(dir, "series:"+text);
+					dismiss();
 				}
 			});
 		} else
 		if (typ.startsWith("series_books")) {
 			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-			valueView.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					String text = typ.replace("series_books:", "").trim();
-					if (!StrUtils.isEmptyStr(text)) {
-						FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = FileInfo.SERIES_PREFIX;
-						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_series));
-						dir.isListed = true;
-						dir.isScanned = true;
-						dir.id = 0L;
-						((CoolReader)mCoolReader).showDirectory(dir, "series:"+text);
-						dismiss();
-					}
+			valueView.setOnClickListener(v -> {
+				String text = typ.replace("series_books:", "").trim();
+				if (!StrUtils.isEmptyStr(text)) {
+					FileInfo dir = new FileInfo();
+					dir.isDirectory = true;
+					dir.pathname = FileInfo.SERIES_PREFIX;
+					dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_series));
+					dir.isListed = true;
+					dir.isScanned = true;
+					dir.id = 0L;
+					((CoolReader)mCoolReader).showDirectory(dir, "series:"+text);
+					dismiss();
 				}
 			});
 		} else
 		if (typ.startsWith("author_series")) {
 			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-			valueView.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					String text = typ.replace("author_series:", "").trim();
-					if (!StrUtils.isEmptyStr(text)) {
-						FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = FileInfo.SERIES_TAG;
-						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_series));
-						dir.isListed = true;
-						dir.isScanned = true;
-						((CoolReader)mCoolReader).showDirectory(dir, "author:"+text);
-						dismiss();
-					}
+			valueView.setOnClickListener(v -> {
+				String text = typ.replace("author_series:", "").trim();
+				if (!StrUtils.isEmptyStr(text)) {
+					FileInfo dir = new FileInfo();
+					dir.isDirectory = true;
+					dir.pathname = FileInfo.SERIES_TAG;
+					dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_series));
+					dir.isListed = true;
+					dir.isScanned = true;
+					((CoolReader)mCoolReader).showDirectory(dir, "author:"+text);
+					dismiss();
 				}
 			});
 		} else
 		if (typ.startsWith("author_books")) {
 			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-			valueView.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					String text = typ.replace("author_books:", "").trim();
-					if (!StrUtils.isEmptyStr(text)) {
-						FileInfo dir = new FileInfo();
-						dir.isDirectory = true;
-						dir.pathname = FileInfo.AUTHOR_PREFIX;
-						dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_author));
-						dir.isListed = true;
-						dir.isScanned = true;
-						dir.id = 0L;
-						((CoolReader)mCoolReader).showDirectory(dir, "author:"+text);
-						dismiss();
-					}
+			valueView.setOnClickListener(v -> {
+				String text = typ.replace("author_books:", "").trim();
+				if (!StrUtils.isEmptyStr(text)) {
+					FileInfo dir = new FileInfo();
+					dir.isDirectory = true;
+					dir.pathname = FileInfo.AUTHOR_PREFIX;
+					dir.setFilename(mCoolReader.getString(R.string.folder_name_books_by_author));
+					dir.isListed = true;
+					dir.isScanned = true;
+					dir.id = 0L;
+					((CoolReader)mCoolReader).showDirectory(dir, "author:"+text);
+					dismiss();
 				}
 			});
 		} else
 		if (typ.equals("text")) {
-			valueView.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					String text = ((TextView) v).getText().toString();
-					if (text != null && text.length() > 0) {
-						ClipboardManager cm = activity.getClipboardmanager();
-						cm.setText(text);
-						L.i("Setting clipboard text: " + text);
-						activity.showToast(activity.getString(R.string.copied_to_clipboard) + ": " + text, v);
-					}
+			valueView.setOnClickListener(v -> {
+				String text = ((TextView) v).getText().toString();
+				if (text != null && text.length() > 0) {
+					ClipboardManager cm = activity.getClipboardmanager();
+					cm.setText(text);
+					L.i("Setting clipboard text: " + text);
+					activity.showToast(activity.getString(R.string.copied_to_clipboard) + ": " + text, v);
 				}
 			});
 		}
@@ -581,18 +551,15 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
-		btnBookFolderOpen = ((ImageButton)view.findViewById(R.id.book_folder_open));
+		btnBookFolderOpen = view.findViewById(R.id.book_folder_open);
 
-			btnBookFolderOpen.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
+			btnBookFolderOpen.setOnClickListener(v -> {
 				CoolReader cr = (CoolReader)mCoolReader;
 				if (mBookInfo != null) {
 					cr.showDirectory(mBookInfo.getFileInfo(), "");
 					dismiss();
 				}
-			}
-		});
+			});
 
 		btnBookShortcut = view.findViewById(R.id.book_create_shortcut);
 
@@ -711,7 +678,7 @@ public class BookInfoDialog extends BaseDialog {
 		FlowTextView txtAnnot = view.findViewById(R.id.lbl_annotation);
 		txtAnnot.setOnClickListener(v -> {
 			String text = ((FlowTextView) v).getText().toString();
-			if ( text!=null && text.length()>0 ) {
+			if (text != null && text.length() > 0) {
 				ClipboardManager cm = activity.getClipboardmanager();
 				cm.setText(text);
 				L.i("Setting clipboard text: " + text);

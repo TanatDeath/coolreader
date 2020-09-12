@@ -12,7 +12,7 @@ a { display: inline; $link.all }
 a[type="note"] { $footnote-link.all }
 
 image { text-align: center; text-indent: 0px; display: block }
-p image { display: inline }
+p image { display: block }
 li image { display: inline }
 
 li { display: list-item; text-indent: 0em;  }

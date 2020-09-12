@@ -165,13 +165,9 @@ public class GotoPageDialog extends BaseDialog {
 			if (mReaderView.getArrAllPages()==null) mPageCount=0;
 				else mPageCount = mReaderView.getArrAllPages().size();
 			setAdapter(new BookPagesAdapter());
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-											   int position, long arg3) {
-					//openContextMenu(DictList.this);
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				//openContextMenu(DictList.this);
+				return true;
 			});
 		}
 

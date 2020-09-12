@@ -682,53 +682,46 @@ public class CRToolBar extends ViewGroup {
 		if (rc.isEmpty())
 			return null;
 		ImageButton ib = new ImageButton(getContext());
-		ib.setOnLongClickListener(new OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				ImageButton ib =(ImageButton) v;
-				ReaderAction ra = null;
-				ReaderAction ram = null;
-				if (ib.getTag()!= null) {
-					if (ib.getTag() instanceof ReaderAction) {
-						ra = (ReaderAction) ib.getTag();
-						ram = ra.getMirrorAction();
-						if (ram != null) onButtonClick(ram);
-					}
-				} else {
-					if (activity!=null)
-						if (activity instanceof CoolReader) {
-							final CoolReader cr = ((CoolReader) activity);
-							cr.registerForContextMenu(cr.contentView);
-							cr.contentView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-								@Override
-								public void onCreateContextMenu(ContextMenu menu, View v,
-																ContextMenu.ContextMenuInfo menuInfo) {
-									menu.clear();
-									MenuInflater inflater = cr.getMenuInflater();
-									inflater.inflate(R.menu.cr3_reader_toolbar_context_menu, menu);
-									menu.setHeaderTitle(cr.getString(R.string.options_view_toolbar_settings));
-									for ( int i=0; i<menu.size(); i++ ) {
-										if (menu.getItem(i).getItemId()==R.id.options_view_toolbar_hide_in_fullscreen) {
-											boolean hideToolb =
-													(cr.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
-											menu.getItem(i).setCheckable(true);
-											menu.getItem(i).setChecked(hideToolb);
-										}
-										menu.getItem(i).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-											public boolean onMenuItemClick(MenuItem item) {
-												onContextItemSelected(item);
-												return true;
-											}
-										});
-									}
-
-								}
-							});
-							cr.contentView.showContextMenu();
-						}
+		ib.setOnLongClickListener(v -> {
+			ImageButton ib1 =(ImageButton) v;
+			ReaderAction ra = null;
+			ReaderAction ram = null;
+			if (ib1.getTag()!= null) {
+				if (ib1.getTag() instanceof ReaderAction) {
+					ra = (ReaderAction) ib1.getTag();
+					ram = ra.getMirrorAction();
+					if (ram != null) onButtonClick(ram);
 				}
-				return true;
+			} else {
+				if (activity!=null)
+					if (activity instanceof CoolReader) {
+						final CoolReader cr = ((CoolReader) activity);
+						cr.registerForContextMenu(cr.contentView);
+						cr.contentView.setOnCreateContextMenuListener((menu, v1, menuInfo) -> {
+							menu.clear();
+							MenuInflater inflater = cr.getMenuInflater();
+							inflater.inflate(R.menu.cr3_reader_toolbar_context_menu, menu);
+							menu.setHeaderTitle(cr.getString(R.string.options_view_toolbar_settings));
+							for ( int i=0; i<menu.size(); i++ ) {
+								if (menu.getItem(i).getItemId()==R.id.options_view_toolbar_hide_in_fullscreen) {
+									boolean hideToolb =
+											(cr.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
+									menu.getItem(i).setCheckable(true);
+									menu.getItem(i).setChecked(hideToolb);
+								}
+								menu.getItem(i).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+									public boolean onMenuItemClick(MenuItem item1) {
+										onContextItemSelected(item1);
+										return true;
+									}
+								});
+							}
+
+						});
+						cr.contentView.showContextMenu();
+					}
 			}
+			return true;
 		});
 
 		if (item != null) {

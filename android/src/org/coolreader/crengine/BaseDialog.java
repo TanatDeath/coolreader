@@ -183,11 +183,7 @@ public class BaseDialog extends Dialog {
 			addButton.setImageResource(addButtonImage);
 			if (addButtonContentDescriptionId != 0) {
 				Utils.setContentDescription(addButton, getContext().getString(addButtonContentDescriptionId));
-				addButton.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						onAddButtonClick();
-					}
-				});
+				addButton.setOnClickListener(v -> onAddButtonClick());
 			}
 			activity.tintViewIcons(addButton,true);
 		}

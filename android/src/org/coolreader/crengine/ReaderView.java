@@ -253,12 +253,38 @@ import com.google.gson.GsonBuilder;
 				if (selectionModeActive) {
 					Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
 					int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
-					Utils.drawFrame2(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4);
+					int newTextSize = 12;
+					float textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+							newTextSize, getResources().getDisplayMetrics());
+					String sText = "";
+					int title =  OptionsDialog.getSelectionActionTitle(mSelection2Action == -1 ? mSelectionAction : mSelection2Action);
+					if (title != 0) sText = sText + OptionsDialog.updDicValue(mActivity.getString(title), mSettings, mActivity, true);
+					sText = sText + " / ";
+					title =  OptionsDialog.getSelectionActionTitle(mMultiSelection2Action == -1 ? mMultiSelectionAction : mMultiSelection2Action);
+					if (title != 0) sText = sText + OptionsDialog.updDicValue(mActivity.getString(title), mSettings, mActivity, true);
+					sText = sText + " / ";
+					title =  OptionsDialog.getSelectionActionTitle(mSelection2ActionLong == -1 ? mSelectionActionLong : mSelection2ActionLong);
+					if (title != 0) sText = sText + OptionsDialog.updDicValue(mActivity.getString(title), mSettings, mActivity, true);
+					Utils.drawFrame2(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4,
+							textSize, sText);
 				}
 				if (inspectorModeActive) {
 					Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
 					int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
-					Utils.drawFrame3(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4);
+					int newTextSize = 12;
+					float textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+							newTextSize, getResources().getDisplayMetrics());
+					String sText = "";
+					int title =  OptionsDialog.getSelectionActionTitle(mSelection3Action == -1 ? mSelectionAction : mSelection3Action);
+					if (title != 0) sText = sText + OptionsDialog.updDicValue(mActivity.getString(title), mSettings, mActivity, true);
+					sText = sText + " / ";
+					title =  OptionsDialog.getSelectionActionTitle(mMultiSelection3Action == -1 ? mMultiSelectionAction : mMultiSelection3Action);
+					if (title != 0) sText = sText + OptionsDialog.updDicValue(mActivity.getString(title), mSettings, mActivity, true);
+					sText = sText + " / ";
+					title =  OptionsDialog.getSelectionActionTitle(mSelection3ActionLong == -1 ? mSelectionActionLong : mSelection3ActionLong);
+					if (title != 0) sText = sText + OptionsDialog.updDicValue(mActivity.getString(title), mSettings, mActivity, true);
+					Utils.drawFrame3(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4,
+							textSize, sText);
 				}
 			} catch ( Exception e ) {
 				log.e("exception while drawing", e);
@@ -570,10 +596,11 @@ import com.google.gson.GsonBuilder;
 			savePositionBookmark(bmk);
 		log.i("calling bookView.onPause()");
 		boolean bNeedSave = true;
-		if (lastSavedToGdBookmark!=null) {
-			if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
-				bNeedSave = false;
-			}
+		if (lastSavedToGdBookmark != null) {
+			if (bmk.getStartPos() != null)
+				if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+					bNeedSave = false;
+				}
 		}
 		if (bNeedSave) {
 			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
@@ -788,7 +815,7 @@ import com.google.gson.GsonBuilder;
 				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary4);
 				break;
 			case SELECTION_ACTION_DICTIONARY_5:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary6);
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary5);
 				break;
 			case SELECTION_ACTION_DICTIONARY_6:
 				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary6);
@@ -2208,12 +2235,7 @@ import com.google.gson.GsonBuilder;
 		text.setTextColor(colorIcon);
 		longtext.setTextColor(colorIcon);
 
-		view.setOnClickListener(new View.OnClickListener () {
-			@Override
-			public void onClick(View v) {
-				dlg.cancel();
-			}
-		});
+		view.setOnClickListener(v -> dlg.cancel());
 	}
 
 	public void showReadingPositionPopup() {
@@ -2309,12 +2331,7 @@ import com.google.gson.GsonBuilder;
 					tvLabel.setText(buf);
 					tvLabel.setTextColor(colorIcon);
 					final BaseDialog dlg1 = dlg;
-					grid.findViewById(R.id.lay_bottom_text).setOnClickListener(new View.OnClickListener () {
-						@Override
-						public void onClick(View v) {
-							dlg1.cancel();
-						}
-					});
+					grid.findViewById(R.id.lay_bottom_text).setOnClickListener(v -> dlg1.cancel());
 					if (isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_NONE) {
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
@@ -3190,8 +3207,8 @@ import com.google.gson.GsonBuilder;
 			else {
 				mActivity.mDictionaries.setiDic2IsActive(1);
 			}
-			log.i("Switched to dictionary: "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
-			mActivity.showToast("Switched to dictionary: "+Integer.toString(mActivity.mDictionaries.isiDic2IsActive()+1));
+			log.i("Switched to dictionary (from 0): "+mActivity.mDictionaries.isiDic2IsActive());
+			mActivity.showToast("Switched to dictionary: "+ (mActivity.mDictionaries.isiDic2IsActive() + 1));
 			break;
 		case DCMD_SAVE_SETTINGS_TO_CLOUD:
 			log.i("Save settings to CLOUD");
@@ -5141,82 +5158,91 @@ import com.google.gson.GsonBuilder;
 		updateBrightnessControl(startY, startY, leftSide);
 	}
 
+	private boolean simplePopup = false;
+
 	private void showCenterPopup(String val) {
-		if (windowCenterPopup == null) windowCenterPopup = new PopupWindow(surface.getContext());
-		windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-		windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-		windowCenterPopup.setTouchable(false);
-		windowCenterPopup.setFocusable(false);
-		windowCenterPopup.setOutsideTouchable(true);
-		windowCenterPopup.setBackgroundDrawable(null);
-		int fontSize = 24;
-		LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
-		LinearLayout toast_ll = (LinearLayout) windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		int colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
-		toast_ll.setBackgroundColor(colorGrayC);
-		TextView tv = (TextView) windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-		tv.setTextColor(colorIcon);
-		tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-		tv.setText(val);
-		windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
-		scheduleHideWindowCenterPopup(500);
+		showCenterPopup(val, 500);
+	}
+
+	private void showCenterPopup(String val, int millis) {
+		BackgroundThread.instance().executeGUI(() -> {
+			boolean useExisting = (windowCenterPopup != null);
+			useExisting = useExisting && simplePopup;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+			int colorGrayC = a.getColor(1, Color.GRAY);
+			int colorIcon = a.getColor(2, Color.GRAY);
+			a.recycle();
+			int fontSize = 24;
+			if (useExisting) {
+				if (millis >= 0) scheduleHideWindowCenterPopup(millis);
+				simplePopup = true;
+				TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+				tv.setTextColor(colorIcon);
+				tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+				tv.setText(val);
+				return;
+			}
+			if (windowCenterPopup == null)
+				windowCenterPopup = new PopupWindow(surface.getContext());
+			windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+			windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+			windowCenterPopup.setTouchable(false);
+			windowCenterPopup.setFocusable(false);
+			windowCenterPopup.setOutsideTouchable(true);
+			windowCenterPopup.setBackgroundDrawable(null);
+			LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
+			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
+			toast_ll.setBackgroundColor(colorGrayC);
+			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+			tv.setTextColor(colorIcon);
+			tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+			tv.setText(val);
+			windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+			simplePopup = true;
+			if (millis >= 0) scheduleHideWindowCenterPopup(millis);
+		});
 	}
 
 	private void showCenterPopupFont(String val, String val2, int fontSize) {
-		if (windowCenterPopup == null) windowCenterPopup = new PopupWindow(surface.getContext());
-		windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-		windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-		windowCenterPopup.setTouchable(false);
-		windowCenterPopup.setFocusable(false);
-		windowCenterPopup.setOutsideTouchable(true);
-		windowCenterPopup.setBackgroundDrawable(null);
-		LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap_2line, null, true));
-		LinearLayout toast_ll = (LinearLayout) windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		int colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
-		toast_ll.setBackgroundColor(colorGrayC);
-		TextView tv = (TextView) windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-		tv.setTextColor(colorIcon);
-		tv.setTextSize(24); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-		tv.setText(val);
-		TextView tv2 = (TextView) windowCenterPopup.getContentView().findViewById(R.id.toast_2nd_line);
-		tv2.setTextColor(colorIcon);
-		tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
-		tv2.setText(val2);
-		String sFace = mActivity.settings().getProperty(ReaderView.PROP_FONT_FACE, "");
-		final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
-		boolean found = false;
-		for (int i=0; i<mFontFacesFiles.length; i++) {
-			String s = mFontFacesFiles[i];
-			if ((s.startsWith(sFace+"~"))&&(!s.toUpperCase().contains("BOLD"))&&(!s.toUpperCase().contains("ITALIC"))) {
-				found = true;
-				String sf = mFontFacesFiles[i];
-				if (sf.contains("~")) {
-					sf = sf.split("~")[1];
-				}
-				try {
-					Typeface tf = null;
-					tf = Typeface.createFromFile(sf);
-					tv2.setTypeface(tf);
-				} catch (Exception e) {
-
-				}
-				break;
+		BackgroundThread.instance().executeGUI(() -> {
+			boolean useExisting = (windowCenterPopup != null);
+			useExisting = useExisting && (!simplePopup);
+			simplePopup = false;
+			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+			int colorGrayC = a.getColor(1, Color.GRAY);
+			int colorIcon = a.getColor(2, Color.GRAY);
+			a.recycle();
+			if (windowCenterPopup == null)
+				windowCenterPopup = new PopupWindow(surface.getContext());
+			if (!useExisting) {
+				windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+				windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+				windowCenterPopup.setTouchable(false);
+				windowCenterPopup.setFocusable(false);
+				windowCenterPopup.setOutsideTouchable(true);
+				windowCenterPopup.setBackgroundDrawable(null);
+				LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap_2line, null, true));
 			}
-		}
-		if (!found)
-			for (int i=0; i<mFontFacesFiles.length; i++) {
+			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
+			toast_ll.setBackgroundColor(colorGrayC);
+			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+			tv.setTextColor(colorIcon);
+			tv.setTextSize(24); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+			tv.setText(val);
+			TextView tv2 = windowCenterPopup.getContentView().findViewById(R.id.toast_2nd_line);
+			tv2.setTextColor(colorIcon);
+			tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+			tv2.setText(val2);
+			String sFace = mActivity.settings().getProperty(ReaderView.PROP_FONT_FACE, "");
+			final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
+			boolean found = false;
+			for (int i = 0; i < mFontFacesFiles.length; i++) {
 				String s = mFontFacesFiles[i];
-				if (s.startsWith(sFace+"~")) {
+				if ((s.startsWith(sFace + "~")) && (!s.toUpperCase().contains("BOLD")) && (!s.toUpperCase().contains("ITALIC"))) {
 					found = true;
 					String sf = mFontFacesFiles[i];
 					if (sf.contains("~")) {
@@ -5232,8 +5258,29 @@ import com.google.gson.GsonBuilder;
 					break;
 				}
 			}
-		windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
-		scheduleHideWindowCenterPopup(500);
+			if (!found)
+				for (int i = 0; i < mFontFacesFiles.length; i++) {
+					String s = mFontFacesFiles[i];
+					if (s.startsWith(sFace + "~")) {
+						found = true;
+						String sf = mFontFacesFiles[i];
+						if (sf.contains("~")) {
+							sf = sf.split("~")[1];
+						}
+						try {
+							Typeface tf = null;
+							tf = Typeface.createFromFile(sf);
+							tv2.setTypeface(tf);
+						} catch (Exception e) {
+
+						}
+						break;
+					}
+				}
+			if (!useExisting)
+				windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+			scheduleHideWindowCenterPopup(500);
+		});
 	}
 
 	private void updateBrightnessControl_old(final int y_start, final int y, final boolean leftSide) {
@@ -5274,10 +5321,38 @@ import com.google.gson.GsonBuilder;
 			currentBrightnessValueIndex = index;
 			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
-			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-				if (newValue < 1) newValue = 1;
-				showCenterPopup(newValue+"%");
+			//if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+			if (newValue < 1) newValue = 1;
+			if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
+				if (leftSide) {
+					int indexR = 0;
+					indexR = lastBrightnessValueIndexRight;
+					if (indexR < 0)
+						indexR = 0;
+					else if (indexR >= n)
+						indexR = n-1;
+					int newValueR = OptionsDialog.mBacklightLevels[indexR];
+					if (newValueR>=0)
+						showCenterPopup(newValue + "% / " + newValueR + "%", 2000);
+					else
+						showCenterPopup(newValue + "%", 2000);
+				} else {
+					int indexL = 0;
+					indexL = lastBrightnessValueIndexLeft;
+					if (indexL < 0)
+						indexL = 0;
+					else if (indexL >= n)
+						indexL = n-1;
+					int newValueL = OptionsDialog.mBacklightLevels[indexL];
+					if (newValueL>=0)
+						showCenterPopup(newValueL + "% / " + newValue + "%", 2000);
+					else
+						showCenterPopup(newValue + "%", 2000);
+				}
+			} else {
+				showCenterPopup(newValue + "%");
 			}
+			//}
 		}
 
 	}
@@ -5438,7 +5513,7 @@ import com.google.gson.GsonBuilder;
 	private interface DrawCanvasCallback {
 		void drawTo(Canvas c);
 	}
-	private void drawCallback( DrawCanvasCallback callback, Rect rc, boolean isPartially )
+	private void drawCallback(DrawCanvasCallback callback, Rect rc, boolean isPartially)
 	{
 		if (!mSurfaceCreated)
 			return;
@@ -6541,24 +6616,45 @@ import com.google.gson.GsonBuilder;
 
 	private int currentProgressPosition = 1;
 	private int currentProgressTitle = R.string.progress_loading;
+
 	private void showProgress(int position, int titleResource) {
-		log.v("showProgress(" + position + ")");
+		int pos = position / 100;
+		showCenterPopup(pos + "% " + mActivity.getString(titleResource), -1);
 		boolean first = currentProgressTitle == 0;
 		if (currentProgressPosition != position || currentProgressTitle != titleResource) {
 			currentProgressPosition = position;
 			currentProgressTitle = titleResource;
-			bookView.draw(!first);
+			//if (first) bookView.draw(!first);
 		}
 	}
 
+//	private void showProgress(int position, int titleResource) {
+//		log.v("showProgress(" + position + ")");
+//		boolean first = currentProgressTitle == 0;
+//		if (currentProgressPosition != position || currentProgressTitle != titleResource) {
+//			currentProgressPosition = position;
+//			currentProgressTitle = titleResource;
+//			bookView.draw(!first);
+//		}
+//	}
+
 	private void hideProgress() {
-		log.v("hideProgress()");
+		scheduleHideWindowCenterPopup(1);
 		if (currentProgressTitle != 0) {
 			currentProgressPosition = -1;
 			currentProgressTitle = 0;
-			bookView.draw(false);
+			//bookView.draw(false);
 		}
 	}
+
+//	private void hideProgress() {
+//		log.v("hideProgress()");
+//		if (currentProgressTitle != 0) {
+//			currentProgressPosition = -1;
+//			currentProgressTitle = 0;
+//			bookView.draw(false);
+//		}
+//	}
 
 	private boolean isProgressActive() {
 		return currentProgressPosition > 0;
@@ -6659,6 +6755,10 @@ import com.google.gson.GsonBuilder;
 			profileNumber = mBookInfo.getFileInfo().getProfileId();
 			//Properties oldSettings = new Properties(mSettings);
 			// TODO: enable storing of profile per book
+//			int curProf = mActivity.getCurrentProfile();
+//			if (curProf != profileNumber) {
+//				showCenterPopup(mActivity.getString(R.string.settings_profile) + ":" +profileNumber, 2000);
+//			}
 			mActivity.setCurrentProfile(profileNumber);
 			if (profileNumber == 0) { // if there is no book profile, then set it to current
 				if (mActivity.getCurrentProfile() != 0)
@@ -6807,7 +6907,7 @@ import com.google.gson.GsonBuilder;
 				selectionModeWasActive = false;
 				inspectorModeActive = false;
 
-				drawPage();
+				//drawPage(); //plotn - possibly it is unnesessary - due to new progress
 
 				BackgroundThread.instance().postGUI(() -> {
 					mActivity.showReader();
@@ -6832,6 +6932,12 @@ import com.google.gson.GsonBuilder;
 				if (null == inputStream)
 					mActivity.setLastBook(filename);
 				UserDicDlg.updDicSearchHistoryAll(mActivity);
+			}
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 		public void fail( Exception e )
@@ -7050,6 +7156,11 @@ import com.google.gson.GsonBuilder;
 	}
 
 	protected void doDrawProgress(Canvas canvas, int position, int titleResource) {
+		// nothing to do - everithing in show progress
+		return;
+	}
+
+	protected void doDrawProgressOld(Canvas canvas, int position, int titleResource) {
 		log.v("doDrawProgress(" + position + ")");
 		if (titleResource == 0)
 			return;
@@ -7213,12 +7324,14 @@ import com.google.gson.GsonBuilder;
 			if (delayMillis <= 1) {
 				if (windowCenterPopup != null) {
 					windowCenterPopup.dismiss();
+					windowCenterPopup = null;
 				}
 			} else {
 				BackgroundThread.instance().postGUI(() -> {
 					if (mylastHideBrighnessTaskId == lastHideBrighnessTaskId) {
 						if (windowCenterPopup != null) {
 							windowCenterPopup.dismiss();
+							windowCenterPopup = null;
 						}
 					}
 				}, delayMillis);

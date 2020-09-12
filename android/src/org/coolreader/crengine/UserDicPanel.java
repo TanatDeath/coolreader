@@ -83,18 +83,15 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			
 			LayoutInflater inflater = LayoutInflater.from(activity);
 			content = (LinearLayout)inflater.inflate(R.layout.user_dic_panel, null);
-			lblWordFound = (TextView)content.findViewById(R.id.word_found);
-			lblStar = (TextView)content.findViewById(R.id.tview_saving);
+			lblWordFound = content.findViewById(R.id.word_found);
+			lblStar = content.findViewById(R.id.tview_saving);
 			lblStar.setText("#");
             lblStar.setTextColor(0xFF000000 | color);
-            lblStar.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (activity.getReaderView()!=null)
-                        activity.getReaderView().scheduleSaveCurrentPositionBookmark(1);
-                        activity.showToast(activity.getString(R.string.pos_saved));
-                }
-            });
+            lblStar.setOnClickListener(v -> {
+				if (activity.getReaderView()!=null)
+					activity.getReaderView().scheduleSaveCurrentPositionBookmark(1);
+					activity.showToast(activity.getString(R.string.pos_saved));
+			});
 			arrLblWords.clear();
 			arrUdeWords.clear();
 			lblWord = (TextView)content.findViewById(R.id.word1);
@@ -123,13 +120,9 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			lblWordFound.setTextColor(0xFF000000 | color);
             lblWordFound.setPaintFlags(lblWordFound.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
-			lblWordFound.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					UserDicDlg dlg = new UserDicDlg(activity,0);
-					dlg.show();
-				}
+			lblWordFound.setOnClickListener(v -> {
+				UserDicDlg dlg = new UserDicDlg(activity,0);
+				dlg.show();
 			});
 
 			int i = 0;
@@ -140,10 +133,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 				tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
 				tv.setTextColor(0xFF000000 | color);
 				tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-				tv.setOnClickListener(new OnClickListener() {
-
-				@Override
-					public void onClick(View v) {
+				tv.setOnClickListener(v -> {
 						if (v instanceof TextView) {
 							String sWord = ((TextView) v).getText().toString();
 							for (UserDicEntry ude: arrUdeWords) {
@@ -162,35 +152,30 @@ public class UserDicPanel extends LinearLayout implements Settings {
 								}
 							}
 						}
-					}
-				});
-				tv.setOnLongClickListener(new OnLongClickListener() {
-
-					@Override
-					public boolean onLongClick(View v) {
-						if (v instanceof TextView) {
-							String sWord = ((TextView) v).getText().toString();
-							for (final UserDicEntry ude: arrUdeWords) {
-								if (ude.getDic_word().equals(sWord)) {
-									activity.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-										@Override
-										public void run() {
-											if (ude.getThisIsDSHE()) {
-												DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
-												dshe.setSearch_text(ude.getDic_word());
-												activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
-											} else
-												activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
-											activity.getmUserDic().remove(ude.getIs_citation()+ude.getDic_word());
-											activity.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-										}
-									});
-									break;
-								}
+					});
+				tv.setOnLongClickListener((OnLongClickListener) v -> {
+					if (v instanceof TextView) {
+						String sWord = ((TextView) v).getText().toString();
+						for (final UserDicEntry ude: arrUdeWords) {
+							if (ude.getDic_word().equals(sWord)) {
+								activity.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
+									@Override
+									public void run() {
+										if (ude.getThisIsDSHE()) {
+											DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+											dshe.setSearch_text(ude.getDic_word());
+											activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+										} else
+											activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+										activity.getmUserDic().remove(ude.getIs_citation()+ude.getDic_word());
+										activity.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+									}
+								});
+								break;
 							}
 						}
-						return true;
 					}
+					return true;
 				});
 			}
 

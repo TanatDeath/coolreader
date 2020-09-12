@@ -108,43 +108,37 @@ public class UserDicDlg extends BaseDialog {
 			View view;
 			int res = R.layout.userdic_item;
 			view = mInflater.inflate(res, null);
-			TextView wordView = (TextView)view.findViewById(R.id.userdic_word);
-			TextView wordTranslateView = (TextView)view.findViewById(R.id.userdic_word_translate);
-			ImageView userdicDel = (ImageView)view.findViewById(R.id.userdic_value_del);
-			userdicDel.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if ((openPage==0)||(openPage==1)) {
-						if (mUserDic == null) return;
-						final UserDicEntry ude = mUserDic.get(position);
-						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-							@Override
-							public void run() {
-								if (ude.getThisIsDSHE()) {
-									DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
-									dshe.setSearch_text(ude.getDic_word());
-									activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
-								} else
-									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
-								mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
-								mUserDic.remove(ude);
-								listUpdated();
-								mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-							}
-						});
-					}
-					if (openPage==2) {
-						final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
-						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-							@Override
-							public void run() {
-								activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
-								mDicSearchHistory.remove(dshe);
-								listUpdated();
-								mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-							}
-						});
-					}
+			TextView wordView = view.findViewById(R.id.userdic_word);
+			TextView wordTranslateView = view.findViewById(R.id.userdic_word_translate);
+			ImageView userdicDel = view.findViewById(R.id.userdic_value_del);
+			userdicDel.setOnClickListener(v -> {
+				if ((openPage==0)||(openPage==1)) {
+					if (mUserDic == null) return;
+					final UserDicEntry ude = mUserDic.get(position);
+					mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, () -> {
+						if (ude.getThisIsDSHE()) {
+							DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+							dshe.setSearch_text(ude.getDic_word());
+							activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+						} else
+							activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+						mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
+						mUserDic.remove(ude);
+						listUpdated();
+						mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+					});
+				}
+				if (openPage==2) {
+					final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
+					mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
+						@Override
+						public void run() {
+							activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+							mDicSearchHistory.remove(dshe);
+							listUpdated();
+							mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+						}
+					});
 				}
 			});
 			mCoolReader.tintViewIcons(view,true);
@@ -445,56 +439,36 @@ public class UserDicDlg extends BaseDialog {
 		btnFake.requestFocus();
 		setFlingHandlers(mList, null, null);
 
-		searchButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				checkedCallback(null);
+		searchButton.setOnClickListener(v -> checkedCallback(null));
+
+		btnPage.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if ( isChecked ) {
+				checkedCallback(btnPage);
+			}
+		});
+		btnBook.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if ( isChecked ) {
+				checkedCallback(btnBook);
+			}
+		});
+		btnAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if ( isChecked ) {
+				checkedCallback(btnAll);
 			}
 		});
 
-		btnPage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if ( isChecked ) {
-					checkedCallback(btnPage);
-				}
-			}
-		});
-		btnBook.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if ( isChecked ) {
-					checkedCallback(btnBook);
-				}
-			}
-		});
-		btnAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if ( isChecked ) {
-					checkedCallback(btnAll);
-				}
-			}
+		btnUserDic.setOnClickListener(v -> {
+			setChecked(btnUserDic);
+			checkedCallback(null);
 		});
 
-		btnUserDic.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnUserDic);
-				checkedCallback(null);
-			}
+		btnCitation.setOnClickListener(v -> {
+			setChecked(btnCitation);
+			checkedCallback(null);
 		});
-
-		btnCitation.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnCitation);
-				checkedCallback(null);
-			}
-		});
-		btnDicSearchHistory.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setChecked(btnDicSearchHistory);
-				checkedCallback(null);
-			}
+		btnDicSearchHistory.setOnClickListener(v -> {
+			setChecked(btnDicSearchHistory);
+			checkedCallback(null);
 		});
 		checkedCallback(null);
 		searchButton.requestFocus();

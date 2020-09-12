@@ -62,13 +62,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 	public void showItemPopupMenu() {
 		mActivity.registerForContextMenu(mActivity.contentView);
-		mActivity.contentView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-			@Override
-			public void onCreateContextMenu(ContextMenu menu, View v,
-											ContextMenu.ContextMenuInfo menuInfo) {
-				mListView.createContextMenu(menu);
-			}
-		});
+		mActivity.contentView.setOnCreateContextMenuListener((menu, v, menuInfo) -> mListView.createContextMenu(menu));
 		mActivity.contentView.showContextMenu();
 	}
 
@@ -114,12 +108,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				boolean bookInfoDialogEnabled = true; // TODO: it's for debug
 				if (!item.isDirectory && !item.isOPDSBook() && bookInfoDialogEnabled && !item.isOnlineCatalogPluginDir()) {
 					if(longAction == 0) {
-						Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, new History.BookInfoLoadedCallback() {
-							@Override
-							public void onBookInfoLoaded(BookInfo bookInfo) {
-								BookInfo bi = new BookInfo(item);
-								mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered, null);
-							}
+						Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, bookInfo -> {
+							BookInfo bi = new BookInfo(item);
+							mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, currDirectoryFiltered, null);
 						});
 						return true;
 					}
@@ -1388,7 +1379,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 					FileInfo downloadDir;
 					@Override
-					public File onDownloadStart(String type, String url) {
+					public File onDownloadStart(String type, String initial_url, String url) {
 						//mEngine.showProgress(0, "Downloading " + url);
 						//mActivity.showToast("Starting download of " + type + " from " + url);
 						log.d("onDownloadStart: called for " + type + " " + url );
@@ -1413,7 +1404,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					}
 
 					@Override
-					public void onDownloadEnd(String type, String url, File file) {
+					public void onDownloadEnd(String type, String initial_url, String url, File file) {
                         if (DeviceInfo.EINK_SONY) {
                             SonyBookSelector selector = new SonyBookSelector(mActivity);
                             selector.notifyScanner(file.getAbsolutePath());
@@ -1449,7 +1440,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						final FileInfo item = item1;
 						log.d("onDownloadEnd: sPathZ = " + sPathZ);
 						BackgroundThread.ensureGUI();
-						item.opdsLink = url;
+						item.opdsLink = initial_url;
 						fileOrDir.pathnameR = item.pathname;
 						fileOrDir.arcnameR = item.arcname;
 						fileOrDir.pathR = item.path;

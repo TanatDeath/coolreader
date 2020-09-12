@@ -812,12 +812,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		lblMotionWd = (TextView) panel.findViewById(R.id.lbl_motion_wd);
 		lblMotionWd.setText(R.string.wd_sett);
 		lblMotionWd.setPaintFlags(lblMotionWd.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-		lblMotionWd.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_MOTION_TIMEOUT);
-			}
-		});
+		lblMotionWd.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_MOTION_TIMEOUT));
 		playPauseButton = panel.findViewById(R.id.tts_play_pause);
 		playPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
@@ -855,11 +850,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.tts_forward).setOnClickListener(v -> jumpToSentence( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE ));
 		mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.tts_stop).setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				stopAndClose();
-			}
-		});
+		mPanel.findViewById(R.id.tts_stop).setOnClickListener(v -> stopAndClose());
 		mPanel.setFocusable(true);
 		mPanel.setEnabled(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {

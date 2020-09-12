@@ -339,16 +339,13 @@ public class DicToastView {
         }
         Toast t = queue.poll();
         window = new PopupWindow(t.anchor.getContext());
-        window.setTouchInterceptor(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                    window.dismiss();
-                    showing.compareAndSet(true, false);
-                    return true;
-                }
-                return false;
+        window.setTouchInterceptor((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                window.dismiss();
+                showing.compareAndSet(true, false);
+                return true;
             }
+            return false;
         });
         curToast = t;
         if (t.arrWA == null) simpleToast(t);
@@ -400,6 +397,7 @@ public class DicToastView {
                      Dictionaries.WIKI_FIND_LIST, t.mUseFirstLink);
             mHandler.postDelayed(handleDismiss, 100);
         });
+        if (t.dicType != IS_WIKI) ((ViewGroup)tvMore.getParent()).removeView(tvMore);
         //tvClose.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
         //tvFull.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -429,13 +427,15 @@ public class DicToastView {
             mActivity.startActivity(i);
             mHandler.postDelayed(handleDismiss, 100);
         });
+            if (t.dicType != IS_WIKI) ((ViewGroup)tvFullWeb.getParent()).removeView(tvFullWeb);
         if ((t.mCurAction == Dictionaries.WIKI_SHOW_PAGE_FULL_ID)||
-                (t.mCurAction == Dictionaries.WIKI_FIND_TITLE_FULL))
+                (t.mCurAction == Dictionaries.WIKI_FIND_TITLE_FULL)||
+                (t.dicType != IS_WIKI))
             ((ViewGroup) tvFull.getParent()).removeView(tvFull);
-        if (t.dicType != IS_WIKI) {
-            ((ViewGroup) tr1.getParent()).removeView(tr1);
-            ((ViewGroup) tr2.getParent()).removeView(tr2);
-        }
+        //if (t.dicType != IS_WIKI) {
+        //    ((ViewGroup) tr1.getParent()).removeView(tr1);
+        //    ((ViewGroup) tr2.getParent()).removeView(tr2);
+        //}
         LinearLayout toast_ll = (LinearLayout) window.getContentView().findViewById(R.id.dic_toast_ll);
         TextView tv = null;
         FlowTextView tv2 = null;
@@ -558,20 +558,17 @@ public class DicToastView {
                 showing.compareAndSet(true, false);
             });
             ImageButton btnToUserDic = (ImageButton) window.getContentView().findViewById(R.id.btn_to_user_dic);
-            btnToUserDic.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (cr.getReaderView().mBookInfo!=null) {
-                        if (cr.getReaderView().lastSelection!=null) {
-                            if (!cr.getReaderView().lastSelection.isEmpty()) {
-                                cr.getReaderView().clearSelection();
-                                cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
-                            }
+            btnToUserDic.setOnClickListener(v -> {
+                if (cr.getReaderView().mBookInfo!=null) {
+                    if (cr.getReaderView().lastSelection!=null) {
+                        if (!cr.getReaderView().lastSelection.isEmpty()) {
+                            cr.getReaderView().clearSelection();
+                            cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
                         }
-                    };
-                    window.dismiss();
-                    showing.compareAndSet(true, false);
-                }
+                    }
+                };
+                window.dismiss();
+                showing.compareAndSet(true, false);
             });
             ImageButton btnCopyToCb = window.getContentView().findViewById(R.id.btn_copy_to_cb);
             btnCopyToCb.setOnClickListener(v -> {
@@ -618,55 +615,46 @@ public class DicToastView {
 
                     }
                 });
-                ImageButton btnTransl = (ImageButton) window.getContentView().findViewById(R.id.btnTransl);
-                btnTransl.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (cr.getReaderView().mBookInfo!=null) {
-                            String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
-                            String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
-                            FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
-                            FileInfo dfi = fi.parent;
-                            if (dfi == null) {
-                                dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-                            }
-                            if (dfi != null) {
-                                cr.editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
-                            }
-                        };
-                        window.dismiss();
-                        showing.compareAndSet(true, false);
-                    }
-                });
-                ImageButton btnToUserDic = (ImageButton) window.getContentView().findViewById(R.id.btn_to_user_dic);
-                btnToUserDic.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (cr.getReaderView().mBookInfo!=null) {
-                            if (cr.getReaderView().lastSelection!=null) {
-                                if (!cr.getReaderView().lastSelection.isEmpty()) {
-                                    cr.getReaderView().clearSelection();
-                                    cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
-                                }
-                            }
-                        };
-                        window.dismiss();
-                        showing.compareAndSet(true, false);
-                    }
-                });
-                ImageButton btnCopyToCb = (ImageButton) window.getContentView().findViewById(R.id.btn_copy_to_cb);
-                btnCopyToCb.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ClipboardManager cm = mActivity.getClipboardmanager();
-                        String s = StrUtils.getNonEmptyStr(t.msg,true);
-                        if (cr.getReaderView().lastSelection != null) {
-                            if (s.startsWith(cr.getReaderView().lastSelection.text+":")) s = s.substring(cr.getReaderView().lastSelection.text.length()+1);
+                ImageButton btnTransl = window.getContentView().findViewById(R.id.btnTransl);
+                btnTransl.setOnClickListener(v -> {
+                    if (cr.getReaderView().mBookInfo!=null) {
+                        String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
+                        String langf = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_from, true);
+                        FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+                        FileInfo dfi = fi.parent;
+                        if (dfi == null) {
+                            dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
                         }
-                        cm.setText(StrUtils.getNonEmptyStr(s,true));
-                        window.dismiss();
-                        showing.compareAndSet(true, false);
+                        if (dfi != null) {
+                            cr.editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+                        }
+                    };
+                    window.dismiss();
+                    showing.compareAndSet(true, false);
+                });
+                ImageButton btnToUserDic = window.getContentView().findViewById(R.id.btn_to_user_dic);
+                btnToUserDic.setOnClickListener(v -> {
+                    if (cr.getReaderView().mBookInfo!=null) {
+                        if (cr.getReaderView().lastSelection!=null) {
+                            if (!cr.getReaderView().lastSelection.isEmpty()) {
+                                cr.getReaderView().clearSelection();
+                                cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
+                            }
+                        }
+                    };
+                    window.dismiss();
+                    showing.compareAndSet(true, false);
+                });
+                ImageButton btnCopyToCb = window.getContentView().findViewById(R.id.btn_copy_to_cb);
+                btnCopyToCb.setOnClickListener(v -> {
+                    ClipboardManager cm = mActivity.getClipboardmanager();
+                    String s = StrUtils.getNonEmptyStr(t.msg,true);
+                    if (cr.getReaderView().lastSelection != null) {
+                        if (s.startsWith(cr.getReaderView().lastSelection.text+":")) s = s.substring(cr.getReaderView().lastSelection.text.length()+1);
                     }
+                    cm.setText(StrUtils.getNonEmptyStr(s,true));
+                    window.dismiss();
+                    showing.compareAndSet(true, false);
                 });
                 mActivity.tintViewIcons(yndRow,true);
             }
@@ -711,12 +699,7 @@ public class DicToastView {
         if (t.arrWA != null) sz = t.arrWA.size();
         if (sz == 0) ((ViewGroup) tvMore.getParent()).removeView(tvMore);
         //tvClose.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        tvClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mHandler.postDelayed(handleDismiss, 100);
-            }
-        });
+        tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
         ViewGroup body = window.getContentView().findViewById(R.id.articles_list);
         CoolReader cr=(CoolReader) mActivity;
         if (cr.getReaderView() != null)

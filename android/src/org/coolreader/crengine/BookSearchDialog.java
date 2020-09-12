@@ -96,8 +96,8 @@ public class BookSearchDialog extends BaseDialog {
 	}
 	
 	public interface SearchCallback {
-		public void start();
-		public void done( FileInfo[] results );
+		void start();
+		void done(FileInfo[] results);
 	}
 
 //	private static String addWildcard( String s, boolean before, boolean after ) {

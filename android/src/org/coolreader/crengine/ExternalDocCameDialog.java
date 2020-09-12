@@ -225,27 +225,27 @@ public class ExternalDocCameDialog extends BaseDialog {
 	}
 
 	private void hideExistingFileControls(ViewGroup view) {
-		TableLayout tl = (TableLayout) view.findViewById(R.id.table);
-		TableRow trowExists1 = (TableRow)view.findViewById(R.id.trow_file_exists1);
-		TableRow trowExists2 = (TableRow)view.findViewById(R.id.trow_file_exists2);
-		TableRow trowExists3 = (TableRow)view.findViewById(R.id.trow_file_exists3);
+		TableLayout tl = view.findViewById(R.id.table);
+		TableRow trowExists1 = view.findViewById(R.id.trow_file_exists1);
+		TableRow trowExists2 = view.findViewById(R.id.trow_file_exists2);
+		TableRow trowExists3 = view.findViewById(R.id.trow_file_exists3);
 		tl.removeView(trowExists1);
 		tl.removeView(trowExists2);
 		tl.removeView(trowExists3);
 	}
 
 	private void hideExistingHttpControls(ViewGroup view) {
-		TableLayout tl = (TableLayout) view.findViewById(R.id.table);
-		TableRow trowExists1 = (TableRow)view.findViewById(R.id.trow_text_or_html);
-		TableRow trowExists2 = (TableRow)view.findViewById(R.id.trow_text_or_html2);
+		TableLayout tl = view.findViewById(R.id.table);
+		TableRow trowExists1 = view.findViewById(R.id.trow_text_or_html);
+		TableRow trowExists2 = view.findViewById(R.id.trow_text_or_html2);
 		tl.removeView(trowExists1);
 		tl.removeView(trowExists2);
 	}
 
 	private void hideExistingFromStreamControls(ViewGroup view) {
-		TableLayout tl = (TableLayout) view.findViewById(R.id.table);
-		TableRow trowExists1 = (TableRow)view.findViewById(R.id.trow_from_stream1);
-		TableRow trowExists2 = (TableRow)view.findViewById(R.id.trow_from_stream2);
+		TableLayout tl = view.findViewById(R.id.table);
+		TableRow trowExists1 = view.findViewById(R.id.trow_from_stream1);
+		TableRow trowExists2 = view.findViewById(R.id.trow_from_stream2);
 		tl.removeView(trowExists1);
 		tl.removeView(trowExists2);
 	}
@@ -368,7 +368,26 @@ public class ExternalDocCameDialog extends BaseDialog {
 		return filesCopied;
 	};
 
-    @Override
+	int secondCountdown;
+
+	private void openExistingClick() {
+		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+				((CoolReader) activity).loadDocumentExt(sExistingName, sUri), 500));
+		onPositiveButtonClick();
+	}
+	private void countdownTick() {
+		secondCountdown--;
+		if (secondCountdown>0) {
+			btnOpenExisting.setText(activity.getString(R.string.open_existing) + " (" + secondCountdown + ")");
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+							countdownTick(),
+					1000));
+		} else {
+			openExistingClick();
+		}
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -382,27 +401,35 @@ public class ExternalDocCameDialog extends BaseDialog {
 		int colorIcon = a.getColor(0, Color.GRAY);
 		int colorGrayC = a.getColor(1, Color.GRAY);
 		a.recycle();
-		tvExtPath = (TextView)view.findViewById(R.id.ext_path);
+		tvExtPath = view.findViewById(R.id.ext_path);
 		if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
 		tvExtPath.setText(sUri);
-		tvDocType = (TextView)view.findViewById(R.id.doc_type);
+		tvDocType = view.findViewById(R.id.doc_type);
 		tvDocType.setText(stype);
-		tvDownloadPath = (TextView)view.findViewById(R.id.download_path);
+		tvDownloadPath = view.findViewById(R.id.download_path);
 		downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
 		tvDownloadPath.setText(downlDir);
-		edtFileName = (EditText)view.findViewById(R.id.file_name);
+		edtFileName = view.findViewById(R.id.file_name);
 		String sBaseName = "";
-		if (uri != null)
-			sBaseName = StrUtils.getNonEmptyStr(queryName(activity.getApplicationContext().getContentResolver(),uri),true);
+		if (uri != null) {
+			sBaseName = StrUtils.getNonEmptyStr(queryName(activity.getApplicationContext().getContentResolver(), uri), true);
+			if (sBaseName.endsWith(".")) sBaseName = sBaseName.substring(0,sBaseName.length()-1);
+		}
 		String sDocFormat = DocumentFormat.extByMimeType(stype);
+		if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = Utils.getFileExtension(sBaseName);
 		if (uri == null) sDocFormat = "html";
 		final String sFDocFormat = sDocFormat;
 		if (sBaseName.endsWith("."+sDocFormat)) sBaseName = sBaseName.substring(0,sBaseName.length()-1-sDocFormat.length());
 		sExistingName = "";
 		if (StrUtils.isEmptyStr(sBaseName)) sBaseName = "CoolReader_Downloaded";
 		else {
-			File f = new File(downlDir+"/"+sBaseName+"."+sDocFormat);
-			if (f.exists()) sExistingName = downlDir+"/"+sBaseName+"."+sDocFormat;
+			if (!StrUtils.isEmptyStr(sDocFormat)) {
+				File f = new File(downlDir + "/" + sBaseName + "." + sDocFormat);
+				if (f.exists()) sExistingName = downlDir + "/" + sBaseName + "." + sDocFormat;
+			} else {
+				File f = new File(downlDir + "/" + sBaseName);
+				if (f.exists()) sExistingName = downlDir + "/" + sBaseName;
+			}
 		}
 		int i = 0;
 		Boolean exs = true;
@@ -422,65 +449,61 @@ public class ExternalDocCameDialog extends BaseDialog {
 		edtFileExt.setText("."+sDocFormat);
 		edtFileExt.setBackgroundColor(colorGrayCT);
 
-		btnOpenFromStream = (Button)view.findViewById(R.id.btn_open_from_stream);
+		btnOpenFromStream = view.findViewById(R.id.btn_open_from_stream);
 		setDashedButton(btnOpenFromStream);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
-		btnOpenFromStream.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (uri != null) {
-					//asdf
-					if (stype.equals("application/zip")) {
-						ContentResolver contentResolver = mActivity.getContentResolver();
-						InputStream inputStream = null;
-						ArrayList<String> arcFontNames = new ArrayList<String>();
-						try {
-							inputStream = contentResolver.openInputStream(uri);
-							ByteArrayOutputStream baos = Utils.inputStreamToBaos(inputStream);
-							InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
-							arcFontNames = getFontNames(is1);
-							if (arcFontNames.size()==0) {
-								final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-								BackgroundThread.instance().postBackground(() ->
-										BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
-								onPositiveButtonClick();
-							} else {
-								final ArrayList<String> arcFontNamesF = arcFontNames;
-								mActivity.askConfirmation(mActivity.getString(R.string.new_fonts,
-										String.valueOf(arcFontNames.size())), () -> {
-											InputStream is11 = new ByteArrayInputStream(baos.toByteArray());
-											int filesCopied = copyFonts(arcFontNamesF, is11);
-											mActivity.showToast(mActivity.getString(R.string.fonts_copied,
-													String.valueOf(filesCopied)));
-											//if (filesCopied>0) {
-											//}
-											onPositiveButtonClick();
-										}, () -> {
-											final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-											BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-													((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
-											onPositiveButtonClick();
-										});
-							}
-						} catch (Exception e) {
+		btnOpenFromStream.setOnClickListener(v -> {
+			if (uri != null) {
+				if (stype.equals("application/zip")) {
+					ContentResolver contentResolver = mActivity.getContentResolver();
+					InputStream inputStream = null;
+					ArrayList<String> arcFontNames = new ArrayList<String>();
+					try {
+						inputStream = contentResolver.openInputStream(uri);
+						ByteArrayOutputStream baos = Utils.inputStreamToBaos(inputStream);
+						InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+						arcFontNames = getFontNames(is1);
+						if (arcFontNames.size()==0) {
+							final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+							BackgroundThread.instance().postBackground(() ->
+									BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
+							onPositiveButtonClick();
+						} else {
+							final ArrayList<String> arcFontNamesF = arcFontNames;
+							mActivity.askConfirmation(mActivity.getString(R.string.new_fonts,
+									String.valueOf(arcFontNames.size())), () -> {
+										InputStream is11 = new ByteArrayInputStream(baos.toByteArray());
+										int filesCopied = copyFonts(arcFontNamesF, is11);
+										mActivity.showToast(mActivity.getString(R.string.fonts_copied,
+												String.valueOf(filesCopied)));
+										//if (filesCopied>0) {
+										//}
+										onPositiveButtonClick();
+									}, () -> {
+										final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+										BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+												((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
+										onPositiveButtonClick();
+									});
 						}
-					} else {
-						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-								((CoolReader) activity).loadDocumentFromUriExt(uri, sUri), 500));
-						onPositiveButtonClick();
+					} catch (Exception e) {
 					}
-				}
-				else {
-					if ((istream != null) && (bThisIsHTML)) {
-						BackgroundThread.instance().postBackground(() ->
-								BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri), 500));
-					}
-					if ((istreamTxt != null) && (!bThisIsHTML)) {
-						BackgroundThread.instance().postBackground(() ->
-								BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri), 500));
-					}
+				} else {
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+							((CoolReader) activity).loadDocumentFromUriExt(uri, sUri), 500));
 					onPositiveButtonClick();
 				}
+			}
+			else {
+				if ((istream != null) && (bThisIsHTML)) {
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri), 500));
+				}
+				if ((istreamTxt != null) && (!bThisIsHTML)) {
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri), 500));
+				}
+				onPositiveButtonClick();
 			}
 		});
 		// ODF file must be saved for later convert
@@ -488,88 +511,77 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnSave = (Button)view.findViewById(R.id.btn_save);
 		setDashedButton(btnSave);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
-		btnSave.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String fName = downlDir+"/"+edtFileName.getText()+edtFileExt.getText();
-				File fEx = new File(fName);
-				if (fEx.exists()) {
-					activity.showToast(activity.getString(R.string.pic_file_exists));
-				} else {
-					if (
-					    (uri != null) ||
-					    ((istream != null) && (bThisIsHTML)) ||
-					    ((istreamTxt != null) && (!bThisIsHTML))
-					) {
-						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-							FileOutputStream fos = null;
-							try {
-								fos = new FileOutputStream(fName);
-								BufferedOutputStream out = new BufferedOutputStream(fos);
-								InputStream in = null;
-								if (uri != null) in = activity.getApplicationContext().getContentResolver().openInputStream(uri);
-								if ((istream != null) && (bThisIsHTML)) in = istream;
-								if ((istreamTxt != null) && (!bThisIsHTML)) in = istreamTxt;
-								Utils.copyStreamContent(out, in);
-								out.flush();
-								fos.getFD().sync();
-								if (stype.contains("opendocument")) {
-									DocConvertDialog dlgConv = new DocConvertDialog((CoolReader)activity, fName);
-									dlgConv.show();
-								} else {
-									BackgroundThread.instance().postBackground(() ->
-											BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500));
-								}
-								onPositiveButtonClick();
-							} catch (Exception e) {
-								log.e("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
-								activity.showToast("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
+		btnSave.setOnClickListener(v -> {
+			String fName = downlDir+"/"+edtFileName.getText()+edtFileExt.getText();
+			File fEx = new File(fName);
+			if (fEx.exists()) {
+				activity.showToast(activity.getString(R.string.pic_file_exists));
+			} else {
+				if (
+					(uri != null) ||
+					((istream != null) && (bThisIsHTML)) ||
+					((istreamTxt != null) && (!bThisIsHTML))
+				) {
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+						FileOutputStream fos = null;
+						try {
+							fos = new FileOutputStream(fName);
+							BufferedOutputStream out = new BufferedOutputStream(fos);
+							InputStream in = null;
+							if (uri != null) in = activity.getApplicationContext().getContentResolver().openInputStream(uri);
+							if ((istream != null) && (bThisIsHTML)) in = istream;
+							if ((istreamTxt != null) && (!bThisIsHTML)) in = istreamTxt;
+							Utils.copyStreamContent(out, in);
+							out.flush();
+							fos.getFD().sync();
+							if (stype.contains("opendocument")) {
+								DocConvertDialog dlgConv = new DocConvertDialog((CoolReader)activity, fName);
+								dlgConv.show();
+							} else {
+								BackgroundThread.instance().postBackground(() ->
+										BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500));
 							}
-						}, 200));
-					}
+							onPositiveButtonClick();
+						} catch (Exception e) {
+							log.e("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
+							activity.showToast("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
+						}
+					}, 200));
 				}
 			}
 		});
-		tvExistingPath = (TextView)view.findViewById(R.id.existing_path);
+		tvExistingPath = view.findViewById(R.id.existing_path);
 		tvExistingPath.setText(sExistingName);
-		btnOpenExisting = (Button)view.findViewById(R.id.btn_open_existing);
+		btnOpenExisting = view.findViewById(R.id.btn_open_existing);
 		Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
 		btnOpenExisting.setTypeface(boldTypeface);
 		setDashedButton(btnOpenExisting);
-		btnOpenExisting.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-						((CoolReader) activity).loadDocumentExt(sExistingName, sUri), 500));
-				onPositiveButtonClick();
-			}
+		btnOpenExisting.setOnClickListener(v -> {
+			openExistingClick();
 		});
-		if (StrUtils.isEmptyStr(sExistingName)) hideExistingFileControls(view);
+		if (StrUtils.isEmptyStr(sExistingName))
+			hideExistingFileControls(view);
+		else {
+			secondCountdown = 10;
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					countdownTick(),
+					1000));
+		}
 
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
 
-		btnAsHTML = (Button)view.findViewById(R.id.btn_as_html);
+		btnAsHTML = view.findViewById(R.id.btn_as_html);
 		btnAsHTML.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 
 		setDashedButton(btnAsHTML);
-		btnAsHTML.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				switchHTML(true);
-			}
-		});
-		btnAsText = (Button)view.findViewById(R.id.btn_as_text);
+		btnAsHTML.setOnClickListener(v -> switchHTML(true));
+		btnAsText = view.findViewById(R.id.btn_as_text);
 		btnAsText.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 
 		setDashedButton(btnAsText);
-		btnAsText.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				switchHTML(false);
-			}
-		});
+		btnAsText.setOnClickListener(v -> switchHTML(false));
 		if (uri != null) hideExistingHttpControls(view);
 			else {
 				switchHTML(true);

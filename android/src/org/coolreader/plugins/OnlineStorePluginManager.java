@@ -11,7 +11,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class OnlineStorePluginManager {
-	private static Map<String, OnlineStoreWrapper> pluginMap = new HashMap<String, OnlineStoreWrapper>();
+	private static Map<String, OnlineStoreWrapper> pluginMap = new HashMap<>();
 	public static OnlineStoreWrapper getPlugin(Activity activity, String path) {
 		if (!path.startsWith(FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX))
 			path = FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + path;

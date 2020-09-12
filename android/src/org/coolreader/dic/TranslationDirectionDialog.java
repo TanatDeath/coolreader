@@ -177,31 +177,25 @@ public class TranslationDirectionDialog extends BaseDialog {
 				Button btnFrom = (Button) view.findViewById(R.id.transl_item_lanf_from);
 				btnFrom.setBackgroundColor(colorGrayCT2);
 				final String[] sArrS = arrS;
-				btnFrom.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						String s = "";
-						if (sArrS.length > 2) s = sArrS[2];
-						if (StrUtils.isEmptyStr(s)) {
-							if (sArrS.length > 3) s = sArrS[3];
-						}
-						if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(sArrS[2]);
+				btnFrom.setOnClickListener(v -> {
+					String s = "";
+					if (sArrS.length > 2) s = sArrS[2];
+					if (StrUtils.isEmptyStr(s)) {
+						if (sArrS.length > 3) s = sArrS[3];
 					}
+					if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(sArrS[2]);
 				});
 				btnFrom.setTextColor(colorIcon);
-				Button btnTo = (Button) view.findViewById(R.id.transl_item_lanf_to);
+				Button btnTo = view.findViewById(R.id.transl_item_lanf_to);
 				btnTo.setBackgroundColor(colorGrayCT2);
 				btnTo.setTextColor(colorIcon);
-				btnTo.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						String s = "";
-						if (sArrS.length > 2) s = sArrS[2];
-						if (StrUtils.isEmptyStr(s)) {
-							if (sArrS.length > 3) s = sArrS[3];
-						}
-						if (!StrUtils.isEmptyStr(s)) editTexts.get(1).setText(sArrS[2]);
+				btnTo.setOnClickListener(v -> {
+					String s = "";
+					if (sArrS.length > 2) s = sArrS[2];
+					if (StrUtils.isEmptyStr(s)) {
+						if (sArrS.length > 3) s = sArrS[3];
 					}
+					if (!StrUtils.isEmptyStr(s)) editTexts.get(1).setText(sArrS[2]);
 				});
 			} else {
 				int res = R.layout.transl_item_ynd;
@@ -236,21 +230,18 @@ public class TranslationDirectionDialog extends BaseDialog {
 				a.recycle();
 				int colorGrayCT = Color.argb(30, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
 				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
-				Button btnFrom = (Button) view.findViewById(R.id.transl_item_lanf_select);
+				Button btnFrom = view.findViewById(R.id.transl_item_lanf_select);
 				btnFrom.setBackgroundColor(colorGrayCT2);
 				if (arrS != null) {
 					if (arrS[0].contains("-")) {
-						btnFrom.setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								String[] arrS2 = arrS[0].split("-");
-								String s = "";
-								if (arrS2.length > 0) s = arrS2[0];
-								if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(arrS2[0]);
-								s = "";
-								if (arrS2.length > 0) s = arrS2[1];
-								if (!StrUtils.isEmptyStr(s)) editTexts.get(1).setText(arrS2[1]);
-							}
+						btnFrom.setOnClickListener(v -> {
+							String[] arrS2 = arrS[0].split("-");
+							String s = "";
+							if (arrS2.length > 0) s = arrS2[0];
+							if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(arrS2[0]);
+							s = "";
+							if (arrS2.length > 0) s = arrS2[1];
+							if (!StrUtils.isEmptyStr(s)) editTexts.get(1).setText(arrS2[1]);
 						});
 					}
 				}
@@ -292,13 +283,9 @@ public class TranslationDirectionDialog extends BaseDialog {
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
 			setAdapter(new TranslationDirectionDialog.TranslListAdapter());
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-											   int position, long arg3) {
-					//mEditView.setText(mTransl.get(position));
-					return true;
-				}
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				//mEditView.setText(mTransl.get(position));
+				return true;
 			});
 		}
 
@@ -413,12 +400,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 						a.recycle();
 						tv1.setMaxLines(2);
 						tv1.setTextColor(colorIcon);
-						tv1.setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								editTexts.get(0).setText("#");
-							}
-						});
+						tv1.setOnClickListener(v -> editTexts.get(0).setText("#"));
 						if (mCoolReader.getReaderView() != null)
 						  if (mCoolReader.getReaderView().getLastsetWidth()>0)
 						    tv1.setMaxWidth(mCoolReader.getReaderView().getLastsetWidth()/2);
@@ -489,13 +471,10 @@ public class TranslationDirectionDialog extends BaseDialog {
 		swButton.setBackgroundColor(colorGrayCT2);
 		swButton.setTextColor(colorIcon);
 		ll.addView(swButton);
-		swButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String s = editTexts.get(0).getText().toString();
-				editTexts.get(0).setText(editTexts.get(1).getText().toString());
-				editTexts.get(1).setText(s);
-			}
+		swButton.setOnClickListener(v -> {
+			String s = editTexts.get(0).getText().toString();
+			editTexts.get(0).setText(editTexts.get(1).getText().toString());
+			editTexts.get(1).setText(s);
 		});
 		LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -507,24 +486,14 @@ public class TranslationDirectionDialog extends BaseDialog {
 		yndButton.setBackgroundColor(colorGrayCT2);
 		yndButton.setTextColor(colorIcon);
 		ll.addView(yndButton);
-		yndButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				yndButtonClick();
-			}
-		});
+		yndButton.setOnClickListener(v -> yndButtonClick());
 		Button lingvoButton = new Button(mCoolReader);
 		lingvoButton.setText(mCoolReader.getString(R.string.lingvo_translate_dics_info));
 		lingvoButton.setBackgroundColor(colorGrayCT2);
 		lingvoButton.setTextColor(colorIcon);
 		lingvoButton.setLayoutParams(llp);
 		ll.addView(lingvoButton);
-		lingvoButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				lingvoButtonClick();
-			}
-		});
+		lingvoButton.setOnClickListener(v -> lingvoButtonClick());
 		tl.addView(ll);
 		mList = new TranslList(activity, false);
 		tl.addView(mList);
@@ -541,11 +510,11 @@ public class TranslationDirectionDialog extends BaseDialog {
 		ArrayList<String> res = new ArrayList<String>();
 		for (int i = 1; i<10; i++) {
 			if (i == 1) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit1);
+				EditText et = view.findViewById(R.id.some_value_edit1);
 				if (et != null) res.add(et.getText().toString());
 			}
 			if (i == 2) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit2);
+				EditText et = view.findViewById(R.id.some_value_edit2);
 				if (et != null) res.add(et.getText().toString());
 			}
 		}

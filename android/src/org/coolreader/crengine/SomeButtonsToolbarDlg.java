@@ -76,22 +76,16 @@ public class SomeButtonsToolbarDlg {
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.somebuttons_toolbar, null));
 		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-		//mReaderView.getS
-
 		mWindow = new PopupWindow( mAnchor.getContext() );
 
-		mWindow.setTouchInterceptor(new OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
-					if (mCloseOnTouchOutside) {
-						closeDialog();
-						return true;
-					}
+		mWindow.setTouchInterceptor((v, event) -> {
+			if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
+				if (mCloseOnTouchOutside) {
+					closeDialog();
+					return true;
 				}
-				return false;
 			}
+			return false;
 		});
 		//super(panel);
 		int colorGrayC;
@@ -168,11 +162,9 @@ public class SomeButtonsToolbarDlg {
 					dicButton.setMaxLines(3);
 					dicButton.setEllipsize(TextUtils.TruncateAt.END);
 					llButtonsPanel.addView(dicButton);
-					dicButton.setOnClickListener(new OnClickListener() {
-						public void onClick(View v) {
-							if (callback!=null) callback.done(o, ((Button) v).getText().toString());
-							closeDialog();
-						}
+					dicButton.setOnClickListener(v -> {
+						if (callback!=null) callback.done(o, ((Button) v).getText().toString());
+						closeDialog();
 					});
 				}
 				LinearLayout llBlank = new LinearLayout(mCoolReader);
@@ -188,31 +180,24 @@ public class SomeButtonsToolbarDlg {
 		}
 
 		mPanel.setFocusable(true);
-		mPanel.setOnKeyListener( new OnKeyListener() {
-
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if ( event.getAction()==KeyEvent.ACTION_UP ) {
-					switch ( keyCode ) {
-					case KeyEvent.KEYCODE_BACK:
-						closeDialog();
-						return true;
-					}
-				} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
-						switch ( keyCode ) {
-						}
-					}
-				if ( keyCode == KeyEvent.KEYCODE_BACK) {
+		mPanel.setOnKeyListener((v, keyCode, event) -> {
+			if ( event.getAction()==KeyEvent.ACTION_UP ) {
+				switch ( keyCode ) {
+				case KeyEvent.KEYCODE_BACK:
+					closeDialog();
 					return true;
 				}
-				return false;
+			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
+					switch ( keyCode ) {
+					}
+				}
+			if ( keyCode == KeyEvent.KEYCODE_BACK) {
+				return true;
 			}
-			
+			return false;
 		});
 
-		mWindow.setOnDismissListener(new OnDismissListener() {
-			@Override
-			public void onDismiss() {
-			}
+		mWindow.setOnDismissListener(() -> {
 		});
 		
 		mWindow.setBackgroundDrawable(new BitmapDrawable());

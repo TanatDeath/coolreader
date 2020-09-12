@@ -707,13 +707,10 @@ public class GoogleDriveRemoteAccess implements RemoteAccess {
 			FileMetadataList metalist = getFileMetadataList(fileList);
 			if (null != completeListener)
 				completeListener.onCompleted(metalist);
-		}).addOnFailureListener(new OnFailureListener() {
-			@Override
-			public void onFailure(@NonNull Exception e) {
-				if (null != completeListener) {
-					completeListener.onCompleted(null);
-					completeListener.onFailed(e);
-				}
+		}).addOnFailureListener(e -> {
+			if (null != completeListener) {
+				completeListener.onCompleted(null);
+				completeListener.onFailed(e);
 			}
 		});
 	}
@@ -904,13 +901,11 @@ public class GoogleDriveRemoteAccess implements RemoteAccess {
 			public void onCompleted(final FileMetadata meta) {
 				if (null != meta) {
 					// File found, get his content
-					Tasks.call(m_executor, () -> m_googleDriveService.files().get(meta.id).executeMediaAsInputStream()).addOnSuccessListener(m_executor, new OnSuccessListener<InputStream>() {
-						@Override
-						public void onSuccess(InputStream inputStream) {
+					Tasks.call(m_executor, () -> m_googleDriveService.files().get(meta.id).executeMediaAsInputStream()).addOnSuccessListener(m_executor,
+						inputStream -> {
 							if (null != completeListener) {
 								completeListener.onCompleted(inputStream);
 							}
-						}
 					}).addOnFailureListener(e -> {
 						if (null != completeListener) {
 							completeListener.onCompleted(null);
@@ -981,14 +976,11 @@ public class GoogleDriveRemoteAccess implements RemoteAccess {
 	}
 
 	private void delete_impl(final FileMetadata meta, final String parentPath, final OnOperationCompleteListener<Boolean> completeListener) {
-		Tasks.call(m_executor, () -> m_googleDriveService.files().delete(meta.id).execute()).addOnSuccessListener(new OnSuccessListener<Void>() {
-			@Override
-			public void onSuccess(Void res) {
-				synchronized (m_cacheLocker) {
-					m_folderListCache.update(parentPath, null);
-				}
-				completeListener.onCompleted(true);
+		Tasks.call(m_executor, () -> m_googleDriveService.files().delete(meta.id).execute()).addOnSuccessListener(res -> {
+			synchronized (m_cacheLocker) {
+				m_folderListCache.update(parentPath, null);
 			}
+			completeListener.onCompleted(true);
 		}).addOnFailureListener(e -> {
 			if (null != completeListener) {
 				completeListener.onCompleted(false);

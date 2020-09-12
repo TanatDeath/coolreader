@@ -1378,7 +1378,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			//ErrorDialog dlg = new ErrorDialog(this, getString(R.string.error), getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()));
 			//dlg.show();
 		} else {
-			if (settingsCanBeMigratedLastInd>=0) {
+			if (settingsCanBeMigratedLastInd >= 0) {
 				showNotice(R.string.note1_can_be_migrated,
 						() -> {},
 						() -> {});
@@ -1826,7 +1826,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void loadDocumentFromUri(Uri uri, Runnable doneCallback, Runnable errorCallback) {
 		runInReader(() -> {
 			ContentResolver contentResolver = getContentResolver();
-			try (InputStream inputStream = contentResolver.openInputStream(uri)) {
+			try {
+				InputStream inputStream = contentResolver.openInputStream(uri);
 				// Don't save the last opened document from the stream in the cloud, since we still cannot open it later in this program.
 				mReaderView.loadDocumentFromStream(inputStream, uri.getPath(), doneCallback, errorCallback);
 			} catch (IOException e) {

@@ -36,6 +36,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
 public class Utils {
@@ -531,7 +532,7 @@ public class Utils {
 		canvas.drawRect(new Rect(rect.left + 1, rect.bottom - 1, rect.right - 1, rect.bottom), paint);
 	}
 
-	public static void drawFrame2(Canvas canvas, Rect rect, Paint paint, int thick) {
+	public static void drawFrame2(Canvas canvas, Rect rect, Paint paint, int thick, float textSize, String sText) {
 		for (int i = 1; i<=thick; i++) {
 			int marg = 2;
 			int l = rect.left+marg;
@@ -542,9 +543,12 @@ public class Utils {
 			canvas.drawRect(new Rect(l, t + thick, l + thick, b), paint);
 			canvas.drawRect(new Rect(r - thick, t + thick, r, b), paint);
 			canvas.drawRect(new Rect(l + thick, b - thick, r - thick, b), paint);
+			canvas.drawText("test text", 0, 0, paint);
+			paint.setTextSize(textSize);
+			canvas.drawText(sText, 20, b - textSize + 10, paint);
 		}
 	}
-	public static void drawFrame3(Canvas canvas, Rect rect, Paint paint, int thick) {
+	public static void drawFrame3(Canvas canvas, Rect rect, Paint paint, int thick, float textSize, String sText) {
 		for (int i = 1; i<=thick; i++) {
 			int marg = 2;
 			int l = rect.left+marg;
@@ -561,6 +565,8 @@ public class Utils {
 				canvas.drawRect(new Rect(l, t  + (ii * 20), l + thick, t + (ii * 20) + 10), paint);
 				canvas.drawRect(new Rect(r - thick, t + (ii * 20), r, t + (ii * 20) + 10), paint);
 			}
+			paint.setTextSize(textSize);
+			canvas.drawText(sText, 20, b - textSize + 10, paint);
 		}
 	}
 	
@@ -826,4 +832,18 @@ public class Utils {
 		}
 		return null;
 	}
+
+	public static String getFileExtension(String fileName) {
+		if (StrUtils.isEmptyStr(fileName)) {
+			return "";
+		} else {
+			int index = fileName.lastIndexOf('.');
+			return index >= 0 ? fileName.substring(index + 1).toLowerCase() : "";
+		}
+	}
+
+	public static String getFileExtension(File file) {
+		return getFileExtension(file.getName());
+	}
+
 }

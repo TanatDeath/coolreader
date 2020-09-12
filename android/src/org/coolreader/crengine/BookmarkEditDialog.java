@@ -191,13 +191,9 @@ public class BookmarkEditDialog extends BaseDialog {
 
 		final CoolReader cr = activity;
 
-		commentLabel.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if (getChecked(btnUserDic))
-					cr.showToast(R.string.dlg_bookmark_info);
-			}
+		commentLabel.setOnClickListener(v -> {
+			if (getChecked(btnUserDic))
+				cr.showToast(R.string.dlg_bookmark_info);
 		});
 
 		posEdit = (EditText)view.findViewById(R.id.position_text);
@@ -250,12 +246,9 @@ public class BookmarkEditDialog extends BaseDialog {
 					commentEdit.setText(cbtextFull);
 			}
 		});
-		lblBookmarkLink.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if ((mIsNew)&&(mBookmark.getType()==Bookmark.TYPE_INTERNAL_LINK))
-					activity.showBookmarksDialog(true, BookmarkEditDialog.this);
-			}
+		lblBookmarkLink.setOnClickListener(v -> {
+			if ((mIsNew)&&(mBookmark.getType()==Bookmark.TYPE_INTERNAL_LINK))
+				activity.showBookmarksDialog(true, BookmarkEditDialog.this);
 		});
 		commentEdit = (EditText)view.findViewById(R.id.comment_edit);
 		String postext = mBookmark.getPercent()/100 + "%";

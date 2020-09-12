@@ -108,11 +108,9 @@ public class ToastView {
             final String msg1 = msg;
             if (mActivity != null)
                 if (mActivity instanceof CoolReader) {
-                    tv.setOnClickListener(new View.OnClickListener() {
-                        public void onClick(View v) {
-                            DictsDlg dlg = new DictsDlg((CoolReader) mActivity, ((CoolReader) mActivity).getReaderView(), msg1, null);
-                            dlg.show();
-                        }
+                    tv.setOnClickListener(v -> {
+                        DictsDlg dlg = new DictsDlg((CoolReader) mActivity, ((CoolReader) mActivity).getReaderView(), msg1, null);
+                        dlg.show();
                     });
                 }
         }

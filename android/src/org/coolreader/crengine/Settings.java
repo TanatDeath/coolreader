@@ -176,6 +176,7 @@ public interface Settings {
 	public static final String PROP_CLOUD_WIKI1_ADDR = "app.cloud.wiki1";
 	public static final String PROP_CLOUD_WIKI2_ADDR = "app.cloud.wiki2";
 	public static final String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
+	public static final String PROP_CLOUD_YND_TRANSLATE_OPTIONS = "app.cloud.ynd.translate.options";
 	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";

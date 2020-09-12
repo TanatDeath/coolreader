@@ -106,36 +106,30 @@ public class DocConvertDialog extends BaseDialog {
 				});
 		int colorIcon = a.getColor(0, Color.GRAY);
 		int colorGrayC = a.getColor(1, Color.GRAY);
-		btnOpenExisting = (Button)view.findViewById(R.id.btn_open_existing);
+		btnOpenExisting = view.findViewById(R.id.btn_open_existing);
 		setDashedButton(btnOpenExisting);
-		btnConv = (Button)view.findViewById(R.id.btn_conv);
+		btnConv = view.findViewById(R.id.btn_conv);
 		setDashedButton(btnConv);
 		FileInfo item = new FileInfo(fileToOpen);
 		((TextView)view.findViewById(R.id.conv_doc_path)).setText(fileToOpen);
 		final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
 		final String sConvPath = downloadDir.pathname+"/converted/";
 		sConvFile = sConvPath + item.getFilename()+".html";
-		btnOpenExisting.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				((CoolReader) activity).loadDocumentExt(sConvFile, "");
-				onPositiveButtonClick();
-			}
+		btnOpenExisting.setOnClickListener(v -> {
+			((CoolReader) activity).loadDocumentExt(sConvFile, "");
+			onPositiveButtonClick();
 		});
-		btnConv.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				try {
-					log.i("Convert odt file");
-					ConvertOdtFormat.convertOdtFile(fileToOpen, sConvPath);
-					File f = new File(sConvFile);
-					if (f.exists()) {
-						((CoolReader) activity).loadDocumentExt(sConvFile, "");
-						onPositiveButtonClick();
-					}
-				} catch (Exception e) {
-					activity.showToast("exception while converting odt file");
+		btnConv.setOnClickListener(v -> {
+			try {
+				log.i("Convert odt file");
+				ConvertOdtFormat.convertOdtFile(fileToOpen, sConvPath);
+				File f = new File(sConvFile);
+				if (f.exists()) {
+					((CoolReader) activity).loadDocumentExt(sConvFile, "");
+					onPositiveButtonClick();
 				}
+			} catch (Exception e) {
+				activity.showToast("exception while converting odt file");
 			}
 		});
 		((TextView)view.findViewById(R.id.conv_path)).setText(sConvFile);

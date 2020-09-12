@@ -134,16 +134,14 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 		setupSeekBar(mSaturation, R.string.options_color_saturation, s, res);
 		setupSeekBar(mValue, R.string.options_color_brightness, v, res);
 
-		final EditText tvSearchText = (EditText)root.findViewById(R.id.search_text);
-		ImageButton ibSearch = (ImageButton)root.findViewById(R.id.btn_search);
-		ibSearch.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				tvSearchText.setText("");
-				currentFilter = "";
-				ColorPickerDialog.ColorListAdapter cla = new ColorPickerDialog.ColorListAdapter();
-				mList.setAdapter(cla);
-				cla.notifyDataSetChanged();
-			}
+		final EditText tvSearchText = root.findViewById(R.id.search_text);
+		ImageButton ibSearch = root.findViewById(R.id.btn_search);
+		ibSearch.setOnClickListener(v1 -> {
+			tvSearchText.setText("");
+			currentFilter = "";
+			ColorListAdapter cla = new ColorListAdapter();
+			mList.setAdapter(cla);
+			cla.notifyDataSetChanged();
 		});
 		tvSearchText.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -499,8 +497,8 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 			View view;
 			int res = R.layout.color_item;
 			view = mInflater.inflate(res, null);
-			TextView text1 = (TextView)view.findViewById(R.id.color_item_title_w);
-			TextView text2 = (TextView)view.findViewById(R.id.color_item_title_b);
+			TextView text1 = view.findViewById(R.id.color_item_title_w);
+			TextView text2 = view.findViewById(R.id.color_item_title_b);
 			int j=0;
 			String colorName = "undefined";
 			int c = 0;
