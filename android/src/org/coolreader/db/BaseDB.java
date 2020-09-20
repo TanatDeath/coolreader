@@ -139,6 +139,17 @@ public abstract class BaseDB {
 		if (bDML) flushAndTransaction();
 	}
 
+	public void execSQLIgnoreErrorsNoFlush(String... sqls) {
+		for (String sql : sqls) {
+			try {
+				mDB.execSQL(sql);
+			} catch (SQLException e) {
+				// ignore
+				Log.w("cr3db", "query failed, ignoring: " + sql);
+			}
+		}
+	}
+
 	protected void ensureOpened() {
 		if (!isOpened())
 			throw new DBRuntimeException("DB is not opened");

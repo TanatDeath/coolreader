@@ -11,6 +11,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.*;
 import org.coolreader.crengine.Properties;
+import org.coolreader.library.AuthorAlias;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 48;
+	public static final int DB_VERSION = 49;
 	@Override
 	protected boolean upgradeSchema() {
 		// When the database is just created, its version is 0.
@@ -183,11 +184,11 @@ public class MainDB extends BaseDB {
 					"book_cnt INTEGER"+
 					")");
 			// ====================================================================
-			if ( currentVersion<1 )
+			if (currentVersion < 1)
 				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN shortcut INTEGER DEFAULT 0");
-			if ( currentVersion<4 )
+			if (currentVersion < 4)
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN flags INTEGER DEFAULT 0");
-			if ( currentVersion<6 )
+			if (currentVersion < 6)
 				execSQL("CREATE TABLE IF NOT EXISTS opds_catalog (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "name VARCHAR NOT NULL COLLATE NOCASE, " +
@@ -307,11 +308,11 @@ public class MainDB extends BaseDB {
 
 				String sql = READ_FILEINFO_SQL + " WHERE file_create_time is null";
 				try (Cursor rs = mDB.rawQuery(sql, null)) {
-					if ( rs.moveToFirst() ) {
+					if (rs.moveToFirst()) {
 						do {
 							FileInfo fileInfo = new FileInfo();
-							readFileInfoFromCursor( fileInfo, rs );
-							if ( !fileInfo.fileExists() )
+							readFileInfoFromCursor(fileInfo, rs);
+							if (!fileInfo.fileExists())
 								continue;
 							long lm = fileInfo.fileLastModified();
 							execSQL("UPDATE book SET file_create_time="+ lm +" WHERE id=" + fileInfo.id);
@@ -360,7 +361,7 @@ public class MainDB extends BaseDB {
 				String sql = "SELECT id, pathname, format FROM book";
 				HashMap<Long, Long> formatsMap = new HashMap<>();
 				try (Cursor rs = mDB.rawQuery(sql, null)) {
-					if ( rs.moveToFirst() ) {
+					if (rs.moveToFirst()) {
 						do {
 							Long id = rs.getLong(0);
 							String pathname = rs.getString(1);
@@ -449,6 +450,25 @@ public class MainDB extends BaseDB {
 								"where (not (b.pathname like '@opds%')) and length(b.title)>=3 "+
 								"GROUP BY substr(b.title,1,3) ");
 			}
+			if (currentVersion < 49) {
+				execSQL("CREATE TABLE IF NOT EXISTS author_aliases (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+						"orig_text VARCHAR NOT NULL COLLATE NOCASE, " +
+						"alias_text VARCHAR NOT NULL COLLATE NOCASE " +
+						")");
+				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+						"author_aliases_orig_text_index ON author_aliases (orig_text, alias_text) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"author_aliases_alias_text_index ON author_aliases (alias_text) ");
+				// Это решил пока не делать
+//				execSQL("CREATE TABLE IF NOT EXISTS settings (" +
+//						"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+//						"author_aliases_size INTEGER, " +
+//						"author_aliases_crc INTEGER " +
+//						")");
+				// - нужна защита от повторной вставки
+				//execSQL("INSERT INTO settings (author_aliases_size, author_aliases_crc) values (0,0)");
+			}
 
 			//==============================================================
 			// add more updates above this line
@@ -472,7 +492,8 @@ public class MainDB extends BaseDB {
 				 + longQuery("SELECT count(*) FROM search_history") + " search_historys, "
 				 + longQuery("SELECT count(*) FROM user_dic") + " user_dics, "
 				 + longQuery("SELECT count(*) FROM dic_search_history") + " dic_search_historys, "
-				 + longQuery("SELECT count(*) FROM folder") + " folders"
+				 + longQuery("SELECT count(*) FROM folder") + " folders, "
+				 + longQuery("SELECT count(*) FROM author_aliases") + " author_aliases "
 		);
 	}
 
@@ -752,7 +773,7 @@ public class MainDB extends BaseDB {
 			Log.e("cr3", "exception while saving user dic", e);
 			return false;
 		} finally {
-			if ( rs!=null )
+			if (rs != null)
 				rs.close();
 		}
 		return true;
@@ -839,7 +860,7 @@ public class MainDB extends BaseDB {
 			Log.e("cr3", "exception while saving dic search history", e);
 			return false;
 		} finally {
-			if ( rs!=null )
+			if (rs != null)
 				rs.close();
 		}
 		return true;
@@ -864,7 +885,7 @@ public class MainDB extends BaseDB {
 		String sql = "SELECT search_text FROM search_history where book_fk=" + book.getFileInfo().id + " ORDER BY id desc";
 		ArrayList<String> list = new ArrayList<>();
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					String sHist = rs.getString(0);
 					list.add(sHist);
@@ -884,7 +905,7 @@ public class MainDB extends BaseDB {
 				" create_time, last_access_time, language, seen_count, coalesce(is_citation,0) as is_cit "+
 				" FROM user_dic";
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					UserDicEntry ude = new UserDicEntry();
 					ude.setId(rs.getLong(0));
@@ -921,7 +942,7 @@ public class MainDB extends BaseDB {
 						"order by last_access_time DESC "+
 						"  LIMIT 5000 ";
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
 					dshe.setId(rs.getLong(0));
@@ -952,7 +973,7 @@ public class MainDB extends BaseDB {
 				" FROM opds_catalog ORDER BY coalesce(was_error,0), last_usage DESC, name";
 		if (mDB == null) return false;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// remove existing entries
 				list.clear();
 				// read DB
@@ -1006,7 +1027,7 @@ public class MainDB extends BaseDB {
 		String sql = "SELECT id, path, position, filename FROM favorite_folders ORDER BY position, path";
         if (mDB == null) return list;
         try (Cursor rs = mDB.rawQuery(sql, null)) {
-            if ( rs.moveToFirst() ) {
+            if (rs.moveToFirst()) {
                 do {
                     Long id = rs.getLong(0);
                     String path = rs.getString(1);
@@ -1066,45 +1087,45 @@ public class MainDB extends BaseDB {
 		"id, type, percent, shortcut, time_stamp, " + 
 		"start_pos, end_pos, title_text, pos_text, comment_text, time_elapsed, link_pos " +
 		"FROM bookmark b ";
-	private void readBookmarkFromCursor( Bookmark v, Cursor rs )
+	private void readBookmarkFromCursor(Bookmark v, Cursor rs)
 	{
 		int i=0;
-		v.setId( rs.getLong(i++) );
-		v.setType( (int)rs.getLong(i++) );
-		v.setPercent( (int)rs.getLong(i++) );
-		v.setShortcut( (int)rs.getLong(i++) );
-		v.setTimeStamp( rs.getLong(i++) );
-		v.setStartPos( rs.getString(i++) );
-		v.setEndPos( rs.getString(i++) );
-		v.setTitleText( rs.getString(i++) );
-		v.setPosText( rs.getString(i++) );
-		v.setCommentText( rs.getString(i++) );
-		v.setTimeElapsed( rs.getLong(i++) );
-		v.setLinkPos( rs.getString(i++) );
+		v.setId(rs.getLong(i++));
+		v.setType((int)rs.getLong(i++));
+		v.setPercent((int)rs.getLong(i++));
+		v.setShortcut((int)rs.getLong(i++));
+		v.setTimeStamp(rs.getLong(i++));
+		v.setStartPos(rs.getString(i++));
+		v.setEndPos(rs.getString(i++));
+		v.setTitleText(rs.getString(i++));
+		v.setPosText(rs.getString(i++));
+		v.setCommentText(rs.getString(i++));
+		v.setTimeElapsed(rs.getLong(i++));
+		v.setLinkPos(rs.getString(i++));
 	}
 
-	public boolean findBy( Bookmark v, String condition ) {
+	public boolean findBy(Bookmark v, String condition) {
 		boolean found = false;
 		try (Cursor rs = mDB.rawQuery(READ_BOOKMARK_SQL + " WHERE " + condition, null)) {
 			if (rs.moveToFirst()) {
-				readBookmarkFromCursor( v, rs );
+				readBookmarkFromCursor(v, rs);
 				found = true;
 			}
 		}
 		return found;
 	}
 
-	public boolean load( ArrayList<Bookmark> list, String condition )
+	public boolean load(ArrayList<Bookmark> list, String condition)
 	{
 		boolean found = false;
 		try (Cursor rs = mDB.rawQuery(READ_BOOKMARK_SQL + " WHERE " + condition, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					Bookmark v = new Bookmark();
-					readBookmarkFromCursor( v, rs );
+					readBookmarkFromCursor(v, rs);
 					list.add(v);
 					found = true;
-				} while ( rs.moveToNext() );
+				} while (rs.moveToNext());
 			}
 		}
 		return found;
@@ -1114,7 +1135,7 @@ public class MainDB extends BaseDB {
 		if (book.getFileInfo().id == null)
 			return; // unknown book id
 		ArrayList<Bookmark> bookmarks = new ArrayList<>();
-		if (load( bookmarks, "book_fk=" + book.getFileInfo().id + " ORDER BY type" ) ) {
+		if (load(bookmarks, "book_fk=" + book.getFileInfo().id + " ORDER BY type" )) {
 			book.setBookmarks(bookmarks);
 		}
 	}
@@ -1340,7 +1361,7 @@ public class MainDB extends BaseDB {
 		}
 		// we have found maximum allowable group level
 		int curSize = grouped.size();
-		for ( Map.Entry<String, Integer> entry : grouped.entrySet() ) {
+		for (Map.Entry<String, Integer> entry : grouped.entrySet()) {
 			String key = (String) entry.getKey();
 			Integer value = (Integer) entry.getValue();
 			if ((curSize-1+value <= iMaxItemsCount)&&(value>1)) { // this group can be "linearized"
@@ -1442,7 +1463,7 @@ public class MainDB extends BaseDB {
 	private boolean loadItemList(ArrayList<FileInfo> list, String sql, String groupPrefixTag, boolean sortAsc) {
 		boolean found = false;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					long id = rs.getLong(0);
@@ -1482,13 +1503,13 @@ public class MainDB extends BaseDB {
 						"join book b on b.id = ba.book_fk and (not (b.pathname like '@opds%')) " +
 						"where a.book_cnt is null " +
 						"group by a.id", null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					execSQLIgnoreErrors("update author set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
 				} while (rs.moveToNext());
 			}
-			if ( rs!=null ) rs.close();
+			if (rs != null) rs.close();
 		} catch (Exception e) {
 			Log.e("cr3", "exception while loading list of authors", e);
 		}
@@ -1550,13 +1571,13 @@ public class MainDB extends BaseDB {
 						"join book b on b.id = bg.book_fk and (not (b.pathname like '@opds%')) "+
 						"where g.book_cnt is null "+
 						"group by g.id", null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					execSQLIgnoreErrors("update genre set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
 				} while (rs.moveToNext());
 			}
-			if ( rs!=null ) rs.close();
+			if (rs != null) rs.close();
 		} catch (Exception e) {
 			Log.e("cr3", "exception while loading list of genres", e);
 		}
@@ -1595,12 +1616,12 @@ public class MainDB extends BaseDB {
 	public long getLongValue(String sql) {
 		long res = -1;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					res = rs.getLong(0);
 				} while (rs.moveToNext());
 			}
-			if ( rs!=null ) rs.close();
+			if (rs != null) rs.close();
 		} catch (Exception e) {
 			Log.e("cr3", "exception while getLongValue", e);
 		}
@@ -1620,13 +1641,13 @@ public class MainDB extends BaseDB {
 						"  and s.book_cnt is null " +
 						"where (not (b.pathname like '@opds%')) " +
 						"group by s.id ", null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					execSQLIgnoreErrors("update series set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
 				} while (rs.moveToNext());
 			}
-			if ( rs!=null ) rs.close();
+			if (rs != null) rs.close();
 		} catch (Exception e) {
 			Log.e("cr3", "exception while loading list of series", e);
 		}
@@ -1688,13 +1709,13 @@ public class MainDB extends BaseDB {
 						"  and bds.book_cnt is null " +
 						"where (not (b.pathname like '@opds%')) " +
 						"group by bds.id", null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					execSQLIgnoreErrors("update book_dates_stats set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
 				} while (rs.moveToNext());
 			}
-			if ( rs!=null ) rs.close();
+			if (rs != null) rs.close();
 		} catch (Exception e) {
 			Log.e("cr3", "exception while loading list of dates", e);
 		}
@@ -1761,7 +1782,7 @@ public class MainDB extends BaseDB {
 						"where (not (b.pathname like '@opds%')) " +
 						"group by bts.stat_level, bts.text_value", null);
 		) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					execSQLIgnoreErrors("update book_titles_stats set book_cnt = " +
@@ -1770,7 +1791,7 @@ public class MainDB extends BaseDB {
 						" and text_value = " + quoteSqlString(rs.getString(1)));
 				} while (rs.moveToNext());
 			}
-			if ( rs!=null ) rs.close();
+			if (rs != null) rs.close();
 		} catch (Exception e) {
 			Log.e("cr3", "exception while loading list of series", e);
 		}
@@ -1932,7 +1953,7 @@ public class MainDB extends BaseDB {
 		String sql = "SELECT id, name FROM author";
 		int count = 0;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					long id = rs.getLong(0);
 					String name = rs.getString(1);
@@ -1958,7 +1979,7 @@ public class MainDB extends BaseDB {
 				" LEFT JOIN genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"'";
 		int count = 0;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					res.put(rs.getString(1),
 							StrUtils.getNonEmptyStr(rs.getString(2),true)+"|"+
@@ -1976,26 +1997,26 @@ public class MainDB extends BaseDB {
 	private SQLiteStatement seriesStmt;
 	private SQLiteStatement seriesSelectStmt;
 	private HashMap<String,Long> seriesCache = new HashMap<String,Long>();
-	public Long getSeriesId( String seriesName )
+	public Long getSeriesId(String seriesName)
 	{
-		if ( seriesName==null || seriesName.trim().length()==0 )
+		if (seriesName == null || seriesName.trim().length() == 0)
 			return null;
 		Long id = seriesCache.get(seriesName); 
-		if ( id!=null )
+		if (id != null)
 			return id;
 		if (seriesSelectStmt == null)
 			seriesSelectStmt = mDB.compileStatement("SELECT id FROM series WHERE name=?");
 		try {
 			seriesSelectStmt.bindString(1, seriesName);
 			return seriesSelectStmt.simpleQueryForLong();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			// not found
 		}
 		if (seriesStmt == null)
 			seriesStmt = mDB.compileStatement("INSERT INTO series (id, name) VALUES (NULL,?)");
 		seriesStmt.bindString(1, seriesName);
 		id = seriesStmt.executeInsert();
-		seriesCache.put( seriesName, id );
+		seriesCache.put(seriesName, id);
 		return id;
 	}
 	
@@ -2006,26 +2027,26 @@ public class MainDB extends BaseDB {
 	private SQLiteStatement folderStmt;
 	private SQLiteStatement folderSelectStmt;
 	private HashMap<String,Long> folderCache = new HashMap<String,Long>();
-	public Long getFolderId( String folderName )
+	public Long getFolderId(String folderName)
 	{
-		if ( folderName==null || folderName.trim().length()==0 )
+		if (folderName == null || folderName.trim().length() == 0)
 			return null;
 		Long id = folderCache.get(folderName); 
-		if ( id!=null )
+		if (id != null)
 			return id;
-		if ( folderSelectStmt==null )
+		if (folderSelectStmt == null)
 			folderSelectStmt = mDB.compileStatement("SELECT id FROM folder WHERE name=?");
 		try {
 			folderSelectStmt.bindString(1, folderName);
 			return folderSelectStmt.simpleQueryForLong();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			// not found
 		}
-		if ( folderStmt==null )
+		if (folderStmt == null)
 			folderStmt = mDB.compileStatement("INSERT INTO folder (id, name) VALUES (NULL,?)");
 		folderStmt.bindString(1, folderName);
 		id = folderStmt.executeInsert();
-		folderCache.put( folderName, id );
+		folderCache.put(folderName, id);
 		return id;
 	}
 	
@@ -2036,50 +2057,50 @@ public class MainDB extends BaseDB {
 	private SQLiteStatement authorStmt;
 	private SQLiteStatement authorSelectStmt;
 	private HashMap<String,Long> authorCache = new HashMap<String,Long>();
-	private Long getAuthorId( String authorName ) {
-		if ( authorName==null || authorName.trim().length()==0 )
+	private Long getAuthorId(String authorName) {
+		if (authorName == null || authorName.trim().length() == 0)
 			return null;
 		Long id = authorCache.get(authorName); 
-		if ( id!=null )
+		if (id != null)
 			return id;
-		if ( authorSelectStmt==null )
+		if (authorSelectStmt == null)
 			authorSelectStmt = mDB.compileStatement("SELECT id FROM author WHERE name=?");
 		try {
 			authorSelectStmt.bindString(1, authorName);
 			return authorSelectStmt.simpleQueryForLong();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			// not found
 		}
-		if ( authorStmt==null )
+		if (authorStmt == null)
 			authorStmt = mDB.compileStatement("INSERT INTO author (id, name) VALUES (NULL,?)");
 		authorStmt.bindString(1, authorName);
 		id = authorStmt.executeInsert();
-		authorCache.put( authorName, id );
+		authorCache.put(authorName, id);
 		return id;
 	}
 	
-	private Long[] getAuthorIds( String authorNames ) {
-		if ( authorNames==null || authorNames.trim().length()==0 )
+	private Long[] getAuthorIds(String authorNames) {
+		if (authorNames == null || authorNames.trim().length() == 0)
 			return null;
 		String[] names = authorNames.split("\\|");
-		if ( names==null || names.length==0 )
+		if (names == null || names.length == 0)
 			return null;
 		ArrayList<Long> ids = new ArrayList<Long>(names.length);
-		for ( String name : names ) {
+		for (String name : names) {
 			Long id = getAuthorId(name);
-			if ( id!=null )
+			if (id != null)
 				ids.add(id);
 		}
-		if ( ids.size()>0 )
+		if (ids.size() > 0)
 			return ids.toArray(new Long[ids.size()]);
 		return null;
 	}
 	
-	public void saveBookAuthors( Long bookId, Long[] authors) {
-		if ( authors==null || authors.length==0 )
+	public void saveBookAuthors(Long bookId, Long[] authors) {
+		if (authors == null || authors.length == 0)
 			return;
 		String insertQuery = "INSERT OR IGNORE INTO book_author (book_fk,author_fk) VALUES ";
-		for ( Long id : authors ) {
+		for (Long id : authors) {
 			String sql = insertQuery + "(" + bookId + "," + id + ")"; 
 			//Log.v("cr3", "executing: " + sql);
 			mDB.execSQL(sql);
@@ -2094,21 +2115,21 @@ public class MainDB extends BaseDB {
 	private SQLiteStatement genreStmtT;
 	private SQLiteStatement genreSelectStmt;
 	private HashMap<String,Long> genreCache = new HashMap<String,Long>();
-	private Long getGenreId( String genreCode, String genreLang) {
-		if ( genreCode==null || genreCode.trim().length()==0 )
+	private Long getGenreId(String genreCode, String genreLang) {
+		if (genreCode == null || genreCode.trim().length() == 0)
 			return null;
 		Long id = genreCache.get(genreCode.trim());
-		if ( id!=null )
+		if (id != null)
 			return id;
-		if ( genreSelectStmt==null )
+		if (genreSelectStmt == null)
 			genreSelectStmt = mDB.compileStatement("SELECT id FROM genre WHERE code=?");
 		try {
 			genreSelectStmt.bindString(1, genreCode.trim());
 			return genreSelectStmt.simpleQueryForLong();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			// not found
 		}
-		if ( genreStmt==null )
+		if (genreStmt == null)
 			genreStmt = mDB.compileStatement("INSERT INTO genre (id, code, name) VALUES (NULL,?,?)");
 		genreStmt.bindString(1, genreCode.trim());
 		String[] geEN = GenreSAXElem.getGenreDescrFull("EN",genreCode.trim());
@@ -2119,8 +2140,8 @@ public class MainDB extends BaseDB {
 		else
 			genreStmt.bindString(2, geEN[0]);
 		id = genreStmt.executeInsert();
-		genreCache.put( genreCode.trim(), id );
-		if ( genreStmtT==null )
+		genreCache.put(genreCode.trim(), id);
+		if (genreStmtT == null)
 			genreStmtT = mDB.compileStatement("INSERT INTO genre_transl (id, code, lang, name) VALUES (NULL,?,?,?)");
 
 		genreStmtT.bindString(1, genreCode.trim());
@@ -2140,30 +2161,30 @@ public class MainDB extends BaseDB {
 		return id;
 	}
 
-	private Long[] getGenreIds( String genreCodes, String genreLang ) {
-		if ( genreCodes==null || genreCodes.trim().length()==0 )
+	private Long[] getGenreIds(String genreCodes, String genreLang) {
+		if (genreCodes == null || genreCodes.trim().length() == 0)
 			return null;
 		String[] codes = genreCodes.split("\\|");
-		if ( codes==null || codes.length==0 )
+		if (codes == null || codes.length == 0)
 			return null;
 		ArrayList<Long> ids = new ArrayList<Long>(codes.length);
-		for ( String code : codes ) {
+		for (String code : codes) {
 			if (!StrUtils.isEmptyStr(code)) {
 				Long id = getGenreId(code.trim(), genreLang);
 				if (id != null)
 					ids.add(id);
 			}
 		}
-		if ( ids.size()>0 )
+		if (ids.size() > 0)
 			return ids.toArray(new Long[ids.size()]);
 		return null;
 	}
 
-	public void saveBookGenres( Long bookId, Long[] genres) {
-		if ( genres==null || genres.length==0 )
+	public void saveBookGenres(Long bookId, Long[] genres) {
+		if (genres == null || genres.length == 0)
 			return;
 		String insertQuery = "INSERT OR IGNORE INTO book_genre (book_fk,genre_fk) VALUES ";
-		for ( Long id : genres ) {
+		for (Long id : genres) {
 			String sql = insertQuery + "(" + bookId + "," + id + ")";
 			//Log.v("cr3", "executing: " + sql);
 			mDB.execSQL(sql);
@@ -2172,7 +2193,7 @@ public class MainDB extends BaseDB {
 
 	private static boolean eq(String s1, String s2)
 	{
-		if ( s1!=null )
+		if (s1 != null)
 			return s1.equals(s2);
 		return s2==null;
 	}
@@ -2243,18 +2264,18 @@ public class MainDB extends BaseDB {
 		if (existing != null)
 			return existing;
 		FileInfo fileInfo = new FileInfo(); 
-		if (findBy( fileInfo, "b.id", id)) {
+		if (findBy(fileInfo, "b.id", id)) {
 			return fileInfo;
 		}
 		return null;
 	}
 
-	private boolean findBy( FileInfo fileInfo, String fieldName, Object fieldValue )
+	private boolean findBy(FileInfo fileInfo, String fieldName, Object fieldValue)
 	{
 		String condition;
 		StringBuilder buf = new StringBuilder(" WHERE ");
 		buf.append(fieldName);
-		if ( fieldValue==null ) {
+		if (fieldValue == null) {
 			buf.append(" IS NULL ");
 		} else {
 			buf.append("=");
@@ -2265,20 +2286,20 @@ public class MainDB extends BaseDB {
 		boolean found = false;
 		try (Cursor rs = mDB.rawQuery(READ_FILEINFO_SQL +
 				condition, null)) {
-			if ( rs.moveToFirst() ) {
-				readFileInfoFromCursor( fileInfo, rs );
+			if (rs.moveToFirst()) {
+				readFileInfoFromCursor(fileInfo, rs);
 				found = true;
 			}
 		}
 		return found;
 	}
 
-	private boolean findAllBy( ArrayList<FileInfo> result, String fieldName, Object fieldValue )
+	private boolean findAllBy(ArrayList<FileInfo> result, String fieldName, Object fieldValue)
 	{
 		String condition;
 		StringBuilder buf = new StringBuilder(" WHERE ");
 		buf.append(fieldName);
-		if ( fieldValue==null ) {
+		if (fieldValue == null) {
 			buf.append(" IS NULL ");
 		} else {
 			buf.append("=");
@@ -2292,7 +2313,7 @@ public class MainDB extends BaseDB {
 			if (rs.moveToFirst()) {
 				do {
 					FileInfo fileInfo = new FileInfo();
-					readFileInfoFromCursor( fileInfo, rs );
+					readFileInfoFromCursor(fileInfo, rs);
 					result.add(fileInfo);
 					found = true;
 				} while (rs.moveToNext());
@@ -2321,25 +2342,25 @@ public class MainDB extends BaseDB {
 		return map;
 	}
 
-	private boolean save( Bookmark v, long bookId )
+	private boolean save(Bookmark v, long bookId)
 	{
 		Log.d("cr3db", "saving bookmark id=" + v.getId() + ", bookId=" + bookId + ", pos=" + v.getStartPos());
 		Bookmark oldValue = new Bookmark();
-		if ( v.getId()!=null ) {
+		if (v.getId() != null) {
 			// update
 			oldValue.setId(v.getId());
-			if ( findBy(oldValue, "book_fk=" + bookId + " AND id=" + v.getId()) ) {
+			if (findBy(oldValue, "book_fk=" + bookId + " AND id=" + v.getId())) {
 				// found, updating
 				QueryHelper h = new QueryHelper(v, oldValue, bookId);
 				h.update(v.getId());
 			} else {
 				oldValue = new Bookmark();
 				QueryHelper h = new QueryHelper(v, oldValue, bookId);
-				v.setId( h.insert() );
+				v.setId(h.insert());
 			}
 		} else {
 			QueryHelper h = new QueryHelper(v, oldValue, bookId);
-			v.setId( h.insert() );
+			v.setId(h.insert());
 		}
 		return true;
 	}
@@ -2530,13 +2551,13 @@ public class MainDB extends BaseDB {
 			
 			fileInfoCache.put(fileInfo);
 			if (fileInfo.id != null) {
-				if ( authorsChanged ) {
+				if (authorsChanged) {
 					vlog.d("updating authors for file " + fileInfo.getPathName());
 					beginChanges();
 					Long[] authorIds = getAuthorIds(fileInfo.getAuthors());
 					saveBookAuthors(fileInfo.id, authorIds);
 				}
-				if ( genresChanged ) {
+				if (genresChanged) {
 					vlog.d("updating genres for file " + fileInfo.getPathName());
 					beginChanges();
 					Long[] genreIds = getGenreIds(fileInfo.getGenres(),currentLanguage);
@@ -2590,21 +2611,21 @@ public class MainDB extends BaseDB {
 		return res;
 	}
 
-	private boolean findRecentBooks( ArrayList<FileInfo> list, int maxCount, int limit )
+	private boolean findRecentBooks(ArrayList<FileInfo> list, int maxCount, int limit)
 	{
 		String sql = READ_FILEINFO_SQL + " WHERE last_access_time>0 ORDER BY last_access_time DESC LIMIT " + limit;
 		boolean found = false;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					FileInfo fileInfo = new FileInfo();
-					readFileInfoFromCursor( fileInfo, rs);
-					if ( !fileInfo.fileExists())
+					readFileInfoFromCursor(fileInfo, rs);
+					if (!fileInfo.fileExists())
 						continue;
 					list.add(fileInfo);
 					fileInfoCache.put(fileInfo);
 					found = true;
-					if ( list.size()>maxCount)
+					if (list.size() > maxCount)
 						break;
 				} while (rs.moveToNext());
 			}
@@ -2627,7 +2648,7 @@ public class MainDB extends BaseDB {
 		ArrayList<Object> values = new ArrayList<Object>();
 		QueryHelper add(String fieldName, int value, int oldValue )
 		{
-			if ( value!=oldValue ) {
+			if (value != oldValue) {
 				fields.add(fieldName);
 				values.add(Long.valueOf(value));
 			}
@@ -2635,7 +2656,7 @@ public class MainDB extends BaseDB {
 		}
 		QueryHelper add(String fieldName, Long value, Long oldValue )
 		{
-			if ( value!=null && (oldValue==null || !oldValue.equals(value))) {
+			if (value != null && (oldValue == null || !oldValue.equals(value))) {
 				fields.add(fieldName);
 				values.add(value);
 			}
@@ -2645,7 +2666,7 @@ public class MainDB extends BaseDB {
 		{
 			String val = StrUtils.isEmptyStr(value)?"":value;
 			String oldVal = StrUtils.isEmptyStr(oldValue)?"":oldValue;
-			if ( val!=null && (oldVal==null || !oldVal.equals(val))) {
+			if (val != null && (oldVal == null || !oldVal.equals(val))) {
 				fields.add(fieldName);
 				values.add(value);
 			}
@@ -2653,7 +2674,7 @@ public class MainDB extends BaseDB {
 		}
 		QueryHelper add(String fieldName, Double value, Double oldValue)
 		{
-			if ( value!=null && (oldValue==null || !oldValue.equals(value))) {
+			if (value != null && (oldValue == null || !oldValue.equals(value))) {
 				fields.add(fieldName);
 				values.add(value);
 			}
@@ -2661,7 +2682,7 @@ public class MainDB extends BaseDB {
 		}
 		Long insert()
 		{
-			if ( fields.size()==0 )
+			if (fields.size() == 0)
 				return null;
 			beginChanges();
 			StringBuilder valueBuf = new StringBuilder();
@@ -2670,12 +2691,12 @@ public class MainDB extends BaseDB {
 				StringBuilder buf = new StringBuilder("INSERT " + ignoreOption + " INTO ");
 				buf.append(tableName);
 				buf.append(" (id");
-				for ( String field : fields ) {
+				for (String field : fields) {
 					buf.append(",");
 					buf.append(field);
 				}
 				buf.append(") VALUES (NULL");
-				for ( @SuppressWarnings("unused") String field : fields ) {
+				for (@SuppressWarnings("unused") String field : fields) {
 					buf.append(",");
 					buf.append("?");
 				}
@@ -2684,7 +2705,7 @@ public class MainDB extends BaseDB {
 				Log.d("cr3db", "going to execute " + sql);
 				Long id;
 				try (SQLiteStatement stmt = mDB.compileStatement(sql)) {
-					for ( int i = 1; i <= values.size(); i++ ) {
+					for (int i = 1; i <= values.size(); i++) {
 						Object v = values.get(i - 1);
 						valueBuf.append(v!=null ? v.toString() : "null");
 						valueBuf.append(",");
@@ -2702,23 +2723,23 @@ public class MainDB extends BaseDB {
 				}
 				flushAndTransaction();
 				return id;
-			} catch ( Exception e ) {
+			} catch (Exception e) {
 				Log.e("cr3db", "insert failed: " + e.getMessage());
 				Log.e("cr3db", "values: " + valueBuf.toString());
 				return null;
 			}
 		}
-		boolean update( Long id )
+		boolean update(Long id)
 		{
-			if ( fields.size()==0 )
+			if (fields.size() == 0)
 				return false;
 			beginChanges();
 			StringBuilder buf = new StringBuilder("UPDATE ");
 			buf.append(tableName);
 			buf.append(" SET ");
 			boolean first = true;
-			for ( String field : fields ) {
-				if ( !first )
+			for (String field : fields) {
+				if (!first)
 					buf.append(",");
 				buf.append(field);
 				buf.append("=?");
@@ -2733,13 +2754,13 @@ public class MainDB extends BaseDB {
 			flushAndTransaction();
 			return true;
 		}
-		Long fromFormat( DocumentFormat f )
+		Long fromFormat(DocumentFormat f)
 		{
-			if ( f==null )
+			if (f == null)
 				return null;
 			return (long)f.ordinal();
 		}
-		QueryHelper( FileInfo newValue, FileInfo oldValue )
+		QueryHelper(FileInfo newValue, FileInfo oldValue)
 		{
 			this("book");
 			if (!newValue.need_to_update_ver) {
@@ -2798,7 +2819,7 @@ public class MainDB extends BaseDB {
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
-		QueryHelper( Bookmark newValue, Bookmark oldValue, long bookId )
+		QueryHelper(Bookmark newValue, Bookmark oldValue, long bookId)
 		{
 			this("bookmark");
 			add("book_fk", bookId, oldValue.getId()!=null ? bookId : null);
@@ -2901,10 +2922,10 @@ public class MainDB extends BaseDB {
 	private boolean findBooks(String sql, ArrayList<FileInfo> list) {
 		boolean found = false;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				do {
 					FileInfo fileInfo = new FileInfo();
-					readFileInfoFromCursor( fileInfo, rs);
+					readFileInfoFromCursor(fileInfo, rs);
 					if (!fileInfo.fileExists())
 						continue;
 					fileInfoCache.put(fileInfo);
@@ -2976,18 +2997,18 @@ public class MainDB extends BaseDB {
 			if ((authorIds == null || authorIds.length() == 0) && (!bQuickSearch))
 				return list;
 			if (!StrUtils.isEmptyStr(authorIds)) {
-				if ( buf.length()>0 )
+				if (buf.length() > 0)
 					buf.append(sDefCond);
 				buf.append(" ( b.id IN (SELECT ba.book_fk FROM book_author ba WHERE ba.author_fk IN (").append(authorIds).append(")) ) ");
 				hasCondition = true;
 			}
 		}
-		if ( !StrUtils.isEmptyStr(seriesSearch) ) {
+		if (!StrUtils.isEmptyStr(seriesSearch)) {
 			String seriesIds = findSeries(maxCount, seriesSearch);
 			if ((seriesIds == null || seriesIds.length() == 0) && (!bQuickSearch))
 				return list;
 			if (!StrUtils.isEmptyStr(seriesIds)) {
-				if ( buf.length()>0 )
+				if (buf.length() > 0)
 					buf.append(sDefCond);
 				buf.append(" ( ");
 				buf.append(" (b.series_fk IN (").append(seriesIds).append(")) ");
@@ -2997,15 +3018,15 @@ public class MainDB extends BaseDB {
 				hasCondition = true;
 			}
 		}
-		if ( !StrUtils.isEmptyStr(titleSearch) ) {
+		if (!StrUtils.isEmptyStr(titleSearch)) {
 			hasCondition = true;
 		}
-		if ( !StrUtils.isEmptyStr(filenameSearch) ) {
+		if (!StrUtils.isEmptyStr(filenameSearch)) {
 			hasCondition = true;
 		}
-		if ( bQuickSearch ) {
+		if (bQuickSearch) {
 			hasCondition = true;
-			if ( buf.length()>0 )
+			if (buf.length() > 0)
 				buf.append(sDefCond);
 			buf.append(" (1=1) ");
 		}
@@ -3015,18 +3036,18 @@ public class MainDB extends BaseDB {
 		String sql = READ_FILEINFO_SQL + condition + " ORDER BY file_create_time desc";
 		Log.d("cr3", "sql: " + sql );
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				int count = 0;
 				do {
 					boolean bDidntFindAll = false;
 					int matchesCnt = 0;
-					if ( !StrUtils.isEmptyStr(titleSearch) ) {
+					if (!StrUtils.isEmptyStr(titleSearch)) {
 						if (!Utils.matchPattern(rs.getString(5), titleSearch))
 							bDidntFindAll = true;
 						else
 							matchesCnt++;
 					}
-					if ( !StrUtils.isEmptyStr(filenameSearch) ) {
+					if (!StrUtils.isEmptyStr(filenameSearch)) {
 						if (!Utils.matchPattern(rs.getString(3), filenameSearch))
 							bDidntFindAll = true;
 						else
@@ -3069,11 +3090,11 @@ public class MainDB extends BaseDB {
 					if ((bDidntFindAll)&&(!bQuickSearch)) continue;
 					if ((matchesCnt==0)&&(bQuickSearch)) continue;
 					FileInfo fi = new FileInfo(); 
-					readFileInfoFromCursor( fi, rs );
+					readFileInfoFromCursor(fi, rs);
 					list.add(fi);
 					fileInfoCache.put(fi);
 					count++;
-				} while ( count<maxCount && rs.moveToNext() );
+				} while (count < maxCount && rs.moveToNext());
 			}
 		}
 		endReading();
@@ -3129,7 +3150,7 @@ public class MainDB extends BaseDB {
 		return list;
 	}
 
-	public void deleteRecentPosition( FileInfo fileInfo ) {
+	public void deleteRecentPosition(FileInfo fileInfo) {
 		Long bookId = getBookId(fileInfo);
 		if (bookId == null)
 			return;
@@ -3268,7 +3289,7 @@ public class MainDB extends BaseDB {
 		Map<String, Long> map = new HashMap<>();
 		String sql = "SELECT id, pathname FROM book";
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
-			if ( rs.moveToFirst() ) {
+			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					Long id = rs.getLong(0);
@@ -3312,6 +3333,29 @@ public class MainDB extends BaseDB {
 			correctFilePaths();
 			pathCorrectionRequired = false;
 		}
+	}
+
+	public int saveAuthorsAliasesInfo(ArrayList<AuthorAlias> list) {
+		if (list == null || list.size() == 0)
+			return 0;
+		int i = 0;
+		execSQL("DELETE FROM author_aliases");
+		for (AuthorAlias al: list) {
+			execSQLIgnoreErrorsNoFlush("insert into author_aliases (orig_text, alias_text) values (" +
+					quoteSqlString(al.origText) + ", " + quoteSqlString(al.aliasText) + ")");
+			i++;
+		}
+		flushAndTransaction();
+		return i;
+	}
+
+	public void deleteAuthorsAliasesInfo() {
+		execSQL("DELETE FROM author_aliases");
+	}
+
+	public void saveAuthorAliasInfo(AuthorAlias al) {
+		execSQLIgnoreErrorsNoFlush("insert into author_aliases (orig_text, alias_text) values (" +
+					quoteSqlString(al.origText) + ", " + quoteSqlString(al.aliasText) + ")");
 	}
 
 }

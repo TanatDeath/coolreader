@@ -507,7 +507,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 			}
 		});
 		// ODF file must be saved for later convert
-		if (stype.contains("opendocument")) hideExistingFromStreamControls(view);
+		if ((stype.contains("opendocument")) && (!stype.contains("opendocument.text"))) hideExistingFromStreamControls(view);
 		btnSave = (Button)view.findViewById(R.id.btn_save);
 		setDashedButton(btnSave);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
@@ -534,7 +534,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 							Utils.copyStreamContent(out, in);
 							out.flush();
 							fos.getFD().sync();
-							if (stype.contains("opendocument")) {
+							if ((stype.contains("opendocument")) && (!stype.contains("opendocument.text"))) {
 								DocConvertDialog dlgConv = new DocConvertDialog((CoolReader)activity, fName);
 								dlgConv.show();
 							} else {

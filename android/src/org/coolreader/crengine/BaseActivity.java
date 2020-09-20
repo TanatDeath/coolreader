@@ -47,6 +47,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -54,10 +55,13 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.text.ClipboardManager;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -67,6 +71,8 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -112,7 +118,7 @@ public class BaseActivity extends Activity implements Settings {
 	private View mDecorView;
 
 	protected CRDBServiceAccessor mCRDBService;
-	protected Dictionaries mDictionaries;
+	public Dictionaries mDictionaries;
 
 	public int sensorPrevRot = -1;
 	public int sensorCurRot = -1;
@@ -1523,6 +1529,165 @@ public class BaseActivity extends Activity implements Settings {
 				curDict, link, link2, curAction, listSkipCount, useFirstLink);
 	}
 
+	PopupWindow windowCenterPopup = null;
+	private boolean simplePopup = false;
+
+	public void showCenterPopup(View surface, String val, boolean forceRecreate) {
+		showCenterPopup(surface, val, 500, forceRecreate);
+	}
+
+	public void showCenterPopup(View surface, String val, int millis, boolean forceRecreate) {
+		BackgroundThread.instance().executeGUI(() -> {
+			boolean useExisting = (windowCenterPopup != null);
+			useExisting = useExisting && simplePopup;
+			useExisting = useExisting && (!forceRecreate);
+			TypedArray a = getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+			int colorGrayC = a.getColor(1, Color.GRAY);
+			int colorIcon = a.getColor(2, Color.GRAY);
+			a.recycle();
+			int fontSize = 24;
+			if (useExisting) {
+				if (millis >= 0) scheduleHideWindowCenterPopup(millis);
+				simplePopup = true;
+				TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+				tv.setTextColor(colorIcon);
+				tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+				tv.setText(val);
+				return;
+			}
+			if (windowCenterPopup == null)
+				windowCenterPopup = new PopupWindow(surface.getContext());
+			windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+			windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+			windowCenterPopup.setTouchable(false);
+			windowCenterPopup.setFocusable(false);
+			windowCenterPopup.setOutsideTouchable(true);
+			windowCenterPopup.setBackgroundDrawable(null);
+			LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
+			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
+			toast_ll.setBackgroundColor(colorGrayC);
+			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+			tv.setTextColor(colorIcon);
+			tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+			tv.setText(val);
+			Display d = getWindowManager().getDefaultDisplay();
+			DisplayMetrics m = new DisplayMetrics();
+			d.getMetrics(m);
+			int screenHeight = m.heightPixels;
+			int screenWidth = m.widthPixels;
+			//windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+			windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, screenWidth / 2, screenHeight / 2);
+			simplePopup = true;
+			if (millis >= 0) scheduleHideWindowCenterPopup(millis);
+		});
+	}
+
+	public void showCenterPopupFont(View surface, String val, String val2, int fontSize) {
+		BackgroundThread.instance().executeGUI(() -> {
+			boolean useExisting = (windowCenterPopup != null);
+			useExisting = useExisting && (!simplePopup);
+			simplePopup = false;
+			TypedArray a = getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+			int colorGrayC = a.getColor(1, Color.GRAY);
+			int colorIcon = a.getColor(2, Color.GRAY);
+			a.recycle();
+			if (windowCenterPopup == null)
+				windowCenterPopup = new PopupWindow(surface.getContext());
+			if (!useExisting) {
+				windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+				windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+				windowCenterPopup.setTouchable(false);
+				windowCenterPopup.setFocusable(false);
+				windowCenterPopup.setOutsideTouchable(true);
+				windowCenterPopup.setBackgroundDrawable(null);
+				LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap_2line, null, true));
+			}
+			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
+			toast_ll.setBackgroundColor(colorGrayC);
+			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+			tv.setTextColor(colorIcon);
+			tv.setTextSize(24); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+			tv.setText(val);
+			TextView tv2 = windowCenterPopup.getContentView().findViewById(R.id.toast_2nd_line);
+			tv2.setTextColor(colorIcon);
+			tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+			tv2.setText(val2);
+			String sFace = settings().getProperty(ReaderView.PROP_FONT_FACE, "");
+			final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
+			boolean found = false;
+			for (int i = 0; i < mFontFacesFiles.length; i++) {
+				String s = mFontFacesFiles[i];
+				if ((s.startsWith(sFace + "~")) && (!s.toUpperCase().contains("BOLD")) && (!s.toUpperCase().contains("ITALIC"))) {
+					found = true;
+					String sf = mFontFacesFiles[i];
+					if (sf.contains("~")) {
+						sf = sf.split("~")[1];
+					}
+					try {
+						Typeface tf = null;
+						tf = Typeface.createFromFile(sf);
+						tv2.setTypeface(tf);
+					} catch (Exception e) {
+
+					}
+					break;
+				}
+			}
+			if (!found)
+				for (int i = 0; i < mFontFacesFiles.length; i++) {
+					String s = mFontFacesFiles[i];
+					if (s.startsWith(sFace + "~")) {
+						found = true;
+						String sf = mFontFacesFiles[i];
+						if (sf.contains("~")) {
+							sf = sf.split("~")[1];
+						}
+						try {
+							Typeface tf = null;
+							tf = Typeface.createFromFile(sf);
+							tv2.setTypeface(tf);
+						} catch (Exception e) {
+
+						}
+						break;
+					}
+				}
+			if (!useExisting)
+				windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
+			scheduleHideWindowCenterPopup(500);
+		});
+	}
+
+	private int lastHidePopupTaskId = 0;
+
+	public void scheduleHideWindowCenterPopup(final int delayMillis) {
+		// GUI thread required
+		BackgroundThread.instance().executeGUI(() -> {
+			final int mylastHidePopupTaskId = ++lastHidePopupTaskId;
+			if (delayMillis <= 1) {
+				if (windowCenterPopup != null) {
+					windowCenterPopup.dismiss();
+					windowCenterPopup = null;
+				}
+			} else {
+				BackgroundThread.instance().postGUI(() -> {
+					if (mylastHidePopupTaskId == lastHidePopupTaskId) {
+						if (windowCenterPopup != null) {
+							windowCenterPopup.dismiss();
+							windowCenterPopup = null;
+						}
+					}
+				}, delayMillis);
+			}
+		});
+	}
+
+
+
 //	public void hideSToast() {
 //		final SuperActivityToast toast = myToast;
 //		if (toast != null && toast.isShowing()) {
@@ -1805,6 +1970,74 @@ public class BaseActivity extends Activity implements Settings {
 		askConfirmation(questionResourceId, action, null);
 	}
 
+	public void askConfirmation(int questionResourceId, final Runnable action, final Runnable cancelAction) {
+		String question = getString(questionResourceId);
+		askConfirmation(null, question, action, cancelAction);
+	}
+
+	public void askConfirmation(int titleResourceId, int questionResourceId, final Runnable action, final Runnable cancelAction) {
+		String title = getString(titleResourceId);
+		String question = getString(questionResourceId);
+		askConfirmation(title, question, action, cancelAction);
+	}
+
+	public void askQuestion(int titleResourceId, int questionResourceId, final Runnable yesAction, final Runnable noAction) {
+		String title = getString(titleResourceId);
+		String question = getString(questionResourceId);
+		askQuestion(title, question, yesAction, noAction);
+	}
+
+	public void askConfirmation(String title, String question, final Runnable action, final Runnable cancelAction) {
+		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+		if (null != title)
+			dlg.setTitle(title);
+		dlg.setMessage(question);
+		dlg.setPositiveButton(R.string.dlg_button_ok, (arg0, arg1) -> action.run());
+		dlg.setNegativeButton(R.string.dlg_button_cancel, (arg0, arg1) -> {
+			if (cancelAction != null)
+				cancelAction.run();
+		});
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
+	}
+
+	public void askQuestion(String title, String question, final Runnable yesAction, final Runnable noAction) {
+		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+		if (null != title)
+			dlg.setTitle(title);
+		dlg.setMessage(question);
+		dlg.setPositiveButton(R.string.dlg_button_yes, (arg0, arg1) -> yesAction.run());
+		dlg.setNegativeButton(R.string.dlg_button_no, (arg0, arg1) -> {
+			if (noAction != null)
+				noAction.run();
+		});
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
+	}
+
+	public void askConfirmation(String question, final Runnable action, final Runnable cancelAction) {
+		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+		dlg.setMessage(question);
+		dlg.setPositiveButton(R.string.dlg_button_ok, (arg0, arg1) -> action.run());
+		dlg.setNegativeButton(R.string.dlg_button_cancel, (arg0, arg1) -> {
+			if (cancelAction != null)
+				cancelAction.run();
+		});
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
+	}
+
+	public void askConfirmation(String question, final Runnable action) {
+		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+		dlg.setTitle(question);
+		dlg.setPositiveButton(R.string.dlg_button_ok, (arg0, arg1) -> action.run());
+		dlg.setNegativeButton(R.string.dlg_button_cancel, (arg0, arg1) -> {
+			// do nothing
+		});
+		AlertDialog adlg = dlg.show();
+		tintAlertDialog(adlg);
+	}
+
 	public void tintAlertDialog(AlertDialog adlg) {
 		int colorGrayC;
 		int colorGray;
@@ -1857,41 +2090,6 @@ public class BaseActivity extends Activity implements Settings {
 			btn2.setTextColor(colorIcon);
 			btn2.setBackgroundColor(colorGrayCT2);
 		}
-	}
-
-	public void askConfirmation(int questionResourceId, final Runnable action, final Runnable cancelAction) {
-		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-		dlg.setMessage(questionResourceId);
-		dlg.setPositiveButton(R.string.dlg_button_ok, (arg0, arg1) -> action.run());
-		dlg.setNegativeButton(R.string.dlg_button_cancel, (arg0, arg1) -> {
-			if (cancelAction != null)
-				cancelAction.run();
-		});
-		AlertDialog adlg = dlg.show();
-		tintAlertDialog(adlg);
-	}
-
-	public void askConfirmation(String question, final Runnable action, final Runnable cancelAction) {
-		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-		dlg.setMessage(question);
-		dlg.setPositiveButton(R.string.dlg_button_ok, (arg0, arg1) -> action.run());
-		dlg.setNegativeButton(R.string.dlg_button_cancel, (arg0, arg1) -> {
-			if (cancelAction != null)
-				cancelAction.run();
-		});
-		AlertDialog adlg = dlg.show();
-		tintAlertDialog(adlg);
-	}
-
-	public void askConfirmation(String question, final Runnable action) {
-		AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-		dlg.setTitle(question);
-		dlg.setPositiveButton(R.string.dlg_button_ok, (arg0, arg1) -> action.run());
-		dlg.setNegativeButton(R.string.dlg_button_cancel, (arg0, arg1) -> {
-			// do nothing
-		});
-		AlertDialog adlg = dlg.show();
-		tintAlertDialog(adlg);
 	}
 
 	public void directoryUpdated(FileInfo dir) {
@@ -2508,6 +2706,12 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE);
 			props.applyDefault(ReaderView.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, "0");
 
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, "0");
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS, "0");
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS, "0");
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK, "0");
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD, "5");		// 5 min.
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_CONFIRMATIONS, "1");
 			
 			if (!DeviceInfo.isEinkScreen(getScreenForceEink())) {
 				props.applyDefault(ReaderView.PROP_APP_HIGHLIGHT_BOOKMARKS, "1");

@@ -540,6 +540,9 @@ public class DicToastView {
 
                 }
             });
+            if (!StrUtils.isEmptyStr(t.mDicName)) {
+                tvYnd1.setText(t.mDicName + ": " + tvYnd1.getText());
+            }
             ImageButton btnTransl = window.getContentView().findViewById(R.id.btnTransl);
             btnTransl.setOnClickListener(v -> {
                 if (cr.getReaderView().mBookInfo!=null) {

@@ -7,6 +7,7 @@ import org.coolreader.R;
 import org.coolreader.dic.DicToastView;
 
 import android.database.DataSetObserver;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -120,7 +121,11 @@ public class TOCDlg extends BaseDialog {
 				}
 				ImageView imgShowPage = view.findViewById(R.id.toc_show_page);
 				TextView pageTextView = view.findViewById(R.id.toc_page);
+				pageTextView.setPaintFlags( pageTextView.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+				if (isCurrentItem) pageTextView.setPaintFlags(pageTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 				TextView titleTextView = view.findViewById(R.id.toc_title);
+				titleTextView.setPaintFlags( titleTextView.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+				if (isCurrentItem) titleTextView.setPaintFlags(titleTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 				TextView marginTextView = view.findViewById(R.id.toc_level_margin);
 				ImageView expandImageView = view.findViewById(R.id.toc_expand_icon);
 				StringBuilder buf = new StringBuilder(item.getLevel()*2);

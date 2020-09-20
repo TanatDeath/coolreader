@@ -16,6 +16,7 @@ import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -44,7 +45,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.zip.CRC32;
 
 import okhttp3.Call;
@@ -58,12 +61,18 @@ import okhttp3.Response;
 public class Dictionaries {
 
 	public static final String YND_DIC_ONLINE = "https://translate.yandex.net/api/v1.5/tr/translate";
+	public static final String YND_DIC_ONLINE_2 = "https://translate.api.cloud.yandex.net/translate/v2/translate";
 	public static final String YND_DIC_GETLANGS = "https://translate.yandex.net/api/v1.5/tr/getLangs";
+	public static final String YND_DIC_GETLANGS_2 = "https://translate.api.cloud.yandex.net/translate/v2/languages";
 	public static final String LINGVO_DIC_ONLINE = "https://developers.lingvolive.com/api";
+	public static final String YND_DIC_GET_TOKEN = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
 	public static OkHttpClient client = new OkHttpClient();
 	public static ArrayList<String> langCodes = new ArrayList<String>();
 	public static String sLingvoToken = "";
+	public static String sYandexIAM = "";
+	public static String sYandexIAMexpiresAt = "";
 	public static int unauthCnt = 0;
+	public static int unauthCntY = 0;
 
 	public static class PopupFrameMetric {
 		public final int Height;
@@ -449,6 +458,167 @@ public class Dictionaries {
 		});
 	};
 
+	public void yandexAuthThenTranslate(String s, String langf, String lang, DictInfo curDict, View view, LangListCallback llc)  {
+		final CoolReader crf2 = (CoolReader) mActivity;
+		crf2.readYndCloudSettings();
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(YND_DIC_GET_TOKEN).newBuilder();
+		String url = urlBuilder.build().toString();
+		JSONObject json = new JSONObject();
+		try {
+			json.put("yandexPassportOauthToken", crf2.yndCloudSettings.oauthToken);
+		} catch (JSONException e) {
+			log.e("yandexAuthThenTranslate json error", e);
+		}
+		RequestBody body = RequestBody.create(
+				MediaType.parse("application/json"), json.toString());
+		Request request = new Request.Builder()
+				.post(body)
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					try {
+						JSONObject jso = new JSONObject(sBody);
+						if (jso.has("iamToken")) sYandexIAM = jso.getString("iamToken");
+						if (jso.has("expiresAt")) sYandexIAMexpiresAt = jso.getString("expiresAt");
+						yandexTranslate(s, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict ,view, llc);
+					} catch (Exception e) {
+						crf2.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+					}
+					//BackgroundThread.instance().postBackground(() ->
+					//		BackgroundThread.instance().postGUI(() -> crf2.showToast(sYandexIAM), 100));
+				}, 100));
+			}
+			public void onFailure(Call call, IOException e) {
+				BackgroundThread.instance().postBackground(() ->
+						BackgroundThread.instance().postGUI(() -> crf2.showToast(e.getMessage()), 100));
+			}
+		});
+	}
+
+	public interface LangListCallback {
+		void click(TreeMap<String, String> lst);
+	}
+
+	public void yandexTranslate(String s, String langf, String lang, DictInfo curDict, View view, LangListCallback llc) {
+		CoolReader cr = (CoolReader) mActivity;
+		if (llc == null) {
+			if (!BaseActivity.PREMIUM_FEATURES) {
+				cr.showToast(R.string.only_in_premium);
+				return;
+			}
+			if (StrUtils.isEmptyStr(lang)) {
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+						cr.showToast(cr.getString(R.string.translate_lang_not_set) + ": ["
+								+ langf + "] -> [" + lang + "]"), 100));
+				return;
+			}
+		}
+		if ((StrUtils.isEmptyStr(sYandexIAM))) {
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					cr.showToast(cr.getString(R.string.cloud_need_authorization)), 100));
+			cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			return;
+		}
+		if (StrUtils.isEmptyStr(cr.yndCloudSettings.folderId)) cr.readYndCloudSettings();
+		if (StrUtils.isEmptyStr(cr.yndCloudSettings.folderId)) {
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					cr.showToast(cr.getString(R.string.cloud_need_authorization)), 100));
+			cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			return;
+		}
+		HttpUrl.Builder urlBuilder;
+		if (llc == null)
+			urlBuilder = HttpUrl.parse(YND_DIC_ONLINE_2).newBuilder();
+		else
+			urlBuilder = HttpUrl.parse(YND_DIC_GETLANGS_2).newBuilder();
+		String url = urlBuilder.build().toString();
+		JSONObject json = new JSONObject();
+		try {
+			json.put("folder_id", cr.yndCloudSettings.folderId);
+			if (llc == null) {
+				json.put("texts", s);
+				if (!StrUtils.isEmptyStr(langf))
+					if (!langf.equals("#"))
+						json.put("sourceLanguageCode", langf);
+				json.put("targetLanguageCode", lang);
+			}
+		} catch (JSONException e) {
+			log.e("yandexAuthThenTranslate json error", e);
+		}
+		RequestBody body = RequestBody.create(
+				MediaType.parse("application/json"), json.toString());
+		Request request = new Request.Builder()
+				.header("Authorization","Bearer "+sYandexIAM)
+				.post(body)
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					if (llc == null) {
+						try {
+							String sText = "";
+							String sLang = "";
+							JSONObject jso = new JSONObject(sBody);
+							if (jso.has("translations")) {
+								JSONArray jsoa = jso.getJSONArray("translations");
+								if (jsoa.length() > 0) {
+									JSONObject jso2 = (JSONObject) jsoa.get(0);
+									if (jso2.has("text")) sText = jso2.getString("text");
+									if (jso2.has("detectedLanguageCode"))
+										sLang = jso2.getString("detectedLanguageCode");
+								}
+								cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang);
+							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+						} catch (Exception e) {
+							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+						}
+					} else {
+						TreeMap<String, String> langs = new TreeMap<>();
+						try {
+							String sLang = "";
+							String sName = "";
+							JSONObject jso = new JSONObject(sBody);
+							if (jso.has("languages")) {
+								JSONArray jsoa = jso.getJSONArray("languages");
+								for (int i = 0; i < jsoa.length(); i++) {
+									JSONObject jso2 = (JSONObject) jsoa.get(i);
+									if (jso2.has("code")) sLang = jso2.getString("code");
+									if (jso2.has("name")) sName = jso2.getString("name");
+									if (!StrUtils.isEmptyStr(sLang)) {
+										langs.put(sLang, sName);
+									}
+								}
+								llc.click(langs);
+							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+						} catch (Exception e) {
+							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+						}
+					}
+				}, 100));
+			}
+
+			public void onFailure(Call call, IOException e) {
+				sYandexIAM = "";
+				if (unauthCntY == 0) {
+					unauthCntY++;
+					yandexAuthThenTranslate(s, langf, lang, curDict, view, llc);
+				} else {
+					cr.showToast(e.getMessage());
+					unauthCntY = 0;
+				}
+			}
+		});
+	};
+
 	public HttpUrl.Builder wikiUrlBuilder(String s, String link, int curAction, int listSkipCount, int prevAction) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(link).newBuilder();
 		if (curAction == WIKI_FIND_TITLE) {
@@ -704,6 +874,21 @@ public class Dictionaries {
 		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("es")) return "es-es";
 		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("uz")) return "uz-uz";
 		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("sv")) return "sv-se";
+		return langCode;
+	}
+
+	private String yndGetDefLangCode(String langCode) {
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("en-us")) return "en";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("az-az")) return "az";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("nl-nl")) return "nl";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("fr-fr")) return "fr";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("de-de")) return "de";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("it-it")) return "it";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("ms-my")) return "ms";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("pt-pt")) return "pt";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("es-es")) return "es";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("uz-uz")) return "uz";
+		if (StrUtils.getNonEmptyStr(langCode,true).equalsIgnoreCase("sv-se")) return "sv";
 		return langCode;
 	}
 
@@ -1292,48 +1477,53 @@ public class Dictionaries {
 				};
 				return;
 			}
-			HttpUrl.Builder urlBuilder = HttpUrl.parse(YND_DIC_ONLINE).newBuilder();
-			urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
-			urlBuilder.addQueryParameter("text", s);
-			String llang = get2dig(lang);
-			if (!StrUtils.isEmptyStr(langf)) llang = get2dig(langf)+"-"+get2dig(lang);
-			if (llang.startsWith("#-")) llang = llang.substring(2);
-			if (llang.startsWith("##-")) llang = llang.substring(3);
-			urlBuilder.addQueryParameter("lang", llang);
-			urlBuilder.addQueryParameter("format", "plain");
-			String url = urlBuilder.build().toString();
-			Request request = new Request.Builder()
-					.url(url)
-					.build();
-			Call call = client.newCall(request);
-			final CoolReader crf = cr;
-			final DictInfo curDictF = curDict;
-			call.enqueue(new okhttp3.Callback() {
-				public void onResponse(Call call, Response response)
-						throws IOException {
-					String sBody = response.body().string();
-					Document docJsoup = Jsoup.parse(sBody, YND_DIC_ONLINE);
-					Elements results = docJsoup.select("Translation > text");
-					String sTransl = "";
-					if (results.size()>0) sTransl = results.text(); else {
-						if ((StrUtils.getNonEmptyStr(sBody,true).contains("408"))
-							&&
-						(StrUtils.getNonEmptyStr(sBody,true).contains("exceeded")))
-						sTransl = mActivity.getString(R.string.online_dic_exceeded);
-						else sTransl = sBody;
-					}
-					final String sTranslF = sTransl;
-					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-						crf.showDicToast(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_YANDEX, "");
-						saveToDicSearchHistory(s, sTranslF, curDictF);
-					}, 100));
-				}
-
-				public void onFailure(Call call, IOException e) {
-					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-							crf.showToast(e.getMessage()), 100));
-				}
-			});
+			if (StrUtils.isEmptyStr(sYandexIAM))
+				yandexAuthThenTranslate(s, langf, lang, curDict, view, null);
+			else
+				yandexTranslate(s, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict, view, null);
+			// old yandex translate
+//			HttpUrl.Builder urlBuilder = HttpUrl.parse(YND_DIC_ONLINE).newBuilder();
+//			urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
+//			urlBuilder.addQueryParameter("text", s);
+//			String llang = get2dig(lang);
+//			if (!StrUtils.isEmptyStr(langf)) llang = get2dig(langf)+"-"+get2dig(lang);
+//			if (llang.startsWith("#-")) llang = llang.substring(2);
+//			if (llang.startsWith("##-")) llang = llang.substring(3);
+//			urlBuilder.addQueryParameter("lang", llang);
+//			urlBuilder.addQueryParameter("format", "plain");
+//			String url = urlBuilder.build().toString();
+//			Request request = new Request.Builder()
+//					.url(url)
+//					.build();
+//			Call call = client.newCall(request);
+//			final CoolReader crf = cr;
+//			final DictInfo curDictF = curDict;
+//			call.enqueue(new okhttp3.Callback() {
+//				public void onResponse(Call call, Response response)
+//						throws IOException {
+//					String sBody = response.body().string();
+//					Document docJsoup = Jsoup.parse(sBody, YND_DIC_ONLINE);
+//					Elements results = docJsoup.select("Translation > text");
+//					String sTransl = "";
+//					if (results.size()>0) sTransl = results.text(); else {
+//						if ((StrUtils.getNonEmptyStr(sBody,true).contains("40"))
+//							&&
+//						(StrUtils.getNonEmptyStr(sBody,true).contains("exceeded")))
+//						sTransl = mActivity.getString(R.string.online_dic_exceeded);
+//						else sTransl = sBody;
+//					}
+//					final String sTranslF = sTransl;
+//					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+//						crf.showDicToast(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_YANDEX, "");
+//						saveToDicSearchHistory(s, sTranslF, curDictF);
+//					}, 100));
+//				}
+//
+//				public void onFailure(Call call, IOException e) {
+//					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+//							crf.showToast(e.getMessage()), 100));
+//				}
+//			});
 			break;
 		case 8:
 			if (!BaseActivity.PREMIUM_FEATURES) {

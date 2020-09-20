@@ -61,6 +61,7 @@ public class FileInfo {
 	public Long id; // db id
 	public String title; // book title
 	public String authors; // authors, delimited with '|'
+	public String authorsAddInfo;
 	public String series; // series name w/o number
 	public int seriesNumber; // number of book inside series
     public int saved_with_ver; // version of database book was saved with
@@ -1842,7 +1843,7 @@ public class FileInfo {
 		return true;
 	}
 
-	public boolean mainEquals(FileInfo other) {
+	public boolean baseEquals(FileInfo other) {
 		if (this == other)
 			return true;
 		if (other == null)

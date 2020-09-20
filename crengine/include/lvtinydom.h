@@ -85,25 +85,26 @@ extern int gDOMVersionRequested;
 #define UNKNOWN_NAMESPACE_TYPE_ID (MAX_NAMESPACE_TYPE_ID>>1)
 
 // document property names
-#define DOC_PROP_AUTHORS         "doc.authors"
-#define DOC_PROP_TITLE           "doc.title"
-#define DOC_PROP_LANGUAGE        "doc.language"
-#define DOC_PROP_DESCRIPTION     "doc.description"
-#define DOC_PROP_KEYWORDS        "doc.keywords"
-#define DOC_PROP_SERIES_NAME     "doc.series.name"
-#define DOC_PROP_SERIES_NUMBER   "doc.series.number"
-#define DOC_PROP_ARC_NAME        "doc.archive.name"
-#define DOC_PROP_ARC_PATH        "doc.archive.path"
-#define DOC_PROP_ARC_SIZE        "doc.archive.size"
-#define DOC_PROP_ARC_FILE_COUNT  "doc.archive.file.count"
-#define DOC_PROP_FILE_NAME       "doc.file.name"
-#define DOC_PROP_FILE_PATH       "doc.file.path"
-#define DOC_PROP_FILE_SIZE       "doc.file.size"
-#define DOC_PROP_FILE_FORMAT     "doc.file.format"
-#define DOC_PROP_FILE_FORMAT_ID  "doc.file.format.id"
-#define DOC_PROP_FILE_CRC32      "doc.file.crc32"
-#define DOC_PROP_CODE_BASE       "doc.file.code.base"
-#define DOC_PROP_COVER_FILE      "doc.cover.file"
+#define DOC_PROP_AUTHORS          "doc.authors"
+#define DOC_PROP_AUTHORS_ADD_INFO "doc.authors.add.info"
+#define DOC_PROP_TITLE            "doc.title"
+#define DOC_PROP_LANGUAGE         "doc.language"
+#define DOC_PROP_DESCRIPTION      "doc.description"
+#define DOC_PROP_KEYWORDS         "doc.keywords"
+#define DOC_PROP_SERIES_NAME      "doc.series.name"
+#define DOC_PROP_SERIES_NUMBER    "doc.series.number"
+#define DOC_PROP_ARC_NAME         "doc.archive.name"
+#define DOC_PROP_ARC_PATH         "doc.archive.path"
+#define DOC_PROP_ARC_SIZE         "doc.archive.size"
+#define DOC_PROP_ARC_FILE_COUNT   "doc.archive.file.count"
+#define DOC_PROP_FILE_NAME        "doc.file.name"
+#define DOC_PROP_FILE_PATH        "doc.file.path"
+#define DOC_PROP_FILE_SIZE        "doc.file.size"
+#define DOC_PROP_FILE_FORMAT      "doc.file.format"
+#define DOC_PROP_FILE_FORMAT_ID   "doc.file.format.id"
+#define DOC_PROP_FILE_CRC32       "doc.file.crc32"
+#define DOC_PROP_CODE_BASE        "doc.file.code.base"
+#define DOC_PROP_COVER_FILE       "doc.cover.file"
 
 #define DEF_SPACE_WIDTH_SCALE_PERCENT 100
 #define DEF_MIN_SPACE_CONDENSING_PERCENT 50
@@ -2838,6 +2839,7 @@ public:
 //utils
 /// extract authors from FB2 document, delimiter is lString16 by default
 lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter=lString16::empty_str, bool shortMiddleName=true );
+lString16 extractDocAuthorsAddInfo( ldomDocument * doc, lString16 delimiter=lString16::empty_str, bool shortMiddleName=true );
 lString16 extractDocTitle( ldomDocument * doc );
 lString16 extractDocLanguage( ldomDocument * doc );
 lString16 extractDocGenre( ldomDocument * doc, lString16 delimiter=lString16::empty_str );

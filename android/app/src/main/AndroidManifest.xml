@@ -49,6 +49,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Stop TTS on incoming call -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Hide Android3 soft buttons on Archos -->
+    <!-- foreground TTS control service, for API >= 28 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <!-- uses-permission android:name="archos.permission.FULLSCREEN.FULL"/ -->
     <!-- Required permission to use in-app billing. -->
     <uses-permission android:name="com.android.vending.BILLING" />
@@ -752,6 +754,7 @@
                 <data android:pathPattern="/.*\\.odt" />
                 <data android:pathPattern="/.*\\..*\\.odt" />
                 <data android:pathPattern="/.*\\..*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\..*\\..*\\.odt" />
                 <data android:pathPattern="/.*\\.ods" />
                 <data android:pathPattern="/.*\\..*\\.ods" />
                 <data android:pathPattern="/.*\\..*\\..*\\.ods" />
@@ -806,6 +809,7 @@
                 <data android:pathPattern="/.*\\.odt" />
                 <data android:pathPattern="/.*\\..*\\.odt" />
                 <data android:pathPattern="/.*\\..*\\..*\\.odt" />
+                <data android:pathPattern="/.*\\..*\\..*\\..*\\.odt" />
                 <data android:pathPattern="/.*\\.ods" />
                 <data android:pathPattern="/.*\\..*\\.ods" />
                 <data android:pathPattern="/.*\\..*\\..*\\.ods" />
@@ -1236,7 +1240,11 @@
         </activity>
         <!-- <service android:name=".sync.SyncService" /> -->
         <!-- Database service -->
-        <service android:name=".db.CRDBService" /> <!-- Donations support -->
+        <service
+                android:name=".db.CRDBService"
+                android:enabled="true"
+                android:exported="false" />
+        <!-- Donations support -->
         <!--
         <service android:name=".donations.BillingService" />
 
@@ -1248,6 +1256,12 @@
             </intent-filter>
         </receiver>
         -->
+        <!-- TTS control service -->
+        <service
+                android:name=".tts.TTSControlService"
+                android:enabled="true"
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback" />
         <!-- Stop TTS on incoming call -->
         <receiver android:name=".PhoneStateReceiver">
             <intent-filter>

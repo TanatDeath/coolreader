@@ -1,31 +1,29 @@
 package org.coolreader.tts;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.Selection;
-import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
+import org.coolreader.crengine.ViewMode;
 
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,45 +34,46 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Browser;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.PopupWindow.OnDismissListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import org.coolreader.tts.TTS;
+import org.coolreader.tts.TTSControlBinder;
+import org.coolreader.tts.TTSControlService;
+import org.coolreader.tts.TTSControlServiceAccessor;
 
 import com.s_trace.motion_watchdog.HandlerThread;
 import com.s_trace.motion_watchdog.MotionWatchdogHandler;
 
-import static android.media.session.MediaSession.*;
-
 public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
+	public static final Logger log = L.create("ttssrv");
+
 	public PopupWindow mWindow;
 	public View mAnchor;
 	public CoolReader mCoolReader;
 	String mLogFileRoot = "";
 	int mForceTTSKoef = 0;
 	ReaderView mReaderView;
+	String mBookTitle;
 	public View mPanel;
 	TTS mTTS;
+	TTSControlServiceAccessor mTTSControl;
 	int mCurPage = -1;
 	String mCurPageText;
 	String mCurPageTextPrev;
@@ -98,11 +97,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 
 	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
 	// For TTS notification:
-	private static final String ACTION_TTS_PREV = "org.coolreader.crengine.tts.prev";
-	private static final String ACTION_TTS_PLAY = "org.coolreader.crengine.tts.play";
-	private static final String ACTION_TTS_PAUSE = "org.coolreader.crengine.tts.pause";
-	private static final String ACTION_TTS_NEXT = "org.coolreader.crengine.tts.next";
-	private static final String ACTION_TTS_STOP = "org.coolreader.crengine.tts.stop";
 	private static final int TTS_NOTIFICATION_ID = 0; // Use same ID for all TTS notifications
 	private static final int COVER_HEIGHT = 256;
 	private static final int COVER_WIDTH = 256;
@@ -110,41 +104,31 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	private Bitmap mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
 	private NotificationManager mNotificationManager;
 	private MediaSession mMediaSession;
-	private BroadcastReceiver mTtsControlReceiver = new BroadcastReceiver() {
+
+	BroadcastReceiver mTTSControlButtonReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			Log.d(TAG, "mTtsControlReceiver onReceive: got " + intent);
-			if (action == null) {
-				Log.w(TAG, "mTtsControlReceiver onReceive: got intent with null action!");
-				return;
-			}
-			switch (action) {
-				case ACTION_TTS_PREV:
-					jumpToSentence(ReaderCommand.DCMD_SELECT_PREV_SENTENCE);
-					break;
-				case ACTION_TTS_PLAY:
-					if (!isSpeaking) {
+			log.d("received action: " + action);
+			if (null != action) {
+				switch (action) {
+					case TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE:
 						toggleStartStopExt(false);
-					}
-					break;
-				case ACTION_TTS_PAUSE:
-					if (isSpeaking) {
-						toggleStartStopExt(false);
-					}
-					break;
-				case ACTION_TTS_NEXT:
-					jumpToSentence(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
-					break;
-				case ACTION_TTS_STOP:
-					stopAndClose();
-					break;
-				default:
-					Log.w(TAG, "mTtsControlReceiver onReceive: got unexpected " + intent);
-					break;
+						break;
+					case TTSControlService.TTS_CONTROL_ACTION_NEXT:
+						jumpToSentence(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
+						break;
+					case TTSControlService.TTS_CONTROL_ACTION_PREV:
+						jumpToSentence(ReaderCommand.DCMD_SELECT_PREV_SENTENCE);
+						break;
+					case TTSControlService.TTS_CONTROL_ACTION_DONE:
+						stopAndClose();
+						break;
+				}
 			}
 		}
 	};
+
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void setMediaSessionPlaybackState(int state) {
 		if (mMediaSession == null) {
@@ -174,129 +158,13 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		return channel;
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void displayNotification(boolean isSpeaking, String sText) {
-		createNotificationChannel();
-		mNotificationManager = (NotificationManager)
-				mCoolReader.getSystemService(Context.NOTIFICATION_SERVICE);
-		if (mNotificationManager == null) {
-			Log.i(TAG, "displayNotification: can't get NotificationService");
-			return;
-		}
-		Notification.Builder builder;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			builder = new Notification.Builder(mCoolReader, CHANNEL_ID);
-		} else {
-			builder = new Notification.Builder(mCoolReader);
-		}
-		// Show controls on lock screen even when user hides sensitive content.
-		builder.setVisibility(Notification.VISIBILITY_PUBLIC);
-		builder.setSmallIcon(R.drawable.known_reader_logo);
-		// Add media control buttons that invoke intents in your media service
-		PendingIntent prevPendingIntent = PendingIntent.getBroadcast(mCoolReader, 0,
-				new Intent(ACTION_TTS_PREV), 0);
-		PendingIntent playPendingIntent = PendingIntent.getBroadcast(mCoolReader, 1,
-				new Intent(ACTION_TTS_PLAY), 0);
-		PendingIntent pausePendingIntent = PendingIntent.getBroadcast(mCoolReader, 1,
-				new Intent(ACTION_TTS_PAUSE), 0);
-		PendingIntent nextPendingIntent = PendingIntent.getBroadcast(mCoolReader, 2,
-				new Intent(ACTION_TTS_NEXT), 0);
-		PendingIntent stopPendingIntent = PendingIntent.getBroadcast(mCoolReader, 3,
-				new Intent(ACTION_TTS_STOP), 0);
-		builder.addAction(R.drawable.ic_media_rew, "Previous", prevPendingIntent); // #0
-		if (isSpeaking) {
-			builder.addAction(R.drawable.ic_media_pause, "Pause", pausePendingIntent); // #1
-		} else {
-			builder.addAction(R.drawable.ic_media_play, "Play", playPendingIntent); // #1
-		}
-		builder.addAction(R.drawable.ic_media_ff, "Next", nextPendingIntent);  // #2
-		builder.addAction(R.drawable.ic_media_stop, "Stop", stopPendingIntent);  // #3
-		// Apply the media style template
-		builder.setStyle(new Notification.MediaStyle()
-				.setShowActionsInCompactView(1 /* #1: play or pause button */)
-				.setMediaSession(mMediaSession.getSessionToken())
-		);
-		if (StrUtils.isEmptyStr(sText)) {
-			builder.setContentTitle(mFileInfo.getTitle());
-			builder.setContentText(mFileInfo.getAuthors());
-		} else {
-			builder.setContentTitle(mFileInfo.getTitle() + " - " + mFileInfo.getAuthors());
-			builder.setContentText(sText);
-		}
-		builder.setLargeIcon(mBookCover);
-		mNotificationManager.notify(TTS_NOTIFICATION_ID, builder.build());
-	}
-
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void startMediaSession() {
-		final BookInfo bookInfo = mReaderView.getBookInfo();
-		if (bookInfo == null) {
-			Log.w(TAG, "startMediaSession: mReaderView.getBookInfo() returned null!");
-			return;
-		}
-		mMediaSession = new MediaSession(mCoolReader, "TTS");
-		mMediaSession.setFlags(FLAG_HANDLES_MEDIA_BUTTONS|FLAG_HANDLES_TRANSPORT_CONTROLS);
-		mMediaSession.setCallback(new Callback() {
-			@Override
-			public void onPlay() {
-				Log.i(TAG, "onPlay");
-				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_PLAY));
-			}
-			@Override
-			public void onPause() {
-				Log.i(TAG, "onPause");
-				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_PAUSE));
-			}
-			@Override
-			public void onSkipToNext() {
-				Log.i(TAG, "onSkipToNext");
-				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_NEXT));
-			}
-			@Override
-			public void onSkipToPrevious() {
-				Log.i(TAG, "onSkipToPrevious");
-				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_PREV));
-			}
-			@Override
-			public void onStop() {
-				Log.i(TAG, "onStop");
-				mCoolReader.sendBroadcast(new Intent(ACTION_TTS_STOP));
-			}
-		});
-		mFileInfo = bookInfo.getFileInfo();
-		Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), mFileInfo, mBookCover,
-				new CoverpageManager.CoverpageBitmapReadyListener() {
-					@Override
-					public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
-						mBookCover = bitmap;
-						displayNotification(isSpeaking, "");
-						MediaMetadata metadata = new MediaMetadata.Builder()
-								.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
-								.putString(MediaMetadata.METADATA_KEY_TITLE, mFileInfo.getTitle())
-								.putString(MediaMetadata.METADATA_KEY_ARTIST, mFileInfo.getAuthors())
-								.build();
-						mMediaSession.setMetadata(metadata);
-						setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
-						mMediaSession.setActive(true);
-					}
-				}
-		);
-	}
 	private void jumpToSentence(ReaderCommand dcmdSelectSentence) {
-		if (isSpeaking) {
-			isSpeaking = false;
-			mTTS.stop();
-			isSpeaking = true;
-		}
-		moveSelection(dcmdSelectSentence);
-	}
-	private void registerTtsControlReceiver() {
-		IntentFilter intentFilter = new IntentFilter(ACTION_TTS_PREV);
-		intentFilter.addAction(ACTION_TTS_PLAY);
-		intentFilter.addAction(ACTION_TTS_PAUSE);
-		intentFilter.addAction(ACTION_TTS_NEXT);
-		intentFilter.addAction(ACTION_TTS_STOP);
-		mCoolReader.registerReceiver(mTtsControlReceiver, intentFilter);
+		if ( isSpeaking ) {
+			stop(() -> {
+				isSpeaking = true;
+				moveSelection( dcmdSelectSentence );
+			});
+		} else moveSelection( dcmdSelectSentence );
 	}
 
 	class TimerHandler extends Handler {
@@ -451,7 +319,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	{
 		TTSToolbarDlg dlg = new TTSToolbarDlg(coolReader, readerView, tts);
 		//dlg.mWindow.update(dlg.mAnchor, width, height)
-		Log.d("cr3", "popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
+		log.d("popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 		//dlg.update();
 		//dlg.showAtLocation(readerView, Gravity.LEFT|Gravity.TOP, readerView.getLeft()+50, readerView.getTop()+50);
 		//dlg.showAsDropDown(readerView);
@@ -500,6 +368,11 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		closed = true;
 		BackgroundThread.instance().executeGUI(() -> {
 			stop();
+			mCoolReader.unregisterReceiver(mTTSControlButtonReceiver);
+			if (null != mTTSControl)
+				mTTSControl.unbind();
+			Intent intent = new Intent(mCoolReader, TTSControlService.class);
+			mCoolReader.stopService(intent);
 			restoreReaderMode();
 			mReaderView.clearSelection();
 			if (onCloseListener != null)
@@ -508,7 +381,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				mWindow.dismiss();
 			mReaderView.save();
 		});
-		mCoolReader.unregisterReceiver(mTtsControlReceiver);
 		if (mNotificationManager != null) {
 			mNotificationManager.cancel(TTS_NOTIFICATION_ID);
 		}
@@ -522,13 +394,16 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	}
 	
 	private boolean changedPageMode;
+
+	// plotn: NB!!! same fix as we did, but in other way. Check if it works
 	private void setReaderMode()
 	{
 		String oldViewSetting = mReaderView.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
 		if ( "1".equals(oldViewSetting) ) {
 			changedPageMode = true;
-			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "0");
-			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "1");
+			//mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "0");
+			//mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "1");
+			mReaderView.setViewModeNonPermanent(ViewMode.SCROLL);
 		}
 		moveSelection( ReaderCommand.DCMD_SELECT_FIRST_SENTENCE );
 	}
@@ -536,8 +411,9 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	private void restoreReaderMode()
 	{
 		if ( changedPageMode ) {
-			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "1");
-			mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "0");
+			//mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "1");
+			//mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "0");
+			mReaderView.setViewModeNonPermanent(ViewMode.PAGES);
 		}
 	}
 	
@@ -549,7 +425,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			
 			@Override
 			public void onNewSelection(Selection selection) {
-				Log.d("cr3", "onNewSelection: " + selection.text);
+				log.d("onNewSelection: " + selection.text);
 				curTime = System.currentTimeMillis();
 				long interv = mReaderView.getDefSavePositionIntervalSpeak();
 				if (interv == 0)
@@ -578,7 +454,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			
 			@Override
 			public void onFail() {
-				Log.d("cr3", "fail()");
+				log.e("fail()");
 				stop();
 				//currentSelection = null;
 			}
@@ -598,7 +474,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			if (sWord.replaceAll("\\p{Punct}", "").length()==0) dWordCountThis = 0;
 		}
 		lastSaveSpeakTime = System.currentTimeMillis();
-		displayNotification(isSpeaking,selection.text);
 		// text clearance
 		String clearText = selection.text;
 		if ((mCoolReader.getmReaderFrame()!=null) && (mCoolReader.getReaderView() != null))
@@ -632,6 +507,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		//mCoolReader.showToast(clearText);
 		//\
 		mTTS.speak(clearText, TTS.QUEUE_ADD, params);
+		runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, currentSelection.text));
 	}
 	
 	private void start() {
@@ -643,7 +519,8 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	}
 
 	private void startMotionWatchdog(){
-		Log.d(TAG, "startMotionWatchdog() enter");
+		String TAG = "MotionWatchdog";
+		log.d("startMotionWatchdog() enter");
 
 		Properties settings = mReaderView.getSettings();
 		int timeout = settings.getInt(ReaderView.PROP_APP_MOTION_TIMEOUT, 0);
@@ -659,6 +536,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	}
 	
 	private boolean isSpeaking;
+	private Runnable mOnStopRunnable;
 	private boolean isAlwaysStop;
 	private int iSentenceCount;
 	private double dWordCount;
@@ -670,7 +548,12 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	private long lastSaveCurPosTime = System.currentTimeMillis();
 
 	private void stop() {
+		stop(null);
+	}
+
+	private void stop(Runnable runnable) {
 		isSpeaking = false;
+		mOnStopRunnable = runnable;
 		if ( mTTS.isSpeaking() ) {
 			mTTS.stop();
 		}
@@ -720,6 +603,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			}
 			playPauseButton.setBackgroundDrawable(c);
 			playPauseButtonEll.setBackgroundDrawable(c);
+			runInTTSControlService(tts -> tts.notifyPause(mBookTitle));
 			stop();
 		} else {
 			playPauseButton.setImageResource(
@@ -735,10 +619,8 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			}
 			playPauseButton.setBackgroundDrawable(c);
 			playPauseButtonEll.setBackgroundDrawable(c);
+			runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, currentSelection.text));
 			start();
-		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			displayNotification(isSpeaking, "");
 		}
 	}
 	
@@ -747,14 +629,26 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		Log.d("cr3", "onUtteranceCompleted " + utteranceId);
 		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
 				isSpeaking?"utterance complete, while is speaking":"utterance complete, while NOT is speaking");
-		if ( isSpeaking ) {
-			if ((iSentenceCount<50) && (dWordCountThis>5)) {
-				dWordCount = dWordCount + dWordCountThis;
-				iSentenceCount = iSentenceCount + 1;
-				lTimeSpan = lTimeSpan + System.currentTimeMillis() - lastSaveSpeakTime;
+		if (null != mOnStopRunnable) {
+			mOnStopRunnable.run();
+			mOnStopRunnable = null;
+		} else {
+			if (isSpeaking) {
+				if ((iSentenceCount < 50) && (dWordCountThis > 5)) {
+					dWordCount = dWordCount + dWordCountThis;
+					iSentenceCount = iSentenceCount + 1;
+					lTimeSpan = lTimeSpan + System.currentTimeMillis() - lastSaveSpeakTime;
+				}
+				moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
 			}
-			moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
 		}
+	}
+
+	private void runInTTSControlService(TTSControlBinder.Callback callback) {
+		if (null == mTTSControl) {
+			mTTSControl = new TTSControlServiceAccessor(mCoolReader);
+		}
+		mTTSControl.bind(callback);
 	}
 
 	public void repaintButtons()
@@ -791,11 +685,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		mTimerHandler = new HandlerThread("TimerHandler");
 		mTimerHandler.start();
 		new TimerHandler(this, mCoolReader, mTimerHandler, 5000);
-
-		registerTtsControlReceiver();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			startMediaSession();
-		}
 
 		int colorGrayC;
 		int colorGray;
@@ -1001,6 +890,38 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		});
 		mCoolReader.tintViewIcons(mPanel);
 		mPanel.requestFocus();
+		BookInfo bookInfo = mReaderView.getBookInfo();
+		if (null != bookInfo) {
+			FileInfo fileInfo = bookInfo.getFileInfo();
+			if (null != fileInfo) {
+				mBookTitle = fileInfo.title;
+				// set language for TTS based on book's language
+				log.d("book language is \"" + fileInfo.language + "\"");
+				if (null != fileInfo.language && fileInfo.language.length() > 0) {
+					Locale locale = new Locale(fileInfo.language);
+					log.d("trying to set TTS language to \"" + locale.getDisplayLanguage() + "\"");
+					mTTS.setLanguage(locale);
+				}
+			}
+		}
+
+		// Start the foreground service to make this app also foreground,
+		// even if the main activity is in the background.
+		// https://developer.android.com/about/versions/oreo/background#services
+		Intent intent = new Intent(coolReader, TTSControlService.class);
+		Bundle data = new Bundle();
+		data.putString("bookTitle", mBookTitle);
+		intent.putExtras(data);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			coolReader.startForegroundService(intent);
+		else
+			coolReader.startService(intent);
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE);
+		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_NEXT);
+		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_PREV);
+		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_DONE);
+		mCoolReader.registerReceiver(mTTSControlButtonReceiver, filter);
 	}
 	
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class AskSomeValuesDialog extends BaseDialog {
 
 	public interface ValuesEnteredCallback {
-		public void done(ArrayList<String> results);
+		void done(ArrayList<String> results);
 	}
 
 	private final CoolReader mCoolReader;
@@ -56,9 +56,9 @@ public class AskSomeValuesDialog extends BaseDialog {
 				}
 			}
 			if (i == 2) {
-				TableRow tr = (TableRow) view.findViewById(R.id.some_value_tr2);
-				TextView tv = (TextView) view.findViewById(R.id.some_value_label2);
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit2);
+				TableRow tr = view.findViewById(R.id.some_value_tr2);
+				TextView tv = view.findViewById(R.id.some_value_label2);
+				EditText et = view.findViewById(R.id.some_value_edit2);
 				if (tr != null) {
 					textViews.add(tv);
 					editTexts.add(et);
@@ -72,7 +72,7 @@ public class AskSomeValuesDialog extends BaseDialog {
 				}
 			}
 		}
-		setView( view );
+		setView(view);
 	}
 
 	@Override

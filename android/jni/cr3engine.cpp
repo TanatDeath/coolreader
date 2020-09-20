@@ -126,7 +126,8 @@ public:
     lString16 filename;
     lString16 title;
     lString16 author;
-    lString16 series;
+	lString16 authorAddInfo;
+	lString16 series;
     int filesize;
     lString16 filedate;
     int seriesNumber;
@@ -411,7 +412,8 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
         doc.saveToStream(out, "utf16");
     #endif
     lString16 authors = extractDocAuthors( &doc, lString16("|"), false );
-    lString16 title = extractDocTitle( &doc );
+	lString16 authorsAddInfo = extractDocAuthorsAddInfo( &doc, lString16("|"), false );
+	lString16 title = extractDocTitle( &doc );
     lString16 language = extractDocLanguage( &doc );
     lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
 	lString16 genre = extractDocGenre( &doc, lString16("|") );
@@ -438,7 +440,8 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
 #endif
     pBookProps->title = title;
     pBookProps->author = authors;
-    pBookProps->series = series;
+	pBookProps->authorAddInfo = authorsAddInfo;
+	pBookProps->series = series;
     pBookProps->filesize = (long)stream->GetSize();
     pBookProps->filename = lString16(name);
     pBookProps->filedate = getDateTimeString( t );
@@ -500,6 +503,7 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	}
 	SET_STR_FLD("title",props.title);
 	SET_STR_FLD("authors",props.author);
+	SET_STR_FLD("authorsAddInfo",props.authorAddInfo);
 	SET_STR_FLD("series",props.series);
 	SET_INT_FLD("seriesNumber",props.seriesNumber);
 	SET_STR_FLD("language",props.language);

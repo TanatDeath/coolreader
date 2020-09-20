@@ -136,6 +136,8 @@
     <string name="dlg_search_hint">Type text here</string>
     <string name="dlg_button_ok">OK</string>
     <string name="dlg_button_cancel">Cancel</string>
+    <string name="dlg_button_yes">Yes</string>
+    <string name="dlg_button_no">No</string>
     <string name="dlg_button_find">Find</string>
     <string name="options_page_animation">Page animation</string>
     <string name="options_controls_enable_volume_keys">Use volume keys for navigation</string>
@@ -1017,6 +1019,7 @@
     <string name="ynd_auth_finished_ok">Yandex disc: authorization finished successfully</string>
     <string name="ynd_auth_finished_error">Yandex disc: authorization error</string>
     <string name="ynd_long_tap">You can open this window later via long tap on Yandex icon. Select an action:</string>
+    <string name="litres_long_tap">You can open this window later via long tap on Litres icon</string>
     <string name="ynd_auth_auto">Auto mode</string>
     <string name="ynd_auth_manual">Manual token input</string>
     <string name="ynd_input_token">Input token / URL</string>
@@ -1090,10 +1093,15 @@
     <string name="toolbar_settings">Toolbar settings</string>
     <string name="cloud_settings">Cloud settings</string>
     <string name="dictionary_settings">Dictionary settings</string>
-    <string name="filebrowser_settings">File browser settings</string>
+    <string name="filebrowser_settings">Library and file browser settings</string>
     <string name="rare_settings">Rare and experimental settings</string>
+    <string name="tts_settings">Text-to-speech settings</string>
+    <string name="backlight_settings">Screen and keys backlight settings</string>
+    <string name="selectionmodes_settings">Special selection modes\' settings</string>
+    <string name="pageandorientation_settings">Page view mode, orientation and animation</string>
+    <string name="selectionmodes_settings_add_info">Separate selection settings for \'Selection mode\' and \'Inspector mode\'</string>
     <string name="page_color_settings">Colors and night mode settings</string>
-    <string name="page_margins_settings">Page margins settings</string>
+    <string name="page_margins_settings">Page and screen margins settings</string>
     <string name="yandex_settings">Yandex disc settings</string>
     <string name="yandex_settings_v">Open Yandex disc settings dialog</string>
     <string name="dropbox_settings">Dropbox settings</string>
@@ -1248,6 +1256,7 @@
     <string name="options_app_hide_css_warning">Hide css styles warning dialog</string>
     <string name="options_app_hide_css_warning_add_info">Hide css styles warning dialog (when open a new book, toggle night mode)</string>
     <string name="options_word_expanion">Word expansion</string>
+    <string name="options_format_unused_space_thres">% of unused space on a line to trigger hyphenation, or addition of letter spacing for justification</string>
     <string name="options_word_expanion_add_info">Some extra spaces added between letters in word in some cases</string>
     <string name="options_word_expanion1">none</string>
     <string name="options_word_expanion2">some</string>
@@ -1271,6 +1280,7 @@
     <string name="page_animation_speed_5">slower</string>
     <string name="wiki_save_history">Save wiki (online) translate to dictionary search history</string>
     <string name="options_app_googledrive_sync_auto">Auto synchronization with Google Drive</string>
+    <string name="options_app_cloudsync_confirmations">Ask for confirmation before updating</string>
     <string name="options_app_googledrive_sync_settings">Settings on Drive</string>
     <string name="options_app_googledrive_sync_bookmarks">Bookmarks and reading position on Drive</string>
     <string name="options_app_googledrive_sync_currentbook">Current reading book info on Drive</string>
@@ -1291,4 +1301,36 @@
     <string name="choose_root_sd">Could not delete file, if the file is on External SD, choose ExtSD root in the dialog</string>
     <string name="manual_open_error">Error while opening manual</string>
     <string name="ynd_translate_settings">Yandex translate settings</string>
+    <string name="sync_confirmation_other_book">Another book (%s) was opened on another device, switch to it?</string>
+    <string name="sync_confirmation_new_reading_position">New reading position found for this book, update?</string>
+    <string name="autosave_period">Autosave period</string>
+    <string name="autosave_period_off">"Off"</string>
+    <string name="autosave_period_1min">"1 minute"</string>
+    <string name="autosave_period_2min">"2 minutes"</string>
+    <string name="autosave_period_3min">"3 minutes"</string>
+    <string name="autosave_period_4min">"4 minutes"</string>
+    <string name="autosave_period_5min">"5 minutes"</string>
+    <string name="autosave_period_10min">"10 minutes"</string>
+    <string name="autosave_period_15min">"15 minutes"</string>
+    <string name="autosave_period_20min">"20 minutes"</string>
+    <string name="autosave_period_30min">"30 minutes"</string>
+    <string name="read_aloud">Read aloud</string>
+    <string name="ynd_cloud_settings">Yandex cloud settings</string>
+    <string name="ynd_oauth">Yandex cloud OAuth token</string>
+    <string name="ynd_folder_id">Yandex cloud folder id</string>
+    <string name="authors_aliases_load">Load author\'s aliases</string>
+    <string name="authors_aliases_load_add_info">Load author\'s aliases from external file</string>
+    <string name="authors_aliases_loading">Author\'s aliases is loading</string>
+    <string name="authors_aliases_loaded">Author\'s aliases is loaded, count = </string>
+    <string name="authors_aliases_enabled">Enable author aliases</string>
+    <string name="authors_aliases_enabled_add_info">When enabled - author\'s real name is substituted by its alias, loaded from external file</string>
+    <string name="litres_settings">Litres settings</string>
+    <string name="litres_settings_add_info">Your Litres username and password</string>
+    <string name="litres_credentials">Litres authorization</string>
+    <string name="litres_username">Username</string>
+    <string name="litres_password">Password</string>
+    <string name="test_connect">Test connection</string>
+    <string name="test">Test</string>
+    <string name="font_tweaks">Font tweaks</string>
+    <string name="spacing_settings">Line, word and symbol spacings</string>
 </resources>

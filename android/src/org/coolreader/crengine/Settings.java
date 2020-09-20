@@ -173,10 +173,13 @@ public interface Settings {
 	public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
 	public static final String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
 	public static final String PROP_CLOUD_YND_HOME_FOLDER = "app.cloud.ynd.home.folder";
+	public static final String PROP_CLOUD_YND_SETTINGS = "app.cloud.ynd.settings";
+	public static final String PROP_CLOUD_DBX_SETTINGS = "app.cloud.dbx.settings";
 	public static final String PROP_CLOUD_WIKI1_ADDR = "app.cloud.wiki1";
 	public static final String PROP_CLOUD_WIKI2_ADDR = "app.cloud.wiki2";
 	public static final String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
 	public static final String PROP_CLOUD_YND_TRANSLATE_OPTIONS = "app.cloud.ynd.translate.options";
+	public static final String PROP_CLOUD_LITRES_SETTINGS = "app.cloud.litres.settings";
 	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
@@ -217,6 +220,8 @@ public interface Settings {
 	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_DATES = "app.browser.sec.group.dates";
 	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_RATING = "app.browser.sec.group.rating";
 	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_STATE = "app.browser.sec.group.state";
+	public static final String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD = "app.browser.authors.aliases.load";
+	public static final String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED = "app.browser.authors.aliases.enabled";
 
     public static final String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
     public static final String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";
@@ -242,10 +247,12 @@ public interface Settings {
 
     public static final String PROP_APP_PLUGIN_ENABLED = "app.plugin.enabled.litres";
 
-	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED = "app.cloudsync.googledrive.enabled";
-	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS = "app.cloudsync.googledrive.settings";
-	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS = "app.cloudsync.googledrive.bookmarks";
-	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK = "app.cloudsync.googledrive.currentbook";
+    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED = "app.cloudsync.googledrive.enabled";
+    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS = "app.cloudsync.googledrive.settings";
+    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS = "app.cloudsync.googledrive.bookmarks";
+    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK = "app.cloudsync.googledrive.currentbook";
+    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD = "app.cloudsync.googledrive.autosaveperiod";
+    String PROP_APP_CLOUDSYNC_CONFIRMATIONS = "app.cloudsync.confirmations";
 
 	public static final String PROP_APP_GEO = "app.geo.locations";
 	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";
@@ -253,6 +260,12 @@ public interface Settings {
 	public static final String PROP_DICTIONARY_TITLE = "window.dictionary.title";
 	public static final String PROP_FILEBROWSER_TITLE = "window.filebrowser.title";
 	public static final String PROP_RARE_TITLE = "window.rare.title";
+	public static final String PROP_TTS_TITLE = "window.tts.title";
+	public static final String PROP_BACKLIGHT_TITLE = "window.backlight.title";
+	public static final String PROP_SELECTION_MODES_TITLE = "window.selection.modes.title";
+	public static final String PROP_PAGEANDORIENTATION_TITLE = "window.pageandorientation.modes.title";
+	public static final String PROP_FONTTWEAKS_TITLE = "window.font.tweaks.title";
+	public static final String PROP_SPACING_TITLE = "window.spacing.title";
 	public static final String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
 	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
 

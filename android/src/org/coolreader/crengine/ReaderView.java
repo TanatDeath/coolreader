@@ -125,6 +125,18 @@ import com.google.gson.GsonBuilder;
 		//getActivity().showToast("load page cnt " + iPageCnt);
 	}
 
+	private void showCenterPopup(String val) {
+		mActivity.showCenterPopup(surface, val, false);
+	};
+
+	private void showCenterPopup(String val, int millis) {
+		mActivity.showCenterPopup(surface, val, millis, false);
+	}
+
+	private void showCenterPopupFont(String val, String val2, int fontSize) {
+		mActivity.showCenterPopupFont(surface, val, val2, fontSize);
+	}
+
 	public String getPageTextFromEngine(int page) {
 		int iPageCnt = getDoc().getPageCount();
 		if (page < iPageCnt) return StrUtils.getNonEmptyStr(getDoc().getPageText(false, page),false);
@@ -246,9 +258,17 @@ import com.google.gson.GsonBuilder;
 					if (dst.width() != canvas.getWidth() || dst.height() != canvas.getHeight())
 						canvas.drawColor(Color.rgb(32, 32, 32));
 					drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, src, dst);
+					if (isCloudSyncProgressActive()) {
+						// draw progressbar on top
+						doDrawProgress(canvas, currentCloudSyncProgressPosition, currentCloudSyncProgressTitle, true);
+					}
 				} else {
 					log.d("onDraw() -- drawing empty screen");
 					drawPageBackground(canvas);
+					if (isCloudSyncProgressActive()) {
+						// draw progressbar on top
+						doDrawProgress(canvas, currentCloudSyncProgressPosition, currentCloudSyncProgressTitle, true);
+					}
 				}
 				if (selectionModeActive) {
 					Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -1602,6 +1622,10 @@ import com.google.gson.GsonBuilder;
 			if (state == STATE_INITIAL && event.getAction() != MotionEvent.ACTION_DOWN)
 				return unexpectedEvent(); // ignore unexpected event
 
+			// Uncomment to disable user interaction during cloud sync
+			//if (isCloudSyncProgressActive())
+			//	return unexpectedEvent();
+
 			if (event.getAction() == MotionEvent.ACTION_UP) {
 				long duration = Utils.timeInterval(firstDown);
 				lastDuration = duration;
@@ -2139,6 +2163,20 @@ import com.google.gson.GsonBuilder;
 
 	public void setSetting(String name, String value) {
 		setSetting(name, value, true, false, true);
+	}
+
+	public void setViewModeNonPermanent(ViewMode mode) {
+		if (mode != viewMode) {
+			if (mode == ViewMode.SCROLL) {
+				doc.doCommand(ReaderCommand.DCMD_TOGGLE_PAGE_SCROLL_VIEW.nativeId, 0);
+				viewMode = mode;
+				mIsPageMode = false;
+			} else {
+				doc.doCommand(ReaderCommand.DCMD_TOGGLE_PAGE_SCROLL_VIEW.nativeId, 0);
+				viewMode = mode;
+				mIsPageMode = true;
+			}
+		}
 	}
 
 	public void saveSetting(String name, String value) {
@@ -2958,7 +2996,7 @@ import com.google.gson.GsonBuilder;
 					ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, tts);
 					ttsToolbar.setOnCloseListener(() -> ttsToolbar = null);
 				})) {
-					log.e("Cannot initilize TTS");
+					log.e("Cannot initialize TTS");
 				}
 			}
 			break;
@@ -4386,16 +4424,36 @@ import com.google.gson.GsonBuilder;
 		return mBookInfo;
 	}
 
+	private int currentCloudSyncProgressPosition = -1;
+	private String currentCloudSyncProgressTitle;
+
 	public void showCloudSyncProgress(int progress) {
-		showProgress(progress, R.string.cloud_synchronization_);
+		log.v("showClodSyncProgress(" + progress + ")");
+		boolean update = false;
+		if (null == currentCloudSyncProgressTitle) {
+			currentCloudSyncProgressTitle = mActivity.getString(R.string.cloud_synchronization_);
+			update = true;
+		}
+		if (currentCloudSyncProgressPosition != progress) {
+			currentCloudSyncProgressPosition = progress;
+			update = true;
+		}
+		if (update)
+			bookView.draw(true);
 	}
 
 	public void hideSyncProgress() {
-		hideProgress();
+		//hideProgress();
+		log.v("hideSyncProgress()");
+		if (currentCloudSyncProgressTitle != null || currentCloudSyncProgressPosition != -1) {
+			currentCloudSyncProgressPosition = -1;
+			currentCloudSyncProgressTitle = null;
+			bookView.draw(false);
+		}
 	}
 
-	public int getmBatteryState() {
-		return mBatteryState;
+	private boolean isCloudSyncProgressActive() {
+		return currentCloudSyncProgressPosition > 0;
 	}
 
 	private int mBatteryState = 100;
@@ -5143,7 +5201,6 @@ import com.google.gson.GsonBuilder;
 	int currentBrightnessValueIndex = -1;
 	int lastBrightnessValueIndexLeft = -1;
 	int lastBrightnessValueIndexRight = -1;
-	PopupWindow windowCenterPopup = null;
 
 	private void startBrightnessControl(final int startY, final boolean leftSide)
 	{
@@ -5156,131 +5213,6 @@ import com.google.gson.GsonBuilder;
 			if (lastBrightnessValueIndexRight == -1)
 				lastBrightnessValueIndexRight = n - 1 - n * (surface.getHeight() / 2) / surface.getHeight();
 		updateBrightnessControl(startY, startY, leftSide);
-	}
-
-	private boolean simplePopup = false;
-
-	private void showCenterPopup(String val) {
-		showCenterPopup(val, 500);
-	}
-
-	private void showCenterPopup(String val, int millis) {
-		BackgroundThread.instance().executeGUI(() -> {
-			boolean useExisting = (windowCenterPopup != null);
-			useExisting = useExisting && simplePopup;
-			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-			int colorGrayC = a.getColor(1, Color.GRAY);
-			int colorIcon = a.getColor(2, Color.GRAY);
-			a.recycle();
-			int fontSize = 24;
-			if (useExisting) {
-				if (millis >= 0) scheduleHideWindowCenterPopup(millis);
-				simplePopup = true;
-				TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-				tv.setTextColor(colorIcon);
-				tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-				tv.setText(val);
-				return;
-			}
-			if (windowCenterPopup == null)
-				windowCenterPopup = new PopupWindow(surface.getContext());
-			windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-			windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-			windowCenterPopup.setTouchable(false);
-			windowCenterPopup.setFocusable(false);
-			windowCenterPopup.setOutsideTouchable(true);
-			windowCenterPopup.setBackgroundDrawable(null);
-			LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
-			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
-			toast_ll.setBackgroundColor(colorGrayC);
-			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-			tv.setTextColor(colorIcon);
-			tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-			tv.setText(val);
-			windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
-			simplePopup = true;
-			if (millis >= 0) scheduleHideWindowCenterPopup(millis);
-		});
-	}
-
-	private void showCenterPopupFont(String val, String val2, int fontSize) {
-		BackgroundThread.instance().executeGUI(() -> {
-			boolean useExisting = (windowCenterPopup != null);
-			useExisting = useExisting && (!simplePopup);
-			simplePopup = false;
-			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-			int colorGrayC = a.getColor(1, Color.GRAY);
-			int colorIcon = a.getColor(2, Color.GRAY);
-			a.recycle();
-			if (windowCenterPopup == null)
-				windowCenterPopup = new PopupWindow(surface.getContext());
-			if (!useExisting) {
-				windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-				windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-				windowCenterPopup.setTouchable(false);
-				windowCenterPopup.setFocusable(false);
-				windowCenterPopup.setOutsideTouchable(true);
-				windowCenterPopup.setBackgroundDrawable(null);
-				LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap_2line, null, true));
-			}
-			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
-			toast_ll.setBackgroundColor(colorGrayC);
-			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-			tv.setTextColor(colorIcon);
-			tv.setTextSize(24); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
-			tv.setText(val);
-			TextView tv2 = windowCenterPopup.getContentView().findViewById(R.id.toast_2nd_line);
-			tv2.setTextColor(colorIcon);
-			tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
-			tv2.setText(val2);
-			String sFace = mActivity.settings().getProperty(ReaderView.PROP_FONT_FACE, "");
-			final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
-			boolean found = false;
-			for (int i = 0; i < mFontFacesFiles.length; i++) {
-				String s = mFontFacesFiles[i];
-				if ((s.startsWith(sFace + "~")) && (!s.toUpperCase().contains("BOLD")) && (!s.toUpperCase().contains("ITALIC"))) {
-					found = true;
-					String sf = mFontFacesFiles[i];
-					if (sf.contains("~")) {
-						sf = sf.split("~")[1];
-					}
-					try {
-						Typeface tf = null;
-						tf = Typeface.createFromFile(sf);
-						tv2.setTypeface(tf);
-					} catch (Exception e) {
-
-					}
-					break;
-				}
-			}
-			if (!found)
-				for (int i = 0; i < mFontFacesFiles.length; i++) {
-					String s = mFontFacesFiles[i];
-					if (s.startsWith(sFace + "~")) {
-						found = true;
-						String sf = mFontFacesFiles[i];
-						if (sf.contains("~")) {
-							sf = sf.split("~")[1];
-						}
-						try {
-							Typeface tf = null;
-							tf = Typeface.createFromFile(sf);
-							tv2.setTypeface(tf);
-						} catch (Exception e) {
-
-						}
-						break;
-					}
-				}
-			if (!useExisting)
-				windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
-			scheduleHideWindowCenterPopup(500);
-		});
 	}
 
 	private void updateBrightnessControl_old(final int y_start, final int y, final boolean leftSide) {
@@ -6615,43 +6547,54 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private int currentProgressPosition = 1;
-	private int currentProgressTitle = R.string.progress_loading;
+	private int currentProgressTitleId = R.string.progress_loading;
+	private String currentProgressTitle = null;
 
 	private void showProgress(int position, int titleResource) {
 		int pos = position / 100;
 		showCenterPopup(pos + "% " + mActivity.getString(titleResource), -1);
-		boolean first = currentProgressTitle == 0;
-		if (currentProgressPosition != position || currentProgressTitle != titleResource) {
+		boolean first = currentProgressTitleId == 0;
+		if (currentProgressPosition != position || currentProgressTitleId != titleResource) {
 			currentProgressPosition = position;
-			currentProgressTitle = titleResource;
+			currentProgressTitleId = titleResource;
+			currentProgressTitle = mActivity.getString(currentProgressTitleId);
 			//if (first) bookView.draw(!first);
 		}
 	}
 
-//	private void showProgress(int position, int titleResource) {
-//		log.v("showProgress(" + position + ")");
-//		boolean first = currentProgressTitle == 0;
-//		if (currentProgressPosition != position || currentProgressTitle != titleResource) {
-//			currentProgressPosition = position;
-//			currentProgressTitle = titleResource;
-//			bookView.draw(!first);
+//		private void showProgress(int position, int titleResource) {
+//			log.v("showProgress(" + position + ")");
+//			boolean first = currentProgressTitleId == 0;
+//			boolean update = false;
+//			if (null == currentProgressTitle || currentProgressTitleId != titleResource) {
+//				currentProgressTitleId = titleResource;
+//				currentProgressTitle = mActivity.getString(currentProgressTitleId);
+//				update = true;
+//			}
+//			if (currentProgressPosition != position || currentProgressTitleId != titleResource) {
+//				currentProgressPosition = position;
+//				update = true;
+//			}
+//			if (update)
+//				bookView.draw(!first);
 //		}
-//	}
 
 	private void hideProgress() {
-		scheduleHideWindowCenterPopup(1);
-		if (currentProgressTitle != 0) {
+		mActivity.scheduleHideWindowCenterPopup(1);
+		if (currentProgressTitleId != 0) {
 			currentProgressPosition = -1;
-			currentProgressTitle = 0;
+			currentProgressTitleId = 0;
+			currentProgressTitle = null;
 			//bookView.draw(false);
 		}
 	}
 
 //	private void hideProgress() {
 //		log.v("hideProgress()");
-//		if (currentProgressTitle != 0) {
+//		if (currentProgressTitleId != 0) {
 //			currentProgressPosition = -1;
-//			currentProgressTitle = 0;
+//			currentProgressTitleId = 0;
+//			currentProgressTitle = null;
 //			bookView.draw(false);
 //		}
 //	}
@@ -6755,10 +6698,10 @@ import com.google.gson.GsonBuilder;
 			profileNumber = mBookInfo.getFileInfo().getProfileId();
 			//Properties oldSettings = new Properties(mSettings);
 			// TODO: enable storing of profile per book
-//			int curProf = mActivity.getCurrentProfile();
-//			if (curProf != profileNumber) {
-//				showCenterPopup(mActivity.getString(R.string.settings_profile) + ":" +profileNumber, 2000);
-//			}
+			int curProf = mActivity.getCurrentProfile();
+			if (curProf != profileNumber) {
+				showCenterPopup(mActivity.getString(R.string.settings_profile) + ":" +profileNumber, -1);
+			}
 			mActivity.setCurrentProfile(profileNumber);
 			if (profileNumber == 0) { // if there is no book profile, then set it to current
 				if (mActivity.getCurrentProfile() != 0)
@@ -7155,22 +7098,46 @@ import com.google.gson.GsonBuilder;
 		return new ToolbarBackgroundDrawable();
 	}
 
-	protected void doDrawProgress(Canvas canvas, int position, int titleResource) {
+	protected void doDrawProgress(Canvas canvas, int position, String title) {
 		// nothing to do - everithing in show progress
 		return;
 	}
 
-	protected void doDrawProgressOld(Canvas canvas, int position, int titleResource) {
+	protected void doDrawProgress(Canvas canvas, int position, String title, boolean transparentFrame) {
+		// nothing to do - everithing in show progress
+		return;
+	}
+
+	protected void doDrawProgressOld(Canvas canvas, int position, String title) {
+		doDrawProgressOld(canvas, position, title, false);
+	}
+
+	protected void doDrawProgressOld(Canvas canvas, int position, String title, boolean transparentFrame) {
 		log.v("doDrawProgress(" + position + ")");
-		if (titleResource == 0)
+		if (null == title)
 			return;
 		int w = canvas.getWidth();
 		int h = canvas.getHeight();
 		int mins = Math.min(w, h) * 7 / 10;
 		int ph = mins / 20;
 		int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
+		int fontSize = 12;			// 12pt
 		float factor = mActivity.getDensityFactor();
 		Rect rc = new Rect(w / 2 - mins / 2, h / 2 - ph / 2, w / 2 + mins / 2, h / 2 + ph / 2);
+		if (transparentFrame) {
+			int frameColor = mSettings.getColor(PROP_BACKGROUND_COLOR, 0xFFFFFF);
+			float lumi = Utils.colorLuminance(frameColor);
+			if (Utils.colorLuminance(frameColor) >= 0.5f)
+				frameColor = Utils.darkerColor(frameColor, 150);
+			else
+				frameColor = Utils.lighterColor(frameColor, 200);
+			Rect frameRc = new Rect(rc);
+			frameRc.left -= ph/2;
+			frameRc.right += ph/2;
+			frameRc.top -= 2*fontSize*factor + ph/2;
+			frameRc.bottom += ph/2;
+			canvas.drawRect(frameRc, Utils.createSolidPaint(0xE0000000 | (frameColor & 0x00FFFFFF)));
+		}
 
 		Utils.drawFrame(canvas, rc, Utils.createSolidPaint(0xC0000000 | textColor));
 		//canvas.drawRect(rc, createSolidPaint(0xFFC0C0A0));
@@ -7184,15 +7151,14 @@ import com.google.gson.GsonBuilder;
 		canvas.drawRect(rc1, Utils.createSolidPaint(0x80000000 | textColor));
 		Paint textPaint = Utils.createSolidPaint(0xFF000000 | textColor);
 		textPaint.setTextAlign(Paint.Align.CENTER);
-		textPaint.setTextSize(15f*factor);
+		textPaint.setTextSize(15f * factor);
 		textPaint.setSubpixelText(true);
-		canvas.drawText(String.valueOf(mActivity.getText(titleResource)), (rc.left + rc.right) / 2, rc1.top - 12f*factor, textPaint);
+		canvas.drawText(title, (rc.left + rc.right) / 2, rc1.top - fontSize * factor, textPaint);
 		//canvas.drawText(String.valueOf(position * 100 / 10000) + "%", rc.left + 4, rc1.bottom - 4, textPaint);
 //		Rect rc2 = new Rect(rc);
 //		rc.left = x;
 //		canvas.drawRect(rc2, createSolidPaint(0xFFC0C0A0));
 	}
-
 
 	private int dimmingAlpha = 255; // no dimming
 	public void setDimmingAlpha(int alpha) {
@@ -7232,7 +7198,6 @@ import com.google.gson.GsonBuilder;
 
 	private int lastSavePositionTaskId = 0;
 	private int lastSavePositionCloudTaskId = 0;
-	private int lastHideBrighnessTaskId = 0;
 
 	public int getDefSavePositionInterval() {
 		int i = getSettings().getInt(ReaderView.PROP_SAVE_POS_TIMEOUT, 0);
@@ -7315,28 +7280,6 @@ import com.google.gson.GsonBuilder;
 //				}
 //    		});
 //    	}
-	}
-
-	public void scheduleHideWindowCenterPopup(final int delayMillis) {
-		// GUI thread required
-		BackgroundThread.instance().executeGUI(() -> {
-			final int mylastHideBrighnessTaskId = ++lastHideBrighnessTaskId;
-			if (delayMillis <= 1) {
-				if (windowCenterPopup != null) {
-					windowCenterPopup.dismiss();
-					windowCenterPopup = null;
-				}
-			} else {
-				BackgroundThread.instance().postGUI(() -> {
-					if (mylastHideBrighnessTaskId == lastHideBrighnessTaskId) {
-						if (windowCenterPopup != null) {
-							windowCenterPopup.dismiss();
-							windowCenterPopup = null;
-						}
-					}
-				}, delayMillis);
-			}
-		});
 	}
 
 	// Sony T2 update position method - by Jotas
@@ -7524,6 +7467,8 @@ import com.google.gson.GsonBuilder;
 				}
 			});
 			//engine.waitTasksCompletion();
+			if (null != ttsToolbar)
+				ttsToolbar.stopAndClose();
 		}
 	}
 

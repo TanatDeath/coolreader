@@ -9519,7 +9519,6 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         lString16 homePage = pauthor.relative( L"/home-page" ).getText().trim();
         lString16 email = pauthor.relative( L"/email" ).getText().trim();
         lString16 author = firstName;
-        lString16 addInfo = lString16::empty_str;
         if ( !author.empty() )
             author += " ";
         if ( !middleName.empty() )
@@ -9529,6 +9528,32 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         author += lastName;
         if ( !authors.empty() )
             authors += delimiter;
+        authors += author;
+    }
+    if (authors == "") {
+        authors = doc->getProps()->getStringDef("AUTHOR", "");
+    }
+    return authors;
+}
+
+lString16 extractDocAuthorsAddInfo( ldomDocument * doc, lString16 delimiter, bool shortMiddleName )
+{
+    if ( delimiter.empty() )
+        delimiter = ", ";
+    lString16 authors_add_info;
+    for ( int i=0; i<16; i++) {
+        lString16 path = cs16("/FictionBook/description/title-info/author[") + fmt::decimal(i+1) + "]";
+        ldomXPointer pauthor = doc->createXPointer(path);
+        if ( !pauthor ) {
+            //CRLog::trace( "xpath not found: %s", UnicodeToUtf8(path).c_str() );
+            break;
+        }
+        lString16 nickName = pauthor.relative( L"/nickname" ).getText().trim();
+        lString16 homePage = pauthor.relative( L"/home-page" ).getText().trim();
+        lString16 email = pauthor.relative( L"/email" ).getText().trim();
+        lString16 addInfo = lString16::empty_str;
+        if ( !authors_add_info.empty() )
+            authors_add_info += delimiter;
         if (( !nickName.empty() ) || ( !homePage.empty() ) || ( !email.empty() )) {
             addInfo = nickName;
             if ((!addInfo.empty()) && ((!homePage.empty()) || (!email.empty())) )
@@ -9538,14 +9563,10 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
                 if ( !email.empty() ) addInfo += ", ";
             }
             if (!email.empty()) addInfo += email;
-            addInfo = " (" + addInfo + ")";
         }
-        authors += author + addInfo;
+        authors_add_info += authors_add_info + addInfo;
     }
-    if (authors == "") {
-        authors = doc->getProps()->getStringDef("AUTHOR", "");
-    }
-    return authors;
+    return authors_add_info;
 }
 
 lString16 extractDocTitle( ldomDocument * doc )
@@ -11391,37 +11412,11 @@ inline bool IsWordSeparator( lChar16 ch )
     return lStr_isWordSeparator(ch);
 }
 
-inline bool IsWordSeparatorInSentence( lChar16 ch )
-{
-    switch (ch) {
-        case '.':
-        case '?':
-        case '!':
-        case L'\x2026': // horizontal ellypsis
-            return false;
-    }
-    return lStr_isWordSeparator(ch);
-}
-
 inline bool IsWordSeparatorOrNull( lChar16 ch )
 {
     if (ch==0) return true;
     return IsWordSeparator(ch);
 }
-
-inline bool IsWordSeparatorInSentenceOrNull( lChar16 ch )
-{
-    if (ch==0) return true;
-    switch (ch) {
-        case '.':
-        case '?':
-        case '!':
-        case L'\x2026': // horizontal ellypsis
-            return false;
-    }
-    return IsWordSeparator(ch);
-}
-
 
 inline bool canWrapWordBefore( lChar16 ch ) {
     return ch>=0x2e80 && ch<0x2CEAF;
@@ -12039,15 +12034,16 @@ bool ldomXPointerEx::isSentenceStart()
     lChar16 prevCh1 = 0;
     lChar16 prevCh2 = 0;
     lChar16 prevCh3 = 0;
+    lChar16 prevCh4 = 0;
 
 
     lChar16 prevNonSpace = 0;
     for ( ;i>0; i-- ) {
         lChar16 ch = text[i-1];
-        prevCh1 = i>1 ? text[i-2] : 0;
         prevCh2 = i>2 ? text[i-3] : 0;
         prevCh3 = i>3 ? text[i-4] : 0;
-        if ( !IsWordSeparatorInSentence(ch) ) {
+        prevCh4 = i>4 ? text[i-5] : 0;
+        if ( !IsUnicodeSpace(ch) ) {
             prevNonSpace = ch;
             break;
         }
@@ -12060,7 +12056,7 @@ bool ldomXPointerEx::isSentenceStart()
             lString16 prevText = pos.getText();
             for ( int j=prevText.length()-1; j>=0; j-- ) {
                 lChar16 ch = prevText[j];
-                if ( !IsWordSeparator(ch) ) {
+                if ( !IsUnicodeSpace(ch) ) {
                     prevNonSpace = ch;
                     break;
                 }
@@ -12073,6 +12069,10 @@ bool ldomXPointerEx::isSentenceStart()
     if (1 == textLen) {
         switch (currCh) {
             case '.':
+                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
+                if ((prevCh2 == 's') && (prevCh3 == 'r')  && (prevCh4 == 'M')) return false;
+                if ((prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+                if ((prevCh2 == 's')  && (prevCh3 == 'M')) return false;
             case '?':
             case '!':
             case L'\x2026': // horizontal ellypsis
@@ -12080,14 +12080,14 @@ bool ldomXPointerEx::isSentenceStart()
         }
     }
 
-    if ( !IsWordSeparator(currCh) && IsWordSeparatorOrNull(prevCh) ) {
+    if ( !IsUnicodeSpace(currCh) && IsUnicodeSpaceOrNull(prevCh) ) {
         switch (prevNonSpace) {
         case 0:
         case '.':
             // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
-            if ((prevCh1 == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
-            if ((prevCh1 == 'r')  && (prevCh2 == 'M')) return false;
-            if ((prevCh1 == 's')  && (prevCh2 == 'M')) return false;
+            if ((prevCh2 == 's') && (prevCh3 == 'r')  && (prevCh4 == 'M')) return false;
+            if ((prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+            if ((prevCh2 == 's')  && (prevCh3 == 'M')) return false;
         case '?':
         case '!':
         case L'\x2026': // horizontal ellypsis
@@ -12115,11 +12115,15 @@ bool ldomXPointerEx::isSentenceEnd()
     lChar16 prevCh = i>0 ? text[i-1] : 0;
     lChar16 prevCh2 = i>1 ? text[i-2] : 0;
     lChar16 prevCh3 = i>2 ? text[i-3] : 0;
+    lChar16 prevCh4 = i>3 ? text[i-4] : 0;
     //lChar16 nextCh = (i+1)<textLen ? text[i+1] : 0;
-    if ( IsWordSeparatorOrNull(currCh) ) {
+    if ( IsUnicodeSpaceOrNull(currCh) ) {
         switch (prevCh) {
         case 0:
         case '.':
+            if ((prevCh2 == 's') && (prevCh3 == 'r')  && (prevCh4 == 'M')) return false;
+            if ((prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+            if ((prevCh2 == 's')  && (prevCh3 == 'M')) return false;
         case '?':
         case '!':
         case L'\x2026': // horizontal ellypsis
@@ -12129,39 +12133,38 @@ bool ldomXPointerEx::isSentenceEnd()
             break;
         }
         //plotn
-        switch (currCh) {
-            case 0:
-            case '.':
-                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
-                if ((prevCh == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
-                if ((prevCh == 'r')  && (prevCh2 == 'M')) return false;
-                if ((prevCh == 's')  && (prevCh2 == 'M')) return false;
-            case '?':
-            case '!':
-            case L'\x2026': // horizontal ellypsis
-                _data->addOffset(1);
- //               if (nextCh = ']') _data->addOffset(1);
-                return true;
-            default:
-                break;
-        }
+//        switch (currCh) {
+//            case 0:
+//            case '.':
+//                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
+//                if ((prevCh == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+//                if ((prevCh == 'r')  && (prevCh2 == 'M')) return false;
+//                if ((prevCh == 's')  && (prevCh2 == 'M')) return false;
+//            case '?':
+//            case '!':
+//            case L'\x2026': // horizontal ellypsis
+//                _data->addOffset(1);
+//                return true;
+//            default:
+//                break;
+//        }
         //plotn
-        switch (nextCh) {
-            case 0:
-            case '.':
-                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
-                if ((prevCh == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
-                if ((prevCh == 'r')  && (prevCh2 == 'M')) return false;
-                if ((prevCh == 's')  && (prevCh2 == 'M')) return false;
-            case '?':
-            case '!':
-            case L'\x2026': // horizontal ellypsis
-                _data->addOffset(1);
-                _data->addOffset(1);
-                return true;
-            default:
-                break;
-        }
+//        switch (nextCh) {
+//            case 0:
+//            case '.':
+//                // Somerset Maugham easter egg - Mr. and Mrs. are not the end of sentences :)
+//                if ((prevCh == 's') && (prevCh2 == 'r')  && (prevCh3 == 'M')) return false;
+//                if ((prevCh == 'r')  && (prevCh2 == 'M')) return false;
+//                if ((prevCh == 's')  && (prevCh2 == 'M')) return false;
+//            case '?':
+//            case '!':
+//            case L'\x2026': // horizontal ellypsis
+//                _data->addOffset(1);
+//                _data->addOffset(1);
+//                return true;
+//            default:
+//                break;
+//        }
     }
     // word is not ended with . ! ?
     // check whether it's last word of block
@@ -16966,7 +16969,7 @@ static void updateStyleDataRecursive( ldomNode * node, LVDocViewCallback * progr
     int n = node->getChildCount();
     for ( int i=0; i<n; i++ ) {
         ldomNode * child = node->getChildNode(i);
-        if ( child->isElement() )
+        if ( child && child->isElement() )
             updateStyleDataRecursive( child, progressCallback, lastProgressPercent );
     }
     if ( styleSheetChanged )

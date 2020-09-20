@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -44,6 +45,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import okhttp3.Call;
 import okhttp3.HttpUrl;
@@ -66,16 +69,16 @@ public class TranslationDirectionDialog extends BaseDialog {
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
 	private FileInfo fInfo;
-	private ArrayList<TextView> textViews = new ArrayList<TextView>();
-	private ArrayList<EditText> editTexts = new ArrayList<EditText>();
+	private ArrayList<TextView> textViews = new ArrayList<>();
+	private ArrayList<EditText> editTexts = new ArrayList<>();
 	public final ValuesEnteredCallback callback;
 	private TranslList mList;
 	private int listType = 0; // 1 - ynd; 2 - lingvo
 	public static OkHttpClient client = new OkHttpClient();
 
-	ArrayList<String[]> mTransl = new ArrayList<String[]>();
-	ArrayList<String[]> mTranslFiltered = new ArrayList<String[]>();
-	HashMap<String, String> yndLangs = new HashMap<String, String>();
+	ArrayList<String[]> mTransl = new ArrayList<>();
+	ArrayList<String[]> mTranslFiltered = new ArrayList<>();
+	TreeMap<String, String> yndLangs = new TreeMap<>();
 
 	private void doFilterList(String filter) {
 		if (listType > 0) {
@@ -174,7 +177,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 				a.recycle();
 				int colorGrayCT = Color.argb(30, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
 				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
-				Button btnFrom = (Button) view.findViewById(R.id.transl_item_lanf_from);
+				Button btnFrom = view.findViewById(R.id.transl_item_lanf_from);
 				btnFrom.setBackgroundColor(colorGrayCT2);
 				final String[] sArrS = arrS;
 				btnFrom.setOnClickListener(v -> {
@@ -300,7 +303,36 @@ public class TranslationDirectionDialog extends BaseDialog {
 		mTranslFiltered.clear();
 		mTransl.clear();
 		yndLangs.clear();
-		listType = 1;
+		listType = 2;
+		if (StrUtils.isEmptyStr(Dictionaries.sYandexIAM))
+			mCoolReader.mDictionaries.yandexAuthThenTranslate("", "", "", null, view,
+					lst -> {
+						yndLangs = lst;
+						for (Map.Entry<String, String> entry : yndLangs.entrySet()) {
+							mTransl.add(new String[]{entry.getValue(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey()});
+							mTranslFiltered.add(new String[]{entry.getValue(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey()});
+						}
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+							TranslListAdapter tla = new TranslListAdapter();
+							mList.setAdapter(tla);
+							tla.notifyDataSetChanged();
+						}, 100));
+					});
+		else
+			mCoolReader.mDictionaries.yandexTranslate("", "", "", null, view,
+					lst -> {
+						yndLangs = lst;
+						for (Map.Entry<String, String> entry : yndLangs.entrySet()) {
+							mTransl.add(new String[]{entry.getValue(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey()});
+							mTranslFiltered.add(new String[]{entry.getValue(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey(), entry.getKey()});
+						}
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+							TranslListAdapter tla = new TranslListAdapter();
+							mList.setAdapter(tla);
+							tla.notifyDataSetChanged();
+						}, 100));
+					});
+		if (1==1) return;
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.YND_DIC_GETLANGS).newBuilder();
 		urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
 		urlBuilder.addQueryParameter("ui", "en");
@@ -370,19 +402,19 @@ public class TranslationDirectionDialog extends BaseDialog {
 		setTitle(sTitle);
 		this.callback = callback;
 		mInflater = LayoutInflater.from(getContext());
-		View view = mInflater.inflate(R.layout.ask_some_values_dialog, null);
+		View view = mInflater.inflate(R.layout.translation_directions_dialog, null);
 		setAddButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings),
 				R.string.dictionary_settings);
-		TextView someText = (TextView) view.findViewById(R.id.some_text);
+		TextView someText = view.findViewById(R.id.some_text);
 		someText.setText(sSomeText);
 		textViews.clear();
 		editTexts.clear();
 		for (int i = 1; i<10; i++) {
 			if (i == 1) {
-				TableRow tr = (TableRow) view.findViewById(R.id.some_value_tr1);
-				TextView tv = (TextView) view.findViewById(R.id.some_value_label1);
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit1);
+				TableRow tr = view.findViewById(R.id.some_value_tr1);
+				TextView tv = view.findViewById(R.id.some_value_label1);
+				EditText et = view.findViewById(R.id.some_value_edit1);
 				if (tr != null) {
 					textViews.add(tv);
 					editTexts.add(et);
@@ -497,7 +529,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 		tl.addView(ll);
 		mList = new TranslList(activity, false);
 		tl.addView(mList);
-		setView( view );
+		setView(view);
 		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 			if (iType == FOR_YND) yndButtonClick();
 			if (iType == FOR_LINGVO) lingvoButtonClick();
@@ -507,7 +539,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 	@Override
 	protected void onPositiveButtonClick() {
 		super.onPositiveButtonClick();
-		ArrayList<String> res = new ArrayList<String>();
+		ArrayList<String> res = new ArrayList<>();
 		for (int i = 1; i<10; i++) {
 			if (i == 1) {
 				EditText et = view.findViewById(R.id.some_value_edit1);

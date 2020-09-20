@@ -83,11 +83,9 @@ public class YNDInputTokenDialog extends BaseDialog {
 		//authManual = (Button) view.findViewById(R.id.ynd_btn_auth_manual);
 		authAuto = (Button) view.findViewById(R.id.ynd_btn_auth_auto_ynd);
 		ImageButton tokenOk =view.findViewById(R.id.ynd_input_token_ok_btn);
-		tokenOk.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				saveYNDToken();
-				dismiss();
-			}
+		tokenOk.setOnClickListener(v -> {
+			saveYNDToken();
+			dismiss();
 		});
 		TextView tokenDeleteTxt = (TextView) view.findViewById(R.id.ynd_txt_delete_token);
         final File fYND = new File(mCoolReader.getSettingsFileF(0).getParent() + "/ynd.token");
@@ -105,34 +103,30 @@ public class YNDInputTokenDialog extends BaseDialog {
 		a.recycle();
 		tokenDelete.setBackgroundColor(colorGrayC);
 
-		tokenDelete.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-        	if (fYND.exists())
-            	if (fYND.delete()) {
-                	mCoolReader.showToast(R.string.success + ": " + fYND.getAbsolutePath() + " [deleted]");
-                } else {
-                	mCoolReader.showToast(R.string.unsuccess + ": " + fYND.getAbsolutePath() + " [was not deleted]");
-                }
-            }
-        });
+		tokenDelete.setOnClickListener(v -> {
+		if (fYND.exists())
+			if (fYND.delete()) {
+				mCoolReader.showToast(R.string.success + ": " + fYND.getAbsolutePath() + " [deleted]");
+			} else {
+				mCoolReader.showToast(R.string.unsuccess + ": " + fYND.getAbsolutePath() + " [was not deleted]");
+			}
+		});
 
-		authAuto.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				String authorizeUrl = Uri.parse(YNDConfig.YND_AUTH_URL)
-						.buildUpon()
-						.appendQueryParameter("response_type", "token")
-						.appendQueryParameter("client_id", YNDConfig.YND_ID)
-						.appendQueryParameter("device_id", mCoolReader.getAndroid_id())
-						.appendQueryParameter("device_name", mCoolReader.getModel())
-						.appendQueryParameter("redirect_url", YNDConfig.YND_REDIRECT_URL)
-						.build().toString();
-				try {
-					Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUrl));
-					mCoolReader.startActivity(myIntent);
-				} catch (ActivityNotFoundException e) {
-					mCoolReader.showToast(R.string.dbx_no_browser);
-					e.printStackTrace();
-				}
+		authAuto.setOnClickListener(v -> {
+			String authorizeUrl = Uri.parse(YNDConfig.YND_AUTH_URL)
+					.buildUpon()
+					.appendQueryParameter("response_type", "token")
+					.appendQueryParameter("client_id", YNDConfig.YND_ID)
+					.appendQueryParameter("device_id", mCoolReader.getAndroid_id())
+					.appendQueryParameter("device_name", mCoolReader.getModel())
+					.appendQueryParameter("redirect_url", YNDConfig.YND_REDIRECT_URL)
+					.build().toString();
+			try {
+				Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUrl));
+				mCoolReader.startActivity(myIntent);
+			} catch (ActivityNotFoundException e) {
+				mCoolReader.showToast(R.string.dbx_no_browser);
+				e.printStackTrace();
 			}
 		});
 

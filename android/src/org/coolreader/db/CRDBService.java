@@ -14,6 +14,7 @@ import com.dropbox.core.v1.DbxEntry;
 
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
+import org.coolreader.library.AuthorAlias;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -721,6 +722,37 @@ public class CRDBService extends Service {
         flush();
    	}
 
+	public interface AuthorsAliasesLoadingCallback {
+		void onAuthorsAliasesLoaded(int cnt);
+		void onAuthorsAliasesLoadProgress(int percent);
+	}
+
+	public void saveAuthorsAliasesInfo(final ArrayList<AuthorAlias> list, final AuthorsAliasesLoadingCallback callback, final Handler handler) {
+		execTask(new Task("saveAuthorsAliasesInfo") {
+			@Override
+			public void work() {
+				mainDB.deleteAuthorsAliasesInfo();
+				int i = 0;
+				int wasperc = 0;
+				if (list.size() > 0) {
+					for (AuthorAlias al : list) {
+						i++;
+						final int perc = (int) i * 100 / list.size();
+						if (wasperc != perc)
+							sendTask(handler, () -> callback.onAuthorsAliasesLoadProgress(perc));
+						mainDB.saveAuthorAliasInfo(al);
+					}
+				} else {
+					sendTask(handler, () -> callback.onAuthorsAliasesLoaded(0));
+				}
+				mainDB.flushAndTransaction();
+				final int iF = i;
+				sendTask(handler, () -> callback.onAuthorsAliasesLoaded(iF));
+			}
+		});
+		flush();
+	}
+
 	private abstract class Task implements Runnable {
 		private final String name;
 		public Task(String name) {
@@ -999,6 +1031,11 @@ public class CRDBService extends Service {
     	public void reopenDatabase() {
         	getService().reopenDatabase();
 		}
+
+		public void saveAuthorsAliasesInfo(final ArrayList<AuthorAlias> list, final AuthorsAliasesLoadingCallback callback) {
+			getService().saveAuthorsAliasesInfo(list, callback, new Handler());
+		}
+
     }
 
     @Override

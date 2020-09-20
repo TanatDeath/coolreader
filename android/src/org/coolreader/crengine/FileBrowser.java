@@ -295,7 +295,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			else {
 				if (
 						//(item.format.name().equals("DOCX"))|| //we have native docx support now
-						(item.format.name().equals("ODT"))
+						(item.format.name().equals("ODT")) &&
+							(
+								(StrUtils.getNonEmptyStr(item.getFilename(), true).toLowerCase().contains(".ods"))
+								||
+								(StrUtils.getNonEmptyStr(item.getFilename(), true).toLowerCase().contains(".odp"))
+							)
 				   ){
 					DocConvertDialog dlgConv = new DocConvertDialog(mActivity, item.pathname);
 					dlgConv.show();
