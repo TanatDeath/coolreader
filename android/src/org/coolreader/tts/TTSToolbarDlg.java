@@ -701,7 +701,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		lblMotionWd = (TextView) panel.findViewById(R.id.lbl_motion_wd);
 		lblMotionWd.setText(R.string.wd_sett);
 		lblMotionWd.setPaintFlags(lblMotionWd.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-		lblMotionWd.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_MOTION_TIMEOUT));
+		lblMotionWd.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE));
 		playPauseButton = panel.findViewById(R.id.tts_play_pause);
 		playPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)

@@ -5,6 +5,7 @@ import android.util.Log;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.StrUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,8 +52,28 @@ public class AuthorAlias {
 				while ((str = reader.readLine()) != null) {
 					if (str.contains("=")) {
 						AuthorAlias al = new AuthorAlias();
-						al.origText=str.split("=")[0];
-						al.aliasText=str.split("=")[1];
+						String orig = StrUtils.getNonEmptyStr(str.split("=")[0],true);
+						String alias = StrUtils.getNonEmptyStr(str.split("=")[1],true);
+						if (orig.split(" ").length > 1) {
+							String[] aorig = orig.split(" ");
+							String origN = "";
+							String origL = aorig[0];
+							for (int i = 1; i <= aorig.length - 1; i++) {
+								origN = origN + " " + aorig[i];
+							}
+							orig = origN + " " + origL;
+						}
+						al.origText=StrUtils.getNonEmptyStr(orig, true);
+						if (alias.split(" ").length > 1) {
+							String[] aalias = alias.split(" ");
+							String aliasN = "";
+							String aliasL = aalias[0];
+							for (int i = 1; i <= aalias.length - 1; i++) {
+								aliasN = aliasN + " " + aalias[i];
+							}
+							alias = aliasN + " " + aliasL;
+						}
+						al.aliasText=StrUtils.getNonEmptyStr(alias, true);
 						AUTHOR_ALIASES.add(al);
 					}
 				};

@@ -13,8 +13,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202009141
-        versionName "2020.09.14.1"
+        versionCode 202009221
+        versionName "2020.09.22.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

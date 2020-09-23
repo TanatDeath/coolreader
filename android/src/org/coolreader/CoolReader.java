@@ -2096,11 +2096,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						DocumentFile documentFile = DocumentFile.fromTreeUri(this, intent.getData());
 						int res = fileToDelete.deleteFileDocTree(this,intent.getData());
 						if (res == -1) {
-							showToast("Could not find file, make sure the root of ExtSD was selected");
+							showToast(R.string.could_not_delete_on_sd);
 							return;
 						}
 						if (res == 0) {
-							showToast("Could not delete file");
+							showToast(R.string.could_not_delete_file);
 							return;
 						}
 						sdCardUri = intent.getData();
@@ -2509,19 +2509,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mReaderView.closeIfOpened(book);
 	}
 
-	public void askDeleteBook(final FileInfo item)
-	{
+	public void askDeleteBook(final FileInfo item) {
 		askConfirmation(R.string.win_title_confirm_book_delete, () -> {
 			closeBookIfOpened(item);
 			FileInfo file = Services.getScanner().findFileInTree(item);
 			if (file == null)
 				file = item;
-			final FileInfo finalFile = file;
-			 if (file.deleteFile()) {
-				waitForCRDBService(() -> {
-					Services.getHistory().removeBookInfo(getDB(), finalFile, true, true);
-					BackgroundThread.instance().postGUI(() -> directoryUpdated(item.parent, null), 700);
-			});
+				final FileInfo finalFile = file;
+				if (file.deleteFile()) {
+					waitForCRDBService(() -> {
+						Services.getHistory().removeBookInfo(getDB(), finalFile, true, true);
+						BackgroundThread.instance().postGUI(() -> directoryUpdated(item.parent, null), 700);
+				});
 			} else {
 				boolean bSucceed = false;
 				int res = 0;

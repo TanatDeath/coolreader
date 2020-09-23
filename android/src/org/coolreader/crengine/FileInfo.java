@@ -436,6 +436,7 @@ public class FileInfo {
 	{
 		title = v.title;
 		authors = v.authors;
+		authorsAddInfo = v.authorsAddInfo;
 		series = v.series;
 		seriesNumber = v.seriesNumber;
 		path = v.path;
@@ -496,6 +497,7 @@ public class FileInfo {
 		String find = StrUtils.getNonEmptyStr(text,true).toUpperCase();
 		if (StrUtils.getNonEmptyStr(title, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(authors, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(authorsAddInfo, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(series, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(String.valueOf(seriesNumber), true).toUpperCase().contains(find)) return true;
 		//if (StrUtils.getNonEmptyStr(path, true).toUpperCase().contains(find)) return true;
@@ -1272,6 +1274,13 @@ public class FileInfo {
 			if (resS.length() > 0) resS = resS.substring(1);
 			this.authors = resS;
 		} else this.authors = null;
+		return true;
+	}
+
+	public boolean setAuthorsAddInfo(String authorsAddInfo) {
+		if (eq(this.authorsAddInfo, authorsAddInfo))
+			return false;
+		this.authorsAddInfo = authorsAddInfo;
 		return true;
 	}
 

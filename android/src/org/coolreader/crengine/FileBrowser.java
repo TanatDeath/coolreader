@@ -1724,7 +1724,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating authors list");
-				mActivity.getDB().loadAuthorsList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir));
+				boolean withAliases = mActivity.settings().getBool(Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED, false);
+				mActivity.getDB().loadAuthorsList(fileOrDir, addFilter, withAliases, new ItemGroupsLoadingCallback(fileOrDir));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesRoot()) {

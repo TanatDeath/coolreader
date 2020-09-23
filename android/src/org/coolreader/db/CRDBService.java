@@ -408,12 +408,12 @@ public class CRDBService extends Service {
     	void onBooksFound(ArrayList<FileInfo> fileList);
     }
     
-	public void loadAuthorsList(FileInfo parent, String filterSeries, final ItemGroupsLoadingCallback callback, final Handler handler) {
+	public void loadAuthorsList(FileInfo parent, String filterSeries, boolean withAliases, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent); 
 		execTask(new Task("loadAuthorsList") {
 			@Override
 			public void work() {
-				mainDB.loadAuthorsList(p, filterSeries);
+				mainDB.loadAuthorsList(p, filterSeries, withAliases);
 				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
 			}
 		});
@@ -862,8 +862,8 @@ public class CRDBService extends Service {
     		getService().removeOPDSCatalog(id);
     	}
 
-    	public void loadAuthorsList(FileInfo parent, String filterSeries, final ItemGroupsLoadingCallback callback) {
-    		getService().loadAuthorsList(parent, filterSeries, callback, new Handler());
+    	public void loadAuthorsList(FileInfo parent, String filterSeries, boolean withAliases, final ItemGroupsLoadingCallback callback) {
+    		getService().loadAuthorsList(parent, filterSeries, withAliases, callback, new Handler());
     	}
 
 		public void loadGenresList(FileInfo parent, final ItemGroupsLoadingCallback callback) {

@@ -1491,8 +1491,8 @@ public class MainDB extends BaseDB {
 		sortItems(list, new ItemGroupFilenameExtractor(), sortAsc);
 		return found;
 	}
-	
-	public boolean loadAuthorsList(FileInfo parent, String filterSeries) {
+
+	public boolean loadAuthorsList(FileInfo parent, String filterSeries, boolean withAliases) {
 		Log.i("cr3", "loadAuthorsList()");
 		beginReading();
 		// gather missed stats
@@ -1518,10 +1518,17 @@ public class MainDB extends BaseDB {
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 
 		String sql = "";
-
-		if (StrUtils.isEmptyStr(filterSeries))
-			sql = "SELECT author.id, author.name, book_cnt as book_count FROM author ORDER BY author.name";
-		else {
+		//asdf
+		if (StrUtils.isEmptyStr(filterSeries)) {
+			if (withAliases)
+				sql = "SELECT coalesce(author_aliases.id + 10000000, author.id) as id, " +
+					  "	coalesce(author_aliases.alias_text, author.name) as name, sum(book_cnt) as book_count FROM author " +
+					  " LEFT JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+					  " GROUP BY coalesce(author_aliases.id + 10000000, author.id), coalesce(author.name, author_aliases.alias_text) " +
+					  " ORDER BY coalesce(author.name, author_aliases.alias_text)";
+			else
+				sql = "SELECT author.id, author.name, book_cnt as book_count FROM author ORDER BY author.name";
+		} else {
 			String series = "";
 			if (filterSeries.startsWith("seriesId:")) series = filterSeries.replace("seriesId:", "");
 			else if (filterSeries.startsWith("series:")) {
@@ -1530,7 +1537,17 @@ public class MainDB extends BaseDB {
 				if (l > 0) series = ""+l;
 			}
 			if (StrUtils.isEmptyStr(series)) return false;
-			sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
+			if (withAliases)
+				sql = "SELECT coalesce(author_aliases.id + 10000000, author.id) as id, " +
+						" coalesce(author_aliases.alias_text, author.name) as name, count(*) as book_count FROM author "+
+						" LEFT JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+						" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
+						"   and (book.series_fk = " + series + " or book.publseries_fk = " + series + ") " +
+						" JOIN book_author ON  book_author.author_fk = author.id " +
+						" GROUP BY coalesce(author_aliases.id + 10000000, author.id), coalesce(author.name, author_aliases.alias_text) " +
+						" ORDER BY coalesce(author.name, author_aliases.alias_text)";
+			else
+				sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
 					" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
 					"   and (book.series_fk = " + series + " or book.publseries_fk = " + series + ") " +
 					" JOIN book_author ON  book_author.author_fk = author.id " +
@@ -1659,17 +1676,54 @@ public class MainDB extends BaseDB {
 			sql = "SELECT series.id, series.name, book_cnt as book_count FROM series "+
 					" ORDER BY series.name";
 		else {
+			//asdf
 			String author = "";
-			if (filterAuthor.startsWith("authorId:")) author = filterAuthor.replace("authorId:", "");
+			ArrayList<Long> listAuthors = new ArrayList<>();
+			if (filterAuthor.startsWith("authorId:")) {
+				author = filterAuthor.replace("authorId:", "");
+				listAuthors.add(Long.valueOf(author));
+				if (Long.valueOf(author) > 10000000L) {
+					listAuthors.clear();
+					try (Cursor rs = mDB.rawQuery(
+							"SELECT distinct author.id FROM author " +
+									" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+									" WHERE author_aliases.id = " + (Long.valueOf(author) - 10000000), null)) {
+						if (rs.moveToFirst()) {
+							do {
+								listAuthors.add(rs.getLong(0));
+							} while (rs.moveToNext());
+						}
+						if (rs != null) rs.close();
+					} catch (Exception e) {
+						Log.e("cr3", "exception while loading list of authors", e);
+					}
+				}
+			}
 			else if (filterAuthor.startsWith("author:")) {
 				String s = filterAuthor.replace("author:", "").trim();
 				long l = getLongValue("SELECT author.id FROM author where trim(author.name) = " + quoteSqlString(s));
-				if (l > 0) author = ""+l;
+				listAuthors.clear();
+				if (l > 0) listAuthors.add(l);
+				try (Cursor rs = mDB.rawQuery(
+						"SELECT distinct author.id FROM author " +
+								" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+								" WHERE author_aliases.alias_text = " + quoteSqlString(s), null)) {
+					if (rs.moveToFirst()) {
+						do {
+							listAuthors.add(rs.getLong(0));
+						} while (rs.moveToNext());
+					}
+					if (rs != null) rs.close();
+				} catch (Exception e) {
+					Log.e("cr3", "exception while loading list of authors", e);
+				}
 			}
-			if (StrUtils.isEmptyStr(author)) return false;
+			String authors = "-1";
+			for (Long l: listAuthors) authors = authors + ", " + l;
+			authors = " (" + authors + ") ";
 			sql = "SELECT series.id, series.name, count(*) as book_count FROM series " +
 					" JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id " +
-					" JOIN book_author ON book_author.book_fk = book.id and book_author.author_fk = " + author +
+					" JOIN book_author ON book_author.book_fk = book.id and book_author.author_fk in " + authors +
 					" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
 		}
 		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX, true);
@@ -1878,16 +1932,51 @@ public class MainDB extends BaseDB {
 		if (!isOpened())
 			return false;
 		long author = authorId;
+		ArrayList<Long> listAuthors = new ArrayList<>();
+		listAuthors.add(authorId);
+		if (authorId > 10000000) {
+			try (Cursor rs = mDB.rawQuery(
+					"SELECT distinct author.id FROM author " +
+						" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+						" WHERE author_aliases.id = " + (authorId - 10000000), null)) {
+				listAuthors.clear();
+				if (rs.moveToFirst()) {
+					do {
+						listAuthors.add(rs.getLong(0));
+					} while (rs.moveToNext());
+				}
+				if (rs != null) rs.close();
+			} catch (Exception e) {
+				Log.e("cr3", "exception while loading list of authors", e);
+			}
+		}
+		//asdf
 		if (!StrUtils.isEmptyStr(addFilter)) {
 			if (addFilter.startsWith("author:")) {
 				String s = addFilter.replace("author:", "").trim();
 				long l = getLongValue("SELECT author.id FROM author where trim(author.name) = " + quoteSqlString(s));
-				if (l > 0) author = l;
+				listAuthors.clear();
+				if (l > 0) listAuthors.add(l);
+				try (Cursor rs = mDB.rawQuery(
+						"SELECT distinct author.id FROM author " +
+							" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+							" WHERE author_aliases.alias_text = " + quoteSqlString(s), null)) {
+					if (rs.moveToFirst()) {
+						do {
+							listAuthors.add(rs.getLong(0));
+						} while (rs.moveToNext());
+					}
+					if (rs != null) rs.close();
+				} catch (Exception e) {
+					Log.e("cr3", "exception while loading list of authors", e);
+				}
 			}
 		}
-		if (author == 0L) return false;
+		String authors = "-1";
+		for (Long l: listAuthors) authors = authors + ", " + l;
+		authors = " (" + authors + ") ";
 		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id "+
-				" WHERE (not (b.pathname like '@opds%')) and book_author.author_fk = " + author + " ORDER BY b.title";
+				" WHERE (not (b.pathname like '@opds%')) and book_author.author_fk in " + authors + " ORDER BY b.title";
 		return findBooks(sql, list);
 	}
 

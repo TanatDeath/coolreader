@@ -1189,7 +1189,7 @@
     <string name="wd_time_left">Stop TTS after %1$s min</string>
     <string name="wd_decrease_vol">Device is still, decrease volume from %1$s to %2$s</string>
     <string name="wd_still">Device is still still :), good night!</string>
-    <string name="wd_sett">Autostop settings</string>
+    <string name="wd_sett">TTS settings</string>
     <string name="not_enough_stat_data">Not enough stat data</string>
     <string name="successfully_loaded">successfully loaded</string>
     <string name="book_was_not_found">book was not found</string>
@@ -1299,6 +1299,8 @@
     <string name="confirmation_title">Confirmation</string>
     <string name="online_dic_exceeded">Sorry, online ditionary limit exceeded. Try again later</string>
     <string name="choose_root_sd">Could not delete file, if the file is on External SD, choose ExtSD root in the dialog</string>
+    <string name="could_not_delete_on_sd">Could not find file, make sure the root of ExtSD was selected</string>>
+    <string name="could_not_delete_file">Could not delete file</string>>
     <string name="manual_open_error">Error while opening manual</string>
     <string name="ynd_translate_settings">Yandex translate settings</string>
     <string name="sync_confirmation_other_book">Another book (%s) was opened on another device, switch to it?</string>

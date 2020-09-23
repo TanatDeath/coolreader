@@ -36,6 +36,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.Buffer;
 
 public class LitresCredentialsDialog extends BaseDialog {
 
@@ -88,7 +89,6 @@ public class LitresCredentialsDialog extends BaseDialog {
 		mBtnTestConnect.setOnClickListener(v -> {
 			try {
 				JSONObject json = CreateJsons.w_create_sid(BuildConfig.LITRES_APP, BuildConfig.LITRES_SECRET);
-				activity.showToast(json.toString());
 				OkHttpClient client = new OkHttpClient();
 				HttpUrl.Builder urlBuilder = HttpUrl.parse(CreateJsons.LITRES_ADDR).newBuilder();
 				String url = urlBuilder.build().toString();
@@ -100,6 +100,12 @@ public class LitresCredentialsDialog extends BaseDialog {
 						.post(body)
 						.url(url)
 						.build();
+				final Request copy = request.newBuilder().build();
+				final Buffer buffer = new Buffer();
+				copy.body().writeTo(buffer);
+				String s = buffer.readUtf8();
+				activity.showToast("Request is: " + s);
+				Log.i("LitresCredentialsDialog", "req: " + s);
 				Call call = client.newCall(request);
 				call.enqueue(new okhttp3.Callback() {
 					public void onResponse(Call call, Response response)

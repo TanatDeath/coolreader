@@ -17,7 +17,9 @@ public class CreateJsons {
 	public static final String LITRES_ADDR = "https://catalit.litres.ru/catalitv2";
 
 	//public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ssXXX"; // таймзона без двоеточия
-	public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ss'Z'"; // с двоеточием, но один хрен ((
+	//public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ss'Z'"; // с двоеточием, но один хрен ((
+	public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ss";
+	public static final int HOUR = 1000 * 60 * 60;
 
 	private static String bytesToHex(byte[] hash) {
 		StringBuffer hexString = new StringBuffer();
@@ -45,7 +47,11 @@ public class CreateJsons {
 	public static JSONObject w_create_sid(String appId, String secret) throws JSONException, NoSuchAlgorithmException {
 		JSONObject json = new JSONObject();
 		json.put("app", appId);
-		String sTime = getCurrentTime();
+		String sTime = getCurrentTime() + "Z";
+		TimeZone tz = TimeZone.getDefault();
+		int offs = tz.getRawOffset() / HOUR;
+		String soffs = ((offs < 0) ? "-" : "+") + String.format("%02d", Math.abs(offs));
+		sTime = sTime + soffs + ":00";
 		json.put("time", sTime);
 		String timeAndSecretSha = getSHA256(sTime + secret);
 		json.put("sha", timeAndSecretSha);
