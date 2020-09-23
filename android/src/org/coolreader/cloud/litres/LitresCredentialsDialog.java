@@ -102,9 +102,11 @@ public class LitresCredentialsDialog extends BaseDialog {
 						.build();
 				final Request copy = request.newBuilder().build();
 				final Buffer buffer = new Buffer();
+				String h = copy.headers().toString();
+				String m = copy.method();
 				copy.body().writeTo(buffer);
 				String s = buffer.readUtf8();
-				activity.showToast("Request is: " + s);
+				activity.showToast(m + "; Headers is: " + h +"; Request is: " + s);
 				Log.i("LitresCredentialsDialog", "req: " + s);
 				Call call = client.newCall(request);
 				call.enqueue(new okhttp3.Callback() {
