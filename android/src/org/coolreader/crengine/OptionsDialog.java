@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.coolreader.CoolReader;
+import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.litres.LitresCredentialsDialog;
 import org.coolreader.db.CRDBService;
 import org.coolreader.dic.Dictionaries;
@@ -827,6 +828,22 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	int[] mPageAnimationSpeedTitles = new int[] {
 			R.string.page_animation_speed_1, R.string.page_animation_speed_2, R.string.page_animation_speed_3,
 			R.string.page_animation_speed_4, R.string.page_animation_speed_5
+	};
+
+	int[] mWordsDontSaveIfMore = new int[] {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20
+	};
+
+	int[] mUserDicPanelKind = new int[] {
+			0, 1, 2
+	};
+
+	int[] mUserDicPanelKindTitles = new int[] {
+			R.string.user_dic_panel0, R.string.user_dic_panel1, R.string.user_dic_panel2
+	};
+
+	int[] mUserDicPanelKindAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 
 	ViewGroup mContentView;
@@ -2427,7 +2444,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					{
 						((CoolReader) mActivity).litresCredentialsDialog = new LitresCredentialsDialog(((CoolReader) mActivity));
 						((CoolReader) mActivity).litresCredentialsDialog.show();
-					}).setDefaultValue(getString(R.string.litres_settings_add_info)).noIcon());
+					}).setDefaultValue(getString(R.string.litres_settings_add_info)).setIconIdByAttr(R.attr.attr_litres_en_logo_2lines, R.drawable.litres_en_logo_2lines));
 			OptionBase optSaveToCloud = new ClickOption(mOwner, getString(R.string.save_settings_to_cloud),
 					getString(R.string.save_settings_to_cloud_v), getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 						view -> {
@@ -2532,9 +2549,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_dict_longtap_change),
 					PROP_APP_DICT_LONGTAP_CHANGE, getString(R.string.options_app_dict_longtap_change_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_single_double_tap, R.drawable.icons8_single_double_tap));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_app_show_user_dic_panel), PROP_APP_SHOW_USER_DIC_PANEL,
+			listView.add(new ListOption(mOwner, getString(R.string.options_app_show_user_dic_panel), PROP_APP_SHOW_USER_DIC_PANEL,
 					getString(R.string.options_app_show_user_dic_panel_add_info), this.lastFilteredValue).
+					add(mUserDicPanelKind, mUserDicPanelKindTitles, mUserDicPanelKindAddInfos).
 					setIconIdByAttr(R.attr.attr_icons8_google_translate_user,R.drawable.icons8_google_translate_user));
+			listView.add(new ListOption(mOwner, getString(R.string.options_font_size_user_dic), PROP_FONT_SIZE_USER_DIC,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(filterFontSizes(mFontSizes)).setDefaultValue("24").
+					setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
 			listView.add(new WikiOption(mOwner, getString(R.string.options_app_wiki1), PROP_CLOUD_WIKI1_ADDR,
 					getString(R.string.options_app_wiki1_add_info), this.lastFilteredValue).setDefaultValue("https://en.wikipedia.org").
 					setIconIdByAttr(R.attr.attr_icons8_wiki1, R.drawable.icons8_wiki1));
@@ -2573,6 +2594,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new BoolOption(mOwner, getString(R.string.wiki_save_history),
 					PROP_CLOUD_WIKI_SAVE_HISTORY, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.dict_dont_save_if_more),
+					PROP_APP_DICT_DONT_SAVE_IF_MORE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mWordsDontSaveIfMore).
+					noIcon());
+			// asdf
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_dict_word_correction),
 					PROP_APP_DICT_WORD_CORRECTION, getString(R.string.options_app_dict_word_correction_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_l_h,R.drawable.icons8_l_h));
@@ -2593,6 +2619,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_app_dict_longtap_change_add_info));
 			this.updateFilteredMark(getString(R.string.options_app_show_user_dic_panel), PROP_APP_SHOW_USER_DIC_PANEL,
 					getString(R.string.options_app_show_user_dic_panel_add_info));
+			this.updateFilteredMark(getString(R.string.options_font_size_user_dic), PROP_FONT_SIZE_USER_DIC,
+					getString(R.string.option_add_info_empty_text));
+			for (int i: mUserDicPanelKindTitles) this.updateFilteredMark(activity.getString(i));
 			return this.lastFiltered;
 		}
 
@@ -5648,7 +5677,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
 					.setBackgroundColor(colorGray); // selected
-
+			mProperties.setProperty(Settings.PROP_APP_OPTIONS_PAGE_SELECTED, "" + mTabs.getCurrentTab());
 		});
 		// setup tabs
 		//setView(R.layout.options);
@@ -5730,7 +5759,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_text_width_drawable, R.drawable.cr3_option_text_width);
 		((SpacingOption)sb14).updateFilterEnd();
 		mOptionsStyles.add(sb14);
-		//asdf
 		OptionBase isO = new ImageScalingOption(this, getString(R.string.options_format_image_scaling), getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_images_drawable, R.drawable.cr3_option_images);
 		((ImageScalingOption)isO).updateFilterEnd();
 		mOptionsStyles.add(isO);
@@ -5832,6 +5860,26 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsControls.add(sb11);
 		mOptionsApplication = new OptionsListView(getContext(), null);
 		mOptionsApplication.add(new LangOption(this, filter).noIcon());
+		CoolReader cr = (CoolReader)mActivity;
+		if (cr.settingsMayBeMigratedLastInd>=0) {
+			mOptionsApplication.add(new ClickOption(this, getString(R.string.migrate_cr_settings),
+					PROP_APP_MIGRATE_SETTINGS, getString(R.string.migrate_cr_settings_add_info), filter,
+					view ->
+					{
+						ArrayList<CloudFileInfo> afi = new ArrayList<>();
+						for (int i = 0; i <= cr.settingsMayBeMigratedLastInd; i++) {
+							if (cr.getSettingsFileExtExists(".cr3", i))
+								if (cr.getSettingsFileExt(".cr3", i).isFile()) {
+									CloudFileInfo cfi = new CloudFileInfo();
+									cfi.name = cr.getSettingsFileExt(".cr3", i).getName();
+									cfi.path = cr.getSettingsFileExt(".cr3", i).getPath();
+									afi.add(cfi);
+								}
+						}
+						CloudSync.restoreSettingsFiles(cr, null, afi, false);
+					}).setDefaultValue(getString(R.string.migrate_cr_settings_profiles) + " " + (cr.settingsMayBeMigratedLastInd + 1)).
+					setIconIdByAttr(R.attr.coolreader_logo_button_drawable, R.drawable.cr3_logo_button));
+		}
 		if (!DeviceInfo.isForceHCTheme(false)) {
 		//plotn - when setting EINK manually, hc doesnt work ... still dont know why
 			mOptionsApplication.add(new ThemeOptions(this, getString(R.string.options_app_ui_theme), getString(R.string.options_app_ui_theme_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
@@ -5942,7 +5990,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mTabs.setCurrentTab(4);
 			activity.showToast(getString(R.string.mi_no_options) +" "+filter);
 		}
-
+		if (StrUtils.isEmptyStr(filter)) {
+			int iTab = mActivity.settings().getInt(Settings.PROP_APP_OPTIONS_PAGE_SELECTED, 4);
+			mTabs.setCurrentTab(iTab);
+		}
 	}
 	
 	private void addTab(String name, int imageDrawable) {

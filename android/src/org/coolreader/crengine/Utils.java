@@ -373,26 +373,26 @@ public class Utils {
 //		};
 	}
 
-	public static String formatSeries( String name, int number )
+	public static String formatSeries(String name, int number)
 	{
-		if ( name==null || name.length()==0 )
+		if (name == null || name.length() == 0)
 			return null;
-		if ( number>0 )
-			return "#" + number + " " + name;
+		if (number > 0)
+			return "#" + number + " " + StrUtils.getNonEmptyStr(name, true).replace("|", "; ");
 		else
-			return name;
+			return StrUtils.getNonEmptyStr(name, true).replace("|", "; ");
 	}
 	
-	public static String formatPercent( int percent )
+	public static String formatPercent(int percent)
 	{
-		if ( percent<=0 )
+		if (percent <= 0)
 			return null;
-		return String.valueOf(percent/100) + "." + String.valueOf(percent/10%10) + "%";
+		return String.valueOf(percent / 100) + "." + String.valueOf(percent / 10 % 10) + "%";
 	}
 
-	public static String formatTime( Activity activity, long timeStamp )
+	public static String formatTime(Activity activity, long timeStamp)
 	{
-		if ( timeStamp<5000*60*60*24*1000 )
+		if (timeStamp < 5000 * 60 * 60 * 24 * 1000)
 			return "";
 		TimeZone tz = java.util.TimeZone.getDefault();
 		Calendar c = Calendar.getInstance(tz);
@@ -400,7 +400,7 @@ public class Utils {
 		return DateFormat.getTimeFormat(activity.getApplicationContext()).format(c.getTime());
 	}
 
-	public static String formatDateFixed( long timeStamp )
+	public static String formatDateFixed(long timeStamp)
 	{
 		//if ( timeStamp<5000*60*60*24*1000 )
 		//	return "";
@@ -413,17 +413,17 @@ public class Utils {
 		return c.get(Calendar.YEAR)+"-"+mm+"-"+dd;
 	}
 	
-	public static String formatDate( Activity activity, long timeStamp )
+	public static String formatDate(Activity activity, long timeStamp)
 	{
-		if ( timeStamp<5000*60*60*24*1000 )
+		if (timeStamp < 5000 * 60 * 60 * 24 * 1000)
 			return "";
 		TimeZone tz = java.util.TimeZone.getDefault();
 		Calendar now = Calendar.getInstance(tz);
 		Calendar c = Calendar.getInstance(tz);
 		c.setTimeInMillis(timeStamp);
-		if ( c.get(Calendar.YEAR)<1980 )
+		if (c.get(Calendar.YEAR) < 1980)
 			return "";
-		if ( c.get(Calendar.YEAR)==now.get(Calendar.YEAR)
+		if (c.get(Calendar.YEAR) == now.get(Calendar.YEAR)
 				&& c.get(Calendar.MONTH)==now.get(Calendar.MONTH)
 				&& c.get(Calendar.DAY_OF_MONTH)==now.get(Calendar.DAY_OF_MONTH)) {
 			return formatTime(activity, timeStamp);
@@ -432,12 +432,11 @@ public class Utils {
 		}
 	}
 
-    public static String formatDate2( Activity activity, long timeStamp )
+    public static String formatDate2(Activity activity, long timeStamp)
     {
-        if ( timeStamp<5000*60*60*24*1000 )
+        if (timeStamp < 5000 * 60 * 60 * 24 * 1000)
             return "";
         TimeZone tz = java.util.TimeZone.getDefault();
-        Calendar now = Calendar.getInstance(tz);
         Calendar c = Calendar.getInstance(tz);
         c.setTimeInMillis(timeStamp);
         if ( c.get(Calendar.YEAR)<1980 )
@@ -487,7 +486,7 @@ public class Utils {
 		if (prof == 0) sProf = "";
 		boolean bEmptyF = item.format==null;
 		if (!bEmptyF) bEmptyF = item.format == DocumentFormat.NONE;
-		return formatSize(item.size) + " " + (bEmptyF ? item.format.name().toLowerCase() : "") + " " +
+		return formatSize(item.size) + " " + (bEmptyF ? "" : item.format.name().toLowerCase()) + " " +
 				formatDate(activity, item.getCreateTime())+sProf;
 	}
 

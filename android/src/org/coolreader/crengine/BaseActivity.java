@@ -1584,6 +1584,50 @@ public class BaseActivity extends Activity implements Settings {
 		});
 	}
 
+	public Typeface getReaderFont() {
+		String sFace = settings().getProperty(ReaderView.PROP_FONT_FACE, "");
+		final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
+		boolean found = false;
+		for (int i = 0; i < mFontFacesFiles.length; i++) {
+			String s = mFontFacesFiles[i];
+			if ((s.startsWith(sFace + "~")) && (!s.toUpperCase().contains("BOLD")) && (!s.toUpperCase().contains("ITALIC"))) {
+				found = true;
+				String sf = mFontFacesFiles[i];
+				if (sf.contains("~")) {
+					sf = sf.split("~")[1];
+				}
+				try {
+					Typeface tf = null;
+					tf = Typeface.createFromFile(sf);
+					return tf;
+				} catch (Exception e) {
+
+				}
+				break;
+			}
+		}
+		if (!found)
+			for (int i = 0; i < mFontFacesFiles.length; i++) {
+				String s = mFontFacesFiles[i];
+				if (s.startsWith(sFace + "~")) {
+					found = true;
+					String sf = mFontFacesFiles[i];
+					if (sf.contains("~")) {
+						sf = sf.split("~")[1];
+					}
+					try {
+						Typeface tf = null;
+						tf = Typeface.createFromFile(sf);
+						return tf;
+					} catch (Exception e) {
+
+					}
+					break;
+				}
+			}
+		return null;
+	}
+
 	public void showCenterPopupFont(View surface, String val, String val2, int fontSize) {
 		BackgroundThread.instance().executeGUI(() -> {
 			boolean useExisting = (windowCenterPopup != null);
@@ -1616,46 +1660,8 @@ public class BaseActivity extends Activity implements Settings {
 			tv2.setTextColor(colorIcon);
 			tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
 			tv2.setText(val2);
-			String sFace = settings().getProperty(ReaderView.PROP_FONT_FACE, "");
-			final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
-			boolean found = false;
-			for (int i = 0; i < mFontFacesFiles.length; i++) {
-				String s = mFontFacesFiles[i];
-				if ((s.startsWith(sFace + "~")) && (!s.toUpperCase().contains("BOLD")) && (!s.toUpperCase().contains("ITALIC"))) {
-					found = true;
-					String sf = mFontFacesFiles[i];
-					if (sf.contains("~")) {
-						sf = sf.split("~")[1];
-					}
-					try {
-						Typeface tf = null;
-						tf = Typeface.createFromFile(sf);
-						tv2.setTypeface(tf);
-					} catch (Exception e) {
-
-					}
-					break;
-				}
-			}
-			if (!found)
-				for (int i = 0; i < mFontFacesFiles.length; i++) {
-					String s = mFontFacesFiles[i];
-					if (s.startsWith(sFace + "~")) {
-						found = true;
-						String sf = mFontFacesFiles[i];
-						if (sf.contains("~")) {
-							sf = sf.split("~")[1];
-						}
-						try {
-							Typeface tf = null;
-							tf = Typeface.createFromFile(sf);
-							tv2.setTypeface(tf);
-						} catch (Exception e) {
-
-						}
-						break;
-					}
-				}
+			Typeface tf = getReaderFont();
+			if (tf != null) tv2.setTypeface(tf);
 			if (!useExisting)
 				windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
 			scheduleHideWindowCenterPopup(500);
@@ -2593,6 +2599,7 @@ public class BaseActivity extends Activity implements Settings {
 	        
 	        fixFontSettings(props);
 	        props.applyDefault(ReaderView.PROP_FONT_SIZE, String.valueOf(fontSize));
+			props.applyDefault(ReaderView.PROP_FONT_SIZE_USER_DIC, String.valueOf(statusFontSize));
 	        props.applyDefault(ReaderView.PROP_FONT_HINTING, "2");
 	        props.applyDefault(ReaderView.PROP_STATUS_FONT_SIZE, DeviceInfo.EINK_NOOK ? "15" : String.valueOf(statusFontSize));
 	        props.applyDefault(ReaderView.PROP_FONT_COLOR, "#000000");

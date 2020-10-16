@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import androidx.core.content.FileProvider;
 import android.util.Log;
+import android.view.View;
 
 import com.dropbox.core.v2.users.FullAccount;
 
@@ -11,11 +12,18 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXPerformAction;
+import org.coolreader.cloud.litres.LitresConfig;
+import org.coolreader.cloud.litres.LitresError;
+import org.coolreader.cloud.litres.LitresJsons;
+import org.coolreader.cloud.litres.LitresPerformAction;
+import org.coolreader.cloud.litres.LitresPurchaseInfo;
+import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.cloud.yandex.YNDConfig;
 import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.cloud.yandex.YNDPerformAction;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.PictureCameDialog;
@@ -25,6 +33,7 @@ import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.crengine.StrUtils;
+import org.coolreader.db.CRDBService;
 
 import java.io.File;
 import java.text.NumberFormat;
@@ -73,6 +82,14 @@ public class CloudAction {
     public static final String CLOUD_COMPLETE_DOWNLOAD_FILE_TO_STRING = "DownloadFileToString";
     public static final String CLOUD_COMPLETE_DELETE_FILE_ASYNC = "DeleteFileAsync";
     public static final String CLOUD_COMPLETE_YND_SAVE_BOOK = "SaveBook";
+    public static final int LITRES_AUTH = 20201;
+    public static final int LITRES_GET_GENRE_LIST = 20202;
+    public static final int LITRES_SEARCH_BOOKS = 20203;
+    public static final int LITRES_PURCHASE_BOOK = 20204;
+    public static final int LITRES_DOWNLOAD_BOOK = 20205;
+    public static final int LITRES_SEARCH_PERSON_LIST = 20206;
+    public static final int LITRES_GET_COLLECTION_LIST = 20207;
+    public static final int LITRES_GET_SEQUENCE_LIST = 20208;
 
     public int action; // action, that will be performed
     public String param; // param(s) passed to an action...
@@ -85,6 +102,8 @@ public class CloudAction {
     public com.dropbox.core.v2.files.Metadata mDbxMd; // metadata for dropbox
     public CloudFileInfo mYndMd; // metadata for yandex
     public String mFile;
+    public LitresSearchParams lsp; // for litres
+    public BookInfoDialog mBookInfoDialog;
 
     public CoolReader mActivity;
 
@@ -839,6 +858,338 @@ public class CloudAction {
         } catch (Exception e) {
             cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void onLitresComplete(CoolReader cr, LitresPerformAction a, String res, Object o, Object dlg, CRDBService.FileInfoLoadingCallback callback) {
+        System.out.println("Litres:" + a.mCurAction.action);
+        System.out.println("Litres:" + a.mCurAction.param);
+
+        LitresError le = null;
+        try {
+            le = LitresJsons.parse_error(a.mCurAction.param2, (String) o);
+        } catch (Exception e) {
+            Log.e("LITRES", e.getMessage(), e);
+        }
+        if (le != null)
+            if (!StrUtils.isEmptyStr(le.errorCode)) {
+                cr.showToast(cr.getString(R.string.cloud_error)+": " + le.errorCode + " " + le.errorText);
+            }
+        if (a.mCurAction.action == LITRES_GET_GENRE_LIST) {
+            ArrayList<FileInfo> arrFi = new ArrayList<>();
+            try {
+                arrFi = LitresJsons.parse_r_genres_list(a.mCurAction.param2, cr, (String) o, a.mCurAction);
+            } catch (Exception e) {
+                Log.e("LITRES", e.getMessage(), e);
+                BackgroundThread.instance().postGUI(() -> {
+                    if (LitresPerformAction.progressDlg != null)
+                        if (LitresPerformAction.progressDlg.isShowing())
+                            LitresPerformAction.progressDlg.dismiss();
+                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                });
+            }
+            callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_GENRE_GROUP_PREFIX);
+        }
+        if (a.mCurAction.action == LITRES_SEARCH_BOOKS) {
+            ArrayList<FileInfo> arrFi = new ArrayList<>();
+            try {
+                arrFi = LitresJsons.parse_r_search_arts(a.mCurAction.param2, cr, a.mCurAction, (String) o);
+            } catch (Exception e) {
+                Log.e("LITRES", e.getMessage(), e);
+                BackgroundThread.instance().postGUI(() -> {
+                    if (LitresPerformAction.progressDlg != null)
+                        if (LitresPerformAction.progressDlg.isShowing())
+                            LitresPerformAction.progressDlg.dismiss();
+                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                });
+            }
+            callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_BOOKS_GROUP_PREFIX);
+        }
+        if (a.mCurAction.action == LITRES_SEARCH_PERSON_LIST) {
+            ArrayList<FileInfo> arrFi = new ArrayList<>();
+            try {
+                arrFi = LitresJsons.parse_r_search_persons(a.mCurAction.param2, cr, a.mCurAction, (String) o);
+            } catch (Exception e) {
+                Log.e("LITRES", e.getMessage(), e);
+                BackgroundThread.instance().postGUI(() -> {
+                    if (LitresPerformAction.progressDlg != null)
+                        if (LitresPerformAction.progressDlg.isShowing())
+                            LitresPerformAction.progressDlg.dismiss();
+                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                });
+            }
+            callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_PERSON_GROUP_PREFIX);
+        }
+        if (a.mCurAction.action == LITRES_GET_COLLECTION_LIST) {
+            ArrayList<FileInfo> arrFi = new ArrayList<>();
+            try {
+                arrFi = LitresJsons.parse_r_collection_list(a.mCurAction.param2, cr, (String) o, a.mCurAction);
+            } catch (Exception e) {
+                Log.e("LITRES", e.getMessage(), e);
+                BackgroundThread.instance().postGUI(() -> {
+                    if (LitresPerformAction.progressDlg != null)
+                        if (LitresPerformAction.progressDlg.isShowing())
+                            LitresPerformAction.progressDlg.dismiss();
+                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                });
+            }
+            callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_COLLECTION_PREFIX);
+        }
+        if (a.mCurAction.action == LITRES_GET_SEQUENCE_LIST) {
+            ArrayList<FileInfo> arrFi = new ArrayList<>();
+            try {
+               arrFi = LitresJsons.parse_r_sequence_list(a.mCurAction.param2, cr, (String) o, a.mCurAction);
+            } catch (Exception e) {
+                Log.e("LITRES", e.getMessage(), e);
+                BackgroundThread.instance().postGUI(() -> {
+                    if (LitresPerformAction.progressDlg != null)
+                        if (LitresPerformAction.progressDlg.isShowing())
+                            LitresPerformAction.progressDlg.dismiss();
+                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                });
+            }
+            callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_SEQUENCE_PREFIX);
+        }
+        a.DoNextAction();
+    }
+
+    public static void onLitresError(CoolReader cr, LitresPerformAction a, String res, Exception e) {
+        Log.e(e.getClass().getName(), "Cloud operation error: "+res, e);
+        final CoolReader crf = cr;
+        final String resf = res;
+        BackgroundThread.instance().postGUI(() -> {
+            if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf,true);
+            if (LitresPerformAction.progressDlg != null)
+                if (LitresPerformAction.progressDlg.isShowing()) LitresPerformAction.progressDlg.dismiss();
+        }, 200);
+    }
+
+    public static void litresAddAuthCAIfNeeded(final CoolReader cr, ArrayList<CloudAction> al) {
+        if (!LitresConfig.didLogin) {
+            CloudAction ca1 = new CloudAction(cr, CloudAction.LITRES_AUTH, true);
+            al.add(ca1);
+        } else {
+            long curTimeSpan = System.currentTimeMillis() - LitresConfig.whenLogin;
+            if (curTimeSpan > 1 * 60 * 60 * 1000) { // one hour
+                CloudAction ca1 = new CloudAction(cr, CloudAction.LITRES_AUTH, true);
+                al.add(ca1);
+            }
+        }
+    }
+
+    public static void litresGetGenreList(final CoolReader cr, LitresSearchParams params, CRDBService.FileInfoLoadingCallback callback) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_GET_GENRE_LIST, true);
+            ca2.lsp = params;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, null, callback);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresGetGenreList err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresGetCollectionList(final CoolReader cr, LitresSearchParams params, CRDBService.FileInfoLoadingCallback callback) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_GET_COLLECTION_LIST, true);
+            ca2.lsp = params;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, null, callback);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresGetCollectionList err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresGetSequenceList(final CoolReader cr, LitresSearchParams params, CRDBService.FileInfoLoadingCallback callback) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_GET_SEQUENCE_LIST, true);
+            ca2.lsp = params;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, null, callback);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresGetSequenceList err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresSearchPersonsList(final CoolReader cr, LitresSearchParams params, CRDBService.FileInfoLoadingCallback callback) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_SEARCH_PERSON_LIST, true);
+            ca2.lsp = params;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, null, callback);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresSearchPersonsList err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresSearchBooks(final CoolReader cr, LitresSearchParams params, CRDBService.FileInfoLoadingCallback callback) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_SEARCH_BOOKS, true);
+            ca2.param = params.searchString;
+            ca2.lsp = params;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, null, callback);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresSearchBooks err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresPurchaseBook(final CoolReader cr, final FileInfo fi, final BookInfoDialog bid) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_PURCHASE_BOOK, true);
+            ca2.param = "" + fi.id;
+            ca2.mBookInfoDialog = bid;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    if (a.mCurAction.action == LITRES_PURCHASE_BOOK) {
+                        LitresPurchaseInfo lpi = null;
+                        try {
+                            lpi = LitresJsons.parse_w_buy_arts(a.mCurAction.param2, cr, (String) o);
+                        } catch (Exception e) {
+                            cr.showCloudToast(cr.getString(R.string.cloud_error)+": "+e.getMessage(),true);
+                            Log.e("LITRES", e.getMessage());
+                        }
+                        if ((a.mCurAction.mBookInfoDialog != null) && (lpi != null))
+                            if (lpi.success)
+                                a.mCurAction.mBookInfoDialog.LitresSetPurchased("", false);
+                            else
+                                a.mCurAction.mBookInfoDialog.LitresSetPurchased(cr.getString(R.string.error) + ": " + lpi.errorMessage, false);
+                    }
+                    CloudAction.onLitresComplete(cr, a, res, o, null, null);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    if (a.mCurAction.mBookInfoDialog != null)
+                        a.mCurAction.mBookInfoDialog.LitresSetPurchased("", true);
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresPurchaseBook err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresDownloadBook(final CoolReader cr, final FileInfo fi, final BookInfoDialog bid) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<>();
+            litresAddAuthCAIfNeeded(cr, al);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_DOWNLOAD_BOOK, true);
+            ca2.param = "" + fi.id;
+            ca2.mBookInfoDialog = bid;
+            ca2.fi = fi;
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    if (a.mCurAction.action == LITRES_DOWNLOAD_BOOK) {
+                        LitresPurchaseInfo lpi = null;
+//                        try {
+//                            lpi = LitresJsons.parse_w_buy_arts(a.mCurAction.param2, cr, (String) o);
+//                        } catch (Exception e) {
+//                            cr.showCloudToast(cr.getString(R.string.cloud_error)+": "+e.getMessage(),true);
+//                            Log.e("LITRES", e.getMessage());
+//                        }
+                    }
+                    CloudAction.onLitresComplete(cr, a, res, o, null, null);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    //if (a.mCurAction.mBookInfoDialog != null)
+                      //  if (a.mCurAction.mBookInfoDialog.btnPurchase != null) {
+                       //     a.mCurAction.mBookInfoDialog.btnPurchase.setEnabled(true);
+                         //   a.mCurAction.mBookInfoDialog.btnPurchase.setVisibility(View.VISIBLE);
+                       // }
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresDownloadBook err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
 }

@@ -21,6 +21,8 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
+import org.coolreader.cloud.litres.LitresCredentialsDialog;
+import org.coolreader.cloud.litres.LitresMainDialog;
 import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
@@ -68,23 +70,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private int coverHeight;
 	private BookInfo currentBook;
 	private CoverpageReadyListener coverpageListener;
-	public ArrayList<FileInfo> lastRecentFiles = new ArrayList<FileInfo>();
+	public ArrayList<FileInfo> lastRecentFiles = new ArrayList<>();
+
 	public CRRootView(CoolReader activity) {
 		super(activity);
-		int colorBlue;
-		int colorGreen;
-		int colorGray;
-		int colorIcon;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeBlue,
-						R.attr.colorThemeGreen,
-						R.attr.colorThemeGray,
-						R.attr.colorIcon});
-		colorBlue = a.getColor(0, Color.BLUE);
-		colorGreen = a.getColor(1, Color.GREEN);
-		colorGray = a.getColor(2, Color.GRAY);
-		colorIcon = a.getColor(3, Color.GRAY);
-		a.recycle();
 		this.mActivity = activity;
 		this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		this.mCoverpageManager = Services.getCoverpageManager();
@@ -137,6 +126,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			return true;
 		}
 		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+			// prevents from closing when dialog was closed
+			if ((System.currentTimeMillis() - mActivity.mLastDialogClosed) < 2000) return true;
 			long duration = Utils.timeInterval(backDownTs);
 			L.v("CRRootView.onKeyUp(" + keyCode + ") duration = " + duration);
 			if (duration > 700 && duration < 10000 || !mActivity.isBookOpened()) {
@@ -382,10 +373,11 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		colorIconL = a.getColor(5, Color.GRAY);
 		a.recycle();
 		String lang = mActivity.getCurrentLanguage();
-		boolean defEnableLitres = lang.toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
-		boolean enableLitres = mActivity.settings().getBool(Settings.PROP_APP_PLUGIN_ENABLED + "." + OnlineStorePluginManager.PLUGIN_PKG_LITRES, defEnableLitres);
-		if (enableLitres)
-			catalogs.add(0, Scanner.createOnlineLibraryPluginItem(OnlineStorePluginManager.PLUGIN_PKG_LITRES, "LitRes"));
+		//boolean defEnableLitres = lang.toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
+		//boolean enableLitres = mActivity.settings().getBool(Settings.PROP_APP_PLUGIN_ENABLED + "." + OnlineStorePluginManager.PLUGIN_PKG_LITRES, defEnableLitres);
+		//if (enableLitres)
+		//catalogs.add(0, Scanner.createOnlineLibraryPluginItem(OnlineStorePluginManager.PLUGIN_PKG_LITRES, "LitRes"));
+		catalogs.add(0, Scanner.createLitresItem("LitRes"));
 		if (Services.getScanner() == null)
 			return;
 		FileInfo opdsRoot = Services.getScanner().getOPDSRoot();
@@ -407,21 +399,26 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				label.setText("Add");
 				label.setTextColor(colorIcon);
 				view.setOnClickListener(v -> mActivity.editOPDSCatalog(null));
-			} else if (item.isOnlineCatalogPluginDir()) {
+			} else if (item.isLitresDir()) {
 				setImageResourceSmall(icon, R.drawable.litres);
 				label.setText(item.getFilename());
 				label.setTextColor(colorIcon);
 				view.setOnLongClickListener(v -> {
-					OnlineStoreWrapper plugin = OnlineStorePluginManager.getPlugin(mActivity, FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + LitresPlugin.PACKAGE_NAME);
-					if (plugin != null) {
-						OnlineStoreLoginDialog dlg = new OnlineStoreLoginDialog(mActivity, plugin,
-								() -> mActivity.showBrowser(FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + LitresPlugin.PACKAGE_NAME));
-						dlg.show();
-					}
+					mActivity.litresCredentialsDialog = new LitresCredentialsDialog(mActivity);
+					mActivity.litresCredentialsDialog.show();
+//					OnlineStoreWrapper plugin = OnlineStorePluginManager.getPlugin(mActivity, FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + LitresPlugin.PACKAGE_NAME);
+//					if (plugin != null) {
+//						OnlineStoreLoginDialog dlg = new OnlineStoreLoginDialog(mActivity, plugin,
+//								() -> mActivity.showBrowser(FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + LitresPlugin.PACKAGE_NAME));
+//						dlg.show();
+//					}
 					return true;
 				});
 				view.setOnClickListener(v -> {
-					mActivity.showBrowser(FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + LitresPlugin.PACKAGE_NAME);
+					LitresMainDialog litresMainDialog = new LitresMainDialog(mActivity, FileBrowser.saveParams);
+					litresMainDialog.show();
+					//mActivity.showBrowser(FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + LitresPlugin.PACKAGE_NAME);
+					//mActivity.showBrowser(FileInfo.LITRES_TAG);
 //						LitresConnection.instance().loadGenres(new ResultHandler() {
 //							@Override
 //							public void onResponse(LitresResponse response) {
@@ -496,7 +493,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				});
 			}
 			// LitRes пока не работает
-			if (!item.isOnlineCatalogPluginDir()) mOnlineCatalogsScroll.addView(view);
+			//if (!item.isOnlineCatalogPluginDir())
+			mOnlineCatalogsScroll.addView(view);
 		}
 		mOnlineCatalogsScroll.invalidate();
 		if (readSetting) bOnlineCatalogsHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE, false);
@@ -757,7 +755,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
 			else if (item.isBooksByRatingRoot())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_stars, R.drawable.icons8_folder_stars));
-			else if (item.isBooksByTitleRoot())
+			else if (item.isBooksByTitleRoot() || item.isBooksByLitresCollectionDir() || item.isBooksByLitresCollectionRoot() || item.isLitresCollection())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			else if (item.isBooksBySeriesRoot())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
@@ -775,7 +773,14 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				label.setMinWidth(coverWidth);
 				label.setMaxWidth(coverWidth * 2);
 			}
-			view.setOnClickListener(v -> mActivity.showDirectory(item, ""));
+			//asdf - remove before release!!!
+			view.setOnClickListener(v -> {
+				if (item.isRescanShortcut()) {
+					ScanLibraryDialog sld = new ScanLibraryDialog(mActivity);
+					sld.show();
+				} else
+					mActivity.showDirectory(item, "");
+			});
 			mLibraryScroll.addView(view);
 		}
 		mLibraryScroll.invalidate();

@@ -2389,9 +2389,11 @@ import com.google.gson.GsonBuilder;
 	}
 
 	public void toggleTitlebar() {
-		boolean newBool = "1".equals(getSetting(PROP_STATUS_LINE));
-		String newValue = !newBool ? "1" : "0";
-		mActivity.setSetting(PROP_STATUS_LINE, newValue, true);
+		String sPos = getSetting(PROP_STATUS_LOCATION);
+		if (sPos.equals("0")) sPos = "3";
+			else if (sPos.equals("3")) sPos = "4";
+				else sPos = "0";
+		mActivity.setSetting(PROP_STATUS_LOCATION, sPos, true);
 	}
 
 	public void toggleDocumentStyles() {

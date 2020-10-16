@@ -28,7 +28,7 @@ public class DBXConfig {
 
     public static boolean init(CoolReader cr) throws IOException {
         // Create Dropbox client
-        final File fDBX = new File(cr.getSettingsFileF(0).getParent() + "/dbx.token");
+        final File fDBX = new File(cr.getSettingsFileExt("[DEFAULT]",0).getParent() + "/dbx.token");
         if (!fDBX.exists()) {
             cr.showToast(R.string.cloud_need_authorization);
             cr.dbxInputTokenDialog = new DBXInputTokenDialog(cr);

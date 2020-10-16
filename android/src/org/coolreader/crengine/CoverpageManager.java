@@ -905,7 +905,9 @@ public class CoverpageManager {
 		}
 	}
 
-	public Bitmap getBookCoverWithTitleBitmap(String title, String author, int w, int h) {
+	public Bitmap getBookCoverWithTitleBitmap(String ptitle, String pauthor, int w, int h) {
+		String author = pauthor;
+		String title = ptitle;
 		if (StrUtils.isEmptyStr(author)) {
 			author = "";
 		}
@@ -913,7 +915,7 @@ public class CoverpageManager {
 			title = "";
 		}
 
-		title = StrUtils.ellipsize(title, 20);
+		title = StrUtils.ellipsize(title, 30);
 		author = StrUtils.ellipsize(author.replaceAll("\\|",", "), 40);
 
 		TextPaint pNormal = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
@@ -932,7 +934,7 @@ public class CoverpageManager {
 
 		int margin = Dips.dpToPx(10);
 		StaticLayout mTextLayout = new StaticLayout(author, pBold, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
-		c.translate(margin, Dips.dpToPx(20));
+		c.translate(margin, Dips.dpToPx(10));
 		mTextLayout.draw(c);
 
 		StaticLayout text2 = new StaticLayout(title, pNormal, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);

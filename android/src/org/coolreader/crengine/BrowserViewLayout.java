@@ -2,10 +2,13 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.litres.LitresSearchParams;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -16,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -28,6 +32,50 @@ public class BrowserViewLayout extends ViewGroup {
 	private CRToolBar toolbarView;
 	private boolean filterIsShown;
 	private LinearLayout bottomBar;
+	private LinearLayout bottomBar1Btn;
+	private LinearLayout bottomBarLitres;
+	private Button btnPop;
+	private Button btnNew;
+
+	private boolean newBooks = true;
+
+	private void setNewOrPopChecked(Button btn) {
+		if (contentView == null) return;
+		if (contentView.saveParams == null) return;
+		if (btn != null) {
+			if (btn == btnNew) {
+				newBooks = true;
+			}
+			if (btn == btnPop) {
+				newBooks = false;
+
+			}
+		}
+		int colorGrayC;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		activity.tintViewIcons(btnNew, PorterDuff.Mode.CLEAR,true);
+		activity.tintViewIcons(btnPop, PorterDuff.Mode.CLEAR,true);
+		btnNew.setBackgroundColor(colorGrayCT);
+		btnPop.setBackgroundColor(colorGrayCT);
+		if (newBooks) {
+			btnNew.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnNew,true);
+			contentView.saveParams.newOrPop = 0;
+			if (btn != null) ((CoolReader)activity).showBrowser(FileInfo.LITRES_TAG, contentView.saveParams);
+		}
+		if (!newBooks) {
+			btnPop.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnPop,true);
+			contentView.saveParams.newOrPop = 1;
+			if (btn != null) ((CoolReader)activity).showBrowser(FileInfo.LITRES_TAG, contentView.saveParams);
+		}
+	}
 
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
@@ -42,11 +90,28 @@ public class BrowserViewLayout extends ViewGroup {
 		this.addView(contentView);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		bottomBar = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar, null);
-		ImageButton btnMenu = bottomBar.findViewById(R.id.btn_show_menu);
-		if (btnMenu != null)
+		bottomBar1Btn = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar_1btn, null);
+		bottomBarLitres = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar_litres, null);
+		btnNew = bottomBarLitres.findViewById(R.id.btn_new);
+		btnPop = bottomBarLitres.findViewById(R.id.btn_pop);
+		Drawable imgP = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable imgP1 = imgP.getConstantState().newDrawable().mutate();
+		Drawable imgP2 = imgP.getConstantState().newDrawable().mutate();
+		btnNew.setCompoundDrawablesWithIntrinsicBounds(imgP1, null, null, null);
+		btnPop.setCompoundDrawablesWithIntrinsicBounds(imgP2, null, null, null);
+		setNewOrPopChecked(null);
+		btnNew.setOnClickListener(v -> setNewOrPopChecked(btnNew));
+		btnPop.setOnClickListener(v -> setNewOrPopChecked(btnPop));
+		bottomBar.addView(bottomBar1Btn);
+		ImageButton btnMenu = bottomBar1Btn.findViewById(R.id.btn_show_menu);
+		if (btnMenu != null) {
 			btnMenu.setOnClickListener(v -> toolbarView.showOverflowMenu());
+		}
 		if (bottomBar != null)
 			bottomBar.setOnClickListener(v -> toolbarView.showOverflowMenu());
+		ImageButton btnMenu2 = bottomBarLitres.findViewById(R.id.btn_show_menu);
+		if (btnMenu2 != null)
+			btnMenu2.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		this.addView(bottomBar);
 		this.onThemeChanged(context.getCurrentTheme());
 		titleView.setFocusable(false);
@@ -61,6 +126,8 @@ public class BrowserViewLayout extends ViewGroup {
 		activity.tintViewIcons(toolbarView);
 		activity.tintViewIcons(titleView);
 		activity.tintViewIcons(bottomBar);
+		activity.tintViewIcons(bottomBar1Btn);
+		activity.tintViewIcons(bottomBarLitres);
 	}
 	
 	private String browserTitle = "";
@@ -103,22 +170,32 @@ public class BrowserViewLayout extends ViewGroup {
 		}
 	}
 
+	public void setBrowserBottomBar(boolean isLitres) {
+		bottomBar.removeAllViews();
+		if (!isLitres)
+			bottomBar.addView(bottomBar1Btn);
+		else {
+			bottomBar.addView(bottomBarLitres);
+			setNewOrPopChecked(null);
+		}
+	}
+
 	public void setBrowserTitle(String title, FileInfo dir) {
 		this.browserTitle = title;
 		if (filterIsShown) switchFilter(false);
 		if (dir!=null) this.dir = dir;
 		((TextView)titleView.findViewById(R.id.title)).setText(title);
 		arrLblPaths.clear();
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path1));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path2));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path3));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path4));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path5));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path6));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path7));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path8));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path9));
-		arrLblPaths.add((TextView)titleView.findViewById(R.id.path10));
+		arrLblPaths.add(titleView.findViewById(R.id.path1));
+		arrLblPaths.add(titleView.findViewById(R.id.path2));
+		arrLblPaths.add(titleView.findViewById(R.id.path3));
+		arrLblPaths.add(titleView.findViewById(R.id.path4));
+		arrLblPaths.add(titleView.findViewById(R.id.path5));
+		arrLblPaths.add(titleView.findViewById(R.id.path6));
+		arrLblPaths.add(titleView.findViewById(R.id.path7));
+		arrLblPaths.add(titleView.findViewById(R.id.path8));
+		arrLblPaths.add(titleView.findViewById(R.id.path9));
+		arrLblPaths.add(titleView.findViewById(R.id.path10));
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorIcon});
 		int colorIcon = a.getColor(0, Color.GRAY);
@@ -131,7 +208,7 @@ public class BrowserViewLayout extends ViewGroup {
 			for (TextView tv : arrLblPaths) {
 				i++;
 				if (dir2!=null) dir2 = dir2.parent;
-				tv.setText(String.valueOf(""));
+				tv.setText("");
 				tv.setTextColor(colorIcon);
 				if ((dir2 != null)&&(!dir2.isRootDir())) {
 					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -284,8 +361,12 @@ public class BrowserViewLayout extends ViewGroup {
 			bottomBar.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),
 					MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
 			int bottomHeight = bottomBar.getMeasuredHeight();
-			contentView.measure(widthMeasureSpec, 
-					MeasureSpec.makeMeasureSpec(h - titleHeight - tbHeight - bottomHeight, MeasureSpec.AT_MOST));
+			try {
+				contentView.measure(widthMeasureSpec,
+						MeasureSpec.makeMeasureSpec(h - titleHeight - tbHeight - bottomHeight, MeasureSpec.AT_MOST));
+			} catch (Exception e) {
+
+			}
 		}
         setMeasuredDimension(w, h);
 	}

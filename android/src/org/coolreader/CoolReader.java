@@ -15,6 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.coolreader.cloud.CloudSync;
+import org.coolreader.cloud.litres.LitresCloudSettings;
 import org.coolreader.cloud.litres.LitresCredentialsDialog;
 import org.coolreader.cloud.yandex.YndCloudSettings;
 import org.coolreader.crengine.AskSomeValuesDialog;
@@ -227,6 +228,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	private HashMap<String, BaseDialog> mBaseDialog = new HashMap<String, BaseDialog>();
+	public Long mLastDialogClosed = 0L;
 
 	public boolean ismDictWordCorrrection() {
         return mDictWordCorrrection;
@@ -270,6 +272,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	private boolean isFirstStart = true;
 	private int settingsCanBeMigratedLastInd = -1;
+	public int settingsMayBeMigratedLastInd = -1;
 	private int reserveSettingsLastInd = -1;
 	private int currentSettingsLastInd = -1;
 	private boolean phoneStateChangeHandlerInstalled = false;
@@ -1031,6 +1034,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (checkIntentIsYandex(sUri)) return true;
 			if (checkIntentIsDropbox(uri, sUri)) return true;
 			if (uri != null) fileToOpen = filePathFromUri(uri);
+			if ((sUri.startsWith("http")) && (StrUtils.isEmptyStr(fileToOpen))) {
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					showToast(R.string.only_in_premium);
+					return true;
+				}
+				processIntentContent("", sUri);
+				return true;
+			}
 			if ((sUri.startsWith("content")) && (StrUtils.isEmptyStr(fileToOpen))) {
 				processIntentContent(stype, uri);
 				return true;
@@ -1297,6 +1308,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	private void checkIfWeCanMigrateSettings() {
 		int i=0;
+		// move files to safe place if exists in old
+		String fpath1 = getSettingsFileF(0).getParent() + "/ynd_cloud_settings.json";
+		String fpath2 = getSettingsFileF(0).getParent() + "/dbx.token";
+		String fpath3 = getSettingsFileF(0).getParent() + "/ynd.token";
+		String nfpath1 = getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json";
+		String nfpath2 = getSettingsFileExt("[DEFAULT]",0).getParent() + "/dbx.token";
+		String nfpath3 = getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd.token";
+		File f1 = new File(fpath1); File nf1 = new File(nfpath1);
+		if ((f1.exists()) && (!nf1.exists()) && (!fpath1.equals(nfpath1)))
+			if (f1.isFile()) {
+				if (Utils.copyFile(f1, nf1)) f1.delete();
+			}
+		File f2 = new File(fpath2); File nf2 = new File(nfpath2);
+		if ((f2.exists()) && (!nf2.exists()) && (!fpath2.equals(nfpath2)))
+			if (f2.isFile()) {
+				if (Utils.copyFile(f2, nf2)) f2.delete();
+			}
+		File f3 = new File(fpath3); File nf3 = new File(nfpath3);
+		if ((f3.exists()) && (!nf3.exists()) && (!fpath3.equals(nfpath3)))
+			if (f3.isFile()) {
+				if (Utils.copyFile(f3, nf3)) f3.delete();
+			}
 		if (!getSettingsFileExtExists("cr3e",0)) {
 			if (getSettingsFileExtExists(".cr3", 0))
 				if (getSettingsFileExt(".cr3", 0).isFile()) {
@@ -1321,6 +1354,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					currentSettingsLastInd = i;
 				i++;
 			}
+			if (getSettingsFileExtExists(".cr3", 0))
+				if (getSettingsFileExt(".cr3", 0).isFile()) {
+					settingsMayBeMigratedLastInd = 0;
+					i++;
+					more = true;
+					while (more) {
+						if (!(getSettingsFileExtExists(".cr3", i)))
+							more = false;
+						else
+							settingsMayBeMigratedLastInd = i;
+						i++;
+					}
+				}
 		}
 		if (getSettingsFileExtExists("[DEFAULT]",0)) {
 			reserveSettingsLastInd = 0;
@@ -1478,7 +1524,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							() -> {});
 				}
 			}, null);
-			// this could cause to show book not in correct dimrnions - till it was resized (by sensor etc.) - so I replaced by notice
+			// this could cause to show book not in correct dimenions - till it was resized (by sensor etc.) - so I replaced by notice
 			//ErrorDialog dlg = new ErrorDialog(this, getString(R.string.error), getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()));
 			//dlg.show();
 		} else {
@@ -1998,11 +2044,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void showBrowser(final FileInfo dir, String addFilter) {
 		String pathname = "";
 		if (dir != null) pathname = dir.pathname;
-		runInBrowser(() -> mBrowser.showDirectory(dir, null, addFilter), FileInfo.RESCAN_LIBRARY_TAG.equals(pathname));
+		runInBrowser(() -> mBrowser.showDirectory(dir, null, addFilter, null), FileInfo.RESCAN_LIBRARY_TAG.equals(pathname));
 	}
 	
 	public void showBrowser(final String dir) {
-		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, ""), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
+		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, "", null), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
+	}
+
+	public void showBrowser(final String dir, String addFilter) {
+		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, addFilter, null), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
+	}
+
+	public void showBrowser(final String dir, Object params) {
+		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, "", params), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
 	}
 	
 	public void showRecentBooks() {
@@ -2022,7 +2076,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void showCatalog(final FileInfo path, String addFilter) {
 		log.d("Activities.showCatalog(" + path + ") is called");
-		runInBrowser(() -> mBrowser.showDirectory(path, null, addFilter), false);
+		runInBrowser(() -> mBrowser.showDirectory(path, null, addFilter, null), false);
 	}
 
 	
@@ -2031,8 +2085,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mBrowserFrame != null)
 			mBrowserFrame.setBrowserTitle(title, dir);
 	}
-	
 
+	public void setBrowserBottomBar(boolean isLitres) {
+		if (mBrowserFrame != null)
+			mBrowserFrame.setBrowserBottomBar(isLitres);
+	}
 	
 	// Dictionary support
 	
@@ -2148,7 +2205,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
     public void setShowUserDicPanel (String id) {
         mShowUserDicPanel = false;
-        if (id.equals("1"))
+        if (!id.equals("0"))
 			mShowUserDicPanel = true;
     }
 
@@ -2692,8 +2749,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mEngine.execute(task);
 	}
 
-	public void showOPDSBookInfo(final FileInfo item, final FileBrowser fb, FileInfo currDir) {
-		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<BookInfoEntry>();
+	public void showCloudItemInfo(final FileInfo item, final FileBrowser fb, FileInfo currDir) {
+		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<>();
 		itemsAll.add(new BookInfoEntry("section","section.file","section"));
 		String sFormat = "";
 		if (item.format != null)
@@ -2703,8 +2760,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		itemsAll.add(new BookInfoEntry("file.name",item.pathname,"text"));
 		itemsAll.add(new BookInfoEntry("section","section.book","section"));
 		if (!StrUtils.isEmptyStr(item.authors))
-			itemsAll.add(new BookInfoEntry("book.authors", item.getAuthors(),"text"));
+			itemsAll.add(new BookInfoEntry("book.authors", StrUtils.getNonEmptyStr(item.getAuthors(), true).replace("|", "; "),"text"));
 		itemsAll.add(new BookInfoEntry("book.title", item.title,"text"));
+		if (!StrUtils.isEmptyStr(item.genre))
+			itemsAll.add(new BookInfoEntry("book.genre", item.genre.replace("|", "; "),"text"));
+		if (!StrUtils.isEmptyStr(item.getSeriesName()))
+			itemsAll.add(new BookInfoEntry("book.series", item.getSeriesName().replace("|", "; "),"text"));
+		bookInfoAddPublisher(item, itemsAll);
 		if (item.tag != null)
 			if (item.tag instanceof OPDSUtil.EntryInfo) {
 				OPDSUtil.EntryInfo ei = (OPDSUtil.EntryInfo) item.tag;
@@ -2720,13 +2782,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					}
 				if (ei.otherElements != null) {
 					for (Map.Entry<String, String> entry : ei.otherElements.entrySet()) {
-						String key = (String) entry.getKey();
-						final String value = (String) entry.getValue();
+						String key = entry.getKey();
+						final String value = entry.getValue();
 						itemsAll.add(new BookInfoEntry(key, value, "text"));
 					}
 				}
 			}
-		BookInfoDialog dlg = new BookInfoDialog(this, itemsAll, null, item.getFilename(),
+		String annot = item.getFilename();
+		if (item.isLitresBook() || item.isLitresSpecialDir())
+			if (!StrUtils.isEmptyStr(item.annotation)) annot = item.annotation;
+		BookInfoDialog dlg = new BookInfoDialog(this, itemsAll, null, annot,
 				BookInfoDialog.OPDS_INFO, item, fb, currDir);
 		dlg.show();
 	}
@@ -2796,6 +2861,42 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			log.e("Min left error");
 		}
 		return sLeft;
+	}
+
+	public void bookInfoAddPublisher(FileInfo fi, ArrayList<BookInfoEntry> itemsBook) {
+		boolean isEmpty = true;
+		if (!StrUtils.isEmptyStr(fi.publname)) isEmpty = false;
+		if (!StrUtils.isEmptyStr(fi.publisher)) isEmpty = false;
+		if (!StrUtils.isEmptyStr(fi.publcity)) isEmpty = false;
+		if (!StrUtils.isEmptyStr(fi.getPublyear())) isEmpty = false;
+		if (!StrUtils.isEmptyStr(fi.publisbn))  isEmpty = false;
+		if (fi.publseries != null) {
+			String s = fi.publseries;
+			if (fi.publseriesNumber > 0) isEmpty = false;
+		}
+		if (isEmpty) return;
+		itemsBook.add(new BookInfoEntry("section", "section.book_publisher","section"));
+		if (!StrUtils.isEmptyStr(fi.publname)) {
+			itemsBook.add(new BookInfoEntry("book.publname", fi.publname,"text"));
+		}
+		if (!StrUtils.isEmptyStr(fi.publisher)) {
+			itemsBook.add(new BookInfoEntry("book.publisher", fi.publisher,"text"));
+		}
+		if (!StrUtils.isEmptyStr(fi.publcity)) {
+			itemsBook.add(new BookInfoEntry("book.publcity", fi.publcity,"text"));
+		}
+		if (!StrUtils.isEmptyStr(fi.getPublyear())) {
+			itemsBook.add(new BookInfoEntry("book.publyear", fi.getPublyear(),"text"));
+		}
+		if (!StrUtils.isEmptyStr(fi.publisbn)) {
+			itemsBook.add(new BookInfoEntry("book.publisbn", fi.publisbn,"text"));
+		}
+		if (fi.publseries != null) {
+			String s = fi.publseries;
+			if (fi.publseriesNumber > 0)
+				s = s + " #" + fi.publseriesNumber;
+			itemsBook.add(new BookInfoEntry("book.publseries", s,"text"));
+		}
 	}
 
 	public void showBookInfo(BookInfo setBI, final int actionType, final FileInfo currDir,  final FileInfo origEntry) {
@@ -3007,28 +3108,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (!StrUtils.isEmptyStr(fi.docversion)) {
 					itemsBook.add(new BookInfoEntry("book.docversion", fi.docversion,"text"));
 				}
-				itemsBook.add(new BookInfoEntry("section", "section.book_publisher","section"));
-				if (!StrUtils.isEmptyStr(fi.publname)) {
-					itemsBook.add(new BookInfoEntry("book.publname", fi.publname,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.publisher)) {
-					itemsBook.add(new BookInfoEntry("book.publisher", fi.publisher,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.publcity)) {
-					itemsBook.add(new BookInfoEntry("book.publcity", fi.publcity,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.getPublyear())) {
-					itemsBook.add(new BookInfoEntry("book.publyear", fi.getPublyear(),"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.publisbn)) {
-					itemsBook.add(new BookInfoEntry("book.publisbn", fi.publisbn,"text"));
-				}
-				if (fi.publseries != null) {
-					String s = fi.publseries;
-					if (fi.publseriesNumber > 0)
-						s = s + " #" + fi.publseriesNumber;
-					itemsBook.add(new BookInfoEntry("book.publseries", s,"text"));
-				}
+				bookInfoAddPublisher(fi, itemsBook);
 				itemsBook.add(new BookInfoEntry("section", "section.book_translation","section"));
 				String lfrom = "[empty]";
 				if (!StrUtils.isEmptyStr(fi.lang_from)) lfrom = fi.lang_from;
@@ -3290,53 +3370,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 
-//	public void readProfileNames()
-//	{
-//		log.d("Reading profileNames.json");
-//		String pn = "";
-//		try {
-//			final File fJson = new File(getSettingsFile(0).getParent() + "/profileNames.json");
-//			BufferedReader reader = new BufferedReader(
-//					new FileReader(fJson));
-//			StringBuilder stringBuilder = new StringBuilder();
-//			String line = null;
-//			String ls = System.getProperty("line.separator");
-//			while ((line = reader.readLine()) != null) {
-//				stringBuilder.append(line);
-//				stringBuilder.append(ls);
-//			}
-//			reader.close();
-//			pn = stringBuilder.toString();
-//			setProfileNames(new ArrayList<String>(StrUtils.stringToArray(pn, String[].class)));
-//		} catch (Exception e) {
-//		}
-//	}
-
-//	public void saveProfileNames()
-//	{
-//		log.d("Starting save profileNames.json");
-//		try {
-//			final File fJson = new File(getSettingsFile(0).getParent() + "/profileNames.json");
-//
-//			final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//			final String prettyJson = gson.toJson(getProfileNames());
-//
-//			BufferedWriter bw = null;
-//			FileWriter fw = null;
-//			char[] bytesArray = new char[1000];
-//			int bytesRead = 1000;
-//			try {
-//				fw = new FileWriter(fJson);
-//				bw = new BufferedWriter(fw);
-//				bw.write(prettyJson);
-//				bw.close();
-//				fw.close();
-//			} catch (Exception e) {
-//			}
-//		} catch (Exception e) {
-//		}
-//	}
-
 	public void saveCurPosFile(boolean is0, String json)
 	{
 		log.d("Starting save cur_pos.json");
@@ -3362,18 +3395,40 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void saveYndCloudSettings(String json)
 	{
 		log.d("Starting save ynd_cloud_settings.json");
-		Utils.saveStringToFileSafe(json,getSettingsFileF(0).getParent() + "/ynd_cloud_settings.json");
+		Utils.saveStringToFileSafe(json,getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json");
 	}
 
 	public YndCloudSettings readYndCloudSettings()
 	{
 		log.d("Reading ynd_cloud_settings.json");
-		String s = Utils.readFileToString(getSettingsFileF(0).getParent() + "/ynd_cloud_settings.json");
+		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json");
 		try {
-			final File fJson = new File(getSettingsFileF(0).getParent() + "/ynd_cloud_settings.json");
+			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json");
 			if (!fJson.exists()) return null;
 			yndCloudSettings = new Gson().fromJson(s, YndCloudSettings.class);
 			return yndCloudSettings;
+		} catch (Exception e) {
+		}
+		return null;
+	}
+
+	public LitresCloudSettings litresCloudSettings = new LitresCloudSettings();
+
+	public void saveLitresCloudSettings(String json)
+	{
+		log.d("Starting save litres_cloud_settings.json");
+		Utils.saveStringToFileSafe(json,getSettingsFileExt("[DEFAULT]",0).getParent() + "/litres_cloud_settings.json");
+	}
+
+	public LitresCloudSettings readLitresCloudSettings()
+	{
+		log.d("Reading litres_cloud_settings.json");
+		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/litres_cloud_settings.json");
+		try {
+			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/litres_cloud_settings.json");
+			if (!fJson.exists()) return null;
+			litresCloudSettings = new Gson().fromJson(s, LitresCloudSettings.class);
+			return litresCloudSettings;
 		} catch (Exception e) {
 		}
 		return null;

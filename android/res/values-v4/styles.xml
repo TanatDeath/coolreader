@@ -173,6 +173,7 @@
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
+        <item name="coolreader_logo_button_drawable">@drawable/cr3_logo_button</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
         <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
@@ -450,6 +451,7 @@
         <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
+        <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -501,6 +503,7 @@
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
+        <item name="coolreader_logo_button_drawable">@drawable/cr3_logo_button</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
         <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
@@ -778,6 +781,7 @@
         <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
+        <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -831,6 +835,7 @@
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
+        <item name="coolreader_logo_button_drawable">@drawable/cr3_logo_button</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
         <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
@@ -1108,6 +1113,7 @@
         <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
+        <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1162,6 +1168,7 @@
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
         <item name="cr3_logo_button_drawable">@drawable/icons8_about</item>
+        <item name="coolreader_logo_button_drawable">@drawable/cr3_logo_button</item>
         <item name="cr3_viewer_exit_drawable">@drawable/icons8_exit</item>
         <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/icons8_openbook</item>
@@ -1439,6 +1446,7 @@
         <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
+        <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1492,6 +1500,7 @@
         <item name="cr3_button_scroll_go_drawable">@drawable/cr3_button_scroll_go_hc</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/cr3_btn_books_swap_hc</item>
         <item name="cr3_logo_button_drawable">@drawable/known_reader_logo</item>
+        <item name="coolreader_logo_button_drawable">@drawable/cr3_logo_button</item>
         <item name="cr3_viewer_exit_drawable">@drawable/cr3_viewer_exit_hc</item>
         <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/cr3_button_book_open_hc</item>
@@ -1769,6 +1778,7 @@
         <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
+        <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1822,6 +1832,7 @@
         <item name="cr3_button_scroll_go_drawable">@drawable/cr3_button_scroll_go_hc</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/cr3_btn_books_swap_hc</item>
         <item name="cr3_logo_button_drawable">@drawable/known_reader_logo</item>
+        <item name="coolreader_logo_button_drawable">@drawable/cr3_logo_button</item>
         <item name="cr3_viewer_exit_drawable">@drawable/cr3_viewer_exit_hc</item>
         <item name="attr_icons8_hide">@drawable/icons8_hide</item>
         <item name="cr3_button_book_open_drawable">@drawable/cr3_button_book_open_hc</item>
@@ -2095,6 +2106,7 @@
         <item name="attr_icons8_page_animation_speed">@drawable/icons8_page_animation_speed</item>
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
+        <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

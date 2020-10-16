@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -55,11 +56,20 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			nightMode = props.getBool(PROP_NIGHT_MODE, false);
 			this.color = props.getColor(Settings.PROP_STATUS_FONT_COLOR, 0);
 			lblWordFound.setTextColor(0xFF000000 | color);
+			Typeface tf = activity.getReaderFont();
+			if (tf != null) {
+				lblWordFound.setTypeface(tf);
+				lblStar.setTypeface(tf);
+			}
+			int fontSize = activity.settings().getInt(Settings.PROP_FONT_SIZE_USER_DIC, 0);
+			if (fontSize != 0) textSize = fontSize;
 			for (TextView tv: arrLblWords) {
 				tv.setTextColor(0xFF000000 | color);
 				tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+				if (tf != null) tv.setTypeface(tf);
 			}
 			lblWordFound.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+			lblStar.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
 			if (needRelayout) {
 				CoolReader.log.d("changing user dic layout");
 				lblWordFound.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
@@ -82,7 +92,11 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			this.color = context.settings().getColor(Settings.PROP_STATUS_FONT_COLOR, 0);
 			
 			LayoutInflater inflater = LayoutInflater.from(activity);
-			content = (LinearLayout)inflater.inflate(R.layout.user_dic_panel, null);
+			int showUD = activity.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
+			if (showUD == 2)
+				content = (LinearLayout)inflater.inflate(R.layout.user_dic_panel_scroll, null);
+			else
+				content = (LinearLayout)inflater.inflate(R.layout.user_dic_panel, null);
 			lblWordFound = content.findViewById(R.id.word_found);
 			lblStar = content.findViewById(R.id.tview_saving);
 			lblStar.setText("#");
@@ -153,23 +167,20 @@ public class UserDicPanel extends LinearLayout implements Settings {
 							}
 						}
 					});
-				tv.setOnLongClickListener((OnLongClickListener) v -> {
+				tv.setOnLongClickListener(v -> {
 					if (v instanceof TextView) {
 						String sWord = ((TextView) v).getText().toString();
 						for (final UserDicEntry ude: arrUdeWords) {
 							if (ude.getDic_word().equals(sWord)) {
-								activity.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-									@Override
-									public void run() {
-										if (ude.getThisIsDSHE()) {
-											DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
-											dshe.setSearch_text(ude.getDic_word());
-											activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
-										} else
-											activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
-										activity.getmUserDic().remove(ude.getIs_citation()+ude.getDic_word());
-										activity.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+								activity.askConfirmation(R.string.win_title_confirm_ude_delete, (Runnable) () -> {
+									if (ude.getThisIsDSHE()) {
+										DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
+										dshe.setSearch_text(ude.getDic_word());
+										activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, activity);
 									}
+									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+									activity.getmUserDic().remove(ude.getIs_citation()+ude.getDic_word());
+									activity.getmReaderFrame().getUserDicPanel().updateUserDicWords();
 								});
 								break;
 							}

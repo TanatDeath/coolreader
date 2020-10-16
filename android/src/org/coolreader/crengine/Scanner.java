@@ -495,6 +495,16 @@ public class Scanner extends FileInfoChangeSource {
 			return createBooksByStateToReadRoot();
 		else if (FileInfo.STATE_FINISHED_TAG.equals(path))
 			return createBooksByStateFinishedRoot();
+		else if (FileInfo.LITRES_TAG.equals(path))
+			return createBooksByLitresRoot();
+		else if (FileInfo.LITRES_GENRE_TAG.equals(path))
+			return createBooksByLitresGenreRoot();
+		else if (FileInfo.LITRES_COLLECTION_TAG.equals(path))
+			return createBooksByLitresCollectionRoot();
+		else if (FileInfo.LITRES_SEQUENCE_TAG.equals(path))
+			return createBooksByLitresSequenceRoot();
+		else if (FileInfo.LITRES_PERSON_TAG.equals(path))
+			return createBooksByLitresPersonRoot();
 		else if (path.startsWith(FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX)) {
 			OnlineStoreWrapper w = OnlineStorePluginManager.getPlugin(mActivity, path);
 			if (w != null)
@@ -523,6 +533,16 @@ public class Scanner extends FileInfoChangeSource {
 			dir.pathname = packageName;
 		else
 			dir.pathname = FileInfo.ONLINE_CATALOG_PLUGIN_PREFIX + packageName;
+		dir.setFilename(label);
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public static FileInfo createLitresItem(String label) {
+		final FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.LITRES_TAG;
 		dir.setFilename(label);
 		dir.isListed = true;
 		dir.isScanned = true;
@@ -692,6 +712,56 @@ public class Scanner extends FileInfoChangeSource {
 		dir.isDirectory = true;
 		dir.pathname = FileInfo.STATE_FINISHED_TAG;
 		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state_finished));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createBooksByLitresRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.LITRES_TAG;
+		dir.setFilename("LitRes");
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createBooksByLitresGenreRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.LITRES_GENRE_TAG;
+		dir.setFilename("LitRes: " + mActivity.getString(R.string.search_genres));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createBooksByLitresCollectionRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.LITRES_COLLECTION_TAG;
+		dir.setFilename("LitRes: " + mActivity.getString(R.string.search_collections));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createBooksByLitresSequenceRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.LITRES_SEQUENCE_TAG;
+		dir.setFilename("LitRes: " + mActivity.getString(R.string.search_sequences));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	public FileInfo createBooksByLitresPersonRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.LITRES_PERSON_TAG;
+		dir.setFilename("LitRes: " + mActivity.getString(R.string.search_persons));
 		dir.isListed = true;
 		dir.isScanned = true;
 		return dir;

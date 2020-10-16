@@ -50,7 +50,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(tokenEdit.getText().toString())) {
 			Log.i("YND","Starting save ynd.token");
 			try {
-				final File fYND = new File(mCoolReader.getSettingsFileF(0).getParent() + "/ynd.token");
+				final File fYND = new File(mCoolReader.getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd.token");
 				BufferedWriter bw = null;
 				FileWriter fw = null;
 				char[] bytesArray = new char[1000];
@@ -88,7 +88,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 			dismiss();
 		});
 		TextView tokenDeleteTxt = (TextView) view.findViewById(R.id.ynd_txt_delete_token);
-        final File fYND = new File(mCoolReader.getSettingsFileF(0).getParent() + "/ynd.token");
+        final File fYND = new File(mCoolReader.getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd.token");
         if (!fYND.exists()) {
         	tokenDelete.setVisibility(View.INVISIBLE);
 			tokenDeleteTxt.setVisibility(View.INVISIBLE);

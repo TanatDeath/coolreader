@@ -1,6 +1,9 @@
 package org.coolreader.crengine;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +11,8 @@ import java.util.Map;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.litres.LitresConfig;
+import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.dic.TranslationDirectionDialog;
 
 import android.app.SearchManager;
@@ -41,6 +46,8 @@ import static org.coolreader.crengine.FileInfo.OPDS_DIR_PREFIX;
 
 public class BookInfoDialog extends BaseDialog {
 
+	public static ProgressDialog progressDlg;
+
 	public final static int BOOK_INFO = 0;
 	public final static int OPDS_INFO = 1;
 	public final static int OPDS_FINAL_INFO = 2;
@@ -48,7 +55,9 @@ public class BookInfoDialog extends BaseDialog {
 	private final BaseActivity mCoolReader;
 	private final BookInfo mBookInfo;
 	private int mActionType;
-	private FileInfo mFileInfoOPDS;
+	private FileInfo mFileInfoCloud;
+	boolean isLitres = false;
+	boolean isPerson = false;
 	private FileBrowser mFileBrowser;
 	private FileInfo mCurrDir;
 	private final LayoutInflater mInflater;
@@ -65,6 +74,13 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnBookShortcut;
 	ImageButton btnBookEdit;
 	Button btnMarkToRead;
+	TableLayout tlLitresDownl;
+	LinearLayout llLitresPurchase;
+	Button btnFragment;
+	Button btnDownloadLitresBook;
+	Button btnDownloadFB2;
+	Button btnDownloadFB3;
+	public Button btnPurchase;
 	ImageButton btnBookDownload;
 	String annot2 = "";
 	ImageButton btnFindAuthors;
@@ -74,8 +90,58 @@ public class BookInfoDialog extends BaseDialog {
 	TextView tvML;
 	Button btnCalc;
 
+	private static int DM_FRAGMENT = 1;
+	private static int DM_FULL = 2;
+
+	int curDownloadMode = DM_FRAGMENT;
+
 	public BookInfo getmBookInfo() {
 		return mBookInfo;
+	}
+
+	private void setLitresDownloadModeChecked(Button btn) {
+		if (btn != null) {
+			if (btn == btnFragment) {
+				curDownloadMode = DM_FRAGMENT;
+			}
+			if (btn == btnDownloadLitresBook) {
+				curDownloadMode = DM_FULL;
+			}
+		}
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		mCoolReader.tintViewIcons(btnFragment, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnDownloadLitresBook, PorterDuff.Mode.CLEAR,true);
+		btnFragment.setBackgroundColor(colorGrayCT);
+		btnDownloadLitresBook.setBackgroundColor(colorGrayCT);
+		if (curDownloadMode == DM_FRAGMENT) {
+			btnFragment.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnFragment,true);
+		}
+		if (curDownloadMode == DM_FULL) {
+			btnDownloadLitresBook.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnDownloadLitresBook,true);
+		}
+	}
+
+	public void LitresSetPurchased(String errorMsg, boolean excep) {
+		if (btnPurchase != null) {
+			btnPurchase.setEnabled(true);
+			btnPurchase.setVisibility(View.VISIBLE);
+			if (excep) return; // exception will be shown in toast
+			if (StrUtils.isEmptyStr(errorMsg)) {
+				btnPurchase.setText(mCoolReader.getString(R.string.online_store_purchase_success));
+				setLitresDownloadModeChecked(btnDownloadLitresBook);
+				hideLayout(btnFragment);
+			} else btnPurchase.setText(mCoolReader.getString(R.string.error) + ": " + errorMsg);
+		}
+
 	}
 
 	private Map<String, Integer> mLabelMap;
@@ -471,6 +537,58 @@ public class BookInfoDialog extends BaseDialog {
 		btnMarkToRead.setTextColor(colorBlue);
 	}
 
+	private void downloadFragment(String format) {
+		final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+		final String fName = downloadDir.pathname+"/fragments/" + Utils.transcribeFileName(mFileInfoCloud.getFilename()) + "_fragment" + format;
+		final File fPath = new File(downloadDir.pathname+"/fragments");
+		if (!fPath.exists()) fPath.mkdir();
+		progressDlg = ProgressDialog.show(mCoolReader,
+				mCoolReader.getString(R.string.network_op),
+				mCoolReader.getString(R.string.network_op),
+				true, false, null);
+		BackgroundThread.instance().postBackground(() -> {
+			FileOutputStream fos;
+			try {
+				InputStream in;
+				String redir_url = Utils.getUrlLoc(new java.net.URL(mFileInfoCloud.fragment_href + format));
+				if (StrUtils.isEmptyStr(redir_url))
+					in = new java.net.URL(mFileInfoCloud.fragment_href + format).openStream();
+				else
+					in = new java.net.URL(redir_url).openStream();
+				final File fBook = new File(fName);
+				fos = new FileOutputStream(fBook);
+				BufferedOutputStream out = new BufferedOutputStream(fos);
+				Utils.copyStreamContent(out, in);
+				out.flush();
+				fos.getFD().sync();
+				BackgroundThread.instance().postBackground(() ->
+						BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).
+								loadDocumentExt(fBook.getPath(), mFileInfoCloud.fragment_href + format), 500));
+				BackgroundThread.instance().postGUI(() -> {
+					onPositiveButtonClick();
+					if (progressDlg != null)
+						if (progressDlg.isShowing()) progressDlg.dismiss();
+				});
+			} catch (Exception e) {
+				BackgroundThread.instance().postGUI(() -> {
+					onPositiveButtonClick();
+					if (progressDlg != null)
+						if (progressDlg.isShowing()) progressDlg.dismiss();
+					activity.showToast(activity.getString(R.string.not_exists_on_server)+" "+e.getLocalizedMessage());
+				});
+			}
+		});
+	}
+
+	private static void hideLayout(View l) {
+		if (l == null) return;
+		try {
+			((ViewGroup) l.getParent()).removeView(l);
+		} catch (Exception e) {
+			//do nothing
+		}
+	}
+
 	public BookInfoDialog(final BaseActivity activity, Collection<BookInfoEntry> items, BookInfo bi, final String annt,
 						  int actionType, FileInfo fiOPDS, FileBrowser fb, FileInfo currDir)
 	{
@@ -488,7 +606,13 @@ public class BookInfoDialog extends BaseDialog {
 		mCoolReader = activity;
 		mBookInfo = bi;
 		mActionType = actionType;
-		mFileInfoOPDS = fiOPDS;
+		mFileInfoCloud = fiOPDS;
+		if (mFileInfoCloud != null) {
+			if ((mFileInfoCloud.isLitresBook()) || (mFileInfoCloud.isLitresSpecialDir()))
+				isLitres = true;
+			if ((mFileInfoCloud.isLitresPerson()))
+				isPerson = true;
+		}
 		mFileBrowser = fb;
 		mCurrDir = currDir;
 		FileInfo file = null;
@@ -521,6 +645,7 @@ public class BookInfoDialog extends BaseDialog {
 		View view = mInflater.inflate(R.layout.book_info_dialog, null);
 		final ImageView image = view.findViewById(R.id.book_cover);
 		image.setOnClickListener(v -> {
+			if ((mActionType == OPDS_INFO) && (isLitres)) return;
 			CoolReader cr = (CoolReader)mCoolReader;
 			if (mBookInfo!=null) {
 				FileInfo fi = mBookInfo.getFileInfo();
@@ -529,7 +654,7 @@ public class BookInfoDialog extends BaseDialog {
 			} else //cr.showToast(R.string.book_info_action_unavailable);
 			{
 				cr.showToast(R.string.book_info_action_downloading);
-				if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
+				if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoCloud, mFileInfoCloud, annot2);
 				dismiss();
 			}
 		});
@@ -546,7 +671,7 @@ public class BookInfoDialog extends BaseDialog {
 			} else {
 				//cr.showToast(R.string.book_info_action_unavailable);
 				cr.showToast(R.string.book_info_action_downloading);
-				if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
+				if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoCloud, mFileInfoCloud, annot2);
 				dismiss();
 			}
 		});
@@ -632,7 +757,7 @@ public class BookInfoDialog extends BaseDialog {
 		btnBookDownload = view.findViewById(R.id.book_download);
 		annot2 = annot;
 		btnBookDownload.setOnClickListener(v -> {
-			if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoOPDS, mFileInfoOPDS, annot2);
+			if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoCloud, mFileInfoCloud, annot2);
 			dismiss();
 		});
 		btnFindAuthors = view.findViewById(R.id.btn_find_authors);
@@ -649,7 +774,7 @@ public class BookInfoDialog extends BaseDialog {
 		image.setMaxWidth(w);
 		Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
 		if (file != null) {
-			if (mFileInfoOPDS!=null) {
+			if (mFileInfoCloud !=null) {
 				String sTitle = StrUtils.getNonEmptyStr(file.title, true);
 				String sAuthors = StrUtils.getNonEmptyStr(file.authors, true).replace("\\|", "\n");
 				if (StrUtils.isEmptyStr(sTitle))
@@ -657,12 +782,17 @@ public class BookInfoDialog extends BaseDialog {
 				Bitmap bmp2 = Services.getCoverpageManager().getBookCoverWithTitleBitmap(sTitle, sAuthors,
 					150, 200);
 				image.setImageBitmap(bmp2);
-				for (OPDSUtil.LinkInfo link : mFileInfoOPDS.links) {
-					if (link.type.contains("image")) {
-						new DownloadImageTask(image).execute(link.href);
-						break;
+				if ((!StrUtils.isEmptyStr(mFileInfoCloud.cover_href)) ||
+					(!StrUtils.isEmptyStr(mFileInfoCloud.cover_href2))) {
+					if (!StrUtils.isEmptyStr(mFileInfoCloud.cover_href)) new DownloadImageTask(image).execute(mFileInfoCloud.cover_href);
+					if (!StrUtils.isEmptyStr(mFileInfoCloud.cover_href2)) new DownloadImageTask(image).execute(mFileInfoCloud.cover_href2);
+				} else
+					for (OPDSUtil.LinkInfo link : mFileInfoCloud.links) {
+						if (link.type.contains("image")) {
+							new DownloadImageTask(image).execute(link.href);
+							break;
+						}
 					}
-				}
 			} else {
 				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), file, bmp, new CoverpageManager.CoverpageBitmapReadyListener() {
 					@Override
@@ -693,7 +823,7 @@ public class BookInfoDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		prof.setText(activity.getString(R.string.settings_profile)+": "+sprof + sF);
 		String sss = "";
-		if (mActionType == OPDS_INFO) sss = "["+mCoolReader.getString(R.string.book_info_action_download1)+"]\n";
+		if ((mActionType == OPDS_INFO) && (!isLitres)) sss = "["+mCoolReader.getString(R.string.book_info_action_download1)+"]\n";
 		if (mActionType == OPDS_FINAL_INFO) sss = sss = "["+mCoolReader.getString(R.string.book_info_action_download2)+"]\n";
 		SpannableString ss = new SpannableString(sss+annot);
 		txtAnnot.setText(ss);
@@ -707,7 +837,125 @@ public class BookInfoDialog extends BaseDialog {
 		colorIcon = a.getColor(2, Color.GRAY);
 		txtAnnot.setTextColor(colorIcon);
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
-		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		tlLitresDownl =  view.findViewById(R.id.tl_downl_book);
+		llLitresPurchase =  view.findViewById(R.id.ll_litres_purchase);
+
+		if (mFileInfoCloud != null) {
+			btnFragment = view.findViewById(R.id.btn_fragment);
+			btnFragment.setOnClickListener(v -> {
+				setLitresDownloadModeChecked(btnFragment);
+			});
+			btnDownloadLitresBook = view.findViewById(R.id.btn_downl);
+			btnDownloadLitresBook.setOnClickListener(v -> {
+				setLitresDownloadModeChecked(btnDownloadLitresBook);
+			});
+			setLitresDownloadModeChecked(null);
+			btnDownloadFB2 = view.findViewById(R.id.btn_fb2);
+			btnDownloadFB3 = view.findViewById(R.id.btn_fb3);
+
+			btnDownloadFB2.setOnClickListener(v -> {
+				btnDownloadFB2.setEnabled(false);
+				btnDownloadFB2.setVisibility(View.INVISIBLE);
+				BackgroundThread.instance().postGUI(() -> {
+					try {
+						if (btnDownloadFB2 != null) {
+							btnDownloadFB2.setEnabled(true);
+							btnDownloadFB2.setVisibility(View.VISIBLE);
+						}
+					} catch (Exception e) {
+
+					}
+				}, 5000);
+				if (curDownloadMode == DM_FRAGMENT) {
+					downloadFragment(".fb2.zip");
+				} else {
+					mCoolReader.showToast("Not implemented yet!");
+//					mFileInfoCloud.format_chosen = ".fb2.zip";
+//					CloudAction.litresDownloadBook((CoolReader) mCoolReader, mFileInfoCloud, this);
+				}
+			});
+
+			btnDownloadFB3.setOnClickListener(v -> {
+				btnDownloadFB3.setEnabled(false);
+				btnDownloadFB3.setVisibility(View.INVISIBLE);
+				BackgroundThread.instance().postGUI(() -> {
+					try {
+						if (btnDownloadFB3 != null) {
+							btnDownloadFB3.setEnabled(true);
+							btnDownloadFB3.setVisibility(View.VISIBLE);
+						}
+					} catch (Exception e) {
+
+					}
+				}, 5000);
+				if (curDownloadMode == DM_FRAGMENT) {
+					downloadFragment(".fb3");
+				} else {
+					mCoolReader.showToast("Not implemented yet!");
+				}
+			});
+			int colorGrayCT = Color.argb(128, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
+			btnDownloadFB2.setBackgroundColor(colorGrayCT);
+			btnDownloadFB3.setBackgroundColor(colorGrayCT);
+			if (mFileInfoCloud.type != 0) {
+				hideLayout(tlLitresDownl);
+			}
+			btnPurchase = view.findViewById(R.id.btn_purchase);
+			btnPurchase.setBackgroundColor(colorGrayCT);
+			TextView tvLvl = view.findViewById(R.id.lbl_purchase);
+			if (mFileInfoCloud.lvl > 0)
+				tvLvl.setText(tvLvl.getText() + " (" + mCoolReader.getString(R.string.online_store_book_rating)+": "+ mFileInfoCloud.lvl + ")");
+			else
+				tvLvl.setText("");
+			btnPurchase.setOnClickListener(v -> {
+				if (mFileInfoCloud.available != 1) return;
+				if (mFileInfoCloud.type != 0) return;
+				if (btnPurchase.getText().toString().equals(mCoolReader.getString(R.string.online_store_purchase_success))) return;
+				mCoolReader.askConfirmation( mCoolReader.getString(R.string.online_store_confirm_purchase), () -> {
+						CloudAction.litresPurchaseBook((CoolReader) mCoolReader, mFileInfoCloud, this);
+						btnPurchase.setEnabled(false);
+						btnPurchase.setVisibility(View.INVISIBLE);
+						BackgroundThread.instance().postGUI(() -> {
+							try {
+								if (btnPurchase != null) {
+									btnPurchase.setEnabled(true);
+									btnPurchase.setVisibility(View.VISIBLE);
+								}
+							} catch (Exception e) {
+
+							}
+						}, 20000);
+					}
+				);
+			});
+
+			if (mFileInfoCloud.available == 1)
+				btnPurchase.setText(String.format("%.2f", mFileInfoCloud.finalPrice) + " " + LitresConfig.currency);
+			else if (mFileInfoCloud.available == 2)
+				btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_soon));
+				else if (mFileInfoCloud.available == 6)
+						btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_soon)+": "+ mFileInfoCloud.availDate);
+					else btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_unavailable));
+			if (mFileInfoCloud.type == 4) btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_not_supported)+": PDF");
+			if (mFileInfoCloud.type == 1) btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_not_supported)+": AudioBook");
+			if (mFileInfoCloud.type == 11) btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_not_supported)+": Gardner books");
+			if (isLitres)
+				if (mFileInfoCloud.lsp.searchType == LitresSearchParams.SEARCH_TYPE_MY_BOOKS) {
+					hideLayout(tlLitresDownl);
+					hideLayout(llLitresPurchase);
+				}
+		}
+		if ((!isLitres) || (isPerson)) {
+			try {
+				hideLayout(btnMarkToRead);
+				hideLayout(tlLitresDownl);
+				hideLayout(llLitresPurchase);
+			} catch (Exception e) {
+				// do nothing
+			}
+		}
+
 		if ((StrUtils.isEmptyStr(mAuthors))||(mFileInfoSearchDir==null)) {
 			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
 			parent.removeView(btnFindAuthors);
@@ -726,6 +974,7 @@ public class BookInfoDialog extends BaseDialog {
 			parent.removeView(btnSendByEmail);
 			parent.removeView(btnDeleteBook);
 			parent.removeView(btnCustomCover);
+			parent.removeView(btnSendByYnd);
 		}
 		if (actionType == OPDS_FINAL_INFO) {
 			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
@@ -733,6 +982,7 @@ public class BookInfoDialog extends BaseDialog {
 			parent.removeView(btnMarkToRead);
 			parent.removeView(btnFindAuthors);
 		}
+		if (isLitres) hideLayout(btnBookDownload);
 		for ( BookInfoEntry item : items ) {
 			String name = item.infoTitle;
 			String value = item.infoValue;

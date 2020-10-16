@@ -271,7 +271,9 @@ public class ExternalDocCameDialog extends BaseDialog {
 		if ((btnAsHTML!=null)&&(bThisIsHTML)) {
 			btnAsHTML.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(btnAsHTML, true);
-			edtFileExt.setText(".html");
+			String sExt = StrUtils.getNonEmptyStr(edtFileExt.getText().toString(),true);
+			if ((StrUtils.isEmptyStr(sExt)) || (sExt.equals(".txt")))
+				edtFileExt.setText(".html");
 		}
 		if ((btnAsText!=null)&&(!bThisIsHTML)) {
 			btnAsText.setBackgroundColor(colorGrayCT2);
@@ -417,11 +419,20 @@ public class ExternalDocCameDialog extends BaseDialog {
 		}
 		String sDocFormat = DocumentFormat.extByMimeType(stype);
 		if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = Utils.getFileExtension(sBaseName);
-		if (uri == null) sDocFormat = "html";
+		if (StrUtils.getNonEmptyStr(sUri, true).startsWith("http")) {
+			if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = DocumentFormat.nameEndWithExt(sUri);
+			if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = Utils.getFileExtension(sUri);
+			if (StrUtils.isEmptyStr(sBaseName)) sBaseName = extractSuggestedName(sUri);
+		}
+		sDocFormat = StrUtils.getNonEmptyStr(sDocFormat,true);
+		if (sBaseName.toLowerCase().endsWith("."+sDocFormat)) {
+			sBaseName = sBaseName.substring(0, sBaseName.length() - sDocFormat.length() - 1);
+		}
+		if ((uri == null) && (StrUtils.isEmptyStr(sDocFormat))) sDocFormat = "html";
 		final String sFDocFormat = sDocFormat;
 		if (sBaseName.endsWith("."+sDocFormat)) sBaseName = sBaseName.substring(0,sBaseName.length()-1-sDocFormat.length());
 		sExistingName = "";
-		if (StrUtils.isEmptyStr(sBaseName)) sBaseName = "CoolReader_Downloaded";
+		if (StrUtils.isEmptyStr(sBaseName)) sBaseName = "KnownReader_Downloaded";
 		else {
 			if (!StrUtils.isEmptyStr(sDocFormat)) {
 				File f = new File(downlDir + "/" + sBaseName + "." + sDocFormat);
@@ -508,7 +519,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		});
 		// ODF file must be saved for later convert
 		if ((stype.contains("opendocument")) && (!stype.contains("opendocument.text"))) hideExistingFromStreamControls(view);
-		btnSave = (Button)view.findViewById(R.id.btn_save);
+		btnSave = view.findViewById(R.id.btn_save);
 		setDashedButton(btnSave);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnSave.setOnClickListener(v -> {

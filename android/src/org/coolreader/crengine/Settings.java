@@ -30,6 +30,7 @@ public interface Settings {
     public static final String PROP_LOG_LEVEL               ="crengine.log.level";
     public static final String PROP_LOG_AUTOFLUSH           ="crengine.log.autoflush";
     public static final String PROP_FONT_SIZE               ="crengine.font.size";
+	public static final String PROP_FONT_SIZE_USER_DIC      ="crengine.font.size.userdic";
     public static final String PROP_FALLBACK_FONT_FACE      ="crengine.font.fallback.face";
 	public static final String PROP_FALLBACK_FONT_FACES     ="crengine.font.fallback.faces";
 	public static final String PROP_STATUS_FONT_COLOR       ="crengine.page.header.font.color";
@@ -159,6 +160,7 @@ public interface Settings {
 	public static final String PROP_APP_DICTIONARY_6 = "app.dictionary6.current";
 	public static final String PROP_APP_DICTIONARY_7 = "app.dictionary7.current";
     public static final String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
+	public static final String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
     public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
@@ -171,6 +173,7 @@ public interface Settings {
 	public static final String PROP_APP_SELECTION3_ACTION_LONG = "app.selection3.action.long";
 	public static final String PROP_APP_MULTI_SELECTION3_ACTION = "app.multiselection3.action";
 	public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
+	public static final String PROP_APP_MIGRATE_SETTINGS = "app.migrate.settings";
 	public static final String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
 	public static final String PROP_CLOUD_YND_HOME_FOLDER = "app.cloud.ynd.home.folder";
 	public static final String PROP_CLOUD_YND_SETTINGS = "app.cloud.ynd.settings";
@@ -190,6 +193,7 @@ public interface Settings {
 	public static final String PROP_APP_ROOT_VIEW_FS_SECTION_HIDE = "app.rootview.fs_section.hide";
 	public static final String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
 	public static final String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
+	public static final String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
 
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
@@ -409,6 +413,7 @@ public interface Settings {
 	    "font.*",
 	    "crengine.page.*",
 	    PROP_FONT_SIZE,
+		PROP_FONT_SIZE_USER_DIC,
 	    PROP_FALLBACK_FONT_FACE,
 	    PROP_INTERLINE_SPACE,
 	    PROP_STATUS_LINE,
@@ -434,6 +439,7 @@ public interface Settings {
 		PROP_APP_DICTIONARY_7,
 		PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_WORD_CORRECTION,
+		PROP_APP_DICT_DONT_SAVE_IF_MORE,
         PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_LONGTAP_CHANGE,
 		PROP_CLOUD_SYNC_VARIANT,

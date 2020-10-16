@@ -314,6 +314,7 @@ public class BaseDialog extends Dialog {
 		// when dialog is closed
 		if (activity instanceof CoolReader) {
 			CoolReader cr = (CoolReader)activity;
+			cr.mLastDialogClosed = System.currentTimeMillis();
 			cr.getmBaseDialog().remove(this.dlgName);
 		}
 		// buggins method of active dialog tracking - i think mine is better :)

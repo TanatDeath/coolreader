@@ -33,7 +33,7 @@ public class NoticeDialog extends Dialog {
 			});
         else
         	button2.setVisibility(View.GONE);
-		TextView noticeText = (TextView) layout.findViewById(R.id.notice_text);
+		TextView noticeText = layout.findViewById(R.id.notice_text);
 		if (!StrUtils.isEmptyStr(sText)) noticeText.setText(sText);
 
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]

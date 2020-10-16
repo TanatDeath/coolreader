@@ -745,6 +745,7 @@ public class CRDBService extends Service {
 				} else {
 					sendTask(handler, () -> callback.onAuthorsAliasesLoaded(0));
 				}
+				mainDB.createUniqueAliasesList();
 				mainDB.flushAndTransaction();
 				final int iF = i;
 				sendTask(handler, () -> callback.onAuthorsAliasesLoaded(iF));
@@ -972,7 +973,7 @@ public class CRDBService extends Service {
 				}
 			if (idx >= 0) {
 				UserDicDlg.mDicSearchHistoryAll.remove(idx);
-				//act.showToast("deleteed:" + StrUtils.getNonEmptyStr(dshe.getSearch_text(),true));
+				//act.showToast("deleted:" + StrUtils.getNonEmptyStr(dshe.getSearch_text(),true));
 			}
         	if (action == DicSearchHistoryEntry.ACTION_SAVE) {
 				UserDicDlg.mDicSearchHistoryAll.add(0, dshe);

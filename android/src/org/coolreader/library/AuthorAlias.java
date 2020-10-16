@@ -23,8 +23,10 @@ public class AuthorAlias {
 
 	public Long origId;
 	public String origText;
+	public String origTextR;
 	public Long aliasId;
 	public String aliasText;
+	public String aliasTextR;
 
 	public static ArrayList<AuthorAlias> AUTHOR_ALIASES = new ArrayList<>();
 
@@ -53,7 +55,9 @@ public class AuthorAlias {
 					if (str.contains("=")) {
 						AuthorAlias al = new AuthorAlias();
 						String orig = StrUtils.getNonEmptyStr(str.split("=")[0],true);
+						al.origText=orig;
 						String alias = StrUtils.getNonEmptyStr(str.split("=")[1],true);
+						al.aliasText=alias;
 						if (orig.split(" ").length > 1) {
 							String[] aorig = orig.split(" ");
 							String origN = "";
@@ -63,7 +67,7 @@ public class AuthorAlias {
 							}
 							orig = origN + " " + origL;
 						}
-						al.origText=StrUtils.getNonEmptyStr(orig, true);
+						al.origTextR=StrUtils.getNonEmptyStr(orig, true);
 						if (alias.split(" ").length > 1) {
 							String[] aalias = alias.split(" ");
 							String aliasN = "";
@@ -73,7 +77,7 @@ public class AuthorAlias {
 							}
 							alias = aliasN + " " + aliasL;
 						}
-						al.aliasText=StrUtils.getNonEmptyStr(alias, true);
+						al.aliasTextR=StrUtils.getNonEmptyStr(alias, true);
 						AUTHOR_ALIASES.add(al);
 					}
 				};

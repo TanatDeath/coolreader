@@ -12,6 +12,7 @@ import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
@@ -32,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -48,6 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
 import okhttp3.Call;
@@ -66,7 +69,10 @@ public class Dictionaries {
 	public static final String YND_DIC_GETLANGS_2 = "https://translate.api.cloud.yandex.net/translate/v2/languages";
 	public static final String LINGVO_DIC_ONLINE = "https://developers.lingvolive.com/api";
 	public static final String YND_DIC_GET_TOKEN = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
-	public static OkHttpClient client = new OkHttpClient();
+	public static OkHttpClient client = new OkHttpClient.Builder().
+		connectTimeout(20,TimeUnit.SECONDS).
+		writeTimeout(40, TimeUnit.SECONDS).
+		readTimeout(40, TimeUnit.SECONDS).build();
 	public static ArrayList<String> langCodes = new ArrayList<String>();
 	public static String sLingvoToken = "";
 	public static String sYandexIAM = "";
@@ -124,6 +130,8 @@ public class Dictionaries {
 		currentDictionary6 = noneDictionary();
 		currentDictionary7 = noneDictionary();
 	}
+
+	public static ProgressDialog progressDlg;
 	
 	public DictInfo currentDictionary;
 	public DictInfo currentDictionary2;
@@ -206,11 +214,11 @@ public class Dictionaries {
 		new DictInfo("PopupDictionary", "Popup Dictionary", "com.barisatamer.popupdictionary", "com.barisatamer.popupdictionary.MainActivity",
 				"android.intent.action.VIEW", 0,R.drawable.popup, null, ""),
 		new DictInfo("GoogleTranslate", "Google Translate", "com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity",
-				Intent.ACTION_SEND, 4, R.drawable.googledic, null, ""),
+				Intent.ACTION_SEND, 10, R.drawable.googledic, null, ""),
 		new DictInfo("YandexTranslate", "Yandex Translate", "ru.yandex.translate", "ru.yandex.translate.ui.activities.MainActivity",
-				Intent.ACTION_SEND, 4, R.drawable.ytr_ic_launcher, null, ""),
+				Intent.ACTION_SEND, 10, R.drawable.ytr_ic_launcher, null, ""),
 		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.search.SearchActivity",
-				Intent.ACTION_SEND, 0, R.drawable.wiki, null, ""),
+				Intent.ACTION_SEND, 10, R.drawable.wiki, null, ""),
 		new DictInfo("YandexTranslateOnline", "Yandex Translate Online", "", "",
 				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null, YND_DIC_ONLINE),
 		new DictInfo("LingvoOnline", "Lingvo Online", "", "",
@@ -223,7 +231,7 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 9, R.drawable.wiki, null, ""),
 	};
 
-	public static List<DictInfo> dictsSendTo = new ArrayList<DictInfo>();
+	public static List<DictInfo> dictsSendTo = new ArrayList<>();
 
 	public static final String DEFAULT_DICTIONARY_ID = "Fora";
 	
@@ -577,6 +585,7 @@ public class Dictionaries {
 										sLang = jso2.getString("detectedLanguageCode");
 								}
 								cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang);
+								saveToDicSearchHistory(s, sText, curDict);
 							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
 						} catch (Exception e) {
 							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
@@ -734,11 +743,21 @@ public class Dictionaries {
 		Call call = client.newCall(request);
 		final CoolReader crf2 = cr;
 		final DictInfo curDictF2 = curDict;
+		if ((curAction == WIKI_FIND_TITLE_FULL) || (curAction == WIKI_SHOW_PAGE_FULL_ID)) {
+			progressDlg = ProgressDialog.show(mActivity,
+					mActivity.getString(R.string.network_op),
+					mActivity.getString(R.string.network_op),
+					true, false, null);
+		}
 		call.enqueue(new okhttp3.Callback() {
 			public void onResponse(Call call, Response response)
 					throws IOException {
 				String sBody = response.body().string();
 				Document docJsoup = Jsoup.parse(sBody, sLinkF);
+				BackgroundThread.instance().postGUI(() -> {
+					if (progressDlg != null)
+						if (progressDlg.isShowing()) progressDlg.dismiss();
+				});
 				wikiTitleText = "";
 				if ((curAction == WIKI_FIND_TITLE)
 						|| (curAction == WIKI_SHOW_PAGE_ID)
@@ -847,6 +866,10 @@ public class Dictionaries {
 
 			public void onFailure(Call call, IOException e) {
 				// showing with no pic
+				BackgroundThread.instance().postGUI(() -> {
+					if (progressDlg != null)
+						if (progressDlg.isShowing()) progressDlg.dismiss();
+				});
 				if (curAction == WIKI_FIND_PIC_INFO)
 					// showing with no pic
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
@@ -1103,7 +1126,12 @@ public class Dictionaries {
 	public void saveToDicSearchHistory(String searchText, String translateText, DictInfo curDict) {
 		CoolReader cr = null;
 		if (mActivity instanceof CoolReader) {
+			//asdf
 			cr = (CoolReader) mActivity;
+			int iDont = cr.settings().getInt(Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE, 0);
+			if (iDont>0) {
+				if (StrUtils.getNonEmptyStr(searchText,true).split(" ").length > iDont) return;
+			}
 			DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
 			dshe.setId(0L);
 			dshe.setSearch_text(searchText);
@@ -1575,6 +1603,34 @@ public class Dictionaries {
 			}
 			wikiTranslate(cr, curDict, view, s, sLink, sLink2, WIKI_FIND_TITLE, true);
 			break;
+			case 10:
+				Intent intent7 = new Intent();
+				intent7.setType("text/plain");
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)  {
+					intent7.setAction(Intent.ACTION_PROCESS_TEXT);
+					intent7.putExtra(Intent.EXTRA_PROCESS_TEXT, s);
+					intent7.putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true);
+				}else{
+					intent7.setAction(Intent.ACTION_SEND);
+					intent7.putExtra(Intent.EXTRA_TEXT, s);
+				}
+				for (ResolveInfo resolveInfo : mActivity.getPackageManager().queryIntentActivities(intent7, 0)) {
+
+					if( resolveInfo.activityInfo.packageName.contains(curDict.packageName)){
+						intent7.setComponent(new ComponentName(
+								resolveInfo.activityInfo.packageName,
+								resolveInfo.activityInfo.name));
+						try
+						{
+							mActivity.startActivity(intent7);
+						} catch ( ActivityNotFoundException e ) {
+							throw new DictionaryException("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
+						}
+					}
+
+				}
+				//intent7.setComponent(new ComponentName(curDict.packageName, curDict.className));
+				break;
 		}
 	}
 

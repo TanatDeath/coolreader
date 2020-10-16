@@ -6,6 +6,7 @@ import  androidx.documentfile.provider.DocumentFile;
 
 import android.util.Log;
 import org.coolreader.R;
+import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.plugins.OnlineStoreBook;
 
 import java.io.File;
@@ -25,6 +26,7 @@ public class FileInfo {
 	public final static String LOADING_STUB_PREFIX = "@loadingstub";
 	public final static String NOT_FOUND_STUB_PREFIX = "@notfoundstub";
 	public final static String ONLINE_CATALOG_PLUGIN_PREFIX = "@plugin:";
+	public final static String LITRES_TAG = "@litresRoot";
 	public final static String AUTHORS_TAG = "@authorsRoot";
 	public final static String AUTHOR_GROUP_PREFIX = "@authorGroup:";
 	public final static String AUTHOR_PREFIX = "@author:";
@@ -57,11 +59,29 @@ public class FileInfo {
 	public final static String SEARCH_SHORTCUT_TAG = "@search";
 	public final static String QSEARCH_SHORTCUT_TAG = "@qsearch";
 	public final static String RESCAN_LIBRARY_TAG = "@rescan";
+	public final static String LITRES_GENRE_TAG = "@litresGenreRoot";
+	public final static String LITRES_PERSON_TAG = "@litresPersonRoot";
+	public final static String LITRES_PREFIX = "@litres";
+	public final static String LITRES_GENRE_GROUP_PREFIX = "@litresGenreGroup:";
+	public final static String LITRES_PERSON_GROUP_PREFIX = "@litresPersonGroup:";
+	public final static String LITRES_GENRE_PREFIX = "@litresGenre:";
+	public final static String LITRES_BOOKS_TAG = "@litresBooksRoot";
+	public final static String LITRES_BOOKS_GROUP_PREFIX = "@litresBooksGroup:";
+	public final static String LITRES_BOOKS_PREFIX = "@litresBooks:";
+	public final static String LITRES_PERSONS_PREFIX = "@litresPersons:";
+	public final static String LITRES_PERSONS_GROUP_PREFIX = "@litresPersonsGroup:";
+	public final static String LITRES_SEQUENCE_TAG = "@litresSequenceRoot";
+	public final static String LITRES_SEQUENCE_PREFIX = "@litresSequence:";
+	public final static String LITRES_SEQUENCE_GROUP_PREFIX = "@litresSequenceGroup:";
+	public final static String LITRES_COLLECTION_TAG = "@litresCollectionRoot";
+	public final static String LITRES_COLLECTION_PREFIX = "@litresCollection:";
+	public final static String LITRES_COLLECTION_GROUP_PREFIX = "@litresCollectionGroup:";
+
 
 	public Long id; // db id
 	public String title; // book title
 	public String authors; // authors, delimited with '|'
-	public String authorsAddInfo;
+	public String authorext; // full_name (or first-middle-last)~firstName~middleName~lastName~nickName~homePage~email
 	public String series; // series name w/o number
 	public int seriesNumber; // number of book inside series
     public int saved_with_ver; // version of database book was saved with
@@ -110,6 +130,24 @@ public class FileInfo {
 	public String proxy_uname;
 	public String proxy_passw;
 	public int onion_def_proxy;
+	// Litres related
+	public String cover_href;
+	public String cover_href2;
+	public String fragment_href;
+	public Double finalPrice = 0D;
+	public int free = 0;
+	public String availDate;
+	public long availDateN;
+	public int available = 0;
+	public int type = 0;
+	public int lvl = 0;
+	public int arts_n = 0;
+	public LitresSearchParams lsp;
+	public String top_arts;
+	public String top_genres;
+	public String format_chosen;
+	public String minage;
+	public String subtitle;
 
 	public DocumentFormat format;
 	public int size; // full file size
@@ -436,7 +474,7 @@ public class FileInfo {
 	{
 		title = v.title;
 		authors = v.authors;
-		authorsAddInfo = v.authorsAddInfo;
+		authorext = v.authorext;
 		series = v.series;
 		seriesNumber = v.seriesNumber;
 		path = v.path;
@@ -497,7 +535,7 @@ public class FileInfo {
 		String find = StrUtils.getNonEmptyStr(text,true).toUpperCase();
 		if (StrUtils.getNonEmptyStr(title, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(authors, true).toUpperCase().contains(find)) return true;
-		if (StrUtils.getNonEmptyStr(authorsAddInfo, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(authorext, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(series, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(String.valueOf(seriesNumber), true).toUpperCase().contains(find)) return true;
 		//if (StrUtils.getNonEmptyStr(path, true).toUpperCase().contains(find)) return true;
@@ -570,7 +608,32 @@ public class FileInfo {
 	
 	public boolean isSpecialDir()
 	{
-		return pathname!=null && pathname.startsWith("@");
+		return pathname!=null &&
+				(
+					(pathname.startsWith("@") && (!isLitresPrefix()))
+					||
+					isLitresPagination()
+					||
+					isLitresSpecialDir()
+				);
+	}
+
+	public boolean isLitresSpecialDir()
+	{
+		// Item, that requires additional behaviour on click - person, genre, collection, etc
+		return pathname!=null && pathname.startsWith("@")
+				&&
+				(
+					(pathname.startsWith(LITRES_GENRE_PREFIX)) ||
+					(pathname.startsWith(LITRES_PERSONS_PREFIX)) ||
+					(pathname.startsWith(LITRES_PERSONS_GROUP_PREFIX)) ||
+					(pathname.startsWith(LITRES_SEQUENCE_PREFIX)) ||
+					(pathname.startsWith(LITRES_SEQUENCE_GROUP_PREFIX)) ||
+					(pathname.startsWith(LITRES_COLLECTION_PREFIX)) ||
+					(pathname.startsWith(LITRES_COLLECTION_GROUP_PREFIX)) ||
+					(pathname.startsWith(LITRES_BOOKS_GROUP_PREFIX)) ||
+					(pathname.startsWith(LITRES_GENRE_GROUP_PREFIX))
+				);
 	}
 
 	public boolean isLoadingStub()
@@ -587,7 +650,36 @@ public class FileInfo {
 	{
 		return pathname!=null && pathname.startsWith(ONLINE_CATALOG_PLUGIN_PREFIX);
 	}
-	
+
+	public boolean isLitresDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_TAG);
+	}
+
+	public boolean isLitresBooksGroupDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_BOOKS_GROUP_PREFIX);
+	}
+
+	public boolean isLitresPaginationNextPage()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_PREFIX) && pathname.contains("nextpage");
+	}
+
+	public boolean isLitresPaginationPrevPage()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_PREFIX) && pathname.contains("prevpage");
+	}
+
+	public boolean isLitresPagination() {
+		return isLitresPaginationPrevPage() || isLitresPaginationNextPage();
+	}
+
+	public boolean isLitresPrefix()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_PREFIX);
+	}
+
 	public boolean isOnlineCatalogPluginBook()
 	{
 		return !isDirectory && pathname != null && pathname.startsWith(ONLINE_CATALOG_PLUGIN_PREFIX) && getOnlineStoreBookInfo() != null;
@@ -607,7 +699,31 @@ public class FileInfo {
 	{
 		return pathname!=null && pathname.startsWith(OPDS_DIR_PREFIX) && getOPDSEntryInfo() != null && getOPDSEntryInfo().getBestAcquisitionLink() != null;
 	}
-	
+
+	public boolean isLitresBook()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_BOOKS_PREFIX);
+	}
+
+	public boolean isCloudBook() {
+		return isOPDSBook() || isLitresBook();
+	}
+
+	public boolean isLitresPerson()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_PERSONS_PREFIX);
+	}
+
+	public boolean isLitresSequence()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_SEQUENCE_PREFIX);
+	}
+
+	public boolean isLitresCollection()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_COLLECTION_PREFIX);
+	}
+
 	private OPDSUtil.EntryInfo getOPDSEntryInfo() {
 		if (tag !=null && tag instanceof OPDSUtil.EntryInfo)
 			return (OPDSUtil.EntryInfo)tag;
@@ -700,6 +816,31 @@ public class FileInfo {
 		return GENRE_TAG.equals(pathname);
 	}
 
+	public boolean isBooksByLitresGenreRoot()
+	{
+		return LITRES_GENRE_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByLitresCollectionRoot()
+	{
+		return LITRES_COLLECTION_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByLitresSequenceRoot()
+	{
+		return LITRES_SEQUENCE_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByLitresPersonRoot()
+	{
+		return LITRES_PERSON_TAG.equals(pathname);
+	}
+
+	public boolean isBooksByLitresBooksRoot()
+	{
+		return LITRES_BOOKS_TAG.equals(pathname);
+	}
+
 	public boolean isRescanShortcut()
 	{
 		return RESCAN_LIBRARY_TAG.equals(pathname);
@@ -738,6 +879,36 @@ public class FileInfo {
 	public boolean isBooksByGenreDir()
 	{
 		return pathname!=null && pathname.startsWith(GENRE_PREFIX);
+	}
+
+	public boolean isBooksByLitresGenreDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_GENRE_PREFIX);
+	}
+
+	public boolean isBooksByLitresGenreGroupDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_GENRE_GROUP_PREFIX);
+	}
+
+	public boolean isBooksByLitresCollectionDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_COLLECTION_PREFIX);
+	}
+
+	public boolean isBooksByLitresSequenceDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_SEQUENCE_PREFIX);
+	}
+
+	public boolean isBooksByLitresPersonDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_PERSONS_PREFIX);
+	}
+
+	public boolean isBooksByLitresBooksDir()
+	{
+		return pathname!=null && pathname.startsWith(LITRES_BOOKS_PREFIX);
 	}
 	
 	public boolean isOnSDCard() {
@@ -885,7 +1056,7 @@ public class FileInfo {
 	public void addDir( FileInfo dir )
 	{
 		if ( dirs==null )
-			dirs = new ArrayList<FileInfo>();
+			dirs = new ArrayList<>();
 		dirs.add(dir);
 		if (dir.parent == null)
 			dir.parent = this;
@@ -893,7 +1064,7 @@ public class FileInfo {
 	public void addFile( FileInfo file )
 	{
 		if ( files==null )
-			files = new ArrayList<FileInfo>();
+			files = new ArrayList<>();
 		files.add(file);
 	}
 	public void addItems( Collection<FileInfo> items )
@@ -1256,6 +1427,24 @@ public class FileInfo {
 		}
 		return null;
 	}
+
+	public String getAuthorExt() {
+		if (authorext!=null) {
+			String[] list = authorext.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			return resS;
+		}
+		return null;
+	}
 	
 	public boolean setAuthors(String authors) {
 		if (eq(this.authors, authors))
@@ -1277,10 +1466,10 @@ public class FileInfo {
 		return true;
 	}
 
-	public boolean setAuthorsAddInfo(String authorsAddInfo) {
-		if (eq(this.authorsAddInfo, authorsAddInfo))
+	public boolean setAuthorext(String authorext) {
+		if (eq(this.authorext, authorext))
 			return false;
-		this.authorsAddInfo = authorsAddInfo;
+		this.authorext = authorext;
 		return true;
 	}
 
@@ -1414,6 +1603,14 @@ public class FileInfo {
 			return false;
 		this.bookdate = bookdate;
 		this.bookDateN = StrUtils.parseDateLong(bookdate);
+		return true;
+	}
+
+	public boolean setAvaildate(String availDate) {
+		if (eq(this.availDate, availDate))
+			return false;
+		this.availDate = availDate;
+		this.availDateN = StrUtils.parseDateLong(availDate);
 		return true;
 	}
 
@@ -1699,6 +1896,24 @@ public class FileInfo {
 			ArrayList<FileInfo> newDirs = new ArrayList<FileInfo>(dirs);
 			Collections.sort( newDirs, SortOrder.getComparator() );
 			dirs = newDirs;
+			if (dirs != null)
+				if (dirs.size()>0)
+					if (dirs.get(0).isLitresPrefix()) {
+						FileInfo nextPageDir = null;
+						FileInfo prevPageDir = null;
+						for (FileInfo fi : dirs) {
+							if (fi.isLitresPaginationNextPage()) nextPageDir = fi;
+							if (fi.isLitresPaginationPrevPage()) prevPageDir = fi;
+						}
+						if (nextPageDir != null) {
+							dirs.remove(nextPageDir);
+							dirs.add(0, nextPageDir);
+						}
+						if (prevPageDir != null) {
+							dirs.remove(prevPageDir);
+							dirs.add(0, prevPageDir);
+						}
+					}
 		}
 		if ( files!=null ) {
 			ArrayList<FileInfo> newFiles = new ArrayList<FileInfo>(files);

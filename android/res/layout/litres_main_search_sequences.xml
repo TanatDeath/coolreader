@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tr_litres_search_sequences"
+        android:layout_margin="2dip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        >
+    <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="fill_parent"
+            android:gravity="left"
+            android:layout_weight="2"
+            android:orientation="horizontal">
+        <Button
+                android:id="@+id/btn_search_sequences"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/search_sequences"
+                android:layout_margin="3dip"
+                android:textColor="?attr/colorIcon"
+                android:drawableLeft="@drawable/icons8_toc_item_collapsed"
+                style="@style/TextAppearance.Widget.EditText"
+                />
+    </LinearLayout>
+</TableRow>

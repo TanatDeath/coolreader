@@ -220,6 +220,35 @@ public enum DocumentFormat {
 		if (stype.equals("application/vnd.oasis.opendocument.presentation")) sExt = "odp";
 		return sExt;
 	}
+
+	public static String nameEndWithExt( String sname )
+	{
+		String sExt = "";
+		if (sname.toLowerCase().endsWith(".zip")) sExt = "zip";
+		if (sname.toLowerCase().endsWith(".txt")) sExt = "txt";
+		if (sname.toLowerCase().endsWith(".fb2")) sExt = "fb2";
+		if (sname.toLowerCase().endsWith(".fb2.zip")) sExt = "fb2.zip";
+		if (sname.toLowerCase().endsWith(".epub.zip")) sExt = "epub.zip";
+		if (sname.toLowerCase().endsWith(".epub")) sExt = "epub";
+		if (sname.toLowerCase().endsWith(".html")) sExt = "html";
+		if (sname.toLowerCase().endsWith(".htm")) sExt = "htm";
+		if (sname.toLowerCase().endsWith(".chm")) sExt = "chm";
+		if (sname.toLowerCase().endsWith(".cbz")) sExt = "cbz";
+		if (sname.toLowerCase().endsWith(".cbr")) sExt = "cbr";
+		if (sname.toLowerCase().endsWith(".cbt")) sExt = "cbt";
+		if (sname.toLowerCase().endsWith(".rtf")) sExt = "rtf";
+		if (sname.toLowerCase().endsWith(".rtf.zip")) sExt = "rtf.zip";
+		if (sname.toLowerCase().endsWith(".docx")) sExt = "docx";
+		if (sname.toLowerCase().endsWith(".doc")) sExt = "doc";
+		if (sname.toLowerCase().endsWith(".mobi")) sExt = "mobi";
+		if (sname.toLowerCase().endsWith(".jpg")) sExt = "jpg";
+		if (sname.toLowerCase().endsWith(".png")) sExt = "png";
+		if (sname.toLowerCase().endsWith(".azw")) sExt = "azw";
+		if (sname.toLowerCase().endsWith(".odt")) sExt = "odt";
+		if (sname.toLowerCase().endsWith(".ods")) sExt = "ods";
+		if (sname.toLowerCase().endsWith(".odp")) sExt = "odp";
+		return sExt;
+	}
 	
 	private DocumentFormat( String cssFileName, int cssResourceId, int iconResourceId, boolean canParseProperties, boolean canParseCoverpages, int priority, String extensions[], String mimeFormats[] )
 	{

@@ -103,16 +103,12 @@ public class OrientationToolbarDlg {
 
 		mWindow = new PopupWindow( mAnchor.getContext() );
 
-		mWindow.setTouchInterceptor(new OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
-					closeDialog();
-					return true;
-				}
-				return false;
+		mWindow.setTouchInterceptor((v, event) -> {
+			if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
+				closeDialog();
+				return true;
 			}
+			return false;
 		});
 		int colorGrayC;
 		int colorGray;
@@ -141,16 +137,14 @@ public class OrientationToolbarDlg {
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_icons8_fix_port, R.drawable.icons8_fix_port)
 			);
 		btnFixNew.setBackgroundDrawable(c);
-		btnFixNew.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				if (DeviceInfo.getSDKLevel() >= 9) {
-					int iSett = mCoolReader.settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
-					Properties props1 = new Properties(mCoolReader.settings());
-					String ornt = getOrientationString(mCoolReader.sensorCurRot);
-					props1.setProperty(Settings.PROP_APP_SCREEN_ORIENTATION, ornt);
-					mCoolReader.setSettings(props1, -1, true);
-					closeDialog();
-				}
+		btnFixNew.setOnClickListener(v -> {
+			if (DeviceInfo.getSDKLevel() >= 9) {
+				int iSett = mCoolReader.settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
+				Properties props1 = new Properties(mCoolReader.settings());
+				String ornt = getOrientationString(mCoolReader.sensorCurRot);
+				props1.setProperty(Settings.PROP_APP_SCREEN_ORIENTATION, ornt);
+				mCoolReader.setSettings(props1, -1, true);
+				closeDialog();
 			}
 		});
 
@@ -166,76 +160,59 @@ public class OrientationToolbarDlg {
 				);
 
 			btnFixOld.setBackgroundDrawable(c);
-			btnFixOld.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					if (DeviceInfo.getSDKLevel() >= 9) {
-						int iSett = mCoolReader.settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
-						Properties props1 = new Properties(mCoolReader.settings());
-						String ornt = getOrientationString(mCoolReader.sensorPrevRot);
-						props1.setProperty(Settings.PROP_APP_SCREEN_ORIENTATION, ornt);
-						mCoolReader.setSettings(props1, -1, true);
-						closeDialog();
-					}
+			btnFixOld.setOnClickListener(v -> {
+				if (DeviceInfo.getSDKLevel() >= 9) {
+					int iSett = mCoolReader.settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
+					Properties props1 = new Properties(mCoolReader.settings());
+					String ornt = getOrientationString(mCoolReader.sensorPrevRot);
+					props1.setProperty(Settings.PROP_APP_SCREEN_ORIENTATION, ornt);
+					mCoolReader.setSettings(props1, -1, true);
+					closeDialog();
 				}
 			});
 		}
 
 		ImageButton btnDisablePopup = mPanel.findViewById(R.id.disable_popup_toolbar);
 		btnDisablePopup.setBackgroundDrawable(c);
-		btnDisablePopup.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Properties props1 = new Properties(mCoolReader.settings());
-				props1.setProperty(Settings.PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION, "0");
-				mCoolReader.setSettings(props1, -1, true);
-				closeDialog();
-			}
+		btnDisablePopup.setOnClickListener(v -> {
+			Properties props1 = new Properties(mCoolReader.settings());
+			props1.setProperty(Settings.PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION, "0");
+			mCoolReader.setSettings(props1, -1, true);
+			closeDialog();
 		});
 
 		ImageButton btnSett = mPanel.findViewById(R.id.btn_orientation_settings);
 		btnSett.setBackgroundDrawable(c);
-		btnSett.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				mCoolReader.optionsFilter = "";
-				mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_SCREEN_ORIENTATION);
-				closeDialog();
-			}
+		btnSett.setOnClickListener(v -> {
+			mCoolReader.optionsFilter = "";
+			mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGEANDORIENTATION_TITLE);
+			closeDialog();
 		});
 
 		mPanel.findViewById(R.id.orientation_cancel).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.orientation_cancel).setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				closeDialog();
-			}
-		});
+		mPanel.findViewById(R.id.orientation_cancel).setOnClickListener(v -> closeDialog());
 
 		mPanel.setFocusable(true);
-		mPanel.setOnKeyListener( new OnKeyListener() {
-
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if ( event.getAction()==KeyEvent.ACTION_UP ) {
-					switch ( keyCode ) {
-					case KeyEvent.KEYCODE_BACK:
-						closeDialog();
-						return true;
-					}
-				} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
-						switch ( keyCode ) {
-						}
-					}
-				if ( keyCode == KeyEvent.KEYCODE_BACK) {
+		mPanel.setOnKeyListener((v, keyCode, event) -> {
+			if ( event.getAction()==KeyEvent.ACTION_UP ) {
+				switch ( keyCode ) {
+				case KeyEvent.KEYCODE_BACK:
+					closeDialog();
 					return true;
 				}
-				return false;
+			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
+					switch ( keyCode ) {
+					}
+				}
+			if ( keyCode == KeyEvent.KEYCODE_BACK) {
+				return true;
 			}
-			
+			return false;
 		});
 
-		mWindow.setOnDismissListener(new OnDismissListener() {
-			@Override
-			public void onDismiss() {
-				restoreReaderMode();
-				mReaderView.clearSelection();
-			}
+		mWindow.setOnDismissListener(() -> {
+			restoreReaderMode();
+			mReaderView.clearSelection();
 		});
 		
 		mWindow.setBackgroundDrawable(new BitmapDrawable());

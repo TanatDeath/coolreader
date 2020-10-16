@@ -100,86 +100,72 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		mOnUpdate = onUpdate;
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.catalog_edit_dialog, null);
-		nameEdit = (EditText) view.findViewById(R.id.catalog_name);
-		imgBtn = (ImageButton) view.findViewById(R.id.test_catalog_btn);
+		nameEdit = view.findViewById(R.id.catalog_name);
+		imgBtn = view.findViewById(R.id.test_catalog_btn);
 		imgBtn.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				if (!StrUtils.isEmptyStr(urlEdit.getText().toString())) {
 					imgBtn.setEnabled(false);
 					imgBtn.setVisibility(View.INVISIBLE);
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							imgBtn.setEnabled(true);
-							imgBtn.setVisibility(View.VISIBLE);
-						}
+					BackgroundThread.instance().postGUI(() -> {
+						imgBtn.setEnabled(true);
+						imgBtn.setVisibility(View.VISIBLE);
 					}, 5000);
 					HttpUrl url = HttpUrl.parse(urlEdit.getText().toString());
 					if (url==null) {
 						activity.showToast("Bad URL");
 					} else {
 						final HttpUrl.Builder urlBuilder = url.newBuilder();
-						BackgroundThread.instance().postBackground(new Runnable() {
-							@Override
-							public void run() {
-								Document doc = null;
-								try {
-									doc = Jsoup.parse(urlBuilder.build().url(), 60000);
-									if (doc != null) {
-										for (Element el : doc.getAllElements()) {
-											if (el.tag().getName().equals("title")) {
-												if (el.parentNode() != null) {
-													Element par = (Element) el.parentNode();
-													if (par.tag().getName().equals("feed")) {
-														BackgroundThread.instance().postGUI(new Runnable() {
-															@Override
-															public void run() {
-																nameEdit.setText(el.text());
-																activity.showToast(activity.getString(R.string.ok));
-															}
-														}, 200);
-													}
+						BackgroundThread.instance().postBackground(() -> {
+							Document doc = null;
+							try {
+								doc = Jsoup.parse(urlBuilder.build().url(), 60000);
+								if (doc != null) {
+									for (Element el : doc.getAllElements()) {
+										if (el.tag().getName().equals("title")) {
+											if (el.parentNode() != null) {
+												Element par = (Element) el.parentNode();
+												if (par.tag().getName().equals("feed")) {
+													BackgroundThread.instance().postGUI(() -> {
+														nameEdit.setText(el.text());
+														activity.showToast(activity.getString(R.string.ok));
+													}, 200);
 												}
 											}
-											if (el.tag().getName().equals("icon")) {
-												if (el.parentNode() != null) {
-													Element par = (Element) el.parentNode();
-													if (par.tag().getName().equals("feed")) {
-														final String sUrl = urlEdit.getText().toString();
-														CRC32 crc = new CRC32();
-														crc.update(sUrl.getBytes());
-														final String sFName = String.valueOf(crc.getValue()) + "_icon.png";
-														String sDir = "";
-														ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
-														if (tDirs.size() > 0) sDir = tDirs.get(0);
-														if (!StrUtils.isEmptyStr(sDir))
-															if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\")))
-																sDir = sDir + "/";
-														if (!StrUtils.isEmptyStr(sDir)) {
-															try {
-																File f = new File(sDir + sFName);
-																if (f.exists()) f.delete();
-																new DownloadImageTask(sDir + sFName, imgBtn).execute(el.text());
-															} catch (Exception e) {
-																BackgroundThread.instance().postGUI(new Runnable() {
-																	@Override
-																	public void run() {
-																		activity.showToast(activity.getString(R.string.pic_problem) + " " +
-																				e.getMessage());
-																	}
-																}, 200);
-															}
+										}
+										if (el.tag().getName().equals("icon")) {
+											if (el.parentNode() != null) {
+												Element par = (Element) el.parentNode();
+												if (par.tag().getName().equals("feed")) {
+													final String sUrl = urlEdit.getText().toString();
+													CRC32 crc = new CRC32();
+													crc.update(sUrl.getBytes());
+													final String sFName = crc.getValue() + "_icon.png";
+													String sDir = "";
+													ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
+													if (tDirs.size() > 0) sDir = tDirs.get(0);
+													if (!StrUtils.isEmptyStr(sDir))
+														if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\")))
+															sDir = sDir + "/";
+													if (!StrUtils.isEmptyStr(sDir)) {
+														try {
+															File f = new File(sDir + sFName);
+															if (f.exists()) f.delete();
+															new DownloadImageTask(sDir + sFName, imgBtn).execute(el.text());
+														} catch (Exception e) {
+															BackgroundThread.instance().postGUI(() -> activity.showToast(activity.getString(R.string.pic_problem) + " " +
+																	e.getMessage()), 200);
 														}
 													}
 												}
-											} // if icon
-										}
-									} // if doc is not null
-									//mActivity.showToast(doc.body().text());
-								} catch (IOException e) {
-									mActivity.showToast(activity.getString(R.string.error) + ": " + e.getMessage());
-									Log.e("opds", "OPDS check catalog: " + e.getMessage());
-								}
+											}
+										} // if icon
+									}
+								} // if doc is not null
+								//mActivity.showToast(doc.body().text());
+							} catch (IOException e) {
+								mActivity.showToast(activity.getString(R.string.error) + ": " + e.getMessage());
+								Log.e("opds", "OPDS check catalog: " + e.getMessage());
 							}
 						});
 					}
@@ -189,14 +175,14 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 				}
 			}
 		});
-		urlEdit = (EditText) view.findViewById(R.id.catalog_url);
-		usernameEdit = (EditText) view.findViewById(R.id.catalog_username);
-		passwordEdit = (EditText) view.findViewById(R.id.catalog_password);
-		proxyaddrEdit = (EditText) view.findViewById(R.id.edt_proxy_addr);
-		proxyportEdit = (EditText) view.findViewById(R.id.edt_proxy_port);
-		proxyunameEdit = (EditText) view.findViewById(R.id.edt_proxy_uname);
-		proxypasswEdit = (EditText) view.findViewById(R.id.edt_proxy_passw);
-		onionDefProxyChb = (CheckBox) view.findViewById(R.id.chb_onion_def_proxy);
+		urlEdit = view.findViewById(R.id.catalog_url);
+		usernameEdit = view.findViewById(R.id.catalog_username);
+		passwordEdit = view.findViewById(R.id.catalog_password);
+		proxyaddrEdit = view.findViewById(R.id.edt_proxy_addr);
+		proxyportEdit = view.findViewById(R.id.edt_proxy_port);
+		proxyunameEdit = view.findViewById(R.id.edt_proxy_uname);
+		proxypasswEdit = view.findViewById(R.id.edt_proxy_passw);
+		onionDefProxyChb = view.findViewById(R.id.chb_onion_def_proxy);
 		nameEdit.setText(mItem.getFilename());
 		urlEdit.setText(mItem.getOPDSUrl());
 		usernameEdit.setText(mItem.username);
@@ -220,19 +206,10 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		if (OPDSConst.BLACK_LIST_MODE == OPDSConst.BLACK_LIST_MODE_FORCE) {
 			mActivity.showToast(R.string.black_list_enforced);
 		} else if (OPDSConst.BLACK_LIST_MODE == OPDSConst.BLACK_LIST_MODE_WARN) {
-			mActivity.askConfirmation(R.string.black_list_warning, new Runnable() {
-				@Override
-				public void run() {
-					save();
-					OPDSCatalogEditDialog.super.onPositiveButtonClick();
-				}
-				
-			}, new Runnable() {
-				@Override
-				public void run() {
-					onNegativeButtonClick();
-				}
-			});
+			mActivity.askConfirmation(R.string.black_list_warning, () -> {
+				save();
+				OPDSCatalogEditDialog.super.onPositiveButtonClick();
+			}, () -> onNegativeButtonClick());
 		} else {
 			save();
 			super.onPositiveButtonClick();

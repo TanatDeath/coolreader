@@ -63,7 +63,7 @@ public class DBXInputTokenDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(token)) {
 			Log.i("DBX","Starting save dbx.token");
 			try {
-				final File fDBX = new File(mCoolReader.getSettingsFileF(0).getParent() + "/dbx.token");
+				final File fDBX = new File(mCoolReader.getSettingsFileExt("[DEFAULT]",0).getParent() + "/dbx.token");
 				BufferedWriter bw = null;
 				FileWriter fw = null;
 				char[] bytesArray = new char[1000];
@@ -142,7 +142,7 @@ public class DBXInputTokenDialog extends BaseDialog {
 			}
 		});
 		TextView tokenDeleteTxt = (TextView) view.findViewById(R.id.txt_delete_token);
-        final File fDBX = new File(mCoolReader.getSettingsFileF(0).getParent() + "/dbx.token");
+        final File fDBX = new File(mCoolReader.getSettingsFileExt("[DEFAULT]",0).getParent() + "/dbx.token");
         if (!fDBX.exists()) {
         	tokenDelete.setVisibility(View.INVISIBLE);
 			tokenDeleteTxt.setVisibility(View.INVISIBLE);

@@ -215,6 +215,125 @@
 				android:layout_marginRight="5dip"
 				/>
 		</uk.co.deanwild.flowtextview.FlowTextView>
+	<LinearLayout
+				android:id="@+id/ll_litres_purchase"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:orientation="vertical">
+			<TextView
+					android:id="@+id/lbl_purchase"
+					android:textStyle="bold"
+					style="@style/TextAppearance.Small"
+					android:singleLine="false"
+					android:maxLines="3"
+					android:text="@string/purchase_book"
+					android:textColor="?attr/colorIcon"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+			<LinearLayout
+					android:id="@+id/ll_litres_purchase_buttons"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:orientation="horizontal">
+				<Button
+						android:layout_margin="5dip"
+						android:id="@+id/btn_purchase"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="3dip"
+						android:layout_marginRight="3dip"
+						android:src="@null"
+						android:maxLines="1"
+						android:ellipsize="end"
+						android:textColor="?attr/colorIcon"
+						android:textStyle="bold"
+						android:contentDescription=""
+						android:text="..." />
+			</LinearLayout>
+		</LinearLayout>
+
+		<TableLayout android:id="@+id/tl_downl_book"
+				xmlns:android="http://schemas.android.com/apk/res/android"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_marginLeft="4dip"
+				android:layout_marginRight="4dip"
+				android:stretchColumns="1"
+				android:layout_weight="10"
+				>
+			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/tr_downl_sel"
+					android:layout_margin="2dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					>
+				<Button
+						android:id="@+id/btn_fragment"
+						android:layout_width="0dip"
+						android:layout_marginTop="2dip"
+						android:layout_marginBottom="2dip"
+						android:layout_marginLeft="2dip"
+						android:layout_marginRight="2dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="@string/download_fragment"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+						android:text="@string/download_fragment" />
+				<Button
+						android:id="@+id/btn_downl"
+						android:layout_width="0dip"
+						android:layout_marginTop="2dip"
+						android:layout_marginBottom="2dip"
+						android:layout_marginLeft="2dip"
+						android:layout_marginRight="2dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="@string/download_book"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+						android:text="@string/download_book" />
+			</TableRow>
+			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/tr_downl"
+					android:layout_margin="2dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					>
+				<Button
+						android:id="@+id/btn_fb2"
+						android:layout_width="0dip"
+						android:layout_marginTop="2dip"
+						android:layout_marginBottom="2dip"
+						android:layout_marginLeft="2dip"
+						android:layout_marginRight="2dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="@string/download_fb2"
+						android:text="@string/download_fb2" />
+				<Button
+						android:id="@+id/btn_fb3"
+						android:layout_width="0dip"
+						android:layout_marginTop="2dip"
+						android:layout_marginBottom="2dip"
+						android:layout_marginLeft="2dip"
+						android:layout_marginRight="2dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="@string/download_fb3"
+						android:text="@string/download_fb3" />
+			</TableRow>
+		</TableLayout>
+
 	<TextView
 				android:id="@+id/lbl_profile"
 				android:textStyle="bold"

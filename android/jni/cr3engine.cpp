@@ -126,7 +126,6 @@ public:
     lString16 filename;
     lString16 title;
     lString16 author;
-	//lString16 authorsAddInfo;
 	lString16 series;
     int filesize;
     lString16 filedate;
@@ -150,6 +149,7 @@ public:
     lString16 publisbn;
 	lString16 publseries;
 	int publseriesNumber;
+	lString16 authorext;
 };
 
 static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
@@ -189,6 +189,7 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
 	lString16 genre = doc->textFromXPath( lString16("package/metadata/subject")).trim();
 	lString16 docsrcurl = doc->textFromXPath( lString16("package/metadata/identifier")).trim();
 	lString16 docsrcocr = doc->textFromXPath( lString16("package/metadata/source")).trim();
+	lString16 authorext = doc->textFromXPath( lString16("package/metadata/creator")).trim();
 
     pBookProps->author = author;
     pBookProps->title = title;
@@ -199,6 +200,7 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
  	pBookProps->genre = genre;
  	pBookProps->docsrcurl = docsrcurl;
 	pBookProps->docsrcocr = docsrcocr;
+	pBookProps->authorext = authorext;
 
     for ( int i=1; i<20; i++ ) {
         ldomNode * item = doc->nodeFromXPath( lString16("package/metadata/meta[") << fmt::decimal(i) << "]" );
@@ -238,6 +240,7 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 	lString16 genres;
 	lString16 srclang = descDoc->textFromXPath( lString16("written/lang"));
 	lString16 bookdate = descDoc->textFromXPath( lString16("written/date"));
+	lString16 authorext;
 
 	for ( int i=1; i<30; i++ ) {
 		ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-relations/subject[") << fmt::decimal(i) << "]");
@@ -250,6 +253,7 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 			}
 			authors += author;
 		}
+		authorext = authors;
 		if (name == "translator") {
 			lString16 translator = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
 			if ( !translators.empty() ) {
@@ -321,6 +325,7 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 	pBookProps->docauthor = docauthor;
 	pBookProps->docsrcurl = docsrcurl;
 	pBookProps->docsrcocr = docsrcocr;
+	pBookProps->authorext = authors;
 
 	time_t t = (time_t)time(0);
 	struct stat fs;
@@ -412,7 +417,6 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
         doc.saveToStream(out, "utf16");
     #endif
     lString16 authors = extractDocAuthors( &doc, lString16("|"), false );
-	//lString16 authorsAddInfo = extractDocAuthorsAddInfo( &doc, lString16("|"), false );
 	lString16 title = extractDocTitle( &doc );
     lString16 language = extractDocLanguage( &doc );
     lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
@@ -433,6 +437,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     lString16 publyear = extractPublYear( &doc );
     lString16 publisbn = extractPublIsbn( &doc );
 	lString16 publseries = extractDocPublishSeries( &doc, &pBookProps->publseriesNumber );
+	lString16 authorext = extractDocAuthorsExt( &doc, lString16("~"), lString16("|") );
 
 #if SERIES_IN_AUTHORS==1
     if ( !series.empty() )
@@ -440,7 +445,6 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
 #endif
     pBookProps->title = title;
     pBookProps->author = authors;
-	//pBookProps->authorsAddInfo = authorsAddInfo;
 	pBookProps->series = series;
     pBookProps->filesize = (long)stream->GetSize();
     pBookProps->filename = lString16(name);
@@ -463,6 +467,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     pBookProps->publyear = publyear;
     pBookProps->publisbn = publisbn;
 	pBookProps->publseries = publseries;
+	pBookProps->authorext = authorext;
 	return true;
 }
 
@@ -503,7 +508,6 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	}
 	SET_STR_FLD("title",props.title);
 	SET_STR_FLD("authors",props.author);
-	//SET_STR_FLD("authorsAddInfo",props.authorsAddInfo);
 	SET_STR_FLD("series",props.series);
 	SET_INT_FLD("seriesNumber",props.seriesNumber);
 	SET_STR_FLD("language",props.language);
@@ -525,6 +529,7 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
     SET_STR_FLD("publisbn",props.publisbn);
 	SET_STR_FLD("publseries",props.publseries);
 	SET_INT_FLD("publseriesNumber",props.publseriesNumber);
+	SET_STR_FLD("authorext",props.authorext);
 
 	return JNI_TRUE;
 }

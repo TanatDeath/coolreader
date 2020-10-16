@@ -273,11 +273,7 @@ public class CloudSync {
             if ((!sDir.endsWith("/")) && (!sDir.endsWith("\\"))) sDir = sDir + "/";
         if (!StrUtils.isEmptyStr(sDir)) {
             File fDir = new File(sDir);
-            File[] matchingFilesInfo = fDir.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.contains("_cr3_ini_") && (name.endsWith(".info"));
-                }
-            });
+            File[] matchingFilesInfo = fDir.listFiles((dir, name) -> name.contains("_cr3_ini_") && (name.endsWith(".info")));
             File[] matchingFiles = fDir.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
                     return name.contains("_cr3.ini");
@@ -342,7 +338,7 @@ public class CloudSync {
             }
         }
         if (!bWasErr) {
-            if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": " + cr.getString(R.string. settings_were_restored));
+            if (!bQuiet) cr.showToast(cr.getString(R.string.success_ext) + ": " + cr.getString(R.string. settings_were_restored));
             cr.finish();
         } else {
             if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.settings_restore_error), true);

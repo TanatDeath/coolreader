@@ -1,6 +1,5 @@
 package org.coolreader.db;
 
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteException;
@@ -8,9 +7,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
-import org.coolreader.R;
 import org.coolreader.crengine.*;
-import org.coolreader.crengine.Properties;
 import org.coolreader.library.AuthorAlias;
 
 import java.util.*;
@@ -46,6 +43,13 @@ public class MainDB extends BaseDB {
 			execSQL("CREATE TABLE IF NOT EXISTS author (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					"name VARCHAR NOT NULL COLLATE NOCASE," +
+					"name_lfm VARCHAR NOT NULL COLLATE NOCASE," +
+					"fname VARCHAR NULL COLLATE NOCASE," +
+					"mname VARCHAR NULL COLLATE NOCASE," +
+					"lname VARCHAR NULL COLLATE NOCASE," +
+					"nname VARCHAR NULL COLLATE NOCASE," +
+					"homepage VARCHAR NULL COLLATE NOCASE," +
+					"email VARCHAR NULL COLLATE NOCASE," +
 					"book_cnt INTEGER"+
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
@@ -451,15 +455,46 @@ public class MainDB extends BaseDB {
 								"GROUP BY substr(b.title,1,3) ");
 			}
 			if (currentVersion < 49) {
+				execSQL("CREATE TABLE IF NOT EXISTS author_aliases_eq (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+						"uorig_text VARCHAR NOT NULL COLLATE NOCASE, " +
+						"uorig_text_r VARCHAR NOT NULL COLLATE NOCASE, " +
+						"alias_text VARCHAR NOT NULL COLLATE NOCASE, " +
+						"alias_text_r VARCHAR NOT NULL COLLATE NOCASE, " +
+						"ualias_text VARCHAR NOT NULL COLLATE NOCASE, " +
+						"ualias_text_r VARCHAR NOT NULL COLLATE NOCASE " +
+						")");
 				execSQL("CREATE TABLE IF NOT EXISTS author_aliases (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT," +
-						"orig_text VARCHAR NOT NULL COLLATE NOCASE, " +
-						"alias_text VARCHAR NOT NULL COLLATE NOCASE " +
+						"alias_text VARCHAR NOT NULL COLLATE NOCASE, " +
+						"alias_text_r VARCHAR NOT NULL COLLATE NOCASE, " +
+						"ualias_text VARCHAR NOT NULL COLLATE NOCASE, " +
+						"ualias_text_r VARCHAR NOT NULL COLLATE NOCASE " +
 						")");
 				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
-						"author_aliases_orig_text_index ON author_aliases (orig_text, alias_text) ");
+						"author_aliases_eq_orig_text_index ON author_aliases_eq (uorig_text, alias_text) ");
 				execSQL("CREATE INDEX IF NOT EXISTS " +
-						"author_aliases_alias_text_index ON author_aliases (alias_text) ");
+						"author_aliases_alias_eq_atext_index ON author_aliases_eq (ualias_text) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"author_aliases_alias_eq_atext_r_index ON author_aliases_eq (ualias_text_r) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"author_aliases_alias_eq_otext_index ON author_aliases_eq (uorig_text) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"author_aliases_alias_eq_otext_r_index ON author_aliases_eq (uorig_text_r) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"author_aliases_alias_text_index ON author_aliases (ualias_text) ");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"author_aliases_alias_text_r_index ON author_aliases (ualias_text_r) ");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN name_lfm VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN uname VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN uname_lfm VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN fname VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN mname VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN lname VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN nname VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN homepage VARCHAR NULL COLLATE NOCASE");
+				execSQLIgnoreErrors("ALTER TABLE author ADD COLUMN email VARCHAR NULL COLLATE NOCASE");
+
 				// Это решил пока не делать
 //				execSQL("CREATE TABLE IF NOT EXISTS settings (" +
 //						"id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -493,6 +528,7 @@ public class MainDB extends BaseDB {
 				 + longQuery("SELECT count(*) FROM user_dic") + " user_dics, "
 				 + longQuery("SELECT count(*) FROM dic_search_history") + " dic_search_historys, "
 				 + longQuery("SELECT count(*) FROM folder") + " folders, "
+				 + longQuery("SELECT count(*) FROM author_aliases_eq") + " author_aliases_eq, "
 				 + longQuery("SELECT count(*) FROM author_aliases") + " author_aliases "
 		);
 	}
@@ -1312,14 +1348,32 @@ public class MainDB extends BaseDB {
 	public static void addGroupedItems2(FileInfo parent, String filter,
 								  ArrayList<FileInfo> items, String groupPrefixTag, final ItemGroupExtractor extractor, int lev) {
 		int iMaxItemsCount = iMaxGroupSize;
-		log.i("iMaxItemsCount "+iMaxItemsCount);
+		log.i("addGroupedItems2 called, filter = "+filter);
+		log.i("groupPrefixTag = "+groupPrefixTag);
+		log.i("lev = "+lev);
+		log.i("iMaxItemsCount = "+iMaxItemsCount);
 		if (iMaxItemsCount<8) iMaxItemsCount = 8;
+		if (parent.isLitresPrefix()) iMaxItemsCount = 999; // All litres without subgrouping - better
+			//if (items.size() > 0)
+			//	if (items.get(0).isLitresPagination()) iMaxItemsCount = 999; // LitRes with paging will not be grouped
 		if (lev >= MAX_GROUP_LEVEL) {
+			int ii = 0;
+			log.i("case1");
+			for (FileInfo fi: items) {
+				ii++;
+				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
 		// if there are already small amount
 		if (items.size()<=iMaxItemsCount) {
+			int ii = 0;
+			log.i("case2");
+			for (FileInfo fi: items) {
+				ii++;
+				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
@@ -1330,19 +1384,30 @@ public class MainDB extends BaseDB {
 		boolean br = false;
 		HashMap<String, Integer> grouped = null;
 		while ((level <= MAX_GROUP_LEVEL) && (!br)) {
-			HashMap<String, Integer> groupedCur = new HashMap<String, Integer>();
+			HashMap<String, Integer> groupedCur = new HashMap<>();
+			HashMap<String, Integer> groupedCur2 = new HashMap<>();
 			for (int i=0; i<items.size(); i++) {
+				String prevfirstLetter = "";
+				boolean prevEq = false;
+				if (level > 1) {
+					prevfirstLetter = extractor.getItemFirstLetters(items.get(i), level - 1);
+					prevEq = prevfirstLetter.toUpperCase().startsWith(filter.toUpperCase());
+				}
 				String firstLetter = extractor.getItemFirstLetters(items.get(i), level);
-				if ((firstLetter.toUpperCase().startsWith(filter.toUpperCase())) || (StrUtils.isEmptyStr(filter))) {
-					// avoid equality with parent
-					//if (!firstLetter.toUpperCase().equals(parent.getFilename().toUpperCase()+"...")) {
+				boolean b = firstLetter.toUpperCase().startsWith(filter.toUpperCase());
+				if (b || (StrUtils.isEmptyStr(filter))) {
 					Integer cnt = groupedCur.get(firstLetter);
 					if (cnt == null) cnt = 0;
 					groupedCur.put(firstLetter, cnt + 1);
-					//}
 				}
+				if (!((!prevfirstLetter.equals("")) && (prevEq) && (!prevfirstLetter.equals(firstLetter))))
+					if (b || (StrUtils.isEmptyStr(filter))) {
+						Integer cnt = groupedCur2.get(firstLetter);
+						if (cnt == null) cnt = 0;
+						groupedCur2.put(firstLetter, cnt + 1);
+					}
 			}
-			if ((groupedCur.size()<=iMaxItemsCount) || (curLevel == 0)  || (prevSize == 1)) {
+			if (((groupedCur.size()<=iMaxItemsCount) || (curLevel == 0)  || (prevSize == 1)) && (groupedCur2.size() > 0)) {
 				curLevel = level;
 				grouped = groupedCur;
 				prevSize = grouped.size();
@@ -1352,10 +1417,22 @@ public class MainDB extends BaseDB {
 			level = level + 1;
 		}
 		if (grouped==null) {
+			int ii = 0;
+			log.i("case3");
+			for (FileInfo fi: items) {
+				ii++;
+				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
 		if (grouped.size()==1) { // grouping failed :)
+			int ii = 0;
+			log.i("case4");
+			for (FileInfo fi: items) {
+				ii++;
+				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
@@ -1468,8 +1545,14 @@ public class MainDB extends BaseDB {
 				do {
 					long id = rs.getLong(0);
 					String name = rs.getString(1);
-					if (FileInfo.AUTHOR_PREFIX.equals(groupPrefixTag))
-						name = Utils.authorNameFileAs(name);
+					if ((FileInfo.AUTHOR_PREFIX.equals(groupPrefixTag)) && (id < 10000000)) {
+						// if reversed name is not equal to name, then use it, instead of mechanical word moving
+						String name_lfm = StrUtils.getNonEmptyStr(rs.getString(3), true);
+						if ((!StrUtils.isEmptyStr(name_lfm)) && (!name_lfm.equals(name)))
+							name = name_lfm;
+						else
+							name = Utils.authorNameFileAs(name);
+					}
 					int bookCount = rs.getInt(2);
 					
 					FileInfo item = new FileInfo();
@@ -1518,16 +1601,23 @@ public class MainDB extends BaseDB {
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 
 		String sql = "";
-		//asdf
 		if (StrUtils.isEmptyStr(filterSeries)) {
 			if (withAliases)
-				sql = "SELECT coalesce(author_aliases.id + 10000000, author.id) as id, " +
-					  "	coalesce(author_aliases.alias_text, author.name) as name, sum(book_cnt) as book_count FROM author " +
-					  " LEFT JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
-					  " GROUP BY coalesce(author_aliases.id + 10000000, author.id), coalesce(author.name, author_aliases.alias_text) " +
-					  " ORDER BY coalesce(author.name, author_aliases.alias_text)";
+				sql = "SELECT coalesce(coalesce(a.id, aa.id) + 10000000, author.id) as id, " +
+						"	coalesce(a.alias_text, aa.alias_text, author.name) as name, " +
+						" sum(book_cnt) as book_count, " +
+						" coalesce(a.alias_text, aa.alias_text, author.name_lfm) as name_lfm " +
+						" FROM author " +
+						" LEFT JOIN author_aliases a on a.ualias_text = author.uname or a.ualias_text_r = author.uname " +
+						" OR a.ualias_text = author.uname_lfm or a.ualias_text_r = author.uname_lfm " +
+						" LEFT JOIN author_aliases_eq ae on ae.uorig_text = author.uname or ae.uorig_text = author.uname_lfm " +
+						" LEFT JOIN author_aliases aa on aa.alias_text = ae.alias_text " +
+						" GROUP BY coalesce(coalesce(a.id, aa.id) + 10000000, author.id), " +
+						" coalesce(a.alias_text, aa.alias_text, author.name), " +
+						" coalesce(a.alias_text, aa.alias_text, author.name_lfm) " +
+						" ORDER BY coalesce(a.alias_text, aa.alias_text, author.name)";
 			else
-				sql = "SELECT author.id, author.name, book_cnt as book_count FROM author ORDER BY author.name";
+				sql = "SELECT author.id, author.name, book_cnt as book_count, author.name_lfm FROM author ORDER BY author.name";
 		} else {
 			String series = "";
 			if (filterSeries.startsWith("seriesId:")) series = filterSeries.replace("seriesId:", "");
@@ -1538,14 +1628,22 @@ public class MainDB extends BaseDB {
 			}
 			if (StrUtils.isEmptyStr(series)) return false;
 			if (withAliases)
-				sql = "SELECT coalesce(author_aliases.id + 10000000, author.id) as id, " +
-						" coalesce(author_aliases.alias_text, author.name) as name, count(*) as book_count FROM author "+
-						" LEFT JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
+				sql = "SELECT coalesce(coalesce(a.id, aa.id) + 10000000, author.id) as id, " +
+						"	coalesce(a.alias_text, aa.alias_text, author.name) as name, " +
+						" sum(book_cnt) as book_count, " +
+						" coalesce(a.alias_text, aa.alias_text, author.name_lfm) as name_lfm " +
+						" FROM author " +
 						" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
 						"   and (book.series_fk = " + series + " or book.publseries_fk = " + series + ") " +
 						" JOIN book_author ON  book_author.author_fk = author.id " +
-						" GROUP BY coalesce(author_aliases.id + 10000000, author.id), coalesce(author.name, author_aliases.alias_text) " +
-						" ORDER BY coalesce(author.name, author_aliases.alias_text)";
+						" LEFT JOIN author_aliases a on a.ualias_text = author.uname or a.ualias_text_r = author.uname " +
+						" OR a.ualias_text = author.uname_lfm or a.ualias_text_r = author.uname_lfm " +
+						" LEFT JOIN author_aliases_eq ae on ae.uorig_text = author.uname or ae.uorig_text = author.uname_lfm " +
+						" LEFT JOIN author_aliases aa on aa.alias_text = ae.alias_text " +
+						" GROUP BY coalesce(coalesce(a.id, aa.id) + 10000000, author.id), " +
+						" coalesce(a.alias_text, aa.alias_text, author.name), " +
+						" coalesce(a.alias_text, aa.alias_text, author.name_lfm) " +
+						" ORDER BY coalesce(a.alias_text, aa.alias_text, author.name)";
 			else
 				sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
 					" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
@@ -1676,7 +1774,6 @@ public class MainDB extends BaseDB {
 			sql = "SELECT series.id, series.name, book_cnt as book_count FROM series "+
 					" ORDER BY series.name";
 		else {
-			//asdf
 			String author = "";
 			ArrayList<Long> listAuthors = new ArrayList<>();
 			if (filterAuthor.startsWith("authorId:")) {
@@ -1685,9 +1782,14 @@ public class MainDB extends BaseDB {
 				if (Long.valueOf(author) > 10000000L) {
 					listAuthors.clear();
 					try (Cursor rs = mDB.rawQuery(
-							"SELECT distinct author.id FROM author " +
-									" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
-									" WHERE author_aliases.id = " + (Long.valueOf(author) - 10000000), null)) {
+							"select distinct au.id from author_aliases a join author au " +
+							" on au.uname = a.ualias_text or au.uname_lfm = a.ualias_text or au.uname = a.ualias_text_r or au.uname_lfm = a.ualias_text_r " +
+							" where a.id = " + (Long.valueOf(author) - 10000000) +
+							" union " +
+							" select distinct au.id from author_aliases_eq ae " +
+							" join author_aliases a on a.alias_text = ae.alias_text " +
+							" join author au on au.uname = ae.uorig_text or au.uname_lfm = ae.uorig_text " +
+							" where a.id = " + (Long.valueOf(author) - 10000000), null)) {
 						if (rs.moveToFirst()) {
 							do {
 								listAuthors.add(rs.getLong(0));
@@ -1704,10 +1806,19 @@ public class MainDB extends BaseDB {
 				long l = getLongValue("SELECT author.id FROM author where trim(author.name) = " + quoteSqlString(s));
 				listAuthors.clear();
 				if (l > 0) listAuthors.add(l);
+				String ss = quoteSqlString(s.trim());
 				try (Cursor rs = mDB.rawQuery(
-						"SELECT distinct author.id FROM author " +
-								" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
-								" WHERE author_aliases.alias_text = " + quoteSqlString(s), null)) {
+						"select distinct au.id from author_aliases a join author au " +
+						" on au.uname = a.ualias_text or au.uname_lfm = a.ualias_text or au.uname = a.ualias_text_r or au.uname_lfm = a.ualias_text_r " +
+						" where a.alias_text = " + ss + " or a.alias_text_r = " + ss + " " +
+						" union " +
+						" select distinct au.id from author_aliases_eq ae " +
+						" join author_aliases a on a.alias_text = ae.alias_text " +
+						" join author au on au.uname = ae.uorig_text or au.uname_lfm = ae.uorig_text " +
+						" where a.alias_text = " + ss + " or a.alias_text_r = " + ss + " or ae.uorig_text = " + ss + " or ae.uorig_text_r = " + ss + " " +
+						" union " +
+						" select distinct au.id from author au " +
+						" where au.name = " + ss + " or au.name_lfm = " + ss + " ", null)) {
 					if (rs.moveToFirst()) {
 						do {
 							listAuthors.add(rs.getLong(0));
@@ -1936,9 +2047,14 @@ public class MainDB extends BaseDB {
 		listAuthors.add(authorId);
 		if (authorId > 10000000) {
 			try (Cursor rs = mDB.rawQuery(
-					"SELECT distinct author.id FROM author " +
-						" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
-						" WHERE author_aliases.id = " + (authorId - 10000000), null)) {
+					"select distinct au.id from author_aliases a join author au " +
+						" on au.uname = a.ualias_text or au.uname_lfm = a.ualias_text or au.uname = a.ualias_text_r or au.uname_lfm = a.ualias_text_r " +
+						" where a.id = " + (Long.valueOf(authorId) - 10000000) +
+						" union " +
+						" select distinct au.id from author_aliases_eq ae " +
+						" join author_aliases a on a.alias_text = ae.alias_text " +
+						" join author au on au.uname = ae.uorig_text or au.uname_lfm = ae.uorig_text " +
+						" where a.id = " + (Long.valueOf(authorId) - 10000000), null)) {
 				listAuthors.clear();
 				if (rs.moveToFirst()) {
 					do {
@@ -1950,17 +2066,25 @@ public class MainDB extends BaseDB {
 				Log.e("cr3", "exception while loading list of authors", e);
 			}
 		}
-		//asdf
 		if (!StrUtils.isEmptyStr(addFilter)) {
 			if (addFilter.startsWith("author:")) {
 				String s = addFilter.replace("author:", "").trim();
 				long l = getLongValue("SELECT author.id FROM author where trim(author.name) = " + quoteSqlString(s));
 				listAuthors.clear();
 				if (l > 0) listAuthors.add(l);
+				String ss = quoteSqlString(s.trim());
 				try (Cursor rs = mDB.rawQuery(
-						"SELECT distinct author.id FROM author " +
-							" JOIN author_aliases on author_aliases.orig_text = upper(author.name) " +
-							" WHERE author_aliases.alias_text = " + quoteSqlString(s), null)) {
+						"select distinct au.id from author_aliases a join author au " +
+								" on au.uname = a.ualias_text or au.uname_lfm = a.ualias_text or au.uname = a.ualias_text_r or au.uname_lfm = a.ualias_text_r " +
+								" where a.alias_text = " + ss + " or a.alias_text_r = " + ss + " " +
+								" union " +
+								" select distinct au.id from author_aliases_eq ae " +
+								" join author_aliases a on a.alias_text = ae.alias_text " +
+								" join author au on au.uname = ae.uorig_text or au.uname_lfm = ae.uorig_text " +
+								" where a.alias_text = " + ss + " or a.alias_text_r = " + ss + " or ae.uorig_text = " + ss + " or ae.uorig_text_r = " + ss + " " +
+								" union " +
+								" select distinct au.id from author au " +
+								" where au.name = " + ss + " or au.name_lfm = " + ss + " ", null)) {
 					if (rs.moveToFirst()) {
 						do {
 							listAuthors.add(rs.getLong(0));
@@ -2146,7 +2270,7 @@ public class MainDB extends BaseDB {
 	private SQLiteStatement authorStmt;
 	private SQLiteStatement authorSelectStmt;
 	private HashMap<String,Long> authorCache = new HashMap<String,Long>();
-	private Long getAuthorId(String authorName) {
+	private Long getAuthorId(String authorName, String authorNameExt) {
 		if (authorName == null || authorName.trim().length() == 0)
 			return null;
 		Long id = authorCache.get(authorName); 
@@ -2161,22 +2285,60 @@ public class MainDB extends BaseDB {
 			// not found
 		}
 		if (authorStmt == null)
-			authorStmt = mDB.compileStatement("INSERT INTO author (id, name) VALUES (NULL,?)");
+			authorStmt = mDB.compileStatement("INSERT INTO author (id, name, name_lfm, uname, uname_lfm, fname, mname, lname, nname, homepage, email) "+
+					" VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		authorStmt.bindString(1, authorName);
+		authorStmt.bindString(3, authorName.toUpperCase());
+		String[] authorExt = authorNameExt.split("~");
+		String name_lfm =  authorName;
+		if (authorExt.length>1)
+			authorStmt.bindString(5, authorExt[1]);
+		else
+			authorStmt.bindString(5, "");
+		if (authorExt.length>2)
+			authorStmt.bindString(6, authorExt[2]);
+		else
+			authorStmt.bindString(6, "");
+		if (authorExt.length>3) {
+			authorStmt.bindString(7, authorExt[3]);
+			name_lfm = authorExt[3] + " " + authorExt[1] + " " + authorExt[2];
+			name_lfm = StrUtils.getNonEmptyStr(name_lfm, true);
+			name_lfm = name_lfm.replaceAll("\\s+", " ").trim();
+		}
+		else
+			authorStmt.bindString(7, "");
+		if (authorExt.length>4)
+			authorStmt.bindString(8, authorExt[4]);
+		else
+			authorStmt.bindString(8, "");
+		if (authorExt.length>5)
+			authorStmt.bindString(9, authorExt[5]);
+		else
+			authorStmt.bindString(9, "");
+		if (authorExt.length>6)
+			authorStmt.bindString(10, authorExt[6]);
+		else
+			authorStmt.bindString(10, "");
+		authorStmt.bindString(2, name_lfm);
+		authorStmt.bindString(4, name_lfm.toUpperCase());
 		id = authorStmt.executeInsert();
 		authorCache.put(authorName, id);
 		return id;
 	}
 	
-	private Long[] getAuthorIds(String authorNames) {
+	private Long[] getAuthorIds(String authorNames, String authorNamesExt) {
 		if (authorNames == null || authorNames.trim().length() == 0)
 			return null;
 		String[] names = authorNames.split("\\|");
+		String[] namesext = authorNamesExt.split("\\|");
 		if (names == null || names.length == 0)
 			return null;
-		ArrayList<Long> ids = new ArrayList<Long>(names.length);
-		for (String name : names) {
-			Long id = getAuthorId(name);
+		ArrayList<Long> ids = new ArrayList<>(names.length);
+		for (int i=0; i < names.length; i++) {
+			String name = names[i];
+			String nameext = "";
+			if (namesext.length > i) nameext = namesext[i];
+			Long id = getAuthorId(name, nameext);
 			if (id != null)
 				ids.add(id);
 		}
@@ -2505,7 +2667,7 @@ public class MainDB extends BaseDB {
 			boolean authorsChanged, boolean genresChanged, boolean seriesChanged, boolean titleChanged, boolean folderChanged,
 			boolean bookDateNChanged, boolean docDateNChanged, boolean publYearNChanged, boolean fileCreateTimeChanged)	{
 		if (authorsChanged) {
-			Long[] authorIds = getAuthorIds(fileInfo.getAuthors());
+			Long[] authorIds = getAuthorIds(fileInfo.getAuthors(), fileInfo.getAuthorExt());
 			if (authorIds != null)
 				for (Long authorId : authorIds) {
 					execSQL("UPDATE author set book_cnt = null WHERE id = " + authorId);
@@ -2643,7 +2805,7 @@ public class MainDB extends BaseDB {
 				if (authorsChanged) {
 					vlog.d("updating authors for file " + fileInfo.getPathName());
 					beginChanges();
-					Long[] authorIds = getAuthorIds(fileInfo.getAuthors());
+					Long[] authorIds = getAuthorIds(fileInfo.getAuthors(), fileInfo.getAuthorExt());
 					saveBookAuthors(fileInfo.id, authorIds);
 				}
 				if (genresChanged) {
@@ -3429,22 +3591,40 @@ public class MainDB extends BaseDB {
 			return 0;
 		int i = 0;
 		execSQL("DELETE FROM author_aliases");
+		execSQL("DELETE FROM author_aliases_eq");
 		for (AuthorAlias al: list) {
-			execSQLIgnoreErrorsNoFlush("insert into author_aliases (orig_text, alias_text) values (" +
-					quoteSqlString(al.origText) + ", " + quoteSqlString(al.aliasText) + ")");
+			execSQLIgnoreErrorsNoFlush(
+					"insert into author_aliases_eq (uorig_text, uorig_text_r, alias_text, alias_text_r, ualias_text, ualias_text_r) values (" +
+					quoteSqlString(al.origText.toUpperCase()) + ", " + quoteSqlString(al.origTextR.toUpperCase()) + ", " +
+					quoteSqlString(al.aliasText) + ", " + quoteSqlString(al.aliasTextR) + ", " +
+					quoteSqlString(al.aliasText.toUpperCase()) + ", " + quoteSqlString(al.aliasTextR.toUpperCase()) +
+				    ")");
 			i++;
 		}
+		flushAndTransaction();
+		execSQL("insert into author_aliases (alias_text, alias_text_r, ualias_text, ualias_text_r) "+
+						"select distinct alias_text, alias_text_r, ualias_text, ualias_text_r from author_aliases_eq");
 		flushAndTransaction();
 		return i;
 	}
 
 	public void deleteAuthorsAliasesInfo() {
 		execSQL("DELETE FROM author_aliases");
+		execSQL("DELETE FROM author_aliases_eq");
 	}
 
 	public void saveAuthorAliasInfo(AuthorAlias al) {
-		execSQLIgnoreErrorsNoFlush("insert into author_aliases (orig_text, alias_text) values (" +
-					quoteSqlString(al.origText) + ", " + quoteSqlString(al.aliasText) + ")");
+		execSQLIgnoreErrorsNoFlush(
+				"insert into author_aliases_eq (uorig_text, uorig_text_r, alias_text, alias_text_r, ualias_text, ualias_text_r) values (" +
+						quoteSqlString(al.origText.toUpperCase()) + ", " + quoteSqlString(al.origTextR.toUpperCase()) + ", " +
+						quoteSqlString(al.aliasText) + ", " + quoteSqlString(al.aliasTextR) + ", " +
+						quoteSqlString(al.aliasText.toUpperCase()) + ", " + quoteSqlString(al.aliasTextR.toUpperCase()) +
+						")");
+	}
+
+	public void createUniqueAliasesList() {
+		execSQL("insert into author_aliases (alias_text, alias_text_r, ualias_text, ualias_text_r) "+
+				"select distinct alias_text, alias_text_r, ualias_text, ualias_text_r from author_aliases_eq");
 	}
 
 }

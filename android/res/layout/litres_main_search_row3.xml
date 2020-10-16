@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tr_litres_search3"
+        android:layout_margin="2dip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        >
+    <Button
+            android:id="@+id/btn_contains"
+            android:layout_width="0dip"
+            android:layout_marginTop="2dip"
+            android:layout_marginBottom="2dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="?attr/colorIcon"
+            android:contentDescription="@string/strict_contains"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:text="@string/strict_contains" />
+    <Button
+            android:id="@+id/btn_startswith"
+            android:layout_width="0dip"
+            android:layout_marginTop="2dip"
+            android:layout_marginBottom="2dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="?attr/colorIcon"
+            android:contentDescription="@string/strict_startswith"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:text="@string/strict_startswith" />
+    <Button
+            android:id="@+id/btn_strict"
+            android:layout_width="0dip"
+            android:layout_marginTop="2dip"
+            android:layout_marginBottom="2dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="2dip"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="?attr/colorIcon"
+            android:contentDescription="@string/strict_exact"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:text="@string/strict_exact" />
+</TableRow>

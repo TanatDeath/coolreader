@@ -31,6 +31,7 @@
     <attr name="cr3_button_scroll_go_drawable" format="reference" />
     <attr name="cr3_btn_books_swap_drawable" format="reference" />
     <attr name="cr3_logo_button_drawable" format="reference" />
+    <attr name="coolreader_logo_button_drawable" format="reference" />
     <attr name="cr3_viewer_exit_drawable" format="reference" />
     <attr name="attr_icons8_hide" format="reference" />
     <attr name="cr3_button_book_open_drawable" format="reference" />
@@ -313,6 +314,7 @@
     <attr name="google_drive_drawable" format="reference" />
     <attr name="attr_icons8_library" format="reference" />
     <attr name="attr_icons8_select_all" format="reference" />
+    <attr name="attr_litres_en_logo_2lines" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />
