@@ -13,12 +13,23 @@ import android.provider.MediaStore;
 import androidx.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.google.android.gms.common.util.IOUtils;
+
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 
 public class FileUtils {
+
+    public static final Logger log = L.create("fileutils");
 
     private static void copyData(InputStream in, OutputStream out) throws Exception {
         byte[] buffer = new byte[8 * 1024];
@@ -285,6 +296,112 @@ public class FileUtils {
             cursor.close();
         }
         return result;
+    }
+
+    public static boolean isArchive(File f) {
+        int fileSignature = 0;
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(f, "r");
+            fileSignature = raf.readInt();
+        } catch (IOException e) {
+            // handle if you like
+        } finally {
+            IOUtils.closeQuietly(raf);
+        }
+        return fileSignature == 0x504B0304 || fileSignature == 0x504B0506 || fileSignature == 0x504B0708;
+    }
+
+    public static void fileDownloadEndThenOpen(
+            String type, String initial_url, String url, File file,
+            CoolReader mActivity, Engine mEngine, String lastOPDScatalogURL, Scanner mScanner,
+            FileInfo downloadDir, FileInfo fileOrDir, FileInfo currDirectory,
+            String annot
+      ) {
+        if (DeviceInfo.EINK_SONY) {
+            SonyBookSelector selector = new SonyBookSelector(mActivity);
+            selector.notifyScanner(file.getAbsolutePath());
+        }
+        mEngine.hideProgress();
+        mActivity.getDB().updateOPDSCatalog(lastOPDScatalogURL, "books_downloaded", "max");
+        //fileOrDir.parent.pathname // @opds:http://89.179.127.112/opds/search/books/u/0/
+        FileInfo fi = new FileInfo(file);
+        boolean isArch = FileUtils.isArchive(file);
+        FileInfo dir = mScanner.findParent(fi, downloadDir);
+        if (dir == null)
+            dir = downloadDir;
+        String sPath = file.getAbsolutePath();
+        String sPathZ = sPath;
+        log.d("onDownloadEnd: sPath = " + sPath);
+        if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))
+                &&(!sPathZ.toLowerCase().endsWith(".epub"))) {
+            int i = 0;
+            sPathZ = sPath + ".zip";
+            File fileZ = new File(sPathZ);
+            boolean bExists = fileZ.exists();
+            while (bExists) {
+                i++;
+                sPathZ = sPath + " ("+i+").zip";
+                fileZ = new File(sPathZ);
+                bExists = fileZ.exists();
+            }
+            file.renameTo(fileZ);
+        }
+        mScanner.listDirectory(dir);
+        FileInfo item1 = dir.findItemByPathName(sPathZ);
+        if (item1 == null) item1 = new FileInfo(sPathZ);
+        final FileInfo item = item1;
+        log.d("onDownloadEnd: sPathZ = " + sPathZ);
+        BackgroundThread.ensureGUI();
+        item.opdsLink = initial_url;
+        fileOrDir.pathnameR = item.pathname;
+        fileOrDir.arcnameR = item.arcname;
+        fileOrDir.pathR = item.path;
+        if (StrUtils.isEmptyStr(fileOrDir.getFilename())) fileOrDir.setFilename(item.getFilename());
+        mActivity.getDB().saveBookInfo(new BookInfo(fileOrDir));
+        mActivity.getDB().flush();
+        if (item.getTitle() == null) {
+            if (!mEngine.scanBookProperties(item))
+                mActivity.showToast("Could not read file properties, possibly format is unsupported");
+            if (item.getTitle() != null) {
+                mActivity.getDB().saveBookInfo(new BookInfo(item));
+                mActivity.getDB().flush();
+            }
+        }
+        if (item != null) {
+            Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item,
+                    bookInfo -> {
+                        BookInfo bif2 = bookInfo;
+
+                        if (bif2 == null) bif2 = new BookInfo(item);
+                        final BookInfo bif = bif2;
+                        if (StrUtils.isEmptyStr(bif.getFileInfo().annotation))
+                            bif.getFileInfo().setAnnotation(annot);
+                        if (bif.getFileInfo().getTitle() != null) {
+                            if (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false)) {
+                                bif.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
+                                mActivity.showToast(item.pathname+" "+
+                                        mActivity.getString(R.string.mi_opds_mark_as_toread));
+                            }
+                            mActivity.getDB().saveBookInfo(bif);
+                            mActivity.getDB().flush();
+                        }
+                        FileInfo dir1 =bif.getFileInfo().parent;
+                        if (dir1 == null) {
+                            dir1 = mScanner.findParent(bif.getFileInfo(), downloadDir);
+                            bif.getFileInfo().parent = dir1;
+                        }
+                        if (dir1!=null) {
+                            final FileInfo dir2 = dir1;
+                            bif.getFileInfo().setFileProperties(bif.getFileInfo());
+                            dir2.setFile(bif.getFileInfo());
+                            mActivity.directoryUpdated(dir2, bif.getFileInfo());
+                        }
+                        mActivity.showBookInfo(bif, BookInfoDialog.OPDS_FINAL_INFO, currDirectory, fileOrDir);
+                    });
+        }
+        else
+            mActivity.loadDocument(fi, true);
     }
 
 }

@@ -52,7 +52,7 @@ public class BookInfoDialog extends BaseDialog {
 	public final static int OPDS_INFO = 1;
 	public final static int OPDS_FINAL_INFO = 2;
 
-	private final BaseActivity mCoolReader;
+	private final CoolReader mCoolReader;
 	private final BookInfo mBookInfo;
 	private int mActionType;
 	private FileInfo mFileInfoCloud;
@@ -120,6 +120,11 @@ public class BookInfoDialog extends BaseDialog {
 		mCoolReader.tintViewIcons(btnDownloadLitresBook, PorterDuff.Mode.CLEAR,true);
 		btnFragment.setBackgroundColor(colorGrayCT);
 		btnDownloadLitresBook.setBackgroundColor(colorGrayCT);
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		btnFragment.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		btnDownloadLitresBook.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		if (curDownloadMode == DM_FRAGMENT) {
 			btnFragment.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnFragment,true);
@@ -138,7 +143,7 @@ public class BookInfoDialog extends BaseDialog {
 			if (StrUtils.isEmptyStr(errorMsg)) {
 				btnPurchase.setText(mCoolReader.getString(R.string.online_store_purchase_success));
 				setLitresDownloadModeChecked(btnDownloadLitresBook);
-				hideLayout(btnFragment);
+				Utils.hideView(btnFragment);
 			} else btnPurchase.setText(mCoolReader.getString(R.string.error) + ": " + errorMsg);
 		}
 
@@ -502,14 +507,6 @@ public class BookInfoDialog extends BaseDialog {
 		table.addView(tableRow);
 	}
 
-	private void setDashedButton(Button btn) {
-		if (btn == null) return;
-		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
-			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
-		else
-			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-	}
-
 	private void paintMarkButton() {
 		int colorGrayC;
 		int colorBlue;
@@ -538,9 +535,11 @@ public class BookInfoDialog extends BaseDialog {
 	}
 
 	private void downloadFragment(String format) {
-		final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-		final String fName = downloadDir.pathname+"/fragments/" + Utils.transcribeFileName(mFileInfoCloud.getFilename()) + "_fragment" + format;
-		final File fPath = new File(downloadDir.pathname+"/fragments");
+		final FileInfo downloadDir1 = Services.getScanner().getDownloadDirectory();
+		final FileInfo downloadDir = new FileInfo(downloadDir1.pathname+"/fragments");
+		downloadDir.parent = downloadDir1;
+		final String fName = downloadDir1.pathname+"/fragments/" + Utils.transcribeFileName(mFileInfoCloud.getFilename()) + "_fragment" + format;
+		final File fPath = new File(downloadDir1.pathname+"/fragments");
 		if (!fPath.exists()) fPath.mkdir();
 		progressDlg = ProgressDialog.show(mCoolReader,
 				mCoolReader.getString(R.string.network_op),
@@ -561,14 +560,17 @@ public class BookInfoDialog extends BaseDialog {
 				Utils.copyStreamContent(out, in);
 				out.flush();
 				fos.getFD().sync();
-				BackgroundThread.instance().postBackground(() ->
-						BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).
-								loadDocumentExt(fBook.getPath(), mFileInfoCloud.fragment_href + format), 500));
 				BackgroundThread.instance().postGUI(() -> {
 					onPositiveButtonClick();
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
+					FileUtils.fileDownloadEndThenOpen("litres", mFileInfoCloud.fragment_href + format, redir_url,
+							fBook, mCoolReader, Services.getEngine(), "", Services.getScanner(), downloadDir,
+							mFileInfoCloud, mFileInfoCloud.parent, mFileInfoCloud.annotation);
 				});
+				//BackgroundThread.instance().postBackground(() ->
+						//BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).
+						//		loadDocumentExt(fBook.getPath(), mFileInfoCloud.fragment_href + format), 500));
 			} catch (Exception e) {
 				BackgroundThread.instance().postGUI(() -> {
 					onPositiveButtonClick();
@@ -578,15 +580,6 @@ public class BookInfoDialog extends BaseDialog {
 				});
 			}
 		});
-	}
-
-	private static void hideLayout(View l) {
-		if (l == null) return;
-		try {
-			((ViewGroup) l.getParent()).removeView(l);
-		} catch (Exception e) {
-			//do nothing
-		}
 	}
 
 	public BookInfoDialog(final BaseActivity activity, Collection<BookInfoEntry> items, BookInfo bi, final String annt,
@@ -603,7 +596,7 @@ public class BookInfoDialog extends BaseDialog {
 					annot = fiOPDS.annotation;
 				}
 			}
-		mCoolReader = activity;
+		mCoolReader = (CoolReader) activity;
 		mBookInfo = bi;
 		mActionType = actionType;
 		mFileInfoCloud = fiOPDS;
@@ -899,7 +892,7 @@ public class BookInfoDialog extends BaseDialog {
 			btnDownloadFB2.setBackgroundColor(colorGrayCT);
 			btnDownloadFB3.setBackgroundColor(colorGrayCT);
 			if (mFileInfoCloud.type != 0) {
-				hideLayout(tlLitresDownl);
+				Utils.hideView(tlLitresDownl);
 			}
 			btnPurchase = view.findViewById(R.id.btn_purchase);
 			btnPurchase.setBackgroundColor(colorGrayCT);
@@ -942,15 +935,15 @@ public class BookInfoDialog extends BaseDialog {
 			if (mFileInfoCloud.type == 11) btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_not_supported)+": Gardner books");
 			if (isLitres)
 				if (mFileInfoCloud.lsp.searchType == LitresSearchParams.SEARCH_TYPE_MY_BOOKS) {
-					hideLayout(tlLitresDownl);
-					hideLayout(llLitresPurchase);
+					Utils.hideView(tlLitresDownl);
+					Utils.hideView(llLitresPurchase);
 				}
 		}
 		if ((!isLitres) || (isPerson)) {
 			try {
-				hideLayout(btnMarkToRead);
-				hideLayout(tlLitresDownl);
-				hideLayout(llLitresPurchase);
+				Utils.hideView(btnMarkToRead);
+				Utils.hideView(tlLitresDownl);
+				Utils.hideView(llLitresPurchase);
 			} catch (Exception e) {
 				// do nothing
 			}
@@ -982,7 +975,7 @@ public class BookInfoDialog extends BaseDialog {
 			parent.removeView(btnMarkToRead);
 			parent.removeView(btnFindAuthors);
 		}
-		if (isLitres) hideLayout(btnBookDownload);
+		if (isLitres) Utils.hideView(btnBookDownload);
 		for ( BookInfoEntry item : items ) {
 			String name = item.infoTitle;
 			String value = item.infoValue;
@@ -993,7 +986,7 @@ public class BookInfoDialog extends BaseDialog {
 		for ( BookInfoEntry item : items ) {
 			addItem(table, item);
 		}
-		buttonsLayout = (ViewGroup)view.findViewById(R.id.base_dlg_button_panel);
+		buttonsLayout = view.findViewById(R.id.base_dlg_button_panel);
 		updateGlobalMargin(buttonsLayout, true, true, true, false);
 		setView( view );
 	}

@@ -329,7 +329,7 @@
     <string name="toast_bookmark_export_ok">Bookmarks were saved to </string>
     <string name="toast_bookmark_export_failed">Error while saving bookmarks to </string>
     <string name="mi_book_scan_recursive">Scan books in directory</string>
-    <string name="mi_book_rescan">Scan all</string>
+    <string name="mi_book_rescan">Scan library</string>
     <string name="dlg_scan_title">Scanning directories</string>
     <string name="dlg_scan_message">It may take several minutes to finish</string>
     <string name="dlg_book_search">Find book</string>
@@ -802,10 +802,10 @@
     <string name="save_current_book_to_cloud_ynd2">Save opened book to this folder</string>
     <string name="save_current_book_to_cloud_ynd3">Save to this folder:</string>
     <string name="save_current_book_to_cloud_email">Send book via Email</string>
-    <string name="open_book_from_gd">Open book from Google One</string>
+    <string name="open_book_from_gd">Open book from Google Drive</string>
     <string name="open_book_from_dbx">Open book from Dropbox</string>
     <string name="open_book_from_ynd">Open book from Yandex disc</string>
-    <string name="open_book_from_gd_short">Google One</string>
+    <string name="open_book_from_gd_short">Google Drive</string>
     <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="open_book_from_y_short">Yandex</string>
     <string name="set_comment_from_cb_capt">Save with comment from clipboard</string>
@@ -832,7 +832,7 @@
     <string name="lbl_find">Find: </string>
     <string name="dlg_whole_drive">Whole drive</string>
     <string name="dlg_folder_drive">In current folder</string>
-    <string name="win_title_open_book_from_gd">Open book from Google One</string>
+    <string name="win_title_open_book_from_gd">Open book from Google Drive</string>
     <string name="win_title_open_book_from_cloud">Cloud - open/save book</string>
     <string name="dlg_bookmark_link">Link to bookmark</string>
     <string name="docx_is_not_installed">extension org.coolreader.docx is not installed, install it to open docx format</string>
@@ -992,7 +992,8 @@
     <string name="this_is_fork">KnownReader project is a fork of known reader application - CoolReader. KnownReader offers rich UI and number of unique features.</string>
     <string name="third_party_farm_fresh_icon_set">Farm-Fresh icon set from http://www.fatcow.com/free-icons</string>
     <string name="open_previously_downloaded">Book was already downloaded, open it instead of new download?</string>
-    <string name="could_not_find_by_link">Could not find local file, showing OPDS entry</string>
+    <string name="open_previously_downloaded_fragment">Fragment was already downloaded, open it instead of new download? (choose \'Cancel\' to proceed to purchase)</string>
+    <string name="could_not_find_by_link">Could not find local file, showing cloud entry</string>
     <string name="force_tts_koef">Force TTS restart koef</string>
     <string name="force_tts_koef_add_info">When TTS engine is unexpectedly stopped by system, application will try to force restart TTS. Higher value means more timeout to wait</string>
     <string name="orient_0">disable orientation panel</string>
@@ -1361,6 +1362,7 @@
     <string name="next_page">Next page</string>
     <string name="prev_page">Previous page</string>
     <string name="download_fragment">Download fragment</string>
+    <string name="fragment">Fragment</string>
     <string name="download_fb2">FB2.ZIP</string>
     <string name="download_fb3">FB3</string>
     <string name="download_book">Download book</string>
@@ -1388,10 +1390,10 @@
     <string name="scan_external_sd">External SD</string>
     <string name="scan_books_folder">Books folder</string>
     <string name="scan_favorite_folder">Favorite folders</string>
+    <string name="scan_downloads_folder">Downloads folders</string>
     <string name="do_scan">Scan selected!</string>
     <string name="library_maintenance">Library maintenance</string>
-    <string name="library_maint_remove_non_fav">Remove books\' info, that are not reside into favorite (and Books) folders</string>
-    <string name="library_maint_remove_non_fav_and_ext">Remove books\' info, that are not reside into favorite, Books and ExtSD folders</string>
+    <string name="library_maint_remove">Remove books\' info, that are NOT RESIDE into selected categories</string>
     <string name="library_maint_remove_non_fav_add_info">Real files will NOT be deleted from your device, there will be removed only information in the internal KnownReader database. You can easily rescan library later (NB: bookmarks of these items will also be removed).</string>
     <string name="library_maint_done_need_restart">Operation performed. It is recommended to restart app</string>
     <string name="library_maint_show_statistics">Show statistics</string>
@@ -1401,4 +1403,23 @@
     <string name="network_op">Data is loading...</string>
     <string name="info">Info</string>
     <string name="books">Books</string>
+    <string name="db_maint_finished_cnt">Database operation comleted. Proceeded entries: </string>
+    <string name="library_maint_need_restart_ask">It is recommended to restart app. Close app now?</string>
+    <string name="whole_device_cannot_proceed">You cannot proceed when whole device is selected - you may need to re-initialize database</string>
+    <string name="db_main_reinit">Reinitialize database</string>
+    <string name="db_main_reinit_add_info">Be strongly careful! Database will be deleted, then recreated in initial state</string>
+    <string name="library_maint_remove_orphans">Remove books\' info, that are not associated with real files (orphans)</string>
+    <string name="library_maint_remove_orphans_add_info">This may happen when file(s) were removed or renamed</string>
+    <string name="library_maint_remove_cloud">Remove cloud books\' info</string>
+    <string name="library_maint_remove_cloud_add_info">Links between downloaded and cloud books will be removed</string>
+    <string name="library_maint_list_is_empty">List is empty - operation was not performed</string>
+    <string name="are_you_sure">Are you sure? This operation cannot be undone</string>
+    <string name="proceeded">Proceeded</string>
+    <string name="restart_app">Restart app now?</string>
+    <string name="long_op">Long operation ...</string>
+    <string name="cancelled_op">Operation cancelled</string>
+    <string name="cnt_authors">Authors:</string>
+    <string name="cnt_genres">Genres:</string>
+    <string name="cnt_entries">Books:</string>
+    <string name="cnt_series">Series:</string>
 </resources>

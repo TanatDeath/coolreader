@@ -27,9 +27,6 @@ import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
 import org.coolreader.layouts.FlowLayout;
-import org.coolreader.plugins.OnlineStorePluginManager;
-import org.coolreader.plugins.OnlineStoreWrapper;
-import org.coolreader.plugins.litres.LitresPlugin;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -377,7 +374,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		//boolean enableLitres = mActivity.settings().getBool(Settings.PROP_APP_PLUGIN_ENABLED + "." + OnlineStorePluginManager.PLUGIN_PKG_LITRES, defEnableLitres);
 		//if (enableLitres)
 		//catalogs.add(0, Scanner.createOnlineLibraryPluginItem(OnlineStorePluginManager.PLUGIN_PKG_LITRES, "LitRes"));
-		catalogs.add(0, Scanner.createLitresItem("LitRes"));
+		//asdf!!!
+		//catalogs.add(0, Scanner.createLitresItem("LitRes"));
 		if (Services.getScanner() == null)
 			return;
 		FileInfo opdsRoot = Services.getScanner().getOPDSRoot();
@@ -529,73 +527,93 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			ImageView icon;
 			TextView label;
 			View view = null;
+
 //			view = inflater.inflate(R.layout.root_item_dir, null);
-//			icon = (ImageView) view.findViewById(R.id.item_icon);
-//			label = (TextView) view.findViewById(R.id.item_name);
+//			icon = view.findViewById(R.id.item_icon);
+//			label = view.findViewById(R.id.item_name);
 //			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
-//            mActivity.tintViewIcons(icon,true);
+//			mActivity.tintViewIcons(icon,true);
 //			label.setText(R.string.open_book_from_gd_short);
 //			label.setTextColor(colorIcon);
 //			label.setMaxWidth(coverWidth * 25 / 10);
 //			view.setOnClickListener(new OnClickListener() {
 //				@Override
 //				public void onClick(View v) {
-//					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+//					mActivity.showToast("Coming soon...");
+//					//mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
 //				}
 //			});
 //			mFilesystemScroll.addView(view);
 
+			View viewGD = inflater.inflate(R.layout.root_item_library_h, null);
+			ImageView iconGD = viewGD.findViewById(R.id.item_icon);
+			TextView labelGD = viewGD.findViewById(R.id.item_name);
+			setImageResourceSmall(iconGD, Utils.resolveResourceIdByAttr(mActivity,
+					R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
+			mActivity.tintViewIcons(iconGD,true);
+			labelGD.setText(R.string.open_book_from_gd_short);
+			labelGD.setTextColor(colorIcon);
+			labelGD.setMaxWidth(coverWidth * 25 / 10);
+			viewGD.setOnClickListener(v -> {
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
+					return;
+				}
+				mActivity.showToast("Coming soon...");
+			});
+			viewGD.setOnLongClickListener(v -> {
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
+					return true;
+				}
+				mActivity.showToast("Coming soon...");
+				return true;
+			});
+			//asdf //not now
+			//mFilesystemScroll.addView(viewGD);
+
 			View viewDBX = inflater.inflate(R.layout.root_item_library_h, null);
-			ImageView iconDBX = (ImageView) viewDBX.findViewById(R.id.item_icon);
-			TextView labelDBX = (TextView) viewDBX.findViewById(R.id.item_name);
+			ImageView iconDBX = viewDBX.findViewById(R.id.item_icon);
+			TextView labelDBX = viewDBX.findViewById(R.id.item_name);
 			setImageResourceSmall(iconDBX, Utils.resolveResourceIdByAttr(mActivity,
 					R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
 			mActivity.tintViewIcons(iconDBX,true);
 			labelDBX.setText(R.string.open_book_from_dbx_short);
 			labelDBX.setTextColor(colorIcon);
 			labelDBX.setMaxWidth(coverWidth * 25 / 10);
-			viewDBX.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (!BaseActivity.PREMIUM_FEATURES) {
-						mActivity.showToast(R.string.only_in_premium);
-						return;
-					}
-					CloudAction.dbxOpenBookDialog(mActivity);
+			viewDBX.setOnClickListener(v -> {
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
+					return;
 				}
+				CloudAction.dbxOpenBookDialog(mActivity);
 			});
-			viewDBX.setOnLongClickListener(new OnLongClickListener() {
-				@Override
-				public boolean onLongClick(View v) {
-					if (!BaseActivity.PREMIUM_FEATURES) {
-						mActivity.showToast(R.string.only_in_premium);
-						return true;
-					}
-					mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
-					mActivity.dbxInputTokenDialog.show();
+			viewDBX.setOnLongClickListener(v -> {
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
 					return true;
 				}
+				mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
+				mActivity.dbxInputTokenDialog.show();
+				return true;
 			});
 			mFilesystemScroll.addView(viewDBX);
 
 			View viewYandex = inflater.inflate(R.layout.root_item_library_h, null);
-			ImageView iconYandex = (ImageView) viewYandex.findViewById(R.id.item_icon);
-			TextView labelYandex = (TextView) viewYandex.findViewById(R.id.item_name);
+			ImageView iconYandex = viewYandex.findViewById(R.id.item_icon);
+			TextView labelYandex = viewYandex.findViewById(R.id.item_name);
 			setImageResourceSmall(iconYandex, Utils.resolveResourceIdByAttr(mActivity,
 					R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
 			mActivity.tintViewIcons(iconYandex,true);
 			labelYandex.setText(R.string.open_book_from_y_short);
 			labelYandex.setTextColor(colorIcon);
 			labelYandex.setMaxWidth(coverWidth * 25 / 10);
-			viewYandex.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (!BaseActivity.PREMIUM_FEATURES) {
-						mActivity.showToast(R.string.only_in_premium);
-						return;
-					}
-					CloudAction.yndOpenBookDialog(mActivity, null,true);
+			viewYandex.setOnClickListener(v -> {
+				if (!BaseActivity.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
+					return;
 				}
+				CloudAction.yndOpenBookDialog(mActivity, null,true);
 			});
 			viewYandex.setOnLongClickListener(new OnLongClickListener() {
 				@Override
@@ -615,8 +633,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				if (item == null)
 					continue;
 				view = inflater.inflate(R.layout.root_item_library_h, null);
-				icon = (ImageView) view.findViewById(R.id.item_icon);
-				label = (TextView) view.findViewById(R.id.item_name);
+				icon = view.findViewById(R.id.item_icon);
+				label = view.findViewById(R.id.item_name);
 				if (item.getType() == FileInfo.TYPE_DOWNLOAD_DIR)
 					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_bookmark_drawable, R.drawable.folder_bookmark));
 				else if (item.getType() == FileInfo.TYPE_FS_ROOT)
@@ -773,7 +791,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				label.setMinWidth(coverWidth);
 				label.setMaxWidth(coverWidth * 2);
 			}
-			//asdf - remove before release!!!
+			// new behavior
 			view.setOnClickListener(v -> {
 				if (item.isRescanShortcut()) {
 					ScanLibraryDialog sld = new ScanLibraryDialog(mActivity);

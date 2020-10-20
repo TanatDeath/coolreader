@@ -2060,7 +2060,10 @@ public class BaseActivity extends Activity implements Settings {
 		Button btn1 = adlg.getButton(AlertDialog.BUTTON_NEGATIVE);
 		Button btn2 = adlg.getButton(AlertDialog.BUTTON_NEUTRAL);
 		TextView tv = adlg.findViewById(R.id.message);
-		if (tv != null) tv.setTextColor(colorIcon);
+		if (tv != null) {
+			tv.setTextColor(colorIcon);
+			tv.setMaxLines(10);
+		}
 		if (btn0 != null) {
 			btn0.setTextColor(colorIcon);
 			btn0.setBackgroundColor(colorGrayCT2);

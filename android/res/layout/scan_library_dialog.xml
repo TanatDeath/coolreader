@@ -11,14 +11,14 @@
             android:layout_height="wrap_content"
             android:layout_margin="3dip">
         <TableLayout android:id="@+id/tl_scan_library_dlg"
-              xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:layout_marginLeft="4dip"
-              android:layout_marginRight="4dip"
-              android:stretchColumns="1"
-              android:layout_weight="10"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="4dip"
+                android:layout_marginRight="4dip"
+                android:stretchColumns="1"
+                android:layout_weight="10"
                 >
             <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/tl_scan_library_label"
@@ -171,6 +171,31 @@
                 </LinearLayout>
             </TableRow>
             <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/tl_scan_library_btn_downl"
+                    android:layout_margin="2dip"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    >
+                <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="fill_parent"
+                        android:gravity="left"
+                        android:layout_weight="2"
+                        android:orientation="horizontal">
+                    <Button
+                            android:id="@+id/btn_scan_downl"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/scan_downloads_folder"
+                            android:layout_margin="1dip"
+                            android:textColor="?attr/colorIcon"
+                            android:drawableLeft="@drawable/icons8_toc_item_normal"
+                            style="@style/TextAppearance.Widget.EditText"
+                            />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/tl_do_scan"
                     android:layout_margin="2dip"
                     android:layout_width="fill_parent"
@@ -238,127 +263,7 @@
                             />
                 </LinearLayout>
             </TableRow>
-            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_margin="2dip"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    >
-                <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="fill_parent"
-                        android:gravity="left"
-                        android:layout_weight="3"
-                        android:orientation="horizontal">
-                    <TextView
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/library_maint_may_need_bk"
-                            android:maxLines="5"
-                            android:ellipsize="middle"
-                            style="@style/TextAppearance.Small"
-                            android:textColor="?attr/colorIcon"
-                            android:singleLine="false"
-                            />
-                </LinearLayout>
-            </TableRow>
 
-            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/tl_maint_remove_non_fav"
-                    android:layout_margin="2dip"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    >
-                <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="fill_parent"
-                        android:gravity="left"
-                        android:layout_weight="2"
-                        android:orientation="horizontal">
-                    <Button
-                            android:id="@+id/btn_maint_remove_non_fav"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/library_maint_remove_non_fav"
-                            android:layout_margin="1dip"
-                            android:textColor="?attr/colorIcon"
-                            style="@style/TextAppearance.Widget.EditText"
-                            />
-                </LinearLayout>
-            </TableRow>
-            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/tl_maint_remove_non_fav_and_ext"
-                    android:layout_margin="2dip"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    >
-                <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="fill_parent"
-                        android:gravity="left"
-                        android:layout_weight="2"
-                        android:orientation="horizontal">
-                    <Button
-                            android:id="@+id/btn_maint_remove_non_fav_and_ext"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/library_maint_remove_non_fav_and_ext"
-                            android:layout_margin="1dip"
-                            android:textColor="?attr/colorIcon"
-                            style="@style/TextAppearance.Widget.EditText"
-                            />
-                </LinearLayout>
-            </TableRow>
-            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_margin="2dip"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    >
-                <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="fill_parent"
-                        android:gravity="left"
-                        android:layout_weight="3"
-                        android:orientation="horizontal">
-                    <TextView
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/library_maint_remove_non_fav_add_info"
-                            android:maxLines="5"
-                            android:ellipsize="middle"
-                            style="@style/TextAppearance.Small"
-                            android:textColor="?attr/colorIcon"
-                            android:singleLine="false"
-                            />
-                </LinearLayout>
-            </TableRow>
-            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/tl_maint_show_statistics"
-                    android:layout_margin="2dip"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    >
-                <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="fill_parent"
-                        android:gravity="left"
-                        android:layout_weight="2"
-                        android:orientation="horizontal">
-                    <Button
-                            android:id="@+id/btn_maint_show_statistics"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/library_maint_show_statistics"
-                            android:layout_margin="1dip"
-                            android:textColor="?attr/colorIcon"
-                            style="@style/TextAppearance.Widget.EditText"
-                            />
-                </LinearLayout>
-            </TableRow>
         </TableLayout>
     </LinearLayout>
 </ScrollView>

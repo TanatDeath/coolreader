@@ -258,14 +258,6 @@ mActivity.setSettings(props, -1, true);
 		return name;
 	}
 
-	private void setDashedButton(Button btn) {
-		if (btn == null) return;
-		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
-			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
-		else
-			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-	}
-
 	public PictureCameDialog(final BaseActivity activity, Object obj, String objMime, String suggestedName)
 	{
 		super("PictureCameDialog", activity, "", true, false);
@@ -371,15 +363,15 @@ mActivity.setSettings(props, -1, true);
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		ibPicCopy.setBackgroundColor(colorGrayCT);
 		ibPicCopy.setTextColor(colorIcon);
-		setDashedButton(ibPicCopy);
+		Utils.setDashedButton(ibPicCopy);
 		ibPicCopyAct.setBackgroundColor(colorGrayCT);
 		ibPicCopyAct.setTextColor(colorIcon);
-		setDashedButton(ibPicCopyAct);
+		Utils.setDashedButton(ibPicCopyAct);
 		ibPicTexture.setTextColor(colorIcon);
 		ibPicBackground.setTextColor(colorIcon);
 		ibPicRememberForLater.setBackgroundColor(colorGrayCT);
 		ibPicRememberForLater.setTextColor(colorIcon);
-		setDashedButton(ibPicRememberForLater);
+		Utils.setDashedButton(ibPicRememberForLater);
 		imageCame.setMinimumHeight(h);
 		imageCame.setMaxHeight(h);
 		imageCame.setMinimumWidth(w);

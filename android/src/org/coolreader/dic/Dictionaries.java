@@ -16,6 +16,7 @@ import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -229,6 +230,8 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 9, R.drawable.wiki, null, ""),
 		new DictInfo("Wikipedia 2 (online)", "Wikipedia 2 (online)", "", "",
 				Intent.ACTION_SEND, 9, R.drawable.wiki, null, ""),
+		new DictInfo("MDict", "MDict", "cn.mdict", "",
+				Intent.ACTION_SEARCH, 10, R.drawable.mdict, null, ""),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -765,7 +768,8 @@ public class Dictionaries {
 						|| (curAction == WIKI_FIND_TITLE_FULL)
 				) {
 					Elements results = docJsoup.select("api > query > pages > page > extract");
-					if (results.size() > 0) wikiTitleText = results.text();
+					if (results.size() > 0) wikiTitleText = results.text(); else
+						wikiTitleText = Utils.cleanupHtmlTags(sBody);
 				}
 				final String sTranslF = wikiTitleText;
 				// if found article
