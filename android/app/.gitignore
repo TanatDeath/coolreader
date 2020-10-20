@@ -1,6 +1,5 @@
 /build
 .externalNativeBuild
-<<<<<<< HEAD
 /.externalNativeBuild
 .cxx
 /.cxx
@@ -9,5 +8,3 @@
 /.idea
 /release
 /release_minsize
-=======
->>>>>>> upstream/master
