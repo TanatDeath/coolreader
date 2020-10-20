@@ -916,7 +916,7 @@ public class CoverpageManager {
 		}
 
 		title = StrUtils.ellipsize(title, 30);
-		author = StrUtils.ellipsize(author.replaceAll("\\|",", "), 40);
+		author = StrUtils.ellipsize(author.replaceAll("\\|",", "), 30);
 
 		TextPaint pNormal = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
 		pNormal.setColor(Color.WHITE);

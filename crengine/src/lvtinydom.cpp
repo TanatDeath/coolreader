@@ -9515,9 +9515,9 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         lString16 firstName = pauthor.relative( L"/first-name" ).getText().trim();
         lString16 lastName = pauthor.relative( L"/last-name" ).getText().trim();
         lString16 middleName = pauthor.relative( L"/middle-name" ).getText().trim();
-        lString16 nickName = pauthor.relative( L"/nickname" ).getText().trim();
-        lString16 homePage = pauthor.relative( L"/home-page" ).getText().trim();
-        lString16 email = pauthor.relative( L"/email" ).getText().trim();
+        //lString16 nickName = pauthor.relative( L"/nickname" ).getText().trim();
+        //lString16 homePage = pauthor.relative( L"/home-page" ).getText().trim();
+        //lString16 email = pauthor.relative( L"/email" ).getText().trim();
         lString16 author = firstName;
         if ( !author.empty() )
             author += " ";
@@ -9529,6 +9529,56 @@ lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter, bool short
         if ( !authors.empty() )
             authors += delimiter;
         authors += author;
+    }
+    if (authors == "") {
+        authors = doc->getProps()->getStringDef("AUTHOR", "");
+    }
+    return authors;
+}
+
+lString16 extractDocAuthorsExt( ldomDocument * doc, lString16 delimiter1, lString16 delimiter)
+{
+    if ( delimiter1.empty() )
+        delimiter1 = " ";
+    if ( delimiter.empty() )
+        delimiter = ", ";
+    lString16 authors;
+    for ( int i=0; i<16; i++) {
+        lString16 path = cs16("/FictionBook/description/title-info/author[") + fmt::decimal(i+1) + "]";
+        ldomXPointer pauthor = doc->createXPointer(path);
+        if ( !pauthor ) {
+            //CRLog::trace( "xpath not found: %s", UnicodeToUtf8(path).c_str() );
+            break;
+        }
+        lString16 firstName = pauthor.relative( L"/first-name" ).getText().trim();
+        lString16 lastName = pauthor.relative( L"/last-name" ).getText().trim();
+        lString16 middleName = pauthor.relative( L"/middle-name" ).getText().trim();
+        lString16 nickName = pauthor.relative( L"/nickname" ).getText().trim();
+        lString16 homePage = pauthor.relative( L"/home-page" ).getText().trim();
+        lString16 email = pauthor.relative( L"/email" ).getText().trim();
+        lString16 author = firstName;
+        lString16 author_full = firstName;
+        author += delimiter1;
+        if ( !author_full.empty() )
+            author_full += " ";
+        if ( !middleName.empty() ) {
+            author += middleName;
+            author_full += middleName;
+        }
+        author += delimiter1;
+        if ( !lastName.empty() && !author.empty() && !middleName.empty() )
+            author_full += " ";
+        author += lastName;
+        author_full += lastName;
+        author += delimiter1;
+        author += nickName;
+        author += delimiter1;
+        author += homePage;
+        author += delimiter1;
+        author += email;
+        if ( !authors.empty() )
+            authors += delimiter;
+        authors += author_full + delimiter1 + author;
     }
     if (authors == "") {
         authors = doc->getProps()->getStringDef("AUTHOR", "");

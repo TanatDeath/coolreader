@@ -282,14 +282,6 @@ public class ExternalDocCameDialog extends BaseDialog {
 		}
 	}
 
-	private void setDashedButton(Button btn) {
-		if (btn == null) return;
-		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
-			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
-		else
-			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-	}
-
 	private ArrayList<String> getFontNames(InputStream is) {
 		ArrayList<String> fontNames = new ArrayList<String>();
 		try {
@@ -461,7 +453,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		edtFileExt.setBackgroundColor(colorGrayCT);
 
 		btnOpenFromStream = view.findViewById(R.id.btn_open_from_stream);
-		setDashedButton(btnOpenFromStream);
+		Utils.setDashedButton(btnOpenFromStream);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnOpenFromStream.setOnClickListener(v -> {
 			if (uri != null) {
@@ -520,7 +512,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		// ODF file must be saved for later convert
 		if ((stype.contains("opendocument")) && (!stype.contains("opendocument.text"))) hideExistingFromStreamControls(view);
 		btnSave = view.findViewById(R.id.btn_save);
-		setDashedButton(btnSave);
+		Utils.setDashedButton(btnSave);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnSave.setOnClickListener(v -> {
 			String fName = downlDir+"/"+edtFileName.getText()+edtFileExt.getText();
@@ -566,7 +558,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnOpenExisting = view.findViewById(R.id.btn_open_existing);
 		Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
 		btnOpenExisting.setTypeface(boldTypeface);
-		setDashedButton(btnOpenExisting);
+		Utils.setDashedButton(btnOpenExisting);
 		btnOpenExisting.setOnClickListener(v -> {
 			openExistingClick();
 		});
@@ -586,12 +578,12 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnAsHTML = view.findViewById(R.id.btn_as_html);
 		btnAsHTML.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 
-		setDashedButton(btnAsHTML);
+		Utils.setDashedButton(btnAsHTML);
 		btnAsHTML.setOnClickListener(v -> switchHTML(true));
 		btnAsText = view.findViewById(R.id.btn_as_text);
 		btnAsText.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 
-		setDashedButton(btnAsText);
+		Utils.setDashedButton(btnAsText);
 		btnAsText.setOnClickListener(v -> switchHTML(false));
 		if (uri != null) hideExistingHttpControls(view);
 			else {

@@ -2839,6 +2839,7 @@ public:
 //utils
 /// extract authors from FB2 document, delimiter is lString16 by default
 lString16 extractDocAuthors( ldomDocument * doc, lString16 delimiter=lString16::empty_str, bool shortMiddleName=true );
+lString16 extractDocAuthorsExt( ldomDocument * doc, lString16 delimiter1, lString16 delimiter);
 lString16 extractDocAuthorsAddInfo( ldomDocument * doc, lString16 delimiter=lString16::empty_str, bool shortMiddleName=true );
 lString16 extractDocTitle( ldomDocument * doc );
 lString16 extractDocLanguage( ldomDocument * doc );

@@ -320,7 +320,7 @@
     <string name="toast_bookmark_export_ok">Закладки сохранены в </string>
     <string name="toast_bookmark_export_failed">Ошибка сохранения закладок в </string>
     <string name="mi_book_scan_recursive">Сканировать книги в директории</string>
-    <string name="mi_book_rescan">Сканировать всё</string>
+    <string name="mi_book_rescan">Сканировать библиотеку</string>
     <string name="dlg_scan_title">Сканирование директорий</string>
     <string name="dlg_scan_message">Это может занять несколько минут...</string>
     <string name="dlg_book_search">Поиск книги</string>
@@ -831,10 +831,10 @@
     <string name="save_current_book_to_cloud_ynd2">Сохранить открытую книгу в эту папку</string>
     <string name="save_current_book_to_cloud_ynd3">Сохранить в эту папку:</string>
     <string name="save_current_book_to_cloud_email">Отправить книгу по Email</string>
-    <string name="open_book_from_gd">Открыть книгу с диска Google One</string>
+    <string name="open_book_from_gd">Открыть книгу с диска Google Drive</string>
     <string name="open_book_from_dbx">Открыть книгу из DropBox</string>
     <string name="open_book_from_ynd">Открыть книгу с Яндекс диска</string>
-    <string name="open_book_from_gd_short">Google One</string>
+    <string name="open_book_from_gd_short">Google Drive</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
     <string name="clipb_contents">Буфер обмена:</string>
@@ -859,7 +859,7 @@
     <string name="lbl_find">Поиск: </string>
     <string name="dlg_whole_drive">По всему диску</string>
     <string name="dlg_folder_drive">В этой папке</string>
-    <string name="win_title_open_book_from_gd">Открыть книгу с диска Google One</string>
+    <string name="win_title_open_book_from_gd">Открыть книгу с диска Google Drive</string>
     <string name="win_title_open_book_from_cloud">Облако - открыть/сохранить книгу</string>
     <string name="dlg_bookmark_link">Ссылка на закладку</string>
     <string name="docx_is_not_installed">Расширение org.coolreader.docx не установлено (установите, чтобы открывать docx формат)</string>
@@ -980,7 +980,8 @@
     </string>
     <string name="this_is_fork">KnownReader это форк известного приложения - CoolReader. KnownReader отличается развитым интерфейсом пользователя, а также содержит много уникальных функций.</string>
     <string name="open_previously_downloaded">Книга была скачана ранее, открыть ее?</string>
-    <string name="could_not_find_by_link">Книга не найдена на этом устройстве, открытие из OPDS</string>
+    <string name="open_previously_downloaded_fragment">Ранее был скачан ознакомительный фрагмент, открыть его? (выберите \'Отмена\' для перехода к покупке)</string>
+    <string name="could_not_find_by_link">Книга не найдена на этом устройстве, открытие из облака</string>
     <string name="force_tts_koef">Коэффициент перезапуска TTS</string>
     <string name="force_tts_koef_add_info">В случаях, когда TTS движок неожиданно останавливается системой, будет сделана попытка перезапустить его. Чем выше значение, тем больше выдерживается пауза.</string>
     <string name="orient_0">Отключить панель ориентации</string>
@@ -1336,6 +1337,7 @@
     <string name="next_page">Следующая страница</string>
     <string name="prev_page">Предыдущая страница</string>
     <string name="download_fragment">Скачать ознакомительный фрагмент</string>
+    <string name="fragment">Фрагмент</string>
     <string name="not_exists_on_server">Файл не существует на сервере</string>
     <string name="purchase_book">Купить книгу</string>
     <string name="download_book">Скачать книгу</string>
@@ -1361,10 +1363,10 @@
     <string name="scan_external_sd">Внешняя SD</string>
     <string name="scan_books_folder">Основная папка книг (Books)</string>
     <string name="scan_favorite_folder">Избранные папки</string>
+    <string name="scan_downloads_folder">Загрузки</string>
     <string name="do_scan">Сканировать выбранное!</string>
     <string name="library_maintenance">Обслуживание библиотеки</string>
-    <string name="library_maint_remove_non_fav">Удалить информацию о книгах, которые не находятся в избранных папках (и в папке Books)</string>
-    <string name="library_maint_remove_non_fav_and_ext">Удалить информацию о книгах, которые не находятся в избранных папках, в папке Books и на внешней карте памяти</string>
+    <string name="library_maint_remove">Удалить информацию о книгах, которые НЕ НАХОДЯТСЯ в выбранных категориях</string>
     <string name="library_maint_remove_non_fav_add_info">Сами файлы НЕ будут удалены с вашего устройства, будет очищена только информация о них в внутренней базе данных KnownReader. Вы можете всегда пересканировать библиотеку впоследствии (Уточнение: закладки по удаляемым элементам также будут удалены).</string>
     <string name="library_maint_done_need_restart">Операция выполнена. Рекомендуется перезапустить приложение</string>
     <string name="library_maint_show_statistics">Показать статистику</string>
@@ -1374,5 +1376,24 @@
     <string name="network_op">Загрузка данных...</string>
     <string name="info">Инфо</string>
     <string name="books">Книги</string>
+    <string name="db_maint_finished_cnt">Операция обслуживания базы данных выполнена. Обработано записей: </string>
+    <string name="library_maint_need_restart_ask">Рекомендуется перезапустить приложение. Закрыть приложение сейчас?</string>
+    <string name="whole_device_cannot_proceed">Невозможно выполнить операцию - выбрано \'все устройство\' - возможно вы хотите произвести переинициализацию базы данны</string>
+    <string name="db_main_reinit">Провести переинициализацию базы данных</string>
+    <string name="db_main_reinit_add_info">Будьте очень осторожны! База данных будет удалена, затем создана новая (пустая)</string>
+    <string name="library_maint_remove_orphans">Удалить информацию о книгах, файлы книг для которых не найдены</string>
+    <string name="library_maint_remove_orphans_add_info">Это может происходить, когда файлы книг удаляются или переименовываются</string>
+    <string name="library_maint_remove_cloud">Удалить облачную информацию о книгах</string>
+    <string name="library_maint_remove_cloud_add_info">Ссылки между скачанными книгами и книгами в облаке будут удалены</string>
+    <string name="library_maint_list_is_empty">Список пуст, операция не выполнена</string>
+    <string name="are_you_sure">Вы уверены? Эта операция не может быть отменена</string>
+    <string name="proceeded">Обработано</string>
+    <string name="restart_app">Перезапустить приложение сейчас?</string>
+    <string name="long_op">Длительная операция ...</string>
+    <string name="cancelled_op">Операция отменена</string>
+    <string name="cnt_authors">Авторов:</string>
+    <string name="cnt_genres">Жанров:</string>
+    <string name="cnt_entries">Книг:</string>
+    <string name="cnt_series">Серий:</string>
 </resources>
 

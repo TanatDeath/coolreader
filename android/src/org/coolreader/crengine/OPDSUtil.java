@@ -945,7 +945,7 @@ xml:base="http://lib.ololo.cc/opds/">
 						if ( fileName==null )
 							fileName = defaultFileName;
 						L.d("Downloading book: " + contentEncoding);
-						downloadBook( contentType, initial_url.toString(), url.toString(), is, contentLen, fileName, isZip );
+						downloadBook(contentType, initial_url.toString(), url.toString(), is, contentLen, fileName, isZip);
 						hideProgress();
 						loadNext = false;
 						itemsLoadedPartially = false;

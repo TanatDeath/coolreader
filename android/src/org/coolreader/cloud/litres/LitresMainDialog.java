@@ -18,6 +18,7 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 
 public class LitresMainDialog extends BaseDialog {
 
@@ -89,14 +90,6 @@ public class LitresMainDialog extends BaseDialog {
 	private int curViewType = VT_SEARCH_BOOKS;
 	private int curFindMode = SM_CONTAINS;
 	private int curPersonMode = PM_ONLY_AUTHORS;
-
-	private void setDashedButton(Button btn) {
-		if (btn == null) return;
-		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
-			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
-		else
-			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-	}
 
 	public void setupView(int iViewType) {
 		tlLitresMain.removeAllViews();
@@ -432,7 +425,7 @@ public class LitresMainDialog extends BaseDialog {
 		trLitresAuth = viewAuth.findViewById(R.id.tr_litres_auth);
 		mBtnAuth = viewAuth.findViewById(R.id.btn_auth);
 		mBtnAuth.setBackgroundColor(colorGrayC);
-		setDashedButton(mBtnAuth);
+		Utils.setDashedButton(mBtnAuth);
 		mCoolReader.tintViewIcons(mBtnAuth,true);;
 		mBtnAuth.setOnClickListener(v -> {
 			mCoolReader.litresCredentialsDialog = new LitresCredentialsDialog(mCoolReader);
@@ -442,7 +435,7 @@ public class LitresMainDialog extends BaseDialog {
 		trLitresMyBooks = viewMy.findViewById(R.id.tr_litres_my_books);
 		mBtnMyBooks = viewMy.findViewById(R.id.btn_my_books);
 		mBtnMyBooks.setBackgroundColor(colorGrayC);
-		setDashedButton(mBtnMyBooks);
+		Utils.setDashedButton(mBtnMyBooks);
 		mBtnMyBooks.setOnClickListener(v -> {
 			try {
 				LitresSearchParams lsp = new LitresSearchParams(LitresSearchParams.SEARCH_TYPE_MY_BOOKS, 0, 0, 20,"", 0, 0);
@@ -494,7 +487,7 @@ public class LitresMainDialog extends BaseDialog {
 		trLitresSearchBtn = viewSearchBtn.findViewById(R.id.tr_litres_search_btn);
 		mBtnSearch = viewSearchBtn.findViewById(R.id.btn_search);
 		mBtnSearch.setBackgroundColor(colorGrayC);
-		setDashedButton(mBtnSearch);
+		Utils.setDashedButton(mBtnSearch);
 		mBtnSearch.setOnClickListener(v -> {
 			doSearch();
 		});
@@ -502,16 +495,16 @@ public class LitresMainDialog extends BaseDialog {
 		trLitresSearchBtnGenres = viewSearchBtnGenres.findViewById(R.id.tr_litres_search_btn_and_genres);
 		mBtnSearchBtnGenres = viewSearchBtnGenres.findViewById(R.id.btn_search);
 		mBtnSearchBtnGenres.setBackgroundColor(colorGrayC);
-		setDashedButton(mBtnSearchBtnGenres);
+		Utils.setDashedButton(mBtnSearchBtnGenres);
 		mBtnSearch2 = viewSearchBtnGenres.findViewById(R.id.btn_search);
 		mBtnSearch2.setBackgroundColor(colorGrayC);
-		setDashedButton(mBtnSearch2);
+		Utils.setDashedButton(mBtnSearch2);
 		mBtnSearch2.setOnClickListener(v -> {
 			doSearch();
 		});
 		mBtnSearchBtnGenresAll = viewSearchBtnGenres.findViewById(R.id.btn_search_all_genres);
 		mBtnSearchBtnGenresAll.setBackgroundColor(colorGrayC);
-		setDashedButton(mBtnSearchBtnGenresAll);
+		Utils.setDashedButton(mBtnSearchBtnGenresAll);
 		mBtnSearchBtnGenresAll.setOnClickListener(v -> {
 			LitresSearchParams lsp = new LitresSearchParams(LitresSearchParams.SEARCH_TYPE_GENRES, 0,0, 20,
 					"", 0, 0);

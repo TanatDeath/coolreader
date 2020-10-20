@@ -389,6 +389,10 @@ public class CRDBService extends Service {
     	void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix);
     }
 
+	public interface ObjectCallback {
+		void onObjectLoaded(Object o);
+	}
+
 	public interface FileInfo1LoadingCallback {
 		void onFileInfoListLoadBegin();
 		void onFileInfoLoaded(FileInfo fi);
@@ -605,14 +609,15 @@ public class CRDBService extends Service {
 		});
 	}
 
-	public void loadFileInfoByOPDSLink(final String opdsLink, final FileInfo1LoadingCallback callback, final Handler handler) {
+	public void loadFileInfoByOPDSLink(final String opdsLink, final boolean isLitres,
+									   final FileInfo1LoadingCallback callback, final Handler handler) {
 		execTask(new Task("loadFileInfoByOPDSLink") {
 			@Override
 			public void work() {
 				if (StrUtils.isEmptyStr(opdsLink)) {
 					sendTask(handler, () -> callback.onFileInfoLoaded(null));
 				} else {
-					final FileInfo fileInfo = mainDB.loadFileInfoByOPDSLink(opdsLink);
+					final FileInfo fileInfo = mainDB.loadFileInfoByOPDSLink(opdsLink, isLitres);
 					sendTask(handler, () -> callback.onFileInfoLoaded(fileInfo));
 				}
 			}
@@ -722,6 +727,10 @@ public class CRDBService extends Service {
         flush();
    	}
 
+	//=======================================================================================
+	// Author aliases access code
+	//=======================================================================================
+
 	public interface AuthorsAliasesLoadingCallback {
 		void onAuthorsAliasesLoaded(int cnt);
 		void onAuthorsAliasesLoadProgress(int percent);
@@ -749,6 +758,54 @@ public class CRDBService extends Service {
 				mainDB.flushAndTransaction();
 				final int iF = i;
 				sendTask(handler, () -> callback.onAuthorsAliasesLoaded(iF));
+			}
+		});
+		flush();
+	}
+
+	//=======================================================================================
+	// Library maintenance access code
+	//=======================================================================================
+
+	public void deleteBookEntries(final ArrayList<String> toRemove, final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("deleteBookEntries") {
+			@Override
+			public void work() {
+				Long cnt = mainDB.deleteBookEntries(toRemove);
+				sendTask(handler, () -> callback.onObjectLoaded(cnt));
+			}
+		});
+		flush();
+	}
+
+	public void deleteOrphanEntries(final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("deleteOrphanEntries") {
+			@Override
+			public void work() {
+				Long cnt = mainDB.deleteOrphanEntries();
+				sendTask(handler, () -> callback.onObjectLoaded(cnt));
+			}
+		});
+		flush();
+	}
+
+	public void deleteCloudEntries(final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("deleteCloudEntries") {
+			@Override
+			public void work() {
+				Long cnt = mainDB.deleteCloudEntries();
+				sendTask(handler, () -> callback.onObjectLoaded(cnt));
+			}
+		});
+		flush();
+	}
+
+	public void getLibraryStats(final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("deleteCloudEntries") {
+			@Override
+			public void work() {
+				LibraryStats ls = mainDB.getLibraryStats();
+				sendTask(handler, () -> callback.onObjectLoaded(ls));
 			}
 		});
 		flush();
@@ -1000,8 +1057,8 @@ public class CRDBService extends Service {
     		getService().loadBookInfo(new FileInfo(fileInfo), callback, new Handler());
     	}
 
-		public void loadFileInfoByOPDSLink(final String opdsLink, final FileInfo1LoadingCallback callback) {
-			getService().loadFileInfoByOPDSLink(opdsLink, callback, new Handler());
+		public void loadFileInfoByOPDSLink(final String opdsLink, final boolean isLitres, final FileInfo1LoadingCallback callback) {
+			getService().loadFileInfoByOPDSLink(opdsLink, isLitres, callback, new Handler());
 		}
 
 		public void createFavoriteFolder(final FileInfo folder) {
@@ -1035,6 +1092,22 @@ public class CRDBService extends Service {
 
 		public void saveAuthorsAliasesInfo(final ArrayList<AuthorAlias> list, final AuthorsAliasesLoadingCallback callback) {
 			getService().saveAuthorsAliasesInfo(list, callback, new Handler());
+		}
+
+		public void deleteBookEntries(final ArrayList<String> toRemove, ObjectCallback callback) {
+			getService().deleteBookEntries(toRemove, callback, new Handler());
+		}
+
+		public void deleteOrphanEntries(ObjectCallback callback) {
+			getService().deleteOrphanEntries(callback, new Handler());
+		}
+
+		public void deleteCloudEntries(ObjectCallback callback) {
+			getService().deleteCloudEntries(callback, new Handler());
+		}
+
+		public void getLibraryStats(ObjectCallback callback) {
+			getService().getLibraryStats(callback, new Handler());
 		}
 
     }

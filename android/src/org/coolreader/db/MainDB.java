@@ -10,6 +10,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
 import org.coolreader.library.AuthorAlias;
 
+import java.io.File;
 import java.util.*;
 
 public class MainDB extends BaseDB {
@@ -443,15 +444,15 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors(
 						"insert into book_titles_stats(text_field, stat_level, text_value, book_cnt) "+
 								"select 'book_title' text_field, 0 stat_level, substr(b.title,1,1) text_value, count(*) as book_cnt from book b "+
-								"where (not (b.pathname like '@opds%')) and length(b.title)>=1 "+
+								"where (not (b.pathname like '@%')) and length(b.title)>=1 "+
 								"GROUP BY substr(b.title,1,1) "+
 								"union all "+
 								"select 'book_title' text_field, 1 stat_level, substr(b.title,1,2) text_value, count(*) as book_cnt from book b "+
-								"where (not (b.pathname like '@opds%')) and length(b.title)>=2 "+
+								"where (not (b.pathname like '@%')) and length(b.title)>=2 "+
 								"GROUP BY substr(b.title,1,2) "+
 								"union all "+
 								"select 'book_title' text_field, 2 stat_level, substr(b.title,1,3) text_value, count(*) as book_cnt from book b "+
-								"where (not (b.pathname like '@opds%')) and length(b.title)>=3 "+
+								"where (not (b.pathname like '@%')) and length(b.title)>=3 "+
 								"GROUP BY substr(b.title,1,3) ");
 			}
 			if (currentVersion < 49) {
@@ -645,6 +646,7 @@ public class MainDB extends BaseDB {
 
 	public void updateOPDSCatalog(String url, String field, String value) {
 		try {
+			if (StrUtils.isEmptyStr(url)) return;
 			Long existingIdByUrl = longQuery("SELECT id FROM opds_catalog WHERE url=" + quoteSqlString(url));
 			if (existingIdByUrl == null)
 				return;
@@ -1583,7 +1585,7 @@ public class MainDB extends BaseDB {
 				"select a.id, count(*) as cnt " +
 						"from author a " +
 						"join book_author ba on ba.author_fk = a.id " +
-						"join book b on b.id = ba.book_fk and (not (b.pathname like '@opds%')) " +
+						"join book b on b.id = ba.book_fk and (not (b.pathname like '@%')) " +
 						"where a.book_cnt is null " +
 						"group by a.id", null)) {
 			if (rs.moveToFirst()) {
@@ -1633,7 +1635,7 @@ public class MainDB extends BaseDB {
 						" sum(book_cnt) as book_count, " +
 						" coalesce(a.alias_text, aa.alias_text, author.name_lfm) as name_lfm " +
 						" FROM author " +
-						" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
+						" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@%')) "+
 						"   and (book.series_fk = " + series + " or book.publseries_fk = " + series + ") " +
 						" JOIN book_author ON  book_author.author_fk = author.id " +
 						" LEFT JOIN author_aliases a on a.ualias_text = author.uname or a.ualias_text_r = author.uname " +
@@ -1646,7 +1648,7 @@ public class MainDB extends BaseDB {
 						" ORDER BY coalesce(a.alias_text, aa.alias_text, author.name)";
 			else
 				sql = "SELECT author.id, author.name, count(*) as book_count FROM author "+
-					" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@opds%')) "+
+					" JOIN book on book.id = book_author.book_fk and (not (book.pathname like '@%')) "+
 					"   and (book.series_fk = " + series + " or book.publseries_fk = " + series + ") " +
 					" JOIN book_author ON  book_author.author_fk = author.id " +
 					" GROUP BY author.name, author.id ORDER BY author.name";
@@ -1683,7 +1685,7 @@ public class MainDB extends BaseDB {
 				"select g.id, count(*) as cnt "+
 						"from genre g "+
 						"join book_genre bg on bg.genre_fk = g.id "+
-						"join book b on b.id = bg.book_fk and (not (b.pathname like '@opds%')) "+
+						"join book b on b.id = bg.book_fk and (not (b.pathname like '@%')) "+
 						"where g.book_cnt is null "+
 						"group by g.id", null)) {
 			if (rs.moveToFirst()) {
@@ -1703,7 +1705,7 @@ public class MainDB extends BaseDB {
 			"nullif(coalesce(genre.code,''),''))) ";
 		//String sql = "SELECT genre.id, "+gname+" name, count(*) as book_count FROM genre "+
 		//		" LEFT JOIN  genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"' " +
-		//		" INNER JOIN book on book.id = book_genre.book_fk and (not (book.pathname like '@opds%')) "+
+		//		" INNER JOIN book on book.id = book_genre.book_fk and (not (book.pathname like '@%')) "+
 		//		" INNER JOIN book_genre ON book_genre.genre_fk = genre.id GROUP BY "+gname+", genre.id ORDER BY "+gname;
 		String sql = "SELECT genre.id, "+gname+" name, book_cnt as book_count FROM genre "+
 				" LEFT JOIN genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"' " +
@@ -1754,7 +1756,7 @@ public class MainDB extends BaseDB {
 						"from series s " +
 						"join book b on (s.id = b.series_fk or s.id = b.publseries_fk) " +
 						"  and s.book_cnt is null " +
-						"where (not (b.pathname like '@opds%')) " +
+						"where (not (b.pathname like '@%')) " +
 						"group by s.id ", null)) {
 			if (rs.moveToFirst()) {
 				// read DB
@@ -1835,7 +1837,7 @@ public class MainDB extends BaseDB {
 			sql = "SELECT series.id, series.name, count(*) as book_count FROM series " +
 					" JOIN book ON book.series_fk = series.id or book.publseries_fk = series.id " +
 					" JOIN book_author ON book_author.book_fk = book.id and book_author.author_fk in " + authors +
-					" where (not (book.pathname like '@opds%')) GROUP BY series.name, series.id ORDER BY series.name";
+					" where (not (book.pathname like '@%')) GROUP BY series.name, series.id ORDER BY series.name";
 		}
 		boolean found = loadItemList(list, sql, FileInfo.SERIES_PREFIX, true);
 		//
@@ -1872,7 +1874,7 @@ public class MainDB extends BaseDB {
 						"  = bds.book_date " +
 						"  and bds.date_field ='"+field+"' " +
 						"  and bds.book_cnt is null " +
-						"where (not (b.pathname like '@opds%')) " +
+						"where (not (b.pathname like '@%')) " +
 						"group by bds.id", null)) {
 			if (rs.moveToFirst()) {
 				// read DB
@@ -1893,7 +1895,7 @@ public class MainDB extends BaseDB {
 //			" else strftime('%Y-%m', datetime("+field+"/1000, 'unixepoch', 'start of month')) end";
 //		String sql = "SELECT "+f1+" as date_n, "+
 //			f2 + " as date_s, " +
-//			" count(*) as book_count FROM book where (not (book.pathname like '@opds%')) GROUP BY " + f1 + ", " +f2;
+//			" count(*) as book_count FROM book where (not (book.pathname like '@%')) GROUP BY " + f1 + ", " +f2;
 
 		String sql = "select book_date, " +
 				"case when book_date=0 then '[empty]' else strftime('%Y-%m', datetime(book_date, 'unixepoch')) end book_date_text, " +
@@ -1944,7 +1946,7 @@ public class MainDB extends BaseDB {
 						"  b.title like bts.text_value || '%' " +
 						"  and substr(b.title,1,length(bts.text_value)) = bts.text_value " +
 						"  and bts.book_cnt is null " +
-						"where (not (b.pathname like '@opds%')) " +
+						"where (not (b.pathname like '@%')) " +
 						"group by bts.stat_level, bts.text_value", null);
 		) {
 			if (rs.moveToFirst()) {
@@ -1982,7 +1984,7 @@ public class MainDB extends BaseDB {
 		boolean found = false;
 		boolean found2 = false;
 		if (lev > 2) {
-			sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) "+
+			sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@%')) "+
 					" and b.title like "+quoteSqlString(parent.getFilename().substring(0,lev)+ "%")+
 					" and substr(b.title,1,length("+quoteSqlString(parent.getFilename().substring(0,lev))+")) = "+
 					quoteSqlString(parent.getFilename().substring(0,lev)) +
@@ -2004,14 +2006,14 @@ public class MainDB extends BaseDB {
 					" and b.title like bts.text_value||'%' " +
 					" and substr(b.title,1,length(bts.text_value)) = bts.text_value "+
 					" and bts.book_cnt <= " + iMaxItemsCount +
-					" WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) " +
+					" WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@%')) " +
 					" and length(b.title)>"+lev+sCond+
 					" ORDER BY b.title";
 			found2 = findBooks(sql, listFiles);
 			if (found2) for (FileInfo fi: listFiles) list.add(fi);
 			// Short filenames
 			if (lev > 0) {
-				sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@opds%')) " +
+				sql = READ_FILEINFO_SQL + " WHERE b.title IS NOT NULL AND b.title != '' and (not (b.pathname like '@%')) " +
 						" and length(b.title)="+lev+" and b.title like " + quoteSqlString(parent.getFilename().substring(0, lev) + "%") +
 						" and substr(b.title,1,length(" + quoteSqlString(parent.getFilename().substring(0, lev))+")) = "+
 						quoteSqlString(parent.getFilename().substring(0, lev)) +
@@ -2100,7 +2102,7 @@ public class MainDB extends BaseDB {
 		for (Long l: listAuthors) authors = authors + ", " + l;
 		authors = " (" + authors + ") ";
 		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id "+
-				" WHERE (not (b.pathname like '@opds%')) and book_author.author_fk in " + authors + " ORDER BY b.title";
+				" WHERE (not (b.pathname like '@%')) and book_author.author_fk in " + authors + " ORDER BY b.title";
 		return findBooks(sql, list);
 	}
 
@@ -2109,7 +2111,7 @@ public class MainDB extends BaseDB {
 		if (!isOpened())
 			return false;
 		String sql = READ_FILEINFO_SQL + " INNER JOIN book_genre ON book_genre.book_fk = b.id "+
-				" WHERE (not (b.pathname like '@opds%')) and book_genre.genre_fk = " + genreId + " ORDER BY b.title";
+				" WHERE (not (b.pathname like '@%')) and book_genre.genre_fk = " + genreId + " ORDER BY b.title";
 		return findBooks(sql, list);
 	}
 	
@@ -2127,7 +2129,7 @@ public class MainDB extends BaseDB {
 		}
 		if (series == 0L) return false;
 		String sql = READ_FILEINFO_SQL + " INNER JOIN series ON series.id = b.series_fk or series.id = b.publseries_fk "+
-				" WHERE (not (b.pathname like '@opds%')) and series.id = " + series + " ORDER BY b.series_number, b.title";
+				" WHERE (not (b.pathname like '@%')) and series.id = " + series + " ORDER BY b.series_number, b.title";
 		return findBooks(sql, list);
 	}
 
@@ -2137,7 +2139,7 @@ public class MainDB extends BaseDB {
 			return false;
 		String f1 = "case when coalesce("+field+",0)=0 then 0 else "+
 				"cast(strftime('%s',datetime("+field+"/1000, 'unixepoch', 'start of month')) as integer) end";
-		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+f1+" = " + bookdateId +
+		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@%')) and "+f1+" = " + bookdateId +
 				" ORDER BY b.title";
 		vlog.i(sql);
 		return findBooks(sql, list);
@@ -2147,7 +2149,7 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+
+		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@%')) and "+
 				" ((flags>>20)&15) BETWEEN " + minRate + " AND " + maxRate + " ORDER BY ((flags>>20)&15) DESC, b.title LIMIT 1000";
 		return findBooks(sql, list);
 	}
@@ -2156,7 +2158,7 @@ public class MainDB extends BaseDB {
 	{
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@opds%')) and "+
+		String sql = READ_FILEINFO_SQL + " WHERE (not (b.pathname like '@%')) and "+
 				" ((flags>>16)&15) = " + state + " ORDER BY b.title LIMIT 1000";
 		return findBooks(sql, list);
 	}
@@ -2540,6 +2542,48 @@ public class MainDB extends BaseDB {
 			if (rs.moveToFirst()) {
 				readFileInfoFromCursor(fileInfo, rs);
 				found = true;
+			}
+		}
+		return found;
+	}
+
+	private boolean findByLitres(FileInfo fileInfo, String fieldName, Object fieldValue)
+	{
+		String condition;
+		StringBuilder buf = new StringBuilder(" WHERE (( ");
+		buf.append(fieldName);
+		buf.append("=");
+		DatabaseUtils.appendValueToSql(buf, fieldValue + ".fb2.zip");
+		buf.append(" ");
+		buf.append(" ) or ( ");
+		buf.append(fieldName);
+		buf.append("=");
+		DatabaseUtils.appendValueToSql(buf, fieldValue + ".fb3");
+		buf.append(" )) ");
+		condition = buf.toString();
+		boolean found = false;
+		boolean fragment = false;
+		FileInfo fileInfo2 = new FileInfo();
+		try (Cursor rs = mDB.rawQuery(READ_FILEINFO_SQL +
+				condition, null)) {
+			if (rs.moveToFirst()) {
+				do {
+					if (!found) {
+						readFileInfoFromCursor(fileInfo, rs);
+						found = true;
+						fragment = (StrUtils.getNonEmptyStr(fileInfo.pathname, true).contains("/fragments/")) ||
+							(StrUtils.getNonEmptyStr(fileInfo.arcname, true).contains("/fragments/"));
+						if (!fragment) return true;
+					} else {
+						readFileInfoFromCursor(fileInfo2, rs);
+						fragment = (StrUtils.getNonEmptyStr(fileInfo2.pathname, true).contains("/fragments/")) ||
+								(StrUtils.getNonEmptyStr(fileInfo2.arcname, true).contains("/fragments/"));
+						if (!fragment) {
+							readFileInfoFromCursor(fileInfo, rs);
+							return true;
+						}
+					}
+				} while (rs.moveToNext());
 			}
 		}
 		return found;
@@ -3282,8 +3326,8 @@ public class MainDB extends BaseDB {
 			buf.append(" (1=1) ");
 		}
 		if (!hasCondition) return list;
-		String condition = buf.length()==0 ? " WHERE (not (b.pathname like '@opds%'))" :
-				" WHERE (" + buf.toString() + ")  and (not (b.pathname like '@opds%'))";
+		String condition = buf.length()==0 ? " WHERE (not (b.pathname like '@%'))" :
+				" WHERE (" + buf.toString() + ")  and (not (b.pathname like '@%'))";
 		String sql = READ_FILEINFO_SQL + condition + " ORDER BY file_create_time desc";
 		Log.d("cr3", "sql: " + sql );
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
@@ -3457,21 +3501,41 @@ public class MainDB extends BaseDB {
 		return null;
 	}
 
-	public FileInfo loadFileInfoByOPDSLink(String opdsLink) {
+	public FileInfo loadFileInfoByOPDSLink(String opdsLink, boolean isLitres) {
 		if (!isOpened())
 			return null;
-		try {
-			FileInfo cached = fileInfoCache.getByOPDSLink(opdsLink);
-			if (cached != null) {
-				return new FileInfo(cached);
+		if (!isLitres) {
+			try {
+				FileInfo cached = fileInfoCache.getByOPDSLink(opdsLink);
+				if (cached != null) {
+					return new FileInfo(cached);
+				}
+				FileInfo fileInfo = new FileInfo();
+				if (loadByOPDSLink(fileInfo, opdsLink, false)) {
+					fileInfoCache.put(fileInfo);
+					return new FileInfo(fileInfo);
+				}
+			} catch (Exception e) {
+				// ignore
 			}
-			FileInfo fileInfo = new FileInfo();
-			if (loadByOPDSLink(fileInfo, opdsLink)) {
-				fileInfoCache.put(fileInfo);
-				return new FileInfo(fileInfo);
+		} else {
+			try {
+				FileInfo cached = fileInfoCache.getByOPDSLink(opdsLink + ".fb2.zip");
+				if (cached != null) {
+					return new FileInfo(cached);
+				}
+				cached = fileInfoCache.getByOPDSLink(opdsLink + ".fb3");
+				if (cached != null) {
+					return new FileInfo(cached);
+				}
+				FileInfo fileInfo = new FileInfo();
+				if (loadByOPDSLink(fileInfo, opdsLink, true)) {
+					fileInfoCache.put(fileInfo);
+					return new FileInfo(fileInfo);
+				}
+			} catch (Exception e) {
+				// ignore
 			}
-		} catch (Exception e) {
-			// ignore
 		}
 		return null;
 	}
@@ -3491,12 +3555,19 @@ public class MainDB extends BaseDB {
 		return false;
 	}
 
-	private boolean loadByOPDSLink(FileInfo fileInfo, String opdsLink) {
-		if (findBy(fileInfo, "opds_link", opdsLink)) {
-			fileInfoCache.put(fileInfo);
-			return true;
+	private boolean loadByOPDSLink(FileInfo fileInfo, String opdsLink, boolean isLitres) {
+		if (StrUtils.isEmptyStr(opdsLink)) return false;
+		if (!isLitres) {
+			if (findBy(fileInfo, "opds_link", opdsLink)) {
+				fileInfoCache.put(fileInfo);
+				return true;
+			}
+		} else {
+			if (findByLitres(fileInfo, "opds_link", opdsLink)) {
+				fileInfoCache.put(fileInfo);
+				return true;
+			}
 		}
-
 		return false;
 	}
 
@@ -3626,5 +3697,151 @@ public class MainDB extends BaseDB {
 		execSQL("insert into author_aliases (alias_text, alias_text_r, ualias_text, ualias_text_r) "+
 				"select distinct alias_text, alias_text_r, ualias_text, ualias_text_r from author_aliases_eq");
 	}
+
+	public void bookStatsClearance() {
+		execSQLIgnoreErrors("update book_dates_stats set book_cnt = null");
+		execSQLIgnoreErrors("update book_titles_stats set book_cnt = null");
+		execSQLIgnoreErrors("update author set book_cnt = null");
+		execSQLIgnoreErrors("update genre set book_cnt = null");
+		execSQLIgnoreErrors("update series set book_cnt = null");
+	}
+
+	public void consistencyClearance() {
+		execSQLIgnoreErrors("delete from book_author where book_fk not in (select id from book)");
+		execSQLIgnoreErrors("delete from book_author where author_fk not in (select id from author)");
+		execSQLIgnoreErrors("delete from author where id not in (select author_fk from book_author)");
+		execSQLIgnoreErrors("delete from book_genre where book_fk not in (select id from book)");
+		execSQLIgnoreErrors("delete from book_genre where genre_fk not in (select id from genre)");
+		execSQLIgnoreErrors("delete from genre where id not in (select genre_fk from book_genre)");
+		execSQLIgnoreErrors("delete from series where id not in (select series_fk from book) "+
+				" and id not in (select publseries_fk from book)");
+	};
+
+	public Long deleteBookEntries(ArrayList<String> toRemove) {
+		if (!isOpened())
+			return 0L;
+		if (toRemove.size() == 0) return 0L;
+		Long wasRec = 0L;
+		Long becomeRec = 0L;
+		String sql = "SELECT count(*) as cnt FROM book";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		String sqlD = "delete from book where not ((1=0) ";
+		String sqlS = "select id from book where not ((1=0) ";
+		for (String s: toRemove) {
+			sqlD = sqlD + " or (pathname like " + quoteSqlString(s + "%") + ")";
+			sqlS = sqlS + " or (pathname like " + quoteSqlString(s + "%") + ")";
+		}
+		sqlD = sqlD + " or (pathname like " + quoteSqlString("@%") + "))";
+		sqlS = sqlS + " or (pathname like " + quoteSqlString("@%") + "))";
+		execSQLIgnoreErrors("delete from book_author where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from book_genre where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from bookmark where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from search_history where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from author where id not in (select author_fk from book_author)");
+		execSQLIgnoreErrors("delete from genre where id not in (select genre_fk from book_genre)");
+		execSQLIgnoreErrors("delete from series where id not in (select series_fk from book) and id not in (select publseries_fk from book)");
+		execSQLIgnoreErrors("delete from folder where id not in (select folder_fk from book)");
+		execSQLIgnoreErrors(sqlD);
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) becomeRec = rs.getLong(0);
+		}
+		bookStatsClearance();
+		consistencyClearance();
+		flushAndTransaction();
+		return wasRec - becomeRec;
+	}
+
+	public Long deleteOrphanEntries() {
+		Long res = 0L;
+		ArrayList<Long> ids = new ArrayList<>();
+		String sql = "SELECT id, pathname, arcname FROM book where not (pathname like '@%')";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				do {
+					Long id = rs.getLong(0);
+					String pathname = rs.getString(1);
+					String arcname = rs.getString(2);
+					File f = null;
+					if (!StrUtils.isEmptyStr(arcname)) f = new File(arcname);
+						else if (!StrUtils.isEmptyStr(pathname)) f = new File(pathname);
+					boolean ex = false;
+					if (f != null)
+						if ((f.exists()) && (f.isFile())) ex = true;
+					if (!ex) ids.add(id);
+				} while (rs.moveToNext());
+			}
+		}
+		for (Long l: ids) {
+			execSQLIgnoreErrors("delete from book where id = " + l);
+			res++;
+		}
+		bookStatsClearance();
+		consistencyClearance();
+		flushAndTransaction();
+		return res;
+	}
+
+	public Long deleteCloudEntries() {
+		if (!isOpened())
+			return 0L;
+		Long wasRec = 0L;
+		Long becomeRec = 0L;
+		String sql = "SELECT count(*) as cnt FROM book";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		String sqlD = "delete from book where (pathname like '@%') ";
+		String sqlS = "select id from book where (pathname like '@%') ";
+		execSQLIgnoreErrors("delete from book_author where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from book_genre where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from bookmark where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from search_history where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from author where id not in (select author_fk from book_author)");
+		execSQLIgnoreErrors("delete from genre where id not in (select genre_fk from book_genre)");
+		execSQLIgnoreErrors("delete from series where id not in (select series_fk from book) and id not in (select publseries_fk from book)");
+		execSQLIgnoreErrors("delete from folder where id not in (select folder_fk from book)");
+		execSQLIgnoreErrors(sqlD);
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) becomeRec = rs.getLong(0);
+		}
+		bookStatsClearance();
+		consistencyClearance();
+		flushAndTransaction();
+		return wasRec - becomeRec;
+	}
+
+	public LibraryStats getLibraryStats() {
+		LibraryStats ls = new LibraryStats();
+		if (!isOpened())
+			return ls;
+		Long wasRec = 0L;
+		String sql = "SELECT count(*) as cnt FROM book";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		ls.entriesCnt = wasRec;
+		wasRec = 0L;
+		sql = "SELECT count(*) as cnt FROM author";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		ls.authorsCnt = wasRec;
+		wasRec = 0L;
+		sql = "SELECT count(*) as cnt FROM genre";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		ls.genresCnt = wasRec;
+		wasRec = 0L;
+		sql = "SELECT count(*) as cnt FROM series";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		ls.seriesCnt = wasRec;
+		return ls;
+	}
+
 
 }

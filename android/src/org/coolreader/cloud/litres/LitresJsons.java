@@ -4,6 +4,8 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.History;
+import org.coolreader.crengine.Services;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
 import org.json.JSONArray;
@@ -643,6 +645,27 @@ public class LitresJsons {
 
 					item.id = Long.parseLong(id);
 					item.tag = "";
+					Services.getHistory().getFileInfoByOPDSLink(cr.getDB(), item.fragment_href, true,
+							new History.FileInfo1LoadedCallback() {
+
+								@Override
+								public void onFileInfoLoadBegin() {
+
+								}
+
+								@Override
+								public void onFileInfoLoaded(final FileInfo fileInfo) {
+									if (fileInfo!=null) {
+										if (fileInfo.exists()) {
+											item.pathnameR = fileInfo.pathname;
+											item.arcnameR = fileInfo.arcname;
+											item.pathR = fileInfo.path;
+											item.opdsLinkR = item.fragment_href;
+										}
+									}
+								}
+							}
+					);
 					list.add(item);
 				}
 			}

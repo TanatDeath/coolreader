@@ -55,9 +55,10 @@ public class History extends FileInfoChangeSource {
 		});
 	}
 
-	public void getFileInfoByOPDSLink(final CRDBService.LocalBinder db, final String opdsLink, final FileInfo1LoadedCallback callback)
+	public void getFileInfoByOPDSLink(final CRDBService.LocalBinder db, final String opdsLink,
+									  final boolean isLitres, final FileInfo1LoadedCallback callback)
 	{
-		db.loadFileInfoByOPDSLink(opdsLink, new CRDBService.FileInfo1LoadingCallback() {
+		db.loadFileInfoByOPDSLink(opdsLink, isLitres, new CRDBService.FileInfo1LoadingCallback() {
 			@Override
 			public void onFileInfoLoaded(FileInfo fileInfo) {
 				callback.onFileInfoLoaded(fileInfo);

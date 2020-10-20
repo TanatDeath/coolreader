@@ -39,6 +39,8 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 
 public class Utils {
 
@@ -891,6 +893,23 @@ public class Utils {
 
 	public static String getFileExtension(File file) {
 		return getFileExtension(file.getName());
+	}
+
+	public static void hideView(View l) {
+		if (l == null) return;
+		try {
+			((ViewGroup) l.getParent()).removeView(l);
+		} catch (Exception e) {
+			//do nothing
+		}
+	}
+
+	public static void setDashedButton(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
 }
