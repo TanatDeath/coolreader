@@ -394,6 +394,8 @@ public class BrowserViewLayout extends ViewGroup {
 				backDownTs = Utils.timeStamp();
 			return true;
 		}
+		if (contentView.onKeyDown(keyCode, event))
+			return true;
 		return super.onKeyDown(keyCode, event);
 	}
 
@@ -419,6 +421,8 @@ public class BrowserViewLayout extends ViewGroup {
 				return true;
 			}
 		}
+		if (contentView.onKeyUp(keyCode, event))
+			return true;
 		return super.onKeyUp(keyCode, event);
 	}
 

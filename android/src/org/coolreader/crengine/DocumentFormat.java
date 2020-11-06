@@ -15,7 +15,7 @@ public enum DocumentFormat {
 			new String[] {".fb2", ".fb2.zip"},
 			new String[] {"application/fb2+zip"}), // doc_format_fb2,
 	FB3("fb3.css", R.raw.fb3, R.drawable.cr3_browser_book_fb3, true, true, 11,
-			new String[] {".fb3" },
+			new String[] {".fb3", ".fb3.zip" },
 			new String[] {"application/fb3"}), // doc_format_fb3,
 	TXT("txt.css", R.raw.txt, R.drawable.icons8_txt_2, false, false, 3,
 			new String[] {".txt", ".tcr", ".pml"},

@@ -3,12 +3,27 @@
 
 #include "../include/crsetup.h"
 #include "../include/lvtinydom.h"
+#include "../include/lvopc.h"
 
 bool DetectFb3Format( LVStreamRef stream );
-//plotn
-ldomDocument * Fb3GetDescDoc( LVStreamRef stream);
 bool ImportFb3Document( LVStreamRef stream, ldomDocument * doc, LVDocViewCallback * progressCallback, CacheLoadingCallback * formatCallback );
-//plotn
 LVStreamRef GetFb3Coverpage(LVContainerRef arc);
+
+class fb3ImportContext
+{
+private:
+    OpcPackage *m_package;
+    OpcPartRef m_bookPart;
+    ldomDocument *m_descDoc;
+public:
+    fb3ImportContext(OpcPackage *package);
+    virtual ~fb3ImportContext();
+
+    lString32 geImageTarget(const lString32 relationId);
+    LVStreamRef openBook();
+    ldomDocument *getDescription();
+public:
+    lString32 m_coverImage;
+};
 
 #endif // FB3FMT_H

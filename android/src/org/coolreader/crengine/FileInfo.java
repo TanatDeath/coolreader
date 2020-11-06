@@ -116,6 +116,7 @@ public class FileInfo {
 	public String pathname; // full path+arcname+filename
 	public String arcname; // archive file name w/o path
 	public String language; // document language
+	public String description;	// book description
 	public String lang_from; // translate from
 	public String lang_to; // translate to
 	public String opdsLink;
@@ -123,6 +124,7 @@ public class FileInfo {
 	public String pathnameR; // pathname form opds-assigned entry
 	public String arcnameR; // arcname form opds-assigned entry
 	public String opdsLinkR; // link form opds-assigned entry
+	public String opdsLinkRfull; // For litres
 	public String username; // username for online catalogs
 	public String password; // password for online catalogs
 	public String proxy_addr;
@@ -134,6 +136,8 @@ public class FileInfo {
 	public String cover_href;
 	public String cover_href2;
 	public String fragment_href;
+	public String full_href;
+	public String full_href_wo_sid;
 	public Double finalPrice = 0D;
 	public int free = 0;
 	public String availDate;
@@ -159,7 +163,7 @@ public class FileInfo {
 	public boolean isDirectory;
 	public boolean isListed;
 	public boolean isScanned;
-	public int crc32;
+	public long crc32;
 	public int domVersion;
 	public int blockRenderingFlags;
 	public FileInfo parent; // parent item
@@ -180,12 +184,12 @@ public class FileInfo {
 		return res;
 	}; //files + directories
 	public boolean isFav; // only for display star in file browser
-	public ArrayList<OPDSUtil.LinkInfo> links = new ArrayList<OPDSUtil.LinkInfo>(); // for OPDS entries
+	public ArrayList<OPDSUtil.LinkInfo> links = new ArrayList<>(); // for OPDS entries
 
 	//Statistics
 	public long lastTimeSaved = 0;
 	public int lastPageSet = 0;
-	public ArrayList<ReadingStat> stats = new ArrayList<ReadingStat>(); // reading stat
+	public ArrayList<ReadingStat> stats = new ArrayList<>(); // reading stat
 
 	// 16 lower bits reserved for document flags
 	public static final int DONT_USE_DOCUMENT_STYLES_FLAG = 1;
@@ -418,7 +422,7 @@ public class FileInfo {
 		String arcn = "";
 		if ((!StrUtils.isEmptyStr(arcname))&&(!StrUtils.isEmptyStr(filename))) {
 			arcn = new File(arcname).getName();
-			if (!arcn.equals(filename)) return filename + " [" + arcn + "]";
+			if (!arcn.equals(filename)) return filename + " [" + arcn.replace(filename, "*") + "]";
 			return filename;
 		}
 		if (!StrUtils.isEmptyStr(filename)) return filename;
@@ -448,6 +452,9 @@ public class FileInfo {
 			pathname = f.getAbsolutePath();
 			isDirectory = true;
 		}
+		File parent_ = f.getParentFile();
+		if (null != parent_)
+			parent = new FileInfo(parent_);
 	}
 	
 	public FileInfo( File f )
@@ -490,6 +497,7 @@ public class FileInfo {
 		createTime = v.createTime;
 		lastAccessTime = v.lastAccessTime;
 		language = v.language;
+		description = v.description;
 		lang_from = v.lang_from;
 		lang_to = v.lang_to;
 		username = v.username;
@@ -528,6 +536,47 @@ public class FileInfo {
         opdsLink = v.opdsLink;
         wordCount = v.wordCount;
 		symCount = v.symCount;
+//		public long bookDateN; //converted to nubmer from string
+//		public long docDateN;
+//		public long publYearN;
+//		public String path; // path to directory where file or archive is located
+//		private String filename; // file name w/o path for normal file, with optional path for file inside archive
+//		public String pathname; // full path+arcname+filename
+//		public String arcname; // archive file name w/o path
+//		public String language; // document language
+//		public String description;	// book description
+//		public String lang_from; // translate from
+//		public String lang_to; // translate to
+//		public String opdsLink;
+//		public String pathR; // path form opds-assigned entry
+//		public String pathnameR; // pathname form opds-assigned entry
+//		public String arcnameR; // arcname form opds-assigned entry
+//		public String opdsLinkR; // link form opds-assigned entry
+//		public String username; // username for online catalogs
+//		public String password; // password for online catalogs
+//		public String proxy_addr;
+//		public String proxy_port;
+//		public String proxy_uname;
+//		public String proxy_passw;
+//		public int onion_def_proxy;
+//		// Litres related
+//		public String cover_href;
+//		public String cover_href2;
+//		public String fragment_href;
+//		public Double finalPrice = 0D;
+//		public int free = 0;
+//		public String availDate;
+//		public long availDateN;
+//		public int available = 0;
+//		public int type = 0;
+//		public int lvl = 0;
+//		public int arts_n = 0;
+//		public LitresSearchParams lsp;
+//		public String top_arts;
+//		public String top_genres;
+//		public String format_chosen;
+//		public String minage;
+//		public String subtitle;
     }
 
 	public boolean contains(String text)
@@ -2008,6 +2057,7 @@ public class FileInfo {
 		if (isScanned != other.isScanned)
 			return false;
 		if (!StrUtils.euqalsIgnoreNulls(language, other.language, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(description, other.description, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(lang_from, other.lang_from, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(lang_to, other.lang_to, true)) return false;
 		if (lastAccessTime != other.lastAccessTime)
@@ -2101,6 +2151,11 @@ public class FileInfo {
 			if (other.language != null)
 				return false;
 		} else if (!language.equals(other.language))
+			return false;
+		if (description == null) {
+			if (other.description != null)
+				return false;
+		} else if (!description.equals(other.description))
 			return false;
 		if (path == null) {
 			if (other.path != null)

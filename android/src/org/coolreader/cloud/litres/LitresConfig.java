@@ -4,6 +4,7 @@ import org.coolreader.CoolReader;
 
 public class LitresConfig {
     public static boolean didLogin = false;
+    public static boolean needReAuth = false;
     public static String country = "";
     public static String currency = "";
     public static String region = "";

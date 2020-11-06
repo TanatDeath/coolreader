@@ -22,7 +22,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 49;
+	public static final int DB_VERSION = 50;
 	@Override
 	protected boolean upgradeSchema() {
 		// When the database is just created, its version is 0.
@@ -129,9 +129,10 @@ public class MainDB extends BaseDB {
 					"doc_date_n INTEGER, " +
                     "publ_year_n INTEGER, " +
 					"opds_link VARCHAR DEFAULT NULL, " +
-					"crc32 INTEGER DEFAULT NULL ," +
+					"crc32 INTEGER DEFAULT NULL, " +
 					"domVersion INTEGER DEFAULT 0, " +
-			        "rendFlags INTEGER DEFAULT 0" +
+			        "rendFlags INTEGER DEFAULT 0, " +
+					"description TEXT DEFAULT NULL " + // for compatibility with CR
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
@@ -504,6 +505,10 @@ public class MainDB extends BaseDB {
 //						")");
 				// - нужна защита от повторной вставки
 				//execSQL("INSERT INTO settings (author_aliases_size, author_aliases_crc) values (0,0)");
+			}
+
+			if (currentVersion < 50) {
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN description TEXT DEFAULT NULL");
 			}
 
 			//==============================================================
@@ -2549,17 +2554,38 @@ public class MainDB extends BaseDB {
 
 	private boolean findByLitres(FileInfo fileInfo, String fieldName, Object fieldValue)
 	{
+		//if (1==1) return false;
+		String val1 = (String)fieldValue;
+		String val2 = "";
+		if (StrUtils.getNonEmptyStr(val1, true).contains("|")) {
+			val2 = val1.split("\\|")[1];
+			val1 = val1.split("\\|")[0];
+		}
 		String condition;
 		StringBuilder buf = new StringBuilder(" WHERE (( ");
 		buf.append(fieldName);
 		buf.append("=");
-		DatabaseUtils.appendValueToSql(buf, fieldValue + ".fb2.zip");
+		DatabaseUtils.appendValueToSql(buf, val1 + ".fb2.zip");
 		buf.append(" ");
-		buf.append(" ) or ( ");
+		buf.append(" ) ");
+		buf.append(" or ( ");
 		buf.append(fieldName);
 		buf.append("=");
-		DatabaseUtils.appendValueToSql(buf, fieldValue + ".fb3");
-		buf.append(" )) ");
+		DatabaseUtils.appendValueToSql(buf, val1 + ".fb3");
+		buf.append(" ) ");
+		if (!StrUtils.isEmptyStr(val2)) {
+			buf.append(" or ( ");
+			buf.append(fieldName);
+			buf.append("=");
+			DatabaseUtils.appendValueToSql(buf, val2 + "&type=fb2.zip");
+			buf.append(" ) ");
+			buf.append(" or ( ");
+			buf.append(fieldName);
+			buf.append("=");
+			DatabaseUtils.appendValueToSql(buf, val2 + "&type=fb3");
+			buf.append(" ) ");
+		}
+		buf.append(" ) ");
 		condition = buf.toString();
 		boolean found = false;
 		boolean fragment = false;
@@ -3099,15 +3125,13 @@ public class MainDB extends BaseDB {
 			add("publseries_fk", getSeriesId(newValue.publseries), getSeriesId(oldValue.publseries));
 			add("publseries_number", (long) newValue.publseriesNumber, (long) oldValue.publseriesNumber);
 			add("file_create_time", (long) newValue.getFileCreateTime(), (long) oldValue.getFileCreateTime());
-			//vlog.v("FCD1:"+newValue.seriesNumber());
-			//vlog.v("FCD2:"+oldValue.getFileCreateTime());
 			add("sym_count", (long) newValue.symCount, (long) oldValue.symCount);
 			add("word_count", (long) newValue.wordCount, (long) oldValue.wordCount);
 			add("book_date_n", (long) newValue.bookDateN, (long) oldValue.bookDateN);
 			add("doc_date_n", (long) newValue.docDateN, (long) oldValue.docDateN);
 			add("publ_year_n", (long) newValue.publYearN, (long) oldValue.publYearN);
 			add("opds_link", newValue.opdsLink, oldValue.opdsLink);
-			//plotn: TODO: may perform
+			add("description", newValue.description, oldValue.description);
 			add("crc32", newValue.crc32, oldValue.crc32);
 			add("domVersion", newValue.domVersion, oldValue.domVersion);
 			add("rendFlags", newValue.blockRenderingFlags, oldValue.blockRenderingFlags);
@@ -3147,7 +3171,7 @@ public class MainDB extends BaseDB {
 		"sp.name as publseries_name, " +
 		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n, opds_link,  " +
 		"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list, " +
-		"crc32, domVersion, rendFlags "
+		"crc32, domVersion, rendFlags, description "
 		;
 
 	private static final String READ_FILEINFO_SQL =
@@ -3211,6 +3235,7 @@ public class MainDB extends BaseDB {
 		fileInfo.crc32 = rs.getInt(i++);
 		fileInfo.domVersion = rs.getInt(i++);
 		fileInfo.blockRenderingFlags = rs.getInt(i++);
+		fileInfo.description = rs.getString(i++);
 		fileInfo.isArchive = fileInfo.arcname != null;
 	}
 
@@ -3525,6 +3550,14 @@ public class MainDB extends BaseDB {
 					return new FileInfo(cached);
 				}
 				cached = fileInfoCache.getByOPDSLink(opdsLink + ".fb3");
+				if (cached != null) {
+					return new FileInfo(cached);
+				}
+				cached = fileInfoCache.getByOPDSLink(opdsLink + "&type=fb2.zip");
+				if (cached != null) {
+					return new FileInfo(cached);
+				}
+				cached = fileInfoCache.getByOPDSLink(opdsLink + "&type=fb3");
 				if (cached != null) {
 					return new FileInfo(cached);
 				}

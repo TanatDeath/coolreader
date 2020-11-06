@@ -22,6 +22,9 @@
 #include "../../crengine/include/fb3fmt.h"
 #include "../../crengine/include/docxfmt.h"
 #include "../../crengine/include/pdbfmt.h"
+#include "../../crengine/include/fb3fmt.h"
+#include "../../crengine/include/docxfmt.h"
+#include "../../crengine/include/odtfmt.h"
 #include "../../crengine/include/lvstream.h"
 
 
@@ -56,7 +59,7 @@ void z_error(char * msg) {
 }
 #endif
 /// returns current time representation string
-static lString16 getDateTimeString( time_t t )
+static lString32 getDateTimeString( time_t t )
 {
     tm * bt = localtime(&t);
     char str[32];
@@ -71,17 +74,17 @@ static lString16 getDateTimeString( time_t t )
 }
 
 #if 0
-static lString16 extractDocSeriesReverse( ldomDocument * doc, int & seriesNumber )
+static lString32 extractDocSeriesReverse( ldomDocument * doc, int & seriesNumber )
 {
 	seriesNumber = 0;
-    lString16 res;
+    lString32 res;
     ldomXPointer p = doc->createXPointer(L"/FictionBook/description/title-info/sequence");
     if ( p.isNull() )
         return res;
     ldomNode * series = p.getNode();
     if ( series ) {
-        lString16 sname = series->getAttributeValue( attr_name );
-        lString16 snumber = series->getAttributeValue( attr_number );
+        lString32 sname = series->getAttributeValue( attr_name );
+        lString32 snumber = series->getAttributeValue( attr_number );
         if ( !sname.empty() ) {
             res << L"(";
             if ( !snumber.empty() ) {
@@ -95,17 +98,17 @@ static lString16 extractDocSeriesReverse( ldomDocument * doc, int & seriesNumber
     return res;
 }
 
-static lString16 extractDocPublSeriesReverse( ldomDocument * doc, int & seriesNumber )
+static lString32 extractDocPublSeriesReverse( ldomDocument * doc, int & seriesNumber )
 {
 	seriesNumber = 0;
-    lString16 res;
+    lString32 res;
     ldomXPointer p = doc->createXPointer(L"/FictionBook/description/publish-info/sequence");
     if ( p.isNull() )
         return res;
     ldomNode * series = p.getNode();
     if ( series ) {
-        lString16 sname = series->getAttributeValue( attr_name );
-        lString16 snumber = series->getAttributeValue( attr_number );
+        lString32 sname = series->getAttributeValue( attr_name );
+        lString32 snumber = series->getAttributeValue( attr_number );
         if ( !sname.empty() ) {
             res << L"(";
             if ( !snumber.empty() ) {
@@ -123,50 +126,52 @@ static lString16 extractDocPublSeriesReverse( ldomDocument * doc, int & seriesNu
 class BookProperties
 {
 public:
-    lString16 filename;
-    lString16 title;
-    lString16 author;
-	lString16 series;
+    lString32 filename;
+    lString32 title;
+    lString32 author;
+    lString32 series;
     int filesize;
-    lString16 filedate;
+    lString32 filedate;
     int seriesNumber;
-    lString16 language;
-	lString16 genre;
-	lString16 annotation;
-	lString16 srclang;
-	lString16 bookdate;
-    lString16 translator;
-    lString16 docauthor;
-    lString16 docprogram;
-    lString16 docdate;
-    lString16 docsrcurl;
-    lString16 docsrcocr;
-    lString16 docversion;
-    lString16 publname;
-    lString16 publisher;
-    lString16 publcity;
-    lString16 publyear;
-    lString16 publisbn;
-	lString16 publseries;
+    lString32 language;
+	lString32 genre;
+	lString32 annotation;
+	lString32 srclang;
+	lString32 bookdate;
+    lString32 translator;
+    lString32 docauthor;
+    lString32 docprogram;
+    lString32 docdate;
+    lString32 docsrcurl;
+    lString32 docsrcocr;
+    lString32 docversion;
+    lString32 publname;
+    lString32 publisher;
+    lString32 publcity;
+    lString32 publyear;
+    lString32 publisbn;
+	lString32 publseries;
 	int publseriesNumber;
-	lString16 authorext;
+	lString32 authorext;
+    lUInt32 crc32;
+    lString32 description;
 };
 
 static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
 {
-    LVContainerRef m_arc = LVOpenArchieve( stream );
-    if ( m_arc.isNull() )
-        return false; // not a ZIP` archive
+    LVContainerRef arc = LVOpenArchieve(stream );
+    if ( arc.isNull() )
+        return false; // not a ZIP archive
 
     // check root media type
-    lString16 rootfilePath = EpubGetRootFilePath(m_arc);
+    lString32 rootfilePath = EpubGetRootFilePath(arc);
     if ( rootfilePath.empty() )
     	return false;
 
-    lString16 codeBase;
+    lString32 codeBase;
     codeBase=LVExtractPath(rootfilePath, false);
 
-    LVStreamRef content_stream = m_arc->OpenStream(rootfilePath.c_str(), LVOM_READ);
+    LVStreamRef content_stream = arc->OpenStream(rootfilePath.c_str(), LVOM_READ);
     if ( content_stream.isNull() )
         return false;
 
@@ -180,16 +185,17 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
         t = fs.st_mtime;
     }
 
-    lString16 author = doc->textFromXPath( lString16("package/metadata/creator")).trim();
-    lString16 title = doc->textFromXPath( lString16("package/metadata/title")).trim();
-    lString16 language = doc->textFromXPath( lString16("package/metadata/language")).trim();
-	lString16 bookdate = doc->textFromXPath( lString16("package/metadata/date")).trim();
-	lString16 annotation = doc->textFromXPath( lString16("package/metadata/description")).trim();
-	lString16 publisher = doc->textFromXPath( lString16("package/metadata/publisher")).trim();
-	lString16 genre = doc->textFromXPath( lString16("package/metadata/subject")).trim();
-	lString16 docsrcurl = doc->textFromXPath( lString16("package/metadata/identifier")).trim();
-	lString16 docsrcocr = doc->textFromXPath( lString16("package/metadata/source")).trim();
-	lString16 authorext = doc->textFromXPath( lString16("package/metadata/creator")).trim();
+	lString32 author = doc->textFromXPath( lString32("package/metadata/creator")).trim();
+	lString32 title = doc->textFromXPath( lString32("package/metadata/title")).trim();
+	lString32 language = doc->textFromXPath( lString32("package/metadata/language")).trim();
+	lString32 description = doc->textFromXPath( cs32("package/metadata/description")).trim();
+	lString32 bookdate = doc->textFromXPath( lString32("package/metadata/date")).trim();
+	lString32 annotation = doc->textFromXPath( lString32("package/metadata/description")).trim();
+	lString32 publisher = doc->textFromXPath( lString32("package/metadata/publisher")).trim();
+	lString32 genre = doc->textFromXPath( lString32("package/metadata/subject")).trim();
+	lString32 docsrcurl = doc->textFromXPath( lString32("package/metadata/identifier")).trim();
+	lString32 docsrcocr = doc->textFromXPath( lString32("package/metadata/source")).trim();
+	lString32 authorext = doc->textFromXPath( lString32("package/metadata/creator")).trim();
 
     pBookProps->author = author;
     pBookProps->title = title;
@@ -201,13 +207,14 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
  	pBookProps->docsrcurl = docsrcurl;
 	pBookProps->docsrcocr = docsrcocr;
 	pBookProps->authorext = authorext;
+    pBookProps->description = description;
 
     for ( int i=1; i<20; i++ ) {
-        ldomNode * item = doc->nodeFromXPath( lString16("package/metadata/meta[") << fmt::decimal(i) << "]" );
+        ldomNode * item = doc->nodeFromXPath( lString32("package/metadata/meta[") << fmt::decimal(i) << "]" );
         if ( !item )
             break;
-        lString16 name = item->getAttributeValue("name");
-        lString16 content = item->getAttributeValue("content");
+        lString32 name = item->getAttributeValue("name");
+        lString32 content = item->getAttributeValue("content");
         if (name == "calibre:series")
         	pBookProps->series = content.trim();
         else if (name == "calibre:series_index")
@@ -215,8 +222,9 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
     }
 
     pBookProps->filesize = (long)stream->GetSize();
-    pBookProps->filename = lString16(name);
+    pBookProps->filename = lString32(name);
     pBookProps->filedate = getDateTimeString( t );
+    pBookProps->crc32 = stream->getcrc32();
 
     delete doc;
 
@@ -225,119 +233,199 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
 
 static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
 {
-	ldomDocument * descDoc = NULL;
-	descDoc = Fb3GetDescDoc( stream );
+	LVContainerRef arc = LVOpenArchieve( stream );
+	if ( arc.isNull() )
+		return false; // not a ZIP archive
 
-	if ( !descDoc )
-		return false;
+	OpcPackage package(arc);
 
-	lString16 title = descDoc->textFromXPath( lString16("title/main"));
-	lString16 authors;
-	lString16 annotation = descDoc->textFromXPath( lString16("annotation"));
-	lString16 language = descDoc->textFromXPath( lString16("lang"));
-	lString16 translators;
-	lString16 publishers;
-	lString16 genres;
-	lString16 srclang = descDoc->textFromXPath( lString16("written/lang"));
-	lString16 bookdate = descDoc->textFromXPath( lString16("written/date"));
-	lString16 authorext;
+	fb3ImportContext context(&package);
 
-	for ( int i=1; i<30; i++ ) {
-		ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-relations/subject[") << fmt::decimal(i) << "]");
-		if ( !item ) break;
-		lString16 name = item->getAttributeValue("link");
-		if (name == "author") {
-			lString16 author = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
-			if ( !authors.empty() ) {
-				authors += " |";
+	CRPropRef doc_props = LVCreatePropsContainer();
+	package.readCoreProperties(doc_props);
+	pBookProps->title = doc_props->getStringDef(DOC_PROP_TITLE, "");
+	pBookProps->author = doc_props->getStringDef(DOC_PROP_AUTHORS, "");
+	pBookProps->description = doc_props->getStringDef(DOC_PROP_DESCRIPTION, "");
+
+	ldomDocument * descDoc = context.getDescription();
+	if ( descDoc ) {
+		pBookProps->language = descDoc->textFromXPath( cs32("fb3-description/lang") );
+		lString32 title = descDoc->textFromXPath( cs32("title/main"));
+		lString32 authors;
+		lString32 annotation = descDoc->textFromXPath( cs32("annotation"));
+		//lString32 language = descDoc->textFromXPath( cs32("lang"));
+		lString32 translators;
+		lString32 publishers;
+		lString32 genres;
+		lString32 srclang = descDoc->textFromXPath( cs32("written/lang"));
+		lString32 bookdate = descDoc->textFromXPath( cs32("written/date"));
+		lString32 authorext;
+
+		for ( int i=1; i<30; i++ ) {
+			ldomNode * item = descDoc->nodeFromXPath(lString32("fb3-relations/subject[") << fmt::decimal(i) << "]");
+			if ( !item ) break;
+			lString32 name = item->getAttributeValue("link");
+			if (name == "author") {
+				lString32 author = descDoc->textFromXPath( lString32("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+				if ( !authors.empty() ) {
+					authors += " |";
+				}
+				authors += author;
 			}
-			authors += author;
-		}
-		authorext = authors;
-		if (name == "translator") {
-			lString16 translator = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
-			if ( !translators.empty() ) {
-				translators += " | ";
+			authorext = authors;
+			if (name == "translator") {
+				lString32 translator = descDoc->textFromXPath( lString32("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+				if ( !translators.empty() ) {
+					translators += " | ";
+				}
+				translators += translator;
 			}
-			translators += translator;
-		}
-		if (name == "publisher") {
-			lString16 publisher = descDoc->textFromXPath( lString16("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
-			if ( !publishers.empty() ) {
-				publishers += " | ";
+			if (name == "publisher") {
+				lString32 publisher = descDoc->textFromXPath( lString32("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+				if ( !publishers.empty() ) {
+					publishers += " | ";
+				}
+				publishers += publisher;
 			}
-			publishers += publisher;
 		}
+		for ( int i=1; i<30; i++ ) {
+			ldomNode * item = descDoc->nodeFromXPath(lString32("fb3-classification/subject[") << fmt::decimal(i) << "]");
+			if ( !item ) break;
+			lString32 genre = descDoc->textFromXPath( lString32("fb3-classification/subject[") << fmt::decimal(i) << "]");
+			if ( !genres.empty() ) {
+				genres += " | ";
+			}
+			genres += genre;
+		}
+
+		ldomNode * item = descDoc->nodeFromXPath(cs32("document-info"));
+		lString32 created = cs32("");
+		lString32 docprogram = cs32("");
+		lString32 docauthor = cs32("");
+		lString32 docsrcurl = cs32("");
+		lString32 docsrcocr = cs32("");
+		if (item) {
+			created = item->getAttributeValue("created");
+			docprogram = item->getAttributeValue("program-used");
+			docauthor = item->getAttributeValue("editor");
+			docsrcurl = item->getAttributeValue("src-url");
+			docsrcocr = item->getAttributeValue("ocr");
+		}
+		lString32 series = descDoc->textFromXPath(cs32("fb3-description/sequence/title/main"));
+		ldomNode * item2 = descDoc->nodeFromXPath(cs32("paper-publish-info"));
+		lString32 publisher = cs32("");
+		lString32 city = cs32("");
+		lString32 year = cs32("");
+		if ( item2 ) {
+			publisher = item2->getAttributeValue("publisher");
+			city = item2->getAttributeValue("city");
+			year = item2->getAttributeValue("year");
+		}
+		lString32 publisbn = descDoc->textFromXPath(cs32("paper-publish-info/isbn"));
+		lString32 publsequence = descDoc->textFromXPath(cs32("paper-publish-info/sequence"));
+
+		pBookProps-> title = title;
+		pBookProps-> author = authors;
+		pBookProps-> annotation = annotation;
+		//pBookProps-> language = language;
+		pBookProps-> translator = translators;
+		pBookProps-> publisher = publishers;
+		pBookProps-> genre = genres;
+		pBookProps-> srclang = srclang;
+		pBookProps-> bookdate = bookdate;
+		pBookProps-> docdate = created;
+		pBookProps->docprogram = docprogram;
+		pBookProps->series = series;
+		pBookProps->publisher = publisher;
+		pBookProps->publcity = city;
+		pBookProps->publyear = year;
+		pBookProps->publisbn = publisbn;
+		pBookProps->publseries = publsequence;
+		pBookProps->docauthor = docauthor;
+		pBookProps->docsrcurl = docsrcurl;
+		pBookProps->docsrcocr = docsrcocr;
+		pBookProps->authorext = authors;
+	} else {
+		CRLog::error("Couldn't parse description doc");
 	}
-	for ( int i=1; i<30; i++ ) {
-		ldomNode * item = descDoc->nodeFromXPath(lString16("fb3-classification/subject[") << fmt::decimal(i) << "]");
-		if ( !item ) break;
-		lString16 genre = descDoc->textFromXPath( lString16("fb3-classification/subject[") << fmt::decimal(i) << "]");
-		if ( !genres.empty() ) {
-			genres += " | ";
-		}
-		genres += genre;
-	}
-
-	ldomNode * item = descDoc->nodeFromXPath(lString16("document-info"));
-    lString16 created = cs16("");
-    lString16 docprogram = cs16("");
-    lString16 docauthor = cs16("");
-    lString16 docsrcurl = cs16("");
-    lString16 docsrcocr = cs16("");
-	if (item) {
-        created = item->getAttributeValue("created");
-        docprogram = item->getAttributeValue("program-used");
-        docauthor = item->getAttributeValue("editor");
-        docsrcurl = item->getAttributeValue("src-url");
-        docsrcocr = item->getAttributeValue("ocr");
-    }
-	lString16 series = descDoc->textFromXPath(lString16("fb3-description/sequence/title/main"));
-	ldomNode * item2 = descDoc->nodeFromXPath(lString16("paper-publish-info"));
-    lString16 publisher = cs16("");
-    lString16 city = cs16("");
-    lString16 year = cs16("");
-    if ( item2 ) {
-        publisher = item2->getAttributeValue("publisher");
-        city = item2->getAttributeValue("city");
-        year = item2->getAttributeValue("year");
-    }
-	lString16 publisbn = descDoc->textFromXPath(lString16("paper-publish-info/isbn"));
-	lString16 publsequence = descDoc->textFromXPath(lString16("paper-publish-info/sequence"));
-
-	pBookProps-> title = title;
-	pBookProps-> author = authors;
-	pBookProps-> annotation = annotation;
-	pBookProps-> language = language;
-	pBookProps-> translator = translators;
-	pBookProps-> publisher = publishers;
-	pBookProps-> genre = genres;
-	pBookProps-> srclang = srclang;
-	pBookProps-> bookdate = bookdate;
-	pBookProps-> docdate = created;
-	pBookProps->docprogram = docprogram;
- 	pBookProps->series = series;
-	pBookProps->publisher = publisher;
-	pBookProps->publcity = city;
-	pBookProps->publyear = year;
-	pBookProps->publisbn = publisbn;
-	pBookProps->publseries = publsequence;
-	pBookProps->docauthor = docauthor;
-	pBookProps->docsrcurl = docsrcurl;
-	pBookProps->docsrcocr = docsrcocr;
-	pBookProps->authorext = authors;
 
 	time_t t = (time_t)time(0);
 	struct stat fs;
 	if ( !stat( name, &fs ) ) {
 		t = fs.st_mtime;
 	}
-
 	pBookProps->filesize = (long)stream->GetSize();
-	pBookProps->filename = lString16(name);
+	pBookProps->filename = lString32(name);
 	pBookProps->filedate = getDateTimeString( t );
+	pBookProps->crc32 = stream->getcrc32();
+	return true;
+}
 
-	delete descDoc;
+static bool GetDOCXBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
+{
+	LVContainerRef arc = LVOpenArchieve( stream );
+	if ( arc.isNull() )
+		return false; // not a ZIP archive
+
+	OpcPackage package(arc);
+
+	CRPropRef doc_props = LVCreatePropsContainer();
+	package.readCoreProperties(doc_props);
+	pBookProps->title = doc_props->getStringDef(DOC_PROP_TITLE, "");
+	pBookProps->author = doc_props->getStringDef(DOC_PROP_AUTHORS, "");
+	pBookProps->description = doc_props->getStringDef(DOC_PROP_DESCRIPTION, "");
+	pBookProps->language = doc_props->getStringDef(DOC_PROP_LANGUAGE, "");
+
+	time_t t = (time_t)time(0);
+	struct stat fs;
+	if ( !stat( name, &fs ) ) {
+		t = fs.st_mtime;
+	}
+	pBookProps->filesize = (long)stream->GetSize();
+	pBookProps->filename = lString32(name);
+	pBookProps->filedate = getDateTimeString( t );
+	pBookProps->crc32 = stream->getcrc32();
+
+	return true;
+}
+
+static bool GetODTBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
+{
+	LVContainerRef arc = LVOpenArchieve( stream );
+	if ( arc.isNull() )
+		return false; // not a ZIP archive
+
+	OpcPackage package(arc);
+
+	//Read document metadata
+	LVStreamRef meta_stream = arc->OpenStream(U"meta.xml", LVOM_READ);
+	if ( meta_stream.isNull() )
+		return false;
+	ldomDocument * metaDoc = LVParseXMLStream( meta_stream );
+	if ( !metaDoc ) {
+		CRLog::error("Couldn't parse document meta data");
+		return false;
+	} else {
+		CRPropRef doc_props = LVCreatePropsContainer();
+
+		lString32 author = metaDoc->textFromXPath( cs32("document-meta/meta/creator") );
+		lString32 title = metaDoc->textFromXPath( cs32("document-meta/meta/title") );
+		lString32 description = metaDoc->textFromXPath( cs32("document-meta/meta/description") );
+		doc_props->setString(DOC_PROP_TITLE, title);
+		doc_props->setString(DOC_PROP_AUTHORS, author );
+		doc_props->setString(DOC_PROP_DESCRIPTION, description );
+		delete metaDoc;
+	}
+
+	time_t t = (time_t)time(0);
+	struct stat fs;
+	if ( !stat( name, &fs ) ) {
+		t = fs.st_mtime;
+	}
+	pBookProps->filesize = (long)stream->GetSize();
+	pBookProps->filename = lString32(name);
+	pBookProps->filedate = getDateTimeString( t );
+	pBookProps->crc32 = stream->getcrc32();
 
 	return true;
 }
@@ -347,9 +435,9 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     CRLog::trace("GetBookProperties( %s )", name);
 
     // check archieve
-    lString16 arcPathName;
-    lString16 arcItemPathName;
-    bool isArchiveFile = LVSplitArcName( lString16(name), arcPathName, arcItemPathName );
+    lString32 arcPathName;
+    lString32 arcItemPathName;
+    bool isArchiveFile = LVSplitArcName( lString32(name), arcPathName, arcItemPathName );
 
     // open stream
     LVStreamRef stream = LVOpenFileStream( (isArchiveFile ? arcPathName : Utf8ToUnicode(lString8(name))).c_str() , LVOM_READ);
@@ -363,6 +451,18 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
         CRLog::trace("GetBookProperties() : epub format detected");
     	return GetEPUBBookProperties( name, stream, pBookProps );
     }
+    if ( DetectFb3Format( stream ) ) {
+        CRLog::trace("GetBookProperties() : fb3 format detected");
+        return GetFB3BookProperties( name, stream, pBookProps );
+    }
+	if ( DetectDocXFormat( stream ) ) {
+		CRLog::trace("GetBookProperties() : docx format detected");
+		return GetDOCXBookProperties( name, stream, pBookProps );
+	}
+	if ( DetectOpenDocumentFormat( stream ) ) {
+		CRLog::trace("GetBookProperties() : odt format detected");
+		return GetODTBookProperties( name, stream, pBookProps );
+	}
 
 	if ( DetectFb3Format( stream ) ) {
 		CRLog::trace("GetBookProperties() : fb3 format detected");
@@ -380,7 +480,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
         }
         stream = container->OpenStream(arcItemPathName.c_str(), LVOM_READ);
         if ( stream.isNull() ) {
-            CRLog::error( "Cannot open archive file item stream %s", LCSTR(lString16(name)) );
+            CRLog::error( "Cannot open archive file item stream %s", LCSTR(lString32(name)) );
             return false;
         }
     }
@@ -416,29 +516,29 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
         LVStreamRef out = LVOpenFileStream(ofname, LVOM_WRITE);
         doc.saveToStream(out, "utf16");
     #endif
-    lString16 authors = extractDocAuthors( &doc, lString16("|"), false );
-	lString16 title = extractDocTitle( &doc );
-    lString16 language = extractDocLanguage( &doc );
-    lString16 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
-	lString16 genre = extractDocGenre( &doc, lString16("|") );
-	lString16 annotation = extractDocAnnotation( &doc );
-	lString16 srclang = extractDocSrcLang( &doc );
-	lString16 bookdate = extractDocBookDate( &doc );
-	lString16 translator = extractDocTranslator( &doc, false );
-    lString16 docauthor = extractDocAuthor( &doc );
-    lString16 docprogram = extractDocProgram( &doc );
-    lString16 docdate = extractDocDate( &doc );
-    lString16 docsrcurl = extractDocSrcUrl( &doc );
-    lString16 docsrcocr = extractDocSrcOcr( &doc );
-    lString16 docversion = extractDocVersion( &doc );
-    lString16 publname = extractPublName( &doc );
-    lString16 publisher = extractPublisher( &doc );
-    lString16 publcity = extractPublCity( &doc );
-    lString16 publyear = extractPublYear( &doc );
-    lString16 publisbn = extractPublIsbn( &doc );
-	lString16 publseries = extractDocPublishSeries( &doc, &pBookProps->publseriesNumber );
-	lString16 authorext = extractDocAuthorsExt( &doc, lString16("~"), lString16("|") );
-
+    lString32 authors = extractDocAuthors( &doc, lString32("|"), false );
+	lString32 title = extractDocTitle( &doc );
+    lString32 language = extractDocLanguage( &doc );
+    lString32 series = extractDocSeries( &doc, &pBookProps->seriesNumber );
+	lString32 genre = extractDocGenre( &doc, lString32("|") );
+	lString32 annotation = extractDocAnnotation( &doc );
+	lString32 srclang = extractDocSrcLang( &doc );
+	lString32 bookdate = extractDocBookDate( &doc );
+	lString32 translator = extractDocTranslator( &doc, false );
+    lString32 docauthor = extractDocAuthor( &doc );
+    lString32 docprogram = extractDocProgram( &doc );
+    lString32 docdate = extractDocDate( &doc );
+    lString32 docsrcurl = extractDocSrcUrl( &doc );
+    lString32 docsrcocr = extractDocSrcOcr( &doc );
+    lString32 docversion = extractDocVersion( &doc );
+    lString32 publname = extractPublName( &doc );
+    lString32 publisher = extractPublisher( &doc );
+    lString32 publcity = extractPublCity( &doc );
+    lString32 publyear = extractPublYear( &doc );
+    lString32 publisbn = extractPublIsbn( &doc );
+	lString32 publseries = extractDocPublishSeries( &doc, &pBookProps->publseriesNumber );
+	lString32 authorext = extractDocAuthorsExt( &doc, lString32("~"), lString32("|") );
+	lString32 description = extractDocDescription( &doc );
 #if SERIES_IN_AUTHORS==1
     if ( !series.empty() )
         authors << "    " << series;
@@ -447,7 +547,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     pBookProps->author = authors;
 	pBookProps->series = series;
     pBookProps->filesize = (long)stream->GetSize();
-    pBookProps->filename = lString16(name);
+    pBookProps->filename = lString32(name);
     pBookProps->filedate = getDateTimeString( t );
     pBookProps->language = language;
 	pBookProps->genre = genre;
@@ -468,7 +568,9 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     pBookProps->publisbn = publisbn;
 	pBookProps->publseries = publseries;
 	pBookProps->authorext = authorext;
-	return true;
+    pBookProps->description = description;
+    pBookProps->crc32 = stream->getcrc32();
+    return true;
 }
 
 
@@ -483,9 +585,9 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	CRJNIEnv env(_env);
 	jclass objclass = env->GetObjectClass(_fileInfo);
 	jfieldID fid = env->GetFieldID(objclass, "pathname", "Ljava/lang/String;");
-	lString16 filename = env.fromJavaString( (jstring)env->GetObjectField(_fileInfo, fid) );
+	lString32 filename = env.fromJavaString( (jstring)env->GetObjectField(_fileInfo, fid) );
     fid = env->GetFieldID(objclass, "arcname", "Ljava/lang/String;");
-    lString16 arcname = env.fromJavaString( (jstring)env->GetObjectField(_fileInfo, fid) );
+    lString32 arcname = env.fromJavaString( (jstring)env->GetObjectField(_fileInfo, fid) );
 	if ( filename.empty() )
 		return JNI_FALSE;
 	if ( !arcname.empty() )
@@ -505,6 +607,11 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	{ \
 	    jfieldID fid = env->GetFieldID(objclass, fldname, "I"); \
 	    env->SetIntField(_fileInfo,fid,src); \
+	}
+	#define SET_LONG_FLD(fldname,src) \
+	{ \
+	    jfieldID fid = env->GetFieldID(objclass, fldname, "J"); \
+	    env->SetLongField(_fileInfo,fid,src); \
 	}
 	SET_STR_FLD("title",props.title);
 	SET_STR_FLD("authors",props.author);
@@ -530,7 +637,52 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	SET_STR_FLD("publseries",props.publseries);
 	SET_INT_FLD("publseriesNumber",props.publseriesNumber);
 	SET_STR_FLD("authorext",props.authorext);
+	SET_LONG_FLD("crc32",props.crc32);
+	SET_STR_FLD("description",props.description);
 
+	return JNI_TRUE;
+}
+
+/*
+ * Class:     org_coolreader_crengine_Engine
+ * Method:    updateFileCRC32Internal
+ * Signature: (Lorg/coolreader/crengine/FileInfo;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_updateFileCRC32Internal
+		(JNIEnv * _env, jclass _engine, jobject _fileInfo)
+{
+	CRJNIEnv env(_env);
+	jclass objclass = env->GetObjectClass(_fileInfo);
+	jfieldID fid = env->GetFieldID(objclass, "pathname", "Ljava/lang/String;");
+	lString32 filename = env.fromJavaString( (jstring)env->GetObjectField(_fileInfo, fid) );
+	fid = env->GetFieldID(objclass, "arcname", "Ljava/lang/String;");
+	lString32 arcname = env.fromJavaString( (jstring)env->GetObjectField(_fileInfo, fid) );
+	if ( filename.empty() )
+		return JNI_FALSE;
+	bool isArchiveFile = !arcname.empty();
+	// open stream
+	LVStreamRef stream = LVOpenFileStream( (isArchiveFile ? arcname : filename).c_str() , LVOM_READ );
+	if (!stream.isNull()) {
+		if (isArchiveFile) {
+			LVContainerRef container = LVOpenArchieve(stream);
+			if (!container.isNull()) {
+				stream = container->OpenStream(filename.c_str(), LVOM_READ);
+				if (stream.isNull()) {
+					CRLog::error("Cannot open archive file item stream %s", LCSTR(filename));
+				}
+			} else {
+				CRLog::error("Cannot read archive contents from %s", LCSTR(arcname));
+				stream = LVStreamRef();
+			}
+		}
+	}
+	if (!stream.isNull()) {
+		fid = env->GetFieldID(objclass, "crc32", "J");
+	    env->SetLongField(_fileInfo, fid, stream->getcrc32());
+	} else {
+		CRLog::error("cannot open file %s", LCSTR(isArchiveFile ? arcname : filename));
+		return JNI_FALSE;
+	}
 	return JNI_TRUE;
 }
 
@@ -540,9 +692,9 @@ void drawBookCoverInternal(JNIEnv * _env, jclass _engine, jobject bitmap, jbyteA
 	CRJNIEnv env(_env);
 	CRLog::debug("drawBookCoverInternal called");
 	lString8 fontFace = UnicodeToUtf8(env.fromJavaString(_fontFace));
-	lString16 title = env.fromJavaString(_title);
-	lString16 authors = env.fromJavaString(_authors);
-	lString16 seriesName = env.fromJavaString(_seriesName);
+	lString32 title = env.fromJavaString(_title);
+	lString32 authors = env.fromJavaString(_authors);
+	lString32 seriesName = env.fromJavaString(_seriesName);
 	LVStreamRef stream;
 	LVDrawBuf * drawbuf = BitmapAccessorInterface::getInstance()->lock(_env, bitmap);
 	if (drawbuf != NULL) {
@@ -615,9 +767,9 @@ jbyteArray scanBookCoverInternal
   (JNIEnv * _env, jclass _class, jstring _path)
 {
 	CRJNIEnv env(_env);
-	lString16 path = env.fromJavaString(_path);
+	lString32 path = env.fromJavaString(_path);
 	CRLog::debug("scanBookCoverInternal(%s) called", LCSTR(path));
-	lString16 arcname, item;
+	lString32 arcname, item;
     LVStreamRef res;
     jbyteArray array = NULL;
     LVContainerRef arc;
@@ -704,8 +856,8 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getArchiveIte
   (JNIEnv * _env, jclass, jstring jarcName)
 {
     CRJNIEnv env(_env);
-    lString16 arcName = env.fromJavaString(jarcName);
-    lString16Collection list;
+    lString32 arcName = env.fromJavaString(jarcName);
+    lString32Collection list;
     
     //fontMan->getFaceList(list);
     LVStreamRef stream = LVOpenFileStream( arcName.c_str(), LVOM_READ );
@@ -718,7 +870,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getArchiveIte
                 if ( item->IsContainer())
                     continue;
                 list.add( item->GetName() );
-                list.add( lString16::itoa(item->GetSize()) );
+                list.add( lString32::itoa(item->GetSize()) );
             }
         }
     }
@@ -792,12 +944,12 @@ jboolean initInternal(JNIEnv * penv, jclass obj, jobjectArray fontArray, jint sd
 	CRLog::info("CRENGINE version %s %s", CR_ENGINE_VERSION, CR_ENGINE_BUILD_DATE);
 	
 	CRLog::info("initializing hyphenation manager");
-    HyphMan::initDictionaries(lString16::empty_str); //don't look for dictionaries
-	HyphMan::activateDictionary(lString16(HYPH_DICT_ID_NONE));
+    HyphMan::initDictionaries(lString32::empty_str); //don't look for dictionaries
+	HyphMan::activateDictionary(lString32(HYPH_DICT_ID_NONE));
 	CRLog::info("creating font manager");
     InitFontManager(lString8::empty_str);
 	CRLog::debug("converting fonts array: %d items", (int)env->GetArrayLength(fontArray));
-	lString16Collection fonts;
+	lString32Collection fonts;
 	env.fromJavaStringArray(fontArray, fonts);
 	int len = fonts.length();
 	CRLog::debug("registering fonts: %d fonts in list", len);
@@ -833,7 +985,7 @@ public:
 
 	virtual ~HyphDataLoaderProxy() {}
 
-	virtual LVStreamRef loadData(lString16 id) {
+	virtual LVStreamRef loadData(lString32 id) {
 		JNIEnv *penv = NULL;
 		bool attached = false;
 		mJavaVM->GetEnv((void **) &penv, JNI_VERSION_1_6);
@@ -886,13 +1038,13 @@ jboolean initDictionaries(JNIEnv *penv, jclass clazz, jobjectArray dictArray) {
 				dict_type = HDT_ALGORITHM;
 				break;
 			case 2:         // org/coolreader/crengine/Engine$HYPH_DICT
-				dict_type = HDT_DICT_ALAN;
+				dict_type = HDT_DICT_TEX;
 				break;
 			default:
 				dict_type = HDT_NONE;
 				break;
 		}
-		lString16 dict_code = env.fromJavaString(code);
+		lString32 dict_code = env.fromJavaString(code);
 		dict = new HyphDictionary(dict_type, dict_code, dict_code, dict_code);
 		if (!HyphMan::addDictionaryItem(dict))
 		    delete dict;
@@ -936,7 +1088,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFaceLi
 {
 	LOGI("getFontFaceListInternal called");
 	CRJNIEnv env(penv);
-	lString16Collection list;
+	lString32Collection list;
 	COFFEE_TRY_JNI(penv, fontMan->getFaceList(list));
 	return env.toJavaStringArray(list);
 }
@@ -951,7 +1103,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFileNa
 {
     LOGI("getFontFileListInternal called");
     CRJNIEnv env(penv);
-    lString16Collection list;
+    lString32Collection list;
     COFFEE_TRY_JNI(penv, fontMan->getFontFileNameList(list));
     return env.toJavaStringArray(list);
 }
@@ -966,7 +1118,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getFontFaceAn
 {
 	LOGI("getFontFileListInternal called");
 	CRJNIEnv env(penv);
-	lString16Collection list;
+	lString32Collection list;
 	COFFEE_TRY_JNI(penv, fontMan->getFontFaceAndFileNameList(list));
 	return env.toJavaStringArray(list);
 }
@@ -1044,7 +1196,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_listFilesInte
 	CRJNIEnv env(penv);
 	if (NULL == jdir)
 		return NULL;
-	jclass pjcFile = env->FindClass("java/io/File");
+	jclass pjcFile = env->GetObjectClass(jdir);
 	if (NULL == pjcFile)
 		return NULL;
 	jmethodID pjmFile_GetAbsolutePath = env->GetMethodID(pjcFile, "getAbsolutePath", "()Ljava/lang/String;");
@@ -1056,7 +1208,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_listFilesInte
 	jstring jpathname = (jstring)env->CallObjectMethod(jdir, pjmFile_GetAbsolutePath);
 	if (NULL == jpathname)
 		return NULL;
-	lString16 path = env.fromJavaString(jpathname);
+	lString32 path = env.fromJavaString(jpathname);
 	jobjectArray jarray = NULL;
 	LVContainerRef dir = LVOpenDirectory(path);
 	if ( !dir.isNull() ) {
@@ -1067,7 +1219,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_listFilesInte
 			for (int i = 0; i < dir->GetObjectCount(); i++) {
 				const LVContainerItemInfo *item = dir->GetObjectInfo(i);
 				if (item && item->GetName()) {
-					lString16 fileName = path + "/" + item->GetName();
+					lString32 fileName = path + "/" + item->GetName();
 					jstring jfilename = env.toJavaString(fileName);
 					if (NULL != jfilename) {
 						env->ExceptionClear();
@@ -1174,6 +1326,7 @@ static JNINativeMethod sEngineMethods[] = {
   {"getFontFaceAndFileNameListInternal", "()[Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_getFontFaceAndFileNameListInternal},
   {"setCacheDirectoryInternal", "(Ljava/lang/String;I)Z", (void*)Java_org_coolreader_crengine_Engine_setCacheDirectoryInternal},
   {"scanBookPropertiesInternal", "(Lorg/coolreader/crengine/FileInfo;)Z", (void*)Java_org_coolreader_crengine_Engine_scanBookPropertiesInternal},
+  {"updateFileCRC32Internal", "(Lorg/coolreader/crengine/FileInfo;)Z", (void*)Java_org_coolreader_crengine_Engine_updateFileCRC32Internal},
   {"getArchiveItemsInternal", "(Ljava/lang/String;)[Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_getArchiveItemsInternal},
   {"isLink", "(Ljava/lang/String;)Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_isLink},
   {"suspendLongOperationInternal", "()V", (void*)Java_org_coolreader_crengine_Engine_suspendLongOperationInternal},

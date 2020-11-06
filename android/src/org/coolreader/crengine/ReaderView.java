@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -45,7 +46,6 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -56,17 +56,15 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.onyx.android.sdk.device.Device;
 
-	public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties, OnKeyListener, OnTouchListener, OnFocusChangeListener {
+public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties, OnKeyListener, OnTouchListener, OnFocusChangeListener {
 
 	public static final Logger log = L.create("rv", Log.VERBOSE);
 	public static final Logger alog = L.create("ra", Log.WARN);
@@ -846,6 +844,19 @@ import com.google.gson.GsonBuilder;
 			case SELECTION_ACTION_BOOKMARK:
 				clearSelection();
 				showNewBookmarkDialog( sel, Bookmark.TYPE_COMMENT, "" );
+				break;
+			case SELECTION_ACTION_BOOKMARK_QUICK:
+				if (sel != null) {
+					clearSelection();
+					Bookmark bmk = new Bookmark();
+					bmk.setType(Bookmark.TYPE_COMMENT);
+					bmk.setPosText(sel.text);
+					bmk.setStartPos(sel.startPos);
+					bmk.setEndPos(sel.endPos);
+					bmk.setPercent(sel.percent);
+					bmk.setTitleText(sel.chapter);
+					addBookmark(bmk);
+				}
 				break;
 			case SELECTION_ACTION_FIND:
 				clearSelection();
@@ -1794,7 +1805,7 @@ import com.google.gson.GsonBuilder;
 					case STATE_DOWN_1:
 						if (distance < dragThreshold)
 							return true;
-						if (DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
+						if ((DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS || DeviceInfo.EINK_HAVE_FRONTLIGHT) && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
 							// backlight control enabled
 							if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
 								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick > 0
@@ -3106,7 +3117,7 @@ import com.google.gson.GsonBuilder;
 					animatePageFlip(1, onFinishHandler);
 				else {
 					if ((mActivity.getScreenBlackpageInterval() != 0) &&
-							(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
+							(curBlackpageInterval >= mActivity.getScreenBlackpageInterval() - 1)) {
 						curBlackpageInterval = 0;
 						bookView.draw(false, true);
 						BackgroundThread.instance().postGUI(() -> {
@@ -3532,6 +3543,9 @@ import com.google.gson.GsonBuilder;
 						showNewBookmarkDialog(lastSelection, Bookmark.TYPE_COMMENT, "");
 					}
 				}
+				break;
+			case DCMD_SAVE_BOOKMARK_QUICK:
+				addBookmark(0);
 				break;
 			case DCMD_SHOW_USER_DIC:
 				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
@@ -4018,6 +4032,9 @@ import com.google.gson.GsonBuilder;
 					|| PROP_APP_SHOW_COVERPAGES.equals(key)
 					|| PROP_APP_COVERPAGE_SIZE.equals(key)
 					|| PROP_APP_SCREEN_BACKLIGHT.equals(key)
+					|| PROP_APP_SCREEN_BACKLIGHT_WARM.equals(key)
+					|| PROP_APP_USE_EINK_FRONTLIGHT.equals(key)
+					|| PROP_APP_SCREEN_BACKLIGHT_EINK.equals(key)
 					|| PROP_APP_BOOK_PROPERTY_SCAN_ENABLED.equals(key)
 					|| PROP_APP_SCREEN_BACKLIGHT_LOCK.equals(key)
 					|| PROP_APP_TAP_ZONE_HILIGHT.equals(key)
@@ -4218,7 +4235,7 @@ import com.google.gson.GsonBuilder;
 				needAsk = true;
 			}
 		}
-		if (needAsk) {
+		if ((needAsk) && (!mActivity.settings().getBool(Settings.PROP_APP_DISABLE_SAFE_MODE, false))) {
 			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile,
 					() -> postLoadTask(fileInfo, doneHandler, errorHandler), () -> {
 				mActivity.showRootWindow();
@@ -4274,7 +4291,7 @@ import com.google.gson.GsonBuilder;
 				needAsk = true;
 			}
 		}
-		if (needAsk) {
+		if ((needAsk) && (!mActivity.settings().getBool(Settings.PROP_APP_DISABLE_SAFE_MODE, false))) {
 			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" (stream)",
 					() -> postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler), () -> {
 						mActivity.showRootWindow();
@@ -5201,83 +5218,110 @@ import com.google.gson.GsonBuilder;
 	}
 
 	int currentBrightnessValueIndex = -1;
-	int lastBrightnessValueIndexLeft = -1;
-	int lastBrightnessValueIndexRight = -1;
+	int currentBrightnessValueWarmIndex = -1;
+	int lastBrightnessValueIndex = -1;
+	int lastBrightnessValueIndexWarm = -1;
 
 	private void startBrightnessControl(final int startY, final boolean leftSide)
 	{
-		currentBrightnessValueIndex = -1;
-		int n = OptionsDialog.mBacklightLevels.length;
-		if (leftSide)
-			if (lastBrightnessValueIndexLeft == -1)
-				lastBrightnessValueIndexLeft = n - 1 - n * (surface.getHeight() / 2) / surface.getHeight();
-		if (!leftSide)
-			if (lastBrightnessValueIndexRight == -1)
-				lastBrightnessValueIndexRight = n - 1 - n * (surface.getHeight() / 2) / surface.getHeight();
+		int currentBrightnessValue = mActivity.getScreenBacklightLevel();
+		int currentBrightnessValueWarm = mActivity.getScreenBacklightLevelWarm();
+		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!mActivity.isOnyxBrightControl());
+		if (!onyxWarm) {
+			if (!mActivity.isOnyxBrightControl())
+				currentBrightnessValueIndex = OptionsDialog.findBacklightSettingIndex(currentBrightnessValue);
+			else
+				currentBrightnessValueIndex = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), currentBrightnessValue);
+			if (lastBrightnessValueIndex == -1) lastBrightnessValueIndex = currentBrightnessValueIndex;
+		} else {
+			if (!mActivity.isOnyxBrightControl())
+				currentBrightnessValueWarmIndex = OptionsDialog.findBacklightSettingIndex(currentBrightnessValueWarm);
+			else
+				currentBrightnessValueWarmIndex = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), currentBrightnessValueWarm);
+			if (lastBrightnessValueIndexWarm == -1) lastBrightnessValueIndexWarm = currentBrightnessValueWarmIndex;
+		}
 		updateBrightnessControl(startY, startY, leftSide);
 	}
 
-	private void updateBrightnessControl_old(final int y_start, final int y, final boolean leftSide) {
-		int n = OptionsDialog.mBacklightLevels.length;
-		int index = n - 1 - y * n / surface.getHeight();
-		if (index < 0)
-			index = 0;
-		else if (index >= n)
-			index = n-1;
-		if (index != currentBrightnessValueIndex) {
-			currentBrightnessValueIndex = index;
-			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
-			mActivity.setScreenBacklightLevel(newValue, leftSide);
-			if (newValue < 0) newValue = 0;
-			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-				showCenterPopup(newValue+"%");
-			}
-		}
-	}
-
 	private void updateBrightnessControl(final int y_start, final int y, final boolean leftSide) {
-		int n = OptionsDialog.mBacklightLevels.length;
-		int index1 = n - 1 - y * n / surface.getHeight();
-		int index2 = n - 1 - y_start * n / surface.getHeight();
+		List<Integer> levelList = null;
+		int count = 0;
+		if (!mActivity.isOnyxBrightControl())
+			count = OptionsDialog.mBacklightLevels.length;
+		else {
+			levelList = EinkScreen.getFrontLightLevels(mActivity);
+			for (int i: levelList) log.i("levelList " + i);
+			if (null != levelList)
+				count = levelList.size();
+			else
+				return;
+		}
+		if (0 == count)
+			return;
+		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!mActivity.isOnyxBrightControl());
+		int index1 = count - 1 - y * count / surface.getHeight();
+		int index2 = count - 1 - y_start * count / surface.getHeight();
+		log.i("index1 " + index1);
+		log.i("index2 " + index2);
+		log.i("count " + count);
+
 		//index1 = index1 / 4 * 3;
 		//index2 = index2 / 4 * 3;
 		int index = 0;
-		if (leftSide)
-			index = index1 - index2 + lastBrightnessValueIndexLeft;
-		if (!leftSide)
-			index = index1 - index2 + lastBrightnessValueIndexRight;
+		if (!onyxWarm)
+			index = index1 - index2 + lastBrightnessValueIndex;
+		if (onyxWarm)
+			index = index1 - index2 + lastBrightnessValueIndexWarm;
 		//int index = currentBrightnessValueIndex + (currentBrightnessValueIndex * aval) / 100;
 		if (index < 0)
 			index = 0;
-		else if (index >= n)
-			index = n-1;
-		if (index != currentBrightnessValueIndex) {
-			currentBrightnessValueIndex = index;
-			int newValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
+		else if (index >= count)
+			index = count-1;
+		log.i("index " + index);
+		int curBrightnessValueIndex = -1;
+		if (!onyxWarm) curBrightnessValueIndex = currentBrightnessValueIndex;
+		if (onyxWarm) curBrightnessValueIndex = currentBrightnessValueWarmIndex;
+		if (index != curBrightnessValueIndex) {
+			if (!onyxWarm) currentBrightnessValueIndex = index;
+			else
+				currentBrightnessValueWarmIndex = index;
+			int newValue = 0;
+			if (mActivity.isOnyxBrightControl())
+				newValue = levelList.get(index);
+			else
+				newValue = OptionsDialog.mBacklightLevels[index];
 			mActivity.setScreenBacklightLevel(newValue, leftSide);
 			//if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			if (newValue < 1) newValue = 1;
-			if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
+			if (onyxWarm) {
 				if (leftSide) {
 					int indexR = 0;
-					indexR = lastBrightnessValueIndexRight;
+					indexR = lastBrightnessValueIndexWarm;
 					if (indexR < 0)
 						indexR = 0;
-					else if (indexR >= n)
-						indexR = n-1;
-					int newValueR = OptionsDialog.mBacklightLevels[indexR];
+					else if (indexR >= count)
+						indexR = count-1;
+					int newValueR = 0;
+					if (!mActivity.isOnyxBrightControl())
+						newValueR = OptionsDialog.mBacklightLevels[indexR];
+					else
+						newValueR = levelList.get(indexR);
 					if (newValueR>=0)
 						showCenterPopup(newValue + "% / " + newValueR + "%", 2000);
 					else
 						showCenterPopup(newValue + "%", 2000);
 				} else {
 					int indexL = 0;
-					indexL = lastBrightnessValueIndexLeft;
+					indexL = lastBrightnessValueIndex;
 					if (indexL < 0)
 						indexL = 0;
-					else if (indexL >= n)
-						indexL = n-1;
-					int newValueL = OptionsDialog.mBacklightLevels[indexL];
+					else if (indexL >= count)
+						indexL = count-1;
+					int newValueL = 0;
+					if (!mActivity.isOnyxBrightControl())
+						newValueL = OptionsDialog.mBacklightLevels[indexL];
+					else
+						newValueL = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), indexL);
 					if (newValueL>=0)
 						showCenterPopup(newValueL + "% / " + newValue + "%", 2000);
 					else
@@ -5292,22 +5336,35 @@ import com.google.gson.GsonBuilder;
 	}
 
 	private void stopBrightnessControl(final int y_start, final int y, final boolean leftSide) {
-		if (currentBrightnessValueIndex >= 0) {
+		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!mActivity.isOnyxBrightControl());
+		int curBrightnessValueIndex = currentBrightnessValueIndex;
+		if (onyxWarm) curBrightnessValueIndex = currentBrightnessValueWarmIndex;
+		if (curBrightnessValueIndex >= 0) {
 			if (y_start >= 0 && y >= 0) {
 				updateBrightnessControl(y_start, y, leftSide);
 			}
-			mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, OptionsDialog.mBacklightLevels[currentBrightnessValueIndex]);
-			OptionsDialog.mBacklightLevelsTitles[0] = mActivity.getString(R.string.options_app_backlight_screen_default);
+			if (mActivity.isOnyxBrightControl()) {
+				mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT_EINK, OptionsDialog.findBacklightSettingIndex(curBrightnessValueIndex));
+			} else {
+				if (!onyxWarm)
+					mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, OptionsDialog.mBacklightLevels[curBrightnessValueIndex]);
+				else
+					mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT_WARM, OptionsDialog.mBacklightLevels[curBrightnessValueIndex]);
+			}
 			if (showBrightnessFlickToast) {
+				OptionsDialog.mBacklightLevelsTitles[0] = mActivity.getString(R.string.options_app_backlight_screen_default);
 				String s = OptionsDialog.mBacklightLevelsTitles[currentBrightnessValueIndex];
 				mActivity.showToast(s);
 			}
 			saveSettings(mSettings);
-			if (leftSide)
-				lastBrightnessValueIndexLeft = currentBrightnessValueIndex;
-			if (!leftSide)
-				lastBrightnessValueIndexRight = currentBrightnessValueIndex;
-			currentBrightnessValueIndex = -1;
+			if (!onyxWarm) {
+				lastBrightnessValueIndex = curBrightnessValueIndex;
+				currentBrightnessValueIndex = -1;
+			}
+			else {
+				lastBrightnessValueIndexWarm = curBrightnessValueIndex;
+				currentBrightnessValueWarmIndex = -1;
+			}
 		}
 	}
 
@@ -6696,6 +6753,11 @@ import com.google.gson.GsonBuilder;
 			this.errorHandler = errorHandler;
 			//FileInfo fileInfo = new FileInfo(filename);
 			disableInternalStyles = mBookInfo.getFileInfo().getFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG);
+			if (mBookInfo.getFileInfo().flags == 0) {
+				boolean embed = mSettings.getBool(PROP_EMBEDDED_STYLES_DEF, false);
+				disableInternalStyles = !embed;
+				mBookInfo.getFileInfo().setFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG, disableInternalStyles);
+			}
 			disableTextAutoformat = mBookInfo.getFileInfo().getFlag(FileInfo.DONT_REFLOW_TXT_FILES_FLAG);
 			profileNumber = mBookInfo.getFileInfo().getProfileId();
 			//Properties oldSettings = new Properties(mSettings);
@@ -6794,7 +6856,7 @@ import com.google.gson.GsonBuilder;
 				}
 				CoolReader.dumpHeapAllocation();
 			} else {
-				log.e("Error occured while trying to load document " + filename);
+				log.e("Error occurred while trying to load document " + filename);
 				throw new IOException("Cannot read document");
 			}
 		}
@@ -6806,18 +6868,6 @@ import com.google.gson.GsonBuilder;
 			log.d("LoadDocumentTask, GUI thread is finished successfully");
 			if (Services.getHistory() != null) {
 				Services.getHistory().updateBookAccess(mBookInfo, getTimeElapsed());
-				java.util.Properties props = doc.getDocProps();
-				if (null != props) {
-					String crc32Str = props.getProperty(DOC_PROP_FILE_CRC32, "0");
-					if (crc32Str.startsWith("0x"))
-						crc32Str = crc32Str.substring(2);
-					try {
-						mBookInfo.getFileInfo().crc32 = Integer.valueOf(crc32Str, 16);
-					} catch (NumberFormatException e) {
-						mBookInfo.getFileInfo().crc32 = 0;
-					}
-				} else
-					mBookInfo.getFileInfo().crc32 = 0;
 				mActivity.waitForCRDBService(() -> mActivity.getDB().saveBookInfo(mBookInfo));
 				if (coverPageBytes != null && mBookInfo != null && mBookInfo.getFileInfo() != null) {
 					// TODO: fix it
@@ -6852,7 +6902,7 @@ import com.google.gson.GsonBuilder;
 				selectionModeWasActive = false;
 				inspectorModeActive = false;
 
-				//drawPage(); //plotn - possibly it is unnesessary - due to new progress
+				drawPage(); //plotn - possibly it is unnesessary - due to new progress. But maybe not - page was empty last time
 
 				BackgroundThread.instance().postGUI(() -> {
 					mActivity.showReader();

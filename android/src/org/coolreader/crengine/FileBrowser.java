@@ -303,17 +303,20 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					boolean bOpenExisting = false;
 					if (
 							(
-									(!StrUtils.isEmptyStr(item.pathnameR)) ||
-											(!StrUtils.isEmptyStr(item.arcnameR))
-							) && (!StrUtils.isEmptyStr(item.opdsLinkR))
-					)
+								(!StrUtils.isEmptyStr(item.pathnameR)) ||
+								(!StrUtils.isEmptyStr(item.arcnameR))
+							) && (
+								(!StrUtils.isEmptyStr(item.opdsLinkR)) ||
+								(!StrUtils.isEmptyStr(item.opdsLinkRfull))
+							)
+						)
 					{
 						String q = mActivity.getString(R.string.open_previously_downloaded);
-						if ((StrUtils.getNonEmptyStr(item.pathnameR, true).contains("/fragments/")) ||
-							(StrUtils.getNonEmptyStr(item.arcnameR, true).contains("/fragments/")))
-								q = mActivity.getString(R.string.open_previously_downloaded_fragment);
+						boolean fragm = ((StrUtils.getNonEmptyStr(item.pathnameR, true).contains("/fragments/")) ||
+								(StrUtils.getNonEmptyStr(item.arcnameR, true).contains("/fragments/")));
+						if (fragm) q = mActivity.getString(R.string.open_previously_downloaded_fragment);
 						mActivity.askConfirmation(q,
-								() -> Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), finalItem.opdsLinkR, item.isLitresBook(),
+								() -> Services.getHistory().getFileInfoByOPDSLink(mActivity.getDB(), fragm ? finalItem.opdsLinkR : finalItem.opdsLinkRfull, item.isLitresBook(),
 										new History.FileInfo1LoadedCallback() {
 
 											@Override

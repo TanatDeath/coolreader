@@ -129,7 +129,7 @@ public class ToastView {
                 Log.e("TOAST", e.getMessage());
             }
             // window.showAtLocation(t.anchor, Gravity.NO_GRAVITY, 0, 0);
-            mHandler.postDelayed(handleDismiss, t.duration == 0 ? 2000 : 3000);
+            mHandler.postDelayed(handleDismiss, t.duration == 0 ? 3000 : 4000);
         }
     }
 }

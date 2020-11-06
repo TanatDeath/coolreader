@@ -11,15 +11,16 @@ my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
 my %ic_smaller_list=(
-        'icons8_wiki1.svg' => 'icons8_wiki1.png',
-        'icons8_wiki2.svg' => 'icons8_wiki2.png',
-        'icons8_two_fingers.svg' => 'icons8_two_fingers.png',
-        'icons8_page_animation_speed.svg' => 'icons8_page_animation_speed.png',
-        'icons8_page_animation.svg' => 'icons8_page_animation.png'
+
 );
 
 my %ic_actions_list=(
-        'icons8_hide.svg' => 'icons8_hide.png'
+        'icons8_hide.svg' => 'icons8_hide.png',
+        'icons8_library.svg' => 'icons8_library.png',
+        'icons8_bookmark_plus_q.svg' => 'icons8_bookmark_plus_q.png',
+        'icons8_two_fingers.svg' => 'icons8_two_fingers.png',
+        'icons8_select_all.svg' => 'icons8_select_all.png',
+        'cr3_option_text_multilang.svg' => 'cr3_option_text_multilang.png'
 );
 
 my %ic_menu_list=(
@@ -49,7 +50,7 @@ while (($srcfile, $dstfile) = each(%ic_smaller_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -66,7 +67,7 @@ while (($srcfile, $dstfile) = each(%ic_actions_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -83,7 +84,7 @@ while (($srcfile, $dstfile) = each(%ic_menu_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -101,7 +102,7 @@ while (($srcfile, $dstfile) = each(%ic_launcher_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -119,7 +120,7 @@ while (($srcfile, $dstfile) = each(%ic_bigicons_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z -e ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;

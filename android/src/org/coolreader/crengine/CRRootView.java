@@ -375,7 +375,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		//if (enableLitres)
 		//catalogs.add(0, Scanner.createOnlineLibraryPluginItem(OnlineStorePluginManager.PLUGIN_PKG_LITRES, "LitRes"));
 		//asdf!!!
-		//catalogs.add(0, Scanner.createLitresItem("LitRes"));
+		catalogs.add(0, Scanner.createLitresItem("LitRes"));
 		if (Services.getScanner() == null)
 			return;
 		FileInfo opdsRoot = Services.getScanner().getOPDSRoot();

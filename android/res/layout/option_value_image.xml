@@ -22,13 +22,15 @@
         android:clickable="true"
         android:background="@null"
         />
-    <RadioButton
+    <ImageView
         android:id="@+id/option_value_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginLeft="4dip"
         android:layout_marginRight="4dip"
+        android:layout_marginTop="4dip"
+        android:layout_marginBottom="4dip"
         android:focusable="false"
         android:focusableInTouchMode="false"
     />

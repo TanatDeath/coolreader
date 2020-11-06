@@ -47,7 +47,7 @@ public:
     virtual bool RegisterFont(lString8 name);
 
     /// returns registered font files
-    virtual void getFontFileNameList(lString16Collection &list);
+    virtual void getFontFileNameList(lString32Collection &list);
 
     //plotn - for use in Android
     virtual void getFontFaceAndFileNameList(lString16Collection &list);

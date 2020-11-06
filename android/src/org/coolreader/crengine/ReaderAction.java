@@ -171,6 +171,7 @@ public class ReaderAction {
 	public final static ReaderAction FONTS_MENU = new ReaderAction("FONTS_MENU", R.string.fonts_menu, ReaderCommand.DCMD_FONTS_MENU, 0, CLOUD_MENU, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_type_filled_2);
 	public final static ReaderAction SAVE_BOOKMARK_LAST_SEL = new ReaderAction("SAVE_BOOKMARK_LAST_SEL", R.string.save_bookmark_last_sel, ReaderCommand.DCMD_SAVE_BOOKMARK_LAST_SEL, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmark_plus);
 	public final static ReaderAction SAVE_BOOKMARK_LAST_SEL_USER_DIC = new ReaderAction("SAVE_BOOKMARK_LAST_SEL_USER_DIC", R.string.save_bookmark_last_sel_user_dic, ReaderCommand.DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC, 0, SAVE_BOOKMARK_LAST_SEL, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_save);
+	public final static ReaderAction SAVE_BOOKMARK_QUICK = new ReaderAction("SAVE_BOOKMARK_QUICK", R.string.save_bookmark_quick, ReaderCommand.DCMD_SAVE_BOOKMARK_QUICK, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmark_plus_q);
 	public final static ReaderAction SHOW_USER_DIC = new ReaderAction("SHOW_USER_DIC", R.string.win_title_user_dic, ReaderCommand.DCMD_SHOW_USER_DIC, 0, SHOW_DICTIONARY, R.string.options_app_show_user_dic_panel_add_info).setIconId(R.drawable.icons8_google_translate_user);
 	public final static ReaderAction SHOW_CITATIONS = new ReaderAction("SHOW_CITATIONS", R.string.win_title_citations, ReaderCommand.DCMD_SHOW_CITATIONS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_quote_2);
 	public final static ReaderAction TOGGLE_PAGE_VIEW_MODE = new ReaderAction("TOGGLE_PAGE_VIEW_MODE", R.string.options_view_mode,
@@ -249,6 +250,7 @@ public class ReaderAction {
 		FONTS_MENU,
 		SAVE_BOOKMARK_LAST_SEL,
 		SAVE_BOOKMARK_LAST_SEL_USER_DIC,
+		SAVE_BOOKMARK_QUICK,
 		SHOW_USER_DIC,
 		SHOW_CITATIONS,
 		TOGGLE_PAGE_VIEW_MODE,

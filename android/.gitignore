@@ -2,7 +2,6 @@ bin
 gen
 libs
 obj
-
 *.iml
 .gradle
 /local.properties
@@ -15,3 +14,10 @@ obj
 /captures
 .externalNativeBuild
 apikey.properties
+/.externalNativeBuild
+/.idea/assetWizardSettings.xml
+/.idea/encodings.xml
+/.idea/jarRepositories.xml
+/.idea/modules.xml
+/.idea/caches/
+/.idea/dictionaries/

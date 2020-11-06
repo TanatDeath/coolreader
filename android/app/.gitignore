@@ -8,3 +8,7 @@
 /.idea
 /release
 /release_minsize
+/.cxx/
+/debug/
+/release/
+/release_stripped/

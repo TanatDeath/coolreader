@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -21,16 +22,18 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TimeZone;
 
+import okhttp3.HttpUrl;
+
 import static org.coolreader.crengine.Utils.cleanupHtmlTags;
 
 public class LitresJsons {
 
 	public static final String LITRES_ADDR = "https://catalit.litres.ru/catalitv2";
-	public static final String LITRES_ADDR_DOWNLOAD = "https://catalit.litres.ru/catalit_download_book";
+	public static final String LITRES_ADDR_DOWNLOAD = "https://catalit.litres.ru/pages/catalit_download_book";
 
 	public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ssXXX"; // таймзона без двоеточия
 	//public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ss'Z'"; // с двоеточием, но один хрен ((
-	//public static final String DATE_FORMAT_1 = "yyyy-MM-dd'T'HH:mm:ss";
+	public static final String DATE_FORMAT_2 = "yyyy-MM-dd'T'HH:mm:ss";
 	public static final int HOUR = 1000 * 60 * 60;
 
 	private static String bytesToHex(byte[] hash) {
@@ -49,23 +52,32 @@ public class LitresJsons {
 		return bytesToHex(encodedhash);
 	}
 
-	public static String getCurrentTime() {
+	public static String getCurrentTimeOld() { // better, but dont works on old androids
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_1);
 		dateFormat.setTimeZone(TimeZone.getDefault());
 		Date today = Calendar.getInstance().getTime();
 		return dateFormat.format(today);
 	}
 
+	public static String getCurrentTime() { // think later about 30m timezone shift
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_2);
+		dateFormat.setTimeZone(TimeZone.getDefault());
+		Date today = Calendar.getInstance().getTime();
+		String sTime = dateFormat.format(today);
+		TimeZone tz = TimeZone.getDefault();
+		int offs = tz.getRawOffset() / HOUR;
+		String soffs = ((offs < 0) ? "-" : "+") + String.format("%02d", Math.abs(offs));
+		sTime = sTime + soffs + ":00";
+		//sTime = "2020-09-23T18:32:56+00:00";
+		return sTime;
+	}
+
+
 	public static JSONObject w_create_sid(String uuid, String appId, String secret,
 										  String login, String passw) throws JSONException, NoSuchAlgorithmException {
 		JSONObject json = new JSONObject();
 		json.put("app", appId);
 		String sTime = getCurrentTime();
-		//TimeZone tz = TimeZone.getDefault();
-		//int offs = tz.getRawOffset() / HOUR;
-		//String soffs = ((offs < 0) ? "-" : "+") + String.format("%02d", Math.abs(offs));
-		//sTime = sTime + soffs + ":00";
-		//sTime = "2020-09-23T18:32:56+00:00";
 		json.put("time", sTime);
 		String timeAndSecretSha = getSHA256(sTime + secret);
 		json.put("sha", timeAndSecretSha);
@@ -78,6 +90,23 @@ public class LitresJsons {
 		jsparams.put("pwd",passw);
 		jsparams.put("sid","0");
 		jsreq.put("param", jsparams);
+		jsa.put(jsreq);
+		json.put("requests", jsa);
+		return json;
+	}
+
+	public static JSONObject w_actualize_sid(String uuid, String appId, String secret, CoolReader cr) throws JSONException, NoSuchAlgorithmException {
+		JSONObject json = new JSONObject();
+		json.put("app", appId);
+		json.put("sid", cr.litresCloudSettings.sessionId);
+		String sTime = getCurrentTime();
+		json.put("time", sTime);
+		String timeAndSecretSha = getSHA256(sTime + secret);
+		json.put("sha", timeAndSecretSha);
+		JSONArray jsa = new JSONArray();
+		JSONObject jsreq = new JSONObject();
+		jsreq.put("func", "w_actualize_sid");
+		jsreq.put("id", uuid);
 		jsa.put(jsreq);
 		json.put("requests", jsa);
 		return json;
@@ -109,6 +138,46 @@ public class LitresJsons {
 			if (json2.has("error_message")) le.errorText = json2.getString("error_message");
 		}
 		return le;
+	}
+
+	public static JSONObject r_profile(String uuid, String appId, String secret,
+										   String sid) throws JSONException, NoSuchAlgorithmException {
+		JSONObject json = new JSONObject();
+		JSONArray jsa2 = new JSONArray();
+		jsa2.put("money_details");
+		jsa2.put("mail");
+		jsa2.put("login");
+		jsa2.put("first_name");
+		jsa2.put("middle_name");
+		jsa2.put("last_name");
+		jsa2.put("nickname");
+		jsa2.put("phone");
+		jsa2.put("birth_date");
+		jsa2.put("gender");
+		jsa2.put("reviews_cnt");
+		jsa2.put("quotes_cnt");
+		jsa2.put("biblio");
+		jsa2.put("subscr");
+		jsa2.put("socnet");
+		jsa2.put("is_megafone_user");
+		jsa2.put("subscr_profit");
+		JSONArray jsa = new JSONArray();
+		JSONObject jsreq = new JSONObject();
+		jsreq.put("func", "r_profile");
+		jsreq.put("id", uuid);
+		JSONObject jsfields = new JSONObject();
+		jsfields.put("fields", jsa2);
+		jsreq.put("param", jsfields);
+		jsa.put(jsreq);
+		json.put("requests", jsa);
+		String sTime = getCurrentTime();
+		json.put("time", sTime);
+		json.put("mobile_app", 1);
+		//json.put("app", appId);
+		json.put("sid", sid);
+		String timeAndSecretSha = getSHA256(sTime + secret);
+		json.put("sha", timeAndSecretSha);
+		return json;
 	}
 
 	public static JSONObject r_genres_list(String uuid, String appId, String secret,
@@ -503,7 +572,7 @@ public class LitresJsons {
 		return json;
 	}
 
-	public static ArrayList<FileInfo> parse_r_search_arts(String uuid, CoolReader cr, CloudAction ca, String jsonBody) throws JSONException {
+	public static ArrayList<FileInfo> parse_r_search_arts(String uuid, CoolReader cr, CloudAction ca, String jsonBody) throws JSONException, MalformedURLException {
 		ArrayList<FileInfo> list = new ArrayList<>();
 		if (ca.lsp != null)
 			if (ca.lsp.beginIndex > 0) {
@@ -628,6 +697,15 @@ public class LitresJsons {
 						item.cover_href2 = "https://cv" + ss + ".litres.ru/pub/c/cover/" + id + ".jpg";
 						item.fragment_href = "https://cv" + ss + ".litres.ru/pub/t/" + id;
 					}
+					String redir_url = Utils.getUrlLoc(new java.net.URL(LitresJsons.LITRES_ADDR_DOWNLOAD));
+					if (StrUtils.isEmptyStr(redir_url)) redir_url = LitresJsons.LITRES_ADDR_DOWNLOAD;
+					HttpUrl.Builder urlBuilder = HttpUrl.parse(redir_url).newBuilder();
+					urlBuilder.addQueryParameter("sid", cr.litresCloudSettings.sessionId);
+					urlBuilder.addQueryParameter("art", "" + id);
+					String url = urlBuilder.build().toString();
+					item.full_href = url;
+					item.full_href_wo_sid = url.replace(cr.litresCloudSettings.sessionId, "[sid]");
+
 					if (jso.has("publisher")) item.publisher =  jso.getString("publisher");
 					if (jso.has("isbn")) item.publisbn =  jso.getString("isbn");
 					if (jso.has("year")) item.setPublyear(jso.getString("year"));
@@ -645,7 +723,7 @@ public class LitresJsons {
 
 					item.id = Long.parseLong(id);
 					item.tag = "";
-					Services.getHistory().getFileInfoByOPDSLink(cr.getDB(), item.fragment_href, true,
+					Services.getHistory().getFileInfoByOPDSLink(cr.getDB(), item.fragment_href + "|" + item.full_href_wo_sid, true,
 							new History.FileInfo1LoadedCallback() {
 
 								@Override
@@ -661,6 +739,7 @@ public class LitresJsons {
 											item.arcnameR = fileInfo.arcname;
 											item.pathR = fileInfo.path;
 											item.opdsLinkR = item.fragment_href;
+											item.opdsLinkRfull = item.full_href_wo_sid;
 										}
 									}
 								}

@@ -126,6 +126,7 @@
     <string name="dlg_search_case_sensitive">Учитывать регистр</string>
     <string name="dlg_search_reverse">Искать назад</string>
     <string name="dlg_search_hint">Введите строку для поиска</string>
+    <string name="dlg_search_hint_hex">Введите строку для поиска или шестнадцатеричное значение</string>
     <string name="dlg_button_ok">Ok</string>
     <string name="dlg_button_cancel">Отмена</string>
     <string name="dlg_button_yes">Да</string>
@@ -134,6 +135,8 @@
     <string name="options_page_animation">Анимация листания</string>
     <string name="options_controls_enable_volume_keys">Листание кнопками громкости</string>
     <string name="options_app_backlight_screen">Яркость подсветки экрана</string>
+    <string name="options_app_backlight_screen_warm">Теплая яркость подсветки экрана</string>
+    <string name="options_app_backlight_screen_eink">Яркость подсветки экрана - EINK метод</string>
     <string name="options_app_backlight_screen_default">Установленная в системе</string>
     <string name="options_app_tapzones_normal">Сенсорный экран</string>
     <string name="options_app_key_actions">Кнопки</string>
@@ -171,6 +174,7 @@
     <string name="action_repeat">(автоповтор)</string>
     <string name="options_app_scan_book_props">Сканировать свойства книг в директории</string>
     <string name="options_page_titlebar">Настройки колонтитула</string>
+    <string name="options_page_titlebar_short">колонтитул</string>
     <string name="options_page_titlebar_new">Настройки колонтитула и полноэкранного режима</string>
     <string name="options_page_show_titlebar_chapter_marks">Метки глав</string>
     <string name="options_page_show_titlebar_battery_percent">Заряд батареи в %</string>
@@ -238,6 +242,7 @@
     <string name="options_selection3_action_long">Режим инспектора: Действие для выделения (длинный тап)</string>
     <string name="options_multi_selection3_action">Режим инспектора: Действие для нескольких выделенных слов</string>
     <string name="options_selection_action_bookmark">Добавить закладку</string>
+    <string name="options_selection_action_bookmark_quick">Добавить быструю закладку</string>
     <string name="options_selection_action_dictionary">Найти в словаре</string>
     <string name="options_selection_action_dictionary_1">Найти в словаре 1</string>
     <string name="options_selection_action_dictionary_2">Найти в словаре 2</string>
@@ -262,7 +267,10 @@
     <string name="book_info_action_download1">Нажмите на обложку, чтобы скачать книгу</string>
     <string name="book_info_action_download2">Нажмите на обложку, чтобы открыть книгу</string>
     <string name="book_info_action_unavailable">Сначала вы должны скачать книгу</string>
-    <string name="mi_book_styles_enable">Разрешить встроенные стили документа</string>
+    <string name="mi_book_styles_enable">Книга: Разрешить встроенные стили документа</string>
+    <string name="mi_book_styles_enable_add_info">Эта настройка - для открытой в данный момент книги</string>
+    <string name="mi_book_styles_enable_def">По умолчанию: Разрешить встроенные стили документа</string>
+    <string name="mi_book_styles_enable_def_add_info">Это настройка по умолчанию для новых книг</string>
     <string name="mi_book_styles_disable">Запретить встроенные стили документа</string>
     <string name="mi_night_mode_disable">Дневной режим</string>
     <string name="mi_night_mode_enable">Ночной режим</string>
@@ -276,6 +284,8 @@
     <string name="book_info_book_publyear">Год издания</string>
     <string name="book_info_book_publisbn">ISBN издания</string>
     <string name="book_info_section_book_translation">Направление перевода</string>
+    <string name="book_info_section_book_translation2">Книга: направление перевода</string>
+    <string name="book_info_section_book_translation2_add_info">Направление перевода работает для НЕКОТОРЫХ словарей, например онлайновых, ABBYY, ...</string>
     <string name="book_info_book_authors">Автор(ы)</string>
     <string name="book_info_book_date">Дата книги</string>
     <string name="book_info_file_path">Путь к файлу</string>
@@ -544,7 +554,7 @@
     <string name="mi_font_bold">Утолщенный шрифт</string>
     <string name="mi_font_previous">Предыдущий шрифт</string>
     <string name="dlg_about_donation_total">Всего: </string>
-    <string name="options_font_embedded_document_font_enabled">Встроенные шрифты документа</string>
+    <string name="options_font_embedded_document_font_enabled">Книга: Встроенные шрифты документа</string>
     <string name="options_app_locale_system">Системный</string>
     <string name="options_app_locale">Язык интерфейса (Interface language)</string>
     <string name="mi_goto_manual">Руководство пользователя</string>
@@ -893,6 +903,7 @@
     <string name="skipped_res_add_info">Позволяет не обновлять страницу полностью для избежания перефоматирования текста (при открытии диалогов, клавиатуры и т.д.)</string>
     <string name="options_app_backlight_timeout_add_info">Принудительная установка времени подстветки экрана 2-6 минут, либо согласно настроек системы (выбрано по умолчанию)</string>
     <string name="options_app_backlight_screen_add_info">Принудительная установка яркости экрана 1-100%, либо согласно настроек системы (выбрано по умолчанию)</string>
+    <string name="options_app_backlight_screen_warm_add_info">Для EINK устройств с двойной фронтальной подсветкой (пока только Onyx)</string>
     <string name="options_app_tts_stop_motion_timeout_add_info">Если датчик движения не фиксирует активность, то чтение вслух прекращается после выбранного периода времени 1-100 минут, изначально выключено</string>
     <string name="options_app_key_backlight_off_add_info">Принудительное отключение подсветки кнопок управления (если имеются отдельные) для более комфортного чтения</string>
     <string name="options_app_settings_icons_add_info">Отображение пиктограмм перед пунктами меню (при отключении - только наименования)</string>
@@ -1242,6 +1253,8 @@
     <string name="options_app_hide_state_dialogs_add_info">Не спрашивать \'установить пометку читаю\', \'отметить как прочитанную\' etc</string>
     <string name="options_app_hide_css_warning">Не показывать диалог о css стилях книги</string>
     <string name="options_app_hide_css_warning_add_info">Не показывать диалог о css стилях книги (при открытии новой книги, переключении ночного режима)</string>
+    <string name="options_app_disable_safe_mode">Отключить безопасный режим</string>
+    <string name="options_app_disable_safe_mode_add_info">Не показывать вопрос \'Вы хотите открыть книгу\' при открытии новых книг</string>
     <string name="options_word_expanion">Разреживание слов</string>
     <string name="options_format_unused_space_thres">% неиспользуемого пространства в строке для срабатывания переноса или добавления расстояния между буквами для выравнивания</string>
     <string name="options_word_expanion_add_info">В некоторых случаях добавляется расстояние между буквами в словах</string>
@@ -1283,9 +1296,6 @@
     <string name="googledrive_sync_from">Синх. с Диска</string>
     <string name="confirmation_title">Подтверждение</string>
     <string name="online_dic_exceeded">К сожалению лимит перевода в онлайн словаре исчерпан. Попробуйте позже</string>
-    <string name="choose_root_sd">Невозможно удалить файл, если файл находится на внешней SD карте, выберите корень внешней SD карты в диалоге</string>
-    <string name="could_not_delete_on_sd">Невозможно найти файл, убедитесь, что был выбран корень внешней SD карты</string>>
-    <string name="could_not_delete_file">Невозможно удалить файл</string>>
     <string name="manual_open_error">Ошибка открытия руководства пользователя</string>
     <string name="ynd_translate_settings">Настройки Yandex translate</string>
     <string name="sync_confirmation_other_book">На другом устройстве была открыта другая книга (%s), переключиться на неё?</string>
@@ -1301,6 +1311,23 @@
     <string name="autosave_period_15min">"15 минут"</string>
     <string name="autosave_period_20min">"20 минут"</string>
     <string name="autosave_period_30min">"30 минут"</string>
+    <string name="choose_root_sd">Невозможно удалить файл, если файл находится на внешней SD карте, выберите корень внешней SD карты в диалоге</string>
+    <string name="could_not_delete_on_sd">Невозможно найти файл, убедитесь, что был выбран корень внешней SD карты</string>
+    <string name="could_not_delete_file">Невозможно удалить файл \"%s\"</string>
+    <string name="bookmarks_keepalive_">Удалять копии закладок старее чем…</string>
+    <string name="bookmarks_keepalive_off">Отключено</string>
+    <string name="bookmarks_keepalive_1day">1 день</string>
+    <string name="bookmarks_keepalive_2days">2 дня</string>
+    <string name="bookmarks_keepalive_3days">3 дня</string>
+    <string name="bookmarks_keepalive_4days">4 дня</string>
+    <string name="bookmarks_keepalive_5days">5 дней</string>
+    <string name="bookmarks_keepalive_6days">6 дней</string>
+    <string name="bookmarks_keepalive_1week">1 неделя</string>
+    <string name="bookmarks_keepalive_2weeks">2 недели</string>
+    <string name="bookmarks_keepalive_1month">1 месяц</string>
+    <string name="bookmarks_keepalive_1quarter">1 квартал</string>
+    <string name="bookmarks_keepalive_half_a_year">полгода</string>
+    <string name="bookmarks_keepalive_1year">1 год</string>
     <string name="read_aloud">Read aloud</string>
     <string name="ynd_cloud_settings">Настройки Яндекс облака</string>
     <string name="ynd_oauth">Яндекс облако OAuth токен</string>
@@ -1328,9 +1355,10 @@
     <string name="user_dic_panel0">Отключена</string>
     <string name="user_dic_panel1">Без прокрутки (потребуется перезапуск)</string>
     <string name="user_dic_panel2">С прокруткой (потребуется перезапуск)</string>
-    <string name="dict_dont_save_if_more">Не сохранять в историю переводов в словаре, если слов больше чем (0 = отключено)</string>
+    <string name="dict_dont_save_if_more">Не сохранять в историю переводов в словаре, если слов больше чем (0 = сохранять всегда)</string>
     <string name="litres_empty_login_or_passw">Логин или пароль для Литрес не заданы - укажите их в облачных настройках</string>
     <string name="search_books">Поиск книг</string>
+    <string name="litres_profile">Профиль, текущий баланс</string>
     <string name="my_books">Мои книги</string>
     <string name="value_is_empty">Не заполнено значение</string>
     <string name="last_is_empty">Не заполнена фамилия</string>
@@ -1395,5 +1423,9 @@
     <string name="cnt_genres">Жанров:</string>
     <string name="cnt_entries">Книг:</string>
     <string name="cnt_series">Серий:</string>
+    <string name="use_eink_backlight_control">Использовать метод контроля яркости для EINK</string>
+    <string name="use_eink_backlight_control_add_info">Если у вас не регулируется яркость скольжением по краю экрана - попробуйте этот метод (только для книг Onyx)</string>
+    <string name="need_purchase">Сначала вы должны купить эту книгу, а затем скачать</string>
+    <string name="already_purchased">Уже купилено, перейдите к скачиванию</string>
 </resources>
 

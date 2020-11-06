@@ -14,6 +14,7 @@ import android.widget.TableRow;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.FileInfo;
@@ -41,6 +42,8 @@ public class LitresMainDialog extends BaseDialog {
 	final TableLayout tlLitresMain;
 	final TableRow trLitresAuth;
 	final Button mBtnAuth;
+	final Button mBtnProfile;
+	final TableRow trLitresProfile;
 	final Button mBtnMyBooks;
 	final TableRow trLitresMyBooks;
 	final TableRow trLitresSearch1;
@@ -97,6 +100,7 @@ public class LitresMainDialog extends BaseDialog {
 			tlLitresMain.addView(trLitresAuth);
 		if (iViewType == VT_SEARCH_BOOKS) {
 			curViewType = VT_SEARCH_BOOKS;
+			//tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearch2);
@@ -114,13 +118,15 @@ public class LitresMainDialog extends BaseDialog {
 			mBtnSearchCollections.setCompoundDrawablesWithIntrinsicBounds(mImgSearchCollectionsCollapsed, null, null, null);
 			mBtnSearchGenres.setCompoundDrawablesWithIntrinsicBounds(mImgSearchGenresCollapsed, null, null, null);
 			mBtnSearchSequences.setCompoundDrawablesWithIntrinsicBounds(mImgSearchSequencesCollapsed, null, null, null);
-			mSearchText.setText("Эмоционально-образная терапия");
+			//mSearchText.setText("365 вопросов");
+			mSearchText.setText("");
 			mSearchText.setHint(R.string.search_books);
 			mSearchText.requestFocus();
 			setModeChecked(null);
 		}
 		if (iViewType == VT_SEARCH_COLLECTIONS) {
 			curViewType = VT_SEARCH_COLLECTIONS;
+			//tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -138,13 +144,15 @@ public class LitresMainDialog extends BaseDialog {
 			mBtnSearchCollections.setCompoundDrawablesWithIntrinsicBounds(mImgSearchCollectionsExpanded, null, null, null);
 			mBtnSearchGenres.setCompoundDrawablesWithIntrinsicBounds(mImgSearchGenresCollapsed, null, null, null);
 			mBtnSearchSequences.setCompoundDrawablesWithIntrinsicBounds(mImgSearchSequencesCollapsed, null, null, null);
-			mSearchText.setText("вой");
+			//mSearchText.setText("вой");
+			mSearchText.setText("");
 			mSearchText.setHint(R.string.search_collections);
 			mSearchText.requestFocus();
 			setModeChecked(null);
 		}
 		if (iViewType == VT_SEARCH_GENRES) {
 			curViewType = VT_SEARCH_GENRES;
+			//tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -163,13 +171,14 @@ public class LitresMainDialog extends BaseDialog {
 			mBtnSearchGenres.setCompoundDrawablesWithIntrinsicBounds(mImgSearchGenresExpanded, null, null, null);
 			mBtnSearchSequences.setCompoundDrawablesWithIntrinsicBounds(mImgSearchSequencesCollapsed, null, null, null);
 			mSearchText.setText("");
-			mSearchText.setText("Детектив");
+			//mSearchText.setText("Детектив");
 			mSearchText.setHint(R.string.search_genres);
 			mSearchText.requestFocus();
 			setModeChecked(null);
 		}
 		if (iViewType == VT_SEARCH_SEQUENCES) {
 			curViewType = VT_SEARCH_SEQUENCES;
+			//tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -187,18 +196,20 @@ public class LitresMainDialog extends BaseDialog {
 			mBtnSearchCollections.setCompoundDrawablesWithIntrinsicBounds(mImgSearchCollectionsCollapsed, null, null, null);
 			mBtnSearchGenres.setCompoundDrawablesWithIntrinsicBounds(mImgSearchGenresCollapsed, null, null, null);
 			mBtnSearchSequences.setCompoundDrawablesWithIntrinsicBounds(mImgSearchSequencesExpanded, null, null, null);
-			mSearchText.setText("вой");
+			mSearchText.setText("");
+			//mSearchText.setText("вой");
 			mSearchText.setHint(R.string.search_sequences);
 			mSearchText.requestFocus();
 			setModeChecked(null);
 		}
 		if (iViewType == VT_SEARCH_PERSONS) {
 			curViewType = VT_SEARCH_PERSONS;
+			//tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
 			tlLitresMain.addView(trLitresSearch2);
-			tlLitresMain.addView(trLitresSearchPersonsMod);
+			//tlLitresMain.addView(trLitresSearchPersonsMod);
 			tlLitresMain.addView(trLitresSearchBtn);
 			tlLitresMain.addView(trLitresSearchPersonsExt);
 			tlLitresMain.addView(trLitresSearchCollections);
@@ -212,25 +223,27 @@ public class LitresMainDialog extends BaseDialog {
 			mBtnSearchGenres.setCompoundDrawablesWithIntrinsicBounds(mImgSearchGenresCollapsed, null, null, null);
 			mBtnSearchSequences.setCompoundDrawablesWithIntrinsicBounds(mImgSearchSequencesCollapsed, null, null, null);
 			mSearchText.setText("");
-			mSearchText.setText("Пушкин");
+			//mSearchText.setText("Пушкин");
 			mSearchText.setHint(R.string.search_persons);
 			mSearchText.requestFocus();
 			setModeChecked(null);
 		}
 		if (iViewType == VT_SEARCH_PERSONS_EXT) {
 			curViewType = VT_SEARCH_PERSONS_EXT;
+			//tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
 			tlLitresMain.addView(trLitresSearchPersonsExt);
 			tlLitresMain.addView(trLitresSearchPersonsFioLabels);
 			tlLitresMain.addView(trLitresSearchPersonsFio);
-			tlLitresMain.addView(trLitresSearchPersonsMod);
+			//tlLitresMain.addView(trLitresSearchPersonsMod); // не работает - разбираться с литресом
 			tlLitresMain.addView(trLitresSearchBtn);
 			tlLitresMain.addView(trLitresSearchCollections);
 			tlLitresMain.addView(trLitresSearchGenres);
 			tlLitresMain.addView(trLitresSearchSequences);
-			mSearchLastName.setText("Лермонтов");
+			mSearchLastName.setText("");
+			//mSearchLastName.setText("Лермонтов");
 			mBtnStartsWith.setEnabled(true);
 			mBtnSearchText.setCompoundDrawablesWithIntrinsicBounds(mImgSearchCollapsed, null, null, null);
 			mBtnSearchPersons.setCompoundDrawablesWithIntrinsicBounds(mImgSearchPersonsCollapsed, null, null, null);
@@ -431,6 +444,19 @@ public class LitresMainDialog extends BaseDialog {
 			mCoolReader.litresCredentialsDialog = new LitresCredentialsDialog(mCoolReader);
 			mCoolReader.litresCredentialsDialog.show();
 		});
+		View viewProfile = mInflater.inflate(R.layout.litres_main_profile, null);
+		trLitresProfile = viewProfile.findViewById(R.id.tr_litres_profile);
+		mBtnProfile = viewProfile.findViewById(R.id.btn_profile);
+		mBtnProfile.setBackgroundColor(colorGrayC);
+		Utils.setDashedButton(mBtnProfile);
+		mBtnProfile.setOnClickListener(v -> {
+			try {
+				CloudAction.litresGetProfile(mCoolReader, this);
+			} catch (Exception e) {
+
+			}
+		});
+		mCoolReader.tintViewIcons(mBtnProfile,true);
 		View viewMy = mInflater.inflate(R.layout.litres_main_search_my_books, null);
 		trLitresMyBooks = viewMy.findViewById(R.id.tr_litres_my_books);
 		mBtnMyBooks = viewMy.findViewById(R.id.btn_my_books);

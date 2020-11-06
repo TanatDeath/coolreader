@@ -110,6 +110,21 @@ public class LitresCredentialsDialog extends BaseDialog {
 					public void onResponse(Call call, Response response)
 							throws IOException {
 						String sBody = response.body().string();
+						LitresError le = null;
+						try {
+							le = LitresJsons.parse_error(uniqueID, sBody);
+						} catch (Exception e) {
+							Log.e("LITRES", e.getMessage(), e);
+						}
+						LitresConfig.needReAuth = false;
+						if (le != null)
+							if (!StrUtils.isEmptyStr(le.errorCode)) {
+								LitresError finalLe = le;
+								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+											activity.showToast(activity.getString(R.string.cloud_error) + ": " + finalLe.errorCode + " " + finalLe.errorText);
+										}));
+								LitresConfig.needReAuth = true;
+							}
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 							try {
 								if (LitresJsons.parse_w_create_sid(uniqueID, activity, sBody))
@@ -126,6 +141,7 @@ public class LitresCredentialsDialog extends BaseDialog {
 					}
 				});
 			} catch (Exception e) {
+				activity.showToast(activity.getString(R.string.cloud_error) + ": " + e.getMessage());
 				e.printStackTrace();
 			}
 		});

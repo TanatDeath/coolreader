@@ -333,20 +333,26 @@ public class FileUtils {
         String sPath = file.getAbsolutePath();
         String sPathZ = sPath;
         log.d("onDownloadEnd: sPath = " + sPath);
-        if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))
-                &&(!sPathZ.toLowerCase().endsWith(".epub"))) {
-            int i = 0;
-            sPathZ = sPath + ".zip";
-            File fileZ = new File(sPathZ);
-            boolean bExists = fileZ.exists();
-            while (bExists) {
-                i++;
-                sPathZ = sPath + " ("+i+").zip";
-                fileZ = new File(sPathZ);
-                bExists = fileZ.exists();
+        if (!StrUtils.getNonEmptyStr(type,true).equals("litres"))
+            if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))
+                    &&(!sPathZ.toLowerCase().endsWith(".epub"))
+                    &&(!sPathZ.toLowerCase().endsWith(".docx"))
+                    &&(!sPathZ.toLowerCase().endsWith(".odt"))
+                    &&(!sPathZ.toLowerCase().endsWith(".ods"))
+                    &&(!sPathZ.toLowerCase().endsWith(".odp"))
+                    &&(!sPathZ.toLowerCase().endsWith(".fb3"))) {
+                int i = 0;
+                sPathZ = sPath + ".zip";
+                File fileZ = new File(sPathZ);
+                boolean bExists = fileZ.exists();
+                while (bExists) {
+                    i++;
+                    sPathZ = sPath + " ("+i+").zip";
+                    fileZ = new File(sPathZ);
+                    bExists = fileZ.exists();
+                }
+                file.renameTo(fileZ);
             }
-            file.renameTo(fileZ);
-        }
         mScanner.listDirectory(dir);
         FileInfo item1 = dir.findItemByPathName(sPathZ);
         if (item1 == null) item1 = new FileInfo(sPathZ);

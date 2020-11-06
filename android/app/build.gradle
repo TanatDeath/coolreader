@@ -13,8 +13,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202010191
-        versionName "2020.10.19.1"
+        versionCode 202010311
+        versionName "2020.10.31.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -43,8 +43,10 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            // to make the bug report more readable.
+            minifyEnabled false
+            shrinkResources false
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules-optimize.pro'
             externalNativeBuild {
                 cmake {

@@ -507,7 +507,8 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		//mCoolReader.showToast(clearText);
 		//\
 		mTTS.speak(clearText, TTS.QUEUE_ADD, params);
-		runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, currentSelection.text));
+		String finalClearText = clearText;
+		runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, finalClearText));
 	}
 	
 	private void start() {
@@ -606,21 +607,23 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			runInTTSControlService(tts -> tts.notifyPause(mBookTitle));
 			stop();
 		} else {
-			playPauseButton.setImageResource(
-					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
-					//R.drawable.ic_media_pause
-			);
-			playPauseButtonEll.setImageResource(
-					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
-					//R.drawable.ic_media_pause
-			);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				setMediaSessionPlaybackState(PlaybackState.STATE_PLAYING);
+			if (null != currentSelection) {
+				playPauseButton.setImageResource(
+						Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
+						//R.drawable.ic_media_pause
+				);
+				playPauseButtonEll.setImageResource(
+						Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
+						//R.drawable.ic_media_pause
+				);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					setMediaSessionPlaybackState(PlaybackState.STATE_PLAYING);
+				}
+				playPauseButton.setBackgroundDrawable(c);
+				playPauseButtonEll.setBackgroundDrawable(c);
+				runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, currentSelection.text));
+				start();
 			}
-			playPauseButton.setBackgroundDrawable(c);
-			playPauseButtonEll.setBackgroundDrawable(c);
-			runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, currentSelection.text));
-			start();
 		}
 	}
 	

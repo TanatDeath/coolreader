@@ -68,6 +68,7 @@ public class BookInfoDialog extends BaseDialog {
 	private String sAuthors = "";
 	private String sBookTitle = "";
 	private String sFileName = "";
+	private boolean mPurchased = false;
 	ImageButton btnBack;
 	ImageButton btnOpenBook;
 	ImageButton btnBookFolderOpen;
@@ -120,11 +121,6 @@ public class BookInfoDialog extends BaseDialog {
 		mCoolReader.tintViewIcons(btnDownloadLitresBook, PorterDuff.Mode.CLEAR,true);
 		btnFragment.setBackgroundColor(colorGrayCT);
 		btnDownloadLitresBook.setBackgroundColor(colorGrayCT);
-		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
-		Drawable img1 = img.getConstantState().newDrawable().mutate();
-		Drawable img2 = img.getConstantState().newDrawable().mutate();
-		btnFragment.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
-		btnDownloadLitresBook.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		if (curDownloadMode == DM_FRAGMENT) {
 			btnFragment.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnFragment,true);
@@ -144,7 +140,19 @@ public class BookInfoDialog extends BaseDialog {
 				btnPurchase.setText(mCoolReader.getString(R.string.online_store_purchase_success));
 				setLitresDownloadModeChecked(btnDownloadLitresBook);
 				Utils.hideView(btnFragment);
-			} else btnPurchase.setText(mCoolReader.getString(R.string.error) + ": " + errorMsg);
+				mPurchased = true;
+			} else {
+				String s = mCoolReader.getString(R.string.error) + ": " + errorMsg;
+				s = StrUtils.getNonEmptyStr(s, true).replace("Error: Error", "Error:");
+				s = s.replace("::", ":");
+				if (s.contains("already exists")) {
+					s = mCoolReader.getString(R.string.already_purchased);
+					setLitresDownloadModeChecked(btnDownloadLitresBook);
+					Utils.hideView(btnFragment);
+					mPurchased = true;
+				}
+				btnPurchase.setText(s);
+			}
 		}
 
 	}
@@ -843,6 +851,12 @@ public class BookInfoDialog extends BaseDialog {
 			btnDownloadLitresBook.setOnClickListener(v -> {
 				setLitresDownloadModeChecked(btnDownloadLitresBook);
 			});
+			Drawable img0 = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+			Drawable img11 = img.getConstantState().newDrawable().mutate();
+			Drawable img22 = img.getConstantState().newDrawable().mutate();
+			btnFragment.setCompoundDrawablesWithIntrinsicBounds(img11, null, null, null);
+			btnDownloadLitresBook.setCompoundDrawablesWithIntrinsicBounds(img22, null, null, null);
+
 			setLitresDownloadModeChecked(null);
 			btnDownloadFB2 = view.findViewById(R.id.btn_fb2);
 			btnDownloadFB3 = view.findViewById(R.id.btn_fb3);
@@ -863,9 +877,8 @@ public class BookInfoDialog extends BaseDialog {
 				if (curDownloadMode == DM_FRAGMENT) {
 					downloadFragment(".fb2.zip");
 				} else {
-					mCoolReader.showToast("Not implemented yet!");
-//					mFileInfoCloud.format_chosen = ".fb2.zip";
-//					CloudAction.litresDownloadBook((CoolReader) mCoolReader, mFileInfoCloud, this);
+					mFileInfoCloud.format_chosen = "fb2.zip";
+					CloudAction.litresDownloadBook((CoolReader) mCoolReader, mFileInfoCloud, this);
 				}
 			});
 
@@ -885,7 +898,8 @@ public class BookInfoDialog extends BaseDialog {
 				if (curDownloadMode == DM_FRAGMENT) {
 					downloadFragment(".fb3");
 				} else {
-					mCoolReader.showToast("Not implemented yet!");
+					mFileInfoCloud.format_chosen = "fb3";
+					CloudAction.litresDownloadBook((CoolReader) mCoolReader, mFileInfoCloud, this);
 				}
 			});
 			int colorGrayCT = Color.argb(128, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
@@ -902,11 +916,12 @@ public class BookInfoDialog extends BaseDialog {
 			else
 				tvLvl.setText("");
 			btnPurchase.setOnClickListener(v -> {
+				if (mPurchased) return;
 				if (mFileInfoCloud.available != 1) return;
 				if (mFileInfoCloud.type != 0) return;
 				if (btnPurchase.getText().toString().equals(mCoolReader.getString(R.string.online_store_purchase_success))) return;
 				mCoolReader.askConfirmation( mCoolReader.getString(R.string.online_store_confirm_purchase), () -> {
-						CloudAction.litresPurchaseBook((CoolReader) mCoolReader, mFileInfoCloud, this);
+						CloudAction.litresPurchaseBook(mCoolReader, mFileInfoCloud, this);
 						btnPurchase.setEnabled(false);
 						btnPurchase.setVisibility(View.INVISIBLE);
 						BackgroundThread.instance().postGUI(() -> {
@@ -935,7 +950,7 @@ public class BookInfoDialog extends BaseDialog {
 			if (mFileInfoCloud.type == 11) btnPurchase.setText(mCoolReader.getString(R.string.online_store_book_not_supported)+": Gardner books");
 			if (isLitres)
 				if (mFileInfoCloud.lsp.searchType == LitresSearchParams.SEARCH_TYPE_MY_BOOKS) {
-					Utils.hideView(tlLitresDownl);
+					//Utils.hideView(tlLitresDownl);
 					Utils.hideView(llLitresPurchase);
 				}
 		}

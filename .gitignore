@@ -1,4 +1,6 @@
 *.*~
+.DS_*
+._*
 qtbuild
 v3build
 v5build
@@ -7,6 +9,7 @@ qtbuild
 qt-build
 qtcreator-build
 CMakeLists.txt.user
+CMakeLists.txt.user.*
 *~
 *.a
 *.so
@@ -18,9 +21,9 @@ cr3gui/data/cr3.ini
 cr3gui/data/dict/
 cr3gui/data/dict_ext
 cr3gui/data/tessdata/
-<<<<<<< HEAD
 .idea/
 /.idea/
-=======
 .directory
->>>>>>> upstream/master
+*.orig
+*.rej
+/clang-analyzer-reports/

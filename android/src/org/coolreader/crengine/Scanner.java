@@ -59,13 +59,14 @@ public class Scanner extends FileInfoChangeSource {
 				item.setFilename(f.getName());
 				item.path = f.getPath();
 				item.pathname = entry.getName();
-				//item.size = (int)entry.getSize();
-				item.size = (int)zf.length();
+				item.size = (int)entry.getSize();
+				//item.size = (int)zf.length();
 				//item.createTime = entry.getTime();
 				item.setCreateTime(zf.lastModified()); // it looks strange whilst if fileinfo.create used zip entry date...
 				item.setFileCreateTime(zf.lastModified());
 				item.arcname = zip.pathname;
-				item.arcsize = (int)entry.getCompressedSize();
+				//item.arcsize = (int)entry.getCompressedSize();
+				item.arcsize = zip.size;
 				item.isArchive = true;
 				items.add(item);
 			}
@@ -146,7 +147,7 @@ public class Scanner extends FileInfoChangeSource {
 							// skip mount root
 							continue;
 						}
-						boolean isZip = pathName.toLowerCase().endsWith(".zip");
+						boolean isZip = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
 						FileInfo item = mFileList.get(pathName);
 						boolean isNew = false;
 						if (item == null) {
@@ -273,6 +274,18 @@ public class Scanner extends FileInfoChangeSource {
 				for (int i=0; i<baseDir.fileCount(); i++) {
 					FileInfo item = baseDir.getFile(i);
 					FileInfo fromDB = mapOfFilesFoundInDb.get(item.getPathName());
+					// check the relevance of data in the database
+					if (fromDB != null) {
+						if (fromDB.crc32 == 0 || fromDB.size != item.size || fromDB.arcsize != item.arcsize ) {
+							// to force rescan and update data in DB
+							fromDB = null;
+						}
+					} else {
+						// not found in DB
+						// for new files set latest DOM level and max block rendering flags
+						item.domVersion = Engine.DOM_VERSION_CURRENT;
+						item.blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
+					}
 					boolean isOldVer = true;
 					if (fromDB != null) {
 						if (fromDB.saved_with_ver == MainDB.DB_VERSION) isOldVer = false;
@@ -290,6 +303,7 @@ public class Scanner extends FileInfoChangeSource {
 						if (item.format.canParseProperties()) {
 							filesForParsing.add(new FileInfo(item));
 						} else {
+							Engine.updateFileCRC32(item);
 							filesForSave.add(new FileInfo(item));
 						}
 					}
@@ -807,6 +821,8 @@ public class Scanner extends FileInfoChangeSource {
 				return found;
 		}
 		for ( int i=0; i<root.fileCount(); i++ ) {
+			String s1 = root.getFile(i).getPathName();
+			String s2 = file.getPathName();
 			if (root.getFile(i).getPathName().equals(file.getPathName()) ||
 					root.isOnSDCard() && root.getFile(i).getPathName().equalsIgnoreCase(file.getPathName()))
 				return root;

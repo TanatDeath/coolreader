@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class BookInfoEditDialog extends BaseDialog {
@@ -292,30 +294,31 @@ public class BookInfoEditDialog extends BaseDialog {
     EditText edPublisbn;
     EditText edPublseriesName;
     EditText edPublseriesNumber;
+    ScrollView mainView;
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
         mInflater = LayoutInflater.from(getContext());
         FileInfo file = mBookInfo.getFileInfo();
-        ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.book_info_edit_dialog, null);
+        mainView = (ScrollView)mInflater.inflate(R.layout.book_info_edit_dialog, null);
         
-        ImageButton btnBack = view.findViewById(R.id.base_dlg_btn_back);
+        ImageButton btnBack = mainView.findViewById(R.id.base_dlg_btn_back);
 		btnBack.setOnClickListener(v -> onNegativeButtonClick());
-		ImageButton btnBack1 = view.findViewById(R.id.base_dlg_btn_back1);
+		ImageButton btnBack1 = mainView.findViewById(R.id.base_dlg_btn_back1);
 		btnBack1.setOnClickListener(v -> onNegativeButtonClick());
-		ImageButton btnOk = view.findViewById(R.id.base_dlg_btn_positive);
+		ImageButton btnOk = mainView.findViewById(R.id.base_dlg_btn_positive);
 		btnOk.setOnClickListener(v -> onOkButtonClick());
-		ImageButton btnOk1 = view.findViewById(R.id.base_dlg_btn_positive1);
+		ImageButton btnOk1 = mainView.findViewById(R.id.base_dlg_btn_positive1);
 		btnOk1.setOnClickListener(v -> onOkButtonClick());
-		ImageButton btnOpenBook = view.findViewById(R.id.btn_open_book);
+		ImageButton btnOpenBook = mainView.findViewById(R.id.btn_open_book);
         btnOpenBook.setOnClickListener(v -> onPositiveButtonClick());
-        ImageButton btnDeleteBook = view.findViewById(R.id.book_delete);
+        ImageButton btnDeleteBook = mainView.findViewById(R.id.book_delete);
         btnDeleteBook.setOnClickListener(v -> {
 		mActivity.askDeleteBook(mBookInfo.getFileInfo());
 		dismiss();
 		});
-        ImageButton btnCustomCover = view.findViewById(R.id.book_custom_cover);
+        ImageButton btnCustomCover = mainView.findViewById(R.id.book_custom_cover);
 		btnCustomCover.setOnClickListener(v -> {
 			if (mActivity.picReceived!=null) {
 				if (mActivity.picReceived.bmpReceived!=null) {
@@ -328,24 +331,24 @@ public class BookInfoEditDialog extends BaseDialog {
 			}
 		});
 
-		ImageButton btnShortcutBook = view.findViewById(R.id.book_shortcut);
+		ImageButton btnShortcutBook = mainView.findViewById(R.id.book_shortcut);
 		btnShortcutBook.setOnClickListener(v -> {
 		mActivity.createBookShortcut(mBookInfo.getFileInfo(),mBookCover);
 		dismiss();
 		});
 
-		ImageButton btnSendByEmail = view.findViewById(R.id.save_to_email);
+		ImageButton btnSendByEmail = mainView.findViewById(R.id.save_to_email);
 
 		btnSendByEmail.setOnClickListener(v -> CloudAction.emailSendBook(mActivity, mBookInfo));
 
-		ImageButton btnSendByYnd = view.findViewById(R.id.save_to_ynd);
+		ImageButton btnSendByYnd = mainView.findViewById(R.id.save_to_ynd);
 
 		btnSendByYnd.setOnClickListener(v -> CloudAction.yndOpenBookDialog(mActivity, mBookInfo.getFileInfo(),true));
 
-		btnStateNone = view.findViewById(R.id.book_state_new);
-		btnStateToRead  = view.findViewById(R.id.book_state_toread);
-		btnStateReading = view.findViewById(R.id.book_state_reading);
-		btnStateFinished = view.findViewById(R.id.book_state_finished);
+		btnStateNone = mainView.findViewById(R.id.book_state_new);
+		btnStateToRead  = mainView.findViewById(R.id.book_state_toread);
+		btnStateReading = mainView.findViewById(R.id.book_state_reading);
+		btnStateFinished = mainView.findViewById(R.id.book_state_finished);
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
@@ -355,11 +358,11 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		btnStateReading.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
 		btnStateFinished.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
-		btnStar1 = view.findViewById(R.id.book_star1);
-		btnStar2 = view.findViewById(R.id.book_star2);
-		btnStar3 = view.findViewById(R.id.book_star3);
-		btnStar4 = view.findViewById(R.id.book_star4);
-		btnStar5 = view.findViewById(R.id.book_star5);
+		btnStar1 = mainView.findViewById(R.id.book_star1);
+		btnStar2 = mainView.findViewById(R.id.book_star2);
+		btnStar3 = mainView.findViewById(R.id.book_star3);
+		btnStar4 = mainView.findViewById(R.id.book_star4);
+		btnStar5 = mainView.findViewById(R.id.book_star5);
 		int colorBlue;
 		int colorGreen;
 		int colorGray;
@@ -387,31 +390,31 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
 		a.recycle();
-		tvProfile = view.findViewById(R.id.profile);
-		tvFileName = view.findViewById(R.id.file_name);
-		edTitle = view.findViewById(R.id.book_title);
-        edSeriesName = view.findViewById(R.id.book_series_name);
-        edSeriesNumber = view.findViewById(R.id.book_series_number);
-   		edLangFrom = view.findViewById(R.id.book_lang_from);
-		edLangTo = view.findViewById(R.id.book_lang_to);
-        edGenre = view.findViewById(R.id.genre);
-        edAnnotation = view.findViewById(R.id.annotation);
-        edSrclang = view.findViewById(R.id.srclang);
-        edBookdate = view.findViewById(R.id.bookdate);
-        edTranslator = view.findViewById(R.id.translator);
-        edDocauthor = view.findViewById(R.id.docauthor);
-        edDocprogram = view.findViewById(R.id.docprogram);
-        edDocdate = view.findViewById(R.id.docdate);
-        edDocsrcurl = view.findViewById(R.id.docsrcurl);
-        edDocsrcocr = view.findViewById(R.id.docsrcocr);
-        edDocversion = view.findViewById(R.id.docversion);
-        edPublname = view.findViewById(R.id.publname);
-        edPublisher = view.findViewById(R.id.publisher);
-        edPublcity = view.findViewById(R.id.publcity);
-        edPublyear = view.findViewById(R.id.publyear);
-        edPublisbn = view.findViewById(R.id.publisbn);
-        edPublseriesName = view.findViewById(R.id.book_publseries_name);
-        edPublseriesNumber = view.findViewById(R.id.book_publseries_number);
+		tvProfile = mainView.findViewById(R.id.profile);
+		tvFileName = mainView.findViewById(R.id.file_name);
+		edTitle = mainView.findViewById(R.id.book_title);
+        edSeriesName = mainView.findViewById(R.id.book_series_name);
+        edSeriesNumber = mainView.findViewById(R.id.book_series_number);
+   		edLangFrom = mainView.findViewById(R.id.book_lang_from);
+		edLangTo = mainView.findViewById(R.id.book_lang_to);
+        edGenre = mainView.findViewById(R.id.genre);
+        edAnnotation = mainView.findViewById(R.id.annotation);
+        edSrclang = mainView.findViewById(R.id.srclang);
+        edBookdate = mainView.findViewById(R.id.bookdate);
+        edTranslator = mainView.findViewById(R.id.translator);
+        edDocauthor = mainView.findViewById(R.id.docauthor);
+        edDocprogram = mainView.findViewById(R.id.docprogram);
+        edDocdate = mainView.findViewById(R.id.docdate);
+        edDocsrcurl = mainView.findViewById(R.id.docsrcurl);
+        edDocsrcocr = mainView.findViewById(R.id.docsrcocr);
+        edDocversion = mainView.findViewById(R.id.docversion);
+        edPublname = mainView.findViewById(R.id.publname);
+        edPublisher = mainView.findViewById(R.id.publisher);
+        edPublcity = mainView.findViewById(R.id.publcity);
+        edPublyear = mainView.findViewById(R.id.publyear);
+        edPublisbn = mainView.findViewById(R.id.publisbn);
+        edPublseriesName = mainView.findViewById(R.id.book_publseries_name);
+        edPublseriesNumber = mainView.findViewById(R.id.book_publseries_number);
 		int state = file.getReadingState();
  		setChecked(btnStateNone);
 		if (state == FileInfo.STATE_TO_READ) setChecked(btnStateToRead);
@@ -427,7 +430,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStar3.setOnClickListener(v -> setRate(btnStar3));
 		btnStar4.setOnClickListener(v -> setRate(btnStar4));
 		btnStar5.setOnClickListener(v -> setRate(btnStar5));
-		final ImageView image = view.findViewById(R.id.book_cover);
+		final ImageView image = mainView.findViewById(R.id.book_cover);
         image.setOnClickListener(v -> {
 			// open book
 			onPositiveButtonClick();
@@ -445,7 +448,7 @@ public class BookInfoEditDialog extends BaseDialog {
 			image.setImageDrawable(drawable);
 		});
 
-        final ImageView progress = view.findViewById(R.id.book_progress);
+        final ImageView progress = mainView.findViewById(R.id.book_progress);
         int percent = -1;
         Bookmark bmk = mBookInfo.getLastPosition();
         if (bmk != null)
@@ -469,7 +472,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		File f = activity.getSettingsFileF(activity.getCurrentProfile());
 		String sF = f.getAbsolutePath();
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
-		TextView prof = (TextView) view.findViewById(R.id.lbl_profile);
+		TextView prof = (TextView) mainView.findViewById(R.id.lbl_profile);
 		String sprof = activity.getCurrentProfileName();
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		tvProfile.setText(sprof + sF);
@@ -501,7 +504,7 @@ public class BookInfoEditDialog extends BaseDialog {
         edPublseriesName.setText(file.publseries);
 		if (file.publseries != null && file.publseries.trim().length() > 0 && file.publseriesNumber > 0)
 			edPublseriesNumber.setText(String.valueOf(file.publseriesNumber));
-		LinearLayout llBookAuthorsList = (LinearLayout)view.findViewById(R.id.book_authors_list);
+		LinearLayout llBookAuthorsList = (LinearLayout)mainView.findViewById(R.id.book_authors_list);
         authors = new AuthorList(llBookAuthorsList, file.getAuthors());
         mChosenRate = 1;
         setRate(btnStar1);
@@ -512,8 +515,8 @@ public class BookInfoEditDialog extends BaseDialog {
 		if (mChosenRate1 == 4) setRate(btnStar4);
 		if (mChosenRate1 == 5) setRate(btnStar5);
         
-    	ImageButton btnRemoveRecent = view.findViewById(R.id.book_recent_delete);
-    	ImageButton btnOpenFolder = view.findViewById(R.id.book_folder_open);
+    	ImageButton btnRemoveRecent = mainView.findViewById(R.id.book_recent_delete);
+    	ImageButton btnOpenFolder = mainView.findViewById(R.id.book_folder_open);
         if (mIsRecentBooksItem) {
         	btnRemoveRecent.setOnClickListener(v -> {
 				mActivity.askDeleteRecent(mBookInfo.getFileInfo());
@@ -529,7 +532,7 @@ public class BookInfoEditDialog extends BaseDialog {
         	parent.removeView(btnOpenFolder);
         }
 
-		Button translButton = view.findViewById(R.id.transl_button);
+		Button translButton = mainView.findViewById(R.id.transl_button);
 		translButton.setTextColor(colorIcon);
 		translButton.setBackgroundColor(colorGrayC);
 
@@ -548,10 +551,10 @@ public class BookInfoEditDialog extends BaseDialog {
 			};
 		});
 
-		buttonsLayout = view.findViewById(R.id.base_dlg_button_panel);
+		buttonsLayout = mainView.findViewById(R.id.base_dlg_button_panel);
 		updateGlobalMargin(buttonsLayout, true, true, true, false);
 
-		setView(view);
+		setView(mainView);
 	}
 	
 	private void save() {
@@ -642,6 +645,18 @@ public class BookInfoEditDialog extends BaseDialog {
 	protected void onOkButtonClick() {
 		save();
 		super.onPositiveButtonClick();
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (KeyEvent.KEYCODE_PAGE_DOWN == keyCode) {
+			mainView.pageScroll(View.FOCUS_DOWN);
+			return true;
+		} else if (KeyEvent.KEYCODE_PAGE_UP == keyCode) {
+			mainView.pageScroll(View.FOCUS_UP);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 
 	private void setChecked(Button btn) {

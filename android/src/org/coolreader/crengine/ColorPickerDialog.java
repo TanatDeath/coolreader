@@ -75,6 +75,25 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 	private TypedArray colorValues;
 	private String currentFilter;
 
+	private void setupColor(int color, Resources res) {
+		mColor = color;
+		int r = Color.red(mColor);
+		int g = Color.green(mColor);
+		int b = Color.blue(mColor);
+		float[] hsv = new float[3];
+		Color.colorToHSV(color, hsv);
+		int h = (int) (hsv[0] * mHue.getMax() / 360);
+		int s = (int) (hsv[1] * mSaturation.getMax());
+		int v = (int) (hsv[2] * mValue.getMax());
+		setupSeekBar(mR, R.string.options_color_r, r, res);
+		setupSeekBar(mG, R.string.options_color_g, g, res);
+		setupSeekBar(mB, R.string.options_color_b, b, res);
+		setupSeekBar(mHue, R.string.options_color_hue, h, res);
+		setupSeekBar(mSaturation, R.string.options_color_saturation, s, res);
+		setupSeekBar(mValue, R.string.options_color_brightness, v, res);
+		updatePreview(color);
+	}
+
 	public ColorPickerDialog(BaseActivity activity, OnColorChangedListener listener, int color, String title) {
 		super("ColorPickerDialog", activity, title, true, false);
 		mInflater = LayoutInflater.from(getContext());
@@ -117,22 +136,8 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 		mSaturation = (SeekBar) root.findViewById(R.id.saturation);
 		mValue = (SeekBar) root.findViewById(R.id.value);
 		mLabel = (TextView) root.findViewById(R.id.value_label);
-		
-		mColor = color;
-		int r = Color.red(mColor);
-		int g = Color.green(mColor);
-		int b = Color.blue(mColor);
-		float[] hsv = new float[3];
-		Color.colorToHSV(color, hsv);
-		int h = (int) (hsv[0] * mHue.getMax() / 360);
-		int s = (int) (hsv[1] * mSaturation.getMax());
-		int v = (int) (hsv[2] * mValue.getMax());
-		setupSeekBar(mR, R.string.options_color_r, r, res);
-		setupSeekBar(mG, R.string.options_color_g, g, res);
-		setupSeekBar(mB, R.string.options_color_b, b, res);
-		setupSeekBar(mHue, R.string.options_color_hue, h, res);
-		setupSeekBar(mSaturation, R.string.options_color_saturation, s, res);
-		setupSeekBar(mValue, R.string.options_color_brightness, v, res);
+
+		setupColor(color, res);
 
 		final EditText tvSearchText = root.findViewById(R.id.search_text);
 		ImageButton ibSearch = root.findViewById(R.id.btn_search);
@@ -147,9 +152,19 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 			@Override
 			public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
 			    currentFilter = cs.toString();
-				ColorPickerDialog.ColorListAdapter cla = new ColorPickerDialog.ColorListAdapter();
-				mList.setAdapter(cla);
-				cla.notifyDataSetChanged();
+			    boolean isHex = false;
+			    try {
+					int color = Color.parseColor("#" + currentFilter.replace("#", ""));
+					isHex = true;
+					setupColor(color, res);
+				} catch (Exception e) {
+
+				}
+			    if (!isHex) {
+					ColorPickerDialog.ColorListAdapter cla = new ColorPickerDialog.ColorListAdapter();
+					mList.setAdapter(cla);
+					cla.notifyDataSetChanged();
+				}
 			}
 
 			@Override

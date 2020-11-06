@@ -135,6 +135,7 @@
     <string name="dlg_search_case_sensitive">Case sensitive</string>
     <string name="dlg_search_reverse">Reverse</string>
     <string name="dlg_search_hint">Type text here</string>
+    <string name="dlg_search_hint_hex">Type text or hex value</string>
     <string name="dlg_button_ok">OK</string>
     <string name="dlg_button_cancel">Cancel</string>
     <string name="dlg_button_yes">Yes</string>
@@ -143,6 +144,8 @@
     <string name="options_page_animation">Page animation</string>
     <string name="options_controls_enable_volume_keys">Use volume keys for navigation</string>
     <string name="options_app_backlight_screen">Screen backlight brightness</string>
+    <string name="options_app_backlight_screen_warm">Warm screen backlight brightness</string>
+    <string name="options_app_backlight_screen_eink">Screen backlight brightness - EINK method</string>
     <string name="options_app_backlight_screen_default">Default</string>
     <string name="options_app_tapzones_normal">Tap zone actions</string>
     <string name="options_app_key_actions">Key actions</string>
@@ -180,6 +183,7 @@
     <string name="action_repeat">(autorepeat)</string>
     <string name="options_app_scan_book_props">Scan properties of all books in directory</string>
     <string name="options_page_titlebar">Title bar options</string>
+    <string name="options_page_titlebar_short">title bar</string>
     <string name="options_page_titlebar_new">Title bar and fullscreen options</string>
     <string name="options_page_show_titlebar_chapter_marks">Chapter bound marks</string>
     <string name="options_page_show_titlebar_battery_percent">Battery charge as percent</string>
@@ -247,6 +251,7 @@
     <string name="options_selection3_action_long">Inspector mode: Single Selection action (longtap)</string>
     <string name="options_multi_selection3_action">Inspector mode: Multi Selection action</string>
     <string name="options_selection_action_bookmark">Add bookmark</string>
+    <string name="options_selection_action_bookmark_quick">Add quick bookmark</string>
     <string name="options_selection_action_dictionary">Find in dictionary</string>
     <string name="options_selection_action_dictionary_1">Find in dictionary 1</string>
     <string name="options_selection_action_dictionary_2">Find in dictionary 2</string>
@@ -270,7 +275,10 @@
     <string name="book_info_action_download2">Click cover to open the book</string>
     <string name="book_info_action_downloading">Book is downloading...</string>
     <string name="book_info_action_unavailable">First you should download the book</string>
-    <string name="mi_book_styles_enable">Enable document internal styles</string>
+    <string name="mi_book_styles_enable">Book: Enable document internal styles</string>
+    <string name="mi_book_styles_enable_add_info">This option is for currently opened book</string>
+    <string name="mi_book_styles_enable_def">Default: Enable document internal styles</string>
+    <string name="mi_book_styles_enable_def_add_info">This option will be default for new books</string>
     <string name="mi_book_styles_disable">Disable document internal styles</string>
     <string name="mi_night_mode_disable">Day mode</string>
     <string name="mi_night_mode_enable">Night mode</string>
@@ -285,6 +293,8 @@
     <string name="book_info_book_publisbn">Publish ISBN</string>
 
     <string name="book_info_section_book_translation">Translation direction</string>
+    <string name="book_info_section_book_translation2">Book: translation direction</string>
+    <string name="book_info_section_book_translation2_add_info">Translation direction works for SOME dictionaries, e.g. online, ABBYY, etc</string>
     <string name="book_info_book_authors">Authors</string>
     <string name="book_info_book_date">Book date</string>
     <string name="book_info_file_path">File path</string>
@@ -567,7 +577,7 @@
     <string name="dlg_about_donation_inapp_purchase_plotn">This fork of Cool Reader is free and maintained by plotn 4pda user. If you want to support development of this project, you can make donation - contact me (by login \'plotn\') at 4pda forum in QMS mesages.</string>
     <string name="dlg_about_donation_total">Total donations from you:</string>
     <string name="option_controls_gesture_page_flipping_enabled">Gesture page flipping</string>
-    <string name="options_font_embedded_document_font_enabled">Document embedded fonts</string>
+    <string name="options_font_embedded_document_font_enabled">Book: Document embedded fonts</string>
     <string name="options_app_locale_system">System</string>
     <string name="options_app_locale">Interface language</string>
     <string name="options_app_locale_bg">Български</string>
@@ -695,7 +705,7 @@
     <string name="online_store_price">Price:</string>
     <string name="online_store_normal_price">Usual price:</string>
     <string name="online_store_please_login">please log in</string>
-    <string name="online_store_confirm_purchase">Do you want to buy this book?</string>
+    <string name="online_store_confirm_purchase">Do you want to purchase this book?</string>
     <string name="online_store_purchase_error">Failed to purchase book</string>
     <string name="online_store_purchase_success">Book has been purchased.</string>
     <string name="online_store_purchase_new_balance">New balance:</string>
@@ -816,6 +826,7 @@
     <string name="options_app_dict_word_correction">Word correction before dictionary</string>
     <string name="options_app_dict_word_correction_add_info">This option allows you to correct shortened words, before it will be sent to dictionary application, e.g. when you select \"l\'homme\" - it will be transformed to \"homme\", etc.</string>
     <string name="save_bookmark_last_sel">Save bookmark (last selection)</string>
+    <string name="save_bookmark_quick">Save quick bookmark</string>
     <string name="save_bookmark_last_sel_user_dic">Save user dictionary entry (last selection)</string>
     <string name="options_app_dict_longtap_change">Toggle dictionary button action - short/long tap</string>
     <string name="options_app_dict_longtap_change_add_info">There are two different actions on a \'dictionary\' button on \'selection toolbar\' (when you select text while reading) - fired by short and long taps. This option allows to swap them.</string>
@@ -904,6 +915,7 @@
     <string name="skipped_res_add_info">Allows you not to refresh the page completely (when open dialogs, keyboard, etc) to avoid text reformatting</string>
     <string name="options_app_backlight_timeout_add_info">Forcing the screen backlight time 2-6 minutes, or according to the system settings (selected by default)</string>
     <string name="options_app_backlight_screen_add_info">Forcing the screen brightness to be set to 1-100%, or according to the system settings (selected by default)</string>
+    <string name="options_app_backlight_screen_warm_add_info">For EINK with double frontlight (currently only Onyx)</string>
     <string name="options_app_tts_stop_motion_timeout_add_info">If the motion sensor does not fix the activity, then the reading aloud stops after a selected time period of 1-100 minutes, disabled by default</string>
     <string name="options_app_key_backlight_off_add_info">Forced off the backlight of control buttons (if there are separate ones) for more comfortable reading</string>
     <string name="options_app_settings_icons_add_info">Display of icons before menu items (when disabled - just title)</string>
@@ -1265,6 +1277,8 @@
     <string name="options_app_hide_state_dialogs_add_info">Do not ask \'set reading state\', \'mark as read\', etc.</string>
     <string name="options_app_hide_css_warning">Hide css styles warning dialog</string>
     <string name="options_app_hide_css_warning_add_info">Hide css styles warning dialog (when open a new book, toggle night mode)</string>
+    <string name="options_app_disable_safe_mode">Disable safe mode</string>
+    <string name="options_app_disable_safe_mode_add_info">Do not show \'Do you want to open book\' question when open new books</string>
     <string name="options_word_expanion">Word expansion</string>
     <string name="options_format_unused_space_thres">% of unused space on a line to trigger hyphenation, or addition of letter spacing for justification</string>
     <string name="options_word_expanion_add_info">Some extra spaces added between letters in word in some cases</string>
@@ -1308,24 +1322,38 @@
     <string name="googledrive_sync_from">Sync from Drive</string>
     <string name="confirmation_title">Confirmation</string>
     <string name="online_dic_exceeded">Sorry, online ditionary limit exceeded. Try again later</string>
-    <string name="choose_root_sd">Could not delete file, if the file is on External SD, choose ExtSD root in the dialog</string>
-    <string name="could_not_delete_on_sd">Could not find file, make sure the root of ExtSD was selected</string>>
-    <string name="could_not_delete_file">Could not delete file</string>>
     <string name="manual_open_error">Error while opening manual</string>
     <string name="ynd_translate_settings">Yandex translate settings</string>
     <string name="sync_confirmation_other_book">Another book (%s) was opened on another device, switch to it?</string>
     <string name="sync_confirmation_new_reading_position">New reading position found for this book, update?</string>
     <string name="autosave_period">Autosave period</string>
-    <string name="autosave_period_off">"Off"</string>
-    <string name="autosave_period_1min">"1 minute"</string>
-    <string name="autosave_period_2min">"2 minutes"</string>
-    <string name="autosave_period_3min">"3 minutes"</string>
-    <string name="autosave_period_4min">"4 minutes"</string>
-    <string name="autosave_period_5min">"5 minutes"</string>
-    <string name="autosave_period_10min">"10 minutes"</string>
-    <string name="autosave_period_15min">"15 minutes"</string>
-    <string name="autosave_period_20min">"20 minutes"</string>
-    <string name="autosave_period_30min">"30 minutes"</string>
+    <string name="autosave_period_off">Off</string>
+    <string name="autosave_period_1min">1 minute</string>
+    <string name="autosave_period_2min">2 minutes</string>
+    <string name="autosave_period_3min">3 minutes</string>
+    <string name="autosave_period_4min">4 minutes</string>
+    <string name="autosave_period_5min">5 minutes</string>
+    <string name="autosave_period_10min">10 minutes</string>
+    <string name="autosave_period_15min">15 minutes</string>
+    <string name="autosave_period_20min">20 minutes</string>
+    <string name="autosave_period_30min">30 minutes</string>
+    <string name="choose_root_sd">Could not delete file, if the file is on External SD, choose ExtSD root in the dialog</string>
+    <string name="could_not_delete_on_sd">Could not find file, make sure the root of ExtSD was selected</string>
+    <string name="could_not_delete_file">Could not delete file \"%s\"</string>
+    <string name="bookmarks_keepalive_">Delete copies of bookmarks older than…</string>
+    <string name="bookmarks_keepalive_off">Off</string>
+    <string name="bookmarks_keepalive_1day">1 day</string>
+    <string name="bookmarks_keepalive_2days">2 days</string>
+    <string name="bookmarks_keepalive_3days">3 days</string>
+    <string name="bookmarks_keepalive_4days">4 days</string>
+    <string name="bookmarks_keepalive_5days">5 days</string>
+    <string name="bookmarks_keepalive_6days">6 days</string>
+    <string name="bookmarks_keepalive_1week">1 week</string>
+    <string name="bookmarks_keepalive_2weeks">2 weeks</string>
+    <string name="bookmarks_keepalive_1month">1 month</string>
+    <string name="bookmarks_keepalive_1quarter">1 quarter</string>
+    <string name="bookmarks_keepalive_half_a_year">half a year</string>
+    <string name="bookmarks_keepalive_1year">1 year</string>
     <string name="read_aloud">Read aloud</string>
     <string name="ynd_cloud_settings">Yandex cloud settings</string>
     <string name="ynd_oauth">Yandex cloud OAuth token</string>
@@ -1353,9 +1381,10 @@
     <string name="user_dic_panel0">Disabled</string>
     <string name="user_dic_panel1">Without scroll (restart needed)</string>
     <string name="user_dic_panel2">With scroll (restart needed)</string>
-    <string name="dict_dont_save_if_more">Do not save to dictionary search history if more than words (0 = disabled)</string>
+    <string name="dict_dont_save_if_more">Do not save to dictionary search history if more than words (0 = save anyway)</string>
     <string name="litres_empty_login_or_passw">Litres login or password is not specified - set it up in cloud settings</string>
     <string name="search_books">Search books</string>
+    <string name="litres_profile">Profile, current balance</string>
     <string name="my_books">My books</string>
     <string name="value_is_empty">Value is empty</string>
     <string name="last_is_empty">Last name is empty</string>
@@ -1422,4 +1451,8 @@
     <string name="cnt_genres">Genres:</string>
     <string name="cnt_entries">Books:</string>
     <string name="cnt_series">Series:</string>
+    <string name="use_eink_backlight_control">Use EINK brightness control method</string>
+    <string name="use_eink_backlight_control_add_info">Try this if you cannot control brightness on the EINK book (only for Onyx)</string>
+    <string name="need_purchase">First, you should purchase this book, then download</string>
+    <string name="already_purchased">Already purchased, proceed to download</string>
 </resources>

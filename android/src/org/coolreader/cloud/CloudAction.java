@@ -15,6 +15,7 @@ import org.coolreader.cloud.dropbox.DBXPerformAction;
 import org.coolreader.cloud.litres.LitresConfig;
 import org.coolreader.cloud.litres.LitresError;
 import org.coolreader.cloud.litres.LitresJsons;
+import org.coolreader.cloud.litres.LitresMainDialog;
 import org.coolreader.cloud.litres.LitresPerformAction;
 import org.coolreader.cloud.litres.LitresPurchaseInfo;
 import org.coolreader.cloud.litres.LitresSearchParams;
@@ -26,6 +27,7 @@ import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.FileUtils;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderView;
@@ -90,6 +92,8 @@ public class CloudAction {
     public static final int LITRES_SEARCH_PERSON_LIST = 20206;
     public static final int LITRES_GET_COLLECTION_LIST = 20207;
     public static final int LITRES_GET_SEQUENCE_LIST = 20208;
+    public static final int LITRES_REAUTH = 20209;
+    public static final int LITRES_PROFILE = 20210;
 
     public int action; // action, that will be performed
     public String param; // param(s) passed to an action...
@@ -235,7 +239,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("DBBOX err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -334,7 +338,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -367,7 +371,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -512,7 +516,7 @@ public class CloudAction {
             a.DoNextAction();
         } catch (Exception e) {
             if (!bErrorQuiet)
-                cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+                cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -539,7 +543,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("DBBOX err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -586,7 +590,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             //System.out.println("DBBOX err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -613,7 +617,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -656,7 +660,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -709,7 +713,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -824,7 +828,7 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -856,7 +860,7 @@ public class CloudAction {
                 a.DoNextAction();
             }
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -871,9 +875,11 @@ public class CloudAction {
         } catch (Exception e) {
             Log.e("LITRES", e.getMessage(), e);
         }
+        LitresConfig.needReAuth = false;
         if (le != null)
             if (!StrUtils.isEmptyStr(le.errorCode)) {
                 cr.showToast(cr.getString(R.string.cloud_error)+": " + le.errorCode + " " + le.errorText);
+                LitresConfig.needReAuth = true;
             }
         if (a.mCurAction.action == LITRES_GET_GENRE_LIST) {
             ArrayList<FileInfo> arrFi = new ArrayList<>();
@@ -955,6 +961,7 @@ public class CloudAction {
 
     public static void onLitresError(CoolReader cr, LitresPerformAction a, String res, Exception e) {
         Log.e(e.getClass().getName(), "Cloud operation error: "+res, e);
+        LitresConfig.needReAuth = true;
         final CoolReader crf = cr;
         final String resf = res;
         BackgroundThread.instance().postGUI(() -> {
@@ -964,16 +971,46 @@ public class CloudAction {
         }, 200);
     }
 
-    public static void litresAddAuthCAIfNeeded(final CoolReader cr, ArrayList<CloudAction> al) {
-        if (!LitresConfig.didLogin) {
+    public static void litresAddAuthCAIfNeeded(final CoolReader cr, ArrayList<CloudAction> al, boolean always) {
+        if ((!LitresConfig.didLogin) || (always)) {
             CloudAction ca1 = new CloudAction(cr, CloudAction.LITRES_AUTH, true);
             al.add(ca1);
         } else {
-            long curTimeSpan = System.currentTimeMillis() - LitresConfig.whenLogin;
-            if (curTimeSpan > 1 * 60 * 60 * 1000) { // one hour
-                CloudAction ca1 = new CloudAction(cr, CloudAction.LITRES_AUTH, true);
+            if (LitresConfig.needReAuth) {
+                CloudAction ca1 = new CloudAction(cr, CloudAction.LITRES_REAUTH, true);
                 al.add(ca1);
+            } else {
+                long curTimeSpan = System.currentTimeMillis() - LitresConfig.whenLogin;
+                if (curTimeSpan > 1 * 60 * 60 * 1000) { // one hour
+                    CloudAction ca1 = new CloudAction(cr, CloudAction.LITRES_AUTH, true);
+                    al.add(ca1);
+                }
             }
+        }
+    }
+
+    public static void litresGetProfile(final CoolReader cr, LitresMainDialog litresMainDialog) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al, true);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_PROFILE, true);
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, litresMainDialog, null);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresGetProfile err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
 
@@ -981,7 +1018,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, false);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_GET_GENRE_LIST, true);
             ca2.lsp = params;
             al.add(ca2);
@@ -998,7 +1035,7 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresGetGenreList err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -1007,7 +1044,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, false);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_GET_COLLECTION_LIST, true);
             ca2.lsp = params;
             al.add(ca2);
@@ -1024,7 +1061,7 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresGetCollectionList err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -1033,7 +1070,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, false);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_GET_SEQUENCE_LIST, true);
             ca2.lsp = params;
             al.add(ca2);
@@ -1050,7 +1087,7 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresGetSequenceList err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -1059,7 +1096,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, false);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_SEARCH_PERSON_LIST, true);
             ca2.lsp = params;
             al.add(ca2);
@@ -1076,7 +1113,7 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresSearchPersonsList err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -1085,7 +1122,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, params.searchType == LitresSearchParams.SEARCH_TYPE_MY_BOOKS);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_SEARCH_BOOKS, true);
             ca2.param = params.searchString;
             ca2.lsp = params;
@@ -1103,7 +1140,7 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresSearchBooks err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -1112,7 +1149,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, true);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_PURCHASE_BOOK, true);
             ca2.param = "" + fi.id;
             ca2.mBookInfoDialog = bid;
@@ -1146,7 +1183,7 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresPurchaseBook err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -1155,7 +1192,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             ArrayList<CloudAction> al = new ArrayList<>();
-            litresAddAuthCAIfNeeded(cr, al);
+            litresAddAuthCAIfNeeded(cr, al, true);
             CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_DOWNLOAD_BOOK, true);
             ca2.param = "" + fi.id;
             ca2.mBookInfoDialog = bid;
@@ -1165,30 +1202,27 @@ public class CloudAction {
                 @Override
                 public void onComplete(LitresPerformAction a, String res, Object o) {
                     if (a.mCurAction.action == LITRES_DOWNLOAD_BOOK) {
-                        LitresPurchaseInfo lpi = null;
-//                        try {
-//                            lpi = LitresJsons.parse_w_buy_arts(a.mCurAction.param2, cr, (String) o);
-//                        } catch (Exception e) {
-//                            cr.showCloudToast(cr.getString(R.string.cloud_error)+": "+e.getMessage(),true);
-//                            Log.e("LITRES", e.getMessage());
-//                        }
+                        if (a.mCurAction.mBookInfoDialog != null) a.mCurAction.mBookInfoDialog.dismiss();
+                        Log.i("Litres", "End of cloud operation");
+                        final FileInfo downloadDir1 = Services.getScanner().getDownloadDirectory();
+                        final FileInfo downloadDir = new FileInfo(downloadDir1.pathname+"/");
+                        BackgroundThread.instance().postGUI(() -> {
+                            FileUtils.fileDownloadEndThenOpen("litres", a.mCurAction.param2, a.mCurAction.param2,
+                                    new File((String) o), cr, Services.getEngine(), "", Services.getScanner(), downloadDir,
+                                    a.mCurAction.fi, a.mCurAction.fi.parent, a.mCurAction.fi.annotation);
+                        });
                     }
                     CloudAction.onLitresComplete(cr, a, res, o, null, null);
                 }
 
                 @Override
                 public void onError(LitresPerformAction a, String res, Exception e) {
-                    //if (a.mCurAction.mBookInfoDialog != null)
-                      //  if (a.mCurAction.mBookInfoDialog.btnPurchase != null) {
-                       //     a.mCurAction.mBookInfoDialog.btnPurchase.setEnabled(true);
-                         //   a.mCurAction.mBookInfoDialog.btnPurchase.setVisibility(View.VISIBLE);
-                       // }
                     CloudAction.onLitresError(cr, a, res, e);
                 }
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_begin)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresDownloadBook err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }

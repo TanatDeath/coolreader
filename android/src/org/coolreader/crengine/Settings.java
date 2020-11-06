@@ -57,6 +57,7 @@ public interface Settings {
 	public static final String PROP_INTERLINE_SPACE         ="crengine.interline.space";
     public static final String PROP_ROTATE_ANGLE            ="window.rotate.angle";
     public static final String PROP_EMBEDDED_STYLES         ="crengine.doc.embedded.styles.enabled";
+	public static final String PROP_EMBEDDED_STYLES_DEF     ="crengine.doc.embedded.styles.def.enabled";
     public static final String PROP_EMBEDDED_FONTS          ="crengine.doc.embedded.fonts.enabled";
     public static final String PROP_DISPLAY_INVERSE         ="crengine.display.inverse";
 //    public static final String PROP_DISPLAY_FULL_UPDATE_INTERVAL ="crengine.display.full.update.interval";
@@ -102,6 +103,7 @@ public interface Settings {
     public static final String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
     public static final String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
     public static final String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
+	public static final String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight";
 
 	 // image scaling settings
 	 // mode: 0=disabled, 1=integer scaling factors, 2=free scaling
@@ -141,6 +143,8 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_ORIENTATION  ="app.screen.orientation";
     public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
     public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
+	public static final String PROP_APP_SCREEN_BACKLIGHT_WARM    ="app.screen.backlight.warm";
+	public static final String PROP_APP_SCREEN_BACKLIGHT_EINK    ="app.screen.backlight.eink";
     public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
     public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
     public static final String PROP_APP_SCREEN_BACKLIGHT_NIGHT ="app.screen.backlight.night";
@@ -152,6 +156,7 @@ public interface Settings {
     public static final String PROP_APP_TAP_ZONE_HILIGHT     ="app.tapzone.hilight";
     public static final String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
     public static final String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
+	public static final String PROP_APP_TRANSLATE_DIR = "app.translate.dir";
     public static final String PROP_APP_DICTIONARY = "app.dictionary.current";
     public static final String PROP_APP_DICTIONARY_2 = "app.dictionary2.current";
 	public static final String PROP_APP_DICTIONARY_3 = "app.dictionary3.current";
@@ -197,6 +202,7 @@ public interface Settings {
 
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
+	public static final String PROP_APP_DISABLE_SAFE_MODE = "app.disable.safe.mode";
 
 	public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
     public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
@@ -257,6 +263,7 @@ public interface Settings {
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK = "app.cloudsync.googledrive.currentbook";
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD = "app.cloudsync.googledrive.autosaveperiod";
     String PROP_APP_CLOUDSYNC_CONFIRMATIONS = "app.cloudsync.confirmations";
+    String PROP_APP_CLOUDSYNC_BOOKMARKS_KEEPALIVE = "app.cloudsync.bookmarks.keepalive";		// days
 
 	public static final String PROP_APP_GEO = "app.geo.locations";
 	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";
@@ -292,6 +299,7 @@ public interface Settings {
 	public static final int SELECTION_ACTION_DICTIONARY_5 = 14;
 	public static final int SELECTION_ACTION_DICTIONARY_6 = 15;
 	public static final int SELECTION_ACTION_DICTIONARY_7 = 16;
+	public static final int SELECTION_ACTION_BOOKMARK_QUICK = 17;
 
 	// available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     public static final int TAP_ACTION_TYPE_LONGPRESS = 0;
@@ -478,7 +486,10 @@ public interface Settings {
 		PROP_GLOBAL_MARGIN,
 
 		PROP_APP_HIDE_STATE_DIALOGS,
-	    PROP_APP_HIDE_CSS_WARNING
+	    PROP_APP_HIDE_CSS_WARNING,
+		PROP_APP_DISABLE_SAFE_MODE,
+
+		PROP_APP_USE_EINK_FRONTLIGHT
 
 };
 
