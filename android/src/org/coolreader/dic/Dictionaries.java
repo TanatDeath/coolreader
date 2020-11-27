@@ -9,6 +9,7 @@ import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DicSearchHistoryEntry;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.OptionsDialog;
@@ -518,7 +519,7 @@ public class Dictionaries {
 	public void yandexTranslate(String s, String langf, String lang, DictInfo curDict, View view, LangListCallback llc) {
 		CoolReader cr = (CoolReader) mActivity;
 		if (llc == null) {
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showToast(R.string.only_in_premium);
 				return;
 			}
@@ -921,7 +922,7 @@ public class Dictionaries {
 
 	private void lingvoTranslate(String s, String langf, String lang, boolean extended, DictInfo curDict, View view) {
 		CoolReader cr = (CoolReader) mActivity;
-		if (!BaseActivity.PREMIUM_FEATURES) {
+		if (!FlavourConstants.PREMIUM_FEATURES) {
 			cr.showToast(R.string.only_in_premium);
 			return;
 		}
@@ -1484,7 +1485,7 @@ public class Dictionaries {
 			}
 			break;
 		case 7:
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showToast(R.string.only_in_premium);
 				return;
 			}
@@ -1558,7 +1559,7 @@ public class Dictionaries {
 //			});
 			break;
 		case 8:
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showToast(R.string.only_in_premium);
 				return;
 			}
@@ -1588,7 +1589,7 @@ public class Dictionaries {
 				else lingvoTranslate(s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), curDict.id.contains("Extended"), curDict, view);
 			break;
 		case 9:
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showToast(R.string.only_in_premium);
 				return;
 			}

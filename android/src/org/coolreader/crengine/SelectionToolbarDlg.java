@@ -76,7 +76,7 @@ public class SelectionToolbarDlg {
 	private void changeSelectionBound(boolean start, int delta) {
 		L.d("changeSelectionBound(" + (start?"start":"end") + ", " + delta + ")");
 		setReaderMode();
-		ReaderCommand cmd = start ? ReaderCommand.DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS : ReaderCommand.DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS; 
+		ReaderCommand cmd = start ? ReaderCommand.DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS : ReaderCommand.DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS;
 		mReaderView.moveSelection(cmd, delta, new ReaderView.MoveSelectionCallback() {
 			
 			@Override
@@ -95,6 +95,7 @@ public class SelectionToolbarDlg {
 	
 	private final static int SELECTION_CONTROL_STEP = 10;
 	private final static int SELECTION_SMALL_STEP = 1;
+	private final static int SELECTION_NEXT_SENTENCE_STEP = 999;
 	private class BoundControlListener implements OnSeekBarChangeListener {
 
 		public BoundControlListener(SeekBar sb, boolean start) {
@@ -295,6 +296,10 @@ public class SelectionToolbarDlg {
 		mPanel.findViewById(R.id.btn_next2).setOnClickListener(v -> changeSelectionBound(false, SELECTION_SMALL_STEP));
 		mPanel.findViewById(R.id.btn_prev1).setOnClickListener(v -> changeSelectionBound(true, -SELECTION_SMALL_STEP));
 		mPanel.findViewById(R.id.btn_prev2).setOnClickListener(v -> changeSelectionBound(false, -SELECTION_SMALL_STEP));
+		mPanel.findViewById(R.id.btn_next_sent1).setOnClickListener(v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP));
+		mPanel.findViewById(R.id.btn_next_sent2).setOnClickListener(v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP));
+		mPanel.findViewById(R.id.btn_prev_sent1).setOnClickListener(v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP));
+		mPanel.findViewById(R.id.btn_prev_sent2).setOnClickListener(v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP));
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
 			if ( event.getAction()==KeyEvent.ACTION_UP ) {

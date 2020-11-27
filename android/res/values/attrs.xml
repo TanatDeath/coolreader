@@ -198,6 +198,7 @@
     <attr name="attr_icons8_google_drive_2" format="reference" />
     <attr name="attr_icons8_quote_2" format="reference" />
     <attr name="attr_icons8_bookmark_plus" format="reference" />
+    <attr name="attr_icons8_bookmark_plus_q" format="reference" />
     <attr name="attr_icons8_google_translate_save" format="reference" />
     <attr name="attr_icons8_edit_row_2" format="reference" />
     <attr name="attr_icons8_bookmark_link" format="reference" />
@@ -258,6 +259,10 @@
     <attr name="attr_icons8_share" format="reference" />
     <attr name="attr_icons8_back_small" format="reference" />
     <attr name="attr_icons8_forward_small" format="reference" />
+    <attr name="attr_icons8_plus_small" format="reference" />
+    <attr name="attr_icons8_plus_plus_small" format="reference" />
+    <attr name="attr_icons8_minus_small" format="reference" />
+    <attr name="attr_icons8_minus_minus_small" format="reference" />
     <attr name="attr_icons8_rounded_corners_margin" format="reference" />
     <attr name="attr_icons8_scroll_down_small" format="reference" />
     <attr name="attr_icons8_scroll_up_small" format="reference" />

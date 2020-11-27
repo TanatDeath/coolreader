@@ -3,6 +3,8 @@ package org.coolreader.crengine;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -124,7 +126,20 @@ import java.util.ArrayList;
 			return 0;
 		}
 
-		
+		public void setChecked(ImageView v, boolean checked) {
+			if (checked) {
+				Drawable d = mCoolReader.getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+				v.setImageDrawable(d);
+				v.setTag("1");
+				mCoolReader.tintViewIconsForce(v);
+			} else {
+				Drawable d = mCoolReader.getResources().getDrawable(R.drawable.icons8_toc_item_empty);
+				v.setImageDrawable(d);
+				v.setTag("0");
+				mCoolReader.tintViewIcons(v, PorterDuff.Mode.CLEAR,true);
+			}
+		}
+
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			View view;
 			boolean isCurrentItem = position == currentProfile - 1;
@@ -135,11 +150,11 @@ import java.util.ArrayList;
 			} else {
 				view = convertView;
 			}
-			RadioButton cb = view.findViewById(R.id.option_value_check);
+			ImageView cb = view.findViewById(R.id.option_value_check);
 			TextView title = view.findViewById(R.id.option_value_text);
 			ImageView iv = view.findViewById(R.id.btn_option_add_info);
 			iv.setVisibility(view.INVISIBLE);
-			cb.setChecked(isCurrentItem);
+			setChecked(cb, isCurrentItem);
 			cb.setFocusable(false);
 			cb.setFocusableInTouchMode(false);
 			title.setText(profileNames[position]);

@@ -555,14 +555,14 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			labelGD.setTextColor(colorIcon);
 			labelGD.setMaxWidth(coverWidth * 25 / 10);
 			viewGD.setOnClickListener(v -> {
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
 					return;
 				}
 				mActivity.showToast("Coming soon...");
 			});
 			viewGD.setOnLongClickListener(v -> {
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
 					return true;
 				}
@@ -582,14 +582,14 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			labelDBX.setTextColor(colorIcon);
 			labelDBX.setMaxWidth(coverWidth * 25 / 10);
 			viewDBX.setOnClickListener(v -> {
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
 					return;
 				}
 				CloudAction.dbxOpenBookDialog(mActivity);
 			});
 			viewDBX.setOnLongClickListener(v -> {
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
 					return true;
 				}
@@ -609,7 +609,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			labelYandex.setTextColor(colorIcon);
 			labelYandex.setMaxWidth(coverWidth * 25 / 10);
 			viewYandex.setOnClickListener(v -> {
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
 					return;
 				}
@@ -618,7 +618,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			viewYandex.setOnLongClickListener(new OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
-					if (!BaseActivity.PREMIUM_FEATURES) {
+					if (!FlavourConstants.PREMIUM_FEATURES) {
 						mActivity.showToast(R.string.only_in_premium);
 						return true;
 					}

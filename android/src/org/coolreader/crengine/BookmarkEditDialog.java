@@ -293,7 +293,7 @@ public class BookmarkEditDialog extends BaseDialog {
 					activity.showBookmarksDialog(true, BookmarkEditDialog.this);
 			});
 			btnUserDic.setOnClickListener(v -> {
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mCoolReader.showToast(R.string.only_in_pro);
 					return;
 				}
@@ -304,7 +304,7 @@ public class BookmarkEditDialog extends BaseDialog {
 				setChecked(btnUserDic);
 			});
 			btnCitation.setOnClickListener(v -> {
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mCoolReader.showToast(R.string.only_in_pro);
 					return;
 				}

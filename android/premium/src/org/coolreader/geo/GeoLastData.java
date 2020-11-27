@@ -1,6 +1,16 @@
 package org.coolreader.geo;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.location.Location;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.Settings;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
@@ -28,7 +38,7 @@ public class GeoLastData {
     public static Double MIN_DIST_STOP_SIGNAL1 = 100D; // meters
     public static Double MIN_DIST_STOP_SIGNAL2 = 400D; // meters
     // geo work - system objects
-    public CoolReader coolReader = null;
+    public CoolReader coolReader;
     public ProviderLocationTracker gps = null;
     public ProviderLocationTracker netw = null;
     public LocationTracker.LocationUpdateListener geoListener = null;
@@ -49,8 +59,8 @@ public class GeoLastData {
     public TransportStop lastStop = null;
     public Double lastStopDist = -1D;
 
-    public GeoLastData(CoolReader cr) {
-        coolReader = cr;
+    public GeoLastData(org.coolreader.CoolReader cr) {
+        this.coolReader = cr;
     }
 
     public void setLastStation(Double lon, Double lat, MetroStation lastSt) {
@@ -296,7 +306,10 @@ public class GeoLastData {
         return null;
     }
 
-    public static void loadMetroStations(CoolReader cr) {
+    public static void loadMetroStations(CoolReader cr, boolean forceReload) {
+        if (!forceReload)
+            if (cr.geoLastData.metroLocations != null)
+                if (!cr.geoLastData.metroLocations.isEmpty()) return;
         String s ="";
         try {
             InputStream is = cr.getResources().openRawResource(R.raw.metro_coords);
@@ -403,7 +416,10 @@ public class GeoLastData {
         }
     }
 
-    public static void loadTransportStops(CoolReader cr) {
+    public static void loadTransportStops(CoolReader cr, boolean forceReload) {
+        if (!forceReload)
+            if (cr.geoLastData.transportStops != null)
+                if (!cr.geoLastData.transportStops.isEmpty()) return;
         if (cr.geoLastData.transportStops == null) cr.geoLastData.transportStops = new ArrayList<TransportStop>();
         cr.geoLastData.transportStops.clear();
         String sT ="";
@@ -474,6 +490,78 @@ public class GeoLastData {
                     }
                 }
         return res;
+    }
+
+    public void createGeoListener(Properties settings) {
+        this.gps = new ProviderLocationTracker(coolReader,
+                ProviderLocationTracker.ProviderType.GPS);
+        this.geoListener = new LocationTracker.LocationUpdateListener() {
+            @Override
+            public void onUpdate(Location oldLoc, long oldTime, Location newLoc,
+                                 long newTime) {
+                geoUpdateCoords(oldLoc, oldTime, newLoc, newTime);
+            }
+
+        };
+
+        this.netw = new ProviderLocationTracker(coolReader,
+                ProviderLocationTracker.ProviderType.NETWORK);
+
+        this.netwListener = new LocationTracker.LocationUpdateListener() {
+            @Override
+            public void onUpdate(Location oldLoc, long oldTime, Location newLoc,
+                                 long newTime) {
+                geoUpdateCoords(oldLoc, oldTime, newLoc, newTime);
+            }
+
+        };
+        int iGeo = settings.getInt(Settings.PROP_APP_GEO, 0);
+        if ((iGeo==2)||(iGeo==4)) this.loadMetroStations(coolReader, false);
+        if ((iGeo==3)||(iGeo==4)) this.loadTransportStops(coolReader, false);
+        if (iGeo>1) {
+            this.gps.start(geoListener);
+            this.netw.start(netwListener);
+        }
+    }
+
+    public void gpsStart() {
+        gps.start(geoListener);
+    }
+
+    public void gpsStop() {
+        gps.stop();
+    }
+
+    public void netwStart() {
+        netw.start(netwListener);
+    }
+
+    public void netwStop() {
+        netw.stop();
+    }
+
+    private static final int REQUEST_CODE_LOCATION_PERMISSION = 200002;
+
+    public boolean checkLocationPermission(CoolReader cr) {
+        if (ContextCompat.checkSelfPermission(cr,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(cr,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new AlertDialog.Builder(cr)
+                        .setTitle(R.string.title_location_permission)
+                        .setMessage(R.string.text_location_permission)
+                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> ActivityCompat.requestPermissions(cr,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                REQUEST_CODE_LOCATION_PERMISSION)).create().show();
+            } else {
+                ActivityCompat.requestPermissions(cr,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_CODE_LOCATION_PERMISSION);
+            }
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }

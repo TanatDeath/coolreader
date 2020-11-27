@@ -853,6 +853,7 @@
     <string name="options_app_dict_word_correction">Обработка слова перед словарем</string>
     <string name="options_app_dict_word_correction_add_info">Эта опция полезна, когда вы пытаетесь перевести сокращенное слово, например, выделяя \"l\'homme\" в словаре будет найдено \"homme\" и т.д.</string>
     <string name="save_bookmark_last_sel">Сохранить закладку (последнее выделение)</string>
+    <string name="save_bookmark_quick">Сохранить быструю закладку</string>
     <string name="save_bookmark_last_sel_user_dic">Сохранить в пользовательский словарь (последнее выделение)</string>
     <string name="options_app_dict_longtap_change">Кнопка словаря - поменять короткий/длинный тап</string>
     <string name="options_app_dict_longtap_change_add_info">Есть два варианта нажатия на кнопку \'словарь\' на \'панели выделения\' (когда вы выделяете текст) - длинный и короткий тапы. Эта опция позволяет поменять их местами.</string>
@@ -1358,7 +1359,8 @@
     <string name="dict_dont_save_if_more">Не сохранять в историю переводов в словаре, если слов больше чем (0 = сохранять всегда)</string>
     <string name="litres_empty_login_or_passw">Логин или пароль для Литрес не заданы - укажите их в облачных настройках</string>
     <string name="search_books">Поиск книг</string>
-    <string name="litres_profile">Профиль, текущий баланс</string>
+    <string name="litres_profile">Текущий баланс</string>
+    <string name="litres_add_credit">Пополнить</string>
     <string name="my_books">Мои книги</string>
     <string name="value_is_empty">Не заполнено значение</string>
     <string name="last_is_empty">Не заполнена фамилия</string>
@@ -1427,5 +1429,8 @@
     <string name="use_eink_backlight_control_add_info">Если у вас не регулируется яркость скольжением по краю экрана - попробуйте этот метод (только для книг Onyx)</string>
     <string name="need_purchase">Сначала вы должны купить эту книгу, а затем скачать</string>
     <string name="already_purchased">Уже купилено, перейдите к скачиванию</string>
+    <string name="show_system_brightness_dialog">Показать системный диалог яркости (Onyx)</string>
+    <string name="sel_start">&lt; начало выделения</string>
+    <string name="sel_end">конец выделения &gt;</string>
 </resources>
 

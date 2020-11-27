@@ -22,7 +22,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 50;
+	public static final int DB_VERSION = 51;
 	@Override
 	protected boolean upgradeSchema() {
 		// When the database is just created, its version is 0.
@@ -510,6 +510,16 @@ public class MainDB extends BaseDB {
 			if (currentVersion < 50) {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN description TEXT DEFAULT NULL");
 			}
+			if (currentVersion < 51) {
+				execSQL("CREATE TABLE IF NOT EXISTS calibre_catalog (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						"name VARCHAR NOT NULL COLLATE NOCASE, " +
+						"cat_type INTEGER DEFAULT 0," + // 0 = local, 1 = yandex, 2 = .. unimplemented yet
+						"local_folder VARCHAR DEFAULT NULL, " +
+						"remote_folder VARCHAR DEFAULT NULL, " +
+						"last_usage INTEGER DEFAULT 0" +
+						")");
+			}
 
 			//==============================================================
 			// add more updates above this line
@@ -671,7 +681,6 @@ public class MainDB extends BaseDB {
 		}
 	}
 
-	
 	public boolean saveOPDSCatalog(Long id, String url, String name, String username, String password,
 		String proxy_addr, String proxy_port, String proxy_uname, String proxy_passw, int onion_def_proxy) {
 		if (!isOpened())
@@ -714,6 +723,42 @@ public class MainDB extends BaseDB {
 			}
 			updateOPDSCatalog(url, "last_usage", "max");
 				
+		} catch (Exception e) {
+			log.e("exception while saving OPDS catalog item", e);
+			return false;
+		}
+		return true;
+	}
+
+	public boolean saveCalibreCatalog(Long id, String name, int catType, String localFolder, String remoteFolder) {
+		if (!isOpened())
+			return false;
+		if (name==null)
+			return false;
+		name = name.trim();
+		if (name.length() == 0)
+			return false;
+		try {
+			Long existingIdByName = longQuery("SELECT id FROM calibre_catalog WHERE name=" + quoteSqlString(name));
+			if (existingIdByName!=null)
+				return false; // duplicates detected
+			if (id == null) id = existingIdByName;
+			if (id == null) {
+				// insert new
+				log.i("Saving "+name+" calibre catalog");
+				execSQL("INSERT INTO calibre_catalog (name, cat_type, local_folder, remote_folder, last_usage) VALUES ("+
+						quoteSqlString(name) + ", " + catType + ", " +
+						quoteSqlString(localFolder) + ", " + quoteSqlString(remoteFolder) + ", " + "0" +
+						")");
+			} else {
+				// update existing
+				execSQL("UPDATE opds_catalog SET name="+quoteSqlString(name)+", cat_type="+ catType +
+						", local_folder="+quoteSqlString(localFolder)+", remote_folder="+quoteSqlString(remoteFolder) +
+						" WHERE id=" + id);
+			}
+			//asdf
+			//updateCalibreCatalog(name, "last_usage", "max");
+
 		} catch (Exception e) {
 			log.e("exception while saving OPDS catalog item", e);
 			return false;

@@ -7,14 +7,14 @@ android {
     compileSdkVersion 30
     defaultConfig {
         //applicationId "org.coolreader.knownreader"
-        applicationId "org.knownreader.premium"
+        //applicationId "org.knownreader.premium"
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 29
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202010311
-        versionName "2020.10.31.1"
+        versionCode 202011221
+        versionName "2020.11.22.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -32,6 +32,19 @@ android {
         buildConfigField("String", "LITRES_SECRET", apikeyProperties['LITRES_SECRET'])
     }
 
+    flavorDimensions "version"
+
+    productFlavors {
+        free {
+            dimension "version"
+            applicationId "org.coolreader.knownreader"
+        }
+        premium {
+            dimension "version"
+            applicationId "org.knownreader.premium"
+        }
+    }
+
     sourceSets {
         main {
             setRoot('src/main')
@@ -39,6 +52,17 @@ android {
             java.srcDirs = ['../../android/src']
             res.srcDirs = ['../../android/res']
             jni.srcDirs = ['../../android/jni']
+        }
+
+        free {
+            java.srcDirs = ['../../android/free/src']
+            res.srcDirs = ['../../android/free/res']
+            manifest.srcFile "../../android/free/AndroidManifest.xml"
+        }
+
+        premium {
+            java.srcDirs = ['../../android/premium/src']
+            res.srcDirs = ['../../android/premium/res']
         }
     }
     buildTypes {
@@ -120,12 +144,14 @@ android {
             def SEP = "_"
             def buildType = variant.buildType.name
             def version = variant.versionName
+            def flavour = variant.getFlavorName().toUpperCase()
             def date = new Date();
             def formattedDate = date.format('yyyyMMdd_HHmm')
             def abi = output.getFilter(com.android.build.OutputFile.ABI)
             if (abi == null) abi = "universal"
-            def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + "_PREMIUM.apk"
+            //def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + "_PREMIUM.apk"
             //def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + "_FREE.apk"
+            def newApkName = abi + SEP + formattedDate + SEP + project + SEP + version + SEP + buildType + SEP + flavour +".apk"
             output.outputFileName = newApkName
         }
     }

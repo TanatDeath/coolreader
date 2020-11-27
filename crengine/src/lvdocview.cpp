@@ -6535,34 +6535,50 @@ int LVDocView::onSelectionCommand( int cmd, int param )
         bool res;
         if (cmd==DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS) {
             // DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS
-            for (int i=0; i<distance; i++) {
-                if (dir>0) {
-                    res = currSel.getStart().nextVisibleWordStart();
-                    CRLog::debug("nextVisibleWordStart returned %s", res?"true":"false");
-                } else {
-                    res = currSel.getStart().prevVisibleWordStart();
-                    CRLog::debug("prevVisibleWordStart returned %s", res?"true":"false");
-                }
-            }
-            if (currSel.isNull()) {
-                currSel.setEnd(currSel.getStart());
-                currSel.getEnd().nextVisibleWordEnd();
-            }
+            if (distance == 999) {
+				if (dir > 0) {
+					res = currSel.getStart().nextSentenceStart();
+				} else {
+					res = currSel.getStart().prevSentenceStart();
+				}
+            } else {
+				for (int i = 0; i < distance; i++) {
+					if (dir > 0) {
+						res = currSel.getStart().nextVisibleWordStart();
+						CRLog::debug("nextVisibleWordStart returned %s", res ? "true" : "false");
+					} else {
+						res = currSel.getStart().prevVisibleWordStart();
+						CRLog::debug("prevVisibleWordStart returned %s", res ? "true" : "false");
+					}
+				}
+				if (currSel.isNull()) {
+					currSel.setEnd(currSel.getStart());
+					currSel.getEnd().nextVisibleWordEnd();
+				}
+			}
         } else {
-            // DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS
-            for (int i=0; i<distance; i++) {
-                if (dir>0) {
-                    res = currSel.getEnd().nextVisibleWordEnd();
-                    CRLog::debug("nextVisibleWordEnd returned %s", res?"true":"false");
-                } else {
-                    res = currSel.getEnd().prevVisibleWordEnd();
-                    CRLog::debug("prevVisibleWordEnd returned %s", res?"true":"false");
-                }
-            }
-            if (currSel.isNull()) {
-                currSel.setStart(currSel.getEnd());
-                currSel.getStart().prevVisibleWordStart();
-            }
+			if (distance == 999) {
+				if (dir > 0) {
+					res = currSel.getEnd().nextSentenceStart();
+				} else {
+					res = currSel.getEnd().prevSentenceStart();
+				}
+			} else {
+				// DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS
+				for (int i = 0; i < distance; i++) {
+					if (dir > 0) {
+						res = currSel.getEnd().nextVisibleWordEnd();
+						CRLog::debug("nextVisibleWordEnd returned %s", res ? "true" : "false");
+					} else {
+						res = currSel.getEnd().prevVisibleWordEnd();
+						CRLog::debug("prevVisibleWordEnd returned %s", res ? "true" : "false");
+					}
+				}
+				if (currSel.isNull()) {
+					currSel.setStart(currSel.getEnd());
+					currSel.getStart().prevVisibleWordStart();
+				}
+			}
         }
         // moved = true; // (never read)
     } else {

@@ -1384,7 +1384,8 @@
     <string name="dict_dont_save_if_more">Do not save to dictionary search history if more than words (0 = save anyway)</string>
     <string name="litres_empty_login_or_passw">Litres login or password is not specified - set it up in cloud settings</string>
     <string name="search_books">Search books</string>
-    <string name="litres_profile">Profile, current balance</string>
+    <string name="litres_profile">Current balance</string>
+    <string name="litres_add_credit">Add credit to account</string>
     <string name="my_books">My books</string>
     <string name="value_is_empty">Value is empty</string>
     <string name="last_is_empty">Last name is empty</string>
@@ -1455,4 +1456,7 @@
     <string name="use_eink_backlight_control_add_info">Try this if you cannot control brightness on the EINK book (only for Onyx)</string>
     <string name="need_purchase">First, you should purchase this book, then download</string>
     <string name="already_purchased">Already purchased, proceed to download</string>
+    <string name="show_system_brightness_dialog">Show system brightness dialog (Onyx)</string>
+    <string name="sel_start">&lt; start of selection</string>
+    <string name="sel_end">end of selection &gt;</string>
 </resources>

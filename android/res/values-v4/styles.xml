@@ -337,6 +337,7 @@
         <item name="attr_icons8_google_drive_2">@drawable/icons8_google_drive_2</item>
         <item name="attr_icons8_quote_2">@drawable/icons8_quote_2</item>
         <item name="attr_icons8_bookmark_plus">@drawable/icons8_bookmark_plus</item>
+        <item name="attr_icons8_bookmark_plus_q">@drawable/icons8_bookmark_plus_q</item>
         <item name="attr_icons8_google_translate_save">@drawable/icons8_google_translate_save</item>
         <item name="attr_icons8_edit_row_2">@drawable/icons8_edit_row_2</item>
         <item name="attr_icons8_bookmark_link">@drawable/icons8_bookmark_link</item>
@@ -397,6 +398,10 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
+        <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
+        <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
+        <item name="attr_icons8_minus_minus_small">@drawable/icons8_minus_minus_small</item>
         <item name="attr_icons8_rounded_corners_margin">@drawable/icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
@@ -668,6 +673,7 @@
         <item name="attr_icons8_google_drive_2">@drawable/icons8_google_drive_2</item>
         <item name="attr_icons8_quote_2">@drawable/icons8_quote_2</item>
         <item name="attr_icons8_bookmark_plus">@drawable/icons8_bookmark_plus</item>
+        <item name="attr_icons8_bookmark_plus_q">@drawable/icons8_bookmark_plus_q</item>
         <item name="attr_icons8_google_translate_save">@drawable/icons8_google_translate_save</item>
         <item name="attr_icons8_edit_row_2">@drawable/icons8_edit_row_2</item>
         <item name="attr_icons8_bookmark_link">@drawable/icons8_bookmark_link</item>
@@ -728,6 +734,10 @@
     	<item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
+        <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
+        <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
+        <item name="attr_icons8_minus_minus_small">@drawable/icons8_minus_minus_small</item>
         <item name="attr_icons8_rounded_corners_margin">@drawable/icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
@@ -1001,6 +1011,7 @@
         <item name="attr_icons8_google_drive_2">@drawable/icons8_google_drive_2</item>
         <item name="attr_icons8_quote_2">@drawable/icons8_quote_2</item>
         <item name="attr_icons8_bookmark_plus">@drawable/icons8_bookmark_plus</item>
+        <item name="attr_icons8_bookmark_plus_q">@drawable/icons8_bookmark_plus_q</item>
         <item name="attr_icons8_google_translate_save">@drawable/icons8_google_translate_save</item>
         <item name="attr_icons8_edit_row_2">@drawable/icons8_edit_row_2</item>
         <item name="attr_icons8_bookmark_link">@drawable/icons8_bookmark_link</item>
@@ -1061,6 +1072,10 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
+        <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
+        <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
+        <item name="attr_icons8_minus_minus_small">@drawable/icons8_minus_minus_small</item>
         <item name="attr_icons8_rounded_corners_margin">@drawable/icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
@@ -1335,6 +1350,7 @@
         <item name="attr_icons8_google_drive_2">@drawable/icons8_google_drive_2</item>
         <item name="attr_icons8_quote_2">@drawable/icons8_quote_2</item>
         <item name="attr_icons8_bookmark_plus">@drawable/icons8_bookmark_plus</item>
+        <item name="attr_icons8_bookmark_plus_q">@drawable/icons8_bookmark_plus_q</item>
         <item name="attr_icons8_google_translate_save">@drawable/icons8_google_translate_save</item>
         <item name="attr_icons8_edit_row_2">@drawable/icons8_edit_row_2</item>
         <item name="attr_icons8_bookmark_link">@drawable/icons8_bookmark_link</item>
@@ -1395,6 +1411,10 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
+        <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
+        <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
+        <item name="attr_icons8_minus_minus_small">@drawable/icons8_minus_minus_small</item>
         <item name="attr_icons8_rounded_corners_margin">@drawable/icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
@@ -1668,6 +1688,7 @@
         <item name="attr_icons8_google_drive_2">@drawable/icons8_google_drive_2</item>
         <item name="attr_icons8_quote_2">@drawable/icons8_quote_2</item>
         <item name="attr_icons8_bookmark_plus">@drawable/icons8_bookmark_plus</item>
+        <item name="attr_icons8_bookmark_plus_q">@drawable/icons8_bookmark_plus_q</item>
         <item name="attr_icons8_google_translate_save">@drawable/icons8_google_translate_save</item>
         <item name="attr_icons8_edit_row_2">@drawable/icons8_edit_row_2</item>
         <item name="attr_icons8_bookmark_link">@drawable/icons8_bookmark_link</item>
@@ -1728,6 +1749,10 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
+        <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
+        <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
+        <item name="attr_icons8_minus_minus_small">@drawable/icons8_minus_minus_small</item>
         <item name="attr_icons8_rounded_corners_margin">@drawable/icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
@@ -2001,6 +2026,7 @@
         <item name="attr_icons8_google_drive_2">@drawable/icons8_google_drive_2</item>
         <item name="attr_icons8_quote_2">@drawable/icons8_quote_2</item>
         <item name="attr_icons8_bookmark_plus">@drawable/icons8_bookmark_plus</item>
+        <item name="attr_icons8_bookmark_plus_q">@drawable/icons8_bookmark_plus_q</item>
         <item name="attr_icons8_google_translate_save">@drawable/icons8_google_translate_save</item>
         <item name="attr_icons8_edit_row_2">@drawable/icons8_edit_row_2</item>
         <item name="attr_icons8_bookmark_link">@drawable/icons8_bookmark_link</item>
@@ -2061,6 +2087,10 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
+        <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
+        <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
+        <item name="attr_icons8_minus_minus_small">@drawable/icons8_minus_minus_small</item>
         <item name="attr_icons8_rounded_corners_margin">@drawable/icons8_rounded_corners_margin</item>
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>

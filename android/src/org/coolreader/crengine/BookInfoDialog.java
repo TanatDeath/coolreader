@@ -131,7 +131,7 @@ public class BookInfoDialog extends BaseDialog {
 		}
 	}
 
-	public void LitresSetPurchased(String errorMsg, boolean excep) {
+	public void litresSetPurchased(String errorMsg, boolean excep) {
 		if (btnPurchase != null) {
 			btnPurchase.setEnabled(true);
 			btnPurchase.setVisibility(View.VISIBLE);
@@ -141,9 +141,11 @@ public class BookInfoDialog extends BaseDialog {
 				setLitresDownloadModeChecked(btnDownloadLitresBook);
 				Utils.hideView(btnFragment);
 				mPurchased = true;
+				if (LitresConfig.litresAccountInfo != null) LitresConfig.litresAccountInfo.needRefresh = true;
 			} else {
 				String s = mCoolReader.getString(R.string.error) + ": " + errorMsg;
 				s = StrUtils.getNonEmptyStr(s, true).replace("Error: Error", "Error:");
+				s = StrUtils.getNonEmptyStr(s, true).replace("Ошибка: Ошибка", "Ошибка:");
 				s = s.replace("::", ":");
 				if (s.contains("already exists")) {
 					s = mCoolReader.getString(R.string.already_purchased);
@@ -335,7 +337,7 @@ public class BookInfoDialog extends BaseDialog {
 							bi.getFileInfo().wordCount = iWordCnt;
 							((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
 							((CoolReader) mCoolReader).getDB().flush();
-							vg.removeView(countButton);
+							Utils.hideView(countButton);
 							if (tvSC != null) tvSC.setText(""+iSymCnt);
 							if (tvWC != null) tvWC.setText(""+iWordCnt);
 							ReadingStatRes sres = ((CoolReader) mCoolReader).getReaderView().getBookInfo().getFileInfo().calcStats();
@@ -748,11 +750,11 @@ public class BookInfoDialog extends BaseDialog {
 		bMarkToRead = activity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false);
 
 		btnMarkToRead.setOnClickListener(v -> {
-		bMarkToRead = !bMarkToRead;
-		Properties props = new Properties(activity.settings());
-		props.setProperty(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, bMarkToRead?"1":"0");
-		activity.setSettings(props, -1, true);
-		paintMarkButton();
+			bMarkToRead = !bMarkToRead;
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, bMarkToRead?"1":"0");
+			activity.setSettings(props, -1, true);
+			paintMarkButton();
 		});
 		paintMarkButton();
 		btnBookDownload = view.findViewById(R.id.book_download);
@@ -955,40 +957,32 @@ public class BookInfoDialog extends BaseDialog {
 				}
 		}
 		if ((!isLitres) || (isPerson)) {
-			try {
-				Utils.hideView(btnMarkToRead);
-				Utils.hideView(tlLitresDownl);
-				Utils.hideView(llLitresPurchase);
-			} catch (Exception e) {
-				// do nothing
-			}
+			if (isPerson) Utils.hideView(btnMarkToRead);
+			Utils.hideView(tlLitresDownl);
+			Utils.hideView(llLitresPurchase);
 		}
 
 		if ((StrUtils.isEmptyStr(mAuthors))||(mFileInfoSearchDir==null)) {
-			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
-			parent.removeView(btnFindAuthors);
+			Utils.hideView(btnFindAuthors);
 		}
 		if (actionType == BOOK_INFO) {
-			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
-			parent.removeView(btnBookDownload);
-			parent.removeView(btnMarkToRead);
+			Utils.hideView(btnBookDownload);
+			Utils.hideView(btnMarkToRead);
 		}
 		if (actionType == OPDS_INFO) {
-			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
-			parent.removeView(btnOpenBook);
-			parent.removeView(btnBookFolderOpen);
-			parent.removeView(btnBookShortcut);
-			parent.removeView(btnBookEdit);
-			parent.removeView(btnSendByEmail);
-			parent.removeView(btnDeleteBook);
-			parent.removeView(btnCustomCover);
-			parent.removeView(btnSendByYnd);
+			Utils.hideView(btnOpenBook);
+			Utils.hideView(btnBookFolderOpen);
+			Utils.hideView(btnBookShortcut);
+			Utils.hideView(btnBookEdit);
+			Utils.hideView(btnSendByEmail);
+			Utils.hideView(btnDeleteBook);
+			Utils.hideView(btnCustomCover);
+			Utils.hideView(btnSendByYnd);
 		}
 		if (actionType == OPDS_FINAL_INFO) {
-			ViewGroup parent = ((ViewGroup)btnBookDownload.getParent());
-			parent.removeView(btnBookDownload);
-			parent.removeView(btnMarkToRead);
-			parent.removeView(btnFindAuthors);
+			Utils.hideView(btnBookDownload);
+			Utils.hideView(btnMarkToRead);
+			Utils.hideView(btnFindAuthors);
 		}
 		if (isLitres) Utils.hideView(btnBookDownload);
 		for ( BookInfoEntry item : items ) {

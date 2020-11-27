@@ -972,7 +972,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 				v.setImageDrawable(d);
 				v.setTag("1");
-				mActivity.tintViewIcons(v);
+				mActivity.tintViewIconsForce(v);
 			} else {
 				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_empty);
 				v.setImageDrawable(d);
@@ -1721,20 +1721,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			CoolReader cr = (CoolReader)mActivity;
 			if ((item.value.equals("2"))||(item.value.equals("3"))||(item.value.equals("4"))) {
 				if (cr.geoLastData != null) {
-					cr.geoLastData.gps.stop();
-					cr.geoLastData.netw.stop();
+					cr.geoLastData.gpsStop();
+					cr.geoLastData.netwStop();
 					if ((item.value.equals("2")) || (item.value.equals("4")))
-						cr.geoLastData.loadMetroStations(cr);
+						cr.geoLastData.loadMetroStations(cr, true);
 					if ((item.value.equals("3")) || (item.value.equals("4")))
-						cr.geoLastData.loadTransportStops(cr);
-					cr.geoLastData.gps.start(cr.geoLastData.geoListener);
-					cr.geoLastData.netw.start(cr.geoLastData.netwListener);
+						cr.geoLastData.loadTransportStops(cr, true);
+					cr.geoLastData.gpsStart();
+					cr.geoLastData.netwStart();
 				}
 				((CoolReader) mActivity).checkLocationPermission();
 			} else {
 				if (cr.geoLastData != null) {
-					cr.geoLastData.gps.stop();
-					cr.geoLastData.netw.stop();
+					cr.geoLastData.gpsStop();
+					cr.geoLastData.netwStop();
 					if (cr.geoLastData.metroLocations == null)
 						cr.geoLastData.metroLocations = new ArrayList<MetroLocation>();
 					cr.geoLastData.metroLocations.clear();
@@ -2751,13 +2751,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 									mActivity.getDB().saveAuthorsAliasesInfo(AuthorAlias.AUTHOR_ALIASES, new CRDBService.AuthorsAliasesLoadingCallback() {
 												@Override
 												public void onAuthorsAliasesLoaded(int cnt) {
-													cr.showCenterPopup(view, getString(R.string.authors_aliases_loaded) + " " + cnt, 1000, true);
+													cr.showPopup(view, getString(R.string.authors_aliases_loaded) + " " + cnt, 1000, true, true);
 													cr.showToast(getString(R.string.authors_aliases_loaded) + " " + cnt);
 												}
 
 												@Override
 												public void onAuthorsAliasesLoadProgress(int percent) {
-													cr.showCenterPopup(view, getString(R.string.authors_aliases_loading) + ", " + percent + "%", 1000, true);
+													cr.showPopup(view, getString(R.string.authors_aliases_loading) + ", " + percent + "%", 1000, true, true);
 												}
 											});
 								});
@@ -5977,8 +5977,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_text_margin_left_drawable, R.drawable.cr3_option_text_margin_left);
 		((PageMarginsOption)sbO8).updateFilterEnd();
 		mOptionsPage.add(sbO8);
-		mOptionsPage.add(new GeoOption(this, filter).
-				setIconIdByAttr(R.attr.attr_icons8_train_headphones, R.drawable.train_headphones));
+		if (FlavourConstants.PREMIUM_FEATURES) {
+			mOptionsPage.add(new GeoOption(this, filter).
+					setIconIdByAttr(R.attr.attr_icons8_train_headphones, R.drawable.train_headphones));
+		}
 		mOptionsControls = new OptionsListView(getContext(), null);
 		OptionBase kmO = new KeyMapOption(this, getString(R.string.options_app_key_actions),
 				getString(R.string.options_app_key_actions_add_info), filter).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);

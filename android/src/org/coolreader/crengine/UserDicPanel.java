@@ -385,18 +385,23 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					}
 				}
 			}
-			Collections.sort(arrUdeWords, new Comparator<UserDicEntry>() {
-				@Override
-				public int compare(UserDicEntry lhs, UserDicEntry rhs) {
-					// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-					//return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());
-					//lets by time
-					if (lhs.getLast_access_time() > rhs.getLast_access_time()) return -1;
-					if (lhs.getLast_access_time() < rhs.getLast_access_time()) return 1;
-					return 0;
-				}
+			Collections.sort(arrUdeWords, (lhs, rhs) -> {
+				// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+				//return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());
+				//lets by time
+				if (lhs.getLast_access_time() > rhs.getLast_access_time()) return -1;
+				if (lhs.getLast_access_time() < rhs.getLast_access_time()) return 1;
+				return 0;
 			});
 			updateViews();
+			if (!arrUdeWords.isEmpty()) {
+				String firstW = arrUdeWords.get(0).getDic_word();
+				if (activity.getmReaderView() != null) {
+					activity.getmReaderView().clearSelection();
+					activity.getmReaderView().findText(firstW, false, false, true);
+				}
+			}
+			//asdf
 		}
 
 		private void updateViews() {

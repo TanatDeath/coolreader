@@ -21,6 +21,7 @@ import org.coolreader.cloud.yandex.YndCloudSettings;
 import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -78,8 +79,6 @@ import org.coolreader.db.BaseDB;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.geo.GeoLastData;
-import org.coolreader.geo.LocationTracker;
-import org.coolreader.geo.ProviderLocationTracker;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 import org.coolreader.tts.TTS;
 
@@ -103,7 +102,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -145,6 +143,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         public int cnt;
     }
 
+    //move to flavor
     public GeoLastData geoLastData = new GeoLastData(this);
 
     public ArrayList<ResizeHistory> getResizeHist() {
@@ -205,6 +204,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public ReaderViewLayout getmReaderFrame() {
 		return mReaderFrame;
+	}
+
+	public ReaderView getmReaderView() {
+		return mReaderView;
 	}
 
 	public ReaderViewLayout mReaderFrame;
@@ -293,7 +296,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int REQUEST_CODE_READ_PHONE_STATE_PERM = 2;
 	private static final int REQUEST_CODE_GOOGLE_DRIVE_SIGN_IN = 3;
 	private static final int REQUEST_CODE_OPEN_DOCUMENT_TREE = 11;
-	private static final int REQUEST_CODE_LOCATION_PERMISSION = 200002;
 
 	public String getAndroid_id() {
 		return android_id;
@@ -1060,7 +1062,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (checkIntentIsDropbox(uri, sUri)) return true;
 			if (uri != null) fileToOpen = filePathFromUri(uri);
 			if ((sUri.startsWith("http")) && (StrUtils.isEmptyStr(fileToOpen))) {
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					showToast(R.string.only_in_premium);
 					return true;
 				}
@@ -1085,7 +1087,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			Uri imageUri1 = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if (sText.toLowerCase().startsWith("http")) {
 				//processIntentHttp(sText);
-				if (!BaseActivity.PREMIUM_FEATURES) {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
 					showToast(R.string.only_in_premium);
 					return true;
 				}
@@ -1210,7 +1212,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		super.onPause();
 		mSensorManager.unregisterListener(deviceOrientation.getEventListener());
         mSensorManager.unregisterListener(this);
-		geoLastData.gps.stop(); geoLastData.netw.stop();
+		geoLastData.gpsStop(); geoLastData.netwStop();
 		if (mReaderView != null) {
 			// save book info to "sync to" as in the actual sync operation the readerView is no longer available
 			BookInfo bookInfo = mReaderView.getBookInfo();
@@ -1268,8 +1270,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		int iGeo = settings().getInt(Settings.PROP_APP_GEO, 0);
 		if (iGeo>1) {
-			geoLastData.gps.start(geoLastData.geoListener);
-			geoLastData.netw.start(geoLastData.netwListener);
+			geoLastData.gpsStart();
+			geoLastData.netwStart();
 		}
 
         if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
@@ -3616,7 +3618,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
 
 				Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage(MAIN_CLASS_NAME);
+				intent.setPackage(FlavourConstants.MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.RECENT_DIR_TAG);
 
@@ -3631,7 +3633,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage(MAIN_CLASS_NAME);
+				intent.setPackage(FlavourConstants.MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_READING_TAG);
 
@@ -3646,7 +3648,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage(MAIN_CLASS_NAME);
+				intent.setPackage(FlavourConstants.MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_TO_READ_TAG);
 
@@ -3661,7 +3663,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage(MAIN_CLASS_NAME);
+				intent.setPackage(FlavourConstants.MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.STATE_FINISHED_TAG);
 
@@ -3676,7 +3678,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						.build();
 
 				intent = new Intent(Intent.ACTION_SEND);
-				intent.setPackage(MAIN_CLASS_NAME);
+				intent.setPackage(FlavourConstants.MAIN_CLASS_NAME);
 				intent.setType("text/plain");
 				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.SEARCH_SHORTCUT_TAG);
 
@@ -3699,63 +3701,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void createGeoListener() {
-
-		geoLastData.gps = new ProviderLocationTracker(this,
-				ProviderLocationTracker.ProviderType.GPS);
-		geoLastData.geoListener = new LocationTracker.LocationUpdateListener() {
-			@Override
-			public void onUpdate(Location oldLoc, long oldTime, Location newLoc,
-								 long newTime) {
-				geoLastData.geoUpdateCoords(oldLoc, oldTime, newLoc, newTime);
-			}
-
-		};
-
-		geoLastData.netw = new ProviderLocationTracker(this,
-				ProviderLocationTracker.ProviderType.NETWORK);
-
-		geoLastData.netwListener = new LocationTracker.LocationUpdateListener() {
-			@Override
-			public void onUpdate(Location oldLoc, long oldTime, Location newLoc,
-								 long newTime) {
-				geoLastData.geoUpdateCoords(oldLoc, oldTime, newLoc, newTime);
-			}
-
-		};
-		int iGeo = settings().getInt(Settings.PROP_APP_GEO, 0);
-		if ((iGeo==2)||(iGeo==4)) geoLastData.loadMetroStations(this);
-		if ((iGeo==3)||(iGeo==4)) geoLastData.loadTransportStops(this);
-		if (iGeo>1) {
-			geoLastData.gps.start(geoLastData.geoListener);
-			geoLastData.netw.start(geoLastData.netwListener);
-		}
+		geoLastData.createGeoListener(settings());
 	}
 
 	public boolean checkLocationPermission() {
-		if (ContextCompat.checkSelfPermission(this,
-				Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-					Manifest.permission.ACCESS_FINE_LOCATION)) {
-				new AlertDialog.Builder(this)
-						.setTitle(R.string.title_location_permission)
-						.setMessage(R.string.text_location_permission)
-						.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialogInterface, int i) {
-						ActivityCompat.requestPermissions(CoolReader.this,
-								new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-								REQUEST_CODE_LOCATION_PERMISSION);
-					}
-				}).create().show();
-			} else {
-				ActivityCompat.requestPermissions(CoolReader.this,
-						new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-						REQUEST_CODE_LOCATION_PERMISSION);
-			}
-			return false;
-		} else {
-			return true;
-		}
+		return geoLastData.checkLocationPermission(this);
 	}
 
 }

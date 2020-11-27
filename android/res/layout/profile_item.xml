@@ -8,7 +8,7 @@
     android:paddingRight="?android:attr/scrollbarSize"
     >
 
-    <ImaegView
+    <ImageView
         android:id="@+id/option_value_check"
         android:layout_marginLeft="4dip"
         android:layout_marginRight="4dip"

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="org.coolreader"
+        android:installLocation="auto">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
+
+    <application
+            android:process="org.coolreader.knownreader"
+            tools:replace="android:process"
+            >
+        <provider
+                tools:node="replace"
+                android:name=".GenericFileProvider"
+                android:authorities="org.knownreader.free.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths" />
+        </provider>
+    </application>
+</manifest>

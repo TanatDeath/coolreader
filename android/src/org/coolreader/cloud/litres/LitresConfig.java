@@ -11,6 +11,8 @@ public class LitresConfig {
     public static String city = "";
     public static long whenLogin;
 
+    public static LitresAccountInfo litresAccountInfo = null;
+
     public static boolean init(CoolReader cr) {
         cr.readLitresCloudSettings();
         return true;

@@ -1,10 +1,12 @@
 package org.coolreader.cloud.litres;
 
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -42,7 +44,8 @@ public class LitresMainDialog extends BaseDialog {
 	final TableLayout tlLitresMain;
 	final TableRow trLitresAuth;
 	final Button mBtnAuth;
-	final Button mBtnProfile;
+	final public Button mBtnProfile;
+	final Button mBtnAddCredit;
 	final TableRow trLitresProfile;
 	final Button mBtnMyBooks;
 	final TableRow trLitresMyBooks;
@@ -94,13 +97,24 @@ public class LitresMainDialog extends BaseDialog {
 	private int curFindMode = SM_CONTAINS;
 	private int curPersonMode = PM_ONLY_AUTHORS;
 
+	public void updateBalance() {
+		if (LitresConfig.litresAccountInfo == null) return;
+		if (mBtnProfile == null) return;
+		if (LitresConfig.litresAccountInfo.needRefresh) return;
+		if (!StrUtils.isEmptyStr(LitresConfig.litresAccountInfo.moneyDetails.get("real_money"))) {
+			mBtnProfile.setText(LitresConfig.litresAccountInfo.moneyDetails.get("real_money") + " " + LitresConfig.currency + " (bonus " +
+					LitresConfig.litresAccountInfo.moneyDetails.get("bonus") + " " + LitresConfig.currency + ")"
+			);
+		}
+	}
+
 	public void setupView(int iViewType) {
 		tlLitresMain.removeAllViews();
 		if (!LitresConfig.didLogin)
 			tlLitresMain.addView(trLitresAuth);
 		if (iViewType == VT_SEARCH_BOOKS) {
 			curViewType = VT_SEARCH_BOOKS;
-			//tlLitresMain.addView(trLitresProfile);
+			tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearch2);
@@ -126,7 +140,7 @@ public class LitresMainDialog extends BaseDialog {
 		}
 		if (iViewType == VT_SEARCH_COLLECTIONS) {
 			curViewType = VT_SEARCH_COLLECTIONS;
-			//tlLitresMain.addView(trLitresProfile);
+			tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -152,7 +166,7 @@ public class LitresMainDialog extends BaseDialog {
 		}
 		if (iViewType == VT_SEARCH_GENRES) {
 			curViewType = VT_SEARCH_GENRES;
-			//tlLitresMain.addView(trLitresProfile);
+			tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -178,7 +192,7 @@ public class LitresMainDialog extends BaseDialog {
 		}
 		if (iViewType == VT_SEARCH_SEQUENCES) {
 			curViewType = VT_SEARCH_SEQUENCES;
-			//tlLitresMain.addView(trLitresProfile);
+			tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -204,7 +218,7 @@ public class LitresMainDialog extends BaseDialog {
 		}
 		if (iViewType == VT_SEARCH_PERSONS) {
 			curViewType = VT_SEARCH_PERSONS;
-			//tlLitresMain.addView(trLitresProfile);
+			tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -230,7 +244,7 @@ public class LitresMainDialog extends BaseDialog {
 		}
 		if (iViewType == VT_SEARCH_PERSONS_EXT) {
 			curViewType = VT_SEARCH_PERSONS_EXT;
-			//tlLitresMain.addView(trLitresProfile);
+			tlLitresMain.addView(trLitresProfile);
 			tlLitresMain.addView(trLitresMyBooks);
 			tlLitresMain.addView(trLitresSearch1);
 			tlLitresMain.addView(trLitresSearchPersons);
@@ -260,6 +274,7 @@ public class LitresMainDialog extends BaseDialog {
 		mCoolReader.tintViewIcons(mBtnSearchSequences, true);
 		mCoolReader.tintViewIcons(mBtnSearchPersons, true);
 		mCoolReader.tintViewIcons(mBtnSearchPersonsExt, true);
+		updateBalance();
 	}
 
 	private void setModeChecked(Button btn) {
@@ -457,6 +472,18 @@ public class LitresMainDialog extends BaseDialog {
 			}
 		});
 		mCoolReader.tintViewIcons(mBtnProfile,true);
+		mBtnAddCredit = viewProfile.findViewById(R.id.btn_add_credit);
+		mBtnAddCredit.setBackgroundColor(colorGrayC);
+		Utils.setDashedButton(mBtnAddCredit);
+		mBtnAddCredit.setOnClickListener(v -> {
+			try {
+				CloudAction.litresPutMoneyOnAccount(mCoolReader, this);
+				if (LitresConfig.litresAccountInfo != null) LitresConfig.litresAccountInfo.needRefresh = true;
+			} catch (Exception e) {
+
+			}
+		});
+		mCoolReader.tintViewIcons(mBtnAddCredit,true);
 		View viewMy = mInflater.inflate(R.layout.litres_main_search_my_books, null);
 		trLitresMyBooks = viewMy.findViewById(R.id.tr_litres_my_books);
 		mBtnMyBooks = viewMy.findViewById(R.id.btn_my_books);

@@ -997,6 +997,7 @@ bool DocViewNative::findText( lString32 pattern, int origin, bool reverse, bool 
         if ( origin == 0 ) {
             // from current page to last page
             start = rc.top;
+			//end = rc.bottom; //plotn, remove!
         } else if ( origin == -1 ) {
             // from first page to current page
             end = rc.top;

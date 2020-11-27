@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import androidx.core.content.FileProvider;
 import android.util.Log;
-import android.view.View;
 
 import com.dropbox.core.v2.users.FullAccount;
 
@@ -12,6 +11,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.dropbox.DBXConfig;
 import org.coolreader.cloud.dropbox.DBXPerformAction;
+import org.coolreader.cloud.litres.LitresAccountInfo;
 import org.coolreader.cloud.litres.LitresConfig;
 import org.coolreader.cloud.litres.LitresError;
 import org.coolreader.cloud.litres.LitresJsons;
@@ -28,6 +28,7 @@ import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FileUtils;
+import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderView;
@@ -94,6 +95,7 @@ public class CloudAction {
     public static final int LITRES_GET_SEQUENCE_LIST = 20208;
     public static final int LITRES_REAUTH = 20209;
     public static final int LITRES_PROFILE = 20210;
+    public static final int LITRES_PUT_MONEY_ON_ACCOUNT = 20211;
 
     public int action; // action, that will be performed
     public String param; // param(s) passed to an action...
@@ -736,7 +738,7 @@ public class CloudAction {
             File bookFile = new File(sBookFName);
             //Uri path = Uri.fromFile(bookFile);
             String sPkg = cr.getApplicationContext().getPackageName();
-            Uri path = FileProvider.getUriForFile(cr, "org.knownreader.fileprovider", bookFile);
+            Uri path = FileProvider.getUriForFile(cr, FlavourConstants.FILE_PROVIDER_NAME, bookFile);
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
             // set the type to 'email'
             emailIntent.setType("vnd.android.cursor.dir/email");
@@ -956,6 +958,28 @@ public class CloudAction {
             }
             callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_SEQUENCE_PREFIX);
         }
+        if (a.mCurAction.action == LITRES_PROFILE) {
+            if (dlg != null) {
+                try {
+                    LitresAccountInfo lai = LitresJsons.parse_r_profile(a.mCurAction.param2, cr, (String) o);
+                    lai.needRefresh = false;
+                    LitresConfig.litresAccountInfo = lai;
+                    LitresMainDialog lmd = (LitresMainDialog) dlg;
+                    lmd.updateBalance();
+                } catch (Exception e) {
+                    Log.e("LITRES", e.getMessage(), e);
+                    BackgroundThread.instance().postGUI(() -> {
+                        if (LitresPerformAction.progressDlg != null)
+                            if (LitresPerformAction.progressDlg.isShowing())
+                                LitresPerformAction.progressDlg.dismiss();
+                        cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                    });
+                }
+            }
+        }
+        if (a.mCurAction.action == LITRES_PUT_MONEY_ON_ACCOUNT) {
+            cr.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://pda.litres.ru/pages/put_money_on_account/?otsid=" + cr.litresCloudSettings.sessionId)));
+        }
         a.DoNextAction();
     }
 
@@ -1011,6 +1035,31 @@ public class CloudAction {
         } catch (Exception e) {
             cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("LITRES litresGetProfile err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    public static void litresPutMoneyOnAccount(final CoolReader cr, LitresMainDialog litresMainDialog) {
+        try {
+            cr.showCloudToast(R.string.cloud_begin,false);
+            ArrayList<CloudAction> al = new ArrayList<CloudAction>();
+            litresAddAuthCAIfNeeded(cr, al, true);
+            CloudAction ca2 = new CloudAction(cr, CloudAction.LITRES_PUT_MONEY_ON_ACCOUNT, true);
+            al.add(ca2);
+            final LitresPerformAction a = new LitresPerformAction(cr, al, new LitresPerformAction.Callback() {
+                @Override
+                public void onComplete(LitresPerformAction a, String res, Object o) {
+                    CloudAction.onLitresComplete(cr, a, res, o, litresMainDialog, null);
+                }
+
+                @Override
+                public void onError(LitresPerformAction a, String res, Exception e) {
+                    CloudAction.onLitresError(cr, a, res, e);
+                }
+            });
+            a.DoFirstAction();
+        } catch (Exception e) {
+            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            System.out.println("LITRES litresPutMoneyOnAccount err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
 
@@ -1167,9 +1216,9 @@ public class CloudAction {
                         }
                         if ((a.mCurAction.mBookInfoDialog != null) && (lpi != null))
                             if (lpi.success)
-                                a.mCurAction.mBookInfoDialog.LitresSetPurchased("", false);
+                                a.mCurAction.mBookInfoDialog.litresSetPurchased("", false);
                             else
-                                a.mCurAction.mBookInfoDialog.LitresSetPurchased(cr.getString(R.string.error) + ": " + lpi.errorMessage, false);
+                                a.mCurAction.mBookInfoDialog.litresSetPurchased(cr.getString(R.string.error) + ": " + lpi.errorMessage, false);
                     }
                     CloudAction.onLitresComplete(cr, a, res, o, null, null);
                 }
@@ -1177,7 +1226,7 @@ public class CloudAction {
                 @Override
                 public void onError(LitresPerformAction a, String res, Exception e) {
                     if (a.mCurAction.mBookInfoDialog != null)
-                        a.mCurAction.mBookInfoDialog.LitresSetPurchased("", true);
+                        a.mCurAction.mBookInfoDialog.litresSetPurchased("", true);
                     CloudAction.onLitresError(cr, a, res, e);
                 }
             });

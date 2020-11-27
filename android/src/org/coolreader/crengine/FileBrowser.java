@@ -1060,7 +1060,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 		}
 		if (fi2!=null) { // OPDS
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				mActivity.showToast(R.string.only_in_premium);
 				return;
 			}

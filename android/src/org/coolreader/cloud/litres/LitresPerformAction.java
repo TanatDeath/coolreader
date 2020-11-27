@@ -81,6 +81,7 @@ public class LitresPerformAction {
                 if (mCurAction.action == CloudAction.LITRES_DOWNLOAD_BOOK) LitresDownloadBook(mCurAction);
                 if (mCurAction.action == CloudAction.LITRES_SEARCH_PERSON_LIST) LitresSearchPersonList(mCurAction);
                 if (mCurAction.action == CloudAction.LITRES_PROFILE) LitresGetProfile(mCurAction);
+                if (mCurAction.action == CloudAction.LITRES_PUT_MONEY_ON_ACCOUNT) LitresPutMoneyOnAccount(mCurAction);
             } else {
                 Log.i("Litres", "End of cloud operation");
                 if (progressDlg != null)
@@ -556,7 +557,7 @@ public class LitresPerformAction {
                     throws IOException {
                 String sBody = response.body().string();
                 BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-                    mCallback.onComplete(LitresPerformAction.this,"PurchaseBook", sBody);
+                    mCallback.onComplete(LitresPerformAction.this,"LitresGetProfile", sBody);
                 }, 100));
             }
 
@@ -567,5 +568,12 @@ public class LitresPerformAction {
             }
         });
     }
+
+    public void LitresPutMoneyOnAccount(final CloudAction ca) throws JSONException, NoSuchAlgorithmException {
+        BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+                mCallback.onComplete(LitresPerformAction.this,"LitresPutMoneyOnAccount", "");
+            }, 100));
+        }
+
 }
 

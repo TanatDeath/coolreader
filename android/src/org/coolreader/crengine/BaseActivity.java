@@ -79,10 +79,10 @@ import android.widget.Toast;
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
 
-	public static boolean PRO_FEATURES = true;
-	public static boolean PREMIUM_FEATURES = PRO_FEATURES;
+	//public static boolean PRO_FEATURES = true;
+	//public static boolean PREMIUM_FEATURES = PRO_FEATURES;
 	//public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
-	public static String MAIN_CLASS_NAME = "org.knownreader.premium";
+	//public static String MAIN_CLASS_NAME = "org.knownreader.premium";
 
 //	@Override
 //	public boolean onCreateOptionsMenu(Menu menu) {
@@ -520,7 +520,9 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_whole_page_to_dic,
 						 R.attr.attr_icons8_texture,
 						 R.attr.attr_icons8_hide,
-				         R.attr.google_drive_drawable
+				         R.attr.google_drive_drawable,
+						 R.attr.attr_icons8_bookmark_plus_q,
+						 R.attr.attr_icons8_sun
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -602,6 +604,9 @@ public class BaseActivity extends Activity implements Settings {
 		int brChooseTexture = a.getResourceId(71, 0);
 		int brHide = a.getResourceId(72, 0);
 		int googleDriveDrawableRes = a.getResourceId(73, 0);
+
+		int brBookmarkPlusQ = a.getResourceId(74, 0);
+		int brSun = a.getResourceId(75, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -756,6 +761,8 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.GDRIVE_SYNCTO.setIconId(googleDriveDrawableRes);
 			ReaderAction.GDRIVE_SYNCFROM.setIconId(googleDriveDrawableRes);
 		}
+		if (brBookmarkPlusQ != 0) ReaderAction.SAVE_BOOKMARK_QUICK.setIconId(brBookmarkPlusQ);
+		if (brSun != 0) ReaderAction.SHOW_SYSTEM_BRIGHTNESS_DIALOG.setIconId(brSun);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1586,10 +1593,14 @@ public class BaseActivity extends Activity implements Settings {
 	private boolean simplePopup = false;
 
 	public void showCenterPopup(View surface, String val, boolean forceRecreate) {
-		showCenterPopup(surface, val, 500, forceRecreate);
+		showPopup(surface, val, 500, forceRecreate, true);
 	}
 
-	public void showCenterPopup(View surface, String val, int millis, boolean forceRecreate) {
+	public void showBottomPopup(View surface, String val, boolean forceRecreate) {
+		showPopup(surface, val, 500, forceRecreate, false);
+	}
+
+	public void showPopup(View surface, String val, int millis, boolean forceRecreate, boolean bCenter) {
 		BackgroundThread.instance().executeGUI(() -> {
 			boolean useExisting = (windowCenterPopup != null);
 			useExisting = useExisting && simplePopup;
@@ -1631,7 +1642,14 @@ public class BaseActivity extends Activity implements Settings {
 			int screenHeight = m.heightPixels;
 			int screenWidth = m.widthPixels;
 			//windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, surface.getWidth() / 2, surface.getHeight() / 2);
-			windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, screenWidth / 2, screenHeight / 2);
+			if (bCenter)
+				windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, screenWidth / 2, screenHeight / 2);
+			else {
+				int [] location = new int[2];
+				surface.getLocationOnScreen(location);
+				int popupY = location[1] + surface.getHeight() - toast_ll.getHeight();
+				windowCenterPopup.showAtLocation(surface, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+			}
 			simplePopup = true;
 			if (millis >= 0) scheduleHideWindowCenterPopup(millis);
 		});
@@ -3074,6 +3092,10 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void tintViewIcons(View v) {
 		tintViewIcons(v, false);
+	}
+
+	public void tintViewIconsForce(View v) {
+		tintViewIcons(v, true);
 	}
 
 	public void tintViewIconsC(View v, int setColor) {

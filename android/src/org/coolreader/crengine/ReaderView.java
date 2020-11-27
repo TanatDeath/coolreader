@@ -127,8 +127,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mActivity.showCenterPopup(surface, val, false);
 	};
 
+	private void showBottomPopup(String val) {
+		mActivity.showBottomPopup(surface, val, false);
+	};
+
 	private void showCenterPopup(String val, int millis) {
-		mActivity.showCenterPopup(surface, val, millis, false);
+		mActivity.showPopup(surface, val, millis, false, true);
+	}
+
+	private void showBottomPopup(String val, int millis) {
+		mActivity.showPopup(surface, val, millis, false, false);
 	}
 
 	private void showCenterPopupFont(String val, String val2, int fontSize) {
@@ -871,14 +879,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				sendQuotationInEmail(sel);
 				break;
 			case SELECTION_ACTION_USER_DIC:
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
 				showNewBookmarkDialog(sel, Bookmark.TYPE_USER_DIC, "");
 				break;
 			case SELECTION_ACTION_CITATION:
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
@@ -1945,29 +1953,38 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		dlg.show();
 	}
 
-	public void findText(final String pattern, final boolean reverse, final boolean caseInsensitive)
+	public void findText(final String pattern, final boolean reverse, final boolean caseInsensitive) {
+		findText(pattern, reverse, caseInsensitive, false);
+	}
+
+	public void findText(final String pattern, final boolean reverse, final boolean caseInsensitive, final boolean forUserDic)
 	{
 		BackgroundThread.ensureGUI();
 		final ReaderView view = this;
 		mEngine.execute(new Task() {
 			public void work() throws Exception {
 				BackgroundThread.ensureBackground();
-				boolean res = doc.findText( pattern, 1, reverse?1:0, caseInsensitive?1:0);
-				if (!res)
-					res = doc.findText( pattern, -1, reverse?1:0, caseInsensitive?1:0);
-				if (!res) {
-					doc.clearSelection();
-					throw new Exception("pattern not found");
+				boolean res = doc.findText( pattern, forUserDic?0:1, reverse?1:0, caseInsensitive?1:0);
+				if (!forUserDic) {
+					if (!res)
+						res = doc.findText(pattern, -1, reverse ? 1 : 0, caseInsensitive ? 1 : 0);
+					if (!res) {
+						doc.clearSelection();
+						throw new Exception("pattern not found");
+					}
 				}
 			}
 			public void done() {
 				BackgroundThread.ensureGUI();
 				drawPage();
-				FindNextDlg.showDialog( mActivity, view, pattern, caseInsensitive );
+				if (!forUserDic)
+					FindNextDlg.showDialog( mActivity, view, pattern, caseInsensitive );
 			}
 			public void fail(Exception e) {
-				BackgroundThread.ensureGUI();
-				mActivity.showToast("Pattern not found");
+				if (!forUserDic) {
+					BackgroundThread.ensureGUI();
+					mActivity.showToast("Pattern not found");
+				}
 			}
 
 		});
@@ -2091,6 +2108,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void addBookmark(final int shortcut) {
+		addBookmark(shortcut, false);
+	}
+
+	public void addBookmark(final int shortcut, boolean isQuick) {
 		BackgroundThread.ensureGUI();
 		// set bookmark instead
 		mEngine.execute(new Task() {
@@ -2116,7 +2137,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						s = mActivity.getString(R.string.toast_shortcut_bookmark_is_set);
 						s.replace("$1", String.valueOf(shortcut));
 					}
-					highlightBookmarks();
+					if (!isQuick) highlightBookmarks();
 					mActivity.showToast(s);
 					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 				}
@@ -2999,7 +3020,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_TTS_PLAY:
 			{
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
@@ -3348,7 +3369,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		//	break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_YND:
 			log.i("Open book from CLOUD_YND");
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				mActivity.showToast(R.string.only_in_premium);
 				break;
 			}
@@ -3356,7 +3377,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			break;
 		case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
 			log.i("Open book from CLOUD_DBX");
-			if (!BaseActivity.PREMIUM_FEATURES) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
 				mActivity.showToast(R.string.only_in_premium);
 				break;
 			}
@@ -3466,7 +3487,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
 						log.i("Open book from CLOUD_YND");
-						if (!BaseActivity.PREMIUM_FEATURES) {
+						if (!FlavourConstants.PREMIUM_FEATURES) {
 							mActivity.showToast(R.string.only_in_premium);
 							return true;
 						}
@@ -3474,7 +3495,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						return true;
 					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
 						log.i("Open book from CLOUD_DBX");
-						if (!BaseActivity.PREMIUM_FEATURES) {
+						if (!FlavourConstants.PREMIUM_FEATURES) {
 							mActivity.showToast(R.string.only_in_premium);
 							return true;
 						}
@@ -3545,10 +3566,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 				break;
 			case DCMD_SAVE_BOOKMARK_QUICK:
-				addBookmark(0);
+				addBookmark(0, true);
+				break;
+			case DCMD_SHOW_SYSTEM_BRIGHTNESS_DIALOG:
+				mActivity.sendBroadcast(new Intent("action.show.brightness.dialog"));
 				break;
 			case DCMD_SHOW_USER_DIC:
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
@@ -3556,7 +3580,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				dlg.show();
 				break;
 			case DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC:
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
@@ -3568,7 +3592,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 				break;
 			case DCMD_SHOW_CITATIONS:
-				if ((!BaseActivity.PRO_FEATURES)&&(!BaseActivity.PREMIUM_FEATURES)) {
+				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
@@ -5307,9 +5331,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					else
 						newValueR = levelList.get(indexR);
 					if (newValueR>=0)
-						showCenterPopup(newValue + "% / " + newValueR + "%", 2000);
+						showBottomPopup(newValue + "% / " + newValueR + "%", 2000);
 					else
-						showCenterPopup(newValue + "%", 2000);
+						showBottomPopup(newValue + "%", 2000);
 				} else {
 					int indexL = 0;
 					indexL = lastBrightnessValueIndex;
@@ -5323,12 +5347,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					else
 						newValueL = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), indexL);
 					if (newValueL>=0)
-						showCenterPopup(newValueL + "% / " + newValue + "%", 2000);
+						showBottomPopup(newValueL + "% / " + newValue + "%", 2000);
 					else
-						showCenterPopup(newValue + "%", 2000);
+						showBottomPopup(newValue + "%", 2000);
 				}
 			} else {
-				showCenterPopup(newValue + "%");
+				showBottomPopup(newValue + "%");
 			}
 			//}
 		}

@@ -180,6 +180,9 @@ public class ReaderAction {
 	public final static ReaderAction CHOOSE_TEXTURE = new ReaderAction("CHOOSE_TEXTURE", R.string.options_choose_texture,
 			ReaderCommand.DCMD_CHOOSE_TEXTURE, 0, FONT_SELECT,
 			R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_texture);
+	public final static ReaderAction SHOW_SYSTEM_BRIGHTNESS_DIALOG = new ReaderAction("SHOW_SYSTEM_BRIGHTNESS_DIALOG", R.string.show_system_brightness_dialog,
+			ReaderCommand.DCMD_SHOW_SYSTEM_BRIGHTNESS_DIALOG, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun);
+
 
 	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
 	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
@@ -261,7 +264,8 @@ public class ReaderAction {
 		CHOOSE_TEXTURE,
 		HIDE,
 		GDRIVE_SYNCTO,
-		GDRIVE_SYNCFROM
+		GDRIVE_SYNCFROM,
+		SHOW_SYSTEM_BRIGHTNESS_DIALOG
 	};
 
 	public boolean isNone() {

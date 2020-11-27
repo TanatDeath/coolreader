@@ -143,6 +143,12 @@ public class LitresJsons {
 	public static JSONObject r_profile(String uuid, String appId, String secret,
 										   String sid) throws JSONException, NoSuchAlgorithmException {
 		JSONObject json = new JSONObject();
+		json.put("app", appId);
+		String sTime = getCurrentTime();
+		json.put("time", sTime);
+		String timeAndSecretSha = getSHA256(sTime + secret);
+		json.put("sha", timeAndSecretSha);
+		json.put("sid", sid);
 		JSONArray jsa2 = new JSONArray();
 		jsa2.put("money_details");
 		jsa2.put("mail");
@@ -170,14 +176,52 @@ public class LitresJsons {
 		jsreq.put("param", jsfields);
 		jsa.put(jsreq);
 		json.put("requests", jsa);
-		String sTime = getCurrentTime();
-		json.put("time", sTime);
-		json.put("mobile_app", 1);
+		//json.put("mobile_app", 1);
 		//json.put("app", appId);
-		json.put("sid", sid);
-		String timeAndSecretSha = getSHA256(sTime + secret);
-		json.put("sha", timeAndSecretSha);
+		//json.put("sid", sid);
 		return json;
+	}
+
+	public static LitresAccountInfo parse_r_profile(String uuid, CoolReader cr, String jsonBody) throws JSONException {
+		LitresAccountInfo lai = new LitresAccountInfo();
+		JSONObject json = new JSONObject(jsonBody);
+		if (json.has(uuid)) {
+			JSONObject json2 = (JSONObject) json.get(uuid);
+			if (json2.has("success")) lai.success = json2.getBoolean("success");
+			if (json2.has("error_message")) lai.errorMessage = json2.getString("error_message");
+			if (json2.has("error_code")) lai.errorCode = json2.getInt("error_code");
+			if (json2.has("fields")) {
+				JSONArray json3a = (JSONArray) json2.get("fields");
+				for (int i = 0; i < json3a.length(); i++) {
+					JSONObject json3 = json3a.getJSONObject(i);
+					Iterator keys = json3.keys();
+					while(keys.hasNext()) {
+						String key = (String) keys.next();
+						if (key.equals("money_details")) {
+							JSONObject json4 = (JSONObject) json3.get("money_details");
+							Iterator keys2 = json4.keys();
+							while (keys2.hasNext()) {
+								String key2 = (String) keys2.next();
+								String value2 = json4.getString(key2);
+								lai.moneyDetails.put(key2, value2);
+							}
+						} else if (key.equals("socnet")) {
+							JSONObject json4 = (JSONObject) json3.get("socnet");
+							Iterator keys2 = json4.keys();
+							while (keys2.hasNext()) {
+								String key2 = (String) keys2.next();
+								String value2 = json4.getString(key2);
+								lai.moneyDetails.put(key2, value2);
+							}
+						} else {
+							String value = json3.getString(key);
+							lai.fields.put(key, value);
+						}
+					}
+				}
+			}
+		}
+		return lai;
 	}
 
 	public static JSONObject r_genres_list(String uuid, String appId, String secret,
