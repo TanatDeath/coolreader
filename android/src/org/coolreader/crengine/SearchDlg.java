@@ -5,12 +5,17 @@ import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -28,27 +33,31 @@ public class SearchDlg extends BaseDialog {
 	private LayoutInflater mInflater;
 	View mDialogView;
 	EditText mEditView;
-	CheckBox mCaseSensitive;
-	CheckBox mReverse;
 	BookInfo mBookInfo;
-	ImageButton mSearchPages;
+	Button mSkim;
+	Button mDoSearch;
+	Button mSearchPages;
+	Button mBtnCaseSentitive;
+	Button mBtnSearchReverse;
 	ArrayList<String> mSearches;
 	private SearchList mList;
-
+	boolean bCaseSensitive = false;
+	boolean bReverse = false;
+	ImageButton btnFake;
 
 	@Override
 	protected void onPositiveButtonClick()
 	{
-		// override it
+		KeyboardUtils.hideKeyboard(mCoolReader,mEditView);
     	String pattern = mEditView.getText().toString();
-    	if ( pattern==null || pattern.length()==0 ) 
-    		mCoolReader.showToast("No pattern specified");
+    	if ( pattern==null || pattern.length()==0 )
+    		mCoolReader.showToast(R.string.no_pattern);
     	else if ( mBookInfo == null )
     		Log.e("search", "No opened book!");
     	else {
 		    activity.getDB().saveSearchHistory(mBookInfo,
 				    mEditView.getText().toString());
-		    mReaderView.findText(mEditView.getText().toString(), mReverse.isChecked(), !mCaseSensitive.isChecked());
+		    mReaderView.findText(mEditView.getText().toString(), bReverse, !bCaseSensitive);
 	    }
         cancel();
 	}
@@ -157,7 +166,7 @@ public class SearchDlg extends BaseDialog {
 	public void searchPagesClick() {
 		final String sText = mEditView.getText().toString().trim();
 		mReaderView.CheckAllPagesLoadVisual();
-		final GotoPageDialog dlg = new GotoPageDialog(activity, title, sText,
+		final GotoPageDialog dlg = new GotoPageDialog(activity, title, sText, bCaseSensitive,
 				new GotoPageDialog.GotoPageHandler() {
 					int pageNumber = 0;
 
@@ -184,6 +193,34 @@ public class SearchDlg extends BaseDialog {
 		dlg.show();
 		dismiss();
 	}
+
+	private void buttonPressed(Button btn) {
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		if (btn == mBtnCaseSentitive) bCaseSensitive = !bCaseSensitive;
+		if (btn == mBtnSearchReverse) bReverse = !bReverse;
+
+		mCoolReader.tintViewIcons(mBtnCaseSentitive, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(mBtnSearchReverse, PorterDuff.Mode.CLEAR,true);
+
+		mBtnCaseSentitive.setBackgroundColor(colorGrayCT);
+		mBtnSearchReverse.setBackgroundColor(colorGrayCT);
+
+		if (bCaseSensitive) {
+			mBtnCaseSentitive.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(mBtnCaseSentitive,true);
+		}
+		if (bReverse) {
+			mBtnSearchReverse.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(mBtnSearchReverse,true);
+		}
+	}
 	
 	public SearchDlg(BaseActivity coolReader, ReaderView readerView, String initialText)
 	{
@@ -191,6 +228,12 @@ public class SearchDlg extends BaseDialog {
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		this.mBookInfo = mReaderView.getBookInfo();
 		setPositiveButtonImage(
@@ -202,17 +245,47 @@ public class SearchDlg extends BaseDialog {
     	mEditView = mDialogView.findViewById(R.id.search_text);
     	if (initialText != null)
     		mEditView.setText(initialText);
-    	mCaseSensitive = mDialogView.findViewById(R.id.search_case_sensitive);
-    	mReverse = mDialogView.findViewById(R.id.search_reverse);
-    	mSearchPages = mDialogView.findViewById(R.id.btn_search_pages);
+		mSkim = mDialogView.findViewById(R.id.btn_skim);
+		mSkim.setOnClickListener(v -> {
+			KeyboardUtils.hideKeyboard(mCoolReader,mEditView);
+			mReaderView.onCommand(ReaderCommand.DCMD_SKIM, 0);
+			cancel();
+		});
+		mSkim.setBackgroundColor(colorGrayCT2);
+		mSearchPages = mDialogView.findViewById(R.id.btn_search_pages);
     	mSearchPages.setOnClickListener(v -> searchPagesClick());
-		ImageButton btnMinus1 = mDialogView.findViewById(R.id.search_dlg_clear_hist_btn);
+		mSearchPages.setBackgroundColor(colorGrayCT2);
+		Utils.setDashedButton(mSearchPages);
+		mDoSearch = mDialogView.findViewById(R.id.btn_do_search);
+		mDoSearch.setOnClickListener(v -> onPositiveButtonClick());
+		mDoSearch.setBackgroundColor(colorGrayCT2);
+		Utils.setDashedButton(mDoSearch);
+		Button btnMinus1 = mDialogView.findViewById(R.id.search_dlg_clear_hist_btn);
+		btnMinus1.setBackgroundColor(colorGrayCT2);
 
 		btnMinus1.setOnClickListener(v -> {
 			activity.getDB().clearSearchHistory(mBookInfo);
 			mCoolReader.showToast(mCoolReader.getString(R.string.search_hist_will_be_cleared));
 			dismiss();
 		});
+
+		mBtnCaseSentitive = mDialogView.findViewById(R.id.btn_case_sentitive);
+		mBtnCaseSentitive.setBackgroundColor(colorGrayCT2);
+		mBtnCaseSentitive.setOnClickListener(v -> {
+			buttonPressed(mBtnCaseSentitive);
+		});
+		mBtnSearchReverse = mDialogView.findViewById(R.id.btn_search_reverse);
+		mBtnSearchReverse.setBackgroundColor(colorGrayCT2);
+		mBtnSearchReverse.setOnClickListener(v -> {
+			buttonPressed(mBtnSearchReverse);
+		});
+		btnFake = mDialogView.findViewById(R.id.btn_fake);
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		BackgroundThread.instance().postGUI(() -> buttonPressed(null), 200);
+		mBtnCaseSentitive.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		mBtnSearchReverse.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 
 		activity.getDB().loadSearchHistory(this.mBookInfo, searches -> {
 			mSearches = searches;

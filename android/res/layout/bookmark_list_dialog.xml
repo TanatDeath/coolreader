@@ -3,17 +3,36 @@
    Comment bookmark item
 -->
 
- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/bookmark_list"
-    android:orientation="vertical"
-    android:layout_weight="8"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:baselineAligned="false"
-    android:layout_marginTop="0dip"
-    android:layout_marginBottom="0dip"
-    android:layout_marginLeft="0dip"
-    android:layout_marginRight="0dip"
-    >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ll_bookmark_list"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
+ <Button
+         android:id="@+id/btn_user_dic"
+         android:layout_width="match_parent"
+         android:checked="true"
+         android:layout_weight="1"
+         android:drawableLeft="?attr/attr_icons8_google_translate_user"
+         android:tag="tint"
+         android:textColor="?attr/colorIcon"
+         style="@style/TextAppearance.Medium"
+         android:text="@string/win_title_user_dic" />
+
+
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+       android:id="@+id/bookmark_list"
+       android:orientation="vertical"
+       android:layout_weight="8"
+       android:layout_width="fill_parent"
+       android:layout_height="fill_parent"
+       android:baselineAligned="false"
+       android:layout_marginTop="0dip"
+       android:layout_marginBottom="0dip"
+       android:layout_marginLeft="0dip"
+       android:layout_marginRight="0dip"
+       >
+
+    </LinearLayout>
 </LinearLayout>

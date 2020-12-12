@@ -183,6 +183,9 @@ public class ReaderAction {
 	public final static ReaderAction SHOW_SYSTEM_BRIGHTNESS_DIALOG = new ReaderAction("SHOW_SYSTEM_BRIGHTNESS_DIALOG", R.string.show_system_brightness_dialog,
 			ReaderCommand.DCMD_SHOW_SYSTEM_BRIGHTNESS_DIALOG, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun);
 
+	public final static ReaderAction SKIM = new ReaderAction("SKIM", R.string.skim_document, ReaderCommand.DCMD_SKIM, 0, SEARCH, R.string.skim_document_add_info).setIconId(R.drawable.icons8_skim);
+	public final static ReaderAction ONLINE_COMBO = new ReaderAction("ONLINE_COMBO", R.string.online_combo, ReaderCommand.DCMD_ONLINE_COMBO, 0, null, R.string.online_combo_add_info).setIconId(R.drawable.icons8_combo);
+	public final static ReaderAction ONLINE_SUPER_COMBO = new ReaderAction("ONLINE_SUPER_COMBO", R.string.online_super_combo, ReaderCommand.DCMD_ONLINE_SUPER_COMBO, 0, ONLINE_COMBO, R.string.online_super_combo_add_info).setIconId(R.drawable.icons8_super_combo);
 
 	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
 	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
@@ -265,7 +268,10 @@ public class ReaderAction {
 		HIDE,
 		GDRIVE_SYNCTO,
 		GDRIVE_SYNCFROM,
-		SHOW_SYSTEM_BRIGHTNESS_DIALOG
+		SHOW_SYSTEM_BRIGHTNESS_DIALOG,
+		SKIM,
+		ONLINE_COMBO,
+		ONLINE_SUPER_COMBO
 	};
 
 	public boolean isNone() {

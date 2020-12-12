@@ -10668,7 +10668,6 @@ bool ldomXRange::findText( lString32 pattern, bool caseInsensitive, bool reverse
             lString32 txt = _start.getNode()->getText();
             if ( caseInsensitive )
                 txt.lowercase();
-
             while ( ::findText( txt, offs, endpos, pattern ) ) {
                 if ( firstFoundTextY==-1 && maxHeight>0 ) {
                     ldomXPointer p( _start.getNode(), offs );

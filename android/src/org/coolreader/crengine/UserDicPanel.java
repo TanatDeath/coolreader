@@ -394,11 +394,15 @@ public class UserDicPanel extends LinearLayout implements Settings {
 				return 0;
 			});
 			updateViews();
-			if (!arrUdeWords.isEmpty()) {
-				String firstW = arrUdeWords.get(0).getDic_word();
+			int showUD = activity.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
+			if ((!arrUdeWords.isEmpty()) && (showUD > 0)) {
+				String wrds = "";
+				for (int i = 0; i < arrUdeWords.size(); i++) {
+					wrds = wrds + (((i == 0) ? "": "~" ) + arrUdeWords.get(i).getDic_word());
+				}
 				if (activity.getmReaderView() != null) {
 					activity.getmReaderView().clearSelection();
-					activity.getmReaderView().findText(firstW, false, false, true);
+					activity.getmReaderView().findText("{{curPage}}" + wrds, false, true, true);
 				}
 			}
 			//asdf

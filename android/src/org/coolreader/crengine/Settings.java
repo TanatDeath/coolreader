@@ -170,7 +170,8 @@ public interface Settings {
     public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
-    public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
+	public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
+	public static final String PROP_APP_BOOKMARK_ACTION_SEND_TO = "app.bookmark.action.send.to";
 	public static final String PROP_APP_SELECTION2_ACTION = "app.selection2.action";
 	public static final String PROP_APP_SELECTION2_ACTION_LONG = "app.selection2.action.long";
 	public static final String PROP_APP_MULTI_SELECTION2_ACTION = "app.multiselection2.action";
@@ -282,7 +283,8 @@ public interface Settings {
 
 	// available options for PROP_APP_SELECTION_ACTION setting
 	public static final int SELECTION_ACTION_SAME_AS_COMMON = -1;
-    public static final int SELECTION_ACTION_TOOLBAR = 0;
+	public static final int SEND_TO_ACTION_NONE = -1;
+	public static final int SELECTION_ACTION_TOOLBAR = 0;
     public static final int SELECTION_ACTION_COPY = 1;
     public static final int SELECTION_ACTION_DICTIONARY = 2;
     public static final int SELECTION_ACTION_BOOKMARK = 3;
@@ -458,7 +460,8 @@ public interface Settings {
         PROP_SAVE_POS_TO_CLOUD_TIMEOUT,
 	    PROP_APP_SELECTION_ACTION,
         PROP_APP_SELECTION_ACTION_LONG,
-        PROP_APP_MULTI_SELECTION_ACTION,
+		PROP_APP_MULTI_SELECTION_ACTION,
+		PROP_APP_BOOKMARK_ACTION_SEND_TO,
 		PROP_APP_SELECTION2_ACTION,
 		PROP_APP_SELECTION2_ACTION_LONG,
 		PROP_APP_MULTI_SELECTION2_ACTION,

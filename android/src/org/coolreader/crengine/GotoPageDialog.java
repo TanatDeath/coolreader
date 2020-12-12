@@ -252,7 +252,7 @@ public class GotoPageDialog extends BaseDialog {
         setView(layout);
 	}
 
-	public GotoPageDialog(BaseActivity activity, final String title, final String findtext, final GotoPageHandler handler )
+	public GotoPageDialog(BaseActivity activity, final String title, final String findtext, final boolean caseSensitive, final GotoPageHandler handler )
 	{
 		super("GotoPageDialog", activity, title, true, false);
 		arrFound = new ArrayList<String[]>();
@@ -288,8 +288,10 @@ public class GotoPageDialog extends BaseDialog {
 			if (sFindText == null) sFindText = "";
 			if (sFindText.equals("")) {
 				arrFound.add(arrPage);
-			} else
-				if (sPage.toLowerCase().contains(sFindText.toLowerCase())) arrFound.add(arrPage);
+			} else {
+				if ((sPage.toLowerCase().contains(sFindText.toLowerCase())) && (!caseSensitive)) arrFound.add(arrPage);
+				if ((sPage.contains(sFindText)) && (caseSensitive)) arrFound.add(arrPage);
+			}
 		}
 	}
 

@@ -463,24 +463,21 @@ public class CloudAction {
                                             sButtons.add(cr.getString(R.string.rpos_restore));
                                             sButtons.add(cr.getString(R.string.rpos_list));
                                             sButtons.add(cr.getString(R.string.rpos_cancel));
-                                            SomeButtonsToolbarDlg.showDialog(cr, cr.getReaderView(), 0, true,
+                                            SomeButtonsToolbarDlg.showDialog(cr, cr.getReaderView().getSurface(), 0, true,
                                                     cr.getString(R.string.rpos_found),
-                                                    sButtons, o1, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
-                                                        @Override
-                                                        public void done(Object o22, String btnPressed) {
-                                                            YNDListFiles o112 = (YNDListFiles) o22;
-                                                            if (o112.fileList.size()>0) {
-                                                                CloudFileInfo cfi1 = o112.fileList.get(0);
-                                                                if (btnPressed.equals(cr.getString(R.string.rpos_restore))) {
-                                                                    CloudSync.loadFromJsonInfoFile(cr, CloudSync.CLOUD_SAVE_READING_POS, cfi1.path, false,
-                                                                            cfi1.name, Settings.CLOUD_SYNC_VARIANT_YANDEX);
-                                                                }
-                                                                if (btnPressed.equals(cr.getString(R.string.rpos_list))) {
-                                                                    BackgroundThread.instance().postGUI(() -> {
-                                                                        ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o112);
-                                                                        dlg2.show();
-                                                                    }, 200);
-                                                                }
+                                                    sButtons, o1, (o22, btnPressed) -> {
+                                                        YNDListFiles o112 = (YNDListFiles) o22;
+                                                        if (o112.fileList.size()>0) {
+                                                            CloudFileInfo cfi1 = o112.fileList.get(0);
+                                                            if (btnPressed.equals(cr.getString(R.string.rpos_restore))) {
+                                                                CloudSync.loadFromJsonInfoFile(cr, CloudSync.CLOUD_SAVE_READING_POS, cfi1.path, false,
+                                                                        cfi1.name, Settings.CLOUD_SYNC_VARIANT_YANDEX);
+                                                            }
+                                                            if (btnPressed.equals(cr.getString(R.string.rpos_list))) {
+                                                                BackgroundThread.instance().postGUI(() -> {
+                                                                    ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o112);
+                                                                    dlg2.show();
+                                                                }, 200);
                                                             }
                                                         }
                                                     });

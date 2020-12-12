@@ -14,9 +14,12 @@ import java.util.concurrent.Callable;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.ChooseReadingPosDlg;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSync;
 
+import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
@@ -760,6 +763,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private int mSelectionAction = SELECTION_ACTION_TOOLBAR;
 	private int mSelectionActionLong = SELECTION_ACTION_TOOLBAR;
+	public int mBookmarkActionSendTo = SEND_TO_ACTION_NONE;
 	private int mMultiSelectionAction = SELECTION_ACTION_TOOLBAR;
 	private int mSelection2Action = SELECTION_ACTION_SAME_AS_COMMON;
 	private int mSelection2ActionLong = SELECTION_ACTION_SAME_AS_COMMON;
@@ -1978,7 +1982,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				BackgroundThread.ensureGUI();
 				drawPage();
 				if (!forUserDic)
-					FindNextDlg.showDialog( mActivity, view, pattern, caseInsensitive );
+					FindNextDlg.showDialog( mActivity, view, pattern, caseInsensitive, false );
 			}
 			public void fail(Exception e) {
 				if (!forUserDic) {
@@ -2243,7 +2247,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if ((newBool) &&(efMode != 2))
 				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text2));
 			sButtons.add(mActivity.getString(R.string.options_page_titlebar_new));
-			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, 5,true,
+			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), 5,true,
 					"",
 					sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
 						@Override
@@ -2980,10 +2984,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
+	private int lastNavBmkIndex = -1;
+
 	public void onCommand(final ReaderCommand cmd, final int param, final Runnable onFinishHandler) {
 		BackgroundThread.ensureGUI();
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
 		boolean eink = false;
+		if ((cmd != ReaderCommand.DCMD_NEXT_BOOKMARK) && (cmd != ReaderCommand.DCMD_PREV_BOOKMARK)) lastNavBmkIndex = -1;
 		switch ( cmd ) {
 		case DCMD_FILE_BROWSER_ROOT:
 			mActivity.showRootWindow();
@@ -3175,6 +3182,50 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			setTimeLeft();
 			break;
+		case DCMD_NEXT_BOOKMARK:
+			if (lastNavBmkIndex >= 0) {
+				if (lastNavBmkIndex < mBookInfo.getBookmarkCount()) {
+					if (lastNavBmkIndex + 1 < mBookInfo.getBookmarkCount()) {
+						lastNavBmkIndex++;
+					} else lastNavBmkIndex = 0;
+					this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
+				} else
+					lastNavBmkIndex = -1;
+			} else {
+				Bookmark bmkC = getCurrentPositionBookmark();
+				int minP = 999999999;
+				for (int i = 0; i < mBookInfo.getBookmarkCount(); i++) {
+					if (mBookInfo.getBookmark(i).getPercent() > bmkC.getPercent())
+						if (minP > mBookInfo.getBookmark(i).getPercent() - bmkC.getPercent()) {
+							minP = mBookInfo.getBookmark(i).getPercent() - bmkC.getPercent();
+							lastNavBmkIndex = i;
+						}
+				}
+				if (lastNavBmkIndex >= 0) this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
+			}
+			break;
+		case DCMD_PREV_BOOKMARK:
+			if (lastNavBmkIndex >= 0) {
+				if (lastNavBmkIndex < mBookInfo.getBookmarkCount()) {
+					if (lastNavBmkIndex - 1 >= 0) {
+						lastNavBmkIndex--;
+					} else lastNavBmkIndex = mBookInfo.getBookmarkCount() - 1;
+					this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
+				} else
+					lastNavBmkIndex = -1;
+			} else {
+				Bookmark bmkC = getCurrentPositionBookmark();
+				int minP = 999999999;
+				for (int i = 0; i < mBookInfo.getBookmarkCount(); i++) {
+					if (bmkC.getPercent() > mBookInfo.getBookmark(i).getPercent())
+						if (minP > bmkC.getPercent() - mBookInfo.getBookmark(i).getPercent()) {
+							minP = bmkC.getPercent() - mBookInfo.getBookmark(i).getPercent();
+							lastNavBmkIndex = i;
+						}
+				}
+				if (lastNavBmkIndex >= 0) this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
+			}
+			break;
 		case DCMD_BEGIN:
 			setTimeLeft();
 		case DCMD_END:
@@ -3188,6 +3239,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		case DCMD_SEARCH:
 			if (isBookLoaded())
 				showSearchDialog(null);
+			break;
+		case DCMD_SKIM:
+			if (isBookLoaded())
+				FindNextDlg.showDialog( mActivity, this, "", true, true );
 			break;
 		case DCMD_EXIT:
 			mActivity.finish();
@@ -3965,7 +4020,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			} catch ( Exception e ) {
 				// ignore
 			}
-		}  else if (PROP_APP_SELECTION2_ACTION.equals(key)) {
+		} else if (PROP_APP_BOOKMARK_ACTION_SEND_TO.equals(key)) {
+			try {
+				int n = Integer.valueOf(value);
+				mBookmarkActionSendTo = n;
+			} catch ( Exception e ) {
+				// ignore
+			}
+		} else if (PROP_APP_SELECTION2_ACTION.equals(key)) {
 			try {
 				int n = Integer.valueOf(value);
 				mSelection2Action = n;
@@ -4260,15 +4322,29 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		}
 		if ((needAsk) && (!mActivity.settings().getBool(Settings.PROP_APP_DISABLE_SAFE_MODE, false))) {
-			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile,
-					() -> postLoadTask(fileInfo, doneHandler, errorHandler), () -> {
-				mActivity.showRootWindow();
-				if (doc != null) {
-					String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
-					File f = new File(sFile);
-					if (f.exists()) f.delete();
-				}
-			});
+			BackgroundThread.instance().postGUI(() -> {
+				ArrayList<String> sButtons = new ArrayList<String>();
+				sButtons.add("*"+mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile);
+				sButtons.add(mActivity.getString(R.string.str_yes));
+				sButtons.add(mActivity.getString(R.string.str_no));
+				SomeButtonsToolbarDlg.showDialog(mActivity, mActivity.getReaderView().getSurface(), 10, true,
+						mActivity.getString(R.string.options_app_safe_mode),
+						sButtons, null, (o22, btnPressed) -> {
+							if (
+								(btnPressed.equals(getActivity().getString(R.string.str_yes))) ||
+								(btnPressed.equals("{{timeout}}"))
+							) {
+								postLoadTask(fileInfo, doneHandler, errorHandler);
+							} else {
+								mActivity.showRootWindow();
+								if (doc != null) {
+									String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
+									File f = new File(sFile);
+									if (f.exists()) f.delete();
+								}
+							}
+						});
+			}, 200);
 		} else postLoadTask(fileInfo, doneHandler, errorHandler);
 		return true;
 	}
@@ -4316,15 +4392,29 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		}
 		if ((needAsk) && (!mActivity.settings().getBool(Settings.PROP_APP_DISABLE_SAFE_MODE, false))) {
-			mActivity.askConfirmation(mActivity.getString(R.string.warn_hang)+" (stream)",
-					() -> postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler), () -> {
-						mActivity.showRootWindow();
-						if (doc != null) {
-							String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
-							File f = new File(sFile);
-							if (f.exists()) f.delete();
-						}
-					});
+			BackgroundThread.instance().postGUI(() -> {
+				ArrayList<String> sButtons = new ArrayList<String>();
+				sButtons.add("*"+mActivity.getString(R.string.warn_hang)+" (stream)");
+				sButtons.add(mActivity.getString(R.string.str_yes));
+				sButtons.add(mActivity.getString(R.string.str_no));
+				SomeButtonsToolbarDlg.showDialog(mActivity, mActivity.getReaderView().getSurface(), 10, true,
+						mActivity.getString(R.string.options_app_safe_mode),
+						sButtons, null, (o22, btnPressed) -> {
+							if (
+									(btnPressed.equals(getActivity().getString(R.string.str_yes))) ||
+											(btnPressed.equals("{{timeout}}"))
+							) {
+								postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler);
+							} else {
+								mActivity.showRootWindow();
+								if (doc != null) {
+									String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
+									File f = new File(sFile);
+									if (f.exists()) f.delete();
+								}
+							}
+						});
+			}, 200);
 		} else postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler);
 		return true;
 	}
@@ -6728,7 +6818,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 						sButtons.add(mActivity.getString(R.string.str_change));
 						sButtons.add("*"+mActivity.getString(R.string.later_css));
-						SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, 10, true,
+						SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), 10, true,
 								mActivity.getString(R.string.opened_doc_props),
 								sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
 									@Override

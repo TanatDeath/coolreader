@@ -1,38 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="fill_parent"
-  android:layout_height="wrap_content">
-  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content">
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/page_item_body"
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content">
-		<EditText
-			android:id="@+id/search_text"
-			android:layout_width="0dip" android:layout_weight="1"
-			android:layout_height="wrap_content"
-			android:text=""
-			style="@style/TextAppearance.Widget.EditText"
-			android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
-		/>
-	  <ImageButton android:id="@+id/btn_search_pages"
-		  android:layout_width="wrap_content"
-		  android:layout_height="wrap_content"
-		  android:layout_marginTop="3dip"
-		  android:layout_marginBottom="3dip"
-		  android:layout_marginLeft="2dip"
-		  android:layout_marginRight="2dip"
-		  android:src="?attr/cr3_option_pages_two_drawable"
-		  android:tag="tint"
-		  android:background="@null"
-		  android:contentDescription="@string/search_pages"/>
-</LinearLayout>
-<CheckBox android:text="@string/dlg_search_case_sensitive" android:id="@+id/search_case_sensitive" android:layout_width="fill_parent" android:layout_height="wrap_content"></CheckBox>
-<CheckBox android:text="@string/dlg_search_reverse" android:id="@+id/search_reverse" android:layout_width="fill_parent" android:layout_height="wrap_content"></CheckBox>
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:orientation="vertical"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content">
+			<Button
+					android:id="@+id/btn_skim"
+					android:layout_width="match_parent"
+					android:checked="true"
+					android:layout_weight="1"
+					android:drawableLeft="?attr/attr_icons8_skim"
+					android:tag="tint"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Medium"
+					android:text="@string/skim_document" />
+
+			<EditText
+				android:id="@+id/search_text"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text=""
+				style="@style/TextAppearance.Widget.EditText"
+				android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
+			/>
+			</LinearLayout>
+	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/layout_clear_hist"
+		android:id="@+id/ll_all_buttons"
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
@@ -42,30 +45,113 @@
 		android:layout_marginLeft="2dip"
 		android:layout_marginRight="2dip"
 		>
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/ll_search_block"
+				android:orientation="vertical"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content">
 
-	<ImageButton android:id="@+id/search_dlg_clear_hist_btn"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="5dip"
-		android:layout_marginBottom="5dip"
-		android:layout_marginLeft="5dip"
-		android:layout_marginRight="5dip"
-		android:src="?attr/cr3_button_cancel_drawable"
-		android:tag="tint"
-		android:focusable="false"
-		android:focusableInTouchMode="false"
-		android:background="@null"
-		android:contentDescription="@string/dlg_button_clear_hist"/>
-	<TextView
-		android:id="@+id/lbl_clear_hist"
-		style="@style/TextAppearance.Medium"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:maxLines="3"
-		android:singleLine="true"
-		android:layout_gravity="center_vertical"
-		android:gravity="center_vertical"
-		android:text="@string/dlg_button_clear_hist" />
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/ll_search_mod"
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content">
+
+				<Button
+					android:id="@+id/btn_case_sentitive"
+					android:layout_width="0dip"
+					android:layout_height="match_parent"
+					android:checked="true"
+					android:layout_weight="1"
+					android:drawableLeft="?attr/attr_cr3_toc_item_normal"
+					android:tag="tint"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Medium"
+					android:text="@string/dlg_search_case_sensitive" />
+				<Button
+					android:id="@+id/btn_search_reverse"
+					android:layout_width="0dip"
+					android:layout_height="match_parent"
+					android:checked="true"
+					android:layout_weight="1"
+					android:drawableLeft="?attr/attr_cr3_toc_item_normal"
+					android:tag="tint"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Medium"
+					android:text="@string/dlg_search_reverse" />
+			</LinearLayout>
+
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/ll_search_buttons"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+
+				<Button
+						android:id="@+id/btn_do_search"
+						android:layout_width="0dip"
+						android:layout_height="match_parent"
+						android:checked="true"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/cr3_viewer_find_drawable"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						android:textStyle="bold"
+						style="@style/TextAppearance.Medium"
+						android:text="@string/do_search" />
+				<Button
+						android:id="@+id/btn_search_pages"
+						android:layout_width="0dip"
+						android:layout_height="match_parent"
+						android:checked="true"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/cr3_option_pages_two_drawable"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@string/search_pages" />
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/ll_spacing"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="10dip">
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/ll_clear_hist"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+				<Button
+					android:id="@+id/search_dlg_clear_hist_btn"
+					android:layout_width="0dip"
+					android:checked="true"
+					android:layout_weight="1"
+					android:drawableLeft="?attr/cr3_button_cancel_drawable"
+					android:tag="tint"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Medium"
+					android:text="@string/dlg_button_clear_hist" />
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/layout_fake"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+				<ImageButton
+						android:id="@+id/btn_fake"
+						android:maxWidth="1px"
+						android:maxHeight="1px"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:checked="false"
+						android:layout_weight="1"
+						android:background="@null"
+						android:focusable="true"
+						android:focusableInTouchMode="true"
+						android:text="@null" />
+			</LinearLayout>
+		</LinearLayout>
 	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/history_list"

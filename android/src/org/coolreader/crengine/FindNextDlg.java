@@ -28,9 +28,9 @@ public class FindNextDlg {
 	View mPanel;
 	final String pattern;
 	final boolean caseInsensitive;
-	static public void showDialog( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive )
+	static public void showDialog( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
 	{
-		FindNextDlg dlg = new FindNextDlg(coolReader, readerView, pattern, caseInsensitive);
+		FindNextDlg dlg = new FindNextDlg(coolReader, readerView, pattern, caseInsensitive, skim);
 		//dlg.mWindow.update(dlg.mAnchor, width, height)
 		Log.d("cr3", "popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 		//dlg.update();
@@ -38,7 +38,7 @@ public class FindNextDlg {
 		//dlg.showAsDropDown(readerView);
 		//dlg.update();
 	}
-	public FindNextDlg( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive )
+	public FindNextDlg( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
 	{
 		this.pattern = pattern;
 		this.caseInsensitive = caseInsensitive;
@@ -61,9 +61,18 @@ public class FindNextDlg {
 			return false;
 		});
 		//super(panel);
+		mReaderView.mBookInfo.sortBookmarks();
 		mPanel = panel;
 		mPanel.findViewById(R.id.search_btn_prev).setOnClickListener(v -> mReaderView.findNext(pattern, true, caseInsensitive));
 		mPanel.findViewById(R.id.search_btn_next).setOnClickListener(v -> mReaderView.findNext(pattern, false, caseInsensitive));
+		mPanel.findViewById(R.id.search_btn_plus_1).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 1));
+		mPanel.findViewById(R.id.search_btn_plus_10).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 10));
+		mPanel.findViewById(R.id.search_btn_minus_1).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1));
+		mPanel.findViewById(R.id.search_btn_minus_10).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 10));
+		mPanel.findViewById(R.id.search_btn_plus_ch).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1));
+		mPanel.findViewById(R.id.search_btn_minus_ch).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1));
+		mPanel.findViewById(R.id.search_btn_plus_bmk).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_NEXT_BOOKMARK, 1));
+		mPanel.findViewById(R.id.search_btn_minus_bmk).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1));
 
 		int colorGrayC;
 		int colorGray;
@@ -76,7 +85,20 @@ public class FindNextDlg {
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		c.setAlpha(130);
 		mPanel.findViewById(R.id.search_btn_prev).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_1).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_10).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_ch).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_bmk).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.search_btn_next).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_1).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_10).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_ch).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_bmk).setBackgroundDrawable(c);
+
+		if (skim) {
+			Utils.hideView(mPanel.findViewById(R.id.search_btn_prev));
+			Utils.hideView(mPanel.findViewById(R.id.search_btn_next));
+		}
 
 		mPanel.findViewById(R.id.search_btn_close).setOnClickListener(v -> {
 			mReaderView.clearSelection();
@@ -135,7 +157,7 @@ public class FindNextDlg {
 		//mWindow.update(location[0], location[1], mPanel.getWidth(), mPanel.getHeight() );
 		//mWindow.setWidth(mPanel.getWidth());
 		//mWindow.setHeight(mPanel.getHeight());
-
+		mWindow.setWidth(mReaderView.getSurface().getWidth());
 		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL,
 				mReaderView.locationFindNext[0], mReaderView.locationFindNext[1] + mReaderView.heightFindNext - mPanel.getHeight());
 //		if ( mWindow.isShowing() )

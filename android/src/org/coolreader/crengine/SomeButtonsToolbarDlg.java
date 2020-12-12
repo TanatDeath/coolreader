@@ -14,15 +14,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
 import org.coolreader.CoolReader;
@@ -34,9 +30,10 @@ public class SomeButtonsToolbarDlg {
 	PopupWindow mWindow;
 	View mAnchor;
 	CoolReader mCoolReader;
-	ReaderView mReaderView;
 	View mPanel;
 	String mTitle;
+	TextView mViewTitle;
+	int closeSecTimeLeft = 0;
 	boolean mCloseOnTouchOutside;
 	ArrayList<String> mButtonsOrTexts;
 	Object o;
@@ -47,11 +44,11 @@ public class SomeButtonsToolbarDlg {
 
 	public final ButtonPressedCallback callback;
 
-	static public void showDialog( CoolReader coolReader, ReaderView readerView,
+	static public void showDialog( CoolReader coolReader, View anchor,
 		int closeSecTime, boolean closeOnTouchOutside,
 		String sTitle, ArrayList<String> buttonsOrTexts, Object o, ButtonPressedCallback callback)
 	{
-		SomeButtonsToolbarDlg dlg = new SomeButtonsToolbarDlg(coolReader, readerView, closeSecTime, closeOnTouchOutside,
+		SomeButtonsToolbarDlg dlg = new SomeButtonsToolbarDlg(coolReader, anchor, closeSecTime, closeOnTouchOutside,
 				sTitle, buttonsOrTexts, o, callback);
 		Log.d("cr3", "question popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 	}
@@ -60,17 +57,16 @@ public class SomeButtonsToolbarDlg {
 		mWindow.dismiss();
 	}
 
-	public SomeButtonsToolbarDlg(CoolReader coolReader, ReaderView readerView,
+	public SomeButtonsToolbarDlg(CoolReader coolReader, View anchor,
 								 int closeSecTime, boolean closeOnTouchOutside,
 			String sTitle, ArrayList<String> buttonsOrTexts, Object o, ButtonPressedCallback callback)
 	{
 		mCoolReader = coolReader;
-		mReaderView = readerView;
-		mTitle = sTitle;
+		mTitle = StrUtils.getNonEmptyStr(sTitle, true);
 		mButtonsOrTexts = buttonsOrTexts;
 		mCloseOnTouchOutside = closeOnTouchOutside;
 		this.callback = callback;
-		mAnchor = readerView.getSurface();
+		mAnchor = anchor;
 		this.o = o;
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.somebuttons_toolbar, null));
@@ -81,6 +77,7 @@ public class SomeButtonsToolbarDlg {
 		mWindow.setTouchInterceptor((v, event) -> {
 			if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
 				if (mCloseOnTouchOutside) {
+					if (callback!=null) callback.done(o, "{{cancel}}");
 					closeDialog();
 					return true;
 				}
@@ -110,26 +107,25 @@ public class SomeButtonsToolbarDlg {
 		panel.setBackgroundColor(colr);
 		int colr2 = Color.argb(170, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
-		//recent dics
 		LinearLayout llButtonsPanel = mPanel.findViewById(R.id.buttonsPanel);
 		Properties props = new Properties(mCoolReader.settings());
 		int newTextSize = props.getInt(Settings.PROP_FONT_SIZE, 16)-2;
 		int iCntRecent = 0;
-		if (!StrUtils.isEmptyStr(mTitle)) {
-			TextView tv = new TextView(mCoolReader);
-			tv.setText(mTitle);
+		if ((!StrUtils.isEmptyStr(mTitle)) || (closeSecTime > 0)) {
+			mViewTitle = new TextView(mCoolReader);
+			mViewTitle.setText(mTitle);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 			llp.setMargins(8, 0, 8, 0);
-			tv.setLayoutParams(llp);
-			tv.setMaxLines(3);
-			tv.setEllipsize(TextUtils.TruncateAt.END);
-			tv.setBackgroundColor(colr2);
-			tv.setTextColor(colorIcon);
-			tv.setTypeface(Typeface.DEFAULT_BOLD);
-			tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
-			llButtonsPanel.addView(tv);
+			mViewTitle.setLayoutParams(llp);
+			mViewTitle.setMaxLines(3);
+			mViewTitle.setEllipsize(TextUtils.TruncateAt.END);
+			mViewTitle.setBackgroundColor(colr2);
+			mViewTitle.setTextColor(colorIcon);
+			mViewTitle.setTypeface(Typeface.DEFAULT_BOLD);
+			mViewTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+			llButtonsPanel.addView(mViewTitle);
 		}
 		if (llButtonsPanel!=null) {
 			for (final String s: mButtonsOrTexts) {
@@ -149,20 +145,20 @@ public class SomeButtonsToolbarDlg {
 					tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize - 2);
 					llButtonsPanel.addView(tv);
 				} else {
-					Button dicButton = new Button(mCoolReader);
-					dicButton.setText(s);
-					dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
-					dicButton.setTextColor(colorIconL);
-					dicButton.setBackgroundColor(colorGray);
+					Button someButton = new Button(mCoolReader);
+					someButton.setText(s);
+					someButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+					someButton.setTextColor(colorIconL);
+					someButton.setBackgroundColor(colorGray);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.MATCH_PARENT,
 							ViewGroup.LayoutParams.WRAP_CONTENT);
 					llp.setMargins(8, 0, 8, 0);
-					dicButton.setLayoutParams(llp);
-					dicButton.setMaxLines(3);
-					dicButton.setEllipsize(TextUtils.TruncateAt.END);
-					llButtonsPanel.addView(dicButton);
-					dicButton.setOnClickListener(v -> {
+					someButton.setLayoutParams(llp);
+					someButton.setMaxLines(3);
+					someButton.setEllipsize(TextUtils.TruncateAt.END);
+					llButtonsPanel.addView(someButton);
+					someButton.setOnClickListener(v -> {
 						if (callback!=null) callback.done(o, ((Button) v).getText().toString());
 						closeDialog();
 					});
@@ -218,14 +214,27 @@ public class SomeButtonsToolbarDlg {
 
 		Handler handler = new Handler();
 
-		if (closeSecTime != 0)
+		if (closeSecTime != 0) {
+			closeSecTimeLeft = closeSecTime;
+
 			handler.postDelayed(() -> {
 				if (mWindow != null) {
+					if (callback != null) callback.done(o, "{{timeout}}");
 					mWindow.dismiss();
 				}
-			},  closeSecTime*1000);
-
+			}, closeSecTime * 1000);
+			tick1s();
+		}
 		mCoolReader.tintViewIcons(mPanel);
+	}
+
+	private void tick1s() {
+		Handler handler = new Handler();
+		handler.postDelayed(() -> {
+			closeSecTimeLeft = closeSecTimeLeft - 1;
+			if (mViewTitle != null) mViewTitle.setText((mTitle + " (" + closeSecTimeLeft + ")").trim());
+			if (closeSecTimeLeft > 1) tick1s();
+		}, 1000);
 	}
 	
 }

@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import org.coolreader.CoolReader;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
+import org.coolreader.layouts.FlowLayout;
 
 import android.app.SearchManager;
 import android.content.Intent;
@@ -30,6 +31,9 @@ import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SelectionToolbarDlg {
 	PopupWindow mWindow;
@@ -186,7 +190,8 @@ public class SelectionToolbarDlg {
 		});
 
 		//recent dics
-		LinearLayout llRecentDics = mPanel.findViewById(R.id.recentDics);
+		FlowLayout llRecentDics = mPanel.findViewById(R.id.recentDics);
+		//llRecentDics.setOrientation(LinearLayout.VERTICAL);
 		Properties props = new Properties(mCoolReader.settings());
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		int iCntRecent = 0;
@@ -199,22 +204,31 @@ public class SelectionToolbarDlg {
 		}
 		if (iCntRecent == 0) iCntRecent++;
 		if (llRecentDics!=null) {
+			List<Dictionaries.DictInfo> diAllDicts = new ArrayList<>();
 			for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.diRecent) {
-				if (!di.equals(mCoolReader.mDictionaries.getCurDictionary())) {
+				diAllDicts.add(di);
+			}
+			for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.getAddDicts()) {
+				diAllDicts.add(di);
+			}
+			ArrayList<String> added = new ArrayList<>();
+			for (final Dictionaries.DictInfo di: diAllDicts) {
+				if (!added.contains(di.id)) {
+					added.add(di.id);
 					Button dicButton = new Button(mCoolReader);
 					dicButton.setText(di.name);
 					dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					//dicButton.setHeight(dicButton.getHeight()-4);
 					dicButton.setTextColor(colorIcon);
 					dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
-					dicButton.setPadding(1, 1, 1, 1);
+					dicButton.setPadding(6, 6, 6, 6);
 					//dicButton.setBackground(null);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.WRAP_CONTENT,
 							ViewGroup.LayoutParams.WRAP_CONTENT);
-					llp.setMargins(4, 1, 1, 4);
+					llp.setMargins(8, 4, 4, 8);
 					dicButton.setLayoutParams(llp);
-					dicButton.setMaxWidth((mReaderView.getRequestedWidth()-20) / iCntRecent);
+					//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 					dicButton.setMaxLines(1);
 					dicButton.setEllipsize(TextUtils.TruncateAt.END);
 					llRecentDics.addView(dicButton);
@@ -291,6 +305,7 @@ public class SelectionToolbarDlg {
 		mPanel.findViewById(R.id.selection_cancel).setOnClickListener(v -> closeDialog(true));
 		new BoundControlListener(mPanel.findViewById(R.id.selection_left_bound_control), true);
 		new BoundControlListener(mPanel.findViewById(R.id.selection_right_bound_control), false);
+		mPanel.findViewById(R.id.selection_more).setBackgroundDrawable(null);
 
 		mPanel.findViewById(R.id.btn_next1).setOnClickListener(v -> changeSelectionBound(true, SELECTION_SMALL_STEP));
 		mPanel.findViewById(R.id.btn_next2).setOnClickListener(v -> changeSelectionBound(false, SELECTION_SMALL_STEP));
