@@ -4,6 +4,7 @@ libs
 obj
 *.iml
 .gradle
+/gradle
 /local.properties
 /.idea
 /.idea/workspace.xml
