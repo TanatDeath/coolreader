@@ -20,12 +20,14 @@ my %ic_actions_list=(
         'icons8_bookmark_plus_q.svg' => 'icons8_bookmark_plus_q.png',
         'icons8_two_fingers.svg' => 'icons8_two_fingers.png',
         'icons8_select_all.svg' => 'icons8_select_all.png',
-        'cr3_option_text_multilang.svg' => 'cr3_option_text_multilang.png'
+        'cr3_option_text_multilang.svg' => 'cr3_option_text_multilang.png',
+        'icons8_skim.svg' => 'icons8_skim.png',
+        'icons8_combo.svg' => 'icons8_combo.png',
+        'icons8_super_combo.svg' => 'icons8_super_combo.png'
 );
 
 my %ic_menu_list=(
         'icons8_css.svg' => 'icons8_css.png'
-
 );
 
 my %ic_launcher_list=(

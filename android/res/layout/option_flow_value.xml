@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/option_item_body"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:paddingRight="?android:attr/scrollbarSize"
+    >
+    <Button
+            android:layout_margin="5dip"
+            android:id="@+id/btn_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dip"
+            android:layout_marginRight="3dip"
+            android:src="@null"
+            android:maxLines="1"
+            android:ellipsize="end"
+            style="@style/TextAppearance.Smaller"
+            android:textAppearance="?android:attr/textAppearanceListItem"
+            android:textColor="?attr/colorIcon"
+            >
+    </Button>
+
+</LinearLayout>

@@ -317,7 +317,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 							mList.setAdapter(tla);
 							tla.notifyDataSetChanged();
 						}, 100));
-					});
+					}, null);
 		else
 			mCoolReader.mDictionaries.yandexTranslate("", "", "", null, view,
 					lst -> {
@@ -331,7 +331,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 							mList.setAdapter(tla);
 							tla.notifyDataSetChanged();
 						}, 100));
-					});
+					}, null);
 		if (1==1) return;
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.YND_DIC_GETLANGS).newBuilder();
 		urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);

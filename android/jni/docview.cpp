@@ -155,10 +155,18 @@ public:
 
 CRTimerUtil _timeoutControl;
 
+//#define DECL_DEF_CR_FONT_SIZES static int cr_font_sizes[] = \
+//	{ 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, \
+//	31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 58, 60, \
+//	62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340 }
+
 #define DECL_DEF_CR_FONT_SIZES static int cr_font_sizes[] = \
 	{ 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, \
-	31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 58, 60, \
-	62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 90, 110, 130, 150, 170, 200, 230, 260, 300, 340 }
+	31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, \
+	61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, \
+	91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, \
+	121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, \
+	170, 200, 230, 260, 300, 340 }
 
 
 DECL_DEF_CR_FONT_SIZES;
@@ -971,9 +979,19 @@ bool DocViewNative::findText( lString32 pattern, int origin, bool reverse, bool 
 {
     if ( pattern.empty() )
         return false;
-    if ( pattern!=_lastPattern && origin==1 )
+	//plotn - selecting words on the current page
+    lString32 pattern2 = pattern;
+    lString32 patternTag = pattern.substr(0, 11); // checking tag {{curPage}}
+	bool curPageMode = false;
+	if ( patternTag == "{{curPage}}" ) {
+		CRLog::debug("CRViewDialog::findText: current page mode");
+        curPageMode = true;
+        pattern2 = pattern.substr(11);
+        CRLog::debug("CRViewDialog::findText: real pattern %s", LCSTR(pattern2));
+    }
+	if ( pattern2!=_lastPattern && origin==1 )
         origin = 0;
-    _lastPattern = pattern;
+	_lastPattern = pattern2;
     LVArray<ldomWord> words;
     lvRect rc;
     _docview->GetPos( rc );
@@ -997,7 +1015,7 @@ bool DocViewNative::findText( lString32 pattern, int origin, bool reverse, bool 
         if ( origin == 0 ) {
             // from current page to last page
             start = rc.top;
-			//end = rc.bottom; //plotn, remove!
+			if (curPageMode) end = rc.bottom;
         } else if ( origin == -1 ) {
             // from first page to current page
             end = rc.top;
@@ -1007,20 +1025,47 @@ bool DocViewNative::findText( lString32 pattern, int origin, bool reverse, bool 
         }
     }
     CRLog::debug("CRViewDialog::findText: Current page: %d .. %d", rc.top, rc.bottom);
-    CRLog::debug("CRViewDialog::findText: searching for text '%s' from %d to %d origin %d", LCSTR(pattern), start, end, origin );
-    if ( _docview->getDocument()->findText( pattern, caseInsensitive, reverse, start, end, words, 200, pageHeight ) ) {
-        CRLog::debug("CRViewDialog::findText: pattern found");
-        _docview->clearSelection();
-        _docview->selectWords( words );
-        ldomMarkedRangeList * ranges = _docview->getMarkedRanges();
-        if ( ranges ) {
-            if ( ranges->length()>0 ) {
-                int pos = ranges->get(0)->start.y;
-                _docview->SetPos(pos);
-            }
-        }
-        return true;
-    }
+    CRLog::debug("CRViewDialog::findText: searching for text '%s' from %d to %d origin %d", LCSTR(pattern2), start, end, origin );
+    if (curPageMode) {
+		_docview->clearSelection();
+		lString32 v1, v2, v3;
+		v1 = pattern2;
+		LVArray<ldomWord> words1;
+		while (v1.split2(cs32("~"), v2, v3)) {
+			CRLog::debug("CRViewDialog::findText: v1, v2: %s, %s", LCSTR(v1), LCSTR(v2));
+			v1 = v3; // the rest of the words
+			//we'll work with v2
+			if (_docview->getDocument()->findText(v2, caseInsensitive, reverse, start, end, words1,
+					10, pageHeight)) {
+				CRLog::debug("CRViewDialog::findText: pattern found");
+				for (int i = 0; i < words1.length(); i++) words.add(words1.get(i));
+			}
+		}
+		//and a final word
+		CRLog::debug("CRViewDialog::findText: v1 last: %s", LCSTR(v1));
+		if (_docview->getDocument()->findText(v1, caseInsensitive, reverse, start, end, words1,
+											  10, pageHeight)) {
+			CRLog::debug("CRViewDialog::findText: pattern found");
+			for (int i = 0; i < words1.length(); i++) words.add(words1.get(i));
+		}
+		if ( !words.empty() ) _docview->selectWords(words);
+		return true;
+    } else {
+		if (_docview->getDocument()->findText(pattern2, caseInsensitive, reverse, start, end, words,
+											  200, pageHeight)) {
+			CRLog::debug("CRViewDialog::findText: pattern found");
+			_docview->clearSelection();
+			_docview->selectWords(words);
+			ldomMarkedRangeList *ranges = _docview->getMarkedRanges();
+			if ( ranges ) {
+				if (ranges->length() > 0) {
+					int pos = ranges->get(0)->start.y;
+					_docview->SetPos(pos);
+				}
+			}
+			return true;
+		}
+	}
     CRLog::debug("CRViewDialog::findText: pattern not found");
     return false;
 }

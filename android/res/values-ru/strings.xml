@@ -234,6 +234,8 @@
     <string name="options_selection_action">Действие для выделения</string>
     <string name="options_selection_action_long">Действие для выделения (длинный тап)</string>
     <string name="options_selection_action_long_add_info">Длинный двойной тап - это действие, которое запускается в момент выделения слова по двойному тапу, в случае если во время второго тапа вы задерживаете и не отпускаете палец более 400мс.</string>
+    <string name="options_bookmark_action_send_to">Действие \'Отправить в\' в диалоге закладки</string>
+    <string name="options_bookmark_action_send_to_add_info">Вы моежете настроить быстрое действие для отправки закладки в стороннее приложение</string>
     <string name="options_multi_selection_action">Действие для нескольких выделенных слов</string>
     <string name="options_selection2_action">Режим выделения: Действие для выделения</string>
     <string name="options_selection2_action_long">Режим выделения: Действие для выделения (длинный тап)</string>
@@ -317,6 +319,7 @@
     <string name="dlg_bookmark_create">Новая закладка</string>
     <string name="dlg_bookmark_edit">Редактирование закладки</string>
     <string name="dlg_bookmark_edit_range_text">Выделенный текст</string>
+    <string name="dlg_bookmark_edit_context_text">Текст контекста</string>
     <string name="dlg_bookmark_type_comment">Комментарий</string>
     <string name="dlg_bookmark_internal_link">Внутренняя ссылка</string>
     <string name="dlg_bookmark_citation">Цитата</string>
@@ -1254,6 +1257,7 @@
     <string name="options_app_hide_state_dialogs_add_info">Не спрашивать \'установить пометку читаю\', \'отметить как прочитанную\' etc</string>
     <string name="options_app_hide_css_warning">Не показывать диалог о css стилях книги</string>
     <string name="options_app_hide_css_warning_add_info">Не показывать диалог о css стилях книги (при открытии новой книги, переключении ночного режима)</string>
+    <string name="options_app_safe_mode">Безопасный режим - предупреждение</string>
     <string name="options_app_disable_safe_mode">Отключить безопасный режим</string>
     <string name="options_app_disable_safe_mode_add_info">Не показывать вопрос \'Вы хотите открыть книгу\' при открытии новых книг</string>
     <string name="options_word_expanion">Разреживание слов</string>
@@ -1397,7 +1401,7 @@
     <string name="do_scan">Сканировать выбранное!</string>
     <string name="library_maintenance">Обслуживание библиотеки</string>
     <string name="library_maint_remove">Удалить информацию о книгах, которые НЕ НАХОДЯТСЯ в выбранных категориях</string>
-    <string name="library_maint_remove_non_fav_add_info">Сами файлы НЕ будут удалены с вашего устройства, будет очищена только информация о них в внутренней базе данных KnownReader. Вы можете всегда пересканировать библиотеку впоследствии (Уточнение: закладки по удаляемым элементам также будут удалены).</string>
+    <string name="library_maint_remove_non_fav_add_info">Сами файлы НЕ будут удалены с вашего устройства, будет очищена только информация о них во внутренней базе данных KnownReader. Вы можете всегда пересканировать библиотеку впоследствии (Уточнение: но закладки (если создавались в книгах) по удаляемым элементам будут удалены навсегда).</string>
     <string name="library_maint_done_need_restart">Операция выполнена. Рекомендуется перезапустить приложение</string>
     <string name="library_maint_show_statistics">Показать статистику</string>
     <string name="library_maint_may_need_bk">Перед операциями с базой данных, будет не лишним создать резервную копию папки cr3e (в корне внутреннего хранилища) - так вы сможете откатить изменения, если что то пойдет не так</string>
@@ -1432,5 +1436,14 @@
     <string name="show_system_brightness_dialog">Показать системный диалог яркости (Onyx)</string>
     <string name="sel_start">&lt; начало выделения</string>
     <string name="sel_end">конец выделения &gt;</string>
+    <string name="bmk_send_to">отправить...</string>
+    <string name="bmk_custom_color">Установить цвет</string>
+    <string name="skim_document">Беглый просмотр книги</string>
+    <string name="skim_document_add_info">Беглый просмотр книги позволяет быстро просмотреть начала глав, переходить по закладкам и т.д.</string>
+    <string name="no_pattern">Не указан шаблон</string>
+    <string name="online_combo">Онлайн комбо</string>
+    <string name="online_combo_add_info">Онлайн комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в пользовательском словаре</string>
+    <string name="online_super_combo">Онлайн супер комбо</string>
+    <string name="online_super_combo_add_info">Онлайн супер комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в пользовательском словаре, после чего передается во внешнюю программу</string>
 </resources>
 

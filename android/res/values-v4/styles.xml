@@ -458,6 +458,9 @@
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
+        <item name="attr_icons8_skim">@drawable/icons8_skim</item>
+        <item name="attr_icons8_combo">@drawable/icons8_combo</item>
+        <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -794,6 +797,9 @@
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
+        <item name="attr_icons8_skim">@drawable/icons8_skim</item>
+        <item name="attr_icons8_combo">@drawable/icons8_combo</item>
+        <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1132,6 +1138,9 @@
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
+        <item name="attr_icons8_skim">@drawable/icons8_skim</item>
+        <item name="attr_icons8_combo">@drawable/icons8_combo</item>
+        <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1471,6 +1480,9 @@
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
+        <item name="attr_icons8_skim">@drawable/icons8_skim</item>
+        <item name="attr_icons8_combo">@drawable/icons8_combo</item>
+        <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1809,6 +1821,9 @@
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info_hc</item>
+        <item name="attr_icons8_skim">@drawable/icons8_skim</item>
+        <item name="attr_icons8_combo">@drawable/icons8_combo</item>
+        <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2143,6 +2158,9 @@
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info_hc</item>
+        <item name="attr_icons8_skim">@drawable/icons8_skim</item>
+        <item name="attr_icons8_combo">@drawable/icons8_combo</item>
+        <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

@@ -248,7 +248,7 @@ public class DicToastView {
             WikiArticle wa = arrWA.get(position);
             Dictionaries dicts = new Dictionaries(mActivity);
             dicts.wikiTranslate((CoolReader) mActivity, mListCurDict, null, String.valueOf(wa.pageId)+"~"+sFindText, mListLink, mListLink2,
-                    Dictionaries.WIKI_SHOW_PAGE_ID, mListUseFirstLink);
+                    Dictionaries.WIKI_SHOW_PAGE_ID, mListUseFirstLink, null);
             mHandler.postDelayed(handleDismiss, 100);
             return true;
         }
@@ -394,7 +394,7 @@ public class DicToastView {
             String ss = sFindText;
             if (ss.contains("~")) ss = ss.split("~")[1];
             dicts.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, ss, t.mLink, t.mLink2,
-                     Dictionaries.WIKI_FIND_LIST, t.mUseFirstLink);
+                     Dictionaries.WIKI_FIND_LIST, t.mUseFirstLink, null);
             mHandler.postDelayed(handleDismiss, 100);
         });
         if (t.dicType != IS_WIKI) ((ViewGroup)tvMore.getParent()).removeView(tvMore);
@@ -405,10 +405,10 @@ public class DicToastView {
             Dictionaries dicts = new Dictionaries(mActivity);
             if (t.mCurAction == Dictionaries.WIKI_FIND_TITLE)
                 dicts.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, sFindText, t.mLink, t.mLink2,
-                        Dictionaries.WIKI_FIND_TITLE_FULL, t.mUseFirstLink);
+                        Dictionaries.WIKI_FIND_TITLE_FULL, t.mUseFirstLink, null);
             else
                 dicts.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, sFindText, t.mLink, t.mLink2,
-                    Dictionaries.WIKI_SHOW_PAGE_FULL_ID, t.mUseFirstLink);
+                    Dictionaries.WIKI_SHOW_PAGE_FULL_ID, t.mUseFirstLink, null);
             mHandler.postDelayed(handleDismiss, 100);
         });
         //tvFullWeb.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -641,7 +641,8 @@ public class DicToastView {
                         if (cr.getReaderView().lastSelection!=null) {
                             if (!cr.getReaderView().lastSelection.isEmpty()) {
                                 cr.getReaderView().clearSelection();
-                                cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
+                                cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC,
+                                        (t.dicType == IS_LINGVO ? "{{lingvo}}" : "") + t.msg);
                             }
                         }
                     };
@@ -695,7 +696,7 @@ public class DicToastView {
             String ss = sFindText;
             if (ss.contains("~")) ss = ss.split("~")[1];
             dicts.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, ss, t.mLink, t.mLink2,
-                    t.mCurAction, mListSkipCount + t.arrWA.size(), t.mUseFirstLink, 0 ,"");
+                    t.mCurAction, mListSkipCount + t.arrWA.size(), t.mUseFirstLink, 0 ,"", null);
             mHandler.postDelayed(handleDismiss, 100);
         });
         int sz = 0;

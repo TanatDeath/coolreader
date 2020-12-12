@@ -24,6 +24,7 @@ import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStatRes;
+import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -2119,9 +2120,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	// Dictionary support
-	
-	
+
+	public interface DictionaryCallback {
+		void done(String result);
+		void fail(Exception e, String msg);
+	}
+
 	public void findInDictionary(String s, View view) {
+		findInDictionary(s, view, null);
+	}
+
+	public void findInDictionary(String s, View view, DictionaryCallback dcb) {
 		if (s != null && s.length() != 0) {
 			int start,end;
 			
@@ -2137,22 +2146,22 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     			final String pattern = s.substring(start,end+1);
 
 				BackgroundThread.instance().postBackground(() ->
-						BackgroundThread.instance().postGUI(() -> findInDictionaryInternal(pattern, view), 100));
+						BackgroundThread.instance().postGUI(() -> findInDictionaryInternal(pattern, view, dcb), 100));
 			}
 		}
 	}
 	
-	private void findInDictionaryInternal(String s, View view) {
+	private void findInDictionaryInternal(String s, View view, DictionaryCallback dcb) {
 		log.d("lookup in dictionary: " + s);
 		try {
-			mDictionaries.findInDictionary(s, view);
+			mDictionaries.findInDictionary(s, view, dcb);
 		} catch (DictionaryException e) {
 			showToast(e.getMessage());
 		}
 	}
 
 	public void showDictionary() {
-		findInDictionaryInternal(null, null);
+		findInDictionaryInternal(null, null, null);
 	}
 	
 	@Override
@@ -2478,6 +2487,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public void updateCurrentPositionStatus(FileInfo book, Bookmark position, PositionProperties props) {
+		if (getReaderView() == null) return;
 		mReaderFrame.getStatusBar().updateCurrentPositionStatus(book, position, props);
 		mReaderFrame.getUserDicPanel().updateCurrentPositionStatus(book, position, props);
 		//showToast("sd "+props.pageNumber);
@@ -2489,20 +2499,32 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		) {
 			book.askedMarkRead = true;
 			final FileInfo book1=book;
-			askConfirmation(R.string.mark_book_as_read, () -> Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
-				book1.setReadingState(FileInfo.STATE_FINISHED);
-				BookInfo bi = new BookInfo(book1);
-				getDB().saveBookInfo(bi);
-				getDB().flush();
-				if (bookInfo.getFileInfo()!=null) {
-					bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
-					if (bookInfo.getFileInfo().parent!=null)
-						directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
-				}
-				BookInfo bi2 = Services.getHistory().getBookInfo(book1);
-				if (bi2 != null)
-					bi2.getFileInfo().setFileProperties(book1);
-			}));
+			BackgroundThread.instance().postGUI(() -> {
+				ArrayList<String> sButtons = new ArrayList<String>();
+				sButtons.add("*" + getString(R.string.mark_book_as_read));
+				sButtons.add(getString(R.string.str_yes));
+				sButtons.add(getString(R.string.str_no));
+				SomeButtonsToolbarDlg.showDialog(this, getReaderView().getSurface(), 10, true,
+						"",
+					sButtons, null, (o22, btnPressed) -> {
+							if (btnPressed.equals(getString(R.string.str_yes))) {
+								Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
+									book1.setReadingState(FileInfo.STATE_FINISHED);
+									BookInfo bi = new BookInfo(book1);
+									getDB().saveBookInfo(bi);
+									getDB().flush();
+									if (bookInfo.getFileInfo() != null) {
+										bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
+										if (bookInfo.getFileInfo().parent != null)
+											directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+									}
+									BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+									if (bi2 != null)
+										bi2.getFileInfo().setFileProperties(book1);
+								});
+							}
+					});
+			}, 200);
 		}
 		checkAskReading(book, props,13, false);
 	}
@@ -2524,25 +2546,37 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if ((book.arrReadBeg.size()>pagesCnt) && (!bDontAsk)) {
 				book.askedMarkReading = true;
 				final FileInfo book1=book;
-				askConfirmation(R.string.mark_book_as_reading, () -> Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
-					book1.setReadingState(FileInfo.STATE_READING);
-					BookInfo bi = new BookInfo(book1);
-					getDB().saveBookInfo(bi);
-					getDB().flush();
-					if (bookInfo.getFileInfo()!=null) {
-						bookInfo.getFileInfo().setReadingState(FileInfo.STATE_READING);
-						if (bookInfo.getFileInfo().parent!=null)
-							directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
-					}
-					BookInfo bi2 = Services.getHistory().getBookInfo(book1);
-					if (bi2 != null)
-						bi2.getFileInfo().setFileProperties(book1);
-					if (openBrowser)
-						showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null, "");
-				}), () -> {
-					if (openBrowser)
-						showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null, "");
-				});
+				BackgroundThread.instance().postGUI(() -> {
+					ArrayList<String> sButtons = new ArrayList<String>();
+					sButtons.add("*" + getString(R.string.mark_book_as_reading));
+					sButtons.add(getString(R.string.str_yes));
+					sButtons.add(getString(R.string.str_no));
+					SomeButtonsToolbarDlg.showDialog(this, getReaderView().getSurface(), 10, true,
+							"",
+							sButtons, null, (o22, btnPressed) -> {
+								if (btnPressed.equals(getString(R.string.str_yes))) {
+									Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
+										book1.setReadingState(FileInfo.STATE_READING);
+										BookInfo bi = new BookInfo(book1);
+										getDB().saveBookInfo(bi);
+										getDB().flush();
+										if (bookInfo.getFileInfo() != null) {
+											bookInfo.getFileInfo().setReadingState(FileInfo.STATE_READING);
+											if (bookInfo.getFileInfo().parent != null)
+												directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+										}
+										BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+										if (bi2 != null)
+											bi2.getFileInfo().setFileProperties(book1);
+										if (openBrowser)
+											showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null, "");
+									});
+								} else {
+									if (openBrowser)
+										showBrowser(!isBrowserCreated() ? getReaderView().getOpenedFileInfo() : null, "");
+								}
+							});
+				}, 200);
 			}
 		}
 	}
@@ -2762,7 +2796,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 									directoryUpdated(currDirectory, file);
 								}
 								if (!StrUtils.isEmptyStr(search_text))
-									findInDictionary(search_text, null);
+									findInDictionary(search_text, null, null);
 							}
 						}
 					});

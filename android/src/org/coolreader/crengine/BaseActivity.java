@@ -522,7 +522,10 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_hide,
 				         R.attr.google_drive_drawable,
 						 R.attr.attr_icons8_bookmark_plus_q,
-						 R.attr.attr_icons8_sun
+						 R.attr.attr_icons8_sun,
+						 R.attr.attr_icons8_skim,
+						 R.attr.attr_icons8_combo,
+						 R.attr.attr_icons8_super_combo
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -607,6 +610,9 @@ public class BaseActivity extends Activity implements Settings {
 
 		int brBookmarkPlusQ = a.getResourceId(74, 0);
 		int brSun = a.getResourceId(75, 0);
+		int brSkim = a.getResourceId(76, 0);
+		int brCombo = a.getResourceId(77, 0);
+		int brSuperCombo = a.getResourceId(78, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -763,6 +769,9 @@ public class BaseActivity extends Activity implements Settings {
 		}
 		if (brBookmarkPlusQ != 0) ReaderAction.SAVE_BOOKMARK_QUICK.setIconId(brBookmarkPlusQ);
 		if (brSun != 0) ReaderAction.SHOW_SYSTEM_BRIGHTNESS_DIALOG.setIconId(brSun);
+		if (brSkim != 0) ReaderAction.SKIM.setIconId(brSkim);
+		if (brCombo != 0) ReaderAction.ONLINE_COMBO.setIconId(brCombo);
+		if (brSuperCombo != 0) ReaderAction.ONLINE_SUPER_COMBO.setIconId(brSuperCombo);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -2757,6 +2766,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION, "2");
 			props.applyDefault(ReaderView.PROP_APP_MULTI_SELECTION_ACTION, "0");
 			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION_LONG, "11");
+			props.applyDefault(ReaderView.PROP_APP_BOOKMARK_ACTION_SEND_TO, "-1");
 			props.applyDefault(ReaderView.PROP_APP_SELECTION2_ACTION, "-1");
 			props.applyDefault(ReaderView.PROP_APP_MULTI_SELECTION2_ACTION, "-1");
 			props.applyDefault(ReaderView.PROP_APP_SELECTION2_ACTION_LONG, "-1");

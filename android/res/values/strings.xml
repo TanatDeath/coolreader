@@ -243,6 +243,8 @@
     <string name="options_selection_action">Single Selection action</string>
     <string name="options_selection_action_long">Single Selection action (longtap)</string>
     <string name="options_selection_action_long_add_info">Long double tap is an action, that fires when you doubletapping the word but hold a finger on the second tap more than 400ms.</string>
+    <string name="options_bookmark_action_send_to">\'Send to\' action in bookmark dialog</string>
+    <string name="options_bookmark_action_send_to_add_info">You can define quick action to send your bookmark to external app</string>
     <string name="options_multi_selection_action">Multi Selection action</string>
     <string name="options_selection2_action">Selection mode: Single Selection action</string>
     <string name="options_selection2_action_long">Selection mode: Single Selection action (longtap)</string>
@@ -326,6 +328,7 @@
     <string name="dlg_bookmark_create">New bookmark</string>
     <string name="dlg_bookmark_edit">Edit bookmark</string>
     <string name="dlg_bookmark_edit_range_text">Selection text</string>
+    <string name="dlg_bookmark_edit_context_text">Context text</string>
     <string name="dlg_bookmark_type_comment">Comment</string>
     <string name="dlg_bookmark_internal_link">Internal link</string>
     <string name="dlg_bookmark_citation">Citation</string>
@@ -1277,6 +1280,7 @@
     <string name="options_app_hide_state_dialogs_add_info">Do not ask \'set reading state\', \'mark as read\', etc.</string>
     <string name="options_app_hide_css_warning">Hide css styles warning dialog</string>
     <string name="options_app_hide_css_warning_add_info">Hide css styles warning dialog (when open a new book, toggle night mode)</string>
+    <string name="options_app_safe_mode">Safe mode warning</string>
     <string name="options_app_disable_safe_mode">Disable safe mode</string>
     <string name="options_app_disable_safe_mode_add_info">Do not show \'Do you want to open book\' question when open new books</string>
     <string name="options_word_expanion">Word expansion</string>
@@ -1459,4 +1463,13 @@
     <string name="show_system_brightness_dialog">Show system brightness dialog (Onyx)</string>
     <string name="sel_start">&lt; start of selection</string>
     <string name="sel_end">end of selection &gt;</string>
+    <string name="bmk_send_to">send to...</string>
+    <string name="bmk_custom_color">Set color</string>
+    <string name="skim_document">Skim over book</string>
+    <string name="skim_document_add_info">Skim over book allows make a quick review of a book - switch chapters, bookmarks, etc.</string>
+    <string name="no_pattern">No pattern specified</string>
+    <string name="online_combo">Online combo</string>
+    <string name="online_combo_add_info">Online combo is the complex action - it allows to translate text (via online dictionary), then save the result to user dic</string>
+    <string name="online_super_combo">Online super combo</string>
+    <string name="online_super_combo_add_info">Online super combo is the complex action - it allows to translate text (via online dictionary), save the result to user dic, then send it to external app</string>
 </resources>

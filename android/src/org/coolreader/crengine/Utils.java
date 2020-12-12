@@ -942,6 +942,14 @@ public class Utils {
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
+	public static void setDashedButton1(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border1);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
 	public static int findNearestIndex(List<Integer> list, int value) {
 		int res = -1;
 		if (list != null && list.size() > 0) {

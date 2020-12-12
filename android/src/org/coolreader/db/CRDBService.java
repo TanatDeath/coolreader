@@ -1024,9 +1024,10 @@ public class CRDBService extends Service {
 			if (UserDicDlg.mDicSearchHistoryAll.size() > 0)
 				for (int i = 0; i < UserDicDlg.mDicSearchHistoryAll.size(); i++) {
 					if (StrUtils.getNonEmptyStr(UserDicDlg.mDicSearchHistoryAll.get(i).getSearch_text(), true).toLowerCase().equals(
-							StrUtils.getNonEmptyStr(dshe.getSearch_text(),true).toLowerCase()))
+							StrUtils.getNonEmptyStr(dshe.getSearch_text(),true).toLowerCase())) {
 						idx = i;
-					break;
+						break;
+					}
 				}
 			if (idx >= 0) {
 				UserDicDlg.mDicSearchHistoryAll.remove(idx);

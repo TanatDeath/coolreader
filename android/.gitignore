@@ -7,6 +7,7 @@ obj
 /local.properties
 /.idea
 /.idea/workspace.xml
+/.idea/gradle.xml
 /.idea/libraries
 /.idea/misc.xml
 .DS_Store

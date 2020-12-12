@@ -286,6 +286,21 @@ public class BookmarksDlg  extends BaseDialog {
 		setPositiveButtonImage(Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_add_drawable, R.drawable.cr3_button_add), R.string.mi_bookmark_add);
 		View frame = mInflater.inflate(R.layout.bookmark_list_dialog, null);
 		ViewGroup body = frame.findViewById(R.id.bookmark_list);
+		frame.findViewById(R.id.btn_user_dic).setOnClickListener(v -> {
+			cancel();
+			UserDicDlg dlg = new UserDicDlg(activity,0);
+			dlg.show();
+		});
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
+		frame.findViewById(R.id.btn_user_dic).setBackgroundColor(colorGrayCT2);
+
 		mList = new BookmarkList(activity, false);
 		body.addView(mList);
 		setView(frame);

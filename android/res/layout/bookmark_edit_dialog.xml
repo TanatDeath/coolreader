@@ -21,6 +21,38 @@
 			android:text="Page 34/1024 (25%) Chapter 1" />
 
 		<TableLayout
+				android:id="@+id/tl_bmk_color"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical">
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<Button
+						android:id="@+id/btn_color_check"
+						android:layout_width="0dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/attr_cr3_toc_item_normal"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@string/bmk_custom_color" />
+				<Button
+						android:id="@+id/btn_color_choose"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+			</TableRow>
+		</TableLayout>
+
+		<TableLayout
 			android:id="@+id/rg_type"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -131,16 +163,40 @@
 			android:singleLine="false"
 			android:text="position text" />
 
-		<TextView
-			android:id="@+id/lbl_comment_text"
-			style="@style/TextAppearance.Medium"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:maxLines="3"
-			android:clickable="true"
-			android:singleLine="false"
-			android:textColor="?attr/colorIcon"
-			android:text="@string/dlg_bookmark_edit_comment" />
+		<TableLayout
+				android:id="@+id/tl_comment_and_dic"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical">
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<TextView
+						android:id="@+id/lbl_comment_text"
+						style="@style/TextAppearance.Medium"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:maxLines="3"
+						android:layout_weight="1"
+						android:clickable="true"
+						android:singleLine="false"
+						android:textColor="?attr/colorIcon"
+						android:text="@string/dlg_bookmark_edit_comment" />
+
+				<Button
+						android:id="@+id/btn_transl"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:drawableLeft="?attr/attr_icons8_drop_down_no_frame_small"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+			</TableRow>
+		</TableLayout>
 
 		<EditText
 			android:id="@+id/comment_edit"
@@ -150,6 +206,62 @@
 			android:editable="true"
 			android:singleLine="false"
 			android:text="comment text" />
+
+		<TableLayout
+				android:id="@+id/tl_send_to"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical">
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<Button
+						android:id="@+id/btn_sent_to1"
+						android:layout_width="0dip"
+						android:layout_height="match_parent"
+						android:checked="true"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/attr_icons8_share"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@string/bmk_send_to" />
+				<Button
+						android:id="@+id/btn_sent_to2"
+						android:layout_width="0dip"
+						android:layout_height="match_parent"
+						android:checked="false"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/attr_icons8_share"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+			</TableRow>
+		</TableLayout>
+
+		<TextView
+				android:id="@+id/lbl_context_text"
+				style="@style/TextAppearance.Medium"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:maxLines="3"
+				android:singleLine="false"
+				android:textColor="?attr/colorIcon"
+				android:text="@string/dlg_bookmark_edit_context_text" />
+
+		<EditText
+				android:id="@+id/context_text"
+				style="@style/TextAppearance.Widget.EditText"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:inputType="none"
+				android:singleLine="false"
+				android:maxLines="4"
+				android:text="context text" />
+
 		<TextView
 			android:id="@+id/lbl_comment_from_cb"
 			style="@style/TextAppearance.Medium"

@@ -2,12 +2,20 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.dic.Dictionaries;
 
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.text.method.KeyListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TableRow;
@@ -37,6 +45,57 @@ public class BookmarkEditDialog extends BaseDialog {
 	final ImageButton btnUserDic;
 	final ImageButton btnInternalLink;
 	final ImageButton btnCitation;
+	final TextView commentLabel;
+	final Button btnSendTo1;
+	final Button btnSendTo2;
+	final Button btnTransl;
+	final Button btnColorCheck;
+	final Button btnColorChoose;
+	final EditText edtContext;
+	public static int lastColor = 0;
+
+	private boolean bColorCheck = false;
+
+	private void paintColorCheckButton() {
+		int colorGrayC;
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		mCoolReader.tintViewIcons(btnColorCheck, PorterDuff.Mode.CLEAR,true);
+		if (bColorCheck) {
+			btnColorCheck.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnColorCheck, true);
+			btnColorCheck.setPaintFlags(btnColorCheck.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+		} else {
+			btnColorCheck.setBackgroundColor(colorGrayCT);
+			btnColorCheck.setPaintFlags( btnColorCheck.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+		}
+	}
+
+	private void selectBmkColor(boolean doSelect) {
+		int colorGray;
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
+		colorGray = a.getColor(0, Color.GRAY);
+		colorGrayC = a.getColor(1, Color.GRAY);
+		a.recycle();
+		int colorGrayCT = Color.argb(128, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
+		if (doSelect) {
+			btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
+			ColorPickerDialog dlg = new ColorPickerDialog(mCoolReader, color -> {
+				lastColor = color;
+				paintColorCheckButton();
+				btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
+			}, lastColor, "");
+			dlg.show();
+		} else {
+			btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
+		}
+	}
 
 	@Override
 	protected void onPositiveButtonClick() {
@@ -97,31 +156,39 @@ public class BookmarkEditDialog extends BaseDialog {
 
 	private void setChecked(ImageButton btn) {
 		rb_descr.setText(btn.getContentDescription()+" ");
-		if (btn.getContentDescription().equals(R.string.dlg_bookmark_type_comment)) {
+		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_type_comment))) {
 			mChosenType = Bookmark.TYPE_COMMENT;
+			commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		}
-		if (btn.getContentDescription().equals(R.string.dlg_bookmark_type_correction)) {
+		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_type_correction))) {
 			mChosenType = Bookmark.TYPE_CORRECTION;
+			commentLabel.setText(R.string.dlg_bookmark_edit_correction);
 		}
-		if (btn.getContentDescription().equals(R.string.dlg_bookmark_internal_link)) {
+		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_internal_link))) {
 			mChosenType = Bookmark.TYPE_INTERNAL_LINK;
+			commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		}
-		if (btn.getContentDescription().equals(R.string.dlg_bookmark_user_dic)) {
+		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_user_dic))) {
 			mChosenType = Bookmark.TYPE_USER_DIC;
+			commentLabel.setText(R.string.dlg_bookmark_edit_translation);
 		}
-		if (btn.getContentDescription().equals(R.string.dlg_bookmark_citation)) {
+		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_citation))) {
 			mChosenType = Bookmark.TYPE_CITATION;
+			commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		}
 		int colorGray;
 		int colorGrayC;
 		int colorIcon;
+		int colorIconL;
 		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
 		colorIcon = a.getColor(2, Color.GRAY);
+		colorIconL = a.getColor(3, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(100,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		rb_descr.setBackgroundColor(colorGrayCT);
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnComment.setBackgroundColor(colorGrayCT);
@@ -129,8 +196,13 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnUserDic.setBackgroundColor(colorGrayCT);
 		btnInternalLink.setBackgroundColor(colorGrayCT);
 		btnCitation.setBackgroundColor(colorGrayCT);
-		lblSetComment.setTextColor(colorIcon);
+		lblSetComment.setTextColor(colorGrayCT2);
 		lblBookmarkLink.setTextColor(colorIcon);
+		btnSendTo1.setBackgroundColor(colorGrayCT);
+		btnSendTo2.setBackgroundColor(colorGrayCT);
+		btnTransl.setBackgroundColor(colorGrayCT);
+		paintColorCheckButton();
+		btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
 		btn.setBackgroundColor(colorGray);
 	}
 
@@ -151,6 +223,57 @@ public class BookmarkEditDialog extends BaseDialog {
 			return mChosenType == Bookmark.TYPE_CITATION;
 		}
 		return false;
+	}
+
+	private Dictionaries.DictInfo currentDic = null;
+
+	private void setupTranslButton() {
+		for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.getAddDicts()) {
+			if (di.id.equals("YandexTranslateOnline") ||
+					di.id.equals("LingvoOnline") ||
+					di.id.equals("LingvoOnline Extended") ||
+					di.id.equals("Wikipedia 1 (online)") ||
+					di.id.equals("Wikipedia 2 (online)")
+			) {
+				btnTransl.setText(di.name);
+				currentDic = di;
+				return;
+			};
+		}
+		Utils.hideView(btnTransl);
+	}
+
+	private String getContextText() {
+		int curPage = ((CoolReader)activity).getReaderView().getDoc().getCurPage();
+		String sPageText = StrUtils.getNonEmptyStr(((CoolReader)activity).getReaderView().getPageTextFromEngine(curPage), true);
+		String sBmkText = StrUtils.getNonEmptyStr(mBookmark.getPosText(), true);
+		String sContextText = "";
+		if (sPageText.contains(sBmkText)) {
+			int iPos = sPageText.indexOf(sBmkText);
+			int iPosBeg = iPos;
+			while (iPosBeg > 0) {
+				iPosBeg--;
+				if (sPageText.startsWith(".", iPosBeg) ||
+						sPageText.startsWith("!", iPosBeg) ||
+						sPageText.startsWith("?", iPosBeg) ||
+						sPageText.startsWith("\u2026", iPosBeg)
+				) break;
+			}
+			int iPosEnd = iPos + sBmkText.length();
+			while (iPosEnd < sPageText.length()-1) {
+				iPosEnd++;
+				if (sPageText.startsWith(".", iPosEnd) ||
+						sPageText.startsWith("!", iPosEnd) ||
+						sPageText.startsWith("?", iPosEnd) ||
+						sPageText.startsWith("\u2026", iPosEnd)
+				) break;
+			}
+			sContextText = StrUtils.getNonEmptyStr((sPageText + ".").substring(iPosBeg + 1, iPosEnd + 1),true);
+		}
+		if (StrUtils.isEmptyStr(sContextText)) sContextText = sPageText;
+		return sContextText;
+		//return sPageText;
+//		return mBookmark.getPosText();
 	}
 
 	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType, String commentText)
@@ -187,7 +310,23 @@ public class BookmarkEditDialog extends BaseDialog {
 		rb_descr = view.findViewById(R.id.lbl_rb_descr);
 		tr_descr = view.findViewById(R.id.tr_rb_descr);
 		final TextView posLabel = view.findViewById(R.id.lbl_position);
-		final TextView commentLabel = view.findViewById(R.id.lbl_comment_text);
+		commentLabel = view.findViewById(R.id.lbl_comment_text);
+		btnSendTo1 = view.findViewById(R.id.btn_sent_to1);
+		btnSendTo2 = view.findViewById(R.id.btn_sent_to2);
+		btnTransl = view.findViewById(R.id.btn_transl);
+		setupTranslButton();
+		btnColorCheck = view.findViewById(R.id.btn_color_check);
+		BackgroundThread.instance().postGUI(() -> paintColorCheckButton(), 200);
+		btnColorCheck.setOnClickListener(v -> {
+			bColorCheck = !bColorCheck;
+			selectBmkColor(bColorCheck);
+			paintColorCheckButton();
+		});
+		btnColorChoose = view.findViewById(R.id.btn_color_choose);
+		btnColorChoose.setOnClickListener(v -> {
+			selectBmkColor(bColorCheck);
+		});
+		edtContext = view.findViewById(R.id.context_text);
 
 		final CoolReader cr = activity;
 
@@ -263,6 +402,7 @@ public class BookmarkEditDialog extends BaseDialog {
 
 		posEdit.setText(mBookmark.getPosText());
 		commentEdit.setText(bookmark.getCommentText());
+		String sCapt = "";
 		if ( isNew ) {
 			if (isComment) setChecked(btnComment);
 			if (!isComment) setChecked(btnCorrection);
@@ -315,10 +455,21 @@ public class BookmarkEditDialog extends BaseDialog {
 				setChecked(btnCitation);
 			});
 			if (!StrUtils.isEmptyStr(commentText)) {
-				String cText = commentText;
-				if (cText.startsWith(mBookmark.getPosText()+":")) cText = cText.substring((mBookmark.getPosText()+":").length());
+				String cText = StrUtils.getNonEmptyStr(commentText, true);
+				if (cText.startsWith("{{lingvo}}")) {
+					cText = cText.replace("{{lingvo}}", "");
+					if (cText.contains(":")) {
+						sCapt = cText.split(":")[0];
+						posEdit.setText(StrUtils.updateText(sCapt, true));
+						cText = cText.replace(sCapt + ":", "");
+					}
+				} else {
+					if (cText.startsWith(mBookmark.getPosText() + ":"))
+						cText = cText.substring((mBookmark.getPosText() + ":").length());
+				}
 				commentEdit.setText(cText.trim());
 			}
+			edtContext.setText(getContextText());
 		} else {
 			btnComment.setClickable(false);
 			btnCorrection.setClickable(false);
@@ -341,13 +492,83 @@ public class BookmarkEditDialog extends BaseDialog {
 		if (chosenType==Bookmark.TYPE_USER_DIC) {
 			setChecked(btnUserDic);
 			mBookmark.setType(Bookmark.TYPE_USER_DIC);
-			posEdit.setText(StrUtils.updateText(mBookmark.getPosText(),true));
+			if (StrUtils.isEmptyStr(sCapt))
+				posEdit.setText(StrUtils.updateText(mBookmark.getPosText(),true));
 			posEdit.setKeyListener(keyList);
 		}
 		if (chosenType==Bookmark.TYPE_CITATION) {
 			setChecked(btnCitation);
 			mBookmark.setType(Bookmark.TYPE_CITATION);
 			posEdit.setKeyListener(keyList);
+		}
+		btnSendTo1.setOnClickListener(v -> {
+			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+			emailIntent.setType("text/plain");
+			emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(posEdit.getText().toString(), true), true));
+			emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(commentEdit.getText().toString(), true), true));
+		 	mCoolReader.startActivity(Intent.createChooser(emailIntent, null));
+		 	onPositiveButtonClick();
+		});
+		btnSendTo2.setOnClickListener(v -> {
+			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+			int selAction = -1;
+			if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
+			if (selAction == -1) {
+				mCoolReader.showToast("Dictionary is not installed. ");
+				return;
+			}
+			int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
+			Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
+			if (curDict == null) {
+				mCoolReader.showToast("Dictionary is not installed. ");
+				return;
+			}
+			emailIntent.setType("text/plain");
+			emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(posEdit.getText().toString(), true), true));
+			emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(commentEdit.getText().toString(), true), true));
+			for (ResolveInfo resolveInfo : mCoolReader.getPackageManager().queryIntentActivities(emailIntent, 0)) {
+				if( resolveInfo.activityInfo.packageName.contains(curDict.packageName)){
+					emailIntent.setComponent(new ComponentName(
+							resolveInfo.activityInfo.packageName,
+							resolveInfo.activityInfo.name));
+					try
+					{
+						mCoolReader.startActivity(emailIntent);
+						onPositiveButtonClick();
+					} catch ( ActivityNotFoundException e ) {
+						mCoolReader.showToast("Dictionary \"" + curDict.name + "\" is not installed. "+e.getMessage());
+					}
+				}
+
+			}
+		});
+		btnTransl.setOnClickListener(v -> {
+			if ((currentDic != null) && (!StrUtils.isEmptyStr(posEdit.getText().toString()))) {
+				mCoolReader.mDictionaries.setAdHocDict(currentDic);
+				mCoolReader.findInDictionary(posEdit.getText().toString(), null, new CoolReader.DictionaryCallback() {
+					@Override
+					public void done(String result) {
+						commentEdit.setText(result);
+					}
+
+					@Override
+					public void fail(Exception e, String msg) {
+						mCoolReader.showToast(msg);
+					}
+				});
+			}
+		});
+		int selAction = -1;
+		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
+		if (selAction == -1) Utils.hideView(btnSendTo2);
+		else {
+			int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
+			String sText = "[undefined]";
+			Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
+			if (curDict != null) sText = curDict.name;
+			//if (titleSendTo != 0) sText = OptionsDialog.updDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader, true);
+			btnSendTo2.setText(sText);
+			if (sText.endsWith("NONE")) Utils.hideView(btnSendTo2);
 		}
 		setView( view );
 		btnFake.requestFocus();

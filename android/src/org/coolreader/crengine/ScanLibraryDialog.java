@@ -7,9 +7,12 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -30,10 +33,15 @@ public class ScanLibraryDialog extends BaseDialog {
 	private final TableLayout tlScanLibrary;
 	private final LinearLayout llScanLibrary;
 	private final Button mBtnScanWholeDevice;
+	private final LinearLayout mLlScanInternal;
 	private final Button mBtnScanInternal;
+	private final LinearLayout mLlScanExternal;
 	private final Button mBtnScanExternal;
+	private final LinearLayout mLlScanBooks;
 	private final Button mBtnScanBooks;
+	private final LinearLayout mLlScanFav;
 	private final Button mBtnScanFav;
+	private final LinearLayout mLlScanDownl;
 	private final Button mBtnScanDownl;
 	private final Button mBtnDoScan;
 	private final Button mLibraryMaintenance;
@@ -237,6 +245,54 @@ public class ScanLibraryDialog extends BaseDialog {
 		}
 	}
 
+	private void addTextToLL(String txt, LinearLayout ll) {
+		Button pathButton = new Button(mCoolReader);
+		pathButton.setText(txt);
+		Properties props = new Properties(mCoolReader.settings());
+		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+		pathButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+		//pathButton.setHeight(pathButton.getHeight()-4);
+		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorIconCT=Color.argb(100,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
+		pathButton.setTextColor(colorIconCT);
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		pathButton.setBackgroundColor(colorGrayCT);
+		pathButton.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+		pathButton.setPadding(6, 6, 6, 6);
+		//pathButton.setBackground(null);
+		LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+		llp.setMargins(8, 4, 4, 8);
+		pathButton.setLayoutParams(llp);
+		pathButton.setMaxLines(1);
+		pathButton.setEllipsize(TextUtils.TruncateAt.END);
+		ll.addView(pathButton);
+	}
+
+	private void addFoldersNames() {
+		ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
+		for (FileInfo fi: folders) {
+			if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
+				if (StrUtils.getNonEmptyStr(fi.title, true).toUpperCase().contains("EXT SD")) {
+					addTextToLL(fi.pathname, mLlScanExternal);
+				} else {
+					addTextToLL(fi.pathname, mLlScanInternal);
+				}
+			} else {
+				if (fi.getType() == FileInfo.TYPE_DOWNLOAD_DIR) {
+					addTextToLL(fi.pathname, mLlScanBooks);
+				} else
+					addTextToLL(fi.pathname, mLlScanFav);
+			}
+		}
+		addTextToLL(Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS, mLlScanDownl);
+	}
+
 	public ScanLibraryDialog(CoolReader activity)
 	{
 		super("ScanLibraryDialog", activity, activity.getString( R.string.litres_main), true, false);
@@ -251,10 +307,15 @@ public class ScanLibraryDialog extends BaseDialog {
 		llScanLibrary = view.findViewById(R.id.ll_scan_library_dlg);
 		tlScanLibrary = view.findViewById(R.id.tl_scan_library_dlg);
 		mBtnScanWholeDevice = view.findViewById(R.id.btn_scan_whole_device);
+		mLlScanInternal = view.findViewById(R.id.ll_scan_internal);
 		mBtnScanInternal = view.findViewById(R.id.btn_scan_internal);
+		mLlScanExternal = view.findViewById(R.id.ll_scan_external);
 		mBtnScanExternal = view.findViewById(R.id.btn_scan_external);
+		mLlScanBooks = view.findViewById(R.id.ll_scan_books);
 		mBtnScanBooks = view.findViewById(R.id.btn_scan_books);
+		mLlScanFav = view.findViewById(R.id.ll_scan_fav);
 		mBtnScanFav = view.findViewById(R.id.btn_scan_fav);
+		mLlScanDownl = view.findViewById(R.id.ll_scan_downl);
 		mBtnScanDownl = view.findViewById(R.id.btn_scan_downl);
 		mBtnDoScan = view.findViewById(R.id.btn_do_scan);
 		mBtnScanWholeDevice.setBackgroundColor(colorGrayC);
@@ -466,6 +527,9 @@ public class ScanLibraryDialog extends BaseDialog {
 			llScanLibrary.addView(tlm);
 			Utils.hideView(mLibraryMaintenance);
 		});
+
+		addFoldersNames();
+
 		setView( view );
 	}
 

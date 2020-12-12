@@ -10,10 +10,17 @@ public class KeyboardUtils {
 
     public static void hideKeyboard(Activity activity) {
         View view = activity.findViewById(android.R.id.content);
-        //if (view != null) {
+        if (view != null) {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        //}
+        }
+    }
+
+    public static void hideKeyboard(Activity activity, View view) {
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     public static void showKeyboard(Activity activity) {
