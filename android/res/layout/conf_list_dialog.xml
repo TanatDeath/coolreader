@@ -69,6 +69,33 @@
                 android:text="@string/pos_percent_sort" />
     </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/ll_del_all"
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:layout_marginTop="4dip"
+                android:layout_marginBottom="4dip"
+                android:layout_marginLeft="4dip"
+                android:layout_marginRight="4dip"
+                >
+        <Button
+                android:id="@+id/btn_delete_all_pos"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:contentDescription="@string/delete_all_pos"
+                android:drawableLeft="@drawable/icons8_delete"
+                android:drawablePadding="4dip"
+                android:text="@string/delete_all_pos" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                android:id="@+id/conf_list"
                android:orientation="vertical"
                android:layout_weight="8"

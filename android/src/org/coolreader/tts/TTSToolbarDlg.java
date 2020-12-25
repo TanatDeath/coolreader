@@ -8,6 +8,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
@@ -17,11 +18,11 @@ import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReaderView;
 import org.coolreader.crengine.Selection;
+import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.Utils;
 import org.coolreader.crengine.ViewMode;
 
-import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -34,8 +35,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,10 +52,6 @@ import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import org.coolreader.tts.TTS;
-import org.coolreader.tts.TTSControlBinder;
-import org.coolreader.tts.TTSControlService;
-import org.coolreader.tts.TTSControlServiceAccessor;
 
 import com.s_trace.motion_watchdog.HandlerThread;
 import com.s_trace.motion_watchdog.MotionWatchdogHandler;
@@ -92,7 +87,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	TextView lblMotionWd;
 	private HandlerThread mMotionWatchdog;
 	private HandlerThread mTimerHandler;
-	private static String CHANNEL_ID = "CoolReader_channel";
+	private static String CHANNEL_ID = "KnownReader_channel";
 	private static int MIN_FORCE_TTS_START_TIME = 5000;
 
 	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
@@ -101,9 +96,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	private static final int COVER_HEIGHT = 256;
 	private static final int COVER_WIDTH = 256;
 	private FileInfo mFileInfo = null;
-	private Bitmap mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
-	private NotificationManager mNotificationManager;
-	private MediaSession mMediaSession;
+	public Bitmap mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
 
 	BroadcastReceiver mTTSControlButtonReceiver = new BroadcastReceiver() {
 		@Override
@@ -128,22 +121,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 			}
 		}
 	};
-
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void setMediaSessionPlaybackState(int state) {
-		if (mMediaSession == null) {
-			return;
-		}
-		PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
-				.setActions(PlaybackState.ACTION_PLAY
-						| PlaybackState.ACTION_STOP
-						| PlaybackState.ACTION_PAUSE
-						| PlaybackState.ACTION_PLAY_PAUSE
-						| PlaybackState.ACTION_SKIP_TO_NEXT
-						| PlaybackState.ACTION_SKIP_TO_PREVIOUS)
-				.setState(state, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1);
-		mMediaSession.setPlaybackState(stateBuilder.build());
-	}
 
 	public NotificationChannel createNotificationChannel() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -328,29 +305,21 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 	}
 
 	public void handleTick(int timeLeft, int currentVolume) {
-		BackgroundThread.instance().postBackground(new Runnable() {
-			@Override
-			public void run() {
-				BackgroundThread.instance().postGUI(new Runnable() {
-					@Override
-					public void run() {
-						if (lblMotionWd != null) {
-							if (timeLeft>0) {
-								String left = String.valueOf(timeLeft/60000);
-								if (timeLeft<60000) left = "< 1";
-								lblMotionWd.setText(mCoolReader.getString(R.string.wd_time_left, left));
-								return;
-							}
-							if (currentVolume == 0) {
-								mCoolReader.showToast(R.string.wd_still);
-								return;
-							}
-							lblMotionWd.setText(mCoolReader.getString(R.string.wd_decrease_vol, String.valueOf(currentVolume), String.valueOf(currentVolume-1)));
-						}
-					}
-				}, 200);
+		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+			if (lblMotionWd != null) {
+				if (timeLeft>0) {
+					String left = String.valueOf(timeLeft/60000);
+					if (timeLeft<60000) left = "< 1";
+					lblMotionWd.setText(mCoolReader.getString(R.string.wd_time_left, left));
+					return;
+				}
+				if (currentVolume == 0) {
+					mCoolReader.showToast(R.string.wd_still);
+					return;
+				}
+				lblMotionWd.setText(mCoolReader.getString(R.string.wd_decrease_vol, String.valueOf(currentVolume), String.valueOf(currentVolume-1)));
 			}
-		});
+		}, 200));
 	}
 	
 	private Runnable onCloseListener;
@@ -381,16 +350,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 				mWindow.dismiss();
 			mReaderView.save();
 		});
-		if (mNotificationManager != null) {
-			mNotificationManager.cancel(TTS_NOTIFICATION_ID);
-		}
-		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				mMediaSession.setActive(false);
-				mMediaSession.release();
-			}
-		} catch (Throwable ignored) {
-		}
+		runInTTSControlService(tts -> tts.notifyStopMediaSession());
 	}
 	
 	private boolean changedPageMode;
@@ -481,7 +441,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					(mCoolReader.getReaderView().getDoc() !=null)) {
 				int curPage = mCoolReader.getReaderView().getDoc().getCurPage();
 				if (mCurPage != curPage) {
-					//mCoolReader.showToast("asdf "+mCurPage);
 					mCurPageTextPrev2 = mCoolReader.getmReaderFrame().getUserDicPanel().getCurPageText(-2,true);
 					mCurPageTextPrev = mCoolReader.getmReaderFrame().getUserDicPanel().getCurPageText(-1,true);
 					mCurPageText = mCoolReader.getmReaderFrame().getUserDicPanel().getCurPageText(0,true);
@@ -599,9 +558,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
 					//R.drawable.ic_media_play
 			);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
-			}
 			playPauseButton.setBackgroundDrawable(c);
 			playPauseButtonEll.setBackgroundDrawable(c);
 			runInTTSControlService(tts -> tts.notifyPause(mBookTitle));
@@ -616,9 +572,6 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 						Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
 						//R.drawable.ic_media_pause
 				);
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-					setMediaSessionPlaybackState(PlaybackState.STATE_PLAYING);
-				}
 				playPauseButton.setBackgroundDrawable(c);
 				playPauseButtonEll.setBackgroundDrawable(c);
 				runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, currentSelection.text));
@@ -779,6 +732,7 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 		});
 
 		mWindow.setOnDismissListener(() -> {
+			mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
 			if ( !closed )
 				stopAndClose();
 		});
@@ -905,6 +859,12 @@ public class TTSToolbarDlg implements TTS.OnUtteranceCompletedListener {
 					log.d("trying to set TTS language to \"" + locale.getDisplayLanguage() + "\"");
 					mTTS.setLanguage(locale);
 				}
+				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), fileInfo, mBookCover,
+						(file, bitmap) -> {
+							mBookCover = bitmap;
+							runInTTSControlService(tts1 -> tts1.notifyStartMediaSession(bookInfo, bitmap));
+						}
+				);
 			}
 		}
 

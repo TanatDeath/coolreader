@@ -22,7 +22,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 51;
+	public static final int DB_VERSION = 52;
 	@Override
 	protected boolean upgradeSchema() {
 		// When the database is just created, its version is 0.
@@ -132,7 +132,8 @@ public class MainDB extends BaseDB {
 					"crc32 INTEGER DEFAULT NULL, " +
 					"domVersion INTEGER DEFAULT 0, " +
 			        "rendFlags INTEGER DEFAULT 0, " +
-					"description TEXT DEFAULT NULL " + // for compatibility with CR
+					"description TEXT DEFAULT NULL, " + // for compatibility with CR
+					"name_crc32 TEXT DEFAULT NULL" +
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"book_folder_index ON book (folder_fk) ");
@@ -172,7 +173,11 @@ public class MainDB extends BaseDB {
 					"title_text VARCHAR," +
 					"pos_text VARCHAR," +
 					"comment_text VARCHAR, " +
-					"time_elapsed INTEGER DEFAULT 0" +
+					"time_elapsed INTEGER DEFAULT 0, " +
+					"is_custom_color INTEGER DEFAULT 0, " +
+				    "custom_color TEXT DEFAULT NULL, " +
+					"short_context TEXT DEFAULT NULL, " +
+					"full_context TEXT DEFAULT NULL " +
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 			"bookmark_book_index ON bookmark (book_fk) ");
@@ -253,7 +258,11 @@ public class MainDB extends BaseDB {
 						"last_access_time INTEGER, " +
 						"language VARCHAR DEFAULT NULL, " +
 						"seen_count INTEGER, " +
-						"is_citation INTEGER DEFAULT 0 " +
+						"is_citation INTEGER DEFAULT 0, " +
+						"is_custom_color INTEGER DEFAULT 0, " +
+						"custom_color TEXT DEFAULT NULL, " +
+						"short_context TEXT DEFAULT NULL, " +
+						"full_context TEXT DEFAULT NULL " +
 						")");
 				execSQL("CREATE INDEX IF NOT EXISTS " +
 						"user_dic_index ON user_dic (dic_word) ");
@@ -519,6 +528,32 @@ public class MainDB extends BaseDB {
 						"remote_folder VARCHAR DEFAULT NULL, " +
 						"last_usage INTEGER DEFAULT 0" +
 						")");
+			}
+			if (currentVersion < 52) {
+				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN name_crc32 TEXT DEFAULT NULL");
+				try (Cursor rs = mDB.rawQuery(
+						"select id, filename from book ", null)) {
+					if (rs.moveToFirst()) {
+						// read DB
+						do {
+							execSQLIgnoreErrors("update book set name_crc32 = " +
+								quoteSqlString(FileInfo.getFNameCRC(rs.getString(1))) + " where id = " + rs.getLong(0));
+						} while (rs.moveToNext());
+					}
+					if (rs != null) rs.close();
+				} catch (Exception e) {
+					Log.e("cr3", "exception while updating books' filename crc", e);
+				}
+				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN is_custom_color INTEGER DEFAULT 0");
+				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN custom_color TEXT DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN short_context TEXT DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN full_context TEXT DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN is_custom_color INTEGER DEFAULT 0");
+				execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN custom_color TEXT DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN short_context TEXT DEFAULT NULL");
+				execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN full_context TEXT DEFAULT NULL");
+				execSQL("CREATE INDEX IF NOT EXISTS " +
+						"user_dic_index2 ON user_dic (dic_from_book) ");
 			}
 
 			//==============================================================
@@ -1173,8 +1208,10 @@ public class MainDB extends BaseDB {
 	private static final String READ_BOOKMARK_SQL = 
 		"SELECT " +
 		"id, type, percent, shortcut, time_stamp, " + 
-		"start_pos, end_pos, title_text, pos_text, comment_text, time_elapsed, link_pos " +
+		"start_pos, end_pos, title_text, pos_text, comment_text, time_elapsed, link_pos, " +
+		"is_custom_color, custom_color, short_context, full_context " +
 		"FROM bookmark b ";
+
 	private void readBookmarkFromCursor(Bookmark v, Cursor rs)
 	{
 		int i=0;
@@ -1190,6 +1227,10 @@ public class MainDB extends BaseDB {
 		v.setCommentText(rs.getString(i++));
 		v.setTimeElapsed(rs.getLong(i++));
 		v.setLinkPos(rs.getString(i++));
+		v.setIsCustomColor((int)rs.getLong(i++));
+		v.setCustomColor(rs.getString(i++));
+		v.setShortContext(rs.getString(i++));
+		v.setFullContext(rs.getString(i++));
 	}
 
 	public boolean findBy(Bookmark v, String condition) {
@@ -3169,17 +3210,18 @@ public class MainDB extends BaseDB {
 			add("publisbn", newValue.publisbn, oldValue.publisbn);
 			add("publseries_fk", getSeriesId(newValue.publseries), getSeriesId(oldValue.publseries));
 			add("publseries_number", (long) newValue.publseriesNumber, (long) oldValue.publseriesNumber);
-			add("file_create_time", (long) newValue.getFileCreateTime(), (long) oldValue.getFileCreateTime());
-			add("sym_count", (long) newValue.symCount, (long) oldValue.symCount);
-			add("word_count", (long) newValue.wordCount, (long) oldValue.wordCount);
-			add("book_date_n", (long) newValue.bookDateN, (long) oldValue.bookDateN);
-			add("doc_date_n", (long) newValue.docDateN, (long) oldValue.docDateN);
-			add("publ_year_n", (long) newValue.publYearN, (long) oldValue.publYearN);
+			add("file_create_time", newValue.getFileCreateTime(), oldValue.getFileCreateTime());
+			add("sym_count", newValue.symCount, oldValue.symCount);
+			add("word_count", newValue.wordCount, oldValue.wordCount);
+			add("book_date_n", newValue.bookDateN, oldValue.bookDateN);
+			add("doc_date_n", newValue.docDateN, oldValue.docDateN);
+			add("publ_year_n", newValue.publYearN, oldValue.publYearN);
 			add("opds_link", newValue.opdsLink, oldValue.opdsLink);
 			add("description", newValue.description, oldValue.description);
 			add("crc32", newValue.crc32, oldValue.crc32);
 			add("domVersion", newValue.domVersion, oldValue.domVersion);
 			add("rendFlags", newValue.blockRenderingFlags, oldValue.blockRenderingFlags);
+			add("name_crc32", newValue.name_crc32, oldValue.name_crc32);
 			if (fields.size() == 0)
 				vlog.v("QueryHelper: no fields to update");
 		}
@@ -3198,6 +3240,10 @@ public class MainDB extends BaseDB {
 			add("time_stamp", newValue.getTimeStamp(), oldValue.getTimeStamp());
 			add("time_elapsed", newValue.getTimeElapsed(), oldValue.getTimeElapsed());
 			add("link_pos", newValue.getLinkPos(), oldValue.getLinkPos());
+			add("is_custom_color", newValue.getIsCustomColor(), oldValue.getIsCustomColor());
+			add("custom_color", newValue.getCustomColor(), oldValue.getCustomColor());
+			add("short_context", newValue.getShortContext(), oldValue.getShortContext());
+			add("full_context", newValue.getFullContext(), oldValue.getFullContext());
 		}
 	}
 
@@ -3216,7 +3262,7 @@ public class MainDB extends BaseDB {
 		"sp.name as publseries_name, " +
 		"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n, opds_link,  " +
 		"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list, " +
-		"crc32, domVersion, rendFlags, description "
+		"crc32, domVersion, rendFlags, description, name_crc32 "
 		;
 
 	private static final String READ_FILEINFO_SQL =
@@ -3281,6 +3327,7 @@ public class MainDB extends BaseDB {
 		fileInfo.domVersion = rs.getInt(i++);
 		fileInfo.blockRenderingFlags = rs.getInt(i++);
 		fileInfo.description = rs.getString(i++);
+		fileInfo.name_crc32 = rs.getString(i++);
 		fileInfo.isArchive = fileInfo.arcname != null;
 	}
 

@@ -180,6 +180,16 @@ public class Dictionaries {
 			return isInstalled;
 		}
 
+		public boolean isOnline() {
+			if (id.equals("YandexTranslateOnline") ||
+				id.equals("LingvoOnline") ||
+				id.equals("LingvoOnline Extended") ||
+				id.equals("Wikipedia 1 (online)") ||
+				id.equals("Wikipedia 2 (online)")
+			) return true;
+			return false;
+		}
+
 		public void setInstalled(boolean installed) {
 			isInstalled = installed;
 		}
@@ -487,8 +497,10 @@ public class Dictionaries {
 						BackgroundThread.instance().postGUI(() -> {
 								if (dcb == null)
 									crf2.showToast(e.getMessage());
-								else
+								else {
+									if (dcb.showDicToast()) crf2.showToast(e.getMessage());
 									dcb.fail(e, e.getMessage());
+								}
 							}, 100));
 			}
 		});
@@ -525,8 +537,11 @@ public class Dictionaries {
 					} catch (Exception e) {
 						if (dcb == null)
 							crf2.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
-						else
+						else {
+							if (dcb.showDicToast())
+								crf2.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
 							dcb.fail(e, e.getMessage());
+						}
 					}
 					//BackgroundThread.instance().postBackground(() ->
 					//		BackgroundThread.instance().postGUI(() -> crf2.showToast(sYandexIAM), 100));
@@ -620,18 +635,30 @@ public class Dictionaries {
 									saveToDicSearchHistory(s, sText, curDict);
 								} else {
 									dcb.done(sText);
+									if (dcb.showDicToast()) {
+										cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang);
+									}
+									if (dcb.saveToHist()) {
+										saveToDicSearchHistory(s, sText, curDict);
+									}
 								}
 							} else {
 								if (dcb == null)
 									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
-								else
+								else {
 									dcb.fail(null, sBody);
+									if (dcb.showDicToast())
+										cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+								}
 							}
 						} catch (Exception e) {
 							if (dcb == null)
 								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
-							else
+							else {
 								dcb.fail(e, e.getMessage());
+								if (dcb.showDicToast())
+									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+							}
 						}
 					} else {
 						TreeMap<String, String> langs = new TreeMap<>();
@@ -898,8 +925,13 @@ public class Dictionaries {
 							if (dcb == null)
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 									curDict, link, link2, prevAction, useFirstLink, addr);
-							else
+							else {
 								dcb.done(articleText);
+								if (dcb.showDicToast()) {
+									crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+											curDict, link, link2, prevAction, useFirstLink, addr);
+								}
+							}
 						}, 100));
 					} else {
 						// showing with no pic
@@ -907,8 +939,13 @@ public class Dictionaries {
 							if (dcb == null)
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 									curDict, link, link2, prevAction, useFirstLink, "");
-							else
+							else {
 								dcb.done(articleText);
+								if (dcb.showDicToast()) {
+									crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+											curDict, link, link2, prevAction, useFirstLink, "");
+								}
+							}
 						}, 100));
 					};
 				}
@@ -926,8 +963,12 @@ public class Dictionaries {
 						if (dcb == null)
 							crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 								curDict, link, link2, prevAction, useFirstLink, "");
-						else
+						else {
 							dcb.done(articleText);
+							if (dcb.showDicToast())
+								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
+										curDict, link, link2, prevAction, useFirstLink, "");
+						}
 					}, 100));
 				else
 					// nothing to show - article did not load
@@ -1077,7 +1118,15 @@ public class Dictionaries {
 										if (dcb == null) {
 											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
 											saveToDicSearchHistory(s, sTrans, curDict);
-										} else dcb.done(sTrans);
+										} else {
+											dcb.done(sTrans);
+											if (dcb.showDicToast()) {
+												cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+											}
+											if (dcb.saveToHist()) {
+												saveToDicSearchHistory(s, sTrans, curDict);
+											}
+ 										}
 									}
 									else lingvoExtended(s, ilangfF, ilangF, sTrans, false, sDic, curDict, view, dcb);
 								}
@@ -1086,7 +1135,9 @@ public class Dictionaries {
 							}
 						}
 					} catch (Exception e) {
-						if (dcb == null) {
+						boolean bShowToast = dcb == null;
+						if (!bShowToast) bShowToast = dcb.showDicToast();
+						if (bShowToast) {
 							cr.showDicToast(s, sBody, DicToastView.IS_LINGVO, "");
 							if ((sBody.contains("for direction")) && (sBody.contains("not found")))
 								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
@@ -1115,7 +1166,11 @@ public class Dictionaries {
 				} else {
 					if (dcb == null)
 						cr.showToast(e.getMessage());
-					else dcb.fail(e, e.getMessage());
+					else {
+						dcb.fail(e, e.getMessage());
+						if (dcb.showDicToast())
+							cr.showToast(e.getMessage());
+					}
 					unauthCnt = 0;
 				}
 			}
@@ -1161,6 +1216,12 @@ public class Dictionaries {
 												saveToDicSearchHistory(s, sTrans + sAdd, curDict);
 											} else {
 												dcb.done(sTrans + sAdd);
+												if (dcb.showDicToast()) {
+													cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+												}
+												if (dcb.saveToHist()) {
+													saveToDicSearchHistory(s, sTrans + sAdd, curDict);
+												}
 											}
 											return;
 										}
@@ -1173,6 +1234,12 @@ public class Dictionaries {
 							saveToDicSearchHistory(s, sTrans + sAdd, curDict);
 						} else  {
 							dcb.done(sTrans + sAdd);
+							if (dcb.showDicToast()) {
+								cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic);
+							}
+							if (dcb.saveToHist()) {
+								saveToDicSearchHistory(s, sTrans + sAdd, curDict);
+							}
 						}
 					} catch (Exception e) {
 						if (dcb == null) {
@@ -1180,6 +1247,12 @@ public class Dictionaries {
 							saveToDicSearchHistory(s, sTrans, curDict);
 						} else {
 							dcb.done(sTrans);
+							if (dcb.showDicToast()) {
+								cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+							}
+							if (dcb.saveToHist()) {
+								saveToDicSearchHistory(s, sTrans, curDict);
+							}
 						}
 					}
 				}, 100));
@@ -1188,8 +1261,11 @@ public class Dictionaries {
 			public void onFailure(Call call, IOException e) {
 				if (dcb == null)
 					cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
-				else
+				else {
 					dcb.done(sTrans);
+					if (dcb.showDicToast())
+						cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+				}
 			}
 		});
 	}
@@ -1240,6 +1316,17 @@ public class Dictionaries {
 		}
 	}
 
+	public DictInfo getCurDict() {
+		DictInfo curDict = currentDictionary;
+		if (iDic2IsActive > 0 && currentDictionary2 != null)
+			curDict = currentDictionary2;
+		if (iDic2IsActive > 1)
+			iDic2IsActive = 0;
+		if (currentDictionaryTmp != null)
+			curDict = currentDictionaryTmp;
+		return curDict;
+	}
+
 	@SuppressLint("NewApi")
 	public void findInDictionary(String s, View view, CoolReader.DictionaryCallback dcb) throws DictionaryException {
 		log.d("lookup in dictionary: " + s);
@@ -1256,13 +1343,7 @@ public class Dictionaries {
 		saveCurrentDictionaryTmp = currentDictionaryTmp;
 		saveIDic2IsActive = iDic2IsActive;
 		//
-		DictInfo curDict = currentDictionary;
-		if (iDic2IsActive > 0 && currentDictionary2 != null)
-			curDict = currentDictionary2;
-		if (iDic2IsActive > 1)
-			iDic2IsActive = 0;
-		if (currentDictionaryTmp != null)
-			curDict = currentDictionaryTmp;
+		DictInfo curDict = getCurDict();
 		currentDictionaryTmp = null;
 		log.i("Chosen dic = "+getCDinfo(curDict));
 		if (null == curDict) {
@@ -1680,7 +1761,7 @@ public class Dictionaries {
 			}
 			wikiTranslate(cr, curDict, view, s, sLink, sLink2, WIKI_FIND_TITLE, true, dcb);
 			break;
-			case 10:
+		case 10:
 				Intent intent7 = new Intent();
 				intent7.setType("text/plain");
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)  {

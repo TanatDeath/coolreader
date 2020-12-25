@@ -502,6 +502,7 @@ public class BookInfoEditDialog extends BaseDialog {
         edPublyear.setText(file.getPublyear());
         edPublisbn.setText(file.publisbn);
         edPublseriesName.setText(file.publseries);
+		edPublseriesNumber.setText("");
 		if (file.publseries != null && file.publseries.trim().length() > 0 && file.publseriesNumber > 0)
 			edPublseriesNumber.setText(String.valueOf(file.publseriesNumber));
 		LinearLayout llBookAuthorsList = (LinearLayout)mainView.findViewById(R.id.book_authors_list);

@@ -23,6 +23,7 @@ import android.widget.PopupWindow.OnDismissListener;
 public class FindNextDlg {
 	PopupWindow mWindow;
 	View mAnchor;
+	int mAnchorHeight = 0;
 	//CoolReader mCoolReader;
 	ReaderView mReaderView;
 	View mPanel;
@@ -45,6 +46,7 @@ public class FindNextDlg {
 		//mCoolReader = coolReader;
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
+		mAnchorHeight = mAnchor.getHeight();
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.search_popup, null));
 		panel.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -70,7 +72,19 @@ public class FindNextDlg {
 		mPanel.findViewById(R.id.search_btn_minus_1).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1));
 		mPanel.findViewById(R.id.search_btn_minus_10).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 10));
 		mPanel.findViewById(R.id.search_btn_plus_ch).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1));
+		mPanel.findViewById(R.id.search_btn_plus_ch).setOnLongClickListener(v ->
+				{
+					mReaderView.goToPage(mReaderView.getDoc().getPageCount());
+					return true;
+				}
+		);
 		mPanel.findViewById(R.id.search_btn_minus_ch).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1));
+		mPanel.findViewById(R.id.search_btn_minus_ch).setOnLongClickListener(v ->
+				{
+					mReaderView.goToPage(1);
+					return true;
+				}
+		);
 		mPanel.findViewById(R.id.search_btn_plus_bmk).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_NEXT_BOOKMARK, 1));
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1));
 
@@ -85,15 +99,25 @@ public class FindNextDlg {
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		c.setAlpha(130);
 		mPanel.findViewById(R.id.search_btn_prev).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_prev).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_plus_1).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_1).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_plus_10).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_10).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_plus_ch).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_ch).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_plus_bmk).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_bmk).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_next).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_next).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_minus_1).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_1).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_minus_10).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_10).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_minus_ch).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_ch).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_bmk).setPadding(6, 15, 6, 15);
 
 		if (skim) {
 			Utils.hideView(mPanel.findViewById(R.id.search_btn_prev));
@@ -159,7 +183,9 @@ public class FindNextDlg {
 		//mWindow.setHeight(mPanel.getHeight());
 		mWindow.setWidth(mReaderView.getSurface().getWidth());
 		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL,
-				mReaderView.locationFindNext[0], mReaderView.locationFindNext[1] + mReaderView.heightFindNext - mPanel.getHeight());
+				mReaderView.locationFindNext[0],
+				mAnchorHeight - mPanel.getHeight());
+				//mReaderView.locationFindNext[1] + mReaderView.heightFindNext - mPanel.getHeight());
 //		if ( mWindow.isShowing() )
 //			mWindow.update(mAnchor, 50, 50);
 		//dlg.mWindow.showAsDropDown(dlg.mAnchor);

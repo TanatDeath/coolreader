@@ -10,7 +10,6 @@ import java.util.List;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.Properties;
@@ -22,7 +21,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -30,7 +28,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -44,6 +41,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 	private Button btnThisDevice;
 	private Button btnDateSort;
 	private Button btnPercentSort;
+	private Button btnDeleteAll;
 	private boolean bHideThisDevice = false;
 	private boolean bDateSort = true;
 	private File[] mMatchingFiles;
@@ -227,10 +225,13 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		btnThisDevice.setTextColor(colorIcon);
 		btnDateSort.setTextColor(colorIcon);
 		btnPercentSort.setTextColor(colorIcon);
+		mCoolReader.tintViewIcons(btnDeleteAll,true);
+		btnDeleteAll.setBackgroundColor(colorGrayCT2);
+		btnDeleteAll.setTextColor(colorIcon);
 	}
 
 	public void sortAndFilterList() {
-		mReadingPosList = new ArrayList<CloudFileInfo>();
+		mReadingPosList = new ArrayList<>();
 		if (mYMatchingFiles != null) {
 			for (CloudFileInfo cfi: mYMatchingFiles.fileList) {
 				if ((!bHideThisDevice) || (!cfi.name.contains(mCoolReader.getAndroid_id())))
@@ -258,59 +259,51 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			}
 		}
 		if (!bDateSort) {
-			Comparator<CloudFileInfo> compareByPercent = new Comparator<CloudFileInfo>() {
-				@Override
-				public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-					double d1 = 0.0;
-					double d2 = 0.0;
-					String[] arrS = o1.name.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
-					if (arrS.length >= 6) {
-						String s = arrS[5].replace(".json", "");
+			Comparator<CloudFileInfo> compareByPercent = (o1, o2) -> {
+				double d1 = 0.0;
+				double d2 = 0.0;
+				String[] arrS = o1.name.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+				if (arrS.length >= 6) {
+					String s = arrS[5].replace(".json", "");
+					try {
+						d1 = Double.valueOf(s);
+					} catch (Exception e) {
+
+					}
+				} else {
+					arrS = o1.comment.split("%");
+					if (arrS.length>0) {
 						try {
-							d1 = Double.valueOf(s);
+							d1 = Double.valueOf(arrS[0]);
 						} catch (Exception e) {
 
 						}
-					} else {
-						arrS = o1.comment.split("%");
-						if (arrS.length>0) {
-							try {
-								d1 = Double.valueOf(arrS[0]);
-							} catch (Exception e) {
-
-							}
-						}
 					}
-					arrS = o2.name.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
-					if (arrS.length >= 6) {
-						String s = arrS[5].replace(".json", "");
-						try {
-							d2 = Double.valueOf(s);
-						} catch (Exception e) {
-
-						}
-					} else {
-						arrS = o2.comment.split("%");
-						if (arrS.length>0) {
-							try {
-								d2 = Double.valueOf(arrS[0]);
-							} catch (Exception e) {
-
-							}
-						}
-					}
-					if (d1 != d2) return d1 < d2 ? 1 : -1;
-					return -(o1.created.compareTo(o2.created));
 				}
+				arrS = o2.name.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+				if (arrS.length >= 6) {
+					String s = arrS[5].replace(".json", "");
+					try {
+						d2 = Double.valueOf(s);
+					} catch (Exception e) {
+
+					}
+				} else {
+					arrS = o2.comment.split("%");
+					if (arrS.length>0) {
+						try {
+							d2 = Double.valueOf(arrS[0]);
+						} catch (Exception e) {
+
+						}
+					}
+				}
+				if (d1 != d2) return d1 < d2 ? 1 : -1;
+				return -(o1.created.compareTo(o2.created));
 			};
 			Collections.sort(mReadingPosList, compareByPercent);
 		} else {
-			Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
-				@Override
-				public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-					return -(o1.created.compareTo(o2.created));
-				}
-			};
+			Comparator<CloudFileInfo> compareByDate = (o1, o2) -> -(o1.created.compareTo(o2.created));
 			Collections.sort(mReadingPosList, compareByDate);
 		}
 		ConfFileAdapter cfa = new ConfFileAdapter();
@@ -321,8 +314,10 @@ public class ChooseReadingPosDlg extends BaseDialog {
 	public void setButtonsState() {
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable imgC = getContext().getResources().getDrawable(R.drawable.icons8_check_no_frame);
+		Drawable imgC1 = imgC.getConstantState().newDrawable().mutate();
 		if (btnThisDevice!=null) {
-			btnThisDevice.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+			btnThisDevice.setCompoundDrawablesWithIntrinsicBounds(imgC1, null, null, null);
 			btnThisDevice.setOnClickListener(v -> {
 				bHideThisDevice = !bHideThisDevice;
 				Properties props = new Properties(mCoolReader.settings());
@@ -372,7 +367,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		mReadingPosList = new ArrayList<CloudFileInfo>();
+		mReadingPosList = new ArrayList<>();
 		for (File f: mMatchingFiles) {
 			if (f.getName().endsWith(".json")) {
 				String sComment = "";
@@ -390,16 +385,31 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			}
 		}
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
-		btnThisDevice = ((Button)frame.findViewById(R.id.btn_this_device));
-		btnDateSort = ((Button)frame.findViewById(R.id.btn_date_sort));
-		btnPercentSort = ((Button)frame.findViewById(R.id.btn_percent_sort));
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		initAddButtons(frame);
+		ViewGroup body = frame.findViewById(R.id.conf_list);
 		mList = new ReadingPosListView(activity, false);
 		body.addView(mList);
 		setView(frame);
 		setButtonsState();
 		sortAndFilterList();
 		setFlingHandlers(mList, null, null);
+	}
+
+	private void initAddButtons(View frame) {
+		btnThisDevice = (frame.findViewById(R.id.btn_this_device));
+		btnDateSort = (frame.findViewById(R.id.btn_date_sort));
+		btnPercentSort = (frame.findViewById(R.id.btn_percent_sort));
+		btnDeleteAll = (frame.findViewById(R.id.btn_delete_all_pos));
+		btnDeleteAll.setOnClickListener(v -> {
+			mCoolReader.askConfirmation(R.string.are_you_sure, () -> {
+				int iSyncVariant2 = mCoolReader.settings().getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
+				CloudSync.loadFromJsonInfoFileList(mCoolReader,
+						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.DELETE_FILES, false);
+				dismiss();
+			});
+		});
+		int iSyncVariant2 = mCoolReader.settings().getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
+		if (iSyncVariant2 != 2) Utils.hideView(btnDeleteAll);
 	}
 
 	public ChooseReadingPosDlg(CoolReader activity, YNDListFiles matchingFiles)
@@ -412,10 +422,8 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		mCoolReader = activity;
 		mReadingPosList = mYMatchingFiles.fileList;
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
-		btnThisDevice = ((Button)frame.findViewById(R.id.btn_this_device));
-		btnDateSort = ((Button)frame.findViewById(R.id.btn_date_sort));
-		btnPercentSort = ((Button)frame.findViewById(R.id.btn_percent_sort));
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		initAddButtons(frame);
+		ViewGroup body = frame.findViewById(R.id.conf_list);
 		mList = new ReadingPosListView(activity, false);
 		body.addView(mList);
 		setView(frame);

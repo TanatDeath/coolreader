@@ -332,6 +332,8 @@
     <string name="dlg_bookmark_type_comment">Comment</string>
     <string name="dlg_bookmark_internal_link">Internal link</string>
     <string name="dlg_bookmark_citation">Citation</string>
+    <string name="citation_created">Citation has been created</string>
+    <string name="user_dic_entry_created">User dic entry has been created</string>
     <string name="dlg_bookmark_user_dic">User dictionary</string>
     <string name="toast_shortcut_bookmark_is_set">Bookmark $1 is set</string>
     <string name="toast_position_bookmark_is_set">Added bookmark for page</string>
@@ -823,7 +825,7 @@
     <string name="open_book_from_y_short">Yandex</string>
     <string name="set_comment_from_cb_capt">Save with comment from clipboard</string>
     <string name="set_comment_from_cb">Set comment ...</string>
-    <string name="clipb_contents">Clipboard contents:</string>
+    <string name="clipb_contents">Clipboard contents (click to paste):</string>
     <string name="fonts_menu">Fonts menu</string>
     <string name="copied_to_cb">Copied to clipboard</string>
     <string name="options_app_dict_word_correction">Word correction before dictionary</string>
@@ -834,6 +836,7 @@
     <string name="options_app_dict_longtap_change">Toggle dictionary button action - short/long tap</string>
     <string name="options_app_dict_longtap_change_add_info">There are two different actions on a \'dictionary\' button on \'selection toolbar\' (when you select text while reading) - fired by short and long taps. This option allows to swap them.</string>
     <string name="win_title_user_dic">User dic / cites / search history</string>
+    <string name="win_title_user_dic_short">User dic (cites, ...)</string>
     <string name="win_title_citations">Citations</string>
     <string name="dlg_userdic_page">Page</string>
     <string name="dlg_userdic_book">Book</string>
@@ -1195,6 +1198,7 @@
     <string name="only_in_premium">This feature is availble in Premium version only</string>
     <string name="str_yes">yes</string>
     <string name="str_no">no</string>
+    <string name="str_yes_and_del_pos">yes, and delete saved (cloud) positions</string>
     <string name="opened_doc_props">Document properties</string>
     <string name="opened_doc_props_styles">Internal styles (colors, margins, background, etc)</string>
     <string name="opened_doc_props_styles_ext">(You may need to disable it when night mode is on)</string>
@@ -1247,6 +1251,7 @@
     <string name="pos_this_device">This device</string>
     <string name="pos_date_sort">By date</string>
     <string name="pos_percent_sort">By value</string>
+    <string name="delete_all_pos">Delete all</string>
     <string name="options_style_multilang">Support for multilingual documents</string>
     <string name="options_style_enable_hyphenation">Enable hyphenation</string>
     <string name="vert_margin_control">Top and bottom margins:</string>
@@ -1278,8 +1283,8 @@
     <string name="options_app_wiki2_add_info">Specify Wikipedia 2 address</string>
     <string name="options_app_hide_state_dialogs">Do not ask book change state questions</string>
     <string name="options_app_hide_state_dialogs_add_info">Do not ask \'set reading state\', \'mark as read\', etc.</string>
-    <string name="options_app_hide_css_warning">Hide css styles warning dialog</string>
-    <string name="options_app_hide_css_warning_add_info">Hide css styles warning dialog (when open a new book, toggle night mode)</string>
+    <string name="options_app_hide_css_warning">Hide css styles warning, fullscreen dialogs</string>
+    <string name="options_app_hide_css_warning_add_info">Hide css styles warning dialog (when open a new book, toggle night mode), fullscreen dialog</string>
     <string name="options_app_safe_mode">Safe mode warning</string>
     <string name="options_app_disable_safe_mode">Disable safe mode</string>
     <string name="options_app_disable_safe_mode_add_info">Do not show \'Do you want to open book\' question when open new books</string>
@@ -1461,8 +1466,8 @@
     <string name="need_purchase">First, you should purchase this book, then download</string>
     <string name="already_purchased">Already purchased, proceed to download</string>
     <string name="show_system_brightness_dialog">Show system brightness dialog (Onyx)</string>
-    <string name="sel_start">&lt; start of selection</string>
-    <string name="sel_end">end of selection &gt;</string>
+    <string name="sel_start">&lt; start</string>
+    <string name="sel_end">end &gt;</string>
     <string name="bmk_send_to">send to...</string>
     <string name="bmk_custom_color">Set color</string>
     <string name="skim_document">Skim over book</string>
@@ -1472,4 +1477,11 @@
     <string name="online_combo_add_info">Online combo is the complex action - it allows to translate text (via online dictionary), then save the result to user dic</string>
     <string name="online_super_combo">Online super combo</string>
     <string name="online_super_combo_add_info">Online super combo is the complex action - it allows to translate text (via online dictionary), save the result to user dic, then send it to external app</string>
+    <string name="options_bookmark_action_send_to_mod">\'Send to\' action modifier</string>
+    <string name="options_bookmark_action_send_to_mod_add_info">You can choose what to send - selected text, full sentence, selected text inside sentence</string>
+    <string name="options_bookmark_action_send_to_mod1">Selected text</string>
+    <string name="options_bookmark_action_send_to_mod2">Context (full sentence) of selected text</string>
+    <string name="options_bookmark_action_send_to_mod3">Context with &lt;b&gt;selected text&lt;\/b&gt;</string>
+    <string name="options_bookmark_action_send_to_mod4">Context with &lt;i&gt;selected text&lt;\/i&gt;</string>
+    <string name="options_bookmark_action_send_to_mod5">Context with &lt;u&gt;selected text&lt;\/u&gt;</string>
 </resources>

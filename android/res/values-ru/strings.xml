@@ -323,6 +323,8 @@
     <string name="dlg_bookmark_type_comment">Комментарий</string>
     <string name="dlg_bookmark_internal_link">Внутренняя ссылка</string>
     <string name="dlg_bookmark_citation">Цитата</string>
+    <string name="citation_created">Цитата создана</string>
+    <string name="user_dic_entry_created">Элемент пользовательского словаря создан</string>
     <string name="dlg_bookmark_user_dic">Пользовательский словарь</string>
     <string name="toast_shortcut_bookmark_is_set">Установлена закладка $1</string>
     <string name="toast_position_bookmark_is_set">Добавлена закладка для страницы</string>
@@ -850,7 +852,7 @@
     <string name="open_book_from_gd_short">Google Drive</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
-    <string name="clipb_contents">Буфер обмена:</string>
+    <string name="clipb_contents">Буфер обмена (нажмите чтобы вставить):</string>
     <string name="fonts_menu">Меню шрифтов</string>
     <string name="copied_to_cb">Скопировано в буфер обмена</string>
     <string name="options_app_dict_word_correction">Обработка слова перед словарем</string>
@@ -861,6 +863,7 @@
     <string name="options_app_dict_longtap_change">Кнопка словаря - поменять короткий/длинный тап</string>
     <string name="options_app_dict_longtap_change_add_info">Есть два варианта нажатия на кнопку \'словарь\' на \'панели выделения\' (когда вы выделяете текст) - длинный и короткий тапы. Эта опция позволяет поменять их местами.</string>
     <string name="win_title_user_dic">Польз. словарь / цитаты / история поиска</string>
+    <string name="win_title_user_dic_short">Польз. словарь (цитаты, ...)</string>
     <string name="win_title_citations">Цитаты</string>
     <string name="dlg_userdic_page">Страница</string>
     <string name="dlg_userdic_book">Книга</string>
@@ -1174,6 +1177,7 @@
     <string name="only_in_premium">Эта функция доступна только в версии Premium</string>
     <string name="str_yes">да</string>
     <string name="str_no">нет</string>
+    <string name="str_yes_and_del_pos">да, и удалить сохраненные позиции (в облаке)</string>
     <string name="opened_doc_props">Свойства документа</string>
     <string name="opened_doc_props_styles">Встроенные стили (цвета, отступы, фон, ...)</string>
     <string name="opened_doc_props_styles_ext">(Возможно потребуется отключить эту опцию при включенном ночном режиме)</string>
@@ -1224,6 +1228,7 @@
     <string name="pos_this_device">Это устройство</string>
     <string name="pos_date_sort">По дате</string>
     <string name="pos_percent_sort">По значению</string>
+    <string name="delete_all_pos">Удалить все</string>
     <string name="options_style_multilang">Поддержка мультиязычных документов</string>
     <string name="options_style_enable_hyphenation">Разрешить переносы</string>
     <string name="vert_margin_control">Отступы сверху и снизу:</string>
@@ -1255,8 +1260,8 @@
     <string name="options_app_wiki2_add_info">Укажите адрес Википедии 2</string>
     <string name="options_app_hide_state_dialogs">Не задавать доп. вопросы о смене статусов книги</string>
     <string name="options_app_hide_state_dialogs_add_info">Не спрашивать \'установить пометку читаю\', \'отметить как прочитанную\' etc</string>
-    <string name="options_app_hide_css_warning">Не показывать диалог о css стилях книги</string>
-    <string name="options_app_hide_css_warning_add_info">Не показывать диалог о css стилях книги (при открытии новой книги, переключении ночного режима)</string>
+    <string name="options_app_hide_css_warning">Не показывать диалоги: о css стилях книги, переключения полноэкранного режима</string>
+    <string name="options_app_hide_css_warning_add_info">Не показывать диалоги о css стилях книги (при открытии новой книги, переключении ночного режима), переключения полноэкранного режима</string>
     <string name="options_app_safe_mode">Безопасный режим - предупреждение</string>
     <string name="options_app_disable_safe_mode">Отключить безопасный режим</string>
     <string name="options_app_disable_safe_mode_add_info">Не показывать вопрос \'Вы хотите открыть книгу\' при открытии новых книг</string>
@@ -1434,8 +1439,8 @@
     <string name="need_purchase">Сначала вы должны купить эту книгу, а затем скачать</string>
     <string name="already_purchased">Уже купилено, перейдите к скачиванию</string>
     <string name="show_system_brightness_dialog">Показать системный диалог яркости (Onyx)</string>
-    <string name="sel_start">&lt; начало выделения</string>
-    <string name="sel_end">конец выделения &gt;</string>
+    <string name="sel_start">&lt; начало</string>
+    <string name="sel_end">конец &gt;</string>
     <string name="bmk_send_to">отправить...</string>
     <string name="bmk_custom_color">Установить цвет</string>
     <string name="skim_document">Беглый просмотр книги</string>
@@ -1445,5 +1450,12 @@
     <string name="online_combo_add_info">Онлайн комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в пользовательском словаре</string>
     <string name="online_super_combo">Онлайн супер комбо</string>
     <string name="online_super_combo_add_info">Онлайн супер комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в пользовательском словаре, после чего передается во внешнюю программу</string>
+    <string name="options_bookmark_action_send_to_mod">Уточнение действия \'Отправить в\'</string>
+    <string name="options_bookmark_action_send_to_mod_add_info">Вы можете выбрать, что отправлять - выбранный текст, все предложение, выделенный текст в предложении</string>
+    <string name="options_bookmark_action_send_to_mod1">Выбранный текст</string>
+    <string name="options_bookmark_action_send_to_mod2">Контекст (все предложение) выбранного текста</string>
+    <string name="options_bookmark_action_send_to_mod3">Контекст с &lt;b&gt;выбранным текстом&lt;\/b&gt;</string>
+    <string name="options_bookmark_action_send_to_mod4">Контекст с &lt;i&gt;выбранным текстом&lt;\/i&gt;</string>
+    <string name="options_bookmark_action_send_to_mod5">Контекст с &lt;u&gt;выбранным текстом&lt;\/u&gt;</string>
 </resources>
 

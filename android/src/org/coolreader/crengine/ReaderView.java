@@ -1600,7 +1600,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			int x = (int)event.getX();
 			int y = (int)event.getY();
 			curPageText = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText(0, false);
-			if ((event.getPointerCount() > 1) && (state == STATE_DOWN_1) && (!mDisableTwoPointerGestures)) {
+			if ((event.getPointerCount() > 1) && (state == STATE_DOWN_1) && (!mDisableTwoPointerGestures) &&
+					(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))) {
 				if (event.getPointerCount() == 3) {
 					state = STATE_THREE_POINTERS;
 				} else {
@@ -2237,37 +2238,39 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		bNeedRedrawOnce = true;
 	//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setFullscreen(newBool);
-		BackgroundThread.instance().postGUI(() -> {
-			ArrayList<String> sButtons = new ArrayList<String>();
-			int efMode = mActivity.settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
-			if ((newBool) &&(efMode != 0))
-				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text_off));
-			if ((newBool) &&(efMode != 1))
-				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text1));
-			if ((newBool) &&(efMode != 2))
-				sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text2));
-			sButtons.add(mActivity.getString(R.string.options_page_titlebar_new));
-			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), 5,true,
-					"",
-					sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
-						@Override
-						public void done(Object o, String btnPressed) {
-							if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text_off))) {
-								mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "0", true);
+		boolean bDontAsk = mActivity.settings().getBool(Settings.PROP_APP_HIDE_CSS_WARNING, false);
+		if (!bDontAsk)
+			BackgroundThread.instance().postGUI(() -> {
+				ArrayList<String> sButtons = new ArrayList<String>();
+				int efMode = mActivity.settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
+				if ((newBool) &&(efMode != 0))
+					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text_off));
+				if ((newBool) &&(efMode != 1))
+					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text1));
+				if ((newBool) &&(efMode != 2))
+					sButtons.add(mActivity.getString(R.string.ext_fullscreen_margin_text2));
+				sButtons.add(mActivity.getString(R.string.options_page_titlebar_new));
+				SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), 5,true,
+						"",
+						sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
+							@Override
+							public void done(Object o, String btnPressed) {
+								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text_off))) {
+									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "0", true);
+								}
+								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text1))) {
+									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "1", true);
+								}
+								if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text2))) {
+									mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "2", true);
+								}
+								if (btnPressed.equals(mActivity.getString(R.string.options_page_titlebar_new))) {
+									mActivity.optionsFilter = "";
+									mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TITLEBAR_NEW);
+								}
 							}
-							if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text1))) {
-								mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "1", true);
-							}
-							if (btnPressed.equals(mActivity.getString(R.string.ext_fullscreen_margin_text2))) {
-								mActivity.setSetting(PROP_EXT_FULLSCREEN_MARGIN, "2", true);
-							}
-							if (btnPressed.equals(mActivity.getString(R.string.options_page_titlebar_new))) {
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TITLEBAR_NEW);
-							}
-						}
-					});
-		}, 200);
+						});
+			}, 200);
 	}
 
 	private void initTapZone(final BaseDialog dlg, View view, final int tapZoneId) {
@@ -3358,8 +3361,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			} else {
 				if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 				else
-					CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-							CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, false, false);
+					CloudSync.loadFromJsonInfoFileList(mActivity,
+							CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
 			}
 			break;
 		case DCMD_SAVE_READING_POS:
@@ -3385,7 +3388,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, false, false);
+						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
 			}
 			break;
 		case DCMD_SAVE_BOOKMARKS:
@@ -3409,7 +3412,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 			} else {
 				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, false, false);
+						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, CloudAction.NO_SPECIAL_ACTION, false);
 			}
 			break;
 		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND:
@@ -3482,7 +3485,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 							else
 								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false, false);
+										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, CloudAction.NO_SPECIAL_ACTION, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_READING_POS) {
@@ -3508,7 +3511,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, false, false);
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
@@ -3532,7 +3535,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 						} else {
 							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, false, false);
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
 						}
 						return true;
 					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
@@ -3656,7 +3659,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case DCMD_TOGGLE_PAGE_VIEW_MODE:
 				String oldViewSetting = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
-                boolean newBool = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ).equals("0");
+				boolean newBool = false;
+				if (this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ) != null)
+					newBool = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ).equals("0");
                 String newValue = newBool ? "1" : "0";
                 saveSetting(PROP_PAGE_VIEW_MODE, newValue);
 				break;
@@ -7031,7 +7036,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							if (iSyncVariant3 != 0) {
 								if (mActivity.mCurrentFrame == mActivity.getmReaderFrame())
 									CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, true, true);
+										CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, CloudAction.FINDING_LAST_POS, true);
 							}
 						}
 					}, 5000);

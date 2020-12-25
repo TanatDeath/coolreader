@@ -8,10 +8,10 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
 	android:background="?attr/colorThemeGray2"
-	android:layout_marginTop="3dip"
-	android:layout_marginBottom="3dip"
-	android:layout_marginLeft="3dip"
-	android:layout_marginRight="3dip"
+	android:layout_marginTop="15dip"
+	android:layout_marginBottom="15dip"
+	android:layout_marginLeft="15dip"
+	android:layout_marginRight="15dip"
     android:baselineAligned="true"
     >
 	<org.coolreader.layouts.FlowLayout
@@ -113,6 +113,14 @@
 				android:src="?attr/cr3_button_more_drawable"
 				android:tag="tint"/>
 	</LinearLayout>
+	<LinearLayout
+			android:id="@+id/ll_sel_add"
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:baselineAligned="true"
+			>
+	</LinearLayout>
 	<TableLayout
 		android:id="@+id/rg_type"
 		android:layout_width="match_parent"
@@ -124,7 +132,7 @@
 				android:orientation="horizontal"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_weight="3"
+				android:layout_weight="4"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
 				android:layout_marginBottom="2dp"
@@ -240,7 +248,7 @@
 					android:orientation="horizontal"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_weight="3"
+					android:layout_weight="4"
 					android:baselineAligned="true"
 					android:gravity="center_vertical"
 					android:layout_marginBottom="15dp"

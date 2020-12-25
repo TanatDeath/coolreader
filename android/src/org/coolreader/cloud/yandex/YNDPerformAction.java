@@ -66,6 +66,7 @@ public class YNDPerformAction {
                 if (mCurAction.action == CloudAction.YND_SAVE_STRING_TO_FILE) YndSaveStringToFile(mCurAction);
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES) YndListJsonFiles(mCurAction);
                 if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES_LASTPOS) YndListJsonFiles(mCurAction);
+                if (mCurAction.action == CloudAction.YND_LIST_JSON_FILES_THEN_DEL) YndListJsonFiles(mCurAction);
                 if (mCurAction.action == CloudAction.YND_DOWNLOAD_FILE_TO_STRING) YndDownloadFileToString(mCurAction);
                 if (mCurAction.action == CloudAction.YND_SAVE_TO_FILE_GET_LINK_W_DIR) YndSaveToFileGetLink(mCurAction, "");
                 if (mCurAction.action == CloudAction.YND_SAVE_BOOK) YndSaveBook(mCurAction);
@@ -82,7 +83,7 @@ public class YNDPerformAction {
         final String findStr = ca.param2;
         Log.i("CLOUD","YND: folder = " + folder);
         if (StrUtils.isEmptyStr(folder))
-            if (!YNDConfig.init(mCoolReader)) return;
+            if (!YNDConfig.init(mCoolReader, ca.mErrorQuiet || ca.mQuiet)) return;
         if (StrUtils.isEmptyStr(folder)) folder = "/";
         folder = folder.replace("\\","/");
         HttpUrl.Builder urlBuilder = null;
@@ -155,7 +156,7 @@ public class YNDPerformAction {
     public void YndCheckCrFolder(final CloudAction ca) throws IOException {
         String folder = "/KnownReader";
         Log.i("CLOUD", "YND: folder = " + folder);
-        if (!YNDConfig.init(mCoolReader)) return;
+        if (!YNDConfig.init(mCoolReader, ca.mErrorQuiet || ca.mQuiet)) return;
         HttpUrl.Builder urlBuilder = null;
         urlBuilder = HttpUrl.parse(YNDConfig.YND_DISK_URL).newBuilder();
         urlBuilder.addQueryParameter("path", folder);

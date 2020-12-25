@@ -53,13 +53,18 @@
         android:clickable="false"
         android:background="@null"
         />
-    <CheckBox android:id="@+id/option_value_cb"
+    <ImageView android:id="@+id/option_value_cb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="0dip"
         android:focusable="false"
-        android:clickable="false"
+        android:clickable="true"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
+        android:layout_marginLeft="4dip"
+        android:layout_marginTop="10dip"
+        android:layout_marginBottom="10dip"
+        android:layout_gravity="center"
+        android:focusableInTouchMode="false"
         />
 </LinearLayout>

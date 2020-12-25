@@ -406,6 +406,7 @@
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_drop_up_no_frame_small">@drawable/icons8_drop_up_no_frame_small</item>
         <item name="attr_icons8_toggle_page_view_mode">@drawable/icons8_toggle_page_scroll</item>
         <item name="attr_icons8_volume_up">@drawable/icons8_volume_up</item>
         <item name="attr_icons8_volume_down">@drawable/icons8_volume_down</item>
@@ -461,6 +462,7 @@
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
+        <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -745,6 +747,7 @@
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_drop_up_no_frame_small">@drawable/icons8_drop_up_no_frame_small</item>
         <item name="attr_icons8_toggle_page_view_mode">@drawable/icons8_toggle_page_scroll</item>
         <item name="attr_icons8_volume_up">@drawable/icons8_volume_up</item>
         <item name="attr_icons8_volume_down">@drawable/icons8_volume_down</item>
@@ -800,6 +803,7 @@
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
+        <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1086,6 +1090,7 @@
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_drop_up_no_frame_small">@drawable/icons8_drop_up_no_frame_small</item>
         <item name="attr_icons8_toggle_page_view_mode">@drawable/icons8_toggle_page_scroll</item>
         <item name="attr_icons8_volume_up">@drawable/icons8_volume_up</item>
         <item name="attr_icons8_volume_down">@drawable/icons8_volume_down</item>
@@ -1141,6 +1146,7 @@
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
+        <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1428,6 +1434,7 @@
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_drop_up_no_frame_small">@drawable/icons8_drop_up_no_frame_small</item>
         <item name="attr_icons8_toggle_page_view_mode">@drawable/icons8_toggle_page_scroll</item>
         <item name="attr_icons8_volume_up">@drawable/icons8_volume_up</item>
         <item name="attr_icons8_volume_down">@drawable/icons8_volume_down</item>
@@ -1483,6 +1490,7 @@
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
+        <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1769,6 +1777,7 @@
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_drop_up_no_frame_small">@drawable/icons8_drop_up_no_frame_small</item>
         <item name="attr_icons8_toggle_page_view_mode">@drawable/icons8_toggle_page_scroll</item>
         <item name="attr_icons8_volume_up">@drawable/icons8_volume_up</item>
         <item name="attr_icons8_volume_down">@drawable/icons8_volume_down</item>
@@ -1824,6 +1833,7 @@
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
+        <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -2110,6 +2120,7 @@
         <item name="attr_icons8_scroll_down_small">@drawable/icons8_scroll_down_small</item>
         <item name="attr_icons8_scroll_up_small">@drawable/icons8_scroll_up_small</item>
         <item name="attr_icons8_drop_down_no_frame_small">@drawable/icons8_drop_down_no_frame_small</item>
+        <item name="attr_icons8_drop_up_no_frame_small">@drawable/icons8_drop_up_no_frame_small</item>
         <item name="attr_icons8_toggle_page_view_mode">@drawable/icons8_toggle_page_scroll</item>
         <item name="attr_icons8_volume_up">@drawable/icons8_volume_up</item>
         <item name="attr_icons8_volume_down">@drawable/icons8_volume_down</item>
@@ -2161,6 +2172,7 @@
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
+        <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
