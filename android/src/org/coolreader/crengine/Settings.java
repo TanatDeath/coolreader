@@ -172,6 +172,7 @@ public interface Settings {
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
 	public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
 	public static final String PROP_APP_BOOKMARK_ACTION_SEND_TO = "app.bookmark.action.send.to";
+	public static final String PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD = "app.bookmark.action.send.to.mod";
 	public static final String PROP_APP_SELECTION2_ACTION = "app.selection2.action";
 	public static final String PROP_APP_SELECTION2_ACTION_LONG = "app.selection2.action.long";
 	public static final String PROP_APP_MULTI_SELECTION2_ACTION = "app.multiselection2.action";
@@ -200,6 +201,7 @@ public interface Settings {
 	public static final String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
 	public static final String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
 	public static final String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
+	public static final String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
 
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
@@ -462,6 +464,7 @@ public interface Settings {
         PROP_APP_SELECTION_ACTION_LONG,
 		PROP_APP_MULTI_SELECTION_ACTION,
 		PROP_APP_BOOKMARK_ACTION_SEND_TO,
+		PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD,
 		PROP_APP_SELECTION2_ACTION,
 		PROP_APP_SELECTION2_ACTION_LONG,
 		PROP_APP_MULTI_SELECTION2_ACTION,

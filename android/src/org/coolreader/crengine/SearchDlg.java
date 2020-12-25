@@ -57,7 +57,9 @@ public class SearchDlg extends BaseDialog {
     	else {
 		    activity.getDB().saveSearchHistory(mBookInfo,
 				    mEditView.getText().toString());
-		    mReaderView.findText(mEditView.getText().toString(), bReverse, !bCaseSensitive);
+			BackgroundThread.instance().postGUI(() -> {
+				mReaderView.findText(mEditView.getText().toString(), bReverse, !bCaseSensitive);
+			}, 500);
 	    }
         cancel();
 	}

@@ -179,7 +179,7 @@
 						android:layout_width="0dip"
 						android:layout_height="wrap_content"
 						android:maxLines="3"
-						android:layout_weight="1"
+						android:layout_weight="2"
 						android:clickable="true"
 						android:singleLine="false"
 						android:textColor="?attr/colorIcon"
@@ -189,7 +189,7 @@
 						android:id="@+id/btn_transl"
 						android:layout_width="0dip"
 						android:checked="false"
-						android:layout_weight="2"
+						android:layout_weight="3"
 						android:drawableLeft="?attr/attr_icons8_drop_down_no_frame_small"
 						android:tag="tint"
 						android:textColor="?attr/colorIcon"
@@ -242,15 +242,39 @@
 			</TableRow>
 		</TableLayout>
 
-		<TextView
-				android:id="@+id/lbl_context_text"
-				style="@style/TextAppearance.Medium"
-				android:layout_width="wrap_content"
+		<TableLayout
+				android:id="@+id/tl_context_and_dic"
+				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:maxLines="3"
-				android:singleLine="false"
-				android:textColor="?attr/colorIcon"
-				android:text="@string/dlg_bookmark_edit_context_text" />
+				android:stretchColumns="1"
+				android:orientation="vertical">
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<TextView
+						android:id="@+id/lbl_context_text"
+						style="@style/TextAppearance.Medium"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_weight="2"
+						android:maxLines="3"
+						android:singleLine="false"
+						android:textColor="?attr/colorIcon"
+						android:text="@string/dlg_bookmark_edit_context_text" />
+
+				<Button
+						android:id="@+id/btn_transl2"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="3"
+						android:drawableLeft="?attr/attr_icons8_drop_up_no_frame_small"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+			</TableRow>
+		</TableLayout>
 
 		<EditText
 				android:id="@+id/context_text"
@@ -260,7 +284,7 @@
 				android:inputType="none"
 				android:singleLine="false"
 				android:maxLines="4"
-				android:text="context text" />
+				android:text="" />
 
 		<TextView
 			android:id="@+id/lbl_comment_from_cb"

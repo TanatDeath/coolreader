@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
 public class FileInfo {
@@ -117,6 +118,7 @@ public class FileInfo {
 	public String arcname; // archive file name w/o path
 	public String language; // document language
 	public String description;	// book description
+	public String name_crc32; // crc32 of filename
 	public String lang_from; // translate from
 	public String lang_to; // translate to
 	public String opdsLink;
@@ -366,6 +368,7 @@ public class FileInfo {
 	{
 		if (pathName.startsWith(FileInfo.OPDS_DIR_PREFIX)) {
 			filename = pathName;
+			name_crc32 = getFNameCRC(filename);
 			path = "";
 			pathname = pathName;
 			isDirectory = true;
@@ -378,6 +381,7 @@ public class FileInfo {
 				pathname = parts[0];
 				File f = new File(pathname);
 				filename = f.getName();
+				name_crc32 = getFNameCRC(filename);
 				path = f.getPath();
 				File arc = new File(arcname);
 				if (arc.isFile() && arc.exists()) {
@@ -393,6 +397,7 @@ public class FileInfo {
 							if ( !entry.isDirectory() && pathname.equals(name) ) {
 								File itemf = new File(name);
 								filename = itemf.getName();
+								name_crc32 = getFNameCRC(filename);
 								path = itemf.getPath();
 								format = DocumentFormat.byExtension(name);
 								size = (int)entry.getSize();
@@ -429,6 +434,13 @@ public class FileInfo {
 		if (!StrUtils.isEmptyStr(arcn)) return arcn;
 		return "";
 	}
+
+	public static String getFNameCRC(String fname) {
+		if (fname == null) return "";
+		CRC32 crc = new CRC32();
+		crc.update(fname.getBytes());
+		return String.valueOf(crc.getValue());
+	}
 	
 	private void fromFile( File f )
 	{
@@ -436,6 +448,7 @@ public class FileInfo {
 		if ( !f.isDirectory() ) {
 			DocumentFormat fmt = DocumentFormat.byExtension(f.getName());
 			filename = f.getName();
+			name_crc32 = getFNameCRC(filename);
 			path = f.getParent();
 			pathname = f.getAbsolutePath();
 			format = fmt;
@@ -448,6 +461,7 @@ public class FileInfo {
 			//if (flags == 0) flags = DONT_USE_DOCUMENT_STYLES_FLAG;
 		} else {
 			filename = f.getName();
+			name_crc32 = getFNameCRC(filename);
 			path = f.getParent();
 			pathname = f.getAbsolutePath();
 			isDirectory = true;
@@ -498,6 +512,7 @@ public class FileInfo {
 		lastAccessTime = v.lastAccessTime;
 		language = v.language;
 		description = v.description;
+		name_crc32 = v.name_crc32;
 		lang_from = v.lang_from;
 		lang_to = v.lang_to;
 		username = v.username;
@@ -1587,6 +1602,7 @@ public class FileInfo {
 		if (eq(this.filename, filename))
 			return false;
 		this.filename = filename;
+		this.name_crc32 = getFNameCRC(filename);
 		//if (StrUtils.isEmptyStr(this.title)) this.title = filename; // dont work properly, think later
 		return true;
 	}
@@ -2058,6 +2074,7 @@ public class FileInfo {
 			return false;
 		if (!StrUtils.euqalsIgnoreNulls(language, other.language, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(description, other.description, true)) return false;
+		if (name_crc32 != other.name_crc32) return false;
 		if (!StrUtils.euqalsIgnoreNulls(lang_from, other.lang_from, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(lang_to, other.lang_to, true)) return false;
 		if (lastAccessTime != other.lastAccessTime)
@@ -2157,6 +2174,7 @@ public class FileInfo {
 				return false;
 		} else if (!description.equals(other.description))
 			return false;
+		if (name_crc32 != other.name_crc32) return false;
 		if (path == null) {
 			if (other.path != null)
 				return false;

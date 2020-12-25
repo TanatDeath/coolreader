@@ -12,12 +12,17 @@ import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,6 +38,13 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	private CoolReader mCoolReader;
 	private LayoutInflater mInflater;
 	private BookmarksListView mList;
+	private Button btnThisDevice;
+	private Button btnDateSort;
+	private Button btnPercentSort;
+	private Button btnDeleteAll;
+	private boolean bHideThisDevice = false;
+	private File[] mMatchingFiles;
+	private YNDListFiles mYMatchingFiles;
 
 	public int cloudMode;
 
@@ -164,7 +177,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
-			if ( mBookmarksList==null )
+			if (mBookmarksList == null)
 				return true;
 			CloudFileInfo m = mBookmarksList.get(position);
 			CloudSync.loadFromJsonInfoFile(mCoolReader, CloudSync.CLOUD_SAVE_BOOKMARKS, m.path,
@@ -172,13 +185,107 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			dismiss();
 			return true;
 		}
-		
-		
+	}
+
+	private void paintButtons() {
+		int colorGrayC;
+		int colorIcon;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue, R.attr.colorIcon});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorIcon = a.getColor(2, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
+		if (!bHideThisDevice) {
+			btnThisDevice.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnThisDevice, true);
+		} else {
+			btnThisDevice.setBackgroundColor(colorGrayCT);
+		}
+		btnThisDevice.setTextColor(colorIcon);
+		mCoolReader.tintViewIcons(btnDeleteAll,true);
+		btnDeleteAll.setBackgroundColor(colorGrayCT2);
+		btnDeleteAll.setTextColor(colorIcon);
+	}
+
+	public void setButtonsState() {
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable imgC = getContext().getResources().getDrawable(R.drawable.icons8_check_no_frame);
+		Drawable imgC1 = imgC.getConstantState().newDrawable().mutate();
+		if (btnThisDevice!=null) {
+			btnThisDevice.setCompoundDrawablesWithIntrinsicBounds(imgC1, null, null, null);
+			btnThisDevice.setOnClickListener(v -> {
+				bHideThisDevice = !bHideThisDevice;
+				Properties props = new Properties(mCoolReader.settings());
+				props.setProperty(Settings.PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV, bHideThisDevice?"1":"0");
+				mCoolReader.setSettings(props, -1, true);
+				paintButtons();
+				sortAndFilterList();
+			});
+		}
+		bHideThisDevice = mCoolReader.settings().getBool(Settings.PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV, false);
+		paintButtons();
+	}
+
+	public void sortAndFilterList() {
+		mBookmarksList = new ArrayList<>();
+		if (mYMatchingFiles != null) {
+			for (CloudFileInfo cfi: mYMatchingFiles.fileList) {
+				if ((!bHideThisDevice) || (!cfi.name.contains(mCoolReader.getAndroid_id())))
+					mBookmarksList.add(cfi);
+			}
+		}
+		if (mMatchingFiles != null) {
+			for (File f: mMatchingFiles) {
+				if (f.getName().endsWith(".json")) {
+					String sComment = "";
+					File fInfo = new File(f.getPath().replace(".json",".info"));
+					if (fInfo.exists()) {
+						sComment = Utils.readFileToString(f.getPath().replace(".json",".info"));
+					}
+					if ((!bHideThisDevice) || (!f.getName().contains(mCoolReader.getAndroid_id()))) {
+						CloudFileInfo yfile = new CloudFileInfo();
+						yfile.comment = sComment;
+						yfile.name = f.getName();
+						yfile.path = f.getPath();
+						yfile.created = new Date(f.lastModified());
+						yfile.modified = new Date(f.lastModified());
+						mBookmarksList.add(yfile);
+					}
+				}
+			}
+		}
+		ChooseBookmarksDlg.ConfFileAdapter cfa = new ChooseBookmarksDlg.ConfFileAdapter();
+		mList.setAdapter(cfa);
+		cfa.notifyDataSetChanged();
+	}
+
+	private void initAddButtons(View frame) {
+		btnThisDevice = (frame.findViewById(R.id.btn_this_device));
+		btnDateSort = (frame.findViewById(R.id.btn_date_sort));
+		btnPercentSort = (frame.findViewById(R.id.btn_percent_sort));
+		Utils.hideView(btnDateSort);
+		Utils.hideView(btnPercentSort	);
+		btnDeleteAll = (frame.findViewById(R.id.btn_delete_all_pos));
+		btnDeleteAll.setOnClickListener(v -> {
+			mCoolReader.askConfirmation(R.string.are_you_sure, () -> {
+				int iSyncVariant2 = mCoolReader.settings().getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
+				CloudSync.loadFromJsonInfoFileList(mCoolReader,
+						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant2 == 1, CloudAction.DELETE_FILES, false);
+				dismiss();
+			});
+		});
+		int iSyncVariant2 = mCoolReader.settings().getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
+		if (iSyncVariant2 != 2) Utils.hideView(btnDeleteAll);
 	}
 
 	public ChooseBookmarksDlg(CoolReader activity, File[] matchingFiles)
 	{
 		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		mMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
 		CloudSync.readKnownDevices(activity);
 		//mThis = this; // for inner classes
@@ -201,43 +308,37 @@ public class ChooseBookmarksDlg extends BaseDialog {
 				mBookmarksList.add(yfile);
 			}
 		}
-//		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
-//			@Override
-//			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-//				return -(o1.created.compareTo(o2.created));
-//			}
-//		};
-//		Collections.sort(mBookmarksList, compareByDate);
-		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		initAddButtons(frame);
+		ViewGroup body = frame.findViewById(R.id.conf_list);
 		mList = new BookmarksListView(activity, false);
 		body.addView(mList);
 		setView(frame);
+		setButtonsState();
+		sortAndFilterList();
 		setFlingHandlers(mList, null, null);
 	}
 
 	public ChooseBookmarksDlg(CoolReader activity, YNDListFiles matchingFiles)
 	{
 		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		mYMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_YANDEX;
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
 		mBookmarksList = matchingFiles.fileList;
-		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
-			@Override
-			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-				return -(o1.created.compareTo(o2.created));
-			}
-		};
+		Comparator<CloudFileInfo> compareByDate = (o1, o2) -> -(o1.created.compareTo(o2.created));
 		Collections.sort(mBookmarksList, compareByDate);
 		//setPositiveButtonImage(R.drawable.cr3_button_add, R.string.mi_Dict_add);
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.conf_list);
+		initAddButtons(frame);
+		ViewGroup body = frame.findViewById(R.id.conf_list);
 		mList = new BookmarksListView(activity, false);
 		body.addView(mList);
 		setView(frame);
+		setButtonsState();
+		sortAndFilterList();
 		setFlingHandlers(mList, null, null);
 	}
 

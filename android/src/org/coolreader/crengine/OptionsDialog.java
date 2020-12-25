@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.coolreader.CoolReader;
+import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.litres.LitresCredentialsDialog;
 import org.coolreader.db.CRDBService;
@@ -67,7 +68,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TableLayout;
@@ -576,6 +576,30 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_DICTIONARY_7
 	};
 
+	static int[] mBookmarkSendToActionMod = new int[] {
+			0,
+			1,
+			2,
+			3,
+			4
+	};
+
+	static int[] mBookmarkSendToActionModTitles = new int[] {
+			R.string.options_bookmark_action_send_to_mod1,
+			R.string.options_bookmark_action_send_to_mod2,
+			R.string.options_bookmark_action_send_to_mod3,
+			R.string.options_bookmark_action_send_to_mod4,
+			R.string.options_bookmark_action_send_to_mod5
+	};
+
+	int[] mBookmarkSendToActionModAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
 	public static int getBookmarkSendToTitle(int v) {
 		for (int i = 0; i < mBookmarkSendToAction.length; i++)
 			if (v == mBookmarkSendToAction[i]) return mBookmarkSendToAction[i];
@@ -968,7 +992,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	OptionBase mGoogleDriveEnableCurrentBookOption;
 	OptionBase mCloudSyncAskConfirmationsOption;
 	OptionBase mGoogleDriveAutoSavePeriodOption;
-	OptionBase mBacklightControl;
+	OptionBase mBacklightControl1;
+	OptionBase mBacklightControl2;
 	OptionBase mCloudSyncBookmarksKeepAliveOptions;
 
 	public final static int OPTION_VIEW_TYPE_NORMAL = 0;
@@ -981,7 +1006,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public Properties getProperties() { return mProperties; }
 	public LayoutInflater getInflater() { return mInflater; }
 
-	OptionBase mTitleBarFontColor = null;
+	OptionBase mTitleBarFontColor1 = null;
+	OptionBase mTitleBarFontColor2 = null;
 
 	public abstract static class OptionBase {
 		protected View myView;
@@ -1014,7 +1040,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			this.setFilteredMark(filter);
 		}
 
-		public void setChecked(ImageView v, boolean checked) {
+		public void setCheckedValue(ImageView v, boolean checked) {
 			if (checked) {
 				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 				v.setImageDrawable(d);
@@ -1022,6 +1048,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mActivity.tintViewIconsForce(v);
 			} else {
 				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_empty);
+				v.setImageDrawable(d);
+				v.setTag("0");
+				mActivity.tintViewIcons(v, PorterDuff.Mode.CLEAR,true);
+			}
+		}
+
+		public void setCheckedOption(ImageView v, boolean checked) {
+			if (checked) {
+				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_checked_checkbox);
+				v.setImageDrawable(d);
+				v.setTag("1");
+				mActivity.tintViewIconsForce(v);
+			} else {
+				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_unchecked_checkbox);
 				v.setImageDrawable(d);
 				v.setTag("0");
 				mActivity.tintViewIcons(v, PorterDuff.Mode.CLEAR,true);
@@ -1247,6 +1287,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				return;
 			refreshList();
 		}
+
+		public boolean onLongClick(View v) {
+			if (!enabled)
+				return false;
+			mActivity.showToast(addInfo, Toast.LENGTH_LONG, v, true, 0);
+			return true;
+		}
 	}
 	
 	class ColorOption extends OptionBase {
@@ -1394,7 +1441,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 			myView = view;
 			TextView labelView = view.findViewById(R.id.option_label);
-			CheckBox valueView = view.findViewById(R.id.option_value_cb);
+			ImageView valueView = view.findViewById(R.id.option_value_cb);
 			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
 			if (addInfo.trim().equals("")) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
@@ -1416,11 +1463,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 //			valueView.setClickable(false);
 			labelView.setText(label);
 			labelView.setEnabled(enabled);
-			valueView.setChecked(getValueBoolean());
-			valueView.setOnCheckedChangeListener((arg0, checked) -> {
+			setCheckedOption(valueView,getValueBoolean());
+			valueView.setOnClickListener((v) -> onSelect());
+			//valueView.setOnCheckedChangeListener((arg0, checked) -> {
 //						mProperties.setBool(property, checked);
 //						refreshList();
-			});
+			//});
 			setupIconView((ImageView)view.findViewById(R.id.option_icon));
 //			view.setClickable(true);
 //			view.setFocusable(true);
@@ -2378,13 +2426,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					R.drawable.cr3_option_font_face));
 			listView.add(new ListOption(mOwner, getString(R.string.options_page_titlebar_font_size), PROP_STATUS_FONT_SIZE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(
 					filterFontSizes(mStatusFontSizes)).setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
-			if (mTitleBarFontColor == null)
-				mTitleBarFontColor = new ColorOption(mOwner,
+			mTitleBarFontColor1 = new ColorOption(mOwner,
 						getString(R.string.options_page_titlebar_font_color)+" ("+
 								getString(R.string.options_page_titlebar_short)+")", PROP_STATUS_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text),
 						this.lastFilteredValue).setIconIdByAttr(R.attr.attr_icons8_font_color,
 						R.drawable.icons8_font_color);
-			listView.add(mTitleBarFontColor);
+			listView.add(mTitleBarFontColor1);
 //			listView.add(new ColorOption(mOwner, getString(R.string.options_page_titlebar_font_color), PROP_STATUS_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 //					setIconIdByAttr(R.attr.attr_icons8_font_color,
 //							R.drawable.icons8_font_color));
@@ -2577,7 +2624,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 								if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
 								else
 									CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-											CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, false, false);
+											CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, CloudAction.NO_SPECIAL_ACTION, false);
 							}
 							return;
 						}, true).
@@ -3011,12 +3058,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 //
 //				}
 //			}
-			if (mBacklightControl == null)
-				mBacklightControl = new ListOption(mOwner, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
+			mBacklightControl1 = new ListOption(mOwner, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
 						getString(R.string.options_controls_flick_brightness_add_info), this.lastFilteredValue).
 						add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").
 						setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
-			listView.add(mBacklightControl);
+			listView.add(mBacklightControl1);
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_key_backlight_off), PROP_APP_KEY_BACKLIGHT_OFF,
 					getString(R.string.options_app_key_backlight_off_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon());
 			dlg.setView(listView);
@@ -3263,7 +3309,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				return;
 			BaseDialog dlg = new BaseDialog("PageColorsOption", mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(), this);
-			listView.add(mTitleBarFontColor);
+			mTitleBarFontColor2 = new ColorOption(mOwner,
+					getString(R.string.options_page_titlebar_font_color)+" ("+
+							getString(R.string.options_page_titlebar_short)+")", PROP_STATUS_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text),
+					this.lastFilteredValue).setIconIdByAttr(R.attr.attr_icons8_font_color,
+					R.drawable.icons8_font_color);
+			listView.add(mTitleBarFontColor2);
 			listView.add(new NightModeOption(mOwner, getString(R.string.options_inverse_view), PROP_NIGHT_MODE,
 					getString(R.string.options_inverse_view_add_info), this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_night_drawable, R.drawable.cr3_option_night));
 			listView.add(new ColorOption(mOwner, getString(R.string.options_color_text), PROP_FONT_COLOR, 0x000000,
@@ -3940,7 +3991,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			boolean isSelected = item.value!=null && currValue!=null && item.value.equals(currValue) ;//getSelectedItemIndex()==position;
 
 			//cb.setChecked(isSelected);
-			setChecked(cb, isSelected);
+			setCheckedValue(cb, isSelected);
 			cb.setOnClickListener(v -> {
 				listView.getOnItemClickListener().onItemClick(listView, listView, position, 0);
 //					mProperties.setProperty(property, item.value);
@@ -4444,7 +4495,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			view.setText(item.label);
 			String currValue = mProperties.getProperty(property);
 			boolean isSelected = item.value!=null && currValue!=null && item.value.equals(currValue) ;//getSelectedItemIndex()==position;
-			setChecked(cb, isSelected);
+			setCheckedValue(cb, isSelected);
 			cb.setOnClickListener(v -> listView.getOnItemClickListener().onItemClick(listView, listView, position, 0));
 		}
 
@@ -5376,7 +5427,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			setFocusableInTouchMode(true);
 			this.root = root;
 			listUpdated("");
+			this.setOnItemLongClickListener((arg0, arg1, pos, id) -> {
+				if (mOptionsThis!=null) {
+					return mOptionsThis.get(pos).onLongClick(arg0);
+				}
+				else {
+					return mOptions.get(pos).onLongClick(arg0);
+				}
+			});
 		}
+
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
 			if (mOptionsThis!=null) {
@@ -5387,7 +5447,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 			return true;
 		}
-		
+
 	}
 	
 	public View createTabContent(String tag) {
@@ -5860,7 +5920,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text,
 	};
 
-	private OptionBase optRenderingPreset = null;
+	private OptionBase optRenderingPreset1 = null;
+	private OptionBase optRenderingPreset2 = null;
 	
 	private void fillStyleEditorOptions(String filter) {
 		mOptionsCSS = new OptionsListView(getContext(),null);
@@ -5889,7 +5950,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 			if (/*isHtmlFormat*/ isFormatWithEmbeddedStyle) {
 				Runnable renderindChangeListsner = () -> {
-					boolean legacyRender = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
+					int rendFlags = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0);
+					boolean legacyRender = rendFlags == 0 ||
 							mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
 					mEnableMultiLangOption.setEnabled(!legacyRender);
 					if (legacyRender) {
@@ -5901,14 +5963,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						mEnableHyphOption.setEnabled(embeddedLang);
 					}
 				};
-				if (optRenderingPreset == null)
-					optRenderingPreset = new ListOption(this, getString(R.string.options_rendering_preset), PROP_RENDER_BLOCK_RENDERING_FLAGS,
+				if (optRenderingPreset1 == null) {
+					optRenderingPreset1 = new ListOption(this, getString(R.string.options_rendering_preset), PROP_RENDER_BLOCK_RENDERING_FLAGS,
 							getString(R.string.option_add_info_empty_text), filter).
 							add(mRenderingPresets, mRenderingPresetsTitles, mRenderingPresetsAddInfos)
 							.setDefaultValue(Integer.valueOf(Engine.BLOCK_RENDERING_FLAGS_WEB).toString())
 							.noIcon()
 							.setOnChangeHandler(renderindChangeListsner);
-				mOptionsCSS.add(optRenderingPreset);
+				}
+				mOptionsCSS.add(optRenderingPreset1);
 				mOptionsCSS.add(new ListOption(this, getString(R.string.options_requested_dom_level), PROP_REQUESTED_DOM_VERSION,
 						getString(R.string.option_add_info_empty_text), filter).
 						add(mDOMVersionPresets, mDOMVersionPresetTitles, mRenderingPresetsAddInfos)
@@ -5985,6 +6048,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			} catch (Exception e) {
 				Log.e("OPTIONSDLG", "setupReaderOptions 2", e);
 			}
+			if (optRenderingPreset1 != null) optRenderingPreset1.refreshItem();
+			if (optRenderingPreset2 != null) optRenderingPreset2.refreshItem();
+			if (mTitleBarFontColor1 != null) mTitleBarFontColor1.refreshItem();
+			if (mTitleBarFontColor2 != null) mTitleBarFontColor2.refreshItem();
+			if (mBacklightControl1 != null) mBacklightControl1.refreshItem();
+			if (mBacklightControl2 != null) mBacklightControl2.refreshItem();
 			mProperties.setProperty(Settings.PROP_APP_OPTIONS_PAGE_SELECTED, "" + mTabs.getCurrentTab());
 		});
 		// setup tabs
@@ -5995,13 +6064,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		
 		//tabWidget.
 		//new TabHost(getContext());
-
-		if (mTitleBarFontColor == null)
-			mTitleBarFontColor = new ColorOption(this,
-					getString(R.string.options_page_titlebar_font_color)+" ("+
-							getString(R.string.options_page_titlebar_short)+")", PROP_STATUS_FONT_COLOR, 0x000000, getString(R.string.option_add_info_empty_text),
-					filter).setIconIdByAttr(R.attr.attr_icons8_font_color,
-							R.drawable.icons8_font_color);
 
 		boolean legacyRender = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
 				mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
@@ -6022,7 +6084,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsStyles.add(new ListOption(this, getString(R.string.options_font_antialias), PROP_FONT_ANTIALIASING,
 				getString(R.string.option_add_info_empty_text), filter).add(mAntialias, mAntialiasTitles, mAntialiasAddInfos).setDefaultValue("2").setIconIdByAttr(R.attr.cr3_option_text_antialias_drawable, R.drawable.cr3_option_text_antialias));
 		Runnable renderindChangeListsner = () -> {
-			boolean legacyRender1 = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0) == 0 ||
+			int rendFlags = mProperties.getInt(PROP_RENDER_BLOCK_RENDERING_FLAGS, 0);
+			boolean legacyRender1 = rendFlags == 0 ||
 					mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < 20180524;
 			mEnableMultiLangOption.setEnabled(!legacyRender1);
 			if (legacyRender1) {
@@ -6034,14 +6097,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mEnableHyphOption.setEnabled(embeddedLang);
 			}
 		};
-		if (optRenderingPreset == null)
-			optRenderingPreset = new ListOption(this, getString(R.string.options_rendering_preset), PROP_RENDER_BLOCK_RENDERING_FLAGS,
+		if (optRenderingPreset2 == null)
+			optRenderingPreset2 = new ListOption(this, getString(R.string.options_rendering_preset), PROP_RENDER_BLOCK_RENDERING_FLAGS,
 					getString(R.string.option_add_info_empty_text), filter).
 					add(mRenderingPresets, mRenderingPresetsTitles, mRenderingPresetsAddInfos)
 					.setDefaultValue(Integer.valueOf(Engine.BLOCK_RENDERING_FLAGS_WEB).toString())
 					.noIcon()
 					.setOnChangeHandler(renderindChangeListsner);
-		mOptionsStyles.add(optRenderingPreset);
+		mOptionsStyles.add(optRenderingPreset2);
 		mEnableMultiLangOption = new BoolOption(this, getString(R.string.options_style_multilang), PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED,
 				getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_text_multilang_drawable,
 				R.drawable.cr3_option_text_multilang).
@@ -6150,11 +6213,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_controls_enable_volume_keys_add_info), filter).setDefaultValue("1").
 					setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
 		//if ( !DeviceInfo.EINK_SCREEN  || DeviceInfo.EINK_HAVE_FRONTLIGHT ) // nook glowlight has this option. 20201022 Still commented, not tested
-		if (mBacklightControl == null)
-			mBacklightControl = new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
+		mBacklightControl2 = new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
 					getString(R.string.options_controls_flick_brightness_add_info), filter).
 					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
-		mOptionsControls.add(mBacklightControl);
+		mOptionsControls.add(mBacklightControl2);
 		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled),
 				PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_controls_gesture_page_flipping_enabled_add_info), filter).add(
 				mPagesPerFullSwipe, mPagesPerFullSwipeTitles, mPagesPerFullSwipeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));
@@ -6173,6 +6235,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				PROP_APP_BOOKMARK_ACTION_SEND_TO, getString(R.string.options_bookmark_action_send_to_add_info), filter).
 				add(mBookmarkSendToAction, mBookmarkSendToActionTitles, mBookmarkSendToActionAddInfos).setDefaultValue("-1").
 				setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
+		mOptionsControls.add(new ListOptionAction(this, getString(R.string.options_bookmark_action_send_to_mod),
+				PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD, getString(R.string.options_bookmark_action_send_to_mod_add_info), filter).
+				add(mBookmarkSendToActionMod, mBookmarkSendToActionModTitles, mBookmarkSendToActionModAddInfos).setDefaultValue("0").
+				setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
 		OptionBase sb11 = new SelectionModesOption(this, getString(R.string.selectionmodes_settings),
 				getString(R.string.selectionmodes_settings_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_select_all, R.drawable.icons8_select_all);
 		((SelectionModesOption)sb11).updateFilterEnd();
@@ -6185,17 +6251,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					PROP_APP_MIGRATE_SETTINGS, getString(R.string.migrate_cr_settings_add_info), filter,
 					view ->
 					{
-						ArrayList<CloudFileInfo> afi = new ArrayList<>();
-						for (int i = 0; i <= cr.settingsMayBeMigratedLastInd; i++) {
-							if (cr.getSettingsFileExtExists(".cr3", i))
-								if (cr.getSettingsFileExt(".cr3", i).isFile()) {
-									CloudFileInfo cfi = new CloudFileInfo();
-									cfi.name = cr.getSettingsFileExt(".cr3", i).getName();
-									cfi.path = cr.getSettingsFileExt(".cr3", i).getPath();
-									afi.add(cfi);
-								}
-						}
-						CloudSync.restoreSettingsFiles(cr, null, afi, false);
+						mActivity.askConfirmation(R.string.migrate_cr_settings_q, () -> {
+							ArrayList<CloudFileInfo> afi = new ArrayList<>();
+							for (int i = 0; i <= cr.settingsMayBeMigratedLastInd; i++) {
+								if (cr.getSettingsFileExtExists(".cr3", i))
+									if (cr.getSettingsFileExt(".cr3", i).isFile()) {
+										CloudFileInfo cfi = new CloudFileInfo();
+										cfi.name = cr.getSettingsFileExt(".cr3", i).getName();
+										cfi.path = cr.getSettingsFileExt(".cr3", i).getPath();
+										afi.add(cfi);
+									}
+							}
+							CloudSync.restoreSettingsFiles(cr, null, afi, false);
+						});
 					}, true).setDefaultValue(getString(R.string.migrate_cr_settings_profiles) + " " + (cr.settingsMayBeMigratedLastInd + 1)).
 					setIconIdByAttr(R.attr.coolreader_logo_button_drawable, R.drawable.cr3_logo_button));
 		}

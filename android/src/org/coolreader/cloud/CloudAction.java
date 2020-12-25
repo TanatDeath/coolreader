@@ -72,6 +72,7 @@ public class CloudAction {
     public static final int YND_DELETE_FILE_ASYNC = 20113;
     public static final int YND_SAVE_BOOK = 20114;
     public static final int YND_SAVE_TO_FILE_GET_LINK_W_DIR = 20115;
+    public static final int YND_LIST_JSON_FILES_THEN_DEL = 20116;
     public static final String CLOUD_COMPLETE_LIST_FOLDER_RESULT = "ListFolderResult";
     public static final String CLOUD_COMPLETE_FULL_ACCOUNT = "FullAccount";
     public static final String CLOUD_COMPLETE_GET_DOWNLOAD_LINK = "GetDownloadLink";
@@ -317,7 +318,7 @@ public class CloudAction {
     public static void yndOpenBookDialog(final CoolReader cr, FileInfo bookToSave, boolean fromHomeFolder) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
-            if (!YNDConfig.init(cr)) return;
+            if (!YNDConfig.init(cr, false)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca1 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_THEN_OPEN_DLG, true);
             ca1.param = "";
@@ -348,7 +349,7 @@ public class CloudAction {
     public static void yndSaveJsonFile(final CoolReader cr, String sFName, String prettyJson, boolean bQuiet, boolean bErrorQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
-            if (!YNDConfig.init(cr)) return;
+            if (!YNDConfig.init(cr, bQuiet)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true, bErrorQuiet);
             al.add(ca1);
@@ -378,19 +379,26 @@ public class CloudAction {
         }
     }
 
+    public static int NO_SPECIAL_ACTION = 0;
+    public static int FINDING_LAST_POS = 1;
+    public static int DELETE_FILES = 2;
+
     public static void yndLoadJsonFileList(final CoolReader cr, String fileMark, String sCRC,
-                                           boolean findingLastPos, boolean bErrorQuiet) {
+                                           int findingLastPos, boolean bErrorQuiet) {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
-            if (!YNDConfig.init(cr)) return;
+            if (!YNDConfig.init(cr, bErrorQuiet)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca1 = new CloudAction(cr, CloudAction.YND_CHECK_CR_FOLDER, true, bErrorQuiet);
             al.add(ca1);
             CloudAction ca2;
-            if (findingLastPos)
+            if (findingLastPos == FINDING_LAST_POS)
                 ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES_LASTPOS, true, bErrorQuiet);
             else
-                ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES, true, bErrorQuiet);
+                if (findingLastPos == DELETE_FILES)
+                    ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES_THEN_DEL, true, bErrorQuiet);
+                else
+                    ca2 = new CloudAction(cr, CloudAction.YND_LIST_JSON_FILES, true, bErrorQuiet);
             ca2.param = fileMark;
             // ca2.param2 - will contain skip if folder exists. Means "skip create, because exists"
             ca2.bookCRC = sCRC;
@@ -402,7 +410,7 @@ public class CloudAction {
 						YNDListFiles o1 = (YNDListFiles) o;
 						if (o1.fileList.size() == 0) {
                             BackgroundThread.instance().postGUI(() -> {
-                                if (!findingLastPos) cr.showToast(cr.getString(R.string.no_cloud_files));
+                                if (findingLastPos == NO_SPECIAL_ACTION) cr.showToast(cr.getString(R.string.no_cloud_files));
                             },200);
 						    return;
                         }
@@ -417,91 +425,39 @@ public class CloudAction {
                         }
 						if (StrUtils.getNonEmptyStr(a.mCurAction.param,true).equals("_rpos_")) {
 							if (a.mCurAction.action == YND_LIST_JSON_FILES_LASTPOS) {
-                                Bookmark bmk = null;
-							    if (cr.getReaderView()!=null) bmk = cr.getReaderView().getCurrentPositionBookmark();
-                                if ((bmk != null) && (iPos >= 0)) {
-                                    CloudFileInfo cfi = o1.fileList.get(iPos);
-                                    String sTitle0 = StrUtils.getNonEmptyStr(cfi.name,true);
-                                    String[] arrS = sTitle0.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
-                                    String sAdd = "";
-                                    String sPerc = "";
-                                    double curPos = 0.0;
-                                    if (arrS.length>=6) {
-                                        sPerc = arrS[5].replace(".json","");
-                                        try {
-                                            //curPos = Double.valueOf(sPerc) * 100;
-                                            NumberFormat format = NumberFormat.getInstance(Locale.US);
-                                            Number number = format.parse(sPerc);
-                                            curPos = number.doubleValue() * 100;
-                                        } catch (Exception e){
-                                            curPos = 0.0;
-                                        }
-                                        sAdd = arrS[4];
-                                        if (sAdd.contains(cr.getAndroid_id())) {
-                                            sAdd = sAdd.replace(cr.getAndroid_id(), cr.getString(R.string.rpos_current_device));
-                                        } else {
-                                            if (CloudSync.devicesKnown != null)
-                                                for (DeviceKnown dev: CloudSync.devicesKnown) {
-                                                    if (sAdd.contains(dev.deviceId))
-                                                        sAdd = sAdd.replace(dev.deviceId, dev.deviceName);
-                                                }
-                                        }
-                                    }
-                                    int iCurPos = (int) curPos;
-                                    final String sAddF = sAdd;
-                                    final String sPercF = sPerc;
-                                    double dPerc = bmk.getPercent();
-                                    dPerc = dPerc / 100;
-                                    Locale l =new Locale("en", "US");
-                                    final String sPercCur1 = String.format(l, "%5.2f", dPerc) + "%";
-                                    final String sPercCur = sPercCur1.replace(",", ".");
-                                    if (iCurPos > bmk.getPercent())
-                                        BackgroundThread.instance().postGUI(() -> {
-                                            ArrayList<String> sButtons = new ArrayList<String>();
-                                            sButtons.add("*"+sPercF+"% "+cr.getString(R.string.rpos_from)+" "+
-                                                    sAddF+" ("+cr.getString(R.string.rpos_now_at)+" "+sPercCur+")");
-                                            sButtons.add(cr.getString(R.string.rpos_restore));
-                                            sButtons.add(cr.getString(R.string.rpos_list));
-                                            sButtons.add(cr.getString(R.string.rpos_cancel));
-                                            SomeButtonsToolbarDlg.showDialog(cr, cr.getReaderView().getSurface(), 0, true,
-                                                    cr.getString(R.string.rpos_found),
-                                                    sButtons, o1, (o22, btnPressed) -> {
-                                                        YNDListFiles o112 = (YNDListFiles) o22;
-                                                        if (o112.fileList.size()>0) {
-                                                            CloudFileInfo cfi1 = o112.fileList.get(0);
-                                                            if (btnPressed.equals(cr.getString(R.string.rpos_restore))) {
-                                                                CloudSync.loadFromJsonInfoFile(cr, CloudSync.CLOUD_SAVE_READING_POS, cfi1.path, false,
-                                                                        cfi1.name, Settings.CLOUD_SYNC_VARIANT_YANDEX);
-                                                            }
-                                                            if (btnPressed.equals(cr.getString(R.string.rpos_list))) {
-                                                                BackgroundThread.instance().postGUI(() -> {
-                                                                    ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o112);
-                                                                    dlg2.show();
-                                                                }, 200);
-                                                            }
-                                                        }
-                                                    });
-                                        }, 200);
+                                checkLastPos(o1, iPos, cr);
+                            } else
+                                    if (a.mCurAction.action == YND_LIST_JSON_FILES_THEN_DEL) {
+                                    CloudAction.yndDeleteOldCloudFiles(cr, (ArrayList<CloudFileInfo>) o1.fileList, true);
                                 }
+                                else {
+                                    BackgroundThread.instance().postGUI(() -> {
+                                        ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o1);
+                                        dlg2.show();
+                                    }, 200);
+                                }
+						}
+						if (StrUtils.getNonEmptyStr(a.mCurAction.param,true).equals("_bmk_")) {
+                            if (a.mCurAction.action == YND_LIST_JSON_FILES_THEN_DEL) {
+                                CloudAction.yndDeleteOldCloudFiles(cr, (ArrayList<CloudFileInfo>) o1.fileList, true);
                             }
-							else {
+                            else {
                                 BackgroundThread.instance().postGUI(() -> {
-                                    ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o1);
+                                    ChooseBookmarksDlg dlg2 = new ChooseBookmarksDlg(cr, o1);
                                     dlg2.show();
                                 }, 200);
                             }
 						}
-						if (StrUtils.getNonEmptyStr(a.mCurAction.param,true).equals("_bmk_")) {
-							BackgroundThread.instance().postGUI(() -> {
-                                ChooseBookmarksDlg dlg2 = new ChooseBookmarksDlg(cr, o1);
-                                dlg2.show();
-                            }, 200);
-						}
                         if (StrUtils.getNonEmptyStr(a.mCurAction.param,true).equals("_settings_")) {
-                            BackgroundThread.instance().postGUI(() -> {
-                                ChooseConfFileDlg dlg = new ChooseConfFileDlg(cr, o1);
-                                dlg.show();
-                            }, 200);
+                            if (a.mCurAction.action == YND_LIST_JSON_FILES_THEN_DEL) {
+                                CloudAction.yndDeleteOldCloudFiles(cr, (ArrayList<CloudFileInfo>) o1.fileList, true);
+                            }
+                            else {
+                                BackgroundThread.instance().postGUI(() -> {
+                                    ChooseConfFileDlg dlg = new ChooseConfFileDlg(cr, o1);
+                                    dlg.show();
+                                }, 200);
+                            }
                         }
 					}
                     CloudAction.onYNDComplete(cr, a, res, o, null);
@@ -517,6 +473,75 @@ public class CloudAction {
             if (!bErrorQuiet)
                 cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+        }
+    }
+
+    private static void checkLastPos(YNDListFiles yndFiles, int iPos, CoolReader cr) {
+        Bookmark bmk = null;
+        if (cr.getReaderView()!=null) bmk = cr.getReaderView().getCurrentPositionBookmark();
+        if ((bmk != null) && (iPos >= 0)) {
+            CloudFileInfo cfi = yndFiles.fileList.get(iPos);
+            String sTitle0 = StrUtils.getNonEmptyStr(cfi.name,true);
+            String[] arrS = sTitle0.split("_"); // 2020-03-30_222303_rpos_635942216_36b928e773055c4a_0.16.json
+            String sAdd = "";
+            String sPerc = "";
+            double curPos = 0.0;
+            if (arrS.length>=6) {
+                sPerc = arrS[5].replace(".json","");
+                try {
+                    //curPos = Double.valueOf(sPerc) * 100;
+                    NumberFormat format = NumberFormat.getInstance(Locale.US);
+                    Number number = format.parse(sPerc);
+                    curPos = number.doubleValue() * 100;
+                } catch (Exception e){
+                    curPos = 0.0;
+                }
+                sAdd = arrS[4];
+                if (sAdd.contains(cr.getAndroid_id())) {
+                    sAdd = sAdd.replace(cr.getAndroid_id(), cr.getString(R.string.rpos_current_device));
+                } else {
+                    if (CloudSync.devicesKnown != null)
+                        for (DeviceKnown dev: CloudSync.devicesKnown) {
+                            if (sAdd.contains(dev.deviceId))
+                                sAdd = sAdd.replace(dev.deviceId, dev.deviceName);
+                        }
+                }
+            }
+            int iCurPos = (int) curPos;
+            final String sAddF = sAdd;
+            final String sPercF = sPerc;
+            double dPerc = bmk.getPercent();
+            dPerc = dPerc / 100;
+            Locale l =new Locale("en", "US");
+            final String sPercCur1 = String.format(l, "%5.2f", dPerc) + "%";
+            final String sPercCur = sPercCur1.replace(",", ".");
+            if (iCurPos > bmk.getPercent())
+                BackgroundThread.instance().postGUI(() -> {
+                    ArrayList<String> sButtons = new ArrayList<String>();
+                    sButtons.add("*"+sPercF+"% "+cr.getString(R.string.rpos_from)+" "+
+                            sAddF+" ("+cr.getString(R.string.rpos_now_at)+" "+sPercCur+")");
+                    sButtons.add(cr.getString(R.string.rpos_restore));
+                    sButtons.add(cr.getString(R.string.rpos_list));
+                    sButtons.add(cr.getString(R.string.rpos_cancel));
+                    SomeButtonsToolbarDlg.showDialog(cr, cr.getReaderView().getSurface(), 0, true,
+                            cr.getString(R.string.rpos_found),
+                            sButtons, yndFiles, (o22, btnPressed) -> {
+                                YNDListFiles o112 = (YNDListFiles) o22;
+                                if (o112.fileList.size()>0) {
+                                    CloudFileInfo cfi1 = o112.fileList.get(0);
+                                    if (btnPressed.equals(cr.getString(R.string.rpos_restore))) {
+                                        CloudSync.loadFromJsonInfoFile(cr, CloudSync.CLOUD_SAVE_READING_POS, cfi1.path, false,
+                                                cfi1.name, Settings.CLOUD_SYNC_VARIANT_YANDEX);
+                                    }
+                                    if (btnPressed.equals(cr.getString(R.string.rpos_list))) {
+                                        BackgroundThread.instance().postGUI(() -> {
+                                            ChooseReadingPosDlg dlg2 = new ChooseReadingPosDlg(cr, o112);
+                                            dlg2.show();
+                                        }, 200);
+                                    }
+                                }
+                            });
+                }, 200);
         }
     }
 
@@ -599,7 +624,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (StrUtils.isEmptyStr(sFolder))
-                if (!YNDConfig.init(cr)) return;
+                if (!YNDConfig.init(cr, false)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             CloudAction ca2 = new CloudAction(cr, CloudAction.YND_LIST_FOLDER_IN_DLG, sFolder, sFindStr, true);
             al.add(ca2);
@@ -626,7 +651,7 @@ public class CloudAction {
         try {
             cr.showCloudToast(R.string.cloud_begin,false);
             if (StrUtils.isEmptyStr(sFolder))
-                if (!YNDConfig.init(cr)) return;
+                if (!YNDConfig.init(cr, bQuiet)) return;
             if (fi==null) return;
             //if (cr.getReaderView()==null) return;
             //if (cr.getReaderView().getBookInfo()==null) return;
@@ -837,7 +862,7 @@ public class CloudAction {
         try
         {
             cr.showCloudToast(R.string.cloud_begin,false);
-            if (!YNDConfig.init(cr)) return;
+            if (!YNDConfig.init(cr, bQuiet)) return;
             ArrayList<CloudAction> al = new ArrayList<CloudAction>();
             for (CloudFileInfo cf: arrCf) {
                 CloudAction ca = new CloudAction(cr, CloudAction.YND_DELETE_FILE_ASYNC, bQuiet);

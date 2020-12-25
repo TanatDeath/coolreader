@@ -26,14 +26,18 @@ public class YNDConfig {
     public static boolean didLogin = false;
     public static String yndToken;
     public static OkHttpClient client;
+    public static boolean didAuthWarn = false;
 
-    public static boolean init(CoolReader cr) throws IOException {
+    public static boolean init(CoolReader cr, boolean bQuiet) throws IOException {
         // Create ynd client
         final File fYND = new File(cr.getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd.token");
         if (!fYND.exists()) {
-            cr.showCloudToast(R.string.cloud_need_authorization,true);
-            cr.yndInputTokenDialog = new YNDInputTokenDialog(cr);
-            cr.yndInputTokenDialog.show();
+            if ((!didAuthWarn) || (!bQuiet))  {
+                cr.showCloudToast(cr.getString(R.string.cloud_need_authorization) + ": Yandex Disc",true);
+                cr.yndInputTokenDialog = new YNDInputTokenDialog(cr);
+                cr.yndInputTokenDialog.show();
+            }
+            didAuthWarn = true;
             return false;
         } else {
             if ((!didLogin)||(StrUtils.isEmptyStr(yndToken))) {

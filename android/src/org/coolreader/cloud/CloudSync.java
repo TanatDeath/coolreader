@@ -141,12 +141,7 @@ public class CloudSync {
         }
         if (System.currentTimeMillis()-lastDeleteTime > MIN_DELETE_FILES_DELAY) {
             lastDeleteTime = System.currentTimeMillis();
-            BackgroundThread.instance().postGUI(new Runnable() {
-                @Override
-                public void run() {
-                    CloudAction.yndDeleteOldCloudFiles(cr, filesToDel, true);
-                }
-            }, DELETE_FILES_DELAY);
+            BackgroundThread.instance().postGUI(() -> CloudAction.yndDeleteOldCloudFiles(cr, filesToDel, true), DELETE_FILES_DELAY);
         }
     }
 
@@ -586,7 +581,7 @@ public class CloudSync {
     }
 
     public static void loadFromJsonInfoFileList(CoolReader cr, int iSaveType, boolean bQuiet,
-                                                boolean fromFile, boolean findingLastPos, boolean bErrorQuiet) {
+                                                boolean fromFile, int findingLastPos, boolean bErrorQuiet) {
         Log.d(TAG, "Starting load json file list from drive...");
         String sCRC = "";
         if (iSaveType != CLOUD_SAVE_SETTINGS) {
@@ -602,7 +597,7 @@ public class CloudSync {
             sCRC = String.valueOf(crc.getValue());
         }
         if (fromFile) {
-            if (!findingLastPos)
+            if (findingLastPos != CloudAction.FINDING_LAST_POS)
                 loadFromJsonInfoFileListFS(cr, iSaveType, bQuiet, sCRC);
         } else {
             String fileMark = "_rpos_";

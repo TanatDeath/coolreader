@@ -13,8 +13,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202011221
-        versionName "2020.11.22.1"
+        versionCode 202012241
+        versionName "2020.12.24.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -63,6 +63,7 @@ android {
         premium {
             java.srcDirs = ['../../android/premium/src']
             res.srcDirs = ['../../android/premium/res']
+            manifest.srcFile "../../android/premium/AndroidManifest.xml"
         }
     }
     buildTypes {

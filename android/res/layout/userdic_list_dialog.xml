@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-   Comment bookmark item
--->
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -109,41 +106,62 @@
             android:focusableInTouchMode="true"
             android:text="@null" />
     </LinearLayout>
-
-    <RadioGroup
-        android:id="@+id/rg_scope"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <RadioButton
-            android:id="@+id/rb_page"
-            android:layout_width="wrap_content"
+    <TableLayout
+            android:id="@+id/rg_scope"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:textColor="?attr/colorIcon"
-            android:layout_weight="1"
-            android:text="@string/dlg_userdic_page" />
-        <RadioButton
-            android:id="@+id/rb_book"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:textColor="?attr/colorIcon"
-            android:layout_weight="1"
-            android:text="@string/dlg_userdic_book" />
-        <RadioButton
-            android:id="@+id/rb_userdic_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:textColor="?attr/colorIcon"
-            android:layout_weight="1"
-            android:text="@string/dlg_userdic_all" />
+            android:stretchColumns="1"
+            android:orientation="vertical">
 
-    </RadioGroup>
-
-
+        <TableRow
+                android:layout_weight="1">
+            <Button
+                android:id="@+id/rb_page2"
+                android:layout_width="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:textColor="?attr/colorIcon"
+                android:contentDescription="@string/dlg_userdic_page"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
+                android:text="@string/dlg_userdic_page" />
+            <Button
+                android:id="@+id/rb_book2"
+                android:layout_width="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:textColor="?attr/colorIcon"
+                android:contentDescription="@string/dlg_userdic_book"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
+                android:text="@string/dlg_userdic_book" />
+            <Button
+                android:id="@+id/rb_userdic_all2"
+                android:layout_width="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:src="@null"
+                android:textColor="?attr/colorIcon"
+                android:contentDescription="@string/dlg_userdic_all"
+                android:drawableLeft="@drawable/icons8_toc_item_normal"
+                android:text="@string/dlg_userdic_all" />
+        </TableRow>
+    </TableLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/layout_clear_hist"
         android:orientation="horizontal"

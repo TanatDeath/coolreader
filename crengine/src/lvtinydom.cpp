@@ -9832,6 +9832,7 @@ lString32 extractDocSeries( ldomDocument * doc, int * pSeriesNumber )
 {
     lString32 res;
     ldomNode * series = doc->createXPointer(U"/FictionBook/description/title-info/sequence").getNode();
+    *pSeriesNumber = 0;
     if ( series ) {
         lString32 sname = lString32(series->getAttributeValue(attr_name)).trim();
         lString32 snumber = series->getAttributeValue(attr_number);
@@ -9853,6 +9854,7 @@ lString32 extractDocPublishSeries( ldomDocument * doc, int * pSeriesNumber ) {
     lString32 res;
     ldomNode *series = doc->createXPointer(
             U"/FictionBook/description/publish-info/sequence").getNode();
+    *pSeriesNumber = 0;
     if (series) {
         lString32 sname = lString32(series->getAttributeValue(attr_name)).trim();
         lString32 snumber = series->getAttributeValue(attr_number);

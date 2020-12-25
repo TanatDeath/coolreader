@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.litres.LitresCloudSettings;
 import org.coolreader.cloud.litres.LitresCredentialsDialog;
@@ -25,6 +27,7 @@ import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
+import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -1319,7 +1322,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (iSyncVariant3 != 0) {
 					if (mCurrentFrame == mReaderFrame)
 						CloudSync.loadFromJsonInfoFileList(CoolReader.this,
-								CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, true, true);
+								CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant3 == 1, CloudAction.FINDING_LAST_POS, true);
 				}
 			}, 5000);
 		}
@@ -1548,7 +1551,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			showNotice(getString(R.string.datadir_is_removed, Engine.getExternalSettingsDirName()), () -> {
 				if (settingsCanBeMigratedLastInd>=0) {
 					showNotice(R.string.note1_can_be_migrated,
-							() -> {},
+							() -> {
+								ArrayList<CloudFileInfo> afi = new ArrayList<>();
+								for (int i = 0; i <= settingsMayBeMigratedLastInd; i++) {
+									if (getSettingsFileExtExists(".cr3", i))
+										if (getSettingsFileExt(".cr3", i).isFile()) {
+											CloudFileInfo cfi = new CloudFileInfo();
+											cfi.name = getSettingsFileExt(".cr3", i).getName();
+											cfi.path = getSettingsFileExt(".cr3", i).getPath();
+											afi.add(cfi);
+										}
+								}
+								CloudSync.restoreSettingsFiles(this, null, afi, false);
+							},
 							() -> {});
 				}
 			}, null);
@@ -1558,7 +1573,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} else {
 			if (settingsCanBeMigratedLastInd >= 0) {
 				showNotice(R.string.note1_can_be_migrated,
-						() -> {},
+						() -> {
+							ArrayList<CloudFileInfo> afi = new ArrayList<>();
+							for (int i = 0; i <= settingsMayBeMigratedLastInd; i++) {
+								if (getSettingsFileExtExists(".cr3", i))
+									if (getSettingsFileExt(".cr3", i).isFile()) {
+										CloudFileInfo cfi = new CloudFileInfo();
+										cfi.name = getSettingsFileExt(".cr3", i).getName();
+										cfi.path = getSettingsFileExt(".cr3", i).getPath();
+										afi.add(cfi);
+									}
+							}
+							CloudSync.restoreSettingsFiles(this, null, afi, false);
+						},
 						() -> {});
 			}
 		}
@@ -2122,6 +2149,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	// Dictionary support
 
 	public interface DictionaryCallback {
+		boolean showDicToast();
+		boolean saveToHist();
 		void done(String result);
 		void fail(Exception e, String msg);
 	}
@@ -2158,6 +2187,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} catch (DictionaryException e) {
 			showToast(e.getMessage());
 		}
+	}
+
+	public Dictionaries.DictInfo getCurOrFirstOnlineDic() {
+		Dictionaries.DictInfo di1 = mDictionaries.getCurDict();
+		if (di1 != null)
+			if (di1.isOnline()) return di1;
+		for (final Dictionaries.DictInfo di: mDictionaries.getAddDicts()) {
+			if (di.isOnline()) return di;
+		}
+		return null;
 	}
 
 	public void showDictionary() {
@@ -2485,7 +2524,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			});
 		});
 	}
-	
+
 	public void updateCurrentPositionStatus(FileInfo book, Bookmark position, PositionProperties props) {
 		if (getReaderView() == null) return;
 		mReaderFrame.getStatusBar().updateCurrentPositionStatus(book, position, props);
@@ -2498,35 +2537,46 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			((!book.askedMarkRead)&&(book.getReadingState()!=FileInfo.STATE_FINISHED) && (props.pageNumber+1==props.pageCount))
 		) {
 			book.askedMarkRead = true;
+			int iSyncVariant2 = settings().getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			final FileInfo book1=book;
 			BackgroundThread.instance().postGUI(() -> {
 				ArrayList<String> sButtons = new ArrayList<String>();
 				sButtons.add("*" + getString(R.string.mark_book_as_read));
+				if (iSyncVariant2 == 2) sButtons.add(getString(R.string.str_yes_and_del_pos)); // only for yandex
 				sButtons.add(getString(R.string.str_yes));
 				sButtons.add(getString(R.string.str_no));
 				SomeButtonsToolbarDlg.showDialog(this, getReaderView().getSurface(), 10, true,
 						"",
 					sButtons, null, (o22, btnPressed) -> {
 							if (btnPressed.equals(getString(R.string.str_yes))) {
-								Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
-									book1.setReadingState(FileInfo.STATE_FINISHED);
-									BookInfo bi = new BookInfo(book1);
-									getDB().saveBookInfo(bi);
-									getDB().flush();
-									if (bookInfo.getFileInfo() != null) {
-										bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
-										if (bookInfo.getFileInfo().parent != null)
-											directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
-									}
-									BookInfo bi2 = Services.getHistory().getBookInfo(book1);
-									if (bi2 != null)
-										bi2.getFileInfo().setFileProperties(book1);
-								});
+								setBookStateFinished(book1);
+							}
+							if (btnPressed.equals(getString(R.string.str_yes_and_del_pos))) {
+								setBookStateFinished(book1);
+								CloudSync.loadFromJsonInfoFileList(this,
+										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.DELETE_FILES, false);
 							}
 					});
 			}, 200);
 		}
 		checkAskReading(book, props,13, false);
+	}
+
+	private void setBookStateFinished(FileInfo book1) {
+		Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
+			book1.setReadingState(FileInfo.STATE_FINISHED);
+			BookInfo bi = new BookInfo(book1);
+			getDB().saveBookInfo(bi);
+			getDB().flush();
+			if (bookInfo.getFileInfo() != null) {
+				bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
+				if (bookInfo.getFileInfo().parent != null)
+					directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+			}
+			BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+			if (bi2 != null)
+				bi2.getFileInfo().setFileProperties(book1);
+		});
 	}
 
 	public boolean willBeCheckAskReading(FileInfo book, PositionProperties props, int pagesCnt) {

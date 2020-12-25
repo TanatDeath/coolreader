@@ -12,13 +12,14 @@
  <Button
          android:id="@+id/btn_user_dic"
          android:layout_width="match_parent"
+         android:layout_height="wrap_content"
          android:checked="true"
          android:layout_weight="1"
          android:drawableLeft="?attr/attr_icons8_google_translate_user"
          android:tag="tint"
          android:textColor="?attr/colorIcon"
          style="@style/TextAppearance.Medium"
-         android:text="@string/win_title_user_dic" />
+         android:text="@string/win_title_user_dic_short" />
 
 
  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

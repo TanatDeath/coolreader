@@ -1,5 +1,6 @@
 package org.coolreader.tts;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,8 +8,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
+import android.media.MediaMetadata;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -17,8 +22,10 @@ import androidx.annotation.RequiresApi;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.Services;
 
 /**
  * This service does not implement TTS!
@@ -31,15 +38,18 @@ public class TTSControlService extends Service {
 	public static final Logger log = L.create("ttssrv");
 
 	private final int NOTIFICATION_ID = 1;
-	private final String NOTIFICATION_CHANNEL_ID = "CoolReader TTS";
+	private final String NOTIFICATION_CHANNEL_ID = "KnownReader TTS";
 
-	public static final String TTS_CONTROL_ACTION_PLAY_PAUSE = "org.coolreader.tts.tts_play_pause";
-	public static final String TTS_CONTROL_ACTION_NEXT = "org.coolreader.tts.tts_next";
-	public static final String TTS_CONTROL_ACTION_PREV = "org.coolreader.tts.tts_prev";
-	public static final String TTS_CONTROL_ACTION_DONE = "org.coolreader.tts.tts_done";
+	public static final String TTS_CONTROL_ACTION_PLAY_PAUSE = "org.knownreader.tts.tts_play_pause";
+	public static final String TTS_CONTROL_ACTION_NEXT = "org.knownreader.tts.tts_next";
+	public static final String TTS_CONTROL_ACTION_PREV = "org.knownreader.tts.tts_prev";
+	public static final String TTS_CONTROL_ACTION_DONE = "org.knownreader.tts.tts_done";
 
 	private boolean mChannelCreated = false;
 	private IBinder mBinder = new TTSControlBinder(this);
+
+	private MediaSession mMediaSession;
+	private Bitmap mBitmap;
 
 	public enum TTSStatus {
 		PLAYED,
@@ -101,6 +111,23 @@ public class TTSControlService extends Service {
 		log.d("onLowMemory");
 	}
 
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void setMediaSessionPlaybackState(int state) {
+		if (mMediaSession == null) {
+			return;
+		}
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+		PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+				.setActions(PlaybackState.ACTION_PLAY
+						| PlaybackState.ACTION_STOP
+						| PlaybackState.ACTION_PAUSE
+						| PlaybackState.ACTION_PLAY_PAUSE
+						| PlaybackState.ACTION_SKIP_TO_NEXT
+						| PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+				.setState(state, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1);
+		mMediaSession.setPlaybackState(stateBuilder.build());
+	}
+
 	private Notification buildNotification(String title, String sentence, TTSStatus status) {
 		Notification notification;
 		Intent notificationIntent = new Intent(this, CoolReader.class);
@@ -145,36 +172,41 @@ public class TTSControlService extends Service {
 					// play/pause
 					Intent intent1 = new Intent(TTS_CONTROL_ACTION_PLAY_PAUSE);
 					PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
-					Notification.Action.Builder actionBld = new Notification.Action.Builder(status == TTSStatus.PAUSED ? R.drawable.ic_media_play : R.drawable.ic_media_pause, "", pendingIntent1);
+					Notification.Action.Builder actionBld = new Notification.Action.Builder(status == TTSStatus.PAUSED ? R.drawable.icons8_play : R.drawable.icons8_pause, "", pendingIntent1);
 					Notification.Action actionPlayPause = actionBld.build();
 					builder = builder.addAction(actionPlayPause);
 					// prev
 					Intent intent2 = new Intent(TTS_CONTROL_ACTION_PREV);
 					PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
-					actionBld = new Notification.Action.Builder(R.drawable.ic_media_rew, "", pendingIntent2);
+					actionBld = new Notification.Action.Builder(R.drawable.icons8_rewind, "", pendingIntent2);
 					Notification.Action actionPrev = actionBld.build();
 					builder = builder.addAction(actionPrev);
 					// next
 					Intent intent3 = new Intent(TTS_CONTROL_ACTION_NEXT);
 					PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
-					actionBld = new Notification.Action.Builder(R.drawable.ic_media_ff, "", pendingIntent3);
+					actionBld = new Notification.Action.Builder(R.drawable.icons8_fast_forward, "", pendingIntent3);
 					Notification.Action actionNext = actionBld.build();
 					builder = builder.addAction(actionNext);
 					// stop
 					Intent intent4 = new Intent(TTS_CONTROL_ACTION_DONE);
 					PendingIntent pendingIntent4 = PendingIntent.getBroadcast(this, 0, intent4, 0);
-					actionBld = new Notification.Action.Builder(R.drawable.ic_media_stop, "", pendingIntent4);
+					actionBld = new Notification.Action.Builder(R.drawable.icons8_stop, "", pendingIntent4);
 					Notification.Action actionStop = actionBld.build();
 					builder = builder.addAction(actionStop);
 					//
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-						builder = builder.setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 3));
-						//if (null != sentence && !sentence.isEmpty())
-						//	builder = builder.setStyle(new Notification.BigTextStyle().bigText(sentence));
+						if (mMediaSession == null)
+							builder = builder.setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 3));
+						else
+							builder = builder.setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 3).setMediaSession(mMediaSession.getSessionToken()));
 						builder = builder.setColor(Color.GRAY);
 						builder = builder.setVisibility(Notification.VISIBILITY_PUBLIC);
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-							builder = builder.setLargeIcon(Icon.createWithResource(this, R.drawable.known_reader_flogo));
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+							if (mBitmap != null)
+								builder = builder.setLargeIcon(mBitmap);
+							else
+								builder = builder.setLargeIcon(Icon.createWithResource(this, R.drawable.known_reader_flogo));
+						}
 					}
 				}
 			} else
@@ -191,6 +223,58 @@ public class TTSControlService extends Service {
 		return notification;
 	}
 
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public void notifyStartMediaSession(BookInfo bookInfo, Bitmap bitmap) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+		if (bookInfo == null) {
+			return;
+		}
+		notifyStopMediaSession();
+		mMediaSession = new MediaSession(this, "TTS");
+		mMediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS|MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+		mMediaSession.setCallback(new MediaSession.Callback() {
+			@Override
+			public void onPlay() {
+				TTSControlService.this.sendBroadcast(new Intent(TTS_CONTROL_ACTION_PLAY_PAUSE));
+			}
+			@Override
+			public void onPause() {
+				TTSControlService.this.sendBroadcast(new Intent(TTS_CONTROL_ACTION_PLAY_PAUSE));
+			}
+			@Override
+			public void onSkipToNext() {
+				TTSControlService.this.sendBroadcast(new Intent(TTS_CONTROL_ACTION_NEXT));
+			}
+			@Override
+			public void onSkipToPrevious() {
+				TTSControlService.this.sendBroadcast(new Intent(TTS_CONTROL_ACTION_PREV));
+			}
+			@Override
+			public void onStop() {
+				TTSControlService.this.sendBroadcast(new Intent(TTS_CONTROL_ACTION_DONE));
+			}
+		});
+		MediaMetadata metadata = new MediaMetadata.Builder()
+				.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+				.putString(MediaMetadata.METADATA_KEY_TITLE, bookInfo.getFileInfo().getTitle())
+				.putString(MediaMetadata.METADATA_KEY_ARTIST, bookInfo.getFileInfo().getAuthors())
+				.build();
+		mMediaSession.setMetadata(metadata);
+		setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
+		mMediaSession.setActive(true);
+		mBitmap = bitmap;
+	}
+
+	public void notifyStopMediaSession() {
+		if (mMediaSession == null) return;
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+		try {
+			mMediaSession.setActive(false);
+			mMediaSession.release();
+		} catch (Throwable ignored) {
+		}
+	}
+
 	public void notifyPlay(String title, String sentence) {
 		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		if (null != notificationManager) {
@@ -200,6 +284,7 @@ public class TTSControlService extends Service {
 			else
 				log.e("Failed to build notification!");
 		}
+		setMediaSessionPlaybackState(PlaybackState.STATE_PLAYING);
 	}
 
 	public void notifyPause(String title) {
@@ -211,6 +296,7 @@ public class TTSControlService extends Service {
 			else
 				log.e("Failed to build notification!");
 		}
+		setMediaSessionPlaybackState(PlaybackState.STATE_STOPPED);
 	}
 
 }

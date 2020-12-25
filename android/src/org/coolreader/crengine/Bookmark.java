@@ -22,6 +22,10 @@ public class Bookmark {
 		timeStamp=v.timeStamp;
 		timeElapsed = v.timeElapsed;
 		linkPos=v.linkPos;
+		isCustomColor=v.isCustomColor;
+		customColor=v.customColor;
+		shortContext=v.shortContext;
+		fullContext=v.fullContext;
 	}
 	
 	@Override
@@ -45,6 +49,13 @@ public class Bookmark {
 		result = prime * result + type;
 		result = prime * result
 				+ ((linkPos == null) ? 0 : linkPos.hashCode());
+		result = prime * result + isCustomColor;
+		result = prime * result
+				+ ((customColor == null) ? 0 : customColor.hashCode());
+		result = prime * result
+				+ ((shortContext == null) ? 0 : shortContext.hashCode());
+		result = prime * result
+				+ ((fullContext == null) ? 0 : fullContext.hashCode());
 		return result;
 	}
 
@@ -99,6 +110,23 @@ public class Bookmark {
 			if (other.linkPos != null)
 				return false;
 		} else if (!linkPos.equals(other.linkPos))
+			return false;
+		else if (isCustomColor != other.isCustomColor)
+			return false;
+		if (customColor == null) {
+			if (other.customColor != null)
+				return false;
+		} else if (!customColor.equals(other.customColor))
+			return false;
+		if (shortContext == null) {
+			if (other.shortContext != null)
+				return false;
+		} else if (!shortContext.equals(other.shortContext))
+			return false;
+		if (fullContext == null) {
+			if (other.fullContext != null)
+				return false;
+		} else if (!fullContext.equals(other.fullContext))
 			return false;
 		if (titleText == null) {
 			if (other.titleText != null)
@@ -165,8 +193,32 @@ public class Bookmark {
 	public String getLinkPos() {
 		return linkPos;
 	}
+	public int getIsCustomColor() {
+		return isCustomColor;
+	}
+	public String getCustomColor() {
+		return customColor;
+	}
+	public String getShortContext() {
+		return shortContext;
+	}
+	public String getFullContext() {
+		return fullContext;
+	}
 	public void setLinkPos(String linkPos) {
 		this.linkPos = linkPos;
+	}
+	public void setIsCustomColor(int isCustomColor) {
+		this.isCustomColor = isCustomColor;
+	}
+	public void setCustomColor(String customColor) {
+		this.customColor = customColor;
+	}
+	public void setShortContext(String shortContext) {
+		this.shortContext = shortContext;
+	}
+	public void setFullContext(String fullContext) {
+		this.fullContext = fullContext;
 	}
 	public String getEndPos() {
 		return endPos;
@@ -275,6 +327,10 @@ public class Bookmark {
 	public String bookFile; // for gson saving
 	public String bookPath;
 	public String bookFileArc;
+	public int isCustomColor;
+	public String customColor;
+	public String shortContext;
+	public String fullContext;
 	@Override
 	public String toString() {
 		return "Bookmark[t=" + type + ", start=" + startPos + "]";

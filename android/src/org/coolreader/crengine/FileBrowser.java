@@ -15,10 +15,6 @@ import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.widget.*;
 
-import androidx.annotation.ColorInt;
-
-import com.google.android.gms.common.util.IOUtils;
-
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
@@ -31,12 +27,9 @@ import org.coolreader.crengine.OPDSUtil.EntryInfo;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.plugins.*;
-import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -1334,6 +1327,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								file.pathname = FileInfo.OPDS_DIR_PREFIX + acquisition.href;
 								file.annotation = entry.summary;
 								file.setFilename(Utils.cleanupHtmlTags(entry.content));
+								file.name_crc32 = FileInfo.getFNameCRC(file.getFilename());
 								file.title = entry.title;
 								file.format = DocumentFormat.byMimeType(acquisition.type);
 								file.setAuthors(entry.getAuthors());

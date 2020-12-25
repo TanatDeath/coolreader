@@ -6,7 +6,10 @@ import org.coolreader.R;
 import org.coolreader.layouts.FlowLayout;
 
 import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -31,9 +34,11 @@ import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TabHost;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.CRC32;
 
 public class SelectionToolbarDlg {
 	PopupWindow mWindow;
@@ -142,17 +147,249 @@ public class SelectionToolbarDlg {
 		mWindow.dismiss();
 	}
 
+	LinearLayout llAddButtonsParent = null;
+	LinearLayout llAddButtons = null;
+
+	public boolean addButtonEnabled = false;
+	private Properties props;
+
+	public void saveUserDic(boolean isCitation, String text) {
+		UserDicEntry ude = new UserDicEntry();
+		ude.setId(0L);
+		ude.setDic_word(selection.text);
+		if (isCitation)
+			ude.setDic_word_translate(BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+		else
+			ude.setDic_word_translate(text);
+		final String sBookFName = mReaderView.mBookInfo.getFileInfo().getFilename();
+		CRC32 crc = new CRC32();
+		crc.update(sBookFName.getBytes());
+		ude.setDic_from_book(String.valueOf(crc.getValue()));
+		ude.setCreate_time(System.currentTimeMillis());
+		ude.setLast_access_time(System.currentTimeMillis());
+		ude.setLanguage(mReaderView.mBookInfo.getFileInfo().language);
+		ude.setSeen_count(0L);
+		ude.setIs_citation(isCitation? 1 : 0);
+		mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
+		mCoolReader.getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
+		BackgroundThread.instance().postGUI(() -> {
+			if (isCitation)
+				mCoolReader.showToast(R.string.citation_created);
+			else
+				mCoolReader.showToast(R.string.user_dic_entry_created);
+			mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+		}, 1000);
+	}
+
+	public void sendTo1(String text) {
+		final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+		String text1 = BookmarkEditDialog.getSendToText1(mCoolReader,
+				selection.text,
+				BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+		String text2 = BookmarkEditDialog.getSendToText2(mCoolReader,
+				selection.text,
+				text,
+				BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+		emailIntent.setType("text/plain");
+		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, text1);
+		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text2);
+		mCoolReader.startActivity(Intent.createChooser(emailIntent, null));
+	}
+
+	public void sendTo2(String text) {
+		final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+		int selAction = -1;
+		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
+		if (selAction == -1) {
+			sendTo1(text);
+			return;
+		}
+		int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
+		Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
+		if (curDict == null) {
+			sendTo1(text);
+			return;
+		}
+		String text1 = BookmarkEditDialog.getSendToText1(mCoolReader,
+			selection.text,
+			BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+		String text2 = BookmarkEditDialog.getSendToText2(mCoolReader,
+				selection.text,
+				text,
+				BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+		emailIntent.setType("text/plain");
+		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, text1);
+		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text2);
+		for (ResolveInfo resolveInfo : mCoolReader.getPackageManager().queryIntentActivities(emailIntent, 0)) {
+			if( resolveInfo.activityInfo.packageName.contains(curDict.packageName)){
+				emailIntent.setComponent(new ComponentName(
+						resolveInfo.activityInfo.packageName,
+						resolveInfo.activityInfo.name));
+				try
+				{
+					mCoolReader.startActivity(emailIntent);
+				} catch ( ActivityNotFoundException e ) {
+					sendTo1(text);
+					return;
+				}
+			}
+
+		}
+	}
+
+	public void toggleAddButtons(boolean dontChange) {
+		if (llAddButtonsParent == null) return;
+		if (llAddButtons == null) return;
+		if (!dontChange) {
+			addButtonEnabled = !addButtonEnabled;
+			if (props != null) {
+				props.setProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, addButtonEnabled ? "1" : "0");
+				mCoolReader.setSettings(props, -1, true);
+			}
+		}
+		if (addButtonEnabled) {
+			llAddButtonsParent.removeAllViews();
+			llAddButtonsParent.addView(llAddButtons);
+			int colorGrayC;
+			int colorGray;
+			int colorIcon;
+			TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+					{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon});
+			colorGrayC = a.getColor(0, Color.GRAY);
+			colorGray = a.getColor(1, Color.GRAY);
+			colorIcon = a.getColor(2, Color.BLACK);
+			a.recycle();
+
+			ColorDrawable c = new ColorDrawable(colorGrayC);
+			c.setAlpha(130);
+			llAddButtons.findViewById(R.id.btn_quick_bookmark).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_quick_bookmark).setOnClickListener(v -> {
+				Bookmark bmk = new Bookmark();
+				bmk.setType(Bookmark.TYPE_COMMENT);
+				bmk.setPosText(selection.text);
+				bmk.setStartPos(selection.startPos);
+				bmk.setEndPos(selection.endPos);
+				bmk.setPercent(selection.percent);
+				bmk.setTitleText(selection.chapter);
+				mReaderView.addBookmark(bmk);
+				closeDialog(true);
+			});
+			llAddButtons.findViewById(R.id.btn_cite).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_cite).setOnClickListener(v -> {
+				saveUserDic(true, "");
+				closeDialog(true);
+			});
+			llAddButtons.findViewById(R.id.btn_user_dic).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_user_dic).setOnClickListener(v -> {
+				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_USER_DIC, "");
+				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+			});
+			llAddButtons.findViewById(R.id.btn_web_search).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_web_search).setOnClickListener(v -> {
+				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+				emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
+				mCoolReader.startActivity(emailIntent);
+				closeDialog(true);
+			});
+			llAddButtons.findViewById(R.id.btn_dic_list).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_dic_list).setOnClickListener(v -> {
+				DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null);
+				dlg.show();
+				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+			});
+			llAddButtons.findViewById(R.id.btn_combo).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_combo).setOnClickListener(v -> {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					mCoolReader.showToast(R.string.only_in_premium);
+					return;
+				}
+				Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
+				if (di != null) {
+					if (!StrUtils.isEmptyStr(selection.text)) {
+						mCoolReader.mDictionaries.setAdHocDict(di);
+						mCoolReader.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
+
+							@Override
+							public boolean showDicToast() {
+								return true;
+							}
+
+							@Override
+							public boolean saveToHist() {
+								return false;
+							}
+
+							@Override
+							public void done(String result) {
+								saveUserDic(false, result);
+								closeDialog(true);
+							}
+
+							@Override
+							public void fail(Exception e, String msg) {
+								mCoolReader.showToast(msg);
+							}
+						});
+					}
+				}
+				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+			});
+			llAddButtons.findViewById(R.id.btn_super_combo).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_super_combo).setOnClickListener(v -> {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					mCoolReader.showToast(R.string.only_in_premium);
+					return;
+				}
+				Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
+				if (di != null) {
+					if (!StrUtils.isEmptyStr(selection.text)) {
+						mCoolReader.mDictionaries.setAdHocDict(di);
+						mCoolReader.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
+
+							@Override
+							public boolean showDicToast() {
+								return true;
+							}
+
+							@Override
+							public boolean saveToHist() {
+								return false;
+							}
+
+							@Override
+							public void done(String result) {
+								saveUserDic(false, result);
+								sendTo2(result);
+								closeDialog(true);
+							}
+
+							@Override
+							public void fail(Exception e, String msg) {
+								mCoolReader.showToast(msg);
+							}
+						});
+					}
+				}
+				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+			});
+		} else {
+			llAddButtonsParent.removeAllViews();
+		}
+		mCoolReader.tintViewIcons(mPanel);
+	}
+
 	public SelectionToolbarDlg(CoolReader coolReader, ReaderView readerView, Selection sel )
 	{
 		this.selection = sel;
 		mCoolReader = coolReader;
+		props = new Properties(mCoolReader.settings());
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar, null));
+		llAddButtons = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_add, null));
+
 		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		
-		//mReaderView.getS
 		
 		mWindow = new PopupWindow( mAnchor.getContext() );
 
@@ -174,12 +411,12 @@ public class SelectionToolbarDlg {
 		colorIcon = a.getColor(2, Color.BLACK);
 		a.recycle();
 
-
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		c.setAlpha(130);
-		//mWindow.setBackgroundDrawable(c);
 
 		mPanel = panel;
+		llAddButtonsParent = panel.findViewById(R.id.ll_sel_add);
+
 		panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
 		//mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
@@ -189,10 +426,13 @@ public class SelectionToolbarDlg {
 			closeDialog(true);
 		});
 
+		String sExt = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
+		addButtonEnabled = StrUtils.getNonEmptyStr(sExt, true).equals("1");
+
+		if (addButtonEnabled) toggleAddButtons(true);
 		//recent dics
 		FlowLayout llRecentDics = mPanel.findViewById(R.id.recentDics);
 		//llRecentDics.setOrientation(LinearLayout.VERTICAL);
-		Properties props = new Properties(mCoolReader.settings());
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		int iCntRecent = 0;
 		if (llRecentDics!=null) {
@@ -315,6 +555,8 @@ public class SelectionToolbarDlg {
 		mPanel.findViewById(R.id.btn_next_sent2).setOnClickListener(v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP));
 		mPanel.findViewById(R.id.btn_prev_sent1).setOnClickListener(v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP));
 		mPanel.findViewById(R.id.btn_prev_sent2).setOnClickListener(v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP));
+		mPanel.findViewById(R.id.selection_more).setOnClickListener(v -> toggleAddButtons(false));
+
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
 			if ( event.getAction()==KeyEvent.ACTION_UP ) {
@@ -370,9 +612,32 @@ public class SelectionToolbarDlg {
 		//mWindow.update(location[0], location[1], mPanel.getWidth(), mPanel.getHeight() );
 		//mWindow.setWidth(mPanel.getWidth());
 		//mWindow.setHeight(mPanel.getHeight());
+		int selectionTop = 0;
+		int selectionBottom = 0;
+		if (mReaderView.lastSelection != null) {
+			selectionTop = mReaderView.lastSelection.startY;
+			selectionBottom = mReaderView.lastSelection.endY;
+		}
+		int panelHeight = mPanel.getHeight();
+		int surfaceHeight = mReaderView.getSurface().getHeight();
 
+		if (selectionBottom<selectionTop) {
+			int dummy = selectionBottom;
+			selectionBottom = selectionTop;
+			selectionTop = dummy;
+		}
 		int popupY = location[1] + mAnchor.getHeight() - mPanel.getHeight();
-		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+
+		if (
+				(selectionTop > (mReaderView.getSurface().getHeight() / 2)) &&
+				(selectionBottom > (mReaderView.getSurface().getHeight() / 2))
+						/*&& -- for some reasons, mPanel Height = 0 here :(((
+						((selectionTop > (surfaceHeight - panelHeight)) ||
+						 (selectionBottom > (surfaceHeight - panelHeight)))*/
+		)
+			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], 0);
+		else
+			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
 //		if ( mWindow.isShowing() )
 //			mWindow.update(mAnchor, 50, 50);
 		//dlg.mWindow.showAsDropDown(dlg.mAnchor);

@@ -30,7 +30,7 @@ public class DBXConfig {
         // Create Dropbox client
         final File fDBX = new File(cr.getSettingsFileExt("[DEFAULT]",0).getParent() + "/dbx.token");
         if (!fDBX.exists()) {
-            cr.showToast(R.string.cloud_need_authorization);
+            cr.showToast(cr.getString(R.string.cloud_need_authorization)+ ": Dropbox");
             cr.dbxInputTokenDialog = new DBXInputTokenDialog(cr);
             cr.dbxInputTokenDialog.show();
             return false;

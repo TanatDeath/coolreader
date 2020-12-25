@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -44,20 +47,45 @@ public class UserDicDlg extends BaseDialog {
 	final ImageButton btnUserDic;
 	final ImageButton btnCitation;
 	final ImageButton btnDicSearchHistory;
-	final RadioButton btnPage;
-	final RadioButton btnBook;
-	final RadioButton btnAll;
+	final Button btnPage2;
+	final Button btnBook2;
+	final Button btnAll2;
 	final ImageButton searchButton;
 	final EditText selEdit;
 
-	private ArrayList<UserDicEntry> mUserDic = new ArrayList<UserDicEntry>();
-	public static ArrayList<DicSearchHistoryEntry> mDicSearchHistoryAll = new ArrayList<DicSearchHistoryEntry>();
-	private ArrayList<DicSearchHistoryEntry> mDicSearchHistory = new ArrayList<DicSearchHistoryEntry>();
+	private ArrayList<UserDicEntry> mUserDic = new ArrayList<>();
+	public static ArrayList<DicSearchHistoryEntry> mDicSearchHistoryAll = new ArrayList<>();
+	private ArrayList<DicSearchHistoryEntry> mDicSearchHistory = new ArrayList<>();
 
 	public final static int ITEM_POSITION=0;
 
 	private void listUpdated() {
 		mList.updateAdapter(new UserDicAdapter());
+	}
+
+	private void paintScopeButtons() {
+		int colorGrayC;
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		a.recycle();
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		mCoolReader.tintViewIcons(btnPage2, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnBook2, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnAll2, PorterDuff.Mode.CLEAR,true);
+		if (getCheckedFromTag(btnPage2.getTag())) {
+			btnPage2.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnPage2,true);
+		} else btnPage2.setBackgroundColor(colorGrayCT);
+		if (getCheckedFromTag(btnBook2.getTag())) {
+			btnBook2.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnBook2,true);
+		} else btnBook2.setBackgroundColor(colorGrayCT);
+		if (getCheckedFromTag(btnAll2.getTag())) {
+			btnAll2.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnAll2,true);
+		} else btnAll2.setBackgroundColor(colorGrayCT);
 	}
 
 	class UserDicAdapter extends BaseAdapter {
@@ -305,6 +333,21 @@ public class UserDicDlg extends BaseDialog {
 
 	}
 
+	private boolean getCheckedFromTag(Object o) {
+		if (o == null) return false;
+		if (!(o instanceof String)) return false;
+		if (o.equals("1")) return true;
+		return false;
+	}
+
+	private void setCheckedTag(Button b) {
+		if (b == null) return;
+		btnPage2.setTag("0");
+		btnBook2.setTag("0");
+		btnAll2.setTag("0");
+		b.setTag("1");
+	}
+
 	private void setChecked(ImageButton btn) {
 		int colorIcon;
 		int colorIconL;
@@ -316,39 +359,40 @@ public class UserDicDlg extends BaseDialog {
 		int colorGrayC = a.getColor(3, Color.GRAY);
 		a.recycle();
 		rb_descr.setText(btn.getContentDescription()+" ");
-		btnPage.setEnabled(true);
-		btnPage.setTextColor(colorIcon);
+		btnPage2.setEnabled(true);
+		btnPage2.setTextColor(colorIcon);
 		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_bookmark_user_dic))) {
 			openPage = 0;
 		}
 		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_bookmark_citation))) {
 			if (openPage == 0) {
-				if (btnPage.isChecked()) {
-					btnBook.setChecked(true);
+				if (getCheckedFromTag(btnPage2.getTag())) {
+					setCheckedTag(btnBook2);
 				}
 			}
-			btnPage.setEnabled(false);
-			btnPage.setTextColor(colorIconL);
+			btnPage2.setEnabled(false);
+			btnPage2.setTextColor(colorIconL);
 			openPage = 1;
 		}
 
 		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_button_dic_search_hist))) {
 			if (openPage == 0) {
-				if (btnPage.isChecked()) {
-					btnBook.setChecked(true);
+				if (getCheckedFromTag(btnPage2.getTag())) {
+					setCheckedTag(btnBook2);
 				}
 			}
-			btnPage.setEnabled(false);
-			btnPage.setTextColor(colorIconL);
+			btnPage2.setEnabled(false);
+			btnPage2.setTextColor(colorIconL);
 			openPage = 2;
 		}
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-        rb_descr.setBackgroundColor(colorGrayCT);
+		rb_descr.setBackgroundColor(colorGrayCT);
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnUserDic.setBackgroundColor(colorGrayCT);
 		btnCitation.setBackgroundColor(colorGrayCT);
 		btnDicSearchHistory.setBackgroundColor(colorGrayCT);
 		btn.setBackgroundColor(colorGray);
+		paintScopeButtons();
 	}
 
 	private boolean getChecked(ImageButton btn) {
@@ -364,14 +408,15 @@ public class UserDicDlg extends BaseDialog {
 		return false;
 	}
 
-	private void checkedCallback(RadioButton btn) {
-		boolean bPageC = btnPage.isChecked();
-		boolean bBookC = btnBook.isChecked();
-		boolean bAllC = btnAll.isChecked();
+	private void checkedCallback(Button btn) {
+		boolean bPageC = getCheckedFromTag(btnPage2.getTag());
+		boolean bBookC = getCheckedFromTag(btnBook2.getTag());
+		boolean bAllC = getCheckedFromTag(btnAll2.getTag());
 		if (btn!=null) {
-			bPageC = (btn.equals(btnPage));
-			bBookC = (btn.equals(btnBook));
-			bAllC = (btn.equals(btnAll));
+			bPageC = (btn.equals(btnPage2));
+			bBookC = (btn.equals(btnBook2));
+			bAllC = (btn.equals(btnAll2));
+			setCheckedTag(btn);
 		}
 		if (bPageC) {
 			if ((openPage==0)||(openPage==1)) {
@@ -403,6 +448,7 @@ public class UserDicDlg extends BaseDialog {
 			if ((openPage==0)||(openPage==1)) updUserDic("");
 			if ((openPage==2)) updDicSearchHistory("");
 		}
+		paintScopeButtons();
 	}
 
 	public UserDicDlg(final CoolReader activity, final int openPage)
@@ -417,45 +463,41 @@ public class UserDicDlg extends BaseDialog {
 			//mCoolReader.showToast(ude.getDic_word()+" "+ude.getIs_citation());
 		}
 		View frame = mInflater.inflate(R.layout.userdic_list_dialog, null);
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.userdic_list);
+		ViewGroup body = frame.findViewById(R.id.userdic_list);
 		mList = new UserDicList(activity, this);
-		btnPage = (RadioButton)frame.findViewById(R.id.rb_page);
-		btnBook = (RadioButton)frame.findViewById(R.id.rb_book);
-		btnAll = (RadioButton)frame.findViewById(R.id.rb_userdic_all);
-		btnUserDic = (ImageButton)frame.findViewById(R.id.rb_user_dic);
-		btnCitation = (ImageButton)frame.findViewById(R.id.rb_citation);
-		btnDicSearchHistory = (ImageButton)frame.findViewById(R.id.rb_dic_search_history);
-		ImageButton btnFake = (ImageButton)frame.findViewById(R.id.btn_fake);
-		rb_descr = (TextView)frame.findViewById(R.id.lbl_rb_descr);
-		tr_descr = (TableRow)frame.findViewById(R.id.tr_rb_descr);
+		btnPage2 = frame.findViewById(R.id.rb_page2);
+		btnBook2 = frame.findViewById(R.id.rb_book2);
+		btnAll2 = frame.findViewById(R.id.rb_userdic_all2);
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		Drawable img3 = img.getConstantState().newDrawable().mutate();
+		btnPage2.setTag("1");
+		btnPage2.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		btnBook2.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+		btnAll2.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
+		btnUserDic = frame.findViewById(R.id.rb_user_dic);
+		btnCitation = frame.findViewById(R.id.rb_citation);
+		btnDicSearchHistory = frame.findViewById(R.id.rb_dic_search_history);
+		ImageButton btnFake = frame.findViewById(R.id.btn_fake);
+		rb_descr = frame.findViewById(R.id.lbl_rb_descr);
+		tr_descr = frame.findViewById(R.id.tr_rb_descr);
 		if (openPage==0) setChecked(btnUserDic);
 		if (openPage==1) setChecked(btnCitation);
 		if (openPage==2) setChecked(btnDicSearchHistory);
 		body.addView(mList);
 		setView(frame);
-		searchButton = (ImageButton) frame.findViewById(R.id.btn_search);
-		selEdit = (EditText) frame.findViewById(R.id.search_text);
+		searchButton = frame.findViewById(R.id.btn_search);
+		selEdit = frame.findViewById(R.id.search_text);
 		selEdit.clearFocus();
 		btnFake.requestFocus();
 		setFlingHandlers(mList, null, null);
 
-		searchButton.setOnClickListener(v -> checkedCallback(null));
+		btnPage2.setOnClickListener(v -> checkedCallback(btnPage2));
+		btnBook2.setOnClickListener(v -> checkedCallback(btnBook2));
+		btnAll2.setOnClickListener(v -> checkedCallback(btnAll2));
 
-		btnPage.setOnCheckedChangeListener((buttonView, isChecked) -> {
-			if ( isChecked ) {
-				checkedCallback(btnPage);
-			}
-		});
-		btnBook.setOnCheckedChangeListener((buttonView, isChecked) -> {
-			if ( isChecked ) {
-				checkedCallback(btnBook);
-			}
-		});
-		btnAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
-			if ( isChecked ) {
-				checkedCallback(btnAll);
-			}
-		});
+		searchButton.setOnClickListener(v -> checkedCallback(null));
 
 		btnUserDic.setOnClickListener(v -> {
 			setChecked(btnUserDic);
@@ -510,23 +552,20 @@ public class UserDicDlg extends BaseDialog {
 		mDicSearchHistory.clear();
 		if (activity instanceof CoolReader) {
 			CoolReader cr = (CoolReader)activity;
-			cr.getDB().loadDicSearchHistory(new CRDBService.DicSearchHistoryLoadingCallback() {
-				@Override
-				public void onDicSearchHistoryLoaded(List<DicSearchHistoryEntry> list) {
-					ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
-					for (DicSearchHistoryEntry dshe: list1) {
-						if ((dshe.getSearch_from_book().equals(sCRC)) || (sCRC.equals("")))
-							if (
-									(selEdit.getText().toString().trim().equals("")) ||
-											(
-													(dshe.getSearch_text().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim())) ||
-															(dshe.getText_translate().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim()))
-											)
-							)
-								mDicSearchHistory.add(dshe);
-					};
-					listUpdated();
-				}
+			cr.getDB().loadDicSearchHistory(list -> {
+				ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
+				for (DicSearchHistoryEntry dshe: list1) {
+					if ((dshe.getSearch_from_book().equals(sCRC)) || (sCRC.equals("")))
+						if (
+								(selEdit.getText().toString().trim().equals("")) ||
+										(
+												(dshe.getSearch_text().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim())) ||
+														(dshe.getText_translate().toLowerCase().contains(selEdit.getText().toString().toLowerCase().trim()))
+										)
+						)
+							mDicSearchHistory.add(dshe);
+				};
+				listUpdated();
 			});
 		}
 	}
@@ -535,14 +574,11 @@ public class UserDicDlg extends BaseDialog {
 		mDicSearchHistoryAll.clear();
 		if (act instanceof CoolReader) {
 			CoolReader cr = (CoolReader)act;
-			cr.getDB().loadDicSearchHistory(new CRDBService.DicSearchHistoryLoadingCallback() {
-				@Override
-				public void onDicSearchHistoryLoaded(List<DicSearchHistoryEntry> list) {
-					ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
-					for (DicSearchHistoryEntry dshe: list1) {
-						mDicSearchHistoryAll.add(dshe);
-					};
-				}
+			cr.getDB().loadDicSearchHistory(list -> {
+				ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
+				for (DicSearchHistoryEntry dshe: list1) {
+					mDicSearchHistoryAll.add(dshe);
+				};
 			});
 		}
 	}

@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -344,6 +345,15 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
     public void refreshFileSystemFolders(boolean readSetting) {
         ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
+		File f = new File(Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS);
+		if ((f.exists()) && (folders != null)) {
+			String label = f.getName();
+			FileInfo fiDownl = new FileInfo(f);
+			fiDownl.isDirectory = true;
+			fiDownl.setType(FileInfo.TYPE_DOWNLOAD_DIR);
+			fiDownl.setTitle(label);
+			folders.add(fiDownl);
+		}
         updateFilesystems(folders);
 		bFilesystemHidden = false;
 		if (readSetting) bFilesystemHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_FS_SECTION_HIDE, false);
@@ -506,18 +516,12 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	private void updateFilesystems(List<FileInfo> dirs) {
 		if (dirs==null) return;
-		int colorBlue;
-		int colorGreen;
-		int colorGray;
 		int colorIcon;
 		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeBlue,
 						R.attr.colorThemeGreen,
 						R.attr.colorThemeGray,
 						R.attr.colorIcon});
-		colorBlue = a.getColor(0, Color.BLUE);
-		colorGreen = a.getColor(1, Color.GREEN);
-		colorGray = a.getColor(2, Color.GRAY);
 		colorIcon = a.getColor(3, Color.GRAY);
 		a.recycle();
 		if (dirs.size()!=0) {

@@ -267,6 +267,7 @@
     <attr name="attr_icons8_scroll_down_small" format="reference" />
     <attr name="attr_icons8_scroll_up_small" format="reference" />
     <attr name="attr_icons8_drop_down_no_frame_small" format="reference" />
+    <attr name="attr_icons8_drop_up_no_frame_small" format="reference" />
     <attr name="attr_icons8_toggle_page_view_mode" format="reference" />
     <attr name="attr_icons8_volume_up" format="reference" />
     <attr name="attr_icons8_volume_down" format="reference" />
@@ -324,6 +325,7 @@
     <attr name="attr_icons8_skim" format="reference" />
     <attr name="attr_icons8_combo" format="reference" />
     <attr name="attr_icons8_super_combo" format="reference" />
+    <attr name="attr_icons8_web_search" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

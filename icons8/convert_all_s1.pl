@@ -14,7 +14,12 @@ my %ic_smaller_list=(
         'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png',
         'icons8_minus_small.svg' => 'icons8_minus_small.png',
         'icons8_plus_plus_small.svg' => 'icons8_plus_plus_small.png',
-        'icons8_plus_small.svg' => 'icons8_plus_small.png'
+        'icons8_plus_small.svg' => 'icons8_plus_small.png',
+        'icons8_drop_up_no_frame.svg' => 'icons8_drop_up_no_frame_small.png',
+        'icons8_unchecked_checkbox.svg' => 'icons8_unchecked_checkbox.png',
+        'icons8_checked_checkbox.svg' => 'icons8_checked_checkbox.png',
+        'icons8_check_no_frame.svg' => 'icons8_check_no_frame.png',
+        'icons8_delete.svg' => 'icons8_delete.png'
 );
 
 my %ic_actions_list=(
@@ -26,7 +31,8 @@ my %ic_actions_list=(
         'cr3_option_text_multilang.svg' => 'cr3_option_text_multilang.png',
         'icons8_skim.svg' => 'icons8_skim.png',
         'icons8_combo.svg' => 'icons8_combo.png',
-        'icons8_super_combo.svg' => 'icons8_super_combo.png'
+        'icons8_super_combo.svg' => 'icons8_super_combo.png',
+        'icons8_web_search.svg' => 'icons8_web_search.png'
 );
 
 my %ic_menu_list=(

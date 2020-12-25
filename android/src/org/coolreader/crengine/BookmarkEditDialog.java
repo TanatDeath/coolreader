@@ -49,6 +49,7 @@ public class BookmarkEditDialog extends BaseDialog {
 	final Button btnSendTo1;
 	final Button btnSendTo2;
 	final Button btnTransl;
+	final Button btnTransl2;
 	final Button btnColorCheck;
 	final Button btnColorChoose;
 	final EditText edtContext;
@@ -201,6 +202,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnSendTo1.setBackgroundColor(colorGrayCT);
 		btnSendTo2.setBackgroundColor(colorGrayCT);
 		btnTransl.setBackgroundColor(colorGrayCT);
+		btnTransl2.setBackgroundColor(colorGrayCT);
 		paintColorCheckButton();
 		btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
 		btn.setBackgroundColor(colorGray);
@@ -228,25 +230,21 @@ public class BookmarkEditDialog extends BaseDialog {
 	private Dictionaries.DictInfo currentDic = null;
 
 	private void setupTranslButton() {
-		for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.getAddDicts()) {
-			if (di.id.equals("YandexTranslateOnline") ||
-					di.id.equals("LingvoOnline") ||
-					di.id.equals("LingvoOnline Extended") ||
-					di.id.equals("Wikipedia 1 (online)") ||
-					di.id.equals("Wikipedia 2 (online)")
-			) {
-				btnTransl.setText(di.name);
-				currentDic = di;
-				return;
-			};
+		Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
+		if (di != null) {
+			btnTransl.setText(di.name);
+			btnTransl2.setText(di.name);
+			currentDic = di;
+			return;
 		}
 		Utils.hideView(btnTransl);
+		Utils.hideView(btnTransl2);
 	}
 
-	private String getContextText() {
-		int curPage = ((CoolReader)activity).getReaderView().getDoc().getCurPage();
-		String sPageText = StrUtils.getNonEmptyStr(((CoolReader)activity).getReaderView().getPageTextFromEngine(curPage), true);
-		String sBmkText = StrUtils.getNonEmptyStr(mBookmark.getPosText(), true);
+	public static String getContextText(CoolReader cr, String text) {
+		int curPage = cr.getReaderView().getDoc().getCurPage();
+		String sPageText = StrUtils.getNonEmptyStr(cr.getReaderView().getPageTextFromEngine(curPage), true);
+		String sBmkText = StrUtils.getNonEmptyStr(text, true);
 		String sContextText = "";
 		if (sPageText.contains(sBmkText)) {
 			int iPos = sPageText.indexOf(sBmkText);
@@ -274,6 +272,40 @@ public class BookmarkEditDialog extends BaseDialog {
 		return sContextText;
 		//return sPageText;
 //		return mBookmark.getPosText();
+	}
+
+	public static String getSendToText1(CoolReader cr, String defText, String context) {
+		String text = StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(defText, true), true);
+		int mod = cr.settings().getInt(Settings.PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD, 0);
+		if ((mod > 0) && (StrUtils.getNonEmptyStr(context, false).contains(StrUtils.getNonEmptyStr(defText, false)))) { // need context, instead of text
+			String newContext = StrUtils.getNonEmptyStr(context, false);
+			if (mod == 2) newContext = newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<b>"+defText+"</b>");
+			if (mod == 3) newContext = newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<i>"+defText+"</i>");
+			if (mod == 4) newContext = newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<u>"+defText+"</u>");
+			return StrUtils.getNonEmptyStr(newContext, true);
+		}
+		return StrUtils.getNonEmptyStr(text, true);
+	}
+
+	public static String getSendToText2(CoolReader cr, String defText1, String defText2, String context) {
+		String text2 = StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(defText2, true), true);
+		int mod = cr.settings().getInt(Settings.PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD, 0);
+		if ((mod > 0) && (StrUtils.getNonEmptyStr(context, false).contains(StrUtils.getNonEmptyStr(defText1, false)))) {
+			if (StrUtils.isEmptyStr(text2)) { // empty comment and context - we'll use full page text
+				int curPage = cr.getReaderView().getDoc().getCurPage();
+				String sPageText = StrUtils.getNonEmptyStr(cr.getReaderView().getPageTextFromEngine(curPage), true);
+				if (mod == 2) sPageText = sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<b>"+defText1+"</b>");
+				if (mod == 3) sPageText = sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<i>"+defText1+"</i>");
+				if (mod == 4) sPageText = sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<u>"+defText1+"</u>");
+				text2 = StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(sPageText, true), true);
+			}
+		} else {
+			if (StrUtils.isEmptyStr(text2)) { // empty comment and no context - we'll use context
+				text2 = StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(context, true), true);
+				//text2 = StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(getContextText(cr, context), true), true);
+			}
+		}
+		return StrUtils.getNonEmptyStr(text2, true);
 	}
 
 	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType, String commentText)
@@ -314,6 +346,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnSendTo1 = view.findViewById(R.id.btn_sent_to1);
 		btnSendTo2 = view.findViewById(R.id.btn_sent_to2);
 		btnTransl = view.findViewById(R.id.btn_transl);
+		btnTransl2 = view.findViewById(R.id.btn_transl2);
 		setupTranslButton();
 		btnColorCheck = view.findViewById(R.id.btn_color_check);
 		BackgroundThread.instance().postGUI(() -> paintColorCheckButton(), 200);
@@ -450,6 +483,9 @@ public class BookmarkEditDialog extends BaseDialog {
 				}
 				mBookmark.setType(Bookmark.TYPE_CITATION);
 				commentLabel.setText(R.string.dlg_bookmark_edit_comment); // : R.string.dlg_bookmark_edit_correction
+				if ((commentEdit.getText().toString().equals("")) ||
+						(commentEdit.getText().toString().equals(posEdit.getText().toString())))
+					commentEdit.setText(getContextText(mCoolReader, mBookmark.getPosText()));
 				posEdit.setKeyListener(keyList);
 				posEdit.setText(mBookmark.getPosText());
 				setChecked(btnCitation);
@@ -469,7 +505,7 @@ public class BookmarkEditDialog extends BaseDialog {
 				}
 				commentEdit.setText(cText.trim());
 			}
-			edtContext.setText(getContextText());
+			edtContext.setText(getContextText(mCoolReader, mBookmark.getPosText()));
 		} else {
 			btnComment.setClickable(false);
 			btnCorrection.setClickable(false);
@@ -504,8 +540,13 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnSendTo1.setOnClickListener(v -> {
 			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 			emailIntent.setType("text/plain");
-			emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(posEdit.getText().toString(), true), true));
-			emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(commentEdit.getText().toString(), true), true));
+			String text1 = getSendToText1(cr, posEdit.getText().toString(),
+					edtContext.getText().toString());
+			String text2 = getSendToText2(cr, posEdit.getText().toString(),
+					commentEdit.getText().toString(),
+					edtContext.getText().toString());
+			emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, text1);
+			emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text2);
 		 	mCoolReader.startActivity(Intent.createChooser(emailIntent, null));
 		 	onPositiveButtonClick();
 		});
@@ -524,8 +565,13 @@ public class BookmarkEditDialog extends BaseDialog {
 				return;
 			}
 			emailIntent.setType("text/plain");
-			emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(posEdit.getText().toString(), true), true));
-			emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(commentEdit.getText().toString(), true), true));
+			String text1 = getSendToText1(cr, posEdit.getText().toString(),
+					edtContext.getText().toString());
+			String text2 = getSendToText2(cr, posEdit.getText().toString(),
+					commentEdit.getText().toString(),
+					edtContext.getText().toString());
+			emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, text1);
+			emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text2);
 			for (ResolveInfo resolveInfo : mCoolReader.getPackageManager().queryIntentActivities(emailIntent, 0)) {
 				if( resolveInfo.activityInfo.packageName.contains(curDict.packageName)){
 					emailIntent.setComponent(new ComponentName(
@@ -543,9 +589,55 @@ public class BookmarkEditDialog extends BaseDialog {
 			}
 		});
 		btnTransl.setOnClickListener(v -> {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
+				mCoolReader.showToast(R.string.only_in_premium);
+				return;
+			}
 			if ((currentDic != null) && (!StrUtils.isEmptyStr(posEdit.getText().toString()))) {
 				mCoolReader.mDictionaries.setAdHocDict(currentDic);
 				mCoolReader.findInDictionary(posEdit.getText().toString(), null, new CoolReader.DictionaryCallback() {
+
+					@Override
+					public boolean showDicToast() {
+						return false;
+					}
+
+					@Override
+					public boolean saveToHist() {
+						return true;
+					}
+
+					@Override
+					public void done(String result) {
+						commentEdit.setText(result);
+					}
+
+					@Override
+					public void fail(Exception e, String msg) {
+						mCoolReader.showToast(msg);
+					}
+				});
+			}
+		});
+		btnTransl2.setOnClickListener(v -> {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
+				mCoolReader.showToast(R.string.only_in_premium);
+				return;
+			}
+			if ((currentDic != null) && (!StrUtils.isEmptyStr(posEdit.getText().toString()))) {
+				mCoolReader.mDictionaries.setAdHocDict(currentDic);
+				mCoolReader.findInDictionary(edtContext.getText().toString(), null, new CoolReader.DictionaryCallback() {
+
+					@Override
+					public boolean showDicToast() {
+						return false;
+					}
+
+					@Override
+					public boolean saveToHist() {
+						return true;
+					}
+
 					@Override
 					public void done(String result) {
 						commentEdit.setText(result);
