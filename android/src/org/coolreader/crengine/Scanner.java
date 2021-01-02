@@ -8,7 +8,11 @@ import org.coolreader.plugins.OnlineStorePluginManager;
 import org.coolreader.plugins.OnlineStoreWrapper;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 
 public class Scanner extends FileInfoChangeSource {
@@ -94,13 +98,18 @@ public class Scanner extends FileInfoChangeSource {
 		}
 		return null;
 	}
-	
+
+	public boolean listDirectory(FileInfo baseDir)
+	{
+		return listDirectory(baseDir, true);
+	}
+
 	/**
 	 * Adds dir and file children to directory FileInfo item.
 	 * @param baseDir is directory to list files and dirs for
 	 * @return true if successful.
 	 */
-	public boolean listDirectory(FileInfo baseDir)
+	public boolean listDirectory(FileInfo baseDir, boolean onlySupportedFormats)
 	{
 		Set<String> knownItems = null;
 		if (baseDir.isListed) {
@@ -173,14 +182,14 @@ public class Scanner extends FileInfoChangeSource {
 							}
 							isNew = true;
 						}
-						if (item.format != null)
-							if (item.format != DocumentFormat.NONE)
-							{
-								item.parent = baseDir;
-								baseDir.addFile(item);
-								if (isNew)
-									mFileList.put(pathName, item);
-							}
+						boolean formatOk = item.format!=null;
+						if (formatOk) formatOk = item.format != DocumentFormat.NONE;
+						if (!onlySupportedFormats || formatOk) {
+							item.parent = baseDir;
+							baseDir.addFile(item);
+							if (isNew)
+								mFileList.put(pathName, item);
+						}
 					}
 				}
 				// process directories 
@@ -278,6 +287,12 @@ public class Scanner extends FileInfoChangeSource {
 					if (fromDB != null) {
 						if (fromDB.crc32 == 0 || fromDB.size != item.size || fromDB.arcsize != item.arcsize ) {
 							// to force rescan and update data in DB
+							log.v("The found entry in the database is outdated (crc32=0), need to rescan " + fromDB.toString());
+							fromDB = null;
+						}
+						if (null != fromDB && DocumentFormat.FB2 == fromDB.format && null == fromDB.genres) {
+							// to force rescan and update data in DB
+							log.v("The found entry in the database is outdated (genres=null), need to rescan " + fromDB.toString());
 							fromDB = null;
 						}
 					} else {
@@ -289,8 +304,6 @@ public class Scanner extends FileInfoChangeSource {
 					boolean isOldVer = true;
 					if (fromDB != null) {
 						if (fromDB.saved_with_ver == MainDB.DB_VERSION) isOldVer = false;
-					}
-					if (fromDB != null) {
 						// use DB value
 						baseDir.setFile(i, fromDB);
 						if (isOldVer) {
@@ -485,6 +498,9 @@ public class Scanner extends FileInfoChangeSource {
 			return createSearchRoot();
 		else if (FileInfo.RECENT_DIR_TAG.equals(path))
 			return getRecentDir();
+		//CR genres implementation
+		//else if (FileInfo.GENRES_TAG.equals(path))
+		//	return createGenresRoot();
 		else if (FileInfo.AUTHORS_TAG.equals(path))
 			return createAuthorsRoot();
 		else if (FileInfo.GENRE_TAG.equals(path))
@@ -595,6 +611,17 @@ public class Scanner extends FileInfoChangeSource {
 	private void addSearchRoot() {
 		addRoot(createSearchRoot());
 	}
+
+//  CR genres implementation
+//	public FileInfo createGenresRoot() {
+//		FileInfo dir = new FileInfo();
+//		dir.isDirectory = true;
+//		dir.pathname = FileInfo.GENRES_TAG;
+//		dir.filename = mActivity.getString(R.string.folder_name_books_by_genre);
+//		dir.isListed = true;
+//		dir.isScanned = true;
+//		return dir;
+//	}
 
 	public FileInfo createRescanRoot() {
 		FileInfo dir = new FileInfo();
@@ -1004,6 +1031,7 @@ public class Scanner extends FileInfoChangeSource {
 		ArrayList<FileInfo> result = new ArrayList<FileInfo>();
 		result.add(pathToFileInfo(FileInfo.RESCAN_LIBRARY_TAG));
 		result.add(pathToFileInfo(FileInfo.SEARCH_SHORTCUT_TAG));
+		//result.add(pathToFileInfo(FileInfo.GENRES_TAG)); //CR genres implementation
 		result.add(pathToFileInfo(FileInfo.AUTHORS_TAG));
 		result.add(pathToFileInfo(FileInfo.TITLE_TAG));
 		result.add(pathToFileInfo(FileInfo.SERIES_TAG));

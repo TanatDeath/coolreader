@@ -56,6 +56,7 @@ import org.coolreader.crengine.ErrorDialog;
 import org.coolreader.crengine.ExternalDocCameDialog;
 import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.FileInfoOperationListener;
 import org.coolreader.crengine.GenreSAXElem;
 import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.L;
@@ -259,15 +260,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public ViewGroup mCurrentFrame;
 	public ViewGroup mPreviousFrame;
 
-	private BookInfo mBookInfoToSync;
 	private boolean mSyncGoogleDriveEnabled = false;
 	private boolean mSyncGoogleDriveEnabledPrev = false;
 	private boolean mCloudSyncAskConfirmations = true;
 	private boolean mSyncGoogleDriveEnabledSettings = false;
 	private boolean mSyncGoogleDriveEnabledBookmarks = false;
-	private boolean mSyncGoogleDriveEnabledCurrentBooks = false;
+	private boolean mSyncGoogleDriveEnabledCurrentBookInfo = false;
+	private boolean mSyncGoogleDriveEnabledCurrentBookBody = false;
 	private int mCloudSyncBookmarksKeepAlive = 14;
 	private int mSyncGoogleDriveAutoSavePeriod = 0;
+	private int mSyncGoogleDriveErrorsCount = 0;
 	private Synchronizer mGoogleDriveSync;
 	private Timer mGoogleDriveAutoSaveTimer = null;
 	// can be add more synchronizers
@@ -281,6 +283,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private String mFileToOpenFromExt = null;
 
 	private FileInfo mFileToDelete = null;
+	private FileInfo mFolderToDelete = null;
 
 	private boolean isFirstStart = true;
 	private int settingsCanBeMigratedLastInd = -1;
@@ -292,7 +295,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private BroadcastReceiver intentReceiver;
 
 	private boolean justCreated = false;
-	private boolean activityPaused = false;
+	private boolean activityIsRunning = false;
 
 	private boolean dataDirIsRemoved = false;
 
@@ -325,6 +328,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.i("CoolReader.onCreate() entered");
 		super.onCreate(savedInstanceState);
 
+		isFirstStart = true;
+		justCreated = true;
+		activityIsRunning = false;
+
 		//AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); -- к сожалению не работает ((
 
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -342,9 +349,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		// apply settings
     	onSettingsChanged(settings(), null);
-
-		isFirstStart = true;
-		justCreated = true;
 
 		mEngine = Engine.getInstance(this);
 
@@ -553,9 +557,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				mSyncGoogleDriveEnabledBookmarks = flg;
 				updateGoogleDriveSynchronizer();
 			}
-		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK)) {
+		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveEnabledCurrentBooks = flg;
+				mSyncGoogleDriveEnabledCurrentBookInfo = flg;
+				updateGoogleDriveSynchronizer();
+			}
+		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_BODY)) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				mSyncGoogleDriveEnabledCurrentBookBody = flg;
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD)) {
@@ -573,7 +582,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				mSyncGoogleDriveAutoSavePeriod = n;
 				updateGoogleDriveSynchronizer();
 			}
-		} else if (key.equals(PROP_APP_CLOUDSYNC_BOOKMARKS_KEEPALIVE)) {
+		} else if (key.equals(PROP_APP_CLOUDSYNC_DATA_KEEPALIVE)) {
 			int n = 0;
 			try {
 				n = Integer.parseInt(value);
@@ -586,7 +595,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				n = 365;
 			mCloudSyncBookmarksKeepAlive = n;
 			updateGoogleDriveSynchronizer();
-		}  else if (key.equals(PROP_APP_USE_EINK_FRONTLIGHT)) {
+		} else if (key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES)) {
+			if (null != mBrowser) {
+				mBrowser.setHideEmptyGenres(flg);
+			}
+		}  else if (key.equals(PROP_APP_USE_EINK_FRONTLIGHT)) { //KR
 			mAppUseEinkFrontlight = StrUtils.getNonEmptyStr(value,true).equals("1");
 		}
         //
@@ -602,49 +615,48 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			mGoogleDriveSync = new Synchronizer(this, googleDriveRemoteAccess, getString(R.string.app_name), REQUEST_CODE_GOOGLE_DRIVE_SIGN_IN);
 			mGoogleDriveSync.setOnSyncStatusListener(new OnSyncStatusListener() {
 				@Override
-				public void onSyncStarted(Synchronizer.SyncDirection direction, boolean forced) {
+				public void onSyncStarted(Synchronizer.SyncDirection direction, boolean showProgress, boolean forced) {
 					if (Synchronizer.SyncDirection.SyncFrom == direction) {
 						log.d("Starting synchronization from Google Drive");
 					} else if (Synchronizer.SyncDirection.SyncTo == direction) {
 						log.d("Starting synchronization to Google Drive");
 					}
-					if (forced || Synchronizer.SyncDirection.SyncFrom == direction) {
-						// Show sync indicator only for 'Sync From' operation
-						// or if this sync operation stated manually by menu action.
+					if (showProgress) {
 						if (null != mReaderView) {
-							mReaderView.showCloudSyncProgress(100);
+							mReaderView.showCloudSyncProgress(100, getString(Synchronizer.SyncDirection.SyncFrom == direction ? R.string.cloud_synchronization_from_ : R.string.cloud_synchronization_to_));
 						}
 					}
 				}
 
 				@Override
-				public void OnSyncProgress(Synchronizer.SyncDirection direction, int current, int total, boolean forced) {
+				public void OnSyncProgress(Synchronizer.SyncDirection direction, boolean showProgress, int current, int total, boolean forced) {
 					log.v("sync progress: current=" + current + "; total=" + total);
-					if (forced || Synchronizer.SyncDirection.SyncFrom == direction) {
-						// Show sync indicator only for 'Sync From' operation
-						// or this sync operation stated manually by menu action.
+					if (showProgress) {
 						if (null != mReaderView) {
 							int total_ = total;
 							if (current > total_)
 								total_ = current;
-							mReaderView.showCloudSyncProgress(10000 * current / total_);
+							mReaderView.showCloudSyncProgress(10000 * current / total_, getString(Synchronizer.SyncDirection.SyncFrom == direction ? R.string.cloud_synchronization_from_ : R.string.cloud_synchronization_to_));
 						}
 					}
 				}
 
 				@Override
-				public void onSyncCompleted(Synchronizer.SyncDirection direction, boolean forced) {
+				public void onSyncCompleted(Synchronizer.SyncDirection direction, boolean showProgress, boolean forced) {
 					if (Synchronizer.SyncDirection.SyncFrom == direction) {
 						log.d("Google Drive SyncFrom successfully completed");
 					} else if (Synchronizer.SyncDirection.SyncTo == direction) {
 						log.d("Google Drive SyncTo successfully completed");
 					}
-					if (forced || Synchronizer.SyncDirection.SyncFrom == direction) {
+					if (forced || Synchronizer.SyncDirection.SyncFrom == direction)
 						showToast(R.string.googledrive_sync_completed);
+					if (showProgress) {
 						// Hide sync indicator
 						if (null != mReaderView)
 							mReaderView.hideSyncProgress();
 					}
+					if (mSyncGoogleDriveEnabled)
+						mSyncGoogleDriveErrorsCount = 0;
 				}
 
 				@Override
@@ -656,6 +668,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						showToast(R.string.googledrive_sync_failed_with, errorString);
 					else
 						showToast(R.string.googledrive_sync_failed);
+					if (mSyncGoogleDriveEnabled) {
+						mSyncGoogleDriveErrorsCount++;
+						if (mSyncGoogleDriveErrorsCount >= 3) {
+							showToast(R.string.googledrive_sync_failed_disabled);
+							log.e("More than 3 sync failures in a row, auto sync disabled.");
+							mSyncGoogleDriveEnabled = false;
+						}
+					}
 				}
 
 				@Override
@@ -677,25 +697,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				public void onBookmarksLoaded(BookInfo bookInfo, boolean forced) {
 					waitForCRDBService(() -> {
 						// TODO: ask the user whether to import new bookmarks.
+						BookInfo currentBook = null;
+						int currentPos = -1;
+						if (null != mReaderView) {
+							currentBook = mReaderView.getBookInfo();
+							if (null != currentBook)
+								currentPos = currentBook.getLastPosition().getPercent();
+						}
 						Services.getHistory().updateBookInfo(bookInfo);
 						getDB().saveBookInfo(bookInfo);
-						if (null != mReaderView) {
-							BookInfo currentBook = mReaderView.getBookInfo();
-							if (null != currentBook) {
-								FileInfo currentFileInfo = currentBook.getFileInfo();
-								if (null != currentFileInfo) {
-									if (currentFileInfo.baseEquals((bookInfo.getFileInfo()))) {
-										// if the book indicated by the bookInfo is currently open.
-										Bookmark lastPos = bookInfo.getLastPosition();
-										if (null != lastPos) {
-											if (forced || !mCloudSyncAskConfirmations) {
-												mReaderView.goToBookmark(lastPos);
-											} else {
-												int currentPos = currentBook.getLastPosition().getPercent();
-												if (Math.abs(currentPos - lastPos.getPercent()) > 10) {		// 0.1%
-													askQuestion(R.string.cloud_synchronization_, R.string.sync_confirmation_new_reading_position,
-															() -> mReaderView.goToBookmark(lastPos), null);
-												}
+						if (null != currentBook) {
+							FileInfo currentFileInfo = currentBook.getFileInfo();
+							if (null != currentFileInfo) {
+								if (currentFileInfo.baseEquals((bookInfo.getFileInfo()))) {
+									// if the book indicated by the bookInfo is currently open.
+									Bookmark lastPos = bookInfo.getLastPosition();
+									if (null != lastPos) {
+										if (forced || !mCloudSyncAskConfirmations) {
+											mReaderView.goToBookmark(lastPos);
+										} else {
+											if (Math.abs(currentPos - lastPos.getPercent()) > 10) {		// 0.1%
+												askQuestion(R.string.cloud_synchronization_from_, R.string.sync_confirmation_new_reading_position,
+														() -> mReaderView.goToBookmark(lastPos), null);
 											}
 										}
 									}
@@ -724,9 +747,23 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								shortBookInfo = "\"";
 							shortBookInfo += fileInfo.title + "\"";
 							String question = getString(R.string.sync_confirmation_other_book, shortBookInfo);
-							askQuestion(getString(R.string.cloud_synchronization_), question, () -> loadDocument(fileInfo, false), null);
+							askQuestion(getString(R.string.cloud_synchronization_from_), question, () -> loadDocument(fileInfo, false), null);
 						}
 					}
+				}
+
+				@Override
+				public void onFileNotFound(FileInfo fileInfo) {
+					if (null == fileInfo)
+						return;
+					String docInfo = "Unknown";
+					if (null != fileInfo.title && !fileInfo.authors.isEmpty())
+						docInfo = fileInfo.title;
+					if (null != fileInfo.authors && !fileInfo.authors.isEmpty())
+						docInfo = fileInfo.authors + ", " + docInfo;
+					if (null != fileInfo.getFilename() && !fileInfo.getFilename().isEmpty())
+						docInfo += " (" + fileInfo.getFilename() + ")";
+					showToast(R.string.sync_info_no_such_document, docInfo);
 				}
 
 			});
@@ -743,7 +780,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.SETTINGS, mSyncGoogleDriveEnabledSettings);
 				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.BOOKMARKS, mSyncGoogleDriveEnabledBookmarks);
-				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKINFO, mSyncGoogleDriveEnabledCurrentBooks);
+				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKINFO, mSyncGoogleDriveEnabledCurrentBookInfo);
+				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKBODY, mSyncGoogleDriveEnabledCurrentBookBody);
 				mGoogleDriveSync.setBookmarksKeepAlive(mCloudSyncBookmarksKeepAlive);
 				if (null != mGoogleDriveAutoSaveTimer) {
 					mGoogleDriveAutoSaveTimer.cancel();
@@ -754,14 +792,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					mGoogleDriveAutoSaveTimer.schedule(new TimerTask() {
 						@Override
 						public void run() {
-							if (!activityPaused && null != mGoogleDriveSync) {
-								mGoogleDriveSync.startSyncTo(false, true, false);
+							if (activityIsRunning && null != mGoogleDriveSync) {
+								mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY);
 							}
 						}
 					}, mSyncGoogleDriveAutoSavePeriod * 60000, mSyncGoogleDriveAutoSavePeriod * 60000);
 				}
-				if (!mSyncGoogleDriveEnabledPrev)		// Enables just now
-					mGoogleDriveSync.startSyncFrom(true, true, false);
 			} else {
 				if (null != mGoogleDriveAutoSaveTimer) {
 					mGoogleDriveAutoSaveTimer.cancel();
@@ -772,25 +808,25 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					// ask user: cleanup & sign out
 					askConfirmation(R.string.googledrive_disabled_cleanup_question,
 							() -> {
-									if (null != mGoogleDriveSync) {
-										mGoogleDriveSync.abort(() -> {
-											if (null != mGoogleDriveSync) {
-												mGoogleDriveSync.cleanupAndSignOut();
-												mGoogleDriveSync = null;
-											}
-										});
-									}
-								},
-							() -> {
-									if (null != mGoogleDriveSync) {
-										mGoogleDriveSync.abort(() -> {
-											if (null != mGoogleDriveSync) {
-												mGoogleDriveSync.signOut();
-												mGoogleDriveSync = null;
-											}
-										});
-									}
+								if (null != mGoogleDriveSync) {
+									mGoogleDriveSync.abort(() -> {
+										if (null != mGoogleDriveSync) {
+											mGoogleDriveSync.cleanupAndSignOut();
+											mGoogleDriveSync = null;
+										}
+									});
 								}
+							},
+							() -> {
+								if (null != mGoogleDriveSync) {
+									mGoogleDriveSync.abort(() -> {
+										if (null != mGoogleDriveSync) {
+											mGoogleDriveSync.signOut();
+											mGoogleDriveSync = null;
+										}
+									});
+								}
+							}
 					);
 				}
 			}
@@ -802,7 +838,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (null == mGoogleDriveSync)
 				buildGoogleDriveSynchronizer();
 			mGoogleDriveSync.setBookmarksKeepAlive(mCloudSyncBookmarksKeepAlive);
-			mGoogleDriveSync.startSyncTo(true, false, true);
+			mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
 		}
 	}
 
@@ -811,12 +847,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (null == mGoogleDriveSync)
 				buildGoogleDriveSynchronizer();
 			mGoogleDriveSync.setBookmarksKeepAlive(mCloudSyncBookmarksKeepAlive);
-			mGoogleDriveSync.startSyncFrom(true, false, true);
+			mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
 		}
 	}
 
-	public BookInfo getBookInfoToSync() {
-		return mBookInfoToSync;
+	private BookInfo getCurrentBookInfo() {
+		BookInfo bookInfo = null;
+		if (mReaderView != null) {
+			bookInfo = mReaderView.getBookInfo();
+			if (null != bookInfo && null == bookInfo.getFileInfo()) {
+				// nullify if fileInfo is null
+				bookInfo = null;
+			}
+		}
+		return bookInfo;
 	}
 
 	@Override
@@ -1213,26 +1257,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	@Override
 	protected void onPause() {
+		activityIsRunning = false;
 		super.onPause();
 		mSensorManager.unregisterListener(deviceOrientation.getEventListener());
         mSensorManager.unregisterListener(this);
 		geoLastData.gpsStop(); geoLastData.netwStop();
 		if (mReaderView != null) {
-			// save book info to "sync to" as in the actual sync operation the readerView is no longer available
-			BookInfo bookInfo = mReaderView.getBookInfo();
-			if (null != bookInfo && null != bookInfo.getFileInfo()) {
-				// make copy
-				mBookInfoToSync = new BookInfo(bookInfo);
-			}
 			mReaderView.onAppPause();
 		}
 		Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null && !mGoogleDriveSync.isBusy()) {
-				mGoogleDriveSync.startSyncTo(false, true, false);
+				mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
 			}
 		}
-		activityPaused = true;
 	}
 	
 	@Override
@@ -1268,7 +1306,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		else
 			log.i("CoolReader.onResume(), mFileToOpenFromExt=" + mFileToOpenFromExt);
 		super.onResume();
-
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), accelerometer, SensorManager.SENSOR_DELAY_UI);
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), magnetometer, SensorManager.SENSOR_DELAY_UI);
 
@@ -1303,16 +1340,22 @@ public class CoolReader extends BaseActivity implements SensorEventListener
             }
 		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null && !mGoogleDriveSync.isBusy()) {
+			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null) {
 				// when the program starts, the local settings file is already updated, so the local file is always newer than the remote one
 				// Therefore, the synchronization mode is quiet, i.e. without comparing modification times and without prompting the user for action.
 				// If the file is opened from an external file manager, we must disable the "currently reading book" sync operation with google drive.
-				if (null == mFileToOpenFromExt)
-					mGoogleDriveSync.startSyncFrom(true, true, false);
-				else
-					mGoogleDriveSync.startSyncFromOnly(true, Synchronizer.SyncTarget.SETTINGS, Synchronizer.SyncTarget.BOOKMARKS);
+				if (!mGoogleDriveSync.isBusy()) {
+					if (null == mFileToOpenFromExt)
+						mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+					else
+						mGoogleDriveSync.startSyncFromOnly(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS, Synchronizer.SyncTarget.SETTINGS, Synchronizer.SyncTarget.BOOKMARKS);
+				} else {
+					log.d("Synchronizer is busy!");
+				}
 			}
 		}
+		activityIsRunning = true;
+
 		if (getReaderView()!=null) {
 			if (getReaderView().ttsToolbar != null)
 				getReaderView().ttsToolbar.repaintButtons();
@@ -1326,7 +1369,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 			}, 5000);
 		}
-		activityPaused = false;
 	}
 
 	@Override
@@ -1802,23 +1844,32 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		// Show/Hide soft navbar after OptionDialog is closed.
 		applyFullscreen(getWindow());
-		if (changedProps.size() > 0) {
-			// After all, sync to the cloud with delay
-			BackgroundThread.instance().postGUI(() -> {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-					if (mSyncGoogleDriveEnabled && mSyncGoogleDriveEnabledSettings && null != mGoogleDriveSync) {
-						if (mSuppressSettingsCopyToCloud) {
-							// Immediately after downloading settings from Google Drive
-							// prevent uploading settings file
-							mSuppressSettingsCopyToCloud = false;
-						} else if (!mGoogleDriveSync.isBusy()) {
-							// After setting changed in OptionsDialog
-							log.d("Some settings is changed, uploading to cloud...");
-							mGoogleDriveSync.startSyncToOnly(false, Synchronizer.SyncTarget.SETTINGS);
-						}
-					}
+		if (!justCreated) {
+			// Only after onStart()!
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				if (mSyncGoogleDriveEnabled && !mSyncGoogleDriveEnabledPrev && null != mGoogleDriveSync) {
+					// if cloud sync has just been enabled in options dialog
+					mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+					mSyncGoogleDriveEnabledPrev = mSyncGoogleDriveEnabled;
+					return;
 				}
-			}, 1000);
+				if (changedProps.size() > 0) {
+					// After options dialog is closed, sync new settings to the cloud with delay
+					BackgroundThread.instance().postGUI(() -> {
+						if (mSyncGoogleDriveEnabled && mSyncGoogleDriveEnabledSettings && null != mGoogleDriveSync) {
+							if (mSuppressSettingsCopyToCloud) {
+								// Immediately after downloading settings from Google Drive
+								// prevent uploading settings file
+								mSuppressSettingsCopyToCloud = false;
+							} else if (!mGoogleDriveSync.isBusy()) {
+								// After setting changed in OptionsDialog
+								log.d("Some settings is changed, uploading to cloud...");
+								mGoogleDriveSync.startSyncToOnly(null, Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY, Synchronizer.SyncTarget.SETTINGS);
+							}
+						}
+					}, 500);
+				}
+			}
 		}
 	}
 
@@ -1896,6 +1947,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				setCurrentFrame(mHomeFrame);
 			}, 200);
 		}
+		if (activityIsRunning) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				// Save bookmarks and current reading position on the cloud
+				if (mSyncGoogleDriveEnabled && null != mGoogleDriveSync && !mGoogleDriveSync.isBusy()) {
+					mGoogleDriveSync.startSyncToOnly(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY, Synchronizer.SyncTarget.BOOKMARKS);
+				}
+			}
+		}
 	}
 	
 	private void runInReader(final Runnable task) {
@@ -1939,7 +1998,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private void runInBrowser(final Runnable task, final boolean dontShowBrowser) {
 		waitForCRDBService(() -> {
 			if (mBrowserFrame == null) {
-				mBrowser = new FileBrowser(CoolReader.this, Services.getEngine(), Services.getScanner(), Services.getHistory());
+				mBrowser = new FileBrowser(CoolReader.this, Services.getEngine(), Services.getScanner(), Services.getHistory(),
+						settings().getBool(PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES, false));
 				mBrowser.setCoverPagesEnabled(settings().getBool(ReaderView.PROP_APP_SHOW_COVERPAGES, true));
 				mBrowser.setCoverPageFontFace(settings().getProperty(ReaderView.PROP_FONT_FACE, DeviceInfo.DEF_FONT_FACE));
 				mBrowser.setCoverPageSizeOption(settings().getInt(ReaderView.PROP_APP_COVERPAGE_SIZE, 1));
@@ -2037,8 +2097,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				doneCallback.run();
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				// Save last opened document on cloud
-				if (mSyncGoogleDriveEnabled && mSyncGoogleDriveEnabledCurrentBooks && null != mGoogleDriveSync && !mGoogleDriveSync.isBusy())
-					mGoogleDriveSync.startSyncToOnly(false, Synchronizer.SyncTarget.CURRENTBOOKINFO);
+				if (mSyncGoogleDriveEnabled && null != mGoogleDriveSync && !mGoogleDriveSync.isBusy()) {
+					ArrayList<Synchronizer.SyncTarget> targets = new ArrayList<Synchronizer.SyncTarget>();
+					if (mSyncGoogleDriveEnabledCurrentBookInfo)
+						targets.add(Synchronizer.SyncTarget.CURRENTBOOKINFO);
+					if (mSyncGoogleDriveEnabledCurrentBookBody)
+						targets.add(Synchronizer.SyncTarget.CURRENTBOOKBODY);
+					if (!targets.isEmpty())
+						mGoogleDriveSync.startSyncToOnly(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_SHOW_SIGN_IN, targets.toArray(new Synchronizer.SyncTarget[0]));
+				}
 			}
 		} : doneCallback, errorCallback));
 	}
@@ -2246,8 +2313,22 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						} else {
 							showToast(R.string.could_not_delete_on_sd);
 						}
+					} else if (mFolderToDelete != null && mFolderToDelete.isDirectory) {
+						Uri sdCardUri = intent.getData();
+						DocumentFile documentFile = null;
+						if (null != sdCardUri)
+							documentFile = Utils.getDocumentFile(mFolderToDelete, this, sdCardUri);
+						if (null != documentFile) {
+							if (documentFile.exists()) {
+								updateExtSDURI(mFolderToDelete, sdCardUri);
+								deleteFolder(mFolderToDelete);
+							}
+						} else {
+							showToast(R.string.could_not_delete_on_sd);
+						}
 					}
 					mFileToDelete = null;
+					mFolderToDelete = null;
 				}
 			}
 		} //if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE)
@@ -2784,6 +2865,62 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		});
 	}
+
+	int mFolderDeleteRetryCount = 0;
+	public void askDeleteFolder(final FileInfo item) {
+		askConfirmation(R.string.win_title_confirm_folder_delete, () -> {
+			mFolderDeleteRetryCount = 0;
+			deleteFolder(item);
+		});
+	}
+
+	private void deleteFolder(final FileInfo item) {
+		if (mFolderDeleteRetryCount > 3)
+			return;
+		if (item != null && item.isDirectory && !item.isOPDSDir() && !item.isOnlineCatalogPluginDir()) {
+			FileInfoOperationListener bookDeleteCallback = (fileInfo, errorStatus) -> {
+				if (0 == errorStatus && null != fileInfo.format) {
+					BackgroundThread.instance().executeGUI(() -> {
+						waitForCRDBService(() -> Services.getHistory().removeBookInfo(getDB(), fileInfo, true, true));
+					});
+				}
+			};
+			BackgroundThread.instance().postBackground(() -> Utils.deleteFolder(item, bookDeleteCallback, (fileInfo, errorStatus) -> {
+				if (0 == errorStatus) {
+					BackgroundThread.instance().executeGUI(() -> directoryUpdated(fileInfo.parent));
+				} else {
+					// Can't be deleted using standard Java I/O,
+					// Try DocumentFile interface...
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						Uri sdCardUri = getExtSDURIByFileInfo(item);
+						if (null != sdCardUri) {
+							Utils.deleteFolderDocTree(item, this, sdCardUri, bookDeleteCallback, (fileInfo2, errorStatus2) -> {
+								BackgroundThread.instance().executeGUI(() -> {
+									if (0 == errorStatus2) {
+										directoryUpdated(fileInfo2.parent);
+									} else {
+										showToast(R.string.choose_root_sd);
+										mFolderDeleteRetryCount++;
+										mFolderToDelete = item;
+										Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+										startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
+									}
+								});
+							});
+						} else {
+							BackgroundThread.instance().executeGUI(() -> {
+								showToast(R.string.choose_root_sd);
+								mFolderDeleteRetryCount++;
+								mFolderToDelete = item;
+								Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+								startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
+							});
+						}
+					}
+				}
+			}));
+		}
+	}
 	
 	public void saveSetting(String name, String value) {
 		if (mReaderView != null)
@@ -3145,6 +3282,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (!StrUtils.isEmptyStr(fi.language)) {
 					itemsBook.add(new BookInfoEntry("book.language",fi.language,"text"));
 				}
+				//CR's implementation
+//				if (fi.format == DocumentFormat.FB2) {
+//					if (fi.genres != null && fi.genres.length() > 0) {
+//						items.add("book.genres=" + fi.genres);
+//					}
+//				}
 				String genreText = "";
 				String genreR = fi.genre_list;
 				if (StrUtils.isEmptyStr(genreR)) genreR = fi.genre;
@@ -3469,12 +3612,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private boolean updateExtSDURI(FileInfo fi, Uri extSDUri) {
 		String prefKey = null;
 		String filePath = null;
-		if (!fi.isDirectory) {
-			if (fi.isArchive && fi.arcname != null) {
-				filePath = fi.arcname;
-			} else
-				filePath = fi.pathname;
-		}
+		if (fi.isArchive && fi.arcname != null) {
+			filePath = fi.arcname;
+		} else
+			filePath = fi.pathname;
 		if (null != filePath) {
 			File f = new File(filePath);
 			filePath = f.getAbsolutePath();
@@ -3499,12 +3640,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		Uri uri = null;
 		String prefKey = null;
 		String filePath = null;
-		if (!fi.isDirectory) {
-			if (fi.isArchive && fi.arcname != null) {
-				filePath = fi.arcname;
-			} else
-				filePath = fi.pathname;
-		}
+		if (fi.isArchive && fi.arcname != null) {
+			filePath = fi.arcname;
+		} else
+			filePath = fi.pathname;
 		if (null != filePath) {
 			File f = new File(filePath);
 			filePath = f.getAbsolutePath();

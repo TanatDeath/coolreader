@@ -250,6 +250,17 @@ public enum DocumentFormat {
 		return sExt;
 	}
 	
+	public static String getSupportedExtension( String filename ) {
+		String s = filename.toLowerCase();
+		for ( int i=0; i<DocumentFormat.values().length; i++ ) {
+			for ( String ext : values()[i].extensions ) {
+				if (s.endsWith(ext))
+					return ext;
+			}
+		}
+		return null;
+	}
+
 	private DocumentFormat( String cssFileName, int cssResourceId, int iconResourceId, boolean canParseProperties, boolean canParseCoverpages, int priority, String extensions[], String mimeFormats[] )
 	{
 		this.cssFileName = cssFileName;

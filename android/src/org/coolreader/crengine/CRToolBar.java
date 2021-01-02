@@ -840,7 +840,7 @@ public class CRToolBar extends ViewGroup {
 	    		View separator = new View(activity);
 	    		separator.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
 	    		addView(separator);
-	    		separator.layout(bottom - windowDividerHeight, top, right, bottom);
+	    		separator.layout(left, bottom - windowDividerHeight, right, bottom);
         	}
     		//popup.
     		if (lastButtonIndex > 0)

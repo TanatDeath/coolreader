@@ -11,6 +11,7 @@ import org.coolreader.plugins.OnlineStoreBook;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +28,10 @@ public class FileInfo {
 	public final static String LOADING_STUB_PREFIX = "@loadingstub";
 	public final static String NOT_FOUND_STUB_PREFIX = "@notfoundstub";
 	public final static String ONLINE_CATALOG_PLUGIN_PREFIX = "@plugin:";
+//  CR implementation
+//	public final static String GENRES_TAG = "@genresRoot";
+//	public final static String GENRES_GROUP_PREFIX = "@genresGroup:";
+//	public final static String GENRES_PREFIX = "@genre:";
 	public final static String LITRES_TAG = "@litresRoot";
 	public final static String AUTHORS_TAG = "@authorsRoot";
 	public final static String AUTHOR_GROUP_PREFIX = "@authorGroup:";
@@ -85,7 +90,8 @@ public class FileInfo {
 	public String authorext; // full_name (or first-middle-last)~firstName~middleName~lastName~nickName~homePage~email
 	public String series; // series name w/o number
 	public int seriesNumber; // number of book inside series
-    public int saved_with_ver; // version of database book was saved with
+	public String genres; // genre codes, delimited with '|', CR implementation, not KR's!
+	public int saved_with_ver; // version of database book was saved with
 	public boolean need_to_update_ver; // file was saved in old format
 	public String genre; // Genre list written directly
 	public String genre_list; // Genre list from genre table
@@ -117,7 +123,7 @@ public class FileInfo {
 	public String pathname; // full path+arcname+filename
 	public String arcname; // archive file name w/o path
 	public String language; // document language
-	public String description;	// book description
+	public String description;	// book description, CR implementation (KR use annotation instead)
 	public String name_crc32; // crc32 of filename
 	public String lang_from; // translate from
 	public String lang_to; // translate to
@@ -226,6 +232,11 @@ public class FileInfo {
 	// bits 26..29 - profile id (0..15 max)
 	public static final int PROFILE_ID_SHIFT = 26;
 	public static final int PROFILE_ID_MASK = 0x0F;
+
+	// NB: CR implementation (of genres)
+	// bitmask for field 'tag' when obtained genres list as special folders
+	public static final int GENRE_DATA_INCCHILD_MASK = 0x80000000;
+	public static final int GENRE_DATA_BOOKCOUNT_MASK = 0x00FFFFFF;
 
 	public long getCreateTime() {
 		return createTime;
@@ -471,7 +482,7 @@ public class FileInfo {
 			parent = new FileInfo(parent_);
 	}
 	
-	public FileInfo( File f )
+	public FileInfo(File f)
 	{
 		fromFile(f);
 		need_to_update_ver = false;
@@ -511,7 +522,8 @@ public class FileInfo {
 		createTime = v.createTime;
 		lastAccessTime = v.lastAccessTime;
 		language = v.language;
-		description = v.description;
+		genres = v.genres; // CR implementation
+		description = v.description; // CR implementation
 		name_crc32 = v.name_crc32;
 		lang_from = v.lang_from;
 		lang_to = v.lang_to;
@@ -810,6 +822,12 @@ public class FileInfo {
 		return SEARCH_SHORTCUT_TAG.equals(pathname);
 	}
 
+//	CR implementation
+//	public boolean isBooksByGenreRoot()
+//	{
+//		return GENRES_TAG.equals(pathname);
+//	}
+
 	public boolean isQSearchShortcut()
 	{
 		return QSEARCH_SHORTCUT_TAG.equals(pathname);
@@ -869,6 +887,12 @@ public class FileInfo {
 	{
 		return TITLE_TAG.equals(pathname);
 	}
+
+//	CR implementation
+//	public boolean isBooksByGenreDir()
+//	{
+//		return pathname!=null && pathname.startsWith(GENRES_PREFIX);
+//	}
 
 	public boolean isBooksByTitleLevel()
 	{
@@ -985,6 +1009,14 @@ public class FileInfo {
 			return true;
 		return parent.isOnSDCard();
 	}
+
+	// CR implementation
+//	public String getGenreCode() {
+//		if (pathname.startsWith(GENRES_PREFIX)) {
+//			return pathname.substring(GENRES_PREFIX.length());
+//		}
+//		return "";
+//	}
 
 	public long getAuthorId()
 	{
@@ -2169,6 +2201,12 @@ public class FileInfo {
 				return false;
 		} else if (!language.equals(other.language))
 			return false;
+		// do not compare genres of books, because in the absence of certain genres in the handbook,
+		// the 'genres' field obtained from the database will not be equal to the field obtained when parsing the book file.
+		/*
+		if (!eqGenre(genres, other.genres))
+			return false;
+		*/
 		if (description == null) {
 			if (other.description != null)
 				return false;
@@ -2202,6 +2240,24 @@ public class FileInfo {
 		if (crc32 != other.crc32)
 			return false;
 		return true;
+	}
+
+	// CR implementation
+	private static boolean eqGenre(String g1, String g2) {
+		if (g1 == null) {
+			if (g2 != null && g2.length() != 0)
+				return false;
+		}
+		if (g1.equals(g2))
+			return true;
+		String[] g1_array = g1.split("\\|");
+		String[] g2_array = g2.split("\\|");
+		if (g1_array.length == g2_array.length) {
+			Arrays.sort(g1_array);
+			Arrays.sort(g2_array);
+			return Arrays.equals(g1_array, g2_array);
+		}
+		return false;
 	}
 
 	@Override

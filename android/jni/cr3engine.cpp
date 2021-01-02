@@ -154,7 +154,9 @@ public:
 	int publseriesNumber;
 	lString32 authorext;
     lUInt32 crc32;
+    lString32 keywords;
     lString32 description;
+    doc_format_t format;
 };
 
 static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProperties * pBookProps)
@@ -188,8 +190,26 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
 	lString32 author = doc->textFromXPath( lString32("package/metadata/creator")).trim();
 	lString32 title = doc->textFromXPath( lString32("package/metadata/title")).trim();
 	lString32 language = doc->textFromXPath( lString32("package/metadata/language")).trim();
+	// There may be multiple <dc:subject> tags, which are usually used for keywords, categories
+	bool subjects_set = false;
+	lString32 subjects;
+	for ( size_t i=1; i<=EPUB_META_MAX_ITER; i++ ) {
+		ldomNode * item = doc->nodeFromXPath(lString32("package/metadata/subject[") << fmt::decimal(i) << "]");
+		if (!item)
+			break;
+		lString32 subject = item->getText().trim();
+		if (subjects_set) {
+			subjects << "\n" << subject;
+		}
+		else {
+			subjects << subject;
+			subjects_set = true;
+		}
+	}
+	// KR - for compatibility with CR
 	lString32 description = doc->textFromXPath( cs32("package/metadata/description")).trim();
 	lString32 bookdate = doc->textFromXPath( lString32("package/metadata/date")).trim();
+	// KR's original field
 	lString32 annotation = doc->textFromXPath( lString32("package/metadata/description")).trim();
 	lString32 publisher = doc->textFromXPath( lString32("package/metadata/publisher")).trim();
 	lString32 genre = doc->textFromXPath( lString32("package/metadata/subject")).trim();
@@ -200,6 +220,7 @@ static bool GetEPUBBookProperties(const char *name, LVStreamRef stream, BookProp
     pBookProps->author = author;
     pBookProps->title = title;
     pBookProps->language = language;
+	pBookProps->keywords = subjects;
 	pBookProps->bookdate = bookdate;
 	pBookProps->annotation = annotation;
  	pBookProps->publisher = publisher;
@@ -447,20 +468,25 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     }
 
 
+    pBookProps->format = doc_format_none;
     if ( DetectEpubFormat( stream ) ) {
         CRLog::trace("GetBookProperties() : epub format detected");
+        pBookProps->format = doc_format_epub;
     	return GetEPUBBookProperties( name, stream, pBookProps );
     }
     if ( DetectFb3Format( stream ) ) {
         CRLog::trace("GetBookProperties() : fb3 format detected");
+        pBookProps->format = doc_format_fb3;
         return GetFB3BookProperties( name, stream, pBookProps );
     }
 	if ( DetectDocXFormat( stream ) ) {
 		CRLog::trace("GetBookProperties() : docx format detected");
+        pBookProps->format = doc_format_docx;
 		return GetDOCXBookProperties( name, stream, pBookProps );
 	}
 	if ( DetectOpenDocumentFormat( stream ) ) {
 		CRLog::trace("GetBookProperties() : odt format detected");
+        pBookProps->format = doc_format_odt;
 		return GetODTBookProperties( name, stream, pBookProps );
 	}
 
@@ -539,10 +565,12 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
 	lString32 publseries = extractDocPublishSeries( &doc, &pBookProps->publseriesNumber );
 	lString32 authorext = extractDocAuthorsExt( &doc, lString32("~"), lString32("|") );
 	lString32 description = extractDocDescription( &doc );
+    lString32 keywords = extractDocKeywords( &doc );
 #if SERIES_IN_AUTHORS==1
     if ( !series.empty() )
         authors << "    " << series;
 #endif
+    pBookProps->format = doc_format_fb2;
     pBookProps->title = title;
     pBookProps->author = authors;
 	pBookProps->series = series;
@@ -568,6 +596,7 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     pBookProps->publisbn = publisbn;
 	pBookProps->publseries = publseries;
 	pBookProps->authorext = authorext;
+    pBookProps->keywords = keywords;
     pBookProps->description = description;
     pBookProps->crc32 = stream->getcrc32();
     return true;
@@ -638,6 +667,17 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_scanBookPropertie
 	SET_INT_FLD("publseriesNumber",props.publseriesNumber);
 	SET_STR_FLD("authorext",props.authorext);
 	SET_LONG_FLD("crc32",props.crc32);
+	if (doc_format_fb2 == props.format) {
+		// TODO: may be fb3 too...
+		// keywords separated by "\n", see lvtinydom.cpp:
+		//    lString32 extractDocKeywords( ldomDocument * doc )
+		int pos = props.keywords.pos('\n');
+		while (pos > 0) {
+			props.keywords[pos] = '|';
+			pos = props.keywords.pos('\n', pos + 1);
+		}
+		SET_STR_FLD("genres", props.keywords);
+	}
 	SET_STR_FLD("description",props.description);
 
 	return JNI_TRUE;

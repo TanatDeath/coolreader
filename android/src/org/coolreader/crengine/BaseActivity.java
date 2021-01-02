@@ -27,6 +27,7 @@ import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBServiceAccessor;
 import org.coolreader.db.MainDB;
 import org.coolreader.dic.WikiArticle;
+import org.coolreader.genrescollection.GenresCollection;
 import org.coolreader.geo.GeoToastView;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
@@ -259,24 +260,31 @@ public class BaseActivity extends Activity implements Settings {
 		if (orientation < 0 || orientation > 5)
 			orientation = 5;
 		setScreenOrientation(orientation);
-		boolean onyxWarm = DeviceInfo.ONYX_BRIGHTNESS_WARM && (!isOnyxBrightControl());
-		if (!isOnyxBrightControl()) {
-			int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1);
-			if (backlight < -1 || backlight > getMaxScreenBrightnessValue100())
-				backlight = -1;
-			setScreenBacklightLevel(backlight, true);
-			if (onyxWarm) {
-				int backlightWarm = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT_WARM, -1);
-				if (backlightWarm < -1 || backlight > getMaxScreenBrightnessValue100())
-					backlightWarm = -1;
-				setScreenBacklightLevel(backlightWarm, false);
-			}
-		} else {
-			int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT_EINK, -1);
-			if (backlight < -1 || backlight > getMaxScreenBrightnessValue())
-				backlight = -1;
-			setScreenBacklightLevel(backlight, true);
-		}
+		// Rework it - adopt CR's implementation
+//		boolean onyxWarm = DeviceInfo.ONYX_BRIGHTNESS_WARM && (!isOnyxBrightControl());
+//		if (!isOnyxBrightControl()) {
+//			int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1);
+//			if (backlight < -1 || backlight > getMaxScreenBrightnessValue100())
+//				backlight = -1;
+//			setScreenBacklightLevel(backlight, true);
+//			if (onyxWarm) {
+//				int backlightWarm = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT_WARM, -1);
+//				if (backlightWarm < -1 || backlight > getMaxScreenBrightnessValue100())
+//					backlightWarm = -1;
+//				setScreenBacklightLevel(backlightWarm, false);
+//			}
+//		} else {
+//			int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT_EINK, -1);
+//			if (backlight < -1 || backlight > getMaxScreenBrightnessValue())
+//				backlight = -1;
+//			setScreenBacklightLevel(backlight, true);
+//		}
+
+		int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1);
+		if (backlight < -1 || backlight > DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE)
+			backlight = -1;
+		setScreenBacklightLevel(backlight);
+
 		bindCRDBService();
 	}
 
@@ -768,7 +776,7 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.GDRIVE_SYNCFROM.setIconId(googleDriveDrawableRes);
 		}
 		if (brBookmarkPlusQ != 0) ReaderAction.SAVE_BOOKMARK_QUICK.setIconId(brBookmarkPlusQ);
-		if (brSun != 0) ReaderAction.SHOW_SYSTEM_BRIGHTNESS_DIALOG.setIconId(brSun);
+		if (brSun != 0) ReaderAction.SHOW_SYSTEM_BACKLIGHT_DIALOG.setIconId(brSun);
 		if (brSkim != 0) ReaderAction.SKIM.setIconId(brSkim);
 		if (brCombo != 0) ReaderAction.ONLINE_COMBO.setIconId(brCombo);
 		if (brSuperCombo != 0) ReaderAction.ONLINE_SUPER_COMBO.setIconId(brSuperCombo);
@@ -1081,47 +1089,64 @@ public class BaseActivity extends Activity implements Settings {
 		return maxVal;
 	}
 
-	public boolean isOnyxBrightControl() {
-    	// plotn - not production ready - think later
-//    	if (this instanceof CoolReader)
-//			return ((DeviceInfo.EINK_HAVE_FRONTLIGHT) && ((CoolReader)this).mAppUseEinkFrontlight);
-		return false;
-	}
-
 	public int getScreenBacklightLevel() {
 		return screenBacklightBrightness;
 	}
 
-	public int getScreenBacklightLevelWarm() {
-		return screenBacklightBrightnessWarm;
+	public int getWarmBacklightLevel() {
+		return screenWarmBacklightBrightness;
 	}
 
-	public void setScreenBacklightLevel(int value, boolean leftSide) {
-		setWarmLight = false;
-		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!isOnyxBrightControl());
-    	if (value < -1)
-    		value = -1;
-    	else if (value > getMaxScreenBrightnessValue())
-    		value = -1;
-    	if (isOnyxBrightControl()) {
-			if (value > 0) {
-				log.i("setting EinkScreen.setFrontLightValue to " + value);
-				EinkScreen.setFrontLightValue(this, value);
-			}
-		} else {
-			if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
-				if (!onyxWarm) screenBacklightBrightness = value;
-				else {
-					screenBacklightBrightnessWarm = value;
-					setWarmLight = true;
-				}
-			} else screenBacklightBrightness = value;
+//  old KR's implementation - replace with CR's
+//	public void setScreenBacklightLevel(int value, boolean leftSide) {
+//		setWarmLight = false;
+//		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!isOnyxBrightControl());
+//    	if (value < -1)
+//    		value = -1;
+//    	else if (value > getMaxScreenBrightnessValue())
+//    		value = -1;
+//    	if (isOnyxBrightControl()) {
+//			if (value > 0) {
+//				log.i("setting EinkScreen.setFrontLightValue to " + value);
+//				EinkScreen.setFrontLightValue(this, value);
+//			}
+//		} else {
+//			if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
+//				if (!onyxWarm) screenBacklightBrightness = value;
+//				else {
+//					screenBacklightBrightnessWarm = value;
+//					setWarmLight = true;
+//				}
+//			} else screenBacklightBrightness = value;
+//			onUserActivity();
+//		}
+//    }
+
+	public void setScreenBacklightLevel(int value) {
+		if (value < -1)
+			value = -1;
+		else if (value > DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE)
+			value = -1;
+		screenBacklightBrightness = value;
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			onUserActivity();
+		else if (DeviceInfo.EINK_HAVE_FRONTLIGHT)
+			EinkScreen.setFrontLightValue(this, value);
+	}
+
+	public void setScreenWarmBacklightLevel(int value) {
+		if (value < -1)
+			value = -1;
+		else if (value > DeviceInfo.MAX_SCREEN_BRIGHTNESS_WARM_VALUE)
+			value = -1;
+		if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
+			screenWarmBacklightBrightness = value;
+			EinkScreen.setWarmLightValue(this, value);
 		}
-    }
+	}
     
     private int screenBacklightBrightness = -1; // use default
-	private int screenBacklightBrightnessWarm = -1; // use default
+	private int screenWarmBacklightBrightness = -1; // use default
 	//private boolean brightnessHackError = false;
     private boolean brightnessHackError = DeviceInfo.SAMSUNG_BUTTONS_HIGHLIGHT_PATCH;
 
@@ -1169,48 +1194,71 @@ public class BaseActivity extends Activity implements Settings {
 		//BackgroundThread.instance().postGUI(task, 10);
 	}
 
-	private void updateBacklightBrightness(float b, boolean warm) {
-		if (!isOnyxBrightControl()) {
-			if (DeviceInfo.ONYX_BRIGHTNESS) {
-				String s = "white";
-				if (warm) s = "warm";
-				Float v = b * 255.0F;
-				int i = v.intValue();
-				if ((i < 1) || (i > 255)) return;
-				log.i("Setting " + s + " onyx brightness to: " + i);
-				try {
-					FileWriter writer = new FileWriter("/sys/class/backlight/" + s + "/brightness");
-					writer.write(String.valueOf(i));
-					writer.close();
-				} catch (Exception e) {
-					log.e("Some caused with onyx brightness adjacement: " + e.getMessage());
-				}
-			} else {
-				Window wnd = getWindow();
-				if (wnd != null) {
-					LayoutParams attrs = wnd.getAttributes();
-					boolean changed = false;
-					if (b < 0 && b > -0.99999f) {
-						//log.d("dimming screen by " + (int)((1 + b)*100) + "%");
-						b = -b * attrs.screenBrightness;
-						if (b < 0.15)
-							return;
-					}
-					float delta = attrs.screenBrightness - b;
-					if (delta < 0)
-						delta = -delta;
-					if (delta > 0.01) {
-						attrs.screenBrightness = b;
-						changed = true;
-					}
-					if (changed) {
-						log.d("Window attribute changed: " + attrs);
-						wnd.setAttributes(attrs);
-					}
-				}
+	private void updateBacklightBrightness(float b) {
+		Window wnd = getWindow();
+		if (wnd != null) {
+			LayoutParams attrs = wnd.getAttributes();
+			boolean changed = false;
+			if (b < 0 && b > -0.99999f) {
+				//log.d("dimming screen by " + (int)((1 + b)*100) + "%");
+				b = -b * attrs.screenBrightness;
+				if (b < 0.15)
+					return;
+			}
+			float delta = attrs.screenBrightness - b;
+			if (delta < 0)
+				delta = -delta;
+			if (delta > 0.01) {
+				attrs.screenBrightness = b;
+				changed = true;
+			}
+			if (changed) {
+				log.d("Window attribute changed: " + attrs);
+				wnd.setAttributes(attrs);
 			}
 		}
-    }
+	}
+	//KR's old implementation
+//	private void updateBacklightBrightness(float b, boolean warm) {
+//		if (DeviceInfo.ONYX_BRIGHTNESS) {
+//			String s = "white";
+//			if (warm) s = "warm";
+//			Float v = b * 255.0F;
+//			int i = v.intValue();
+//			if ((i < 1) || (i > 255)) return;
+//			log.i("Setting " + s + " onyx brightness to: " + i);
+//			try {
+//				FileWriter writer = new FileWriter("/sys/class/backlight/" + s + "/brightness");
+//				writer.write(String.valueOf(i));
+//				writer.close();
+//			} catch (Exception e) {
+//				log.e("Some caused with onyx brightness adjacement: " + e.getMessage());
+//			}
+//		} else {
+//			Window wnd = getWindow();
+//			if (wnd != null) {
+//				LayoutParams attrs = wnd.getAttributes();
+//				boolean changed = false;
+//				if (b < 0 && b > -0.99999f) {
+//					//log.d("dimming screen by " + (int)((1 + b)*100) + "%");
+//					b = -b * attrs.screenBrightness;
+//					if (b < 0.15)
+//						return;
+//				}
+//				float delta = attrs.screenBrightness - b;
+//				if (delta < 0)
+//					delta = -delta;
+//				if (delta > 0.01) {
+//					attrs.screenBrightness = b;
+//					changed = true;
+//				}
+//				if (changed) {
+//					log.d("Window attribute changed: " + attrs);
+//					wnd.setAttributes(attrs);
+//				}
+//			}
+//		}
+//    }
 
     private void updateButtonsBrightness(float buttonBrightness) {
 		Window wnd = getWindow();
@@ -1246,8 +1294,8 @@ public class BaseActivity extends Activity implements Settings {
     }
 
     private final static int MIN_BACKLIGHT_LEVEL_PERCENT = DeviceInfo.MIN_SCREEN_BRIGHTNESS_VALUE;
-    
-    protected void setDimmingAlpha(int alpha) {
+
+	protected void setDimmingAlpha(int alpha) {
     	// override it
     }
     
@@ -1257,30 +1305,26 @@ public class BaseActivity extends Activity implements Settings {
     }
 
     private final static int MIN_BRIGHTNESS_IN_BROWSER = 12;
-    public void onUserActivity()
-    {
-    	if (backlightControl != null)
-      	    backlightControl.onUserActivity();
-    	// Hack
-    	//if ( backlightControl.isHeld() )
 
-		final boolean warm = setWarmLight;
-    	BackgroundThread.instance().executeGUI(() -> {
+	public void onUserActivity() {
+		if (backlightControl != null)
+			backlightControl.onUserActivity();
+		// Hack
+		//if ( backlightControl.isHeld() )
+		BackgroundThread.instance().executeGUI(() -> {
 			try {
 				float b;
 				int dimmingAlpha = 255;
 				// screenBacklightBrightness is 0..100
-				int sblb = screenBacklightBrightness;
-				if (warm) sblb = screenBacklightBrightnessWarm;
-				if (sblb >= 0) {
-					int percent = sblb;
+				if (screenBacklightBrightness >= 0) {
+					int percent = screenBacklightBrightness;
 					if (!allowLowBrightness() && percent < MIN_BRIGHTNESS_IN_BROWSER)
 						percent = MIN_BRIGHTNESS_IN_BROWSER;
 					float minb = MIN_BACKLIGHT_LEVEL_PERCENT / 100.0f;
-					if ( percent >= 10 ) {
+					if (percent >= 10) {
 						// real brightness control, no colors dimming
 						b = (percent - 10) / (100.0f - 10.0f); // 0..1
-						b = minb + b * (1-minb); // minb..1
+						b = minb + b * (1 - minb); // minb..1
 						if (b < minb) // BRIGHTNESS_OVERRIDE_OFF
 							b = minb;
 						else if (b > 1.0f)
@@ -1288,21 +1332,69 @@ public class BaseActivity extends Activity implements Settings {
 					} else {
 						// minimal brightness with colors dimming
 						b = minb;
-						dimmingAlpha = 255 - (11-percent) * 180 / 10;
+						dimmingAlpha = 255 - (11 - percent) * 180 / 10;
 					}
 				} else {
 					// system
 					b = -1.0f; //BRIGHTNESS_OVERRIDE_NONE
 				}
-				if (!DeviceInfo.ONYX_BRIGHTNESS) setDimmingAlpha(dimmingAlpha);
-				log.v("Brightness: " + b + ", dim: " + dimmingAlpha);
-				updateBacklightBrightness(b, warm);
+				if (!DeviceInfo.isEinkScreen(getScreenForceEink())) setDimmingAlpha(dimmingAlpha);
+				//log.v("Brightness: " + b + ", dim: " + dimmingAlpha);
+				updateBacklightBrightness(b);
 				updateButtonsBrightness(keyBacklightOff ? 0.0f : -1.0f);
-			} catch ( Exception e ) {
+			} catch (Exception e) {
 				// ignore
 			}
 		});
-    }
+	}
+
+	//old KR's - revert to CR implementation
+//	public void onUserActivity()
+//    {
+//    	if (backlightControl != null)
+//      	    backlightControl.onUserActivity();
+//    	// Hack
+//    	//if ( backlightControl.isHeld() )
+//
+//		final boolean warm = setWarmLight;
+//    	BackgroundThread.instance().executeGUI(() -> {
+//			try {
+//				float b;
+//				int dimmingAlpha = 255;
+//				// screenBacklightBrightness is 0..100
+//				int sblb = screenBacklightBrightness;
+//				if (warm) sblb = screenBacklightBrightnessWarm;
+//				if (sblb >= 0) {
+//					int percent = sblb;
+//					if (!allowLowBrightness() && percent < MIN_BRIGHTNESS_IN_BROWSER)
+//						percent = MIN_BRIGHTNESS_IN_BROWSER;
+//					float minb = MIN_BACKLIGHT_LEVEL_PERCENT / 100.0f;
+//					if ( percent >= 10 ) {
+//						// real brightness control, no colors dimming
+//						b = (percent - 10) / (100.0f - 10.0f); // 0..1
+//						b = minb + b * (1-minb); // minb..1
+//						if (b < minb) // BRIGHTNESS_OVERRIDE_OFF
+//							b = minb;
+//						else if (b > 1.0f)
+//							b = 1.0f; //BRIGHTNESS_OVERRIDE_FULL
+//					} else {
+//						// minimal brightness with colors dimming
+//						b = minb;
+//						dimmingAlpha = 255 - (11-percent) * 180 / 10;
+//					}
+//				} else {
+//					// system
+//					b = -1.0f; //BRIGHTNESS_OVERRIDE_NONE
+//				}
+//				if (!DeviceInfo.ONYX_BRIGHTNESS) setDimmingAlpha(dimmingAlpha);
+//				log.v("Brightness: " + b + ", dim: " + dimmingAlpha);
+//				updateBacklightBrightness(b, warm);
+//				updateButtonsBrightness(keyBacklightOff ? 0.0f : -1.0f);
+//			} catch ( Exception e ) {
+//				// ignore
+//			}
+//		});
+//    }
 
     
 	public boolean isWakeLockEnabled() {
@@ -1403,7 +1495,7 @@ public class BaseActivity extends Activity implements Settings {
 				} else {
 					BackgroundThread.instance().postGUI(backlightTimerTask, nextTimerInterval);
 					if (dim) {
-						updateBacklightBrightness(-0.9f, false); // reduce by 9%
+						updateBacklightBrightness(-0.9f); // reduce by 9%
 					}
 				}
 			}
@@ -1900,6 +1992,8 @@ public class BaseActivity extends Activity implements Settings {
 	
 	public void setLanguage(String lang) {
 		setLanguage(Lang.byCode(lang));
+		// reload Genres Collection
+		GenresCollection.reloadGenresFromResource(this);
 	}
 	
 	public void setLanguage(Lang lang) {
@@ -1971,40 +2065,35 @@ public class BaseActivity extends Activity implements Settings {
         		// ignore
         	}
         	setScreenOrientation(orientation);
-        } else if ( ((!DeviceInfo.isEinkScreen(getScreenForceEink())) || DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) && PROP_APP_SCREEN_BACKLIGHT.equals(key)
-			&& (!isOnyxBrightControl())) {
-        	try {
-        		final int n = Integer.valueOf(value);
-        		// delay before setting brightness
-        		BackgroundThread.instance().postGUI(() -> BackgroundThread.instance().
-						postBackground(() -> BackgroundThread.instance().
-								postGUI(() -> setScreenBacklightLevel(n, true))), 100);
-        	} catch ( Exception e ) {
-        		// ignore
-        	}
-        } else if ( ((!DeviceInfo.isEinkScreen(getScreenForceEink())) || DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) && PROP_APP_SCREEN_BACKLIGHT_WARM.equals(key)
-		    && (!isOnyxBrightControl()) ) {
+//		  old KR implementation - reverting to CR's
+//        } else if ( ((!DeviceInfo.isEinkScreen(getScreenForceEink())) || DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) && PROP_APP_SCREEN_BACKLIGHT.equals(key)
+//			&& (!isOnyxBrightControl())) {
+//        	try {
+//        		final int n = Integer.valueOf(value);
+//        		// delay before setting brightness
+//        		BackgroundThread.instance().postGUI(() -> BackgroundThread.instance().
+//						postBackground(() -> BackgroundThread.instance().
+//								postGUI(() -> setScreenBacklightLevel(n, true))), 100);
+//        	} catch ( Exception e ) {
+//        		// ignore
+//        	}
+		} else if ((!DeviceInfo.isEinkScreen(getScreenForceEink()) || DeviceInfo.EINK_HAVE_FRONTLIGHT) && PROP_APP_SCREEN_BACKLIGHT.equals(key)) {
 			try {
 				final int n = Integer.valueOf(value);
 				// delay before setting brightness
-				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance().
-						postBackground(() -> BackgroundThread.instance().
-								postGUI(() -> setScreenBacklightLevel(n, false))), 100);
-			} catch ( Exception e ) {
+				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+						.postBackground(() -> BackgroundThread.instance()
+								.postGUI(() -> setScreenBacklightLevel(n))), 100);
+			} catch (Exception e) {
 				// ignore
 			}
-		} else if ( ((!DeviceInfo.isEinkScreen(getScreenForceEink())) || DeviceInfo.EINK_HAVE_FRONTLIGHT) && PROP_APP_SCREEN_BACKLIGHT_EINK.equals(key)
-				&& (isOnyxBrightControl()) ) {
+		} else if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT && PROP_APP_SCREEN_WARM_BACKLIGHT.equals(key)) {
 			try {
-				final int n = Integer.valueOf(value);
-				// delay before setting brightness
-				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance().
-						postBackground(() -> BackgroundThread.instance().
-								postGUI(() -> setScreenBacklightLevel(n, false))), 100);
-			} catch ( Exception e ) {
-				// ignore
+				int n = Integer.parseInt(value);
+				setScreenWarmBacklightLevel(n);
+			} catch (Exception ignored) {
 			}
-		} else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
+        } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
         	Services.getScanner().setHideEmptyDirs(flg);
         } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
         	iCutoutMode = stringToInt(value, 0);
@@ -2741,10 +2830,9 @@ public class BaseActivity extends Activity implements Settings {
 	        props.applyDefault(ReaderView.PROP_APP_FULLSCREEN, "0");
 	        props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_SPEED, "1500");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT, "-1");
-			props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT_WARM, "-1");
+			props.applyDefault(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT, "-1"); //CR
 			props.applyDefault(ReaderView.PROP_APP_USE_EINK_FRONTLIGHT, "0");
-			props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT_EINK, "-1");
-			props.applyDefault(ReaderView.PROP_SHOW_BATTERY, "1"); 
+			props.applyDefault(ReaderView.PROP_SHOW_BATTERY, "1");
 			props.applyDefault(ReaderView.PROP_SHOW_POS_PERCENT, "0"); 
 			props.applyDefault(ReaderView.PROP_SHOW_PAGE_COUNT, "1");
 			props.applyDefault(ReaderView.PROP_SHOW_PAGES_TO_CHAPTER, "1");
@@ -2763,6 +2851,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_BOOK_SORT_ORDER, FileInfo.DEF_SORT_ORDER.name());
 			props.applyDefault(ReaderView.PROP_APP_DICTIONARY, Dictionaries.DEFAULT_DICTIONARY_ID);
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES, "0");
 			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION, "2");
 			props.applyDefault(ReaderView.PROP_APP_MULTI_SELECTION_ACTION, "0");
 			props.applyDefault(ReaderView.PROP_APP_SELECTION_ACTION_LONG, "11");
@@ -2845,10 +2934,11 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, "0");
 			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS, "0");
 			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS, "0");
-			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK, "0");
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, "0");
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_BODY, "0");
 			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD, "5");		// 5 min.
 			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_CONFIRMATIONS, "1");
-			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_BOOKMARKS_KEEPALIVE, "14");				// 2 weeks
+			props.applyDefault(ReaderView.PROP_APP_CLOUDSYNC_DATA_KEEPALIVE, "14");				// 2 weeks
 
 			if (!DeviceInfo.isEinkScreen(getScreenForceEink())) {
 				props.applyDefault(ReaderView.PROP_APP_HIGHLIGHT_BOOKMARKS, "1");

@@ -269,14 +269,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, src, dst);
 					if (isCloudSyncProgressActive()) {
 						// draw progressbar on top
-						doDrawProgress(canvas, currentCloudSyncProgressPosition, currentCloudSyncProgressTitle, true);
+						doDrawProgress(canvas, currentCloudSyncProgressPosition, currentCloudSyncProgressTitle, !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()));
 					}
 				} else {
 					log.d("onDraw() -- drawing empty screen");
 					drawPageBackground(canvas);
 					if (isCloudSyncProgressActive()) {
 						// draw progressbar on top
-						doDrawProgress(canvas, currentCloudSyncProgressPosition, currentCloudSyncProgressTitle, true);
+						doDrawProgress(canvas, currentCloudSyncProgressPosition, currentCloudSyncProgressTitle, !DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()));
 					}
 				}
 				if (selectionModeActive) {
@@ -422,6 +422,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	// Double tap selections within this radius are are assumed to be attempts to select a single point
 	public static final int DOUBLE_TAP_RADIUS = 60;
+
+	private final static int BRIGHTNESS_TYPE_COMMON = 0;
+	private final static int BRIGHTNESS_TYPE_WARM = 1;
 
 	private ViewMode viewMode = ViewMode.PAGES;
 
@@ -960,6 +963,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //	}
 
 	private int isBacklightControlFlick = 1;
+	private int isWarmBacklightControlFlick = 2;
+
 	private boolean isTouchScreenEnabled = true;
 	//	private boolean isManualScrollActive = false;
 //	private boolean isBrightnessControlActive = false;
@@ -1293,6 +1298,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		private final static int EXPIRATION_TIME_MS = 180000;
 
 		int state = STATE_INITIAL;
+		int brightness_type = BRIGHTNESS_TYPE_COMMON;
 		int stateInsp = STATE_INITIAL;
 
 		int start_x = 0;
@@ -1345,7 +1351,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				case STATE_DONE:
 				case STATE_BRIGHTNESS:
 				case STATE_FLIP_TRACKING:
-					stopBrightnessControl(-1, -1, leftSideBrightness);
+					//stopBrightnessControl(-1, -1, leftSideBrightness);
+					stopBrightnessControl(-1, -1, brightness_type);
 					break;
 			}
 			state = STATE_DONE;
@@ -1673,7 +1680,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						state = STATE_DONE;
 						return cancel();
 					case STATE_BRIGHTNESS:
-						stopBrightnessControl(start_y, now_y, leftSideBrightness);
+						//stopBrightnessControl(start_y, now_y, leftSideBrightness);
+						stopBrightnessControl(x, y, brightness_type);
 						state = STATE_DONE;
 						return cancel();
 					case STATE_SELECTION:
@@ -1818,32 +1826,57 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					case STATE_DOWN_1:
 						if (distance < dragThreshold)
 							return true;
-						if ((DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS || DeviceInfo.EINK_HAVE_FRONTLIGHT) && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
+						if ((!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ||
+								DeviceInfo.EINK_HAVE_FRONTLIGHT) && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
 							// backlight control enabled
-							if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
-								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick > 0
-										|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick > 0) {
-									// brightness
-									state = STATE_BRIGHTNESS;
-									leftSideBrightness = start_x < dragThreshold * 170 / 100;
-									startBrightnessControl(start_y, leftSideBrightness);
-									return true;
-								}
-							} else {
-								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick == 1
-										|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick == 2) {
-									// brightness
-									state = STATE_BRIGHTNESS;
-									leftSideBrightness = start_x < dragThreshold * 170 / 100;
-									startBrightnessControl(start_y, leftSideBrightness);
-									return true;
-								}
+							if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick == 1
+									|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick == 2) {
+								// brightness
+								state = STATE_BRIGHTNESS;
+								brightness_type = BRIGHTNESS_TYPE_COMMON;
+								startBrightnessControl(start_x, start_y, brightness_type);
+								return true;
 							}
 						}
+						if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT && isWarmBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
+							// warm backlight control enabled
+							if (start_x < dragThreshold * 170 / 100 && isWarmBacklightControlFlick == 1
+									|| start_x > width - dragThreshold * 170 / 100 && isWarmBacklightControlFlick == 2) {
+								// warm backlight brightness
+								state = STATE_BRIGHTNESS;
+								brightness_type = BRIGHTNESS_TYPE_WARM;
+								startBrightnessControl(start_x, start_y, brightness_type);
+								return true;
+							}
+						}
+						//old KR's implementation
+//						if ((DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS || DeviceInfo.EINK_HAVE_FRONTLIGHT) && isBacklightControlFlick != BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
+//							// backlight control enabled
+//							if (DeviceInfo.ONYX_BRIGHTNESS_WARM && DeviceInfo.ONYX_BRIGHTNESS) {
+//								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick > 0
+//										|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick > 0) {
+//									// brightness
+//									state = STATE_BRIGHTNESS;
+//									leftSideBrightness = start_x < dragThreshold * 170 / 100;
+//									startBrightnessControl(start_y, leftSideBrightness);
+//									return true;
+//								}
+//							} else {
+//								if (start_x < dragThreshold * 170 / 100 && isBacklightControlFlick == 1
+//										|| start_x > width - dragThreshold * 170 / 100 && isBacklightControlFlick == 2) {
+//									// brightness
+//									state = STATE_BRIGHTNESS;
+//									leftSideBrightness = start_x < dragThreshold * 170 / 100;
+//									startBrightnessControl(start_y, leftSideBrightness);
+//									return true;
+//								}
+//							}
+//						}
 
 
-						boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
-						int dir = isPageMode ? x - start_x : y - start_y;
+						//boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
+						//int dir = isPageMode ? x - start_x : y - start_y;
+						int dir = mIsPageMode ? x - start_x : y - start_y;
 						if (Math.abs(mGesturePageFlipsPerFullSwipe) == 1) {
 							dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
 							if (getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
@@ -1863,7 +1896,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						updateAnimation(x, y);
 						return true;
 					case STATE_BRIGHTNESS:
-						updateBrightnessControl(start_y, now_y, leftSideBrightness);
+						//updateBrightnessControl(start_y, now_y, leftSideBrightness);
+						updateBrightnessControl(x, y, brightness_type);
 						return true;
 					case STATE_FLIP_TRACKING:
 						updatePageFlipTracking(x, y);
@@ -2413,10 +2447,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
 					}
-					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
+					//asdf
+					//TODO: настройки яркости я все равно хочу менять, тут надо будет это пересмотреть
+					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) || (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT)) {
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
 					}
-					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) || (DeviceInfo.ONYX_BRIGHTNESS_WARM)) {
+					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_RIGHT) || (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT)) {
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
 					}
 					dlg.setView(grid);
@@ -3626,8 +3662,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_SAVE_BOOKMARK_QUICK:
 				addBookmark(0, true);
 				break;
-			case DCMD_SHOW_SYSTEM_BRIGHTNESS_DIALOG:
-				mActivity.sendBroadcast(new Intent("action.show.brightness.dialog"));
+			case DCMD_BACKLIGHT_SET_DEFAULT:
+				setSetting(PROP_APP_SCREEN_BACKLIGHT, "-1");		// system default backlight level
+				break;
+			case DCMD_SHOW_SYSTEM_BACKLIGHT_DIALOG:
+				if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {
+					if (DeviceInfo.EINK_ONYX) {
+						mActivity.sendBroadcast(new Intent("action.show.brightness.dialog"));
+					} else {
+						// TODO: other eink devices with frontlight
+					}
+				}
 				break;
 			case DCMD_SHOW_USER_DIC:
 				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
@@ -3783,7 +3828,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private void updateLoadedBookInfo()
 	{
 		BackgroundThread.ensureBackground();
-		// get title, authors, etc.
+		// get title, authors, genres, etc.
 		doc.updateBookInfo(mBookInfo);
 		updateCurrentPositionStatus();
 		// check whether current book properties updated on another devices
@@ -3969,6 +4014,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			secondaryTapActionType = flg ? TAP_ACTION_TYPE_DOUBLE : TAP_ACTION_TYPE_LONGPRESS;
 		} else if (key.equals(PROP_APP_FLICK_BACKLIGHT_CONTROL)) {
 			isBacklightControlFlick = "1".equals(value) ? 1 : ("2".equals(value) ? 2 : 0);
+		} else if (key.equals(PROP_APP_FLICK_WARMLIGHT_CONTROL)) {
+			isWarmBacklightControlFlick = "1".equals(value) ? 1 : ("2".equals(value) ? 2 : 0);
 		} else if (PROP_APP_HIGHLIGHT_BOOKMARKS.equals(key)) {
 			flgHighlightBookmarks = !"0".equals(value);
 			clearSelection();
@@ -4123,16 +4170,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_APP_SHOW_COVERPAGES.equals(key)
 					|| PROP_APP_COVERPAGE_SIZE.equals(key)
 					|| PROP_APP_SCREEN_BACKLIGHT.equals(key)
-					|| PROP_APP_SCREEN_BACKLIGHT_WARM.equals(key)
+					|| PROP_APP_SCREEN_WARM_BACKLIGHT.equals(key)
 					|| PROP_APP_USE_EINK_FRONTLIGHT.equals(key)
-					|| PROP_APP_SCREEN_BACKLIGHT_EINK.equals(key)
 					|| PROP_APP_BOOK_PROPERTY_SCAN_ENABLED.equals(key)
 					|| PROP_APP_SCREEN_BACKLIGHT_LOCK.equals(key)
 					|| PROP_APP_TAP_ZONE_HILIGHT.equals(key)
 					|| PROP_APP_DICTIONARY.equals(key)
 					|| PROP_APP_DOUBLE_TAP_SELECTION.equals(key)
 					|| PROP_APP_FLICK_BACKLIGHT_CONTROL.equals(key)
+					|| PROP_APP_FLICK_WARMLIGHT_CONTROL.equals(key)
 					|| PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS.equals(key)
+					|| PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES.equals(key)
 					|| PROP_APP_SELECTION_ACTION.equals(key)
 					|| PROP_APP_FILE_BROWSER_SIMPLE_MODE.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE.equals(key)
@@ -4565,19 +4613,25 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int currentCloudSyncProgressPosition = -1;
 	private String currentCloudSyncProgressTitle;
 
-	public void showCloudSyncProgress(int progress) {
+	public void showCloudSyncProgress(int progress, String title) {
 		log.v("showClodSyncProgress(" + progress + ")");
 		boolean update = false;
-		if (null == currentCloudSyncProgressTitle) {
-			currentCloudSyncProgressTitle = mActivity.getString(R.string.cloud_synchronization_);
+		if (null == currentCloudSyncProgressTitle || !currentCloudSyncProgressTitle.equals(title)) {
+			currentCloudSyncProgressTitle = title;
 			update = true;
 		}
 		if (currentCloudSyncProgressPosition != progress) {
 			currentCloudSyncProgressPosition = progress;
 			update = true;
 		}
-		if (update)
+		if (update) {
+			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) && -1 == savedEinkUpdateMode) {
+				savedEinkUpdateMode = EinkScreen.getUpdateMode();
+				savedEinkUpdateInterval = EinkScreen.getUpdateInterval();
+				EinkScreen.ResetController(EinkScreen.CMODE_ONESHOT, 0, surface);
+			}
 			bookView.draw(true);
+		}
 	}
 
 	public void hideSyncProgress() {
@@ -4586,6 +4640,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (currentCloudSyncProgressTitle != null || currentCloudSyncProgressPosition != -1) {
 			currentCloudSyncProgressPosition = -1;
 			currentCloudSyncProgressTitle = null;
+			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				if (!isProgressActive()) {
+					EinkScreen.ResetController(savedEinkUpdateMode, savedEinkUpdateInterval, surface);
+					savedEinkUpdateMode = -1;
+					savedEinkUpdateInterval = -1;
+				}
+			}
 			bookView.draw(false);
 		}
 	}
@@ -5337,138 +5398,138 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	int currentBrightnessValueIndex = -1;
-	int currentBrightnessValueWarmIndex = -1;
-	int lastBrightnessValueIndex = -1;
-	int lastBrightnessValueIndexWarm = -1;
+	int currentBrightnessValue = -1;
+	int currentBrightnessPrevYPos = -1;
 
-	private void startBrightnessControl(final int startY, final boolean leftSide)
-	{
-		int currentBrightnessValue = mActivity.getScreenBacklightLevel();
-		int currentBrightnessValueWarm = mActivity.getScreenBacklightLevelWarm();
-		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!mActivity.isOnyxBrightControl());
-		if (!onyxWarm) {
-			if (!mActivity.isOnyxBrightControl())
-				currentBrightnessValueIndex = OptionsDialog.findBacklightSettingIndex(currentBrightnessValue);
-			else
-				currentBrightnessValueIndex = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), currentBrightnessValue);
-			if (lastBrightnessValueIndex == -1) lastBrightnessValueIndex = currentBrightnessValueIndex;
-		} else {
-			if (!mActivity.isOnyxBrightControl())
-				currentBrightnessValueWarmIndex = OptionsDialog.findBacklightSettingIndex(currentBrightnessValueWarm);
-			else
-				currentBrightnessValueWarmIndex = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), currentBrightnessValueWarm);
-			if (lastBrightnessValueIndexWarm == -1) lastBrightnessValueIndexWarm = currentBrightnessValueWarmIndex;
+	private void startBrightnessControl(final int startX, final int startY, int type) {
+		switch (type) {
+			case BRIGHTNESS_TYPE_COMMON:
+				currentBrightnessValue = mActivity.getScreenBacklightLevel();
+				if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+					currentBrightnessValueIndex = OptionsDialog.findBacklightSettingIndex(currentBrightnessValue);
+					if (0 == currentBrightnessValueIndex) {		// system backlight level
+						// A trick that allows you to reduce the brightness of the backlight
+						// if the brightness is set to the same as in the system.
+						currentBrightnessValue = 50;
+						currentBrightnessValueIndex = OptionsDialog.findBacklightSettingIndex(currentBrightnessValue);
+					}
+				}
+				else if (DeviceInfo.EINK_HAVE_FRONTLIGHT)
+					currentBrightnessValueIndex = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), currentBrightnessValue);
+				break;
+			case BRIGHTNESS_TYPE_WARM:
+				currentBrightnessValue = mActivity.getWarmBacklightLevel();
+				if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT)
+					currentBrightnessValueIndex = Utils.findNearestIndex(EinkScreen.getWarmLightLevels(mActivity), currentBrightnessValue);
+				break;
+			default:
+				return;
 		}
-		updateBrightnessControl(startY, startY, leftSide);
+		currentBrightnessPrevYPos = startY;
+		updateBrightnessControl(startX, startY, type);
 	}
 
-	private void updateBrightnessControl(final int y_start, final int y, final boolean leftSide) {
+	private void updateBrightnessControl(final int x, final int y, int type) {
 		List<Integer> levelList = null;
 		int count = 0;
-		if (!mActivity.isOnyxBrightControl())
-			count = OptionsDialog.mBacklightLevels.length;
-		else {
-			levelList = EinkScreen.getFrontLightLevels(mActivity);
-			for (int i: levelList) log.i("levelList " + i);
-			if (null != levelList)
-				count = levelList.size();
-			else
+		boolean bOnyxLight = false;
+		boolean bOnyxWarmLight = false;
+		switch (type) {
+			case BRIGHTNESS_TYPE_COMMON:
+				if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+					count = OptionsDialog.mBacklightLevels.length;
+				else if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {
+					levelList = EinkScreen.getFrontLightLevels(mActivity);
+					if (null != levelList) {
+						count = levelList.size();
+						bOnyxLight = true;
+					}
+					else
+						return;
+				}
+				break;
+			case BRIGHTNESS_TYPE_WARM:
+				if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
+					levelList = EinkScreen.getWarmLightLevels(mActivity);
+					if (null != levelList) {
+						count = levelList.size();
+						bOnyxWarmLight = true;
+					}
+					else
+						return;
+				}
+				break;
+			default:
 				return;
 		}
 		if (0 == count)
 			return;
-		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!mActivity.isOnyxBrightControl());
-		int index1 = count - 1 - y * count / surface.getHeight();
-		int index2 = count - 1 - y_start * count / surface.getHeight();
-		log.i("index1 " + index1);
-		log.i("index2 " + index2);
-		log.i("count " + count);
-
-		//index1 = index1 / 4 * 3;
-		//index2 = index2 / 4 * 3;
-		int index = 0;
-		if (!onyxWarm)
-			index = index1 - index2 + lastBrightnessValueIndex;
-		if (onyxWarm)
-			index = index1 - index2 + lastBrightnessValueIndexWarm;
-		//int index = currentBrightnessValueIndex + (currentBrightnessValueIndex * aval) / 100;
+		// plotn: added 1.3 koef so it was very slow change - through all the screen height
+		int diff = (int) 1.3f * count*(currentBrightnessPrevYPos - y)/surface.getHeight();
+		int index = currentBrightnessValueIndex + diff;
 		if (index < 0)
 			index = 0;
 		else if (index >= count)
-			index = count-1;
-		log.i("index " + index);
-		int curBrightnessValueIndex = -1;
-		if (!onyxWarm) curBrightnessValueIndex = currentBrightnessValueIndex;
-		if (onyxWarm) curBrightnessValueIndex = currentBrightnessValueWarmIndex;
-		if (index != curBrightnessValueIndex) {
-			if (!onyxWarm) currentBrightnessValueIndex = index;
-			else
-				currentBrightnessValueWarmIndex = index;
-			int newValue = 0;
-			if (mActivity.isOnyxBrightControl())
-				newValue = levelList.get(index);
-			else
-				newValue = OptionsDialog.mBacklightLevels[index];
-			mActivity.setScreenBacklightLevel(newValue, leftSide);
-			//if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-			if (newValue < 1) newValue = 1;
-			if (onyxWarm) {
-				if (leftSide) {
-					int indexR = 0;
-					indexR = lastBrightnessValueIndexWarm;
-					if (indexR < 0)
-						indexR = 0;
-					else if (indexR >= count)
-						indexR = count-1;
-					int newValueR = 0;
-					if (!mActivity.isOnyxBrightControl())
-						newValueR = OptionsDialog.mBacklightLevels[indexR];
-					else
-						newValueR = levelList.get(indexR);
-					if (newValueR>=0)
-						showBottomPopup(newValue + "% / " + newValueR + "%", 2000);
-					else
-						showBottomPopup(newValue + "%", 2000);
-				} else {
-					int indexL = 0;
-					indexL = lastBrightnessValueIndex;
-					if (indexL < 0)
-						indexL = 0;
-					else if (indexL >= count)
-						indexL = count-1;
-					int newValueL = 0;
-					if (!mActivity.isOnyxBrightControl())
-						newValueL = OptionsDialog.mBacklightLevels[indexL];
-					else
-						newValueL = Utils.findNearestIndex(EinkScreen.getFrontLightLevels(mActivity), indexL);
-					if (newValueL>=0)
-						showBottomPopup(newValueL + "% / " + newValue + "%", 2000);
-					else
-						showBottomPopup(newValue + "%", 2000);
-				}
-			} else {
-				showBottomPopup(newValue + "%");
+			index = count - 1;
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+			if (index == 0) {
+				// ignore system brightness level on non eink devices
+				currentBrightnessPrevYPos = y;
+				return;
 			}
-			//}
 		}
-
+		if (index != currentBrightnessValueIndex) {
+			currentBrightnessValueIndex = index;
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+				currentBrightnessValue = OptionsDialog.mBacklightLevels[currentBrightnessValueIndex];
+			else {
+				// Here levelList already != null
+				currentBrightnessValue = levelList.get(currentBrightnessValueIndex);
+			}
+			switch (type) {
+				case BRIGHTNESS_TYPE_COMMON:
+					mActivity.setScreenBacklightLevel(currentBrightnessValue);
+					break;
+				case BRIGHTNESS_TYPE_WARM:
+					mActivity.setScreenWarmBacklightLevel(currentBrightnessValue);
+					break;
+			}
+			currentBrightnessPrevYPos = y;
+		}
+		if ((!bOnyxLight) && (!bOnyxWarmLight)) {
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+				showCenterPopup(currentBrightnessValue + "%", 2000);
+			else
+				showBottomPopup(currentBrightnessValue + "%");
+		} else {
+			float percentLevel = currentBrightnessValue;
+			if (bOnyxLight)
+				percentLevel = 100 * currentBrightnessValue / (float) DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE;
+			if (bOnyxWarmLight)
+				percentLevel = 100 * currentBrightnessValue / (float) DeviceInfo.MAX_SCREEN_BRIGHTNESS_WARM_VALUE;
+			String sVal = currentBrightnessValue + "%";
+			if (percentLevel < 10)
+				sVal = String.format("%1$.1f%%", percentLevel);
+			else
+				sVal = String.format("%1$.0f%%", percentLevel);
+			showBottomPopup(sVal);
+		}
 	}
 
-	private void stopBrightnessControl(final int y_start, final int y, final boolean leftSide) {
-		boolean onyxWarm = (!leftSide) && DeviceInfo.ONYX_BRIGHTNESS_WARM && (!mActivity.isOnyxBrightControl());
-		int curBrightnessValueIndex = currentBrightnessValueIndex;
-		if (onyxWarm) curBrightnessValueIndex = currentBrightnessValueWarmIndex;
-		if (curBrightnessValueIndex >= 0) {
-			if (y_start >= 0 && y >= 0) {
-				updateBrightnessControl(y_start, y, leftSide);
+	private void stopBrightnessControl(final int x, final int y, int type) {
+		if (currentBrightnessValueIndex >= 0) {
+			if (x >= 0 && y >= 0) {
+				updateBrightnessControl(x, y, type);
 			}
-			if (mActivity.isOnyxBrightControl()) {
-				mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT_EINK, OptionsDialog.findBacklightSettingIndex(curBrightnessValueIndex));
-			} else {
-				if (!onyxWarm)
-					mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, OptionsDialog.mBacklightLevels[curBrightnessValueIndex]);
-				else
-					mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT_WARM, OptionsDialog.mBacklightLevels[curBrightnessValueIndex]);
+			switch (type) {
+				case BRIGHTNESS_TYPE_COMMON:
+					mSettings.setInt(PROP_APP_SCREEN_BACKLIGHT, currentBrightnessValue);
+					break;
+				case BRIGHTNESS_TYPE_WARM:
+					mSettings.setInt(PROP_APP_SCREEN_WARM_BACKLIGHT, currentBrightnessValue);
+					break;
+				default:
+					return;
 			}
 			if (showBrightnessFlickToast) {
 				OptionsDialog.mBacklightLevelsTitles[0] = mActivity.getString(R.string.options_app_backlight_screen_default);
@@ -5476,14 +5537,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showToast(s);
 			}
 			saveSettings(mSettings);
-			if (!onyxWarm) {
-				lastBrightnessValueIndex = curBrightnessValueIndex;
-				currentBrightnessValueIndex = -1;
-			}
-			else {
-				lastBrightnessValueIndexWarm = curBrightnessValueIndex;
-				currentBrightnessValueWarmIndex = -1;
-			}
+			currentBrightnessValue = -1;
+			currentBrightnessValueIndex = -1;
+			currentBrightnessPrevYPos = -1;
 		}
 	}
 
@@ -5640,11 +5696,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				canvas = holder.lockCanvas(rc);
 				//log.v("before draw(canvas)");
 				if (canvas != null) {
-					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())){
+					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+						// pre draw update
 						EinkScreen.PrepareController(surface, isPartially);
 					}
 					callback.drawTo(canvas);
-					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())){
+					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+						// post draw update
 						EinkScreen.UpdateController(surface, isPartially);
 					}
 				}
@@ -5720,7 +5778,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			this.maxY = maxY;
 			long start = android.os.SystemClock.uptimeMillis();
 			log.v("ScrollViewAnimation -- creating: drawing two pages to buffer");
-			PositionProperties currPos = doc.getPositionProps(null, false	);
+			PositionProperties currPos = doc.getPositionProps(null, false);
 			int pos = currPos.y;
 			int pos0 = pos - (maxY - startY);
 			if (pos0 < 0)
@@ -6727,10 +6785,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int currentProgressPosition = 1;
 	private int currentProgressTitleId = R.string.progress_loading;
 	private String currentProgressTitle = null;
+	private int savedEinkUpdateMode = -1;
+	private int savedEinkUpdateInterval = -1;
 
 	private void showProgress(int position, int titleResource) {
 		int pos = position / 100;
-		showCenterPopup(pos + "% " + mActivity.getString(titleResource), -1);
+		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+			showCenterPopup(pos + "% " + mActivity.getString(titleResource), -1);
+		else
+			showBottomPopup(pos + "% " + mActivity.getString(titleResource), -1);
 		boolean first = currentProgressTitleId == 0;
 		if (currentProgressPosition != position || currentProgressTitleId != titleResource) {
 			currentProgressPosition = position;
@@ -6740,22 +6803,28 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-//		private void showProgress(int position, int titleResource) {
-//			log.v("showProgress(" + position + ")");
-//			boolean first = currentProgressTitleId == 0;
-//			boolean update = false;
-//			if (null == currentProgressTitle || currentProgressTitleId != titleResource) {
-//				currentProgressTitleId = titleResource;
-//				currentProgressTitle = mActivity.getString(currentProgressTitleId);
-//				update = true;
-//			}
-//			if (currentProgressPosition != position || currentProgressTitleId != titleResource) {
-//				currentProgressPosition = position;
-//				update = true;
-//			}
-//			if (update)
-//				bookView.draw(!first);
+//	private void showProgress(int position, int titleResource) {
+//		log.v("showProgress(" + position + ")");
+//		boolean first = currentProgressTitleId == 0;
+//		boolean update = false;
+//		if (null == currentProgressTitle || currentProgressTitleId != titleResource) {
+//			currentProgressTitleId = titleResource;
+//			currentProgressTitle = mActivity.getString(currentProgressTitleId);
+//			update = true;
 //		}
+//		if (currentProgressPosition != position || currentProgressTitleId != titleResource) {
+//			currentProgressPosition = position;
+//			update = true;
+//		}
+//		if (update) {
+//			if (DeviceInfo.EINK_SCREEN && -1 == savedEinkUpdateMode) {
+//				savedEinkUpdateMode = EinkScreen.getUpdateMode();
+//				savedEinkUpdateInterval = EinkScreen.getUpdateInterval();
+//				EinkScreen.ResetController(EinkScreen.CMODE_ONESHOT, 0, surface);
+//			}
+//			bookView.draw(!first);
+//		}
+//	}
 
 	private void hideProgress() {
 		mActivity.scheduleHideWindowCenterPopup(1);
@@ -6773,6 +6842,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			currentProgressPosition = -1;
 //			currentProgressTitleId = 0;
 //			currentProgressTitle = null;
+//			if (DeviceInfo.EINK_SCREEN) {
+//				if (!isCloudSyncProgressActive()) {
+//					EinkScreen.ResetController(savedEinkUpdateMode, savedEinkUpdateInterval, surface);
+//					savedEinkUpdateMode = -1;
+//					savedEinkUpdateInterval = -1;
+//				}
+//			}
 //			bookView.draw(false);
 //		}
 //	}
@@ -6985,9 +7061,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		{
 			BackgroundThread.ensureGUI();
 			log.d("LoadDocumentTask, GUI thread is finished successfully");
-			if (Services.getHistory() != null) {
+			if (!Services.isStopped()) {
 				Services.getHistory().updateBookAccess(mBookInfo, getTimeElapsed());
-				mActivity.waitForCRDBService(() -> mActivity.getDB().saveBookInfo(mBookInfo));
+				final BookInfo finalBookInfo = new BookInfo(mBookInfo);
+				mActivity.waitForCRDBService(() -> mActivity.getDB().saveBookInfo(finalBookInfo));
 				if (coverPageBytes != null && mBookInfo != null && mBookInfo.getFileInfo() != null) {
 					// TODO: fix it
 					/*
@@ -7054,14 +7131,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 			}
 		}
-		public void fail( Exception e )
+		public void fail(Exception e)
 		{
 			BackgroundThread.ensureGUI();
 			close();
 			log.v("LoadDocumentTask failed for " + mBookInfo, e);
+			final FileInfo finalFileInfo = new FileInfo(mBookInfo.getFileInfo());
+
 			mActivity.waitForCRDBService(() -> {
-				if (Services.getHistory() != null)
-					Services.getHistory().removeBookInfo(mActivity.getDB(), mBookInfo.getFileInfo(), true, false);
+				if (!Services.isStopped())
+					Services.getHistory().removeBookInfo(mActivity.getDB(), finalFileInfo, true, false);
 			});
 			mBookInfo = null;
 			log.d("LoadDocumentTask is finished with exception " + e.getMessage());
@@ -7284,48 +7363,48 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	protected void doDrawProgressOld(Canvas canvas, int position, String title, boolean transparentFrame) {
-		log.v("doDrawProgress(" + position + ")");
-		if (null == title)
-			return;
-		int w = canvas.getWidth();
-		int h = canvas.getHeight();
-		int mins = Math.min(w, h) * 7 / 10;
-		int ph = mins / 20;
-		int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
-		int fontSize = 12;			// 12pt
-		float factor = mActivity.getDensityFactor();
-		Rect rc = new Rect(w / 2 - mins / 2, h / 2 - ph / 2, w / 2 + mins / 2, h / 2 + ph / 2);
-		if (transparentFrame) {
-			int frameColor = mSettings.getColor(PROP_BACKGROUND_COLOR, 0xFFFFFF);
-			float lumi = Utils.colorLuminance(frameColor);
-			if (Utils.colorLuminance(frameColor) >= 0.5f)
-				frameColor = Utils.darkerColor(frameColor, 150);
-			else
-				frameColor = Utils.lighterColor(frameColor, 200);
-			Rect frameRc = new Rect(rc);
-			frameRc.left -= ph/2;
-			frameRc.right += ph/2;
-			frameRc.top -= 2*fontSize*factor + ph/2;
-			frameRc.bottom += ph/2;
-			canvas.drawRect(frameRc, Utils.createSolidPaint(0xE0000000 | (frameColor & 0x00FFFFFF)));
-		}
+			log.v("doDrawProgress(" + position + ")");
+			if (null == title)
+				return;
+			int w = canvas.getWidth();
+			int h = canvas.getHeight();
+			int mins = Math.min(w, h) * 7 / 10;
+			int ph = mins / 20;
+			int textColor = mSettings.getColor(PROP_FONT_COLOR, 0x000000);
+			int fontSize = 12;			// 12pt
+			float factor = mActivity.getDensityFactor();
+			Rect rc = new Rect(w / 2 - mins / 2, h / 2 - ph / 2, w / 2 + mins / 2, h / 2 + ph / 2);
+			if (transparentFrame) {
+				int frameColor = mSettings.getColor(PROP_BACKGROUND_COLOR, 0xFFFFFF);
+				float lumi = Utils.colorLuminance(frameColor);
+				if (Utils.colorLuminance(frameColor) >= 0.5f)
+					frameColor = Utils.darkerColor(frameColor, 150);
+				else
+					frameColor = Utils.lighterColor(frameColor, 200);
+				Rect frameRc = new Rect(rc);
+				frameRc.left -= ph/2;
+				frameRc.right += ph/2;
+				frameRc.top -= 2*fontSize*factor + ph/2;
+				frameRc.bottom += ph/2;
+				canvas.drawRect(frameRc, Utils.createSolidPaint(0xE0000000 | (frameColor & 0x00FFFFFF)));
+			}
 
-		Utils.drawFrame(canvas, rc, Utils.createSolidPaint(0xC0000000 | textColor));
-		//canvas.drawRect(rc, createSolidPaint(0xFFC0C0A0));
-		rc.left += 2;
-		rc.right -= 2;
-		rc.top += 2;
-		rc.bottom -= 2;
-		int x = rc.left + (rc.right - rc.left) * position / 10000;
-		Rect rc1 = new Rect(rc);
-		rc1.right = x;
-		canvas.drawRect(rc1, Utils.createSolidPaint(0x80000000 | textColor));
-		Paint textPaint = Utils.createSolidPaint(0xFF000000 | textColor);
-		textPaint.setTextAlign(Paint.Align.CENTER);
-		textPaint.setTextSize(15f * factor);
-		textPaint.setSubpixelText(true);
-		canvas.drawText(title, (rc.left + rc.right) / 2, rc1.top - fontSize * factor, textPaint);
-		//canvas.drawText(String.valueOf(position * 100 / 10000) + "%", rc.left + 4, rc1.bottom - 4, textPaint);
+			Utils.drawFrame(canvas, rc, Utils.createSolidPaint(0xC0000000 | textColor));
+			//canvas.drawRect(rc, createSolidPaint(0xFFC0C0A0));
+			rc.left += 2;
+			rc.right -= 2;
+			rc.top += 2;
+			rc.bottom -= 2;
+			int x = rc.left + (rc.right - rc.left) * position / 10000;
+			Rect rc1 = new Rect(rc);
+			rc1.right = x;
+			canvas.drawRect(rc1, Utils.createSolidPaint(0x80000000 | textColor));
+			Paint textPaint = Utils.createSolidPaint(0xFF000000 | textColor);
+			textPaint.setTextAlign(Paint.Align.CENTER);
+			textPaint.setTextSize(15f * factor);
+			textPaint.setSubpixelText(true);
+			canvas.drawText(title, (rc.left + rc.right) / 2, rc1.top - fontSize * factor, textPaint);
+			//canvas.drawText(String.valueOf(position * 100 / 10000) + "%", rc.left + 4, rc1.bottom - 4, textPaint);
 //		Rect rc2 = new Rect(rc);
 //		rc.left = x;
 //		canvas.drawRect(rc2, createSolidPaint(0xFFC0C0A0));
@@ -7400,7 +7479,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (mylastSavePositionTaskId == lastSavePositionTaskId) {
 							if (bookInfo != null) {
 								log.v("saving last position");
-								if (Services.getHistory() != null) {
+								if (!Services.isStopped()) {
+									// this delayed task can be completed after calling CoolReader.onDestroy(),
+									// which in turn calls Services.stopServices().
 									savePositionBookmark(bmk);
 									Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
 								}
@@ -7524,20 +7605,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (bmk != null && mBookInfo != null && isBookLoaded()) {
 			//setBookPosition();
 			if (lastSavedBookmark == null || !lastSavedBookmark.getStartPos().equals(bmk.getStartPos())) {
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				Bookmark bmk2 = new Bookmark(bmk);
-				bmk2.bookFile=mBookInfo.getFileInfo().getFilename();
-				bmk2.bookPath=mBookInfo.getFileInfo().pathname;
-				bmk2.bookFileArc="";
-				if (mBookInfo.getFileInfo().isArchive)
-				  bmk2.bookFileArc=mBookInfo.getFileInfo().arcname;
-				final String prettyJson = gson.toJson(bmk2);
-  			    getActivity().saveCurPosFile(false, prettyJson);
-				Services.getHistory().updateRecentDir();
-				mActivity.getDB().saveBookInfo(mBookInfo);
-				mActivity.getDB().flush();
-				lastSavedBookmark = bmk;
-				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("*");
+				if (!Services.isStopped()) {
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					Bookmark bmk2 = new Bookmark(bmk);
+					bmk2.bookFile = mBookInfo.getFileInfo().getFilename();
+					bmk2.bookPath = mBookInfo.getFileInfo().pathname;
+					bmk2.bookFileArc = "";
+					if (mBookInfo.getFileInfo().isArchive)
+						bmk2.bookFileArc = mBookInfo.getFileInfo().arcname;
+					final String prettyJson = gson.toJson(bmk2);
+					getActivity().saveCurPosFile(false, prettyJson);
+					Services.getHistory().updateRecentDir();
+					mActivity.getDB().saveBookInfo(mBookInfo);
+					mActivity.getDB().flush();
+					lastSavedBookmark = bmk;
+					mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("*");
+				}
 			}
 		}
 	}
@@ -7572,13 +7655,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		mActivity.einkRefresh();
 		BackgroundThread.ensureGUI();
 		if (isBookLoaded() && mBookInfo != null) {
-			log.v("saving last immediately");
-			log.d("bookmark count 1 = " + mBookInfo.getBookmarkCount());
-			Services.getHistory().updateBookAccess(mBookInfo, getTimeElapsed());
-			log.d("bookmark count 2 = " + mBookInfo.getBookmarkCount());
-			mActivity.getDB().saveBookInfo(mBookInfo);
-			log.d("bookmark count 3 = " + mBookInfo.getBookmarkCount());
-			mActivity.getDB().flush();
+			if (!Services.isStopped()) {
+				log.v("saving last immediately");
+				log.d("bookmark count 1 = " + mBookInfo.getBookmarkCount());
+				Services.getHistory().updateBookAccess(mBookInfo, getTimeElapsed());
+				log.d("bookmark count 2 = " + mBookInfo.getBookmarkCount());
+				mActivity.getDB().saveBookInfo(mBookInfo);
+				log.d("bookmark count 3 = " + mBookInfo.getBookmarkCount());
+				mActivity.getDB().flush();
+			}
 		}
 		//scheduleSaveCurrentPositionBookmark(0);
 		//post( new SavePositionTask() );

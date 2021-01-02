@@ -1,6 +1,5 @@
 package org.coolreader.crengine;
 
-import android.app.SearchManager;
 import android.util.Log;
 
 import org.coolreader.R;
@@ -103,7 +102,7 @@ public interface Settings {
     public static final String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
     public static final String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
     public static final String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
-	public static final String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight";
+	public static final String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight"; //KR
 
 	 // image scaling settings
 	 // mode: 0=disabled, 1=integer scaling factors, 2=free scaling
@@ -143,9 +142,8 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_ORIENTATION  ="app.screen.orientation";
     public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
     public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
-	public static final String PROP_APP_SCREEN_BACKLIGHT_WARM    ="app.screen.backlight.warm";
-	public static final String PROP_APP_SCREEN_BACKLIGHT_EINK    ="app.screen.backlight.eink";
-    public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
+	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT    ="app.screen.warm.backlight"; //CR!
+	public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
     public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
     public static final String PROP_APP_SCREEN_BACKLIGHT_NIGHT ="app.screen.backlight.night";
     public static final String PROP_APP_DOUBLE_TAP_SELECTION     ="app.controls.doubletap.selection";
@@ -155,7 +153,8 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_BACKLIGHT_LOCK    ="app.screen.backlight.lock.enabled";
     public static final String PROP_APP_TAP_ZONE_HILIGHT     ="app.tapzone.hilight";
     public static final String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
-    public static final String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
+	public static final String PROP_APP_FLICK_WARMLIGHT_CONTROL = "app.screen.warmlight.control.flick"; //CR!
+	public static final String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
 	public static final String PROP_APP_TRANSLATE_DIR = "app.translate.dir";
     public static final String PROP_APP_DICTIONARY = "app.dictionary.current";
     public static final String PROP_APP_DICTIONARY_2 = "app.dictionary2.current";
@@ -221,8 +220,10 @@ public interface Settings {
     public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_NIGHT = "crengine.highlight.bookmarks.color.correction.night";
 
     public static final String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
-    public static final String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
-    public static final String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
+	public static final String PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES = "app.browser.hide.empty.genres";
+	public static final String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
+
+	public static final String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
 	public static final String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
 	public static final String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
 	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON = "app.browser.sec.group.common";
@@ -263,10 +264,11 @@ public interface Settings {
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED = "app.cloudsync.googledrive.enabled";
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS = "app.cloudsync.googledrive.settings";
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS = "app.cloudsync.googledrive.bookmarks";
-    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK = "app.cloudsync.googledrive.currentbook";
-    String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD = "app.cloudsync.googledrive.autosaveperiod";
-    String PROP_APP_CLOUDSYNC_CONFIRMATIONS = "app.cloudsync.confirmations";
-    String PROP_APP_CLOUDSYNC_BOOKMARKS_KEEPALIVE = "app.cloudsync.bookmarks.keepalive";		// days
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO = "app.cloudsync.googledrive.currentbook";
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_BODY = "app.cloudsync.googledrive.currentbook.body";
+	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD = "app.cloudsync.googledrive.autosaveperiod";
+	String PROP_APP_CLOUDSYNC_CONFIRMATIONS = "app.cloudsync.confirmations";
+	String PROP_APP_CLOUDSYNC_DATA_KEEPALIVE = "app.cloudsync.bookmarks.keepalive";		// days
 
 	public static final String PROP_APP_GEO = "app.geo.locations";
 	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";

@@ -119,6 +119,15 @@ static css_font_family_t DEFAULT_FONT_FAMILY = css_ff_sans_serif;
 #define MAX_STATUS_FONT_SIZE 255
 #endif
 
+// Fallback defines, see crsetup.h
+#ifndef SCREEN_SIZE_MIN
+#define SCREEN_SIZE_MIN 80
+#endif
+
+#ifndef SCREEN_SIZE_MAX
+#define SCREEN_SIZE_MAX 32767
+#endif
+
 #if defined(__SYMBIAN32__)
 #include <e32std.h>
 #define DEFAULT_PAGE_MARGIN 2
@@ -832,7 +841,7 @@ static lString32 getSectionHeader(ldomNode * section) {
     ldomNode * child = section->getChildElementNode(0, U"title");
     if (!child)
 		return header;
-	header = child->getText(L' ', 1024);
+	header = child->getText(U' ', 1024);
 	return header;
 }
 
@@ -2270,11 +2279,11 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 			piw = m_infoFont->getTextWidth(pageinfo.c_str(), pageinfo.length());
 			if (!can2lines) {
 				m_infoFont->DrawTextString(drawbuf, info.right - piw, iy,
-										   pageinfo.c_str(), pageinfo.length(), L' ', NULL, false);
+										   pageinfo.c_str(), pageinfo.length(), U' ', NULL, false);
 			}
 			if (can2lines)
 				m_infoFont->DrawTextString(drawbuf, info.right - piw, iy2 + m_infoFont->getHeight()+2,
-										   pageinfo.c_str(), pageinfo.length(), L' ', NULL, false);
+										   pageinfo.c_str(), pageinfo.length(), U' ', NULL, false);
 			info.right -= piw + info.height() / 2;
 			if (!can2lines) saveRight = info.right;
 			}
@@ -2290,10 +2299,10 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 			int w = m_infoFont->getTextWidth(clock.c_str(), clock.length()) + 2;
 			if (!can2lines)
 				m_infoFont->DrawTextString(drawbuf, info.right - w, iy,
-					clock.c_str(), clock.length(), L' ', NULL, false);
+					clock.c_str(), clock.length(), U' ', NULL, false);
 			if (can2lines)
 				m_infoFont->DrawTextString(drawbuf, saveRight - w, iy2,
-										   clock.c_str(), clock.length(), L' ', NULL, false);
+										   clock.c_str(), clock.length(), U' ', NULL, false);
 			if (!can2lines) info.right -= w + info.height() / 2;
 		}
 		int authorsw = 0;
@@ -2313,7 +2322,7 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 		}
 		if (phi & PGHDR_AUTHOR && !authors.empty()) {
 			if (!title.empty())
-				authors += L'.';
+				authors += U'.';
 			authorsw = m_infoFont->getTextWidth(authors.c_str(),
 					authors.length());
 		}
@@ -2344,12 +2353,12 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	if ((!text.empty())||(!text2.empty())) {
 		if (can2lines) {
 			m_infoFont->DrawTextString(drawbuf, info.left, iy2, text.c_str(),
-									   text.length(), L' ', NULL, false);
+									   text.length(), U' ', NULL, false);
 			m_infoFont->DrawTextString(drawbuf, info.left, iy2+m_infoFont->getHeight()+2, text2.c_str(),
-									   text2.length(), L' ', NULL, false);
+									   text2.length(), U' ', NULL, false);
 		} else {
 			m_infoFont->DrawTextString(drawbuf, info.left, iy, text.c_str(),
-									   text.length(), L' ', NULL, false);
+									   text.length(), U' ', NULL, false);
 		}
 	}
 	drawbuf->SetClipRect(&oldcr);
@@ -2551,6 +2560,18 @@ void LVDocView::GetPos(lvRect & rc) {
 		rc.top = _pos;
 		rc.bottom = _pos + GetHeight();
 	}
+}
+
+int LVDocView::getPageFlow(int pageIndex)
+{
+	if (pageIndex >= 0 && pageIndex < m_pages.length())
+		return m_pages[pageIndex]->flow;
+	return -1;
+}
+
+bool LVDocView::hasNonLinearFlows()
+{
+	return m_pages.hasNonLinearFlows();
 }
 
 int LVDocView::getPageHeight(int pageIndex)
@@ -3097,7 +3118,7 @@ LVRef<ldomXRange> LVDocView::getPageDocumentRange(int pageIndex) {
     // Note: this may return a range that may not include some parts
     // of the document that are actually displayed on that page, like
     // floats that were in some HTML fragment of the previous page,
-    // but whose positionning has been shifted/delayed and ended up
+    // but whose positioning has been shifted/delayed and ended up
     // on this page (so, getCurrentPageLinks() may miss links from
     // such floats).
     // With floats, a page may actually show more than one range,
@@ -4106,10 +4127,14 @@ void LVDocView::SetRotateAngle( cr_rotate_angle_t angle )
 void LVDocView::Resize(int dx, int dy) {
 	//LVCHECKPOINT("Resize");
 	CRLog::trace("LVDocView:Resize(%dx%d)", dx, dy);
-	if (dx < 80 || dx > 32767)
-		dx = 80;
-	if (dy < 80 || dy > 32767)
-		dy = 80;
+	if (dx < SCREEN_SIZE_MIN)
+		dx = SCREEN_SIZE_MIN;
+	else if (dx > SCREEN_SIZE_MAX)
+		dx = SCREEN_SIZE_MAX;
+	if (dy < SCREEN_SIZE_MIN)
+		dy = SCREEN_SIZE_MIN;
+	else if (dy > SCREEN_SIZE_MAX)
+		dy = SCREEN_SIZE_MAX;
 #if CR_INTERNAL_PAGE_ORIENTATION==1
 	if ( m_rotateAngle==CR_ROTATE_ANGLE_90 || m_rotateAngle==CR_ROTATE_ANGLE_270 ) {
 		CRLog::trace("Screen is rotated, swapping dimensions");
@@ -4279,11 +4304,11 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
     CRLog::debug("LoadDocument(%s) textMode=%s", LCSTR(lString32(fname)), getTextFormatOptions()==txt_format_pre ? "pre" : "autoformat");
 
 	// split file path and name
-	lString32 filename16(fname);
+	lString32 filename32(fname);
 
 	lString32 arcPathName;
 	lString32 arcItemPathName;
-	bool isArchiveFile = LVSplitArcName(filename16, arcPathName,
+	bool isArchiveFile = LVSplitArcName(filename32, arcPathName,
 			arcItemPathName);
 
 	int savedRenderFlags = m_props->getIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_LEGACY);
@@ -4307,7 +4332,7 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
 		stream = m_container->OpenStream(arcItemPathName.c_str(), LVOM_READ);
 		if (stream.isNull()) {
 			CRLog::error("Cannot open archive file item stream %s", LCSTR(
-					filename16));
+					filename32));
 			return false;
 		}
 
@@ -4321,7 +4346,7 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
 				(int) stream->GetSize()));
 		m_doc_props->setString(DOC_PROP_FILE_NAME, arcItemPathName);
 		m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
-		CRFileHistRecord* record = m_hist.getRecord( filename16, stream->GetSize() );
+		CRFileHistRecord* record = m_hist.getRecord( filename32, stream->GetSize() );
 		lUInt32 newDOMVersion;
 		lUInt32 domVersionRequested = m_props->getIntDef(PROP_REQUESTED_DOM_VERSION, gDOMVersionCurrent);
 		bool convertBookmarks = needToConvertBookmarks(record, domVersionRequested) && !metadataOnly;
@@ -4346,10 +4371,10 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
 		return false;
 	}
 
-	lString32 fn = LVExtractFilename(filename16);
-	lString32 dir = LVExtractPath(filename16);
+	lString32 fn = LVExtractFilename(filename32);
+	lString32 dir = LVExtractPath(filename32);
 
-	CRLog::info("Loading document %s : fn=%s, dir=%s", LCSTR(filename16),
+	CRLog::info("Loading document %s : fn=%s, dir=%s", LCSTR(filename32),
 			LCSTR(fn), LCSTR(dir));
 #if 0
 	int i;
@@ -4383,7 +4408,7 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
 			(int) stream->GetSize()));
 	m_doc_props->setHex(DOC_PROP_FILE_CRC32, stream->getcrc32());
 
-	CRFileHistRecord* record = m_hist.getRecord( filename16, stream->GetSize() );
+	CRFileHistRecord* record = m_hist.getRecord( filename32, stream->GetSize() );
 	int newDOMVersion;
 	lUInt32 domVersionRequested = m_props->getIntDef(PROP_REQUESTED_DOM_VERSION, gDOMVersionCurrent);
 	bool convertBookmarks = needToConvertBookmarks(record, domVersionRequested) && !metadataOnly;
@@ -5090,11 +5115,13 @@ void LVDocView::createEmptyDocument() {
 			PROP_EMBEDDED_STYLES, true));
     m_doc->setDocFlag(DOC_FLAG_ENABLE_DOC_FONTS, m_props->getBoolDef(
             PROP_EMBEDDED_FONTS, true));
+    m_doc->setDocFlag(DOC_FLAG_NONLINEAR_PAGEBREAK, m_props->getBoolDef(
+            PROP_NONLINEAR_PAGEBREAK, false));
     m_doc->setSpaceWidthScalePercent(m_props->getIntDef(PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT, DEF_SPACE_WIDTH_SCALE_PERCENT));
     m_doc->setMinSpaceCondensingPercent(m_props->getIntDef(PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT, DEF_MIN_SPACE_CONDENSING_PERCENT));
     m_doc->setUnusedSpaceThresholdPercent(m_props->getIntDef(PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT, DEF_UNUSED_SPACE_THRESHOLD_PERCENT));
     m_doc->setMaxAddedLetterSpacingPercent(m_props->getIntDef(PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT, DEF_MAX_ADDED_LETTER_SPACING_PERCENT));
-    m_doc->setHangingPunctiationEnabled(m_props->getBoolDef(PROP_FLOATING_PUNCTUATION, true));
+    m_doc->setHangingPunctiationEnabled(m_props->getBoolDef(PROP_FLOATING_PUNCTUATION, false));
     m_doc->setRenderBlockRenderingFlags(m_props->getIntDef(PROP_RENDER_BLOCK_RENDERING_FLAGS, BLOCK_RENDERING_FLAGS_DEFAULT));
     m_doc->setDOMVersionRequested(m_props->getIntDef(PROP_REQUESTED_DOM_VERSION, gDOMVersionCurrent));
     if (m_def_interline_space == 100) // (avoid any rounding issue)
@@ -5317,7 +5344,7 @@ bool LVDocView::ParseDocument() {
 			if (rootNode)
 				el = rootNode->findChildElement(path);
 			if (el != NULL) {
-                lString32 s = el->getText(L' ', 1024);
+                lString32 s = el->getText(U' ', 1024);
 				if (!s.empty()) {
 					m_doc_props->setString(DOC_PROP_TITLE, s);
 				}
@@ -5608,7 +5635,7 @@ bool LVDocView::getBookmarkPosText(ldomXPointer bm, lString32 & titleText,
         posText += txt;
 		el = el->getParentNode();
 	} else {
-        posText = el->getText(L' ', 1024);
+        posText = el->getText(U' ', 1024);
 	}
     bool inTitle = false;
 	do {
@@ -6956,7 +6983,6 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
     for (int i = 0; i < props->getCount(); i++) {
         lString8 name(props->getName(i));
         lString32 value = props->getValue(i);
-        //bool isUnknown = false;
         if (name == PROP_FONT_ANTIALIASING) {
             int antialiasingMode = props->getIntDef(PROP_FONT_ANTIALIASING, 2);
             fontMan->SetAntialiasMode(antialiasingMode);
@@ -7165,6 +7191,11 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
             if (m_doc) // not when noDefaultDocument=true
                 getDocument()->setDocFlag(DOC_FLAG_ENABLE_DOC_FONTS, value);
             REQUEST_RENDER("propsApply doc fonts")
+        } else if (name == PROP_NONLINEAR_PAGEBREAK) {
+            bool value = props->getBoolDef(PROP_NONLINEAR_PAGEBREAK, false);
+            if (m_doc) // not when noDefaultDocument=true
+                getDocument()->setDocFlag(DOC_FLAG_NONLINEAR_PAGEBREAK, value);
+            REQUEST_RENDER("propsApply nonlinear")
         } else if (name == PROP_FOOTNOTES) {
             bool value = props->getBoolDef(PROP_FOOTNOTES, true);
             if (m_doc) // not when noDefaultDocument=true
@@ -7241,12 +7272,13 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
 
             // unknown property, adding to list of unknown properties
             unknown->setString(name.c_str(), value);
-            //isUnknown = true;
         }
-        //if ( !isUnknown ) {
-        // update current value in properties
+        // Update current value in properties
+        // Even if not used above to set anything if no m_doc, this saves
+        // the value in m_props so it might be used by createEmptyDocument()
+        // when creating the coming up document (and further documents
+        // if the value is not re-set).
         m_props->setString(name.c_str(), value);
-        //}
     }
     if (needUpdateMargins)
         updatePageMargins();
@@ -7398,13 +7430,13 @@ bool SimpleTitleFormatter::measure() {
     return _width < _maxWidth && _height < _maxHeight;
 }
 bool SimpleTitleFormatter::splitLines(const char * delimiter) {
-    lString32 delim16(delimiter);
+    lString32 delim32(delimiter);
     int bestpos = -1;
     int bestdist = -1;
     int start = 0;
     bool skipDelimiter = *delimiter == '|';
     for (;;) {
-        int p = _text.pos(delim16, start);
+        int p = _text.pos(delim32, start);
         if (p < 0)
             break;
         int dist = _text.length() / 2 - p;
@@ -7418,8 +7450,8 @@ bool SimpleTitleFormatter::splitLines(const char * delimiter) {
     }
     if (bestpos < 0)
         return false;
-    _lines.add(_text.substr(0, bestpos + (skipDelimiter ? 0 : delim16.length())).trim());
-    _lines.add(_text.substr(bestpos + delim16.length()).trim());
+    _lines.add(_text.substr(0, bestpos + (skipDelimiter ? 0 : delim32.length())).trim());
+    _lines.add(_text.substr(bestpos + delim32.length()).trim());
     return measure();
 }
 bool SimpleTitleFormatter::format(int fontSize) {

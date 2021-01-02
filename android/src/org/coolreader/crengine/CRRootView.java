@@ -271,10 +271,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			cover.setMaxHeight(coverHeight);
 			cover.setMaxWidth(coverWidth);
 			if (item.isRecentDir()) {
-				cover.setImageResource(
-						Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_next_drawable, R.drawable.cr3_button_next)
-						//R.drawable.cr3_button_next
-				);
+				cover.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_next_drawable, R.drawable.cr3_button_next));
 				mActivity.tintViewIcons(cover,true);
 				if (label != null) {
 					label.setText("More...");
@@ -785,6 +782,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 			else if (item.isBooksByGenreRoot())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_theatre_mask, R.drawable.icons8_theatre_mask));
+			//else if (item.isBooksByGenreRoot() // CR implementation
 			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() ||
 					item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
 				setImageResourceSmall(image, Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_year, R.drawable.icons8_folder_year));

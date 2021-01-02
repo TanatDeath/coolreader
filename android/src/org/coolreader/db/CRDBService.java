@@ -423,6 +423,19 @@ public class CRDBService extends Service {
 		});
 	}
 
+//  CR implementation
+//	public void loadGenresList(FileInfo parent, boolean showEmptyGenres, final ItemGroupsLoadingCallback callback, final Handler handler) {
+//		final FileInfo p = new FileInfo(parent);
+//		execTask(new Task("loadGenresList") {
+//			@Override
+//			public void work() {
+//				mainDB.loadGenresList(p, showEmptyGenres);
+//				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
+//			}
+//		});
+//	}
+
+	//KR implementation
 	public void loadGenresList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent);
 		execTask(new Task("loadGenresList") {
@@ -478,6 +491,18 @@ public class CRDBService extends Service {
 		});
 	}
 
+	//  CR implementation
+//	public void findGenresBooks(final String genreCode, boolean showEmptyGenres, final FileInfoLoadingCallback callback, final Handler handler) {
+//		execTask(new Task("findGenresBooks") {
+//			@Override
+//			public void work() {
+//				final ArrayList<FileInfo> list = mainDB.findByGenre(genreCode, showEmptyGenres);
+//				sendTask(handler, () -> callback.onFileInfoListLoaded(list));
+//			}
+//		});
+//	}
+
+	// KR implementation
 	public void findGenreBooks(final long genreId, final FileInfoLoadingCallback callback, final Handler handler) {
 		execTask(new Task("findGenreBooks") {
 			@Override
@@ -570,17 +595,15 @@ public class CRDBService extends Service {
 		});
 	}
 
-	/*
-	public void findByFingerprint(final int maxCount, final String filename, int crc32, final BookSearchCallback callback, final Handler handler) {
+	public void findByFingerprints(final int maxCount, Collection<String> fingerprints, final BookSearchCallback callback, final Handler handler) {
 		execTask(new Task("findByFingerprint") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = mainDB.findByFingerprint(maxCount, filename, crc32);
+				final ArrayList<FileInfo> list = mainDB.findByFingerprints(maxCount, fingerprints);
 				sendTask(handler, () -> callback.onBooksFound(list));
 			}
 		});
 	}
-	*/
 
 	private ArrayList<FileInfo> deepCopyFileInfos(final Collection<FileInfo> src) {
 		final ArrayList<FileInfo> list = new ArrayList<>(src.size());
@@ -924,6 +947,12 @@ public class CRDBService extends Service {
     		getService().loadAuthorsList(parent, filterSeries, withAliases, callback, new Handler());
     	}
 
+    	// CR implementation
+//		public void loadGenresList(FileInfo parent, boolean showEmptyGenres, final ItemGroupsLoadingCallback callback) {
+//			getService().loadGenresList(parent, showEmptyGenres, callback, new Handler());
+//		}
+
+		// KR implementation
 		public void loadGenresList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
 			getService().loadGenresList(parent, callback, new Handler());
 		}
@@ -944,6 +973,12 @@ public class CRDBService extends Service {
     		getService().findAuthorBooks(authorId, addFilter, callback, new Handler());
     	}
 
+		// CR implementation
+//		public void loadGenresBooks(String genreCode, boolean showEmptyGenres, FileInfoLoadingCallback callback) {
+//			getService().findGenresBooks(genreCode, showEmptyGenres, callback, new Handler());
+//		}
+
+		// KR implementation
 		public void loadGenreBooks(long genreId, FileInfoLoadingCallback callback) {
 			getService().findGenreBooks(genreId, callback, new Handler());
 		}
@@ -988,11 +1023,9 @@ public class CRDBService extends Service {
     		getService().saveFileInfos(deepCopyFileInfos(list));
     	}
 
-    	/*
-    	public void findByFingerprint(final int maxCount, final String filename, int crc32, final BookSearchCallback callback) {
-    		getService().findByFingerprint(maxCount, filename, crc32, callback, new Handler());
-    	}
-    	*/
+		public void findByFingerprints(final int maxCount, Collection<String> fingerprints, final BookSearchCallback callback) {
+			getService().findByFingerprints(maxCount, fingerprints, callback, new Handler());
+		}
 
 		public void findByPatterns(final int maxCount, final String author, final String title, final String series, final String filename, final BookSearchCallback callback) {
     		getService().findByPatterns(maxCount, author, title, series, filename, callback, new Handler());

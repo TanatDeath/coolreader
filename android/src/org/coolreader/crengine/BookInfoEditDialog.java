@@ -479,8 +479,33 @@ public class BookInfoEditDialog extends BaseDialog {
 		edTitle.setText(file.title);
         //edAuthor.setText(file.authors);
         edSeriesName.setText(file.series);
-        if (file.series != null && file.series.trim().length() > 0 && file.seriesNumber > 0)
-        	edSeriesNumber.setText(String.valueOf(file.seriesNumber));
+		if (file.series != null && file.series.trim().length() > 0 && file.seriesNumber > 0)
+			edSeriesNumber.setText(String.valueOf(file.seriesNumber));
+		else
+			edSeriesNumber.setText("");
+		// CR implementation - genres ans description
+//		if (DocumentFormat.FB2 == file.format) {
+//			if (file.genres != null && file.genres.length() > 0) {
+//				// genre codes separated by "|", see MainDB.READ_FILEINFO_FIELDS:
+//				StringBuilder genres = new StringBuilder();
+//				String[] parts = file.genres.split("\\|");
+//				for (String code : parts) {
+//					code = code.trim();
+//					if (code.length() > 0) {
+//						if (genres.length() > 0)
+//							genres.append("\n");
+//						genres.append(Services.getGenresCollection().translate(code));
+//					}
+//				}
+//				edGenres.setText(genres.toString());
+//				lblGenres.setVisibility(View.VISIBLE);
+//				edGenres.setVisibility(View.VISIBLE);
+//			}
+//		}
+//		if (file.description != null && file.description.length() > 0) {
+//			edDescription.setText(file.description);
+//			edDescription.setVisibility(View.VISIBLE);
+//		}
         edLangFrom.setText(file.lang_from);
 		edLangTo.setText(file.lang_to);
 		String genreR = file.genre_list;
@@ -523,15 +548,14 @@ public class BookInfoEditDialog extends BaseDialog {
 				mActivity.askDeleteRecent(mBookInfo.getFileInfo());
 				dismiss();
 			});
-        	btnOpenFolder.setOnClickListener(v -> {
-				mActivity.showDirectory(mBookInfo.getFileInfo(), "");
-				dismiss();
-			});
         } else {
-        	ViewGroup parent = ((ViewGroup)btnRemoveRecent.getParent());
-        	parent.removeView(btnRemoveRecent);
-        	parent.removeView(btnOpenFolder);
+        	Utils.hideView(btnRemoveRecent);
+        	//parent.removeView(btnOpenFolder);
         }
+		btnOpenFolder.setOnClickListener(v -> {
+			mActivity.showDirectory(mBookInfo.getFileInfo(), "");
+			dismiss();
+		});
 
 		Button translButton = mainView.findViewById(R.id.transl_button);
 		translButton.setTextColor(colorIcon);
@@ -656,8 +680,19 @@ public class BookInfoEditDialog extends BaseDialog {
 		} else if (KeyEvent.KEYCODE_PAGE_UP == keyCode) {
 			mainView.pageScroll(View.FOCUS_UP);
 			return true;
+		}  else if (KeyEvent.KEYCODE_BACK == keyCode) {
+			return true;
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (KeyEvent.KEYCODE_BACK == keyCode) {
+			dismiss();
+			return true;
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 
 	private void setChecked(Button btn) {

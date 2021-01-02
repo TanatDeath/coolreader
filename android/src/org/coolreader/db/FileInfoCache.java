@@ -121,5 +121,6 @@ public class FileInfoCache {
 		for (int i=itemsToRemove; i>=0; i--) {
 			list.remove(i);
 		}
+		currentSize -= itemsToRemove;
 	}
 }

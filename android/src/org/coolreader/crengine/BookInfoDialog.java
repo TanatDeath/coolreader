@@ -185,6 +185,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.title", R.string.book_info_book_title);
 		mLabelMap.put("book.date", R.string.book_info_book_date);
 		mLabelMap.put("book.series", R.string.book_info_book_series_name);
+		//mLabelMap.put("book.genres", R.string.book_info_genres); // CR implementation
 		mLabelMap.put("book.language", R.string.book_info_book_language);
 		mLabelMap.put("book.genre", R.string.book_info_book_genre);
 		mLabelMap.put("book.srclang", R.string.book_info_book_srclang);
@@ -243,6 +244,24 @@ public class BookInfoDialog extends BaseDialog {
 			if (section != null)
 				value = section;
 			isSection = true;
+// 		CR implementation
+//		} else if ("book.genres".equals(name)) {
+//			// genres ids separated by "|", see MainDB.READ_FILEINFO_FIELDS:
+//			StringBuilder genres = new StringBuilder();
+//			String[] parts = value.split("\\|");
+//			for (String code : parts) {
+//				code = code.trim();
+//				if (code.length() > 0) {
+//					if (genres.length() > 0)
+//						genres.append("\n");
+//					genres.append(Services.getGenresCollection().translate(code));
+//				}
+//			}
+//			value = genres.toString();
+//			Integer id = mLabelMap.get(name);
+//			String title = id!=null ? getContext().getString(id) : name;
+//			if ( title!=null )
+//				name = title;
 		} else {
 			Integer id = mLabelMap.get(name);
 			String title = id!=null ? getContext().getString(id) : name;

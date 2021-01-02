@@ -16,6 +16,14 @@
         "language": "-"
     },
     {
+        "name": "Armenian",
+        "filename": "Armenian.pattern",
+        "language": "hy",
+        "left_hyphen_min": 1,
+        "right_hyphen_min": 2,
+        "aliases": ["arm", "hye", "hyw"]
+    },
+    {
         "name": "Basque",
         "filename": "Basque.pattern",
         "language": "eu",
@@ -107,6 +115,13 @@
         "aliases": ["fra", "fre"]
     },
     {
+        "name": "Friulian",
+        "filename": "Friulian.pattern",
+        "language": "fur",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 2
+    },
+    {
         "name": "Galician",
         "filename": "Galician.pattern",
         "language": "gl",
@@ -160,6 +175,22 @@
         "aliases": ["ita"]
     },
     {
+        "name": "Latin (liturgical)",
+        "filename": "Latin_liturgical.pattern",
+        "language": "la-lit",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 2,
+        "aliases": ["lat-lit"]
+    },
+    {
+        "name": "Latin",
+        "filename": "Latin.pattern",
+        "language": "la",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 2,
+        "aliases": ["lat"]
+    },
+    {
         "name": "Latvian",
         "filename": "Latvian.pattern",
         "language": "lv",
@@ -197,13 +228,27 @@
         "aliases": ["oci"]
     },
     {
+        "name": "Piedmontese",
+        "filename": "Piedmontese.pattern",
+        "language": "pms",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 2
+    },
+    {
         "name": "Polish",
         "filename": "Polish.pattern",
         "language": "pl",
         "aliases": ["pol"]
     },
     {
-        "name": "Portuguese",
+        "name": "Portuguese (BR)",
+        "filename": "Portuguese_BR.pattern",
+        "language": "pt-BR",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 3
+    },
+    {
+        "name": "Portuguese (PT)",
         "filename": "Portuguese.pattern",
         "language": "pt",
         "left_hyphen_min": 2,
@@ -215,6 +260,14 @@
         "filename": "Romanian.pattern",
         "language": "ro",
         "aliases": ["ron"]
+    },
+    {
+        "name": "Romansh",
+        "filename": "Romansh.pattern",
+        "language": "rm",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 2,
+        "aliases": ["roh"]
     },
     {
         "name": "Russian + English (UK)",
@@ -285,5 +338,13 @@
         "left_hyphen_min": 2,
         "right_hyphen_min": 3,
         "aliases": ["cym"]
+    },
+    {
+        "name": "Zulu",
+        "filename": "Zulu.pattern",
+        "language": "zu",
+        "left_hyphen_min": 2,
+        "right_hyphen_min": 1,
+        "aliases": ["zul"]
     }
 ]

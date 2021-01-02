@@ -47,6 +47,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	LayoutInflater mInflater;
 	History mHistory;
 	ListView mListView;
+	boolean mHideEmptyGenres;
 	ArrayList<FileInfo> mFileSystemFolders;
 	ArrayList<FileInfo> mfavFolders;
 	ArrayList<String> mOnlyFSFolders;
@@ -225,12 +226,19 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
 			}
 
-		    for ( int i=0; i<menu.size(); i++ ) {
-		    	menu.getItem(i).setOnMenuItemClickListener(item -> {
+			for ( int i=0; i<menu.size(); i++ ) {
+				MenuItem menuItem = menu.getItem(i);
+				if (selectedItem!=null && selectedItem.isDirectory && selectedItem.isSpecialDir()) {
+					if (menuItem.getItemId() == R.id.folder_delete || menuItem.getItemId() == R.id.folder_to_favorites) {
+						menuItem.setVisible(false);
+					}
+				}
+				menu.getItem(i).setOnMenuItemClickListener(item -> {
 					onContextItemSelected(item);
 					return true;
 				});
-		    }
+			}
+
 		}
 
 		boolean ignoreActionSetting = false;
@@ -421,7 +429,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 
 	CoverpageManager.CoverpageReadyListener coverpageListener;
-	public FileBrowser(CoolReader activity, Engine engine, Scanner scanner, History history) {
+	public FileBrowser(CoolReader activity, Engine engine, Scanner scanner, History history, boolean hideEmptyGenres) {
 		super(activity);
 		this.mActivity = activity;
 		this.mEngine = engine;
@@ -429,6 +437,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		this.mInflater = LayoutInflater.from(activity);// activity.getLayoutInflater();
 		this.mHistory = history;
 		this.mCoverpageManager = Services.getCoverpageManager();
+		this.mHideEmptyGenres = hideEmptyGenres;
 		Services.getFileSystemFolders().loadFavoriteFolders(mActivity.getDB());
 		ArrayList<FileInfo> favFolders = new ArrayList<>();
 		ArrayList<String> favFoldersS = new ArrayList<>();
@@ -465,6 +474,14 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		scanner.addListener(this);
 		showDirectory( null, null, "", null);
 
+	}
+
+	public void setHideEmptyGenres(boolean value) {
+		mHideEmptyGenres = value;
+		if (null != currDirectory && (currDirectory.isBooksByGenreDir() || currDirectory.isBooksByGenreRoot())) {
+			// update
+			showDirectory(currDirectory, null, "", null);
+		}
 	}
 	
 	public void onClose() {
@@ -625,14 +642,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
             return true;
 		case R.id.folder_delete:
 			log.d("folder_delete menu item selected");
-			//mActivity.showToast(selectedItem.pathname);
-			final File f = new File(selectedItem.pathname);
-			String[] children = f.list();
-			if (children!=null)
-				if (children.length>0)
-					mActivity.askConfirmation( mActivity.getString(R.string.delete_dir_confirm)+" "+children.length,
-							() -> mActivity.DeleteRecursive(f,selectedItem)); else mActivity.DeleteRecursive(f,selectedItem);
-			if (f.isFile()) mActivity.askDeleteBook(selectedItem);
+			mActivity.askDeleteFolder(selectedItem);
 			return true;
 		case R.id.folder_to_favorites:
             log.d("folder_to_favorites menu item selected");
@@ -1490,27 +1500,31 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 		}
 	}
-	
+
 	private class ItemGroupsLoadingCallback implements CRDBService.ItemGroupsLoadingCallback {
 		private final FileInfo baseDir;
-		public ItemGroupsLoadingCallback(FileInfo baseDir) {
+		private final FileInfo itemToSelect;
+		public ItemGroupsLoadingCallback(FileInfo baseDir, FileInfo itemToSelect) {
 			this.baseDir = baseDir;
+			this.itemToSelect = itemToSelect;
 		}
 		@Override
 		public void onItemGroupsLoaded(FileInfo parent) {
 			baseDir.setItems(parent);
 			//plotn - very experimental
 			baseDir.sort(mSortOrder);
-			showDirectoryInternal(baseDir, null);
+			showDirectoryInternal(baseDir, itemToSelect);
 		}
-	};
+	}
 	
 	private class FileInfoLoadingCallback implements CRDBService.FileInfoLoadingCallback {
 		private final FileInfo baseDir;
-		public FileInfoLoadingCallback(FileInfo baseDir) {
+		private final FileInfo itemToSelect;
+		public FileInfoLoadingCallback(FileInfo baseDir, FileInfo itemToSelect) {
 			//plotn - very experimental
 			baseDir.sort(mSortOrder);
 			this.baseDir = baseDir;
+			this.itemToSelect = itemToSelect;
 		}
 
 		@Override
@@ -1560,7 +1574,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			MainDB.addGroupedItems2(baseDir, "",list, prefix, extractor, 1);
 			//plotn - very experimental
 			baseDir.sort(mSortOrder);
-			showDirectoryInternal(baseDir, null);
+			showDirectoryInternal(baseDir, itemToSelect);
 			mActivity.setBrowserBottomBar(false);
 			if (baseDir.isLitresDir()) {
 				if (saveParams != null) {
@@ -1648,6 +1662,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				showFindBookDialog(false, "", null);
 				return;
 			}
+//			CR genres implementation - commenting
+//			if (fileOrDir.isBooksByGenreRoot()) {
+//				// Display genres list
+//				log.d("Show genres list");
+//				mActivity.getDB().loadGenresList(fileOrDir, !mHideEmptyGenres, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
+//				return;
+//			}
 			if (fileOrDir.isRescanShortcut()) {
 				ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
 				//lets reduce the list
@@ -1706,129 +1727,135 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				// refresh authors list
 				log.d("Updating authors list");
 				boolean withAliases = mActivity.settings().getBool(Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED, false);
-				mActivity.getDB().loadAuthorsList(fileOrDir, addFilter, withAliases, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadAuthorsList(fileOrDir, addFilter, withAliases, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating series list");
-				mActivity.getDB().loadSeriesList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadSeriesList(fileOrDir, addFilter, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
             if (fileOrDir.isBooksByBookdateRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
                 log.d("Updating bookdate list");
-                mActivity.getDB().loadByDateList(fileOrDir, "book_date_n", new ItemGroupsLoadingCallback(fileOrDir));
+                mActivity.getDB().loadByDateList(fileOrDir, "book_date_n", new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
                 return;
             }
 			if (fileOrDir.isBooksByDocdateRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating docdate list");
-				mActivity.getDB().loadByDateList(fileOrDir, "doc_date_n", new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateList(fileOrDir, "doc_date_n", new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByPublyearRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating publyear list");
-				mActivity.getDB().loadByDateList(fileOrDir, "publ_year_n", new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateList(fileOrDir, "publ_year_n", new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByFiledateRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating filedate list");
-				mActivity.getDB().loadByDateList(fileOrDir, "file_create_time", new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateList(fileOrDir, "file_create_time", new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByRatingRoot()) {
 				showDirectoryLoadingStub();
 				log.d("Updating rated books list");
-				mActivity.getDB().loadBooksByRating(1, 10, new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadBooksByRating(1, 10, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByStateFinishedRoot()) {
 				showDirectoryLoadingStub();
 				log.d("Updating books by state=finished");
-				mActivity.getDB().loadBooksByState(FileInfo.STATE_FINISHED, new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadBooksByState(FileInfo.STATE_FINISHED, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByStateReadingRoot()) {
 				showDirectoryLoadingStub();
 				log.d("Updating books by state=reading");
-				mActivity.getDB().loadBooksByState(FileInfo.STATE_READING, new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadBooksByState(FileInfo.STATE_READING, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByStateToReadRoot()) {
 				showDirectoryLoadingStub();
 				log.d("Updating books by state=toRead");
-				mActivity.getDB().loadBooksByState(FileInfo.STATE_TO_READ, new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadBooksByState(FileInfo.STATE_TO_READ, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByTitleRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating title list");
-				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByTitleLevel()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating title list");
-				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadTitleList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
+//			CR genres implementation - commenting
+//			if (fileOrDir.isBooksByGenreDir()) {
+//				log.d("Updating genres book list");
+//				mActivity.getDB().loadGenresBooks(fileOrDir.getGenreCode(), !mHideEmptyGenres, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
+//				return;
+//			}
 			if (fileOrDir.isBooksByAuthorDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating author book list");
-				mActivity.getDB().loadAuthorBooks(fileOrDir.getAuthorId(), addFilter, new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadAuthorBooks(fileOrDir.getAuthorId(), addFilter, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksBySeriesDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating series book list");
-				mActivity.getDB().loadSeriesBooks(fileOrDir.getSeriesId(), addFilter, new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadSeriesBooks(fileOrDir.getSeriesId(), addFilter, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByBookdateDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating bookdate book list");
-				mActivity.getDB().loadByDateBooks(fileOrDir.getBookdateId(), "book_date_n", new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateBooks(fileOrDir.getBookdateId(), "book_date_n", new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByDocdateDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating docdate book list");
-				mActivity.getDB().loadByDateBooks(fileOrDir.getDocdateId(), "doc_date_n", new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateBooks(fileOrDir.getDocdateId(), "doc_date_n", new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByPublyearDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating publyear book list");
-				mActivity.getDB().loadByDateBooks(fileOrDir.getPublyearId(), "publ_year_n", new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateBooks(fileOrDir.getPublyearId(), "publ_year_n", new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByFiledateDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating filedate book list");
-				mActivity.getDB().loadByDateBooks(fileOrDir.getFiledateId(), "file_create_time",  new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadByDateBooks(fileOrDir.getFiledateId(), "file_create_time",  new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByGenreRoot()) {
 				showDirectoryLoadingStub();
 				// refresh authors list
 				log.d("Updating genre list");
-				mActivity.getDB().loadGenresList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir));
+				mActivity.getDB().loadGenresList(fileOrDir, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isBooksByGenreDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating genre book list");
-				mActivity.getDB().loadGenreBooks(fileOrDir.getGenreId(), new FileInfoLoadingCallback(fileOrDir));
+				mActivity.getDB().loadGenreBooks(fileOrDir.getGenreId(), new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
 			if (fileOrDir.isLitresDir()) {
@@ -1836,31 +1863,31 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				if ((lsp != null) && (saveParams != null)) lsp.newOrPop = saveParams.newOrPop;
 				if (lsp == null) lsp = saveParams;
 				else saveParams = lsp;
-				CloudAction.litresSearchBooks(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir));
+				CloudAction.litresSearchBooks(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 			}
 			if (fileOrDir.isBooksByLitresGenreRoot()) {
 				LitresSearchParams lsp = (LitresSearchParams) params;
 				if (lsp == null) lsp = saveParams;
 				else saveParams = lsp;
-				CloudAction.litresGetGenreList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir));
+				CloudAction.litresGetGenreList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 			}
 			if (fileOrDir.isBooksByLitresCollectionRoot()) {
 				LitresSearchParams lsp = (LitresSearchParams) params;
 				if (lsp == null) lsp = saveParams;
 				else saveParams = lsp;
-				CloudAction.litresGetCollectionList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir));
+				CloudAction.litresGetCollectionList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 			}
 			if (fileOrDir.isBooksByLitresSequenceRoot()) {
 				LitresSearchParams lsp = (LitresSearchParams) params;
 				if (lsp == null) lsp = saveParams;
 				else saveParams = lsp;
-				CloudAction.litresGetSequenceList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir));
+				CloudAction.litresGetSequenceList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 			}
 			if (fileOrDir.isBooksByLitresPersonRoot()) {
 				LitresSearchParams lsp = (LitresSearchParams) params;
 				if (lsp == null) lsp = saveParams;
 				else saveParams = lsp;
-				CloudAction.litresSearchPersonsList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir));
+				CloudAction.litresSearchPersonsList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 			}
 		} else {
 			if (currDirectory != null)
@@ -2101,6 +2128,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			Button btn1;
 			Button btn2;
 			//TextView field3;
+			//ImageView infoButton; //CR - commenting
+
 			void setText(TextView view, String text, int color)
 			{
 				setText(view, text, color, null);
@@ -2262,6 +2291,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				}
 				boolean doTint = true;
 				if (item.isDirectory) {
+					// CR implementation of genres - commenting
+					//if (item.isBooksByGenreRoot() || item.isBooksByGenreDir())
+					//	image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 					if (item.isLitresPaginationNextPage())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_next_drawable, R.drawable.icons8_forward));
 					else if (item.isLitresPaginationPrevPage())
@@ -2308,6 +2340,22 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						setText(series, "", colorIcon);
 						setText(author, "", colorIcon);
 					}
+
+//					CR implementation of genres - commenting
+//					if ( item.isBooksByGenreDir() ) {
+//						if (item.tag instanceof Integer) {
+//							int code = (Integer) item.tag;
+//							setText(field1, "books: " + (code & FileInfo.GENRE_DATA_BOOKCOUNT_MASK));
+//							if ((code & FileInfo.GENRE_DATA_INCCHILD_MASK) == FileInfo.GENRE_DATA_INCCHILD_MASK) {
+//								setText(field2, mActivity.getString(R.string.including_subgenres));
+//							} else {
+//								setText(field2, "");
+//							}
+//						} else {
+//							setText(field1, "");
+//							setText(field2, "");
+//						}
+//					}
 
 					if (item.isBooksBySeriesDir() || item.isBooksByBookdateDir() || item.isBooksByDocdateDir()
 							|| item.isBooksByPublyearDir() || item.isBooksByFiledateDir() ||
@@ -2594,7 +2642,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								fld.setBackgroundColor(colorGrayCT2);
 							}
 						}
-						//if (fld != null) fld.setText("asdf");
+//						CR infoButton - we dont use it, KR have its own UI here
+//						if (infoButton != null)
+//							infoButton.setOnClickListener(v -> mActivity.editBookInfo(Services.getScanner().createRecentRoot(), item));
  					}
 					
 				}
@@ -2647,6 +2697,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				holder.btn1 = view.findViewById(R.id.btn_1);
 				holder.btn2 = view.findViewById(R.id.btn_2);
 				//holder.field3 = (TextView)view.findViewById(R.id.browser_item_field3);
+				//CR infoButton - we dont use it, KR have its own UI here
+				//holder.infoButton = view.findViewById(R.id.browser_item_button_info);
 				view.setTag(holder);
 			} else {
 				view = convertView;
@@ -2775,9 +2827,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		if (!BackgroundThread.isGUIThread())
 			throw new IllegalStateException("showDirectoryInternal should be called from GUI thread!");
 		int index = dir!=null ? dir.getItemIndex(file) : -1;
-		if (dir != null && !dir.isRootDir())
-			index++;
-		
+
 		String title = "";
 		if (dir != null) {
 			title = dir.getFilename();

@@ -790,6 +790,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.autosave_period_30min
 	};
 
+
 	int[] mWordExpansion = new int[] {
 			0, 5, 15, 20
 	};
@@ -989,12 +990,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	OptionBase mEnableHyphOption;
 	OptionBase mGoogleDriveEnableSettingsOption;
 	OptionBase mGoogleDriveEnableBookmarksOption;
-	OptionBase mGoogleDriveEnableCurrentBookOption;
+	OptionBase mGoogleDriveEnableCurrentBookInfoOption;
+	OptionBase mGoogleDriveEnableCurrentBookBodyOption;
 	OptionBase mCloudSyncAskConfirmationsOption;
 	OptionBase mGoogleDriveAutoSavePeriodOption;
-	OptionBase mBacklightControl1;
-	OptionBase mBacklightControl2;
-	OptionBase mCloudSyncBookmarksKeepAliveOptions;
+	OptionBase mCloudSyncDataKeepAliveOptions;
 
 	public final static int OPTION_VIEW_TYPE_NORMAL = 0;
 	public final static int OPTION_VIEW_TYPE_BOOLEAN = 1;
@@ -2735,9 +2735,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					add(mUserDicPanelKind, mUserDicPanelKindTitles, mUserDicPanelKindAddInfos).
 					setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_google_translate_user,R.drawable.icons8_google_translate_user));
-			listView.add(new ListOption(mOwner, getString(R.string.options_font_size_user_dic), PROP_FONT_SIZE_USER_DIC,
-					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(filterFontSizes(mFontSizes)).setDefaultValue("24").
-					setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
+
+			FlowListOption optFontSize = new FlowListOption(mOwner, getString(R.string.options_font_size_user_dic), PROP_FONT_SIZE_USER_DIC,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
+			for (int i = 20; i <= 150; i++) optFontSize.add(""+i, ""+i,"");
+			optFontSize.setDefaultValue("24").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size);
+			listView.add(optFontSize);
+//			listView.add(new ListOption(mOwner, getString(R.string.options_font_size_user_dic), PROP_FONT_SIZE_USER_DIC,
+//					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(filterFontSizes(mFontSizes)).setDefaultValue("24").
+//					setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
 			listView.add(new WikiOption(mOwner, getString(R.string.options_app_wiki1), PROP_CLOUD_WIKI1_ADDR,
 					getString(R.string.options_app_wiki1_add_info), this.lastFilteredValue).setDefaultValue("https://en.wikipedia.org").
 					setIconIdByAttr(R.attr.attr_icons8_wiki1, R.drawable.icons8_wiki1));
@@ -2835,6 +2841,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
 					getString(R.string.options_app_browser_hide_empty_dirs_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
+					getString(R.string.options_app_browser_hide_empty_dirs_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+			//CR implementation
+			//listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
+			//		getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
+			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
 			listView.add(new BoolOption(mOwner, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
 					getString(R.string.mi_book_browser_simple_mode_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
@@ -2918,6 +2931,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_app_scan_book_props_add_info));
 			this.updateFilteredMark(getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
 					getString(R.string.options_app_browser_hide_empty_dirs_add_info));
+			this.updateFilteredMark(getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
+					getString(R.string.option_add_info_empty_text));
 			this.updateFilteredMark(getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
 					getString(R.string.mi_book_browser_simple_mode_add_info));
 			this.updateFilteredMark(getString(R.string.mi_book_browser_max_group_size), PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
@@ -3000,69 +3015,88 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				return;
 			BaseDialog dlg = new BaseDialog("BacklightOption", mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(), this);
-
-			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+			// common screen or not onyx
+			if (
+			     (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) ||
+				 ((DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) && (!DeviceInfo.ONYX_HAVE_FRONTLIGHT) && (!DeviceInfo.ONYX_HAVE_NATURAL_BACKLIGHT))
+			) {
 				listView.add(new ListOption(mOwner, getString(R.string.options_app_backlight_timeout), PROP_APP_SCREEN_BACKLIGHT_LOCK,
 						getString(R.string.options_app_backlight_timeout_add_info), this.lastFilteredValue).
 						add(mBacklightTimeout, mBacklightTimeoutTitles, mBacklightLevelsAddInfos).setDefaultValue("3").setIconIdByAttr(R.attr.attr_icons8_sun_1, R.drawable.icons8_sun_1));
 				mBacklightLevelsTitles[0] = getString(R.string.options_app_backlight_screen_default);
-				listView.add(new ListOption(mOwner, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
+				listView.add(new FlowListOption(mOwner, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
 						getString(R.string.options_app_backlight_screen_add_info), this.lastFilteredValue).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).
 						setDefaultValue("-1").
 						setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
-			} else if ( DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS ) {
-				listView.add(new ListOption(mOwner, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
-						getString(R.string.options_app_backlight_screen_add_info), this.lastFilteredValue).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).
-						setDefaultValue("-1").
-						setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
-				boolean onyxWarm = DeviceInfo.ONYX_BRIGHTNESS_WARM;
-				if (onyxWarm)
-					listView.add(new ListOption(mOwner, getString(R.string.options_app_backlight_screen_warm), PROP_APP_SCREEN_BACKLIGHT_WARM,
-							getString(R.string.options_app_backlight_screen_warm_add_info), this.lastFilteredValue).add(mBacklightLevels, mBacklightLevelsTitles, mBacklightLevelsAddInfos).
-							setDefaultValue("-1").
-							setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
 			}
-			//plotn - not production ready , think later
-//			if ( DeviceInfo.EINK_HAVE_FRONTLIGHT ) {
-//				List<Integer> frontLightLevels = EinkScreen.getFrontLightLevels(mActivity);
-//				if (null != frontLightLevels && frontLightLevels.size() > 0) {
-//					ArrayList<String> levelsTitles = new ArrayList<>();
-//					ArrayList<Integer> levels = new ArrayList<>();
-//					ArrayList<Integer> levelsAddInfos = new ArrayList<>();
-//					levels.add(-1);
-//					levelsTitles.add(getString(R.string.options_app_backlight_screen_default));
-//					levelsAddInfos.add(R.string.option_add_info_empty_text);
-//					for (Integer level : frontLightLevels) {
-//						float percentLevel = 100 * level / (float)DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE;
-//						if (percentLevel < 10)
-//							levelsTitles.add(String.format("%1$.1f%%", percentLevel));
-//						else
-//							levelsTitles.add(String.format("%1$.0f%%", percentLevel));
-//						levels.add(level);
-//						levelsAddInfos.add(R.string.option_add_info_empty_text);
-//					}
-//					mAppScreenBacklightEink = new ListOption(mOwner, getString(R.string.options_app_backlight_screen_eink), PROP_APP_SCREEN_BACKLIGHT_EINK,
-//							getString(R.string.options_app_backlight_screen_add_info), this.lastFilteredValue).add(levels, levelsTitles, levelsAddInfos).
-//							setDefaultValue("-1").
-//							setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun);
-//					listView.add(new BoolOption(mOwner, getString(R.string.use_eink_backlight_control), PROP_APP_USE_EINK_FRONTLIGHT,
-//							getString(R.string.use_eink_backlight_control_add_info), this.lastFilteredValue).setDefaultValue("0").
-//							noIcon()
-//						.setOnChangeHandler(() -> {
-//							boolean value = mProperties.getBool(PROP_APP_USE_EINK_FRONTLIGHT, false);
-//							mAppScreenBacklightEink.setEnabled(value);
-//						}));
-//					boolean value = mProperties.getBool(PROP_APP_USE_EINK_FRONTLIGHT, false);
-//					mAppScreenBacklightEink.setEnabled(value);
-//					listView.add(mAppScreenBacklightEink);
-//
-//				}
-//			}
-			mBacklightControl1 = new ListOption(mOwner, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
+			// screen with touch
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) || DeviceInfo.EINK_HAVE_FRONTLIGHT || DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) {
+				OptionBase mBacklightControl = new ListOption(mOwner, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
 						getString(R.string.options_controls_flick_brightness_add_info), this.lastFilteredValue).
 						add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").
 						setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
-			listView.add(mBacklightControl1);
+				listView.add(mBacklightControl);
+			}
+			// screen with warm light
+			if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
+				OptionBase mBacklightControlWarm = new ListOption(mOwner, getString(R.string.options_controls_flick_warm), PROP_APP_FLICK_WARMLIGHT_CONTROL,
+						getString(R.string.options_controls_flick_brightness_add_info), this.lastFilteredValue).
+						add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("2").
+						setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
+				listView.add(mBacklightControlWarm);
+			}
+			// eink screen with api
+			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				if ( DeviceInfo.EINK_HAVE_FRONTLIGHT ) {
+					List<Integer> frontLightLevels = EinkScreen.getFrontLightLevels(mActivity);
+					if (null != frontLightLevels && frontLightLevels.size() > 0) {
+						ArrayList<String> levelsTitles = new ArrayList<>();
+						ArrayList<Integer> levels = new ArrayList<>();
+						ArrayList<Integer> addInfos = new ArrayList<>();
+						levels.add(-1);
+						addInfos.add(R.string.option_add_info_empty_text);
+						levelsTitles.add(getString(R.string.options_app_backlight_screen_default));
+						for (Integer level : frontLightLevels) {
+							float percentLevel = 100 * level / (float) DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE;
+							if (percentLevel < 10)
+								levelsTitles.add(String.format("%1$.1f%%", percentLevel));
+							else
+								levelsTitles.add(String.format("%1$.0f%%", percentLevel));
+							levels.add(level);
+							addInfos.add(R.string.option_add_info_empty_text);
+						}
+						listView.add(new FlowListOption(mOwner, getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
+								getString(R.string.options_app_backlight_screen_add_info), this.lastFilteredValue).add(levels, levelsTitles, addInfos).
+								setDefaultValue("-1").
+								setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
+					}
+					if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
+						List<Integer> warmLightLevels = EinkScreen.getWarmLightLevels(mActivity);
+						if (null != warmLightLevels && warmLightLevels.size() > 0) {
+							ArrayList<String> levelsTitles = new ArrayList<>();
+							ArrayList<Integer> levels = new ArrayList<>();
+							ArrayList<Integer> addInfos = new ArrayList<>();
+							levels.add(-1);
+							levelsTitles.add(getString(R.string.options_app_backlight_screen_default));
+							addInfos.add(R.string.option_add_info_empty_text);
+							for (Integer level : warmLightLevels) {
+								float percentLevel = 100 * level / (float) DeviceInfo.MAX_SCREEN_BRIGHTNESS_WARM_VALUE;
+								if (percentLevel < 10)
+									levelsTitles.add(String.format("%1$.1f%%", percentLevel));
+								else
+									levelsTitles.add(String.format("%1$.0f%%", percentLevel));
+								levels.add(level);
+								addInfos.add(R.string.option_add_info_empty_text);
+							}
+							listView.add(new FlowListOption(mOwner, getString(R.string.options_app_warm_backlight_screen), PROP_APP_SCREEN_WARM_BACKLIGHT,
+									getString(R.string.options_app_backlight_screen_add_info), this.lastFilteredValue).add(levels, levelsTitles, addInfos).
+									setDefaultValue("-1").
+									setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
+						}
+					}
+				}
+			}
+
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_key_backlight_off), PROP_APP_KEY_BACKLIGHT_OFF,
 					getString(R.string.options_app_key_backlight_off_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon());
 			dlg.setView(listView);
@@ -3076,12 +3110,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			for (int i: mBacklightLevelsAddInfos) if (i > 0) this.updateFilteredMark(activity.getString(i));
 			this.updateFilteredMark(getString(R.string.options_app_backlight_screen), PROP_APP_SCREEN_BACKLIGHT,
 					getString(R.string.options_app_backlight_screen_add_info));
-			this.updateFilteredMark(getString(R.string.options_app_backlight_screen_warm), PROP_APP_SCREEN_BACKLIGHT_WARM,
-					getString(R.string.options_app_backlight_screen_warm_add_info));
+			this.updateFilteredMark(getString(R.string.options_app_warm_backlight_screen), PROP_APP_SCREEN_WARM_BACKLIGHT,
+					getString(R.string.options_app_backlight_screen_add_info));
 			this.updateFilteredMark(getString(R.string.use_eink_backlight_control), PROP_APP_USE_EINK_FRONTLIGHT,
 					getString(R.string.use_eink_backlight_control_add_info));
 			for (String s: mMotionTimeoutsTitles) this.updateFilteredMark(s);
 			this.updateFilteredMark(getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
+					getString(R.string.options_controls_flick_brightness_add_info));
+			this.updateFilteredMark(getString(R.string.options_controls_flick_warm), PROP_APP_FLICK_WARMLIGHT_CONTROL,
 					getString(R.string.options_controls_flick_brightness_add_info));
 			for (int i: mFlickBrightnessTitles) if (i > 0) this.updateFilteredMark(activity.getString(i));
 			for (int i: mFlickBrightnessAddInfos) if (i > 0) this.updateFilteredMark(activity.getString(i));
@@ -6052,8 +6088,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if (optRenderingPreset2 != null) optRenderingPreset2.refreshItem();
 			if (mTitleBarFontColor1 != null) mTitleBarFontColor1.refreshItem();
 			if (mTitleBarFontColor2 != null) mTitleBarFontColor2.refreshItem();
-			if (mBacklightControl1 != null) mBacklightControl1.refreshItem();
-			if (mBacklightControl2 != null) mBacklightControl2.refreshItem();
+			//asdf TODO: refresh backlight items
+			//if (mBacklightControl1 != null) mBacklightControl1.refreshItem();
+			//if (mBacklightControl2 != null) mBacklightControl2.refreshItem();
 			mProperties.setProperty(Settings.PROP_APP_OPTIONS_PAGE_SELECTED, "" + mTabs.getCurrentTab());
 		});
 		// setup tabs
@@ -6213,10 +6250,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_controls_enable_volume_keys_add_info), filter).setDefaultValue("1").
 					setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
 		//if ( !DeviceInfo.EINK_SCREEN  || DeviceInfo.EINK_HAVE_FRONTLIGHT ) // nook glowlight has this option. 20201022 Still commented, not tested
-		mBacklightControl2 = new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
-					getString(R.string.options_controls_flick_brightness_add_info), filter).
-					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
-		mOptionsControls.add(mBacklightControl2);
+
+		//asdf TODO: work with backlight
+//		mBacklightControl2 = new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
+//					getString(R.string.options_controls_flick_brightness_add_info), filter).
+//					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
+//		mOptionsControls.add(mBacklightControl2);
+
 		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled),
 				PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_controls_gesture_page_flipping_enabled_add_info), filter).add(
 				mPagesPerFullSwipe, mPagesPerFullSwipeTitles, mPagesPerFullSwipeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));
@@ -6315,15 +6355,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 //		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 //			boolean gdriveSyncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+//			boolean gdriveSyncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
 //			mOptionsCloudSync = new OptionsListView(getContext());
 //			mOptionsCloudSync.add(new BoolOption(this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED).setDefaultValue("0").noIcon()
 //					.setOnChangeHandler(() -> {
 //						boolean syncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+//						boolean syncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
 //						mCloudSyncAskConfirmationsOption.setEnabled(syncEnabled);
 //						mGoogleDriveEnableSettingsOption.setEnabled(syncEnabled);
 //						mGoogleDriveEnableBookmarksOption.setEnabled(syncEnabled);
-//						mGoogleDriveEnableCurrentBookOption.setEnabled(syncEnabled);
-//						//mGoogleDriveAutoSavePeriodOption.setEnabled(syncEnabled);
+//						mGoogleDriveEnableCurrentBookInfoOption.setEnabled(syncEnabled);
+//						mGoogleDriveEnableCurrentBookBodyOption.setEnabled(syncEnabled && syncBookInfoEnabled);
+//						mGoogleDriveAutoSavePeriodOption.setEnabled(syncEnabled);
+//						// mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
 //					}));
 //			mCloudSyncAskConfirmationsOption = new BoolOption(this, getString(R.string.options_app_cloudsync_confirmations), PROP_APP_CLOUDSYNC_CONFIRMATIONS).setDefaultValue("1").noIcon();
 //			mCloudSyncAskConfirmationsOption.enabled = gdriveSyncEnabled;
@@ -6331,18 +6375,25 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 //			mGoogleDriveEnableSettingsOption.enabled = gdriveSyncEnabled;
 //			mGoogleDriveEnableBookmarksOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_bookmarks), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS).setDefaultValue("0").noIcon();
 //			mGoogleDriveEnableBookmarksOption.enabled = gdriveSyncEnabled;
-//			mGoogleDriveEnableCurrentBookOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK).setDefaultValue("0").noIcon();
-//			mGoogleDriveEnableCurrentBookOption.enabled = gdriveSyncEnabled;
+//			mGoogleDriveEnableCurrentBookInfoOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook_info), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO).setDefaultValue("0").noIcon();
+//			mGoogleDriveEnableCurrentBookInfoOption.enabled = gdriveSyncEnabled;
+//			mGoogleDriveEnableCurrentBookInfoOption.setOnChangeHandler(() -> {
+//				boolean syncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
+//				mGoogleDriveEnableCurrentBookBodyOption.setEnabled(syncBookInfoEnabled);
+//			});
+//			mGoogleDriveEnableCurrentBookBodyOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook_body), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_BODY).setDefaultValue("0").noIcon();
+//			mGoogleDriveEnableCurrentBookBodyOption.enabled = gdriveSyncEnabled && gdriveSyncBookInfoEnabled;
 //			mGoogleDriveAutoSavePeriodOption = new ListOption(this, getString(R.string.autosave_period), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD).add(mGoogleDriveAutoSavePeriod, mGoogleDriveAutoSavePeriodTitles).setDefaultValue(Integer.valueOf(5).toString()).noIcon();
 //			mGoogleDriveAutoSavePeriodOption.enabled = gdriveSyncEnabled;
-//		    mCloudSyncBookmarksKeepAliveOptions = new ListOption(this, getString(R.string.bookmarks_keepalive_), PROP_APP_CLOUDSYNC_BOOKMARKS_KEEPALIVE).add(mCloudBookmarksKeepAlive, mCloudBookmarksKeepAliveTitles).setDefaultValue(Integer.valueOf(14).toString()).noIcon();
-//		    // mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
+//			mCloudSyncDataKeepAliveOptions = new ListOption(this, getString(R.string.sync_data_keepalive_), PROP_APP_CLOUDSYNC_DATA_KEEPALIVE).add(mCloudBookmarksKeepAlive, mCloudBookmarksKeepAliveTitles).setDefaultValue(Integer.valueOf(14).toString()).noIcon();
+//			// mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
 //			mOptionsCloudSync.add(mCloudSyncAskConfirmationsOption);
 //			mOptionsCloudSync.add(mGoogleDriveEnableSettingsOption);
 //			mOptionsCloudSync.add(mGoogleDriveEnableBookmarksOption);
-//			mOptionsCloudSync.add(mGoogleDriveEnableCurrentBookOption);
+//			mOptionsCloudSync.add(mGoogleDriveEnableCurrentBookInfoOption);
+//			mOptionsCloudSync.add(mGoogleDriveEnableCurrentBookBodyOption);
 //			mOptionsCloudSync.add(mGoogleDriveAutoSavePeriodOption);
-//			mOptionsCloudSync.add(mCloudSyncBookmarksKeepAliveOptions);
+//			mOptionsCloudSync.add(mCloudSyncDataKeepAliveOptions);
 //		}
 
 		fillStyleEditorOptions(filter);
