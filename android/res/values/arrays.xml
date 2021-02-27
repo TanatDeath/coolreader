@@ -402,4 +402,70 @@
         <item>200</item>
     </integer-array>
 
+    <string-array name="fine_embolden_titles">
+        <item>-2.0</item>
+        <item>-1.75</item>
+        <item>-1.5</item>
+        <item>-1.25</item>
+        <item>-1.0</item>
+        <item>-0.875</item>
+        <item>-0.75</item>
+        <item>-0.625</item>
+        <item>-0.5</item>
+        <item>-0.375</item>
+        <item>-0.25</item>
+        <item>-0.125</item>
+        <item>0</item>
+        <item>0.125</item>
+        <item>0.25</item>
+        <item>0.375</item>
+        <item>0.5</item>
+        <item>0.625</item>
+        <item>0.75</item>
+        <item>0.875</item>
+        <item>1.0</item>
+        <item>1.25</item>
+        <item>1.5</item>
+        <item>1.75</item>
+        <item>2.0</item>
+        <item>2.5</item>
+        <item>3.0</item>
+        <item>3.5</item>
+        <item>4.0</item>
+        <item>5.0</item>
+    </string-array>
+
+    <integer-array name="fine_embolden_values">
+        <item>-16</item>
+        <item>-14</item>
+        <item>-12</item>
+        <item>-10</item>
+        <item>-8</item>
+        <item>-7</item>
+        <item>-6</item>
+        <item>-5</item>
+        <item>-4</item>
+        <item>-3</item>
+        <item>-2</item>
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>20</item>
+        <item>24</item>
+        <item>28</item>
+        <item>32</item>
+        <item>64</item>
+    </integer-array>
+
 </resources>

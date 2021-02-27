@@ -210,22 +210,11 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 		mValue.setProgress(v);
 		updatePreview(mColor);
 	}
-	
-	private static String byteToHex(int n) {
-		String s = Integer.toHexString(n & 255);
-		if (s.length()<2)
-			s = "0" + s;
-		return s;
-	}
-	private static String colorToHex(int n) {
-		return ("#" + byteToHex(Color.red(n))
-			 + byteToHex(Color.green(n))
-			 + byteToHex(Color.blue(n))).toUpperCase();
-	}
+
 	private void updatePreview(int color) {
 		mPreviewDrawable.setColor(color);
 		mPreviewDrawable.invalidateSelf();
-		mLabel.setText(colorToHex(mColor));
+		mLabel.setText(Utils.colorToHex(mColor));
 	}
 
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {

@@ -6,6 +6,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,12 +19,15 @@ import java.util.TimerTask;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSync;
+import org.coolreader.cloud.lingvo.LingvoCloudSettings;
 import org.coolreader.cloud.litres.LitresCloudSettings;
 import org.coolreader.cloud.litres.LitresCredentialsDialog;
 import org.coolreader.cloud.yandex.YndCloudSettings;
 import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BookInfoEntry;
+import org.coolreader.crengine.CalibreCatalogEditDialog;
 import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.EinkScreen;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStatRes;
@@ -124,8 +129,13 @@ import android.view.ViewGroup;
 import android.provider.Settings.Secure;
 import android.view.WindowManager;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import javax.net.ssl.SSLContext;
 
 public class CoolReader extends BaseActivity implements SensorEventListener
 {
@@ -174,12 +184,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		this.resizeHist = resizeHist;
 	}
 
-//	public void setProfileNames(ArrayList<String> profileNames) {
-//		this.profileNames = profileNames;
-//	}
-
-	private ArrayList<ResizeHistory> resizeHist = new ArrayList<ResizeHistory>();
-//	private ArrayList<String> profileNames = new ArrayList<String>();
+	private ArrayList<ResizeHistory> resizeHist = new ArrayList<>();
 
 	Sensor accelerometer;
 	Sensor magnetometer;
@@ -422,7 +427,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} catch (Exception e) {
 			log.e("exception while init genre list", e);
 		}
-        log.i("CoolReader.onCreate() exiting");
+			log.i("CoolReader.onCreate() exiting");
+		// working with ssl - needed for nook
+//		try {
+//			ProviderInstaller.installIfNeeded(getApplicationContext());
+//			SSLContext sslContext;
+//			sslContext = SSLContext.getInstance("TLSv1.2");
+//			sslContext.init(null, null, null);
+//			sslContext.createSSLEngine();
+//		} catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException
+//				| NoSuchAlgorithmException | KeyManagementException e) {
+//			log.e("CoolReader.onCreate() sslContext error: " + e.getMessage());
+//		}
     }
 
 	public final static boolean CLOSE_BOOK_ON_STOP = false;
@@ -1825,7 +1841,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mReaderView != null)
 				mReaderView.updateSettings(props);
 		}
-        for ( Map.Entry<Object, Object> entry : changedProps.entrySet() ) {
+		// if we start first time - then read system backlight
+		//log.i("bGetBacklightFromSystem: "+bGetBacklightFromSystem);
+
+		if (bGetBacklightFromSystem) {
+		//	log.i("initialBacklight: "+initialBacklight);
+		//	log.i("initialWarmBacklight: "+initialWarmBacklight);
+			initialBacklight = EinkScreen.getFrontLightValue(this);
+			initialWarmBacklight = EinkScreen.getWarmLightValue(this);
+		//	log.i("initialBacklight 2: "+initialBacklight);
+		//	log.i("initialWarmBacklight 2: "+initialWarmBacklight);
+		}
+
+		for ( Map.Entry<Object, Object> entry : changedProps.entrySet() ) {
     		String key = (String)entry.getKey();
     		final String value = (String)entry.getValue();
     		applyAppSetting( key, value );
@@ -1836,6 +1864,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				});
 			}
         }
+        // after reading of all settings (only once) - we'll check should we set backlight or not
+		if (initialBacklight != -1) {
+				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+					.postBackground(() -> BackgroundThread.instance()
+							.postGUI(() -> setScreenBacklightLevel(initialBacklight))), 100);
+		}
+		if (initialWarmBacklight != -1)
+				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+						.postBackground(() -> BackgroundThread.instance()
+								.postGUI(() -> setScreenWarmBacklightLevel(initialWarmBacklight))), 200);
 		BOOK_READING_STATE_NO_STATE = "["+getString(R.string.book_state_none)+"]";
 		BOOK_READING_STATE_TO_READ = "["+getString(R.string.book_state_toread)+"]";
 		BOOK_READING_STATE_READING = "["+getString(R.string.book_state_reading)+"]";
@@ -2866,6 +2904,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		});
 	}
 
+	public void askDeleteCalibreCatalog(final FileInfo item)
+	{
+		askConfirmation(R.string.win_title_confirm_catalog_delete, () -> {
+			if (item != null && item.isOPDSDir()) {
+				waitForCRDBService(() -> {
+					getDB().removeCalibreCatalog(item.id);
+					directoryUpdated(Services.getScanner().createCalibreRoot());
+				});
+			}
+		});
+	}
+
 	int mFolderDeleteRetryCount = 0;
 	public void askDeleteFolder(final FileInfo item) {
 		askConfirmation(R.string.win_title_confirm_folder_delete, () -> {
@@ -3419,7 +3469,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public void editOPDSCatalog(FileInfo opds) {
-		if (opds==null) {
+		if (opds == null) {
 			opds = new FileInfo();
 			opds.isDirectory = true;
 			opds.pathname = FileInfo.OPDS_DIR_PREFIX + "http://";
@@ -3429,6 +3479,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			opds.parent = Services.getScanner().getOPDSRoot();
 		}
 		OPDSCatalogEditDialog dlg = new OPDSCatalogEditDialog(CoolReader.this, opds,
+				() -> refreshOPDSRootDirectory(true));
+		dlg.show();
+	}
+
+	public void editCalibreCatalog(FileInfo fi) {
+		if (fi == null) {
+			fi = new FileInfo();
+			fi.isDirectory = true;
+			fi.pathname = FileInfo.OPDS_DIR_PREFIX + "http://";
+			fi.setFilename("New Calibre Catalog");
+			fi.isListed = true;
+			fi.isScanned = true;
+			fi.parent = Services.getScanner().getOPDSRoot();
+		}
+		CalibreCatalogEditDialog dlg = new CalibreCatalogEditDialog(CoolReader.this, fi,
 				() -> refreshOPDSRootDirectory(true));
 		dlg.show();
 	}
@@ -3725,6 +3790,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (!fJson.exists()) return null;
 			yndCloudSettings = new Gson().fromJson(s, YndCloudSettings.class);
 			return yndCloudSettings;
+		} catch (Exception e) {
+		}
+		return null;
+	}
+
+	public LingvoCloudSettings lingvoCloudSettings = new LingvoCloudSettings();
+
+	public void saveLingvoCloudSettings(String json)
+	{
+		log.d("Starting save lingvo_cloud_settings.json");
+		Utils.saveStringToFileSafe(json,getSettingsFileExt("[DEFAULT]",0).getParent() + "/lingvo_cloud_settings.json");
+	}
+
+	public LingvoCloudSettings readLingvoCloudSettings()
+	{
+		log.d("Reading lingvo_cloud_settings.json");
+		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/lingvo_cloud_settings.json");
+		try {
+			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/lingvo_cloud_settings.json");
+			if (!fJson.exists()) return null;
+			lingvoCloudSettings = new Gson().fromJson(s, LingvoCloudSettings.class);
+			return lingvoCloudSettings;
 		} catch (Exception e) {
 		}
 		return null;

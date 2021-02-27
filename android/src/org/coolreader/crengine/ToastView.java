@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -83,6 +84,16 @@ public class ToastView {
         }
         Toast t = queue.poll();
         window = new PopupWindow(t.anchor.getContext());
+        window.setTouchInterceptor((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                window.dismiss();
+                showing.compareAndSet(true, false);
+                if (((CoolReader)mActivity).getmReaderView() != null)
+                    ((CoolReader)mActivity).getmReaderView().disableTouch = true;
+                return true;
+            }
+            return false;
+        });
         window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
         window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         window.setTouchable(false);
@@ -115,13 +126,22 @@ public class ToastView {
                 }
         }
         tv.setText(msg);
-
+        tv.setOnClickListener((v) -> {
+            if (((CoolReader)mActivity).getmReaderView() != null)
+                ((CoolReader)mActivity).getmReaderView().disableTouch = true;
+            window.dismiss();
+        });
         tv.setTextColor(colorIcon);
         tv.setGravity(Gravity.CENTER);
-
+        toast_ll.setOnClickListener((v) -> {
+            if (((CoolReader)mActivity).getmReaderView() != null)
+                ((CoolReader)mActivity).getmReaderView().disableTouch = true;
+            window.dismiss();
+        });
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);
-        int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
+        //int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
+        int popupY = t.anchor.getHeight() - toast_ll.getHeight() - 50;
         if (window != null) {
             try {
                 window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);

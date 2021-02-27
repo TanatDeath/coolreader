@@ -2213,6 +2213,9 @@ bool isSameFontStyle( css_style_rec_t * style1, css_style_rec_t * style2 )
 
 //int rend_font_embolden = STYLE_FONT_EMBOLD_MODE_EMBOLD;
 int rend_font_embolden = STYLE_FONT_EMBOLD_MODE_NORMAL;
+bool rend_font_italicize = false;
+int rend_font_embolden_alg = 0;
+int rend_font_fine_embolden = 0;
 
 void LVRendSetFontEmbolden( int addWidth )
 {
@@ -2227,6 +2230,36 @@ void LVRendSetFontEmbolden( int addWidth )
 int LVRendGetFontEmbolden()
 {
     return rend_font_embolden;
+}
+
+void LVRendSetFontItalicize( bool italicize )
+{
+    rend_font_italicize = italicize;
+}
+
+bool LVRendGetFontItalicize()
+{
+    return rend_font_italicize;
+}
+
+void LVRendSetFontEmboldenAlg( int emboldenAlg )
+{
+    rend_font_embolden_alg = emboldenAlg;
+}
+
+int LVRendGetFontEmboldenAlg()
+{
+    return rend_font_embolden_alg;
+}
+
+void LVRendSetFontFineEmbolden( int fineEmbolden )
+{
+    rend_font_fine_embolden = fineEmbolden;
+}
+
+int LVRendGetFontFineEmbolden()
+{
+    return rend_font_fine_embolden;
 }
 
 LVFontRef getFont(css_style_rec_t * style, int documentId)

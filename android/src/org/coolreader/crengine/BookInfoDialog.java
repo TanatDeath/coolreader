@@ -29,6 +29,7 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -90,6 +92,7 @@ public class BookInfoDialog extends BaseDialog {
 	TextView tvSC;
 	TextView tvML;
 	Button btnCalc;
+	ScrollView mainView;
 
 	private static int DM_FRAGMENT = 1;
 	private static int DM_FULL = 2;
@@ -664,8 +667,8 @@ public class BookInfoDialog extends BaseDialog {
 		//setTitle(mCoolReader.getString(R.string.dlg_book_info));
 		fillMap();
 		mInflater = LayoutInflater.from(getContext());
-		View view = mInflater.inflate(R.layout.book_info_dialog, null);
-		final ImageView image = view.findViewById(R.id.book_cover);
+		mainView = (ScrollView) mInflater.inflate(R.layout.book_info_dialog, null);
+		final ImageView image = mainView.findViewById(R.id.book_cover);
 		image.setOnClickListener(v -> {
 			if ((mActionType == OPDS_INFO) && (isLitres)) return;
 			CoolReader cr = (CoolReader)mCoolReader;
@@ -680,10 +683,10 @@ public class BookInfoDialog extends BaseDialog {
 				dismiss();
 			}
 		});
-		btnBack = view.findViewById(R.id.base_dlg_btn_back);
+		btnBack = mainView.findViewById(R.id.base_dlg_btn_back);
 		btnBack.setOnClickListener(v -> onNegativeButtonClick());
 
-		btnOpenBook = ((ImageButton)view.findViewById(R.id.btn_open_book));
+		btnOpenBook = ((ImageButton)mainView.findViewById(R.id.btn_open_book));
 		btnOpenBook.setOnClickListener(v -> {
 			CoolReader cr = (CoolReader)mCoolReader;
 			if (mBookInfo!=null) {
@@ -698,7 +701,7 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
-		btnBookFolderOpen = view.findViewById(R.id.book_folder_open);
+		btnBookFolderOpen = mainView.findViewById(R.id.book_folder_open);
 
 			btnBookFolderOpen.setOnClickListener(v -> {
 				CoolReader cr = (CoolReader)mCoolReader;
@@ -708,7 +711,7 @@ public class BookInfoDialog extends BaseDialog {
 				}
 			});
 
-		btnBookShortcut = view.findViewById(R.id.book_create_shortcut);
+		btnBookShortcut = mainView.findViewById(R.id.book_create_shortcut);
 
 		btnBookShortcut.setOnClickListener(v -> {
 		CoolReader cr = (CoolReader)mCoolReader;
@@ -718,7 +721,7 @@ public class BookInfoDialog extends BaseDialog {
 		} else cr.showToast(R.string.book_info_action_unavailable);
 		});
 
-		btnBookEdit = view.findViewById(R.id.book_edit);
+		btnBookEdit = mainView.findViewById(R.id.book_edit);
 		btnBookEdit.setOnClickListener(v -> {
 		CoolReader cr = (CoolReader) mCoolReader;
 		if (mBookInfo!=null) {
@@ -734,21 +737,21 @@ public class BookInfoDialog extends BaseDialog {
 		} else cr.showToast(R.string.book_info_action_unavailable);
 		});
 
-		ImageButton btnSendByEmail = view.findViewById(R.id.save_to_email);
+		ImageButton btnSendByEmail = mainView.findViewById(R.id.save_to_email);
 
 		btnSendByEmail.setOnClickListener(v -> CloudAction.emailSendBook((CoolReader) mCoolReader, mBookInfo));
 
-		ImageButton btnSendByYnd = view.findViewById(R.id.save_to_ynd);
+		ImageButton btnSendByYnd = mainView.findViewById(R.id.save_to_ynd);
 
 		btnSendByYnd.setOnClickListener(v -> CloudAction.yndOpenBookDialog((CoolReader) mCoolReader, mBookInfo.getFileInfo(),true));
 
-		ImageButton btnDeleteBook = view.findViewById(R.id.book_delete);
+		ImageButton btnDeleteBook = mainView.findViewById(R.id.book_delete);
 		btnDeleteBook.setOnClickListener(v -> {
 			((CoolReader)activity).askDeleteBook(mBookInfo.getFileInfo());
 			dismiss();
 		});
 
-		ImageButton btnCustomCover = view.findViewById(R.id.book_custom_cover);
+		ImageButton btnCustomCover = mainView.findViewById(R.id.book_custom_cover);
 		btnCustomCover.setOnClickListener((View.OnClickListener) v -> {
 			if (((CoolReader)activity).picReceived!=null) {
 				if (((CoolReader)activity).picReceived.bmpReceived!=null) {
@@ -761,7 +764,7 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
-		btnMarkToRead = view.findViewById(R.id.btn_mark_toread);
+		btnMarkToRead = mainView.findViewById(R.id.btn_mark_toread);
 
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
@@ -776,13 +779,13 @@ public class BookInfoDialog extends BaseDialog {
 			paintMarkButton();
 		});
 		paintMarkButton();
-		btnBookDownload = view.findViewById(R.id.book_download);
+		btnBookDownload = mainView.findViewById(R.id.book_download);
 		annot2 = annot;
 		btnBookDownload.setOnClickListener(v -> {
 			if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoCloud, mFileInfoCloud, annot2);
 			dismiss();
 		});
-		btnFindAuthors = view.findViewById(R.id.btn_find_authors);
+		btnFindAuthors = mainView.findViewById(R.id.btn_find_authors);
 		btnFindAuthors.setOnClickListener(v -> {
 			if ((mFileBrowser != null) && (mFileInfoSearchDir!=null))
 				mFileBrowser.showFindBookDialog(false, mAuthors, mFileInfoSearchDir);
@@ -826,8 +829,8 @@ public class BookInfoDialog extends BaseDialog {
 				});
 			}
 		}
-		TableLayout table = view.findViewById(R.id.table);
-		FlowTextView txtAnnot = view.findViewById(R.id.lbl_annotation);
+		TableLayout table = mainView.findViewById(R.id.table);
+		FlowTextView txtAnnot = mainView.findViewById(R.id.lbl_annotation);
 		txtAnnot.setOnClickListener(v -> {
 			String text = ((FlowTextView) v).getText().toString();
 			if (text != null && text.length() > 0) {
@@ -840,7 +843,7 @@ public class BookInfoDialog extends BaseDialog {
 		File f = activity.getSettingsFileF(activity.getCurrentProfile());
 		String sF = f.getAbsolutePath();
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
-		TextView prof = (TextView) view.findViewById(R.id.lbl_profile);
+		TextView prof = (TextView) mainView.findViewById(R.id.lbl_profile);
 		String sprof = activity.getCurrentProfileName();
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		prof.setText(activity.getString(R.string.settings_profile)+": "+sprof + sF);
@@ -860,15 +863,15 @@ public class BookInfoDialog extends BaseDialog {
 		txtAnnot.setTextColor(colorIcon);
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
 
-		tlLitresDownl =  view.findViewById(R.id.tl_downl_book);
-		llLitresPurchase =  view.findViewById(R.id.ll_litres_purchase);
+		tlLitresDownl =  mainView.findViewById(R.id.tl_downl_book);
+		llLitresPurchase =  mainView.findViewById(R.id.ll_litres_purchase);
 
 		if (mFileInfoCloud != null) {
-			btnFragment = view.findViewById(R.id.btn_fragment);
+			btnFragment = mainView.findViewById(R.id.btn_fragment);
 			btnFragment.setOnClickListener(v -> {
 				setLitresDownloadModeChecked(btnFragment);
 			});
-			btnDownloadLitresBook = view.findViewById(R.id.btn_downl);
+			btnDownloadLitresBook = mainView.findViewById(R.id.btn_downl);
 			btnDownloadLitresBook.setOnClickListener(v -> {
 				setLitresDownloadModeChecked(btnDownloadLitresBook);
 			});
@@ -879,8 +882,8 @@ public class BookInfoDialog extends BaseDialog {
 			btnDownloadLitresBook.setCompoundDrawablesWithIntrinsicBounds(img22, null, null, null);
 
 			setLitresDownloadModeChecked(null);
-			btnDownloadFB2 = view.findViewById(R.id.btn_fb2);
-			btnDownloadFB3 = view.findViewById(R.id.btn_fb3);
+			btnDownloadFB2 = mainView.findViewById(R.id.btn_fb2);
+			btnDownloadFB3 = mainView.findViewById(R.id.btn_fb3);
 
 			btnDownloadFB2.setOnClickListener(v -> {
 				btnDownloadFB2.setEnabled(false);
@@ -929,9 +932,9 @@ public class BookInfoDialog extends BaseDialog {
 			if (mFileInfoCloud.type != 0) {
 				Utils.hideView(tlLitresDownl);
 			}
-			btnPurchase = view.findViewById(R.id.btn_purchase);
+			btnPurchase = mainView.findViewById(R.id.btn_purchase);
 			btnPurchase.setBackgroundColor(colorGrayCT);
-			TextView tvLvl = view.findViewById(R.id.lbl_purchase);
+			TextView tvLvl = mainView.findViewById(R.id.lbl_purchase);
 			if (mFileInfoCloud.lvl > 0)
 				tvLvl.setText(tvLvl.getText() + " (" + mCoolReader.getString(R.string.online_store_book_rating)+": "+ mFileInfoCloud.lvl + ")");
 			else
@@ -1014,9 +1017,32 @@ public class BookInfoDialog extends BaseDialog {
 		for ( BookInfoEntry item : items ) {
 			addItem(table, item);
 		}
-		buttonsLayout = view.findViewById(R.id.base_dlg_button_panel);
+		buttonsLayout = mainView.findViewById(R.id.base_dlg_button_panel);
 		updateGlobalMargin(buttonsLayout, true, true, true, false);
-		setView( view );
+		setView( mainView );
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (KeyEvent.KEYCODE_PAGE_DOWN == keyCode) {
+			mainView.pageScroll(View.FOCUS_DOWN);
+			return true;
+		} else if (KeyEvent.KEYCODE_PAGE_UP == keyCode) {
+			mainView.pageScroll(View.FOCUS_UP);
+			return true;
+		}  else if (KeyEvent.KEYCODE_BACK == keyCode) {
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (KeyEvent.KEYCODE_BACK == keyCode) {
+			dismiss();
+			return true;
+		}
+		return super.onKeyUp(keyCode, event);
 	}
 
 }

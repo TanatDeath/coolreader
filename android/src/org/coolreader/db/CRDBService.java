@@ -219,7 +219,7 @@ public class CRDBService extends Service {
 	}
 
 	//=======================================================================================
-    // OPDS catalogs access code
+    // OPDS and Calibre catalogs access code
     //=======================================================================================
     public interface OPDSCatalogsLoadingCallback {
     	void onOPDSCatalogsLoaded(ArrayList<FileInfo> catalogs);
@@ -238,6 +238,35 @@ public class CRDBService extends Service {
 						proxy_addr, proxy_port,
 						proxy_uname, proxy_passw,
 				  		onion_def_proxy);
+			}
+		});
+	}
+
+	public void saveCalibreCatalog(final Long id, final String name,
+								final boolean isLocal,
+								final String localFolder,
+								final String remoteFolderYD
+	) {
+		execTask(new Task("saveCalibreCatalog") {
+			@Override
+			public void work() {
+				mainDB.saveCalibreCatalog(id, name, isLocal,
+						localFolder, remoteFolderYD);
+			}
+		});
+	}
+
+	public void updateCalibreCatalog(final String name,
+								   final boolean isLocal,
+								   final String localFolder,
+								   final String remoteFolderYD,
+								   final boolean onlyMax
+	) {
+    	execTask(new Task("saveCalibreCatalog") {
+			@Override
+			public void work() {
+				mainDB.updateCalibreCatalog(name, isLocal,
+						localFolder, remoteFolderYD, onlyMax);
 			}
 		});
 	}
@@ -337,6 +366,15 @@ public class CRDBService extends Service {
 		});
 	}
 
+	public void removeCalibreCatalog(final Long id) {
+		execTask(new Task("removeCalibreCatalog") {
+			@Override
+			public void work() {
+				mainDB.removeCalibreCatalog(id);
+			}
+		});
+	}
+
 	//=======================================================================================
     // coverpage DB access code
     //=======================================================================================
@@ -423,6 +461,18 @@ public class CRDBService extends Service {
 		});
 	}
 
+	public void loadCalibreAuthorsList(FileInfo parent, String filterSeries, boolean withAliases,
+									   final ItemGroupsLoadingCallback callback, final Handler handler) {
+		final FileInfo p = new FileInfo(parent);
+		execTask(new Task("loadCalibreAuthorsList") {
+			@Override
+			public void work() {
+				mainDB.loadCalibreAuthorsList(p, filterSeries, withAliases);
+				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
+			}
+		});
+	}
+
 //  CR implementation
 //	public void loadGenresList(FileInfo parent, boolean showEmptyGenres, final ItemGroupsLoadingCallback callback, final Handler handler) {
 //		final FileInfo p = new FileInfo(parent);
@@ -487,6 +537,17 @@ public class CRDBService extends Service {
 				final ArrayList<FileInfo> list = new ArrayList<>();
 				mainDB.findAuthorBooks(list, authorId, addFilter);
 				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.AUTHOR_GROUP_PREFIX));
+			}
+		});
+	}
+
+	public void findCalibreAuthorBooks(final long authorId, final String addFilter, final FileInfoLoadingCallback callback, final Handler handler) {
+		execTask(new Task("findCalibreAuthorBooks") {
+			@Override
+			public void work() {
+				final ArrayList<FileInfo> list = new ArrayList<>();
+				mainDB.findCalibreAuthorBooks(list, authorId, addFilter);
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.CALIBRE_AUTHOR_GROUP_PREFIX));
 			}
 		});
 	}
@@ -943,11 +1004,35 @@ public class CRDBService extends Service {
     		getService().removeOPDSCatalog(id);
     	}
 
-    	public void loadAuthorsList(FileInfo parent, String filterSeries, boolean withAliases, final ItemGroupsLoadingCallback callback) {
+		public void saveCalibreCatalog(final Long id, final String name, final boolean isLocal,
+									final String localFolder,
+									final String remoteFolderYD
+		) {
+			getService().saveCalibreCatalog(id, name, isLocal, localFolder, remoteFolderYD);
+		}
+
+		public void updateCalibreCatalog(final String name, final boolean isLocal,
+										 final String localFolder,
+										 final String remoteFolderYD,
+										 final boolean onlyMax) {
+			getService().updateCalibreCatalog(name, isLocal, localFolder, remoteFolderYD, onlyMax);
+		}
+
+		public void removeCalibreCatalog(final Long id) {
+			getService().removeCalibreCatalog(id);
+		}
+
+		public void loadAuthorsList(FileInfo parent, String filterSeries, boolean withAliases,
+									final ItemGroupsLoadingCallback callback) {
     		getService().loadAuthorsList(parent, filterSeries, withAliases, callback, new Handler());
     	}
 
-    	// CR implementation
+		public void loadCalibreAuthorsList(FileInfo parent, String filterSeries, boolean withAliases,
+										   final ItemGroupsLoadingCallback callback) {
+			getService().loadCalibreAuthorsList(parent, filterSeries, withAliases, callback, new Handler());
+		}
+
+// 		CR implementation
 //		public void loadGenresList(FileInfo parent, boolean showEmptyGenres, final ItemGroupsLoadingCallback callback) {
 //			getService().loadGenresList(parent, showEmptyGenres, callback, new Handler());
 //		}
@@ -972,6 +1057,10 @@ public class CRDBService extends Service {
     	public void loadAuthorBooks(long authorId, String addFilter, FileInfoLoadingCallback callback) {
     		getService().findAuthorBooks(authorId, addFilter, callback, new Handler());
     	}
+
+		public void loadCalibreAuthorBooks(long authorId, String addFilter, FileInfoLoadingCallback callback) {
+			getService().findCalibreAuthorBooks(authorId, addFilter, callback, new Handler());
+		}
 
 		// CR implementation
 //		public void loadGenresBooks(String genreCode, boolean showEmptyGenres, FileInfoLoadingCallback callback) {

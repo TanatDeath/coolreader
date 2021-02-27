@@ -164,6 +164,18 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
 void LVRendSetFontEmbolden( int addWidth=STYLE_FONT_EMBOLD_MODE_EMBOLD );
 /// get global document font style embolden mode
 int LVRendGetFontEmbolden();
+/// set global document font style italicize mode
+void LVRendSetFontItalicize( bool italicize );
+/// get global document font style italicize mode
+bool LVRendGetFontItalicize();
+/// set global document font style embolden algorithm
+void LVRendSetFontEmboldenAlg( int emboldenAlg );
+/// get global document font style embolden algorithm
+int LVRendGetFontEmboldenAlg();
+/// set global document font style fine embolden
+void LVRendSetFontFineEmbolden( int fineEmbolden );
+/// get global document font style fine embolden
+int LVRendGetFontFineEmbolden();
 
 int measureBorder(ldomNode *enode,int border);
 int lengthToPx( css_length_t val, int base_px, int base_em, bool unspecified_as_em=false );

@@ -140,13 +140,14 @@ public class BookmarksDlg  extends BaseDialog {
 				String s1 = b.getTitleText();
 				String s2 = b.getPosText();
 				String s3 = b.getCommentText();
+				String s4 = Utils.formatDateFixed(b.getTimeStamp()) + " " + Utils.formatTime(activity, b.getTimeStamp());
 				if ( s1!=null && s2!=null ) {
-					s1 = percentString + "   " + s1;
+					s1 = percentString + "   " + s1 + " (" + s4 + ")";
 				} else if ( s1!=null ) {
 					s2 = s1;
-					s1 = percentString;  
+					s1 = percentString + " (" + s4 + ")";
 				} else if ( s2!=null ) {
-					s1 = percentString;
+					s1 = percentString + " (" + s4 + ")";
 				} else {
 					s1 = s2 = "";
 				}

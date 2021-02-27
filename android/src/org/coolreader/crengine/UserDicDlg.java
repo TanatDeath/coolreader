@@ -32,6 +32,7 @@ import org.coolreader.db.CRDBService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,8 @@ public class UserDicDlg extends BaseDialog {
 	final Button btnAll2;
 	final ImageButton searchButton;
 	final EditText selEdit;
+	HashMap<Integer, Integer> themeColors;
+	boolean isEInk = false;
 
 	private ArrayList<UserDicEntry> mUserDic = new ArrayList<>();
 	public static ArrayList<DicSearchHistoryEntry> mDicSearchHistoryAll = new ArrayList<>();
@@ -64,11 +67,7 @@ public class UserDicDlg extends BaseDialog {
 	}
 
 	private void paintScopeButtons() {
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnPage2, PorterDuff.Mode.CLEAR,true);
@@ -349,15 +348,10 @@ public class UserDicDlg extends BaseDialog {
 	}
 
 	private void setChecked(ImageButton btn) {
-		int colorIcon;
-		int colorIconL;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorIcon, R.attr.colorIconL, R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast});
-		colorIcon = a.getColor(0, Color.GRAY);
-		colorIconL = a.getColor(1, Color.GRAY);
-		int colorGray = a.getColor(2, Color.GRAY);
-		int colorGrayC = a.getColor(3, Color.GRAY);
-		a.recycle();
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		int colorIconL = themeColors.get(R.attr.colorIconL);
+		int colorGray = themeColors.get(R.attr.colorThemeGray2);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		rb_descr.setText(btn.getContentDescription()+" ");
 		btnPage2.setEnabled(true);
 		btnPage2.setTextColor(colorIcon);
@@ -456,6 +450,8 @@ public class UserDicDlg extends BaseDialog {
 		super("UserDicDlg", activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(activity, isEInk);
 		mUserDic.clear();
 		for (UserDicEntry ude: activity.getmReaderFrame().getUserDicPanel().getArrUdeWords()) {
 			if (ude.getIs_citation()==openPage)

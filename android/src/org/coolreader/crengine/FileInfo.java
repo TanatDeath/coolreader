@@ -25,17 +25,23 @@ public class FileInfo {
 	public final static String ROOT_DIR_TAG = "@root";
 	public final static String OPDS_LIST_TAG = "@opds";
 	public final static String OPDS_DIR_PREFIX = "@opds:";
+	public final static String CALIBRE_DIR_PREFIX = "@calibre:";
 	public final static String LOADING_STUB_PREFIX = "@loadingstub";
 	public final static String NOT_FOUND_STUB_PREFIX = "@notfoundstub";
 	public final static String ONLINE_CATALOG_PLUGIN_PREFIX = "@plugin:";
-//  CR implementation
+	//calibre
+	public final static String CALIBRE_LIST_TAG = "@calibre";
+	//  CR implementation
 //	public final static String GENRES_TAG = "@genresRoot";
 //	public final static String GENRES_GROUP_PREFIX = "@genresGroup:";
 //	public final static String GENRES_PREFIX = "@genre:";
 	public final static String LITRES_TAG = "@litresRoot";
 	public final static String AUTHORS_TAG = "@authorsRoot";
 	public final static String AUTHOR_GROUP_PREFIX = "@authorGroup:";
+	public final static String CALIBRE_AUTHOR_GROUP_PREFIX = "@calibreAuthorGroup:";
 	public final static String AUTHOR_PREFIX = "@author:";
+	public final static String CALIBRE_PREFIX = "@calibre";
+	public final static String CALIBRE_AUTHOR_PREFIX = "@calibreAuthor:";
 	public final static String SERIES_TAG = "@seriesRoot";
 	public final static String SERIES_GROUP_PREFIX = "@seriesGroup:";
 	public final static String SERIES_PREFIX = "@series:";
@@ -140,6 +146,7 @@ public class FileInfo {
 	public String proxy_uname;
 	public String proxy_passw;
 	public int onion_def_proxy;
+	public String remote_folder; // calibre related
 	// Litres related
 	public String cover_href;
 	public String cover_href2;
@@ -756,6 +763,11 @@ public class FileInfo {
 		return pathname!=null && pathname.startsWith(LITRES_PREFIX);
 	}
 
+	public boolean isCalibrePrefix()
+	{
+		return pathname!=null && pathname.startsWith(CALIBRE_PREFIX);
+	}
+
 	public boolean isOnlineCatalogPluginBook()
 	{
 		return !isDirectory && pathname != null && pathname.startsWith(ONLINE_CATALOG_PLUGIN_PREFIX) && getOnlineStoreBookInfo() != null;
@@ -816,7 +828,15 @@ public class FileInfo {
 	{
 		return OPDS_LIST_TAG.equals(pathname);
 	}
-	
+
+	public boolean isCalibreRoot() {
+		return pathname.startsWith(CALIBRE_LIST_TAG);
+	}
+
+	public boolean isCalibreByAuthors() {
+		return isCalibreRoot() && filename.startsWith(AUTHORS_TAG);
+	}
+
 	public boolean isSearchShortcut()
 	{
 		return SEARCH_SHORTCUT_TAG.equals(pathname);
@@ -937,6 +957,11 @@ public class FileInfo {
 	public boolean isBooksByAuthorDir()
 	{
 		return pathname!=null && pathname.startsWith(AUTHOR_PREFIX);
+	}
+
+	public boolean isBooksByCalibreAuthorDir()
+	{
+		return pathname!=null && pathname.startsWith(CALIBRE_AUTHOR_PREFIX);
 	}
 	
 	public boolean isBooksBySeriesDir()

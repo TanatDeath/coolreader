@@ -341,6 +341,8 @@ public class DicToastView {
         window = new PopupWindow(t.anchor.getContext());
         window.setTouchInterceptor((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                if (((CoolReader)mActivity).getmReaderView() != null)
+                    ((CoolReader)mActivity).getmReaderView().disableTouch = true;
                 window.dismiss();
                 showing.compareAndSet(true, false);
                 return true;
@@ -463,12 +465,13 @@ public class DicToastView {
             if (tv != null) tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, tSize);
             if (tv2 != null) tv2.setTextSize(/*TypedValue.COMPLEX_UNIT_PX,*/ tSize);
         }
-        if (t.dicType == IS_WIKI) {
-            if (tv != null)
-                tv.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-            if (tv2 != null)
-                tv2.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-        }
+        // SvyatKV - https://github.com/plotn/coolreader/issues/411
+//        if (t.dicType == IS_WIKI) {
+//            if (tv != null)
+//                tv.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
+//            if (tv2 != null)
+//                tv2.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
+//        }
         String sFace = mActivity.settings().getProperty(ReaderView.PROP_FONT_FACE, "");
         final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
         boolean found = false;
@@ -605,7 +608,7 @@ public class DicToastView {
                 tvYnd1.setOnClickListener(v -> {
                     mHandler.postDelayed(handleDismiss, 100);
                     String sLink = "";
-                    if (t.dicType == IS_LINGVO) sLink = "https://www.lingvo.ru/";
+                    if (t.dicType == IS_LINGVO) sLink = "https://developers.lingvolive.com/";
                     if (t.dicType == IS_WIKI) sLink = t.mDicName;
                     Uri uri = Uri.parse(sLink);
                     Context context = t.anchor.getContext();

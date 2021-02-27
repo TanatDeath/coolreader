@@ -115,6 +115,10 @@ public class BookmarkEditDialog extends BaseDialog {
 			ude.setCreate_time(System.currentTimeMillis());
 			ude.setLast_access_time(System.currentTimeMillis());
 			ude.setLanguage(mBookInfo.getFileInfo().language);
+			ude.setShortContext(edtContext.getText().toString());
+			ude.setFullContext(getFullContextText(mCoolReader));
+			ude.setIsCustomColor(bColorCheck ? 1 : 0);
+			ude.setCustomColor(Utils.colorToHex(lastColor));
 			ude.setSeen_count(0L);
 			ude.setIs_citation(0);
 			if (mBookmark.getType() == Bookmark.TYPE_CITATION) ude.setIs_citation(1);
@@ -126,11 +130,20 @@ public class BookmarkEditDialog extends BaseDialog {
 		} else {
 			if (mIsNew) {
 				mBookmark.setCommentText(commentEdit.getText().toString());
+				mBookmark.setShortContext(edtContext.getText().toString());
+				mBookmark.setFullContext(getFullContextText(mCoolReader));
+				mBookmark.setIsCustomColor(bColorCheck ? 1 : 0);
+				mBookmark.setCustomColor(Utils.colorToHex(lastColor));
 				if (mBookmark.getType() == Bookmark.TYPE_INTERNAL_LINK)
 					mBookmark.setType(Bookmark.TYPE_COMMENT);
 				mReaderView.addBookmark(mBookmark);
 			} else {
-				if (mOriginalBookmark.setCommentText(commentEdit.getText().toString())) {
+				boolean changed = mOriginalBookmark.setCommentText(commentEdit.getText().toString());
+				boolean changed2 = mOriginalBookmark.setIsCustomColor(bColorCheck ? 1 : 0);
+				boolean changed3 = mOriginalBookmark.setCustomColor(Utils.colorToHex(lastColor));
+				boolean changed4 = mOriginalBookmark.setShortContext(edtContext.getText().toString());
+				if (changed || changed2 || changed3 || changed4)
+					{
 					mOriginalBookmark.setTimeStamp(System.currentTimeMillis());
 					mReaderView.updateBookmark(mOriginalBookmark);
 				}
@@ -241,6 +254,16 @@ public class BookmarkEditDialog extends BaseDialog {
 		Utils.hideView(btnTransl2);
 	}
 
+	public static String getFullContextText(CoolReader cr) {
+		if (cr != null)
+			if (cr.getReaderView() != null) {
+				return StrUtils.getNonEmptyStr(
+						cr.getReaderView().getPageTextFromEngine(
+								cr.getReaderView().getDoc().getCurPage()), true);
+			}
+		return "";
+	}
+
 	public static String getContextText(CoolReader cr, String text) {
 		int curPage = cr.getReaderView().getDoc().getCurPage();
 		String sPageText = StrUtils.getNonEmptyStr(cr.getReaderView().getPageTextFromEngine(curPage), true);
@@ -282,6 +305,9 @@ public class BookmarkEditDialog extends BaseDialog {
 			if (mod == 2) newContext = newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<b>"+defText+"</b>");
 			if (mod == 3) newContext = newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<i>"+defText+"</i>");
 			if (mod == 4) newContext = newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<u>"+defText+"</u>");
+			if (mod == 5) newContext = defText + "<br>" + newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<b>"+defText+"</b>");
+			if (mod == 6) newContext = defText + "<br>" + newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<i>"+defText+"</i>");
+			if (mod == 7) newContext = defText + "<br>" +newContext.replaceAll(StrUtils.getNonEmptyStr(defText, false), "<u>"+defText+"</u>");
 			return StrUtils.getNonEmptyStr(newContext, true);
 		}
 		return StrUtils.getNonEmptyStr(text, true);
@@ -297,6 +323,9 @@ public class BookmarkEditDialog extends BaseDialog {
 				if (mod == 2) sPageText = sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<b>"+defText1+"</b>");
 				if (mod == 3) sPageText = sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<i>"+defText1+"</i>");
 				if (mod == 4) sPageText = sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<u>"+defText1+"</u>");
+				if (mod == 5) sPageText = defText1 + "<br>" + sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<b>"+defText1+"</b>");
+				if (mod == 6) sPageText = defText1 + "<br>" + sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<i>"+defText1+"</i>");
+				if (mod == 7) sPageText = defText1 + "<br>" + sPageText.replaceAll(StrUtils.getNonEmptyStr(defText1, false), "<u>"+defText1+"</u>");
 				text2 = StrUtils.textShrinkLines(StrUtils.getNonEmptyStr(sPageText, true), true);
 			}
 		} else {
@@ -426,7 +455,8 @@ public class BookmarkEditDialog extends BaseDialog {
 		String postext = mBookmark.getPercent()/100 + "%";
 		if ( mBookmark.getTitleText()!=null )
 			postext = postext + "  " + mBookmark.getTitleText();
-		posLabel.setText(postext);
+		String s4 = Utils.formatDateFixed(mBookmark.getTimeStamp()) + " " + Utils.formatTime(activity, mBookmark.getTimeStamp());
+		posLabel.setText(postext + " (" + s4 + ")");
 		if (isComment) commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		if (isCorrection) commentLabel.setText(R.string.dlg_bookmark_edit_correction);
 		if (isUserDic) commentLabel.setText(R.string.dlg_bookmark_edit_translation);
@@ -435,6 +465,18 @@ public class BookmarkEditDialog extends BaseDialog {
 
 		posEdit.setText(mBookmark.getPosText());
 		commentEdit.setText(bookmark.getCommentText());
+		edtContext.setText(bookmark.getShortContext());
+		bColorCheck = bookmark.isCustomColor == 1;
+		int color = 0;
+		if (bColorCheck) {
+			try {
+				color = Color.parseColor("#" + bookmark.customColor.replace("#", ""));
+			} catch (Exception e) {
+				bColorCheck = false;
+			}
+		}
+		lastColor = color;
+		if (bColorCheck) selectBmkColor(false);
 		String sCapt = "";
 		if ( isNew ) {
 			if (isComment) setChecked(btnComment);

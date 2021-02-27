@@ -95,6 +95,11 @@
     <string name="options_font_size_user_dic">User dic panel\'s font size</string>
     <string name="options_font_face">Font face</string>
     <string name="options_font_embolden">Embolden font</string>
+    <string name="options_font_fine_embolden">Character weight koef</string>
+    <string name="options_font_embolden_alg">Font embolden algorithm</string>
+    <string name="options_font_embolden_alg0">Default</string>
+    <string name="options_font_embolden_alg1">Freetype embolden API</string>
+    <string name="options_font_italicize">Italicize font (algorithmic)</string>
     <string name="options_font_antialias">Font antialiasing</string>
     <string name="options_font_antialias_off">No antialias</string>
     <string name="options_font_antialias_on_for_big">On for big fonts</string>
@@ -145,6 +150,9 @@
     <string name="options_controls_enable_volume_keys">Use volume keys for navigation</string>
     <string name="options_app_backlight_screen">Screen backlight brightness</string>
     <string name="options_app_warm_backlight_screen">Warm Screen backlight brightness</string>
+    <string name="options_app_get_backlight_from_system">Use system backlight value on start</string>
+    <string name="options_app_get_backlight_from_system_short">Use system</string>
+    <string name="options_app_get_backlight_from_system_add_info">If checked - KR will use system\'s backlight value at start, otherwise - use it\'s own</string>
     <string name="options_app_backlight_screen_eink">Screen backlight brightness - EINK method</string>
     <string name="options_app_backlight_screen_default">Default</string>
     <string name="action_backlight_set_default">Set the backlight brightness as in the system</string>
@@ -223,7 +231,15 @@
     <string name="options_controls_flick_warm">Warm backlight control by flick</string>
     <string name="options_controls_flick_brightness_right">Right edge</string>
     <string name="options_controls_flick_brightness_left">Left edge</string>
+    <string name="options_controls_flick_brightness_both">Both edges</string>
     <string name="options_controls_flick_brightness_none">Disabled</string>
+    <string name="options_controls_flick_brightness_left_cold">Left - cold, right - warm</string>
+    <string name="options_controls_flick_brightness_left_warm">Left - warm, right - cold</string>
+    <string name="options_controls_flick_brightness_left_both_warm">Left - both, right - warm</string>
+    <string name="options_controls_flick_brightness_right_both_warm">Right - both, left - warm</string>
+    <string name="options_controls_flick_brightness_left_both_cold">Left - both, right - cold</string>
+    <string name="options_controls_flick_brightness_right_both_cold">Right - both, left - cold</string>
+    <string name="options_controls_flick_brightness_both_both">Both edges - both lights</string>
     <string name="options_page_show_titlebar_page_number">Page number</string>
     <string name="options_app_dictionary">Dictionary</string>
     <string name="options_app_dictionary_not_installed">(not installed)</string>
@@ -384,6 +400,7 @@
     <string name="options_page_animation_dim">Dim</string>
     <string name="progress_downloading">Downloading</string>
     <string name="mi_book_opds_root">Online catalogs</string>
+    <string name="mi_book_calibre_root">Calibre library</string>
     <string name="opds_search">Search in catalog...</string>
     <string name="mi_tts_play">Read Aloud</string>
     <string name="options_format_image_scaling_block_scale">Block image max zoom</string>
@@ -430,6 +447,11 @@
     <string name="dlg_catalog_edit_proxy_uname">Proxy login</string>
     <string name="dlg_catalog_edit_proxy_passw">Proxy password</string>
     <string name="dlg_catalog_edit_onion_def_proxy">Set proxy to 127.0.0.1:8118 for onion links</string>
+    <string name="dlg_calibre_catalog_edit_title">Calibre library</string>
+    <string name="dlg_catalog_is_local">Local</string>
+    <string name="dlg_catalog_is_remote_yd">Remote (Yandex disc)</string>
+    <string name="dlg_catalog_local_folder">Local folder</string>
+    <string name="dlg_catalog_remote_folder">Remote folder</string>
     <string name="options_format_min_space_width_percent" formatted="false">Min space width %</string>
     <string name="options_selection_keep_selection_after_dictionary">Keep selection after dictionary</string>
     <string name="action_toggle_autoscroll">Autoscroll</string>
@@ -450,6 +472,7 @@
     <string name="folder_name_books_by_state_reading">Reading</string>
     <string name="folder_name_books_by_state_finished">Finished</string>
     <string name="options_view_bookmarks_highlight">Highlight bookmarks</string>
+    <string name="options_view_highlight_user_dic">Highlight user dic words</string>
     <string name="options_css_footnotetitle">Footnote title</string>
     <string name="options_css_subtitle">Subtitle</string>
     <string name="options_css_textauthor">Text / Cite / Epigraph author</string>
@@ -555,7 +578,7 @@
     <string name="options_font_hinting_disabled">Disabled</string>
     <string name="options_font_hinting_auto">Autohinting</string>
     <string name="options_font_fallback_face">Fallback font</string>
-    <string name="win_title_confirm_catalog_delete">Do you really want to delete this catalog?</string>
+    <string name="win_title_confirm_catalog_delete">Do you really want to delete this catalog / library ?</string>
     <string name="win_title_confirm_history_record_delete">Do you really want to remove this book from recent list?</string>
     <string name="win_title_confirm_book_delete">Do you really want to delete this book / archive ?</string>
     <string name="win_title_confirm_folder_delete">Do you really want to delete this folder along with all the books?</string>
@@ -943,7 +966,7 @@
     <string name="options_controls_enable_volume_keys_add_info">Page flipping with volume buttons</string>
     <string name="options_app_tapzone_hilite_add_info">Select the pressed place on the screen with the rectangle</string>
     <string name="options_app_trackball_disable_add_info">Disabling the trackball to prevent accidental page flipping (example: HTC A8181)</string>
-    <string name="options_controls_flick_brightness_add_info">Slide your finger up or down to increase or decrease the brightness (Disable, Left edge, Right edge). For EINK devices with double light (cold and warm) - both sides will be used.</string>
+    <string name="options_controls_flick_brightness_add_info">Slide your finger up or down to increase or decrease the brightness (disabled, left edge, right edge)</string>
     <string name="option_controls_gesture_page_flipping_enabled_add_info">To flip pages with gestures (Disabled, 1-20 pages), default 1 page (from right to left)</string>
     <string name="options_selection_action_add_info">Set an action that fired when selecting a word</string>
     <string name="options_multi_selection_action_add_info">The action, that fired when selecting several words</string>
@@ -964,6 +987,7 @@
     <string name="options_page_footnotes_add_info">Display footnotes (if any) at the bottom of the page</string>
     <string name="options_page_animation_add_info">Enable or disable the animation while flipping</string>
     <string name="options_view_bookmarks_highlight_add_info">Enable or disable bookmark highlighting</string>
+    <string name="options_view_bookmarks_user_dic_add_info">Enable or disable user dic highlighting</string>
     <string name="options_rounded_corners_margin_add_info">Move the right and left side of the header elements closer to the center of the screen on devices with Edge Screen</string>
     <string name="pos_recovered">Reading position was loaded from recovery file</string>
     <string name="pos_saved">Reading position was saved</string>
@@ -1372,6 +1396,11 @@
     <string name="online_dic_exceeded">Sorry, online ditionary limit exceeded. Try again later</string>
     <string name="manual_open_error">Error while opening manual</string>
     <string name="ynd_translate_settings">Yandex translate settings</string>
+    <string name="lingvo_settings">Lingvo online settings</string>
+    <string name="lingvo_settings_add_info">Use your own lingvo online token (if specified)</string>
+    <string name="lingvo_token">Lingvo online token</string>
+    <string name="http_error">Ошибка http, код:</string>
+    <string name="lingvo_unauth">Lingvo online - unauthorized. Check you token</string>
     <string name="sync_confirmation_other_book">Another book (%s) was opened on another device, switch to it?</string>
     <string name="sync_confirmation_new_reading_position">New reading position found for this book, update?</string>
     <string name="bookmarks_keepalive_">Delete copies of bookmarks older than…</string>
@@ -1496,4 +1525,28 @@
     <string name="options_bookmark_action_send_to_mod3">Context with &lt;b&gt;selected text&lt;\/b&gt;</string>
     <string name="options_bookmark_action_send_to_mod4">Context with &lt;i&gt;selected text&lt;\/i&gt;</string>
     <string name="options_bookmark_action_send_to_mod5">Context with &lt;u&gt;selected text&lt;\/u&gt;</string>
+    <string name="options_bookmark_action_send_to_mod6">selected text&lt;br&gt;Context with &lt;b&gt;selected text&lt;\/b&gt;</string>
+    <string name="options_bookmark_action_send_to_mod7">selected text&lt;br&gt;Context with &lt;i&gt;selected text&lt;\/i&gt;</string>
+    <string name="options_bookmark_action_send_to_mod8">selected text&lt;br&gt;Context with &lt;u&gt;selected text&lt;\/u&gt;</string>
+    <string name="double_tap_interval">Double tap interval (ms)</string>
+    <string name="prevent_tap_interval">Prevent unintentional taps interval (ms, 0 = off)</string>
+    <string name="prevent_tap_interval_add_info">Second tap (or physical buttom click) is ignored if it was during specified time here. When double tap setting is enabled - this affects only physical buttons</string>
+    <string name="intent_error">Cannot start action</string>
+    <string name="simple_font_select_dialog">Simple font select dialog</string>
+    <string name="simple_font_select_dialog_add_info">Only font face names is shown in simple mode (in full mode - with font examples, including bold and italic)</string>
+    <string name="fix_double_backlight_delta">Fix cold and warm delta</string>
+    <string name="fix_double_backlight_delta_add_info">Do not change warm/cold delta when change (both) backlight by swipe</string>
+    <string name="add_opds_catalog">Add OPDS catalog</string>
+    <string name="add_remove_litres_catalog">Add / remove Litres catalog</string>
+    <string name="add_calibre_catalog_local">Add Calibre local library</string>
+    <string name="add_calibre_catalog_yd">Add Calibre remore (Yandex disc) library</string>
+    <string name="calibre_search">Search (calibre)</string>
+    <string name="calibre_authors">Authors (calibre)</string>
+    <string name="calibre_titles">Titles (calibre)</string>
+    <string name="calibre_series">Series (calibre)</string>
+    <string name="calibre_rating">Rating (calibre)</string>
+    <string name="calibre_publish_date">Pubish date (calibre)</string>
+    <string name="calibre_tags">Tags (calibre)</string>
+    <string name="books_l">books:</string>
+    <string name="folders_l">folders:</string>
 </resources>

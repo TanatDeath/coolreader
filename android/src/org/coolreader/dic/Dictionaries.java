@@ -3,6 +3,7 @@ package org.coolreader.dic;
 import org.coolreader.BuildConfig;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.cloud.TLSSocketFactory;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
@@ -37,7 +38,6 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
@@ -49,19 +49,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
 import okhttp3.Call;
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionSpec;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.TlsVersion;
 
 public class Dictionaries {
 
@@ -71,11 +74,25 @@ public class Dictionaries {
 	public static final String YND_DIC_GETLANGS_2 = "https://translate.api.cloud.yandex.net/translate/v2/languages";
 	public static final String LINGVO_DIC_ONLINE = "https://developers.lingvolive.com/api";
 	public static final String YND_DIC_GET_TOKEN = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
+
+//	public static OkHttpClient client = new OkHttpClient();
+
 	public static OkHttpClient client = new OkHttpClient.Builder().
 		connectTimeout(20,TimeUnit.SECONDS).
 		writeTimeout(40, TimeUnit.SECONDS).
-		readTimeout(40, TimeUnit.SECONDS).build();
-	public static ArrayList<String> langCodes = new ArrayList<String>();
+		readTimeout(40, TimeUnit.SECONDS).
+//			socketFactory(new TLSSocketFactory()).
+//		connectionSpecs(Arrays.asList(ConnectionSpec.CLEARTEXT,
+//							 new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+//									 .allEnabledTlsVersions().allEnabledCipherSuites().build())
+//        ).
+//		connectionSpecs(Arrays.asList(ConnectionSpec.CLEARTEXT,
+//							 new ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
+//									 .allEnabledTlsVersions().allEnabledCipherSuites().build())
+//        ).
+		build();
+
+	public static ArrayList<String> langCodes = new ArrayList<>();
 	public static String sLingvoToken = "";
 	public static String sYandexIAM = "";
 	public static String sYandexIAMexpiresAt = "";
@@ -301,6 +318,8 @@ public class Dictionaries {
 			for (int i = 0; i < resolveInfos.size(); i++) {
 				ResolveInfo ri = resolveInfos.get(i);
 				String packageName = ri.activityInfo.packageName;
+		//		log.i("resolveInfos: " + ri.activityInfo.packageName + " / " + ri.activityInfo.name +
+		//				ri.activityInfo.loadLabel(pm).toString());
 				Drawable icon = null;
 				try {
 					icon = pm.getApplicationIcon(ri.activityInfo.packageName);
@@ -474,19 +493,46 @@ public class Dictionaries {
 	private void lingvoAuthThenTranslate(String s, String langf, String lang, boolean extended, DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(LINGVO_DIC_ONLINE+"/v1.1/authenticate").newBuilder();
 		String url = urlBuilder.build().toString();
+		final CoolReader crf2 = (CoolReader) mActivity;
+		crf2.readLingvoCloudSettings();
+		String token = BuildConfig.LINGVO;
+		if (!StrUtils.isEmptyStr(crf2.lingvoCloudSettings.lingvoToken)) token = crf2.lingvoCloudSettings.lingvoToken;
 		RequestBody body = RequestBody.create(
 				MediaType.parse("text/plain"), "");
 		Request request = new Request.Builder()
-				.header("Authorization","Basic "+BuildConfig.LINGVO)
+				.header("Authorization","Basic " + token)
 				.post(body)
 				.url(url)
 				.build();
 		Call call = client.newCall(request);
-		final CoolReader crf2 = (CoolReader) mActivity;
 		call.enqueue(new okhttp3.Callback() {
 			public void onResponse(Call call, Response response)
 					throws IOException {
 				String sBody = response.body().string();
+				if (StrUtils.getNonEmptyStr(response.message(), true).equals("Unauthorized")) {
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> {
+								if (dcb == null)
+									crf2.showToast(crf2.getString(R.string.lingvo_unauth));
+								else {
+									if (dcb.showDicToast()) crf2.showToast(crf2.getString(R.string.lingvo_unauth));
+									dcb.fail(null, crf2.getString(R.string.lingvo_unauth));
+								}
+							}, 100));
+					return;
+				}
+				if (response.code() != 200) {
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> {
+								if (dcb == null)
+									crf2.showToast(crf2.getString(R.string.http_error) + " " + response.code());
+								else {
+									if (dcb.showDicToast()) crf2.showToast(crf2.getString(R.string.http_error) + " " + response.code());
+									dcb.fail(null, crf2.getString(R.string.http_error) + " " + response.code());
+								}
+							}, 100));
+					return;
+				}
 				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 					sLingvoToken = sBody;
 					lingvoTranslate(s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), extended, curDict, view, dcb);

@@ -25,7 +25,7 @@ public class DeviceInfo {
 	public final static int MAX_SCREEN_BRIGHTNESS_VALUE;
 	public final static int MAX_SCREEN_BRIGHTNESS_WARM_VALUE;
 	public final static boolean SAMSUNG_BUTTONS_HIGHLIGHT_PATCH;
-	private final static boolean EINK_SCREEN;
+	public final static boolean EINK_SCREEN;
 	public final static boolean SCREEN_CAN_CONTROL_BRIGHTNESS;
 	public final static boolean ONYX_BRIGHTNESS_FILE;
 	public final static boolean ONYX_BRIGHTNESS_WARM_FILE;
@@ -152,12 +152,14 @@ public class DeviceInfo {
         		(MODEL.toLowerCase().startsWith("gt-i")); // AMOLED screens: GT-IXXXX
 		EINK_NOOK1 = MANUFACTURER.toLowerCase().contentEquals("barnesandnoble") &&
 				(PRODUCT.contentEquals("NOOK") || MODEL.contentEquals("NOOK") || MODEL.contentEquals("BNRV350") ||
-						MODEL.contentEquals("BNRV300") || MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510")) &&
+						MODEL.contentEquals("BNRV300") || MODEL.contentEquals("BNRV500") ||
+						MODEL.contentEquals("BNRV510") || MODEL.contentEquals("BNRV520")|| MODEL.contentEquals("BNRV700")) &&
 				(DEVICE.toLowerCase().contentEquals("zoom2") || DEVICE.toLowerCase().contentEquals("ntx_6sl"));
 		EINK_NOOK2 = DEVICE.toLowerCase().contentEquals("ntx_6sl");
 		EINK_NOOK = EINK_NOOK1 || EINK_NOOK2;
 		EINK_NOOK_120 = EINK_NOOK && (MODEL.contentEquals("BNRV350") || MODEL.contentEquals("BNRV300") ||
-				MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510"));
+				MODEL.contentEquals("BNRV500") || MODEL.contentEquals("BNRV510") || MODEL.contentEquals("BNRV520")
+				|| MODEL.contentEquals("BNRV700"));
 		EINK_SONY = MANUFACTURER.toLowerCase().contentEquals("sony") && MODEL.startsWith("PRS-T");
 		//MANUFACTURER=Onyx, MODEL=*; All ONYX BOOX Readers have e-ink screen
 		EINK_ONYX = (MANUFACTURER.toLowerCase().contentEquals("onyx") || MANUFACTURER.toLowerCase().contentEquals("onyx-intl")) &&
@@ -198,7 +200,10 @@ public class DeviceInfo {
 			Application app = (Application) ReflectUtil.invokeMethodSafely(method, null);
 			if (null != app) {
 				onyx_have_frontlight = Device.currentDevice().hasFLBrightness(app);
-				List<Integer> list = Device.currentDevice().getFrontLightValueList(app);
+				List<Integer> list = null;
+				try {
+					list = Device.currentDevice().getFrontLightValueList(app);
+				} catch (Exception ignored) {}
 				if (list != null && list.size() > 0) {
 					onyx_max_screen_brightness_value = list.get(list.size() - 1);
 					if (!onyx_have_frontlight) {
@@ -233,8 +238,13 @@ public class DeviceInfo {
 		EINK_HAVE_FRONTLIGHT = ONYX_HAVE_FRONTLIGHT; // TODO: add other e-ink devices with frontlight support
 		EINK_HAVE_NATURAL_BACKLIGHT = ONYX_HAVE_NATURAL_BACKLIGHT;	// TODO: add other e-ink devices with natural backlight support
 
-		SCREEN_CAN_CONTROL_BRIGHTNESS = ((!EINK_SCREEN) || (EINK_NOOK && DEVICE.toLowerCase().contentEquals("ntx_6sl") &&
-				MODEL.contentEquals("BNRV510")))
+		SCREEN_CAN_CONTROL_BRIGHTNESS =
+				(
+					(!EINK_SCREEN) ||
+					(EINK_NOOK && //DEVICE.toLowerCase().contentEquals("ntx_6sl") &&
+							(MODEL.contentEquals("BNRV510") || MODEL.contentEquals("BNRV520") || MODEL.contentEquals("BNRV700"))
+					)
+				)
 				|| ONYX_BRIGHTNESS_FILE || ONYX_BRIGHTNESS_WARM_FILE || EINK_HAVE_FRONTLIGHT || EINK_HAVE_NATURAL_BACKLIGHT;
 
 		POCKETBOOK = MODEL.toLowerCase().startsWith("pocketbook") || MODEL.toLowerCase().startsWith("obreey");

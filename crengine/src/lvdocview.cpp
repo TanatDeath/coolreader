@@ -1138,12 +1138,15 @@ void LVDocView::drawCoverTo(LVDrawBuf * drawBuf, lvRect & rc) {
 			scale_y = scale_x;
 		else
 			scale_x = scale_y;
+
 		int dst_dx = (src_dx * scale_x) >> 16;
 		int dst_dy = (src_dy * scale_y) >> 16;
-        if (dst_dx > rc.width() * 6 / 8)
+		//plotn - more strict proportions - to avoid horizontal or vertical rescaling
+        if (dst_dx > rc.width() * 15 / 16)
 			dst_dx = imgrc.width();
-        if (dst_dy > rc.height() * 6 / 8)
+        if (dst_dy > rc.height() * 15 / 16)
 			dst_dy = imgrc.height();
+		//\
 		//CRLog::trace("drawCoverTo() - drawing image");
         // It's best to use a 16bpp LVColorDrawBuf as the intermediate buffer,
         // as using 32bpp would mess colors up when drawBuf is itself 32bpp.
@@ -6328,7 +6331,15 @@ int LVDocView::doCommand(LVDocCmd cmd, int param) {
         REQUEST_RENDER("doCommand-toggle bold")
 	}
 		break;
-	case DCMD_TOGGLE_PAGE_SCROLL_VIEW: {
+	//plotn - think later
+//    case DCMD_TOGGLE_ITALICIZE: {
+//            bool b = m_props->getBoolDef(PROP_FONT_ITALICIZE, false);
+//            m_props->setBool(PROP_FONT_ITALICIZE, b);
+//            LVRendSetFontItalicize(b);
+//            REQUEST_RENDER("doCommand-toggle italicize")
+//        }
+//            break;
+    case DCMD_TOGGLE_PAGE_SCROLL_VIEW: {
 		toggleViewMode();
 	}
 		break;
@@ -6800,6 +6811,12 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	static int bool_options_def_false[] = { 0, 1 };
 
 	props->limitValueList(PROP_FONT_WEIGHT_EMBOLDEN, bool_options_def_false, 2);
+	props->limitValueList(PROP_FONT_ITALICIZE, bool_options_def_false, 2);
+	static int int_option_embolding_alg[] = { 0, 1 };
+	props->limitValueList(PROP_FONT_EMBOLDEN_ALG, int_option_embolding_alg, 2);
+	static int int_option_fine_embolding[] = { 0, -16, -14, -12, -10, -8, -7, -6, -5, -4, -3, -2, -1, 0,
+											   1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 64 };
+	props->limitValueList(PROP_FONT_FINE_EMBOLDEN, int_option_fine_embolding, 31); // leading zero is default
 #ifndef ANDROID
 	props->limitValueList(PROP_EMBEDDED_STYLES, bool_options_def_true, 2);
 	props->limitValueList(PROP_EMBEDDED_FONTS, bool_options_def_true, 2);
@@ -7029,7 +7046,25 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 LVRendSetFontEmbolden(v);
                 REQUEST_RENDER("propsApply - embolden")
             }
-        } else if (name == PROP_TXT_OPTION_PREFORMATTED) {
+        } else if (name == PROP_FONT_ITALICIZE) {
+			bool italicize = props->getBoolDef(PROP_FONT_ITALICIZE, false);
+			if (italicize != LVRendGetFontItalicize()) {
+				LVRendSetFontItalicize(italicize);
+				REQUEST_RENDER("propsApply - italicize")
+			}
+		} else if (name == PROP_FONT_EMBOLDEN_ALG) {
+			int emboldenAlg = props->getIntDef(PROP_FONT_EMBOLDEN_ALG, 0);
+			if (emboldenAlg != LVRendGetFontEmboldenAlg()) {
+				LVRendSetFontEmboldenAlg(emboldenAlg);
+				REQUEST_RENDER("propsApply - emboldenAlg")
+			}
+		} else if (name == PROP_FONT_FINE_EMBOLDEN) {
+			int fineEmbolden = props->getIntDef(PROP_FONT_FINE_EMBOLDEN, 0);
+			if (fineEmbolden != LVRendGetFontFineEmbolden()) {
+				LVRendSetFontFineEmbolden(fineEmbolden);
+				REQUEST_RENDER("propsApply - fineEmbolden")
+			}
+		} else if (name == PROP_TXT_OPTION_PREFORMATTED) {
             bool preformatted = props->getBoolDef(PROP_TXT_OPTION_PREFORMATTED,
                                                   false);
             setTextFormatOptions(preformatted ? txt_format_pre

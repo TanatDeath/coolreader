@@ -16,6 +16,10 @@
 #include "lvfreetypeface.h"
 #include "lvfontboldtransform.h"
 #include "../../include/crlog.h"
+#include "../../include/lvrend.h"
+
+//#define USE_FT_EMBOLDEN //plotn, for some reasons this define isnt work here from lvfreetypeface.cpp - so I added, but commented in order
+//not to change behaviour (later i decided to make corrsponding setting value for this
 
 #if (USE_FONTCONFIG == 1)
 #include <fontconfig/fontconfig.h>
@@ -728,15 +732,19 @@ fprintf(_log, "GetFont(size=%d, weight=%d, italic=%d, family=%d, typeface='%s')\
             int deltaWeight = weight - item->getDef()->getWeight();
             if (deltaWeight >= 200) {
                 // This instantiated cached font has a too low weight
-#ifndef USE_FT_EMBOLDEN
-                // embolden using LVFontBoldTransform
-                CRLog::debug("font: apply Embolding to increase weight from %d to %d",
-                                    newDef.getWeight(), newDef.getWeight() + 200 );
-                newDef.setWeight( newDef.getWeight() + 200 );
-                LVFontRef ref = LVFontRef( new LVFontBoldTransform( item->getFont(), &_globalCache ) );
-                _cache.update( &newDef, ref );
-                return ref;
-#endif
+//#ifndef USE_FT_EMBOLDEN
+                int emboldingAlg = LVRendGetFontEmboldenAlg();
+                if (emboldingAlg == 0) {
+                    // embolden using LVFontBoldTransform
+                    CRLog::debug("font: apply Embolding to increase weight from %d to %d",
+                                 newDef.getWeight(), newDef.getWeight() + 200);
+                    newDef.setWeight(newDef.getWeight() + 200);
+                    LVFontRef ref = LVFontRef(
+                            new LVFontBoldTransform(item->getFont(), &_globalCache));
+                    _cache.update(&newDef, ref);
+                    return ref;
+                }
+//#endif
                 // when USE_FT_EMBOLDEN, ignore this low-weight cached font instance
                 // and go loading from the font file again to apply embolden.
             } else {
@@ -798,17 +806,21 @@ fprintf(_log, "GetFont(size=%d, weight=%d, italic=%d, family=%d, typeface='%s')\
         int deltaWeight = weight - newDef.getWeight();
         if (deltaWeight >= 200) {
             // embolden
-            #ifndef USE_FT_EMBOLDEN
+            // #ifndef USE_FT_EMBOLDEN
+            int emboldingAlg = LVRendGetFontEmboldenAlg();
+            if (emboldingAlg == 0) {
                 CRLog::debug("font: apply Embolding to increase weight from %d to %d",
-                                    newDef.getWeight(), newDef.getWeight() + 200 );
+                             newDef.getWeight(), newDef.getWeight() + 200);
                 // Create a wrapper with LVFontBoldTransform which will bolden the glyphs
-                newDef.setWeight( newDef.getWeight() + 200 );
-                ref = LVFontRef( new LVFontBoldTransform( ref, &_globalCache ) );
-            #else
+                newDef.setWeight(newDef.getWeight() + 200);
+                ref = LVFontRef(new LVFontBoldTransform(ref, &_globalCache));
+            } else {
+                //#else
                 // Will make some of this font's methods do embolden the glyphs and widths
                 font->setEmbolden();
-                newDef.setWeight( font->getWeight() );
-            #endif
+                newDef.setWeight(font->getWeight());
+                //#endif
+            }
         }
         for (int i = 0; i < _fallbackFontFaces.length(); i++) {
             if (item->getDef()->getTypeFace() == _fallbackFontFaces[i]) {

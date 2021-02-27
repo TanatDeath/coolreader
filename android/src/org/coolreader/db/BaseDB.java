@@ -24,6 +24,10 @@ public abstract class BaseDB {
 	public String mBackupRestoredToDBFile = "";
 
 	protected SQLiteDatabase mDB;
+	// database for calibre catalog
+	protected SQLiteDatabase mCatalogDB;
+	private File catalogDBFile;
+
 	private File mFileName;
 	public boolean restoredFromBackup;
 	private boolean error = false;
@@ -119,6 +123,34 @@ public abstract class BaseDB {
 			}
 		}
 		return null;
+	}
+
+	protected boolean catalogDBIsOpened() {
+		if ((catalogDBFile == null) || (mCatalogDB == null)) return false;
+		if (!mCatalogDB.isOpen()) return false;
+		return true;
+	}
+
+	protected boolean openCatalogDB(File dbFile) {
+		boolean needReopen = false;
+		if ((catalogDBFile == null) || (mCatalogDB == null)) needReopen = true;
+		if (!needReopen)
+			if (!catalogDBFile.getAbsolutePath().equals(dbFile.getAbsolutePath())) needReopen = true;
+		if (!needReopen)
+			if (!mCatalogDB.isOpen()) needReopen = true;
+		if (!needReopen) return true;
+		SQLiteDatabase db = null;
+		try {
+			db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+			db.rawQuery("PRAGMA synchronous=3", null);
+			db.rawQuery("PRAGMA journal_mode = DELETE", null);
+			mCatalogDB = db;
+			catalogDBFile = dbFile;
+			return true;
+		} catch (SQLiteException e) {
+			log.e("Error while opening catalog DB " + dbFile.getAbsolutePath() + ". " + e.getMessage());
+			return false;
+		}
 	}
 
 	public void execSQLIgnoreErrors(String... sqls) {

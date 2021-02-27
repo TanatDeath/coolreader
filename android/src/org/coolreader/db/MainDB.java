@@ -3,8 +3,10 @@ package org.coolreader.db;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
+import android.graphics.Color;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
@@ -845,6 +847,35 @@ public class MainDB extends BaseDB {
 		}
 	}
 
+	public void updateCalibreCatalog(String name, boolean isLocal,
+									 String localFolder,
+									 String remoteFolderYD,
+									 boolean onlyMax) {
+		try {
+			if (StrUtils.isEmptyStr(name)) return;
+			Long existingIdByUrl = longQuery("SELECT id FROM calibre_catalog WHERE name=" + quoteSqlString(name));
+			if (existingIdByUrl == null)
+				return;
+			// update existing
+			int catType = isLocal ? 0 : 1;
+			if (onlyMax) {
+				Long fValue = longQuery("SELECT max(last_usage) FROM calibre_catalog");
+				if (fValue == null)
+					fValue = 1L;
+				else
+					fValue = fValue + 1;
+				execSQL("UPDATE calibre_catalog SET last_usage=" + fValue + " WHERE id=" + existingIdByUrl);
+			} else {
+				execSQL("UPDATE calibre_catalog SET cat_type=" + catType
+						+ ", local_folder = " + quoteSqlString(localFolder)
+						+ ", remote_folder = " + quoteSqlString(remoteFolderYD)
+						+ " WHERE id=" + existingIdByUrl);
+			}
+		} catch (Exception e) {
+			log.e("exception while updating Calibre catalog item", e);
+		}
+	}
+
 	public boolean saveOPDSCatalog(Long id, String url, String name, String username, String password,
 		String proxy_addr, String proxy_port, String proxy_uname, String proxy_passw, int onion_def_proxy) {
 		if (!isOpened())
@@ -894,7 +925,7 @@ public class MainDB extends BaseDB {
 		return true;
 	}
 
-	public boolean saveCalibreCatalog(Long id, String name, int catType, String localFolder, String remoteFolder) {
+	public boolean saveCalibreCatalog(Long id, String name, boolean isLocal, String localFolder, String remoteFolderYD) {
 		if (!isOpened())
 			return false;
 		if (name==null)
@@ -902,6 +933,7 @@ public class MainDB extends BaseDB {
 		name = name.trim();
 		if (name.length() == 0)
 			return false;
+		int catType = isLocal ? 0: 1;
 		try {
 			Long existingIdByName = longQuery("SELECT id FROM calibre_catalog WHERE name=" + quoteSqlString(name));
 			if (existingIdByName!=null)
@@ -912,17 +944,14 @@ public class MainDB extends BaseDB {
 				log.i("Saving "+name+" calibre catalog");
 				execSQL("INSERT INTO calibre_catalog (name, cat_type, local_folder, remote_folder, last_usage) VALUES ("+
 						quoteSqlString(name) + ", " + catType + ", " +
-						quoteSqlString(localFolder) + ", " + quoteSqlString(remoteFolder) + ", " + "0" +
+						quoteSqlString(localFolder) + ", " + quoteSqlString(remoteFolderYD) + ", " + "0" +
 						")");
 			} else {
 				// update existing
 				execSQL("UPDATE opds_catalog SET name="+quoteSqlString(name)+", cat_type="+ catType +
-						", local_folder="+quoteSqlString(localFolder)+", remote_folder="+quoteSqlString(remoteFolder) +
+						", local_folder="+quoteSqlString(localFolder)+", remote_folder="+quoteSqlString(remoteFolderYD) +
 						" WHERE id=" + id);
 			}
-			//asdf
-			//updateCalibreCatalog(name, "last_usage", "max");
-
 		} catch (Exception e) {
 			log.e("exception while saving OPDS catalog item", e);
 			return false;
@@ -1154,7 +1183,8 @@ public class MainDB extends BaseDB {
 		HashMap<String, UserDicEntry> hshDic = new HashMap<String, UserDicEntry>();
 		if (mDB == null) return hshDic;
 		String sql = "SELECT id, dic_word, dic_word_translate, dic_from_book, "+
-				" create_time, last_access_time, language, seen_count, coalesce(is_citation,0) as is_cit "+
+				" create_time, last_access_time, language, seen_count, coalesce(is_citation,0) as is_cit, "+
+				"is_custom_color, custom_color, short_context, full_context " +
 				" FROM user_dic";
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
@@ -1169,6 +1199,10 @@ public class MainDB extends BaseDB {
 					ude.setLanguage(rs.getString(6));
 					ude.setSeen_count(rs.getLong(7));
 					ude.setIs_citation(rs.getInt(8));
+					ude.setIsCustomColor(rs.getInt(9) == 1 ? 1 : 0);
+					ude.setCustomColor(rs.getString(10));
+					ude.setShortContext(rs.getString(11));
+					ude.setFullContext(rs.getString(12));
 					hshDic.put(ude.getIs_citation()+ude.getDic_word(),ude);
 				} while (rs.moveToNext());
 			}
@@ -1219,10 +1253,17 @@ public class MainDB extends BaseDB {
 	public boolean loadOPDSCatalogs(ArrayList<FileInfo> list) {
 		log.i("loadOPDSCatalogs()");
 		boolean found = false;
-		String sql = "SELECT id, name, url, username, password, "+
-				" proxy_addr, proxy_port, proxy_uname, proxy_passw, "+
-				" onion_def_proxy, books_downloaded, was_error "+
-				" FROM opds_catalog ORDER BY coalesce(was_error,0), last_usage DESC, name";
+		String sql = "SELECT id, name, url, username, password, " +
+				"proxy_addr, proxy_port, proxy_uname, proxy_passw, " +
+				"onion_def_proxy, books_downloaded, coalesce(was_error, 0) as was_error, " +
+				"last_usage, '' as local_folder, '' as remote_folder " +
+				"FROM opds_catalog " +
+				"union all " +
+				"select id, name, '@calibre' as url, '' as username, '' as password, " +
+				"'' as proxy_addr, '' as proxy_port, '' as proxy_uname, '' as proxy_passw, " +
+				"0 as onion_def_proxy, 0 as books_downloaded, 0 as was_error, " +
+				"last_usage, local_folder, remote_folder from calibre_catalog " +
+				"ORDER BY 12, 13 DESC, 2";
 		if (mDB == null) return false;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
@@ -1232,7 +1273,7 @@ public class MainDB extends BaseDB {
 				do {
 					Long id = rs.getLong(0);
 					String name = rs.getString(1);
-					String url = rs.getString(2);
+					String url = StrUtils.getNonEmptyStr(rs.getString(2), false);
 					String username = rs.getString(3);
 					String password = rs.getString(4);
 					String proxy_addr = rs.getString(5);
@@ -1242,9 +1283,16 @@ public class MainDB extends BaseDB {
 					int onion_def_proxy = rs.getInt(9);
 					Long book_downloaded = rs.getLong(10);
 					int was_error = rs.getInt(11);
+					String local_folder = rs.getString(13);
+					String remote_folder = rs.getString(14);
+
 					FileInfo opds = new FileInfo();
 					opds.isDirectory = true;
-					opds.pathname = FileInfo.OPDS_DIR_PREFIX + url;
+					if (url.equals("@calibre")) {
+						opds.pathname = FileInfo.CALIBRE_DIR_PREFIX + local_folder;
+						opds.remote_folder = remote_folder;
+					} else
+						opds.pathname = FileInfo.OPDS_DIR_PREFIX + url;
 					opds.setFilename(name);
 					opds.username = username;
 					opds.password = password;
@@ -1271,6 +1319,11 @@ public class MainDB extends BaseDB {
 	public void removeOPDSCatalog(Long id) {
 		log.i("removeOPDSCatalog(" + id + ")");
 		execSQLIgnoreErrors("DELETE FROM opds_catalog WHERE id = " + id);
+	}
+
+	public void removeCalibreCatalog(Long id) {
+		log.i("removeCalibreCatalog(" + id + ")");
+		execSQLIgnoreErrors("DELETE FROM calibre_catalog WHERE id = " + id);
 	}
 
     public ArrayList<FileInfo> loadFavoriteFolders() {
@@ -1570,32 +1623,32 @@ public class MainDB extends BaseDB {
 	public static void addGroupedItems2(FileInfo parent, String filter,
 								  ArrayList<FileInfo> items, String groupPrefixTag, final ItemGroupExtractor extractor, int lev) {
 		int iMaxItemsCount = iMaxGroupSize;
-		log.i("addGroupedItems2 called, filter = "+filter);
-		log.i("groupPrefixTag = "+groupPrefixTag);
-		log.i("lev = "+lev);
-		log.i("iMaxItemsCount = "+iMaxItemsCount);
+//		log.i("addGroupedItems2 called, filter = "+filter);
+//		log.i("groupPrefixTag = "+groupPrefixTag);
+//		log.i("lev = "+lev);
+//		log.i("iMaxItemsCount = "+iMaxItemsCount);
 		if (iMaxItemsCount<8) iMaxItemsCount = 8;
 		if (parent.isLitresPrefix()) iMaxItemsCount = 999; // All litres without subgrouping - better
 			//if (items.size() > 0)
 			//	if (items.get(0).isLitresPagination()) iMaxItemsCount = 999; // LitRes with paging will not be grouped
 		if (lev >= MAX_GROUP_LEVEL) {
-			int ii = 0;
-			log.i("case1");
-			for (FileInfo fi: items) {
-				ii++;
-				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-			}
+			//int ii = 0;
+			//log.i("case1");
+//			for (FileInfo fi: items) {
+//				ii++;
+//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
 		// if there are already small amount
 		if (items.size()<=iMaxItemsCount) {
-			int ii = 0;
-			log.i("case2");
-			for (FileInfo fi: items) {
-				ii++;
-				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-			}
+			//int ii = 0;
+			//log.i("case2");
+//			for (FileInfo fi: items) {
+//				ii++;
+//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
@@ -1639,22 +1692,22 @@ public class MainDB extends BaseDB {
 			level = level + 1;
 		}
 		if (grouped==null) {
-			int ii = 0;
-			log.i("case3");
-			for (FileInfo fi: items) {
-				ii++;
-				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-			}
+			//int ii = 0;
+			//log.i("case3");
+//			for (FileInfo fi: items) {
+//				ii++;
+//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
 		if (grouped.size()==1) { // grouping failed :)
-			int ii = 0;
-			log.i("case4");
-			for (FileInfo fi: items) {
-				ii++;
-				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-			}
+			//int ii = 0;
+			//log.i("case4");
+//			for (FileInfo fi: items) {
+//				ii++;
+//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
+//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
@@ -1758,16 +1811,21 @@ public class MainDB extends BaseDB {
 			i = groupEnd;
 		}
 	}
-	
+
 	private boolean loadItemList(ArrayList<FileInfo> list, String sql, String groupPrefixTag, boolean sortAsc) {
+		return loadItemList(mDB, list, sql, groupPrefixTag, sortAsc);
+	}
+
+	private boolean loadItemList(SQLiteDatabase db, ArrayList<FileInfo> list, String sql, String groupPrefixTag, boolean sortAsc) {
 		boolean found = false;
-		try (Cursor rs = mDB.rawQuery(sql, null)) {
+		try (Cursor rs = db.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
 				// read DB
 				do {
 					long id = rs.getLong(0);
 					String name = rs.getString(1);
-					if ((FileInfo.AUTHOR_PREFIX.equals(groupPrefixTag)) && (id < 10000000)) {
+					if (((FileInfo.AUTHOR_PREFIX.equals(groupPrefixTag)) || (FileInfo.CALIBRE_AUTHOR_PREFIX.equals(groupPrefixTag)))
+							&& (id < 10000000)) {
 						// if reversed name is not equal to name, then use it, instead of mechanical word moving
 						String name_lfm = StrUtils.getNonEmptyStr(rs.getString(3), true);
 						if ((!StrUtils.isEmptyStr(name_lfm)) && (!name_lfm.equals(name)))
@@ -1923,6 +1981,53 @@ public class MainDB extends BaseDB {
 		}
 		//addGroupedItems(parent, list, 0, list.size(), FileInfo.AUTHOR_GROUP_PREFIX, 1, new ItemGroupFilenameExtractor());
 		addGroupedItems2(parent, "", list, FileInfo.AUTHOR_GROUP_PREFIX, new ItemGroupFilenameExtractor(),1);
+		endReading();
+		return found;
+	}
+
+	public boolean loadCalibreAuthorsList(FileInfo parent, String filterSeries, boolean withAliases) {
+		Log.i("cr3", "loadCalibreAuthorsList()");
+		String catalogFileName = parent.pathname.replace(FileInfo.CALIBRE_DIR_PREFIX, "") +
+				"/metadata.db";
+		if (!openCatalogDB(new File(catalogFileName))) return false;
+		parent.clear();
+		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+		String sql = "";
+		if (StrUtils.isEmptyStr(filterSeries)) {
+			sql = "SELECT authors.id, authors.name, count(distinct bal.book) as book_count, authors.sort as name_lfm FROM authors " +
+					" JOIN books_authors_link bal on bal.author = authors.id " +
+					" GROUP BY authors.name, authors.id ORDER BY authors.name ";
+		} else {
+			String series = "";
+			if (filterSeries.startsWith("seriesId:")) series = filterSeries.replace("seriesId:", "");
+			else if (filterSeries.startsWith("series:")) {
+				String s = filterSeries.replace("series:", "").trim();
+				long l = getLongValue("SELECT series.id FROM series where trim(series.name) = " + quoteSqlString(s));
+				if (l > 0) series = ""+l;
+			}
+			if (StrUtils.isEmptyStr(series)) return false;
+			sql = "SELECT authors.id, authors.name, count(distinct bal.book) as book_count, authors.sort as name_lfm FROM books_series_link bsl " +
+					" JOIN books_authors_link bal on bal.book = bsl.book " +
+					" JOIN authors on authors.id = bal.author " +
+					" where bsl.series = " + series +
+					" GROUP BY authors.name, authors.id ORDER BY authors.name";
+		}
+
+		boolean found = loadItemList(mCatalogDB, list, sql, FileInfo.CALIBRE_AUTHOR_PREFIX, true);
+		//
+		sortItems(list, new ItemGroupFilenameExtractor(), true);
+		// remove duplicate titles
+		for (int i=list.size() - 1; i > 0; i--) {
+			String title = list.get(i).getFilename();
+			if (title == null) {
+				list.remove(i);
+				continue;
+			}
+			String prevTitle = list.get(i - 1).getFilename();
+			if (title.equals(prevTitle))
+				list.remove(i);
+		}
+		addGroupedItems2(parent, "", list, FileInfo.CALIBRE_AUTHOR_GROUP_PREFIX, new ItemGroupFilenameExtractor(),1);
 		endReading();
 		return found;
 	}
@@ -2350,6 +2455,28 @@ public class MainDB extends BaseDB {
 				} catch (Exception e) {
 					Log.e("cr3", "exception while loading list of authors", e);
 				}
+			}
+		}
+		String authors = "-1";
+		for (Long l: listAuthors) authors = authors + ", " + l;
+		authors = " (" + authors + ") ";
+		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id "+
+				" WHERE (not (b.pathname like '@%')) and book_author.author_fk in " + authors + " ORDER BY b.title";
+		return findBooks(sql, list);
+	}
+
+	public boolean findCalibreAuthorBooks(ArrayList<FileInfo> list, long authorId, String addFilter)
+	{
+		if (!catalogDBIsOpened()) return false;
+		long author = authorId;
+		ArrayList<Long> listAuthors = new ArrayList<>();
+		listAuthors.add(authorId);
+		if (!StrUtils.isEmptyStr(addFilter)) {
+			if (addFilter.startsWith("author:")) {
+				String s = addFilter.replace("author:", "").trim();
+				long l = getLongValue("SELECT author.id FROM author where trim(author.name) = " + quoteSqlString(s));
+				listAuthors.clear();
+				if (l > 0) listAuthors.add(l);
 			}
 		}
 		String authors = "-1";
@@ -3475,6 +3602,33 @@ public class MainDB extends BaseDB {
 		"LEFT JOIN series s ON s.id=b.series_fk " +
 		"LEFT JOIN series sp ON sp.id=b.publseries_fk " +
 		"LEFT JOIN folder f ON f.id=b.folder_fk ";
+
+//	select b.id, b.path||'/'||d.name||'.'||lower(d.format) as pathname, b.path,
+//	d.name||'.'||lower(d.format) as filename, '' as arcname, b.title,
+//			(SELECT GROUP_CONCAT(a.name,'|') FROM books_authors_link bal JOIN authors a ON a.id=bal.author WHERE bal.book=b.id) as authors,
+//  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as series_name,
+//  0 as series_number, d.format, d.uncompressed_size as filesize, d.uncompressed_size as arcsize,
+//	b.timestamp as create_time, b.last_modified as last_access_time, 0 as flags,
+//  (SELECT GROUP_CONCAT(l.lang_code,', ') FROM books_languages_link bll JOIN languages l on l.id = bll.lang_code WHERE bll.book=b.id) as language,
+//  (SELECT GROUP_CONCAT(l.lang_code,', ') FROM books_languages_link bll JOIN languages l on l.id = bll.lang_code WHERE bll.book=b.id) as lang_from,
+//  '' as lang_to, null as saved_vith_ver,
+//  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre,
+//  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as annotation,
+//  null as srclang, b.pubdate as bookdate, null as translator, null as docauthor,
+//  null as docprogram, null as docdate,
+//  (SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'uri') as docsrcurl,
+//  null as docsrcocr, null as docversion, null as publname, null as publisher,
+//  null as publcity, b.pubdate as publyear,
+//	coalesce((SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'isbn'), b.isbn) as publisbn,
+//  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as publseries_name,
+//  0 as publseries_number, b.timestamp as file_create_time, 0 as sym_count, 0 as word_count,
+//  null as book_date_n, null as doc_date_n, null as publ_year_n, null as opds_link,
+//  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre_list,
+//  null as crc32, null as domVersion, null as rendFlags,
+//  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as description,
+//  null as name_crc32
+//	from books b
+//	join data d on d.book = b.id
 
 	private void readFileInfoFromCursor(FileInfo fileInfo, Cursor rs) {
 		int i = 0;

@@ -93,6 +93,9 @@
     <attr name="attr_icons8_document_selection2" format="reference" />
     <attr name="attr_icons8_document_selection_lock" format="reference" />
     <attr name="attr_icons8_sun" format="reference" />
+    <attr name="attr_icons8_sun_auto" format="reference" />
+    <attr name="attr_icons8_sun_warm" format="reference" />
+    <attr name="attr_icons8_sun_cold" format="reference" />
     <attr name="attr_icons8_sun_1" format="reference" />
     <attr name="attr_icons8_double_tap" format="reference" />
     <attr name="attr_icons8_file" format="reference" />
@@ -321,11 +324,14 @@
     <attr name="attr_icons8_library" format="reference" />
     <attr name="attr_icons8_select_all" format="reference" />
     <attr name="attr_litres_en_logo_2lines" format="reference" />
+    <attr name="icons8_litres_en_logo_2lines_big" format="reference" />
     <attr name="cr3_button_info_drawable" format="reference" />
     <attr name="attr_icons8_skim" format="reference" />
     <attr name="attr_icons8_combo" format="reference" />
     <attr name="attr_icons8_super_combo" format="reference" />
     <attr name="attr_icons8_web_search" format="reference" />
+    <attr name="attr_icons8_opds" format="reference" />
+    <attr name="attr_icons8_calibre" format="reference" />
 
     <attr name="attr_icons8_rate_star" format="reference" />
     <attr name="attr_icons8_rate_star_filled" format="reference" />

@@ -2,7 +2,6 @@ package org.coolreader.crengine;
 
 import java.util.ArrayList;
 
-import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 public class ReaderAction {
@@ -182,7 +181,7 @@ public class ReaderAction {
 			R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_texture);
 
 	public final static ReaderAction BACKLIGHT_SET_DEFAULT = new ReaderAction("BACKLIGHT_SET_DEFAULT", R.string.action_backlight_set_default,
-			ReaderCommand.DCMD_BACKLIGHT_SET_DEFAULT, 0, null, R.string.option_add_info_empty_text);
+			ReaderCommand.DCMD_BACKLIGHT_SET_DEFAULT, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun_auto);
 
 	public final static ReaderAction SHOW_SYSTEM_BACKLIGHT_DIALOG = new ReaderAction("SHOW_SYSTEM_BACKLIGHT_DIALOG", R.string.action_show_onyx_backlight_system_dialog,
 			ReaderCommand.DCMD_SHOW_SYSTEM_BACKLIGHT_DIALOG, 0, BACKLIGHT_SET_DEFAULT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun);
@@ -193,6 +192,19 @@ public class ReaderAction {
 
 	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
 	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
+
+	public final static ReaderAction ADD_OPDS_CATALOG = new ReaderAction("ADD_OPDS_CATALOG", R.string.add_opds_catalog, ReaderCommand.DCMD_ADD_OPDS_CATALOG, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_opds);
+	public final static ReaderAction ADD_REMOVE_LITRES_CATALOG = new ReaderAction("ADD_REMOVE_LITRES_CATALOG", R.string.add_remove_litres_catalog, ReaderCommand.DCMD_ADD_REMOVE_LITRES_CATALOG, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_litres_en_logo_2lines_big);
+	public final static ReaderAction ADD_CALIBRE_CATALOG_LOCAL = new ReaderAction("ADD_CALIBRE_CATALOG_LOCAL", R.string.add_calibre_catalog_local, ReaderCommand.DCMD_ADD_CALIBRE_CATALOG_LOCAL, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_calibre);
+	public final static ReaderAction ADD_CALIBRE_CATALOG_YD = new ReaderAction("ADD_CALIBRE_CATALOG_YD", R.string.add_calibre_catalog_yd, ReaderCommand.DCMD_ADD_CALIBRE_CATALOG_YD, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_calibre);
+
+	public final static ReaderAction CALIBRE_SEARCH = new ReaderAction("CALIBRE_SEARCH", R.string.calibre_search, ReaderCommand.DCMD_CALIBRE_SEARCH, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_find);
+	public final static ReaderAction CALIBRE_SHOW_AUTHORS = new ReaderAction("CALIBRE_SHOW_AUTHORS", R.string.calibre_authors, ReaderCommand.DCMD_CALIBRE_SHOW_AUTHORS, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_author);
+	public final static ReaderAction CALIBRE_SHOW_TITLES = new ReaderAction("CALIBRE_SHOW_TITLES", R.string.calibre_titles, ReaderCommand.DCMD_CALIBRE_SHOW_TITLES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_authors);
+	public final static ReaderAction CALIBRE_SHOW_SERIES = new ReaderAction("CALIBRE_SHOW_SERIES", R.string.calibre_series, ReaderCommand.DCMD_CALIBRE_SHOW_SERIES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_hash);
+	public final static ReaderAction CALIBRE_SHOW_RATING = new ReaderAction("CALIBRE_SHOW_RATING", R.string.calibre_rating, ReaderCommand.DCMD_CALIBRE_SHOW_RATING, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_stars);
+	public final static ReaderAction CALIBRE_SHOW_PUB_DATES = new ReaderAction("CALIBRE_SHOW_PUB_DATES", R.string.calibre_publish_date, ReaderCommand.DCMD_CALIBRE_SHOW_PUB_DATES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_year);
+	public final static ReaderAction CALIBRE_SHOW_TAGS = new ReaderAction("CALIBRE_SHOW_TAGS", R.string.calibre_tags, ReaderCommand.DCMD_CALIBRE_SHOW_TAGS, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_theatre_mask);
 
 	public final static ReaderAction[] AVAILABLE_ACTIONS;
 
@@ -358,6 +370,7 @@ public class ReaderAction {
 				SKIM,
 				ONLINE_COMBO,
 				ONLINE_SUPER_COMBO
+				// calibre will only be available from rootview
 		};
 		if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {
 			// TODO: and may be other eink devices with frontlight...

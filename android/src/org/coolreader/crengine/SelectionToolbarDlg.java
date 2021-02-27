@@ -37,6 +37,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -47,8 +48,10 @@ public class SelectionToolbarDlg {
 	ReaderView mReaderView;
 	View mPanel;
 	Selection selection;
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
-	static public void showDialog( CoolReader coolReader, ReaderView readerView, final Selection selection )
+	static public void showDialog(CoolReader coolReader, ReaderView readerView, final Selection selection)
 	{
 		SelectionToolbarDlg dlg = new SelectionToolbarDlg(coolReader, readerView, selection);
 		//dlg.mWindow.update(dlg.mAnchor, width, height)
@@ -153,7 +156,7 @@ public class SelectionToolbarDlg {
 	public boolean addButtonEnabled = false;
 	private Properties props;
 
-	public void saveUserDic(boolean isCitation, String text) {
+	public static void saveUserDic(boolean isCitation, String text, Selection selection, CoolReader mCoolReader, ReaderView mReaderView) {
 		UserDicEntry ude = new UserDicEntry();
 		ude.setId(0L);
 		ude.setDic_word(selection.text);
@@ -168,6 +171,10 @@ public class SelectionToolbarDlg {
 		ude.setCreate_time(System.currentTimeMillis());
 		ude.setLast_access_time(System.currentTimeMillis());
 		ude.setLanguage(mReaderView.mBookInfo.getFileInfo().language);
+		ude.setShortContext(BookmarkEditDialog.getContextText(mCoolReader, text));
+		ude.setFullContext(BookmarkEditDialog.getFullContextText(mCoolReader));
+		ude.setIsCustomColor(0);
+		ude.setCustomColor(Utils.colorToHex(0));
 		ude.setSeen_count(0L);
 		ude.setIs_citation(isCitation? 1 : 0);
 		mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
@@ -181,7 +188,7 @@ public class SelectionToolbarDlg {
 		}, 1000);
 	}
 
-	public void sendTo1(String text) {
+	public static void sendTo1(String text, Selection selection, CoolReader mCoolReader) {
 		final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 		String text1 = BookmarkEditDialog.getSendToText1(mCoolReader,
 				selection.text,
@@ -196,18 +203,18 @@ public class SelectionToolbarDlg {
 		mCoolReader.startActivity(Intent.createChooser(emailIntent, null));
 	}
 
-	public void sendTo2(String text) {
+	public static void sendTo2(String text, Selection selection, CoolReader mCoolReader) {
 		final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 		int selAction = -1;
 		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
 		if (selAction == -1) {
-			sendTo1(text);
+			sendTo1(text, selection, mCoolReader);
 			return;
 		}
 		int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
 		Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
 		if (curDict == null) {
-			sendTo1(text);
+			sendTo1(text, selection, mCoolReader);
 			return;
 		}
 		String text1 = BookmarkEditDialog.getSendToText1(mCoolReader,
@@ -229,7 +236,7 @@ public class SelectionToolbarDlg {
 				{
 					mCoolReader.startActivity(emailIntent);
 				} catch ( ActivityNotFoundException e ) {
-					sendTo1(text);
+					sendTo1(text, selection, mCoolReader);
 					return;
 				}
 			}
@@ -243,23 +250,18 @@ public class SelectionToolbarDlg {
 		if (!dontChange) {
 			addButtonEnabled = !addButtonEnabled;
 			if (props != null) {
+				mCoolReader.getReaderView().skipFallbackWarning = true;
 				props.setProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, addButtonEnabled ? "1" : "0");
+				mCoolReader.getReaderView().skipFallbackWarning = true;
 				mCoolReader.setSettings(props, -1, true);
 			}
 		}
 		if (addButtonEnabled) {
 			llAddButtonsParent.removeAllViews();
 			llAddButtonsParent.addView(llAddButtons);
-			int colorGrayC;
-			int colorGray;
-			int colorIcon;
-			TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon});
-			colorGrayC = a.getColor(0, Color.GRAY);
-			colorGray = a.getColor(1, Color.GRAY);
-			colorIcon = a.getColor(2, Color.BLACK);
-			a.recycle();
-
+			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+			int colorGray = themeColors.get(R.attr.colorThemeGray2);
+			int colorIcon = themeColors.get(R.attr.colorIcon);
 			ColorDrawable c = new ColorDrawable(colorGrayC);
 			c.setAlpha(130);
 			llAddButtons.findViewById(R.id.btn_quick_bookmark).setBackgroundDrawable(c);
@@ -271,12 +273,16 @@ public class SelectionToolbarDlg {
 				bmk.setEndPos(selection.endPos);
 				bmk.setPercent(selection.percent);
 				bmk.setTitleText(selection.chapter);
+				bmk.setIsCustomColor(0);
+				bmk.setCustomColor(Utils.colorToHex(0));
+				bmk.setShortContext(BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+				bmk.setFullContext(BookmarkEditDialog.getFullContextText(mCoolReader));
 				mReaderView.addBookmark(bmk);
 				closeDialog(true);
 			});
 			llAddButtons.findViewById(R.id.btn_cite).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_cite).setOnClickListener(v -> {
-				saveUserDic(true, "");
+				saveUserDic(true, "", selection, mCoolReader, mReaderView);
 				closeDialog(true);
 			});
 			llAddButtons.findViewById(R.id.btn_user_dic).setBackgroundDrawable(c);
@@ -288,7 +294,11 @@ public class SelectionToolbarDlg {
 			llAddButtons.findViewById(R.id.btn_web_search).setOnClickListener(v -> {
 				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
 				emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
-				mCoolReader.startActivity(emailIntent);
+				try {
+					mCoolReader.startActivity(emailIntent);
+				} catch (Exception e) {
+					mCoolReader.showToast(mCoolReader.getString(R.string.intent_error)+": "+e.getMessage());
+				}
 				closeDialog(true);
 			});
 			llAddButtons.findViewById(R.id.btn_dic_list).setBackgroundDrawable(c);
@@ -321,7 +331,7 @@ public class SelectionToolbarDlg {
 
 							@Override
 							public void done(String result) {
-								saveUserDic(false, result);
+								saveUserDic(false, result, selection, mCoolReader, mReaderView);
 								closeDialog(true);
 							}
 
@@ -348,7 +358,7 @@ public class SelectionToolbarDlg {
 
 							@Override
 							public boolean showDicToast() {
-								return true;
+								return false;
 							}
 
 							@Override
@@ -358,8 +368,8 @@ public class SelectionToolbarDlg {
 
 							@Override
 							public void done(String result) {
-								saveUserDic(false, result);
-								sendTo2(result);
+								saveUserDic(false, result, selection, mCoolReader, mReaderView);
+								sendTo2(result, selection, mCoolReader);
 								closeDialog(true);
 							}
 
@@ -385,6 +395,8 @@ public class SelectionToolbarDlg {
 		props = new Properties(mCoolReader.settings());
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(coolReader, isEInk);
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar, null));
 		llAddButtons = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_add, null));
@@ -394,22 +406,16 @@ public class SelectionToolbarDlg {
 		mWindow = new PopupWindow( mAnchor.getContext() );
 
 		mWindow.setTouchInterceptor((v, event) -> {
-			if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
+			if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
 				closeDialog(true);
 				return true;
 			}
 			return false;
 		});
 		//super(panel);
-		int colorGrayC;
-		int colorGray;
-		int colorIcon;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		colorGray = a.getColor(1, Color.GRAY);
-		colorIcon = a.getColor(2, Color.BLACK);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGray = themeColors.get(R.attr.colorThemeGray2);
+		int colorIcon = themeColors.get(R.attr.colorIcon);
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		c.setAlpha(130);
@@ -417,7 +423,10 @@ public class SelectionToolbarDlg {
 		mPanel = panel;
 		llAddButtonsParent = panel.findViewById(R.id.ll_sel_add);
 
-		panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (isEInk)
+			panel.setBackgroundColor(Color.argb(200, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+		else
+			panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
 		//mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
 		mPanel.findViewById(R.id.selection_copy).setBackgroundDrawable(c);

@@ -62,6 +62,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -76,6 +77,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.dropbox.core.v2.team.BaseDfbReport;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
@@ -125,6 +128,10 @@ public class BaseActivity extends Activity implements Settings {
 	public int sensorCurRot = -1;
 
 	public int iCutoutMode = 0; // for cutout screens
+
+	public boolean bGetBacklightFromSystem = false; // onyx
+	public int initialBacklight = -1;
+	public int initialWarmBacklight = -1;
 
 	//private volatile SuperActivityToast myToast;
 
@@ -283,7 +290,8 @@ public class BaseActivity extends Activity implements Settings {
 		int backlight = props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1);
 		if (backlight < -1 || backlight > DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE)
 			backlight = -1;
-		setScreenBacklightLevel(backlight);
+		if (!DeviceInfo.EINK_HAVE_FRONTLIGHT) // only if not onyx
+			setScreenBacklightLevel(backlight);
 
 		bindCRDBService();
 	}
@@ -533,7 +541,18 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_sun,
 						 R.attr.attr_icons8_skim,
 						 R.attr.attr_icons8_combo,
-						 R.attr.attr_icons8_super_combo
+						 R.attr.attr_icons8_super_combo,
+						 R.attr.attr_icons8_sun_auto,
+						 R.attr.cr3_browser_find_drawable,
+						 R.attr.attr_icons8_folder_stars,
+						 R.attr.cr3_browser_folder_authors_drawable,
+						 R.attr.attr_icons8_folder_hash,
+						 R.attr.attr_icons8_folder_author,
+						 R.attr.attr_icons8_theatre_mask,
+						 R.attr.attr_icons8_folder_year,
+						 R.attr.icons8_litres_en_logo_2lines_big,
+						 R.attr.attr_icons8_calibre,
+						 R.attr.attr_icons8_opds
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -621,6 +640,19 @@ public class BaseActivity extends Activity implements Settings {
 		int brSkim = a.getResourceId(76, 0);
 		int brCombo = a.getResourceId(77, 0);
 		int brSuperCombo = a.getResourceId(78, 0);
+		int brSunAuto = a.getResourceId(79, 0);
+
+		int brCalibreSearch = a.getResourceId(80, 0);
+		int brCalibreRating = a.getResourceId(81, 0);
+		int brCalibreTitles = a.getResourceId(82, 0);
+		int brCalibreSeries = a.getResourceId(83, 0);
+		int brCalibreAuthors = a.getResourceId(84, 0);
+		int brCalibreTags = a.getResourceId(85, 0);
+		int brCalibrePublDate = a.getResourceId(86, 0);
+
+		int brLitresLogo = a.getResourceId(87, 0);
+		int brCalibreLogo = a.getResourceId(88, 0);
+		int brOpdsLogo = a.getResourceId(89, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -780,6 +812,18 @@ public class BaseActivity extends Activity implements Settings {
 		if (brSkim != 0) ReaderAction.SKIM.setIconId(brSkim);
 		if (brCombo != 0) ReaderAction.ONLINE_COMBO.setIconId(brCombo);
 		if (brSuperCombo != 0) ReaderAction.ONLINE_SUPER_COMBO.setIconId(brSuperCombo);
+		if (brSunAuto != 0) ReaderAction.BACKLIGHT_SET_DEFAULT.setIconId(brSunAuto);
+		if (brCalibreSearch != 0) ReaderAction.CALIBRE_SEARCH.setIconId(brCalibreSearch);
+		if (brCalibreRating != 0) ReaderAction.CALIBRE_SHOW_RATING.setIconId(brCalibreRating);
+		if (brCalibreTitles != 0) ReaderAction.CALIBRE_SHOW_TITLES.setIconId(brCalibreTitles);
+		if (brCalibreSeries != 0) ReaderAction.CALIBRE_SHOW_SERIES.setIconId(brCalibreSeries);
+		if (brCalibreAuthors != 0) ReaderAction.CALIBRE_SHOW_AUTHORS.setIconId(brCalibreAuthors);
+		if (brCalibreTags != 0) ReaderAction.CALIBRE_SHOW_TAGS.setIconId(brCalibreTags);
+		if (brCalibrePublDate != 0) ReaderAction.CALIBRE_SHOW_PUB_DATES.setIconId(brCalibrePublDate);
+		if (brLitresLogo != 0) ReaderAction.ADD_REMOVE_LITRES_CATALOG.setIconId(brLitresLogo);
+		if (brCalibreLogo != 0) ReaderAction.ADD_CALIBRE_CATALOG_YD.setIconId(brCalibreLogo);
+		if (brCalibreLogo != 0) ReaderAction.ADD_CALIBRE_CATALOG_LOCAL.setIconId(brCalibreLogo);
+		if (brOpdsLogo != 0) ReaderAction.ADD_OPDS_CATALOG.setIconId(brOpdsLogo);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1123,10 +1167,12 @@ public class BaseActivity extends Activity implements Settings {
 //    }
 
 	public void setScreenBacklightLevel(int value) {
+    	log.i("setScreenBacklightLevel called, value = " + value);
 		if (value < -1)
 			value = -1;
 		else if (value > DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE)
 			value = -1;
+		log.i("setScreenBacklightLevel, updated value = " + value);
 		screenBacklightBrightness = value;
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			onUserActivity();
@@ -1135,10 +1181,12 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void setScreenWarmBacklightLevel(int value) {
+		log.i("setScreenWarmBacklightLevel called, value = " + value);
 		if (value < -1)
 			value = -1;
 		else if (value > DeviceInfo.MAX_SCREEN_BRIGHTNESS_WARM_VALUE)
 			value = -1;
+		log.i("setScreenWarmBacklightLevel, updated value = " + value);
 		if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
 			screenWarmBacklightBrightness = value;
 			EinkScreen.setWarmLightValue(this, value);
@@ -1195,6 +1243,7 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	private void updateBacklightBrightness(float b) {
+		log.i("updateBacklightBrightness called, b = " + b);
 		Window wnd = getWindow();
 		if (wnd != null) {
 			LayoutParams attrs = wnd.getAttributes();
@@ -1694,23 +1743,37 @@ public class BaseActivity extends Activity implements Settings {
 	private boolean simplePopup = false;
 
 	public void showCenterPopup(View surface, String val, boolean forceRecreate) {
-		showPopup(surface, val, 500, forceRecreate, true);
+		showPopup(surface, val, 500, forceRecreate, true, false);
 	}
 
 	public void showBottomPopup(View surface, String val, boolean forceRecreate) {
-		showPopup(surface, val, 500, forceRecreate, false);
+		showPopup(surface, val, 500, forceRecreate, false, false);
 	}
 
-	public void showPopup(View surface, String val, int millis, boolean forceRecreate, boolean bCenter) {
+	public void showCenterPopupBrightness(View surface, String val, boolean forceRecreate) {
+		showPopup(surface, val, 500, forceRecreate, true, true);
+	}
+
+	public void showBottomPopupBrightness(View surface, String val, boolean forceRecreate) {
+		showPopup(surface, val, 500, forceRecreate, false, true);
+	}
+
+	long lastPopupTime = System.currentTimeMillis();
+
+	public void showPopup(View surface, String val, int millis, boolean forceRecreate, boolean bCenter, boolean bBrightness) {
+		long lastPopupT = lastPopupTime;
+		long thisPopupTime = System.currentTimeMillis();
+		if ((DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) && (thisPopupTime - lastPopupT < 500)) return;
+		lastPopupTime = thisPopupTime;
+		boolean isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		HashMap<Integer, Integer> themeColors = Utils.getThemeColors((CoolReader) this, isEInk);
 		BackgroundThread.instance().executeGUI(() -> {
 			boolean useExisting = (windowCenterPopup != null);
 			useExisting = useExisting && simplePopup;
-			useExisting = useExisting && (!forceRecreate);
-			TypedArray a = getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-			int colorGrayC = a.getColor(1, Color.GRAY);
-			int colorIcon = a.getColor(2, Color.GRAY);
-			a.recycle();
+			useExisting = useExisting && (!forceRecreate) && (thisPopupTime - lastPopupT < 1000);
+			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+			int colorGray = themeColors.get(R.attr.colorThemeGray2);
+			int colorIcon = themeColors.get(R.attr.colorIcon);
 			int fontSize = 24;
 			if (useExisting) {
 				if (millis >= 0) scheduleHideWindowCenterPopup(millis);
@@ -1725,15 +1788,49 @@ public class BaseActivity extends Activity implements Settings {
 				windowCenterPopup = new PopupWindow(surface.getContext());
 			windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
 			windowCenterPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-			windowCenterPopup.setTouchable(false);
+			windowCenterPopup.setTouchable(true);
 			windowCenterPopup.setFocusable(false);
 			windowCenterPopup.setOutsideTouchable(true);
 			windowCenterPopup.setBackgroundDrawable(null);
+			windowCenterPopup.setTouchInterceptor((v, event) -> {
+				if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+					windowCenterPopup.dismiss();
+					if (((CoolReader)this).getmReaderView() != null)
+						((CoolReader)this).getmReaderView().disableTouch = true;
+					return true;
+				}
+				return false;
+			});
 			LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
+			if ((DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) || (!bBrightness))
+				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
+			else
+				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_brightness, null, true));
 			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
-			toast_ll.setBackgroundColor(colorGrayC);
+			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+				toast_ll.setBackgroundColor(Color.argb(0, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+			else {
+				toast_ll.setBackgroundColor(colorGrayC);
+				Button toast_btn = windowCenterPopup.getContentView().findViewById(R.id.toast_btn);
+				if (toast_btn != null) {
+					toast_btn.setBackgroundColor(colorGray);
+					tintViewIcons(toast_ll, true);
+					toast_btn.setPadding(6, 6, 6, 6);
+					toast_btn.setOnClickListener((v) -> {
+						((CoolReader) this).getReaderView().skipFallbackWarning = true;
+						((CoolReader) this).getReaderView().setSetting(PROP_APP_SCREEN_BACKLIGHT, "-1");		// system default backlight level
+						((CoolReader) this).getReaderView().skipFallbackWarning = true;
+						((CoolReader) this).getReaderView().setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT, "-1"); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+			}
 			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
+			tv.setOnClickListener((v) -> {
+				if (((CoolReader)this).getmReaderView() != null)
+					((CoolReader)this).getmReaderView().disableTouch = true;
+				windowCenterPopup.dismiss();
+			});
 			tv.setTextColor(colorIcon);
 			tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
 			tv.setText(val);
@@ -1965,9 +2062,6 @@ public class BaseActivity extends Activity implements Settings {
 		intent.addCategory(Intent.CATEGORY_HOME);
 		startActivity(intent);
 	}
-	
-
-	
 
 	private static String PREF_HELP_FILE = "HelpFile";
 	
@@ -1981,8 +2075,6 @@ public class BaseActivity extends Activity implements Settings {
 		SharedPreferences pref = getSharedPreferences(PREF_FILE, 0);
 		pref.edit().putString(PREF_HELP_FILE, v).commit();
 	}
-
-	
 	
 	private String currentLanguage;
 	
@@ -2077,11 +2169,22 @@ public class BaseActivity extends Activity implements Settings {
 //        	} catch ( Exception e ) {
 //        		// ignore
 //        	}
-		} else if ((!DeviceInfo.isEinkScreen(getScreenForceEink()) || DeviceInfo.EINK_HAVE_FRONTLIGHT) && PROP_APP_SCREEN_BACKLIGHT.equals(key)) {
+		} else if (DeviceInfo.EINK_HAVE_FRONTLIGHT && PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM.equals(key)) {
 			try {
 				final int n = Integer.valueOf(value);
+				bGetBacklightFromSystem = n == 1;
+			} catch (Exception e) {
+				// ignore
+			}
+		} else if ((!DeviceInfo.isEinkScreen(getScreenForceEink())  ||
+				DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS ||
+				DeviceInfo.EINK_HAVE_FRONTLIGHT) && PROP_APP_SCREEN_BACKLIGHT.equals(key)) {
+			try {
+				final int n = Integer.valueOf(value);
+				initialBacklight = n;
 				// delay before setting brightness
-				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+				if (!DeviceInfo.EINK_HAVE_FRONTLIGHT) // only if not onyx
+					BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
 						.postBackground(() -> BackgroundThread.instance()
 								.postGUI(() -> setScreenBacklightLevel(n))), 100);
 			} catch (Exception e) {
@@ -2090,7 +2193,8 @@ public class BaseActivity extends Activity implements Settings {
 		} else if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT && PROP_APP_SCREEN_WARM_BACKLIGHT.equals(key)) {
 			try {
 				int n = Integer.parseInt(value);
-				setScreenWarmBacklightLevel(n);
+				initialWarmBacklight = n;
+//				setScreenWarmBacklightLevel(n);
 			} catch (Exception ignored) {
 			}
         } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {

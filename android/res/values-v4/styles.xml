@@ -234,6 +234,9 @@
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
+        <item name="attr_icons8_sun_auto">@drawable/icons8_sun_auto</item>
+        <item name="attr_icons8_sun_warm">@drawable/icons8_sun_warm</item>
+        <item name="attr_icons8_sun_cold">@drawable/icons8_sun_cold</item>
         <item name="attr_icons8_sun_1">@drawable/icons8_sun_1</item>
         <item name="attr_icons8_double_tap">@drawable/icons8_double_tap</item>
         <item name="attr_icons8_file">@drawable/icons8_file</item>
@@ -458,11 +461,14 @@
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
+        <item name="icons8_litres_en_logo_2lines_big">@drawable/icons8_litres_en_logo_2lines_big</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
         <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
+        <item name="attr_icons8_opds">@drawable/icons8_opds</item>
+        <item name="attr_icons8_calibre">@drawable/icons8_calibre</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -575,6 +581,9 @@
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
+        <item name="attr_icons8_sun_auto">@drawable/icons8_sun_auto</item>
+        <item name="attr_icons8_sun_warm">@drawable/icons8_sun_warm</item>
+        <item name="attr_icons8_sun_cold">@drawable/icons8_sun_cold</item>
         <item name="attr_icons8_sun_1">@drawable/icons8_sun_1</item>
         <item name="attr_icons8_double_tap">@drawable/icons8_double_tap</item>
         <item name="attr_icons8_file">@drawable/icons8_file</item>
@@ -799,11 +808,14 @@
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
+        <item name="icons8_litres_en_logo_2lines_big">@drawable/icons8_litres_en_logo_2lines_big</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
         <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
+        <item name="attr_icons8_opds">@drawable/icons8_opds</item>
+        <item name="attr_icons8_calibre">@drawable/icons8_calibre</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -918,6 +930,9 @@
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
+        <item name="attr_icons8_sun_auto">@drawable/icons8_sun_auto</item>
+        <item name="attr_icons8_sun_warm">@drawable/icons8_sun_warm</item>
+        <item name="attr_icons8_sun_cold">@drawable/icons8_sun_cold</item>
         <item name="attr_icons8_sun_1">@drawable/icons8_sun_1</item>
         <item name="attr_icons8_double_tap">@drawable/icons8_double_tap</item>
         <item name="attr_icons8_file">@drawable/icons8_file</item>
@@ -1142,11 +1157,14 @@
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
+        <item name="icons8_litres_en_logo_2lines_big">@drawable/icons8_litres_en_logo_2lines_big</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
         <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
+        <item name="attr_icons8_opds">@drawable/icons8_opds</item>
+        <item name="attr_icons8_calibre">@drawable/icons8_calibre</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1262,6 +1280,9 @@
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
+        <item name="attr_icons8_sun_auto">@drawable/icons8_sun_auto</item>
+        <item name="attr_icons8_sun_warm">@drawable/icons8_sun_warm</item>
+        <item name="attr_icons8_sun_cold">@drawable/icons8_sun_cold</item>
         <item name="attr_icons8_sun_1">@drawable/icons8_sun_1</item>
         <item name="attr_icons8_double_tap">@drawable/icons8_double_tap</item>
         <item name="attr_icons8_file">@drawable/icons8_file</item>
@@ -1486,11 +1507,14 @@
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
+        <item name="icons8_litres_en_logo_2lines_big">@drawable/icons8_litres_en_logo_2lines_big</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info</item>
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
         <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
+        <item name="attr_icons8_opds">@drawable/icons8_opds</item>
+        <item name="attr_icons8_calibre">@drawable/icons8_calibre</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1605,6 +1629,9 @@
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
+        <item name="attr_icons8_sun_auto">@drawable/icons8_sun_auto</item>
+        <item name="attr_icons8_sun_warm">@drawable/icons8_sun_warm</item>
+        <item name="attr_icons8_sun_cold">@drawable/icons8_sun_cold</item>
         <item name="attr_icons8_sun_1">@drawable/icons8_sun_1</item>
         <item name="attr_icons8_double_tap">@drawable/icons8_double_tap</item>
         <item name="attr_icons8_file">@drawable/icons8_file</item>
@@ -1829,11 +1856,14 @@
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
+        <item name="icons8_litres_en_logo_2lines_big">@drawable/icons8_litres_en_logo_2lines_big</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info_hc</item>
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
         <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
+        <item name="attr_icons8_opds">@drawable/icons8_opds</item>
+        <item name="attr_icons8_calibre">@drawable/icons8_calibre</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>
@@ -1948,6 +1978,9 @@
         <item name="attr_icons8_document_selection2">@drawable/icons8_document_selection2</item>
         <item name="attr_icons8_document_selection_lock">@drawable/icons8_document_selection_lock</item>
         <item name="attr_icons8_sun">@drawable/icons8_sun</item>
+        <item name="attr_icons8_sun_auto">@drawable/icons8_sun_auto</item>
+        <item name="attr_icons8_sun_warm">@drawable/icons8_sun_warm</item>
+        <item name="attr_icons8_sun_cold">@drawable/icons8_sun_cold</item>
         <item name="attr_icons8_sun_1">@drawable/icons8_sun_1</item>
         <item name="attr_icons8_double_tap">@drawable/icons8_double_tap</item>
         <item name="attr_icons8_file">@drawable/icons8_file</item>
@@ -2168,11 +2201,14 @@
         <item name="attr_icons8_library">@drawable/icons8_library</item>
         <item name="attr_icons8_select_all">@drawable/icons8_select_all</item>
         <item name="attr_litres_en_logo_2lines">@drawable/litres_en_logo_2lines</item>
+        <item name="icons8_litres_en_logo_2lines_big">@drawable/icons8_litres_en_logo_2lines_big</item>
         <item name="cr3_button_info_drawable">@drawable/cr3_button_info_hc</item>
         <item name="attr_icons8_skim">@drawable/icons8_skim</item>
         <item name="attr_icons8_combo">@drawable/icons8_combo</item>
         <item name="attr_icons8_super_combo">@drawable/icons8_super_combo</item>
         <item name="attr_icons8_web_search">@drawable/icons8_web_search</item>
+        <item name="attr_icons8_opds">@drawable/icons8_opds</item>
+        <item name="attr_icons8_calibre">@drawable/icons8_calibre</item>
 
         <item name="attr_icons8_rate_star">@drawable/icons8_rate_star</item>
         <item name="attr_icons8_rate_star_filled">@drawable/icons8_rate_star_filled</item>

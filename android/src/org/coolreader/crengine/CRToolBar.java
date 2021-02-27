@@ -1,6 +1,7 @@
 package org.coolreader.crengine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
@@ -67,6 +68,8 @@ public class CRToolBar extends ViewGroup {
 	private boolean grayIcons = false;
 	private boolean invIcons = false;
 	public boolean useBackgrColor = false;
+	boolean isEInk;
+	HashMap<Integer, Integer> themeColors;
 
 	public boolean isColorDark(int color){
 		double darkness = 1-(0.299*Color.red(color) + 0.587*Color.green(color) + 0.114*Color.blue(color))/255;
@@ -162,6 +165,8 @@ public class CRToolBar extends ViewGroup {
 		super(context);
 		this.activity = context;
 		this.preferredItemHeight = context.getPreferredItemHeight();
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors((CoolReader) context, isEInk);
 	}
 
 	private LinearLayout inflateItem(ReaderAction action) {
@@ -264,6 +269,8 @@ public class CRToolBar extends ViewGroup {
 					 boolean ignoreSett, boolean ignoreInv) {
 		super(context);
 		this.activity = context;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors((CoolReader) context, isEInk);
 		//this.actions = actions;
 		createActionsLists(actions, ignoreSett);
 		if (useActionsMore) this.actionsToolbar = this.actionsMore;
@@ -774,13 +781,15 @@ public class CRToolBar extends ViewGroup {
         	int buttonsPerLine = (btnCount + lineCount - 1) / lineCount;
 
         	int y0 = 0;
-        	if (popupLocation == Settings.VIEWER_TOOLBAR_BOTTOM) {
-	    		View separator = new View(activity);
-	    		separator.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
-	    		addView(separator);
-	    		separator.layout(left, top, right, top + windowDividerHeight);
-	    		y0 = windowDividerHeight + 4;
-        	}
+        	//plotn - let it be always
+        	//if (popupLocation == Settings.VIEWER_TOOLBAR_BOTTOM) {
+			View separator = new View(activity);
+			//separator.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
+			separator.setBackgroundColor(themeColors.get(R.attr.colorIcon));
+			addView(separator);
+			separator.layout(left, top, right, top + windowDividerHeight);
+			y0 = windowDividerHeight + 4;
+        	//}
         	
         	
 //        	ScrollView scroll = new ScrollView(activity);
@@ -836,12 +845,13 @@ public class CRToolBar extends ViewGroup {
         		}
 //        		addView(scroll);
         	}
-        	if (popupLocation != Settings.VIEWER_TOOLBAR_BOTTOM) {
-	    		View separator = new View(activity);
-	    		separator.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
-	    		addView(separator);
-	    		separator.layout(left, bottom - windowDividerHeight, right, bottom);
-        	}
+        	//if (popupLocation != Settings.VIEWER_TOOLBAR_BOTTOM) {
+			View separator2 = new View(activity);
+			//separator2.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
+			separator2.setBackgroundColor(themeColors.get(R.attr.colorIcon));
+			addView(separator2);
+			separator2.layout(left, bottom - windowDividerHeight, right, bottom);
+        	//}
     		//popup.
     		if (lastButtonIndex > 0)
     			for (int i=lastButtonIndex + 1; i < actions.size(); i++)

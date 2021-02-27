@@ -208,15 +208,6 @@ public class Bookmark {
 	public void setLinkPos(String linkPos) {
 		this.linkPos = linkPos;
 	}
-	public void setIsCustomColor(int isCustomColor) {
-		this.isCustomColor = isCustomColor;
-	}
-	public void setCustomColor(String customColor) {
-		this.customColor = customColor;
-	}
-	public void setShortContext(String shortContext) {
-		this.shortContext = shortContext;
-	}
 	public void setFullContext(String fullContext) {
 		this.fullContext = fullContext;
 	}
@@ -251,6 +242,25 @@ public class Bookmark {
 		this.addCommentText = addCommentText;
 		return true;
 	}
+	public boolean setIsCustomColor(int isCustomColor) {
+		if (this.isCustomColor == isCustomColor)
+			return false;
+		this.isCustomColor = isCustomColor;
+		return true;
+	}
+	public boolean setCustomColor(String customColor) {
+		if ( !changed(this.customColor, customColor) )
+			return false;
+		this.customColor = customColor;
+		return true;
+	}
+	public boolean setShortContext(String shortContext) {
+		if ( !changed(this.shortContext, shortContext) )
+			return false;
+		this.shortContext = shortContext;
+		return true;
+	}
+
 	public String getTitleText() {
 		return titleText;
 	}

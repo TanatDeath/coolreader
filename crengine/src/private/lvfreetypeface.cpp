@@ -18,6 +18,7 @@
 #include "../../include/lvfnt.h"
 #include "../../include/lvtextfm.h"
 #include "../../include/crlog.h"
+#include "../../include/lvrend.h"
 #include "lvfontglyphcache.h"
 #include "lvfontdef.h"
 #include "lvfontcache.h"
@@ -47,7 +48,7 @@
 // make fake bold (for fonts that do not provide a bold face).
 // This gives a chance to get them working with Harfbuzz, even if
 // they won't look as nice as if they came with a real bold font.
-#define USE_FT_EMBOLDEN
+#define USE_FT_EMBOLDEN // plotn - possibly this define does not work, anyway we change it to settings value
 
 // Helpers with font metrics (units are 1/64 px)
 // #define FONT_METRIC_FLOOR(x)    ((x) & -64)
@@ -1059,7 +1060,9 @@ bool LVFreeTypeFace::getGlyphInfo(lUInt32 code, LVFont::glyph_info_t *glyph, lCh
         // See setEmbolden() for details
         FT_GlyphSlot_Embolden(_slot);
     }
-    if (_italic == 2) {
+    bool italicIs2 = _italic == 2;
+    italicIs2 = italicIs2 || LVRendGetFontItalicize();
+    if (italicIs2) {
         // When the font does not provide italic glyphs (_italic = 2), some fake
         // italic/oblique is obtained with FreeType transformation (formerly with
         // _matrix.xy and FT_Set_Transform(), now with FT_GlyphSlot_Oblique()).
@@ -1777,6 +1780,8 @@ LVFontGlyphCacheItem *LVFreeTypeFace::getGlyph(lUInt32 ch, lChar32 def_char, lUI
     }
     LVFontGlyphCacheItem *item = _glyph_cache.get(ch);
     if (!item) {
+        bool italicIs2 = _italic == 2;
+        italicIs2 = italicIs2 || LVRendGetFontItalicize();
         int rend_flags = FT_LOAD_RENDER | (!_drawMonochrome ? FT_LOAD_TARGET_LIGHT
                                                             : (FT_LOAD_TARGET_MONO)); //|FT_LOAD_MONOCHROME|FT_LOAD_FORCE_AUTOHINT
         if (_hintingMode == HINTING_MODE_BYTECODE_INTERPRETOR) {
@@ -1786,7 +1791,8 @@ LVFontGlyphCacheItem *LVFreeTypeFace::getGlyph(lUInt32 ch, lChar32 def_char, lUI
         } else if (_hintingMode == HINTING_MODE_DISABLED) {
             rend_flags |= FT_LOAD_NO_AUTOHINT | FT_LOAD_NO_HINTING;
         }
-        if (_embolden || _italic == 2) { // Don't render yet
+        int fineEmbolding = LVRendGetFontFineEmbolden();
+        if (_embolden || italicIs2 || (fineEmbolding != 0)) { // Don't render yet
             rend_flags &= ~FT_LOAD_RENDER;
             // Also disable any hinting, as it would be wrong after embolden
             rend_flags |= FT_LOAD_NO_AUTOHINT | FT_LOAD_NO_HINTING;
@@ -1808,10 +1814,21 @@ LVFontGlyphCacheItem *LVFreeTypeFace::getGlyph(lUInt32 ch, lChar32 def_char, lUI
         if (_embolden) {
             FT_GlyphSlot_Embolden(_slot); // See setEmbolden() for details
         }
-        if (_italic == 2) {
+        if (italicIs2) {
             FT_GlyphSlot_Oblique(_slot);
         }
-        if (_embolden || _italic==2) {
+        if (fineEmbolding != 0) {
+            FT_Pos emboldX = fineEmbolding * 8;
+            FT_Pos emboldY;
+            if (_hintingMode != HINTING_MODE_DISABLED) {
+                emboldY = emboldX / 64 * 64;
+            }
+            else {
+                emboldY = emboldX;
+            }
+            FT_Outline_EmboldenXY(&_slot->outline, emboldX, emboldY);
+        }
+        if (_embolden || italicIs2 || (fineEmbolding != 0)) {
             // Render now that transformations are applied
             FT_Render_Glyph(_slot, _drawMonochrome?FT_RENDER_MODE_MONO:FT_RENDER_MODE_LIGHT);
         }
@@ -1842,7 +1859,10 @@ LVFontGlyphCacheItem* LVFreeTypeFace::getGlyphByIndex(lUInt32 index) {
             rend_flags |= FT_LOAD_NO_AUTOHINT | FT_LOAD_NO_HINTING;
         }
 
-        if (_embolden || _italic == 2) { // Don't render yet
+        bool italicIs2 = _italic == 2;
+        italicIs2 = italicIs2 || LVRendGetFontItalicize();
+        int fineEmbolding = LVRendGetFontFineEmbolden();
+        if (_embolden || italicIs2 || (fineEmbolding != 0)) { // Don't render yet
             rend_flags &= ~FT_LOAD_RENDER;
             // Also disable any hinting, as it would be wrong after embolden
             rend_flags |= FT_LOAD_NO_AUTOHINT | FT_LOAD_NO_HINTING;
@@ -1869,10 +1889,21 @@ LVFontGlyphCacheItem* LVFreeTypeFace::getGlyphByIndex(lUInt32 index) {
                 FT_Outline_Translate(&_slot->outline, -_embolden_half_strength, -_embolden_half_strength);
             }
         }
-        if (_italic==2) {
+        if (italicIs2) {
             FT_GlyphSlot_Oblique(_slot);
         }
-        if (_embolden || _italic==2) {
+        if (fineEmbolding != 0) {
+            FT_Pos emboldX = fineEmbolding * 8;
+            FT_Pos emboldY;
+            if (_hintingMode != HINTING_MODE_DISABLED) {
+                emboldY = emboldX / 64 * 64;
+            }
+            else {
+                emboldY = emboldX;
+            }
+            FT_Outline_EmboldenXY(&_slot->outline, emboldX, emboldY);
+        }
+        if (_embolden || italicIs2 || (fineEmbolding != 0)) {
             // Render now that transformations are applied
             FT_Render_Glyph(_slot, _drawMonochrome?FT_RENDER_MODE_MONO:FT_RENDER_MODE_LIGHT);
         }

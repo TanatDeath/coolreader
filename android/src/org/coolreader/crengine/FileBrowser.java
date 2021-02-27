@@ -205,7 +205,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			} else if ((selectedItem!=null) && (selectedItem.pathname.startsWith("@")) && (selectedItem.pathname.contains("Group:"))) {
 				inflater.inflate(R.menu.cr3_file_browser_group_folder_context_menu, menu);
 				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_folder));
-			} else if (selectedItem!=null && (selectedItem.isBooksByAuthorRoot() || selectedItem.isBooksByAuthorDir())) {
+			} else if (selectedItem!=null && (selectedItem.isBooksByAuthorRoot() || selectedItem.isBooksByAuthorDir()
+					|| selectedItem.isBooksByCalibreAuthorDir())) {
 				inflater.inflate(R.menu.cr3_file_browser_author_folder_context_menu, menu);
 				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_author_folder));
 			} else if (selectedItem!=null && (selectedItem.isBooksBySeriesRoot() || selectedItem.isBooksBySeriesDir())) {
@@ -1815,6 +1816,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				mActivity.getDB().loadAuthorBooks(fileOrDir.getAuthorId(), addFilter, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 				return;
 			}
+			if (fileOrDir.isBooksByCalibreAuthorDir()) {
+				showDirectoryLoadingStub();
+				log.d("Updating calibre author book list");
+				mActivity.getDB().loadCalibreAuthorBooks(fileOrDir.getAuthorId(), addFilter,
+						new FileInfoLoadingCallback(fileOrDir, itemToSelect));
+				return;
+			}
 			if (fileOrDir.isBooksBySeriesDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating series book list");
@@ -1888,6 +1896,17 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				if (lsp == null) lsp = saveParams;
 				else saveParams = lsp;
 				CloudAction.litresSearchPersonsList(mActivity, lsp, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
+			}
+			if (fileOrDir.isCalibreRoot()) {
+				if (fileOrDir.isCalibreByAuthors())
+					mActivity.showToast("calibre "+fileOrDir.pathname+" "+fileOrDir.getFilename());
+					showDirectoryLoadingStub();
+					// refresh calibre authors list
+					log.d("Updating calibre authors list");
+					boolean withAliases = mActivity.settings().getBool(Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED, false);
+					mActivity.getDB().loadCalibreAuthorsList(fileOrDir, addFilter, withAliases,
+							new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
+					return;
 			}
 		} else {
 			if (currDirectory != null)
@@ -2135,6 +2154,14 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				setText(view, text, color, null);
 			}
 
+			void setText(TextView view, String text, int color, int count)
+			{
+				if (count>0)
+					setText(view, text, color, null);
+				else
+					setText(view, "", color, null);
+			}
+
 			void setText(TextView view, String text, int color, String pathname)
 			{
 				if (pathname != null) {
@@ -2299,7 +2326,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					else if (item.isLitresPaginationPrevPage())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_prev_drawable, R.drawable.icons8_back));
 					else if (item.isBooksByAuthorDir() || item.isBooksByAuthorRoot() || item.isBooksByLitresPersonDir()
-							|| item.isBooksByLitresPersonRoot())
+							|| item.isBooksByLitresPersonRoot() || item.isBooksByCalibreAuthorDir())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 					else if (item.isBooksBySeriesRoot() || item.isBooksByLitresSequenceDir() || item.isBooksByLitresSequenceRoot() || item.isLitresSequence())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_hash, R.drawable.icons8_folder_hash));
@@ -2359,14 +2386,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 					if (item.isBooksBySeriesDir() || item.isBooksByBookdateDir() || item.isBooksByDocdateDir()
 							|| item.isBooksByPublyearDir() || item.isBooksByFiledateDir() ||
-							item.isBooksByAuthorDir() || item.isBooksByGenreDir() || item.isBooksByTitleLevel()) {
+							item.isBooksByAuthorDir() || item.isBooksByCalibreAuthorDir() ||
+							item.isBooksByGenreDir() || item.isBooksByTitleLevel()) {
 						int bookCount = 0;
 						if (item.fileCount() > 0)
 							bookCount = item.fileCount();
 						else if (item.tag != null && item.tag instanceof Integer)
 							bookCount = (Integer)item.tag;
 						if (!item.isLitresPrefix())
-							setText(field1, "books: " + bookCount, colorIcon);
+							setText(field1, mActivity.getString(R.string.books_l) + " " + bookCount, colorIcon, bookCount);
 						else
 							setText(field1, "", colorIcon);
 						//setText(field2, "folders: 0", colorIcon);
@@ -2381,9 +2409,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							&& !item.isBooksByDocdateRoot() && !item.isBooksByPublyearRoot() && !item.isBooksByFiledateRoot()
                             && !item.isBooksByTitleRoot()) || item.dirCount()>0) && !item.isOnlineCatalogPluginDir()
 							&& !item.isLitresPrefix()) {
-						setText(field1,"books: " + item.fileCount(), colorIcon);
+						setText(field1,mActivity.getString(R.string.books_l) + " " + item.fileCount(), colorIcon, item.fileCount());
 						if (item.dirCount()>0)
-							setText(field2, "folders: " + item.dirCount(), colorIcon);
+							setText(field2, mActivity.getString(R.string.folders_l) + " " + item.dirCount(), colorIcon, item.dirCount());
 						else
 							setText(field2, "", colorIcon);
 						setText(fieldState, "", colorIcon);
@@ -2844,7 +2872,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if ((title.startsWith("@")) && (dir.isBooksByLitresCollectionRoot())) title = mActivity.getString(R.string.search_collections);
 			if ((title.startsWith("@")) && (dir.isBooksByLitresPersonRoot())) title = mActivity.getString(R.string.search_persons);
 		}
-		
+
+		if (dir.isCalibrePrefix()) {
+			if (title.equals(FileInfo.AUTHORS_TAG)) title = mActivity.getString(R.string.calibre_authors);
+		}
+
 		mActivity.setBrowserTitle(title, dir);
 		mListView.setAdapter(currentListAdapter);
 		currentListAdapter.notifyDataSetChanged();

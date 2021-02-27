@@ -38,6 +38,8 @@ public class EinkScreen {
 		mRefreshNumber = -1;
 	}
 
+	private static boolean needFullRefresh = false;
+
 	public static void PrepareController(View view, boolean isPartially) {
 		if (DeviceInfo.EINK_NOOK || DeviceInfo.EINK_TOLINO) {
 			//System.err.println("Sleep = " + isPartially);
@@ -102,20 +104,26 @@ public class EinkScreen {
 		} else if (DeviceInfo.EINK_ONYX) {
 			if (mRefreshNumber == -1) {
 				mRefreshNumber = 0;
-				onyxRepaintEveryThing(view);
+				//onyxRepaintEveryThing(view);
+				needFullRefresh = true;
 				return;
 			}
 			if (mUpdateInterval > 0) {
 				mRefreshNumber++;
 				if (mRefreshNumber >= mUpdateInterval) {
 					mRefreshNumber = 0;
-					onyxRepaintEveryThing(view);
+					needFullRefresh = true;
+					//onyxRepaintEveryThing(view);
 				}
 			}
 		}
 	}
 
 	public static void UpdateController(View view, boolean isPartially) {
+		if (needFullRefresh) {
+			onyxRepaintEveryThing(view);
+			needFullRefresh = false;
+		}
 		if (DeviceInfo.EINK_ONYX) {
 			if (mRefreshNumber > 0 || mUpdateInterval == 0) {
 				switch (mUpdateMode) {
@@ -140,10 +148,12 @@ public class EinkScreen {
 			case Rk32xx:
 			case Rk33xx:
 			case SDM:
-				EpdController.repaintEveryThing(UpdateMode.GC);
+			 	EpdController.repaintEveryThing(UpdateMode.GC);
 				break;
 			default:
 				EpdController.setViewDefaultUpdateMode(view, UpdateMode.GC);
+				// plotn - was it forgotten? added, but not sure
+				EpdController.byPass(0);
 				break;
 		}
 	}
@@ -304,6 +314,19 @@ public class EinkScreen {
 		return res;
 	}
 
+	public static int getFrontLightValue(Context context) {
+		if (DeviceInfo.EINK_ONYX) {
+			if (DeviceInfo.ONYX_HAVE_FRONTLIGHT) {
+				if (DeviceInfo.ONYX_HAVE_NATURAL_BACKLIGHT) {
+					return Device.currentDevice().getColdLightConfigValue(context);
+				} else {
+					return Device.currentDevice().getFrontLightConfigValue(context);
+				}
+			}
+		}
+		return -1;
+	}
+
 	public static boolean setWarmLightValue(Context context, int value) {
 		boolean res = false;
 		if (DeviceInfo.EINK_ONYX) {
@@ -319,6 +342,15 @@ public class EinkScreen {
 			}
 		}
 		return res;
+	}
+
+	public static int getWarmLightValue(Context context) {
+		if (DeviceInfo.EINK_ONYX) {
+			if (DeviceInfo.ONYX_HAVE_NATURAL_BACKLIGHT) {
+				return Device.currentDevice().getWarmLightConfigValue(context);
+			}
+		}
+		return -1;
 	}
 
 	public static List<Integer> getFrontLightLevels(Context context) {

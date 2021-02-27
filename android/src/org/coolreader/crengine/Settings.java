@@ -24,7 +24,10 @@ public interface Settings {
     public static final String PROP_FONT_GAMMA_DAY          ="font.gamma.day";
     public static final String PROP_FONT_GAMMA_NIGHT        ="font.gamma.night";
     public static final String PROP_FONT_WEIGHT_EMBOLDEN    ="font.face.weight.embolden";
-    public static final String PROP_TXT_OPTION_PREFORMATTED ="crengine.file.txt.preformatted";
+	public static final String PROP_FONT_ITALICIZE          ="font.face.italicize";
+	public static final String PROP_FONT_EMBOLDEN_ALG       ="font.face.embolden.alg";
+	public static final String PROP_FONT_FINE_EMBOLDEN      ="font.face.fine.embolden";
+	public static final String PROP_TXT_OPTION_PREFORMATTED ="crengine.file.txt.preformatted";
     public static final String PROP_LOG_FILENAME            ="crengine.log.filename";
     public static final String PROP_LOG_LEVEL               ="crengine.log.level";
     public static final String PROP_LOG_AUTOFLUSH           ="crengine.log.autoflush";
@@ -53,6 +56,8 @@ public interface Settings {
     public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
     public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
 	public static final String PROP_PAGE_ANIMATION_SPEED    ="crengine.page.animation.speed";
+	public static final String PROP_DOUBLE_CLICK_INTERVAL    ="crengine.double.click.interval";
+	public static final String PROP_PREVENT_CLICK_INTERVAL    ="crengine.prevent.click.interval";
 	public static final String PROP_INTERLINE_SPACE         ="crengine.interline.space";
     public static final String PROP_ROTATE_ANGLE            ="window.rotate.angle";
     public static final String PROP_EMBEDDED_STYLES         ="crengine.doc.embedded.styles.enabled";
@@ -143,6 +148,8 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
     public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
 	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT    ="app.screen.warm.backlight"; //CR!
+	public static final String PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM = "app.screen.get.backlight.from.system";
+	public static final String PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA    = "app.screen.backlight.fix.delta";
 	public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
     public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
     public static final String PROP_APP_SCREEN_BACKLIGHT_NIGHT ="app.screen.backlight.night";
@@ -153,7 +160,7 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_BACKLIGHT_LOCK    ="app.screen.backlight.lock.enabled";
     public static final String PROP_APP_TAP_ZONE_HILIGHT     ="app.tapzone.hilight";
     public static final String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
-	public static final String PROP_APP_FLICK_WARMLIGHT_CONTROL = "app.screen.warmlight.control.flick"; //CR!
+	//public static final String PROP_APP_FLICK_WARMLIGHT_CONTROL = "app.screen.warmlight.control.flick"; //CR!
 	public static final String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
 	public static final String PROP_APP_TRANSLATE_DIR = "app.translate.dir";
     public static final String PROP_APP_DICTIONARY = "app.dictionary.current";
@@ -188,7 +195,9 @@ public interface Settings {
 	public static final String PROP_CLOUD_WIKI2_ADDR = "app.cloud.wiki2";
 	public static final String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
 	public static final String PROP_CLOUD_YND_TRANSLATE_OPTIONS = "app.cloud.ynd.translate.options";
+	public static final String PROP_CLOUD_LINGVO_OPTIONS = "app.cloud.lingvo.options";
 	public static final String PROP_CLOUD_LITRES_SETTINGS = "app.cloud.litres.settings";
+	public static final String PROP_CLOUD_LITRES_DISABLED = "app.cloud.litres.disabled";
 	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
@@ -205,9 +214,11 @@ public interface Settings {
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
 	public static final String PROP_APP_DISABLE_SAFE_MODE = "app.disable.safe.mode";
+	public static final String PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG = "app.use.simple.font.select.dialog";
 
 	public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
-    public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
+	public static final String PROP_APP_HIGHLIGHT_USER_DIC = "crengine.highlight.user.dic";
+	public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
     public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT = "crengine.highlight.bookmarks.color.comment";
     public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION = "crengine.highlight.bookmarks.color.correction";
     public static final String PROP_APP_HIGHLIGHT_BOOKMARKS_DAY = "crengine.highlight.bookmarks.day";
@@ -306,6 +317,8 @@ public interface Settings {
 	public static final int SELECTION_ACTION_DICTIONARY_6 = 15;
 	public static final int SELECTION_ACTION_DICTIONARY_7 = 16;
 	public static final int SELECTION_ACTION_BOOKMARK_QUICK = 17;
+	public static final int SELECTION_ACTION_COMBO = 18;
+	public static final int SELECTION_ACTION_SUPER_COMBO = 19;
 
 	// available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     public static final int TAP_ACTION_TYPE_LONGPRESS = 0;
@@ -316,8 +329,16 @@ public interface Settings {
     public static final int BACKLIGHT_CONTROL_FLICK_NONE = 0;
     public static final int BACKLIGHT_CONTROL_FLICK_LEFT = 1;
     public static final int BACKLIGHT_CONTROL_FLICK_RIGHT = 2;
+	public static final int BACKLIGHT_CONTROL_FLICK_BOTH = 3;
+	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM = 4;
+	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD = 5;
+	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM = 6;
+	public static final int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM = 7;
+	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD = 8;
+	public static final int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD = 9;
+	public static final int BACKLIGHT_CONTROL_FLICK_BOTH_BOTH = 10;
 
-    public static final int APP_STARTUP_ACTION_LAST_BOOK = 0;
+	public static final int APP_STARTUP_ACTION_LAST_BOOK = 0;
     public static final int APP_STARTUP_ACTION_ROOT = 1;
     public static final int APP_STARTUP_ACTION_RECENT_BOOKS = 2;
     public static final int APP_STARTUP_ACTION_LAST_BOOK_FOLDER = 3;
@@ -475,6 +496,7 @@ public interface Settings {
 		PROP_APP_MULTI_SELECTION3_ACTION,
 		PROP_APP_SELECTION_PERSIST,
 	    PROP_APP_HIGHLIGHT_BOOKMARKS + "*",
+		PROP_APP_HIGHLIGHT_USER_DIC,
 	    PROP_HIGHLIGHT_SELECTION_COLOR + "*",
 	    PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT + "*",
 	    PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION + "*",
@@ -496,6 +518,7 @@ public interface Settings {
 		PROP_APP_HIDE_STATE_DIALOGS,
 	    PROP_APP_HIDE_CSS_WARNING,
 		PROP_APP_DISABLE_SAFE_MODE,
+		PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG,
 
 		PROP_APP_USE_EINK_FRONTLIGHT
 

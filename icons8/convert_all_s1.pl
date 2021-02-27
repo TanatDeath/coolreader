@@ -32,7 +32,16 @@ my %ic_actions_list=(
         'icons8_skim.svg' => 'icons8_skim.png',
         'icons8_combo.svg' => 'icons8_combo.png',
         'icons8_super_combo.svg' => 'icons8_super_combo.png',
-        'icons8_web_search.svg' => 'icons8_web_search.png'
+        'icons8_web_search.svg' => 'icons8_web_search.png',
+        'icons8_night_vision.svg' => 'icons8_night_vision.png',
+        'icons8_sun_auto.svg' => 'icons8_sun_auto.png',
+        'icons8_sun_warm.svg' => 'icons8_sun_warm.png',
+        'icons8_sun_cold.svg' => 'icons8_sun_cold.png',
+        'icons8_page_animation_speed.svg' => 'icons8_page_animation_speed.png',
+        'icons8_page_animation.svg' => 'icons8_page_animation.png',
+        'icons8_opds.svg' => 'icons8_opds.png',
+        'icons8_calibre.svg' => 'icons8_calibre.png',
+        'litres_en_logo_2lines.svg' => 'icons8_litres_en_logo_2lines_big.png'
 );
 
 my %ic_menu_list=(

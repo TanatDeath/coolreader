@@ -86,6 +86,11 @@
     <string name="options_font_size_user_dic">Размер шрифта на панели пользовательского словаря</string>
     <string name="options_font_face">Шрифт</string>
     <string name="options_font_embolden">Жирность</string>
+    <string name="options_font_fine_embolden">Коэффициент толщины символа</string>
+    <string name="options_font_embolden_alg">Алгоритм отрисовки жирности шрифта</string>
+    <string name="options_font_embolden_alg0">По умолчанию</string>
+    <string name="options_font_embolden_alg1">Через Freetype embolden API</string>
+    <string name="options_font_italicize">Курсив (алгоритмически)</string>
     <string name="options_font_antialias">Сглаживание шрифта</string>
     <string name="options_font_antialias_off">Без сглаживания</string>
     <string name="options_font_antialias_on_for_big">Сглаживать большие шрифты</string>
@@ -136,6 +141,9 @@
     <string name="options_controls_enable_volume_keys">Листание кнопками громкости</string>
     <string name="options_app_backlight_screen">Яркость подсветки экрана</string>
     <string name="options_app_warm_backlight_screen">Яркость тёплой подсветки экрана</string>
+    <string name="options_app_get_backlight_from_system">При запуске использовать системное значение яркости</string>
+    <string name="options_app_get_backlight_from_system_short">Как в системе</string>
+    <string name="options_app_get_backlight_from_system_add_info">Если установлено - KR будет использовать системное значение яркости при запуске, иначе - свое собственное</string>
     <string name="options_app_backlight_screen_eink">Яркость подсветки экрана - EINK метод</string>
     <string name="options_app_backlight_screen_default">Установленная в системе</string>
     <string name="action_backlight_set_default">Яркость подсветки установленная в системе</string>
@@ -215,6 +223,14 @@
     <string name="options_controls_flick_brightness_right">Правый край</string>
     <string name="options_controls_flick_brightness_left">Левый край</string>
     <string name="options_controls_flick_brightness_none">Отключено</string>
+    <string name="options_controls_flick_brightness_both">Оба края</string>
+    <string name="options_controls_flick_brightness_left_cold">Слева - холодная, справа - теплая</string>
+    <string name="options_controls_flick_brightness_left_warm">Слева - теплая, справа - холодная</string>
+    <string name="options_controls_flick_brightness_left_both_warm">Слева - обе, справа - теплая</string>
+    <string name="options_controls_flick_brightness_right_both_warm">Справа - обе, слева - теплая</string>
+    <string name="options_controls_flick_brightness_left_both_cold">Слева - обе, справа - холодная</string>
+    <string name="options_controls_flick_brightness_right_both_cold">Справа - обе, слева - холодная</string>
+    <string name="options_controls_flick_brightness_both_both">Оба края - обе подсветки</string>
     <string name="options_page_show_titlebar_page_number">Номер страницы</string>
     <string name="options_app_dictionary">Словарь</string>
     <string name="options_app_dictionary2">Словарь 2</string>
@@ -373,6 +389,7 @@
     <string name="options_page_animation_dim">Затемнение</string>
     <string name="progress_downloading">Загружаю</string>
     <string name="mi_book_opds_root">Онлайн-каталоги</string>
+    <string name="mi_book_calibre_root">Библиотека Calibre</string>
     <string name="opds_search">Поиск в каталоге...</string>
     <string name="mi_tts_play">Читать вслух</string>
     <string name="options_format_image_scaling_block_scale">Макс. увеличение для обычных картинок</string>
@@ -419,6 +436,11 @@
     <string name="dlg_catalog_edit_proxy_uname">Имя пользователя для прокси</string>
     <string name="dlg_catalog_edit_proxy_passw">Пароль для прокси</string>
     <string name="dlg_catalog_edit_onion_def_proxy">Установить прокси 127.0.0.1:8118 для ссылок onion</string>
+    <string name="dlg_calibre_catalog_edit_title">Библиотека Calibre</string>
+    <string name="dlg_catalog_is_local">Локальная</string>
+    <string name="dlg_catalog_is_remote_yd">Удаленная (на Яндекс диске)</string>
+    <string name="dlg_catalog_local_folder">Локальная папка</string>
+    <string name="dlg_catalog_remote_folder">Удаленная папка</string>
     <string name="options_format_min_space_width_percent">Мин. ширина пробела</string>
     <string name="options_selection_keep_selection_after_dictionary">Сохранять выделение после словаря</string>
     <string name="action_toggle_autoscroll">Автолистание</string>
@@ -439,6 +461,7 @@
     <string name="folder_name_books_by_state_reading">Читаю</string>
     <string name="folder_name_books_by_state_finished">Прочитанные</string>
     <string name="options_view_bookmarks_highlight">Подсвечивать закладки</string>
+    <string name="options_view_highlight_user_dic">Подсвечивать слова пользовательского словаря</string>
     <string name="options_css_footnotetitle">Заголовок сноски</string>
     <string name="options_css_subtitle">Подзаголовок</string>
     <string name="options_css_poem">Стихи</string>
@@ -542,7 +565,7 @@
     <string name="options_font_hinting_disabled">Отключен</string>
     <string name="options_font_hinting_auto">Автохинтинг</string>
     <string name="options_font_fallback_face">Резервный шрифт</string>
-    <string name="win_title_confirm_catalog_delete">Вы действительно хотите удалить этот каталог?</string>
+    <string name="win_title_confirm_catalog_delete">Вы действительно хотите удалить этот каталог / библиотеку ?</string>
     <string name="win_title_confirm_history_record_delete">Вы действительно хотите удалить эту книгу из списка последних книг?</string>
     <string name="win_title_confirm_book_delete">Вы действительно хотите удалить эту книгу / архив ?</string>
     <string name="win_title_confirm_folder_delete">Вы действительно хотите удалить эту папку вместе со всеми книгами?</string>
@@ -932,7 +955,7 @@
     <string name="options_controls_enable_volume_keys_add_info">Листание страниц кнопками громкости</string>
     <string name="options_app_tapzone_hilite_add_info">Выделять место нажатия на экран прямоугольником</string>
     <string name="options_app_trackball_disable_add_info">Отключение трекбола для предотвращения случайного пролистывания (пример: HTC A8181)</string>
-    <string name="options_controls_flick_brightness_add_info">Проведите пальцем вверх или вниз для увеличения или уменьшения яркости (Выключено, Левый край, Правый край). Для EINK устройств с двойной подсветкой (теплая и холодная) - будут задействованы обе стороны</string>
+    <string name="options_controls_flick_brightness_add_info">Проведите пальцем вверх или вниз для увеличения или уменьшения яркости (выключено, левый край, правый край)</string>
     <string name="option_controls_gesture_page_flipping_enabled_add_info">Листать страницы с помощью жестов (Выключено, 1-20 страниц), по умолчанию 1 страница (справа налево)</string>
     <string name="options_selection_action_add_info">Действие, которое запускается при выделении слова</string>
     <string name="options_multi_selection_action_add_info">Действие, которое запускается при выделении нескольких слов</string>
@@ -953,6 +976,7 @@
     <string name="options_page_footnotes_add_info">Отображение сносок (если есть) внизу страницы</string>
     <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
     <string name="options_view_bookmarks_highlight_add_info">Выбор или отключение выделения закладок</string>
+    <string name="options_view_bookmarks_user_dic_add_info">Выбор или отключение выделения слов пользовательского словаря</string>
     <string name="options_rounded_corners_margin_add_info">Смещает правую и левую части элементов колонтитула ближе к центру экрана на устройствах с Edge Screen</string>
     <string name="pos_recovered">Позиция чтения была загружена из файла восстановления</string>
     <string name="pos_saved">Позиция чтения была сохранена</string>
@@ -1320,6 +1344,11 @@
     <string name="online_dic_exceeded">К сожалению лимит перевода в онлайн словаре исчерпан. Попробуйте позже</string>
     <string name="manual_open_error">Ошибка открытия руководства пользователя</string>
     <string name="ynd_translate_settings">Настройки Yandex translate</string>
+    <string name="lingvo_settings">Настройки Lingvo онлайн</string>
+    <string name="lingvo_settings_add_info">Использовать ваш токен lingvo онлайн (если указан)</string>
+    <string name="lingvo_token">Токен lingvo онлайн</string>
+    <string name="lingvo_unauth">Lingvo онлайн - авторизация не успешна. Проверьте токен</string>
+    <string name="http_error">Ошибка http, код:</string>
     <string name="sync_confirmation_other_book">На другом устройстве была открыта другая книга (%s), переключиться на неё?</string>
     <string name="sync_confirmation_new_reading_position">Для этой книги найдена новая позиция чтения, обновить?</string>
     <string name="autosave_period">Период автосохранения</string>
@@ -1469,5 +1498,29 @@
     <string name="options_bookmark_action_send_to_mod3">Контекст с &lt;b&gt;выбранным текстом&lt;\/b&gt;</string>
     <string name="options_bookmark_action_send_to_mod4">Контекст с &lt;i&gt;выбранным текстом&lt;\/i&gt;</string>
     <string name="options_bookmark_action_send_to_mod5">Контекст с &lt;u&gt;выбранным текстом&lt;\/u&gt;</string>
+    <string name="options_bookmark_action_send_to_mod6">выбранный текст&lt;br&gt;Контекст с &lt;b&gt;выбранным текстом&lt;\/b&gt;</string>
+    <string name="options_bookmark_action_send_to_mod7">выбранный текст&lt;br&gt;Контекст с &lt;i&gt;выбранным текстом&lt;\/i&gt;</string>
+    <string name="options_bookmark_action_send_to_mod8">выбранный текст&lt;br&gt;Контекст с &lt;u&gt;выбранным текстом&lt;\/u&gt;</string>
+    <string name="double_tap_interval">Интервал двойного тапа (мс)</string>
+    <string name="prevent_tap_interval">Интервал для предотвращения случайных нажатий (мс, 0 = выключено)</string>
+    <string name="prevent_tap_interval_add_info">Если второй тап (или нажатие физической кнопки) был в течение этого времени, то он не засчитывается. При включенном двойном тапе эта настройка влияет только на физические кнопки устройства</string>
+    <string name="intent_error">Невозможно запустить действие</string>
+    <string name="simple_font_select_dialog">Простой диалог выбора шрифта</string>
+    <string name="simple_font_select_dialog_add_info">В простом режиме показываются только названия шрифтов (в полном - примеры шрифтов с панграммами, включая жирное начертание и курсив)</string>
+    <string name="fix_double_backlight_delta">Зафиксировать дельту между холодной и теплой подсветкой</string>
+    <string name="fix_double_backlight_delta_add_info">Не менять соотношение теплой/холодной подтсветки при регулировке обоих подсветок свайпом</string>
+    <string name="add_opds_catalog">Добавить OPDS каталог</string>
+    <string name="add_remove_litres_catalog">Добавить / удалить Litres каталог</string>
+    <string name="add_calibre_catalog_local">Calibre: Добавить локальную библиотеку</string>
+    <string name="add_calibre_catalog_yd">Calibre: Добавить удаленную библиотеку (на Яндекс диске)</string>
+    <string name="calibre_search">Поиск (calibre)</string>
+    <string name="calibre_authors">Авторы (calibre)</string>
+    <string name="calibre_titles">Названия (calibre)</string>
+    <string name="calibre_series">Серии (calibre)</string>
+    <string name="calibre_rating">По рейтингу (calibre)</string>
+    <string name="calibre_publish_date">Дата публикации (calibre)</string>
+    <string name="calibre_tags">Тэги (calibre)</string>
+    <string name="books_l">книг:</string>
+    <string name="folders_l">папок:</string>
 </resources>
 

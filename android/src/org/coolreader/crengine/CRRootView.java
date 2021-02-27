@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import static org.coolreader.crengine.FileInfo.AUTHORS_TAG;
+
 public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	public static final Logger log = L.create("cr");
@@ -53,6 +55,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private TextView mTextOnlineCatalogs;
 	private ImageView mImgOnlineCatalogs;
 	private boolean bOnlineCatalogsHidden = false;
+	private boolean bLitresHidden = false;
 	private FlowLayout mOnlineCatalogsScroll;
     private Button btnStateToRead;
     private Button btnStateReading;
@@ -63,9 +66,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private boolean bRecentToRead = true;
 	private boolean bRecentReading = true;
 	private boolean bRecentFinished = true;
-	private CoverpageManager mCoverpageManager;
-	private int coverWidth;
-	private int coverHeight;
+	private final CoverpageManager mCoverpageManager;
+	private final int coverWidth;
+	private final int coverHeight;
 	private BookInfo currentBook;
 	private CoverpageReadyListener coverpageListener;
 	public ArrayList<FileInfo> lastRecentFiles = new ArrayList<>();
@@ -157,7 +160,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	}
 
 	private void setBookInfoItem(ViewGroup baseView, int viewId, String value) {
-		TextView view = (TextView)baseView.findViewById(viewId);
+		TextView view = baseView.findViewById(viewId);
 		if (view != null) {
 			if (value != null && value.length() > 0) {
 				view.setText(value);
@@ -171,7 +174,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
     	currentBook = book;
     	
     	// set current book cover page
-		ImageView cover = (ImageView)mView.findViewById(R.id.book_cover);
+		ImageView cover = mView.findViewById(R.id.book_cover);
 		if (currentBook != null) {
 			FileInfo item = currentBook.getFileInfo();
 			cover.setImageDrawable(mCoverpageManager.getCoverpageDrawableFor(mActivity.getDB(), item, coverWidth, coverHeight));
@@ -199,7 +202,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			colorGray = a.getColor(2, Color.GRAY);
 			colorIcon = a.getColor(3, Color.GRAY);
 			a.recycle();
-			TextView tvInfo = (TextView)mView.findViewById(R.id.lbl_book_info1);
+			TextView tvInfo = mView.findViewById(R.id.lbl_book_info1);
 			int n = item.getReadingState();
 			if (n == FileInfo.STATE_READING)
 				tvInfo.setTextColor(colorGreen);
@@ -335,9 +338,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	public void refreshOnlineCatalogs(boolean readSetting) {
 		needRefreshOnlineCatalogs = false;
+		bOnlineCatalogsHidden = false;
+		bLitresHidden = false;
 		mActivity.waitForCRDBService(() ->
 				mActivity.getDB().loadOPDSCatalogs(catalogs -> updateOnlineCatalogs(catalogs, readSetting)));
-		bOnlineCatalogsHidden = false;
 	}
 
     public void refreshFileSystemFolders(boolean readSetting) {
@@ -381,8 +385,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		//boolean enableLitres = mActivity.settings().getBool(Settings.PROP_APP_PLUGIN_ENABLED + "." + OnlineStorePluginManager.PLUGIN_PKG_LITRES, defEnableLitres);
 		//if (enableLitres)
 		//catalogs.add(0, Scanner.createOnlineLibraryPluginItem(OnlineStorePluginManager.PLUGIN_PKG_LITRES, "LitRes"));
-		//asdf!!!
-		catalogs.add(0, Scanner.createLitresItem("LitRes"));
+		if (!bLitresHidden) catalogs.add(0, Scanner.createLitresItem("LitRes"));
 		if (Services.getScanner() == null)
 			return;
 		FileInfo opdsRoot = Services.getScanner().getOPDSRoot();
@@ -403,7 +406,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
                 mActivity.tintViewIcons(icon,true);
 				label.setText("Add");
 				label.setTextColor(colorIcon);
-				view.setOnClickListener(v -> mActivity.editOPDSCatalog(null));
+				view.setOnClickListener(v -> showAddCatalogMenu(icon, mView));
 			} else if (item.isLitresDir()) {
 				setImageResourceSmall(icon, R.drawable.litres);
 				label.setText(item.getFilename());
@@ -491,7 +494,13 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					setImageResourceSmall(icon, R.drawable.webnovel); else
 					mActivity.tintViewIcons(icon,true);
 				findIconForCatalog(item, icon);
-				view.setOnClickListener(v -> mActivity.showCatalog(item, ""));
+				view.setOnClickListener(
+					v -> {
+							if (item.isCalibreRoot()) {
+								showCalibreMenu(icon, mView, item);
+							} else mActivity.showCatalog(item, "");
+						}
+				);
 				view.setOnLongClickListener(v -> {
 					mActivity.editOPDSCatalog(item);
 					return true;
@@ -502,7 +511,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			mOnlineCatalogsScroll.addView(view);
 		}
 		mOnlineCatalogsScroll.invalidate();
-		if (readSetting) bOnlineCatalogsHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE, false);
+		if (readSetting) {
+			bOnlineCatalogsHidden = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE, false);
+			bLitresHidden = mActivity.settings().getBool(Settings.PROP_CLOUD_LITRES_DISABLED, false);
+		}
 		if (bOnlineCatalogsHidden) {
 			mOnlineCatalogsScroll.removeAllViews();
 			Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
@@ -723,7 +735,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			String path = item.pathname.replace(FileInfo.OPDS_DIR_PREFIX, "");
 			CRC32 crc = new CRC32();
 			crc.update(path.getBytes());
-			final String sFName = String.valueOf(crc.getValue()) + "_icon.png";
+			final String sFName = crc.getValue() + "_icon.png";
 			String sDir = "";
 			ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.IconDirs, true);
 			if (tDirs.size() > 0) sDir = tDirs.get(0);
@@ -740,7 +752,6 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 								icon.getDrawable().getIntrinsicHeight(), false);
 						icon.setImageBitmap(resizedBitmap);
 					}
-					;
 				} catch (Exception e) {
 					log.e("Catalog custom icon error: " + e.getMessage());
 				}
@@ -850,8 +861,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private void createViews() {
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		View view = inflater.inflate(R.layout.root_window, null);
-		LinearLayout llMain = (LinearLayout)view.findViewById(R.id.ll_main_rootwindow);
-		LayoutParams lp = ((ViewGroup) llMain).getLayoutParams();
+		LinearLayout llMain = view.findViewById(R.id.ll_main_rootwindow);
+		LayoutParams lp = llMain.getLayoutParams();
 		int globalMargins = mActivity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
 		if (globalMargins > 0)
 			if( lp instanceof MarginLayoutParams )
@@ -998,7 +1009,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			paintRecentButtons();
 			refreshRecentBooks();
 		});
-		btnRecentReading  = (Button)view.findViewById(R.id.book_recent_reading);
+		btnRecentReading  = view.findViewById(R.id.book_recent_reading);
 		btnRecentReading.setOnClickListener(v -> {
 			bRecentReading = !bRecentReading;
 			paintRecentButtons();
@@ -1077,7 +1088,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
         updateCurrentBook(Services.getHistory().getLastBook());
 
-		((ImageButton)mView.findViewById(R.id.btn_menu)).setOnClickListener((OnClickListener) v -> showMenu(mView.findViewById(R.id.btn_menu), mView));
+		mView.findViewById(R.id.btn_menu).setOnClickListener(v -> showMenu(mView.findViewById(R.id.btn_menu), mView));
 		mActivity.tintViewIcons(mView.findViewById(R.id.btn_menu),true);
 
 		mView.findViewById(R.id.current_book).setOnClickListener(v -> {
@@ -1231,6 +1242,78 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 //					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
 //					return true;
 //				}
+			return false;
+		});
+	}
+
+	public void showAddCatalogMenu(View anchor, View parentAnchor) {
+		ReaderAction[] actions = {
+				ReaderAction.ADD_OPDS_CATALOG,
+				ReaderAction.ADD_REMOVE_LITRES_CATALOG,
+				ReaderAction.ADD_CALIBRE_CATALOG_LOCAL,
+				ReaderAction.ADD_CALIBRE_CATALOG_YD
+		};
+		mActivity.showActionsToolbarMenu(actions, anchor, parentAnchor, item -> {
+			if (item == ReaderAction.ADD_OPDS_CATALOG) {
+				mActivity.editOPDSCatalog(null);
+				return true;
+			} else if (item == ReaderAction.ADD_REMOVE_LITRES_CATALOG) {
+				bLitresHidden = !bLitresHidden;
+				Properties props = new Properties(mActivity.settings());
+				props.setProperty(Settings.PROP_CLOUD_LITRES_DISABLED, bLitresHidden?"1":"0");
+				mActivity.setSettings(props, -1, false);
+				mOnlineCatalogsScroll.removeAllViews();
+				mActivity.waitForCRDBService(() -> mActivity.getDB().loadOPDSCatalogs(catalogs -> {
+					updateOnlineCatalogs(catalogs, false);
+				}));
+				return true;
+			} else if (item == ReaderAction.ADD_CALIBRE_CATALOG_LOCAL) {
+				//mActivity.showToast("Work in progress...");
+				//return false;
+				mActivity.editCalibreCatalog(null);
+				return true;
+			} else if (item == ReaderAction.ADD_CALIBRE_CATALOG_YD) {
+				//mActivity.showToast("Work in progress...");
+				//return false;
+				mActivity.editCalibreCatalog(null);
+				return true;
+			}
+			return false;
+		});
+	}
+
+	public void showCalibreMenu(View anchor, View parentAnchor, FileInfo calibreCatalog) {
+		ReaderAction[] actions = {
+				ReaderAction.CALIBRE_SEARCH,
+				ReaderAction.CALIBRE_SHOW_AUTHORS,
+				ReaderAction.CALIBRE_SHOW_TITLES,
+				ReaderAction.CALIBRE_SHOW_SERIES,
+				ReaderAction.CALIBRE_SHOW_RATING,
+				ReaderAction.CALIBRE_SHOW_PUB_DATES,
+				ReaderAction.CALIBRE_SHOW_TAGS
+		};
+		mActivity.showActionsToolbarMenu(actions, anchor, parentAnchor, item -> {
+			if (item == ReaderAction.CALIBRE_SHOW_AUTHORS) {
+				FileInfo fi = new FileInfo();
+				fi.isDirectory = true;
+				fi.isScanned = true;
+				fi.isListed = true;
+				fi.id = -1L;
+				fi.pathname = calibreCatalog.pathname;
+				fi.setFilename(AUTHORS_TAG);
+				mActivity.showDirectory(fi, "");
+				return true;
+			}
+//			else if (item == ReaderAction.ADD_LITRES_CATALOG) {
+//				mActivity.showToast("Coming soon...");
+//				return true;
+//			} else if (item == ReaderAction.ADD_CALIBRE_CATALOG_LOCAL) {
+//				mActivity.editCalibreCatalog(null);
+//				return true;
+//			} else if (item == ReaderAction.ADD_CALIBRE_CATALOG_YD) {
+//				mActivity.editCalibreCatalog(null);
+//				return true;
+//			}
 			return false;
 		});
 	}

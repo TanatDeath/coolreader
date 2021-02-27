@@ -1,6 +1,5 @@
 package org.coolreader.crengine;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -14,15 +13,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.FileInfo.SortOrder;
 import org.coolreader.db.BaseDB;
@@ -1118,6 +1117,46 @@ public class Utils {
 			res = list.get(index);
 		}
 		return res;
+	}
+
+	public static HashMap<Integer, Integer> getThemeColors(CoolReader cr, boolean forEink) {
+		HashMap<Integer, Integer> res = new HashMap<>();
+		int colorGrayC;
+		int colorGray;
+		int colorIcon;
+		int colorIconL;
+		TypedArray a = cr.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon,
+						R.attr.colorIconL});
+		colorGrayC = a.getColor(0, Color.GRAY);
+		colorGray = a.getColor(1, Color.GRAY);
+		colorIcon = a.getColor(2, Color.BLACK);
+		colorIconL = a.getColor(3, Color.GRAY);
+		a.recycle();
+		if (forEink) {
+			res.put(R.attr.colorThemeGray2Contrast, Color.WHITE);
+			res.put(R.attr.colorThemeGray2, Color.BLACK);
+			res.put(R.attr.colorIcon, Color.BLACK);
+			res.put(R.attr.colorIconL, Color.GRAY);
+		}
+		res.put(R.attr.colorThemeGray2Contrast, colorGrayC);
+		res.put(R.attr.colorThemeGray2, colorGray);
+		res.put(R.attr.colorIcon, colorIcon);
+		res.put(R.attr.colorIconL, colorIconL);
+		return res;
+	}
+
+	public static String byteToHex(int n) {
+		String s = Integer.toHexString(n & 255);
+		if (s.length()<2)
+			s = "0" + s;
+		return s;
+	}
+
+	public static String colorToHex(int n) {
+		return ("#" + byteToHex(Color.red(n))
+				+ byteToHex(Color.green(n))
+				+ byteToHex(Color.blue(n))).toUpperCase();
 	}
 
 }

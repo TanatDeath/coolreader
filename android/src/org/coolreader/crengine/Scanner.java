@@ -556,6 +556,16 @@ public class Scanner extends FileInfoChangeSource {
 		return dir;
 	}
 
+	public FileInfo createCalibreRoot() {
+		final FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.CALIBRE_LIST_TAG;
+		dir.setFilename(mActivity.getString(R.string.mi_book_calibre_root));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
 	public static FileInfo createOnlineLibraryPluginItem(String packageName, String label) {
 		final FileInfo dir = new FileInfo();
 		dir.isDirectory = true;

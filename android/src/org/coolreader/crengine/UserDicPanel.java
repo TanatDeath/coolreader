@@ -401,11 +401,12 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					wrds = wrds + (((i == 0) ? "": "~" ) + arrUdeWords.get(i).getDic_word());
 				}
 				if (activity.getmReaderView() != null) {
-					activity.getmReaderView().clearSelection();
-					activity.getmReaderView().findText("{{curPage}}" + wrds, false, true, true);
+					if (activity.getmReaderView().flgHighlightUserDic) {
+						activity.getmReaderView().clearSelection();
+						activity.getmReaderView().findText("{{curPage}}" + wrds, false, true, true);
+					}
 				}
 			}
-			//asdf
 		}
 
 		private void updateViews() {

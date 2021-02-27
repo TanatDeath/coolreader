@@ -20,6 +20,11 @@ public class UserDicEntry {
     private boolean thisIsDSHE = false;
     private Long seen_count;
     private int is_citation;
+    public int isCustomColor;
+    public String customColor;
+    public String shortContext;
+
+    public String fullContext;
 
     public int getIs_citation() {
         return is_citation;
@@ -99,6 +104,38 @@ public class UserDicEntry {
 
     public void setSeen_count(Long seen_count) {
         this.seen_count = seen_count;
+    }
+
+    public int getIsCustomColor() {
+        return isCustomColor;
+    }
+
+    public void setIsCustomColor(int isCustomColor) {
+        this.isCustomColor = isCustomColor;
+    }
+
+    public String getCustomColor() {
+        return customColor;
+    }
+
+    public void setCustomColor(String customColor) {
+        this.customColor = customColor;
+    }
+
+    public String getShortContext() {
+        return shortContext;
+    }
+
+    public void setShortContext(String shortContext) {
+        this.shortContext = shortContext;
+    }
+
+    public String getFullContext() {
+        return fullContext;
+    }
+
+    public void setFullContext(String fullContext) {
+        this.fullContext = fullContext;
     }
 
 }
