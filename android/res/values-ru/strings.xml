@@ -1138,9 +1138,9 @@
     <string name="rare_settings">Редкие и экспериментальные настройки</string>
     <string name="tts_settings">Настройки Text-to-speech</string>
     <string name="backlight_settings">Настройки яркости экрана и кнопок</string>
-    <string name="selectionmodes_settings">Настройки для специальных режимов выделения</string>
+    <string name="selectionmodes_settings">Настройки действий для выделения (одного и нескольких слов)</string>
     <string name="pageandorientation_settings">Настройки страницы: режим просмотра, ориентация и анимация</string>
-    <string name="selectionmodes_settings_add_info">Отдельные настройки выделения для \'Режима выделения\' и \'Режима инспектора\'</string>
+    <string name="selectionmodes_settings_add_info">Настройки выделения для \'Обычного режима\', \'Режима выделения\' и \'Режима инспектора\'</string>
     <string name="page_color_settings">Настройки цветов и ночного режима</string>
     <string name="page_margins_settings">Настройки отступов страницы и экрана</string>
     <string name="yandex_settings">Настройки Яндекс диска</string>
@@ -1522,5 +1522,8 @@
     <string name="calibre_tags">Тэги (calibre)</string>
     <string name="books_l">книг:</string>
     <string name="folders_l">папок:</string>
+    <string name="hyph_rend_options">Переносы, мультиязычность, рендеринг, нюансы форматирования (epub, txt, html)</string>
+    <string name="force_eink_warn">Подтвердите и откройте настройки снова - опции Eink станут доступны</string>
+    <string name="eink_screen_update_options">Настройки обновления Eink экрана</string>
 </resources>
 

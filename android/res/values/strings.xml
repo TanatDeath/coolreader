@@ -1153,9 +1153,9 @@
     <string name="rare_settings">Rare and experimental settings</string>
     <string name="tts_settings">Text-to-speech settings</string>
     <string name="backlight_settings">Screen and keys backlight settings</string>
-    <string name="selectionmodes_settings">Special selection modes\' settings</string>
+    <string name="selectionmodes_settings">Selection actions (single and multi words) settings</string>
     <string name="pageandorientation_settings">Page view mode, orientation and animation</string>
-    <string name="selectionmodes_settings_add_info">Separate selection settings for \'Selection mode\' and \'Inspector mode\'</string>
+    <string name="selectionmodes_settings_add_info">Settings for \'Common mode\', \'Selection mode\' and \'Inspector mode\' selection modes</string>
     <string name="page_color_settings">Colors and night mode settings</string>
     <string name="page_margins_settings">Page and screen margins settings</string>
     <string name="yandex_settings">Yandex disc settings</string>
@@ -1549,4 +1549,7 @@
     <string name="calibre_tags">Tags (calibre)</string>
     <string name="books_l">books:</string>
     <string name="folders_l">folders:</string>
+    <string name="hyph_rend_options">Hyphenation, multilingual, rendering, formatting tweaks (epub, txt, html)</string>
+    <string name="force_eink_warn">Confirm and open settings again - eink options will be enabled</string>
+    <string name="eink_screen_update_options">Eink screen update settings</string>
 </resources>

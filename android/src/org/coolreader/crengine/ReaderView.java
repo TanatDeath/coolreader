@@ -1475,7 +1475,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		private void updatePageFlipTracking(final int x, final int y) {
 			if (!mOpened)
 				return;
-			final int swipeDistance = mIsPageMode ? x - start_x : y - start_y;
+			//plotn - some strange behavior with mIsPageMode
+			//final int swipeDistance = mIsPageMode ? x - start_x : y - start_y;
+			final int swipeDistance = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
+			//final int swipeDistance = x - start_x;
 			final int distanceForFlip = surface.getWidth() / mGesturePageFlipsPerFullSwipe;
 			int pagesToFlip = swipeDistance / distanceForFlip;
 			if (pagesToFlip == 0) {
@@ -1965,7 +1968,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 						//boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
 						//int dir = isPageMode ? x - start_x : y - start_y;
-						int dir = mIsPageMode ? x - start_x : y - start_y;
+						//plotn - some strange behavior with mIsPageMode
+						//int dir = mIsPageMode ? x - start_x : y - start_y;
+						int dir = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
+						//int dir = x - start_x;
 						if (Math.abs(mGesturePageFlipsPerFullSwipe) == 1) {
 							dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
 							if (getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
@@ -1976,7 +1982,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							updateAnimation(x, y);
 							state = STATE_FLIPPING;
 						}
-							if (Math.abs(mGesturePageFlipsPerFullSwipe) > 1) {
+						if (Math.abs(mGesturePageFlipsPerFullSwipe) > 1) {
 							state = STATE_FLIP_TRACKING;
 							updatePageFlipTracking(start_x, start_y);
 						}

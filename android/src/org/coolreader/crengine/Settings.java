@@ -292,6 +292,8 @@ public interface Settings {
 	public static final String PROP_SELECTION_MODES_TITLE = "window.selection.modes.title";
 	public static final String PROP_PAGEANDORIENTATION_TITLE = "window.pageandorientation.modes.title";
 	public static final String PROP_FONTTWEAKS_TITLE = "window.font.tweaks.title";
+	public static final String PROP_EINKSCREENUPDATE_TITLE = "window.eink.screen.update.title";
+	public static final String PROP_HYPH_REND_TITLE = "window.hyph.rend.title";
 	public static final String PROP_SPACING_TITLE = "window.spacing.title";
 	public static final String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
 	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
