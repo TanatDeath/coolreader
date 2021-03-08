@@ -59,6 +59,7 @@ public class DicToastView {
     public static int IS_YANDEX = 0;
     public static int IS_LINGVO = 1;
     public static int IS_WIKI = 2;
+    public static int IS_DEEPL = 3;
 
     public static int mColorIconL = Color.GRAY;
 
@@ -609,6 +610,7 @@ public class DicToastView {
                     mHandler.postDelayed(handleDismiss, 100);
                     String sLink = "";
                     if (t.dicType == IS_LINGVO) sLink = "https://developers.lingvolive.com/";
+                    if (t.dicType == IS_DEEPL) sLink = "https://www.deepl.com/";
                     if (t.dicType == IS_WIKI) sLink = t.mDicName;
                     Uri uri = Uri.parse(sLink);
                     Context context = t.anchor.getContext();

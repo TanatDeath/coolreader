@@ -339,7 +339,8 @@ public class Scanner extends FileInfoChangeSource {
 						for ( int i=0; i<count; i++ ) {
 							if (control.isStopped())
 								break;
-							progress.setProgress(i * 10000 / count);
+							if (progress != null)
+								progress.setProgress(i * 10000 / count);
 							FileInfo item = filesForParsing.get(i);
 							log.v("scanBookProperties for "+item.getFilename());
 							engine.scanBookProperties(item);
@@ -348,7 +349,7 @@ public class Scanner extends FileInfoChangeSource {
 					} catch (Exception e) {
 						L.e("Exception while scanning", e);
 					}
-					progress.hide();
+					if (progress != null) progress.hide();
 					// jump to GUI thread
 					BackgroundThread.instance().postGUI(() -> {
 						// GUI thread
@@ -377,6 +378,11 @@ public class Scanner extends FileInfoChangeSource {
 	 * @param scanControl is to stop long scanning
 	 */
 	public void scanDirectory(final CRDBService.LocalBinder db, final FileInfo baseDir, final Runnable readyCallback, final boolean recursiveScan, final ScanControl scanControl) {
+		scanDirectory(db, baseDir, readyCallback, recursiveScan, scanControl, false);
+	}
+
+	public void scanDirectory(final CRDBService.LocalBinder db, final FileInfo baseDir, final Runnable readyCallback, final boolean recursiveScan, final ScanControl scanControl,
+							  boolean hideProgress) {
 		// Call in GUI thread only!
 		BackgroundThread.ensureGUI();
 
@@ -390,7 +396,7 @@ public class Scanner extends FileInfoChangeSource {
 		}
 		Engine.ProgressControl progress = engine.createProgress(recursiveScan ? 0 : R.string.progress_scanning);
 		log.d("calling scanDirectoryFiles");
-		scanDirectoryFiles(db, baseDir, scanControl, progress, new Runnable() {
+		scanDirectoryFiles(db, baseDir, scanControl, hideProgress ? null : progress, new Runnable() {
 			@Override
 			public void run() {
 				// GUI thread

@@ -95,7 +95,7 @@ public class ProgressDialog extends AlertDialog {
                 }
             };
             View view = inflater.inflate(R.layout.alert_dialog_progress, null);
-            mProgress = (ProgressBar) view.findViewById(R.id.progress);
+            mProgress = view.findViewById(R.id.progress);
             //view.setBackgroundColor(Color.WHITE);
             setView(view);
 //    		if ( DeviceInfo.FORCE_LIGHT_THEME ) {

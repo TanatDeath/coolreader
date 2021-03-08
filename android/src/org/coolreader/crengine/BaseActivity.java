@@ -1808,7 +1808,7 @@ public class BaseActivity extends Activity implements Settings {
 				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_brightness, null, true));
 			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
 			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
-				toast_ll.setBackgroundColor(Color.argb(0, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+				toast_ll.setBackgroundColor(Color.argb(100, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
 			else {
 				toast_ll.setBackgroundColor(colorGrayC);
 				Button toast_btn = windowCenterPopup.getContentView().findViewById(R.id.toast_btn);

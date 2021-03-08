@@ -19,6 +19,7 @@ import java.util.TimerTask;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSync;
+import org.coolreader.cloud.deepl.DeeplCloudSettings;
 import org.coolreader.cloud.lingvo.LingvoCloudSettings;
 import org.coolreader.cloud.litres.LitresCloudSettings;
 import org.coolreader.cloud.litres.LitresCredentialsDialog;
@@ -3812,6 +3813,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (!fJson.exists()) return null;
 			lingvoCloudSettings = new Gson().fromJson(s, LingvoCloudSettings.class);
 			return lingvoCloudSettings;
+		} catch (Exception e) {
+		}
+		return null;
+	}
+
+	public DeeplCloudSettings deeplCloudSettings = new DeeplCloudSettings();
+
+	public void saveDeeplCloudSettings(String json)
+	{
+		log.d("Starting save deepl_cloud_settings.json");
+		Utils.saveStringToFileSafe(json,getSettingsFileExt("[DEFAULT]",0).getParent() + "/deepl_cloud_settings.json");
+	}
+
+	public DeeplCloudSettings readDeeplCloudSettings()
+	{
+		log.d("Reading deepl_cloud_settings.json");
+		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/deepl_cloud_settings.json");
+		try {
+			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/deepl_cloud_settings.json");
+			if (!fJson.exists()) return null;
+			deeplCloudSettings = new Gson().fromJson(s, DeeplCloudSettings.class);
+			return deeplCloudSettings;
 		} catch (Exception e) {
 		}
 		return null;

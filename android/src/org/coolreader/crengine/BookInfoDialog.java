@@ -11,6 +11,7 @@ import java.util.Map;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.litres.LitresConfig;
 import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -59,6 +60,7 @@ public class BookInfoDialog extends BaseDialog {
 	private int mActionType;
 	private FileInfo mFileInfoCloud;
 	boolean isLitres = false;
+	boolean isCalibreBook = false;
 	boolean isPerson = false;
 	private FileBrowser mFileBrowser;
 	private FileInfo mCurrDir;
@@ -638,6 +640,9 @@ public class BookInfoDialog extends BaseDialog {
 			if ((mFileInfoCloud.isLitresPerson()))
 				isPerson = true;
 		}
+		if (mBookInfo != null)
+			if (mBookInfo.getFileInfo() != null)
+				if (mBookInfo.getFileInfo().isCalibrePrefix()) isCalibreBook = true;
 		mFileBrowser = fb;
 		mCurrDir = currDir;
 		FileInfo file = null;
@@ -670,28 +675,61 @@ public class BookInfoDialog extends BaseDialog {
 		mainView = (ScrollView) mInflater.inflate(R.layout.book_info_dialog, null);
 		final ImageView image = mainView.findViewById(R.id.book_cover);
 		image.setOnClickListener(v -> {
+			final CoolReader cr = mCoolReader;
 			if ((mActionType == OPDS_INFO) && (isLitres)) return;
-			CoolReader cr = (CoolReader)mCoolReader;
-			if (mBookInfo!=null) {
+			if (isCalibreBook) {
 				FileInfo fi = mBookInfo.getFileInfo();
-				cr.loadDocument(fi, true);
+				String fname =
+						fi.remote_folder.replace(FileInfo.CALIBRE_DIR_PREFIX, "") + "/" +
+						fi.pathname.replace(FileInfo.CALIBRE_BOOKS_PREFIX, "");
+				File f = new File(fname);
+				if (f.exists())
+					BackgroundThread.instance().postGUI(() -> {
+						cr.loadDocument(new FileInfo(fname), true);
+					}, 300);
+				else
+					cr.showToast(cr.getString(R.string.not_exists) + ": " + fname);
 				dismiss();
-			} else //cr.showToast(R.string.book_info_action_unavailable);
-			{
-				cr.showToast(R.string.book_info_action_downloading);
-				if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoCloud, mFileInfoCloud, annot2);
-				dismiss();
-			}
+			} else
+				if (mBookInfo!=null) {
+					FileInfo fi = mBookInfo.getFileInfo();
+					BackgroundThread.instance().postGUI(() -> {
+						cr.loadDocument(fi, true);
+					}, 300);
+					dismiss();
+				} else //cr.showToast(R.string.book_info_action_unavailable);
+					{
+						cr.showToast(R.string.book_info_action_downloading);
+						if (mFileBrowser != null) mFileBrowser.showOPDSDir(mFileInfoCloud, mFileInfoCloud, annot2);
+						dismiss();
+					}
 		});
 		btnBack = mainView.findViewById(R.id.base_dlg_btn_back);
 		btnBack.setOnClickListener(v -> onNegativeButtonClick());
 
-		btnOpenBook = ((ImageButton)mainView.findViewById(R.id.btn_open_book));
+		btnOpenBook = mainView.findViewById(R.id.btn_open_book);
 		btnOpenBook.setOnClickListener(v -> {
-			CoolReader cr = (CoolReader)mCoolReader;
+			CoolReader cr = mCoolReader;
 			if (mBookInfo!=null) {
+				if (isCalibreBook) {
+					FileInfo fi = mBookInfo.getFileInfo();
+					String fname =
+							fi.remote_folder.replace(FileInfo.CALIBRE_DIR_PREFIX, "") + "/" +
+									fi.pathname.replace(FileInfo.CALIBRE_BOOKS_PREFIX, "");
+					File f = new File(fname);
+					if (f.exists())
+						BackgroundThread.instance().postGUI(() -> {
+							cr.loadDocument(new FileInfo(fname), true);
+						}, 300);
+					else
+						cr.showToast(cr.getString(R.string.not_exists) + ": " + fname);
+					dismiss();
+					return;
+				}
 				FileInfo fi = mBookInfo.getFileInfo();
-				cr.loadDocument(fi, true);
+				BackgroundThread.instance().postGUI(() -> {
+					cr.loadDocument(fi, true);
+				}, 300);
 				dismiss();
 			} else {
 				//cr.showToast(R.string.book_info_action_unavailable);
@@ -993,6 +1031,15 @@ public class BookInfoDialog extends BaseDialog {
 		}
 		if (actionType == OPDS_INFO) {
 			Utils.hideView(btnOpenBook);
+			Utils.hideView(btnBookFolderOpen);
+			Utils.hideView(btnBookShortcut);
+			Utils.hideView(btnBookEdit);
+			Utils.hideView(btnSendByEmail);
+			Utils.hideView(btnDeleteBook);
+			Utils.hideView(btnCustomCover);
+			Utils.hideView(btnSendByYnd);
+		}
+		if (isCalibreBook) {
 			Utils.hideView(btnBookFolderOpen);
 			Utils.hideView(btnBookShortcut);
 			Utils.hideView(btnBookEdit);

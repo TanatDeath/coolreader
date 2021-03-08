@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Color;
@@ -1989,7 +1990,7 @@ public class MainDB extends BaseDB {
 		Log.i("cr3", "loadCalibreAuthorsList()");
 		String catalogFileName = parent.pathname.replace(FileInfo.CALIBRE_DIR_PREFIX, "") +
 				"/metadata.db";
-		if (!openCatalogDB(new File(catalogFileName))) return false;
+		if (!openCatalogDB(new File(catalogFileName), parent)) return false;
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 		String sql = "";
@@ -2090,8 +2091,12 @@ public class MainDB extends BaseDB {
 	}
 
 	public long getLongValue(String sql) {
+		return 	getLongValue(sql, mDB);
+	}
+
+	public long getLongValue(String sql, SQLiteDatabase db) {
 		long res = -1;
-		try (Cursor rs = mDB.rawQuery(sql, null)) {
+		try (Cursor rs = db.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
 				do {
 					res = rs.getLong(0);
@@ -2474,7 +2479,7 @@ public class MainDB extends BaseDB {
 		if (!StrUtils.isEmptyStr(addFilter)) {
 			if (addFilter.startsWith("author:")) {
 				String s = addFilter.replace("author:", "").trim();
-				long l = getLongValue("SELECT author.id FROM author where trim(author.name) = " + quoteSqlString(s));
+				long l = getLongValue("SELECT authors.id FROM authors where trim(authors.name) = " + quoteSqlString(s), mCatalogDB);
 				listAuthors.clear();
 				if (l > 0) listAuthors.add(l);
 			}
@@ -2482,9 +2487,9 @@ public class MainDB extends BaseDB {
 		String authors = "-1";
 		for (Long l: listAuthors) authors = authors + ", " + l;
 		authors = " (" + authors + ") ";
-		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id "+
-				" WHERE (not (b.pathname like '@%')) and book_author.author_fk in " + authors + " ORDER BY b.title";
-		return findBooks(sql, list);
+		String sql = READ_FILEINFO_SQL_CALIBRE +
+				" join books_authors_link bal on bal.book=b.id where bal.author in " + authors + " ORDER BY b.title";
+		return findBooksCalibre(sql, list, mCatalogDB);
 	}
 
 	public boolean findGenreBooks(ArrayList<FileInfo> list, long genreId)
@@ -3603,32 +3608,33 @@ public class MainDB extends BaseDB {
 		"LEFT JOIN series sp ON sp.id=b.publseries_fk " +
 		"LEFT JOIN folder f ON f.id=b.folder_fk ";
 
-//	select b.id, b.path||'/'||d.name||'.'||lower(d.format) as pathname, b.path,
-//	d.name||'.'||lower(d.format) as filename, '' as arcname, b.title,
-//			(SELECT GROUP_CONCAT(a.name,'|') FROM books_authors_link bal JOIN authors a ON a.id=bal.author WHERE bal.book=b.id) as authors,
-//  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as series_name,
-//  0 as series_number, d.format, d.uncompressed_size as filesize, d.uncompressed_size as arcsize,
-//	b.timestamp as create_time, b.last_modified as last_access_time, 0 as flags,
-//  (SELECT GROUP_CONCAT(l.lang_code,', ') FROM books_languages_link bll JOIN languages l on l.id = bll.lang_code WHERE bll.book=b.id) as language,
-//  (SELECT GROUP_CONCAT(l.lang_code,', ') FROM books_languages_link bll JOIN languages l on l.id = bll.lang_code WHERE bll.book=b.id) as lang_from,
-//  '' as lang_to, null as saved_vith_ver,
-//  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre,
-//  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as annotation,
-//  null as srclang, b.pubdate as bookdate, null as translator, null as docauthor,
-//  null as docprogram, null as docdate,
-//  (SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'uri') as docsrcurl,
-//  null as docsrcocr, null as docversion, null as publname, null as publisher,
-//  null as publcity, b.pubdate as publyear,
-//	coalesce((SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'isbn'), b.isbn) as publisbn,
-//  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as publseries_name,
-//  0 as publseries_number, b.timestamp as file_create_time, 0 as sym_count, 0 as word_count,
-//  null as book_date_n, null as doc_date_n, null as publ_year_n, null as opds_link,
-//  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre_list,
-//  null as crc32, null as domVersion, null as rendFlags,
-//  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as description,
-//  null as name_crc32
-//	from books b
-//	join data d on d.book = b.id
+	private static final String READ_FILEINFO_SQL_CALIBRE =
+		"  select b.id, b.path||'/'||d.name||'.'||lower(d.format) as pathname, b.path, " +
+		"	d.name||'.'||lower(d.format) as filename, '' as arcname, b.title, " +
+		"			(SELECT GROUP_CONCAT(a.name,'|') FROM books_authors_link bal JOIN authors a ON a.id=bal.author WHERE bal.book=b.id) as authors, " +
+		"  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as series_name, " +
+		"  0 as series_number, d.format, d.uncompressed_size as filesize, d.uncompressed_size as arcsize, " +
+		"	b.timestamp as create_time, b.last_modified as last_access_time, 0 as flags, " +
+		"  (SELECT GROUP_CONCAT(l.lang_code,', ') FROM books_languages_link bll JOIN languages l on l.id = bll.lang_code WHERE bll.book=b.id) as language, " +
+		"  null as lang_from, " +
+		"  null as lang_to, null as saved_vith_ver, " +
+		"  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre, " +
+		"  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as annotation, " +
+		"  null as srclang, b.pubdate as bookdate, null as translator, null as docauthor, " +
+		"  null as docprogram, null as docdate, " +
+		"  (SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'uri') as docsrcurl, " +
+		"  null as docsrcocr, null as docversion, null as publname, null as publisher, " +
+		"  null as publcity, b.pubdate as publyear, " +
+		"	coalesce((SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'isbn'), b.isbn) as publisbn, " +
+		"  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as publseries_name, " +
+		"  0 as publseries_number, b.timestamp as file_create_time, 0 as sym_count, 0 as word_count, " +
+		"  null as book_date_n, null as doc_date_n, null as publ_year_n, null as opds_link, " +
+		"  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre_list, " +
+		"  null as crc32, null as domVersion, null as rendFlags, " +
+		"  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as description, " +
+		"  null as name_crc32 " +
+		"	from books b " +
+		"	join data d on d.book = b.id ";
 
 	private void readFileInfoFromCursor(FileInfo fileInfo, Cursor rs) {
 		int i = 0;
@@ -3701,6 +3707,24 @@ public class MainDB extends BaseDB {
 						continue;
 					fileInfoCache.put(fileInfo);
 					list.add(new FileInfo(fileInfo));
+					found = true;
+				} while (rs.moveToNext());
+			}
+		}
+		return found;
+	}
+
+	private boolean findBooksCalibre(String sql, ArrayList<FileInfo> list, SQLiteDatabase db) {
+		boolean found = false;
+		try (Cursor rs = db.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				do {
+					FileInfo fileInfo = new FileInfo();
+					readFileInfoFromCursor(fileInfo, rs);
+					FileInfo fi = new FileInfo(fileInfo);
+					fi.pathname = FileInfo.CALIBRE_BOOKS_PREFIX + fi.pathname;
+					fi.remote_folder = catalogDBFileInfo.pathname;
+					list.add(fi);
 					found = true;
 				} while (rs.moveToNext());
 			}

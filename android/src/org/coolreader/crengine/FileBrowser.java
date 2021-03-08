@@ -1899,7 +1899,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			}
 			if (fileOrDir.isCalibreRoot()) {
 				if (fileOrDir.isCalibreByAuthors())
-					mActivity.showToast("calibre "+fileOrDir.pathname+" "+fileOrDir.getFilename());
+					//mActivity.showToast("calibre "+fileOrDir.pathname+" "+fileOrDir.getFilename());
 					showDirectoryLoadingStub();
 					// refresh calibre authors list
 					log.d("Updating calibre authors list");
@@ -2532,8 +2532,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						String filename1 = StrUtils.getNonEmptyStr(item.getFilename(),true);
 						String filename2 = StrUtils.getNonEmptyStr(item.isArchive && item.arcname != null /*&& !item.isDirectory */
 								? new File(item.arcname).getName() : null, true);
-						filename2 = StrUtils.getNonEmptyStr(filename2, true).replace(filename1.trim(), "*");
-						filename1 = StrUtils.getNonEmptyStr(filename1, true).replace(title, "*");
+						if (!StrUtils.isEmptyStr(filename1.trim()))
+							filename2 = StrUtils.getNonEmptyStr(filename2, true).replace(filename1.trim(), "*");
+						if (!StrUtils.isEmptyStr(title))
+							filename1 = StrUtils.getNonEmptyStr(filename1, true).replace(title, "*");
 						String onlineBookInfo = "";
 						if (item.getOnlineStoreBookInfo() != null) {
 							OnlineStoreBook book = item.getOnlineStoreBookInfo();
@@ -2864,19 +2866,26 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (dir.isOnlineCatalogPluginDir())
 				title = translateOnlineStorePluginItem(dir);
 		}
-		if (dir.isLitresPrefix()) {
-			if ((title.startsWith("@")) && (dir.isBooksByLitresGenreRoot())) title = mActivity.getString(R.string.search_genres);
-			if ((title.startsWith("@")) && (dir.isBooksByLitresBooksRoot())) title = mActivity.getString(R.string.search_books);
-			if ((title.startsWith("@")) && (dir.isLitresDir())) title = mActivity.getString(R.string.litres_main);
-			if ((title.startsWith("@")) && (dir.isBooksByLitresSequenceRoot())) title = mActivity.getString(R.string.search_sequences);
-			if ((title.startsWith("@")) && (dir.isBooksByLitresCollectionRoot())) title = mActivity.getString(R.string.search_collections);
-			if ((title.startsWith("@")) && (dir.isBooksByLitresPersonRoot())) title = mActivity.getString(R.string.search_persons);
-		}
+		if (dir != null) {
+			if (dir.isLitresPrefix()) {
+				if ((title.startsWith("@")) && (dir.isBooksByLitresGenreRoot()))
+					title = mActivity.getString(R.string.search_genres);
+				if ((title.startsWith("@")) && (dir.isBooksByLitresBooksRoot()))
+					title = mActivity.getString(R.string.search_books);
+				if ((title.startsWith("@")) && (dir.isLitresDir()))
+					title = mActivity.getString(R.string.litres_main);
+				if ((title.startsWith("@")) && (dir.isBooksByLitresSequenceRoot()))
+					title = mActivity.getString(R.string.search_sequences);
+				if ((title.startsWith("@")) && (dir.isBooksByLitresCollectionRoot()))
+					title = mActivity.getString(R.string.search_collections);
+				if ((title.startsWith("@")) && (dir.isBooksByLitresPersonRoot()))
+					title = mActivity.getString(R.string.search_persons);
+			}
 
-		if (dir.isCalibrePrefix()) {
-			if (title.equals(FileInfo.AUTHORS_TAG)) title = mActivity.getString(R.string.calibre_authors);
+			if (dir.isCalibrePrefix()) {
+				title = FileInfo.getDisplayName(mActivity, title);
+			}
 		}
-
 		mActivity.setBrowserTitle(title, dir);
 		mListView.setAdapter(currentListAdapter);
 		currentListAdapter.notifyDataSetChanged();

@@ -1185,7 +1185,7 @@
     <string name="calc_stats">Рассчитать статистику</string>
     <string name="translated_with_ynd">Переведено сервисом «Яндекс.Переводчик»</string>
     <string name="translate_lang_not_set">Язык(и) не задан(ы) (направления перевода)</string>
-    <string name="translate_lang_not_found">Коды языков (языка) не найдены (направления перевода)</string>
+    <string name="translate_lang_not_found">Коды языков (языка) не найдены или не поддерживаются (направления перевода)</string>
     <string name="whole_page_to_dic">Перевести всю страницу</string>
     <string name="settings_saved">Настройки сохранены</string>
     <string name="no_cloud_files">Файл(ы) не найдены</string>
@@ -1348,6 +1348,8 @@
     <string name="lingvo_settings_add_info">Использовать ваш токен lingvo онлайн (если указан)</string>
     <string name="lingvo_token">Токен lingvo онлайн</string>
     <string name="lingvo_unauth">Lingvo онлайн - авторизация не успешна. Проверьте токен</string>
+    <string name="deepl_unauth">Deepl.com - авторизация не успешна. Проверьте токен</string>
+    <string name="deepl_quoata">Deepl.com - превышена квота. Проверьте состояние аккаунта</string>
     <string name="http_error">Ошибка http, код:</string>
     <string name="sync_confirmation_other_book">На другом устройстве была открыта другая книга (%s), переключиться на неё?</string>
     <string name="sync_confirmation_new_reading_position">Для этой книги найдена новая позиция чтения, обновить?</string>
@@ -1419,6 +1421,7 @@
     <string name="download_fragment">Скачать ознакомительный фрагмент</string>
     <string name="fragment">Фрагмент</string>
     <string name="not_exists_on_server">Файл не существует на сервере</string>
+    <string name="not_exists">Файл не существует</string>
     <string name="purchase_book">Купить книгу</string>
     <string name="download_book">Скачать книгу</string>
     <string name="strict_contains">содержит</string>
@@ -1445,6 +1448,7 @@
     <string name="scan_favorite_folder">Избранные папки</string>
     <string name="scan_downloads_folder">Загрузки</string>
     <string name="do_scan">Сканировать выбранное!</string>
+    <string name="do_scan_starting">Сканирование запускается...</string>
     <string name="library_maintenance">Обслуживание библиотеки</string>
     <string name="library_maint_remove">Удалить информацию о книгах, которые НЕ НАХОДЯТСЯ в выбранных категориях</string>
     <string name="library_maint_remove_non_fav_add_info">Сами файлы НЕ будут удалены с вашего устройства, будет очищена только информация о них во внутренней базе данных KnownReader. Вы можете всегда пересканировать библиотеку впоследствии (Уточнение: но закладки (если создавались в книгах) по удаляемым элементам будут удалены навсегда).</string>
@@ -1525,5 +1529,12 @@
     <string name="hyph_rend_options">Переносы, мультиязычность, рендеринг, нюансы форматирования (epub, txt, html)</string>
     <string name="force_eink_warn">Подтвердите и откройте настройки снова - опции Eink станут доступны</string>
     <string name="eink_screen_update_options">Настройки обновления Eink экрана</string>
+    <string name="interrupt">Прервать</string>
+    <string name="interrupting">Прерывается...</string>
+    <string name="authors">Авторов:</string>
+    <string name="genres">Жанров:</string>
+    <string name="series">Серий:</string>
+    <string name="entries">Новых книг:</string>
+    <string name="translated_from">Переведено с:</string>
 </resources>
 

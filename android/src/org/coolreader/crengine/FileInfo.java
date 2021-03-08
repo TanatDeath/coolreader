@@ -5,6 +5,8 @@ import android.net.Uri;
 import  androidx.documentfile.provider.DocumentFile;
 
 import android.util.Log;
+
+import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.plugins.OnlineStoreBook;
@@ -31,6 +33,7 @@ public class FileInfo {
 	public final static String ONLINE_CATALOG_PLUGIN_PREFIX = "@plugin:";
 	//calibre
 	public final static String CALIBRE_LIST_TAG = "@calibre";
+	public final static String CALIBRE_BOOKS_PREFIX = "@calibreBooks:";
 	//  CR implementation
 //	public final static String GENRES_TAG = "@genresRoot";
 //	public final static String GENRES_GROUP_PREFIX = "@genresGroup:";
@@ -763,6 +766,12 @@ public class FileInfo {
 		return pathname!=null && pathname.startsWith(LITRES_PREFIX);
 	}
 
+	public static String getDisplayName(CoolReader cr, String s) {
+		String ss = s;
+		if (ss.equals(FileInfo.AUTHORS_TAG)) ss = cr.getString(R.string.calibre_authors);
+		return ss;
+	}
+
 	public boolean isCalibrePrefix()
 	{
 		return pathname!=null && pathname.startsWith(CALIBRE_PREFIX);
@@ -791,6 +800,11 @@ public class FileInfo {
 	public boolean isLitresBook()
 	{
 		return pathname!=null && pathname.startsWith(LITRES_BOOKS_PREFIX);
+	}
+
+	public boolean isCalibreBook()
+	{
+		return pathname!=null && pathname.startsWith(CALIBRE_BOOKS_PREFIX);
 	}
 
 	public boolean isCloudBook() {
@@ -1045,7 +1059,7 @@ public class FileInfo {
 
 	public long getAuthorId()
 	{
-		if (!isBooksByAuthorDir())
+		if (!isBooksByAuthorDir() && (!isBooksByCalibreAuthorDir()))
 			return 0;
 		return id;
 	}

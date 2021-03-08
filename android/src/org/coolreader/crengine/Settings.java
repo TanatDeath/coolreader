@@ -196,6 +196,7 @@ public interface Settings {
 	public static final String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
 	public static final String PROP_CLOUD_YND_TRANSLATE_OPTIONS = "app.cloud.ynd.translate.options";
 	public static final String PROP_CLOUD_LINGVO_OPTIONS = "app.cloud.lingvo.options";
+	public static final String PROP_CLOUD_DEEPL_OPTIONS = "app.cloud.deepl.options";
 	public static final String PROP_CLOUD_LITRES_SETTINGS = "app.cloud.litres.settings";
 	public static final String PROP_CLOUD_LITRES_DISABLED = "app.cloud.litres.disabled";
 	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";

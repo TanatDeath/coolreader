@@ -1206,7 +1206,7 @@
     <string name="calc_stats">Calculate statistics</string>
     <string name="translated_with_ynd">Translated with «Yandex.Translate»</string>
     <string name="translate_lang_not_set">Language(s) not set (translate directions)</string>
-    <string name="translate_lang_not_found">Language(s) codes not found (translate directions)</string>
+    <string name="translate_lang_not_found">Language(s) codes not found or not supported (translate directions)</string>
     <string name="whole_page_to_dic">Translate whole page</string>
     <string name="settings_saved">Settings were saved</string>
     <string name="no_cloud_files">No files found</string>
@@ -1399,8 +1399,13 @@
     <string name="lingvo_settings">Lingvo online settings</string>
     <string name="lingvo_settings_add_info">Use your own lingvo online token (if specified)</string>
     <string name="lingvo_token">Lingvo online token</string>
+    <string name="deepl_settings">Deepl.com settings</string>
+    <string name="deepl_settings_add_info">Specify your Deepl.com online token</string>
+    <string name="deepl_token">Deepl.com token</string>
     <string name="http_error">Ошибка http, код:</string>
     <string name="lingvo_unauth">Lingvo online - unauthorized. Check you token</string>
+    <string name="deepl_unauth">Deepl.com - unauthorized. Check you token</string>
+    <string name="deepl_quoata">Deepl.com - quota exceeded. Check you account state</string>
     <string name="sync_confirmation_other_book">Another book (%s) was opened on another device, switch to it?</string>
     <string name="sync_confirmation_new_reading_position">New reading position found for this book, update?</string>
     <string name="bookmarks_keepalive_">Delete copies of bookmarks older than…</string>
@@ -1447,6 +1452,7 @@
     <string name="download_fb3">FB3</string>
     <string name="download_book">Download book</string>
     <string name="not_exists_on_server">File not exists on server</string>
+    <string name="not_exists">File not exists</string>
     <string name="purchase_book">Purchase book</string>
     <string name="strict_contains">contains</string>
     <string name="strict_startswith">starts with</string>
@@ -1472,6 +1478,7 @@
     <string name="scan_favorite_folder">Favorite folders</string>
     <string name="scan_downloads_folder">Downloads folders</string>
     <string name="do_scan">Scan selected!</string>
+    <string name="do_scan_starting">Scanning is starting...</string>
     <string name="library_maintenance">Library maintenance</string>
     <string name="library_maint_remove">Remove books\' info, that are NOT RESIDE into selected categories</string>
     <string name="library_maint_remove_non_fav_add_info">Real files will NOT be deleted from your device, there will be removed only information in the internal KnownReader database. You can easily rescan library later (NB: bookmarks of these items will also be removed).</string>
@@ -1552,4 +1559,11 @@
     <string name="hyph_rend_options">Hyphenation, multilingual, rendering, formatting tweaks (epub, txt, html)</string>
     <string name="force_eink_warn">Confirm and open settings again - eink options will be enabled</string>
     <string name="eink_screen_update_options">Eink screen update settings</string>
+    <string name="interrupt">Interrupt</string>
+    <string name="interrupting">Interrupting...</string>
+    <string name="authors">Authors:</string>
+    <string name="genres">Genres:</string>
+    <string name="series">Series:</string>
+    <string name="entries">New books:</string>
+    <string name="translated_from">Translated from:</string>
 </resources>

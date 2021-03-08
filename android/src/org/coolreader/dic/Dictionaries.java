@@ -74,6 +74,7 @@ public class Dictionaries {
 	public static final String YND_DIC_GETLANGS_2 = "https://translate.api.cloud.yandex.net/translate/v2/languages";
 	public static final String LINGVO_DIC_ONLINE = "https://developers.lingvolive.com/api";
 	public static final String YND_DIC_GET_TOKEN = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
+	public static final String DEEPL_DIC_ONLINE = "https://api.deepl.com/v2";
 
 //	public static OkHttpClient client = new OkHttpClient();
 
@@ -98,6 +99,8 @@ public class Dictionaries {
 	public static String sYandexIAMexpiresAt = "";
 	public static int unauthCnt = 0;
 	public static int unauthCntY = 0;
+	public static int unauthCntDeepl = 0;
+	public static boolean deeplAuthenticated = false;
 
 	public static class PopupFrameMetric {
 		public final int Height;
@@ -191,6 +194,7 @@ public class Dictionaries {
 		public final int dicIcon;
 		public Drawable icon;
 		public final String httpLink;
+		public final boolean isOnline;
 		public String dataKey = SearchManager.QUERY;
 
 		public boolean isInstalled() {
@@ -213,7 +217,7 @@ public class Dictionaries {
 
 		public boolean isInstalled = false;
 		public DictInfo ( String id, String name, String packageName, String className, String action, Integer internal,
-						  int dicIcon, Drawable icon, String httpLink) {
+						  int dicIcon, Drawable icon, String httpLink, boolean isOnline) {
 			this.id = id;
 			this.name = name;
 			this.packageName = packageName;
@@ -223,62 +227,67 @@ public class Dictionaries {
 			this.dicIcon = dicIcon;
 			this.icon = icon;
 			this.httpLink = httpLink;
+			this.isOnline = isOnline;
 		}
 		public DictInfo setDataKey(String key) { this.dataKey = key; return this; }
 	}
 
 	static final DictInfo dicts[] = {
 		new DictInfo("NONE", "(NONE)", "", "",
-				Intent.ACTION_SEARCH, 0, 0, null, ""),
+				Intent.ACTION_SEARCH, 0, 0, null, "", false),
 		new DictInfo("Fora", "Fora Dictionary", "com.ngc.fora", "com.ngc.fora.ForaDictionary",
-				Intent.ACTION_SEARCH, 0, R.drawable.fora, null, ""),
+				Intent.ACTION_SEARCH, 0, R.drawable.fora, null, "", false),
 		new DictInfo("ColorDict", "ColorDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 0, R.drawable.colordict, null, ""),
+				Intent.ACTION_SEARCH, 0, R.drawable.colordict, null, "", false),
 		new DictInfo("ColorDictApi", "ColorDict new / GoldenDict", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 1, R.drawable.goldendict, null, "'"),
+				Intent.ACTION_SEARCH, 1, R.drawable.goldendict, null, "'", false),
 		new DictInfo("ColorDictApi (minicard)", "ColorDict new / GoldenDict (minicard)", "com.socialnmobile.colordict", "com.socialnmobile.colordict.activity.Main",
-				Intent.ACTION_SEARCH, 6, R.drawable.goldendict, null, ""),
+				Intent.ACTION_SEARCH, 6, R.drawable.goldendict, null, "", false),
 		new DictInfo("AardDict", "Aard Dictionary", "aarddict.android", "aarddict.android.Article",
-				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, ""),
+				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, "", false),
 		new DictInfo("AardDictLookup", "Aard Dictionary Lookup", "aarddict.android", "aarddict.android.Lookup",
-				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, ""),
+				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, "", false),
 		new DictInfo("Aard2", "Aard 2 Dictionary", "itkach.aard2", "aard2.lookup",
-				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null, ""),
+				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null, "", false),
 		new DictInfo("Dictan", "Dictan Dictionary", "info.softex.dictan", null,
-				Intent.ACTION_VIEW, 2, R.drawable.dictan, null, ""),
+				Intent.ACTION_VIEW, 2, R.drawable.dictan, null, "", false),
 		new DictInfo("FreeDictionary.org", "Free Dictionary . org", "org.freedictionary", "org.freedictionary.MainActivity",
-				"android.intent.action.VIEW", 0, R.drawable.freedictionary, null, ""),
+				"android.intent.action.VIEW", 0, R.drawable.freedictionary, null, "", false),
 		new DictInfo("ABBYYLingvo", "ABBYY Lingvo", "com.abbyy.mobile.lingvo.market", null /*com.abbyy.mobile.lingvo.market.MainActivity*/,
-				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0, R.drawable.lingvo, null, "").setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
+				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0, R.drawable.lingvo, null, "", false)
+				.setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		new DictInfo("ABBYYLingvo (minicard)", "ABBYY Lingvo (minicard)", "com.abbyy.mobile.lingvo.market", null,
-				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 5, R.drawable.lingvo, null, "").setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
+				"com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 5, R.drawable.lingvo, null, "", false)
+				.setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		//new DictInfo("ABBYYLingvoLive", "ABBYY Lingvo Live", "com.abbyy.mobile.lingvolive", null, "com.abbyy.mobile.lingvo.intent.action.TRANSLATE", 0).setDataKey("com.abbyy.mobile.lingvo.intent.extra.TEXT"),
 		new DictInfo("LingoQuizLite", "Lingo Quiz Lite", "mnm.lite.lingoquiz", "mnm.lite.lingoquiz.ExchangeActivity",
-				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null, "").setDataKey("EXTRA_WORD"),
+				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null, "", false).setDataKey("EXTRA_WORD"),
 		new DictInfo("LingoQuiz", "Lingo Quiz", "mnm.lingoquiz", "mnm.lingoquiz.ExchangeActivity",
-				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null, "").setDataKey("EXTRA_WORD"),
+				"lingoquiz.intent.action.ADD_WORD", 0, R.drawable.lingo_quiz, null, "", false).setDataKey("EXTRA_WORD"),
 		new DictInfo("LEODictionary", "LEO Dictionary", "org.leo.android.dict", "org.leo.android.dict.LeoDict",
-				"android.intent.action.SEARCH", 0, R.drawable.leo, null, "").setDataKey("query"),
+				"android.intent.action.SEARCH", 0, R.drawable.leo, null, "", false).setDataKey("query"),
 		new DictInfo("PopupDictionary", "Popup Dictionary", "com.barisatamer.popupdictionary", "com.barisatamer.popupdictionary.MainActivity",
-				"android.intent.action.VIEW", 0,R.drawable.popup, null, ""),
+				"android.intent.action.VIEW", 0,R.drawable.popup, null, "", false),
 		new DictInfo("GoogleTranslate", "Google Translate", "com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity",
-				Intent.ACTION_SEND, 10, R.drawable.googledic, null, ""),
+				Intent.ACTION_SEND, 10, R.drawable.googledic, null, "", false),
 		new DictInfo("YandexTranslate", "Yandex Translate", "ru.yandex.translate", "ru.yandex.translate.ui.activities.MainActivity",
-				Intent.ACTION_SEND, 10, R.drawable.ytr_ic_launcher, null, ""),
+				Intent.ACTION_SEND, 10, R.drawable.ytr_ic_launcher, null, "", false),
 		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.search.SearchActivity",
-				Intent.ACTION_SEND, 10, R.drawable.wiki, null, ""),
+				Intent.ACTION_SEND, 10, R.drawable.wiki, null, "", false),
 		new DictInfo("YandexTranslateOnline", "Yandex Translate Online", "", "",
-				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null, YND_DIC_ONLINE),
+				Intent.ACTION_SEND, 7, R.drawable.ytr_ic_launcher, null, YND_DIC_ONLINE, true),
 		new DictInfo("LingvoOnline", "Lingvo Online", "", "",
-					Intent.ACTION_SEND, 8, R.drawable.lingvo, null, LINGVO_DIC_ONLINE),
+					Intent.ACTION_SEND, 8, R.drawable.lingvo, null, LINGVO_DIC_ONLINE, true),
 		new DictInfo("LingvoOnline Extended", "Lingvo Online Extended", "", "",
-					Intent.ACTION_SEND, 8, R.drawable.lingvo, null, LINGVO_DIC_ONLINE),
+					Intent.ACTION_SEND, 8, R.drawable.lingvo, null, LINGVO_DIC_ONLINE, true),
 		new DictInfo("Wikipedia 1 (online)", "Wikipedia 1 (online)", "", "",
-				Intent.ACTION_SEND, 9, R.drawable.wiki, null, ""),
+				Intent.ACTION_SEND, 9, R.drawable.wiki, null, "", true),
 		new DictInfo("Wikipedia 2 (online)", "Wikipedia 2 (online)", "", "",
-				Intent.ACTION_SEND, 9, R.drawable.wiki, null, ""),
+				Intent.ACTION_SEND, 9, R.drawable.wiki, null, "", true),
 		new DictInfo("MDict", "MDict", "cn.mdict", "",
-				Intent.ACTION_SEARCH, 10, R.drawable.mdict, null, ""),
+				Intent.ACTION_SEARCH, 10, R.drawable.mdict, null, "", false),
+		new DictInfo("Deepl", "Deepl.com", "", "",
+				Intent.ACTION_SEND, 11, R.drawable.deepl, null, DEEPL_DIC_ONLINE, true),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -336,7 +345,7 @@ public class Dictionaries {
 					DictInfo di = new DictInfo(ri.activityInfo.name,
 							ri.activityInfo.loadLabel(pm).toString(),
 							packageName, ri.activityInfo.name,
-							Intent.ACTION_SEND,4,0, icon, "");
+							Intent.ACTION_SEND,4,0, icon, "", false);
 					dictsSendTo.add(di);
 					ldi.add(di);
 				}
@@ -744,6 +753,67 @@ public class Dictionaries {
 		});
 	};
 
+	private void deeplAuthThenTranslate(String s, String langf, String lang, DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
+		final CoolReader crf2 = (CoolReader) mActivity;
+		deeplAuthenticated = false;
+		crf2.readDeeplCloudSettings();
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE+"/usage").newBuilder().addQueryParameter("auth_key", crf2.deeplCloudSettings.deeplToken);
+		String url = urlBuilder.build().toString();
+		Request request = new Request.Builder()
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				if ((response.code() == 403) || (response.code() == 456)) {
+					String sErr = "";
+					if (response.code() == 403) sErr = crf2.getString(R.string.deepl_unauth);
+					if (response.code() == 456) sErr = crf2.getString(R.string.deepl_quoata);
+					String finalSErr = sErr;
+					BackgroundThread.instance().postBackground(() ->
+						BackgroundThread.instance().postGUI(() -> {
+							if (dcb == null)
+								crf2.showToast(finalSErr);
+							else {
+								if (dcb.showDicToast()) crf2.showToast(finalSErr);
+								dcb.fail(null, finalSErr);
+							}
+						}, 100));
+					return;
+				}
+				if (response.code() != 200) {
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> {
+								if (dcb == null)
+									crf2.showToast(crf2.getString(R.string.http_error) + " " + response.code());
+								else {
+									if (dcb.showDicToast()) crf2.showToast(crf2.getString(R.string.http_error) + " " + response.code());
+									dcb.fail(null, crf2.getString(R.string.http_error) + " " + response.code());
+								}
+							}, 100));
+					return;
+				}
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					deeplAuthenticated = true;
+					deeplTranslate(s, deeplGetDefLangCode(langf, true), deeplGetDefLangCode(lang, false), curDict, view, dcb);
+				}, 100));
+			}
+			public void onFailure(Call call, IOException e) {
+				BackgroundThread.instance().postBackground(() ->
+						BackgroundThread.instance().postGUI(() -> {
+							if (dcb == null)
+								crf2.showToast(e.getMessage());
+							else {
+								if (dcb.showDicToast()) crf2.showToast(e.getMessage());
+								dcb.fail(e, e.getMessage());
+							}
+						}, 100));
+			}
+		});
+	};
+
 	public HttpUrl.Builder wikiUrlBuilder(String s, String link, int curAction, int listSkipCount, int prevAction) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(link).newBuilder();
 		if (curAction == WIKI_FIND_TITLE) {
@@ -1055,6 +1125,27 @@ public class Dictionaries {
 		return langCode;
 	}
 
+	private String deeplGetDefLangCode(String langCode, boolean isSrc) {
+		if (isSrc) {
+			if (StrUtils.getNonEmptyStr(langCode,true).toLowerCase().startsWith("en-")) return "en";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("nl-")) return "nl";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("fr-")) return "fr";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("de-")) return "de";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("it-")) return "it";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("es-")) return "es";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("pt-")) return "pt";
+		} else {
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().equalsIgnoreCase("en")) return "en-us";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("nl-")) return "nl";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("fr-")) return "fr";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("de-")) return "de";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("it-")) return "it";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().equalsIgnoreCase("pt")) return "pt-pt";
+			if (StrUtils.getNonEmptyStr(langCode, true).toLowerCase().startsWith("es-")) return "es";
+		}
+		return StrUtils.getNonEmptyStr(langCode, true).toUpperCase();
+	}
+
 	private void lingvoTranslate(String s, String langf, String lang, boolean extended, DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		CoolReader cr = (CoolReader) mActivity;
 		if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -1218,6 +1309,140 @@ public class Dictionaries {
 							cr.showToast(e.getMessage());
 					}
 					unauthCnt = 0;
+				}
+			}
+		});
+	};
+
+	private void deeplTranslate(String s, String langf, String lang, DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
+		CoolReader cr = (CoolReader) mActivity;
+		if (!FlavourConstants.PREMIUM_FEATURES) {
+			cr.showToast(R.string.only_in_premium);
+			return;
+		}
+		if ((StrUtils.isEmptyStr(langf))||(StrUtils.isEmptyStr(lang))) {
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					cr.showToast(cr.getString(R.string.translate_lang_not_set)+": ["
+							+langf+"] -> ["+lang + "]"), 100));
+			return;
+		}
+		if (
+			(!(
+			langf.equals("DE")||langf.equals("EN")||langf.equals("FR")||langf.equals("IT")||langf.equals("JA")||
+					langf.equals("ES")||langf.equals("NL")||langf.equals("PL")||langf.equals("PT")||langf.equals("RU")||
+					langf.equals("ZH")
+			))
+			||
+			(!(
+					lang.equals("DE")||lang.equals("EN-GB")||lang.equals("EN-US")||lang.equals("EN")||lang.equals("FR")||lang.equals("IT")||
+							lang.equals("JA")||lang.equals("ES")||lang.equals("NL")||lang.equals("PL")||
+							lang.equals("PT-PT")||lang.equals("PT-BR")||lang.equals("PT")||lang.equals("RU")||
+							lang.equals("ZH")
+			))
+		) {
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					cr.showToast(cr.getString(R.string.translate_lang_not_found)+": ["
+							+langf + "] -> ["+lang + "}]"), 100));
+			return;
+		}
+		final CoolReader crf2 = (CoolReader) mActivity;
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE+"/v2/translate").newBuilder();
+		urlBuilder.addQueryParameter("auth_key", crf2.deeplCloudSettings.deeplToken);
+		urlBuilder.addQueryParameter("text", s);
+		urlBuilder.addQueryParameter("target_lang", lang);
+		String url = urlBuilder.build().toString();
+		Request request = new Request.Builder()
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				if ((response.code() == 403) || (response.code() == 456)) {
+					String sErr = "";
+					if (response.code() == 403) sErr = crf2.getString(R.string.deepl_unauth);
+					if (response.code() == 456) sErr = crf2.getString(R.string.deepl_quoata);
+					String finalSErr = sErr;
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> {
+								if (dcb == null)
+									crf2.showToast(finalSErr);
+								else {
+									if (dcb.showDicToast()) crf2.showToast(finalSErr);
+									dcb.fail(null, finalSErr);
+								}
+							}, 100));
+					deeplAuthenticated = false;
+					return;
+				}
+				if (response.code() != 200) {
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> {
+								if (dcb == null)
+									crf2.showToast(crf2.getString(R.string.http_error) + " " + response.code());
+								else {
+									if (dcb.showDicToast()) crf2.showToast(crf2.getString(R.string.http_error) + " " + response.code());
+									dcb.fail(null, crf2.getString(R.string.http_error) + " " + response.code());
+								}
+							}, 100));
+					deeplAuthenticated = false;
+					return;
+				}
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					try {
+						JSONObject jso = new JSONObject(sBody);
+						if (jso.has("translations")) {
+							String sDic = "";
+							JSONArray jsoT = jso.getJSONArray("translations");
+							if (jsoT.length() > 0) {
+								if (jsoT.getJSONObject(0).has("detected_source_language"))
+									sDic = crf2.getString(R.string.translated_from) + " " + jsoT.getJSONObject(0).getString("detected_source_language");
+								if (jsoT.getJSONObject(0).has("text")) {
+									String sTrans = jsoT.getJSONObject(0).getString("text");
+									if (!StrUtils.isEmptyStr(sTrans)) {
+										if (dcb == null) {
+											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic);
+											saveToDicSearchHistory(s, sTrans, curDict);
+										} else {
+											dcb.done(sTrans);
+											if (dcb.showDicToast()) {
+												cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic);
+											}
+											if (dcb.saveToHist()) {
+												saveToDicSearchHistory(s, sTrans, curDict);
+											}
+										}
+									}
+								} else {
+									if (dcb != null) dcb.fail(null, sBody);
+								}
+							}
+						}
+					} catch (Exception e) {
+						boolean bShowToast = dcb == null;
+						if (!bShowToast) bShowToast = dcb.showDicToast();
+						if (bShowToast) {
+							cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "");
+						} else dcb.fail(e, e.getMessage());
+					}
+				}, 100));
+			}
+
+			public void onFailure(Call call, IOException e) {
+				deeplAuthenticated = false;
+				if (unauthCntDeepl == 0) {
+					unauthCntDeepl++;
+					deeplAuthThenTranslate(s, langf, lang, curDict, view, dcb);
+				} else {
+					if (dcb == null)
+						cr.showToast(e.getMessage());
+					else {
+						dcb.fail(e, e.getMessage());
+						if (dcb.showDicToast())
+							cr.showToast(e.getMessage());
+					}
+					unauthCntDeepl = 0;
 				}
 			}
 		});
@@ -1834,6 +2059,36 @@ public class Dictionaries {
 
 				}
 				//intent7.setComponent(new ComponentName(curDict.packageName, curDict.className));
+				break;
+		case 11:
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					cr.showToast(R.string.only_in_premium);
+					return;
+				}
+				checkLangCodes();
+				book = cr.getReaderView().getBookInfo();
+				lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
+				langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
+				if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
+				if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
+					if (cr.getReaderView().mBookInfo!=null) {
+						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+						FileInfo dfi = fi.parent;
+						if (dfi == null) {
+							dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+						}
+						if (dfi != null) {
+							currentDictionary = saveCurrentDictionary;
+							currentDictionary2 = saveCurrentDictionary2;
+							currentDictionaryTmp = saveCurrentDictionaryTmp;
+							iDic2IsActive = saveIDic2IsActive;
+							cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_COMMON);
+						}
+					};
+					return;
+				}
+				if (!deeplAuthenticated) deeplAuthThenTranslate(s, langf, lang, curDict, view, dcb);
+				else deeplTranslate(s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), curDict, view, dcb);
 				break;
 		}
 	}

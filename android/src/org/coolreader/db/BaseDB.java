@@ -2,6 +2,7 @@ package org.coolreader.db;
 
 import java.io.File;
 
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.Utils;
@@ -26,7 +27,8 @@ public abstract class BaseDB {
 	protected SQLiteDatabase mDB;
 	// database for calibre catalog
 	protected SQLiteDatabase mCatalogDB;
-	private File catalogDBFile;
+	protected File catalogDBFile;
+	protected FileInfo catalogDBFileInfo;
 
 	private File mFileName;
 	public boolean restoredFromBackup;
@@ -131,7 +133,7 @@ public abstract class BaseDB {
 		return true;
 	}
 
-	protected boolean openCatalogDB(File dbFile) {
+	protected boolean openCatalogDB(File dbFile, FileInfo catalog) {
 		boolean needReopen = false;
 		if ((catalogDBFile == null) || (mCatalogDB == null)) needReopen = true;
 		if (!needReopen)
@@ -146,6 +148,7 @@ public abstract class BaseDB {
 			db.rawQuery("PRAGMA journal_mode = DELETE", null);
 			mCatalogDB = db;
 			catalogDBFile = dbFile;
+			catalogDBFileInfo = catalog;
 			return true;
 		} catch (SQLiteException e) {
 			log.e("Error while opening catalog DB " + dbFile.getAbsolutePath() + ". " + e.getMessage());

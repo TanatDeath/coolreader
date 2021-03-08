@@ -788,8 +788,12 @@ public class CRToolBar extends ViewGroup {
 			separator.setBackgroundColor(themeColors.get(R.attr.colorIcon));
 			addView(separator);
 			separator.layout(left, top, right, top + windowDividerHeight);
-			y0 = windowDividerHeight + 4;
-        	//}
+			View separator2 = new View(activity);
+			separator2.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
+			addView(separator2);
+			separator2.layout(left, top + windowDividerHeight, right, top + (2 * windowDividerHeight));
+			y0 = (2 *windowDividerHeight) + 4;
+			//}
         	
         	
 //        	ScrollView scroll = new ScrollView(activity);
@@ -846,13 +850,15 @@ public class CRToolBar extends ViewGroup {
 //        		addView(scroll);
         	}
         	//if (popupLocation != Settings.VIEWER_TOOLBAR_BOTTOM) {
-			View separator2 = new View(activity);
-			//separator2.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
-			separator2.setBackgroundColor(themeColors.get(R.attr.colorIcon));
-			addView(separator2);
-			separator2.layout(left, bottom - windowDividerHeight, right, bottom);
+			View separator3 = new View(activity);
+			separator3.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
+			addView(separator3);
+			separator3.layout(left, bottom - (2 * windowDividerHeight), right, bottom);
+			View separator4 = new View(activity);
+			separator4.setBackgroundColor(themeColors.get(R.attr.colorIcon));
+			addView(separator4);
+			separator4.layout(left, bottom - windowDividerHeight, right, bottom);
         	//}
-    		//popup.
     		if (lastButtonIndex > 0)
     			for (int i=lastButtonIndex + 1; i < actions.size(); i++)
     				if (actionsMore.contains(actions.get(i)))
@@ -938,7 +944,7 @@ public class CRToolBar extends ViewGroup {
         if (isVertical) {
 	        int contentHeight = MeasureSpec.getSize(heightMeasureSpec);
 	        int maxWidth = buttonWidth + BUTTON_SPACING + BUTTON_SPACING + BAR_SPACING + getPaddingLeft() + getPaddingRight();
-	        setMeasuredDimension(maxWidth, contentHeight);
+	        setMeasuredDimension(maxWidth, contentHeight + (windowDividerHeight * 4));
         } else {
 	        int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
 	        if (isMultiline) {
@@ -946,12 +952,12 @@ public class CRToolBar extends ViewGroup {
 	        	int lineCount = calcLineCount(contentWidth);
 	        	if (lineCount > maxMultilineLines)
 	        		lineCount = maxMultilineLines;
-	        	int h = lineCount * itemHeight + BAR_SPACING + BAR_SPACING + windowDividerHeight + 4;
+	        	int h = lineCount * itemHeight + BAR_SPACING + BAR_SPACING + (windowDividerHeight *4) + 4;
 //	        	if (h > contentHeight - itemHeight)
 //	        		h = contentHeight - itemHeight;
 	        	setMeasuredDimension(contentWidth, h);
 	        } else {
-	        	setMeasuredDimension(contentWidth, buttonHeight + BUTTON_SPACING * 2 + BAR_SPACING);
+	        	setMeasuredDimension(contentWidth, buttonHeight + BUTTON_SPACING * 2 + BAR_SPACING + (windowDividerHeight *4));
 	        }
         }
 	}

@@ -2875,6 +2875,30 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						dlgA.show();
 					}, true).
 					noIcon());
+			listView.add(new ClickOption(mOwner, getString(R.string.deepl_settings),
+					PROP_CLOUD_DEEPL_OPTIONS, getString(R.string.deepl_settings_add_info), this.lastFilteredValue,
+					view -> {
+						ArrayList<String[]> vl = new ArrayList<>();
+						((CoolReader)activity).readLingvoCloudSettings();
+						String[] arrS1 = {activity.getString(R.string.deepl_token), activity.getString(R.string.deepl_token),
+								StrUtils.getNonEmptyStr(((CoolReader)activity).deeplCloudSettings.deeplToken, true)};
+						vl.add(arrS1);
+						AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+								(CoolReader) activity,
+								activity.getString(R.string.deepl_settings),
+								activity.getString(R.string.deepl_settings),
+								vl, results -> {
+							if (results != null) {
+								if (results.size() >= 1)
+									((CoolReader)activity).deeplCloudSettings.deeplToken = StrUtils.getNonEmptyStr(results.get(0), true);
+							}
+							Gson gson = new GsonBuilder().setPrettyPrinting().create();
+							final String prettyJson = gson.toJson(((CoolReader)activity).deeplCloudSettings);
+							((CoolReader)activity).saveDeeplCloudSettings(prettyJson);
+						});
+						dlgA.show();
+					}, true).
+					noIcon());
 			listView.add(new BoolOption(mOwner, getString(R.string.wiki_save_history),
 					PROP_CLOUD_WIKI_SAVE_HISTORY, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					noIcon());
