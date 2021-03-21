@@ -10,11 +10,11 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
+import android.os.Build;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -22,19 +22,13 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.PopupWindow.OnDismissListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TabHost;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -260,10 +254,10 @@ public class SelectionToolbarDlg {
 			llAddButtonsParent.removeAllViews();
 			llAddButtonsParent.addView(llAddButtons);
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-			int colorGray = themeColors.get(R.attr.colorThemeGray2);
-			int colorIcon = themeColors.get(R.attr.colorIcon);
 			ColorDrawable c = new ColorDrawable(colorGrayC);
-			c.setAlpha(130);
+			String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
+			if (!sTranspButtons.equals("0")) c.setAlpha(130);
+				else c.setAlpha(255);
 			llAddButtons.findViewById(R.id.btn_quick_bookmark).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_quick_bookmark).setOnClickListener(v -> {
 				Bookmark bmk = new Bookmark();
@@ -418,15 +412,20 @@ public class SelectionToolbarDlg {
 		int colorIcon = themeColors.get(R.attr.colorIcon);
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
-		c.setAlpha(130);
-
+		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
+		if (!sTranspButtons.equals("0")) c.setAlpha(130);
+			else c.setAlpha(255);
 		mPanel = panel;
 		llAddButtonsParent = panel.findViewById(R.id.ll_sel_add);
 
-		if (isEInk)
-			panel.setBackgroundColor(Color.argb(200, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
-		else
-			panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		String sBkg = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND, "0");
+		if (sBkg.equals("0")) panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (sBkg.equals("1")) panel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (sBkg.equals("2")) panel.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+//		if (isEInk)
+//			panel.setBackgroundColor(Color.argb(200, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+//		else
+//			panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
 		//mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
 		mPanel.findViewById(R.id.selection_copy).setBackgroundDrawable(c);
@@ -469,7 +468,8 @@ public class SelectionToolbarDlg {
 					dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					//dicButton.setHeight(dicButton.getHeight()-4);
 					dicButton.setTextColor(colorIcon);
-					dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+					if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+						else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 					dicButton.setPadding(6, 6, 6, 6);
 					//dicButton.setBackground(null);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
@@ -602,8 +602,21 @@ public class SelectionToolbarDlg {
 			restoreReaderMode();
 			mReaderView.clearSelection();
 		});
-		
+
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
+
+		// plotn - I think this is not needed
+//		if (!DeviceInfo.EINK_SCREEN) {
+//			// transparent
+//			mWindow.setBackgroundDrawable(new BitmapDrawable());
+//		}
+//		else {
+//			// white background with rectangle
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//				mWindow.setBackgroundDrawable(mCoolReader.getDrawable(R.drawable.btn_default_normal_hc_light));
+//			else
+//				mWindow.setBackgroundDrawable(mCoolReader.getResources().getDrawable(R.drawable.btn_default_normal_hc_light));
+//		}
 		//mWindow.setAnimationStyle(android.R.style.Animation_Toast);
 		mWindow.setWidth(WindowManager.LayoutParams.FILL_PARENT);
 		mWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
@@ -678,5 +691,5 @@ public class SelectionToolbarDlg {
 //		}
 		mCoolReader.tintViewIcons(mPanel);
 	}
-	
+
 }

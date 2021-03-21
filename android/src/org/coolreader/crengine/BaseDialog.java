@@ -130,8 +130,10 @@ public class BaseDialog extends Dialog {
 			setContentView(layoutView);
 		}
 		contentsLayout.removeAllViews();
-		activity.tintViewIcons(view);
-		contentsLayout.addView(view);
+		if (null != view) {
+			activity.tintViewIcons(view);
+			contentsLayout.addView(view);
+		}
 	}
 	
 	protected void onPositiveButtonClick()
@@ -293,9 +295,11 @@ public class BaseDialog extends Dialog {
             }
         }
 		contentsLayout = layout.findViewById(R.id.base_dialog_content_view);
-        contentsLayout.addView(view);
 
-        updateGlobalMargin(contentsLayout, true, false, true, true);
+		if (null != view)
+        	contentsLayout.addView(view);
+
+		updateGlobalMargin(contentsLayout, true, false, true, true);
 		updateGlobalMargin(upperTextLayout, true, true, true, false);
 
 		setTitle(title);

@@ -62,6 +62,7 @@ public class DicToastView {
     public static int IS_DEEPL = 3;
 
     public static int mColorIconL = Color.GRAY;
+    public static PopupWindow curWindow = null;
 
     private static Dictionaries.DictInfo mListCurDict;
     private static String mListLink;
@@ -119,6 +120,7 @@ public class DicToastView {
     private static Runnable handleDismiss = () -> {
         if (window != null) {
             window.dismiss();
+            curWindow=null;
             show();
         }
     };
@@ -254,6 +256,14 @@ public class DicToastView {
             return true;
         }
     }
+
+    public static void hideToast(BaseActivity act) {
+        try {
+            mHandler.postDelayed(handleDismiss, 100);
+        } catch (Exception e) {
+
+        }
+    }
     
     private static void showToastInternal(BaseActivity act, View anchor, String msg, int duration,
                                  int dicT, String dicName, ArrayList<WikiArticle> arrWA,
@@ -340,11 +350,13 @@ public class DicToastView {
         }
         Toast t = queue.poll();
         window = new PopupWindow(t.anchor.getContext());
+        curWindow = window;
         window.setTouchInterceptor((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                 if (((CoolReader)mActivity).getmReaderView() != null)
                     ((CoolReader)mActivity).getmReaderView().disableTouch = true;
                 window.dismiss();
+                curWindow = null;
                 showing.compareAndSet(true, false);
                 return true;
             }
@@ -562,6 +574,7 @@ public class DicToastView {
                     }
                 };
                 window.dismiss();
+                curWindow = null;
                 showing.compareAndSet(true, false);
             });
             ImageButton btnToUserDic = (ImageButton) window.getContentView().findViewById(R.id.btn_to_user_dic);
@@ -575,6 +588,7 @@ public class DicToastView {
                     }
                 };
                 window.dismiss();
+                curWindow = null;
                 showing.compareAndSet(true, false);
             });
             ImageButton btnCopyToCb = window.getContentView().findViewById(R.id.btn_copy_to_cb);
@@ -586,6 +600,7 @@ public class DicToastView {
                 }
                 cm.setText(StrUtils.getNonEmptyStr(s,true));
                 window.dismiss();
+                curWindow = null;
                 showing.compareAndSet(true, false);
             });
             mActivity.tintViewIcons(yndRow,true);
@@ -638,6 +653,7 @@ public class DicToastView {
                         }
                     };
                     window.dismiss();
+                    curWindow = null;
                     showing.compareAndSet(true, false);
                 });
                 ImageButton btnToUserDic = window.getContentView().findViewById(R.id.btn_to_user_dic);
@@ -652,6 +668,7 @@ public class DicToastView {
                         }
                     };
                     window.dismiss();
+                    curWindow = null;
                     showing.compareAndSet(true, false);
                 });
                 ImageButton btnCopyToCb = window.getContentView().findViewById(R.id.btn_copy_to_cb);
@@ -663,6 +680,7 @@ public class DicToastView {
                     }
                     cm.setText(StrUtils.getNonEmptyStr(s,true));
                     window.dismiss();
+                    curWindow = null;
                     showing.compareAndSet(true, false);
                 });
                 mActivity.tintViewIcons(yndRow,true);

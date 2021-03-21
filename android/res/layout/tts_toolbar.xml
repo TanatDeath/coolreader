@@ -6,7 +6,7 @@
     android:id="@+id/tts_toolbar_body"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:background="?attr/colorThemeGray2"
+    android:background="?attr/tts_toolbar_background"
     android:layout_marginTop="3dip"
     android:layout_marginBottom="3dip"
 	android:layout_marginLeft="3dip"
@@ -91,7 +91,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_ff"
-                android:tag="tint"
+            android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_forward"/>
@@ -103,7 +103,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_stop"
-                android:tag="tint"
+            android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_stop"/>

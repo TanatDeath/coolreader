@@ -715,12 +715,9 @@ public class BookmarkEditDialog extends BaseDialog {
 
 	@Override
 	protected void onThirdButtonClick() {
-		mCoolReader.askConfirmation(R.string.win_title_confirm_bookmark_delete, new Runnable() {
-			@Override
-			public void run() {
-				mReaderView.removeBookmark(mBookmark);
-				onNegativeButtonClick();
-			}
+		mCoolReader.askConfirmation(R.string.win_title_confirm_bookmark_delete, () -> {
+			mReaderView.removeBookmark(mBookmark);
+			onNegativeButtonClick();
 		});
 	}
 
@@ -730,5 +727,4 @@ public class BookmarkEditDialog extends BaseDialog {
 		onPositiveButtonClick();
 	}
 
-	
 }

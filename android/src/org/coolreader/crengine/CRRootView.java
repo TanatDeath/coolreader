@@ -31,6 +31,7 @@ import org.coolreader.layouts.FlowLayout;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -40,6 +41,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	public static final Logger log = L.create("cr");
 
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 	public boolean needRefreshOnlineCatalogs = false;
 	private final CoolReader mActivity;
 	private ViewGroup mView;
@@ -76,6 +79,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	public CRRootView(CoolReader activity) {
 		super(activity);
 		this.mActivity = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(activity, isEInk);
 		this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		this.mCoverpageManager = Services.getCoverpageManager();
 		this.mCoverpageManager.setmCoolReader(mActivity);
@@ -188,20 +193,9 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			setBookInfoItem(mView, R.id.lbl_book_title, currentBook.getFileInfo().title);
 			setBookInfoItem(mView, R.id.lbl_book_series, Utils.formatSeries(item.series, item.seriesNumber));
 			String state = Utils.formatReadingState(mActivity, item);
-			int colorBlue;
-			int colorGreen;
-			int colorGray;
-			int colorIcon;
-			TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorThemeBlue,
-							R.attr.colorThemeGreen,
-							R.attr.colorThemeGray,
-							R.attr.colorIcon});
-			colorBlue = a.getColor(0, Color.BLUE);
-			colorGreen = a.getColor(1, Color.GREEN);
-			colorGray = a.getColor(2, Color.GRAY);
-			colorIcon = a.getColor(3, Color.GRAY);
-			a.recycle();
+			int colorBlue = themeColors.get(R.attr.colorThemeBlue);
+			int colorGreen = themeColors.get(R.attr.colorThemeGreen);
+			int colorGray = themeColors.get(R.attr.colorThemeGray);
 			TextView tvInfo = mView.findViewById(R.id.lbl_book_info1);
 			int n = item.getReadingState();
 			if (n == FileInfo.STATE_READING)
@@ -243,20 +237,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			bFirst = false;
 			if (!bSkip) books.add(bi);
 		}
-		int colorBlue;
-		int colorGreen;
-		int colorGray;
-		int colorIcon;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeBlue,
-						R.attr.colorThemeGreen,
-						R.attr.colorThemeGray,
-						R.attr.colorIcon});
-		colorBlue = a.getColor(0, Color.BLUE);
-		colorGreen = a.getColor(1, Color.GREEN);
-		colorGray = a.getColor(2, Color.GRAY);
-		colorIcon = a.getColor(3, Color.GRAY);
-		a.recycle();
+		int colorBlue = themeColors.get(R.attr.colorThemeBlue);
+		int colorGreen = themeColors.get(R.attr.colorThemeGreen);
+		int colorGray = themeColors.get(R.attr.colorThemeGray);
+		int colorIcon = themeColors.get(R.attr.colorIcon);
 		lastRecentFiles.clear();
 		for (int i=0;i<books.size();i++) lastRecentFiles.add(books.get(i).getFileInfo());
 		ArrayList<FileInfo> files = new ArrayList<>();
@@ -368,18 +352,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	public static ArrayList<FileInfo> lastCatalogs = new ArrayList<>();
 	private void updateOnlineCatalogs(ArrayList<FileInfo> catalogs, boolean readSetting) {
-		int colorIcon;
-		int colorIconL;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeBlue,
-						R.attr.colorThemeGreen,
-						R.attr.colorThemeGray,
-						R.attr.colorIcon,
-						R.attr.colorThemeGray2Contrast,
-						R.attr.colorIconL});
-		colorIcon = a.getColor(3, Color.GRAY);
-		colorIconL = a.getColor(5, Color.GRAY);
-		a.recycle();
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		int colorIconL = themeColors.get(R.attr.colorIconL);
 		String lang = mActivity.getCurrentLanguage();
 		//boolean defEnableLitres = lang.toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
 		//boolean enableLitres = mActivity.settings().getBool(Settings.PROP_APP_PLUGIN_ENABLED + "." + OnlineStorePluginManager.PLUGIN_PKG_LITRES, defEnableLitres);
@@ -525,14 +499,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 	private void updateFilesystems(List<FileInfo> dirs) {
 		if (dirs==null) return;
-		int colorIcon;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeBlue,
-						R.attr.colorThemeGreen,
-						R.attr.colorThemeGray,
-						R.attr.colorIcon});
-		colorIcon = a.getColor(3, Color.GRAY);
-		a.recycle();
+		int colorIcon = themeColors.get(R.attr.colorIcon);
 		if (dirs.size()!=0) {
 			LayoutInflater inflater = LayoutInflater.from(mActivity);
 			mFilesystemScroll.removeAllViews();
@@ -764,14 +731,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	}
 
 	private void updateLibraryItems(ArrayList<FileInfo> dirs, boolean readSetting) {
-		int colorIcon;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeBlue,
-						R.attr.colorThemeGreen,
-						R.attr.colorThemeGray,
-						R.attr.colorIcon});
-		colorIcon = a.getColor(3, Color.GRAY);
-		a.recycle();
+		int colorIcon = themeColors.get(R.attr.colorIcon);
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		mLibraryScroll.removeAllViews();
 		for (final FileInfo item : dirs) {
@@ -834,11 +794,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	}
 
 	private void paintRecentButtons() {
-		int colorGrayC;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mActivity.tintViewIcons(btnRecentToRead, PorterDuff.Mode.CLEAR,true);
@@ -1054,26 +1010,12 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				mActivity.showDirectory(dir, "");
 			}
 		});
+		int colorBlue = themeColors.get(R.attr.colorThemeBlue);
+		int colorGreen = themeColors.get(R.attr.colorThemeGreen);
+		int colorGray = themeColors.get(R.attr.colorThemeGray);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 
-        int colorBlue;
-        int colorGreen;
-        int colorGray;
-        int colorIcon;
-        int colorGrayC;
-        TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-                {R.attr.colorThemeBlue,
-                        R.attr.colorThemeGreen,
-                        R.attr.colorThemeGray,
-                        R.attr.colorIcon,
-                        R.attr.colorThemeGray2Contrast});
-        colorBlue = a.getColor(0, Color.BLUE);
-        colorGreen = a.getColor(1, Color.GREEN);
-        colorGray = a.getColor(2, Color.GRAY);
-        colorIcon = a.getColor(3, Color.GRAY);
-        colorGrayC = a.getColor(4, Color.GRAY);
-        a.recycle();
-
-        btnStateReading.setTextColor(colorGreen);
+		btnStateReading.setTextColor(colorGreen);
         btnStateToRead.setTextColor(colorBlue);
         btnStateFinished.setTextColor(colorGray);
 		btnRecentReading.setTextColor(colorGreen);
@@ -1212,6 +1154,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			ReaderAction.RECENT_BOOKS,
 			ReaderAction.USER_MANUAL,
 			ReaderAction.OPTIONS,
+			ReaderAction.SAVE_LOGCAT,
 			ReaderAction.HIDE,
 			ReaderAction.EXIT,	
 		};
@@ -1237,11 +1180,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			} else if (item == ReaderAction.OPTIONS) {
 				mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
 				return true;
+			} else if (item == ReaderAction.SAVE_LOGCAT) {
+				mActivity.createLogcatFile();
+				return true;
 			}
-//				else if (item == ReaderAction.OPEN_BOOK_FROM_GD) {
-//					mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-//					return true;
-//				}
 			return false;
 		});
 	}

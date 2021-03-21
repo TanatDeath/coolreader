@@ -35,7 +35,7 @@
             android:layout_width="0dip" android:layout_weight="3"
 	        android:layout_height="match_parent"
 	        android:src="?attr/attr_icons8_copy"
-                android:tag="tint"
+            android:tag="tint"
             android:minHeight="?android:attr/listPreferredItemHeight"
 			android:minWidth="?android:attr/listPreferredItemHeight"
 	        android:layout_marginTop="2dip"
@@ -63,7 +63,7 @@
 	        android:layout_marginLeft="1dip"
 	        android:layout_marginRight="1dip"
 	        android:src="?attr/attr_icons8_bookmark_simple"
-                android:tag="tint"
+            android:tag="tint"
 	        android:contentDescription="@string/options_selection_action_bookmark"/>
         <ImageButton android:id="@+id/selection_email"
             android:layout_width="0dip" android:layout_weight="3"
@@ -99,7 +99,7 @@
 	        android:layout_marginLeft="1dip"
 	        android:layout_marginRight="1dip"
 	        android:src="?attr/cr3_viewer_exit_drawable"
-                android:tag="tint"
+            android:tag="tint"
 	        android:contentDescription="@string/dlg_button_cancel"/>
 		<ImageButton android:id="@+id/selection_more"
 				android:layout_width="0dip" android:layout_weight="1"
@@ -130,9 +130,9 @@
 		<TableRow>
 			<LinearLayout
 				android:orientation="horizontal"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:layout_weight="4"
+				android:layout_weight="3"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
 				android:layout_marginBottom="2dp"
@@ -197,7 +197,8 @@
 			</LinearLayout>
 			<LinearLayout
 				android:orientation="horizontal"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
+				android:layout_marginRight="5dp"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
 				android:baselineAligned="true"
@@ -223,11 +224,12 @@
 		<TableRow>
 			<LinearLayout
 					android:orientation="horizontal"
-					android:layout_width="wrap_content"
+					android:layout_width="0dp"
+					android:layout_marginLeft="15dp"
 					android:layout_height="wrap_content"
 					android:layout_weight="1"
 					android:baselineAligned="true"
-                                        android:layout_gravity="right"
+                    android:layout_gravity="right"
 					android:layout_marginBottom="15dp"
 					android:gravity="center"
 					>
@@ -248,13 +250,13 @@
 			</LinearLayout>
 			<LinearLayout
 					android:orientation="horizontal"
-					android:layout_width="wrap_content"
+					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:layout_weight="4"
+					android:layout_weight="3"
 					android:baselineAligned="true"
 					android:gravity="center_vertical"
 					android:layout_marginBottom="15dp"
-                                        android:layout_marginRight="15dp"
+                    android:layout_marginRight="15dp"
 					>
 				<ImageButton android:id="@+id/btn_prev_sent2"
 						style="@style/TextAppearance.Small"

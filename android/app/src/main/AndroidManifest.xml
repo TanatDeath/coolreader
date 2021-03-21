@@ -76,7 +76,7 @@
                 android:launchMode="singleInstance"
                 android:screenOrientation="sensor"
                 android:theme="@android:style/Theme.NoTitleBar"
-                android:windowSoftInputMode="stateHidden">
+                android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -1125,6 +1125,7 @@
                 <data
                         android:host="*"
                         android:scheme="content" />
+                <data android:mimeType="*/*" />
                 <data android:pathPattern="/.*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2" />

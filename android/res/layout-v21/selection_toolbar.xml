@@ -132,9 +132,9 @@
 		<TableRow>
 			<LinearLayout
 				android:orientation="horizontal"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:layout_weight="4"
+				android:layout_weight="3"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
 				android:layout_marginBottom="2dp"
@@ -166,7 +166,8 @@
 				/>
 				<SeekBar android:id="@+id/selection_left_bound_control"
 					android:layout_height="wrap_content"
-					android:layout_width="2dip" android:layout_weight="1"
+					android:layout_width="2dip"
+					android:layout_weight="1"
 					android:layout_marginTop="2dip"
 					android:layout_marginBottom="2dip"
 					android:layout_marginLeft="2dip"
@@ -201,7 +202,8 @@
 			</LinearLayout>
 			<LinearLayout
 				android:orientation="horizontal"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
+				android:layout_marginRight="5dp"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
 				android:baselineAligned="true"
@@ -227,7 +229,8 @@
 		<TableRow>
 			<LinearLayout
 					android:orientation="horizontal"
-					android:layout_width="wrap_content"
+					android:layout_width="0dp"
+					android:layout_marginLeft="5dp"
 					android:layout_height="wrap_content"
 					android:layout_weight="1"
 					android:baselineAligned="true"
@@ -252,9 +255,9 @@
 			</LinearLayout>
 			<LinearLayout
 					android:orientation="horizontal"
-					android:layout_width="wrap_content"
+					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:layout_weight="4"
+					android:layout_weight="3"
 					android:baselineAligned="true"
 					android:gravity="center_vertical"
 					android:layout_marginBottom="15dp"

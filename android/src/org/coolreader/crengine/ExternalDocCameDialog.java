@@ -80,6 +80,10 @@ public class ExternalDocCameDialog extends BaseDialog {
 		return sLastSeg.trim();
 	}
 
+	public String replaceInvalidChars(String s) {
+		return StrUtils.getNonEmptyStr(s, true).replaceAll("[\\\\/:*?\"<>|]", "");
+	}
+
 	private boolean checkIntentImgUrl(String sUrl) {
 		// link example:
 		//https://www.google.com/imgres?imgurl=https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg?auto%3Dcompress%26cs%3Dtinysrgb%26dpr%3D1%26w%3D500&imgrefurl=https://www.pexels.com/search/galaxy%2520wallpaper/&tbnid=ch8IfDIaCMZBvM&vet=1&docid=nvJrYCoGRBCahM&w=500&h=667&q=wallpaper&source=sh/x/im
@@ -146,7 +150,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 								BackgroundThread.instance().postBackground(() ->
 										BackgroundThread.instance().postGUI(() -> {
 									tvExtPath.setText(tvExtPath.getText()+"; "+sTitle);
-									edtFileName.setText(extractSuggestedName(sTitle));
+									edtFileName.setText(replaceInvalidChars(extractSuggestedName(sTitle)));
 								}, 100));
 							} catch (Exception e) {
 								docJsoup = null;
@@ -444,12 +448,12 @@ public class ExternalDocCameDialog extends BaseDialog {
 			exs = fEx.exists();
 			i++;
 		}
-		edtFileName.setText(sBName);
+		edtFileName.setText(replaceInvalidChars(sBName));
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		edtFileName.setBackgroundColor(colorGrayCT);
 
-		edtFileExt = (EditText) view.findViewById(R.id.file_ext);
-		edtFileExt.setText("."+sDocFormat);
+		edtFileExt = view.findViewById(R.id.file_ext);
+		edtFileExt.setText("."+replaceInvalidChars(sDocFormat));
 		edtFileExt.setBackgroundColor(colorGrayCT);
 
 		btnOpenFromStream = view.findViewById(R.id.btn_open_from_stream);

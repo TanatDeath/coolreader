@@ -266,8 +266,13 @@ private:
     int m_font_size; // = m_requested_font_size, possibly scaled according to DPI
     int m_status_font_size;
     int m_def_interline_space;
+#if USE_LIMITED_FONT_SIZES_SET
     LVArray<int> m_font_sizes;
     bool m_font_sizes_cyclic;
+#else
+    int m_min_font_size;
+    int m_max_font_size;
+#endif
     bool m_is_rendered;
 
     LVDocViewMode m_view_mode; // DVM_SCROLL, DVM_PAGES
@@ -321,6 +326,7 @@ private:
     lvRect m_pageRects[2];
     int    m_pagesVisible;
     int    m_pagesVisibleOverride;
+    int m_pageHeaderPos;
     int m_pageHeaderInfo;
     bool m_showCover;
     LVRefVec<LVImageSource> m_headerIcons;
@@ -418,7 +424,7 @@ public:
     /// get screen rectangle for specified cursor position, returns false if not visible
     bool getCursorRect( ldomXPointer ptr, lvRect & rc, bool scrollToCursor = false );
     /// set status bar and clock mode
-    void setStatusMode( int newMode, bool showClock, bool showTitle,
+    void setStatusMode( int pos, bool showClock, bool showTitle,
             bool showBattery, bool showChapterMarks, bool showPercent,
             bool showPageNumber, bool showPageCount, bool showPagesToChapter,
             bool showTimeLeft);
@@ -695,6 +701,10 @@ public:
     /// set window visible page count, to use exact value independent of font size and window sides
     void overrideVisiblePageCount(int n);
 
+    /// get page header position
+    int getPageheaderPosition() { return m_pageHeaderPos; }
+    /// set page header position
+    void setPageHeaderPosition( int pos );
     /// get page header info mask
     int getPageHeaderInfo() { return m_pageHeaderInfo; }
     /// set page header info mask
@@ -873,8 +883,13 @@ public:
     /// sets new status bar font size
     void setStatusFontSize( int newSize );
 
+#if USE_LIMITED_FONT_SIZES_SET
     /// sets posible base font sizes (for ZoomFont)
     void setFontSizes( LVArray<int> & sizes, bool cyclic );
+#else
+    void setMinFontSize( int size );
+    void setMaxFontSize( int size );
+#endif
 
     /// get drawing buffer
     //LVDrawBuf * GetDrawBuf() { return &m_drawbuf; }

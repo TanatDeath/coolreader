@@ -118,25 +118,31 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			this.userDicView.setBackgroundDrawable(statusBackground);
 			toolbarBackground = contentView.createToolbarBackgroundDrawable();
 			ArrayList<ReaderAction> actionsList = ReaderAction.createList(
-				ReaderAction.GO_BACK,
-				ReaderAction.TOC,
-				ReaderAction.BOOK_INFO,
-				ReaderAction.FONTS_MENU,
-				ReaderAction.SEARCH,
-				ReaderAction.OPTIONS,
-				ReaderAction.BOOKMARKS,
-				ReaderAction.FILE_BROWSER_ROOT,
-				ReaderAction.TOGGLE_DAY_NIGHT,
-				ReaderAction.TOGGLE_SELECTION_MODE,
-				ReaderAction.GO_PAGE,
-				ReaderAction.GO_PERCENT,
-				ReaderAction.FILE_BROWSER,
-				ReaderAction.TTS_PLAY,
-				ReaderAction.GO_FORWARD,
-				ReaderAction.RECENT_BOOKS,
-				ReaderAction.OPEN_PREVIOUS_BOOK,
-				ReaderAction.TOGGLE_AUTOSCROLL
-			);
+					ReaderAction.GO_BACK,
+					ReaderAction.TOC,
+					ReaderAction.BOOK_INFO,
+					ReaderAction.FONTS_MENU,
+					ReaderAction.SEARCH,
+					ReaderAction.OPTIONS,
+					ReaderAction.BOOKMARKS,
+					ReaderAction.FILE_BROWSER_ROOT,
+					ReaderAction.TOGGLE_DAY_NIGHT,
+					ReaderAction.TOGGLE_SELECTION_MODE,
+					ReaderAction.GO_PAGE,
+					ReaderAction.GO_PERCENT,
+					ReaderAction.FILE_BROWSER,
+					ReaderAction.TTS_PLAY,
+					ReaderAction.GO_FORWARD,
+					ReaderAction.RECENT_BOOKS,
+					ReaderAction.OPEN_PREVIOUS_BOOK,
+					ReaderAction.TOGGLE_AUTOSCROLL,
+					ReaderAction.SAVE_LOGCAT);
+			if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {
+				if (DeviceInfo.EINK_ONYX && DeviceInfo.ONYX_HAVE_BRIGHTNESS_SYSTEM_DIALOG) {
+					actionsList.add(7, ReaderAction.SHOW_SYSTEM_BACKLIGHT_DIALOG);
+				}
+				// TODO: add other e-ink devices with backlight support
+			}
 			if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				actionsList.add(ReaderAction.GDRIVE_SYNCTO);
 				actionsList.add(ReaderAction.GDRIVE_SYNCFROM);

@@ -33,7 +33,6 @@ public interface Settings {
     public static final String PROP_LOG_AUTOFLUSH           ="crengine.log.autoflush";
     public static final String PROP_FONT_SIZE               ="crengine.font.size";
 	public static final String PROP_FONT_SIZE_USER_DIC      ="crengine.font.size.userdic";
-    public static final String PROP_FALLBACK_FONT_FACE      ="crengine.font.fallback.face";
 	public static final String PROP_FALLBACK_FONT_FACES     ="crengine.font.fallback.faces";
 	public static final String PROP_STATUS_FONT_COLOR       ="crengine.page.header.font.color";
     public static final String PROP_STATUS_FONT_COLOR_DAY   ="crengine.page.header.font.color.day";
@@ -148,7 +147,8 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
     public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
 	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT    ="app.screen.warm.backlight"; //CR!
-	public static final String PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM = "app.screen.get.backlight.from.system";
+	//decided to remove and do like in CR
+	//public static final String PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM = "app.screen.get.backlight.from.system";
 	public static final String PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA    = "app.screen.backlight.fix.delta";
 	public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
     public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
@@ -211,6 +211,8 @@ public interface Settings {
 	public static final String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
 	public static final String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
 	public static final String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
+	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
+	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
 
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
@@ -349,8 +351,12 @@ public interface Settings {
     public static final int VIEWER_STATUS_NONE = 0;
     public static final int VIEWER_STATUS_TOP = 1;
     public static final int VIEWER_STATUS_BOTTOM = 2;
-    public static final int VIEWER_STATUS_PAGE = 3;
-	public static final int VIEWER_STATUS_PAGE_2LINES = 4;
+
+	public static final int VIEWER_STATUS_PAGE_HEADER = 3;
+	public static final int VIEWER_STATUS_PAGE_FOOTER = 4;
+    public static final int VIEWER_STATUS_PAGE = 5;
+	public static final int VIEWER_STATUS_PAGE_2LINES_HEADER = 6;
+	public static final int VIEWER_STATUS_PAGE_2LINES_FOOTER = 7;
 
 	public static final int VIEWER_TOOLBAR_NONE = 0;
     public static final int VIEWER_TOOLBAR_TOP = 1;
@@ -452,7 +458,7 @@ public interface Settings {
 	    "crengine.page.*",
 	    PROP_FONT_SIZE,
 		PROP_FONT_SIZE_USER_DIC,
-	    PROP_FALLBACK_FONT_FACE,
+	    PROP_FALLBACK_FONT_FACES,
 	    PROP_INTERLINE_SPACE,
 	    PROP_STATUS_LINE,
 	    PROP_FOOTNOTES,
@@ -525,7 +531,7 @@ public interface Settings {
 
 		PROP_APP_USE_EINK_FRONTLIGHT
 
-};
+	};
 
 
 }

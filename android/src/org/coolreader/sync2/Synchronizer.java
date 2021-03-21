@@ -31,7 +31,6 @@ import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
@@ -90,6 +89,8 @@ public class Synchronizer {
 	public final static int SYNC_FLAG_SHOW_SIGN_IN = 0x04;
 	/// show progress bar for sync process
 	public final static int SYNC_FLAG_SHOW_PROGRESS = 0x08;
+	/// ask user about changed position or changed document
+	public final static int SYNC_FLAG_ASK_CHANGED = 0x10;
 
 	private class DownloadInfo implements Cloneable {
 		public String m_filepath;		// full path to file on the cloud
@@ -124,7 +125,6 @@ public class Synchronizer {
 	private int m_lockTryCount = 0;
 
 	private static final String[] ALLOWED_OPTIONS_PROP_NAMES = {
-			Settings.PROP_FALLBACK_FONT_FACE,
 			Settings.PROP_FALLBACK_FONT_FACES,
 			Settings.PROP_FOOTNOTES,
 			Settings.PROP_APP_HIGHLIGHT_BOOKMARKS,
@@ -247,35 +247,48 @@ public class Synchronizer {
 	}
 
 	protected void doneSuccessfully() {
-		if (null != m_onStatusListener)
-			BackgroundThread.instance().executeGUI(() -> m_onStatusListener.onSyncCompleted(m_syncDirection, (m_flags & SYNC_FLAG_SHOW_PROGRESS) != 0, (m_flags & SYNC_FLAG_FORCE) != 0));
+		BackgroundThread.instance().executeGUI(() -> {
+			if (null != m_onStatusListener) {
+				m_onStatusListener.onSyncCompleted(m_syncDirection, (m_flags & SYNC_FLAG_SHOW_PROGRESS) != 0, (m_flags & SYNC_FLAG_QUIETLY) == 0);
+			}
+		});
 		m_isBusy = false;
 	}
 
 	protected void doneFailed(String error) {
-		if (null != m_onStatusListener)
-			BackgroundThread.instance().executeGUI(() -> m_onStatusListener.onSyncError(m_syncDirection, error));
+		BackgroundThread.instance().executeGUI(() -> {
+			if (null != m_onStatusListener) {
+				m_onStatusListener.onSyncError(m_syncDirection, error);
+			}
+		});
 		m_isBusy = false;
 	}
 
 	protected void doneAborted() {
-		if (null != m_onStatusListener)
-			BackgroundThread.instance().executeGUI(() -> m_onStatusListener.onAborted(m_syncDirection));
+		BackgroundThread.instance().executeGUI(() -> {
+			if (null != m_onStatusListener) {
+				m_onStatusListener.onAborted(m_syncDirection);
+			}
+		});
 		m_isBusy = false;
 	}
 
 	protected void setSyncStarted(SyncDirection dir) {
 		m_isBusy = true;
 		m_syncDirection = dir;
-		if (null != m_onStatusListener) {
-			BackgroundThread.instance().executeGUI(() -> m_onStatusListener.onSyncStarted(m_syncDirection, (m_flags & SYNC_FLAG_SHOW_PROGRESS) != 0, (m_flags & SYNC_FLAG_FORCE) != 0));
-		}
+		BackgroundThread.instance().executeGUI(() -> {
+			if (null != m_onStatusListener) {
+				m_onStatusListener.onSyncStarted(m_syncDirection, (m_flags & SYNC_FLAG_SHOW_PROGRESS) != 0, (m_flags & SYNC_FLAG_QUIETLY) == 0);
+			}
+		});
 	}
 
-	protected void setSyncProgress(int current, int total) {
-		if (null != m_onStatusListener) {
-			BackgroundThread.instance().executeGUI(() -> m_onStatusListener.OnSyncProgress(m_syncDirection, (m_flags & SYNC_FLAG_SHOW_PROGRESS) != 0, current, total, (m_flags & SYNC_FLAG_FORCE) != 0));
-		}
+	protected void updateSyncProgress(int current, int total) {
+		BackgroundThread.instance().executeGUI(() -> {
+			if (null != m_onStatusListener) {
+				m_onStatusListener.OnSyncProgress(m_syncDirection, (m_flags & SYNC_FLAG_SHOW_PROGRESS) != 0, current, total, (m_flags & SYNC_FLAG_QUIETLY) == 0);
+			}
+		});
 	}
 
 	protected boolean checkAbort() {
@@ -359,7 +372,7 @@ public class Synchronizer {
 				if (checkAbort())
 					return;
 				m_currentOperationIndex++;
-				setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+				updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 				if (0 == statusCode) {
 					log.d("SignInSyncOperation: SignIn successfully.");
 					onContinue.run();
@@ -381,7 +394,7 @@ public class Synchronizer {
 				if (checkAbort())
 					return;
 				m_currentOperationIndex++;
-				setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+				updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 				if (0 == statusCode) {
 					log.d("SignInQuietlySyncOperation: signIn successfully.");
 					onContinue.run();
@@ -404,7 +417,7 @@ public class Synchronizer {
 				if (checkAbort())
 					return;
 				m_currentOperationIndex++;
-				setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+				updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 				if (0 == statusCode) {
 					log.d("SignOutSyncOperation: SignOut successfully.");
 					onContinue.run();
@@ -430,7 +443,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != meta) {
 						onContinue.run();
 					} else {
@@ -476,7 +489,7 @@ public class Synchronizer {
 								m_remoteAccess.discardDirCache();
 								log.d("lock file created, continue.");
 								m_currentOperationIndex++;
-								setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+								updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 								onContinue.run();
 							}
 
@@ -496,7 +509,7 @@ public class Synchronizer {
 								insertOperation(this_op, new CheckLockFileSyncOperation());
 								// update progress bar on screen
 								m_currentOperationIndex++;
-								setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+								updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 								onContinue.run();
 							}, LOCK_FILE_CHECK_PERIOD);
 						} else {
@@ -504,7 +517,7 @@ public class Synchronizer {
 							m_remoteAccess.discardDirCache();
 							log.d("lock file still exists after waiting " + (LOCK_FILE_CHECK_MAX_COUNT*LOCK_FILE_CHECK_PERIOD)/1000 + " seconds, ignore ..." );
 							m_currentOperationIndex++;
-							setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+							updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 							onContinue.run();
 						}
 					}
@@ -541,7 +554,7 @@ public class Synchronizer {
 								if (checkAbort())
 									return;
 								m_currentOperationIndex++;
-								setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+								updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 								onContinue.run();
 							}
 
@@ -553,7 +566,7 @@ public class Synchronizer {
 						});
 					} else {
 						m_currentOperationIndex++;
-						setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+						updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 						onContinue.run();
 					}
 				}
@@ -590,7 +603,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					SyncOperation this_op = CheckUploadSettingsSyncOperation.this;
 					if (null != meta) {
 						// file found on remote device
@@ -680,7 +693,7 @@ public class Synchronizer {
 						if (checkAbort())
 							return;
 						m_currentOperationIndex++;
-						setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+						updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 						if (null != result && result) {
 							log.d("file created or updated.");
 							onContinue.run();
@@ -726,7 +739,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					SyncOperation this_op = CheckDownloadSettingsSyncOperation.this;
 					if (null != meta) {
 						// file found on remote device
@@ -799,7 +812,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != inputStream) {
 						log.d("Reading settings from remote service...");
 						try {
@@ -822,9 +835,11 @@ public class Synchronizer {
 								if (allowed)
 									props.put(key, allProps.get(key));
 							}
-							if (null != m_onStatusListener) {
-								BackgroundThread.instance().executeGUI(() -> m_onStatusListener.onSettingsLoaded(props, (m_flags & SYNC_FLAG_FORCE) != 0));
-							}
+							BackgroundThread.instance().executeGUI(() -> {
+								if (null != m_onStatusListener) {
+									m_onStatusListener.onSettingsLoaded(props, (m_flags & SYNC_FLAG_QUIETLY) == 0);
+								}
+							});
 							log.d(" ... done.");
 						} catch (Exception e) {
 							log.e("DownloadSettingsSyncOperation: file opened, but failed to read or write: " + e.toString());
@@ -871,7 +886,7 @@ public class Synchronizer {
 						if (checkAbort())
 							return;
 						m_currentOperationIndex++;
-						setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+						updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 						if (null != result && result) {
 							log.d("file created or updated.");
 							onContinue.run();
@@ -891,7 +906,7 @@ public class Synchronizer {
 				// bookmarks data is null, continue with next operation
 				log.d("bookmarks data is null, continue with next operation");
 				m_currentOperationIndex++;
-				setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+				updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 				onContinue.run();
 			}
 		}
@@ -917,7 +932,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != inputStream) {
 						syncBookmarks(inputStream);
 						onContinue.run();
@@ -949,7 +964,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != metalist) {
 						SyncOperation op = DownloadAllBookmarksSyncOperation.this;
 						for (FileMetadata meta : metalist) {
@@ -1012,7 +1027,7 @@ public class Synchronizer {
 						if (checkAbort())
 							return;
 						m_currentOperationIndex++;
-						setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+						updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 						if (null != result && result) {
 							log.d("file created or updated.");
 							onContinue.run();
@@ -1048,7 +1063,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != inputStream) {
 						try {
 							Properties props = new Properties();
@@ -1152,7 +1167,7 @@ public class Synchronizer {
 									if (checkAbort())
 										return;
 									m_currentOperationIndex++;
-									setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+									updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 									if (null != result && result) {
 										log.d("file created or updated.");
 										onContinue.run();
@@ -1175,7 +1190,7 @@ public class Synchronizer {
 					} else {
 						log.d("book data file already exist on the cloud.");
 						m_currentOperationIndex++;
-						setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+						updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 						onContinue.run();
 					}
 				}
@@ -1202,7 +1217,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != metalist) {
 						ArrayList<DownloadInfo> filesToCheck = new ArrayList<DownloadInfo>();
 						for (FileMetadata meta : metalist) {
@@ -1262,8 +1277,8 @@ public class Synchronizer {
 												if (!found)
 													filesToDownload.add(reqinfo);
 											}
-											SyncOperation op = DownloadAllBooksBodySyncOperation.this;
 											if (filesToDownload.size() > 0) {
+												SyncOperation op = DownloadAllBooksBodySyncOperation.this;
 												for (DownloadInfo info : filesToDownload) {
 													log.d("scheduling book loading from file: \"" + info.m_filepath + "\"");
 													SyncOperation downloadBookBody = new DownloadBookBodySyncOperation(info);
@@ -1315,7 +1330,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != inputStream) {
 						String sourceName = downloadInfo.m_meta.fileName;
 						int sourceSize = downloadInfo.m_meta.getCustomPropSourceSize();
@@ -1424,7 +1439,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null != result && result) {
 						log.d("data removed.");
 						onContinue.run();
@@ -1455,7 +1470,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (null == metalist) {
 						// `metalist` can be null, which means that the folder you are looking for was not found.
 						log.d(REMOTE_FOLDER_PATH + " don't exist yet...");
@@ -1505,7 +1520,7 @@ public class Synchronizer {
 					if (checkAbort())
 						return;
 					m_currentOperationIndex++;
-					setSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+					updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
 					if (result)
 						log.d("File \"" + m_fileName + "\" trashed.");
 					onContinue.run();
@@ -1874,8 +1889,47 @@ public class Synchronizer {
 			final List<Bookmark> finalBookmarks = bookmarks;
 			final FileInfo finalFileInfo = fileInfo;
 			BackgroundThread.instance().executeGUI(() -> m_coolReader.waitForCRDBService(() -> {
-				//m_coolReader.getDB().findByFingerprint(2, finalFileInfo.filename, finalFileInfo.crc32,
-				m_coolReader.getDB().findByPatterns(2, finalFileInfo.authors, finalFileInfo.title, finalFileInfo.series, finalFileInfo.getFilename(),
+				CRDBService.BookSearchCallback searchCallback = new CRDBService.BookSearchCallback() {
+					@Override
+					public void onBooksSearchBegin() {
+
+					}
+
+					@Override
+					public void onBooksFound(ArrayList<FileInfo> fileList) {
+						// Check this files for existence
+						ArrayList<FileInfo> newList = new ArrayList<FileInfo>();
+						for (FileInfo fi : fileList) {
+							if (fi.exists())
+								newList.add(fi);
+						}
+						if (fileList.size() != newList.size())
+							fileList = newList;
+						if (0 == fileList.size()) {
+							// this book not found in db
+							// find in filesystem?
+							log.e("file \"" + finalFileInfo.getFilename() + "\" not found in database!");
+						} else {
+							if (fileList.size() > 1) {
+								// multiple files found that matches this fileInfo
+								// select first or nothing?
+								log.e("multiple files with name \"" + finalFileInfo.getFilename() + "\" found, using first.");
+								// TODO: show message
+							}
+							FileInfo dbFileInfo = fileList.get(0);
+							BookInfo bookInfo = new BookInfo(dbFileInfo);
+							for (Bookmark bk : finalBookmarks) {
+								bookInfo.addBookmark(bk);
+							}
+							log.d("Book \"" + dbFileInfo + "\" found, syncing...");
+							if (null != m_onStatusListener)
+								m_onStatusListener.onBookmarksLoaded(bookInfo, (m_flags & SYNC_FLAG_ASK_CHANGED) != 0);
+						}
+					}
+				};
+				ArrayList<String> fingerprints = new ArrayList<String>();
+				fingerprints.add(Long.toString(finalFileInfo.crc32));
+				m_coolReader.getDB().findByFingerprints(2, fingerprints,
 						new CRDBService.BookSearchCallback() {
 							@Override
 							public void onBooksSearchBegin() {
@@ -1884,46 +1938,65 @@ public class Synchronizer {
 
 							@Override
 							public void onBooksFound(ArrayList<FileInfo> fileList) {
-								// Check this files for existence
-								ArrayList<FileInfo> newList = new ArrayList<FileInfo>();
-								for (FileInfo fi : fileList) {
-									if (fi.exists())
-										newList.add(fi);
-								}
-								if (fileList.size() != newList.size())
-									fileList = newList;
-								if (0 == fileList.size()) {
-									// this book not found in db
-									// find in filesystem?
-									log.e("file \"" + finalFileInfo.getFilename() + "\" not found in database!");
+								if (!fileList.isEmpty()) {
+									searchCallback.onBooksFound(fileList);
 								} else {
-									if (fileList.size() > 1) {
-										// multiple files found that matches this fileInfo
-										// select first or nothing?
-										log.e("multiple files with name \"" + finalFileInfo.getFilename() + "\" found, using first.");
-										// TODO: show message
-									}
-									FileInfo dbFileInfo = fileList.get(0);
-									BookInfo bookInfo = new BookInfo(dbFileInfo);
-									for (Bookmark bk : finalBookmarks) {
-										bookInfo.addBookmark(bk);
-									}
-									log.d("Book \"" + dbFileInfo + "\" found, syncing...");
-									if (null != m_onStatusListener)
-										m_onStatusListener.onBookmarksLoaded(bookInfo, (m_flags & SYNC_FLAG_FORCE) != 0);
+									// fallback, try to find by pattern
+									m_coolReader.getDB().findByPatterns(2, finalFileInfo.authors, finalFileInfo.title, finalFileInfo.series,
+											finalFileInfo.getFilename(), searchCallback);
 								}
 							}
-						});
+						}
+					);
 			}));
 		}
-
 	}
 
-	private void syncSetCurrentBook(FileInfo fileInfo) {
+	private void syncSetCurrentBook(final FileInfo fileInfo) {
 		log.v("syncSetCurrentBook()");
 		BackgroundThread.instance().executeGUI(() -> m_coolReader.waitForCRDBService(() -> {
-			//m_coolReader.getDB().findByFingerprint(2, fileName, crc32,
-			m_coolReader.getDB().findByPatterns(2, fileInfo.authors, fileInfo.title, fileInfo.series, fileInfo.getFilename(),
+			CRDBService.BookSearchCallback searchCallback =
+				new CRDBService.BookSearchCallback() {
+					@Override
+					public void onBooksSearchBegin() {
+
+					}
+
+					@Override
+					public void onBooksFound(ArrayList<FileInfo> fileList) {
+						// Check this files for existence
+						ArrayList<FileInfo> newList = new ArrayList<FileInfo>();
+						for (FileInfo fi : fileList) {
+							if (fi.exists())
+								newList.add(fi);
+						}
+						if (fileList.size() != newList.size())
+							fileList = newList;
+						if (0 == fileList.size()) {
+							// this book not found in db
+							// find in filesystem?
+							log.e("file \"" + fileInfo.getFilename() + "\" not found in database!");
+							if (null != m_onStatusListener) {
+								m_onStatusListener.onFileNotFound(fileInfo);
+							}
+						} else {
+							if (fileList.size() > 1) {
+								// multiple files found that matches this fileInfo
+								// select first or nothing?
+								log.e("multiple files with name \"" + fileInfo.getFilename() + "\" found, using first.");
+								// TODO: show message
+							}
+							FileInfo dbFileInfo = fileList.get(0);
+							if (null != m_onStatusListener) {
+								log.d("Book \"" + dbFileInfo + "\" found, call listener to load this book...");
+								m_onStatusListener.onCurrentBookInfoLoaded(fileList.get(0), (m_flags & SYNC_FLAG_ASK_CHANGED) != 0);
+							}
+						}
+					}
+				};
+			ArrayList<String> fingerprints = new ArrayList<String>();
+			fingerprints.add(Long.toString(fileInfo.crc32));
+			m_coolReader.getDB().findByFingerprints(2, fingerprints,
 					new CRDBService.BookSearchCallback() {
 						@Override
 						public void onBooksSearchBegin() {
@@ -1932,33 +2005,11 @@ public class Synchronizer {
 
 						@Override
 						public void onBooksFound(ArrayList<FileInfo> fileList) {
-							// Check this files for existence
-							ArrayList<FileInfo> newList = new ArrayList<FileInfo>();
-							for (FileInfo fi : fileList) {
-								if (fi.exists())
-									newList.add(fi);
-							}
-							if (fileList.size() != newList.size())
-								fileList = newList;
-							if (0 == fileList.size()) {
-								// this book not found in db
-								// find in filesystem?
-								log.e("file \"" + fileInfo.getFilename() + "\" not found in database!");
-								if (null != m_onStatusListener) {
-									m_onStatusListener.onFileNotFound(fileInfo);
-								}
+							if (!fileList.isEmpty()) {
+								searchCallback.onBooksFound(fileList);
 							} else {
-								if (fileList.size() > 1) {
-									// multiple files found that matches this fileInfo
-									// select first or nothing?
-									log.e("multiple files with name \"" + fileInfo.getFilename() + "\" found, using first.");
-									// TODO: show message
-								}
-								FileInfo dbFileInfo = fileList.get(0);
-								if (null != m_onStatusListener) {
-									log.d("Book \"" + dbFileInfo + "\" found, call listener to load this book...");
-									m_onStatusListener.onCurrentBookInfoLoaded(fileList.get(0), (m_flags & SYNC_FLAG_FORCE) != 0);
-								}
+								// fallback, try to find by pattern
+								m_coolReader.getDB().findByPatterns(2, fileInfo.authors, fileInfo.title, fileInfo.series, fileInfo.getFilename(), searchCallback);
 							}
 						}
 					});
