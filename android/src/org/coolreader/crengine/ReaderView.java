@@ -1074,8 +1074,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.A2, surface); //fast2
 			mActivity.setScreenUpdateInterval(999, surface);
 		} else {
+<<<<<<< HEAD
 			int updModeCode = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code);
 			int updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
+=======
+>>>>>>> e103f843e4661f3e60c1d2a0f4beeea928504758
 			if (updMode != EinkScreen.EinkUpdateMode.Unspecified) mActivity.setScreenUpdateMode(updMode, surface); //fast
 			if (updInterval != -1) mActivity.setScreenUpdateInterval(updInterval, surface);
 		}
