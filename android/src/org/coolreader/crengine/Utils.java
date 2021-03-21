@@ -1125,24 +1125,39 @@ public class Utils {
 		int colorGray;
 		int colorIcon;
 		int colorIconL;
+		int colorThemeBlue;
+		int colorThemeGreen;
+		int colorThemeGray;
 		TypedArray a = cr.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon,
-						R.attr.colorIconL});
+						R.attr.colorIconL,
+						R.attr.colorThemeBlue,
+						R.attr.colorThemeGreen,
+						R.attr.colorThemeGray});
 		colorGrayC = a.getColor(0, Color.GRAY);
 		colorGray = a.getColor(1, Color.GRAY);
 		colorIcon = a.getColor(2, Color.BLACK);
 		colorIconL = a.getColor(3, Color.GRAY);
+		colorThemeBlue = a.getColor(4, Color.BLUE);
+		colorThemeGreen = a.getColor(5, Color.GREEN);
+		colorThemeGray = a.getColor(6, Color.GRAY);
 		a.recycle();
 		if (forEink) {
 			res.put(R.attr.colorThemeGray2Contrast, Color.WHITE);
 			res.put(R.attr.colorThemeGray2, Color.BLACK);
 			res.put(R.attr.colorIcon, Color.BLACK);
 			res.put(R.attr.colorIconL, Color.GRAY);
+			res.put(R.attr.colorThemeBlue, Color.GRAY);
+			res.put(R.attr.colorThemeGreen, Color.GRAY);
+			res.put(R.attr.colorThemeGray, Color.GRAY);
 		}
 		res.put(R.attr.colorThemeGray2Contrast, colorGrayC);
 		res.put(R.attr.colorThemeGray2, colorGray);
 		res.put(R.attr.colorIcon, colorIcon);
 		res.put(R.attr.colorIconL, colorIconL);
+		res.put(R.attr.colorThemeBlue, colorThemeBlue);
+		res.put(R.attr.colorThemeGreen, colorThemeGreen);
+		res.put(R.attr.colorThemeGray, colorThemeGray);
 		return res;
 	}
 

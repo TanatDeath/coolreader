@@ -3,7 +3,7 @@
      file 'app/src/main/AndroidManifest.xml' used instead! -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       android:installLocation="auto"
-      android:versionName="3.2.47-1" android:versionCode="32470">
+      android:versionName="3.2.54-1" android:versionCode="32540">
     <supports-screens
         android:xlargeScreens="true"
         android:largeScreens="true"
@@ -42,7 +42,7 @@
             android:configChanges="orientation|keyboardHidden|locale|screenSize|screenLayout|layoutDirection"
             android:theme="@android:style/Theme.NoTitleBar"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="stateHidden"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="sensor">
             
             <intent-filter>

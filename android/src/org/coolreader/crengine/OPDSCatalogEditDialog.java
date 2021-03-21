@@ -194,7 +194,6 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 		onionDefProxyChb.setChecked(mItem.onion_def_proxy==1);
 		setThirdButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
-				//R.drawable.icons8_minus,
 				R.string.mi_catalog_delete);
 		setView(view);
 	}

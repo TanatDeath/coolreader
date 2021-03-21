@@ -152,6 +152,7 @@ public class ReaderAction {
 	public final static ReaderAction SCAN_DIRECTORY_RECURSIVE = new ReaderAction("SCAN_DIRECTORY_RECURSIVE", R.string.mi_book_scan_recursive, ReaderCommand.DCMD_SCAN_DIRECTORY_RECURSIVE, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_scan);
 	public final static ReaderAction NEXT_CHAPTER = new ReaderAction("NEXT_CHAPTER", R.string.action_chapter_next, ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_down_ch);
 	public final static ReaderAction PREV_CHAPTER = new ReaderAction("PREV_CHAPTER", R.string.action_chapter_prev, ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1, NEXT_CHAPTER, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_up_ch);
+	public final static ReaderAction SAVE_LOGCAT = new ReaderAction("SAVE_LOGCAT", R.string.action_logcat, ReaderCommand.DCMD_SAVE_LOGCAT, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_log);
 	public final static ReaderAction EXIT = new ReaderAction("EXIT", R.string.action_exit, ReaderCommand.DCMD_EXIT, 0, R.id.cr3_mi_exit, null , R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_viewer_exit);
 	public final static ReaderAction HIDE = new ReaderAction("HIDE", R.string.action_hide, ReaderCommand.DCMD_HIDE, 0, R.id.cr3_mi_hide, EXIT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_hide);
 
@@ -369,7 +370,8 @@ public class ReaderAction {
 				BACKLIGHT_SET_DEFAULT,
 				SKIM,
 				ONLINE_COMBO,
-				ONLINE_SUPER_COMBO
+				ONLINE_SUPER_COMBO,
+				SAVE_LOGCAT
 				// calibre will only be available from rootview
 		};
 		if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {

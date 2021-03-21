@@ -3768,7 +3768,7 @@ public class MainDB extends BaseDB {
 				(StrUtils.getNonEmptyStr(sField, true).matches(".*"+StrUtils.getNonEmptyStr(searchText,true)+".*"));
 	}
 	
-	public ArrayList<FileInfo> findByPatterns(int maxCount, String author, String title, String series, String filename)
+	public ArrayList<FileInfo> findByPatterns(int maxCount, String authors, String title, String series, String filename)
 	{
 		Log.i("cr3","findByPatterns fired");
 		beginReading();
@@ -3779,16 +3779,28 @@ public class MainDB extends BaseDB {
 		}
 		String sDefCond = bQuickSearch ? " OR ":" AND ";
 		ArrayList<FileInfo> list = new ArrayList<>();
-		String searchText =  StrUtils.getNonEmptyStr(author, true);
-		String authorSearch =  StrUtils.getNonEmptyStr(bQuickSearch ? author : author, true);
-		String titleSearch = StrUtils.getNonEmptyStr(bQuickSearch ? author : title, true);
-		String seriesSearch = StrUtils.getNonEmptyStr(bQuickSearch ? author : series, true);
-		String filenameSearch = StrUtils.getNonEmptyStr(bQuickSearch ? author : filename, true);
+		String searchText =  StrUtils.getNonEmptyStr(authors, true);
+		String authorSearch =  StrUtils.getNonEmptyStr(bQuickSearch ? authors : authors, true);
+		String titleSearch = StrUtils.getNonEmptyStr(bQuickSearch ? authors : title, true);
+		String seriesSearch = StrUtils.getNonEmptyStr(bQuickSearch ? authors : series, true);
+		String filenameSearch = StrUtils.getNonEmptyStr(bQuickSearch ? authors : filename, true);
 		
 		StringBuilder buf = new StringBuilder();
 		boolean hasCondition = false;
 		if (!StrUtils.isEmptyStr(authorSearch)) {
-			String authorIds = findAuthors(maxCount, authorSearch);
+			// When synchronizing from the cloud, the 'authors' variable can contain multiple authors separated by '|'.
+			// See MainDB.READ_FILEINFO_FIELDS
+			String[] authorsArray = authorSearch.split("\\|");
+			StringBuilder authorIdsSB = new StringBuilder();
+			for (String author : authorsArray) {
+				String ids = findAuthors(maxCount, author);
+				if (ids.length() > 0) {
+					if (authorIdsSB.length() > 0)
+						authorIdsSB.append(",");
+					authorIdsSB.append(ids);
+				}
+			}
+			String authorIds = authorIdsSB.toString();
 			if ((authorIds == null || authorIds.length() == 0) && (!bQuickSearch))
 				return list;
 			if (!StrUtils.isEmptyStr(authorIds)) {

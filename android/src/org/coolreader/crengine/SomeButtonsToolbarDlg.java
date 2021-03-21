@@ -138,7 +138,7 @@ public class SomeButtonsToolbarDlg {
 							ViewGroup.LayoutParams.WRAP_CONTENT);
 					llp.setMargins(8, 0, 8, 0);
 					tv.setLayoutParams(llp);
-					tv.setMaxLines(3);
+					tv.setMaxLines(8);
 					tv.setEllipsize(TextUtils.TruncateAt.END);
 					tv.setBackgroundColor(colr2);
 					tv.setTextColor(colorIcon);

@@ -78,6 +78,7 @@
     <string name="win_title_search">Найти текст</string>
     <string name="win_title_options_apply">Применить новые настройки?</string>
     <string name="win_title_screen_orientation_change_apply">Изменить ориентацию экрана?</string>
+    <string name="win_title_log">Журнал</string>
     <string name="tab_options_styles">Стили</string>
     <string name="tab_options_page">Страница</string>
     <string name="tab_options_app">Программа</string>
@@ -116,6 +117,7 @@
     <string name="options_page_landscape_pages">Страницы в альбомном режиме</string>
     <string name="options_page_landscape_pages_one">Одна страница</string>
     <string name="options_page_landscape_pages_two">Две страницы</string>
+    <string name="options_ignore_document_margins">Игнорировать отступы документа</string>
     <string name="options_page_margin_left">Левый отступ</string>
     <string name="options_page_margin_right">Правый отступ</string>
     <string name="options_page_margin_top">Верхний отступ</string>
@@ -144,7 +146,7 @@
     <string name="options_app_get_backlight_from_system">При запуске использовать системное значение яркости</string>
     <string name="options_app_get_backlight_from_system_short">Как в системе</string>
     <string name="options_app_get_backlight_from_system_add_info">Если установлено - KR будет использовать системное значение яркости при запуске, иначе - свое собственное</string>
-    <string name="options_app_backlight_screen_eink">Яркость подсветки экрана - EINK метод</string>
+    <string name="options_app_backlight_screen_eink">Яркость подсветки экрана - E-Ink метод</string>
     <string name="options_app_backlight_screen_default">Установленная в системе</string>
     <string name="action_backlight_set_default">Яркость подсветки установленная в системе</string>
     <string name="options_app_tapzones_normal">Сенсорный экран</string>
@@ -181,6 +183,7 @@
     <string name="action_touch_screen_disabled_toast">Сенсорный экран отключен</string>
     <string name="action_touch_screen_enabled_toast">Сенсорный экран включен</string>
     <string name="action_repeat">(автоповтор)</string>
+    <string name="action_logcat">Сохранить журнал</string>
     <string name="options_app_scan_book_props">Сканировать свойства книг в директории</string>
     <string name="options_page_titlebar">Настройки колонтитула</string>
     <string name="options_page_titlebar_short">колонтитул</string>
@@ -198,6 +201,7 @@
     <string name="options_app_key_long_press">(длинное нажатие)</string>
     <string name="options_app_key_double_press">(двойное нажатие)</string>
     <string name="options_app_double_tap_selection">Выделение текста по двойному щелчку</string>
+    <string name="options_app_double_tap_selection_slowdown">(Замедляет время реакции на одиночные нажатия)</string>
     <string name="mi_select_text">Выделить текст</string>
     <string name="action_toggle_selection_mode">Режим выделения текста</string>
     <string name="action_toggle_inspector_mode">Режим инспектора страницы</string>
@@ -410,11 +414,12 @@
     <string name="options_screen_update_mode_fast2">Быстрый 2</string>
     <string name="options_screen_update_interval">Интервал полного обновления</string>
     <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы</string>
-    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на EINK экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
+    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на E-Ink экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
     <string name="options_screen_blackpage_duration">Длительность отрисовки черной страницы</string>
     <string name="options_screen_blackpage_duration_add_info">Время (в мс) на которое будет показана черная заливка области чтения</string>
-    <string name="options_screen_force_eink">Это EINK устройство (если не определилось автоматически)</string>
-    <string name="options_screen_force_eink_add_info">Вы можете принудительно указать, что это EINK устройство, в случаях, когда это не определил KnownReader. Если вы меняете эту настройку - закройте и откройте диалог настроек заново, чтобы увидеть настройки для eink</string>
+    <string name="options_screen_force_eink">Это E-Ink устройство (если не определилось автоматически)</string>
+    <string name="options_screen_force_eink_add_info">Вы можете принудительно указать, что это E-Ink устройство, в случаях, когда это не определил KnownReader. Если вы меняете эту настройку - закройте и откройте диалог настроек заново, чтобы увидеть настройки для E-Ink</string>
+    <string name="options_screen_update_interval_none">Не обновлять</string>
     <string name="options_render_font_gamma">Гамма-коррекция шрифта</string>
     <string name="action_toggle_titlebar">Вкл/выкл колонтитул</string>
     <string name="action_show_position_info">Информация о позиции</string>
@@ -566,6 +571,8 @@
     <string name="options_font_hinting_auto">Автохинтинг</string>
     <string name="options_font_fallback_face">Резервный шрифт</string>
     <string name="win_title_confirm_catalog_delete">Вы действительно хотите удалить этот каталог / библиотеку ?</string>
+    <string name="options_font_fallback_face_num">Резервный шрифт №%s</string>
+    <string name="options_font_fallback_faces">Резервные шрифты</string>
     <string name="win_title_confirm_history_record_delete">Вы действительно хотите удалить эту книгу из списка последних книг?</string>
     <string name="win_title_confirm_book_delete">Вы действительно хотите удалить эту книгу / архив ?</string>
     <string name="win_title_confirm_folder_delete">Вы действительно хотите удалить эту папку вместе со всеми книгами?</string>
@@ -646,6 +653,8 @@
     <string name="options_page_show_titlebar_hidden">Не показывать</string>
     <string name="options_page_show_titlebar_page_header">В заголовке страницы</string>
     <string name="options_page_show_titlebar_page_header_2lines">В заголовке страницы, 2 строки</string>
+    <string name="options_page_show_titlebar_page_footer">Внизу страницы</string>
+    <string name="options_page_show_titlebar_page_footer_2lines">Внизу страницы, 2 строки</string>
     <string name="options_page_show_titlebar_bottom">Внизу</string>
     <string name="options_page_show_titlebar_top">Вверху</string>
     <string name="options_view_toolbar_position_short_side">По короткому краю</string>
@@ -736,7 +745,8 @@
     <string name="options_app_plugins">Плагины</string>
     <string name="note1_reader_menu">ВНИМАНИЕ! В новой версии для поддержки полноэкранного режима и гашения экранных кнопок под Android 3 и 4 в приложении указана целевая платформа Android 4. В этом режиме экранная кнопка меню недоступна. Без панели инструментов в режиме чтения меню можно вызвать коротким нажатием в центре экрана. Длинное нажатие открывает настройки. Включить панель инструментов для режима чтения? (Этот выбор всегда можно изменить в Настройках/Страница/Панель инструментов)</string>
     <string name="note1_can_be_migrated">Найдены настройки CoolReader. Вы хотите скопировать настройки CoolReader в KnownReader?</string>
-    <string name="root_item_recent">Последние открытые</string>
+    <string name="note2_logcat">Добавлена функция сохранения журнала работы программы. Если при выполнении какой-либо операции программа аварийно завершилась или некорректно работает, можно создать журнал работы программы. Если программа завершилась с ошибкой нужно запустить её заново и в меню чтения выбрать пункт "Сохранить журнал". В результате будет создан лог-файл, который поможет в решении проблемы.</string>
+    <string name="root_item_recent">Последние открытые книги</string>
     <string name="root_item_library">Библиотека</string>
     <string name="root_item_filesystem">Открыть книгу из файловой системы / облака</string>
     <string name="root_item_online_catalogs">Сетевые библиотеки</string>
@@ -744,6 +754,7 @@
     <string name="black_list_enforced">Нельзя добавлять этот адрес, так как по запросу LitRes.ru он добавлен в черный список каталогов, нарушающих авторские права.</string>
     <string name="black_list_warning">Внимание! этот адрес по запросу LitRes.ru был добавлен в черный список каталогов, нарушающих авторские права. Вы действительно хотите использовать этот каталог?</string>
     <string name="cant_open_file">Невозможно открыть файл \"%s\"!</string>
+    <string name="opened_from_stream">Документ открыт из потока, местоположение файла неизвестно. Невозможно сохранить информацию о последнем открытом файле!</string>
     <string name="error">Ошибка</string>
     <string name="options_app_tts_stop_motion_timeout">Остановить чтение вслух при бездействии датчика движения</string>
     <string name="motion_timeout_off">"Выключено"</string>
@@ -937,7 +948,7 @@
     <string name="skipped_res_add_info">Позволяет не обновлять страницу полностью для избежания перефоматирования текста (при открытии диалогов, клавиатуры и т.д.)</string>
     <string name="options_app_backlight_timeout_add_info">Принудительная установка времени подстветки экрана 2-6 минут, либо согласно настроек системы (выбрано по умолчанию)</string>
     <string name="options_app_backlight_screen_add_info">Принудительная установка яркости экрана 1-100%, либо согласно настроек системы (выбрано по умолчанию)</string>
-    <string name="options_app_backlight_screen_warm_add_info">Для EINK устройств с двойной фронтальной подсветкой (пока только Onyx)</string>
+    <string name="options_app_backlight_screen_warm_add_info">Для E-Ink устройств с двойной фронтальной подсветкой (пока только Onyx)</string>
     <string name="options_app_tts_stop_motion_timeout_add_info">Если датчик движения не фиксирует активность, то чтение вслух прекращается после выбранного периода времени 1-100 минут, изначально выключено</string>
     <string name="options_app_key_backlight_off_add_info">Принудительное отключение подсветки кнопок управления (если имеются отдельные) для более комфортного чтения</string>
     <string name="options_app_settings_icons_add_info">Отображение пиктограмм перед пунктами меню (при отключении - только наименования)</string>
@@ -1130,7 +1141,7 @@
     <string name="error_open_as_text">Функция \'Открыть как текст\' недоступна</string>
     <string name="open_as_html_add_info">Если выбрано \'Открыть как текст\' - документ будет преобразован в обычный текст</string>
     <string name="doc_convert_needed">Необходимо преобразование документа</string>
-    <string name="toolbar">Панель инструментов</string>
+    <string name="toolbar">Панель инструментов и панель выделения</string>
     <string name="toolbar_settings">Настройки панели инструментов</string>
     <string name="cloud_settings">Настройки облачных сервисов</string>
     <string name="dictionary_settings">Настройки словарей</string>
@@ -1243,6 +1254,8 @@
     <string name="file_was_not_found_or_empty">файл не найден (или пустой)</string>
     <string name="reading_pos_updated">позиция чтения обновлена</string>
     <string name="successfully_saved_to">успешно сохранено в</string>
+    <string name="send_book_by_email">Отправить книгу по email</string>
+    <string name="send_logcat">Отправить лог</string>
     <string name="cloud_download_error">ошибка скачивания (получения ссылки)</string>
     <string name="shortcut_created">Создание ярлыка запрошено у операционной системы</string>
     <string name="sec_group_common">Вторичная группировка - общая настройка</string>
@@ -1338,9 +1351,6 @@
     <string name="confirmation_title">Подтверждение</string>
     <string name="sync_info_no_such_document">Документ \"%s\" не найден на этом устройстве!</string>
     <string name="sync_data_keepalive_">Удалять данные синхронизации старее чем…</string>
-    <string name="book_info_genres">Жанр(ы)</string>
-    <string name="including_subgenres">(Включая поджанры)</string>
-    <string name="action_show_onyx_backlight_system_dialog">Показать системный диалог для настройки подсветки</string>
     <string name="online_dic_exceeded">К сожалению лимит перевода в онлайн словаре исчерпан. Попробуйте позже</string>
     <string name="manual_open_error">Ошибка открытия руководства пользователя</string>
     <string name="ynd_translate_settings">Настройки Yandex translate</string>
@@ -1479,7 +1489,7 @@
     <string name="cnt_genres">Жанров:</string>
     <string name="cnt_entries">Книг:</string>
     <string name="cnt_series">Серий:</string>
-    <string name="use_eink_backlight_control">Использовать метод контроля яркости для EINK</string>
+    <string name="use_eink_backlight_control">Использовать метод контроля яркости для E-Ink</string>
     <string name="use_eink_backlight_control_add_info">Если у вас не регулируется яркость скольжением по краю экрана - попробуйте этот метод (только для книг Onyx)</string>
     <string name="need_purchase">Сначала вы должны купить эту книгу, а затем скачать</string>
     <string name="already_purchased">Уже купилено, перейдите к скачиванию</string>
@@ -1527,8 +1537,8 @@
     <string name="books_l">книг:</string>
     <string name="folders_l">папок:</string>
     <string name="hyph_rend_options">Переносы, мультиязычность, рендеринг, нюансы форматирования (epub, txt, html)</string>
-    <string name="force_eink_warn">Подтвердите и откройте настройки снова - опции Eink станут доступны</string>
-    <string name="eink_screen_update_options">Настройки обновления Eink экрана</string>
+    <string name="force_eink_warn">Подтвердите и откройте настройки снова - опции E-Ink станут доступны</string>
+    <string name="eink_screen_update_options">Настройки обновления E-Ink экрана</string>
     <string name="interrupt">Прервать</string>
     <string name="interrupting">Прерывается...</string>
     <string name="authors">Авторов:</string>
@@ -1536,5 +1546,23 @@
     <string name="series">Серий:</string>
     <string name="entries">Новых книг:</string>
     <string name="translated_from">Переведено с:</string>
+    <string name="book_info_genres">Жанр(ы)</string>
+    <string name="including_subgenres">(Включая поджанры)</string>
+    <string name="action_show_onyx_backlight_system_dialog">Показать системный диалог для настройки подсветки</string>
+    <string name="confirmation_select_folder_for_log">На следующем экране выберите каталог для сохранения файла журнала</string>
+    <string name="notice_log_saved_to_">Файл журнала сохранен в файле \"%s\". Этот файл может содержать личные данные, например, какие книги вы читаете, будьте внимательны. Отправить файл?</string>
+    <string name="sel_panel_extended">Панель выделения: расширенный режим</string>
+    <string name="sel_panel_extended_add_info">Опция добавляет второй ряд кнопок на панели выделения</string>
+    <string name="sel_panel_background">Панель выделения: фон</string>
+    <string name="sel_panel_background_1">Полупрозрачный</string>
+    <string name="sel_panel_background_2">Прозрачный</string>
+    <string name="sel_panel_background_3">Непрозрачный</string>
+    <string name="sel_panel_transp_buttons">Панель выделения: прозрачные кнопки</string>
+    <string name="sel_panel_add_info">Сквозь прозрачные элементы виден текст страницы книги, с другой стороны - так они становятся менее видны</string>
+    <string name="open_url">Открыть внешнюю ссылку (%s)?</string>
+    <string name="open_url_browser">В браузере</string>
+    <string name="open_url_kr">В KnownReader</string>
+    <string name="open_url_cancel">Отмена</string>
+    <string name="open_url_cannot">Невозможно открыть ссылку: %s</string>
 </resources>
 

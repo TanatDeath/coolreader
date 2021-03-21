@@ -19,7 +19,12 @@ my %ic_smaller_list=(
         'icons8_unchecked_checkbox.svg' => 'icons8_unchecked_checkbox.png',
         'icons8_checked_checkbox.svg' => 'icons8_checked_checkbox.png',
         'icons8_check_no_frame.svg' => 'icons8_check_no_frame.png',
-        'icons8_delete.svg' => 'icons8_delete.png'
+        'icons8_delete.svg' => 'icons8_delete.png',
+        'icons8_type_filled.svg' => 'icons8_type_filled.png',
+        'icons8_css.svg' => 'icons8_css.png',
+        'icons8_page.svg' => 'icons8_page.png',
+        'icons8_settings.svg' => 'icons8_settings.png',
+        'icons8_cursor.svg' => 'icons8_cursor.png'
 );
 
 my %ic_actions_list=(
@@ -41,11 +46,12 @@ my %ic_actions_list=(
         'icons8_page_animation.svg' => 'icons8_page_animation.png',
         'icons8_opds.svg' => 'icons8_opds.png',
         'icons8_calibre.svg' => 'icons8_calibre.png',
-        'litres_en_logo_2lines.svg' => 'icons8_litres_en_logo_2lines_big.png'
+        'litres_en_logo_2lines.svg' => 'icons8_litres_en_logo_2lines_big.png',
+        'onyx_dictionary.svg' => 'onyx_dictionary.png'
 );
 
 my %ic_menu_list=(
-        'icons8_css.svg' => 'icons8_css.png'
+        'icons8_css.svg_' => 'icons8_css.png_'
 );
 
 my %ic_launcher_list=(

@@ -22,7 +22,8 @@ public class NoticeDialog extends Dialog {
         setTitle(R.string.app_name);
         Button button1 = layout.findViewById(R.id.base_dlg_btn_positive);
         button1.setOnClickListener(v -> {
-			onOkButton.run();
+			if (onOkButton != null)
+				onOkButton.run();
 			dismiss();
 		});
 		Button button2 = layout.findViewById(R.id.base_dlg_btn_negative);
@@ -33,7 +34,7 @@ public class NoticeDialog extends Dialog {
 			});
         else
         	button2.setVisibility(View.GONE);
-		TextView noticeText = layout.findViewById(R.id.notice_text);
+		TextView noticeText = layout.findViewById(R.id.notice_text_view);
 		if (!StrUtils.isEmptyStr(sText)) noticeText.setText(sText);
 
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
@@ -47,4 +48,10 @@ public class NoticeDialog extends Dialog {
 
 		setContentView(layout);
 	}
+
+	public void setMessage(int resourceId) {
+		TextView textView = findViewById(R.id.notice_text_view);
+		textView.setText(resourceId);
+	}
+
 }

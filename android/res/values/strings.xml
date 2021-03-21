@@ -85,6 +85,7 @@
     <string name="win_title_search">Search</string>
     <string name="win_title_options_apply">Apply changes?</string>
     <string name="win_title_screen_orientation_change_apply">Apply screen orientation change?</string>
+    <string name="win_title_log">Log</string>
     <string name="tab_options_styles">Styles</string>
     <string name="tab_options_page">Page</string>
     <string name="tab_options_app">App</string>
@@ -125,6 +126,7 @@
     <string name="options_page_landscape_pages">Landscape pages</string>
     <string name="options_page_landscape_pages_one">One page</string>
     <string name="options_page_landscape_pages_two">Two pages</string>
+    <string name="options_ignore_document_margins">Ignore document margins</string>
     <string name="options_page_margin_left">Left margin</string>
     <string name="options_page_margin_right">Right margin</string>
     <string name="options_page_margin_top">Top margin</string>
@@ -153,7 +155,7 @@
     <string name="options_app_get_backlight_from_system">Use system backlight value on start</string>
     <string name="options_app_get_backlight_from_system_short">Use system</string>
     <string name="options_app_get_backlight_from_system_add_info">If checked - KR will use system\'s backlight value at start, otherwise - use it\'s own</string>
-    <string name="options_app_backlight_screen_eink">Screen backlight brightness - EINK method</string>
+    <string name="options_app_backlight_screen_eink">Screen backlight brightness - E-Ink method</string>
     <string name="options_app_backlight_screen_default">Default</string>
     <string name="action_backlight_set_default">Set the backlight brightness as in the system</string>
     <string name="options_app_tapzones_normal">Tap zone actions</string>
@@ -190,6 +192,7 @@
     <string name="action_touch_screen_disabled_toast">Touch screen is locked</string>
     <string name="action_touch_screen_enabled_toast">Touch screen is unlocked</string>
     <string name="action_repeat">(autorepeat)</string>
+    <string name="action_logcat">Save log</string>
     <string name="options_app_scan_book_props">Scan properties of all books in directory</string>
     <string name="options_page_titlebar">Title bar options</string>
     <string name="options_page_titlebar_short">title bar</string>
@@ -207,6 +210,7 @@
     <string name="options_app_key_long_press">(long press)</string>
     <string name="options_app_key_double_press">(double press)</string>
     <string name="options_app_double_tap_selection">Text selection with double tap</string>
+    <string name="options_app_double_tap_selection_slowdown">(Slows down the reaction time to single taps)</string>
     <string name="mi_select_text">Select text</string>
     <string name="action_toggle_selection_mode">Toggle selection mode</string>
     <string name="action_toggle_inspector_mode">Toggle page inspector mode</string>
@@ -418,14 +422,17 @@
     <string name="options_screen_update_mode">Screen update mode</string>
     <string name="options_screen_update_mode_fast">Fast</string>
     <string name="options_screen_update_mode_fast2">Fast 2</string>
+    <string name="options_screen_update_mode_onyx_regal">SNOW Field</string>
+    <string name="options_screen_update_mode_onyx_a2">A2</string>
     <string name="options_screen_update_mode_quality">Quality</string>
     <string name="options_screen_update_interval">Full screen update interval</string>
     <string name="options_screen_blackpage_interval">Force black page paint interval</string>
     <string name="options_screen_blackpage_interval_add_info">This option will enable filling reading area with black color every N pages</string>
     <string name="options_screen_blackpage_duration">Black page paint duration</string>
     <string name="options_screen_blackpage_duration_add_info">Time (in ms) the black filled area will be shown</string>
-    <string name="options_screen_force_eink">This device has EINK screen (when not autodetected)</string>
-    <string name="options_screen_force_eink_add_info">You can force set EINK settings, when it was now detected by KnownReader. You must close and reopen options dialog when changing this value - to see these options</string>
+    <string name="options_screen_force_eink">This device has E-Ink screen (when not autodetected)</string>
+    <string name="options_screen_force_eink_add_info">You can force set E-Ink settings, when it was now detected by KnownReader. You must close and reopen options dialog when changing this value - to see these options</string>
+    <string name="options_screen_update_interval_none">None</string>
     <string name="options_render_font_gamma">Font Gamma</string>
     <string name="action_toggle_titlebar">Toggle Title Bar</string>
     <string name="action_show_position_info">Show position popup</string>
@@ -579,6 +586,8 @@
     <string name="options_font_hinting_auto">Autohinting</string>
     <string name="options_font_fallback_face">Fallback font</string>
     <string name="win_title_confirm_catalog_delete">Do you really want to delete this catalog / library ?</string>
+    <string name="options_font_fallback_face_num">Fallback font #%s</string>
+    <string name="options_font_fallback_faces">Fallback fonts</string>
     <string name="win_title_confirm_history_record_delete">Do you really want to remove this book from recent list?</string>
     <string name="win_title_confirm_book_delete">Do you really want to delete this book / archive ?</string>
     <string name="win_title_confirm_folder_delete">Do you really want to delete this folder along with all the books?</string>
@@ -656,6 +665,8 @@
     <string name="options_page_show_titlebar_hidden">None</string>
     <string name="options_page_show_titlebar_page_header">Page header</string>
     <string name="options_page_show_titlebar_page_header_2lines">Page header, (always) 2 lines</string>
+    <string name="options_page_show_titlebar_page_footer">Page footer</string>
+    <string name="options_page_show_titlebar_page_footer_2lines">Page footer, (always) 2 lines</string>
     <string name="options_page_show_titlebar_bottom">Bottom</string>
     <string name="options_page_show_titlebar_top">Top</string>
     <string name="options_view_toolbar_position_short_side">Short side</string>
@@ -749,6 +760,7 @@
     <string name="options_app_plugins">Plugins</string>
     <string name="note1_reader_menu">WARNING: To support fullscreen mode and dimming of softkeys on Android 3 and 4, target Android version has been changed to Android 4. In this mode legacy Menu soft button is not available anymore. Without reader toolbar, in reading mode you can open menu by tapping at center of screen. Long tap at center of screen shows settings dialog. Turn on toolbar in reading mode now? (You can always change this option in Settings/Page/Toolbar)</string>
     <string name="note1_can_be_migrated">CoolReader settings found. Do you want to copy CoolReader\'s settings into KnownReader?</string>
+    <string name="note2_logcat">Added the function of saving the program log. If during the execution of any operation the program terminates abnormally or does not work correctly, you can create a log file. If the program terminated with an error, you need to start it again and select the "Save log" item in the reading menu. A log file will be generated to help resolve the issue.</string>
     <string name="root_item_recent">Recent books</string>
     <string name="root_item_library">Browse library</string>
     <string name="root_item_filesystem">Browse file system / cloud</string>
@@ -757,6 +769,7 @@
     <string name="black_list_warning">WARNING: this URL is added to black list of catalogs which may violate DMCA by request of LitRes.ru Do you really want to add this catalog?</string>
     <string name="error">Error</string>
     <string name="cant_open_file">Can\'t open file \"%s\"!</string>
+    <string name="opened_from_stream">Document opened from stream, file location unknown. Unable to save information about the last opened file!</string>
     <string name="options_app_tts_stop_motion_timeout">Stop reading aloud on motion sensor timeout</string>
     <string name="motion_timeout_off">"Off"</string>
     <string name="motion_timeout_10sec">"10 seconds"</string>
@@ -948,7 +961,7 @@
     <string name="skipped_res_add_info">Allows you not to refresh the page completely (when open dialogs, keyboard, etc) to avoid text reformatting</string>
     <string name="options_app_backlight_timeout_add_info">Forcing the screen backlight time 2-6 minutes, or according to the system settings (selected by default)</string>
     <string name="options_app_backlight_screen_add_info">Forcing the screen brightness to be set to 1-100%, or according to the system settings (selected by default)</string>
-    <string name="options_app_backlight_screen_warm_add_info">For EINK with double frontlight (currently only Onyx)</string>
+    <string name="options_app_backlight_screen_warm_add_info">For E-Ink with double frontlight (currently only Onyx)</string>
     <string name="options_app_tts_stop_motion_timeout_add_info">If the motion sensor does not fix the activity, then the reading aloud stops after a selected time period of 1-100 minutes, disabled by default</string>
     <string name="options_app_key_backlight_off_add_info">Forced off the backlight of control buttons (if there are separate ones) for more comfortable reading</string>
     <string name="options_app_settings_icons_add_info">Display of icons before menu items (when disabled - just title)</string>
@@ -1145,7 +1158,7 @@
     <string name="error_open_as_text">Open as text is not accessible</string>
     <string name="open_as_html_add_info">If \'Open as text\' is chosen - document will be converted to plain text</string>
     <string name="doc_convert_needed">Document conversion needed</string>
-    <string name="toolbar">Toolbar</string>
+    <string name="toolbar">Toolbar and selection popup</string>
     <string name="toolbar_settings">Toolbar settings</string>
     <string name="cloud_settings">Cloud settings</string>
     <string name="dictionary_settings">Dictionary settings</string>
@@ -1265,6 +1278,7 @@
     <string name="reading_pos_updated">reading pos updated</string>
     <string name="successfully_saved_to">successfully saved to</string>
     <string name="send_book_by_email">Send book by email</string>
+    <string name="send_logcat">Send logcat</string>
     <string name="could_not_email_book">Could not email book</string>
     <string name="cloud_download_error">download error (getting link)</string>
     <string name="shortcut_created">Shortcut creation is requested (from OS)</string>
@@ -1509,8 +1523,8 @@
     <string name="cnt_genres">Genres:</string>
     <string name="cnt_entries">Books:</string>
     <string name="cnt_series">Series:</string>
-    <string name="use_eink_backlight_control">Use EINK brightness control method</string>
-    <string name="use_eink_backlight_control_add_info">Try this if you cannot control brightness on the EINK book (only for Onyx)</string>
+    <string name="use_eink_backlight_control">Use E-Ink brightness control method</string>
+    <string name="use_eink_backlight_control_add_info">Try this if you cannot control brightness on the E-Ink book (only for Onyx)</string>
     <string name="need_purchase">First, you should purchase this book, then download</string>
     <string name="already_purchased">Already purchased, proceed to download</string>
     <string name="show_system_brightness_dialog">Show system brightness dialog (Onyx)</string>
@@ -1557,7 +1571,7 @@
     <string name="books_l">books:</string>
     <string name="folders_l">folders:</string>
     <string name="hyph_rend_options">Hyphenation, multilingual, rendering, formatting tweaks (epub, txt, html)</string>
-    <string name="force_eink_warn">Confirm and open settings again - eink options will be enabled</string>
+    <string name="force_eink_warn">Confirm and open settings again - E-Ink options will be enabled</string>
     <string name="eink_screen_update_options">Eink screen update settings</string>
     <string name="interrupt">Interrupt</string>
     <string name="interrupting">Interrupting...</string>
@@ -1566,4 +1580,19 @@
     <string name="series">Series:</string>
     <string name="entries">New books:</string>
     <string name="translated_from">Translated from:</string>
+    <string name="confirmation_select_folder_for_log">On the next screen, select a directory to save the log file</string>
+    <string name="notice_log_saved_to_">The log file was saved in file \"%s\". This file may contain personal data, for example, which books you read, be careful. Send the file?</string>
+    <string name="sel_panel_extended">Selection panel: extended mode</string>
+    <string name="sel_panel_extended_add_info">This option adds second button row to a selection panel</string>
+    <string name="sel_panel_background">Selection panel: background</string>
+    <string name="sel_panel_background_1">Semi-transparent</string>
+    <string name="sel_panel_background_2">Transparent</string>
+    <string name="sel_panel_background_3">Solid</string>
+    <string name="sel_panel_transp_buttons">Selection panel: transparent buttons</string>
+    <string name="sel_panel_add_info">You can see the book contents behind transparent elements, on the other hand - they are less visible</string>
+    <string name="open_url">Open external url (%s)?</string>
+    <string name="open_url_browser">In browser</string>
+    <string name="open_url_kr">In KnownReader</string>
+    <string name="open_url_cancel">Cancel</string>
+    <string name="open_url_cannot">Cannot open link: %s</string>
 </resources>

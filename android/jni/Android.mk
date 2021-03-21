@@ -20,21 +20,24 @@ CRFLAGS := -DLINUX=1 -D_LINUX=1 -DFOR_ANDROID=1 -DCR3_PATCH \
 
 CR3_ROOT := $(LOCAL_PATH)/../..
 
+include $(CR3_ROOT)/thirdparty_repo/repo_srcdirs.mk
+
 LOCAL_C_INCLUDES := \
     $(CR3_ROOT)/crengine/include \
     $(CR3_ROOT)/crengine/fc-lang \
-    $(CR3_ROOT)/thirdparty/libpng \
-    $(CR3_ROOT)/thirdparty/freetype/include \
-    $(CR3_ROOT)/thirdparty/freetype \
-    $(CR3_ROOT)/thirdparty/harfbuzz/src \
-    $(CR3_ROOT)/thirdparty/libjpeg \
-    $(CR3_ROOT)/thirdparty/antiword \
-    $(CR3_ROOT)/thirdparty/chmlib/src \
-    $(CR3_ROOT)/thirdparty/nanosvg/src \
-    $(CR3_ROOT)/thirdparty/fribidi/lib \
-    $(CR3_ROOT)/thirdparty/libunibreak/src \
+    $(CR3_ROOT)/thirdparty/$(REPO_LIBPNG_SRCDIR) \
+    $(CR3_ROOT)/thirdparty/$(REPO_FREETYPE_SRCDIR)/include \
+    $(CR3_ROOT)/thirdparty/$(REPO_FREETYPE_SRCDIR) \
+    $(CR3_ROOT)/thirdparty/$(REPO_HARFBUZZ_SRCDIR)/src \
+    $(CR3_ROOT)/thirdparty/$(REPO_LIBJPEG_SRCDIR) \
+    $(CR3_ROOT)/thirdparty_unman/antiword \
+    $(CR3_ROOT)/thirdparty_unman/chmlib/src \
+    $(CR3_ROOT)/thirdparty_unman/nanosvg/src \
+    $(CR3_ROOT)/thirdparty/$(REPO_FRIBIDI_SRCDIR)/lib \
+    $(CR3_ROOT)/thirdparty/$(REPO_LIBUNIBREAK_SRCDIR)/src \
     $(CR3_ROOT)/android/app/thirdparty_libs/freetype \
-    $(CR3_ROOT)/android/app/thirdparty_libs/fribidi/lib
+    $(CR3_ROOT)/android/app/thirdparty_libs/fribidi/lib \
+    $(CR3_ROOT)/android/app/thirdparty_libs/libpng/lib
 
 
 LOCAL_CFLAGS += $(CRFLAGS)
@@ -49,8 +52,8 @@ CRENGINE_SRC_FILES := \
     ../../crengine/src/cp_stats.cpp \
     ../../crengine/src/lvstring.cpp \
     ../../crengine/src/lvstring8collection.cpp \
-    ../../crengine/src/lvstring16collection.cpp \
-    ../../crengine/src/lvstring16hashedcollection.cpp \
+    ../../crengine/src/lvstring32collection.cpp \
+    ../../crengine/src/lvstring32hashedcollection.cpp \
     ../../crengine/src/crlog.cpp \
     ../../crengine/src/serialbuf.cpp \
     ../../crengine/src/props.cpp \

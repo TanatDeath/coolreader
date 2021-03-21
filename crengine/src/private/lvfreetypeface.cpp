@@ -44,12 +44,6 @@
 #include FT_SYNTHESIS_H // for FT_GlyphSlot_Embolden()
 #include FT_GLYPH_H     // for FT_Matrix_Multiply()
 
-// Use Freetype embolden API instead of LVFontBoldTransform to
-// make fake bold (for fonts that do not provide a bold face).
-// This gives a chance to get them working with Harfbuzz, even if
-// they won't look as nice as if they came with a real bold font.
-#define USE_FT_EMBOLDEN // plotn - possibly this define does not work, anyway we change it to settings value
-
 // Helpers with font metrics (units are 1/64 px)
 // #define FONT_METRIC_FLOOR(x)    ((x) & -64)
 // #define FONT_METRIC_CEIL(x)     (((x)+63) & -64)
@@ -117,14 +111,18 @@ static lChar32 getReplacementChar(lUInt32 code, bool * can_be_ignored = NULL) {
         case 0x2044:
             return '/';
         case 0x2022: // css_lst_disc:
-            return '*';
-        case 0x26AA: // css_lst_disc:
-        case 0x25E6: // css_lst_disc:
+        case 0x26AB: // css_lst_disc:
+        case 0x2981: // css_lst_disc:
         case 0x25CF: // css_lst_disc:
-            return 'o';
-        case 0x25CB: // css_lst_circle:
             return '*';
+        case 0x26AA: // css_lst_circle:
+        case 0x25E6: // css_lst_circle:
+        case 0x26AC: // css_lst_circle:
+        case 0x25CB: // css_lst_circle:
+            return 'o';
         case 0x25A0: // css_lst_square:
+        case 0x25AA: // css_lst_square:
+        case 0x25FE: // css_lst_square:
             return '-';
         default:
             break;
@@ -357,8 +355,13 @@ LVFont *LVFreeTypeFace::getFallbackFont(lUInt32 fallbackPassMask) {
     // Get first unprocessed font
     if (!res.isNull() ) {
         if ( res->getFallbackMask() & fallbackPassMask ) {       // already processed
-            // (full_mask & fallbackPassMask) != full_mask, then recursion is not endless
-            res = res->getFallbackFont(fallbackPassMask | _fallback_mask);
+            if ((fallbackPassMask | _fallback_mask) != fallbackPassMask) {
+                // (full_mask & fallbackPassMask) != full_mask, then recursion is not endless
+                res = res->getFallbackFont(fallbackPassMask | _fallback_mask);
+            } else {
+                CRLog::error("getFallbackFont(): invalid fallback pass mask: fallbackPassMask=0x%04X, _fallback_mask=0x%04X", fallbackPassMask, _fallback_mask);
+                return NULL;
+            }
         }
     }
     return res.get();
@@ -860,12 +863,12 @@ FT_UInt LVFreeTypeFace::getCharIndex(lUInt32 code, lChar32 def_char) {
             FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
         }
     }
-    if ( ch_glyph_index==0 ) {
+    if ( ch_glyph_index==0 && def_char != 0 ) {
         bool can_be_ignored = false;
         lUInt32 replacement = getReplacementChar( code, &can_be_ignored );
         if ( replacement )
             ch_glyph_index = FT_Get_Char_Index( _face, replacement );
-        if ( ch_glyph_index==0 && def_char && !can_be_ignored ) {
+        if ( ch_glyph_index==0 && !can_be_ignored ) {
             // if neither the index of this character nor the index of the replacement character is found,
             // and if this character can be safely ignored,
             // we simply skip it so as not to draw the unnecessary replacement character.
