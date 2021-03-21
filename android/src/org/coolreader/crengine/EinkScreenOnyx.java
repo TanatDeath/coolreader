@@ -136,7 +136,10 @@ public class EinkScreenOnyx implements EinkScreen {
 
 	@Override
 	public void updateController(View view, boolean isPartially) {
-		if (needFullRefresh) refreshScreen(view);
+		if (needFullRefresh) {
+			onyxRepaintEveryThing(view, false);
+			needFullRefresh = false;
+		}
 	}
 
 	@Override
