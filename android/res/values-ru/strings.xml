@@ -1206,7 +1206,7 @@
     <string name="invalid_dic">Не настроен текущий словарь! Настройте словари</string>
     <string name="upload_complete">Загрузка завершена!</string>
     <string name="knownreader_donate_line1">KnownReader - больше, чем просто ридер. Это приложение для чтения электронных книг, которое выросло из проекта CoolReader. Мы вложили в него душу и добавили то, что было важно для нас и для вас: изменили навигацию, поменяли оформление, расширили возможности словарей, облачных функций. Этим список не ограничивается. Мы благодарны автору оригинального CoolReader и всем контрибьюторам в кодовую базу, теперь мы начинаем собственное путешествие в PlayMarket. Если вам пришлось по душе наше приложение и вы хотите поддержать нас, вы всегда можете сделать это следующим образом:</string>
-    <string name="knownreader_donate_line2">1. Пожертвуйте любую сумму:</string>
+    <string name="knownreader_donate_line2">1. Посетите наш сайт:</string>
     <string name="knownreader_donate_line3">https://knownreader.com/contribute</string>
     <string name="knownreader_donate_line4">2. Свяжитесь с нами на форуме 4pda:</string>
     <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
