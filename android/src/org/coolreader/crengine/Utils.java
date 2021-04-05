@@ -294,7 +294,7 @@ public class Utils {
 	private static boolean deleteFolderDocTree_impl(FileInfo folder, Context context, Uri sdCardUri, FileInfoOperationListener bookDeleteCallback) {
 		boolean res = true;
 		Scanner scanner = Services.getScanner();
-		scanner.listDirectory(folder, false);
+		scanner.listDirectory(folder, false, false);
 		DocumentFile documentFile;
 		int i;
 		for (i = 0; i < folder.dirCount(); i++) {
@@ -330,7 +330,7 @@ public class Utils {
 	private static boolean deleteFolder_impl(FileInfo folder, FileInfoOperationListener bookDeleteCallback) {
 		boolean res = true;
 		Scanner scanner = Services.getScanner();
-		scanner.listDirectory(folder, false);
+		scanner.listDirectory(folder, false, false);
 		int i;
 		// delete recursively all child folders
 		for (i = 0; i < folder.dirCount(); i++) {
@@ -639,6 +639,23 @@ public class Utils {
 			return String.valueOf(size/1000000) + "." + String.valueOf(size%1000000/100000) + "M";
 		else
 			return String.valueOf(size/1000000) + "M";
+	}
+	public static String formatSize( long size )
+	{
+		if ( size==0 )
+			return "";
+		if ( size<10000 )
+			return String.valueOf(size);
+		else if ( size<1000000 )
+			return String.valueOf(size/1000) + "K";
+		else if ( size<10000000 )		// < 10M
+			return String.valueOf(size/1000000) + "." + String.valueOf(size%1000000/100000) + "M";
+		else if ( size<1000000000 )		// < 1G
+			return String.valueOf(size/1000000) + "M";
+		else if ( size<10000000000L )	// < 10G
+			return String.valueOf(size/1000000000L) + "." + String.valueOf(size%1000000000L/100000000L) + "G";
+		else
+			return String.valueOf(size/1000000000L) + "G";
 	}
 
 	public static String formatFileInfo(Activity activity, FileInfo item) {
@@ -1172,6 +1189,26 @@ public class Utils {
 		return ("#" + byteToHex(Color.red(n))
 				+ byteToHex(Color.green(n))
 				+ byteToHex(Color.blue(n))).toUpperCase();
+	}
+
+	public static int parseInt(String str, int defValue) {
+		return parseInt(str, defValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+
+	public static int parseInt(String str, int defValue, int minValue, int maxValue) {
+		int n;
+		if (null == str)
+			return defValue;
+		try {
+			n = Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			n = defValue;
+		}
+		if (n < minValue)
+			n = minValue;
+		else if (n > maxValue)
+			n = maxValue;
+		return n;
 	}
 
 }

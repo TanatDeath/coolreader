@@ -5,11 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,12 +16,9 @@ import java.util.concurrent.Callable;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.cloud.ChooseReadingPosDlg;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSync;
 
-import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.crengine.InputDialog.InputHandler;
 import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
@@ -44,7 +38,6 @@ import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -71,7 +64,6 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.onyx.android.sdk.device.Device;
 
 public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties, OnKeyListener, OnTouchListener, OnFocusChangeListener {
 
@@ -210,7 +202,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void onWindowVisibilityChanged(int visibility) {
 			if (visibility == VISIBLE) {
 				if (DeviceInfo.isEinkScreen(mActivity.getScreenForceEink()))
-					mActivity.getEinkScreen().refreshScreen(surface);
+					mEinkScreen.refreshScreen(surface);
 				startStats();
 				checkSize();
 			} else
@@ -222,7 +214,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void onWindowFocusChanged(boolean hasWindowFocus) {
 			if (hasWindowFocus) {
 				if (DeviceInfo.isEinkScreen(mActivity.getScreenForceEink()))
-					BackgroundThread.instance().postGUI(() -> mActivity.getEinkScreen().refreshScreen(surface), 400);
+					BackgroundThread.instance().postGUI(() -> mEinkScreen.refreshScreen(surface), 400);
 				startStats();
 				checkSize();
 			} else
@@ -632,6 +624,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		Bookmark bmk = getCurrentPositionBookmark();
 		if (bmk != null)
 			savePositionBookmark(bmk);
+		if (!mAvgDrawAnimationStats.isEmpty())
+			setSetting(PROP_APP_VIEW_ANIM_DURATION, String.valueOf(mAvgDrawAnimationStats.average()), false, true, false);
 		log.i("calling bookView.onPause()");
 		boolean bNeedSave = true;
 		if (lastSavedToGdBookmark != null) {
@@ -1982,7 +1976,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								return true;
 							}
 						}
-
 						//boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
 						//int dir = isPageMode ? x - start_x : y - start_y;
 						//plotn - some strange behavior with mIsPageMode
@@ -3188,6 +3181,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					log.i("TTS created: opening TTS toolbar");
 					ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, tts);
 					ttsToolbar.setOnCloseListener(() -> ttsToolbar = null);
+					ttsToolbar.setAppSettings(mSettings, null);
 				})) {
 					log.e("Cannot initialize TTS");
 				}
@@ -3860,6 +3854,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			ttsToolbar.pause();
 	}
 
+	public boolean isTTSActive() {
+		return ttsToolbar != null;
+	}
+
+	public TTSToolbarDlg getTTSToolbar() {
+		return ttsToolbar;
+	}
+
 	public void doEngineCommand(final ReaderCommand cmd, final int param)
 	{
 		doEngineCommand( cmd, param, null );
@@ -4192,121 +4194,37 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			flgHighlightUserDic = !"0".equals(value);
 			clearSelection();
 		} else if (PROP_APP_VIEW_AUTOSCROLL_SPEED.equals(key)) {
-			int n = 1500;
-			try {
-				n = Integer.parseInt(value);
-			} catch (NumberFormatException e) {
-				// ignore
-			}
-			if (n < 200)
-				n = 200;
-			if (n > 10000)
-				n = 10000;
-			autoScrollSpeed = n;
+			autoScrollSpeed = Utils.parseInt(value, 1500, 200, 10000);
 		} else if (PROP_PAGE_ANIMATION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				if (n < 0 || n > PAGE_ANIMATION_MAX)
-					n = PAGE_ANIMATION_SLIDE2;
-				pageFlipAnimationMode = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
-			//pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
+			pageFlipAnimationMode = Utils.parseInt(value, PAGE_ANIMATION_SLIDE2, PAGE_ANIMATION_NONE, PAGE_ANIMATION_MAX);
 		} else if (PROP_PAGE_ANIMATION_SPEED.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				pageFlipAnimationSpeed = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
-			//pageFlipAnimationSpeedMs = pageFlipAnimationMode!=PAGE_ANIMATION_NONE ? DEF_PAGE_FLIP_MS : 0;
+			pageFlipAnimationSpeed = Utils.parseInt(value, 300, 100, 800);
 		} else if (PROP_DOUBLE_CLICK_INTERVAL.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				doubleClickInterval = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			doubleClickInterval = Utils.parseInt(value, 400, 100, 1000);
 		} else if (PROP_PREVENT_CLICK_INTERVAL.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				preventClickInterval = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			preventClickInterval =  Utils.parseInt(value, 0, 0, 1000);
 		} else if (PROP_CONTROLS_ENABLE_VOLUME_KEYS.equals(key)) {
 			enableVolumeKeys = flg;
 		} else if (PROP_APP_SELECTION_ACTION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mSelectionAction = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mSelectionAction = Utils.parseInt(value, Settings.SELECTION_ACTION_TOOLBAR);
 		} else if (PROP_APP_MULTI_SELECTION_ACTION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mMultiSelectionAction = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mMultiSelectionAction = Utils.parseInt(value, Settings.SELECTION_ACTION_TOOLBAR);
 		} else if (PROP_APP_SELECTION_ACTION_LONG.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mSelectionActionLong = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mSelectionActionLong = Utils.parseInt(value, Settings.SELECTION_ACTION_TOOLBAR);
 		} else if (PROP_APP_BOOKMARK_ACTION_SEND_TO.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mBookmarkActionSendTo = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mBookmarkActionSendTo = Utils.parseInt(value, -1);
 		} else if (PROP_APP_SELECTION2_ACTION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mSelection2Action = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mSelection2Action = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		} else if (PROP_APP_MULTI_SELECTION2_ACTION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mMultiSelection2Action = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mMultiSelection2Action = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		} else if (PROP_APP_SELECTION2_ACTION_LONG.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mSelection2ActionLong = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mSelection2ActionLong = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		}  else if (PROP_APP_SELECTION3_ACTION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mSelection3Action = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mSelection3Action = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		} else if (PROP_APP_MULTI_SELECTION3_ACTION.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mMultiSelection3Action = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mMultiSelection3Action = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		} else if (PROP_APP_SELECTION3_ACTION_LONG.equals(key)) {
-			try {
-				int n = Integer.valueOf(value);
-				mSelection3ActionLong = n;
-			} catch ( Exception e ) {
-				// ignore
-			}
+			mSelection3ActionLong = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		} else {
 			//mActivity.applyAppSetting(key, value);
 		}
@@ -4408,11 +4326,19 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		log.v("oldNightMode=" + mSettings.getProperty(PROP_NIGHT_MODE) + " newNightMode=" + newSettings.getProperty(PROP_NIGHT_MODE));
 		BackgroundThread.ensureGUI();
 		final Properties currSettings = new Properties(mSettings);
-		setAppSettings( newSettings, currSettings );
-		Properties changedSettings = newSettings.diff(currSettings);
-		currSettings.setAll(changedSettings);
-		mSettings = currSettings;
-		BackgroundThread.instance().postBackground(() -> applySettings(currSettings));
+		if (null != ttsToolbar) {
+			// ignore all non TTS options if TTS is active...
+			ttsToolbar.setAppSettings(newSettings, currSettings);
+			Properties changedSettings = newSettings.diff(currSettings);
+			currSettings.setAll(changedSettings);
+			mSettings = currSettings;
+		} else {
+			setAppSettings(newSettings, currSettings);
+			Properties changedSettings = newSettings.diff(currSettings);
+			currSettings.setAll(changedSettings);
+			mSettings = currSettings;
+			BackgroundThread.instance().postBackground(() -> applySettings(currSettings));
+		}
 	}
 
 	private void setBackgroundTexture(String textureId, int color) {
@@ -5482,21 +5408,23 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	volatile private int nextHiliteId = 0;
-	private final static int HILITE_RECT_ALPHA = 32;
+	private final static int HILITE_RECT_ALPHA = 64;
 	private Rect hiliteRect = null;
+
 	private void unhiliteTapZone() {
 		hiliteTapZone( false, 0, 0, surface.getWidth(), surface.getHeight() );
 	}
+
 	private void hiliteTapZone(final boolean hilite, final int startX, final int startY, final int maxX, final int maxY) {
-		alog.d("highliteTapZone("+startX + ", " + startY+")");
+		alog.d("highliteTapZone(" + startX + ", " + startY + ")");
 		final int myHiliteId = ++nextHiliteId;
 		int txcolor = mSettings.getColor(PROP_FONT_COLOR, Color.BLACK);
-		final int color = (txcolor & 0xFFFFFF) | (HILITE_RECT_ALPHA<<24);
+		final int color = (txcolor & 0xFFFFFF) | (HILITE_RECT_ALPHA << 24);
 		BackgroundThread.instance().executeBackground(() -> {
 			if (myHiliteId != nextHiliteId || (!hilite && hiliteRect == null))
 				return;
 
-			if (currentAutoScrollAnimation!=null) {
+			if (currentAutoScrollAnimation != null) {
 				hiliteRect = null;
 				return;
 			}
@@ -5505,7 +5433,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			final BitmapInfo pageImage = preparePageImage(0);
 			if (pageImage != null && pageImage.bitmap != null && pageImage.position != null) {
 				//PositionProperties currPos = pageImage.position;
-				final Rect rc = hilite ? tapZoneBounds( startX, startY, maxX, maxY ) : hiliteRect;
+				final Rect rc = hilite ? tapZoneBounds(startX, startY, maxX, maxY) : hiliteRect;
 				if (hilite)
 					hiliteRect = rc;
 				else
@@ -5514,15 +5442,19 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					drawCallback(canvas -> {
 						if (mInitialized && mCurrentPageInfo != null) {
 							log.d("onDraw() -- drawing page image");
-							drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, rc, rc);
+							Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+							Rect src = new Rect(0, 0, mCurrentPageInfo.bitmap.getWidth(), mCurrentPageInfo.bitmap.getHeight());
+							drawDimmedBitmap(canvas, mCurrentPageInfo.bitmap, src, dst);
 							if (hilite) {
 								Paint p = new Paint();
+								p.setStyle(Paint.Style.FILL);
 								p.setColor(color);
+								int w = (int)(2.0f*mActivity.getDensityFactor());
 //					    			if ( true ) {
-								canvas.drawRect(new Rect(rc.left, rc.top, rc.right-2, rc.top+2), p);
-								canvas.drawRect(new Rect(rc.left, rc.top+2, rc.left+2, rc.bottom-2), p);
-								canvas.drawRect(new Rect(rc.right-2-2, rc.top+2, rc.right-2, rc.bottom-2), p);
-								canvas.drawRect(new Rect(rc.left+2, rc.bottom-2-2, rc.right-2-2, rc.bottom-2), p);
+								canvas.drawRect(new Rect(rc.left, rc.top, rc.right - w, rc.top + w), p);
+								canvas.drawRect(new Rect(rc.left, rc.top + w, rc.left + w, rc.bottom - w), p);
+								canvas.drawRect(new Rect(rc.right - w - w, rc.top + w, rc.right - w, rc.bottom - w), p);
+								canvas.drawRect(new Rect(rc.left + w, rc.bottom - w - w, rc.right - w - w, rc.bottom - w), p);
 //					    			} else {
 //					    				canvas.drawRect(rc, p);
 //					    			}
@@ -5532,6 +5464,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		});
 	}
+
 	private void scheduleUnhilite(int delay) {
 		final int myHiliteId = nextHiliteId;
 		BackgroundThread.instance().postGUI(() -> {
@@ -5950,8 +5883,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		{
 			Canvas canvas = null;
 			long startTs = android.os.SystemClock.uptimeMillis();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				try {
+					canvas = holder.lockHardwareCanvas();
+				} catch (Exception e) {
+					log.e("drawCallback() -> lockHardwareCanvas(): " + e.toString());
+				}
+			}
 			try {
-				canvas = holder.lockCanvas(rc);
+				if (canvas == null)
+					canvas = holder.lockCanvas(rc);
 				//log.v("before draw(canvas)");
 				if (canvas != null) {
 					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
@@ -5960,21 +5901,20 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						mEinkScreen.prepareController(surface, isPartially);
 					}
 					callback.drawTo(canvas);
-					if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-						// post draw update
-						mEinkScreen.updateController(surface, isPartially);
-					}
 				}
 			} finally {
 				//log.v("exiting finally");
 				if (canvas != null && surface.getHolder() != null) {
 					//log.v("before unlockCanvasAndPost");
-					if (canvas != null && holder != null) {
-						holder.unlockCanvasAndPost(canvas);
-						//if ( rc==null ) {
+					holder.unlockCanvasAndPost(canvas);
+					if ( rc == null && currentAnimation != null ) {
+
 						long endTs = android.os.SystemClock.uptimeMillis();
 						updateAnimationDurationStats(endTs - startTs);
-						//}
+					}
+					if (DeviceInfo.EINK_SCREEN) {
+						// post draw update
+						mEinkScreen.updateController(surface, isPartially);
 					}
 					//log.v("after unlockCanvasAndPost");
 				}
@@ -6916,12 +6856,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private static final class RingBuffer {
-		private long [] mArray;
+		private long[] mArray;
 		private long mSum;
 		private long mAvg;
 		private int mPos;
 		private int mCount;
-		private int mSize;
+		private final int mSize;
 		private ReaderView mRV;
 		public int mUpdCnt = 0;
 
@@ -6956,6 +6896,19 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		}
 
+		public boolean isEmpty() {
+			return 0 == mCount;
+		}
+
+		public void fill(long value) {
+			mPos = 0;
+			mCount = 0;
+			mSum = 0;
+			for (int i = 0; i < mSize; i++) {
+				add(value);
+			}
+		}
+
 		public void readRingBuffer()
 		{
 			log.d("Reading rbuf.json");
@@ -6983,15 +6936,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		public void fullRecalc(ArrayList<Long> newArray) {
 			if (newArray.size() > 0) {
-				mArray = new long[newArray.size()];
+				mArray = new long[mSize];
 				mSum = 0L;
 				mCount = 0;
 				for (int i = 0; i < newArray.size(); i++) {
-					mArray[i] = newArray.get(i);
+					if (i < mSize)
+						mArray[i] = newArray.get(i);
 					mSum += mArray[i];
 					mCount++;
 				}
-				mAvg = mSum /mCount;
+				mAvg = mSum / mCount;
 				log.d("Ring buffer fullRecalc, cnt = " + mCount);
 			}
 		}
@@ -7005,7 +6959,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-	RingBuffer mAvgDrawAnimationStats = new RingBuffer(this, 16, 50);
+	RingBuffer mAvgDrawAnimationStats = new RingBuffer(this, 32, 50);
 
 	private long getAvgAnimationDrawDuration() {
 		return mAvgDrawAnimationStats.average();
@@ -7643,7 +7597,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			canvas.drawColor(currentBackgroundColor | 0xFF000000);
 			backgrNormalizedColor = currentBackgroundColor;
 			if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				mActivity.getWindow().setNavigationBarColor(backgrNormalizedColor);
+				mActivity.runOnUiThread(() -> mActivity.getWindow().setNavigationBarColor(backgrNormalizedColor));
 			}
 		}
 	}

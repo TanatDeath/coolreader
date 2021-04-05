@@ -96,6 +96,47 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_stop"/>
+		<ImageButton android:id="@+id/tts_options"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0"
+			android:layout_marginTop="5dip"
+			android:layout_marginBottom="5dip"
+			android:layout_marginLeft="2dip"
+			android:layout_marginRight="2dip"
+			android:src="?attr/cr3_viewer_settings_drawable"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:tag="tint"
+			android:contentDescription="@string/tts_options"/>
+	</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:orientation="horizontal"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:baselineAligned="true"
+			>
+		<TextView android:id="@+id/tts_lbl_volume"
+				android:layout_height="wrap_content"
+				android:layout_width="0dip" android:layout_weight="1"
+				android:text="@string/tts_volume"
+				android:layout_marginTop="5dip"
+				android:layout_marginBottom="2dip"
+				android:layout_marginLeft="5dip"
+				android:layout_marginRight="5dip"
+				android:textColor="?attr/colorIcon"
+				android:textStyle="bold"
+				/>
+		<TextView android:id="@+id/tts_lbl_speed" android:layout_height="wrap_content"
+				android:layout_width="0dip" android:layout_weight="1"
+				android:text="@string/tts_rate"
+				android:layout_marginTop="5dip"
+				android:layout_marginBottom="2dip"
+				android:layout_marginLeft="5dip"
+				android:layout_marginRight="5dip"
+				android:textColor="?attr/colorIcon"
+				android:textStyle="bold"
+				/>
 	</LinearLayout>
     <TableLayout
 		android:id="@+id/tts_seek_bars"

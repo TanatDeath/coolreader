@@ -701,8 +701,21 @@
     <string name="tts_back">Rewind</string>
     <string name="tts_forward">Forward</string>
     <string name="tts_stop">Stop</string>
+    <string name="tts_options">Options</string>
     <string name="tts_volume">Volume</string>
     <string name="tts_rate">Rate</string>
+    <string name="tts_failed">Failure of speech synthesis</string>
+    <string name="mi_options_tts">TTS Options</string>
+    <string name="options_tts_engine">TTS Engine</string>
+    <string name="options_tts_use_doc_lang">Auto set TTS language by the language of the document</string>
+    <string name="options_tts_language">Language</string>
+    <string name="options_tts_voice">Voice</string>
+    <string name="options_tts_voice_quality_very_low">Very low quality</string>
+    <string name="options_tts_voice_quality_low">Low quality</string>
+    <string name="options_tts_voice_quality_normal">Normal quality</string>
+    <string name="options_tts_voice_quality_high">High quality</string>
+    <string name="options_tts_voice_quality_very_high">Very high quality</string>
+    <string name="tts_init_failure">TTS engine \"%s\" init failure, disabling it…</string>
     <string name="dlg_button_open_book">Open book</string>
     <string name="dlg_button_open_folder">Open containing folder</string>
     <string name="dlg_button_recent_delete">Remove from recent books list</string>
@@ -1595,4 +1608,14 @@
     <string name="open_url_kr">In KnownReader</string>
     <string name="open_url_cancel">Cancel</string>
     <string name="open_url_cannot">Cannot open link: %s</string>
+    <string name="inconsistent_options">Inconsistent options were found: the reading menu was disabled in the "Tap zone actions" section, the reading menu was not associated with any buttons in the "Keys actions" section, and the toolbar was also disabled. In order not to lose the functionality of the program, choose variant: enable the display of the toolbar, or add an action to display the reading menu on the touch screen</string>
+    <string name="inconsistent_options_toolbar">enable toolbar</string>
+    <string name="inconsistent_options_tap_reading_menu">add reading menu on the touch screen</string>
+    <string name="options_hide_empty_dirs_slowdown">(May slow down the listing of directory contents)</string>
+    <string name="file_not_found">File was not found</string>
+    <string name="tts_panel_background">TTS panel: background</string>
+    <string name="tts_panel_transp_buttons">TTS panel: transparent buttons</string>
+    <string name="user_dic_content">Show user dic content</string>
+    <string name="user_dic_content_0">Show user dic content and (online) translate history</string>
+    <string name="user_dic_content_1">Show user dic content only</string>
 </resources>

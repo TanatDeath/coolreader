@@ -172,8 +172,8 @@ public class FileInfo {
 	public String subtitle;
 
 	public DocumentFormat format;
-	public int size; // full file size
-	public int arcsize; // compressed size
+	public long size; // full file size
+	public long arcsize; // compressed size
 	private long createTime;
 	public long lastAccessTime;
 	public int flags;
@@ -406,7 +406,7 @@ public class FileInfo {
 				path = f.getPath();
 				File arc = new File(arcname);
 				if (arc.isFile() && arc.exists()) {
-					arcsize = (int)arc.length();
+					arcsize = arc.length();
 					isArchive = true;
 					try {
 						//ZipFile zip = new ZipFile(new File(arcname));
@@ -421,8 +421,8 @@ public class FileInfo {
 								name_crc32 = getFNameCRC(filename);
 								path = itemf.getPath();
 								format = DocumentFormat.byExtension(name);
-								size = (int)entry.getSize();
-								arcsize = (int)entry.getCompressedSize();
+								size = entry.getSize();
+								//arcsize = entry.getCompressedSize();
 								createTime = entry.getTime();
 								break;
 							}
@@ -475,7 +475,7 @@ public class FileInfo {
 			format = fmt;
 			if (format == null) format = DocumentFormat.NONE;
 			createTime = f.lastModified();
-			size = (int)f.length();
+			size = f.length();
 			domVersion = Engine.DOM_VERSION_CURRENT;
 			blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
 			//if (StrUtils.isEmptyStr(title)) title = filename; // Dont work properly, think later
@@ -1196,13 +1196,15 @@ public class FileInfo {
 		if (dir.parent == null)
 			dir.parent = this;
 	}
-	public void addFile( FileInfo file )
+
+	public void addFile(FileInfo file)
 	{
-		if ( files==null )
+		if (files == null)
 			files = new ArrayList<>();
 		files.add(file);
 	}
-	public void addItems( Collection<FileInfo> items )
+
+	public void addItems(Collection<FileInfo> items)
 	{
 		for ( FileInfo item : items ) {
 			if ( item.isDirectory )
@@ -1212,17 +1214,41 @@ public class FileInfo {
 			item.parent = this;
 		}
 	}
-	public void replaceItems( Collection<FileInfo> items )
+
+	public void replaceItems(Collection<FileInfo> items)
 	{
 		files = null;
 		dirs = null;
 		addItems( items );
 	}
+
+	public boolean updateItem(FileInfo item) {
+		if (null != dirs) {
+			for (FileInfo dir : dirs) {
+				if (dir.pathNameEquals(item)) {
+					dir.assign(item);
+					dir.setItems(item);
+					return true;
+				}
+			}
+		}
+		if (null != files) {
+			for (FileInfo file : files) {
+				if (file.pathNameEquals(item)) {
+					file.assign(item);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public boolean isEmpty()
 	{
 		return fileCount()==0 && dirCount()==0;
 	}
-	public FileInfo getItem( int index )
+
+	public FileInfo getItem(int index)
 	{
 		if ( index<0 )
 			throw new IndexOutOfBoundsException();
@@ -1348,15 +1374,21 @@ public class FileInfo {
 
 	public void setItems(FileInfo copyFrom)
 	{
+		if (this == copyFrom)
+			return;
 		clear();
 		for (int i=0; i<copyFrom.fileCount(); i++) {
-			addFile(copyFrom.getFile(i));
-			copyFrom.getFile(i).parent = this;
+			FileInfo file = copyFrom.getFile(i);
+			file.parent = this;
+			addFile(file);
 		}
 		for (int i=0; i<copyFrom.dirCount(); i++) {
-			addDir(copyFrom.getDir(i));
-			copyFrom.getDir(i).parent = this;
+			FileInfo dir = copyFrom.getDir(i);
+			dir.parent = this;
+			addDir(dir);
 		}
+		isListed = copyFrom.isListed;
+		isScanned = copyFrom.isScanned;
 	}
 
 	public void setItems(Collection<FileInfo> list)
@@ -1371,17 +1403,22 @@ public class FileInfo {
 				addFile(item);
 			item.parent = this;
 		}
+		isListed = true;
 	}
 
-	public void removeEmptyDirs()
+	public boolean removeEmptyDirs()
 	{
-		if ( parent==null || pathname.startsWith("@") || !isListed || dirs==null )
-			return;
+		if (parent == null || pathname.startsWith("@") || !isListed || dirs == null)
+			return false;
+		boolean removed = false;
 		for ( int i=dirCount()-1; i>=0; i-- ) {
 			FileInfo dir = getDir(i);
-			if ( dir.isListed && dir.dirCount() == 0 && dir.fileCount() == 0)
+			if ( dir.isListed && dir.dirCount() == 0 && dir.fileCount() == 0) {
 				dirs.remove(i);
+				removed = true;
+			}
 		}
+		return removed;
 	}
 	
 	public void removeChild( FileInfo item )
@@ -2065,7 +2102,7 @@ public class FileInfo {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((arcname == null) ? 0 : arcname.hashCode());
-		result = prime * result + arcsize;
+		result = prime * result + (int)arcsize;
 		result = prime * result + ((authors == null) ? 0 : authors.hashCode());
 		result = prime * result + (int) (createTime ^ (createTime >>> 32));
 		result = prime * result + ((dirs == null) ? 0 : dirs.hashCode());
@@ -2092,7 +2129,7 @@ public class FileInfo {
 				+ ((pathname == null) ? 0 : pathname.hashCode());
 		result = prime * result + ((series == null) ? 0 : series.hashCode());
 		result = prime * result + seriesNumber;
-		result = prime * result + size;
+		result = prime * result + (int)size;
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
 	}

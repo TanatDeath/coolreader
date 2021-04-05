@@ -168,6 +168,7 @@ public class Synchronizer {
 	private static final String LOCK_FILE_PATH = REMOTE_FOLDER_PATH + "/.lock";
 	private static final int LOCK_FILE_CHECK_PERIOD = 500;			// ms
 	private static final int LOCK_FILE_CHECK_MAX_COUNT = 120;		// total wait 60 sec.
+	private static final int MAX_FILESIZE_TO_UPLOAD = 10485760;		// 10MB
 
 	private static final int BOOKMARKS_BUNDLE_VERSION = 3;
 	private static final int CURRENTBOOKINFO_BUNDLE_VERSION = 3;
@@ -1014,7 +1015,7 @@ public class Synchronizer {
 				props.setProperty("title", fileInfo.title);
 				props.setProperty("series", fileInfo.series);
 				props.setInt("seriesNumber", fileInfo.seriesNumber);
-				props.setInt("size", fileInfo.size);
+				props.setLong("size", fileInfo.size);
 				props.setLong("crc32", fileInfo.crc32);
 				props.storeToXML(gzipOutputStream, "CoolReader current document info");
 				gzipOutputStream.close();
@@ -1077,7 +1078,7 @@ public class Synchronizer {
 								fileInfo.title = props.getProperty("title");
 								fileInfo.series = props.getProperty("series");
 								fileInfo.seriesNumber = props.getInt("seriesNumber", 0);
-								fileInfo.size = props.getInt("size", 0);
+								fileInfo.size = props.getLong("size", 0);
 								fileInfo.crc32 = props.getLong("crc32", 0);
 								syncSetCurrentBook(fileInfo);
 								onContinue.run();
@@ -1120,9 +1121,16 @@ public class Synchronizer {
 			// TODO: check if CRC32 on arcname != fileInfo.crc32
 			String fingerprint = Long.toString(fileInfo.crc32, 10);
 			String bookFilePath = (fileInfo.isArchive && null != fileInfo.arcname) ? fileInfo.arcname : fileInfo.pathname;
-			int bookFileSize = (fileInfo.isArchive && null != fileInfo.arcname) ? fileInfo.arcsize : fileInfo.size;
+			long bookFileSize = (fileInfo.isArchive && null != fileInfo.arcname) ? fileInfo.arcsize : fileInfo.size;
 			File bookFile = new File(bookFilePath);
 			String bookFileName = bookFile.getName();
+			if (bookFileSize > MAX_FILESIZE_TO_UPLOAD) {
+				log.w("File \"" + bookFileName + "\" is too big (" + bookFileSize + "), skipping uploading to cloud!");
+				m_currentOperationIndex++;
+				updateSyncProgress(m_currentOperationIndex, m_totalOperationsCount);
+				onContinue.run();
+				return;
+			}
 			// ".cr3/some_file.fb2.123456.data.gz"
 			// ".cr3/some_file.fb2.zip.123456.data.gz"
 			String cloudFilePath = REMOTE_FOLDER_PATH + "/" + bookFileName + "." + fingerprint + ".data.gz";
@@ -1157,7 +1165,7 @@ public class Synchronizer {
 							outputStream.close();
 							HashMap<String, String> customProps = new HashMap<String, String>(2);
 							customProps.put(FileMetadata.CUSTOM_PROP_FINGERPRINT, fingerprint);
-							customProps.put(FileMetadata.CUSTOM_PROP_SOURCE_SIZE, Integer.toString(bookFileSize, 10));
+							customProps.put(FileMetadata.CUSTOM_PROP_SOURCE_SIZE, Long.toString(bookFileSize, 10));
 							log.d("UploadCurrentBookBodySyncOperation: starting to upload file: " + bookFileName);
 							m_remoteAccess.writeFile(cloudFilePath, outputStream.toByteArray(), customProps, new OnOperationCompleteListener<Boolean>() {
 								@Override
@@ -1382,7 +1390,7 @@ public class Synchronizer {
 													throw new IOException("Invalid size of file, saved " + totalSize + ", must be " + sourceSize);
 												// parse & save in DB
 												BackgroundThread.instance().executeGUI(() -> m_coolReader.waitForCRDBService(() -> {
-													Services.getScanner().scanDirectory(m_coolReader.getDB(), new FileInfo(outDir), () -> onContinue.run(), false, new Scanner.ScanControl());
+													Services.getScanner().scanDirectory(m_coolReader.getDB(), new FileInfo(outDir), null, (scanControl) -> onContinue.run(), false, new Scanner.ScanControl());
 												}));
 												log.d("File \"" + file.getAbsolutePath() + "\" successfully saved.");
 											} catch (Exception e) {
@@ -1792,7 +1800,7 @@ public class Synchronizer {
 				serializer.endTag("", "seriesNumber");
 				// File Size
 				serializer.startTag("", "size");
-				serializer.text(Integer.toString(fileInfo.size, 10));
+				serializer.text(Long.toString(fileInfo.size, 10));
 				serializer.endTag("", "size");
 				// File CRC32
 				serializer.startTag("", "crc32");

@@ -45,6 +45,7 @@ import android.widget.Toast;
 import com.abbyy.mobile.lingvo.api.MinicardContract;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1931,7 +1932,17 @@ public class Dictionaries {
 					FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 					FileInfo dfi = fi.parent;
 					if (dfi == null) {
-						dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+						FileInfo root = Services.getScanner().getRoot();
+						dfi = Services.getScanner().findParent(fi, root);
+					}
+					if (dfi == null) dfi = fi.parent;
+					if (dfi == null) {
+						File f = new File(fi.pathname);
+						String par = f.getParent();
+						if (par != null) {
+							File df = new File(par);
+							dfi = new FileInfo(df);
+						}
 					}
 					if (dfi != null) {
 						currentDictionary = saveCurrentDictionary;
@@ -1939,6 +1950,8 @@ public class Dictionaries {
 						currentDictionaryTmp = saveCurrentDictionaryTmp;
 						iDic2IsActive = saveIDic2IsActive;
 						cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_YND);
+					} else {
+						((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 					}
 				};
 				return;

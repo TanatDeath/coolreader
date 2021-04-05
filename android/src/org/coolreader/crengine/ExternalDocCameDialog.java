@@ -75,6 +75,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		sLastSeg = sLastSeg.replace("&", "_").replace("#", "_")
 				.replace("?", "_").replace("%", "_")
 				.replace(":","/")
+				.replace(".","_")
 				.replace("/","_").replace("\\","")
 				.replace("\\\\","");
 		return sLastSeg.trim();

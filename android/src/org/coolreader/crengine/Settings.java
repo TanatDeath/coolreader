@@ -173,7 +173,8 @@ public interface Settings {
     public static final String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
 	public static final String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
-    public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
+	public static final String PROP_APP_SHOW_USER_DIC_CONTENT = "app.dictionary.user.dic.content";
+	public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
 	public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
@@ -213,6 +214,8 @@ public interface Settings {
 	public static final String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
 	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
 	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
+	public static final String PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND = "app.options.tts.toolbar.background";
+	public static final String PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.tts.toolbar.transp.buttons";
 
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
@@ -283,6 +286,14 @@ public interface Settings {
 	String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD = "app.cloudsync.googledrive.autosaveperiod";
 	String PROP_APP_CLOUDSYNC_CONFIRMATIONS = "app.cloudsync.confirmations";
 	String PROP_APP_CLOUDSYNC_DATA_KEEPALIVE = "app.cloudsync.bookmarks.keepalive";		// days
+
+	String PROP_APP_TTS_SPEED = "app.tts.speed";
+	String PROP_APP_TTS_ENGINE = "app.tts.engine";
+	String PROP_APP_TTS_USE_DOC_LANG = "app.tts.use.doc.lang";		// The TTS language is set according to the language of the book.
+	String PROP_APP_TTS_FORCE_LANGUAGE = "app.tts.force.lang";		// Force use specified language
+	String PROP_APP_TTS_VOICE = "app.tts.voice";
+
+	String PROP_APP_VIEW_ANIM_DURATION ="app.view.anim.duration";
 
 	public static final String PROP_APP_GEO = "app.geo.locations";
 	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";
@@ -482,9 +493,9 @@ public interface Settings {
 		PROP_APP_DICTIONARY_6,
 		PROP_APP_DICTIONARY_7,
 		PROP_APP_SHOW_USER_DIC_PANEL,
+		PROP_APP_SHOW_USER_DIC_CONTENT,
         PROP_APP_DICT_WORD_CORRECTION,
 		PROP_APP_DICT_DONT_SAVE_IF_MORE,
-        PROP_APP_SHOW_USER_DIC_PANEL,
         PROP_APP_DICT_LONGTAP_CHANGE,
 		PROP_CLOUD_SYNC_VARIANT,
 		PROP_CLOUD_WIKI1_ADDR,

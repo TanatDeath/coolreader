@@ -43,6 +43,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	
 	Engine mEngine;
 	Scanner mScanner;
+	Scanner.ScanControl mScanControl;
 	CoolReader mActivity;
 	LayoutInflater mInflater;
 	History mHistory;
@@ -435,6 +436,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		this.mActivity = activity;
 		this.mEngine = engine;
 		this.mScanner = scanner;
+		this.mScanControl = new Scanner.ScanControl();
 		this.mInflater = LayoutInflater.from(activity);// activity.getLayoutInflater();
 		this.mHistory = history;
 		this.mCoverpageManager = Services.getCoverpageManager();
@@ -486,11 +488,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 	
 	public void onClose() {
+		mScanControl.stop();
 		this.mCoverpageManager.removeCoverpageReadyListener(coverpageListener);
 		coverpageListener = null;
 		super.onDetachedFromWindow();
 	}
 
+	public void stopCurrentScan() {
+		mScanControl.stop();
+	}
 
 	public CoverpageManager getCoverpageManager() {
 		return mCoverpageManager;
@@ -917,6 +923,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					LitresMainDialog litresMainDialog = new LitresMainDialog(mActivity, FileBrowser.saveParams);
 					litresMainDialog.show();
 				}
+			mScanControl.stop();
 			if (showRoot) mActivity.showRootWindow();
 		}
 		else
@@ -1594,11 +1601,19 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			return;
 		if (!currDirectory.pathNameEquals(object) && !currDirectory.hasItem(object))
 			return;
+		if (currDirectory != object) {
+			if (currDirectory.pathNameEquals(object)) {
+				currDirectory.setItems(object);
+			} else if (currDirectory.hasItem(object)) {
+				currDirectory.updateItem(object);
+			}
+		}
 		// refresh
 		if (filePropsOnly)
 			currentListAdapter.notifyInvalidated();
 		else
 			showDirectoryInternal(currDirectory, null);
+		mActivity.setBrowserProgressStatus(true);
 	}
 
 	public static LitresSearchParams saveParams;
@@ -1670,53 +1685,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 //				mActivity.getDB().loadGenresList(fileOrDir, !mHideEmptyGenres, new ItemGroupsLoadingCallback(fileOrDir, itemToSelect));
 //				return;
 //			}
-			if (fileOrDir.isRescanShortcut()) {
-				ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
-				//lets reduce the list
-				boolean bReduced = true;
-				while (bReduced) {
-					bReduced = false;
-					for (FileInfo fi : folders) {
-						String sFName = fi.pathname;
-						if (!sFName.endsWith("/")) sFName = sFName + "/";
-						for (FileInfo fiC : folders) {
-							if ((fiC.pathname.startsWith(sFName)) && (!fiC.pathname.equals(sFName))
-									&& (!fiC.pathname.equals(fi.pathname))) {
-								bReduced = true;
-								folders.remove(fiC);
-								break;
-							}
-						}
-						if (bReduced) break;
-					}
-				}
-				for (FileInfo fi: folders) {
-					File f = new File(fi.pathname);
-					if (f.exists() && f.isDirectory()) {
-						String pathText = fi.pathname;
-						String[] arrLab = pathText.split("/");
-						if (arrLab.length>2) pathText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
-						log.i("scanDirectoryRecursive started (all)");
-						final Scanner.ScanControl control = new Scanner.ScanControl();
-						final ProgressDialog dlg = ProgressDialog.show(mActivity,
-								pathText + " - " + mActivity.getString(R.string.dlg_scan_title),
-								mActivity.getString(R.string.dlg_scan_message),
-								true, true, new OnCancelListener() {
-									@Override
-									public void onCancel(DialogInterface dialog) {
-										log.i("scanDirectoryRecursive (all) : stop handler");
-										control.stop();
-									}
-								});
-						mScanner.scanDirectory(mActivity.getDB(), fi, () -> {
-							log.i("scanDirectoryRecursive (all) : finish handler");
-							if (dlg.isShowing())
-								dlg.dismiss();
-						}, true, control);
-					}
-				}
-				return;
-			}
 			if (fileOrDir.isQSearchShortcut()) {
 				currDirectory = null;
 				currDirectoryFiltered = null;
@@ -1925,53 +1893,27 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		final FileInfo dir = fileOrDir!=null && !fileOrDir.isDirectory ? mScanner.findParent(file, mScanner.getRoot()) : fileOrDir;
 		if (dir != null) {
 			showDirectoryLoadingStub();
+			// if previous scan is in progress, interrupt it
+			if (!mScanControl.isStopped())
+				mScanControl.stop();
+			mScanControl = new Scanner.ScanControl();
+			// if previous scan is in progress, interrupt it
+			if (!mScanControl.isStopped())
+				mScanControl.stop();
+			mScanControl = new Scanner.ScanControl();
 			mScanner.scanDirectory(mActivity.getDB(), dir, () -> {
-//					plotn: think later
-//					boolean wasGrouped = true;
-//					if (dir.dirs != null) {
-//						for (FileInfo fi: dir.dirs)
-//							if (fi.pathname != null)
-//								if (fi.pathname.startsWith(FileInfo.TITLE_GROUP_PREFIX)) {
-//									wasGrouped = true;
-//									break;
-//								}
-//					}
-//					if ((dir.files != null)&&(!wasGrouped))
-//						if (dir.files.size()>MainDB.iMaxGroupSize) {
-//							FileInfo newGroup = MainDB.createItemGroup("", FileInfo.TITLE_GROUP_PREFIX);
-//							newGroup.setFilename(dir.getFilename());
-//							newGroup.title = dir.title;
-//							MainDB.ItemGroupTitleExtractor extractor = new MainDB.ItemGroupTitleExtractor();
-//							MainDB.addGroupedItems2(newGroup, "",
-//								dir.files, FileInfo.TITLE_GROUP_PREFIX, extractor, 1);
-//							if (newGroup.dirs != null) {
-//								if (newGroup.dirs.size()>0) {
-//									dir.files.clear();
-//									if (newGroup.files != null)
-//										for (FileInfo fi : newGroup.files) {
-//											fi.parent = dir;
-//											dir.files.add(fi);
-//										}
-//									if (dir.dirs == null) dir.dirs = new ArrayList<FileInfo>();
-//									for (FileInfo fi : newGroup.dirs) {
-//										fi.parent = dir;
-//										dir.dirs.add(fi);
-//									}
-//								}
-//							}
-//						}
-//					FileInfo newGroup = MainDB.createItemGroup("", FileInfo.TITLE_GROUP_PREFIX);
-//							newGroup.setFilename(dir.getFilename());
-//							newGroup.title = dir.title;
-//							MainDB.ItemGroupTitleExtractor extractor = new MainDB.ItemGroupTitleExtractor();
-//							MainDB.addGroupedItems2(newGroup, "",
-//								dir.getElements(), FileInfo.TITLE_GROUP_PREFIX, extractor, 1);
-//					newGroup.sort(mSortOrder);
-//					showDirectoryInternal(newGroup, file);
 				if (dir.allowSorting())
 					dir.sort(mSortOrder);
 				showDirectoryInternal(dir, file);
-			}, false, new Scanner.ScanControl() );
+				mActivity.setBrowserProgressStatus(true);
+			}, (scanControl) -> {
+				if (!scanControl.isStopped()) {
+					if (dir.allowSorting())
+						dir.sort(mSortOrder);
+					showDirectoryInternal(dir, file);
+				}
+				mActivity.setBrowserProgressStatus(false);
+			}, false, mScanControl);
 		} else
 			showDirectoryInternal(null, file);
 	}
@@ -1985,19 +1927,25 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			showOPDSDir(currDirectory, null, "");
 		} else {
 			log.i("scanCurrentDirectoryRecursive started");
-			final Scanner.ScanControl control = new Scanner.ScanControl();
+			if (!mScanControl.isStopped())
+				mScanControl.stop();
+			mScanControl = new Scanner.ScanControl();
 			final ProgressDialog dlg = ProgressDialog.show(mActivity,
 					mActivity.getString(R.string.dlg_scan_title),
 					mActivity.getString(R.string.dlg_scan_message),
 					true, true, dialog -> {
 						log.i("scanCurrentDirectoryRecursive : stop handler");
-						control.stop();
+						mScanControl.stop();
 					});
 			mScanner.scanDirectory(mActivity.getDB(), currDirectory, () -> {
+				showDirectoryInternal(currDirectory, null);
+				mActivity.setBrowserProgressStatus(true);
+			}, (scanControl) -> {
 				log.i("scanCurrentDirectoryRecursive : finish handler");
+				mActivity.setBrowserProgressStatus(false);
 				if (dlg.isShowing())
 					dlg.dismiss();
-			}, true, control);
+			}, true, mScanControl);
 		}
 	}
 

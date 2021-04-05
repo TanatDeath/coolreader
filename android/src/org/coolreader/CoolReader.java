@@ -3,8 +3,6 @@ package org.coolreader;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -30,7 +28,6 @@ import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.CalibreCatalogEditDialog;
 import org.coolreader.crengine.DocumentFormat;
-import org.coolreader.crengine.EinkScreen;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStatRes;
@@ -94,16 +91,13 @@ import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.geo.GeoLastData;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
-import org.coolreader.tts.TTS;
 
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -117,14 +111,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.speech.tts.TextToSpeech;
+import org.coolreader.tts.OnTTSCreatedListener;
+import org.coolreader.tts.TTSToolbarDlg;
 
-import androidx.core.content.ContextCompat;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 import android.view.LayoutInflater;
@@ -134,13 +128,8 @@ import android.view.ViewGroup;
 import android.provider.Settings.Secure;
 import android.view.WindowManager;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.security.ProviderInstaller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import javax.net.ssl.SSLContext;
 
 public class CoolReader extends BaseActivity implements SensorEventListener
 {
@@ -551,18 +540,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         	if (mBrowser != null)
         		mBrowser.setCoverPageFontFace(value);
         } else if (key.equals(PROP_APP_COVERPAGE_SIZE)) {
-        	int n = 0;
-        	try {
-        		n = Integer.parseInt(value);
-        	} catch (NumberFormatException e) {
-        		// ignore
-        	}
-        	if (n < 0)
-        		n = 0;
-        	else if (n > 2)
-        		n = 2;
-        	if (mBrowser != null)
-        		mBrowser.setCoverPageSizeOption(n);
+			if (mBrowser != null)
+				mBrowser.setCoverPageSizeOption(Utils.parseInt(value, 0, 0, 2));
         } else if (key.equals(PROP_APP_FILE_BROWSER_SIMPLE_MODE)) {
         	if (mBrowser != null)
         		mBrowser.setSimpleViewMode(flg);
@@ -596,40 +575,44 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				int n = 0;
-				try {
-					n = Integer.parseInt(value);
-				} catch (NumberFormatException e) {
-					// ignore
-				}
-				if (n < 0)
-					n = 0;
-				else if (n > 30)
-					n = 30;
-				mSyncGoogleDriveAutoSavePeriod = n;
+				mSyncGoogleDriveAutoSavePeriod = Utils.parseInt(value, 0, 0, 30);
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_DATA_KEEPALIVE)) {
-			int n = 0;
-			try {
-				n = Integer.parseInt(value);
-			} catch (NumberFormatException e) {
-				// ignore
-			}
-			if (n < 0)
-				n = 0;
-			else if (n > 365)
-				n = 365;
-			mCloudSyncBookmarksKeepAlive = n;
+			mCloudSyncBookmarksKeepAlive = Utils.parseInt(value, 14, 0, 365);
 			updateGoogleDriveSynchronizer();
+		} else if (key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS)) {
+			// already in super method:
+			// Services.getScanner().setHideEmptyDirs(flg);
+			// Here only refresh the file browser
+			if (null != mBrowser) {
+				mBrowser.showLastDirectory();
+			}
 		} else if (key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES)) {
 			if (null != mBrowser) {
 				mBrowser.setHideEmptyGenres(flg);
 			}
-		}  else if (key.equals(PROP_APP_USE_EINK_FRONTLIGHT)) { //KR
+		} else if (key.equals(PROP_APP_USE_EINK_FRONTLIGHT)) { //KR
 			mAppUseEinkFrontlight = StrUtils.getNonEmptyStr(value,true).equals("1");
+		} else if (key.equals(PROP_APP_TTS_ENGINE)) {
+			ttsEnginePackage = value;
+			if (null != mReaderView && mReaderView.isTTSActive() && null != tts) {
+				// Stop current TTS process & create new
+				mReaderView.stopTTS();
+				if (tts != null) {
+					// Cleanup previous TTS
+					tts.shutdown();
+					tts = null;
+					ttsInitialized = false;
+					ttsError = false;
+				}
+				initTTS(tts -> {
+					TTSToolbarDlg dlg = mReaderView.getTTSToolbar();
+					dlg.changeTTS(tts);
+				});
+			}
 		}
-        //
+		//
 	}
 
 	private void buildGoogleDriveSynchronizer() {
@@ -1298,6 +1281,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mReaderView != null) {
 			mReaderView.onAppPause();
 		}
+		if (mBrowser != null) {
+			mBrowser.stopCurrentScan();
+		}
 		Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null && !mGoogleDriveSync.isBusy()) {
@@ -1901,6 +1887,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		// Show/Hide soft navbar after OptionDialog is closed.
 		applyFullscreen(getWindow());
+		validateSettings();
 		if (!justCreated) {
 			// Only after onStart()!
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -1973,6 +1960,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				// update recent books directory
 				mBrowser.refreshDirectory(Services.getScanner().getRecentDir(), null);
 				mBrowser.scrollToLastPos();
+			} else {
+				if (null != mBrowser)
+					mBrowser.stopCurrentScan();
 			}
 			onUserActivity();
 		}
@@ -1985,6 +1975,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public void showRootWindow() {
+		if (null != mBrowser)
+			mBrowser.stopCurrentScan();
 		if ((mCurrentFrame != mReaderFrame) || (mReaderFrame == null)) {
 			setCurrentFrame(mHomeFrame);
 		} else {
@@ -2015,6 +2007,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	private void runInReader(final Runnable task) {
+		if (null != mBrowser)
+			mBrowser.stopCurrentScan();
 		waitForCRDBService(() -> {
 			if (mReaderFrame != null) {
 				task.run();
@@ -2273,11 +2267,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		runInBrowser(() -> mBrowser.showDirectory(path, null, addFilter, null), false);
 	}
 
-	
-	
 	public void setBrowserTitle(String title, FileInfo dir) {
 		if (mBrowserFrame != null)
 			mBrowserFrame.setBrowserTitle(title, dir);
+	}
+
+	public void setBrowserProgressStatus(boolean enable) {
+		if (!enable) {
+			log.e("setBrowserProgressStatus(false)");
+		}
+		if (mBrowserFrame != null)
+			mBrowserFrame.setBrowserProgressStatus(enable);
 	}
 
 	public void setBrowserBottomBar(boolean isLitres) {
@@ -2559,18 +2559,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
     // ========================================================================================
     // TTS
-	public TTS tts;
+	public TextToSpeech tts;
 	public boolean ttsInitialized;
-	public boolean ttsError;
-	
-	public boolean initTTS(final TTS.OnTTSCreatedListener listener) {
-		if (ttsError || !TTS.isFound()) {
-			if (!ttsError) {
-				ttsError = true;
-				showToast("TTS is not available");
-			}
-			return false;
-		}
+	private boolean ttsError;
+	private String ttsEnginePackage;
+	private Timer initTTSTimer;
+
+	private final static long INIT_TTS_TIMEOUT = 10000;		// 10 sec.
+
+	public boolean initTTS(final OnTTSCreatedListener listener) {
 		if (!phoneStateChangeHandlerInstalled) {
 			boolean readPhoneStateIsAvailable;
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -2599,43 +2596,42 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			BackgroundThread.instance().executeGUI(() -> listener.onCreated(tts));
 			return true;
 		}
-
-		if (ttsInitialized && tts != null) {
-			showToast("TTS initialization is already called");
-			return false;
-		}
 		showToast("Initializing TTS");
-    	tts = new TTS(this, status -> {
+		TextToSpeech.OnInitListener onInitListener = status -> {
 			//tts.shutdown();
+			initTTSTimer.cancel();
+			initTTSTimer = null;
 			L.i("TTS init status: " + status);
-			if (status == TTS.SUCCESS) {
+			if (status == TextToSpeech.SUCCESS) {
 				ttsInitialized = true;
 				BackgroundThread.instance().executeGUI(() -> listener.onCreated(tts));
-				// will play silence
-				if (Build.VERSION.SDK_INT >= 24) {
-					MediaPlayer mp = new MediaPlayer();
-					try {
-						final FileDescriptor fd = getResources().openRawResourceFd(R.raw.silence).getFileDescriptor();
-						mp.setDataSource(fd);
-						mp.prepareAsync();
-						mp.start();
-						mp.setOnCompletionListener(mp1 -> {
-							L.i("silence completed");
-						});
-
-						L.i("silence");
-					} catch (IOException e) {
-						L.e("silence error: "+e.getMessage());
-					}
-				}
 			} else {
 				ttsError = true;
 				BackgroundThread.instance().executeGUI(() -> showToast("Cannot initialize TTS"));
 			}
-		});
+		};
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH && null != ttsEnginePackage && ttsEnginePackage.length() > 0)
+			tts = new TextToSpeech(this, onInitListener, ttsEnginePackage);
+		else
+			tts = new TextToSpeech(this, onInitListener);
+		initTTSTimer = new Timer();
+		initTTSTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				// TTS engine init hangs, remove it from settings
+				log.e("TTS engine \"" + ttsEnginePackage + "\" init failure, disabling!");
+				BackgroundThread.instance().executeGUI(() -> showToast(R.string.tts_init_failure, ttsEnginePackage));
+				setSetting(PROP_APP_TTS_ENGINE, "", false);
+				ttsEnginePackage = "";
+				try {
+					mReaderView.getTTSToolbar().stopAndClose();
+				} catch (Exception ignored) {}
+				initTTSTimer.cancel();
+				initTTSTimer = null;
+			}
+		}, INIT_TTS_TIMEOUT);
 		return true;
 	}
-	
 
     // ============================================================
 	private AudioManager am;
@@ -2675,7 +2671,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				BackgroundThread.instance().executeGUI(() -> {
 					OptionsDialog.toastShowCnt++;
 					if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
-					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
+					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null);
 					dlg.show();
 				});
 			});
@@ -2691,7 +2687,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFaces = Engine.getFontFaceList();
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(() -> {
-					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
+					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null);
 					dlg.selectedTab = tab;
 					dlg.show();
 				});
@@ -2699,6 +2695,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void showOptionsDialogExt(final OptionsDialog.Mode mode, final String selectOption)
+	{
+		showOptionsDialogExt(mode, selectOption, null);
+	}
+
+	public void showOptionsDialogExt(final OptionsDialog.Mode mode, final String selectOption, TextToSpeech tts)
 	{
 		BackgroundThread.instance().postBackground(() -> {
 			final String[] mFontFaces = Engine.getFontFaceList();
@@ -2708,7 +2709,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					OptionsDialog.toastShowCnt++;
 					if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 				}
-				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mReaderView, mFontFaces, mFontFacesFiles, mode);
+				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts);
 				dlg.selectedOption = selectOption;
 				dlg.show();
 			});
@@ -3760,17 +3761,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		setLastNotificationMask(getLastNotificationMask() | NOTIFICATION_READER_MENU_MASK);
 		showNotifications();
 
-//		showNotice(R.string.note1_reader_menu, new Runnable() {
-//			@Override
-//			public void run() {
-//				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
-//			}
-//		}, new Runnable() {
-//			@Override
-//			public void run() {
-//				setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_NONE), false);
-//			}
-//		});
+//		showNotice(R.string.note1_reader_menu,
+//				R.string.dlg_button_yes, () -> {
+//					setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
+//					setLastNotificationMask(getLastNotificationMask() | NOTIFICATION_READER_MENU_MASK);
+//					showNotifications();
+//				},
+//				R.string.dlg_button_no, () -> {
+//					setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_NONE), false);
+//					setLastNotificationMask(getLastNotificationMask() | NOTIFICATION_READER_MENU_MASK);
+//					showNotifications();
+//				}
+//		);
 	}
 
 	//KR - still thinking this is not needed and makes interface ugly

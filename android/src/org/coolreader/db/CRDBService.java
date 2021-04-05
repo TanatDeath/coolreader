@@ -708,11 +708,11 @@ public class CRDBService extends Service {
 		});
 	}
 
-	public void loadFileInfos(final ArrayList<String> pathNames, final FileInfoLoadingCallback callback, final Handler handler) {
+	public void loadFileInfos(final ArrayList<String> pathNames, final Scanner.ScanControl control, final Engine.ProgressControl progress, final FileInfoLoadingCallback callback, final Handler handler) {
 		execTask(new Task("loadFileInfos") {
 			@Override
 			public void work() {
-				final ArrayList<FileInfo> list = mainDB.loadFileInfos(pathNames);
+				final ArrayList<FileInfo> list = mainDB.loadFileInfos(pathNames, control, progress);
 				sendTask(handler, () -> callback.onFileInfoListLoaded(list, ""));
 			}
 		});
@@ -1120,11 +1120,11 @@ public class CRDBService extends Service {
 			getService().findByPatterns(maxCount, authors, title, series, filename, callback, new Handler());
 		}
 
-    	public void loadFileInfos(final ArrayList<String> pathNames, final FileInfoLoadingCallback callback) {
-    		getService().loadFileInfos(pathNames, callback, new Handler());
-    	}
+		public void loadFileInfos(final ArrayList<String> pathNames, final Scanner.ScanControl control, final Engine.ProgressControl progress, final FileInfoLoadingCallback callback) {
+			getService().loadFileInfos(pathNames, control, progress, callback, new Handler());
+		}
 
-    	public void deleteBook(final FileInfo fileInfo)	{
+		public void deleteBook(final FileInfo fileInfo)	{
     		getService().deleteBook(new FileInfo(fileInfo));
     	}
 
@@ -1233,7 +1233,9 @@ public class CRDBService extends Service {
 			getService().getLibraryStats(callback, new Handler());
 		}
 
-    }
+		public void loadFileInfos(ArrayList<String> pathNames, FileInfoLoadingCallback fileInfoLoadingCallback) {
+		}
+	}
 
     @Override
     public IBinder onBind(Intent intent) {

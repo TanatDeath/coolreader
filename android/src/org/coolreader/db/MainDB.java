@@ -12,6 +12,7 @@ import android.util.Log;
 
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
+import org.coolreader.crengine.Scanner;
 import org.coolreader.genrescollection.GenresCollection;
 import org.coolreader.library.AuthorAlias;
 
@@ -2880,6 +2881,7 @@ public class MainDB extends BaseDB {
 				for (FileInfo item : list) {
 					if (item.exists())
 						continue;
+					// TODO: also check fingerprint
 					if (item.size == fi.size) {
 						log.i("Found record for file of the same name and size: treat as moved " + item.getFilename() + " " + item.size);
 						// fix and save
@@ -3652,8 +3654,8 @@ public class MainDB extends BaseDB {
 		fileInfo.series = rs.getString(i++);
 		fileInfo.seriesNumber = rs.getInt(i++);
 		fileInfo.format = DocumentFormat.byId(rs.getInt(i++));
-		fileInfo.size = rs.getInt(i++);
-		fileInfo.arcsize = rs.getInt(i++);
+		fileInfo.size = rs.getLong(i++);
+		fileInfo.arcsize = rs.getLong(i++);
 		fileInfo.setCreateTime(rs.getLong(i++));
 		fileInfo.lastAccessTime = rs.getLong(i++);
 		fileInfo.flags = rs.getInt(i++);
@@ -4043,16 +4045,22 @@ public class MainDB extends BaseDB {
 		return list;
 	}
 
-	public ArrayList<FileInfo> loadFileInfos(ArrayList<String> pathNames) {
+	public ArrayList<FileInfo> loadFileInfos(ArrayList<String> pathNames, final Scanner.ScanControl control, final Engine.ProgressControl progress) {
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 		if (!isOpened())
 			return list;
 		try {
 			beginReading();
+			int count = pathNames.size();
+			int i = 0;
 			for (String path : pathNames) {
 				FileInfo file = findFileInfoByPathname(path, true);
+				if (control.isStopped())
+					break;
+				progress.setProgress(i * 10000 / (2*count));
 				if (file != null)
 					list.add(new FileInfo(file));
+				i++;
 			}
 			endReading();
 		} catch (Exception e) {

@@ -83,41 +83,6 @@ import com.dropbox.core.v2.team.BaseDfbReport;
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
 
-	//public static boolean PRO_FEATURES = true;
-	//public static boolean PREMIUM_FEATURES = PRO_FEATURES;
-	//public static String MAIN_CLASS_NAME = "org.coolreader.knownreader";
-	//public static String MAIN_CLASS_NAME = "org.knownreader.premium";
-
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		MenuInflater inflater = getMenuInflater();
-//		inflater.inflate(R.menu.cr3_browser_menu, menu);
-//		getLayoutInflater().setFactory(new LayoutInflater.Factory() {
-//			@Override
-//			public View onCreateView(String name, Context context, AttributeSet attrs) {
-//				if (name.equalsIgnoreCase("com.android.internal.view.menu.IconMenuItemView")) {
-//					try{
-//						LayoutInflater f = getLayoutInflater();
-//						final View view = f.createView(name, null, attrs);
-//						new Handler().post(new Runnable() {
-//							public void run() {
-//								// set the background drawable
-//								view .setBackgroundResource(R.drawable.background_tiled_dark_v3);
-//
-//								// set the text color
-//								((TextView) view).setTextColor(Color.WHITE);
-//							}
-//						});
-//						return view;
-//					} catch (InflateException e) {
-//					} catch (ClassNotFoundException e) {}
-//				}
-//				return null;
-//			}
-//		});
-//		return super.onCreateOptionsMenu(menu);
-//	}
-
 	private static final Logger log = L.create("ba");
 	private View mDecorView;
 
@@ -2137,18 +2102,7 @@ public class BaseActivity extends Activity implements Settings {
 	// Store system locale here, on class creation
 	private static final Locale defaultLocale = Locale.getDefault();
 
-	
-	static public int stringToInt(String value, int defValue) {
-		if (value == null)
-			return defValue;
-		try {
-			return Integer.valueOf(value);
-		} catch ( NumberFormatException e ) {
-			return defValue;
-		}
-	}
-	
-	public void applyAppSetting( String key, String value )
+	public void applyAppSetting(String key, String value)
 	{
 		boolean flg = "1".equals(value);
         if ( key.equals(PROP_APP_FULLSCREEN)) {
@@ -2158,75 +2112,75 @@ public class BaseActivity extends Activity implements Settings {
         } else if (key.equals(PROP_APP_KEY_BACKLIGHT_OFF)) {
 			setKeyBacklightDisabled(flg);
         } else if (key.equals(PROP_APP_SCREEN_BACKLIGHT_LOCK)) {
-        	int n = 0;
-        	try {
-        		n = Integer.parseInt(value);
-        	} catch (NumberFormatException e) {
-        		// ignore
-        	}
-			setScreenBacklightDuration(n);
+			setScreenBacklightDuration(Utils.parseInt(value, 0));
         } else if (key.equals(PROP_NIGHT_MODE)) {
 			setNightMode(flg);
         } else if (key.equals(PROP_APP_SCREEN_UPDATE_MODE)) {
-			setScreenUpdateMode(EinkScreen.EinkUpdateMode.byCode(stringToInt(value, 0)), getContentView());
+			setScreenUpdateMode(EinkScreen.EinkUpdateMode.byCode(Utils.parseInt(value, 0)), getContentView());
         } else if (key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL)) {
-			setScreenUpdateInterval(stringToInt(value, 10), getContentView());
+			setScreenUpdateInterval(Utils.parseInt(value, 10), getContentView());
 		} else if (key.equals(PROP_APP_SCREEN_BLACKPAGE_INTERVAL)) {
-			setScreenBlackpageInterval(stringToInt(value, 0));
+			setScreenBlackpageInterval(Utils.parseInt(value, 0));
         } else if (key.equals(PROP_APP_SCREEN_BLACKPAGE_DURATION)) {
-            setScreenBlackpageDuration(stringToInt(value, 300));
+            setScreenBlackpageDuration(Utils.parseInt(value, 300));
         } else if (key.equals(PROP_APP_SCREEN_FORCE_EINK)) {
-            setScreenForceEink(stringToInt(value, 0)==0?false:true);
+            setScreenForceEink(Utils.parseInt(value, 0) == 0? false : true);
         } else if (key.equals(PROP_APP_THEME)) {
 			if (DeviceInfo.isForceHCTheme(getScreenForceEink())) setCurrentTheme("WHITE");
 			else setCurrentTheme(value);
         } else if (key.equals(PROP_APP_SCREEN_ORIENTATION)) {
-        	int orientation = 0;
-        	try {
-        		orientation = Integer.parseInt(value);
-        	} catch (NumberFormatException e) {
-        		// ignore
-        	}
-        	setScreenOrientation(orientation);
+			setScreenOrientation(Utils.parseInt(value, 0));
 		}
-		// CR new features - do not apply eink brightness at startup
-//		else if (DeviceInfo.EINK_HAVE_FRONTLIGHT && PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM.equals(key)) {
-//			try {
-//				final int n = Integer.valueOf(value);
-//				bGetBacklightFromSystem = n == 1;
-//			} catch (Exception e) {
-//				// ignore
-//			}
-//		} else if ((!DeviceInfo.isEinkScreen(getScreenForceEink())  ||
-//				DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS ||
-//				DeviceInfo.EINK_HAVE_FRONTLIGHT) && PROP_APP_SCREEN_BACKLIGHT.equals(key)) {
-		//}
         else if ((!DeviceInfo.isEinkScreen(getScreenForceEink())) && PROP_APP_SCREEN_BACKLIGHT.equals(key)) {
-			try {
-				final int n = Integer.valueOf(value);
-				initialBacklight = n;
-				// delay before setting brightness
-				if (!DeviceInfo.EINK_HAVE_FRONTLIGHT) // only if not onyx
-					BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
-						.postBackground(() -> BackgroundThread.instance()
-								.postGUI(() -> setScreenBacklightLevel(n))), 100);
-			} catch (Exception e) {
-				// ignore
-			}
-//		} else if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT && PROP_APP_SCREEN_WARM_BACKLIGHT.equals(key)) {
-//			try {
-//				int n = Integer.parseInt(value);
-//				initialWarmBacklight = n;
-//			} catch (Exception ignored) {
-//			}
+			final int n = Utils.parseInt(value, -1, -1, 100);
+			initialBacklight = n;
+			// delay before setting brightness
+			BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+				.postBackground(() -> BackgroundThread.instance()
+						.postGUI(() -> setScreenBacklightLevel(n))), 100);
         } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
         	Services.getScanner().setHideEmptyDirs(flg);
         } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
-        	iCutoutMode = stringToInt(value, 0);
-			setCutoutMode(iCutoutMode);
+        	setCutoutMode(Utils.parseInt(value, 0));
 		}
 		// Don't apply screen brightness on e-ink devices on program startup and at any other events
 		// On e-ink in ReaderView gesture handlers setScreenBacklightLevel() & setScreenWarmBacklightLevel() called directly
+	}
+
+	public void validateSettings() {
+		Properties props = settings();
+		boolean menuKeyActionFound = false;
+		for (SettingsManager.DefKeyAction ka : SettingsManager.DEF_KEY_ACTIONS) {
+			if (ReaderAction.READER_MENU.id.equals(ka.action.id)) {
+				if (ka.keyCode != KeyEvent.KEYCODE_MENU || hasHardwareMenuKey()) {
+					menuKeyActionFound = true;
+					break;
+				}
+			}
+		}
+		boolean menuTapActionFound = false;
+		for (SettingsManager.DefTapAction ka : SettingsManager.DEF_TAP_ACTIONS) {
+			String paramName = ka.longPress ? ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + ka.zone : ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + ka.zone;
+			String value = props.getProperty(paramName);
+			if (ReaderAction.READER_MENU.id.equals(value))
+				menuTapActionFound = true;
+		}
+		boolean toolbarEnabled = (props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE
+				&& isFullscreen() && !props.getBool(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false));
+		if (!menuTapActionFound && !menuKeyActionFound && !toolbarEnabled) {
+			showNotice(R.string.inconsistent_options,
+					R.string.inconsistent_options_toolbar, () -> {
+						// enabled toolbar
+						setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), true);
+						setSetting(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, String.valueOf(0), true);
+					},
+					R.string.inconsistent_options_tap_reading_menu, () -> {
+						String paramName = ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".5";
+						setSetting(paramName, ReaderAction.READER_MENU.id, true);
+					}
+			);
+		}
+		// TODO: check any other options for compatibility
 	}
 
 	@TargetApi(28)
@@ -2283,6 +2237,13 @@ public class BaseActivity extends Activity implements Settings {
 		String sText = "";
 		if (questionResourceId != 0) sText = getString(questionResourceId);
 		NoticeDialog dlg = new NoticeDialog(this, sText, action, cancelAction);
+		dlg.show();
+	}
+
+	public void showNotice(int questionResourceId, int button1TextRes, final Runnable button1Runnable,
+						   int button2TextRes, final Runnable button2Runnable) {
+		NoticeDialog dlg = new NoticeDialog(this, "", button1TextRes, button1Runnable, button2TextRes, button2Runnable);
+		dlg.setMessage(questionResourceId);
 		dlg.show();
 	}
 
@@ -2470,12 +2431,14 @@ public class BaseActivity extends Activity implements Settings {
 	}
 	
 	public void showBrowserOptionsDialog() {
+		//OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, OptionsDialog.Mode.BROWSER);
+		//OptionsDialog dlg = new OptionsDialog(BaseActivity.this, OptionsDialog.Mode.BROWSER, null, null, null);
 		if (this instanceof CoolReader) {
 			((CoolReader) this).optionsFilter = "";
 			((CoolReader) this).showOptionsDialogExt(OptionsDialog.Mode.READER, PROP_FILEBROWSER_TITLE);
 		} else {
 			// dead code :)
-			OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, null, OptionsDialog.Mode.BROWSER);
+			OptionsDialog dlg = new OptionsDialog(BaseActivity.this, OptionsDialog.Mode.BROWSER, null, null, null, null);
 			dlg.show();
 		}
 	}
@@ -2846,38 +2809,51 @@ public class BaseActivity extends Activity implements Settings {
 	        }
 	        
 	        // default key actions
-            boolean menuKeyActionFound = false;
-	        for ( DefKeyAction ka : DEF_KEY_ACTIONS ) {
-	        		props.applyDefault(ka.getProp(), ka.action.id);
-	        		if (ReaderAction.READER_MENU.id.equals(ka.action.id))
-	        		  menuKeyActionFound = true;
-	        }
-	        if (DeviceInfo.NOOK_NAVIGATION_KEYS) {
+
+			for (DefKeyAction ka : DEF_KEY_ACTIONS) {
+				props.applyDefault(ka.getProp(), ka.action.id);
+			}
+			if (DeviceInfo.NOOK_NAVIGATION_KEYS) {
 	        	// Add default key mappings for Nook devices & also override defaults for some keys (PAGE_UP, PAGE_DOWN)
 		        for ( DefKeyAction ka : DEF_NOOK_KEY_ACTIONS ) {
 			        props.applyDefault(ka.getProp(), ka.action.id);
 		        }
 	        }
 
-	        boolean menuTapActionFound = false;
-	        for ( DefTapAction ka : DEF_TAP_ACTIONS ) {
-	        	String paramName = ka.longPress ? ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + ka.zone : ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + ka.zone;
-	        	String value = props.getProperty(paramName);
-	        	if (ReaderAction.READER_MENU.id.equals(value))
-	        		menuTapActionFound = true;
-	        }
+			/*
+			 * Moved to function validateSettings()
+			 *
+			boolean menuKeyActionFound = false;
+			for (DefKeyAction ka : DEF_KEY_ACTIONS) {
+				if (ReaderAction.READER_MENU.id.equals(ka.action.id)) {
+					menuKeyActionFound = true;
+					break;
+				}
+			}
 
-          // default tap zone actions
-	        for ( DefTapAction ka : DEF_TAP_ACTIONS ) {
-	        	String paramName = ka.longPress ? ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + ka.zone : ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + ka.zone;
-	        	
-	        	if (ka.zone == 5 && !activity.hasHardwareMenuKey() && !menuTapActionFound && !menuKeyActionFound) {
-	        		// force assignment of central tap zone
-	        		props.setProperty(paramName, ka.action.id);
-	        	} else {
-	        		props.applyDefault(paramName, ka.action.id);
-	        	}
-	        }
+			boolean menuTapActionFound = false;
+			for (DefTapAction ka : DEF_TAP_ACTIONS) {
+				String paramName = ka.longPress ? ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + ka.zone : ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + ka.zone;
+				String value = props.getProperty(paramName);
+				if (ReaderAction.READER_MENU.id.equals(value))
+					menuTapActionFound = true;
+			}
+
+			boolean toolbarEnabled = props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE;
+
+			// default tap zone actions
+			for (DefTapAction ka : DEF_TAP_ACTIONS) {
+				String paramName = ka.longPress ? ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + ka.zone : ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + ka.zone;
+
+				if (ka.zone == 5 && !ka.longPress && !menuTapActionFound && !(activity.hasHardwareMenuKey() && menuKeyActionFound) && !toolbarEnabled) {
+					// force assignment of central tap zone
+					log.w("force assignment of central tap zone to " + ka.action.id);
+					props.setProperty(paramName, ka.action.id);
+				} else {
+					props.applyDefault(paramName, ka.action.id);
+				}
+			}
+			*/
 	        
 	        if (DeviceInfo.EINK_NOOK) {
 	    		props.applyDefault(ReaderView.PROP_PAGE_ANIMATION, ReaderView.PAGE_ANIMATION_NONE);

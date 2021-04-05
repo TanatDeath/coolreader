@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.zip.CRC32;
 
 public class BookmarkEditDialog extends BaseDialog {
@@ -54,6 +55,8 @@ public class BookmarkEditDialog extends BaseDialog {
 	final Button btnColorChoose;
 	final EditText edtContext;
 	public static int lastColor = 0;
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
 	private boolean bColorCheck = false;
 
@@ -199,7 +202,6 @@ public class BookmarkEditDialog extends BaseDialog {
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
 		colorIcon = a.getColor(2, Color.GRAY);
-		colorIconL = a.getColor(3, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(100,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
@@ -341,6 +343,8 @@ public class BookmarkEditDialog extends BaseDialog {
 	{
 		super("BookmarkEditDialog", activity, "", true, false);
 		mCoolReader = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mReaderView = readerView;
 		mIsNew = isNew;
 		mOriginalBookmark = bookmark;
@@ -389,6 +393,11 @@ public class BookmarkEditDialog extends BaseDialog {
 			selectBmkColor(bColorCheck);
 		});
 		edtContext = view.findViewById(R.id.context_text);
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		((TextView) view.findViewById(R.id.lbl_rb_descr)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
+		((TextView) view.findViewById(R.id.lbl_selection_text)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
+		((TextView) view.findViewById(R.id.lbl_comment_text)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
+		((TextView) view.findViewById(R.id.lbl_context_text)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
 
 		final CoolReader cr = activity;
 

@@ -339,52 +339,54 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					}
 				}
 			}
-			// check recent translates
-			for (DicSearchHistoryEntry dshe: UserDicDlg.mDicSearchHistoryAll) {
-				String sKey = dshe.getSearch_text().toLowerCase();
-				String sValue = dshe.getText_translate().toLowerCase();
-				if ((!StrUtils.isEmptyStr(sKey))&&(!StrUtils.isEmptyStr(sValue))) {
-					try {
-						String[] arrKey = sKey.split("~");
-						boolean bWas = false;
-						for (String sK : arrKey) {
-							//CoolReader.log.i(sK);
-							String sK2 = sK.replaceAll("-", " ");
-							String sK3 = sK.replaceAll("-", "");
-							String[] arrK = sK.split("\\|");
-							String[] arrK2 = sK2.split("\\|");
-							String[] arrK3 = sK3.split("\\|");
-							if ((!bWas)&&
-									(sCurPage.contains(arrK[0]) || sCurPage.contains(arrK2[0]) || sCurPage.contains(arrK3[0]))) {
-								bWas = true;
-								boolean bDouble = false;
-								for (int i = 0; i < this.arrUdeWords.size(); i++) {
-									if (StrUtils.getNonEmptyStr(this.arrUdeWords.get(i).getDic_word(),true).
-											equals(StrUtils.getNonEmptyStr(sKey,true))) {
-										bDouble = true;
-										break;
+			String sContent = activity.settings().getProperty(Settings.PROP_APP_SHOW_USER_DIC_CONTENT, "0");
+			if (sContent.equals("0"))
+				// check recent translates
+				for (DicSearchHistoryEntry dshe: UserDicDlg.mDicSearchHistoryAll) {
+					String sKey = dshe.getSearch_text().toLowerCase();
+					String sValue = dshe.getText_translate().toLowerCase();
+					if ((!StrUtils.isEmptyStr(sKey))&&(!StrUtils.isEmptyStr(sValue))) {
+						try {
+							String[] arrKey = sKey.split("~");
+							boolean bWas = false;
+							for (String sK : arrKey) {
+								//CoolReader.log.i(sK);
+								String sK2 = sK.replaceAll("-", " ");
+								String sK3 = sK.replaceAll("-", "");
+								String[] arrK = sK.split("\\|");
+								String[] arrK2 = sK2.split("\\|");
+								String[] arrK3 = sK3.split("\\|");
+								if ((!bWas)&&
+										(sCurPage.contains(arrK[0]) || sCurPage.contains(arrK2[0]) || sCurPage.contains(arrK3[0]))) {
+									bWas = true;
+									boolean bDouble = false;
+									for (int i = 0; i < this.arrUdeWords.size(); i++) {
+										if (StrUtils.getNonEmptyStr(this.arrUdeWords.get(i).getDic_word(),true).
+												equals(StrUtils.getNonEmptyStr(sKey,true))) {
+											bDouble = true;
+											break;
+										}
+									}
+									boolean tooMuch = sKey.split("\\s+").length>3;
+									if ((!bDouble)&&(!tooMuch)) {
+										this.wc = this.wc + 1;
+										UserDicEntry ude = new UserDicEntry();
+										ude.setDic_word(sKey);
+										ude.setDic_word_translate(sValue);
+										ude.setCreate_time(dshe.getCreate_time());
+										ude.setLast_access_time(dshe.getLast_access_time());
+										ude.setDic_from_book(dshe.getSearch_from_book());
+										ude.setLanguage(dshe.getLanguage_from());
+										ude.setThisIsDSHE(true);
+										this.arrUdeWords.add(ude);
 									}
 								}
-								boolean tooMuch = sKey.split("\\s+").length>3;
-								if ((!bDouble)&&(!tooMuch)) {
-									this.wc = this.wc + 1;
-									UserDicEntry ude = new UserDicEntry();
-									ude.setDic_word(sKey);
-									ude.setDic_word_translate(sValue);
-									ude.setCreate_time(dshe.getCreate_time());
-									ude.setLast_access_time(dshe.getLast_access_time());
-									ude.setDic_from_book(dshe.getSearch_from_book());
-									ude.setLanguage(dshe.getLanguage_from());
-									ude.setThisIsDSHE(true);
-									this.arrUdeWords.add(ude);
-								}
 							}
-						}
-					} catch (Exception e) {
+						} catch (Exception e) {
 
+						}
 					}
 				}
-			}
 			Collections.sort(arrUdeWords, (lhs, rhs) -> {
 				// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
 				//return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());

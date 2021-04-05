@@ -678,6 +678,25 @@
     <string name="options_view_toolbar_appear_50">Размер 50%</string>
     <string name="options_view_toolbar_appear_50_gray">Размер 50%, затемнена</string>
     <string name="options_view_toolbar_appear_50_inv">Размер 50%, серые иконки</string>
+    <string name="tts_play">Старт / Пауза</string>
+    <string name="tts_back">Предыдущий</string>
+    <string name="tts_forward">Следующий</string>
+    <string name="tts_stop">Стоп</string>
+    <string name="tts_options">Настройки</string>
+    <string name="tts_volume">Громкость</string>
+    <string name="tts_rate">Темп</string>
+    <string name="tts_failed">Сбой синтеза речи</string>
+    <string name="mi_options_tts">Настройки TTS</string>
+    <string name="options_tts_engine">Движок TTS</string>
+    <string name="options_tts_use_doc_lang">Автоматически выбирать язык TTS в соответствии с языком документа</string>
+    <string name="options_tts_language">Язык</string>
+    <string name="options_tts_voice">Голос</string>
+    <string name="options_tts_voice_quality_very_low">Очень низкое качество</string>
+    <string name="options_tts_voice_quality_low">Низкое качество</string>
+    <string name="options_tts_voice_quality_normal">Нормальное качество</string>
+    <string name="options_tts_voice_quality_high">Высокое качество</string>
+    <string name="options_tts_voice_quality_very_high">Очень высокое качество</string>
+    <string name="tts_init_failure">Сбой инициализации движка TTS \"%s\", отключаем его…</string>
     <string name="dlg_button_back">Назад</string>
     <string name="dlg_about_donation_iron">$0.3: Cool Reader пожертвование - железо</string>
     <string name="dlg_about_donation_vip">$100: Cool Reader пожертвование - VIP</string>
@@ -685,12 +704,6 @@
     <string name="tb_button_find_close">Закрыть поиск</string>
     <string name="tb_button_find_next">Найти следующий</string>
     <string name="options_selection_action_mail">Поделиться</string>
-    <string name="tts_play">Включить / Пауза</string>
-    <string name="tts_back">Назад</string>
-    <string name="tts_forward">Вперед</string>
-    <string name="tts_stop">Стоп</string>
-    <string name="tts_volume">Громкость</string>
-    <string name="tts_rate">Частота</string>
     <string name="dlg_button_open_book">Открыть книгу</string>
     <string name="dlg_button_open_folder">Открыть папку</string>
     <string name="dlg_button_recent_delete">Убрать из списка недавних книг</string>
@@ -1224,7 +1237,7 @@
     <string name="opened_doc_props_text">Автоформатирование текста</string>
     <string name="str_change">Изменить ...</string>
     <string name="later_css">Вы всегда можете это сделать потом - на вкладке CSS в настройках</string>
-    <string name="ynd_autolang"># - автовыбор (только Яндекс онлайн)</string>
+    <string name="ynd_autolang"># - авто (только Я-онлайн)</string>
     <string name="new_fonts">В архиве содержатся новые шрифты (%1$s). Скопировать их в папку шрифтов?</string>
     <string name="fonts_copied">Скопировано шрифтов: %1$s. Чтобы их использовать - перезапустите приложение (возможно потребуется перезагрузка)</string>
     <string name="delete_font">Удалить шрифт / семейство шрифтов?</string>
@@ -1564,5 +1577,15 @@
     <string name="open_url_kr">В KnownReader</string>
     <string name="open_url_cancel">Отмена</string>
     <string name="open_url_cannot">Невозможно открыть ссылку: %s</string>
+    <string name="inconsistent_options">Обнаружены противоречивые настройки: в разделе "Сенсорный экран" отключено меню чтения, в разделе "кнопки" меню чтения не связано ни с одной кнопкой, кроме того выключена панель инструментов. Чтобы не потерять функционал программы выберите один вариант: либо включить отображение панели инструментов либо добавить действие для вывода меню чтения на сенсорный экран</string>
+    <string name="inconsistent_options_toolbar">Включить панель инструментов</string>
+    <string name="inconsistent_options_tap_reading_menu">Добавить меню чтения на сенсорный экран</string>
+    <string name="options_hide_empty_dirs_slowdown">(Может замедлить вывод содержимого каталога)</string>
+    <string name="file_not_found">Файл не найден</string>
+    <string name="tts_panel_background">TTS panel: background</string>
+    <string name="tts_panel_transp_buttons">TTS panel: transparent buttons</string>
+    <string name="user_dic_content">Показывать содержимое пользовательского словаря</string>
+    <string name="user_dic_content_0">Показывать содержимое пользовательского словаря и историю переводов (онлайн)</string>
+    <string name="user_dic_content_1">Показывать только содержимое пользовательского словаря</string>
 </resources>
 

@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -470,7 +471,7 @@ public class SelectionToolbarDlg {
 					dicButton.setTextColor(colorIcon);
 					if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 						else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-					dicButton.setPadding(6, 6, 6, 6);
+					dicButton.setPadding(10, 10, 10, 10);
 					//dicButton.setBackground(null);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -480,7 +481,14 @@ public class SelectionToolbarDlg {
 					//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 					dicButton.setMaxLines(1);
 					dicButton.setEllipsize(TextUtils.TruncateAt.END);
+					TextView tv = new TextView(mCoolReader);
+					tv.setText(" ");
+					tv.setPadding(10, 10, 10, 10);
+					tv.setLayoutParams(llp);
+					tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+					tv.setTextColor(colorIcon);
 					llRecentDics.addView(dicButton);
+					llRecentDics.addView(tv);
 					dicButton.setOnClickListener(v -> {
 						mCoolReader.mDictionaries.setAdHocDict(di);
 						String sSText = selection.text;

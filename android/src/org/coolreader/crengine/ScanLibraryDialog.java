@@ -277,10 +277,11 @@ public class ScanLibraryDialog extends BaseDialog {
 //								});
 //							});
 					Services.getScanner().scanDirectory(mCoolReader.getDB(), new FileInfo(s), () -> {
+						//mActivity.setBrowserProgressStatus(true);
+					}, (scanControl) -> {
 						Log.i("SCANDLG","scanDirectoryRecursive (all) : finish handler");
-//						if (dlg.isShowing())
-//							dlg.dismiss();
 						scanFromStack();
+						//mActivity.setBrowserProgressStatus(false);
 					}, false, control, true);
 					if (windowCenterPopup != null)
 						if (windowCenterPopup.isShowing()) {

@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -257,6 +258,11 @@ public class BrowserViewLayout extends ViewGroup {
 			((ImageButton) titleView.findViewById(R.id.btn_filter)).setOnClickListener(v -> switchFilter(!filterIsShown));
 			activity.tintViewIcons(titleView.findViewById(R.id.btn_filter), true);
 		}
+	}
+
+	public void setBrowserProgressStatus(boolean enable) {
+		ProgressBar progressBar = titleView.findViewById(R.id.progress);
+		progressBar.setVisibility(enable ? View.VISIBLE : View.GONE);
 	}
 
 	public void onThemeChanged(InterfaceTheme theme) {
