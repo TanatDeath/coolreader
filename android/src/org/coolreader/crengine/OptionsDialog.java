@@ -243,7 +243,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public static int[] mFineEmboldenValues;
 
 	int[] mInterlineSpaces = new int[] {
-			80, 85, 90, 95, 100, 105, 110, 115, 120, 130, 140, 150, 160, 180, 200
+			70, 72, 74, 76, 78, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+			91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+			102, 103, 104, 105, 106, 107, 108, 109, 110,
+			111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+			122, 124, 126, 128, 130, 132, 134, 136, 138, 140,
+			142, 144, 146, 148, 150, 152, 154, 156, 158, 160,
+			162, 164, 166, 168, 170, 172, 174, 176, 178, 180,
+			182, 184, 186, 188, 190, 192, 194, 196, 198, 200,
+			202, 204, 206, 208, 200, 212, 214, 216, 218, 220
 		};
 	int[] mMinSpaceWidths = new int[] {
 			25, 30, 40, 50, 60, 70, 80, 90, 100
@@ -1093,6 +1101,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text
 	};
 
+	int[] mSwipeSensivity = new int[] {
+			1, 2, 0, 3, 4
+	};
+	int[] mSwipeSensivityTitles = new int[] {
+			R.string.brightness_swipe_sensivity_1, R.string.brightness_swipe_sensivity_2,
+			R.string.brightness_swipe_sensivity_0,
+			R.string.brightness_swipe_sensivity_3, R.string.brightness_swipe_sensivity_4
+	};
+	int[] mSwipeSensivityAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -1811,6 +1833,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					//mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 					return;
 				});
+			view.setOnLongClickListener(v-> {
+				if (!StrUtils.isEmptyStr(addInfo))
+					mActivity.showToast(addInfo, Toast.LENGTH_LONG, view, true, 0);
+				return true;
+			});
 			setupIconView(view.findViewById(R.id.option_icon));
 			return view;
 		}
@@ -2708,7 +2735,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new FontsOptions(mOwner, getString(R.string.options_page_titlebar_font_face), PROP_STATUS_FONT_FACE,
 					getString(R.string.option_add_info_empty_text), false, this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
 					R.drawable.cr3_option_font_face));
-			//asdf: потом совместить
 			//listView.add(new NumberPickerOption(mOwner, getString(R.string.options_page_titlebar_font_size), PROP_STATUS_FONT_SIZE).setMinValue(mActivity.getMinFontSize()).setMaxValue(mActivity.getMaxFontSize()).setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
 			FlowListOption optFontSize = (FlowListOption) new FlowListOption(mOwner, getString(R.string.options_page_titlebar_font_size), PROP_STATUS_FONT_SIZE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
 					.setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size);
@@ -2837,9 +2863,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.sel_panel_extended_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
 			listView.add(new ListOption(mOwner, getString(R.string.sel_panel_background), PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND,
 					getString(R.string.sel_panel_add_info), this.lastFilteredValue).
-					add(mSelPanelBackground, mSelPanelBackgroundTitles, mSelPanelBackgroundAddInfos).setDefaultValue("0").noIcon());
+					add(mSelPanelBackground, mSelPanelBackgroundTitles, mSelPanelBackgroundAddInfos).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_toolbar_background,R.drawable.icons8_toolbar_background));
 			listView.add(new BoolOption(mOwner, getString(R.string.sel_panel_transp_buttons), PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS,
-					getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_transp_buttons,R.drawable.icons8_transp_buttons));
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3012,9 +3040,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 										}
 									}
 									if (dfi != null) {
-										((CoolReader)mActivity).editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+										((CoolReader)mActivity).editBookTransl(false, view, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
 									} else {
-										((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
+										mActivity.showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 									}
 								}, true).setDefaultValue(lfrom + " -> " + lto).noIcon());
 					}
@@ -3041,6 +3069,40 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new DictOptions(mOwner, getString(R.string.options_app_dictionary)+" 7", PROP_APP_DICTIONARY_7,
 					getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
+			listView.add(new ClickOption(mOwner, getString(R.string.quick_translation_dirs),
+					PROP_APP_QUICK_TRANSLATION_DIRS, getString(R.string.quick_translation_dirs_info), this.lastFilteredValue,
+					view -> {
+						//asdf
+						ArrayList<String[]> vl = new ArrayList<>();
+						String sVal = mProperties.getProperty(PROP_APP_QUICK_TRANSLATION_DIRS);
+						String[] sVals = StrUtils.getNonEmptyStr(sVal, true).split(";");
+						String[] sValsFull = {"", "", "", "", "", "", "", "", "", ""};
+						int i = 0;
+						for (String s: sVals) {
+							if (i > 9) break;
+							sValsFull[i] = s;
+							i++;
+						}
+						i = 0;
+						for (String s: sValsFull) {
+							i++;
+							String[] arrS1 = {mActivity.getString(R.string.lang_pair) + " " + i,
+									mActivity.getString(R.string.lang_pair) + " " + i, s};
+							vl.add(arrS1);
+						}
+						AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+								(CoolReader) activity,
+								activity.getString(R.string.quick_translation_dirs),
+								activity.getString(R.string.quick_translation_dirs_info),
+								vl, results -> {
+							if (results != null) {
+								String res = "";
+								for (String s: results) res = res + ";" + s;
+								mProperties.setProperty(PROP_APP_QUICK_TRANSLATION_DIRS, res.substring(1));
+							}
+						});
+						dlgA.show();
+					}, false).noIcon());
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_dict_longtap_change),
 					PROP_APP_DICT_LONGTAP_CHANGE, getString(R.string.options_app_dict_longtap_change_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_single_double_tap, R.drawable.icons8_single_double_tap));
@@ -3209,8 +3271,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			//CR implementation
 			//listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
 			//		getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
-			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
-					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
 			listView.add(new BoolOption(mOwner, getString(R.string.mi_book_browser_simple_mode), PROP_APP_FILE_BROWSER_SIMPLE_MODE,
 					getString(R.string.mi_book_browser_simple_mode_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
@@ -3348,7 +3408,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					engineOption.add(info.name, info.label, "");
 				}
 				engineOption.setDefaultValue(currentEngine);
-				listView.add(engineOption.noIcon());
+				engineOption.setIconIdByAttr(R.attr.attr_icons8_tts_engine, R.drawable.icons8_tts_engine);
+				listView.add(engineOption);
 				// onchange handler
 				engineOption.setOnChangeHandler(() -> {
 					if (mTemporaryTTS && null != mTTS) {
@@ -3370,7 +3431,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				});
 			}
 			mTTSUseDocLangOption = new BoolOption(mOwner, getString(R.string.options_tts_use_doc_lang), PROP_APP_TTS_USE_DOC_LANG,
-					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1").noIcon();
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_document_lang,R.drawable.icons8_document_lang);
 			listView.add(mTTSUseDocLangOption);
 			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
 				boolean useDocLang = mProperties.getBool(PROP_APP_TTS_USE_DOC_LANG, true);
@@ -3378,6 +3439,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 				fillTTSLanguages(mTTSLanguageOption);
 				mTTSLanguageOption.setEnabled(!useDocLang);
+				mTTSLanguageOption.setIconIdByAttr(R.attr.attr_icons8_tts_lang, R.drawable.icons8_tts_lang);
 				listView.add(mTTSLanguageOption);
 				// onchange handler
 				String lang = mProperties.getProperty (PROP_APP_TTS_FORCE_LANGUAGE, "");
@@ -3395,13 +3457,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						PROP_APP_TTS_VOICE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 				fillTTSVoices(mTTSVoiceOption, lang);
 				mTTSVoiceOption.setEnabled(!useDocLang);
+				mTTSVoiceOption.setIconIdByAttr(R.attr.attr_icons8_voice, R.drawable.icons8_voice);
 				listView.add(mTTSVoiceOption);
 			}
 			listView.add(new ListOption(mOwner, getString(R.string.tts_panel_background), PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND,
 					getString(R.string.sel_panel_add_info), this.lastFilteredValue).
-					add(mSelPanelBackground, mSelPanelBackgroundTitles, mSelPanelBackgroundAddInfos).setDefaultValue("0").noIcon());
+					add(mSelPanelBackground, mSelPanelBackgroundTitles, mSelPanelBackgroundAddInfos).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_toolbar_background,R.drawable.icons8_toolbar_background));
 			listView.add(new BoolOption(mOwner, getString(R.string.tts_panel_transp_buttons), PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS,
-					getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_transp_buttons,R.drawable.icons8_transp_buttons));
 			listView.add(new ListOption(mOwner, getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT,
 					getString(R.string.options_app_tts_stop_motion_timeout_add_info), this.lastFilteredValue).
 					add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
@@ -3472,6 +3537,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public String getValueLabel() { return ">"; }
 	}
 
+	private Integer roundBackLight(float bl) {
+		if (bl < 20) return (int) bl;
+		return (int) (5*(Math.ceil(Math.abs(bl/5))));
+	}
+
 	class BacklightOption extends SubmenuOption {
 		public BacklightOption( OptionOwner owner, String label, String addInfo, String filter ) {
 			super(owner, label, PROP_BACKLIGHT_TITLE, addInfo, filter);
@@ -3537,10 +3607,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						levelsTitles.add(getString(R.string.options_app_backlight_screen_default));
 						for (Integer level : frontLightLevels) {
 							float percentLevel = 100 * level / (float) DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE;
-							if (percentLevel < 10)
-								levelsTitles.add(String.format("%1$.1f%%", percentLevel));
+							if (levelsTitles.contains(roundBackLight(percentLevel) + "%"))
+								levelsTitles.add((roundBackLight(percentLevel) + 1) + "%");
 							else
-								levelsTitles.add(String.format("%1$.0f%%", percentLevel));
+								levelsTitles.add(roundBackLight(percentLevel) + "%");
 							levels.add(level);
 							addInfos.add(R.string.option_add_info_empty_text);
 						}
@@ -3560,10 +3630,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 							addInfos.add(R.string.option_add_info_empty_text);
 							for (Integer level : warmLightLevels) {
 								float percentLevel = 100 * level / (float) DeviceInfo.MAX_SCREEN_BRIGHTNESS_WARM_VALUE;
-								if (percentLevel < 10)
-									levelsTitles.add(String.format("%1$.1f%%", percentLevel));
+								if (levelsTitles.contains(roundBackLight(percentLevel) + "%"))
+									levelsTitles.add((roundBackLight(percentLevel) + 1) + "%");
 								else
-									levelsTitles.add(String.format("%1$.0f%%", percentLevel));
+									levelsTitles.add(roundBackLight(percentLevel) + "%");
 								levels.add(level);
 								addInfos.add(R.string.option_add_info_empty_text);
 							}
@@ -3580,6 +3650,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_key_backlight_off), PROP_APP_KEY_BACKLIGHT_OFF,
 					getString(R.string.options_app_key_backlight_off_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon());
+
+			listView.add(new ListOption(mOwner, getString(R.string.brightness_swipe_sensivity), PROP_APP_BACKLIGHT_SWIPE_SENSIVITY,
+					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+					add(mSwipeSensivity, mSwipeSensivityTitles, mSwipeSensivityAddInfos).setDefaultValue("2").noIcon());
+
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3703,12 +3778,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						getString(R.string.options_app_trackball_disable_add_info), this.lastFilteredValue).setDefaultValue("0").
 						setIconIdByAttr(R.attr.attr_icons8_computer_mouse,R.drawable.icons8_computer_mouse));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_hide_state_dialogs), PROP_APP_HIDE_STATE_DIALOGS,
-					getString(R.string.options_app_hide_state_dialogs_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.options_app_hide_state_dialogs_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_no_questions,R.drawable.icons8_no_dialogs));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_hide_css_warning), PROP_APP_HIDE_CSS_WARNING,
 					getString(R.string.options_app_hide_css_warning_add_info), this.lastFilteredValue).setDefaultValue(
-					(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) ? "1": "0").noIcon());
+					(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) ? "1": "0").
+					setIconIdByAttr(R.attr.attr_icons8_no_dialogs,R.drawable.icons8_no_dialogs));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_disable_safe_mode), PROP_APP_DISABLE_SAFE_MODE,
-					getString(R.string.options_app_disable_safe_mode_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.options_app_disable_safe_mode_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_no_safe_mode,R.drawable.icons8_no_safe_mode));
 			listView.add(new BoolOption(mOwner, getString(R.string.simple_font_select_dialog), PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG,
 					getString(R.string.simple_font_select_dialog_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
 			listView.add(new IconsBoolOption(mOwner, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS,
@@ -4011,7 +4089,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				return;
 			BaseDialog dlg = new BaseDialog("SpacingOption", mActivity, label, false, false);
 			OptionsListView listView = new OptionsListView(getContext(), this);
-			listView.add(new ListOption(mOwner, getString(R.string.options_interline_space), PROP_INTERLINE_SPACE,
+			listView.add(new FlowListOption(mOwner, getString(R.string.options_interline_space), PROP_INTERLINE_SPACE,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					addPercents(mInterlineSpaces).setDefaultValue("100").
 					setIconIdByAttr(R.attr.cr3_option_line_spacing_drawable, R.drawable.cr3_option_line_spacing));
@@ -4136,7 +4214,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				listView.add(new ListOption(mOwner, getString(R.string.orientation_popup_toolbar_duration),
 						PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION,
 						getString(R.string.orient_add_info), this.lastFilteredValue).
-						add(mOrient, mOrientTitles, mOrientAddInfos).setDefaultValue("10").noIcon());
+						add(mOrient, mOrientTitles, mOrientAddInfos).setDefaultValue("10").setIconIdByAttr(R.attr.attr_icons8_disable_toolbar, R.drawable.icons8_disable_toolbar));
 			}
 			else
 				listView.add(new ListOption(mOwner, getString(R.string.options_page_orientation), PROP_APP_SCREEN_ORIENTATION,
@@ -7402,7 +7480,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				add(mBookmarkSendToActionMod, mBookmarkSendToActionModTitles, mBookmarkSendToActionModAddInfos).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
 		mOptionsApplication = new OptionsListView(getContext(), null);
-		mOptionsApplication.add(new LangOption(this, filter).noIcon());
+		mOptionsApplication.add(new LangOption(this, filter).setIconIdByAttr(R.attr.attr_icons8_system_lang, R.drawable.icons8_system_lang));
 		CoolReader cr = (CoolReader)mActivity;
 		if (cr.settingsMayBeMigratedLastInd>=0) {
 			mOptionsApplication.add(new ClickOption(this, getString(R.string.migrate_cr_settings),

@@ -286,7 +286,8 @@ public class Scanner extends FileInfoChangeSource {
 					mapOfFilesFoundInDb.put(f.getPathName(), f);
 				for (int i=0; i<baseDir.fileCount(); i++) {
 					FileInfo item = baseDir.getFile(i);
-					FileInfo fromDB = mapOfFilesFoundInDb.get(item.getPathName());
+					String pathn = item.getPathName();
+					FileInfo fromDB = mapOfFilesFoundInDb.get(pathn);
 					// check the relevance of data in the database
 					if (fromDB != null) {
 						if (fromDB.crc32 == 0 || fromDB.size != item.size || fromDB.arcsize != item.arcsize ) {
@@ -294,11 +295,12 @@ public class Scanner extends FileInfoChangeSource {
 							log.v("The found entry in the database is outdated (crc32=0), need to rescan " + fromDB.toString());
 							fromDB = null;
 						}
-						if (null != fromDB && DocumentFormat.FB2 == fromDB.format && null == fromDB.genres) {
-							// to force rescan and update data in DB
-							log.v("The found entry in the database is outdated (genres=null), need to rescan " + fromDB.toString());
-							fromDB = null;
-						}
+						// this is CR code to rescan genres, if needed. We have a bit different, so this code reverts to constant rescan
+//						if (null != fromDB && DocumentFormat.FB2 == fromDB.format && null == fromDB.genre_list) {
+//							// to force rescan and update data in DB
+//							log.v("The found entry in the database is outdated (genres=null), need to rescan " + fromDB.toString());
+//							fromDB = null;
+//						}
 					} else {
 						// not found in DB
 						// for new files set latest DOM level and max block rendering flags

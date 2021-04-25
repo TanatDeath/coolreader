@@ -495,6 +495,17 @@
         <item name="cr3_button_light_drawable">@drawable/cr3_button_light</item>
         <item name="cr3_button_inc_drawable">@drawable/cr3_button_inc</item>
         <item name="cr3_button_dec_drawable">@drawable/cr3_button_dec</item>
+        <item name="attr_icons8_document_lang">@drawable/icons8_document_lang</item>
+        <item name="attr_icons8_log">@drawable/icons8_log</item>
+        <item name="attr_icons8_no_dialogs">@drawable/icons8_no_dialogs</item>
+        <item name="attr_icons8_no_questions">@drawable/icons8_no_questions</item>
+        <item name="attr_icons8_no_safe_mode">@drawable/icons8_no_safe_mode</item>
+        <item name="attr_icons8_toolbar_background">@drawable/icons8_toolbar_background</item>
+        <item name="attr_icons8_transp_buttons">@drawable/icons8_transp_buttons</item>
+        <item name="attr_icons8_tts_engine">@drawable/icons8_tts_engine</item>
+        <item name="attr_icons8_tts_lang">@drawable/icons8_tts_lang</item>
+        <item name="attr_icons8_voice">@drawable/icons8_voice</item>
+        <item name="attr_icons8_system_lang">@drawable/icons8_system_lang</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -870,6 +881,17 @@
         <item name="cr3_button_light_drawable">@drawable/cr3_button_light</item>
         <item name="cr3_button_inc_drawable">@drawable/cr3_button_inc</item>
         <item name="cr3_button_dec_drawable">@drawable/cr3_button_dec</item>
+        <item name="attr_icons8_document_lang">@drawable/icons8_document_lang</item>
+        <item name="attr_icons8_log">@drawable/icons8_log</item>
+        <item name="attr_icons8_no_dialogs">@drawable/icons8_no_dialogs</item>
+        <item name="attr_icons8_no_questions">@drawable/icons8_no_questions</item>
+        <item name="attr_icons8_no_safe_mode">@drawable/icons8_no_safe_mode</item>
+        <item name="attr_icons8_toolbar_background">@drawable/icons8_toolbar_background</item>
+        <item name="attr_icons8_transp_buttons">@drawable/icons8_transp_buttons</item>
+        <item name="attr_icons8_tts_engine">@drawable/icons8_tts_engine</item>
+        <item name="attr_icons8_tts_lang">@drawable/icons8_tts_lang</item>
+        <item name="attr_icons8_voice">@drawable/icons8_voice</item>
+        <item name="attr_icons8_system_lang">@drawable/icons8_system_lang</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -1937,6 +1959,17 @@
         <item name="cr3_button_light_drawable">@drawable/cr3_button_light_hc</item>
         <item name="cr3_button_inc_drawable">@drawable/cr3_button_inc_hc</item>
         <item name="cr3_button_dec_drawable">@drawable/cr3_button_dec_hc</item>
+        <item name="attr_icons8_document_lang">@drawable/icons8_document_lang</item>
+        <item name="attr_icons8_log">@drawable/icons8_log</item>
+        <item name="attr_icons8_no_dialogs">@drawable/icons8_no_dialogs</item>
+        <item name="attr_icons8_no_questions">@drawable/icons8_no_dialogs</item>
+        <item name="attr_icons8_no_safe_mode">@drawable/icons8_no_safe_mode</item>
+        <item name="attr_icons8_toolbar_background">@drawable/icons8_toolbar_background</item>
+        <item name="attr_icons8_transp_buttons">@drawable/icons8_transp_buttons</item>
+        <item name="attr_icons8_tts_engine">@drawable/icons8_tts_engine</item>
+        <item name="attr_icons8_tts_lang">@drawable/icons8_tts_lang</item>
+        <item name="attr_icons8_voice">@drawable/icons8_voice</item>
+        <item name="attr_icons8_system_lang">@drawable/icons8_system_lang</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>
@@ -2311,6 +2344,17 @@
         <item name="cr3_button_light_drawable">@drawable/cr3_button_light_hc</item>
         <item name="cr3_button_inc_drawable">@drawable/cr3_button_inc_hc</item>
         <item name="cr3_button_dec_drawable">@drawable/cr3_button_dec_hc</item>
+        <item name="attr_icons8_document_lang">@drawable/icons8_document_lang</item>
+        <item name="attr_icons8_log">@drawable/icons8_log</item>
+        <item name="attr_icons8_no_dialogs">@drawable/icons8_no_dialogs</item>
+        <item name="attr_icons8_no_questions">@drawable/icons8_no_dialogs</item>
+        <item name="attr_icons8_no_safe_mode">@drawable/icons8_no_safe_mode</item>
+        <item name="attr_icons8_toolbar_background">@drawable/icons8_toolbar_background</item>
+        <item name="attr_icons8_transp_buttons">@drawable/icons8_transp_buttons</item>
+        <item name="attr_icons8_tts_engine">@drawable/icons8_tts_engine</item>
+        <item name="attr_icons8_tts_lang">@drawable/icons8_tts_lang</item>
+        <item name="attr_icons8_voice">@drawable/icons8_voice</item>
+        <item name="attr_icons8_system_lang">@drawable/icons8_system_lang</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>

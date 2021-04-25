@@ -45,6 +45,7 @@ public class SelectionToolbarDlg {
 	Selection selection;
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
+	public static boolean isVisibleNow = false;
 
 	static public void showDialog(CoolReader coolReader, ReaderView readerView, final Selection selection)
 	{
@@ -97,7 +98,7 @@ public class SelectionToolbarDlg {
 				Log.d("cr3", "fail()");
 				//currentSelection = null;
 			}
-		});
+		}, true);
 	}
 	
 	private final static int SELECTION_CONTROL_STEP = 10;
@@ -142,6 +143,8 @@ public class SelectionToolbarDlg {
 		if (clearSelection)
 			mReaderView.clearSelection();
 		restoreReaderMode();
+		isVisibleNow = false;
+		mReaderView.toggleScreenUpdateModeMode();
 		mWindow.dismiss();
 	}
 
@@ -608,6 +611,8 @@ public class SelectionToolbarDlg {
 
 		mWindow.setOnDismissListener(() -> {
 			restoreReaderMode();
+			isVisibleNow = false;
+			mReaderView.toggleScreenUpdateModeMode();
 			mReaderView.clearSelection();
 		});
 
@@ -697,6 +702,8 @@ public class SelectionToolbarDlg {
 //				}
 //			});
 //		}
+		isVisibleNow = true;
+		mReaderView.toggleScreenUpdateModeMode();
 		mCoolReader.tintViewIcons(mPanel);
 	}
 

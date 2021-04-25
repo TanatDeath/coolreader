@@ -127,6 +127,7 @@
 		android:id="@+id/rg_type"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:layout_margin="25dip"
 		android:orientation="vertical">
 		>
 		<TableRow>

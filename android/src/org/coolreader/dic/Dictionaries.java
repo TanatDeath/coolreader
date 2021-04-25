@@ -1295,7 +1295,7 @@ public class Dictionaries {
 											dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 										}
 										if (dfi != null) {
-											cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+											cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
 										}
 									}
 									;
@@ -1770,7 +1770,7 @@ public class Dictionaries {
 									currentDictionary2 = saveCurrentDictionary2;
 									currentDictionaryTmp = saveCurrentDictionaryTmp;
 									iDic2IsActive = saveIDic2IsActive;
-									cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+									cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
 								}
 							};
 							return;
@@ -1949,7 +1949,7 @@ public class Dictionaries {
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionaryTmp = saveCurrentDictionaryTmp;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_YND);
+						cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_YND);
 					} else {
 						((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 					}
@@ -2026,7 +2026,7 @@ public class Dictionaries {
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionaryTmp = saveCurrentDictionaryTmp;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+						cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
 					}
 				};
 				return;
@@ -2104,7 +2104,7 @@ public class Dictionaries {
 							currentDictionary2 = saveCurrentDictionary2;
 							currentDictionaryTmp = saveCurrentDictionaryTmp;
 							iDic2IsActive = saveIDic2IsActive;
-							cr.editBookTransl(dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_COMMON);
+							cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_COMMON);
 						}
 					};
 					return;

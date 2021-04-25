@@ -103,23 +103,27 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data android:mimeType="*/*" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.pml" />
                 <data android:pathPattern="/.*\\.azw" />
                 <data android:pathPattern="/.*\\.tcr" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:mimeType="text/plain"
-                        android:scheme="file" />
+                        android:scheme="http" />
+
                 <data android:pathPattern=".*\\.pml" />
                 <data android:pathPattern=".*\\.azw" />
                 <data android:pathPattern=".*\\.tcr" />
@@ -148,10 +152,12 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:mimeType="text/plain"
-                        android:scheme="file" />
+                        android:scheme="http" />
+
                 <data android:pathPattern=".*\\.pml" />
                 <data android:pathPattern=".*\\.azw" />
                 <data android:pathPattern=".*\\.tcr" />
@@ -242,7 +248,10 @@
                 <data android:host="*" />
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.jpg" />
                 <data android:pathPattern="/.*\\..*\\.jpg" />
                 <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
@@ -262,12 +271,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.jpg" />
                 <data android:pathPattern="/.*\\..*\\.jpg" />
                 <data android:pathPattern="/.*\\..*\\..*\\.jpg" />
@@ -325,10 +334,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.mobi" />
                 <data android:pathPattern="/.*\\..*\\.mobi" />
                 <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
@@ -375,12 +386,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.mobi" />
                 <data android:pathPattern="/.*\\..*\\.mobi" />
                 <data android:pathPattern="/.*\\..*\\..*\\.mobi" />
@@ -451,10 +462,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.doc" />
                 <data android:pathPattern="/.*\\..*\\.doc" />
                 <data android:pathPattern="/.*\\..*\\..*\\.doc" />
@@ -468,12 +481,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.doc" />
                 <data android:pathPattern="/.*\\..*\\.doc" />
                 <data android:pathPattern="/.*\\..*\\..*\\.doc" />
@@ -516,10 +529,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docx" />
@@ -545,12 +560,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\.docx" />
                 <data android:pathPattern="/.*\\..*\\..*\\.docx" />
@@ -606,10 +621,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.rtf" />
                 <data android:pathPattern="/.*\\..*\\.rtf" />
                 <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
@@ -630,12 +647,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.rtf" />
                 <data android:pathPattern="/.*\\..*\\.rtf" />
                 <data android:pathPattern="/.*\\..*\\..*\\.rtf" />
@@ -681,10 +698,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.chm" />
@@ -703,12 +722,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\.chm" />
                 <data android:pathPattern="/.*\\..*\\..*\\.chm" />
@@ -746,10 +765,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.html" />
                 <data android:pathPattern="/.*\\..*\\.html" />
                 <data android:pathPattern="/.*\\..*\\..*\\.html" />
@@ -799,12 +820,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.html" />
                 <data android:pathPattern="/.*\\..*\\.html" />
                 <data android:pathPattern="/.*\\..*\\..*\\.html" />
@@ -876,10 +897,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.txt" />
                 <data android:pathPattern="/.*\\..*\\.txt" />
                 <data android:pathPattern="/.*\\..*\\..*\\.txt" />
@@ -900,12 +923,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data
-                        android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
                         android:scheme="http" />
@@ -958,10 +977,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.epub" />
                 <data android:pathPattern="/.*\\..*\\.epub" />
                 <data android:pathPattern="/.*\\..*\\..*\\.epub" />
@@ -983,12 +1004,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.epub" />
                 <data android:pathPattern="/.*\\..*\\.epub" />
                 <data android:pathPattern="/.*\\..*\\..*\\.epub" />
@@ -1029,10 +1050,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" />
-                <data android:scheme="file" />
+                <data android:scheme="file" android:host="*" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data
+                        android:host="*"
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
@@ -1119,13 +1142,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" />
                 <data
                         android:host="*"
-                        android:scheme="file" />
-                <data
-                        android:host="*"
-                        android:scheme="content" />
-                <data android:mimeType="*/*" />
+                        android:scheme="http" />
+
                 <data android:pathPattern="/.*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\.fb2" />
                 <data android:pathPattern="/.*\\..*\\..*\\.fb2" />
@@ -1142,10 +1164,13 @@
                 <data android:pathPattern="/.*\\..*\\.zip" />
                 <data android:pathPattern="/.*\\..*\\..*\\.zip" />
                 <data android:pathPattern=".*\\.fb2\\.zip" />
+                <data android:pathPattern=".*\\..*\\.fb2\\.zip"/>
+                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.zip"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2\\.zip"/>
+                <data android:pathPattern=".*\\.zip"/>
                 <data android:pathPattern="/.*\\.fb2\\.zip" />
                 <data android:pathPattern=".*\\.fb2.zip" />
                 <data android:pathPattern="/.*\\.fb2.zip" />
-                <data android:pathPattern=".*\\.zip" />
                 <data android:pathPattern="/.*\\.zip" />
                 <data android:pathPattern="/.*\\.FBZ" />
                 <data android:pathPattern=".*\\.FBZ" />
@@ -1212,8 +1237,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="file" />
-                <data android:scheme="content" />
+                <data android:scheme="file" android:host="*" />
+                <data android:scheme="content" android:host="*"/>
+                <data
+                        android:host="*"
+                        android:scheme="http" />
                 <data android:mimeType="application/x-fictionbook+xml" />
                 <data android:mimeType="application/x-fictionbook" />
                 <data android:mimeType="application/x-fb2" />
@@ -1228,6 +1256,7 @@
                 <data android:mimeType="application/x-zip-compressed-fb2" />
                 <data android:mimeType="application/x-fictionbook-ebook" />
                 <data android:mimeType="application/x-fictionbook+zip" />
+                <data android:mimeType="application/octet-stream" />
             </intent-filter>
         </activity-alias> <!-- Sync support -->
 

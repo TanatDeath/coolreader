@@ -53,7 +53,7 @@ public class BookInfoDialog extends BaseDialog {
 
 	public final static int BOOK_INFO = 0;
 	public final static int OPDS_INFO = 1;
-	public final static int OPDS_FINAL_INFO = 2;
+		public final static int OPDS_FINAL_INFO = 2;
 
 	private final CoolReader mCoolReader;
 	private final BookInfo mBookInfo;
@@ -421,7 +421,7 @@ public class BookInfoDialog extends BaseDialog {
 					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 				}
 				if (dfi != null) {
-					cr.editBookTransl(dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+					cr.editBookTransl(false, translButton, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
 				}
 				dismiss();
 			});

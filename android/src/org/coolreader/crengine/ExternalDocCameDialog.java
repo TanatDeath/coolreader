@@ -13,6 +13,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.OpenableColumns;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +41,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -49,7 +52,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ExternalDocCameDialog extends BaseDialog {
-
 
 	private CoolReader mActivity;
 	private int mWindowSize;
@@ -64,7 +66,11 @@ public class ExternalDocCameDialog extends BaseDialog {
 	private String sExistingName = "";
 	private Document docJsoup = null;
 	private Boolean bThisIsHTML = true;
+	private Boolean bMoveToBooks = true;
 	private String sTitle = "";
+
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
 	public static final Logger log = L.create("edcd");
 
@@ -190,6 +196,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 		this.mActivity = activity;
 		this.stype = stype;
 		this.uri = null;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(mActivity, isEInk);
 		if (obj instanceof Uri) this.uri = (Uri) obj;
 		if (obj instanceof String) sUri = (String) obj;
 		if(getWindow().getAttributes().softInputMode==WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
@@ -217,6 +225,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	Button btnOpenExisting;
 	Button btnAsHTML;
 	Button btnAsText;
+	Button btnMoveToBooks;
 
 	private String queryName(ContentResolver resolver, Uri uri) {
 		Cursor returnCursor =
@@ -257,12 +266,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 
 	private void switchHTML(boolean isHTML) {
 		bThisIsHTML = isHTML;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGray = a.getColor(0, Color.GRAY);
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		int colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		if (btnAsHTML!=null) {
@@ -284,6 +288,21 @@ public class ExternalDocCameDialog extends BaseDialog {
 			btnAsText.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(btnAsText, true);
 			edtFileExt.setText(".txt");
+		}
+	}
+
+	private void switchMoveToBooks(boolean bMove) {
+		bMoveToBooks = bMove;
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (btnMoveToBooks!=null) {
+			btnMoveToBooks.setBackgroundColor(colorGrayCT);
+			mActivity.tintViewIcons(btnMoveToBooks, PorterDuff.Mode.CLEAR,true);
+		}
+		if ((btnMoveToBooks!=null)&&(bMoveToBooks)) {
+			btnMoveToBooks.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(btnMoveToBooks, true);
 		}
 	}
 
@@ -368,6 +387,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	};
 
 	int secondCountdown;
+	boolean stopCount = false;
 
 	private void openExistingClick() {
 		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
@@ -375,6 +395,10 @@ public class ExternalDocCameDialog extends BaseDialog {
 		onPositiveButtonClick();
 	}
 	private void countdownTick() {
+		if (stopCount) {
+			btnOpenExisting.setText(activity.getString(R.string.open_existing));
+			return;
+		}
 		secondCountdown--;
 		if (secondCountdown>0) {
 			btnOpenExisting.setText(activity.getString(R.string.open_existing) + " (" + secondCountdown + ")");
@@ -386,6 +410,37 @@ public class ExternalDocCameDialog extends BaseDialog {
 		}
 	}
 
+	private FileInfo getFileProps(File file, FileInfo fileDir) {
+		FileInfo fi = new FileInfo(file);
+		boolean isArch = FileUtils.isArchive(file);
+		FileInfo dir = Services.getScanner().findParent(fi, fileDir);
+		String sPath = file.getAbsolutePath();
+		String sPathZ = sPath;
+		if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))
+				&&(!sPathZ.toLowerCase().endsWith(".epub"))
+				&&(!sPathZ.toLowerCase().endsWith(".docx"))
+				&&(!sPathZ.toLowerCase().endsWith(".odt"))
+				&&(!sPathZ.toLowerCase().endsWith(".ods"))
+				&&(!sPathZ.toLowerCase().endsWith(".odp"))
+				&&(!sPathZ.toLowerCase().endsWith(".fb3"))) {
+			int i = 0;
+			sPathZ = sPath + ".zip";
+			File fileZ = new File(sPathZ);
+			boolean bExists = fileZ.exists();
+			while (bExists) {
+				i++;
+				sPathZ = sPath + " ("+i+").zip";
+				fileZ = new File(sPathZ);
+				bExists = fileZ.exists();
+			}
+			file.renameTo(fileZ);
+		}
+		Services.getScanner().listDirectory(dir);
+		FileInfo item1 = dir.findItemByPathName(sPathZ);
+		if (item1 == null) item1 = new FileInfo(sPathZ);
+		return item1;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -393,13 +448,7 @@ public class ExternalDocCameDialog extends BaseDialog {
         mInflater = LayoutInflater.from(getContext());
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.external_doc_came_dialog, null);
         
-        TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorIcon,
-				 R.attr.colorThemeGray2Contrast
-				});
-		int colorIcon = a.getColor(0, Color.GRAY);
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		tvExtPath = view.findViewById(R.id.ext_path);
 		if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
 		tvExtPath.setText(sUri);
@@ -409,6 +458,11 @@ public class ExternalDocCameDialog extends BaseDialog {
 		downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
 		tvDownloadPath.setText(downlDir);
 		edtFileName = view.findViewById(R.id.file_name);
+		edtFileName.setOnFocusChangeListener((view1, hasFocus) -> {
+			if (hasFocus) {
+				stopCount = true;
+			}
+		});
 		String sBaseName = "";
 		if (uri != null) {
 			sBaseName = StrUtils.getNonEmptyStr(queryName(activity.getApplicationContext().getContentResolver(), uri), true);
@@ -418,7 +472,13 @@ public class ExternalDocCameDialog extends BaseDialog {
 		if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = Utils.getFileExtension(sBaseName);
 		if (StrUtils.getNonEmptyStr(sUri, true).startsWith("http")) {
 			if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = DocumentFormat.nameEndWithExt(sUri);
-			if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = Utils.getFileExtension(sUri);
+			if (StrUtils.isEmptyStr(sDocFormat)) {
+				if (bThisIsHTML)
+					sDocFormat = "html";
+				else
+					sDocFormat = "txt";
+				//sDocFormat = Utils.getFileExtension(sUri);
+			}
 			if (StrUtils.isEmptyStr(sBaseName)) sBaseName = extractSuggestedName(sUri);
 		}
 		sDocFormat = StrUtils.getNonEmptyStr(sDocFormat,true);
@@ -456,7 +516,11 @@ public class ExternalDocCameDialog extends BaseDialog {
 		edtFileExt = view.findViewById(R.id.file_ext);
 		edtFileExt.setText("."+replaceInvalidChars(sDocFormat));
 		edtFileExt.setBackgroundColor(colorGrayCT);
-
+		edtFileExt.setOnFocusChangeListener((view1, hasFocus) -> {
+			if (hasFocus) {
+				stopCount = true;
+			}
+		});
 		btnOpenFromStream = view.findViewById(R.id.btn_open_from_stream);
 		Utils.setDashedButton(btnOpenFromStream);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
@@ -547,7 +611,49 @@ public class ExternalDocCameDialog extends BaseDialog {
 								dlgConv.show();
 							} else {
 								BackgroundThread.instance().postBackground(() ->
-										BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500));
+									{
+										if (bMoveToBooks) {
+											FileInfo fileOrDir = getFileProps(new File(fName), new FileInfo(downlDir));
+											Services.getEngine().scanBookProperties(fileOrDir);
+											FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+											String subdir = null;
+											if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
+												subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
+												if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
+													subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
+											} else {
+												subdir = "NoAuthor";
+											}
+											if (downloadDir == null) {
+												BackgroundThread.instance().postGUI(() ->
+												{
+													((CoolReader) activity).showToast(R.string.cannot_move_to_books);
+													((CoolReader) activity).loadDocumentExt(fName, sUri);
+												}, 500);
+											} else {
+												File f = new File(fName);
+												File resultDir = new File(downloadDir.getPathName());
+												resultDir = new File(resultDir, subdir);
+												resultDir.mkdirs();
+												File result = new File(resultDir.getAbsolutePath() + "/" + f.getName());
+												if (f.renameTo(result)) {
+													downloadDir.findItemByPathName(result.getAbsolutePath());
+													File resF = result;
+													BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).
+															loadDocumentExt(resF.getAbsolutePath(), sUri), 500);
+												} else {
+													BackgroundThread.instance().postGUI(() ->
+													{
+														((CoolReader) activity).showToast(R.string.cannot_move_to_books);
+														((CoolReader) activity).loadDocumentExt(fName, sUri);
+													},
+															500);
+												}
+											}
+										} else
+											BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500);
+									}
+								);
 							}
 							onPositiveButtonClick();
 						} catch (Exception e) {
@@ -579,6 +685,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		Drawable img0 = getContext().getResources().getDrawable(R.drawable.icons8_check_no_frame);
+		Drawable img3 = img0.getConstantState().newDrawable().mutate();
 
 		btnAsHTML = view.findViewById(R.id.btn_as_html);
 		btnAsHTML.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
@@ -596,6 +704,13 @@ public class ExternalDocCameDialog extends BaseDialog {
 				BackgroundThread.instance().postBackground(() ->
 						BackgroundThread.instance().postGUI(() -> switchHTML(true), 200));
 		}
+
+		btnMoveToBooks = view.findViewById(R.id.btn_move_to_books);
+		btnMoveToBooks.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
+		switchMoveToBooks(bMoveToBooks);
+		btnMoveToBooks.setOnClickListener(v -> switchMoveToBooks(!bMoveToBooks));
+		BackgroundThread.instance().postBackground(() ->
+				BackgroundThread.instance().postGUI(() -> switchMoveToBooks(bMoveToBooks), 200));
 		setView(view);
 		// if link is http
 		if (uri==null) doDownloadHttp(sUri);

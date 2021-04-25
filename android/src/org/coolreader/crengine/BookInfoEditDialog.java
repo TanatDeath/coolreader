@@ -571,7 +571,7 @@ public class BookInfoEditDialog extends BaseDialog {
 					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 				}
 				if (dfi != null) {
-					mActivity.editBookTransl(dfi, fi, langf, lang, "", BookInfoEditDialog.this, TranslationDirectionDialog.FOR_COMMON);
+					mActivity.editBookTransl(false, translButton, dfi, fi, langf, lang, "", BookInfoEditDialog.this, TranslationDirectionDialog.FOR_COMMON);
 				}
 			};
 		});

@@ -341,6 +341,17 @@
     <attr name="cr3_button_light_drawable" format="reference" />
     <attr name="cr3_button_inc_drawable" format="reference" />
     <attr name="cr3_button_dec_drawable" format="reference" />
+    <attr name="attr_icons8_document_lang" format="reference" />
+    <attr name="attr_icons8_log" format="reference" />
+    <attr name="attr_icons8_no_dialogs" format="reference" />
+    <attr name="attr_icons8_no_questions" format="reference" />
+    <attr name="attr_icons8_no_safe_mode" format="reference" />
+    <attr name="attr_icons8_toolbar_background" format="reference" />
+    <attr name="attr_icons8_transp_buttons" format="reference" />
+    <attr name="attr_icons8_tts_engine" format="reference" />
+    <attr name="attr_icons8_tts_lang" format="reference" />
+    <attr name="attr_icons8_voice" format="reference" />
+    <attr name="attr_icons8_system_lang" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

@@ -1064,7 +1064,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private long lastTimeKey = 0L;
 
 	public void toggleScreenUpdateModeMode() {
-		if ((selectionModeActive) || (inspectorModeActive)) {
+		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
 			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.A2, surface); //fast2
 			mActivity.setScreenUpdateInterval(999, surface);
 		} else {
@@ -5601,8 +5601,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 		}
 		// plotn: added 1.3 koef so it was very slow change - through all the screen height
-		int diffCold = (int) 1.3f * countCold * (currentBrightnessPrevYPos - y)/surface.getHeight();
-		int diffWarm = (int) 1.3f * countWarm * (currentBrightnessPrevYPos - y)/surface.getHeight();
+		int sens = mSettings.getInt(PROP_APP_BACKLIGHT_SWIPE_SENSIVITY, 0);
+		float koef = 1.4f;
+		if (sens == 1) koef = 1.0f;
+		if (sens == 2) koef = 1.2f;
+		if (sens == 3) koef = 1.7f;
+		if (sens == 4) koef = 2.0f;
+
+		int diffCold = (int) koef * countCold * (currentBrightnessPrevYPos - y)/surface.getHeight();
+		int diffWarm = (int) koef * countWarm * (currentBrightnessPrevYPos - y)/surface.getHeight();
 		log.i("countWarm = " + countWarm);
 		log.i("countCold = " + countCold);
 		log.i("diffWarm = " + diffWarm);
@@ -8296,6 +8303,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void moveSelection(final ReaderCommand command, final int param, final MoveSelectionCallback callback) {
+		moveSelection(command, param, callback, false);
+	}
+
+	public void moveSelection(final ReaderCommand command, final int param, final MoveSelectionCallback callback, boolean noRepaint) {
 		post( new Task() {
 			private boolean res;
 			private Selection selection = new Selection();
@@ -8309,7 +8320,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (callback != null) {
 					clearImageCache();
 					surface.invalidate();
-					drawPage();
+					drawPage(noRepaint);
 					if (res)
 						callback.onNewSelection(selection);
 					else

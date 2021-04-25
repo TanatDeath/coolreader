@@ -3153,9 +3153,77 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}));
 	}
 
-	public void editBookTransl(final FileInfo currDirectory, final FileInfo item,
+	public void editBookTransl(final boolean noQuick,
+							   final View anchor,
+							   final FileInfo currDirectory, final FileInfo item,
 							   final String lang_from, final String lang_to, final String search_text,
 							   BookInfoEditDialog bied, int iType) {
+		if (!noQuick) {
+			String sQuickDirs = settings().getProperty(Settings.PROP_APP_QUICK_TRANSLATION_DIRS);
+			if (!StrUtils.isEmptyStr(sQuickDirs)) {
+				String[] sQuickDirsArr = sQuickDirs.split(";");
+				int iCnt = 0;
+				ArrayList<String> sButtons = new ArrayList<>();
+				sButtons.add(getString(R.string.all_languages));
+				for (String s: sQuickDirsArr)
+					if (s.contains("=")) {
+						sButtons.add(s.replace("=", " -> "));
+						iCnt++;
+					}
+				if (iCnt > 0) {
+					View anch = anchor;
+					if (anch == null) {
+						anch = mCurrentFrame;
+						if (mCurrentFrame == mReaderFrame) anch = getReaderView().getSurface();
+					}
+					SomeButtonsToolbarDlg.showDialog(this, anch, 0, true,
+							getString(R.string.select_transl_dir),
+							sButtons, null, (o22, btnPressed) -> {
+								if (btnPressed.equals(getString(R.string.all_languages))) {
+									editBookTransl(true,
+										anchor, currDirectory, item, lang_from, lang_to, search_text, bied, iType);
+									return;
+								}
+								if (btnPressed.contains("->")) {
+									String[] pair = btnPressed.replace(" -> ", "=").split("=");
+									String l_from = pair[0];
+									String l_to = pair[1];
+									waitForCRDBService(() -> Services.getHistory().getOrCreateBookInfo(getDB(), item, bookInfo -> {
+											if (bookInfo == null) bookInfo = new BookInfo(item);
+											BookInfo bookInfoF = bookInfo;
+											FileInfo file = bookInfoF.getFileInfo();
+											if (bied != null) bied.edLangFrom.setText(l_from);
+												else file.lang_from = l_from;
+											if (bied != null) bied.edLangTo.setText(l_to);
+												else file.lang_to = l_to;
+											if (bied == null) {
+												getDB().saveBookInfo(bookInfoF);
+												getDB().flush();
+												if (getReaderView() != null) {
+													if (getReaderView().getBookInfo() != null) {
+														BookInfo book = getReaderView().getBookInfo();
+														book.getFileInfo().lang_from = file.lang_from;
+														book.getFileInfo().lang_to = file.lang_to;
+													}
+												}
+												BookInfo bi = Services.getHistory().getBookInfo(file);
+												if (bi != null)
+													bi.getFileInfo().setFileProperties(file);
+												if (currDirectory != null) {
+													currDirectory.setFile(file);
+													directoryUpdated(currDirectory, file);
+												}
+												if (!StrUtils.isEmptyStr(search_text))
+													findInDictionary(search_text, null, null);
+											}
+										}
+									));
+								}
+							});
+					return;
+				}
+			}
+		}
 		waitForCRDBService(() -> Services.getHistory().getOrCreateBookInfo(getDB(), item, bookInfo -> {
 			if (bookInfo == null)
 				bookInfo = new BookInfo(item);

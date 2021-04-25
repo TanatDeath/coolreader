@@ -107,6 +107,7 @@ public interface Settings {
     public static final String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
     public static final String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
 	public static final String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight"; //KR
+	public static final String PROP_APP_BACKLIGHT_SWIPE_SENSIVITY   ="app.backlight.swipe.sensivity";
 
 	 // image scaling settings
 	 // mode: 0=disabled, 1=integer scaling factors, 2=free scaling
@@ -174,6 +175,7 @@ public interface Settings {
 	public static final String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
 	public static final String PROP_APP_SHOW_USER_DIC_CONTENT = "app.dictionary.user.dic.content";
+	public static final String PROP_APP_QUICK_TRANSLATION_DIRS = "app.quick.translation.dirs";
 	public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
@@ -540,7 +542,9 @@ public interface Settings {
 		PROP_APP_DISABLE_SAFE_MODE,
 		PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG,
 
-		PROP_APP_USE_EINK_FRONTLIGHT
+		PROP_APP_USE_EINK_FRONTLIGHT,
+
+		PROP_APP_QUICK_TRANSLATION_DIRS
 
 	};
 

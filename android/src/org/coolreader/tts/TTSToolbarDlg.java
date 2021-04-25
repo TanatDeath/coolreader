@@ -111,6 +111,9 @@ public class TTSToolbarDlg implements Settings {
 	private String mForcedVoice;
 	private int mTTSSpeedPercent = 50;		// 50% (normal)
 
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
+
 	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
 	// For TTS notification:
 	private static final int TTS_NOTIFICATION_ID = 0; // Use same ID for all TTS notifications
@@ -549,12 +552,7 @@ public class TTSToolbarDlg implements Settings {
 
 		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
 				isSpeaking?"stop tts":"start tts");
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
-
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS, "0");
 		if (!sTranspButtons.equals("0")) c.setAlpha(130);
@@ -601,12 +599,7 @@ public class TTSToolbarDlg implements Settings {
 	public void repaintButtons()
 	{
 		int colorGrayC;
-		int colorGray;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		colorGray = a.getColor(1, Color.GRAY);
-		a.recycle();
+		colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS, "0");
@@ -619,6 +612,7 @@ public class TTSToolbarDlg implements Settings {
 			mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
+			mPanel.findViewById(R.id.tts_options).setBackgroundDrawable(c);
 		}
 	}
 
@@ -693,6 +687,30 @@ public class TTSToolbarDlg implements Settings {
 				break;
 			case PROP_APP_TTS_VOICE:
 				mForcedVoice = value;
+				break;
+			case PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS:
+				int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+				ColorDrawable c = new ColorDrawable(colorGrayC);
+				int val1 = Utils.parseInt(value, 0);
+				if (val1 != 0) c.setAlpha(130);
+					else c.setAlpha(255);
+				mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
+				mPanel.findViewById(R.id.tts_play_pause_ell).setBackgroundDrawable(c);
+				mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
+				mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
+				mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
+				mPanel.findViewById(R.id.tts_options).setBackgroundDrawable(c);
+				ivVolDown.setBackgroundDrawable(c);
+				ivVolUp.setBackgroundDrawable(c);
+				ivFreqDown.setBackgroundDrawable(c);
+				ivFreqUp.setBackgroundDrawable(c);
+				break;
+			case PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND:
+				int val = Utils.parseInt(value, 0, 0, 2);
+				int colorGray = themeColors.get(R.attr.colorThemeGray2);
+				if (val == 0) mPanel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				if (val == 1) mPanel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				if (val == 2) mPanel.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 				break;
 		}
 	}
@@ -872,6 +890,7 @@ public class TTSToolbarDlg implements Settings {
         mReaderView = readerView;
 		View anchor = readerView.getSurface();
 		mTTS = tts;
+		themeColors = Utils.getThemeColors(coolReader, isEInk);
 		setupTTSHandlers();
 		Context context = anchor.getContext();
 
@@ -879,44 +898,38 @@ public class TTSToolbarDlg implements Settings {
 		mTimerHandler.start();
 		new TimerHandler(this, mCoolReader, mTimerHandler, 5000);
 
-		int colorGrayC;
-		int colorGray;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		colorGray = a.getColor(1, Color.GRAY);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGray = themeColors.get(R.attr.colorThemeGray2);
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS, "0");
 		if (!sTranspButtons.equals("0")) c.setAlpha(130);
 		else c.setAlpha(255);
 
-		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.tts_toolbar, null));
-		lblMotionWd = panel.findViewById(R.id.lbl_motion_wd);
+		mPanel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.tts_toolbar, null));
+		lblMotionWd = mPanel.findViewById(R.id.lbl_motion_wd);
 		lblMotionWd.setText(R.string.wd_sett);
 		lblMotionWd.setPaintFlags(lblMotionWd.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 		lblMotionWd.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, mTTS));
-		mPlayPauseButton = panel.findViewById(R.id.tts_play_pause);
+		mPlayPauseButton = mPanel.findViewById(R.id.tts_play_pause);
 		mPlayPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
 				//R.drawable.ic_media_play
 		);
 		mPlayPauseButton.setBackgroundDrawable(c);
-		mPlayPauseButtonEll = panel.findViewById(R.id.tts_play_pause_ell);
+		mPlayPauseButtonEll = mPanel.findViewById(R.id.tts_play_pause_ell);
 		mPlayPauseButtonEll.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
 				//R.drawable.ic_media_play
 		);
 		mPlayPauseButtonEll.setBackgroundDrawable(c);
-		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		ImageButton backButton = panel.findViewById(R.id.tts_back);
-		ImageButton forwardButton = panel.findViewById(R.id.tts_forward);
-		ImageButton stopButton = panel.findViewById(R.id.tts_stop);
+		mPanel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		ImageButton backButton = mPanel.findViewById(R.id.tts_back);
+		ImageButton forwardButton = mPanel.findViewById(R.id.tts_forward);
+		ImageButton stopButton = mPanel.findViewById(R.id.tts_stop);
 
 		mWindow = new PopupWindow(anchor.getContext());
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
-		mPanel = panel;
 		mPlayPauseButton.setBackgroundDrawable(c);
 		mPlayPauseButton.setOnClickListener(v -> toggleStartStopExt(false));
 		mPlayPauseButtonEll.setOnClickListener(v -> toggleStartStopExt(true));
@@ -938,7 +951,7 @@ public class TTSToolbarDlg implements Settings {
 		forwardButton.setOnClickListener(v -> jumpToSentence( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE ));
 		stopButton.setBackgroundDrawable(c);
 		stopButton.setOnClickListener(v -> stopAndClose());
-		ImageButton optionsButton = panel.findViewById(R.id.tts_options);
+		ImageButton optionsButton = mPanel.findViewById(R.id.tts_options);
 		optionsButton.setBackgroundDrawable(c);
 		optionsButton.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, mTTS));
 		mPanel.setFocusable(true);
@@ -990,10 +1003,10 @@ public class TTSToolbarDlg implements Settings {
 		mWindow.setTouchable(true);
 		mWindow.setOutsideTouchable(true);
 		String sBkg = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND, "0");
-		if (sBkg.equals("0")) panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		if (sBkg.equals("1")) panel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		if (sBkg.equals("2")) panel.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		mWindow.setContentView(panel);
+		if (sBkg.equals("0")) mPanel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (sBkg.equals("1")) mPanel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (sBkg.equals("2")) mPanel.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		mWindow.setContentView(mPanel);
 
 
 		int [] location = new int[2];
@@ -1005,9 +1018,9 @@ public class TTSToolbarDlg implements Settings {
 
 		// setup speed && volume seek bars
 		int volume = mCoolReader.getVolume();
-		mVolumeTextView = panel.findViewById(R.id.tts_lbl_volume);
+		mVolumeTextView = mPanel.findViewById(R.id.tts_lbl_volume);
 		mVolumeTextView.setText(String.format(Locale.getDefault(), "%s (%d%%)", context.getString(R.string.tts_volume), volume));
-		mSpeedTextView = panel.findViewById(R.id.tts_lbl_speed);
+		mSpeedTextView = mPanel.findViewById(R.id.tts_lbl_speed);
 		mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), speechRateFromPercent(50)));
 
 		mSbSpeed = mPanel.findViewById(R.id.tts_sb_speed);
@@ -1135,6 +1148,6 @@ public class TTSToolbarDlg implements Settings {
 		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_PREV);
 		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_DONE);
 		mCoolReader.registerReceiver(mTTSControlButtonReceiver, filter);
-		panel.requestFocus();
+		mPanel.requestFocus();
 	}
 }

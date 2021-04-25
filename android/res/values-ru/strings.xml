@@ -1220,7 +1220,7 @@
     <string name="upload_complete">Загрузка завершена!</string>
     <string name="knownreader_donate_line1">KnownReader - больше, чем просто ридер. Это приложение для чтения электронных книг, которое выросло из проекта CoolReader. Мы вложили в него душу и добавили то, что было важно для нас и для вас: изменили навигацию, поменяли оформление, расширили возможности словарей, облачных функций. Этим список не ограничивается. Мы благодарны автору оригинального CoolReader и всем контрибьюторам в кодовую базу, теперь мы начинаем собственное путешествие в PlayMarket. Если вам пришлось по душе наше приложение и вы хотите поддержать нас, вы всегда можете сделать это следующим образом:</string>
     <string name="knownreader_donate_line2">1. Посетите наш сайт:</string>
-    <string name="knownreader_donate_line3">https://knownreader.com/contribute</string>
+    <string name="knownreader_donate_line3">https://knownreader.com/</string>
     <string name="knownreader_donate_line4">2. Свяжитесь с нами на форуме 4pda:</string>
     <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
     <string name="with_the_help">Использовались примеры кода из проектов (всплывающие окна, ярлыки, намерения): FBReader, Librera, AlReader, PocketBook, Koreader</string>
@@ -1582,10 +1582,23 @@
     <string name="inconsistent_options_tap_reading_menu">Добавить меню чтения на сенсорный экран</string>
     <string name="options_hide_empty_dirs_slowdown">(Может замедлить вывод содержимого каталога)</string>
     <string name="file_not_found">Файл не найден</string>
-    <string name="tts_panel_background">TTS panel: background</string>
-    <string name="tts_panel_transp_buttons">TTS panel: transparent buttons</string>
+    <string name="tts_panel_background">Панель TTS: фон</string>
+    <string name="tts_panel_transp_buttons">Панель TTS: прозрачные кнопки</string>
     <string name="user_dic_content">Показывать содержимое пользовательского словаря</string>
     <string name="user_dic_content_0">Показывать содержимое пользовательского словаря и историю переводов (онлайн)</string>
     <string name="user_dic_content_1">Показывать только содержимое пользовательского словаря</string>
+    <string name="brightness_swipe_sensivity">Контроль яркости - чувствительность свайпа</string>
+    <string name="brightness_swipe_sensivity_0">Нормальная</string>
+    <string name="brightness_swipe_sensivity_1">Еще медленнее</string>
+    <string name="brightness_swipe_sensivity_2">Медленно</string>
+    <string name="brightness_swipe_sensivity_3">Быстро</string>
+    <string name="brightness_swipe_sensivity_4">Еще быстрее</string>
+    <string name="try_to_move_to_books">Переместить книгу в папку \'Books\'</string>
+    <string name="cannot_move_to_books">Невозможно книгу в папку \'Books\'</string>
+    <string name="quick_translation_dirs">Быстрые направления перевода</string>
+    <string name="quick_translation_dirs_info">Можно указать до 10 быстрых направлений перевода (в формате "с_языка=на_язык")</string>
+    <string name="lang_pair">Языковая пара</string>
+    <string name="select_transl_dir">Выберите направление перевода</string>
+    <string name="all_languages">Выбрать из всех языков</string>
 </resources>
 

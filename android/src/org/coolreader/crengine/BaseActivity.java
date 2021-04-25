@@ -526,8 +526,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.icons8_litres_en_logo_2lines_big,
 						 R.attr.attr_icons8_calibre,
 						 R.attr.attr_icons8_opds,
-						 R.attr.cr3_button_log_drawable,
-						 R.attr.cr3_button_light_drawable
+						 R.attr.attr_icons8_log,
+						 R.attr.attr_icons8_sun_auto
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);

@@ -379,6 +379,20 @@
 							/>
 				</LinearLayout>
 			</TableRow>
+			<TableRow
+					android:id="@+id/trow_move_to_books">
+				<Button
+						android:id="@+id/btn_move_to_books"
+						android:layout_width="0dip"
+						android:layout_weight="1"
+						android:layout_height="fill_parent"
+						android:layout_marginBottom="2dip"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="@null"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+						android:text="@string/try_to_move_to_books" />
+			</TableRow>
 			<TableRow>
 				<LinearLayout
 						android:layout_width="0dip"

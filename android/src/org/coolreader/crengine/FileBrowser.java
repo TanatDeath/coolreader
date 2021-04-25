@@ -541,18 +541,17 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	FileInfo selectedItem = null;
 
 	void saveBookInfo() {
-		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, new History.BookInfoLoadedCallback() {
-			@Override
-			public void onBookInfoLoaded(BookInfo bookInfo) {
-				BookInfo bi = new BookInfo(selectedItem);
-				mActivity.getDB().saveBookInfo(bi);
-				mActivity.getDB().flush();
-				BookInfo bi2 = Services.getHistory().getBookInfo(selectedItem);
-				if (bi2 != null)
-					bi2.getFileInfo().setFileProperties(selectedItem);
-				if ((selectedItem.parent) != null)
-					mActivity.directoryUpdated(selectedItem.parent, selectedItem);
-			}
+		Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, bookInfo -> {
+			if (bookInfo == null)
+				bookInfo = new BookInfo(selectedItem);
+			bookInfo.getFileInfo().assign(selectedItem);
+			mActivity.getDB().saveBookInfo(bookInfo);
+			mActivity.getDB().flush();
+			BookInfo bi2 = Services.getHistory().getBookInfo(selectedItem);
+			if (bi2 != null)
+				bi2.getFileInfo().setFileProperties(selectedItem);
+			if ((selectedItem.parent) != null)
+				mActivity.directoryUpdated(selectedItem.parent, selectedItem);
 		});
 	}
 	
@@ -1457,7 +1456,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						downloadDir = Services.getScanner().getDownloadDirectory();
 						log.d("onDownloadStart: after getDownloadDirectory()" );
 						String subdir = null;
-						if (fileOrDir.getAuthors() != null) {
+						if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
 							subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
 							if (subdir.length() > MAX_SUBDIR_LEN)
 								subdir = subdir.substring(0, MAX_SUBDIR_LEN);
@@ -1897,9 +1896,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			if (!mScanControl.isStopped())
 				mScanControl.stop();
 			mScanControl = new Scanner.ScanControl();
-			// if previous scan is in progress, interrupt it
-			if (!mScanControl.isStopped())
-				mScanControl.stop();
 			mScanControl = new Scanner.ScanControl();
 			mScanner.scanDirectory(mActivity.getDB(), dir, () -> {
 				if (dir.allowSorting())
