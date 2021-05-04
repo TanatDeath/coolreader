@@ -346,7 +346,8 @@ public class Scanner extends FileInfoChangeSource {
 						for ( int i=0; i<count1; i++ ) {
 							if (control.isStopped())
 								break;
-							progress.setProgress((i + count) * 10000 / (2*count));
+							if (progress != null)
+								progress.setProgress((i + count) * 10000 / (2*count));
 							FileInfo item = filesForParsing.get(i);
 							engine.scanBookProperties(item);
 							filesForSave1.add(item);
@@ -354,7 +355,8 @@ public class Scanner extends FileInfoChangeSource {
 						for ( int i=0; i<count2; i++ ) {
 							if (control.isStopped())
 								break;
-							progress.setProgress((i + count) * 10000 / (2*count));
+							if (progress != null)
+								progress.setProgress((i + count) * 10000 / (2*count));
 							FileInfo item = filesForCRC32Update.get(i);
 							Engine.updateFileCRC32(item);
 							filesForSave1.add(item);
@@ -462,7 +464,7 @@ public class Scanner extends FileInfoChangeSource {
 			});
 		});
 	}
-	
+
 	private boolean addRoot( String pathname, int resourceId, boolean listIt) {
 		return addRoot( pathname, mActivity.getResources().getString(resourceId), listIt);
 	}

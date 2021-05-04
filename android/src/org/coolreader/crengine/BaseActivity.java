@@ -372,6 +372,10 @@ public class BaseActivity extends Activity implements Settings {
 	public int getPalmTipPixels() {
 		return densityDpi / 3; // 1/3"
 	}
+
+	public int getPalmTipPixelsK(int k) {
+		return densityDpi / (k == 0? 3 : k); // 1/3"
+	}
 	
 	public int getDensityDpi() {
 		return densityDpi;
@@ -2141,7 +2145,8 @@ public class BaseActivity extends Activity implements Settings {
         } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
         	Services.getScanner().setHideEmptyDirs(flg);
         } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
-        	setCutoutMode(Utils.parseInt(value, 0));
+			iCutoutMode = Utils.parseInt(value, 0);
+        	setCutoutMode(iCutoutMode);
 		}
 		// Don't apply screen brightness on e-ink devices on program startup and at any other events
 		// On e-ink in ReaderView gesture handlers setScreenBacklightLevel() & setScreenWarmBacklightLevel() called directly
@@ -2165,8 +2170,8 @@ public class BaseActivity extends Activity implements Settings {
 			if (ReaderAction.READER_MENU.id.equals(value))
 				menuTapActionFound = true;
 		}
-		boolean toolbarEnabled = (props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE
-				&& isFullscreen() && !props.getBool(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false));
+		boolean toolbarEnabled = props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE;
+		if (isFullscreen()) toolbarEnabled = toolbarEnabled && (!props.getBool(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false));
 		if (!menuTapActionFound && !menuKeyActionFound && !toolbarEnabled) {
 			showNotice(R.string.inconsistent_options,
 					R.string.inconsistent_options_toolbar, () -> {
@@ -2935,7 +2940,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_STATUS_FONT_COLOR, "#FF000000"); // don't use separate color
 	        props.applyDefault(ReaderView.PROP_STATUS_FONT_COLOR_DAY, "#FF000000"); // don't use separate color
 	        props.applyDefault(ReaderView.PROP_STATUS_FONT_COLOR_NIGHT, "#80000000"); // don't use separate color
-	        props.setProperty(ReaderView.PROP_ROTATE_ANGLE, "0"); // crengine's rotation will not be user anymore
+	        props.setProperty(ReaderView.PROP_ROTATE_ANGLE, "0"); // crengine's rotation will not be user anymore // be user? not "be used"?? I dont know what was meant
 	        props.setProperty(ReaderView.PROP_DISPLAY_INVERSE, "0");
 	        props.applyDefault(ReaderView.PROP_APP_FULLSCREEN, "0");
 	        props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_SPEED, "1500");
@@ -2952,6 +2957,9 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_SHOW_TIME, "1");
 			props.applyDefault(ReaderView.PROP_FONT_ANTIALIASING, "2");
 			props.applyDefault(ReaderView.PROP_APP_GESTURE_PAGE_FLIPPING, "1");
+			props.applyDefault(ReaderView.PROP_APP_GESTURE_PAGE_FLIPPING_NEW, "1");
+			props.applyDefault(ReaderView.PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY, "3");
+			props.applyDefault(ReaderView.PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT, "5");
 			props.applyDefault(ReaderView.PROP_APP_DISABLE_TWO_POINTER_GESTURES, "0");
 			props.applyDefault(ReaderView.PROP_APP_SHOW_COVERPAGES, "1");
 			props.applyDefault(ReaderView.PROP_APP_COVERPAGE_SIZE, "1");

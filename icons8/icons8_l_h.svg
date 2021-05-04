@@ -13,7 +13,7 @@
    height="416px"
    id="svg2608"
    sodipodi:docname="icons8_l_h.svg"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
   <metadata
      id="metadata2614">
     <rdf:RDF>
@@ -22,7 +22,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -37,17 +37,18 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1850"
-     inkscape:window-height="1016"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
      id="namedview2610"
      showgrid="false"
      inkscape:zoom="0.5673077"
      inkscape:cx="234.21469"
      inkscape:cy="226.92822"
-     inkscape:window-x="70"
-     inkscape:window-y="27"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2608" />
+     inkscape:current-layer="svg2608"
+     inkscape:document-rotation="0" />
   <g
      id="surface1"
      transform="matrix(0.68707146,0,0,0.67063728,-2.2701529,3.9035188)"
@@ -71,7 +72,7 @@
      style="fill:#808080">
     <path
        inkscape:connector-curvature="0"
-       d="M 4.7594803,-4.4183167 5,22 H 9 V 10.125 L 11.600421,8 H 15.1875 L 17,9.8125 V 22 h 4 V 9 C 20.996094,8.472656 20.78125,7.964844 20.40625,7.59375 l -3,-3 C 17.035156,4.21875 16.527344,4.003906 16,4 H 12 C 11.9375,3.996094 11.875,3.996094 11.8125,4 11.515625,4.027344 11.226563,4.125 10.96875,4.28125 L 9,5.46875 v -9.8870667 z"
+       d="M 4.7594803,-4.4183167 5,22 H 9 L 9.1603465,10.958645 c 0,0 0.2904957,-3.0839564 2.4400745,-2.958645 h 2.677421 c 0,0 2.438684,0.4858413 2.722158,2.979603 V 22 h 4 V 10.333831 C 20.9961,9.8064875 20.78125,7.964844 20.40625,7.59375 18.764864,5.5933764 19.02605,5.7604789 17.224318,4.59375 16.853224,4.21875 15.253823,4.003906 14.726479,4 H 12 C 11.9375,3.996094 11.875,3.996094 11.8125,4 11.515625,4.027344 6.8526158,5.3125 9,5.46875 v 0 -9.8870667 z"
        id="path1475"
        sodipodi:nodetypes="ccccccccccccccccccc"
        style="fill:#808080" />

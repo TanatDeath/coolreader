@@ -1115,6 +1115,40 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text
 	};
 
+	int[] mFlippingType = new int[] {
+			0, 1, 2
+	};
+
+	int[] mFlippingTypeTitles = new int[] {
+			R.string.page_flipping_type_0,
+			R.string.page_flipping_type_1,
+			R.string.page_flipping_type_2
+	};
+
+	int[] mFlippingTypeAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	int[] mFlippingSensivity = new int[] {
+			1, 2, 3, 4, 5
+	};
+
+	int[] mFlippingSensivityTitles = new int[] {
+			R.string.page_flipping_sensivity_1,
+			R.string.page_flipping_sensivity_2,
+			R.string.page_flipping_sensivity_3,
+			R.string.page_flipping_sensivity_4,
+			R.string.page_flipping_sensivity_5
+	};
+
+	int[] mFlippingSensivityAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -1591,7 +1625,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if (!enabled)
 				return;
 			mProperties.setProperty(property, "1".equals(mProperties.getProperty(property)) ? "0" : "1");
+			if (null != onChangeHandler)
+				onChangeHandler.run();
 			showIcons = mProperties.getBool(property, true);
+			refreshList();
 			mOptionsStyles.refresh();
 			mOptionsCSS.refresh();
 			mOptionsPage.refresh();
@@ -2860,7 +2897,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			((ReaderToolbarOption)rtO).updateFilterEnd();
 			listView.add(rtO);
 			listView.add(new BoolOption(mOwner, getString(R.string.sel_panel_extended), PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR,
-					getString(R.string.sel_panel_extended_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.sel_panel_extended_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_ext_toolbar, R.drawable.icons8_ext_toolbar));
 			listView.add(new ListOption(mOwner, getString(R.string.sel_panel_background), PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND,
 					getString(R.string.sel_panel_add_info), this.lastFilteredValue).
 					add(mSelPanelBackground, mSelPanelBackgroundTitles, mSelPanelBackgroundAddInfos).setDefaultValue("0").
@@ -3072,7 +3110,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ClickOption(mOwner, getString(R.string.quick_translation_dirs),
 					PROP_APP_QUICK_TRANSLATION_DIRS, getString(R.string.quick_translation_dirs_info), this.lastFilteredValue,
 					view -> {
-						//asdf
 						ArrayList<String[]> vl = new ArrayList<>();
 						String sVal = mProperties.getProperty(PROP_APP_QUICK_TRANSLATION_DIRS);
 						String[] sVals = StrUtils.getNonEmptyStr(sVal, true).split(";");
@@ -3086,7 +3123,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						i = 0;
 						for (String s: sValsFull) {
 							i++;
-							String[] arrS1 = {mActivity.getString(R.string.lang_pair) + " " + i,
+							String[] arrS1 = 	{mActivity.getString(R.string.lang_pair) + " " + i,
 									mActivity.getString(R.string.lang_pair) + " " + i, s};
 							vl.add(arrS1);
 						}
@@ -3102,7 +3139,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 							}
 						});
 						dlgA.show();
-					}, false).noIcon());
+					}, false).
+					setIconIdByAttr(R.attr.attr_icons8_quick_transl_dir, R.drawable.icons8_quick_transl_dir));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_dict_longtap_change),
 					PROP_APP_DICT_LONGTAP_CHANGE, getString(R.string.options_app_dict_longtap_change_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_single_double_tap, R.drawable.icons8_single_double_tap));
@@ -3110,7 +3148,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_app_show_user_dic_panel_add_info), this.lastFilteredValue).
 					add(mUserDicPanelKind, mUserDicPanelKindTitles, mUserDicPanelKindAddInfos).
 					setDefaultValue("0").
-					setIconIdByAttr(R.attr.attr_icons8_google_translate_user,R.drawable.icons8_google_translate_user));
+					setIconIdByAttr(R.attr.attr_icons8_user_dic_panel,R.drawable.icons8_user_dic_panel));
 			listView.add(new ListOption(mOwner, getString(R.string.user_dic_content), PROP_APP_SHOW_USER_DIC_CONTENT,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					add(mUserDicContent, mUserDicContentTitles, mUserDicContentInfos).setDefaultValue("0").noIcon());
@@ -3253,7 +3291,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			OptionsListView listView = new OptionsListView(getContext(), this);
 			listView.add(new ListOption(mOwner, getString(R.string.mi_book_sort_order), PROP_APP_BOOK_SORT_ORDER,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
-					.add(sortOrderValues, sortOrderLabels, sortOrderAddInfos).setDefaultValue(FileInfo.SortOrder.TITLE_AUTHOR.name()).noIcon());
+					.add(sortOrderValues, sortOrderLabels, sortOrderAddInfos).setDefaultValue(FileInfo.SortOrder.TITLE_AUTHOR.name()).
+							setIconIdByAttr(R.attr.attr_icons8_alphabetical_sorting, R.drawable.icons8_alphabetical_sorting));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_show_cover_pages), PROP_APP_SHOW_COVERPAGES,
 					getString(R.string.options_app_show_cover_pages_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_book, R.drawable.icons8_book));
@@ -3267,7 +3306,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
 					getString(R.string.options_app_browser_hide_empty_dirs_add_info), this.lastFilteredValue).
-					setComment(getString(R.string.options_hide_empty_dirs_slowdown)).setDefaultValue("0").noIcon());
+					//setComment(getString(R.string.options_hide_empty_dirs_slowdown)).
+					setDefaultValue("0").noIcon());
 			//CR implementation
 			//listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
 			//		getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
@@ -3302,13 +3342,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 							Log.e("OPTIONS", "exception while init authors aliases list", e);
 						}
 					}, true).setDefaultValue(getString(R.string.authors_aliases_load_add_info)).
-					noIcon());
+					setIconIdByAttr(R.attr.attr_icons8_anon_load, R.drawable.icons8_anon_load));
 			listView.add(new BoolOption(mOwner, getString(R.string.authors_aliases_enabled), PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED,
 					getString(R.string.authors_aliases_enabled_add_info), this.lastFilteredValue).
-					noIcon());
+					setIconIdByAttr(R.attr.attr_icons8_anon, R.drawable.icons8_anon));
 			listView.add(new ListOption(mOwner, getString(R.string.mi_book_browser_max_group_size), PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
 					getString(R.string.mi_book_browser_max_group_size_add_info), this.lastFilteredValue).
-					add(mBrowserMaxGroupItems).setDefaultValue("8").noIcon());
+					add(mBrowserMaxGroupItems).setDefaultValue("8").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
 			listView.add(new ListOption(mOwner, getString(R.string.browser_tap_option_tap), PROP_APP_FILE_BROWSER_TAP_ACTION,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("0").noIcon());
@@ -3317,28 +3357,36 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("1").noIcon());
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_common), PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon, mSecGroupCommonTitles, mSecGroupCommonTitlesAddInfos).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon, mSecGroupCommonTitles, mSecGroupCommonTitlesAddInfos).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_author), PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_series), PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_genres), PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_rating), PROP_APP_FILE_BROWSER_SEC_GROUP_RATING,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_state), PROP_APP_FILE_BROWSER_SEC_GROUP_STATE,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_dates), PROP_APP_FILE_BROWSER_SEC_GROUP_DATES,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon3, mSecGroupCommonTitles3, mSecGroupCommonTitlesAddInfos3).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon3, mSecGroupCommonTitles3, mSecGroupCommonTitlesAddInfos3).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_search), PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").noIcon());
+					add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3470,12 +3518,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ListOption(mOwner, getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT,
 					getString(R.string.options_app_tts_stop_motion_timeout_add_info), this.lastFilteredValue).
 					add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
-					setIconIdByAttr(R.attr.attr_icons8_moving_sensor,R.drawable.icons8_moving_sensor));
+					setIconIdByAttr(R.attr.attr_icons8_moving_sensor_n,R.drawable.icons8_moving_sensor));
 			listView.add(new ListOption(mOwner, getString(R.string.force_tts_koef),
 					PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), this.lastFilteredValue).
 					add(mForceTTS, mForceTTSTitles, mForceTTSAddInfos).
 					setDefaultValue("0").
-					setIconIdByAttr(R.attr.cr3_button_tts_drawable, R.drawable.icons8_speaker));
+					setIconIdByAttr(R.attr.attr_icons8_speaker_koef, R.drawable.icons8_speaker_koef));
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3653,7 +3701,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 			listView.add(new ListOption(mOwner, getString(R.string.brightness_swipe_sensivity), PROP_APP_BACKLIGHT_SWIPE_SENSIVITY,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mSwipeSensivity, mSwipeSensivityTitles, mSwipeSensivityAddInfos).setDefaultValue("2").noIcon());
+					add(mSwipeSensivity, mSwipeSensivityTitles, mSwipeSensivityAddInfos).setDefaultValue("2").
+					setIconIdByAttr(R.attr.attr_icons8_backlight_swipe_sensitivity, R.drawable.icons8_backlight_swipe_sensitivity));
 
 			dlg.setView(listView);
 			dlg.show();
@@ -3772,11 +3821,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(srO);
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_tapzone_hilite), PROP_APP_TAP_ZONE_HILIGHT,
 					getString(R.string.options_app_tapzone_hilite_add_info), this.lastFilteredValue).setDefaultValue("0").
-					setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
+					setIconIdByAttr(R.attr.attr_icons8_highlight_tap_zone, R.drawable.	icons8_highlight_tap_zone));
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 				listView.add(new BoolOption(mOwner, getString(R.string.options_app_trackball_disable), PROP_APP_TRACKBALL_DISABLED,
 						getString(R.string.options_app_trackball_disable_add_info), this.lastFilteredValue).setDefaultValue("0").
-						setIconIdByAttr(R.attr.attr_icons8_computer_mouse,R.drawable.icons8_computer_mouse));
+						setIconIdByAttr(R.attr.attr_icons8_disable_trackball,R.drawable.icons8_disable_trackball));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_hide_state_dialogs), PROP_APP_HIDE_STATE_DIALOGS,
 					getString(R.string.options_app_hide_state_dialogs_add_info), this.lastFilteredValue).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_no_questions,R.drawable.icons8_no_dialogs));
@@ -3788,14 +3837,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_app_disable_safe_mode_add_info), this.lastFilteredValue).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_no_safe_mode,R.drawable.icons8_no_safe_mode));
 			listView.add(new BoolOption(mOwner, getString(R.string.simple_font_select_dialog), PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG,
-					getString(R.string.simple_font_select_dialog_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					getString(R.string.simple_font_select_dialog_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_font_select_dialog,R.drawable.icons8_font_select_dialog));
 			listView.add(new IconsBoolOption(mOwner, getString(R.string.options_app_settings_icons), PROP_APP_SETTINGS_SHOW_ICONS,
-					getString(R.string.options_app_settings_icons_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon());
+					getString(R.string.options_app_settings_icons_add_info), this.lastFilteredValue).setDefaultValue("1").
+					setIconIdByAttr(R.attr.attr_icons8_alligator,R.drawable.icons8_alligator));
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 				listView.add(new BoolOption(mOwner, getString(R.string.options_app_settings_icons_is_custom_color), PROP_APP_ICONS_IS_CUSTOM_COLOR,
-						getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
+						getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_paint_palette1, R.drawable.icons8_paint_palette1));
 				listView.add(new ColorOption(mOwner, getString(R.string.options_app_settings_icons_custom_color), PROP_APP_ICONS_CUSTOM_COLOR, 0x000000,
-						getString(R.string.option_add_info_empty_text), this.lastFilteredValue).noIcon());
+						getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setIconIdByAttr(R.attr.attr_icons8_paint_palette1, R.drawable.icons8_paint_palette1));
 			}
 			dlg.setView(listView);
 			dlg.show();
@@ -3822,6 +3873,72 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						getString(R.string.option_add_info_empty_text));
 			this.updateFilteredMark(getString(R.string.options_app_settings_icons_custom_color), PROP_APP_ICONS_CUSTOM_COLOR,
 						getString(R.string.option_add_info_empty_text));
+			return this.lastFiltered;
+		}
+
+		public String getValueLabel() { return ">"; }
+	}
+
+	class PageFlipOption extends SubmenuOption {
+		public PageFlipOption( OptionOwner owner, String label, String addInfo, String filter ) {
+			super(owner, label, PROP_PAGE_FLIP_TITLE, addInfo, filter);
+		}
+
+		public void onSelect() {
+			if (!enabled)
+				return;
+			BaseDialog dlg = new BaseDialog("PageFlipOption", mActivity, label, false, false);
+
+			// replaced by new implementation
+			//		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled),
+			//				PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_controls_gesture_page_flipping_enabled_add_info), filter).add(
+			//				mPagesPerFullSwipe, mPagesPerFullSwipeTitles, mPagesPerFullSwipeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));
+			OptionsListView listView = new OptionsListView(getContext(), this);
+
+			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+				listView.add(new BoolOption(mOwner, getString(R.string.options_controls_enable_volume_keys), PROP_CONTROLS_ENABLE_VOLUME_KEYS,
+						getString(R.string.options_controls_enable_volume_keys_add_info), this.lastFilteredValue).setDefaultValue("1").
+						setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
+
+			OptionBase loPC = new ListOption(mOwner, getString(R.string.page_flipping_page_count),
+					PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT, getString(R.string.page_flipping_page_count_add_info), this.lastFilteredValue).add(
+					new int[] {
+							1, 2, 3, 4, 5, 6, 7, 8, 9 ,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+					}
+			).setDefaultValue("5").setIconIdByAttr(R.attr.attr_icons8_document_4pages, R.drawable.icons8_document_4pages);
+
+			listView.add(new ListOption(mOwner, getString(R.string.page_flipping_type),
+					PROP_APP_GESTURE_PAGE_FLIPPING_NEW, getString(R.string.page_flipping_type_add_info), this.lastFilteredValue).add(
+					mFlippingType, mFlippingTypeTitles, mFlippingTypeAddInfos).setDefaultValue("1").
+					setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture).
+					setOnChangeHandler(() -> {
+						int value1 = mProperties.getInt(PROP_APP_GESTURE_PAGE_FLIPPING_NEW, 0);
+						loPC.setEnabled(value1 > 1);
+					}));
+			int value1 = mProperties.getInt(PROP_APP_GESTURE_PAGE_FLIPPING_NEW, 0);
+			loPC.setEnabled(value1 > 1);
+			listView.add(loPC);
+			listView.add(new ListOption(mOwner, getString(R.string.page_flipping_sensivity),
+					PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY, getString(R.string.page_flipping_sensivity_add_info), this.lastFilteredValue).add(
+					mFlippingSensivity, mFlippingSensivityTitles, mFlippingSensivityAddInfos).setDefaultValue("3").
+					setIconIdByAttr(R.attr.attr_icons8_gesture_sensivity, R.drawable.icons8_gesture_sensivity));
+			dlg.setView(listView);
+			dlg.show();
+		}
+
+		public boolean updateFilterEnd() {
+			this.updateFilteredMark(getString(R.string.options_controls_enable_volume_keys), PROP_CONTROLS_ENABLE_VOLUME_KEYS,
+					getString(R.string.options_controls_enable_volume_keys_add_info));
+			this.updateFilteredMark(getString(R.string.page_flipping_page_count), PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT,
+					getString(R.string.page_flipping_page_count_add_info));
+			this.updateFilteredMark(getString(R.string.page_flipping_type), PROP_APP_GESTURE_PAGE_FLIPPING_NEW,
+					getString(R.string.page_flipping_type_add_info));
+			this.updateFilteredMark(getString(R.string.page_flipping_sensivity), PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY,
+					getString(R.string.page_flipping_sensivity_add_info));
+			for (int i: mFlippingTypeTitles) if (i > 0) this.updateFilteredMark(activity.getString(i));
+			for (int i: mFlippingTypeAddInfos) if (i > 0) this.updateFilteredMark(activity.getString(i));
+			for (int i: mFlippingSensivityTitles) if (i > 0) this.updateFilteredMark(activity.getString(i));
+			for (int i: mFlippingSensivityAddInfos) if (i > 0) this.updateFilteredMark(activity.getString(i));
 			return this.lastFiltered;
 		}
 
@@ -7441,30 +7558,28 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.options_controls_tap_secondary_action_type_add_info), filter).add(mTapSecondaryActionType, mTapSecondaryActionTypeTitles, mTapSecondaryActionTypeAddInfos).setDefaultValue(String.valueOf(TAP_ACTION_TYPE_LONGPRESS)).
 				setIconIdByAttr(R.attr.attr_icons8_double_tap, R.drawable.icons8_double_tap));
 		mOptionsControls.add(new BoolOption(this, getString(R.string.options_app_double_tap_selection), PROP_APP_DOUBLE_TAP_SELECTION,
-				getString(R.string.options_app_double_tap_selection_add_info), filter).setComment(getString(R.string.options_app_double_tap_selection_slowdown)).
-				setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
+				getString(R.string.options_app_double_tap_selection_add_info), filter).
+				//setComment(getString(R.string.options_app_double_tap_selection_slowdown)).
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_double_click_tap, R.drawable.icons8_double_click_tap));
 		mOptionsControls.add(new ListOption(this, getString(R.string.double_tap_interval), PROP_DOUBLE_CLICK_INTERVAL,
 				getString(R.string.option_add_info_empty_text), filter).
 				add(mDoubleClickIntervals).
-				setDefaultValue("400").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
+				setDefaultValue("400").setIconIdByAttr(R.attr.attr_icons8_double_click_tap_interval, R.drawable.icons8_double_click_tap_interval));
 		mOptionsControls.add(new ListOption(this, getString(R.string.prevent_tap_interval), PROP_PREVENT_CLICK_INTERVAL,
 				getString(R.string.prevent_tap_interval_add_info), filter).
 				add(mPreventClickIntervals).
-				setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_touch_drawable, R.drawable.cr3_option_touch));
-		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
-			mOptionsControls.add(new BoolOption(this, getString(R.string.options_controls_enable_volume_keys), PROP_CONTROLS_ENABLE_VOLUME_KEYS,
-					getString(R.string.options_controls_enable_volume_keys_add_info), filter).setDefaultValue("1").
-					setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_prevent_accidental_tap_interval, R.drawable.icons8_prevent_accidental_tap_interval));
 		//if ( !DeviceInfo.EINK_SCREEN  || DeviceInfo.EINK_HAVE_FRONTLIGHT ) // nook glowlight has this option. 20201022 Still commented, not tested
 		//asdf TODO: work with backlight
 //		mBacklightControl2 = new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
 //					getString(R.string.options_controls_flick_brightness_add_info), filter).
 //					add(mFlickBrightness, mFlickBrightnessTitles, mFlickBrightnessAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_sunrise,R.drawable.icons8_sunrise);
 //		mOptionsControls.add(mBacklightControl2);
+		OptionBase sbPFO = new PageFlipOption(this, getString(R.string.page_flipping_settings),
+				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture);
+		((PageFlipOption)sbPFO).updateFilterEnd();
+		mOptionsControls.add(sbPFO);
 
-		mOptionsControls.add(new ListOption(this, getString(R.string.option_controls_gesture_page_flipping_enabled),
-				PROP_APP_GESTURE_PAGE_FLIPPING, getString(R.string.option_controls_gesture_page_flipping_enabled_add_info), filter).add(
-				mPagesPerFullSwipe, mPagesPerFullSwipeTitles, mPagesPerFullSwipeAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_gesture, R.drawable.icons8_gesture));
 		mOptionsControls.add(new BoolOption(this, getString(R.string.disable_two_pointer_gestures), PROP_APP_DISABLE_TWO_POINTER_GESTURES,
 				getString(R.string.two_pointer_gestures_add_info), filter).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_two_fingers, R.drawable.icons8_two_fingers));
 		OptionBase sb11 = new SelectionModesOption(this, getString(R.string.selectionmodes_settings),
@@ -7474,11 +7589,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsControls.add(new ListOptionAction(this, getString(R.string.options_bookmark_action_send_to),
 				PROP_APP_BOOKMARK_ACTION_SEND_TO, getString(R.string.options_bookmark_action_send_to_add_info), filter).
 				add(mBookmarkSendToAction, mBookmarkSendToActionTitles, mBookmarkSendToActionAddInfos).setDefaultValue("-1").
-				setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
+				setIconIdByAttr(R.attr.attr_icons8_send_to_action, R.drawable.icons8_send_to_action));
 		mOptionsControls.add(new ListOptionAction(this, getString(R.string.options_bookmark_action_send_to_mod),
 				PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD, getString(R.string.options_bookmark_action_send_to_mod_add_info), filter).
 				add(mBookmarkSendToActionMod, mBookmarkSendToActionModTitles, mBookmarkSendToActionModAddInfos).setDefaultValue("0").
-				setIconIdByAttr(R.attr.attr_icons8_document_selection1, R.drawable.icons8_document_selection1));
+				setIconIdByAttr(R.attr.attr_icons8_send_to_action_more, R.drawable.icons8_send_to_action_more));
 		mOptionsApplication = new OptionsListView(getContext(), null);
 		mOptionsApplication.add(new LangOption(this, filter).setIconIdByAttr(R.attr.attr_icons8_system_lang, R.drawable.icons8_system_lang));
 		CoolReader cr = (CoolReader)mActivity;
@@ -7540,7 +7655,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			})
 		);
 		OptionBase sbO6 = new RareOption(this, getString(R.string.rare_settings),
-				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_other_drawable, R.drawable.icons8_more);
+				getString(R.string.option_add_info_empty_text), filter)
+				.setIconIdByAttr(R.attr.attr_icons8_physics, R.drawable.icons8_physics);
 		((RareOption)sbO6).updateFilterEnd();
 		mOptionsApplication.add(sbO6);
 

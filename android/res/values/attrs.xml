@@ -352,6 +352,28 @@
     <attr name="attr_icons8_tts_lang" format="reference" />
     <attr name="attr_icons8_voice" format="reference" />
     <attr name="attr_icons8_system_lang" format="reference" />
+    <attr name="attr_icons8_alligator" format="reference" />
+    <attr name="attr_icons8_anon" format="reference" />
+    <attr name="attr_icons8_anon_load" format="reference" />
+    <attr name="attr_icons8_backlight_swipe_sensitivity" format="reference" />
+    <attr name="attr_icons8_disable_trackball" format="reference" />
+    <attr name="attr_icons8_document_4pages" format="reference" />
+    <attr name="attr_icons8_double_click_tap" format="reference" />
+    <attr name="attr_icons8_double_click_tap_interval" format="reference" />
+    <attr name="attr_icons8_ext_toolbar" format="reference" />
+    <attr name="attr_icons8_font_select_dialog" format="reference" />
+    <attr name="attr_icons8_gesture_sensivity" format="reference" />
+    <attr name="attr_icons8_highlight_tap_zone" format="reference" />
+    <attr name="attr_icons8_moving_sensor_n" format="reference" />
+    <attr name="attr_icons8_physics" format="reference" />
+    <attr name="attr_icons8_prevent_accidental_tap_interval" format="reference" />
+    <attr name="attr_icons8_quick_transl_dir" format="reference" />
+    <attr name="attr_icons8_send_to_action" format="reference" />
+    <attr name="attr_icons8_send_to_action_more" format="reference" />
+    <attr name="attr_icons8_speaker_koef" format="reference" />
+    <attr name="attr_icons8_user_dic_panel" format="reference" />
+    <attr name="attr_icons8_group" format="reference" />
+    <attr name="attr_icons8_group2" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

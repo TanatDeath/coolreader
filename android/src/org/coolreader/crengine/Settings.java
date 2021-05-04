@@ -265,6 +265,9 @@ public interface Settings {
 
     public static final String PROP_APP_SECONDARY_TAP_ACTION_TYPE = "app.touch.secondary.action.type";
     public static final String PROP_APP_GESTURE_PAGE_FLIPPING = "app.touch.gesture.page.flipping";
+	public static final String PROP_APP_GESTURE_PAGE_FLIPPING_NEW = "app.touch.gesture.page.flipping.new";
+	public static final String PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY = "app.touch.gesture.page.flipping.sensivity";
+	public static final String PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT = "app.touch.gesture.page.flipping.page.count";
 	public static final String PROP_APP_DISABLE_TWO_POINTER_GESTURES = "app.touch.gesture.twopointer.disable";
 
     public static final String PROP_APP_VIEW_AUTOSCROLL_SPEED  ="app.view.autoscroll.speed";
@@ -313,6 +316,7 @@ public interface Settings {
 	public static final String PROP_SPACING_TITLE = "window.spacing.title";
 	public static final String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
 	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
+	public static final String PROP_PAGE_FLIP_TITLE = "window.page.flip.title";
 
 	// available options for PROP_APP_SELECTION_ACTION setting
 	public static final int SELECTION_ACTION_SAME_AS_COMMON = -1;

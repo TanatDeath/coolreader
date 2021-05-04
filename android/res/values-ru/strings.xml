@@ -968,14 +968,14 @@
     <string name="options_app_show_cover_pages_add_info">Отображать обложки книг вместе с названиями</string>
     <string name="options_app_cover_page_size_add_info">Выбор отображаемого размера обложки книги (Маленькие, Средние, Большие)</string>
     <string name="options_app_scan_book_props_add_info">Получать информацию о книгах в выбранной папке (автор, жанр, год издания и т.д.)</string>
-    <string name="options_app_browser_hide_empty_dirs_add_info">Скрывать папки не содержащие книг</string>
+    <string name="options_app_browser_hide_empty_dirs_add_info">Скрывать папки не содержащие книг (может замедлить вывод содержимого каталога)</string>
     <string name="mi_book_browser_simple_mode_add_info">Данная опция отключает отображение обложек и прочей информации в папках с книгами</string>
     <string name="save_pos_to_cloud_timeout_add_info">Позиция чтения будет сохраняться каждые 1-100 минут в облачное хранилище, изначально выключено (требуется разрешение использования аккаунта)</string>
     <string name="save_pos_timeout_add_info">Позиция чтения будет сохраняться на этом устройстве</string>
     <string name="options_app_key_actions_add_info">Назначение действий для кнопок и поведения при подключении гарнитуры</string>
     <string name="options_app_tapzones_normal_add_info">Настройка действий программы при нажатии на область экрана (экран разбит на 9 клеток 3x3)</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Настройка дополнительного действия при длинном или коротком нажатии</string>
-    <string name="options_app_double_tap_selection_add_info">Выделить текст при двойном нажатии на экран (для копирования, сохранения закладки, вызова словаря, отправки и т.д.)</string>
+    <string name="options_app_double_tap_selection_add_info">Выделить текст при двойном нажатии на экран (для копирования, сохранения закладки, вызова словаря, отправки и т.д.). ВНИМАНИЕ: Включение этой настройки замедляет время реакции на одиночные нажатия (на время интервала двойного тапа, по умолчанию - 400 мс)</string>
     <string name="options_controls_enable_volume_keys_add_info">Листание страниц кнопками громкости</string>
     <string name="options_app_tapzone_hilite_add_info">Выделять место нажатия на экран прямоугольником</string>
     <string name="options_app_trackball_disable_add_info">Отключение трекбола для предотвращения случайного пролистывания (пример: HTC A8181)</string>
@@ -1160,6 +1160,7 @@
     <string name="dictionary_settings">Настройки словарей</string>
     <string name="filebrowser_settings">Настройки библиотеки и файлового браузера</string>
     <string name="rare_settings">Редкие и экспериментальные настройки</string>
+    <string name="page_flipping_settings">Настройки листания</string>
     <string name="tts_settings">Настройки Text-to-speech</string>
     <string name="backlight_settings">Настройки яркости экрана и кнопок</string>
     <string name="selectionmodes_settings">Настройки действий для выделения (одного и нескольких слов)</string>
@@ -1425,7 +1426,7 @@
     <string name="font_tweaks">Тонкие настройки шрифта</string>
     <string name="spacing_settings">Расстояния между строками, словами и символами</string>
     <string name="migrate_cr_settings">Скопировать настройки из CoolReader</string>
-    <string name="migrate_cr_settings_add_info">Файлы CoolReader никак не модифиццируются, вы сможете пользоваться им как и раньше</string>
+    <string name="migrate_cr_settings_add_info">Файлы CoolReader никак не модифицируются, вы сможете пользоваться им как и раньше</string>
     <string name="migrate_cr_settings_profiles">Число профилей:</string>
     <string name="migrate_cr_settings_q">Вы уверены? Текущие настройки будут заменены</string>
     <string name="user_dic_panel0">Отключена</string>
@@ -1600,5 +1601,22 @@
     <string name="lang_pair">Языковая пара</string>
     <string name="select_transl_dir">Выберите направление перевода</string>
     <string name="all_languages">Выбрать из всех языков</string>
+    <string name="page_flipping_type">Листание жестами</string>
+    <string name="page_flipping_type_add_info">Вы можете листать страницы жестами - если указано более одной страницы, то количество переворачиваемых страниц зависит от длины жеста</string>
+    <string name="page_flipping_type_0">Отключено</string>
+    <string name="page_flipping_type_1">Одна страница</string>
+    <string name="page_flipping_type_2">Несколько страниц</string>
+    <string name="page_flipping_sensivity">Чувствительность жеста листания</string>
+    <string name="page_flipping_sensivity_add_info">Можно указать коэффициент длины жеста, чтобы исключить случайное распознавание простого нажатия как жеста</string>
+    <string name="page_flipping_sensivity_1">более длинный</string>
+    <string name="page_flipping_sensivity_2">длинный</string>
+    <string name="page_flipping_sensivity_3">нормальный</string>
+    <string name="page_flipping_sensivity_4">короткий</string>
+    <string name="page_flipping_sensivity_5">еще короче</string>
+    <string name="page_flipping_page_count">Листание - количество страниц</string>
+    <string name="page_flipping_page_count_add_info">Количество страниц, которые будут перевернуты в случае если вы сделаете полный жест - с одного края экрана до другого</string>
+    <string name="wireless_charging">Беспроводная зарядка</string>
+    <string name="usb_charging">USB зарядка</string>
+    <string name="ac_charging">AC зарядка</string>
 </resources>
 

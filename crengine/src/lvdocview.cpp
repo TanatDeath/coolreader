@@ -1478,8 +1478,14 @@ void LVDocView::drawBatteryState(LVDrawBuf * drawbuf, const lvRect & batteryRc,
 		if ( m_batteryIcons.size()==1 )
 			icons.add(m_batteryIcons[0]);
 	}
-	LVDrawBatteryIcon(drawbuf, batteryRc, m_battery_state, m_battery_state
-			== CR_BATTERY_STATE_CHARGING, icons, drawPercent ? m_batteryFont.get() : NULL);
+	int m_b_state = m_battery_state;
+	if (m_b_state >= 30000) m_b_state -= 30000;
+	if (m_b_state >= 20000) m_b_state -= 20000;
+	if (m_b_state >= 10000) m_b_state -= 10000;
+	//LVDrawBatteryIcon(drawbuf, batteryRc, m_b_state, m_battery_state
+	//		== CR_BATTERY_STATE_CHARGING, icons, drawPercent ? m_batteryFont.get() : NULL);
+	LVDrawBatteryIcon(drawbuf, batteryRc, m_b_state, m_battery_state
+		> 9000, icons, drawPercent ? m_batteryFont.get() : NULL);
 #if 0
 	if ( m_batteryIcons.length()>1 ) {
 		int iconIndex = ((m_batteryIcons.length() - 1 ) * m_battery_state + (100/m_batteryIcons.length()/2) )/ 100;
@@ -2324,10 +2330,26 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 				pageinfoPerc << fmt::decimal(pp) << "%";
             }
             if ( batteryPercentNormalFont && m_battery_state>=0 ) {
-                if ( !pageinfoPerc.empty() )
-				    pageinfoPerc << " | ~" << fmt::decimal(m_battery_state) << "";
+            	lString32 chmark;
+            	chmark += "";
+				int m_b_state = m_battery_state;
+            	if (m_b_state >= 30000) {
+					chmark += "W";
+					m_b_state -= 30000;
+				} else
+					if (m_b_state >= 20000) {
+						chmark += "A";
+						m_b_state -= 20000;
+					} else
+					if (m_b_state >= 10000) {
+						chmark += "U";
+						m_b_state -= 10000;
+					} else chmark += "~";
+
+				if ( !pageinfoPerc.empty() )
+				    pageinfoPerc << " | " << chmark << fmt::decimal(m_b_state) << "";
                 else
-                    pageinfoPerc << " ~" << fmt::decimal(m_battery_state) << "";
+                    pageinfoPerc << " " << chmark << fmt::decimal(m_b_state) << "";
             }
             if ((can2lines) && (PGHDR_CLOCK)) pageinfo = pageinfo1;
             	else pageinfo += pageinfoPerc;
@@ -6775,7 +6797,15 @@ int LVDocView::onSelectionCommand( int cmd, int param )
 }
 
 //static int cr_font_sizes[] = { 24, 29, 33, 39, 44 };
-static int cr_interline_spaces[] = { 100, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 180, 200 };
+static int cr_interline_spaces[] = { 100, 70, 72, 74, 76, 78, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+									 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+									 102, 103, 104, 105, 106, 107, 108, 109, 110,
+									 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+									 122, 124, 126, 128, 130, 132, 134, 136, 138, 140,
+									 142, 144, 146, 148, 150, 152, 154, 156, 158, 160,
+									 162, 164, 166, 168, 170, 172, 174, 176, 178, 180,
+									 182, 184, 186, 188, 190, 192, 194, 196, 198, 200,
+									 202, 204, 206, 208, 200, 212, 214, 216, 218, 220 };
 
 static const char * def_style_macros[] = {
     "styles.def.align", "text-align: justify",

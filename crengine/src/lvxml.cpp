@@ -2896,7 +2896,10 @@ bool LVXMLParser::CheckFormat()
                     SetCharset( encname.c_str() );
                 }
             }
-        } else if ( !res && s.pos("<html xmlns=\"http://www.w3.org/1999/xhtml\"") >= 0) {
+        } else if ( !res &&
+            (s.pos("<html xmlns=\"http://www.w3.org/1999/xhtml\"") >= 0) ||
+                (s.pos("<!DOCTYPE html>") >= 0)
+                ) {
             res = m_allowHtml;
         } else if (!res && !m_fb2Only) {
             // not XML or XML without declaration;

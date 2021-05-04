@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.icu.util.IslamicCalendar;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -41,26 +42,29 @@ public class ScanLibraryDialog extends BaseDialog {
 
 	public static ProgressDialog progressDlg;
 
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
+
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
 	private final TableLayout tlScanLibrary;
 	private final LinearLayout llScanLibrary;
 	private final Button mBtnScanWholeDevice;
-	private final LinearLayout mLlScanInternal;
-	private final Button mBtnScanInternal;
-	private final LinearLayout mLlScanExternal;
-	private final Button mBtnScanExternal;
+	private final LinearLayout mLlScanCards;
+	private final ArrayList<Button> cardButtons = new ArrayList<>();
+	private final HashMap<String, Boolean> cardButtonsSelected = new HashMap<>();
 	private final LinearLayout mLlScanBooks;
 	private final Button mBtnScanBooks;
+	private String mBtnScanBooksPath = "";
 	private final LinearLayout mLlScanFav;
 	private final Button mBtnScanFav;
+	private String mBtnScanFavPath = "";
 	private final LinearLayout mLlScanDownl;
 	private final Button mBtnScanDownl;
+	private String mBtnScanDownlPath = "";
 	private final Button mBtnDoScan;
 	private final Button mLibraryMaintenance;
 	private boolean bScanWholeDevice = false;
-	private boolean bScanInternal = false;
-	private boolean bScanExternal = false;
 	private boolean bScanBooks = false;
 	private boolean bScanFav = false;
 	private boolean bScanDownl = false;
@@ -81,9 +85,38 @@ public class ScanLibraryDialog extends BaseDialog {
 	private TextView mSeriesCnt;
 	private TextView mGenresCnt;
 	private Button mBtnInterrupt;
+	private TextView mPercent;
+	private int initialSize;
 
 	public boolean needInterrupt = false;
 	public boolean finished = false;
+
+	private boolean isAllCardSelected() {
+		for (Button btnCard: cardButtons)
+			if (!cardButtonsSelected.get(btnCard.getContentDescription().toString())) return false;
+		return true;
+	}
+
+	private boolean isPathOnCards(String path) {
+		for (Button btnCard: cardButtons)
+			if (cardButtonsSelected.get(btnCard.getContentDescription().toString())) {
+				if (path.startsWith(btnCard.getContentDescription().toString())) return true;
+			}
+		return false;
+	}
+
+	private void disableCardsForPath(String path) {
+		for (Button btnCard: cardButtons)
+			if (cardButtonsSelected.get(btnCard.getContentDescription().toString())) {
+				if (path.startsWith(btnCard.getContentDescription().toString()))
+					cardButtonsSelected.put(btnCard.getContentDescription().toString(), false);
+			}
+	}
+
+	private void disableAllCards() {
+		for (Button btnCard: cardButtons)
+			cardButtonsSelected.put(btnCard.getContentDescription().toString(), false);
+	}
 
 	private void buttonPressed(Button btn) {
 		int colorGrayC;
@@ -95,8 +128,9 @@ public class ScanLibraryDialog extends BaseDialog {
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		mCoolReader.tintViewIcons(mBtnScanWholeDevice, PorterDuff.Mode.CLEAR,true);
-		mCoolReader.tintViewIcons(mBtnScanInternal, PorterDuff.Mode.CLEAR,true);
-		mCoolReader.tintViewIcons(mBtnScanExternal, PorterDuff.Mode.CLEAR,true);
+		for (Button btnCard: cardButtons) {
+			mCoolReader.tintViewIcons(btnCard, PorterDuff.Mode.CLEAR,true);
+		}
 		mCoolReader.tintViewIcons(mBtnScanBooks, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnScanFav, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnScanDownl, PorterDuff.Mode.CLEAR,true);
@@ -104,67 +138,57 @@ public class ScanLibraryDialog extends BaseDialog {
 		if (btn == mBtnScanWholeDevice) {
 			if (bScanWholeDevice) {
 				bScanWholeDevice = false;
-				bScanInternal = false;
-				bScanExternal = false;
+				for (Button btnCard: cardButtons) {
+					cardButtonsSelected.put(btnCard.getContentDescription().toString(), false);
+				}
 				bScanBooks = true;
 				bScanFav = false;
 				bScanDownl = false;
 			} else {
 				bScanWholeDevice = true;
-				bScanInternal = true;
-				bScanExternal = true;
+				for (Button btnCard: cardButtons) {
+					cardButtonsSelected.put(btnCard.getContentDescription().toString(), true);
+				}
 				bScanBooks = true;
 				bScanFav = true;
 				bScanDownl = true;
 			}
 		}
 
-		if (btn == mBtnScanInternal) {
-			if (bScanInternal) {
-				bScanWholeDevice = false;
-				bScanInternal = false;
-			} else {
-				bScanInternal = true;
-				bScanBooks = true;
-				bScanDownl = true;
-				bScanWholeDevice = bScanInternal & bScanExternal;
-				bScanBooks = bScanBooks || bScanInternal;
-				bScanFav = bScanFav || (bScanInternal & bScanExternal);
-				bScanDownl = bScanDownl || bScanInternal;
-			}
-		}
-
-		if (btn == mBtnScanExternal) {
-			if (bScanExternal) {
-				bScanWholeDevice = false;
-				bScanExternal = false;
-			} else {
-				bScanExternal = true;
-				bScanWholeDevice = bScanInternal & bScanExternal;
-				bScanFav = bScanFav || (bScanInternal & bScanExternal);
-				bScanDownl = bScanDownl || bScanInternal;
+		for (Button btnCard: cardButtons) {
+			if (btn == btnCard) {
+				String cardPath = btnCard.getContentDescription().toString();
+				boolean curV = cardButtonsSelected.get(cardPath);
+				cardButtonsSelected.put(cardPath, !curV);
+				if (curV) {
+					bScanWholeDevice = false;
+				} else {
+					bScanBooks = isPathOnCards(mBtnScanBooksPath);
+					bScanDownl = isPathOnCards(mBtnScanDownlPath);
+					bScanWholeDevice = isAllCardSelected();
+					bScanFav = isAllCardSelected();
+				}
 			}
 		}
 
 		if (btn == mBtnScanBooks) {
 			if (bScanBooks) {
 				bScanBooks = false;
-				bScanInternal = false;
+				disableCardsForPath(mBtnScanBooksPath);
 				bScanWholeDevice = false;
 			} else {
 				bScanBooks = true;
-				bScanWholeDevice = bScanInternal & bScanExternal;
-				bScanFav = bScanFav || (bScanInternal & bScanExternal);
-				bScanDownl = bScanDownl || bScanInternal;
+				bScanWholeDevice = isAllCardSelected();
+				bScanFav = bScanFav || (isAllCardSelected());
+				bScanDownl = bScanDownl || isPathOnCards(mBtnScanDownlPath);
 			}
 		}
 
 		if (btn == mBtnScanFav) {
 			if (bScanFav) {
 				bScanFav = false;
-				bScanInternal = false;
+				disableAllCards();
 				bScanWholeDevice = false;
-				bScanExternal = false;
 			} else {
 				bScanFav = true;
 			}
@@ -173,17 +197,16 @@ public class ScanLibraryDialog extends BaseDialog {
 		if (btn == mBtnScanDownl) {
 			if (bScanDownl) {
 				bScanDownl = false;
-				bScanInternal = false;
+				disableCardsForPath(mBtnScanDownlPath);
 				bScanWholeDevice = false;
 			} else {
 				bScanDownl = true;
-				bScanWholeDevice = bScanInternal & bScanExternal;
+				bScanWholeDevice = isAllCardSelected();
 			}
 		}
 
 		mBtnScanWholeDevice.setBackgroundColor(colorGrayCT);
-		mBtnScanInternal.setBackgroundColor(colorGrayCT);
-		mBtnScanExternal.setBackgroundColor(colorGrayCT);
+		for (Button btnCard: cardButtons) btnCard.setBackgroundColor(colorGrayCT);
 		mBtnScanBooks.setBackgroundColor(colorGrayCT);
 		mBtnScanFav.setBackgroundColor(colorGrayCT);
 		mBtnScanDownl.setBackgroundColor(colorGrayCT);
@@ -192,13 +215,11 @@ public class ScanLibraryDialog extends BaseDialog {
 			mBtnScanWholeDevice.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnScanWholeDevice,true);
 		}
-		if (bScanInternal) {
-			mBtnScanInternal.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(mBtnScanInternal,true);
-		}
-		if (bScanExternal) {
-			mBtnScanExternal.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(mBtnScanExternal,true);
+		for (Button btnCard: cardButtons) {
+			if (cardButtonsSelected.get(btnCard.getContentDescription().toString())) {
+				btnCard.setBackgroundColor(colorGrayCT2);
+				mCoolReader.tintViewIcons(btnCard,true);
+			}
 		}
 		if (bScanBooks) {
 			mBtnScanBooks.setBackgroundColor(colorGrayCT2);
@@ -258,6 +279,7 @@ public class ScanLibraryDialog extends BaseDialog {
 		} else {
 			String s = toScan.get(0);
 			toScan.remove(0);
+			int curSize = toScan.size();
 			BackgroundThread.instance().postGUI(() -> {
 				File f = new File(s);
 				if (f.exists() && f.isDirectory()) {
@@ -266,25 +288,21 @@ public class ScanLibraryDialog extends BaseDialog {
 					if (arrLab.length>2) pathText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
 					Log.i("SCANDLG", "scanDirectoryRecursive started (all)");
 					final Scanner.ScanControl control = new Scanner.ScanControl();
-//					final ProgressDialog dlg = ProgressDialog.show(mCoolReader,
-//							pathText + " - " + mCoolReader.getString(R.string.dlg_scan_title),
-//							mCoolReader.getString(R.string.dlg_scan_message),
-//							true, true, dialog -> {
-//								Log.i("SCANDLG", "scanDirectoryRecursive started (all) : stop handler");
-//								control.stop();
-//								BackgroundThread.instance().postGUI(() -> {
-//									mCoolReader.showToast(R.string.cancelled_op);
-//								});
-//							});
 					Services.getScanner().scanDirectory(mCoolReader.getDB(), new FileInfo(s), () -> {
-						//mActivity.setBrowserProgressStatus(true);
 					}, (scanControl) -> {
 						Log.i("SCANDLG","scanDirectoryRecursive (all) : finish handler");
 						scanFromStack();
-						//mActivity.setBrowserProgressStatus(false);
 					}, false, control, true);
 					if (windowCenterPopup != null)
 						if (windowCenterPopup.isShowing()) {
+							int perc = 0;
+							try {
+								perc = curSize * 100 / initialSize;
+								perc = 100 - perc;
+							} catch (Exception e) {
+								// do nothing
+							}
+							//int percent =  toScan.size();
 							String ss = "";
 							int i = 1;
 							for (String s1: toScan) {
@@ -297,7 +315,7 @@ public class ScanLibraryDialog extends BaseDialog {
 								}
 							}
 							mScanText.setText(ss);
-							//mScanText.setText(mScanText.getText().toString().replace(s + "\n", ""));
+							mPercent.setText(perc + "%");
 						}
 				} else scanFromStack();
 			});
@@ -334,22 +352,57 @@ public class ScanLibraryDialog extends BaseDialog {
 	}
 
 	private void addFoldersNames() {
+
 		ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
 		for (FileInfo fi: folders) {
-			if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
-				if (StrUtils.getNonEmptyStr(fi.title, true).toUpperCase().contains("EXT SD")) {
-					addTextToLL(fi.pathname, mLlScanExternal);
-				} else {
-					addTextToLL(fi.pathname, mLlScanInternal);
-				}
-			} else {
+			if (fi.getType() != FileInfo.TYPE_FS_ROOT) {
 				if (fi.getType() == FileInfo.TYPE_DOWNLOAD_DIR) {
 					addTextToLL(fi.pathname, mLlScanBooks);
-				} else
+					mBtnScanBooksPath = fi.pathname;
+				} else{
 					addTextToLL(fi.pathname, mLlScanFav);
+					mBtnScanFavPath = fi.pathname;
+				}
 			}
 		}
 		addTextToLL(Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS, mLlScanDownl);
+		mBtnScanDownlPath = Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS;
+	}
+
+	private void addFoldersToLL(ViewGroup view) {
+		ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
+		for (FileInfo fi : folders) {
+			if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
+				Button cardButton = new Button(mCoolReader);
+				if (StrUtils.getNonEmptyStr(fi.title, true).toUpperCase().contains("EXT SD"))
+					cardButton.setText(mCoolReader.getString(R.string.scan_external_sd)+": "+fi.pathname);
+				else
+					cardButton.setText(mCoolReader.getString(R.string.scan_internal_storage)+": "+fi.pathname);
+				cardButton.setContentDescription(fi.pathname);
+				cardButtonsSelected.put(cardButton.getContentDescription().toString(),false);
+				int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+				int colorIcon = themeColors.get(R.attr.colorIcon);
+				cardButton.setBackgroundColor(colorGrayC);
+				Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+				Drawable img1 = img.getConstantState().newDrawable().mutate();
+				cardButton.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+				cardButton.setPadding(10, 20, 10, 20);
+				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+						ViewGroup.LayoutParams.FILL_PARENT,
+						ViewGroup.LayoutParams.WRAP_CONTENT);
+				llp.setMargins(8, 8, 8, 8);
+				cardButton.setLayoutParams(llp);
+				cardButton.setTextColor(colorIcon);
+				//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
+				cardButton.setMaxLines(3);
+				cardButton.setEllipsize(TextUtils.TruncateAt.END);
+				cardButton.setOnClickListener(v -> {
+					buttonPressed(cardButton);
+				});
+				view.addView(cardButton);
+				cardButtons.add(cardButton);
+			}
+		}
 	}
 
 	ArrayList<String> toScanTemp;
@@ -415,6 +468,7 @@ public class ScanLibraryDialog extends BaseDialog {
 			else {
 				toast_ll.setBackgroundColor(colorGrayC);
 				mBtnInterrupt = windowCenterPopup.getContentView().findViewById(R.id.btn_interrupt);
+				mPercent = windowCenterPopup.getContentView().findViewById(R.id.percent_title);
 				if (mBtnInterrupt != null) {
 					mBtnInterrupt.setBackgroundColor(colorGray);
 					mCoolReader.tintViewIcons(toast_ll, true);
@@ -471,10 +525,9 @@ public class ScanLibraryDialog extends BaseDialog {
 	{
 		super("ScanLibraryDialog", activity, activity.getString( R.string.scan_library), true, false);
 		mCoolReader = activity;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		a.recycle();
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		setTitle(mCoolReader.getString(R.string.scan_library));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.scan_library_dialog, null);
@@ -482,10 +535,8 @@ public class ScanLibraryDialog extends BaseDialog {
 		llScanLibrary = view.findViewById(R.id.ll_scan_library_dlg);
 		tlScanLibrary = view.findViewById(R.id.tl_scan_library_dlg);
 		mBtnScanWholeDevice = view.findViewById(R.id.btn_scan_whole_device);
-		mLlScanInternal = view.findViewById(R.id.ll_scan_internal);
-		mBtnScanInternal = view.findViewById(R.id.btn_scan_internal);
-		mLlScanExternal = view.findViewById(R.id.ll_scan_external);
-		mBtnScanExternal = view.findViewById(R.id.btn_scan_external);
+		mLlScanCards = view.findViewById(R.id.ll_scan_cards);
+		addFoldersToLL(mLlScanCards);
 		mLlScanBooks = view.findViewById(R.id.ll_scan_books);
 		mBtnScanBooks = view.findViewById(R.id.btn_scan_books);
 		mLlScanFav = view.findViewById(R.id.ll_scan_fav);
@@ -494,33 +545,21 @@ public class ScanLibraryDialog extends BaseDialog {
 		mBtnScanDownl = view.findViewById(R.id.btn_scan_downl);
 		mBtnDoScan = view.findViewById(R.id.btn_do_scan);
 		mBtnScanWholeDevice.setBackgroundColor(colorGrayC);
-		mBtnScanInternal.setBackgroundColor(colorGrayC);
-		mBtnScanExternal.setBackgroundColor(colorGrayC);
 		mBtnScanBooks.setBackgroundColor(colorGrayC);
 		mBtnScanFav.setBackgroundColor(colorGrayC);
 		mBtnScanDownl.setBackgroundColor(colorGrayC);
 		mBtnDoScan.setBackgroundColor(colorGrayC);
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
-		Drawable img2 = img.getConstantState().newDrawable().mutate();
-		Drawable img3 = img.getConstantState().newDrawable().mutate();
 		Drawable img4 = img.getConstantState().newDrawable().mutate();
 		Drawable img5 = img.getConstantState().newDrawable().mutate();
 		Drawable img6 = img.getConstantState().newDrawable().mutate();
 		mBtnScanWholeDevice.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
-		mBtnScanInternal.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
-		mBtnScanExternal.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
 		mBtnScanBooks.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
 		mBtnScanFav.setCompoundDrawablesWithIntrinsicBounds(img5, null, null, null);
 		mBtnScanDownl.setCompoundDrawablesWithIntrinsicBounds(img6, null, null, null);
 		mBtnScanWholeDevice.setOnClickListener(v -> {
 			buttonPressed(mBtnScanWholeDevice);
-		});
-		mBtnScanInternal.setOnClickListener(v -> {
-			buttonPressed(mBtnScanInternal);
-		});
-		mBtnScanExternal.setOnClickListener(v -> {
-			buttonPressed(mBtnScanExternal);
 		});
 		mBtnScanBooks.setOnClickListener(v -> {
 			buttonPressed(mBtnScanBooks);
@@ -544,11 +583,10 @@ public class ScanLibraryDialog extends BaseDialog {
 			ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
 			for (FileInfo fi: folders) {
 				if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
-					if (StrUtils.getNonEmptyStr(fi.title, true).toUpperCase().contains("EXT SD")) {
-						if (bScanExternal) toScan.add(fi.pathname + "/");
-					} else {
-						if (bScanInternal) toScan.add(fi.pathname + "/");
-					}
+					for (Button btnCard: cardButtons)
+						if (cardButtonsSelected.get(btnCard.getContentDescription().toString()))
+							if (btnCard.getContentDescription().toString().equals(fi.pathname))
+								toScan.add(fi.pathname + "/");
 				} else {
 					if (fi.getType() == FileInfo.TYPE_DOWNLOAD_DIR) {
 						if (bScanBooks) toScan.add(fi.pathname + "/");
@@ -565,6 +603,7 @@ public class ScanLibraryDialog extends BaseDialog {
 			updateToScanFolders();
 			finished = false;
 			needInterrupt = false;
+			initialSize = toScan.size();
 			showFoldersPopup();
 			mCoolReader.getDB().getLibraryStats(o -> {
 				if (progressDlg != null)
@@ -584,11 +623,10 @@ public class ScanLibraryDialog extends BaseDialog {
 			ArrayList<String> toRemove = new ArrayList<>();
 			for (FileInfo fi: folders) {
 				if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
-					if (StrUtils.getNonEmptyStr(fi.title, true).toUpperCase().contains("EXT SD")) {
-						if (bScanExternal) toRemove.add(fi.pathname + "/");
-					} else {
-						if (bScanInternal) toRemove.add(fi.pathname + "/");
-					}
+					for (Button btnCard: cardButtons)
+						if (cardButtonsSelected.get(btnCard.getContentDescription().toString()))
+							if (btnCard.getContentDescription().toString().equals(fi.pathname))
+								toScan.add(fi.pathname + "/");
 				} else {
 					if (fi.getType() == FileInfo.TYPE_DOWNLOAD_DIR) {
 						if (bScanBooks) toRemove.add(fi.pathname + "/");

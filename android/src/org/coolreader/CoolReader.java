@@ -112,6 +112,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -365,7 +366,24 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 			@Override
 			public void onReceive(Context context, Intent intent) {
+
+				// Are we charging / charged?
+				int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+				boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+						status == BatteryManager.BATTERY_STATUS_FULL;
+
+				// How are we charging?
+				int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+				boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+				boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+				boolean wirelessCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+
 				int level = intent.getIntExtra("level", 0);
+
+				if (usbCharge) level += 10000; else
+					if (acCharge) level += 20000; else
+						if (wirelessCharge) level += 30000;
+
 				if (mReaderView != null)
 					mReaderView.setBatteryState(level);
 				else
@@ -1342,8 +1360,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		//Properties props = SettingsManager.instance(this).get();
 		
-		if (mReaderView != null)
+		if (mReaderView != null) {
 			mReaderView.onAppResume();
+//			if (mCurrentFrame == mReaderFrame)
+//				setCutoutMode(this.iCutoutMode);
+		}
 		
 		if (DeviceInfo.isEinkScreen(getScreenForceEink())) {
             if (DeviceInfo.EINK_SONY) {
@@ -2599,7 +2620,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		showToast("Initializing TTS");
 		TextToSpeech.OnInitListener onInitListener = status -> {
 			//tts.shutdown();
-			initTTSTimer.cancel();
+			if (initTTSTimer != null) initTTSTimer.cancel();
 			initTTSTimer = null;
 			L.i("TTS init status: " + status);
 			if (status == TextToSpeech.SUCCESS) {
@@ -3128,7 +3149,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								emailIntent.putExtra(Intent.EXTRA_STREAM, path);
 								// the mail subject
 								emailIntent.putExtra(Intent.EXTRA_SUBJECT, "KnownReader logcat file");
-								startActivity(Intent.createChooser(emailIntent, getString(R.string.send_book_by_email)+ "..."));
+								startActivity(Intent.createChooser(emailIntent, getString(R.string.send_logcat)+ "..."));
 							}
 						});
 			}, 200);
@@ -3452,7 +3473,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		itemsSys.add(new BookInfoEntry("section","section.system","section"));
 		itemsSys.add(new BookInfoEntry("system.version","KnownReader " + getVersion(),"text"));
 		if (getReaderView()!=null)
-			itemsSys.add(new BookInfoEntry("system.battery",getReaderView().getBatteryState() + "%","text"));
+			itemsSys.add(new BookInfoEntry("system.battery",getReaderView().getBatteryStateText(),"text"));
 		itemsSys.add(new BookInfoEntry("system.time",Utils.formatTime(this, System.currentTimeMillis()),"text"));
 		if ((getReaderView()!=null)&&(getReaderView().getLastsetWidth()!=0)&&(getReaderView().getLastsetHeight()!=0))
 			itemsSys.add(new BookInfoEntry("system.resolution","last requested ("+

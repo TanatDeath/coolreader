@@ -187,6 +187,7 @@
 
 				<Button
 						android:id="@+id/btn_transl"
+						android:layout_height="wrap_content"
 						android:layout_width="0dip"
 						android:checked="false"
 						android:layout_weight="3"
@@ -220,7 +221,7 @@
 				<Button
 						android:id="@+id/btn_sent_to1"
 						android:layout_width="0dip"
-						android:layout_height="match_parent"
+						android:layout_height="wrap_content"
 						android:checked="true"
 						android:layout_weight="1"
 						android:drawableLeft="?attr/attr_icons8_share"
@@ -231,7 +232,7 @@
 				<Button
 						android:id="@+id/btn_sent_to2"
 						android:layout_width="0dip"
-						android:layout_height="match_parent"
+						android:layout_height="wrap_content"
 						android:checked="false"
 						android:layout_weight="1"
 						android:drawableLeft="?attr/attr_icons8_share"
@@ -268,6 +269,7 @@
 						android:layout_width="0dip"
 						android:checked="false"
 						android:layout_weight="3"
+						android:layout_height="wrap_content"
 						android:drawableLeft="?attr/attr_icons8_drop_up_no_frame_small"
 						android:tag="tint"
 						android:textColor="?attr/colorIcon"

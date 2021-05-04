@@ -1053,7 +1053,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //	private int selectionEndX = 0;
 //	private int selectionEndY = 0;
 	private boolean doubleTapSelectionEnabled = false;
-	private int mGesturePageFlipsPerFullSwipe;
+	//private int mGesturePageFlipsPerFullSwipe;
+	private int mGesturePageFlipSwipeN;
+	private int mGesturePageFlipSensivity;
+	private int mGesturePageFlipPageCount;
 	private boolean mIsPageMode;
 	private boolean mDisableTwoPointerGestures;
 	private int secondaryTapActionType = TAP_ACTION_TYPE_LONGPRESS;
@@ -1479,7 +1482,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			//final int swipeDistance = mIsPageMode ? x - start_x : y - start_y;
 			final int swipeDistance = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
 			//final int swipeDistance = x - start_x;
-			final int distanceForFlip = surface.getWidth() / mGesturePageFlipsPerFullSwipe;
+			final int distanceForFlip = - ((surface.getWidth() - (mActivity.getPalmTipPixelsK(mGesturePageFlipSensivity) / 2)) / mGesturePageFlipPageCount);
 			int pagesToFlip = swipeDistance / distanceForFlip;
 			if (pagesToFlip == 0) {
 				return; // Nothing to do
@@ -1942,9 +1945,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				adx2 = dx2 > 0 ? dx2 : -dx2;
 				ady2 = dy2 > 0 ? dy2 : -dy2;
 				int dragThreshold = mActivity.getPalmTipPixels();
+				int dragThresholdK = mActivity.getPalmTipPixelsK(mGesturePageFlipSensivity);
 				switch (state) {
 					case STATE_DOWN_1:
-						if (distance < dragThreshold)
+						if (distance < Math.min(dragThreshold, dragThresholdK))
 							return true;
 						if ((!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ||
 								DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS ||
@@ -1976,14 +1980,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								return true;
 							}
 						}
+						if (distance < dragThresholdK)
+							return true;
 						//boolean isPageMode = mSettings.getInt(PROP_PAGE_VIEW_MODE, 1) == 1;
 						//int dir = isPageMode ? x - start_x : y - start_y;
 						//plotn - some strange behavior with mIsPageMode
 						//int dir = mIsPageMode ? x - start_x : y - start_y;
 						int dir = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
 						//int dir = x - start_x;
-						if (Math.abs(mGesturePageFlipsPerFullSwipe) == 1) {
-							dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
+						if (mGesturePageFlipSwipeN == 1) {
+							//dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
 							if (getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 								// no animation
 								return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
@@ -1992,7 +1998,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							updateAnimation(x, y);
 							state = STATE_FLIPPING;
 						}
-						if (Math.abs(mGesturePageFlipsPerFullSwipe) > 1) {
+						if (mGesturePageFlipSwipeN == 2) {
 							state = STATE_FLIP_TRACKING;
 							updatePageFlipTracking(start_x, start_y);
 						}
@@ -4162,8 +4168,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			hiliteTapZoneOnTap = flg;
 		} else if (key.equals(PROP_APP_DOUBLE_TAP_SELECTION)) {
 			doubleTapSelectionEnabled = flg;
-		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING)) {
-			mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
+		//} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING)) {
+		//	mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
+		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING_NEW)) {
+			mGesturePageFlipSwipeN = Integer.valueOf(value);
+		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY)) {
+			mGesturePageFlipSensivity = Integer.valueOf(value);
+		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT)) {
+			mGesturePageFlipPageCount = Integer.valueOf(value);
 		} else if (key.equals(PROP_APP_DISABLE_TWO_POINTER_GESTURES)) {
 			mDisableTwoPointerGestures = "1".equals(value);
 		}else if (key.equals(PROP_APP_SECONDARY_TAP_ACTION_TYPE)) {
@@ -4710,9 +4722,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int mBatteryState = 100;
 	public void setBatteryState(int state) {
 		if (state != mBatteryState) {
+			//mActivity.showToast("" + mBatteryState+ ", set "+ state);
 			log.i("Battery state changed: " + state);
+			int diff = Math.abs(state - mBatteryState);
 			mBatteryState = state;
-			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) && !isAutoScrollActive()) {
+			if (
+					(
+						(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+						||
+						(diff > 9000)
+					)
+					&& (!isAutoScrollActive())) {
+				//mActivity.showToast("draw page");
 				drawPage();
 			}
 		}
@@ -4720,6 +4741,23 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public int getBatteryState() {
 		return mBatteryState;
+	}
+
+	public String getBatteryStateText() {
+		int level = mBatteryState;
+		if (level >= 30000) {
+			level = level - 30000;
+			return "" + level + "% (" + getActivity().getString(R.string.wireless_charging) + ")";
+		}
+		if (level >= 20000) {
+			level = level - 20000;
+			return "" + level + "% (" + getActivity().getString(R.string.ac_charging) + ")";
+		}
+		if (level >= 10000) {
+			level = level - 10000;
+			return "" + level + "% (" + getActivity().getString(R.string.usb_charging) + ")";
+		}
+		return "" + mBatteryState + "%";
 	}
 
 	private static final VMRuntimeHack runtime = new VMRuntimeHack();

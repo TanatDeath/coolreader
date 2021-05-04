@@ -981,14 +981,14 @@
     <string name="options_app_show_cover_pages_add_info">Show book covers along with titles</string>
     <string name="options_app_cover_page_size_add_info">Selecting the display size of the book cover (Small, Medium, Large)</string>
     <string name="options_app_scan_book_props_add_info">Retrieve information about books in the selected folder (author, genre, year of publication, etc.)</string>
-    <string name="options_app_browser_hide_empty_dirs_add_info">Hide folders that do not contain books</string>
+    <string name="options_app_browser_hide_empty_dirs_add_info">Hide folders that do not contain books (may slow down the listing of directory contents)</string>
     <string name="mi_book_browser_simple_mode_add_info">This option disables the display of covers and other information of books in folders</string>
     <string name="save_pos_to_cloud_timeout_add_info">The reading position will be saved every 1-100 minutes on the cloud storage, disabled by default (requires account permission for access)</string>
     <string name="save_pos_timeout_add_info">The reading position will be saved to local file on this device</string>
     <string name="options_app_key_actions_add_info">Assign actions for buttons and behavior when connecting a headset</string>
     <string name="options_app_tapzones_normal_add_info">Customize the actions of the program when you tap the screen area (screen is divided to 9 tap zones 3x3)</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Setting up an additional action for long or short press</string>
-    <string name="options_app_double_tap_selection_add_info">Select text when double-tapping on the screen (for copying, saving bookmark, call the dictionary, sending, etc)</string>
+    <string name="options_app_double_tap_selection_add_info">Select text when double-tapping on the screen (for copying, saving bookmark, call the dictionary, sending, etc). ATTENTION: Torning this value on will slow down the reaction time to single taps (at the value of double tap interval, 400ms by default)</string>
     <string name="options_controls_enable_volume_keys_add_info">Page flipping with volume buttons</string>
     <string name="options_app_tapzone_hilite_add_info">Select the pressed place on the screen with the rectangle</string>
     <string name="options_app_trackball_disable_add_info">Disabling the trackball to prevent accidental page flipping (example: HTC A8181)</string>
@@ -1177,6 +1177,7 @@
     <string name="dictionary_settings">Dictionary settings</string>
     <string name="filebrowser_settings">Library and file browser settings</string>
     <string name="rare_settings">Rare and experimental settings</string>
+    <string name="page_flipping_settings">Page flipping settings</string>
     <string name="tts_settings">Text-to-speech settings</string>
     <string name="backlight_settings">Screen and keys backlight settings</string>
     <string name="selectionmodes_settings">Selection actions (single and multi words) settings</string>
@@ -1631,4 +1632,21 @@
     <string name="lang_pair">Language pair</string>
     <string name="select_transl_dir">Select translation direction</string>
     <string name="all_languages">Select from all languages</string>
+    <string name="page_flipping_type">Gesture page flipping</string>
+    <string name="page_flipping_type_add_info">You can flip pages by gestures - if more than one page specified, value of pages turned depends on gesture length</string>
+    <string name="page_flipping_type_0">Disabled</string>
+    <string name="page_flipping_type_1">One page</string>
+    <string name="page_flipping_type_2">Number of pages</string>
+    <string name="page_flipping_sensivity">Flipping gesture sensivity</string>
+    <string name="page_flipping_sensivity_add_info">You can specify koefficient to determine which gesture length is recognized as flipping gesture</string>
+    <string name="page_flipping_sensivity_1">longer</string>
+    <string name="page_flipping_sensivity_2">long</string>
+    <string name="page_flipping_sensivity_3">normal</string>
+    <string name="page_flipping_sensivity_4">short</string>
+    <string name="page_flipping_sensivity_5">shorter</string>
+    <string name="page_flipping_page_count">Flipping - page count</string>
+    <string name="page_flipping_page_count_add_info">A number of pages, that will be flipped if you make a full slide from one side of screen to opposite</string>
+    <string name="wireless_charging">Wireless charging</string>
+    <string name="usb_charging">USB charging</string>
+    <string name="ac_charging">AC charging</string>
 </resources>
