@@ -139,7 +139,8 @@ static css_font_family_t DEFAULT_FONT_FAMILY = css_ff_sans_serif;
 #endif
 #endif
 
-#define HEADER_MARGIN       4
+#define HEADER_MARGIN			4
+#define HEADER_NAVBAR_H			4		// marks on navigation bar, scaled by DPI
 #define PAGE_HEADER_POS_NONE    0
 #define PAGE_HEADER_POS_TOP     1
 #define PAGE_HEADER_POS_BOTTOM  2
@@ -1370,9 +1371,23 @@ int LVDocView::getPageHeaderHeight() {
 		return 0;
 	if (!getInfoFont())
 		return 0;
+	// Page header layout
+	//---------------------------------------------------------------------------------------
+	//                                                                                           margin/2
+	//   Author    Title                                                          9,78% [67%]    text
+	//                                |                     |                   |           |    text + navbar (top part)
+	//==== ========== ==========-------------------------------------------------------------    navbar
+	//                                |                     |                   |           |    navbar (bottom part)
+	//---------------------------------------------------------------------------------------
+	//
+	// NB: "picture" above is from "classic CR", KR adds 2 (optional) lines of status bar
+	//
 	int h = getInfoFont()->getHeight();
+	int navbarh = scaleForRenderDPI(HEADER_NAVBAR_H);
+    int hm = scaleForRenderDPI(HEADER_MARGIN);
+    int twenty = scaleForRenderDPI(10);
 	int h2 = h;
-	int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() * 11/10 + HEADER_MARGIN / 2 : 0;
+	int bh = m_batteryIcons.length()>0 ? m_batteryIcons[0]->GetHeight() : 0;
 	if ( bh>h )
 		h = bh;
 	bool isPortrait = (m_dx < m_font_size * MIN_EM_PER_PAGE || m_dx * 5 < m_dy * 6);
@@ -1386,7 +1401,7 @@ int LVDocView::getPageHeaderHeight() {
 	if ((iMod == 1)&&(!isPortrait)) iMarg = 0;
 	if ((iMod == 2)&&(isPortrait)) iMarg = 0;
 	if (((iLines == PAGE_HEADER_POS_TOP_2LINES) || (iLines == PAGE_HEADER_POS_BOTTOM_2LINES)) &&(iMarg<h2)) iMarg = h2; //always 2 lines mode
-	return h + HEADER_MARGIN + 20 + iMarg; //plotn - due to different marker heights
+    return h + (navbarh + ((navbarh * 3) / 2) + hm + 1)/2 + iMarg + twenty;
 }
 
 bool LVDocView::isPageHeader2lines() {
@@ -1434,8 +1449,8 @@ void LVDocView::getPageHeaderRectangle(int pageIndex, lvRect & headerRc) {
 			case PAGE_HEADER_POS_BOTTOM:
 			case PAGE_HEADER_POS_BOTTOM_2LINES:
 				// header/status at page footer
-				headerRc.bottom -= HEADER_MARGIN;
 				headerRc.top = headerRc.bottom - h;
+				headerRc.bottom -= HEADER_MARGIN;
 				break;
 		}
 		headerRc.left += HEADER_MARGIN + propHeaderMargin;
@@ -1956,10 +1971,12 @@ void LVDocView::getPageRectangle(int pageIndex, lvRect & pageRect) {
 		pageRect = m_pageRects[1];
 }
 
+// deprecated: ready to remove
 void LVDocView::getNavigationBarRectangle(lvRect & navRect) {
 	getNavigationBarRectangle(getVisiblePageCount() == 2 ? 1 : 2, navRect);
 }
 
+// deprecated: ready to remove
 void LVDocView::getNavigationBarRectangle(int pageIndex, lvRect & navRect) {
 	lvRect headerRect;
 	getPageHeaderRectangle(pageIndex, headerRect);
@@ -1969,6 +1986,7 @@ void LVDocView::getNavigationBarRectangle(int pageIndex, lvRect & navRect) {
 	navRect.top = navRect.bottom - 6;
 }
 
+// deprecated: ready to remove
 void LVDocView::drawNavigationBar(LVDrawBuf * drawbuf, int pageIndex,
 		int percent) {
     CR_UNUSED2(drawbuf, percent);
@@ -2019,12 +2037,26 @@ void LVDocView::setPageHeaderOverride(lString32 s) {
 /// draw page header to buffer
 void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 		int pageIndex, int phi, int pageCount) {
+	int w = GetWidth();
+	int h = GetHeight();
+	if (w > h)
+		w = h;
+	int markh = scaleForRenderDPI(HEADER_NAVBAR_H);
+	int markw = scaleForRenderDPI(7)/10;
+	int thinw = scaleForRenderDPI(7)/10;
+	int boldw = scaleForRenderDPI(2);
+	int mediumh = scaleForRenderDPI(3);
+	if (markw < 1)
+		markw = 1;
+	if (thinw < 1)
+		thinw = 1;
 	lvRect oldcr;
 	drawbuf->GetClipRect(&oldcr);
-	lvRect hrc = headerRc;
-    hrc.bottom += 2;
-	drawbuf->SetClipRect(&hrc);
-	bool drawGauge = true;
+	drawbuf->SetClipRect(&headerRc);
+///	lvRect hrc = headerRc;
+///  hrc.bottom += 2;
+///	drawbuf->SetClipRect(&hrc);
+///	bool drawGauge = true;
 	lvRect info = headerRc;
 	int iMarginPos = m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN_POS, 0);
     int iMarginMod = m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN_MOD, 0);
@@ -2051,51 +2083,34 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
            info.right = info.right - m_props->getIntDef(PROP_ROUNDED_CORNERS_MARGIN, 0);;
     }
 	bool can2lines = isPageHeader2lines();
+	int gpos = 0;
+	switch (m_pageHeaderPos) {
+		case PAGE_HEADER_POS_TOP:
+		case PAGE_HEADER_POS_TOP_2LINES:
+			gpos = info.bottom - (markh + ((markh * 3) / 2)) + scaleForRenderDPI(3);
+			break;
+		case PAGE_HEADER_POS_BOTTOM:
+		case PAGE_HEADER_POS_BOTTOM_2LINES:
+			gpos = info.top + (markh + ((markh * 3) / 2));
+			break;
+		default:
+			break;
+	}
 //    if ( m_statusColor!=0xFF000000 ) {
 //        CRLog::trace("Status color = %06x, textColor=%06x", m_statusColor, getTextColor());
 //    } else {
 //        CRLog::trace("Status color = TRANSPARENT, textColor=%06x", getTextColor());
 //    }
 	lUInt32 cl1 = m_statusColor!=0xFF000000 ? m_statusColor : getTextColor();
-    //lUInt32 cl2 = getBackgroundColor();
-    //lUInt32 cl3 = 0xD0D0D0;
-    //lUInt32 cl4 = 0xC0C0C0;
-	drawbuf->SetTextColor(cl1);
-	//lUInt32 pal[4];
 	int percent = getPosPercent();
+
+	// draw navbar
 	bool leftPage = (getVisiblePageCount() == 2 && !(pageIndex & 1));
-	if (leftPage || !drawGauge)
+	if (leftPage)
 		percent = 10000;
-        int percent_pos = /*info.left + */percent * info.width() / 10000;
-	//    int gh = 3; //drawGauge ? 3 : 1;
+	int percent_pos = /*info.left + */percent * info.width() / 10000;
 	LVArray<int> & sbounds = getSectionBounds4Levels();
-    LVArray<int> & sbounds_pages = getSectionBounds4LevelsPages();
-    lvRect navBar;
-	getNavigationBarRectangle(pageIndex, navBar);
-	int gpos = 0;
-	switch (m_pageHeaderPos) {
-		case PAGE_HEADER_POS_TOP:
-		case PAGE_HEADER_POS_TOP_2LINES:
-			gpos = info.bottom;
-			break;
-		case PAGE_HEADER_POS_BOTTOM:
-		case PAGE_HEADER_POS_BOTTOM_2LINES:
-			gpos = info.top + 4;
-			break;
-		default:
-			break;
-	}
-//	if (drawbuf->GetBitsPerPixel() <= 2) {
-//		// gray
-//		cl3 = 1;
-//		cl4 = cl1;
-//		//pal[0] = cl1;
-//	}
-	if ( leftPage )
-		drawbuf->FillRect(info.left, gpos - 2, info.right, gpos - 2 + 1, cl1);
-        //drawbuf->FillRect(info.left+percent_pos, gpos-gh, info.right, gpos-gh+1, cl1 ); //cl3
-        //      drawbuf->FillRect(info.left + percent_pos, gpos - 2, info.right, gpos - 2
-        //                      + 1, cl1); // cl3
+	LVArray<int> & sbounds_pages = getSectionBounds4LevelsPages();
 
 	int sbound_index = 0;
     int curBound = 0;
@@ -2121,9 +2136,12 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 
     bool enableMarks = !leftPage && (phi & PGHDR_CHAPTER_MARKS) /*&& sbounds.length()<info.width()/5*/;
     bool enableMarks0 = !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev0<info.width()/5;
-    bool enableMarks1 = enableMarks0 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev1<info.width()/5;
-    bool enableMarks2 = enableMarks0 && enableMarks1 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev2<info.width()/5;
-    bool enableMarks3 = enableMarks0 && enableMarks1 && enableMarks2 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) && sboundsLengthLev3<info.width()/5;
+    bool enableMarks1 = enableMarks0 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) &&
+    		(sboundsLengthLev0 + sboundsLengthLev1)<info.width()/5;
+    bool enableMarks2 = enableMarks0 && enableMarks1 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) &&
+    		(sboundsLengthLev0 + sboundsLengthLev1 + sboundsLengthLev2)<info.width()/5;
+    bool enableMarks3 = enableMarks0 && enableMarks1 && enableMarks2 && !leftPage && (phi & PGHDR_CHAPTER_MARKS) &&
+			(sboundsLengthLev0 + sboundsLengthLev1 + sboundsLengthLev2 + sboundsLengthLev3)<info.width()/5;
 
     curBound = 0;
     curBoundLevel = 0;
@@ -2134,21 +2152,10 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
         sbound_index++;
     }
     sbound_index = 0;
-    int w = GetWidth();
-	int h = GetHeight();
-	if (w > h)
-		w = h;
-	int markh = 5;
-	int markw = 2;
-	if (w > 700) {
-		markh = 8;
-        markw = 3;
-	}
 	for ( int x = info.left; x<info.right; x++ ) {
-		int cl = -1;
-		int sz = 1;
-        int sz1 = 1;
-        int szx = 1;
+		lUInt32 cl = 0xFFFFFFFF;
+		int sz = thinw;
+		int szx = thinw;
 		int boundCategory = 0;
         while ( enableMarks && sbound_index<sbounds.length() ) {
             curBound = sbounds[sbound_index];
@@ -2166,17 +2173,15 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 		}
 		if ( leftPage ) {
 			cl = cl1;
-			sz = 1;
-            sz1 = 1;
+			sz = thinw;
 		} else {
             if ( x < info.left + percent_pos ) {
-                sz = 4;
-                sz1 = 4;
+                sz = boldw;
 				if ( boundCategory==0 )
 					cl = cl1;
                 else {
                     sz = 0;
-                    sz1 = 0;
+					x += markw - 1;
                 }
                 // check if marker amount is too much
                 if (
@@ -2185,18 +2190,16 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                         ((curBoundLevel == 2) && (!enableMarks2)) ||
                         ((curBoundLevel == 3) && (!enableMarks3))
                         ) {
-                    sz = 4;
-                    sz1 = 4;
+                    sz = boldw;
                     cl = cl1;
                 }
             } else {
 				if ( boundCategory!=0 ) {
 				    int curBoundInv = maxLevel - curBoundLevel - 1; // 0 - the topmost marker
-                    //CRLog::trace("curBoundLevel =  %d, maxLevel = %d", (int) curBoundLevel,
+                    //CRLog::trace("curBoundLevel = %d, maxLevel = %d", (int) curBoundLevel,
 					//			 (int) maxLevel);
                     if (curBoundInv < 0) curBoundInv = 0;
-                    sz = markh + (curBoundInv * 3);
-                    sz1 = markh + (curBoundInv * 3);
+                    sz = markh + (curBoundInv * (markh / 2));
                 }
 				cl = cl1;
 				szx = markw;
@@ -2215,36 +2218,40 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                      ((curBoundLevel == 2) && (!enableMarks2)) ||
                      ((curBoundLevel == 3) && (!enableMarks3))
                    ) {
-                    sz = 1;
-                    sz1 = 1;
+                    sz = thinw;
                     cl = cl1;
                 }
             }
 		}
-        if ( cl!=-1 && sz>0 ) {
-        	if (sz>1)
-				drawbuf->FillRect(x, gpos - 2 - sz / 2 - 1, x + szx, gpos - 2 + sz1 / 2 + 1 + 1, cl);
+		if ( cl!=0xFFFFFFFF && sz>0 ) {
+        	if (sz>thinw) {
+                drawbuf->FillRect(x, gpos - sz / 2, x + szx, gpos + sz / 2, cl);
+            }
         	else {
         		// draw dotted line
         		int x0 = x;
         		while (x0<=x+szx) {
 					if(x0 % 2 == 0)
-						drawbuf->FillRect(x0, gpos - 2 - sz / 2 - 1, x0+1, gpos - 2 + sz1 / 2 + 1 + 1, cl);
+						drawbuf->FillRect(x0, gpos - thinw, x0+1, gpos + thinw, cl);
         			x0++;
         		}
         	}
 		}
 	}
 
+	// draw icons & text info
+	drawbuf->SetTextColor(cl1);
+
 	lString32 text;
 	lString32 text2;
 
-	//int iy = info.top; // + (info.height() - m_infoFont->getHeight()) * 2 / 3;
-    int iy = info.top + /*m_infoFont->getHeight() +*/ (info.height() - m_infoFont->getHeight()) / 2 - HEADER_MARGIN/2;
-	int iy2 = info.top + /*m_infoFont->getHeight() +*/ (info.height() - (m_infoFont->getHeight() * 2 + 2) ) / 2 - HEADER_MARGIN/2;
-	if (PAGE_HEADER_POS_BOTTOM == m_pageHeaderPos) {
-		iy += 4 + 1;
-		iy2 += 4 + 1;
+	int leftIh = info.height() - (markh + ((markh * 3) / 2));
+	int iy = info.top + (leftIh - m_infoFont->getHeight()) / 2 - HEADER_MARGIN/2;
+	int iy2 = info.top + (leftIh - (m_infoFont->getHeight() * 2 + 2) ) / 2 - HEADER_MARGIN/2;
+
+	if ((PAGE_HEADER_POS_BOTTOM == m_pageHeaderPos) || (PAGE_HEADER_POS_BOTTOM_2LINES == m_pageHeaderPos)) {
+		iy += (markh + ((markh * 3) / 2)) + 1 + scaleForRenderDPI(3);
+		iy2 += (markh + ((markh * 3) / 2)) + 1 + scaleForRenderDPI(3);
 	}
 
 	if (!m_pageHeaderOverride.empty()) {
@@ -2283,7 +2290,7 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 				//    brc.left = brc.right - brc.height()/2;
 				//else
 				brc.left = brc.right - batteryIconWidth - 2;
-				brc.bottom -= 5;
+                brc.bottom -= markh;
 				drawBatteryState(drawbuf, brc, isVertical);
 				info.right = brc.left - info.height() / 2;
 			}
@@ -2360,11 +2367,11 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 			piw = m_infoFont->getTextWidth(pageinfo.c_str(), pageinfo.length());
 			if (!can2lines) {
 				m_infoFont->DrawTextString(drawbuf, info.right - piw, iy,
-										   pageinfo.c_str(), pageinfo.length(), U' ', NULL, false);
+										   pageinfo.c_str(), pageinfo.length(), U' ', NULL, false, NULL, 0, -999999);
 			}
 			if (can2lines)
 				m_infoFont->DrawTextString(drawbuf, info.right - piw, iy2 + m_infoFont->getHeight()+2,
-										   pageinfo.c_str(), pageinfo.length(), U' ', NULL, false);
+										   pageinfo.c_str(), pageinfo.length(), U' ', NULL, false, NULL, 0, -999999);
 			info.right -= piw + info.height() / 2;
 			if (!can2lines) saveRight = info.right;
 			}
@@ -2380,10 +2387,10 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 			int w = m_infoFont->getTextWidth(clock.c_str(), clock.length()) + 2;
 			if (!can2lines)
 				m_infoFont->DrawTextString(drawbuf, info.right - w, iy,
-					clock.c_str(), clock.length(), U' ', NULL, false);
+					clock.c_str(), clock.length(), U' ', NULL, false, NULL, 0, -999999);
 			if (can2lines)
 				m_infoFont->DrawTextString(drawbuf, saveRight - w, iy2,
-										   clock.c_str(), clock.length(), U' ', NULL, false);
+										   clock.c_str(), clock.length(), U' ', NULL, false, NULL, 0, -999999);
 			if (!can2lines) info.right -= w + info.height() / 2;
 		}
 		int authorsw = 0;
@@ -2434,12 +2441,12 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 	if ((!text.empty())||(!text2.empty())) {
 		if (can2lines) {
 			m_infoFont->DrawTextString(drawbuf, info.left, iy2, text.c_str(),
-									   text.length(), U' ', NULL, false);
+									   text.length(), U' ', NULL, false, NULL, 0, -999999);
 			m_infoFont->DrawTextString(drawbuf, info.left, iy2+m_infoFont->getHeight()+2, text2.c_str(),
-									   text2.length(), U' ', NULL, false);
+									   text2.length(), U' ', NULL, false, NULL, 0, -999999);
 		} else {
 			m_infoFont->DrawTextString(drawbuf, info.left, iy, text.c_str(),
-									   text.length(), U' ', NULL, false);
+									   text.length(), U' ', NULL, false, NULL, 0, -999999);
 		}
 	}
 	drawbuf->SetClipRect(&oldcr);
@@ -3311,7 +3318,7 @@ void LVDocView::setRenderProps(int dx, int dy) {
 	lString8 fontName = lString8(DEFAULT_FONT_NAME);
 	m_font_size = scaleFontSizeForDPI(m_requested_font_size);
 	gRootFontSize = m_font_size; // stored as global (for 'rem' css unit)
-	m_font = fontMan->GetFont(m_font_size, 400 + LVRendGetFontEmbolden(),
+	m_font = fontMan->GetFont(m_font_size, LVRendGetBaseFontWeight(),
 			false, DEFAULT_FONT_FAMILY, m_defaultFontFace);
 	//m_font = LVCreateFontTransform( m_font, LVFONT_TRANSFORM_EMBOLDEN );
 	m_infoFont = fontMan->GetFont(m_status_font_size, 400, false,
@@ -6439,14 +6446,13 @@ int LVDocView::doCommand(LVDocCmd cmd, int param) {
     case DCMD_REQUEST_RENDER:
         REQUEST_RENDER("doCommand-request render")
 		break;
-	case DCMD_TOGGLE_BOLD: {
-		int b = m_props->getIntDef(PROP_FONT_WEIGHT_EMBOLDEN, 0) ? 0 : 1;
-		m_props->setInt(PROP_FONT_WEIGHT_EMBOLDEN, b);
-		LVRendSetFontEmbolden(b ? STYLE_FONT_EMBOLD_MODE_EMBOLD
-				: STYLE_FONT_EMBOLD_MODE_NORMAL);
-        REQUEST_RENDER("doCommand-toggle bold")
-	}
-		break;
+    case DCMD_SET_BASE_FONT_WEIGHT: {
+        // replaces DCMD_TOGGLE_BOLD
+        m_props->setInt(PROP_FONT_BASE_WEIGHT, param);
+        LVRendSetBaseFontWeight(param);
+        REQUEST_RENDER("doCommand-set font weight")
+        break;
+    }
 	//plotn - think later
 //    case DCMD_TOGGLE_ITALICIZE: {
 //            bool b = m_props->getBoolDef(PROP_FONT_ITALICIZE, false);
@@ -6935,8 +6941,9 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 #endif
 	static int bool_options_def_true[] = { 1, 0 };
 	static int bool_options_def_false[] = { 0, 1 };
+    static int int_option_weight[] = { 100, 200, 300, 400, 425, 450, 475, 500, 525, 550, 600, 650, 700, 800, 900, 950 };
 
-	props->limitValueList(PROP_FONT_WEIGHT_EMBOLDEN, bool_options_def_false, 2);
+    props->limitValueList(PROP_FONT_BASE_WEIGHT, int_option_weight, sizeof(int_option_weight) / sizeof(int), 3);
 	props->limitValueList(PROP_FONT_ITALICIZE, bool_options_def_false, 2);
 	static int int_option_embolding_alg[] = { 0, 1 };
 	props->limitValueList(PROP_FONT_EMBOLDEN_ALG, int_option_embolding_alg, 2);
@@ -6949,6 +6956,8 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 #endif
 	static int int_option_hinting[] = { 0, 1, 2 };
 	props->limitValueList(PROP_FONT_HINTING, int_option_hinting, 3);
+	static int int_option_char_compress[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+	props->limitValueList(PROP_FONT_CHAR_SPACE_COMPRESS, int_option_char_compress, 16);
     static int int_option_shaping[] = { 1, 0, 2 };
     props->limitValueList(PROP_FONT_SHAPING, int_option_shaping, 3);
     static int int_options_1_2[] = { 2, 1 };
@@ -7130,7 +7139,11 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                     // requestRender() does m_doc->clearRendBlockCache(), which is needed
                     // on hinting mode change
             }
-        } else if (name == PROP_HIGHLIGHT_SELECTION_COLOR || name == PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT || name == PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT) {
+        } else if (name == PROP_FONT_CHAR_SPACE_COMPRESS) {
+			int compv = props->getIntDef(PROP_FONT_CHAR_SPACE_COMPRESS, 0);
+			fontMan->SetCharSpaceCompress(compv);
+			REQUEST_RENDER("propsApply - font char compress")
+		} else if (name == PROP_HIGHLIGHT_SELECTION_COLOR || name == PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT || name == PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT) {
             REQUEST_RENDER("propsApply - highlight")
         } else if (name == PROP_LANDSCAPE_PAGES) {
             int pages = props->getIntDef(PROP_LANDSCAPE_PAGES, 2);
@@ -7145,13 +7158,13 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 fontMan->SetShapingMode((shaping_mode_t)mode);
                 REQUEST_RENDER("Setting shaping mode");
             }
-        } else if (name == PROP_FONT_WEIGHT_EMBOLDEN) {
-            bool embolden = props->getBoolDef(PROP_FONT_WEIGHT_EMBOLDEN, false);
-            int v = embolden ? STYLE_FONT_EMBOLD_MODE_EMBOLD
-                             : STYLE_FONT_EMBOLD_MODE_NORMAL;
-            if (v != LVRendGetFontEmbolden()) {
-                LVRendSetFontEmbolden(v);
-                REQUEST_RENDER("propsApply - embolden")
+        } else if (name == PROP_FONT_BASE_WEIGHT) {
+            // replaces PROP_FONT_WEIGHT_EMBOLDEN
+            int v = props->getIntDef(PROP_FONT_BASE_WEIGHT, 400);
+            if ( LVRendGetBaseFontWeight() != v ) {
+                LVRendSetBaseFontWeight(v);
+                REQUEST_RENDER("propsApply - font weight")
+
             }
         } else if (name == PROP_FONT_ITALICIZE) {
 			bool italicize = props->getBoolDef(PROP_FONT_ITALICIZE, false);

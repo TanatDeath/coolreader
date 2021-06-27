@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -19,6 +20,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.SeekBar;
+
+import androidx.annotation.RequiresApi;
 
 public class FindNextDlg {
 	PopupWindow mWindow;
@@ -27,6 +31,7 @@ public class FindNextDlg {
 	//CoolReader mCoolReader;
 	ReaderView mReaderView;
 	View mPanel;
+	SeekBar mSeekBar;
 	final String pattern;
 	final boolean caseInsensitive;
 	static public void showDialog( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
@@ -39,7 +44,8 @@ public class FindNextDlg {
 		//dlg.showAsDropDown(readerView);
 		//dlg.update();
 	}
-	public FindNextDlg( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
+
+	public FindNextDlg(BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
 	{
 		this.pattern = pattern;
 		this.caseInsensitive = caseInsensitive;
@@ -65,28 +71,58 @@ public class FindNextDlg {
 		//super(panel);
 		mReaderView.mBookInfo.sortBookmarks();
 		mPanel = panel;
-		mPanel.findViewById(R.id.search_btn_prev).setOnClickListener(v -> mReaderView.findNext(pattern, true, caseInsensitive));
-		mPanel.findViewById(R.id.search_btn_next).setOnClickListener(v -> mReaderView.findNext(pattern, false, caseInsensitive));
-		mPanel.findViewById(R.id.search_btn_plus_1).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 1));
-		mPanel.findViewById(R.id.search_btn_plus_10).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 10));
-		mPanel.findViewById(R.id.search_btn_minus_1).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1));
-		mPanel.findViewById(R.id.search_btn_minus_10).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 10));
-		mPanel.findViewById(R.id.search_btn_plus_ch).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1));
-		mPanel.findViewById(R.id.search_btn_plus_ch).setOnLongClickListener(v ->
-				{
-					mReaderView.goToPage(mReaderView.getDoc().getPageCount());
-					return true;
+		mPanel.findViewById(R.id.search_btn_prev).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.findNext(pattern, true, caseInsensitive)));
+		mPanel.findViewById(R.id.search_btn_next).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.findNext(pattern, false, caseInsensitive)));
+		mPanel.findViewById(R.id.search_btn_plus_1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 1)));
+		mPanel.findViewById(R.id.search_btn_plus_10).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 10)));
+		mPanel.findViewById(R.id.search_btn_minus_1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1)));
+		mPanel.findViewById(R.id.search_btn_minus_10).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 10)));
+		mPanel.findViewById(R.id.search_btn_plus_ch).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1)));
+		mSeekBar = mPanel.findViewById(R.id.page_seek);
+		if (mSeekBar != null) {
+			mReaderView.getCurrentPositionProperties((props, positionText) -> {
+				if (props == null) {
+					Utils.hideView(mSeekBar);
+					return;
 				}
-		);
-		mPanel.findViewById(R.id.search_btn_minus_ch).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1));
-		mPanel.findViewById(R.id.search_btn_minus_ch).setOnLongClickListener(v ->
-				{
-					mReaderView.goToPage(1);
-					return true;
-				}
-		);
-		mPanel.findViewById(R.id.search_btn_plus_bmk).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_NEXT_BOOKMARK, 1));
-		mPanel.findViewById(R.id.search_btn_minus_bmk).setOnClickListener(v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1));
+				mSeekBar.setMax(props.pageCount);
+				mSeekBar.setProgress(props.pageNumber);
+				mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress,
+												  boolean fromUser) {
+						if (fromUser) {
+							try {
+								mReaderView.goToPage(progress);
+							} catch (Exception e) {
+								// ignore
+							}
+						}
+					}
+				});
+			});
+		}
+		mPanel.findViewById(R.id.search_btn_minus_ch).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1)));
+		mPanel.findViewById(R.id.search_btn_plus_bmk).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_NEXT_BOOKMARK, 1)));
+		mPanel.findViewById(R.id.search_btn_minus_bmk).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1)));
 
 		int colorGrayC;
 		int colorGray;

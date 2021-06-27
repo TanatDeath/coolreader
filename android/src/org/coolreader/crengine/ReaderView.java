@@ -1,9 +1,11 @@
 package org.coolreader.crengine;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1918,8 +1920,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				int distance = 0;
 				int dx2 = 0;
 				int dy2 = 0;
-				int adx2 = 0;
-				int ady2 = 0;
 
 				if (event.getPointerCount()>1) {
 					now_x = (int)event.getX(0);
@@ -1942,8 +1942,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					dx2 = now_x2 - start_x2;
 				if (now_y2 != 0)
 					dy2 = now_y2 - start_y2;
-				adx2 = dx2 > 0 ? dx2 : -dx2;
-				ady2 = dy2 > 0 ? dy2 : -dy2;
 				int dragThreshold = mActivity.getPalmTipPixels();
 				int dragThresholdK = mActivity.getPalmTipPixelsK(mGesturePageFlipSensivity);
 				switch (state) {
@@ -1987,12 +1985,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						//plotn - some strange behavior with mIsPageMode
 						//int dir = mIsPageMode ? x - start_x : y - start_y;
 						int dir = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
+						boolean menuShown = false;
 						//int dir = x - start_x;
 						if (mGesturePageFlipSwipeN == 1) {
 							//dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
 							if (getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 								// no animation
-								return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
+								if ((x <= (width / 2) + dragThresholdK) &&
+										(x >= (width / 2) - dragThresholdK) &&
+										(start_x <= (width / 2) + dragThresholdK) &&
+										(start_x >= (width / 2) - dragThresholdK) &&
+										(Math.abs(start_x - x) < Math.abs(start_y - y))
+								) {
+									menuShown = true;
+									mActivity.showReaderMenu();
+								} else
+									return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
 							}
 							startAnimation(start_x, start_y, width, height, x, y);
 							updateAnimation(x, y);
@@ -2001,6 +2009,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (mGesturePageFlipSwipeN == 2) {
 							state = STATE_FLIP_TRACKING;
 							updatePageFlipTracking(start_x, start_y);
+						}
+						if ((x <= (width / 2) + dragThresholdK) &&
+								(x >= (width / 2) - dragThresholdK) &&
+								(start_x <= (width / 2) + dragThresholdK) &&
+								(start_x >= (width / 2) - dragThresholdK) &&
+								(Math.abs(start_x - x) < Math.abs(start_y - y)) &&
+								(!menuShown)
+						) {
+							mActivity.showReaderMenu();
 						}
 						return true;
 					case STATE_FLIPPING:
@@ -3143,40 +3160,40 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		boolean eink = false;
 		if ((cmd != ReaderCommand.DCMD_NEXT_BOOKMARK) && (cmd != ReaderCommand.DCMD_PREV_BOOKMARK)) lastNavBmkIndex = -1;
 		switch ( cmd ) {
-		case DCMD_FILE_BROWSER_ROOT:
-			mActivity.showRootWindow();
-			break;
-		case DCMD_ABOUT:
-			mActivity.showAboutDialog();
-			break;
-		case DCMD_SWITCH_PROFILE:
-			showSwitchProfileDialog();
-			break;
-		case DCMD_TOGGLE_AUTOSCROLL:
-			toggleAutoScroll();
-			break;
-		case DCMD_AUTOSCROLL_SPEED_INCREASE:
-			changeAutoScrollSpeed(1);
-			break;
-		case DCMD_AUTOSCROLL_SPEED_DECREASE:
-			changeAutoScrollSpeed(-1);
-			break;
-		case DCMD_SHOW_DICTIONARY:
-			mActivity.showDictionary();
-			break;
-		case DCMD_OPEN_PREVIOUS_BOOK:
-			mActivity.loadPreviousDocument(() -> {
-				// do nothing
-			});
-			break;
-		case DCMD_BOOK_INFO:
-			if (isBookLoaded())
-				showBookInfo();
-			break;
-		case DCMD_USER_MANUAL:
-			showManual();
-			break;
-		case DCMD_TTS_PLAY:
+			case DCMD_FILE_BROWSER_ROOT:
+				mActivity.showRootWindow();
+				break;
+			case DCMD_ABOUT:
+				mActivity.showAboutDialog();
+				break;
+			case DCMD_SWITCH_PROFILE:
+				showSwitchProfileDialog();
+				break;
+			case DCMD_TOGGLE_AUTOSCROLL:
+				toggleAutoScroll();
+				break;
+			case DCMD_AUTOSCROLL_SPEED_INCREASE:
+				changeAutoScrollSpeed(1);
+				break;
+			case DCMD_AUTOSCROLL_SPEED_DECREASE:
+				changeAutoScrollSpeed(-1);
+				break;
+			case DCMD_SHOW_DICTIONARY:
+				mActivity.showDictionary();
+				break;
+			case DCMD_OPEN_PREVIOUS_BOOK:
+				mActivity.loadPreviousDocument(() -> {
+					// do nothing
+				});
+				break;
+			case DCMD_BOOK_INFO:
+				if (isBookLoaded())
+					showBookInfo();
+				break;
+			case DCMD_USER_MANUAL:
+				showManual();
+				break;
+			case DCMD_TTS_PLAY:
 			{
 				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
 					mActivity.showToast(R.string.only_in_pro);
@@ -3193,263 +3210,261 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 			}
 			break;
-		case DCMD_TOGGLE_DOCUMENT_STYLES:
-			if (isBookLoaded())
-				toggleDocumentStyles();
-			break;
-		case DCMD_SHOW_HOME_SCREEN:
-			mActivity.showHomeScreen();
-			break;
-		case DCMD_TOGGLE_ORIENTATION:
-			toggleScreenOrientation();
-			break;
-		case DCMD_TOGGLE_FULLSCREEN:
-			toggleFullscreen();
-			break;
-		case DCMD_TOGGLE_TITLEBAR:
-			toggleTitlebar();
-			break;
-		case DCMD_SHOW_POSITION_INFO_POPUP:
-			if (isBookLoaded())
-				showReadingPositionPopup();
-			break;
-		case DCMD_TOGGLE_SELECTION_MODE:
-			if (isBookLoaded())
-				toggleSelectionMode();
-			break;
-		case DCMD_TOGGLE_INSPECTOR_MODE:
-			if (isBookLoaded())
-				toggleInspectorMode();
-			break;
-		case DCMD_TOGGLE_TOUCH_SCREEN_LOCK:
-			isTouchScreenEnabled = !isTouchScreenEnabled;
-			if (isTouchScreenEnabled)
-				mActivity.showToast(R.string.action_touch_screen_enabled_toast);
-			else
-				mActivity.showToast(R.string.action_touch_screen_disabled_toast);
-			break;
-		case DCMD_LINK_BACK:
-		case DCMD_LINK_FORWARD:
-			navigateByHistory(cmd);
-            break;
-		case DCMD_ZOOM_OUT:
-            doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
-            syncViewSettings(getSettings(), true, true);
-            break;
-		case DCMD_ZOOM_IN:
-            doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
-            syncViewSettings(getSettings(), true, true);
-            break;
-		case DCMD_FONT_SELECT:
-			mActivity.optionsFilter = "";
-			mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
-			break;
-		case DCMD_FONT_BOLD:
-			Properties props1 = new Properties(mActivity.settings());
-			props1.setProperty(PROP_FONT_WEIGHT_EMBOLDEN,
-					props1.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
-			mActivity.setSettings(props1, -1, true);
-			break;
-		case DCMD_FONT_NEXT:
-			switchFontFace(1);
-            break;
-		case DCMD_FONT_PREVIOUS:
-			switchFontFace(-1);
-            break;
-		case DCMD_CHOOSE_TEXTURE:
-			mActivity.optionsFilter = "";
-			mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGE_BACKGROUND_IMAGE);
-			break;
-		case DCMD_MOVE_BY_CHAPTER:
-			if (isBookLoaded())
-				doEngineCommand(cmd, param, onFinishHandler);
-			setTimeLeft();
-            drawPage();
-			break;
-		case DCMD_PAGEDOWN:
-			if (isBookLoaded()) {
-				final FileInfo fileInfo = mBookInfo.getFileInfo();
-				if (fileInfo != null) {
-					PositionProperties currpos = doc.getPositionProps(null, true);
-					if (null != currpos) {
-						fileInfo.lastTimeSaved = System.currentTimeMillis();
-						fileInfo.lastPageSet = currpos.pageNumber;
-						ReadingStat rs = new ReadingStat();
-						rs.pageNumber = currpos.pageNumber;
-						rs.pageCount = doc.getPageCount();
-						rs.pageSymbolCount = StrUtils.getNonEmptyStr(doc.getPageText(false, currpos.pageNumber-1),true).length();
-						rs.readingBeginTS = fileInfo.lastTimeSaved;
-						rs.readingEndTS = 0;
-						rs.speedKoef = 0.0;
-						fileInfo.stats.add(rs);
-						while (fileInfo.stats.size()>100) fileInfo.stats.remove(0);
-						for (ReadingStat rs1: fileInfo.stats) {
-							if ((rs1.pageNumber == rs.pageNumber - 1) && (rs1.readingEndTS == 0)) {
-								rs1.readingEndTS = System.currentTimeMillis();
-								if (rs1.pageSymbolCount > 0)
-									rs1.speedKoef = ((double)(rs1.readingEndTS - rs1.readingBeginTS)) / ((double) rs1.pageSymbolCount);
+			case DCMD_TOGGLE_DOCUMENT_STYLES:
+				if (isBookLoaded())
+					toggleDocumentStyles();
+				break;
+			case DCMD_SHOW_HOME_SCREEN:
+				mActivity.showHomeScreen();
+				break;
+			case DCMD_TOGGLE_ORIENTATION:
+				toggleScreenOrientation();
+				break;
+			case DCMD_TOGGLE_FULLSCREEN:
+				toggleFullscreen();
+				break;
+			case DCMD_TOGGLE_TITLEBAR:
+				toggleTitlebar();
+				break;
+			case DCMD_SHOW_POSITION_INFO_POPUP:
+				if (isBookLoaded())
+					showReadingPositionPopup();
+				break;
+			case DCMD_TOGGLE_SELECTION_MODE:
+				if (isBookLoaded())
+					toggleSelectionMode();
+				break;
+			case DCMD_TOGGLE_INSPECTOR_MODE:
+				if (isBookLoaded())
+					toggleInspectorMode();
+				break;
+			case DCMD_TOGGLE_TOUCH_SCREEN_LOCK:
+				isTouchScreenEnabled = !isTouchScreenEnabled;
+				if (isTouchScreenEnabled)
+					mActivity.showToast(R.string.action_touch_screen_enabled_toast);
+				else
+					mActivity.showToast(R.string.action_touch_screen_disabled_toast);
+				break;
+			case DCMD_LINK_BACK:
+			case DCMD_LINK_FORWARD:
+				navigateByHistory(cmd);
+				break;
+			case DCMD_ZOOM_OUT:
+				doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
+				syncViewSettings(getSettings(), true, true);
+				break;
+			case DCMD_ZOOM_IN:
+				doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
+				syncViewSettings(getSettings(), true, true);
+				break;
+			case DCMD_FONT_SELECT:
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
+				break;
+			case DCMD_FONT_BOLD:
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_BASE_WEIGHT);
+				break;
+			case DCMD_FONT_NEXT:
+				switchFontFace(1);
+				break;
+			case DCMD_FONT_PREVIOUS:
+				switchFontFace(-1);
+				break;
+			case DCMD_CHOOSE_TEXTURE:
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGE_BACKGROUND_IMAGE);
+				break;
+			case DCMD_MOVE_BY_CHAPTER:
+				if (isBookLoaded())
+					doEngineCommand(cmd, param, onFinishHandler);
+				setTimeLeft();
+				drawPage();
+				break;
+			case DCMD_PAGEDOWN:
+				if (isBookLoaded()) {
+					final FileInfo fileInfo = mBookInfo.getFileInfo();
+					if (fileInfo != null) {
+						PositionProperties currpos = doc.getPositionProps(null, true);
+						if (null != currpos) {
+							fileInfo.lastTimeSaved = System.currentTimeMillis();
+							fileInfo.lastPageSet = currpos.pageNumber;
+							ReadingStat rs = new ReadingStat();
+							rs.pageNumber = currpos.pageNumber;
+							rs.pageCount = doc.getPageCount();
+							rs.pageSymbolCount = StrUtils.getNonEmptyStr(doc.getPageText(false, currpos.pageNumber-1),true).length();
+							rs.readingBeginTS = fileInfo.lastTimeSaved;
+							rs.readingEndTS = 0;
+							rs.speedKoef = 0.0;
+							fileInfo.stats.add(rs);
+							while (fileInfo.stats.size()>100) fileInfo.stats.remove(0);
+							for (ReadingStat rs1: fileInfo.stats) {
+								if ((rs1.pageNumber == rs.pageNumber - 1) && (rs1.readingEndTS == 0)) {
+									rs1.readingEndTS = System.currentTimeMillis();
+									if (rs1.pageSymbolCount > 0)
+										rs1.speedKoef = ((double)(rs1.readingEndTS - rs1.readingBeginTS)) / ((double) rs1.pageSymbolCount);
+								}
 							}
 						}
 					}
-				}
-				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-				if (param == 1 && !eink)
-					animatePageFlip(1, onFinishHandler);
-				else {
-					if ((mActivity.getScreenBlackpageInterval() != 0) &&
-							(curBlackpageInterval >= mActivity.getScreenBlackpageInterval() - 1)) {
-						curBlackpageInterval = 0;
-						bookView.draw(false, true);
-						BackgroundThread.instance().postGUI(() -> {
-							//drawPage();
+					eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+					if (param == 1 && !eink)
+						animatePageFlip(1, onFinishHandler);
+					else {
+						if ((mActivity.getScreenBlackpageInterval() != 0) &&
+								(curBlackpageInterval >= mActivity.getScreenBlackpageInterval() - 1)) {
+							curBlackpageInterval = 0;
+							bookView.draw(false, true);
+							BackgroundThread.instance().postGUI(() -> {
+								//drawPage();
+								doEngineCommand(cmd, param, onFinishHandler);
+							}, blackpageDuration);
+						} else {
+							if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
 							doEngineCommand(cmd, param, onFinishHandler);
-						}, blackpageDuration);
-					} else {
-						if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
-						doEngineCommand(cmd, param, onFinishHandler);
+						}
 					}
 				}
-			}
-			setTimeLeft();
-			break;
-		case DCMD_PAGEUP:
-			if (isBookLoaded()) {
-				eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-				if (param == 1 && !eink)
-					animatePageFlip(-1, onFinishHandler);
-				else {
-					if ((mActivity.getScreenBlackpageInterval() != 0) &&
-							(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
-						curBlackpageInterval = 0;
-						bookView.draw(false, true);
-						BackgroundThread.instance().postGUI(() -> {
-							//drawPage();
+				setTimeLeft();
+				break;
+			case DCMD_PAGEUP:
+				if (isBookLoaded()) {
+					eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+					if (param == 1 && !eink)
+						animatePageFlip(-1, onFinishHandler);
+					else {
+						if ((mActivity.getScreenBlackpageInterval() != 0) &&
+								(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
+							curBlackpageInterval = 0;
+							bookView.draw(false, true);
+							BackgroundThread.instance().postGUI(() -> {
+								//drawPage();
+								doEngineCommand(cmd, param, onFinishHandler);
+							}, blackpageDuration);
+						} else {
+							if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
 							doEngineCommand(cmd, param, onFinishHandler);
-						}, blackpageDuration);
-					} else {
-						if (mActivity.getScreenBlackpageInterval() != 0) curBlackpageInterval++;
-						doEngineCommand(cmd, param, onFinishHandler);
+						}
 					}
 				}
-			}
-			setTimeLeft();
-			break;
-		case DCMD_NEXT_BOOKMARK:
-			if (lastNavBmkIndex >= 0) {
-				if (lastNavBmkIndex < mBookInfo.getBookmarkCount()) {
-					if (lastNavBmkIndex + 1 < mBookInfo.getBookmarkCount()) {
-						lastNavBmkIndex++;
-					} else lastNavBmkIndex = 0;
-					this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
-				} else
-					lastNavBmkIndex = -1;
-			} else {
-				Bookmark bmkC = getCurrentPositionBookmark();
-				int minP = 999999999;
-				for (int i = 0; i < mBookInfo.getBookmarkCount(); i++) {
-					if (mBookInfo.getBookmark(i).getPercent() > bmkC.getPercent())
-						if (minP > mBookInfo.getBookmark(i).getPercent() - bmkC.getPercent()) {
-							minP = mBookInfo.getBookmark(i).getPercent() - bmkC.getPercent();
-							lastNavBmkIndex = i;
-						}
+				setTimeLeft();
+				break;
+			case DCMD_NEXT_BOOKMARK:
+				if (lastNavBmkIndex >= 0) {
+					if (lastNavBmkIndex < mBookInfo.getBookmarkCount()) {
+						if (lastNavBmkIndex + 1 < mBookInfo.getBookmarkCount()) {
+							lastNavBmkIndex++;
+						} else lastNavBmkIndex = 0;
+						this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
+					} else
+						lastNavBmkIndex = -1;
+				} else {
+					Bookmark bmkC = getCurrentPositionBookmark();
+					int minP = 999999999;
+					for (int i = 0; i < mBookInfo.getBookmarkCount(); i++) {
+						if (mBookInfo.getBookmark(i).getPercent() > bmkC.getPercent())
+							if (minP > mBookInfo.getBookmark(i).getPercent() - bmkC.getPercent()) {
+								minP = mBookInfo.getBookmark(i).getPercent() - bmkC.getPercent();
+								lastNavBmkIndex = i;
+							}
+					}
+					if (lastNavBmkIndex >= 0) this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
 				}
-				if (lastNavBmkIndex >= 0) this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
-			}
-			break;
-		case DCMD_PREV_BOOKMARK:
-			if (lastNavBmkIndex >= 0) {
-				if (lastNavBmkIndex < mBookInfo.getBookmarkCount()) {
-					if (lastNavBmkIndex - 1 >= 0) {
-						lastNavBmkIndex--;
-					} else lastNavBmkIndex = mBookInfo.getBookmarkCount() - 1;
-					this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
-				} else
-					lastNavBmkIndex = -1;
-			} else {
-				Bookmark bmkC = getCurrentPositionBookmark();
-				int minP = 999999999;
-				for (int i = 0; i < mBookInfo.getBookmarkCount(); i++) {
-					if (bmkC.getPercent() > mBookInfo.getBookmark(i).getPercent())
-						if (minP > bmkC.getPercent() - mBookInfo.getBookmark(i).getPercent()) {
-							minP = bmkC.getPercent() - mBookInfo.getBookmark(i).getPercent();
-							lastNavBmkIndex = i;
-						}
+				break;
+			case DCMD_PREV_BOOKMARK:
+				if (lastNavBmkIndex >= 0) {
+					if (lastNavBmkIndex < mBookInfo.getBookmarkCount()) {
+						if (lastNavBmkIndex - 1 >= 0) {
+							lastNavBmkIndex--;
+						} else lastNavBmkIndex = mBookInfo.getBookmarkCount() - 1;
+						this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
+					} else
+						lastNavBmkIndex = -1;
+				} else {
+					Bookmark bmkC = getCurrentPositionBookmark();
+					int minP = 999999999;
+					for (int i = 0; i < mBookInfo.getBookmarkCount(); i++) {
+						if (bmkC.getPercent() > mBookInfo.getBookmark(i).getPercent())
+							if (minP > bmkC.getPercent() - mBookInfo.getBookmark(i).getPercent()) {
+								minP = bmkC.getPercent() - mBookInfo.getBookmark(i).getPercent();
+								lastNavBmkIndex = i;
+							}
+					}
+					if (lastNavBmkIndex >= 0) this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
 				}
-				if (lastNavBmkIndex >= 0) this.goToBookmark(mBookInfo.getBookmark(lastNavBmkIndex));
-			}
-			break;
-		case DCMD_BEGIN:
-			setTimeLeft();
-		case DCMD_END:
-			if (isBookLoaded())
-				doEngineCommand(cmd, param);
-			setTimeLeft();
-			break;
-		case DCMD_RECENT_BOOKS_LIST:
-			mActivity.showRecentBooks();
-			break;
-		case DCMD_SEARCH:
-			if (isBookLoaded())
-				showSearchDialog(null);
-			break;
-		case DCMD_SKIM:
-			if (isBookLoaded())
-				FindNextDlg.showDialog( mActivity, this, "", true, true );
-			break;
-		case DCMD_EXIT:
-			mActivity.finish();
-			break;
-		case DCMD_HIDE:
-			mActivity.onBackPressed();
-			break;
-		case DCMD_BOOKMARKS:
-			if (isBookLoaded())
-				mActivity.showBookmarksDialog(false, null);
-			break;
-		case DCMD_GO_PERCENT_DIALOG:
-			if (isBookLoaded())
-				showGoToPercentDialog();
-			break;
-		case DCMD_GO_PAGE_DIALOG:
-			if (isBookLoaded())
-				showGoToPageDialog();
-			break;
-		case DCMD_TOC_DIALOG:
-			if (isBookLoaded())
-				showTOC();
-			break;
-		case DCMD_FILE_BROWSER:
-			boolean needBrowser = true;
-			if (mBookInfo != null) {
-				final FileInfo fileInfo = mBookInfo.getFileInfo();
-				if (fileInfo != null) {
-					final Bookmark bmk = doc != null ? doc.getCurrentPageBookmark() : null;
-					final PositionProperties props = bmk != null ? doc.getPositionProps(bmk.getStartPos(), true) : null;
-					if (props != null) {
-						needBrowser = !(mActivity.willBeCheckAskReading(fileInfo, props, 7));
-						mActivity.checkAskReading(fileInfo, props, 7, true);
+				break;
+			case DCMD_BEGIN:
+				setTimeLeft();
+			case DCMD_END:
+				if (isBookLoaded())
+					doEngineCommand(cmd, param);
+				setTimeLeft();
+				break;
+			case DCMD_RECENT_BOOKS_LIST:
+				mActivity.showRecentBooks();
+				break;
+			case DCMD_SEARCH:
+				if (isBookLoaded())
+					showSearchDialog(null);
+				break;
+			case DCMD_SKIM:
+				if (isBookLoaded())
+					FindNextDlg.showDialog( mActivity, this, "", true, true );
+				break;
+			case DCMD_EXIT:
+				mActivity.finish();
+				break;
+			case DCMD_HIDE:
+				mActivity.onBackPressed();
+				break;
+			case DCMD_BOOKMARKS:
+				if (isBookLoaded())
+					mActivity.showBookmarksDialog(false, null);
+				break;
+			case DCMD_GO_PERCENT_DIALOG:
+				if (isBookLoaded())
+					showGoToPercentDialog();
+				break;
+			case DCMD_GO_PAGE_DIALOG:
+				if (isBookLoaded())
+					showGoToPageDialog();
+				break;
+			case DCMD_TOC_DIALOG:
+				if (isBookLoaded())
+					showTOC();
+				break;
+			case DCMD_FILE_BROWSER:
+				boolean needBrowser = true;
+				if (mBookInfo != null) {
+					final FileInfo fileInfo = mBookInfo.getFileInfo();
+					if (fileInfo != null) {
+						final Bookmark bmk = doc != null ? doc.getCurrentPageBookmark() : null;
+						final PositionProperties props = bmk != null ? doc.getPositionProps(bmk.getStartPos(), true) : null;
+						if (props != null) {
+							needBrowser = !(mActivity.willBeCheckAskReading(fileInfo, props, 7));
+							mActivity.checkAskReading(fileInfo, props, 7, true);
+						}
 					}
 				}
-			}
-			if (needBrowser)
-				mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null, "");
-			break;
-		case DCMD_CURRENT_BOOK_DIRECTORY:
-			mActivity.showBrowser(getOpenedFileInfo(), "");
-			break;
-		case DCMD_OPTIONS_DIALOG:
-			mActivity.optionsFilter = "";
-			mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
-			break;
-		case DCMD_OPTIONS_DIALOG_FILTERED:
-			showFilterDialog();
-			break;
-		case DCMD_READER_MENU:
-			mActivity.showReaderMenu();
-			break;
-		case DCMD_TOGGLE_DAY_NIGHT_MODE:
-			//ExternalDocCameDialog dlgE = new ExternalDocCameDialog(mActivity,"sd","dsf");
-			//dlgE.show();
+				if (needBrowser)
+					mActivity.showBrowser(!mActivity.isBrowserCreated() ? getOpenedFileInfo() : null, "");
+				break;
+			case DCMD_CURRENT_BOOK_DIRECTORY:
+				mActivity.showBrowser(getOpenedFileInfo(), "");
+				break;
+			case DCMD_OPTIONS_DIALOG:
+				mActivity.optionsFilter = "";
+				mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
+				break;
+			case DCMD_OPTIONS_DIALOG_FILTERED:
+				showFilterDialog();
+				break;
+			case DCMD_READER_MENU:
+				mActivity.showReaderMenu();
+				break;
+			case DCMD_TOGGLE_DAY_NIGHT_MODE:
+				//ExternalDocCameDialog dlgE = new ExternalDocCameDialog(mActivity,"sd","dsf");
+				//dlgE.show();
 //			ArrayList<String[]> vl = new ArrayList<String[]>();
 //			String[] arrS1 = {"val1", "hint1"};
 //			vl.add(arrS1);
@@ -3464,8 +3479,21 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			sButtons.add("adfad4");
 //			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, true, "title",
 //					sButtons,null);
-			//CloudAction.yndCheckCrFolder(mActivity);
-			//final String sF = s;
+				//CloudAction.yndCheckCrFolder(mActivity);
+				//final String sF = s;
+//			mActivity.initSDCV();
+//			try {
+//				String command = mActivity.getSettingsFileF(0).getParent() + "/sdcv";
+//				Process sdcv = Runtime.getRuntime().exec(command);
+//				BufferedReader isr = new BufferedReader(new InputStreamReader(sdcv.getInputStream()));
+//				String line = isr.readLine();
+//				while (line != null) {
+//					log.i("sdcv output: " + line);
+//					line = isr.readLine();
+//				}
+//			} catch (Exception e) {
+//				log.e("exec error: " + e.getMessage());
+//			}
 			toggleDayNightMode();
 //			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
 //					0, true);
@@ -3473,250 +3501,250 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
 //			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
 //			mActivity.geoLastData.doSignal(false,false);
-			break;
-		case DCMD_TOGGLE_DICT_ONCE:
-			log.i("Next dictionary will be the 2nd for one time");
-			mActivity.showToast(mActivity.getString(R.string.next_dict_will_be_2nd));
-			mActivity.mDictionaries.setiDic2IsActive(2);
-			break;
-		case DCMD_TOGGLE_DICT:
-			if (mActivity.mDictionaries.isiDic2IsActive() > 0) {
-				mActivity.mDictionaries.setiDic2IsActive(0);
-			}
-			else {
-				mActivity.mDictionaries.setiDic2IsActive(1);
-			}
-			log.i("Switched to dictionary (from 0): "+mActivity.mDictionaries.isiDic2IsActive());
-			mActivity.showToast("Switched to dictionary: "+ (mActivity.mDictionaries.isiDic2IsActive() + 1));
-			break;
-		case DCMD_SAVE_SETTINGS_TO_CLOUD:
-			log.i("Save settings to CLOUD");
-			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant == 0) {
-				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-			} else {
-				CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
-			}
-			break;
-		case DCMD_LOAD_SETTINGS_FROM_CLOUD:
-			log.i("Load settings from CLOUD");
-			int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant2 == 0) {
-				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-			} else {
-				if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
-				else
-					CloudSync.loadFromJsonInfoFileList(mActivity,
-							CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-			}
-			break;
-		case DCMD_SAVE_READING_POS:
-			log.i("Save reading pos to CLOUD");
-			iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant == 0) {
-				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-			} else {
-				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
-				Bookmark bmk = getCurrentPositionBookmark();
-				lastSavedToGdBookmark = bmk;
-			}
-			break;
-		case DCMD_LOAD_READING_POS:
-			log.i("Load rpos from CLOUD");
-			int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant3 == 0) {
-				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-			} else {
-				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-			}
-			break;
-		case DCMD_SAVE_BOOKMARKS:
-			log.i("Save bookmarks to CLOUD");
-			int iSyncVariant5 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant5 == 0) {
-				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-			} else {
-				CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant5 == 1, false);
-			};
-			break;
-		case DCMD_LOAD_BOOKMARKS:
-			log.i("Load bookmarks from CLOUD");
-			int iSyncVariant4 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant4 == 0) {
-				mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-				mActivity.optionsFilter = "";
-				mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-			} else {
-				CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-						CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-			}
-			break;
-		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND:
-			log.i("Save current book to CLOUD_YND");
-			FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
-			CloudAction.yndOpenBookDialog(mActivity, fi,true);
-			break;
-		//case DCMD_OPEN_BOOK_FROM_CLOUD:
-		//	log.i("Open book from CLOUD");
-		//	mActivity.showToast("To come...");
-			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-		//	break;
-		case DCMD_OPEN_BOOK_FROM_CLOUD_YND:
-			log.i("Open book from CLOUD_YND");
-			if (!FlavourConstants.PREMIUM_FEATURES) {
-				mActivity.showToast(R.string.only_in_premium);
 				break;
-			}
-			CloudAction.yndOpenBookDialog(mActivity, null,true);
-			break;
-		case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
-			log.i("Open book from CLOUD_DBX");
-			if (!FlavourConstants.PREMIUM_FEATURES) {
-				mActivity.showToast(R.string.only_in_premium);
+			case DCMD_TOGGLE_DICT_ONCE:
+				log.i("Next dictionary will be the 2nd for one time");
+				mActivity.showToast(mActivity.getString(R.string.next_dict_will_be_2nd));
+				mActivity.mDictionaries.setiDic2IsActive(2);
 				break;
-			}
-			CloudAction.dbxOpenBookDialog(mActivity);
-			break;
-		case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL:
-			log.i("DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
-			CloudAction.emailSendBook(mActivity, null);
-			break;
-		case DCMD_CLOUD_MENU:
-			log.i("CLOUD menu");
-			ReaderAction[] actions = {
-					ReaderAction.SAVE_SETTINGS_TO_CLOUD,
-					ReaderAction.LOAD_SETTINGS_FROM_CLOUD,
-					ReaderAction.SAVE_READING_POS,
-					ReaderAction.LOAD_READING_POS,
-					ReaderAction.SAVE_BOOKMARKS,
-					ReaderAction.LOAD_BOOKMARKS,
-					ReaderAction.OPEN_BOOK_FROM_CLOUD_YND,
-					ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX,
-					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL,
-					ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND //,
-					//ReaderAction.OPEN_BOOK_FROM_GD
-			};
-			mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
-				@Override
-				public boolean onActionSelected(ReaderAction item) {
-					if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
-						log.i("Save settings to CLOUD");
-						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-						if (iSyncVariant == 0) {
-							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-						} else {
-							CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
-						}
-						return true;
-					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
-						log.i("Load settings from CLOUD");
-						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-						if (iSyncVariant == 0) {
-							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-						} else {
-							if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
-							else
-								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, CloudAction.NO_SPECIAL_ACTION, false);
-						}
-						return true;
-					} else if (item == ReaderAction.SAVE_READING_POS) {
-						log.i("Save reading pos to CLOUD");
-						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-						if (iSyncVariant == 0) {
-							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-						} else {
-							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
-						}
-						Bookmark bmk = getCurrentPositionBookmark();
-						lastSavedToGdBookmark = bmk;
-						return true;
-					} else if (item == ReaderAction.LOAD_READING_POS) {
-						log.i("Load reading pos from CLOUD");
-						int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-						if (iSyncVariant2 == 0) {
-							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-						} else {
-							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-						}
-						return true;
-					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
-						log.i("Save bookmarks to CLOUD");
-						int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-						if (iSyncVariant == 0) {
-							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-						} else {
-							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1, false);
-						}
-						return true;
-					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
-						log.i("Load bookmarks from CLOUD");
-						int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-						if (iSyncVariant3 == 0) {
-							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-						} else {
-							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-						}
-						return true;
-					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
-						log.i("Save current book to YND");
-						FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
-						CloudAction.yndOpenBookDialog(mActivity, fi,true);
-						return true;
-					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
-						log.i("Open book from CLOUD_YND");
-						if (!FlavourConstants.PREMIUM_FEATURES) {
-							mActivity.showToast(R.string.only_in_premium);
-							return true;
-						}
-						CloudAction.yndOpenBookDialog(mActivity, null,true);
-						return true;
-					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
-						log.i("Open book from CLOUD_DBX");
-						if (!FlavourConstants.PREMIUM_FEATURES) {
-							mActivity.showToast(R.string.only_in_premium);
-							return true;
-						}
-						CloudAction.dbxOpenBookDialog(mActivity);
-						return true;
-					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL) {
-						log.i("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
-						CloudAction.emailSendBook(mActivity, null);
-						return true;
-					}
-					return false;
+			case DCMD_TOGGLE_DICT:
+				if (mActivity.mDictionaries.isiDic2IsActive() > 0) {
+					mActivity.mDictionaries.setiDic2IsActive(0);
 				}
-			});
-			break;
+				else {
+					mActivity.mDictionaries.setiDic2IsActive(1);
+				}
+				log.i("Switched to dictionary (from 0): "+mActivity.mDictionaries.isiDic2IsActive());
+				mActivity.showToast("Switched to dictionary: "+ (mActivity.mDictionaries.isiDic2IsActive() + 1));
+				break;
+			case DCMD_SAVE_SETTINGS_TO_CLOUD:
+				log.i("Save settings to CLOUD");
+				int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+				} else {
+					CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
+				}
+				break;
+			case DCMD_LOAD_SETTINGS_FROM_CLOUD:
+				log.i("Load settings from CLOUD");
+				int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant2 == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+				} else {
+					if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+					else
+						CloudSync.loadFromJsonInfoFileList(mActivity,
+								CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+				}
+				break;
+			case DCMD_SAVE_READING_POS:
+				log.i("Save reading pos to CLOUD");
+				iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+				} else {
+					CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+							CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
+					Bookmark bmk = getCurrentPositionBookmark();
+					lastSavedToGdBookmark = bmk;
+				}
+				break;
+			case DCMD_LOAD_READING_POS:
+				log.i("Load rpos from CLOUD");
+				int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant3 == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+				} else {
+					CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+							CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+				}
+				break;
+			case DCMD_SAVE_BOOKMARKS:
+				log.i("Save bookmarks to CLOUD");
+				int iSyncVariant5 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant5 == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+				} else {
+					CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+							CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant5 == 1, false);
+				};
+				break;
+			case DCMD_LOAD_BOOKMARKS:
+				log.i("Load bookmarks from CLOUD");
+				int iSyncVariant4 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant4 == 0) {
+					mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+				} else {
+					CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+							CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant4 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+				}
+				break;
+			case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND:
+				log.i("Save current book to CLOUD_YND");
+				FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
+				CloudAction.yndOpenBookDialog(mActivity, fi,true);
+				break;
+			//case DCMD_OPEN_BOOK_FROM_CLOUD:
+			//	log.i("Open book from CLOUD");
+			//	mActivity.showToast("To come...");
+			//((CoolReader)mActivity).mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
+			//	break;
+			case DCMD_OPEN_BOOK_FROM_CLOUD_YND:
+				log.i("Open book from CLOUD_YND");
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
+					break;
+				}
+				CloudAction.yndOpenBookDialog(mActivity, null,true);
+				break;
+			case DCMD_OPEN_BOOK_FROM_CLOUD_DBX:
+				log.i("Open book from CLOUD_DBX");
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					mActivity.showToast(R.string.only_in_premium);
+					break;
+				}
+				CloudAction.dbxOpenBookDialog(mActivity);
+				break;
+			case DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL:
+				log.i("DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
+				CloudAction.emailSendBook(mActivity, null);
+				break;
+			case DCMD_CLOUD_MENU:
+				log.i("CLOUD menu");
+				ReaderAction[] actions = {
+						ReaderAction.SAVE_SETTINGS_TO_CLOUD,
+						ReaderAction.LOAD_SETTINGS_FROM_CLOUD,
+						ReaderAction.SAVE_READING_POS,
+						ReaderAction.LOAD_READING_POS,
+						ReaderAction.SAVE_BOOKMARKS,
+						ReaderAction.LOAD_BOOKMARKS,
+						ReaderAction.OPEN_BOOK_FROM_CLOUD_YND,
+						ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX,
+						ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL,
+						ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND //,
+						//ReaderAction.OPEN_BOOK_FROM_GD
+				};
+				mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
+					@Override
+					public boolean onActionSelected(ReaderAction item) {
+						if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
+							log.i("Save settings to CLOUD");
+							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+							} else {
+								CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
+							}
+							return true;
+						} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
+							log.i("Load settings from CLOUD");
+							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+							} else {
+								if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+								else
+									CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+											CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, CloudAction.NO_SPECIAL_ACTION, false);
+							}
+							return true;
+						} else if (item == ReaderAction.SAVE_READING_POS) {
+							log.i("Save reading pos to CLOUD");
+							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+							} else {
+								CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
+							}
+							Bookmark bmk = getCurrentPositionBookmark();
+							lastSavedToGdBookmark = bmk;
+							return true;
+						} else if (item == ReaderAction.LOAD_READING_POS) {
+							log.i("Load reading pos from CLOUD");
+							int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant2 == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+							} else {
+								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+							}
+							return true;
+						} else if (item == ReaderAction.SAVE_BOOKMARKS) {
+							log.i("Save bookmarks to CLOUD");
+							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+							} else {
+								CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+										CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1, false);
+							}
+							return true;
+						} else if (item == ReaderAction.LOAD_BOOKMARKS) {
+							log.i("Load bookmarks from CLOUD");
+							int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+							if (iSyncVariant3 == 0) {
+								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+								mActivity.optionsFilter = "";
+								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+							} else {
+								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+										CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+							}
+							return true;
+						} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
+							log.i("Save current book to YND");
+							FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
+							CloudAction.yndOpenBookDialog(mActivity, fi,true);
+							return true;
+						} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
+							log.i("Open book from CLOUD_YND");
+							if (!FlavourConstants.PREMIUM_FEATURES) {
+								mActivity.showToast(R.string.only_in_premium);
+								return true;
+							}
+							CloudAction.yndOpenBookDialog(mActivity, null,true);
+							return true;
+						} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
+							log.i("Open book from CLOUD_DBX");
+							if (!FlavourConstants.PREMIUM_FEATURES) {
+								mActivity.showToast(R.string.only_in_premium);
+								return true;
+							}
+							CloudAction.dbxOpenBookDialog(mActivity);
+							return true;
+						} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL) {
+							log.i("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
+							CloudAction.emailSendBook(mActivity, null);
+							return true;
+						}
+						return false;
+					}
+				});
+				break;
 			case DCMD_FONTS_MENU:
 				log.i("Fonts menu");
 				ReaderAction[] fonts_actions = {
@@ -3753,10 +3781,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
 							return true;
 						} else if (item == ReaderAction.FONT_BOLD) {
-							Properties props = new Properties(mActivity.settings());
-							props.setProperty(PROP_FONT_WEIGHT_EMBOLDEN,
-									props.getBool(PROP_FONT_WEIGHT_EMBOLDEN,false)?"0":"1");
-							mActivity.setSettings(props, -1, true);
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_BASE_WEIGHT);
 							return true;
 						} else if (item == ReaderAction.CHOOSE_TEXTURE) {
 							mActivity.optionsFilter = "";
@@ -3826,8 +3852,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				boolean newBool = false;
 				if (this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ) != null)
 					newBool = this.getSetting( ReaderView.PROP_PAGE_VIEW_MODE ).equals("0");
-                String newValue = newBool ? "1" : "0";
-                saveSetting(PROP_PAGE_VIEW_MODE, newValue);
+				String newValue = newBool ? "1" : "0";
+				saveSetting(PROP_PAGE_VIEW_MODE, newValue);
 				break;
 			case DCMD_WHOLE_PAGE_TO_DIC:
 				log.i("Whole page to dic");
@@ -4614,17 +4640,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			fileName = getManualFileName();
 			log.i("Manual document: " + fileName);
 		}
-		//Fix for Onyx - not needed
-//		if (fileName.contains("/mnt/sdcard")) {
-//			File file = new File(fileName);
-//			if (!file.exists()) {
-//				File tfile = new File(fileName.replace("/mnt/sdcard", "/storage/emulated/0"));
-//				if (tfile.exists()) {
-//					fileName = fileName.replace("/mnt/sdcard", "/storage/emulated/0");
-//				}
-//			}
-//		}
-		String normalized = mEngine.getPathCorrector().normalize(fileName);
+		String normalized = mEngine.getPathCorrector().normalizeIfPossible(fileName);
 		if (normalized == null) {
 			log.e("Trying to load book from non-standard path " + fileName);
 			//mActivity.showSToast("Trying to load book from non-standard path " + fileName); // this cause Onyx Darwin 5 to shutdown CR

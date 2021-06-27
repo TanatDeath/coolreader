@@ -938,9 +938,12 @@ public class MainDB extends BaseDB {
 		int catType = isLocal ? 0: 1;
 		try {
 			Long existingIdByName = longQuery("SELECT id FROM calibre_catalog WHERE name=" + quoteSqlString(name));
-			if (existingIdByName!=null)
-				return false; // duplicates detected
-			if (id == null) id = existingIdByName;
+			if (id == null) {
+				if (existingIdByName != null) return false; // duplicates detected
+			} else {
+				existingIdByName = longQuery("SELECT id FROM calibre_catalog WHERE id != " + id + " and name=" + quoteSqlString(name));
+				if (existingIdByName != null) return false; // duplicates detected
+			}
 			if (id == null) {
 				// insert new
 				log.i("Saving "+name+" calibre catalog");
@@ -950,7 +953,7 @@ public class MainDB extends BaseDB {
 						")");
 			} else {
 				// update existing
-				execSQL("UPDATE opds_catalog SET name="+quoteSqlString(name)+", cat_type="+ catType +
+				execSQL("UPDATE calibre_catalog SET name="+quoteSqlString(name)+", cat_type="+ catType +
 						", local_folder="+quoteSqlString(localFolder)+", remote_folder="+quoteSqlString(remoteFolderYD) +
 						" WHERE id=" + id);
 			}

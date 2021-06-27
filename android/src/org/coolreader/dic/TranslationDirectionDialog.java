@@ -34,6 +34,7 @@ import org.coolreader.crengine.OptionsDialog;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
+import org.coolreader.layouts.FlowLayout;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -491,12 +492,17 @@ public class TranslationDirectionDialog extends BaseDialog {
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		TableLayout tl = (TableLayout) view;
-		LinearLayout ll = new LinearLayout(mCoolReader);
+		FlowLayout ll = new FlowLayout(mCoolReader);
+//		LinearLayout.LayoutParams llp0 = new LinearLayout.LayoutParams(
+//				ViewGroup.LayoutParams.WRAP_CONTENT,
+//				ViewGroup.LayoutParams.WRAP_CONTENT);
+//		llp0.setMargins(5, 3, 5, 3);
 		LinearLayout.LayoutParams llp1 = new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
 		llp1.setMargins(5, 3, 5, 3);
-		ll.setOrientation(LinearLayout.HORIZONTAL);
+//		ll.setOrientation(LinearLayout.VERTICAL);
+//		ll.setLayoutParams(llp0);
 		Button swButton = new Button(mCoolReader);
 		swButton.setLayoutParams(llp1);
 		swButton.setText(mCoolReader.getString(R.string.translate_dics_switch));

@@ -468,7 +468,11 @@ public class SelectionToolbarDlg {
 				if (!added.contains(di.id)) {
 					added.add(di.id);
 					Button dicButton = new Button(mCoolReader);
-					dicButton.setText(di.name);
+					String sAdd = di.getAddText(mCoolReader);
+					if (StrUtils.isEmptyStr(sAdd))
+						dicButton.setText(di.name);
+					else
+						dicButton.setText(di.name + ": " + sAdd);
 					dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					//dicButton.setHeight(dicButton.getHeight()-4);
 					dicButton.setTextColor(colorIcon);
@@ -567,14 +571,22 @@ public class SelectionToolbarDlg {
 		new BoundControlListener(mPanel.findViewById(R.id.selection_right_bound_control), false);
 		mPanel.findViewById(R.id.selection_more).setBackgroundDrawable(null);
 
-		mPanel.findViewById(R.id.btn_next1).setOnClickListener(v -> changeSelectionBound(true, SELECTION_SMALL_STEP));
-		mPanel.findViewById(R.id.btn_next2).setOnClickListener(v -> changeSelectionBound(false, SELECTION_SMALL_STEP));
-		mPanel.findViewById(R.id.btn_prev1).setOnClickListener(v -> changeSelectionBound(true, -SELECTION_SMALL_STEP));
-		mPanel.findViewById(R.id.btn_prev2).setOnClickListener(v -> changeSelectionBound(false, -SELECTION_SMALL_STEP));
-		mPanel.findViewById(R.id.btn_next_sent1).setOnClickListener(v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP));
-		mPanel.findViewById(R.id.btn_next_sent2).setOnClickListener(v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP));
-		mPanel.findViewById(R.id.btn_prev_sent1).setOnClickListener(v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP));
-		mPanel.findViewById(R.id.btn_prev_sent2).setOnClickListener(v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP));
+		mPanel.findViewById(R.id.btn_next1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, SELECTION_SMALL_STEP)));
+		mPanel.findViewById(R.id.btn_next2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, SELECTION_SMALL_STEP)));
+		mPanel.findViewById(R.id.btn_prev1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, -SELECTION_SMALL_STEP)));
+		mPanel.findViewById(R.id.btn_prev2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, -SELECTION_SMALL_STEP)));
+		mPanel.findViewById(R.id.btn_next_sent1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP)));
+		mPanel.findViewById(R.id.btn_next_sent2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP)));
+		mPanel.findViewById(R.id.btn_prev_sent1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP)));
+		mPanel.findViewById(R.id.btn_prev_sent2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP)));
 		mPanel.findViewById(R.id.selection_more).setOnClickListener(v -> toggleAddButtons(false));
 
 		mPanel.setFocusable(true);

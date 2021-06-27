@@ -45,6 +45,7 @@ import android.widget.Toast;
 import com.abbyy.mobile.lingvo.api.MinicardContract;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +77,9 @@ public class Dictionaries {
 	public static final String LINGVO_DIC_ONLINE = "https://developers.lingvolive.com/api";
 	public static final String YND_DIC_GET_TOKEN = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
 	public static final String DEEPL_DIC_ONLINE = "https://api.deepl.com/v2";
+	public static final String DEEPL_DIC_ONLINE_FREE = "https://api-free.deepl.com/v2";
+	public static final String DICTCC_DIC_ONLINE = "https://{langpair}.dict.cc";
+	public static final String GOOGLE_DIC_ONLINE = "https://translate.googleapis.com/translate_a/single";
 
 //	public static OkHttpClient client = new OkHttpClient();
 
@@ -202,14 +206,30 @@ public class Dictionaries {
 			return isInstalled;
 		}
 
+		public String getAddText(CoolReader cr) {
+			if (id.equals("Wikipedia 1 (online)")) {
+				String s = cr.settings().getProperty(Settings.PROP_CLOUD_WIKI1_ADDR);
+				if (!StrUtils.isEmptyStr(s)) {
+					s = s.replace(".wikipedia.org", "");
+					s = s.replace("https://", "");
+					s = s.replace("http://", "");
+					return s;
+				}
+			}
+			if (id.equals("Wikipedia 2 (online)")) {
+				String s = cr.settings().getProperty(Settings.PROP_CLOUD_WIKI2_ADDR);
+				if (!StrUtils.isEmptyStr(s)) {
+					s = s.replace(".wikipedia.org", "");
+					s = s.replace("https://", "");
+					s = s.replace("http://", "");
+					return s;
+				}
+			}
+			return "";
+		}
+
 		public boolean isOnline() {
-			if (id.equals("YandexTranslateOnline") ||
-				id.equals("LingvoOnline") ||
-				id.equals("LingvoOnline Extended") ||
-				id.equals("Wikipedia 1 (online)") ||
-				id.equals("Wikipedia 2 (online)")
-			) return true;
-			return false;
+			return isOnline;
 		}
 
 		public void setInstalled(boolean installed) {
@@ -277,6 +297,8 @@ public class Dictionaries {
 				"android.intent.action.VIEW", 0,R.drawable.popup, null, "", false),
 		new DictInfo("GoogleTranslate", "Google Translate", "com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity",
 				Intent.ACTION_SEND, 10, R.drawable.googledic, null, "", false),
+		new DictInfo("GoogleOnline", "Google Translate Online", "", "",
+				Intent.ACTION_SEND, 13, R.drawable.googledic, null, GOOGLE_DIC_ONLINE, true),
 		new DictInfo("YandexTranslate", "Yandex Translate", "ru.yandex.translate", "ru.yandex.translate.ui.activities.MainActivity",
 				Intent.ACTION_SEND, 10, R.drawable.ytr_ic_launcher, null, "", false),
 		new DictInfo("Wikipedia", "Wikipedia", "org.wikipedia", "org.wikipedia.search.SearchActivity",
@@ -295,6 +317,8 @@ public class Dictionaries {
 				Intent.ACTION_SEARCH, 10, R.drawable.mdict, null, "", false),
 		new DictInfo("Deepl", "Deepl.com", "", "",
 				Intent.ACTION_SEND, 11, R.drawable.deepl, null, DEEPL_DIC_ONLINE, true),
+		new DictInfo("Dict.cc (online)", "Dict.cc (online)", "", "",
+				Intent.ACTION_SEND, 12, R.drawable.dictcc, null, DICTCC_DIC_ONLINE, true),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -391,7 +415,7 @@ public class Dictionaries {
 							act.isPackageInstalled("mobi.goldendict.androie") // changed package name - 4pda version 2.0.1b7
 					);
 				}
-				if ((dict.internal == 7)||(dict.internal == 8)||(dict.internal == 9)) dict.setInstalled(true);
+				if (dict.isOnline) dict.setInstalled(true);
 			}
 		}
 		for (DictInfo dict : dicts) {
@@ -479,9 +503,9 @@ public class Dictionaries {
 	}
 
 	public DictInfo getCurDictionary() {
-		log.i("getCurDictionary, currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
-				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
-				", currentDictionaryTmp = " + getCDinfo(currentDictionaryTmp));
+//		log.i("getCurDictionary, currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
+//				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
+//				", currentDictionaryTmp = " + getCDinfo(currentDictionaryTmp));
 		DictInfo curDict = currentDictionary;
 		if (iDic2IsActive > 0 && currentDictionary2 != null)
 			curDict = currentDictionary2;
@@ -763,11 +787,232 @@ public class Dictionaries {
 		});
 	};
 
+	public void dictCCTranslate(String s, String langf, String lang, DictInfo curDict, View view,
+								LangListCallback llc, CoolReader.DictionaryCallback dcb) {
+		CoolReader cr = (CoolReader) mActivity;
+		if (llc == null) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
+				cr.showToast(R.string.only_in_premium);
+				return;
+			}
+			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+						cr.showToast(cr.getString(R.string.translate_lang_not_set) + ": ["
+								+ langf + "] -> [" + lang + "]"), 100));
+				return;
+			}
+		}
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(DICTCC_DIC_ONLINE.
+			replace("{langpair}", (langf+lang).toLowerCase())).newBuilder().addQueryParameter("s", s);
+		BackgroundThread.instance().postBackground(() -> {
+			try {
+				if (llc == null) {
+					String sTitle = "";
+					Document docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
+					if (StrUtils.getNonEmptyStr(docJsoup.text(), true).contains("language pair is not supported")) {
+						sTitle = cr.getString(R.string.language_pair_not_supported) + " (" + langf + " -> " + lang + ")";
+					} else {
+						//Elements resultWords = docJsoup.select("td.td7nl > a, var");
+						Elements resultTrs = docJsoup.select("tr");
+						for (Element el : resultTrs) {
+							Elements resultTds = el.select("td.td7nl");
+							int i = 0;
+							for (Element el1 : resultTds) {
+								Elements texts = el1.select("a, var");
+								for (Element t : texts) {
+									sTitle = sTitle + t.text() + " ";
+								}
+								if (i % 2 == 0)
+									sTitle = sTitle + " -> ";
+								else
+									sTitle = sTitle + "; ";
+								i++;
+							}
+
+						}
+					}
+					String finalSTitle0 = sTitle;
+					if (StrUtils.isEmptyStr(sTitle)) sTitle = cr.getString(R.string.not_found);
+					String finalSTitle = sTitle;
+					BackgroundThread.instance().postBackground(() ->
+							BackgroundThread.instance().postGUI(() -> {
+								if (dcb == null) {
+									cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC, urlBuilder.build().url().toString());
+									if (!StrUtils.isEmptyStr(finalSTitle0))
+										saveToDicSearchHistory(s, finalSTitle, curDict);
+								} else {
+									dcb.done(finalSTitle);
+									if (dcb.showDicToast()) {
+										cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC, urlBuilder.build().url().toString());
+									}
+									if (dcb.saveToHist())
+										if (!StrUtils.isEmptyStr(finalSTitle0)) {
+										saveToDicSearchHistory(s, finalSTitle, curDict);
+									}
+								}
+							}, 100));
+				} else {
+
+				}
+			} catch (Exception e) {
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					log.e(cr.getString(R.string.error)+": "+
+							e.getClass().getSimpleName()+" "+e.getMessage());
+					cr.showToast(cr.getString(R.string.error)+": "+
+							e.getClass().getSimpleName()+" "+e.getMessage());
+				}, 100));
+			}
+		});
+	};
+
+	public void googleTranslate(String s, String langf, String lang, DictInfo curDict, View view,
+								LangListCallback llc, CoolReader.DictionaryCallback dcb) {
+		CoolReader cr = (CoolReader) mActivity;
+		if (llc == null) {
+			if (!FlavourConstants.PREMIUM_FEATURES) {
+				cr.showToast(R.string.only_in_premium);
+				return;
+			}
+			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+						cr.showToast(cr.getString(R.string.translate_lang_not_set) + ": ["
+								+ langf + "] -> [" + lang + "]"), 100));
+				return;
+			}
+		}
+		HttpUrl.Builder urlBuilder = HttpUrl.parse(GOOGLE_DIC_ONLINE).newBuilder()
+				.addQueryParameter("client", "gtx") // -- (using "t" raises 403 Forbidden)
+				.addQueryParameter("ie", "UTF-8") //input encoding
+				.addQueryParameter("oe", "UTF-8") //output encoding
+				.addQueryParameter("sl", langf) //source language (we need to specify "auto" to detect language)
+				.addQueryParameter("tl", lang) //target language
+				.addQueryParameter("hl", lang) //?
+				.addQueryParameter("otf", "1") //?
+				.addQueryParameter("ssel", "0") //?
+				.addQueryParameter("tsel", "0") //?
+				// what we want in result
+				.addQueryParameter("dt", "t") //translation of source text
+				.addQueryParameter("dt", "at") //alternate translations
+				// Next options only give additional results when text is a single word
+				.addQueryParameter("dt", "bd") //dictionary (articles, reverse translations, etc)
+				.addQueryParameter("dt", "ex") //examples
+				.addQueryParameter("dt", "ld") //?
+				.addQueryParameter("dt", "md") //definitions of source text
+				.addQueryParameter("dt", "qca") //?
+				.addQueryParameter("dt", "rw") //"see also" list
+				.addQueryParameter("dt", "rm") //transcription / transliteration of source and translated texts
+				.addQueryParameter("dt", "ss") //synonyms of source text, if it's one word
+				.addQueryParameter("q", s);
+		String url = urlBuilder.build().toString();
+		log.i("translate url: " + url);
+		Request request = new Request.Builder()
+				.url(url)
+				.build();
+		Call call = client.newCall(request);
+		call.enqueue(new okhttp3.Callback() {
+			public void onResponse(Call call, Response response)
+					throws IOException {
+				String sBody = response.body().string();
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					try {
+						String sTrans = "";
+						JSONArray jsa = new JSONArray(sBody);
+						if (jsa.length()>0) {
+							JSONArray jsa2 = jsa.getJSONArray(0);
+							if (jsa2.length()>0) {
+								JSONArray jsa3 = jsa2.getJSONArray(0);
+								if (jsa3.length()>0) {
+									sTrans = jsa3.getString(0);
+								}
+							}
+						}
+						String sTransAdd = "";
+						try {
+							if (jsa.length() > 1) {
+								if (jsa.isNull(1)) {
+									if (jsa.length() > 5) {
+										JSONArray jsa22 = jsa.getJSONArray(5);
+										if (jsa22.length() > 0) {
+											JSONArray jsa3 = jsa22.getJSONArray(0);
+											if (jsa3.length() > 2) {
+												JSONArray jsa4 = jsa3.getJSONArray(2);
+												for (int i = 0; i < jsa4.length(); i++) {
+													JSONArray jsa5 = jsa4.getJSONArray(i);
+													if (jsa5.length() > 0) {
+														if (!jsa5.getString(0).equals(sTrans))
+															sTransAdd = sTransAdd + ", " + jsa5.getString(0);
+													}
+												}
+											}
+										}
+									}
+								} else {
+									JSONArray jsa22 = jsa.getJSONArray(1);
+									if (jsa22.length() > 0) {
+										JSONArray jsa3 = jsa22.getJSONArray(0);
+										if (jsa3.length() > 1) {
+											JSONArray jsa4 = jsa3.getJSONArray(1);
+											for (int i = 0; i < jsa4.length(); i++) {
+												if (!jsa4.getString(i).equals(sTrans))
+													sTransAdd = sTransAdd + ", " + jsa4.getString(i);
+											}
+										}
+									}
+								}
+							}
+						} catch (Exception e) {
+							log.e(e.getMessage());
+							// do nothing
+						}
+						if (sTransAdd.startsWith(", ")) sTransAdd = sTransAdd.substring(2);
+						if (!StrUtils.isEmptyStr(sTrans)) {
+							if (!StrUtils.isEmptyStr(sTransAdd)) sTrans = sTrans + " (" + sTransAdd + ")";
+							if (dcb == null) {
+								cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE, "Google translate");
+								saveToDicSearchHistory(s, sTrans, curDict);
+							} else {
+								dcb.done(sTrans);
+								if (dcb.showDicToast()) {
+									cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE, "Google translate");
+								}
+								if (dcb.saveToHist()) {
+									saveToDicSearchHistory(s, sTrans, curDict);
+								}
+							}
+						} else {
+							if (dcb != null) dcb.fail(null, sBody);
+						}
+					} catch (Exception e) {
+						boolean bShowToast = dcb == null;
+						if (!bShowToast) bShowToast = dcb.showDicToast();
+						if (bShowToast) {
+							cr.showDicToast(s, sBody, DicToastView.IS_GOOGLE, "Google translate");
+						} else dcb.fail(e, e.getMessage());
+					}
+				}, 100));
+			}
+
+			public void onFailure(Call call, IOException e) {
+				if (dcb == null)
+					cr.showToast(e.getMessage());
+				else {
+					dcb.fail(e, e.getMessage());
+					if (dcb.showDicToast())
+						cr.showToast(e.getMessage());
+				}
+			}
+		});
+	};
+
 	private void deeplAuthThenTranslate(String s, String langf, String lang, DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		final CoolReader crf2 = (CoolReader) mActivity;
 		deeplAuthenticated = false;
 		crf2.readDeeplCloudSettings();
-		HttpUrl.Builder urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE+"/usage").newBuilder().addQueryParameter("auth_key", crf2.deeplCloudSettings.deeplToken);
+		HttpUrl.Builder urlBuilder;
+		if (StrUtils.getNonEmptyStr(crf2.deeplCloudSettings.deeplToken,false).endsWith(":fx"))
+			urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE_FREE+"/usage").newBuilder().addQueryParameter("auth_key", crf2.deeplCloudSettings.deeplToken);
+		else
+			urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE+"/usage").newBuilder().addQueryParameter("auth_key", crf2.deeplCloudSettings.deeplToken);
 		String url = urlBuilder.build().toString();
 		Request request = new Request.Builder()
 				.url(url)
@@ -807,7 +1052,7 @@ public class Dictionaries {
 				}
 				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 					deeplAuthenticated = true;
-					deeplTranslate(s, deeplGetDefLangCode(langf, true), deeplGetDefLangCode(lang, false), curDict, view, dcb);
+					deeplTranslate(s, deeplGetDefLangCode(langf, true), deeplGetDefLangCode(lang, true), curDict, view, dcb);
 				}, 100));
 			}
 			public void onFailure(Call call, IOException e) {
@@ -1156,6 +1401,24 @@ public class Dictionaries {
 		return StrUtils.getNonEmptyStr(langCode, true).toUpperCase();
 	}
 
+	private String dictccGetDefLangCode(String langCode) {
+		String lc = StrUtils.getNonEmptyStr(langCode, true).toLowerCase();
+		if (lc.length() > 2) return lc.substring(0,2);
+		return lc;
+	}
+
+	private String googleGetDefLangCode(String langCode) {
+		String lc = StrUtils.getNonEmptyStr(langCode, true).toLowerCase();
+		if (lc.equals("*")) return "auto";
+		if (lc.equals("ceb")) return lc;
+		if (lc.equals("zh_TW")) return lc;
+		if (lc.equals("zh-TW")) return lc;
+		if (lc.equals("haw")) return lc;
+		if (lc.equals("hmn")) return lc;
+		if (lc.length() > 2) return lc.substring(0,2);
+		return lc;
+	}
+
 	private void lingvoTranslate(String s, String langf, String lang, boolean extended, DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		CoolReader cr = (CoolReader) mActivity;
 		if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -1337,26 +1600,41 @@ public class Dictionaries {
 			return;
 		}
 		if (
+//			(!(
+//			langf.equals("DE")||langf.equals("EN")||langf.equals("FR")||langf.equals("IT")||langf.equals("JA")||
+//					langf.equals("ES")||langf.equals("NL")||langf.equals("PL")||langf.equals("PT")||langf.equals("RU")||
+//					langf.equals("ZH")
+//			))
+//			||
 			(!(
-			langf.equals("DE")||langf.equals("EN")||langf.equals("FR")||langf.equals("IT")||langf.equals("JA")||
-					langf.equals("ES")||langf.equals("NL")||langf.equals("PL")||langf.equals("PT")||langf.equals("RU")||
-					langf.equals("ZH")
-			))
-			||
-			(!(
-					lang.equals("DE")||lang.equals("EN-GB")||lang.equals("EN-US")||lang.equals("EN")||lang.equals("FR")||lang.equals("IT")||
-							lang.equals("JA")||lang.equals("ES")||lang.equals("NL")||lang.equals("PL")||
-							lang.equals("PT-PT")||lang.equals("PT-BR")||lang.equals("PT")||lang.equals("RU")||
-							lang.equals("ZH")
+					lang.equalsIgnoreCase("DE")||
+					lang.equalsIgnoreCase("EN-GB")||
+					lang.equalsIgnoreCase("EN-US")||
+					lang.equalsIgnoreCase("EN")||
+					lang.equalsIgnoreCase("FR")||
+					lang.equalsIgnoreCase("IT")||
+					lang.equalsIgnoreCase("JA")||
+					lang.equalsIgnoreCase("ES")||
+					lang.equalsIgnoreCase("NL")||
+					lang.equalsIgnoreCase("PL")||
+					lang.equalsIgnoreCase("PT-PT")||
+					lang.equalsIgnoreCase("PT-BR")||
+					lang.equalsIgnoreCase("PT")||
+					lang.equalsIgnoreCase("RU")||
+					lang.equalsIgnoreCase("ZH")
 			))
 		) {
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 					cr.showToast(cr.getString(R.string.translate_lang_not_found)+": ["
-							+langf + "] -> ["+lang + "}]"), 100));
+							+langf + "] -> ["+lang + "]"), 100));
 			return;
 		}
 		final CoolReader crf2 = (CoolReader) mActivity;
-		HttpUrl.Builder urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE+"/v2/translate").newBuilder();
+		HttpUrl.Builder urlBuilder;
+		if (StrUtils.getNonEmptyStr(crf2.deeplCloudSettings.deeplToken,false).endsWith(":fx"))
+			urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE_FREE+"/translate").newBuilder();
+		else
+			urlBuilder = HttpUrl.parse(DEEPL_DIC_ONLINE+"/translate").newBuilder();
 		urlBuilder.addQueryParameter("auth_key", crf2.deeplCloudSettings.deeplToken);
 		urlBuilder.addQueryParameter("text", s);
 		urlBuilder.addQueryParameter("target_lang", lang);
@@ -1407,7 +1685,7 @@ public class Dictionaries {
 							JSONArray jsoT = jso.getJSONArray("translations");
 							if (jsoT.length() > 0) {
 								if (jsoT.getJSONObject(0).has("detected_source_language"))
-									sDic = crf2.getString(R.string.translated_from) + " " + jsoT.getJSONObject(0).getString("detected_source_language");
+									sDic = "Deepl.com, " + crf2.getString(R.string.translated_from) + " " + jsoT.getJSONObject(0).getString("detected_source_language");
 								if (jsoT.getJSONObject(0).has("text")) {
 									String sTrans = jsoT.getJSONObject(0).getString("text");
 									if (!StrUtils.isEmptyStr(sTrans)) {
@@ -1560,7 +1838,6 @@ public class Dictionaries {
 	public void saveToDicSearchHistory(String searchText, String translateText, DictInfo curDict) {
 		CoolReader cr = null;
 		if (mActivity instanceof CoolReader) {
-			//asdf
 			cr = (CoolReader) mActivity;
 			int iDont = cr.settings().getInt(Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE, 0);
 			if (iDont>0) {
@@ -1608,16 +1885,55 @@ public class Dictionaries {
 		return curDict;
 	}
 
+	public DictInfo curDictByNum(String num, DictInfo curDict) {
+		if (StrUtils.isEmptyStr(num)) return curDict;
+		if (num.equals("1")) return currentDictionary;
+		if (num.equals("2")) return currentDictionary2;
+		if (num.equals("3")) return currentDictionary3;
+		if (num.equals("4")) return currentDictionary4;
+		if (num.equals("5")) return currentDictionary5;
+		if (num.equals("6")) return currentDictionary6;
+		if (num.equals("7")) return currentDictionary7;
+		return curDict;
+	}
+
+	public DictInfo getOfflineDicComformity(String sConformity, DictInfo curDict) {
+		if (StrUtils.isEmptyStr(sConformity)) return curDict;
+		String[] sConformityArr = sConformity.split(";");
+		if (currentDictionary == curDict)
+			if (sConformityArr.length>=0)
+				return curDictByNum(sConformityArr[0], curDict);
+		if (currentDictionary2 == curDict)
+			if (sConformityArr.length>=1)
+				return curDictByNum(sConformityArr[1], curDict);
+		if (currentDictionary3 == curDict)
+			if (sConformityArr.length>=2)
+				return curDictByNum(sConformityArr[2], curDict);
+		if (currentDictionary4 == curDict)
+			if (sConformityArr.length>=3)
+				return curDictByNum(sConformityArr[3], curDict);
+		if (currentDictionary5 == curDict)
+			if (sConformityArr.length>=4)
+				return curDictByNum(sConformityArr[4], curDict);
+		if (currentDictionary6 == curDict)
+			if (sConformityArr.length>=5)
+				return curDictByNum(sConformityArr[5], curDict);
+		if (currentDictionary7 == curDict)
+			if (sConformityArr.length>=6)
+				return curDictByNum(sConformityArr[6], curDict);
+		return curDict;
+	}
+
 	@SuppressLint("NewApi")
 	public void findInDictionary(String s, View view, CoolReader.DictionaryCallback dcb) throws DictionaryException {
-		log.d("lookup in dictionary: " + s);
-		log.i("currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
-				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
-				", currentDictionaryTmp = " + getCDinfo(currentDictionaryTmp) +
-				", saveCurrentDictionary = " + getCDinfo(saveCurrentDictionary) +
-				", saveCurrentDictionary2 = " + getCDinfo(saveCurrentDictionary2) +
-				", saveCurrentDictionaryTmp = " + getCDinfo(saveCurrentDictionaryTmp) +
-				", saveIDic2IsActive = " + saveIDic2IsActive);
+//		log.d("lookup in dictionary: " + s);
+//		log.i("currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
+//				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
+//				", currentDictionaryTmp = " + getCDinfo(currentDictionaryTmp) +
+//				", saveCurrentDictionary = " + getCDinfo(saveCurrentDictionary) +
+//				", saveCurrentDictionary2 = " + getCDinfo(saveCurrentDictionary2) +
+//				", saveCurrentDictionaryTmp = " + getCDinfo(saveCurrentDictionaryTmp) +
+//				", saveIDic2IsActive = " + saveIDic2IsActive);
 		// save - if we ask for transl direction
 		saveCurrentDictionary = currentDictionary;
 		saveCurrentDictionary2 = currentDictionary2;
@@ -1627,6 +1943,12 @@ public class Dictionaries {
 		DictInfo curDict = getCurDict();
 		currentDictionaryTmp = null;
 		log.i("Chosen dic = "+getCDinfo(curDict));
+		// play with network availability
+		if (!((CoolReader)mActivity).isNetworkAvailable()) {
+			String sConformity = ((CoolReader)mActivity).settings().getProperty(Settings.PROP_APP_ONLINE_OFFLINE_DICS);
+			if (!StrUtils.isEmptyStr(sConformity)) curDict = getOfflineDicComformity(sConformity, curDict);
+		}
+		//\
 		if (null == curDict) {
 			((CoolReader)mActivity).optionsFilter = "";
 			((CoolReader)mActivity).showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
@@ -1659,7 +1981,7 @@ public class Dictionaries {
 		switch (curDict.internal) {
 		case 0:
 			Intent intent0 = new Intent(curDict.action);
-			if (curDict.className != null || DeviceInfo.getSDKLevel() == 3) {
+			if (curDict.className != null) {
 				intent0.setComponent(new ComponentName(
 						curDict.packageName, curDict.className));
 			} else {
@@ -1960,49 +2282,6 @@ public class Dictionaries {
 				yandexAuthThenTranslate(s, langf, lang, curDict, view, null, dcb);
 			else
 				yandexTranslate(s, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict, view, null, dcb);
-			// old yandex translate
-//			HttpUrl.Builder urlBuilder = HttpUrl.parse(YND_DIC_ONLINE).newBuilder();
-//			urlBuilder.addQueryParameter("key", BuildConfig.YND_TRANSLATE);
-//			urlBuilder.addQueryParameter("text", s);
-//			String llang = get2dig(lang);
-//			if (!StrUtils.isEmptyStr(langf)) llang = get2dig(langf)+"-"+get2dig(lang);
-//			if (llang.startsWith("#-")) llang = llang.substring(2);
-//			if (llang.startsWith("##-")) llang = llang.substring(3);
-//			urlBuilder.addQueryParameter("lang", llang);
-//			urlBuilder.addQueryParameter("format", "plain");
-//			String url = urlBuilder.build().toString();
-//			Request request = new Request.Builder()
-//					.url(url)
-//					.build();
-//			Call call = client.newCall(request);
-//			final CoolReader crf = cr;
-//			final DictInfo curDictF = curDict;
-//			call.enqueue(new okhttp3.Callback() {
-//				public void onResponse(Call call, Response response)
-//						throws IOException {
-//					String sBody = response.body().string();
-//					Document docJsoup = Jsoup.parse(sBody, YND_DIC_ONLINE);
-//					Elements results = docJsoup.select("Translation > text");
-//					String sTransl = "";
-//					if (results.size()>0) sTransl = results.text(); else {
-//						if ((StrUtils.getNonEmptyStr(sBody,true).contains("40"))
-//							&&
-//						(StrUtils.getNonEmptyStr(sBody,true).contains("exceeded")))
-//						sTransl = mActivity.getString(R.string.online_dic_exceeded);
-//						else sTransl = sBody;
-//					}
-//					final String sTranslF = sTransl;
-//					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-//						crf.showDicToast(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_YANDEX, "");
-//						saveToDicSearchHistory(s, sTranslF, curDictF);
-//					}, 100));
-//				}
-//
-//				public void onFailure(Call call, IOException e) {
-//					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-//							crf.showToast(e.getMessage()), 100));
-//				}
-//			});
 			break;
 		case 8:
 			if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -2112,6 +2391,84 @@ public class Dictionaries {
 				if (!deeplAuthenticated) deeplAuthThenTranslate(s, langf, lang, curDict, view, dcb);
 				else deeplTranslate(s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), curDict, view, dcb);
 				break;
+		case 12:
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					cr.showToast(R.string.only_in_premium);
+					return;
+				}
+				BookInfo book12 = cr.getReaderView().getBookInfo();
+				String lang12 = StrUtils.getNonEmptyStr(book12.getFileInfo().lang_to,true);
+				String langf12 = StrUtils.getNonEmptyStr(book12.getFileInfo().lang_from, true);
+				if (StrUtils.isEmptyStr(langf12)) langf = book12.getFileInfo().language;
+				if (StrUtils.isEmptyStr(lang12)||StrUtils.isEmptyStr(langf12)) {
+					if (cr.getReaderView().mBookInfo!=null) {
+						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+						FileInfo dfi = fi.parent;
+						if (dfi == null) {
+							FileInfo root = Services.getScanner().getRoot();
+							dfi = Services.getScanner().findParent(fi, root);
+						}
+						if (dfi == null) dfi = fi.parent;
+						if (dfi == null) {
+							File f = new File(fi.pathname);
+							String par = f.getParent();
+							if (par != null) {
+								File df = new File(par);
+								dfi = new FileInfo(df);
+							}
+						}
+						if (dfi != null) {
+							currentDictionary = saveCurrentDictionary;
+							currentDictionary2 = saveCurrentDictionary2;
+							currentDictionaryTmp = saveCurrentDictionaryTmp;
+							iDic2IsActive = saveIDic2IsActive;
+							cr.editBookTransl(false, null, dfi, fi, langf12, lang12, s, null, TranslationDirectionDialog.FOR_COMMON);
+						} else {
+							((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
+						}
+					};
+					return;
+				}
+				dictCCTranslate(s, dictccGetDefLangCode(langf12), dictccGetDefLangCode(lang12), curDict, view, null, dcb);
+			case 13:
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					cr.showToast(R.string.only_in_premium);
+					return;
+				}
+				BookInfo book13 = cr.getReaderView().getBookInfo();
+				String lang13 = StrUtils.getNonEmptyStr(book13.getFileInfo().lang_to,true);
+				String langf13 = StrUtils.getNonEmptyStr(book13.getFileInfo().lang_from, true);
+				if (StrUtils.isEmptyStr(langf13)) langf = book13.getFileInfo().language;
+				if (StrUtils.isEmptyStr(lang13)||StrUtils.isEmptyStr(langf13)) {
+					if (cr.getReaderView().mBookInfo!=null) {
+						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+						FileInfo dfi = fi.parent;
+						if (dfi == null) {
+							FileInfo root = Services.getScanner().getRoot();
+							dfi = Services.getScanner().findParent(fi, root);
+						}
+						if (dfi == null) dfi = fi.parent;
+						if (dfi == null) {
+							File f = new File(fi.pathname);
+							String par = f.getParent();
+							if (par != null) {
+								File df = new File(par);
+								dfi = new FileInfo(df);
+							}
+						}
+						if (dfi != null) {
+							currentDictionary = saveCurrentDictionary;
+							currentDictionary2 = saveCurrentDictionary2;
+							currentDictionaryTmp = saveCurrentDictionaryTmp;
+							iDic2IsActive = saveIDic2IsActive;
+							cr.editBookTransl(false, null, dfi, fi, langf13, lang13, s, null, TranslationDirectionDialog.FOR_COMMON);
+						} else {
+							((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
+						}
+					};
+					return;
+				}
+				googleTranslate(s, googleGetDefLangCode(langf13), googleGetDefLangCode(lang13), curDict, view, null, dcb);
 		}
 	}
 

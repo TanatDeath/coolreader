@@ -23,9 +23,11 @@ import org.coolreader.cloud.yandex.YNDConfig;
 import org.coolreader.cloud.yandex.YNDListFiles;
 import org.coolreader.cloud.yandex.YNDPerformAction;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.ExternalDocCameDialog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FileUtils;
 import org.coolreader.crengine.FlavourConstants;
@@ -599,11 +601,15 @@ public class CloudAction {
                         if (dir == null)
                             dir = downloadDir;
                         Services.getScanner().listDirectory(dir);
-                        FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
-                        if (item != null)
-                            cr.loadDocument(item, true);
-                        else
-                            cr.loadDocument(fi, true);
+                        final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+                        final File fPath = new File(downloadDir.pathname+"/Dropbox");
+                        ExternalDocCameDialog.tryToMoveThenOpen(cr, fBook.getAbsolutePath(),
+                                fPath.getAbsolutePath(), "");
+//                        FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
+//                        if (item != null)
+//                            cr.loadDocument(item, true);
+//                        else
+//                            cr.loadDocument(fi, true);
                     }
                 }
 
@@ -719,11 +725,14 @@ public class CloudAction {
                                 if (dir == null)
                                     dir = downloadDir;
                                 Services.getScanner().listDirectory(dir);
-                                FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
-                                if (item != null)
-                                    cr.loadDocument(item, true);
-                                else
-                                    cr.loadDocument(fi, true);
+                                final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+                                final File fPath = new File(downloadDir.pathname+"/YandexDisc");
+                                ExternalDocCameDialog.tryToMoveThenOpen(cr, fBook.getAbsolutePath(),
+                                        fPath.getAbsolutePath(), "");
+//                                if (item != null)
+//                                    cr.loadDocument(item, true);
+//                                else
+//                                    cr.loadDocument(fi, true);
                             }
                         }, 200);
                     }

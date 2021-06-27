@@ -88,6 +88,7 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.calibre_catalog_edit_dialog, null);
 		nameEdit = view.findViewById(R.id.catalog_name);
+		nameEdit.setText(StrUtils.getNonEmptyStr(item.getFilename(), true));
 		btnIsLocal = view.findViewById(R.id.btn_is_local);
 		btnIsLocal.setOnClickListener(v -> { setCheckedTag(btnIsLocal); paintScopeButtons(); });
 		btnIsRemoteYD = view.findViewById(R.id.btn_is_remote_yd);
@@ -99,6 +100,8 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 		btnIsLocal.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		btnIsRemoteYD.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		edtLocalFolder = view.findViewById(R.id.catalog_local_folder);
+		if (item.id != null)
+			edtLocalFolder.setText(StrUtils.getNonEmptyStr(item.pathname, true).replace(FileInfo.CALIBRE_DIR_PREFIX, ""));
 		edtRemoteFolderYD = view.findViewById(R.id.catalog_remote_folder);
  	    setThirdButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
@@ -115,7 +118,7 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 	}
 	
 	private void save() {
-		boolean isLocal = getCheckedFromTag(btnIsLocal);
+		boolean isLocal = getCheckedFromTag(btnIsLocal.getTag());
 		activity.getDB().saveCalibreCatalog(mItem.id,
 				nameEdit.getText().toString(),
 				isLocal,

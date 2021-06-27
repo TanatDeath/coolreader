@@ -86,6 +86,7 @@
     <string name="options_font_size">Размер шрифта</string>
     <string name="options_font_size_user_dic">Размер шрифта на панели пользовательского словаря</string>
     <string name="options_font_face">Шрифт</string>
+    <string name="options_font_weight">Насыщенность шрифта</string>
     <string name="options_font_embolden">Жирность</string>
     <string name="options_font_fine_embolden">Коэффициент толщины символа</string>
     <string name="options_font_embolden_alg">Алгоритм отрисовки жирности шрифта</string>
@@ -646,6 +647,7 @@
 
     <string name="book_state_toread">К прочтению</string>
     <string name="book_mark_toread">Отметить \"К прочтению\"</string>
+    <string name="book_marked_reading">Книга отмечена как \"Читаю\"</string>
     <string name="book_state_reading">Читаю</string>
     <string name="book_state_none">Нет пометки</string>
     <string name="book_state_finished">Прочитана</string>
@@ -973,7 +975,7 @@
     <string name="save_pos_to_cloud_timeout_add_info">Позиция чтения будет сохраняться каждые 1-100 минут в облачное хранилище, изначально выключено (требуется разрешение использования аккаунта)</string>
     <string name="save_pos_timeout_add_info">Позиция чтения будет сохраняться на этом устройстве</string>
     <string name="options_app_key_actions_add_info">Назначение действий для кнопок и поведения при подключении гарнитуры</string>
-    <string name="options_app_tapzones_normal_add_info">Настройка действий программы при нажатии на область экрана (экран разбит на 9 клеток 3x3)</string>
+    <string name="options_app_tapzones_normal_add_info">Настройка действий программы при нажатии на область экрана (экран разбит на 9 клеток 3x3). ВНИМАНИЕ: Вы всегда можете вызвать главное меню свайпом вверх или вниз по центру экрана</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Настройка дополнительного действия при длинном или коротком нажатии</string>
     <string name="options_app_double_tap_selection_add_info">Выделить текст при двойном нажатии на экран (для копирования, сохранения закладки, вызова словаря, отправки и т.д.). ВНИМАНИЕ: Включение этой настройки замедляет время реакции на одиночные нажатия (на время интервала двойного тапа, по умолчанию - 400 мс)</string>
     <string name="options_controls_enable_volume_keys_add_info">Листание страниц кнопками громкости</string>
@@ -1181,6 +1183,7 @@
     <string name="cloud_sync_variant3_v">Синхронизация будет производиться через Яндекс диск (используется папка KnownReader)</string>
     <string name="switch_profile_note">Переключение профилей доступно только при открытой книге</string>
     <string name="settings_info">Глобальные настройки выделены курсивом (остальные - зависят от выбранного профиля)</string>
+    <string name="settings_info_short">(глобальные настройки - курсивом)</string>
     <string name="global_margin">Отступ экрана (требуется перезапуск)</string>
     <string name="global_margin_add_info">Для устройств с тачскрином и бортиками</string>
     <string name="lang_from">С языка (1)</string>
@@ -1230,6 +1233,7 @@
     <string name="only_in_premium">Эта функция доступна только в версии Premium</string>
     <string name="str_yes">да</string>
     <string name="str_no">нет</string>
+    <string name="str_cancel">отмена</string>
     <string name="str_yes_and_del_pos">да, и удалить сохраненные позиции (в облаке)</string>
     <string name="opened_doc_props">Свойства документа</string>
     <string name="opened_doc_props_styles">Встроенные стили (цвета, отступы, фон, ...)</string>
@@ -1595,10 +1599,16 @@
     <string name="brightness_swipe_sensivity_3">Быстро</string>
     <string name="brightness_swipe_sensivity_4">Еще быстрее</string>
     <string name="try_to_move_to_books">Переместить книгу в папку \'Books\'</string>
-    <string name="cannot_move_to_books">Невозможно книгу в папку \'Books\'</string>
+    <string name="try_to_move_to_books_then_open">Переместить книгу в папку \'Books\', после чего открыть</string>
+    <string name="cannot_move_to_books">Невозможно переместить книгу в папку \'Books\'</string>
+    <string name="moved_to_books">Книга успешно перенесена в папку \'Books\'</string>
     <string name="quick_translation_dirs">Быстрые направления перевода</string>
     <string name="quick_translation_dirs_info">Можно указать до 10 быстрых направлений перевода (в формате "с_языка=на_язык")</string>
+    <string name="online_offline_dics">Соответсвтие онлайн и оффлайн словарей</string>
+    <string name="online_offline_dics_add_info">Можно указать соответствие онлайновому словарю оффлайнового, который будет использоваться вместо него, когда вы не в сети</string>
+    <string name="online_offline_dics_add_info_ext">Можно указать соответствие онлайновому словарю оффлайнового, который будет использоваться вместо него, когда вы не в сети. Введите номер словаря</string>
     <string name="lang_pair">Языковая пара</string>
+    <string name="conformity">Соответствие</string>
     <string name="select_transl_dir">Выберите направление перевода</string>
     <string name="all_languages">Выбрать из всех языков</string>
     <string name="page_flipping_type">Листание жестами</string>
@@ -1618,5 +1628,24 @@
     <string name="wireless_charging">Беспроводная зарядка</string>
     <string name="usb_charging">USB зарядка</string>
     <string name="ac_charging">AC зарядка</string>
+    <string name="font_weight_thin">Тончайший</string>
+    <string name="font_weight_extralight">Сверхлегкий</string>
+    <string name="font_weight_light">Лёгкий</string>
+    <string name="font_weight_book">Book</string>
+    <string name="font_weight_regular">Нормальный</string>
+    <string name="font_weight_medium">Medium</string>
+    <string name="font_weight_semibold">Полужирный</string>
+    <string name="font_weight_bold">Жирный</string>
+    <string name="font_weight_extrabold">Сверхжирный</string>
+    <string name="font_weight_black">Тяжелый</string>
+    <string name="font_weight_extrablack">Сверхтяжёлый</string>
+    <string name="font_weight_fake">синтетический*</string>
+    <string name="add_bookmark_to_page">Добавить закладку на страницу</string>
+    <string name="cannot_move">Невозможно переместить - открытие из исходного местоположения</string>
+    <string name="language_pair_not_supported">Эта языковая пара не поддерживается</string>
+    <string name="options_char_space_compress">Сжатие расстояний между символами</string>
+    <string name="options_char_space_compress_add_info">Можно уменьшить расстояния между символами - используйте осторожно</string>
+    <string name="save_brightness">Сохранить значение</string>
+    <string name="load_brightness">Загрузить значение</string>
 </resources>
 

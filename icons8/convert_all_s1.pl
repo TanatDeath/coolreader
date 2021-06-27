@@ -88,7 +88,8 @@ my %ic_actions_list=(
         'icons8_speaker_koef.svg' => 'icons8_speaker_koef.png',
         'icons8_user_dic_panel.svg' => 'icons8_user_dic_panel.png',
         'icons8_group.svg' => 'icons8_group.png',
-        'icons8_group2.svg' => 'icons8_group2.png'
+        'icons8_group2.svg' => 'icons8_group2.png',
+        'icons8_airplane_mode_on.svg' => 'icons8_airplane_mode_on.png'
 );
 
 my %ic_menu_list=(

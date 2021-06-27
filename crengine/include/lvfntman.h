@@ -26,6 +26,7 @@ class LVFontManager {
 protected:
     bool _allowKerning;
     int _antialiasMode;
+    int _compv;
     shaping_mode_t _shapingMode;
     hinting_mode_t _hintingMode;
 public:
@@ -35,6 +36,9 @@ public:
     /// returns most similar font
     virtual LVFontRef GetFont(int size, int weight, bool italic, css_font_family_t family, lString8 typeface,
                                 int features=0, int documentId = -1, bool useBias=false) = 0;
+
+    /// return available font weight values
+    virtual void GetAvailableFontWeights(LVArray<int>& weights, lString8 typeface) = 0;
 
     /// set fallback font face list semicolon separated (returns true if any font is found)
     virtual bool SetFallbackFontFaces( lString8 faces ) {
@@ -67,7 +71,7 @@ public:
     /// registers font by name
     virtual bool RegisterFont( lString8 name ) = 0;
     /// registers font by name and face
-    virtual bool RegisterExternalFont(lString32 /*name*/, lString8 /*face*/, bool /*bold*/, bool /*italic*/) { return false; }
+    virtual bool RegisterExternalFont(int /*documentId*/, lString32 /*name*/, lString8 /*face*/, bool /*bold*/, bool /*italic*/) { return false; }
     /// registers document font
     virtual bool
     RegisterDocumentFont(int /*documentId*/, LVContainerRef /*container*/, lString32 /*name*/,
@@ -138,6 +142,10 @@ public:
     virtual void SetGamma( double gamma );
     /// sets current hinting mode
     virtual void SetHintingMode(hinting_mode_t /*mode*/) { }
+    /// gets char compress value
+    virtual int GetCharSpaceCompress() { return _compv; }
+    /// sets char compress value
+    virtual void SetCharSpaceCompress(int compv) { _compv = compv; gc(); clearGlyphCache(); };
     /// returns current hinting mode
     virtual hinting_mode_t  GetHintingMode() { return HINTING_MODE_AUTOHINT; }
     ///

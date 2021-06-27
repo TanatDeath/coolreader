@@ -95,6 +95,7 @@
     <string name="options_font_size">Font size</string>
     <string name="options_font_size_user_dic">User dic panel\'s font size</string>
     <string name="options_font_face">Font face</string>
+    <string name="options_font_weight">Font weight</string>
     <string name="options_font_embolden">Embolden font</string>
     <string name="options_font_fine_embolden">Character weight koef</string>
     <string name="options_font_embolden_alg">Font embolden algorithm</string>
@@ -658,6 +659,7 @@
     <string name="dlg_goto_input_percent">Input position percent to go:</string>
     <string name="book_state_toread">To read</string>
     <string name="book_mark_toread">Mark as \"To read\"</string>
+    <string name="book_marked_reading">Book was marked as \"Reading\"</string>
     <string name="book_state_reading">Reading</string>
     <string name="book_state_none">No mark</string>
     <string name="book_state_finished">Finished</string>
@@ -986,7 +988,7 @@
     <string name="save_pos_to_cloud_timeout_add_info">The reading position will be saved every 1-100 minutes on the cloud storage, disabled by default (requires account permission for access)</string>
     <string name="save_pos_timeout_add_info">The reading position will be saved to local file on this device</string>
     <string name="options_app_key_actions_add_info">Assign actions for buttons and behavior when connecting a headset</string>
-    <string name="options_app_tapzones_normal_add_info">Customize the actions of the program when you tap the screen area (screen is divided to 9 tap zones 3x3)</string>
+    <string name="options_app_tapzones_normal_add_info">Customize the actions of the program when you tap the screen area (screen is divided to 9 tap zones 3x3). NOTE: You always can get main menu by swipe up or down in the center of the screen</string>
     <string name="options_controls_tap_secondary_action_type_add_info">Setting up an additional action for long or short press</string>
     <string name="options_app_double_tap_selection_add_info">Select text when double-tapping on the screen (for copying, saving bookmark, call the dictionary, sending, etc). ATTENTION: Torning this value on will slow down the reaction time to single taps (at the value of double tap interval, 400ms by default)</string>
     <string name="options_controls_enable_volume_keys_add_info">Page flipping with volume buttons</string>
@@ -1198,6 +1200,7 @@
     <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex disc (folder KnownReader is used)</string>
     <string name="switch_profile_note">Profile switching is enabled only when book is open</string>
     <string name="settings_info">Global settings are italic (other - depends on profile)</string>
+    <string name="settings_info_short">(global settings are italic)</string>
     <string name="global_margin">Screen margin (restart needed)</string>
     <string name="global_margin_add_info">For touchscreen devices with skirtings</string>
     <string name="lang_from">From language (1)</string>
@@ -1253,6 +1256,7 @@
     <string name="only_in_premium">This feature is availble in Premium version only</string>
     <string name="str_yes">yes</string>
     <string name="str_no">no</string>
+    <string name="str_cancel">cancel</string>
     <string name="str_yes_and_del_pos">yes, and delete saved (cloud) positions</string>
     <string name="opened_doc_props">Document properties</string>
     <string name="opened_doc_props_styles">Internal styles (colors, margins, background, etc)</string>
@@ -1626,10 +1630,16 @@
     <string name="brightness_swipe_sensivity_3">Fast</string>
     <string name="brightness_swipe_sensivity_4">Faster</string>
     <string name="try_to_move_to_books">Move book to \'Books\' folder</string>
+    <string name="try_to_move_to_books_then_open">Move book to \'Books\' folder, then open</string>
     <string name="cannot_move_to_books">Cannot move book to \'Books\' folder</string>
+    <string name="moved_to_books">Successfully moved book to \'Books\' folder</string>
     <string name="quick_translation_dirs">Quick translations direction</string>
     <string name="quick_translation_dirs_info">Specify up to 10 quick translation directions (format "from_lang=to_lang")</string>
+    <string name="online_offline_dics">Online-offline dics conformity</string>
+    <string name="online_offline_dics_add_info">You can specify an offline dic using instead of online, while your device is offline</string>
+    <string name="online_offline_dics_add_info_ext">You can specify an offline dic using instead of online, while your device is offline. Input dic number</string>
     <string name="lang_pair">Language pair</string>
+    <string name="conformity">Conformity</string>
     <string name="select_transl_dir">Select translation direction</string>
     <string name="all_languages">Select from all languages</string>
     <string name="page_flipping_type">Gesture page flipping</string>
@@ -1649,4 +1659,25 @@
     <string name="wireless_charging">Wireless charging</string>
     <string name="usb_charging">USB charging</string>
     <string name="ac_charging">AC charging</string>
+    <string name="font_weight_thin">Thin</string>
+    <string name="font_weight_extralight">ExtraLight</string>
+    <string name="font_weight_light">Light</string>
+    <string name="font_weight_book">Book</string>
+    <string name="font_weight_regular">Regular</string>
+    <string name="font_weight_medium">Medium</string>
+    <string name="font_weight_semibold">SemiBold</string>
+    <string name="font_weight_bold">Bold</string>
+    <string name="font_weight_extrabold">ExtraBold</string>
+    <string name="font_weight_black">Heavy/Black</string>
+    <string name="font_weight_extrablack">ExtraBlack</string>
+    <string name="font_weight_fake">synthetic*</string>
+    <string name="add_bookmark_to_page">Add bookmark to page</string>
+    <string name="btn_decrease">decrease</string>
+    <string name="btn_increase">increase</string>
+    <string name="cannot_move">Cannot move - open from existing location</string>
+    <string name="language_pair_not_supported">This language pair is not supported</string>
+    <string name="options_char_space_compress">Char space compress</string>
+    <string name="options_char_space_compress_add_info">You can reduce space between chars - use carefully</string>
+    <string name="save_brightness">Save value</string>
+    <string name="load_brightness">Load value</string>
 </resources>

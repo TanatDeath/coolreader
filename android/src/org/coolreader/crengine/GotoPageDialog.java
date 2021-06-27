@@ -88,24 +88,6 @@ public class GotoPageDialog extends BaseDialog {
 			return ITEM_POSITION;
 		}
 
-		public void setHighLightedText(TextView tv, String textToHighlight) {
-			if (StrUtils.isEmptyStr(textToHighlight)) return;
-			String tvt = tv.getText().toString();
-			if (StrUtils.isEmptyStr(tvt)) return;
-			int ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), 0);
-			Spannable wordToSpan = new SpannableString(tv.getText());
-			for (int ofs = 0; ofs < tvt.length() && ofe != -1; ofs = ofe + 1) {
-				ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), ofs);
-				if (ofe == -1)
-					break;
-				else {
-					// set color here
-					wordToSpan.setSpan(new BackgroundColorSpan(mColorIconL), ofe, ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					tv.setText(wordToSpan, TextView.BufferType.SPANNABLE);
-				}
-			}
-		}
-
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view;
 			int res = R.layout.page_item;
@@ -128,7 +110,7 @@ public class GotoPageDialog extends BaseDialog {
 				if ( titleTextView!=null ) {
 					titleTextView.setText(s);
 					if (!StrUtils.isEmptyStr(mFindText))
-						setHighLightedText(titleTextView,mFindText);
+						Utils.setHighLightedText(titleTextView,mFindText, mColorIconL);
 				}
 			} else {
 				if ( titleTextView!=null )
@@ -177,7 +159,7 @@ public class GotoPageDialog extends BaseDialog {
 			if (arrFound == null)
 				value = String.valueOf(position+1);
 			else {
-				TextView labelView = (TextView)view.findViewById(R.id.page_item_shortcut);
+				TextView labelView = view.findViewById(R.id.page_item_shortcut);
 				if (labelView != null) value = String.valueOf(Integer.valueOf(labelView.getText().toString().trim())+1);
 			}
 			try {
@@ -206,16 +188,16 @@ public class GotoPageDialog extends BaseDialog {
 		this.mReaderView.CheckAllPagesLoadVisual();
         this.mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_dlg, null);
-        input = (EditText)layout.findViewById(R.id.input_field);
-        TextView promptView = (TextView)layout.findViewById(R.id.lbl_prompt);
+        input = layout.findViewById(R.id.input_field);
+        TextView promptView = layout.findViewById(R.id.lbl_prompt);
         if (promptView != null) {
         	promptView.setText(prompt);
         }
-		ViewGroup body = (ViewGroup)layout.findViewById(R.id.pages_list);
+		ViewGroup body = layout.findViewById(R.id.pages_list);
 		mList = new GotoPageDialog.BookPagesList(activity, false);
 		body.addView(mList);
 
-        SeekBar seekBar = (SeekBar)layout.findViewById(R.id.goto_position_seek_bar);
+        SeekBar seekBar = layout.findViewById(R.id.goto_position_seek_bar);
         if (seekBar != null) {
         	seekBar.setMax(maxValue - minValue);
         	seekBar.setProgress(currentValue);

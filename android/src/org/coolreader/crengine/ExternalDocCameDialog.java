@@ -223,6 +223,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	EditText edtFileName;
 	TextView tvExistingPath;
 	Button btnOpenExisting;
+	Button btnMoveToBooksThenOpen;
 	Button btnAsHTML;
 	Button btnAsText;
 	Button btnMoveToBooks;
@@ -389,10 +390,15 @@ public class ExternalDocCameDialog extends BaseDialog {
 	int secondCountdown;
 	boolean stopCount = false;
 
-	private void openExistingClick() {
-		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-				((CoolReader) activity).loadDocumentExt(sExistingName, sUri), 500));
-		onPositiveButtonClick();
+	private void openExistingClick(boolean doMove) {
+		if (!doMove) {
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					((CoolReader) activity).loadDocumentExt(sExistingName, sUri), 500));
+			onPositiveButtonClick();
+		} else {
+			tryToMoveThenOpen(activity, sExistingName, downlDir, sUri);
+			onPositiveButtonClick();
+		}
 	}
 	private void countdownTick() {
 		if (stopCount) {
@@ -406,11 +412,11 @@ public class ExternalDocCameDialog extends BaseDialog {
 							countdownTick(),
 					1000));
 		} else {
-			openExistingClick();
+			openExistingClick(false);
 		}
 	}
 
-	private FileInfo getFileProps(File file, FileInfo fileDir) {
+	private static FileInfo getFileProps(File file, FileInfo fileDir) {
 		FileInfo fi = new FileInfo(file);
 		boolean isArch = FileUtils.isArchive(file);
 		FileInfo dir = Services.getScanner().findParent(fi, fileDir);
@@ -439,6 +445,47 @@ public class ExternalDocCameDialog extends BaseDialog {
 		FileInfo item1 = dir.findItemByPathName(sPathZ);
 		if (item1 == null) item1 = new FileInfo(sPathZ);
 		return item1;
+	}
+
+	public static void tryToMoveThenOpen(BaseActivity cr, String fNameThis, String downlD, String sUr) {
+		FileInfo fileOrDir = getFileProps(new File(fNameThis), new FileInfo(downlD));
+		Services.getEngine().scanBookProperties(fileOrDir);
+		FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+		String subdir = null;
+		if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
+			subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
+			if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
+				subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
+		} else {
+			subdir = "NoAuthor";
+		}
+		if (downloadDir == null) {
+			BackgroundThread.instance().postGUI(() ->
+			{
+				cr.showToast(R.string.cannot_move_to_books);
+				((CoolReader) cr).loadDocumentExt(fNameThis, sUr);
+			}, 500);
+		} else {
+			File f = new File(fNameThis);
+			File resultDir = new File(downloadDir.getPathName());
+			resultDir = new File(resultDir, subdir);
+			resultDir.mkdirs();
+			File result = new File(resultDir.getAbsolutePath() + "/" + f.getName());
+			if (f.renameTo(result)) {
+				downloadDir.findItemByPathName(result.getAbsolutePath());
+				File resF = result;
+				cr.showToast(R.string.moved_to_books);
+				BackgroundThread.instance().postGUI(() -> ((CoolReader) cr).
+						loadDocumentExt(resF.getAbsolutePath(), sUr), 500);
+			} else {
+				BackgroundThread.instance().postGUI(() ->
+						{
+							cr.showToast(R.string.cannot_move_to_books);
+							((CoolReader) cr).loadDocumentExt(fNameThis, sUr);
+						},
+						500);
+			}
+		}
 	}
 
 	@Override
@@ -525,6 +572,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		Utils.setDashedButton(btnOpenFromStream);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnOpenFromStream.setOnClickListener(v -> {
+			stopCount = true;
 			if (uri != null) {
 				if (stype.equals("application/zip")) {
 					ContentResolver contentResolver = mActivity.getContentResolver();
@@ -584,6 +632,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		Utils.setDashedButton(btnSave);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
 		btnSave.setOnClickListener(v -> {
+			stopCount = true;
 			String fName = downlDir+"/"+edtFileName.getText()+edtFileExt.getText();
 			File fEx = new File(fName);
 			if (fEx.exists()) {
@@ -613,43 +662,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 								BackgroundThread.instance().postBackground(() ->
 									{
 										if (bMoveToBooks) {
-											FileInfo fileOrDir = getFileProps(new File(fName), new FileInfo(downlDir));
-											Services.getEngine().scanBookProperties(fileOrDir);
-											FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-											String subdir = null;
-											if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
-												subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
-												if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
-													subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
-											} else {
-												subdir = "NoAuthor";
-											}
-											if (downloadDir == null) {
-												BackgroundThread.instance().postGUI(() ->
-												{
-													((CoolReader) activity).showToast(R.string.cannot_move_to_books);
-													((CoolReader) activity).loadDocumentExt(fName, sUri);
-												}, 500);
-											} else {
-												File f = new File(fName);
-												File resultDir = new File(downloadDir.getPathName());
-												resultDir = new File(resultDir, subdir);
-												resultDir.mkdirs();
-												File result = new File(resultDir.getAbsolutePath() + "/" + f.getName());
-												if (f.renameTo(result)) {
-													downloadDir.findItemByPathName(result.getAbsolutePath());
-													File resF = result;
-													BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).
-															loadDocumentExt(resF.getAbsolutePath(), sUri), 500);
-												} else {
-													BackgroundThread.instance().postGUI(() ->
-													{
-														((CoolReader) activity).showToast(R.string.cannot_move_to_books);
-														((CoolReader) activity).loadDocumentExt(fName, sUri);
-													},
-															500);
-												}
-											}
+											tryToMoveThenOpen(activity, fName, downlDir, sUri);
 										} else
 											BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500);
 									}
@@ -667,11 +680,18 @@ public class ExternalDocCameDialog extends BaseDialog {
 		tvExistingPath = view.findViewById(R.id.existing_path);
 		tvExistingPath.setText(sExistingName);
 		btnOpenExisting = view.findViewById(R.id.btn_open_existing);
+		btnMoveToBooksThenOpen = view.findViewById(R.id.btn_move_to_books_then_open);
 		Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
 		btnOpenExisting.setTypeface(boldTypeface);
 		Utils.setDashedButton(btnOpenExisting);
 		btnOpenExisting.setOnClickListener(v -> {
-			openExistingClick();
+			stopCount = true;
+			openExistingClick(false);
+		});
+		Utils.setDashedButton(btnMoveToBooksThenOpen);
+		btnMoveToBooksThenOpen.setOnClickListener(v -> {
+			stopCount = true;
+			openExistingClick(true);
 		});
 		if (StrUtils.isEmptyStr(sExistingName))
 			hideExistingFileControls(view);
@@ -692,12 +712,12 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnAsHTML.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 
 		Utils.setDashedButton(btnAsHTML);
-		btnAsHTML.setOnClickListener(v -> switchHTML(true));
+		btnAsHTML.setOnClickListener(v -> { stopCount = true; switchHTML(true); });
 		btnAsText = view.findViewById(R.id.btn_as_text);
 		btnAsText.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 
 		Utils.setDashedButton(btnAsText);
-		btnAsText.setOnClickListener(v -> switchHTML(false));
+		btnAsText.setOnClickListener(v -> { stopCount = true; switchHTML(false); });
 		if (uri != null) hideExistingHttpControls(view);
 			else {
 				switchHTML(true);
@@ -708,7 +728,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnMoveToBooks = view.findViewById(R.id.btn_move_to_books);
 		btnMoveToBooks.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
 		switchMoveToBooks(bMoveToBooks);
-		btnMoveToBooks.setOnClickListener(v -> switchMoveToBooks(!bMoveToBooks));
+		btnMoveToBooks.setOnClickListener(v -> { stopCount = true; switchMoveToBooks(!bMoveToBooks);});
 		BackgroundThread.instance().postBackground(() ->
 				BackgroundThread.instance().postGUI(() -> switchMoveToBooks(bMoveToBooks), 200));
 		setView(view);
@@ -719,15 +739,18 @@ public class ExternalDocCameDialog extends BaseDialog {
 	@Override
 	protected void onPositiveButtonClick() {
 		super.onPositiveButtonClick();
+		stopCount = true;
 	}
 
 	@Override
 	protected void onNegativeButtonClick() {
 		super.onNegativeButtonClick();
+		stopCount = true;
 	}
 
 	protected void onOkButtonClick() {
 		super.onPositiveButtonClick();
+		stopCount = true;
 	}
 
 }

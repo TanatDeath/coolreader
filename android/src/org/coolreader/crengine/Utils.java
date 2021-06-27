@@ -38,12 +38,16 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.format.DateFormat;
+import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -896,20 +900,18 @@ public class Utils {
 
 	// to support API LEVEL 3: View.setContentDescription() has been added only since API LEVEL 4
 	public static void setContentDescription(View view, CharSequence text) {
-		if (DeviceInfo.getSDKLevel() >= 4) {
-			Method m;
-			try {
-				m = view.getClass().getMethod("setContentDescription", CharSequence.class);
-				m.invoke(view, text);
-			} catch (NoSuchMethodException e) {
-				// Ignore
-			} catch (IllegalArgumentException e) {
-				// Ignore
-			} catch (IllegalAccessException e) {
-				// Ignore
-			} catch (InvocationTargetException e) {
-				// Ignore
-			}
+		Method m;
+		try {
+			m = view.getClass().getMethod("setContentDescription", CharSequence.class);
+			m.invoke(view, text);
+		} catch (NoSuchMethodException e) {
+			// Ignore
+		} catch (IllegalArgumentException e) {
+			// Ignore
+		} catch (IllegalAccessException e) {
+			// Ignore
+		} catch (InvocationTargetException e) {
+			// Ignore
 		}
 	}
 
@@ -1209,6 +1211,25 @@ public class Utils {
 		else if (n > maxValue)
 			n = maxValue;
 		return n;
+	}
+
+	public static void setHighLightedText(TextView tv, String textToHighlight, int color) {
+		if (StrUtils.isEmptyStr(textToHighlight)) return;
+		String tvt = tv.getText().toString();
+		if (StrUtils.isEmptyStr(tvt)) return;
+		int ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), 0);
+		Spannable wordToSpan = new SpannableString(tv.getText());
+		for (int ofs = 0; ofs < tvt.length() && ofe != -1; ofs = ofe + 1) {
+			ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), ofs);
+			if (ofe == -1)
+				break;
+			else {
+				// set color here
+				wordToSpan.setSpan(new BackgroundColorSpan(color), ofe,
+						ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				tv.setText(wordToSpan, TextView.BufferType.SPANNABLE);
+			}
+		}
 	}
 
 }

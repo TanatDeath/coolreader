@@ -60,6 +60,8 @@ public class DicToastView {
     public static int IS_LINGVO = 1;
     public static int IS_WIKI = 2;
     public static int IS_DEEPL = 3;
+    public static int IS_DICTCC = 4;
+    public static int IS_GOOGLE = 5;
 
     public static int mColorIconL = Color.GRAY;
     public static PopupWindow curWindow = null;
@@ -71,6 +73,7 @@ public class DicToastView {
 
     private static class Toast {
         private View anchor;
+        private String sFindText;
         private String msg;
         private int duration;
         private ArrayList<WikiArticle> arrWA;
@@ -84,11 +87,13 @@ public class DicToastView {
         private boolean mUseFirstLink;
         private String mPicAddr;
 
-        private Toast(View anchor, String msg, int duration, ArrayList<WikiArticle> arrWA,
+        private Toast(View anchor,
+                      String sFindText, String msg, int duration, ArrayList<WikiArticle> arrWA,
                       int dicType, String dicName, Dictionaries.DictInfo curDict,
                       String link, String link2, int curAction, boolean useFirstLink,
                       String picAddr) {
             this.anchor = anchor;
+            this.sFindText = sFindText;
             this.msg = msg;
             this.duration = duration;
             this.arrWA = arrWA;
@@ -164,24 +169,6 @@ public class DicToastView {
             return ITEM_POSITION;
         }
 
-        public void setHighLightedText(TextView tv, String textToHighlight) {
-            if (StrUtils.isEmptyStr(textToHighlight)) return;
-            String tvt = tv.getText().toString();
-            if (StrUtils.isEmptyStr(tvt)) return;
-            int ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), 0);
-            Spannable wordToSpan = new SpannableString(tv.getText());
-            for (int ofs = 0; ofs < tvt.length() && ofe != -1; ofs = ofe + 1) {
-                ofe = tvt.toUpperCase().indexOf(textToHighlight.toUpperCase(), ofs);
-                if (ofe == -1)
-                    break;
-                else {
-                    // set color here
-                    wordToSpan.setSpan(new BackgroundColorSpan(mColorIconL), ofe, ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    tv.setText(wordToSpan, TextView.BufferType.SPANNABLE);
-                }
-            }
-        }
-
         public View getView(int position, View convertView, ViewGroup parent) {
             View view;
             //if (mInflater == null) return null;
@@ -198,12 +185,12 @@ public class DicToastView {
                 sSnippet = Utils.cleanupHtmlTags(wa.snippet);
                 labelView.setText(sTitle);
                 titleTextView.setText(sSnippet);
-                if (!StrUtils.isEmptyStr(sFindText))
-                    setHighLightedText(titleTextView,sFindText);
             } else {
                 labelView.setText(sTitle);
                 titleTextView.setText(sSnippet);
             }
+            if (!StrUtils.isEmptyStr(sFindText))
+                Utils.setHighLightedText(titleTextView, sFindText, mColorIconL);
             return view;
         }
 
@@ -285,7 +272,8 @@ public class DicToastView {
         mListLink2 = link2;
         mListUseFirstLink = useFirstLink;
         try {
-            queue.put(new Toast(anchor, msg, duration, arrWA, dicT, dicName, curDict, link, link2, curAction, useFirstLink, picAddr));
+            queue.put(new Toast(anchor, sFindText, msg,
+                    duration, arrWA, dicT, dicName, curDict, link, link2, curAction, useFirstLink, picAddr));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -457,6 +445,7 @@ public class DicToastView {
         if (StrUtils.isEmptyStr(t.mPicAddr)) {
             tv = window.getContentView().findViewById(R.id.dic_text);
             tv.setText(t.msg);
+            if (!StrUtils.isEmptyStr(sFindText)) Utils.setHighLightedText(tv,sFindText, mColorIconL);
         } else {
             tv2 = window.getContentView().findViewById(R.id.dic_text_flow);
             tv2.setText(t.msg);
@@ -614,7 +603,12 @@ public class DicToastView {
                 TableRow yndRow = (TableRow) mInflater.inflate(R.layout.dic_ynd_item, null);
                 dicTable.addView(yndRow);
                 TextView tvYnd1 = (TextView) window.getContentView().findViewById(R.id.ynd_tv1);
-                tvYnd1.setText(t.mDicName);
+                if (t.dicType == IS_DICTCC) {
+                    String s = StrUtils.getNonEmptyStr(t.mDicName,true);
+                    if (s.contains("?")) s = s.substring(0, s.indexOf("?"));
+                    tvYnd1.setText(s);
+                } else
+                    tvYnd1.setText(t.mDicName);
                 Integer tSizeI = tSize;
                 Double tSizeD = Double.valueOf(tSizeI.doubleValue() *0.8);
                 if (tSize > 0) {
@@ -627,6 +621,8 @@ public class DicToastView {
                     if (t.dicType == IS_LINGVO) sLink = "https://developers.lingvolive.com/";
                     if (t.dicType == IS_DEEPL) sLink = "https://www.deepl.com/";
                     if (t.dicType == IS_WIKI) sLink = t.mDicName;
+                    if (t.dicType == IS_DICTCC) sLink = t.mDicName;
+                    if (t.dicType == IS_GOOGLE) sLink = "https://translate.google.com/";
                     Uri uri = Uri.parse(sLink);
                     Context context = t.anchor.getContext();
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);

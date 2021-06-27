@@ -2,7 +2,6 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.cloud.litres.LitresSearchParams;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -160,8 +159,12 @@ public class BrowserViewLayout extends ViewGroup {
 			});
 
 			filter_edit.requestFocus();
+			BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+					.postBackground(() -> BackgroundThread.instance()
+							.postGUI(() -> KeyboardUtils.showKeyboard(activity))), 200);
 		} else {
 			filterIsShown = false;
+			KeyboardUtils.hideKeyboard(activity, filterView);
 			if (filterView!=null) ll_path.removeView(filterView);
 			ll_path.removeAllViews();
 			for (TextView tv : arrLblPaths) {
@@ -260,7 +263,9 @@ public class BrowserViewLayout extends ViewGroup {
 		}
 	}
 
+	private boolean progressStatusEnabled = false;
 	public void setBrowserProgressStatus(boolean enable) {
+		progressStatusEnabled = enable;
 		ProgressBar progressBar = titleView.findViewById(R.id.progress);
 		progressBar.setVisibility(enable ? View.VISIBLE : View.GONE);
 	}
@@ -273,6 +278,7 @@ public class BrowserViewLayout extends ViewGroup {
 		titleView = inflater.inflate(R.layout.browser_status_bar, null);
 		addView(titleView);
 		setBrowserTitle(browserTitle, null);
+		setBrowserProgressStatus(progressStatusEnabled);
 		toolbarView.setBackgroundResource(theme.getBrowserToolbarBackground(toolbarView.isVertical()));
 		toolbarView.onThemeChanged(theme);
 		requestLayout();

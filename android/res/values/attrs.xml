@@ -8,6 +8,7 @@
     <attr name="statusbarBackgroundBrowser" format="reference|color" />
     <attr name="statusbarBackgroundReader" format="reference|color" />
     <attr name="textColorToolBarLabel" format="reference|color" />
+    <attr name="textColorOptionLabel" format="reference|color" />
     <attr name="textColorOptionValue" format="reference|color" />
     <declare-styleable name="View">
         <attr name="horizontalDelimiterRoot"/>
@@ -374,6 +375,7 @@
     <attr name="attr_icons8_user_dic_panel" format="reference" />
     <attr name="attr_icons8_group" format="reference" />
     <attr name="attr_icons8_group2" format="reference" />
+    <attr name="attr_icons8_airplane_mode_on" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

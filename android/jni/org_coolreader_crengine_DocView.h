@@ -349,7 +349,6 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_getPageImageTextureI
 JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftInternal
         (JNIEnv *, jobject, jstring);
 
-
 #ifdef __cplusplus
 }
 #endif

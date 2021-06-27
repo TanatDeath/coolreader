@@ -1,8 +1,10 @@
 // Main Class
 package org.coolreader;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -111,6 +113,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -1607,12 +1611,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 
 		if (mUserDic == null) {
-			waitForCRDBService(() -> getDB().loadUserDic(new CRDBService.UserDicLoadingCallback() {
-					@Override
-					public void onUserDicLoaded(HashMap<String, UserDicEntry> list) {
-						mUserDic = list;
-					}
-				}));
+			waitForCRDBService(() -> getDB().loadUserDic(list -> mUserDic = list));
 		}
 
 		if (isBookOpened()) {
@@ -1866,19 +1865,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mReaderView != null)
 				mReaderView.updateSettings(props);
 		}
-		// if we start first time - then read system backlight
-		//log.i("bGetBacklightFromSystem: "+bGetBacklightFromSystem);
-
-		// Do this CR's way - not setting of brighness on Onyx at startup
-		//if (bGetBacklightFromSystem) {
-		//	log.i("initialBacklight: "+initialBacklight);
-		//	log.i("initialWarmBacklight: "+initialWarmBacklight);
-		//	initialBacklight = mEinkScreen.getFrontLightValue(this);
-		//	initialWarmBacklight = mEinkScreen.getWarmLightValue(this);
-		//	log.i("initialBacklight 2: "+initialBacklight);
-		//	log.i("initialWarmBacklight 2: "+initialWarmBacklight);
-		//}
-
 		for ( Map.Entry<Object, Object> entry : changedProps.entrySet() ) {
     		String key = (String)entry.getKey();
     		final String value = (String)entry.getValue();
@@ -1894,12 +1880,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (initialBacklight != -1) {
 				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
 					.postBackground(() -> BackgroundThread.instance()
-							.postGUI(() -> setScreenBacklightLevel(initialBacklight))), 100);
+							.postGUI(() -> {
+								setScreenBacklightLevel(initialBacklight);
+								initialBacklight = -1;
+							})), 100);
 		}
 		if (initialWarmBacklight != -1)
 				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
 						.postBackground(() -> BackgroundThread.instance()
-								.postGUI(() -> setScreenWarmBacklightLevel(initialWarmBacklight))), 200);
+								.postGUI(() -> {
+									setScreenWarmBacklightLevel(initialWarmBacklight);
+									initialWarmBacklight = -1;
+								})), 200);
 		BOOK_READING_STATE_NO_STATE = "["+getString(R.string.book_state_none)+"]";
 		BOOK_READING_STATE_TO_READ = "["+getString(R.string.book_state_toread)+"]";
 		BOOK_READING_STATE_READING = "["+getString(R.string.book_state_reading)+"]";
@@ -2096,6 +2088,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						ReaderAction.SEARCH,
 						ReaderAction.SCAN_DIRECTORY_RECURSIVE,
 						ReaderAction.FILE_BROWSER_SORT_ORDER,
+						ReaderAction.SAVE_LOGCAT,
 						ReaderAction.EXIT
 						), false, false, true, true);
 				mBrowserToolBar.setBackgroundResource(R.drawable.ui_status_background_browser_dark);
@@ -2133,6 +2126,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							break;
 						case DCMD_FILE_BROWSER_SORT_ORDER:
 							mBrowser.showSortOrderMenu();
+							break;
+						case DCMD_SAVE_LOGCAT:
+							createLogcatFile();
 							break;
 						default:
 							// do nothing
@@ -2294,9 +2290,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void setBrowserProgressStatus(boolean enable) {
-		if (!enable) {
-			log.e("setBrowserProgressStatus(false)");
-		}
 		if (mBrowserFrame != null)
 			mBrowserFrame.setBrowserProgressStatus(enable);
 	}
@@ -2345,6 +2338,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		try {
 			mDictionaries.findInDictionary(s, view, dcb);
 		} catch (DictionaryException e) {
+			if (e.getMessage().contains("is not installed")) {
+				optionsFilter = "";
+				showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			}
 			showToast(e.getMessage());
 		}
 	}
@@ -2691,7 +2688,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(() -> {
 					OptionsDialog.toastShowCnt++;
-					if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
+					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null);
 					dlg.show();
 				});
@@ -2728,13 +2725,49 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			BackgroundThread.instance().executeGUI(() -> {
 				if ((!selectOption.equals(PROP_FILEBROWSER_TITLE))&&(selectOption == null)) {
 					OptionsDialog.toastShowCnt++;
-					if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
+					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 				}
 				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts);
 				dlg.selectedOption = selectOption;
 				dlg.show();
 			});
 		});
+	}
+
+	public void AskBookStars(FileInfo book) {
+		BackgroundThread.instance().postGUI(() -> {
+			ArrayList<String> sButtons = new ArrayList<String>();
+			sButtons.add("*" + getString(R.string.book_info_rating));
+			sButtons.add(getString(R.string.mi_book_rate_5));
+			sButtons.add(getString(R.string.mi_book_rate_4));
+			sButtons.add(getString(R.string.mi_book_rate_3));
+			sButtons.add(getString(R.string.mi_book_rate_2));
+			sButtons.add(getString(R.string.mi_book_rate_1));
+			sButtons.add(getString(R.string.mi_book_rate_0));
+			sButtons.add(getString(R.string.str_cancel));
+			SomeButtonsToolbarDlg.showDialog(this, getReaderView().getSurface(), 10, true,
+					"",
+				sButtons, null, (o22, btnPressed) -> {
+					if (btnPressed.equals(getString(R.string.mi_book_rate_5))) {
+						setBookRate(book, 5);
+					}
+					if (btnPressed.equals(getString(R.string.mi_book_rate_4))) {
+						setBookRate(book, 4);
+					}
+					if (btnPressed.equals(getString(R.string.mi_book_rate_3))) {
+						setBookRate(book, 3);
+					}
+					if (btnPressed.equals(getString(R.string.mi_book_rate_2))) {
+						setBookRate(book, 2);
+					}
+					if (btnPressed.equals(getString(R.string.mi_book_rate_1))) {
+						setBookRate(book, 1);
+					}
+					if (btnPressed.equals(getString(R.string.mi_book_rate_0))) {
+						setBookRate(book, 0);
+					}
+				});
+		}, 200);
 	}
 
 	public void updateCurrentPositionStatus(FileInfo book, Bookmark position, PositionProperties props) {
@@ -2762,9 +2795,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					sButtons, null, (o22, btnPressed) -> {
 							if (btnPressed.equals(getString(R.string.str_yes))) {
 								setBookStateFinished(book1);
+								AskBookStars(book1);
 							}
 							if (btnPressed.equals(getString(R.string.str_yes_and_del_pos))) {
 								setBookStateFinished(book1);
+								AskBookStars(book1);
 								CloudSync.loadFromJsonInfoFileList(this,
 										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.DELETE_FILES, false);
 							}
@@ -2782,6 +2817,23 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			getDB().flush();
 			if (bookInfo.getFileInfo() != null) {
 				bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
+				if (bookInfo.getFileInfo().parent != null)
+					directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+			}
+			BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+			if (bi2 != null)
+				bi2.getFileInfo().setFileProperties(book1);
+		});
+	}
+
+	private void setBookRate(FileInfo book1, int rate) {
+		Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
+			book1.setRate(rate);
+			BookInfo bi = new BookInfo(book1);
+			getDB().saveBookInfo(bi);
+			getDB().flush();
+			if (bookInfo.getFileInfo() != null) {
+				bookInfo.getFileInfo().setRate(rate);
 				if (bookInfo.getFileInfo().parent != null)
 					directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
 			}
@@ -2906,6 +2958,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						}
 						if (btnPressed.equals(getString(R.string.open_url_kr))) {
 							processIntentContent("", url);
+							return;
 						}
 					});
 		}
@@ -3028,10 +3081,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void askDeleteCalibreCatalog(final FileInfo item)
 	{
 		askConfirmation(R.string.win_title_confirm_catalog_delete, () -> {
-			if (item != null && item.isOPDSDir()) {
+			if (item != null && item.isCalibreRoot()) {
 				waitForCRDBService(() -> {
 					getDB().removeCalibreCatalog(item.id);
 					directoryUpdated(Services.getScanner().createCalibreRoot());
+					refreshOPDSRootDirectory(true);
 				});
 			}
 		});
@@ -3733,9 +3787,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			opds.isScanned = true;
 			opds.parent = Services.getScanner().getOPDSRoot();
 		}
-		OPDSCatalogEditDialog dlg = new OPDSCatalogEditDialog(CoolReader.this, opds,
-				() -> refreshOPDSRootDirectory(true));
-		dlg.show();
+		if (StrUtils.getNonEmptyStr(opds.pathname, false).startsWith("@calibre")) {
+			CalibreCatalogEditDialog dlg = new CalibreCatalogEditDialog(CoolReader.this, opds,
+					() -> refreshOPDSRootDirectory(true));
+			dlg.show();
+		} else {
+			OPDSCatalogEditDialog dlg = new OPDSCatalogEditDialog(CoolReader.this, opds,
+					() -> refreshOPDSRootDirectory(true));
+			dlg.show();
+		}
 	}
 
 	public void editCalibreCatalog(FileInfo fi) {
@@ -4344,6 +4404,34 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public boolean checkLocationPermission() {
 		return geoLastData.checkLocationPermission(this);
 	}
+
+	public boolean isNetworkAvailable() {
+		ConnectivityManager manager =
+				(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+		boolean isAvailable = false;
+		if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
+			// Network is present and connected
+			isAvailable = true;
+		}
+		return isAvailable;
+	}
+
+//	public boolean initSDCV() {
+//		File f = new File(getSettingsFileF(0).getParent() + "/sdcv");
+//		if (!f.exists()) {
+//			InputStream targetStream = getResources().openRawResource(R.raw.sdcv);
+//			if (targetStream != null) {
+//				try {
+//					Utils.saveStreamToFile(targetStream, getSettingsFileF(0).getParent() + "/sdcv");
+//				} catch (Exception e) {
+//					return false;
+//				}
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 }
 

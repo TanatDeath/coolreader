@@ -8,7 +8,6 @@ import android.util.Log;
 
 import org.coolreader.R;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -653,6 +652,10 @@ public class Engine {
 
 	private native static String[] getFontFaceAndFileNameListInternal();
 
+	private native static int[] getAvailableFontWeightInternal(String fontFace);
+
+	private native static int[] getAvailableSynthFontWeightInternal();
+
 	private native static String[] getArchiveItemsInternal(String arcName); // pairs: pathname, size
 
 	private native static boolean setKeyBacklightInternal(int value);
@@ -1109,8 +1112,20 @@ public class Engine {
 	}
 
 	public static String[] getFontFaceAndFileNameList() {
-		synchronized(lock) {
+		synchronized (lock) {
 			return getFontFaceAndFileNameListInternal();
+		}
+	}
+
+	public static int[] getAvailableFontWeight(String fontFace) {
+		synchronized (lock) {
+			return getAvailableFontWeightInternal(fontFace);
+		}
+	}
+
+	public static int[] getAvailableSynthFontWeight() {
+		synchronized (lock) {
+			return getAvailableSynthFontWeightInternal();
 		}
 	}
 
@@ -1347,12 +1362,12 @@ public class Engine {
 		try {
 			String reg = "(?i).*vold.*(vfat|ntfs|exfat|fat32|ext3|ext4).*rw.*";
 			String reg2 = "(?i).*fuse.*(vfat|ntfs|exfat|fat32|ext3|ext4|fuse).*rw.*";
-			StringBuilder s = new StringBuilder();
+			String s = "";
 			try {
 				final Process process = new ProcessBuilder().command("mount")
 						.redirectErrorStream(true).start();
 				ProcessIOWithTimeout processIOWithTimeout = new ProcessIOWithTimeout(process, 1024);
-				int exitCode = processIOWithTimeout.waitForProcess(100);
+				int exitCode = processIOWithTimeout.waitForProcess(200);
 				if (exitCode == ProcessIOWithTimeout.EXIT_CODE_TIMEOUT) {
 					// Timeout
 					log.e("Timed out waiting for mount command output, " +
@@ -1360,19 +1375,13 @@ public class Engine {
 					process.destroy();
 					return out;
 				}
-				try (ByteArrayInputStream inputStream = new ByteArrayInputStream(processIOWithTimeout.receivedData())) {
-					byte[] buffer = new byte[1024];
-					int rb;
-					while ((rb = inputStream.read(buffer)) != -1) {
-						s.append(new String(buffer, 0, rb));
-					}
-				}
+				s = processIOWithTimeout.receivedText();
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 
 			// parse output
-			final String[] lines = s.toString().split("\n");
+			final String[] lines = s.split("\n");
 			for (String line : lines) {
 				if (!line.toLowerCase(Locale.US).contains("asec")) {
 					log.d("mount entry: " + line);
@@ -1847,9 +1856,9 @@ public class Engine {
 			new BackgroundTextureInfo("bg_paper2_dark", "Paper 2 (dark)",
 					R.drawable.bg_paper2_dark),
 			new BackgroundTextureInfo("tx_wood", "Wood",
-					DeviceInfo.getSDKLevel() == 3 ? R.drawable.tx_wood_v3 : R.drawable.tx_wood),
+					R.drawable.tx_wood),
 			new BackgroundTextureInfo("tx_wood_dark", "Wood (dark)",
-					DeviceInfo.getSDKLevel() == 3 ? R.drawable.tx_wood_dark_v3 : R.drawable.tx_wood_dark),
+					R.drawable.tx_wood_dark),
 			new BackgroundTextureInfo("tx_fabric", "Fabric",
 					R.drawable.tx_fabric),
 			new BackgroundTextureInfo("tx_fabric_dark", "Fabric (dark)",

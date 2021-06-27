@@ -6,11 +6,12 @@
 #define PROP_FONT_GAMMA_INDEX        "font.gamma.index" // currently supported: 0..30 ~= 0.65 .. 1.35, see gammatbl.h
 #define PROP_FONT_ANTIALIASING       "font.antialiasing.mode"
 #define PROP_FONT_HINTING            "font.hinting.mode"
+#define PROP_FONT_CHAR_SPACE_COMPRESS "font.char.space.compress"
 #define PROP_FONT_SHAPING            "font.shaping.mode"
 #define PROP_FONT_KERNING_ENABLED    "font.kerning.enabled"
 #define PROP_FONT_COLOR              "font.color.default"
 #define PROP_FONT_FACE               "font.face.default"
-#define PROP_FONT_WEIGHT_EMBOLDEN    "font.face.weight.embolden"
+#define PROP_FONT_BASE_WEIGHT        "font.face.base.weight"        // replaces PROP_FONT_WEIGHT_EMBOLDEN ("font.face.weight.embolden")
 #define PROP_FONT_ITALICIZE          "font.face.italicize"
 #define PROP_FONT_EMBOLDEN_ALG       "font.face.embolden.alg"
 #define PROP_FONT_FINE_EMBOLDEN      "font.face.fine.embolden"

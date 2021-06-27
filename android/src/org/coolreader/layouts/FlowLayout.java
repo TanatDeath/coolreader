@@ -32,6 +32,18 @@ public class FlowLayout extends ViewGroup {
 		mPaint.setStrokeWidth(2.0f);
 	}
 
+	public FlowLayout(Context context) {
+		super(context);
+
+		mHorizontalSpacing = 5;
+		mVerticalSpacing = 5;
+
+		mPaint = new Paint();
+		mPaint.setAntiAlias(true);
+		mPaint.setColor(0xffff0000);
+		mPaint.setStrokeWidth(2.0f);
+	}
+
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec) - getPaddingRight();

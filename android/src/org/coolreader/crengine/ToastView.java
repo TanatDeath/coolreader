@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -30,11 +31,13 @@ public class ToastView {
         private View anchor;
         private String msg;
         private int duration;
+        private String word;
 
-        private Toast(View anchor, String msg, int duration) {
+        private Toast(View anchor, String msg, int duration, String word) {
             this.anchor = anchor;
             this.msg = msg;
             this.duration = duration;
+            this.word = word;
         }
     }
 
@@ -46,6 +49,7 @@ public class ToastView {
     private static int colorGray;
     private static int colorGrayC;
     private static int colorIcon;
+    private static int mColorIconL = Color.GRAY;
     private static BaseActivity mActivity;
 
     private static final Runnable handleDismiss = () -> {
@@ -56,19 +60,20 @@ public class ToastView {
     };
 
     static int fontSize = 24;
-    public static void showToast(BaseActivity act, View anchor, String msg, int duration, int textSize) {
+    public static void showToast(BaseActivity act, View anchor, String msg, int duration, int textSize, String word) {
         TypedArray a = act.getTheme().obtainStyledAttributes(new int[]
-                {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
+                {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
         colorGray = a.getColor(0, Color.GRAY);
         colorGrayC = a.getColor(1, Color.GRAY);
         colorIcon = a.getColor(2, Color.GRAY);
+        mColorIconL = a.getColor(3, Color.GRAY);
         a.recycle();
 
         mReaderView = anchor;
         mActivity = act;
     	fontSize = textSize;
         try {
-            queue.put(new Toast(anchor, msg, duration));
+            queue.put(new Toast(anchor, msg, duration, word));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -113,6 +118,7 @@ public class ToastView {
         toast_ll.setBackgroundColor(colorGrayC);
         TextView tv = (TextView) window.getContentView().findViewById(R.id.toast);
         tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
+        //tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
         String msg = t.msg;
         if (msg.startsWith("*")) {
             msg=msg.substring(1);
@@ -126,6 +132,7 @@ public class ToastView {
                 }
         }
         tv.setText(msg);
+        if (!StrUtils.isEmptyStr(t.word)) Utils.setHighLightedText(tv, t.word, mColorIconL);
         tv.setOnClickListener((v) -> {
             if (((CoolReader)mActivity).getmReaderView() != null)
                 ((CoolReader)mActivity).getmReaderView().disableTouch = true;

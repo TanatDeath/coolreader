@@ -1649,7 +1649,7 @@ public class BaseActivity extends Activity implements Settings {
 	public void showToast(String msg, int duration) {
 		log.v("showing toast: " + msg);
 		if (DeviceInfo.isUseCustomToast(getScreenForceEink())) {
-			ToastView.showToast(this, getContentView(), msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
+			ToastView.showToast(this, getContentView(), msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20), "");
 		} else {
 			// classic Toast
 			Toast toast = Toast.makeText(this, msg, duration);
@@ -1664,7 +1664,7 @@ public class BaseActivity extends Activity implements Settings {
 	public void showToast(String msg, int duration, View view) {
 		log.v("showing toast: " + msg);
 		if (DeviceInfo.isUseCustomToast(getScreenForceEink())) {
-			ToastView.showToast(this, view, msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20));
+			ToastView.showToast(this, view, msg, Toast.LENGTH_LONG, settings().getInt(ReaderView.PROP_FONT_SIZE, 20), "");
 		} else {
 			// classic Toast
 			Toast toast = Toast.makeText(this, msg, duration);
@@ -1673,6 +1673,10 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void showToast(String msg, int duration, View view, boolean forceCustom, int textSize) {
+		showToast( msg, duration, view, forceCustom, textSize, "");
+	}
+
+	public void showToast(String msg, int duration, View view, boolean forceCustom, int textSize, String word) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
@@ -1680,7 +1684,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (textSize == 0) textSize1 = 16; //settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 			//	settings().getInt(ReaderView.PROP_FONT_SIZE, 20);
 		if (DeviceInfo.isUseCustomToast(getScreenForceEink()) || forceCustom) {
-			ToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, textSize1);
+			ToastView.showToast(this, view1, msg, Toast.LENGTH_LONG, textSize1, word);
 		} else {
 			// classic Toast
 			Toast toast = Toast.makeText(this, msg, duration);
@@ -1812,15 +1816,94 @@ public class BaseActivity extends Activity implements Settings {
 			else {
 				toast_ll.setBackgroundColor(colorGrayC);
 				Button toast_btn = windowCenterPopup.getContentView().findViewById(R.id.toast_btn);
+				final ReaderView rv = ((CoolReader) this).getReaderView();
 				if (toast_btn != null) {
 					toast_btn.setBackgroundColor(colorGray);
 					tintViewIcons(toast_ll, true);
 					toast_btn.setPadding(6, 6, 6, 6);
 					toast_btn.setOnClickListener((v) -> {
-						((CoolReader) this).getReaderView().skipFallbackWarning = true;
-						((CoolReader) this).getReaderView().setSetting(PROP_APP_SCREEN_BACKLIGHT, "-1");		// system default backlight level
-						((CoolReader) this).getReaderView().skipFallbackWarning = true;
-						((CoolReader) this).getReaderView().setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT, "-1"); // and dont forget the warm one
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT, "-1");		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT, "-1"); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+				Button save_1 = windowCenterPopup.getContentView().findViewById(R.id.save_brightness_1);
+				if (save_1 != null) {
+					save_1.setBackgroundColor(colorGray);
+					save_1.setOnClickListener((v) -> {
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT1,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1));		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT1,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT, -1)); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+				Button save_2 = windowCenterPopup.getContentView().findViewById(R.id.save_brightness_2);
+				if (save_2 != null) {
+					save_2.setBackgroundColor(colorGray);
+					save_2.setOnClickListener((v) -> {
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT2,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1));		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT2,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT, -1)); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+				Button save_3 = windowCenterPopup.getContentView().findViewById(R.id.save_brightness_3);
+				if (save_3 != null) {
+					save_3.setBackgroundColor(colorGray);
+					save_3.setOnClickListener((v) -> {
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT3,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT, -1));		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT3,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT, -1)); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+				Button load_1 = windowCenterPopup.getContentView().findViewById(R.id.load_brightness_1);
+				if (load_1 != null) {
+					load_1.setBackgroundColor(colorGray);
+					load_1.setOnClickListener((v) -> {
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT1, -1));		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT1, -1)); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+				Button load_2 = windowCenterPopup.getContentView().findViewById(R.id.load_brightness_2);
+				if (load_2 != null) {
+					load_2.setBackgroundColor(colorGray);
+					load_2.setOnClickListener((v) -> {
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT2, -1));		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT2, -1)); // and dont forget the warm one
+						windowCenterPopup.dismiss();
+					});
+				}
+				Button load_3 = windowCenterPopup.getContentView().findViewById(R.id.load_brightness_3);
+				if (load_3 != null) {
+					load_3.setBackgroundColor(colorGray);
+					load_3.setOnClickListener((v) -> {
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_BACKLIGHT,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT3, -1));		// system default backlight level
+						rv.skipFallbackWarning = true;
+						rv.setSetting(PROP_APP_SCREEN_WARM_BACKLIGHT,
+								"" + settings().getInt(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT3, -1)); // and dont forget the warm one
 						windowCenterPopup.dismiss();
 					});
 				}
@@ -1994,12 +2077,16 @@ public class BaseActivity extends Activity implements Settings {
 //	}
 
 	public void showSToast(String msg) {
+		showSToast(msg, "");
+	}
+
+	public void showSToast(String msg, String word) {
 		boolean bShown = false;
 		if (this instanceof CoolReader)
 			if (((CoolReader) this).getReaderView()!=null)
 				if (((CoolReader) this).getReaderView().getSurface()!=null) {
 					bShown = true;
-					showToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), true, 0);
+					showToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), true, 0, word);
 				}
 		if (!bShown) {
 			showToast(msg);
@@ -2172,19 +2259,20 @@ public class BaseActivity extends Activity implements Settings {
 		}
 		boolean toolbarEnabled = props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE;
 		if (isFullscreen()) toolbarEnabled = toolbarEnabled && (!props.getBool(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false));
-		if (!menuTapActionFound && !menuKeyActionFound && !toolbarEnabled) {
-			showNotice(R.string.inconsistent_options,
-					R.string.inconsistent_options_toolbar, () -> {
-						// enabled toolbar
-						setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), true);
-						setSetting(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, String.valueOf(0), true);
-					},
-					R.string.inconsistent_options_tap_reading_menu, () -> {
-						String paramName = ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".5";
-						setSetting(paramName, ReaderAction.READER_MENU.id, true);
-					}
-			);
-		}
+		// KR - disabling this, seems to work with bugs
+//		if (!menuTapActionFound && !menuKeyActionFound && !toolbarEnabled) {
+//			showNotice(R.string.inconsistent_options,
+//					R.string.inconsistent_options_toolbar, () -> {
+//						// enabled toolbar
+//						setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), true);
+//						setSetting(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, String.valueOf(0), true);
+//					},
+//					R.string.inconsistent_options_tap_reading_menu, () -> {
+//						String paramName = ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".5";
+//						setSetting(paramName, ReaderAction.READER_MENU.id, true);
+//					}
+//			);
+//		}
 		// TODO: check any other options for compatibility
 	}
 
@@ -2701,7 +2789,7 @@ public class BaseActivity extends Activity implements Settings {
 			new DefTapAction(5, false, ReaderAction.READER_MENU),
 			new DefTapAction(5, true, ReaderAction.OPTIONS),
 		};
-		
+
 		
 		private boolean isValidFontFace(String face) {
 			String[] fontFaces = Engine.getFontFaceList();
@@ -2798,6 +2886,12 @@ public class BaseActivity extends Activity implements Settings {
 					props.remove("crengine.hyphenation.dictionary.code");
 				}
 			}
+			String oldEmbolden = props.getProperty(ReaderView.PROP_FONT_WEIGHT_EMBOLDEN_OBSOLETED);
+			if (null != oldEmbolden && oldEmbolden.length() > 0) {
+				boolean flg = "1".equals(oldEmbolden);
+				props.applyDefault(ReaderView.PROP_FONT_BASE_WEIGHT, flg ? 700 : 400);
+				props.remove(PROP_FONT_WEIGHT_EMBOLDEN_OBSOLETED);
+			}
 		}
 		
 		public Properties loadSettings(BaseActivity activity, File file) {
@@ -2816,8 +2910,10 @@ public class BaseActivity extends Activity implements Settings {
 	        // default key actions
 
 			for (DefKeyAction ka : DEF_KEY_ACTIONS) {
+				log.v("applying: " +ka.getProp()+ ", " +ka.action.id);
 				props.applyDefault(ka.getProp(), ka.action.id);
 			}
+
 			if (DeviceInfo.NOOK_NAVIGATION_KEYS) {
 	        	// Add default key mappings for Nook devices & also override defaults for some keys (PAGE_UP, PAGE_DOWN)
 		        for ( DefKeyAction ka : DEF_NOOK_KEY_ACTIONS ) {
@@ -2825,9 +2921,6 @@ public class BaseActivity extends Activity implements Settings {
 		        }
 	        }
 
-			/*
-			 * Moved to function validateSettings()
-			 *
 			boolean menuKeyActionFound = false;
 			for (DefKeyAction ka : DEF_KEY_ACTIONS) {
 				if (ReaderAction.READER_MENU.id.equals(ka.action.id)) {
@@ -2849,16 +2942,16 @@ public class BaseActivity extends Activity implements Settings {
 			// default tap zone actions
 			for (DefTapAction ka : DEF_TAP_ACTIONS) {
 				String paramName = ka.longPress ? ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".long." + ka.zone : ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + "." + ka.zone;
-
-				if (ka.zone == 5 && !ka.longPress && !menuTapActionFound && !(activity.hasHardwareMenuKey() && menuKeyActionFound) && !toolbarEnabled) {
-					// force assignment of central tap zone
-					log.w("force assignment of central tap zone to " + ka.action.id);
-					props.setProperty(paramName, ka.action.id);
-				} else {
-					props.applyDefault(paramName, ka.action.id);
-				}
+//				KR - remove tap zone reassignment
+//				if (ka.zone == 5 && !ka.longPress && !menuTapActionFound && !(activity.hasHardwareMenuKey() && menuKeyActionFound) && !toolbarEnabled) {
+//					// force assignment of central tap zone
+//					log.w("force assignment of central tap zone to " + ka.action.id);
+//					props.setProperty(paramName, ka.action.id);
+//				} else {
+//					props.applyDefault(paramName, ka.action.id);
+//				}
+				props.applyDefault(paramName, ka.action.id);
 			}
-			*/
 	        
 	        if (DeviceInfo.EINK_NOOK) {
 	    		props.applyDefault(ReaderView.PROP_PAGE_ANIMATION, ReaderView.PAGE_ANIMATION_NONE);
@@ -2928,6 +3021,7 @@ public class BaseActivity extends Activity implements Settings {
 	        fixFontSettings(props);
 			upgradeSettings(props);
 	        props.applyDefault(ReaderView.PROP_FONT_SIZE, String.valueOf(fontSize));
+			props.applyDefault(ReaderView.PROP_FONT_BASE_WEIGHT, 400);
 			props.applyDefault(ReaderView.PROP_FONT_SIZE_USER_DIC, String.valueOf(statusFontSize));
 	        props.applyDefault(ReaderView.PROP_FONT_HINTING, "2");
 	        props.applyDefault(ReaderView.PROP_STATUS_FONT_SIZE, DeviceInfo.EINK_NOOK ? "15" : String.valueOf(statusFontSize));
@@ -2983,6 +3077,8 @@ public class BaseActivity extends Activity implements Settings {
 
 			props.applyDefault(ReaderView.PROP_CLOUD_WIKI_SAVE_HISTORY, "0");
 
+			// Here use mActivity.getDensityDpi() is incorrect
+			// since lvrend.cpp assumes a base DPI of 96 and *not* 160 when using the PROP_RENDER_DPI property!
 			props.setProperty(ReaderView.PROP_RENDER_DPI, Integer.valueOf((int)(96*mActivity.getDensityFactor())).toString());
 
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMOUT_BLOCK_MODE, "1");

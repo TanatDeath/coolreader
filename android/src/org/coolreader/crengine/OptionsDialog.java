@@ -158,7 +158,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 		return curSize;
 	}
-	
+
+	int[] mSynthWeights;
 	public static int findBacklightSettingIndex(int value) {
 		int bestIndex = 0;
 		int bestDiff = -1;
@@ -899,6 +900,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 
+	int[] mCharCompress = new int[] {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+	};
+
 	int[] mSecGroupCommon = new int[] {
 			0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 	};
@@ -1182,6 +1187,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	OptionBase mTTSUseDocLangOption;
 	ListOption mTTSLanguageOption;
 	ListOption mTTSVoiceOption;
+	ListOption mFontWeightOption;
+	OptionBase mFontHintingOption;
 
 	public final static int OPTION_VIEW_TYPE_NORMAL = 0;
 	public final static int OPTION_VIEW_TYPE_BOOLEAN = 1;
@@ -1434,7 +1441,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					TextView label = (TextView) view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+							if (!isSettingBelongToProfile(property)) {
 								if (!StrUtils.isEmptyStr(property))
 									label.setTypeface(null, Typeface.ITALIC);
 							}
@@ -1565,7 +1572,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					TextView label = (TextView) view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+							if (!isSettingBelongToProfile(property)) {
 								if (!StrUtils.isEmptyStr(property))
 									label.setTypeface(null, Typeface.ITALIC);
 							}
@@ -1744,7 +1751,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					TextView label = view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+							if (!isSettingBelongToProfile(property)) {
 								if (!StrUtils.isEmptyStr(property))
 									label.setTypeface(null, Typeface.ITALIC);
 							}
@@ -1823,7 +1830,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					TextView label = view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+							if (!isSettingBelongToProfile(property)) {
 								if (!StrUtils.isEmptyStr(property))
 									label.setTypeface(null, Typeface.ITALIC);
 							}
@@ -3141,6 +3148,40 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						dlgA.show();
 					}, false).
 					setIconIdByAttr(R.attr.attr_icons8_quick_transl_dir, R.drawable.icons8_quick_transl_dir));
+			listView.add(new ClickOption(mOwner, getString(R.string.online_offline_dics),
+					PROP_APP_ONLINE_OFFLINE_DICS, getString(R.string.online_offline_dics_add_info), this.lastFilteredValue,
+					view -> {
+						ArrayList<String[]> vl = new ArrayList<>();
+						String sVal = mProperties.getProperty(PROP_APP_ONLINE_OFFLINE_DICS);
+						String[] sVals = StrUtils.getNonEmptyStr(sVal, true).split(";");
+						String[] sValsFull = {"", "", "", "", "", "", ""};
+						int i = 0;
+						for (String s: sVals) {
+							if (i > 6) break;
+							sValsFull[i] = s;
+							i++;
+						}
+						i = 0;
+						for (String s: sValsFull) {
+							i++;
+							String[] arrS1 = {mActivity.getString(R.string.conformity) + " " + i,
+									mActivity.getString(R.string.conformity) + " " + i, s};
+							vl.add(arrS1);
+						}
+						AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
+								(CoolReader) activity,
+								activity.getString(R.string.online_offline_dics),
+								activity.getString(R.string.online_offline_dics_add_info_ext),
+								vl, results -> {
+							if (results != null) {
+								String res = "";
+								for (String s: results) res = res + ";" + s;
+								mProperties.setProperty(PROP_APP_ONLINE_OFFLINE_DICS, res.substring(1));
+							}
+						});
+						dlgA.show();
+					}, false).
+					setIconIdByAttr(R.attr.attr_icons8_airplane_mode_on, R.drawable.icons8_airplane_mode_on));
 			listView.add(new BoolOption(mOwner, getString(R.string.options_app_dict_longtap_change),
 					PROP_APP_DICT_LONGTAP_CHANGE, getString(R.string.options_app_dict_longtap_change_add_info), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_single_double_tap, R.drawable.icons8_single_double_tap));
@@ -3966,7 +4007,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ListOption(mOwner, getString(R.string.options_font_hinting), PROP_FONT_HINTING,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mHinting, mHintingTitles, mHintingTitlesAddInfos).setDefaultValue("2")
 					.noIcon());
-					//.setIconIdByAttr(R.attr.cr3_option_text_hinting_drawable, R.drawable.cr3_option_text_hinting_hc));
+			//.setIconIdByAttr(R.attr.cr3_option_text_hinting_drawable, R.drawable.cr3_option_text_hinting_hc));
 			listView.add(new ListOption(mOwner, getString(R.string.options_font_embolden_alg), PROP_FONT_EMBOLDEN_ALG,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mEmboldenAlg, mEmboldenAlgTitles, mEmboldenAlgAddInfos).setDefaultValue("0").
 					setIconIdByAttr(R.attr.cr3_option_text_bold_drawable, R.drawable.cr3_option_text_bold));
@@ -4216,6 +4257,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new ListOption(mOwner, getString(R.string.options_word_expanion), PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT,
 					getString(R.string.options_word_expanion_add_info), this.lastFilteredValue).
 					add(mWordExpansion, mWordExpansionTitles, mWordExpansionAddInfos)
+					.setDefaultValue("0")
+					.noIcon()
+			);
+			listView.add(new ListOption(mOwner, getString(R.string.options_char_space_compress), PROP_FONT_CHAR_SPACE_COMPRESS,
+					getString(R.string.options_char_space_compress_add_info), this.lastFilteredValue).
+					add(mCharCompress)
 					.setDefaultValue("0")
 					.noIcon()
 			);
@@ -4745,7 +4792,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			String str_value = String.valueOf(value);
 			String label = mActivity.getString(labelID);
 			list.add( new Three(str_value, label, addInfo) );
-			listFiltered.add( new Three(str_value, label, addInfo) );
+			listFiltered.add(new Three(str_value, label, addInfo));
 			this.updateFilteredMark(str_value);
 			this.updateFilteredMark(label);
 			this.updateFilteredMark(addInfo);
@@ -4763,15 +4810,25 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return this;
 		}
 
+		public ListOption add(int value, String label, String addInfo) {
+			String str_value = String.valueOf(value);
+			list.add(new Three(str_value, label, addInfo));
+			listFiltered.add(new Three(str_value, label, addInfo));
+			this.updateFilteredMark(str_value);
+			this.updateFilteredMark(label);
+			this.updateFilteredMark(addInfo);
+			return this;
+		}
+
 		public ListOption add(String[]values) {
-			for ( String item : values ) {
+			for (String item : values) {
 				add(item, item, mActivity.getString(R.string.option_add_info_empty_text));
 				this.updateFilteredMark(item);
 			}
 			return this;
 		}
 		public ListOption add(double[]values) {
-			for ( double item : values ) {
+			for (double item : values) {
 				String s = String.valueOf(item); 
 				add(s, s, mActivity.getString(R.string.option_add_info_empty_text));
 				this.updateFilteredMark(s);
@@ -4779,7 +4836,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return this;
 		}
 		public ListOption add(int[]values) {
-			for ( int item : values ) {
+			for (int item : values) {
 				String s = String.valueOf(item); 
 				add(s, s, mActivity.getString(R.string.option_add_info_empty_text));
 				this.updateFilteredMark(s);
@@ -5412,7 +5469,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					TextView label = (TextView) view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
-							if (!((((OptionsDialog)mOwner).mFilteredProps).contains(property))) {
+							if (!isSettingBelongToProfile(property)) {
 								if (!StrUtils.isEmptyStr(property))
 									label.setTypeface(null, Typeface.ITALIC);
 							}
@@ -5766,6 +5823,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			for (DictInfo dict : dicts) {
 				boolean installed = mActivity.isPackageInstalled(dict.packageName) || StrUtils.isEmptyStr(dict.packageName);
 				String sAdd = mActivity.getString(R.string.options_app_dictionary_not_installed);
+				String sAdd2 = dict.getAddText((CoolReader) mActivity);
+				if (!StrUtils.isEmptyStr(sAdd2)) sAdd2 = ": " + sAdd2;
 				if (StrUtils.isEmptyStr(dict.packageName)) sAdd = "";
 				if (((dict.internal==1)||(dict.internal==6)) &&
 						(dict.packageName.equals("com.socialnmobile.colordict")) && (!installed)) {
@@ -5778,14 +5837,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					if (!((StrUtils.isEmptyStr(dict.packageName))&&(StrUtils.isEmptyStr(dict.className))))
 						sInfo = "Package: " + dict.packageName + "; \nclass: " + dict.className;
 					else sInfo = "Link: " + dict.httpLink;
-					add(dict.id, (installed ? "GoldenDict" + sMinicard: dict.name + " " + sAdd),
+					add(dict.id, (installed ? "GoldenDict" + sMinicard: dict.name + sAdd2 + " " + sAdd),
 							sInfo);
 				} else {
 					String sInfo = "";
 					if (!((StrUtils.isEmptyStr(dict.packageName))&&(StrUtils.isEmptyStr(dict.className))))
 						sInfo = "Package: " + dict.packageName + "; \nclass: " + dict.className;
 					else sInfo = "Link: " + dict.httpLink;
-					add(dict.id, dict.name + (installed ? "" : " " + sAdd),
+					add(dict.id, dict.name + sAdd2 + (installed ? "" : " " + sAdd),
 							sInfo);
 				}
 			}
@@ -6391,115 +6450,54 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 	}
 
-	class NumberPickerOption extends OptionBase {
-		private int minValue = 9;
-		private int maxValue = 340;
-		public NumberPickerOption( OptionOwner owner, String label, String property, String addInfo, String filter ) {
-			super(owner, label, property, addInfo, filter);
-		}
-		public int getItemViewType() {
-			return OPTION_VIEW_TYPE_NUMBER;
-		}
-		private int getValueInt() {
-			int res = 0;
-			try {
-				res = Integer.parseInt(mProperties.getProperty(property));
-			} catch (NumberFormatException ignored) {}
-			return res;
-		}
-		NumberPickerOption setMinValue(int minValue) {
-			this.minValue = minValue;
-			return this;
-		}
-		NumberPickerOption setMaxValue(int maxValue) {
-			this.maxValue = maxValue;
-			return this;
-		}
-		public void onSelect() {
-			if (!enabled)
-				return;
-			View view = getView(null, null);
-			EditText valueView = view.findViewById(R.id.option_value);
-			valueView.requestFocus();
-			refreshList();
-		}
-		public View getView(View convertView, ViewGroup parent) {
-			View view;
-			convertView = myView;
-			if (null == convertView) {
-				view = mInflater.inflate(R.layout.option_item_number, null);
-				myView = view;
-				TextView labelView = view.findViewById(R.id.option_label);
-				EditText valueView = view.findViewById(R.id.option_value);
-				ImageButton decButton = view.findViewById(R.id.option_btn_dec);
-				ImageButton incButton = view.findViewById(R.id.option_btn_inc);
-				View marginView = view.findViewById(R.id.margin_view);
-				marginView.setFocusableInTouchMode(true);
-				marginView.requestFocusFromTouch();
-				labelView.setText(label);
-				if (labelView.isEnabled()) enabledColor = labelView.getCurrentTextColor();
-				labelView.setEnabled(enabled);
-				int colorIcon = themeColors.get(R.attr.colorIcon);
-				int colorIconT=Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
-				if (!enabled)
-					labelView.setTextColor(colorIconT);
-				else
-					labelView.setTextColor(enabledColor);
-				valueView.setText(String.valueOf(getValueInt()));
-				valueView.addTextChangedListener(new TextWatcher() {
-					@Override
-					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-					}
-
-					@Override
-					public void onTextChanged(CharSequence s, int start, int before, int count) {
-					}
-
-					@Override
-					public void afterTextChanged(Editable s) {
-						if (!enabled)
-							return;
-						try {
-							int value = Integer.parseInt(s.toString());
-							if (value < minValue) {
-								value = minValue;
-							} else if (value > maxValue) {
-								value = maxValue;
-							}
-							mProperties.setProperty(property, String.valueOf(value));
-						} catch (NumberFormatException ignored) {}
-					}
-				});
-				decButton.setOnClickListener(v -> {
-					if (!enabled)
-						return;
-					int value = getValueInt() - 1;
-					if (value >= minValue) {
-						mProperties.setProperty(property, String.valueOf(value));
-						View view1 = getView(null, null);
-						EditText editText = view1.findViewById(R.id.option_value);
-						editText.setText(String.valueOf(value));
-					}
-				});
-				incButton.setOnClickListener(v -> {
-					if (!enabled)
-						return;
-					int value = getValueInt() + 1;
-					if (value <= maxValue) {
-						mProperties.setProperty(property, String.valueOf(value));
-						View view1 = getView(null, null);
-						EditText editText = view1.findViewById(R.id.option_value);
-						editText.setText(String.valueOf(value));
-					}
-				});
-				valueView.setEnabled(enabled);
-				setupIconView((ImageView)view.findViewById(R.id.option_icon));
-			} else {
-				view = convertView;
-			}
-			return view;
-		}
-	}
+//  commented out - not used in KR, but maintain in actual state
+//	class NumberPickerOption extends OptionBase {
+//		private int minValue = 9;
+//		private int maxValue = 340;
+//		public NumberPickerOption(OptionOwner owner, String label, String property ) {
+//			super(owner, label, property);
+//		}
+//		public int getItemViewType() {
+//			return OPTION_VIEW_TYPE_NUMBER;
+//		}
+//		private int getValueInt() {
+//			int res = 0;
+//			try {
+//				res = Integer.parseInt(mProperties.getProperty(property));
+//			} catch (NumberFormatException ignored) {}
+//			return res;
+//		}
+//		NumberPickerOption setMinValue(int minValue) {
+//			this.minValue = minValue;
+//			return this;
+//		}
+//		NumberPickerOption setMaxValue(int maxValue) {
+//			this.maxValue = maxValue;
+//			return this;
+//		}
+//		public void onSelect() {
+//			if (!enabled)
+//				return;
+//			InputDialog dlg = new InputDialog(mActivity, label, false, "", true, minValue, maxValue, getValueInt(), new InputDialog.InputHandler() {
+//				@Override
+//				public boolean validate(String s) throws Exception {
+//					int value = Integer.parseInt(s);
+//					return value >= minValue && value <= maxValue;
+//				}
+//
+//				@Override
+//				public void onOk(String s) throws Exception {
+//					getProperties().setProperty(property, s);
+//					refreshItem();
+//				}
+//
+//				@Override
+//				public void onCancel() {
+//				}
+//			});
+//			dlg.show();
+//		}
+//	}
 
 	//byte[] fakeLongArrayForDebug;
 	
@@ -6533,6 +6531,26 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		return props;
 	}
 
+	public static boolean isSettingBelongToProfile(String settingName) {
+		ArrayList<String> props = new ArrayList<String>();
+		boolean found = false;
+		for (String pattern : Settings.PROFILE_SETTINGS) {
+			if (pattern.endsWith("*")) {
+				if (settingName.startsWith(pattern.substring(0, pattern.length()-1))) {
+					found = true;
+					break;
+				}
+			} else if (pattern.equalsIgnoreCase(settingName)) {
+				found = true;
+				break;
+			} else if (settingName.startsWith("styles.")) {
+				found = true;
+				break;
+			}
+		}
+		return found;
+	}
+
 	public OptionsDialog(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles, TextToSpeech tts)
 	{
 		super("OptionsDialog", activity, null, false, false);
@@ -6558,6 +6576,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		File f = activity.getSettingsFileF(activity.getCurrentProfile());
 		String sF = f.getAbsolutePath();
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
+		sF = sF + "\n"+getString(R.string.settings_info_short);
 		if (!filter.trim().equals("")) sF = sF + "\n"+getString(R.string.mi_filter_option) + ": "+filter;
 		String sprof = activity.getCurrentProfileName();
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
@@ -6585,6 +6604,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 		}
 		showIcons = mProperties.getBool(PROP_APP_SETTINGS_SHOW_ICONS, true);
+		mSynthWeights = Engine.getAvailableSynthFontWeight();
+		if (null == mSynthWeights)
+			mSynthWeights = new int[] {};
 		this.mode = mode;
 	}
 	
@@ -7329,7 +7351,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				else
 					quality = getString(R.string.options_tts_voice_quality_very_low);
 				if (langCode.toLowerCase().equals(language.toLowerCase()))
-					list.add(new Three(voice.getName(), voice.getName() + " (" + quality + ")", ""));
+					//list.add(new Three(voice.getName(), voice.getName() + " (" + quality + ")", ""));
+					list.add(new Three(voice.getName(), voice.getName(), quality));
 			}
 			Collections.sort(list, (o1, o2) -> o1.label.compareTo(o2.label));
 			for (Three three : list) {
@@ -7417,6 +7440,104 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		setView(view);
 	}
 
+	private String getWeightName(int weight) {
+		String name = "";
+		switch (weight) {
+			case 100:
+				name = getString(R.string.font_weight_thin);
+				break;
+			case 200:
+				name = getString(R.string.font_weight_extralight);
+				break;
+			case 300:
+				name = getString(R.string.font_weight_light);
+				break;
+			case 350:
+				name = getString(R.string.font_weight_book);
+				break;
+			case 400:
+				name = getString(R.string.font_weight_regular);
+				break;
+			case 500:
+				name = getString(R.string.font_weight_medium);
+				break;
+			case 600:
+				name = getString(R.string.font_weight_semibold);
+				break;
+			case 700:
+				name = getString(R.string.font_weight_bold);
+				break;
+			case 800:
+				name = getString(R.string.font_weight_extrabold);
+				break;
+			case 900:
+				name = getString(R.string.font_weight_black);
+				break;
+			case 950:
+				name = getString(R.string.font_weight_extrablack);
+				break;
+		}
+		return name;
+	}
+
+	private void updateFontWeightValues(ListOption option, String faceName) {
+		// get available weight for font faceName
+		int[] nativeWeights = Engine.getAvailableFontWeight(faceName);
+		if (null == nativeWeights || 0 == nativeWeights.length) {
+			// invalid font
+			option.clear();
+			return;
+		}
+		ArrayList<Integer> nativeWeightsArray = new ArrayList<>();	// for search
+		for (int w : nativeWeights)
+			nativeWeightsArray.add(w);
+		// combine with synthetic weights
+		ArrayList<Integer> weights = new ArrayList<>();
+		int synth_idx = 0;
+		int i, j;
+		int weight = 0, prev_weight = 0;
+		for (i = 0; i < nativeWeights.length; i++) {
+			weight = nativeWeights[i];
+			for (j = synth_idx; j < mSynthWeights.length; j++) {
+				int synth_weight = mSynthWeights[j];
+				if (synth_weight < weight) {
+					if (synth_weight > prev_weight)
+						weights.add(synth_weight);
+				}
+				else
+					break;
+			}
+			synth_idx = j;
+			weights.add(weight);
+			prev_weight = weight;
+		}
+		for (j = synth_idx; j < mSynthWeights.length; j++) {
+			if (mSynthWeights[j] > weight)
+				weights.add(mSynthWeights[j]);
+		}
+		// fill items
+		option.clear();
+		for (i = 0; i < weights.size(); i++) {
+			weight = weights.get(i);
+			String label = String.valueOf(weight);
+			String descr = getWeightName(weight);
+			if (!nativeWeightsArray.contains(weight)) {
+				if (descr.length() > 0)
+					descr += ", " + getString(R.string.font_weight_fake);
+				else
+					descr = getString(R.string.font_weight_fake);
+			}
+			// if (descr.length() > 0)
+			//	label += " (" + descr + ")"; - better put it to addinfo
+			option.add(weight, label, descr);
+		}
+		// enable/disable font hinting option
+		//int base_weight = mProperties.getInt(PROP_FONT_BASE_WEIGHT, 400);
+		//mFontHintingOption.setEnabled(nativeWeightsArray.contains(base_weight));
+	}
+
+	//asdf: строчка 2254 нового файла , 2501 старого
+
 	private void setupReaderOptions(String filter)
 	{
         mInflater = LayoutInflater.from(getContext());
@@ -7458,20 +7579,38 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mProperties.getInt(PROP_REQUESTED_DOM_VERSION, 0) < Engine.DOM_VERSION_CURRENT;
 
 		mOptionsStyles = new OptionsListView(getContext(), null);
-		mOptionsStyles.add(new FontsOptions(this, getString(R.string.options_font_face), PROP_FONT_FACE,
-				getString(R.string.option_add_info_empty_text), false, filter).setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
+		OptionBase fontOption = new FontsOptions(this, getString(R.string.options_font_face), PROP_FONT_FACE,
+				getString(R.string.option_add_info_empty_text), false, filter).
+				setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face);
+		mOptionsStyles.add(fontOption);
 		FlowListOption optFontSize = new FlowListOption(this, getString(R.string.options_font_size), PROP_FONT_SIZE,
 				getString(R.string.option_add_info_empty_text), filter);
 		for (int i = 0; i <= mFontSizes.length-1; i++) optFontSize.add(""+mFontSizes[i], ""+mFontSizes[i],"");
 		optFontSize.setDefaultValue("24").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size);
 		mOptionsStyles.add(optFontSize);
-		//mOptionsStyles.add(new ListOption(this, getString(R.string.options_font_size), PROP_FONT_SIZE,
-		//		getString(R.string.option_add_info_empty_text), filter).add(filterFontSizes(mFontSizes)).setDefaultValue("24").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
-		mOptionsStyles.add(new BoolOption(this, getString(R.string.options_font_embolden), PROP_FONT_WEIGHT_EMBOLDEN,
-				getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_text_bold_drawable, R.drawable.cr3_option_text_bold));
 		mOptionsStyles.add(new BoolOption(this, getString(R.string.options_font_italicize), PROP_FONT_ITALICIZE,
 				getString(R.string.option_add_info_empty_text), filter).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_text_italic_drawable, R.drawable.cr3_option_text_italic));
-		//mOptionsStyles.add(new BoolOption(getString(R.string.options_font_antialias), PROP_FONT_ANTIALIASING).setInverse().setDefaultValue("0"));
+		mFontWeightOption = (ListOption) new ListOption(this,
+				getString(R.string.options_font_weight), PROP_FONT_BASE_WEIGHT, getString(R.string.option_add_info_empty_text), filter).
+				setIconIdByAttr(R.attr.cr3_option_text_bold_drawable, R.drawable.cr3_option_text_bold);
+		updateFontWeightValues(mFontWeightOption, mProperties.getProperty(PROP_FONT_FACE, ""));
+		mOptionsStyles.add(mFontWeightOption);
+		fontOption.setOnChangeHandler(() -> {
+			String faceName = mProperties.getProperty(PROP_FONT_FACE, "");
+			updateFontWeightValues(mFontWeightOption, faceName);
+		});
+		mFontWeightOption.setOnChangeHandler(() -> {
+			// enable/disable font hinting option
+			String faceName = mProperties.getProperty(PROP_FONT_FACE, "");
+			int[] nativeWeights = Engine.getAvailableFontWeight(faceName);
+			if (null != nativeWeights && 0 != nativeWeights.length) {
+				ArrayList<Integer> nativeWeightsArray = new ArrayList<>();    // for search
+				for (int w : nativeWeights)
+					nativeWeightsArray.add(w);
+				//int base_weight = mProperties.getInt(PROP_FONT_BASE_WEIGHT, 400);
+				//mFontHintingOption.setEnabled(nativeWeightsArray.contains(base_weight));
+			}
+		});
 		OptionBase sbFFO = new FallbackFontsOptions(this, getString(R.string.options_font_fallback_faces), getString(R.string.option_add_info_empty_text), filter)
 			.setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face);
 		((FallbackFontsOptions)sbFFO).updateFilterEnd();

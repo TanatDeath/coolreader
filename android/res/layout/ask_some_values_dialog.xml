@@ -59,7 +59,7 @@
                             android:layout_width="0dip"
                             android:layout_height="fill_parent"
                             android:gravity="left"
-                            android:layout_weight="3"
+                            android:layout_weight="2"
                             android:orientation="horizontal">
                         <EditText
                           android:id="@+id/some_value_edit1"
@@ -101,7 +101,7 @@
                             android:layout_width="0dip"
                             android:layout_height="fill_parent"
                             android:gravity="left"
-                            android:layout_weight="3"
+                            android:layout_weight="2"
                             android:orientation="horizontal">
                         <EditText
                                 android:id="@+id/some_value_edit2"
@@ -143,7 +143,7 @@
                             android:layout_width="0dip"
                             android:layout_height="fill_parent"
                             android:gravity="left"
-                            android:layout_weight="3"
+                            android:layout_weight="2"
                             android:orientation="horizontal">
                         <EditText
                                 android:id="@+id/some_value_edit3"
@@ -185,7 +185,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit4"
@@ -227,7 +227,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit5"
@@ -269,7 +269,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit6"
@@ -311,7 +311,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit7"
@@ -353,7 +353,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit8"
@@ -395,7 +395,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit9"
@@ -437,7 +437,7 @@
                         android:layout_width="0dip"
                         android:layout_height="fill_parent"
                         android:gravity="left"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="horizontal">
                     <EditText
                             android:id="@+id/some_value_edit10"

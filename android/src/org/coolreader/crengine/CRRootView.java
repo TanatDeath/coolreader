@@ -1156,7 +1156,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			ReaderAction.OPTIONS,
 			ReaderAction.SAVE_LOGCAT,
 			ReaderAction.HIDE,
-			ReaderAction.EXIT,	
+			ReaderAction.EXIT,
 		};
 		mActivity.showActionsToolbarMenu(actions, anchor, parentAnchor, item -> {
 			if (item == ReaderAction.EXIT) {
@@ -1219,6 +1219,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				//return false;
 				mActivity.editCalibreCatalog(null);
 				return true;
+			} else if (item == ReaderAction.SAVE_LOGCAT) {
+				mActivity.createLogcatFile();
 			}
 			return false;
 		});

@@ -122,6 +122,8 @@ public:
     }
     //\plotn
 
+    virtual void getAvailableFontWeights(LVArray<int>& weights, lString8 faceName);
+
     virtual void clearFallbackFonts() {
         for (int i = 0; i < _registered_list.length(); i++) {
             LVFontRef fontRef = _registered_list[i]->getFont();

@@ -54,6 +54,8 @@
     <!-- uses-permission android:name="archos.permission.FULLSCREEN.FULL"/ -->
     <!-- Required permission to use in-app billing. -->
     <uses-permission android:name="com.android.vending.BILLING" />
+    <!-- Needed for making a desision - should we try to use online dictionary, or network is not available -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
             android:allowBackup="true"

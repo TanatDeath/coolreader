@@ -20,13 +20,15 @@ public interface Settings {
     public static final String PROP_FONT_ANTIALIASING       ="font.antialiasing.mode";
     public static final String PROP_FONT_FACE               ="font.face.default";
     public static final String PROP_FONT_HINTING            ="font.hinting.mode";
+	public static final String PROP_FONT_CHAR_SPACE_COMPRESS = "font.char.space.compress";
     public static final String PROP_FONT_GAMMA              ="font.gamma";
     public static final String PROP_FONT_GAMMA_DAY          ="font.gamma.day";
     public static final String PROP_FONT_GAMMA_NIGHT        ="font.gamma.night";
-    public static final String PROP_FONT_WEIGHT_EMBOLDEN    ="font.face.weight.embolden";
+	public static final String PROP_FONT_WEIGHT_EMBOLDEN_OBSOLETED ="font.face.weight.embolden";	// obsoleted
 	public static final String PROP_FONT_ITALICIZE          ="font.face.italicize";
 	public static final String PROP_FONT_EMBOLDEN_ALG       ="font.face.embolden.alg";
 	public static final String PROP_FONT_FINE_EMBOLDEN      ="font.face.fine.embolden";
+	public static final String PROP_FONT_BASE_WEIGHT        ="font.face.base.weight";        // replaces PROP_FONT_WEIGHT_EMBOLDEN ("font.face.weight.embolden")
 	public static final String PROP_TXT_OPTION_PREFORMATTED ="crengine.file.txt.preformatted";
     public static final String PROP_LOG_FILENAME            ="crengine.log.filename";
     public static final String PROP_LOG_LEVEL               ="crengine.log.level";
@@ -148,6 +150,12 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
     public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
 	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT    ="app.screen.warm.backlight"; //CR!
+	public static final String PROP_APP_SCREEN_BACKLIGHT1    ="app.screen.backlight1";
+	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT1    ="app.screen.warm.backlight1";
+	public static final String PROP_APP_SCREEN_BACKLIGHT2    ="app.screen.backlight2";
+	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT2    ="app.screen.warm.backlight2";
+	public static final String PROP_APP_SCREEN_BACKLIGHT3    ="app.screen.backlight3";
+	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT3    ="app.screen.warm.backlight3";
 	//decided to remove and do like in CR
 	//public static final String PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM = "app.screen.get.backlight.from.system";
 	public static final String PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA    = "app.screen.backlight.fix.delta";
@@ -176,6 +184,7 @@ public interface Settings {
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
 	public static final String PROP_APP_SHOW_USER_DIC_CONTENT = "app.dictionary.user.dic.content";
 	public static final String PROP_APP_QUICK_TRANSLATION_DIRS = "app.quick.translation.dirs";
+	public static final String PROP_APP_ONLINE_OFFLINE_DICS = "app.quick.translation.online.offline.dics";
 	public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
     public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
     public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
@@ -548,7 +557,8 @@ public interface Settings {
 
 		PROP_APP_USE_EINK_FRONTLIGHT,
 
-		PROP_APP_QUICK_TRANSLATION_DIRS
+		PROP_APP_QUICK_TRANSLATION_DIRS,
+		PROP_APP_ONLINE_OFFLINE_DICS
 
 	};
 

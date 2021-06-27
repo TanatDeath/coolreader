@@ -1612,7 +1612,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			currentListAdapter.notifyInvalidated();
 		else
 			showDirectoryInternal(currDirectory, null);
-		mActivity.setBrowserProgressStatus(true);
 	}
 
 	public static LitresSearchParams saveParams;
@@ -1891,31 +1890,34 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		final FileInfo file = fileOrDir==null || fileOrDir.isDirectory ? itemToSelect : fileOrDir;
 		final FileInfo dir = fileOrDir!=null && !fileOrDir.isDirectory ? mScanner.findParent(file, mScanner.getRoot()) : fileOrDir;
 		if (dir != null) {
-			showDirectoryLoadingStub();
-			// if previous scan is in progress, interrupt it
-			if (!mScanControl.isStopped())
-				mScanControl.stop();
-			mScanControl = new Scanner.ScanControl();
-			mScanControl = new Scanner.ScanControl();
-			mScanner.scanDirectory(mActivity.getDB(), dir, () -> {
-				if (dir.allowSorting())
-					dir.sort(mSortOrder);
+			if (dir.isSpecialDir()) {
 				showDirectoryInternal(dir, file);
-				mActivity.setBrowserProgressStatus(true);
-			}, (scanControl) -> {
-				if (!scanControl.isStopped()) {
+			} else {
+				showDirectoryLoadingStub();
+				// if previous scan is in progress, interrupt it
+				if (!mScanControl.isStopped())
+					mScanControl.stop();
+				mScanControl = new Scanner.ScanControl();
+				mScanner.scanDirectory(mActivity.getDB(), dir, () -> {
 					if (dir.allowSorting())
 						dir.sort(mSortOrder);
 					showDirectoryInternal(dir, file);
-				}
-				mActivity.setBrowserProgressStatus(false);
-			}, false, mScanControl);
+					mActivity.setBrowserProgressStatus(true);
+				}, (scanControl) -> {
+					if (!scanControl.isStopped()) {
+						if (dir.allowSorting())
+							dir.sort(mSortOrder);
+						showDirectoryInternal(dir, file);
+					}
+					mActivity.setBrowserProgressStatus(false);
+				}, false, mScanControl);
+			}
 		} else
 			showDirectoryInternal(null, file);
 	}
 	
 	public void scanCurrentDirectoryRecursive() {
-		if (currDirectory == null)
+		if (currDirectory == null || currDirectory.isSpecialDir())
 			return;
 		if (currDirectory.isOPDSDir()) {
 			currDirectory.dirs = null;
@@ -1935,10 +1937,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					});
 			mScanner.scanDirectory(mActivity.getDB(), currDirectory, () -> {
 				showDirectoryInternal(currDirectory, null);
-				mActivity.setBrowserProgressStatus(true);
 			}, (scanControl) -> {
 				log.i("scanCurrentDirectoryRecursive : finish handler");
-				mActivity.setBrowserProgressStatus(false);
+				if (!scanControl.isStopped()) {
+					if (currDirectory.allowSorting())
+						currDirectory.sort(mSortOrder);
+					showDirectoryInternal(currDirectory, null);
+				}
 				if (dlg.isShowing())
 					dlg.dismiss();
 			}, true, mScanControl);

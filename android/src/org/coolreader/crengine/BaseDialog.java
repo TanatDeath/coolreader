@@ -323,6 +323,10 @@ public class BaseDialog extends Dialog {
 		}
 		// buggins method of active dialog tracking - i think mine is better :)
 		Log.d("DLG","BaseDialog.onClose()");
+		if (needCancelButton)
+			onNegativeButtonClick();
+		else if (buttonsLayout != null)
+			onPositiveButtonClick();
 		activity.onDialogClosed(this);
 	}
 

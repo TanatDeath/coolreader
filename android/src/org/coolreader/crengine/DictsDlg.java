@@ -37,11 +37,27 @@ public class DictsDlg extends BaseDialog {
 	private String mSearchText;
 	private EditText selEdit;
 
+	List<Dictionaries.DictInfo> dictInfoList;
+
+	public void fillDictListInfo() {
+		dictInfoList = new ArrayList<>();
+		for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.diRecent) {
+			dictInfoList.add(di);
+		}
+		for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.getAddDicts()) {
+			if (!dictInfoList.contains(di)) dictInfoList.add(di);
+		}
+		for (final Dictionaries.DictInfo di: Dictionaries.getDictListExt(mCoolReader,true)) {
+			if (!dictInfoList.contains(di)) dictInfoList.add(di);
+		}
+	}
+
 	//DictsDlg mThis;
 
 	public final static int ITEM_POSITION=0;
 
 	class DictListAdapter extends BaseAdapter {
+
 		public boolean areAllItemsEnabled() {
 			return true;
 		}
@@ -51,20 +67,20 @@ public class DictsDlg extends BaseDialog {
 		}
 
 		public int getCount() {
-			return Dictionaries.getDictListExt(mCoolReader,true).size();
+			if (dictInfoList == null) fillDictListInfo();
+			return dictInfoList.size();
 		}
 
 		public Object getItem(int position) {
-			if ( position<0 || position>=Dictionaries.getDictListExt(mCoolReader,true).size() )
+			if (dictInfoList == null) fillDictListInfo();
+			if ( position<0 || position>=dictInfoList.size() )
 				return null;
-			return Dictionaries.getDictListExt(mCoolReader,true).get(position);
+			return dictInfoList.get(position);
 		}
 
 		public long getItemId(int position) {
 			return position;
 		}
-
-		
 		
 		public int getItemViewType(int position) {
 			return ITEM_POSITION;
@@ -87,8 +103,13 @@ public class DictsDlg extends BaseDialog {
 				labelView.setText(String.valueOf(position+1));
 			}
 			if ( b!=null ) {
-				if ( titleTextView!=null )
-					titleTextView.setText(b.name);
+				if ( titleTextView!=null ) {
+					String sAdd = b.getAddText(mCoolReader);
+					if (StrUtils.isEmptyStr(sAdd))
+						titleTextView.setText(b.name);
+					else
+						titleTextView.setText(b.name + ": " + sAdd);
+				}
 				if (b.dicIcon!=0)
 					ivIcon.setImageDrawable(mCoolReader.getResources().getDrawable(b.dicIcon));
 				if (b.icon != null) {
@@ -142,7 +163,8 @@ public class DictsDlg extends BaseDialog {
 
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
-			mCoolReader.mDictionaries.setAdHocDict(Dictionaries.getDictListExt(mCoolReader,true).get(position));
+			if (dictInfoList == null) fillDictListInfo();
+			mCoolReader.mDictionaries.setAdHocDict(dictInfoList.get(position));
 			String sSText = mSearchText.trim();
 			if (selEdit!=null) sSText = selEdit.getText().toString().trim();
 			mCoolReader.findInDictionary(sSText, mCallerView);

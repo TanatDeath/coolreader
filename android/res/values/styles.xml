@@ -1,8 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <style name="TabWidget" parent="@android:style/Widget.TabWidget">
+        <!-- item name="android:textAppearance">@style/TextAppearance.Small</item>
+        <item name="ellipsize">marquee</item>
+        <item name="singleLine">true</item-->
+        <!--item name="android:tabStripLeft">@android:drawable/tab_bottom_left</item>
+        <item name="android:tabStripRight">@android:drawable/tab_bottom_right</item>
+        <item name="android:tabStripEnabled">true</item>
+        <item name="android:divider">@null</item-->
         <item name="android:gravity">fill_horizontal|center_vertical</item>
+        <item name="android:tabStripLeft">@null</item>
+        <item name="android:tabStripRight">@null</item>
+        <item name="android:tabStripEnabled">false</item>
+        <!-- item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:dividerPadding">8dip</item>
+        <item name="android:measureWithLargestChild">true</item>
+        <item name="android:tabLayout">@android:layout/tab_indicator_holo</item-->
     </style>
     
     <style name="TextAppearance.Widget.EditText" parent="@android:style/TextAppearance.Widget.EditText">
@@ -11,17 +25,19 @@
     <style name="ListView">
     </style>
     <style name="ListView.Dark" parent="@style/Theme.Dark">
+        <!--item name="android:background">@drawable/background_tiled_dark</item-->
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">vertical</item>
         <item name="android:listSelector">@null</item>
-        <item name="android:divider">@drawable/divider_dark_tiled_v3</item>
+        <item name="android:divider">@drawable/divider_dark_tiled</item>
     </style>
         
     <style name="ListView.Light" parent="@style/Theme.Light">
+        <!--item name="android:background">@drawable/background_tiled_light</item-->
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">vertical</item>
         <item name="android:listSelector">@null</item>
-        <item name="android:divider">@drawable/divider_light_tiled_v3</item>
+        <item name="android:divider">@drawable/divider_light_tiled</item>
     </style>
         
     <style name="ListView.Black" parent="@style/Theme.Black">
@@ -32,6 +48,7 @@
     </style>
 
     <style name="ListView.White" parent="@style/Theme.White">
+        <!--item name="android:background">@android:color/white</item-->
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">vertical</item>
         <item name="android:listSelector">@null</item>
@@ -85,23 +102,23 @@
     </style>
 
     <style name="Theme.Light" parent="@style/Theme.White">
-        <item name="android:windowBackground">@drawable/background_tiled_light_v3</item>
+        <item name="android:windowBackground">@drawable/background_tiled_light</item>
         <item name="android:colorBackground">#ffe0e0e0</item>
         <!-- item name="android:textColor">@android:color/black</item-->
         <item name="android:listViewStyle">@style/ListView.Light</item>
         <item name="android:listViewWhiteStyle">@style/ListView.Light</item>
-
-        <item name="rootDelimiterStyle">@style/RootDelimiter.Light</item>
+        <item name="textColorOptionLabel">@color/label_light</item>
+        <item name="textColorOptionValue">@color/value_light</item>
     </style>
 
     <style name="Theme.Dark" parent="@style/Theme.Black">
-        <item name="android:windowBackground">@drawable/background_tiled_dark_v3</item>
+        <item name="android:windowBackground">@drawable/background_tiled_dark</item>
         <item name="android:colorBackground">#ff302030</item>
         <!-- item name="android:textColor">@android:color/white</item-->
         <item name="android:listViewStyle">@style/ListView.Dark</item>
         <item name="android:listViewWhiteStyle">@style/ListView.Dark</item>
-
-        <item name="rootDelimiterStyle">@style/RootDelimiter.Dark</item>
+        <item name="textColorOptionLabel">@color/label_dark</item>
+        <item name="textColorOptionValue">@color/value_dark</item>
     </style>
 
     <style name="Theme.White" parent="@android:style/Theme.Light">
@@ -119,14 +136,13 @@
         <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
         <item name="android:textAppearanceLarge">@style/TextAppearance.MediumLarge</item>
 
-        <item name="rootDelimiterStyle">@style/RootDelimiter.White</item>
-
         <!-- toolbar button background -->
         <item name="cr3_toolbar_button_background_drawable">@drawable/cr3_toolbar_button_background</item>
         <!-- tabbar background color -->
         <item name="tabbarBackground">#40404040</item>
         <item name="textColorToolBarLabel">?android:attr/textColorSecondary</item>
-        <item name="textColorOptionValue">?attr/textColorToolBarLabel</item>
+        <item name="textColorOptionLabel">?android:attr/textColorPrimary</item>
+        <item name="textColorOptionValue">?android:attr/textColorSecondary</item>
         <item name="tts_toolbar_background">#D0808080</item>
 
         <!-- icons -->
@@ -232,6 +248,7 @@
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
+        <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -267,14 +284,13 @@
         <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
         <item name="android:textAppearanceLarge">@style/TextAppearance.MediumLarge</item>
         
-        <item name="rootDelimiterStyle">@style/RootDelimiter.Black</item>
-
         <!-- toolbar button background -->
         <item name="cr3_toolbar_button_background_drawable">@drawable/cr3_toolbar_button_background</item>
         <!-- tabbar background color -->
         <item name="tabbarBackground">#40404040</item>
         <item name="textColorToolBarLabel">?android:attr/textColorSecondary</item>
-        <item name="textColorOptionValue">?attr/textColorToolBarLabel</item>
+        <item name="textColorOptionLabel">?android:attr/textColorPrimary</item>
+        <item name="textColorOptionValue">?android:attr/textColorSecondary</item>
         <item name="tts_toolbar_background">#D0808080</item>
 
         <!-- icons -->
@@ -380,6 +396,7 @@
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
+        <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -428,7 +445,7 @@
     <style name="Theme.HiContrast1" parent="@android:style/Theme.Light">
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:colorBackground">@android:color/white</item>
-        <!-- item name="android:textColor">@android:color/black</item-->
+        <!-- item name="android:textColor">@android:color/black</item -->
         <item name="android:listViewStyle">@style/ListView.White</item>
         <item name="android:listViewWhiteStyle">@style/ListView.White</item>
         <item name="android:checkboxStyle">@style/CheckBox.HC.Light</item>
@@ -440,14 +457,13 @@
         <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
         <item name="android:textAppearanceLarge">@style/TextAppearance.MediumLarge</item>
 
-        <item name="rootDelimiterStyle">@style/RootDelimiter.White</item>
-
         <!-- toolbar button background -->
         <item name="cr3_toolbar_button_background_drawable">@drawable/cr3_toolbar_button_background_hc</item>
         <!-- tabbar background color -->
         <item name="tabbarBackground">#FFFFFFFF</item>
-        <item name="textColorToolBarLabel">@android:color/black</item>
-        <item name="textColorOptionValue">?attr/textColorToolBarLabel</item>
+        <item name="textColorToolBarLabel">@color/label_hc_light</item>
+        <item name="textColorOptionLabel">@color/label_hc_light</item>
+        <item name="textColorOptionValue">@color/label_hc_light</item>
         <item name="tts_toolbar_background">#FFFFFFFF</item>
 
         <!-- icons -->
@@ -553,6 +569,7 @@
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
+        <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>
@@ -587,14 +604,13 @@
         <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
         <item name="android:textAppearanceLarge">@style/TextAppearance.MediumLarge</item>
 
-        <item name="rootDelimiterStyle">@style/RootDelimiter.Black</item>
-
         <!-- toolbar button background -->
         <item name="cr3_toolbar_button_background_drawable">@drawable/cr3_toolbar_button_background_hc</item>
         <!-- tabbar background color -->
         <item name="tabbarBackground">#40404040</item>
-        <item name="textColorToolBarLabel">@android:color/white</item>
-        <item name="textColorOptionValue">?attr/textColorToolBarLabel</item>
+        <item name="textColorToolBarLabel">@color/label_hc_dark</item>
+        <item name="textColorOptionLabel">@color/label_hc_dark</item>
+        <item name="textColorOptionValue">@color/label_hc_dark</item>
         <item name="tts_toolbar_background">#FFFFFFFF</item>
 
         <!-- icons -->
@@ -700,6 +716,7 @@
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
+        <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>
@@ -828,7 +845,7 @@
         <item name="android:background">#60808080</item>
     </style>
     <style name="TapZoneGridCell">
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">fill_parent</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
@@ -841,19 +858,21 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:maxLines">3</item>
+        <item name="android:maxLines">5</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
         <item name="android:padding">2dip</item>
         <item name="android:layout_margin">2dip</item>
+        <item name="android:ellipsize">end</item>
     </style>
     <style name="TapZoneGridCellTextSecond">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:maxLines">3</item>
+        <item name="android:maxLines">5</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
         <item name="android:padding">2dip</item>
         <item name="android:layout_margin">2dip</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
 
@@ -861,16 +880,17 @@
     <style name="RootDelimiter">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">8dip</item>
-        <item name="android:background">@drawable/divider_light_tiled_v3</item>
+        <item name="android:background">@drawable/divider_light_tiled</item>
         <!-- item name="android:background">?android:attr/windowBackground</item-->
     </style>
 
+    <!--
     <style name="RootDelimiter.Dark" parent="@style/Theme.Dark">
-        <item name="android:background">@drawable/divider_light_tiled_v3</item>
+        <item name="android:background">@drawable/divider_light_tiled</item>
     </style>
         
     <style name="RootDelimiter.Light" parent="@style/Theme.Light">
-        <item name="android:background">@drawable/divider_light_tiled_v3</item>
+        <item name="android:background">@drawable/divider_light_tiled</item>
     </style>
         
     <style name="RootDelimiter.Black" parent="@style/Theme.Black">
@@ -880,5 +900,6 @@
     <style name="RootDelimiter.White" parent="@style/Theme.White">
         <item name="android:background">@drawable/divider_white_tiled</item>
     </style>
-    
+    -->
+
 </resources>

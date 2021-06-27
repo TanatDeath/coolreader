@@ -1,12 +1,10 @@
 package org.coolreader.crengine;
 
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,7 +13,6 @@ import org.coolreader.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -108,25 +105,25 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			});
 			arrLblWords.clear();
 			arrUdeWords.clear();
-			lblWord = (TextView)content.findViewById(R.id.word1);
+			lblWord = content.findViewById(R.id.word1);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word2);
+			lblWord = content.findViewById(R.id.word2);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word3);
+			lblWord = content.findViewById(R.id.word3);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word4);
+			lblWord = content.findViewById(R.id.word4);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word5);
+			lblWord = content.findViewById(R.id.word5);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word6);
+			lblWord = content.findViewById(R.id.word6);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word7);
+			lblWord = content.findViewById(R.id.word7);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word8);
+			lblWord = content.findViewById(R.id.word8);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word9);
+			lblWord = content.findViewById(R.id.word9);
 			arrLblWords.add(lblWord);
-			lblWord = (TextView)content.findViewById(R.id.word10);
+			lblWord = content.findViewById(R.id.word10);
 			arrLblWords.add(lblWord);
 
 			lblWordFound.setText("");
@@ -160,7 +157,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 
 								}
 								if (sKey.equals(sWord)) {
-									activity.showSToast("*"+StrUtils.updateText(ude.getDic_word_translate(),true));
+									activity.showSToast("*"+StrUtils.updateText(ude.getDic_word_translate(),true), sWord);
 									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_UPDATE_CNT);
 									break;
 								}
@@ -435,6 +432,11 @@ public class UserDicPanel extends LinearLayout implements Settings {
 						String[] arrKey = sKey.split("~");
 						sKey = arrKey[0];
 						arrLblWords.get(i).setText(sKey.replace("|", ""));
+						Typeface tf = activity.getReaderFont();
+						if (ude.getThisIsDSHE())
+							arrLblWords.get(i).setTypeface(tf, Typeface.ITALIC);
+						else
+							arrLblWords.get(i).setTypeface(tf);
 					} catch (Exception e) {
 
 					}
