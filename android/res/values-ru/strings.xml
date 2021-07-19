@@ -644,7 +644,6 @@
     <string name="book_info_book_docsrcurl">URL документа</string>
     <string name="book_info_book_docsrcocr">OCR документа</string>
     <string name="book_info_book_docversion">Версия документа</string>
-
     <string name="book_state_toread">К прочтению</string>
     <string name="book_mark_toread">Отметить \"К прочтению\"</string>
     <string name="book_marked_reading">Книга отмечена как \"Читаю\"</string>
@@ -1647,5 +1646,24 @@
     <string name="options_char_space_compress_add_info">Можно уменьшить расстояния между символами - используйте осторожно</string>
     <string name="save_brightness">Сохранить значение</string>
     <string name="load_brightness">Загрузить значение</string>
+    <string name="dic_common">Обычные</string>
+    <string name="dic_online">Онлайн</string>
+    <string name="dic_application">Приложения</string>
+    <string name="init_app">Инициализация приложения</string>
+    <string name="init_app_clear_cache">Очистить кэш</string>
+    <string name="init_app_clear_cache_add_info">Это безопасная операция. Иногда случаях кэш становится поврежден, вы можете полностью очистить его - в некоторых ситуациях это может помочь</string>
+    <string name="init_app_clear_settings">Сбросить настройки</string>
+    <string name="init_app_clear_settings_add_info">Внимание! Все настройки будут сброшены до начального состояния, отменить эту операцию нельзя! Используйте эту опцию, когда вы хотите сбросить настройки</string>
+    <string name="init_app_clear_db">Удалить базу данных книг</string>
+    <string name="init_app_clear_db_add_info">Внимание! База данных книг будет полностью удалена, отменить эту операцию нельзя! Все закладки, элементы пользовательского словаря и (и т.д.) будут удалены</string>
+    <string name="do_init_app">Выполнить выбранные операции</string>
+    <string name="actions_selected">Выбрано действий:</string>
+    <string name="confirm_to_proceed">Подтверждаете выполнение?</string>
+    <string name="actions_performed">Действия выполнены. Закрытие приложения</string>
+    <string name="actions_performed_err">Действия выполнены частично. Количество ошибок: </string>
+    <string name="closing_app">Закрытие приложения</string>
+    <string name="safe_mode_clear_cache">Очистить кэш, затем открыть</string>
+    <string name="folder_exists">Папка существует</string>
+    <string name="folder_not_exists">Папка не существует</string>
 </resources>
 

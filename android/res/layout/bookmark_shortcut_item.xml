@@ -27,13 +27,19 @@
         android:baselineAligned="false">
 
 
-	    <TextView android:id="@+id/bookmark_item_shortcut"
-	        style="@style/TextAppearance.Medium"
-			android:text="1" 
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:singleLine="true"
-	        android:layout_gravity="left" />
+		<TextView
+				android:id="@+id/bookmark_item_shortcut"
+				style="@style/TextAppearance.Medium"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="left"
+				android:singleLine="true"
+				android:text="1" />
+		<View   android:id="@+id/color_cell"
+				android:layout_width="14dip"
+				android:layout_height="fill_parent"
+				android:layout_margin="5dip"
+				/>
     </LinearLayout>
 
     <LinearLayout android:id="@+id/bookmark_item_text"

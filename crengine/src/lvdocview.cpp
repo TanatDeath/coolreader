@@ -3879,7 +3879,7 @@ void LVDocView::updateBookMarksRanges()
                 lvPoint ept = ep.toPoint();
                 if (ept.y < 0)
                     continue;
-                ldomXRange *n_range = new ldomXRange(p, ep);
+                ldomXRange *n_range = new ldomXRange(p, ep, 0, bmk->getIsCustomColor(), bmk->getCustomColor());
                 if (!n_range->isNull()) {
                     int flags = 1;
                     if (t == bmkt_pos)
@@ -3951,7 +3951,7 @@ void LVDocView::updateBookMarksRanges()
                     lString32 spos = bmk->getStartPos();
                     ldomXPointer sp = m_doc->createXPointer(spos);
                     if (!sp.isNull()) {
-                        ldomXRange bmk_range(sp, ep);
+                        ldomXRange bmk_range(sp, ep, 0, bmk->getIsCustomColor(), bmk->getCustomColor());
 
                         ldomXRange *n_range = new ldomXRange(*page, bmk_range);
                         if (!n_range->isNull())
@@ -6219,7 +6219,7 @@ bool LVDocView::exportBookmarks(lString32 filename) {
 			newContent.append(1, (lChar8)0xef);
 			newContent.append(1, (lChar8)0xbb);
 			newContent.append(1, (lChar8)0xbf);
-			newContent << "# Cool Reader 3 - exported bookmarks\r\n";
+			newContent << "# KnownReader - exported bookmarks\r\n";
 			newContent << "# file name: " << UnicodeToUtf8(rec->getFileName())
 					<< "\r\n";
 			if (!rec->getFilePathName().empty())
@@ -6248,6 +6248,9 @@ bool LVDocView::exportBookmarks(lString32 filename) {
 		if (!bmk->getCommentText().empty())
 			newContent << ">> " << UnicodeToUtf8(bmk->getCommentText())
 					<< "\r\n";
+		if (bmk->getIsCustomColor() != 0) {
+			//asdf
+		}
 		newContent << "\r\n";
 	}
 

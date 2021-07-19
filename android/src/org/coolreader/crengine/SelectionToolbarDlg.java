@@ -42,6 +42,7 @@ public class SelectionToolbarDlg {
 	CoolReader mCoolReader;
 	ReaderView mReaderView;
 	View mPanel;
+	public static Selection stSel;
 	Selection selection;
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
@@ -91,6 +92,7 @@ public class SelectionToolbarDlg {
 			public void onNewSelection(Selection selection) {
 				Log.d("cr3", "onNewSelection: " + selection.text);
 				SelectionToolbarDlg.this.selection = selection;
+				stSel = selection;
 			}
 			
 			@Override
@@ -389,6 +391,7 @@ public class SelectionToolbarDlg {
 	public SelectionToolbarDlg(CoolReader coolReader, ReaderView readerView, Selection sel )
 	{
 		this.selection = sel;
+		stSel = selection;
 		mCoolReader = coolReader;
 		props = new Properties(mCoolReader.settings());
 		mReaderView = readerView;

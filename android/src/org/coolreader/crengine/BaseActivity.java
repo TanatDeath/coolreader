@@ -94,9 +94,9 @@ public class BaseActivity extends Activity implements Settings {
 
 	public int iCutoutMode = 0; // for cutout screens
 
-	public boolean bGetBacklightFromSystem = false; // onyx
-	public int initialBacklight = -1;
-	public int initialWarmBacklight = -1;
+//	public boolean bGetBacklightFromSystem = false; // onyx
+//	public int initialBacklight = -1;
+//	public int initialWarmBacklight = -1;
 
 	//private volatile SuperActivityToast myToast;
 
@@ -531,7 +531,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_calibre,
 						 R.attr.attr_icons8_opds,
 						 R.attr.attr_icons8_log,
-						 R.attr.attr_icons8_sun_auto
+						 R.attr.attr_icons8_sun_auto,
+						 R.attr.attr_icons8_delete_database,
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -635,6 +636,7 @@ public class BaseActivity extends Activity implements Settings {
 
 		int btnLogDrawableRes = a.getResourceId(90, 0);
 		int btnLightDrawableRes = a.getResourceId(91, 0);
+		int brDeleteDatabase = a.getResourceId(92, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -808,6 +810,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (brOpdsLogo != 0) ReaderAction.ADD_OPDS_CATALOG.setIconId(brOpdsLogo);
 		if (btnLogDrawableRes != 0) ReaderAction.SAVE_LOGCAT.setIconId(btnLogDrawableRes);
 		if (btnLightDrawableRes != 0) ReaderAction.SHOW_SYSTEM_BACKLIGHT_DIALOG.setIconId(btnLightDrawableRes);
+		if (brDeleteDatabase != 0) ReaderAction.INIT_APP_DIALOG.setIconId(brDeleteDatabase);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1870,6 +1873,10 @@ public class BaseActivity extends Activity implements Settings {
 				}
 				Button load_1 = windowCenterPopup.getContentView().findViewById(R.id.load_brightness_1);
 				if (load_1 != null) {
+					int vl = settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT1, -1);
+					String sVl = String.valueOf(vl);
+					if (vl == -1) sVl = "s";
+					load_1.setText("1:"+sVl);
 					load_1.setBackgroundColor(colorGray);
 					load_1.setOnClickListener((v) -> {
 						rv.skipFallbackWarning = true;
@@ -1883,6 +1890,10 @@ public class BaseActivity extends Activity implements Settings {
 				}
 				Button load_2 = windowCenterPopup.getContentView().findViewById(R.id.load_brightness_2);
 				if (load_2 != null) {
+					int vl = settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT2, -1);
+					String sVl = String.valueOf(vl);
+					if (vl == -1) sVl = "s";
+					load_2.setText("2:"+sVl);
 					load_2.setBackgroundColor(colorGray);
 					load_2.setOnClickListener((v) -> {
 						rv.skipFallbackWarning = true;
@@ -1896,6 +1907,10 @@ public class BaseActivity extends Activity implements Settings {
 				}
 				Button load_3 = windowCenterPopup.getContentView().findViewById(R.id.load_brightness_3);
 				if (load_3 != null) {
+					int vl = settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT3, -1);
+					String sVl = String.valueOf(vl);
+					if (vl == -1) sVl = "s";
+					load_3.setText("3:"+sVl);
 					load_3.setBackgroundColor(colorGray);
 					load_3.setOnClickListener((v) -> {
 						rv.skipFallbackWarning = true;
@@ -2224,7 +2239,7 @@ public class BaseActivity extends Activity implements Settings {
 		}
         else if ((!DeviceInfo.isEinkScreen(getScreenForceEink())) && PROP_APP_SCREEN_BACKLIGHT.equals(key)) {
 			final int n = Utils.parseInt(value, -1, -1, 100);
-			initialBacklight = n;
+	//		initialBacklight = n;
 			// delay before setting brightness
 			BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
 				.postBackground(() -> BackgroundThread.instance()

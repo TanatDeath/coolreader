@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.CRC32;
 
@@ -57,6 +58,7 @@ public class BookmarkEditDialog extends BaseDialog {
 	public static int lastColor = 0;
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
+	private final ArrayList<Button> colorButtons = new ArrayList<>();
 
 	private boolean bColorCheck = false;
 
@@ -366,6 +368,58 @@ public class BookmarkEditDialog extends BaseDialog {
 		setTitle(mCoolReader.getString( mIsNew ? R.string.dlg_bookmark_create : R.string.dlg_bookmark_edit));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.bookmark_edit_dialog, null);
+		Button btnColor1 = view.findViewById(R.id.btn_color_1);
+		if (btnColor1 != null) colorButtons.add(btnColor1);
+		Button btnColor2 = view.findViewById(R.id.btn_color_2);
+		if (btnColor2 != null) colorButtons.add(btnColor2);
+		Button btnColor3 = view.findViewById(R.id.btn_color_3);
+		if (btnColor3 != null) colorButtons.add(btnColor3);
+		Button btnColor4 = view.findViewById(R.id.btn_color_4);
+		if (btnColor4 != null) colorButtons.add(btnColor4);
+		Button btnColor5 = view.findViewById(R.id.btn_color_5);
+		if (btnColor5 != null) colorButtons.add(btnColor5);
+		Button btnColor6 = view.findViewById(R.id.btn_color_6);
+		if (btnColor6 != null) colorButtons.add(btnColor6);
+		Button btnColor7 = view.findViewById(R.id.btn_color_7);
+		if (btnColor7 != null) colorButtons.add(btnColor7);
+		Button btnColor8 = view.findViewById(R.id.btn_color_8);
+		if (btnColor8 != null) colorButtons.add(btnColor8);
+		Button btnColor9 = view.findViewById(R.id.btn_color_9);
+		if (btnColor9 != null) colorButtons.add(btnColor9);
+		Button btnColor10 = view.findViewById(R.id.btn_color_10);
+		if (btnColor10 != null) colorButtons.add(btnColor10);
+		Button btnColor11 = view.findViewById(R.id.btn_color_11);
+		if (btnColor11 != null) colorButtons.add(btnColor11);
+		Button btnColor12 = view.findViewById(R.id.btn_color_12);
+		if (btnColor12 != null) colorButtons.add(btnColor12);
+		Button btnColor13 = view.findViewById(R.id.btn_color_13);
+		if (btnColor13 != null) colorButtons.add(btnColor13);
+		Button btnColor14 = view.findViewById(R.id.btn_color_14);
+		if (btnColor14 != null) colorButtons.add(btnColor14);
+		for (int i=0; i<colorButtons.size(); i++) {
+			Button btn = colorButtons.get(i);
+			if (i == 0) btn.setHint("#ff0000"); //RED
+			if (i == 1) btn.setHint("#008000"); //GREEN
+			if (i == 2) btn.setHint("#0000ff"); //BLUE
+			if (i == 3) btn.setHint("#FFFF00"); //YELLOW
+			if (i == 4) btn.setHint("#800000"); //MAROON
+			if (i == 5) btn.setHint("#00ff00"); //LIME
+			if (i == 6) btn.setHint("#000080"); //NAVY
+			if (i == 7) btn.setHint("#800080"); //PURPLE
+			if (i == 8) btn.setHint("#808000"); //OLIVE
+			if (i == 9) btn.setHint("#00ffff"); //AQUA
+			if (i == 10) btn.setHint("#ff00ff"); //fuchsia
+			if (i == 11) btn.setHint("#008080"); //teal
+			if (i == 12) btn.setHint("#808080"); //gray
+			if (i == 13) btn.setHint("#c0c0c0"); //silver
+			btn.setBackgroundColor(Color.parseColor(btn.getHint().toString()));
+			btn.setOnClickListener(v -> {
+				bColorCheck = true;
+				lastColor = Color.parseColor(btn.getHint().toString());
+				selectBmkColor(false);
+				paintColorCheckButton();
+			});
+		}
 		btnComment = view.findViewById(R.id.rb_comment);
 		btnCorrection = view.findViewById(R.id.rb_correction);
 		btnUserDic = view.findViewById(R.id.rb_user_dic);
@@ -479,7 +533,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		int color = 0;
 		if (bColorCheck) {
 			try {
-				color = Color.parseColor("#" + bookmark.customColor.replace("#", ""));
+				color = Color.parseColor("#" + bookmark.getCustomColor().replace("#", ""));
 			} catch (Exception e) {
 				bColorCheck = false;
 			}

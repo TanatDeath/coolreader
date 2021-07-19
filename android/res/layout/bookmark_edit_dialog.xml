@@ -50,6 +50,151 @@
 						style="@style/TextAppearance.Medium"
 						android:text="@null" />
 			</TableRow>
+			<TableRow
+					android:layout_weight="1"
+					android:layout_height="25dip"
+					>
+				<Button
+						android:id="@+id/btn_color_1"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_2"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_3"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_4"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_5"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_6"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_7"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_8"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_9"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_10"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_11"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_12"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_13"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+				<Button
+						android:id="@+id/btn_color_14"
+						android:layout_width="0dip"
+						android:layout_height="25dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@null" />
+			</TableRow>
 		</TableLayout>
 
 		<TableLayout

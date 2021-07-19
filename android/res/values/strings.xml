@@ -1680,4 +1680,23 @@
     <string name="options_char_space_compress_add_info">You can reduce space between chars - use carefully</string>
     <string name="save_brightness">Save value</string>
     <string name="load_brightness">Load value</string>
+    <string name="dic_common">Common</string>
+    <string name="dic_online">Online</string>
+    <string name="dic_application">App</string>
+    <string name="init_app">Init app dialog</string>
+    <string name="init_app_clear_cache">Clear cache folder</string>
+    <string name="init_app_clear_cache_add_info">This is safe operation. Sometimes cache can become broken, you can completely clear it - in some situations this may help</string>
+    <string name="init_app_clear_settings">Reset setting</string>
+    <string name="init_app_clear_settings_add_info">Warning! All settings will be reset to default, this cannot be undone! Use it when you want to reset all settings</string>
+    <string name="init_app_clear_db">Delete books database</string>
+    <string name="init_app_clear_db_add_info">Warning! Books database will be completely removed, this cannot be undone! All bookmarks, user dic, etc will be deleted</string>
+    <string name="do_init_app">Perform selected</string>
+    <string name="actions_selected">Actions selected:</string>
+    <string name="confirm_to_proceed">Confirm to proceed?</string>
+    <string name="actions_performed">Actions was performed. Closing app</string>
+    <string name="actions_performed_err">Actions was performed partially. Error count: </string>
+    <string name="closing_app">Closing app</string>
+    <string name="safe_mode_clear_cache">Clear cache folder, then open</string>
+    <string name="folder_exists">Folder exists</string>
+    <string name="folder_not_exists">Folder not exists</string>
 </resources>

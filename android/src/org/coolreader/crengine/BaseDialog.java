@@ -30,6 +30,7 @@ public class BaseDialog extends Dialog {
 	BaseActivity activity;
 	String title;
 	String upperText;
+	boolean searchEnabled;
 	boolean needCancelButton;
 	String dlgName;
 	int positiveButtonImage;
@@ -141,6 +142,12 @@ public class BaseDialog extends Dialog {
 		// override it
 		dismiss();
 	}
+
+	protected void onSearchClick()
+	{
+		// override it
+		dismiss();
+	}
 	
 	protected void onNegativeButtonClick()
 	{
@@ -223,6 +230,7 @@ public class BaseDialog extends Dialog {
 			setTitle(title);
 		if (upperText != null)
 			setUpperText(upperText);
+		setSearchEnabled(searchEnabled);
 		if (buttonsLayout != null) {
 			buttonsLayout.setOnTouchListener((v, event) -> {
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -259,6 +267,21 @@ public class BaseDialog extends Dialog {
 			TextView lbl = upperTextLayout.findViewById(R.id.base_dlg_upper_text);
 			if (lbl != null)
 				lbl.setText(upperText != null ? upperText : "");
+		}
+	}
+
+	public void setSearchEnabled(boolean searchEnabled) {
+		this.searchEnabled = searchEnabled;
+		if (upperTextLayout != null) {
+			ImageButton ib = upperTextLayout.findViewById(R.id.find_btn);
+			if (ib != null) {
+				if (searchEnabled) {
+					ib.setVisibility(View.VISIBLE);
+					ib.setOnClickListener(v -> onSearchClick());
+					activity.tintViewIcons((View) ib.getParent());
+				}
+				else ib.setVisibility(View.INVISIBLE);
+			}
 		}
 	}
 
@@ -304,6 +327,7 @@ public class BaseDialog extends Dialog {
 
 		setTitle(title);
 		setUpperText(upperText);
+		setSearchEnabled(searchEnabled);
 
 		return layout;
 	}

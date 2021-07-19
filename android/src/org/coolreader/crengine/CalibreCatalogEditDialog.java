@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import net.rdrei.android.dirchooser.DirectoryChooserActivity;
+import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
@@ -40,8 +44,10 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 	private final EditText nameEdit;
 	private final Button btnIsLocal;
 	private final Button btnIsRemoteYD;
-	private final EditText edtLocalFolder;
+	public final EditText edtLocalFolder;
 	private final EditText edtRemoteFolderYD;
+	private final ImageButton btnTestCatalog;
+	private final ImageButton btnChooseCatalog;
 	boolean isEInk;
 	HashMap<Integer, Integer> themeColors;
 	private final Runnable mOnUpdate;
@@ -100,8 +106,38 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 		btnIsLocal.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		btnIsRemoteYD.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		edtLocalFolder = view.findViewById(R.id.catalog_local_folder);
+		btnTestCatalog = view.findViewById(R.id.test_catalog_btn);
+		btnChooseCatalog = view.findViewById(R.id.choose_catalog_btn);
 		if (item.id != null)
 			edtLocalFolder.setText(StrUtils.getNonEmptyStr(item.pathname, true).replace(FileInfo.CALIBRE_DIR_PREFIX, ""));
+		btnTestCatalog.setOnClickListener(v -> {
+			boolean ex = false;
+			try {
+				File f = new File(edtLocalFolder.getText().toString());
+				if ((f.exists()) && (f.isDirectory())) ex = true;
+			} finally {
+				// do nothing
+			}
+			if (!ex) mCoolReader.showToast(R.string.folder_not_exists);
+			else mCoolReader.showToast(R.string.folder_exists);
+		});
+		btnChooseCatalog.setOnClickListener(v -> {
+			final Intent chooserIntent = new Intent(
+					mCoolReader,
+					DirectoryChooserActivity.class);
+
+			final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
+					.newDirectoryName("NewFolder")
+					.allowReadOnlyDirectory(true)
+					.allowNewDirectoryNameModification(true)
+					.build();
+
+			chooserIntent.putExtra(
+					DirectoryChooserActivity.EXTRA_CONFIG,
+					config);
+			mCoolReader.cced=this;
+			mCoolReader.startActivityForResult(chooserIntent, CoolReader.REQUEST_CODE_CHOOSE_DIR);
+		});
 		edtRemoteFolderYD = view.findViewById(R.id.catalog_remote_folder);
  	    setThirdButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),

@@ -4620,7 +4620,8 @@ void LFormattedText::setHighlightOptions(text_highlight_options_t * v)
 }
 
 
-void DrawBookmarkTextUnderline(LVDrawBuf & drawbuf, int x0, int y0, int x1, int y1, int y, int flags, text_highlight_options_t * options) {
+void DrawBookmarkTextUnderline(LVDrawBuf & drawbuf, int x0, int y0, int x1, int y1, int y, int flags, text_highlight_options_t * options,
+                               int isCustomColor, lUInt32 customColor) {
     if (!(flags & (4 | 8)))
         return;
     if (options->bookmarkHighlightMode == highlight_mode_none)
@@ -4632,6 +4633,8 @@ void DrawBookmarkTextUnderline(LVDrawBuf & drawbuf, int x0, int y0, int x1, int 
             cl = (flags & 4) ? 0xCCCCCC : 0xAAAAAA;
     } else {
         cl = (flags & 4) ? options->commentColor : options->correctionColor;
+        if (isCustomColor != 0)
+            cl = customColor;
     }
 
     if (options->bookmarkHighlightMode == highlight_mode_solid) {
@@ -4810,7 +4813,7 @@ void LFormattedText::Draw( LVDrawBuf * buf, int x, int y, ldomMarkedRangeList * 
                     if ( range->intersects( lineRect, mark ) ) {
                         //
                         DrawBookmarkTextUnderline(*buf, mark.left + x, mark.top + y, mark.right + x, mark.bottom + y, mark.bottom + y - 2, range->flags,
-                                                  &m_pbuffer->highlight_options);
+                                                  &m_pbuffer->highlight_options, range->isCustomColor , range->customColor);
                     }
                 }
             }

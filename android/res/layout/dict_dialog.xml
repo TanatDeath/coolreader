@@ -92,6 +92,46 @@
 			android:singleLine="false"
 			android:text="position text" />
 
+		<TableLayout
+				android:id="@+id/tl_dic_type"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical">
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<Button
+						android:id="@+id/btn_dic_type_0"
+						android:layout_width="0dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+						android:text="@string/dic_common" />
+				<Button
+						android:id="@+id/btn_dic_type_1"
+						android:layout_width="0dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+						android:text="@string/dic_online" />
+				<Button
+						android:id="@+id/btn_dic_type_2"
+						android:layout_width="0dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+						android:text="@string/dic_application" />
+			</TableRow>
+		</TableLayout>
+
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			android:id="@+id/dict_list"
 			android:orientation="vertical"

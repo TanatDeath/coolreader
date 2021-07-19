@@ -31,6 +31,7 @@ import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.CalibreCatalogEditDialog;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FlavourConstants;
+import org.coolreader.crengine.InputDialog;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
@@ -135,6 +136,8 @@ import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import net.rdrei.android.dirchooser.DirectoryChooserActivity;
 
 public class CoolReader extends BaseActivity implements SensorEventListener
 {
@@ -307,6 +310,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int REQUEST_CODE_READ_PHONE_STATE_PERM = 2;
 	private static final int REQUEST_CODE_GOOGLE_DRIVE_SIGN_IN = 3;
 	private static final int REQUEST_CODE_OPEN_DOCUMENT_TREE = 11;
+	public static final int REQUEST_CODE_CHOOSE_DIR = 10012;
+
+	public CalibreCatalogEditDialog cced = null; // for callback
 
 	// open document tree activity commands
 	private static final int ODT_CMD_NO_SPEC = -1;
@@ -1877,21 +1883,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
         }
         // after reading of all settings (only once) - we'll check should we set backlight or not
-		if (initialBacklight != -1) {
-				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
-					.postBackground(() -> BackgroundThread.instance()
-							.postGUI(() -> {
-								setScreenBacklightLevel(initialBacklight);
-								initialBacklight = -1;
-							})), 100);
-		}
-		if (initialWarmBacklight != -1)
-				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
-						.postBackground(() -> BackgroundThread.instance()
-								.postGUI(() -> {
-									setScreenWarmBacklightLevel(initialWarmBacklight);
-									initialWarmBacklight = -1;
-								})), 200);
+//		if (initialBacklight != -1) {
+//				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+//					.postBackground(() -> BackgroundThread.instance()
+//							.postGUI(() -> {
+//								setScreenBacklightLevel(initialBacklight);
+//								initialBacklight = -1;
+//							})), 100);
+//		}
+//		if (initialWarmBacklight != -1)
+//				BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+//						.postBackground(() -> BackgroundThread.instance()
+//								.postGUI(() -> {
+//									setScreenWarmBacklightLevel(initialWarmBacklight);
+//									initialWarmBacklight = -1;
+//								})), 200);
 		BOOK_READING_STATE_NO_STATE = "["+getString(R.string.book_state_none)+"]";
 		BOOK_READING_STATE_TO_READ = "["+getString(R.string.book_state_toread)+"]";
 		BOOK_READING_STATE_READING = "["+getString(R.string.book_state_reading)+"]";
@@ -2459,6 +2465,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 			}
 		} //if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE)
+	 	  else if (requestCode == REQUEST_CODE_CHOOSE_DIR) {
+	 	  	try {
+	 	  		if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
+					cced.edtLocalFolder.setText(intent.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR));
+				}
+			} finally {
+	 	  		// do nothing
+			}
+		}
 	}
 	
 	public void setDict( String id ) {
@@ -2909,10 +2924,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 	
-	public void sendBookFragment(BookInfo bookInfo, String text) {
+	public void sendBookFragment(BookInfo bookInfo, String chapter, String text) {
         final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
         emailIntent.setType("text/plain");
-    	emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, bookInfo.getFileInfo().getAuthors() + " " + bookInfo.getFileInfo().getTitle());
+    	emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, (bookInfo.getFileInfo().getAuthors() + " " + bookInfo.getFileInfo().getTitle()
+		 + " " + chapter).trim());
         emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
 		startActivity(Intent.createChooser(emailIntent, null));	
 	}
@@ -4432,6 +4448,37 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //		}
 //		return false;
 //	}
+
+	public void showInputDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final InputDialog.InputHandler handler) {
+		BackgroundThread.instance().executeGUI(() -> {
+			final InputDialog dlg = new InputDialog(this, title, prompt, isNumberEdit, minValue, maxValue, lastValue, handler);
+			dlg.show();
+		});
+	}
+
+	public void showFilterDialog() {
+		showInputDialog(this.getString(R.string.mi_filter_option), this.getString(R.string.mi_filter_option),
+				false,
+				1, 2, 3,
+				new InputDialog.InputHandler() {
+					@Override
+					public boolean validate(String s) {
+						return true;
+					}
+					@Override
+					public boolean validateNoCancel(String s) {
+						return true;
+					}
+					@Override
+					public void onOk(String s) {
+						optionsFilter = s;
+						showOptionsDialog(OptionsDialog.Mode.READER);
+					}
+					@Override
+					public void onCancel() {
+					}
+				});
+	}
 
 }
 

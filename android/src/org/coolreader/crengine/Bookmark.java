@@ -1,6 +1,8 @@
 package org.coolreader.crengine;
 
 
+import android.graphics.Color;
+
 public class Bookmark {
 
 	public Bookmark()
@@ -252,6 +254,7 @@ public class Bookmark {
 		if ( !changed(this.customColor, customColor) )
 			return false;
 		this.customColor = customColor;
+		this.icustomColor = Color.parseColor("#" + customColor.replace("#", ""));
 		return true;
 	}
 	public boolean setShortContext(String shortContext) {
@@ -338,12 +341,13 @@ public class Bookmark {
 	public String bookPath;
 	public String bookFileArc;
 	public int isCustomColor;
-	public String customColor;
+	private String customColor;
+	public int icustomColor;
 	public String shortContext;
 	public String fullContext;
 	@Override
 	public String toString() {
 		return "Bookmark[t=" + type + ", start=" + startPos + "]";
 	}
-	
+
 }

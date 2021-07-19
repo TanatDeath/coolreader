@@ -1910,6 +1910,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						showDirectoryInternal(dir, file);
 					}
 					mActivity.setBrowserProgressStatus(false);
+					// try to restore position
+					scrollToLastPos();
 				}, false, mScanControl);
 			}
 		} else
@@ -2841,8 +2843,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		mListView.setSelection(index);
 		mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		mListView.invalidate();
-		// try to restore position
-		scrollToLastPos();
 	}
 
 	private class MyGestureListener extends SimpleOnGestureListener {

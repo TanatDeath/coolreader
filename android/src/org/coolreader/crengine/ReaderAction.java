@@ -206,6 +206,7 @@ public class ReaderAction {
 	public final static ReaderAction CALIBRE_SHOW_RATING = new ReaderAction("CALIBRE_SHOW_RATING", R.string.calibre_rating, ReaderCommand.DCMD_CALIBRE_SHOW_RATING, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_stars);
 	public final static ReaderAction CALIBRE_SHOW_PUB_DATES = new ReaderAction("CALIBRE_SHOW_PUB_DATES", R.string.calibre_publish_date, ReaderCommand.DCMD_CALIBRE_SHOW_PUB_DATES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_year);
 	public final static ReaderAction CALIBRE_SHOW_TAGS = new ReaderAction("CALIBRE_SHOW_TAGS", R.string.calibre_tags, ReaderCommand.DCMD_CALIBRE_SHOW_TAGS, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_theatre_mask);
+	public final static ReaderAction INIT_APP_DIALOG = new ReaderAction("INIT_APP_DIALOG", R.string.init_app, ReaderCommand.DCMD_INIT_APP_DIALOG, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_delete_database);
 
 	public final static ReaderAction[] AVAILABLE_ACTIONS;
 

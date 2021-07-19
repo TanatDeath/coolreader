@@ -1232,4 +1232,18 @@ public class Utils {
 		}
 	}
 
+	public static boolean deleteDirectory(File directoryToBeDeleted) {
+		File[] allContents = directoryToBeDeleted.listFiles();
+		if (allContents != null) {
+			for (File file : allContents) deleteDirectory(file);
+		}
+		boolean succ = directoryToBeDeleted.delete();
+		return succ;
+	}
+
+	public static String getBookInfoToSend(Selection sel) {
+		if (sel.chapter != null && sel.chapter.length() > 0) return "\"" + sel.chapter + "\"";
+		return "";
+	}
+
 }

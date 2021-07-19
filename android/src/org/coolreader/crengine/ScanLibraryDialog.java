@@ -1,13 +1,10 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.icu.util.IslamicCalendar;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -16,7 +13,6 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -28,15 +24,10 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.CloudSync;
-import org.coolreader.db.CRDBService;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.stream.Collectors;
 
 public class ScanLibraryDialog extends BaseDialog {
 
@@ -119,11 +110,7 @@ public class ScanLibraryDialog extends BaseDialog {
 	}
 
 	private void buttonPressed(Button btn) {
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
@@ -750,8 +737,7 @@ public class ScanLibraryDialog extends BaseDialog {
 		});
 
 		addFoldersNames();
-
-		setView( view );
+		setView(view);
 	}
 
 	@Override

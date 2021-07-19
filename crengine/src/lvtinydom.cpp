@@ -3633,14 +3633,8 @@ ldomDocument::ldomDocument()
 , lists(100)
 {
     _docIndex = ldomNode::registerDocument(this);
-    allocTinyElement(NULL, 0, 0);
-    // Note: valgrind reports (sometimes, when some document is opened or closed,
-    // with metadataOnly or not) a memory leak (64 bytes in 1 blocks are definitely
-    // lost), about this, created in allocTinyElement():
-    //    tinyElement * elem = new tinyElement(...)
-    // possibly because it's not anchored anywhere.
-    // Attempt at anchoring into a _nullNode, and calling ->detroy()
-    // in ~ldomDocument(), did not prevent this report, and caused other ones...
+    ldomNode* node = allocTinyElement(NULL, 0, 0);
+    node->persist();
 
     //new ldomElement( this, NULL, 0, 0, 0 );
     //assert( _instanceMapCount==2 );
@@ -5889,6 +5883,7 @@ int initTableRendMethods( ldomNode * enode, int state )
             first_unproper = -1;
             last_unproper = -1;
         }
+        child->persist();
     }
     // if ( state==0 ) {
     //     dumpRendMethods( enode, cs32("   ") );
@@ -5898,9 +5893,11 @@ int initTableRendMethods( ldomNode * enode, int state )
 
 bool hasInvisibleParent( ldomNode * node )
 {
-    for ( ; !node->isRoot(); node = node->getParentNode() )
-        if ( node->getStyle()->display==css_d_none )
+    for ( ; node && !node->isRoot(); node = node->getParentNode() ) {
+        css_style_ref_t style = node->getStyle();
+        if (!style.isNull() && style->display == css_d_none)
             return true;
+        }
     return false;
 }
 
@@ -7261,6 +7258,8 @@ void ldomNode::initNodeRendMethod()
             }
         }
     }
+
+    persist();
 }
 #endif
 
@@ -8498,9 +8497,14 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
                 }
 
                 lUInt32 hints = WORD_FLAGS_TO_FNT_FLAGS(word->flags);
-                font->measureText( str.c_str()+word->t.start, word->t.len, width, flg, word->width+50, '?',
-                            src->lang_cfg, src->letter_spacing + word->added_letter_spacing, false, hints);
-
+                if (str.empty() && word->t.len > 0) {
+                    // Don't know that the fuck up, but it happens
+                    for (int i = 0; i < word->t.len; i++)
+                    width[i] = 0;
+                } else {
+                    font->measureText( str.c_str()+word->t.start, word->t.len, width, flg, word->width+50, '?',
+                    src->lang_cfg, src->letter_spacing + word->added_letter_spacing, false, hints);
+                }
                 bool word_is_rtl = word->flags & LTEXT_WORD_DIRECTION_IS_RTL;
                 if ( word_is_rtl ) {
                     for ( int i=word->t.len-1; i>=0; i-- ) {
@@ -10751,7 +10755,8 @@ void ldomXRangeList::getRanges( ldomMarkedRangeList &dst )
                 ptStart = ptEnd;
                 ptEnd = ptTmp;
             }
-            ldomMarkedRange * item = new ldomMarkedRange( ptStart, ptEnd, range->getFlags() );
+            ldomMarkedRange * item = new ldomMarkedRange( ptStart, ptEnd, range->getFlags(),
+                                                          range->getIsCustomColor(), range->getCustomColor() );
             if ( !item->empty() )
                 dst.add( item );
             else
@@ -10765,7 +10770,7 @@ void ldomXRangeList::getRanges( ldomMarkedRangeList &dst )
             for (int i=0; i<rects.length(); i++) {
                 lvRect r = rects[i];
                 // printf("r %d %dx%d %dx%d\n", i, r.topLeft().x, r.topLeft().y, r.bottomRight().x, r.bottomRight().y);
-                ldomMarkedRange * item = new ldomMarkedRange( r.topLeft(), r.bottomRight(), range->getFlags() );
+                ldomMarkedRange * item = new ldomMarkedRange( r.topLeft(), r.bottomRight(), range->getFlags(), range->getIsCustomColor(), range->getCustomColor() );
                 if ( !item->empty() )
                     dst.add( item );
                 else
@@ -11193,7 +11198,7 @@ ldomMarkedRangeList::ldomMarkedRangeList( const ldomMarkedRangeList * list, lvRe
         add( new ldomMarkedRange(
             lvPoint(src->start.x-rc.left, src->start.y-rc.top ),
             lvPoint(src->end.x-rc.left, src->end.y-rc.top ),
-            src->flags ) );
+            src->flags, src->isCustomColor, src->customColor ) );
     }
 }
 
@@ -12474,7 +12479,7 @@ void ldomXRange::forEach( ldomNodeCallback * callback )
 {
     if ( isNull() )
         return;
-    ldomXRange pos( _start, _end, 0 );
+    ldomXRange pos( _start, _end, 0, 0, 0 );
     bool allowGoRecurse = true;
     while ( !pos._start.isNull() && pos._start.compare( _end ) < 0 ) {
         // do something
@@ -18140,6 +18145,7 @@ void ldomNode::moveItemsTo( ldomNode * destination, int startChildIndex, int end
         item->setParentNode(destination);
         destination->addChild( item->getDataIndex() );
     }
+    destination->persist();
     // TODO: renumber rest of children in necessary
 /*#ifdef _DEBUG
     if ( !_document->checkConsistency( false ) )

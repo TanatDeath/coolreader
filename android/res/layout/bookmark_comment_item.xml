@@ -24,6 +24,12 @@
         android:tag="tint"
         />
 
+    <View   android:id="@+id/color_cell"
+            android:layout_width="14dip"
+            android:layout_height="fill_parent"
+            android:layout_margin="5dip"
+            />
+
  <LinearLayout 
      android:id="@+id/shortcut_bookmark_item_text"
      android:orientation="vertical"

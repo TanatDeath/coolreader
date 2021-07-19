@@ -1002,16 +1002,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		dlg.show();
 	}
 
-	public void sendQuotationInEmail( Selection sel ) {
-		StringBuilder buf = new StringBuilder();
-		if (mBookInfo.getFileInfo().getAuthors()!=null)
-			buf.append("|" + mBookInfo.getFileInfo().getAuthors() + "\n");
-		if (mBookInfo.getFileInfo().title!=null)
-			buf.append("|" + mBookInfo.getFileInfo().title + "\n");
-		if (sel.chapter!=null && sel.chapter.length()>0)
-			buf.append("|" + sel.chapter + "\n");
-		buf.append(sel.text + "\n");
-		mActivity.sendBookFragment(mBookInfo, buf.toString());
+	public void sendQuotationInEmail(Selection sel) {
+		String s = Utils.getBookInfoToSend(sel);
+		//mActivity.sendBookFragment(mBookInfo, s + "\n" + sel.text + "\n");
+		mActivity.sendBookFragment(mBookInfo, s, sel.text);
 	}
 
 	public void copyToClipboard(String text) {
@@ -1070,11 +1064,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void toggleScreenUpdateModeMode() {
 		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
+			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
+			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
 			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.A2, surface); //fast2
 			mActivity.setScreenUpdateInterval(999, surface);
 		} else {
-			int updModeCode = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code);
-			int updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
 			if (updMode != EinkScreen.EinkUpdateMode.Unspecified) mActivity.setScreenUpdateMode(updMode, surface); //fast
 			if (updInterval != -1) mActivity.setScreenUpdateInterval(updInterval, surface);
 		}
@@ -1422,6 +1416,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		private boolean unexpectedEvent() {
 			cancel();
 			return true; // ignore
+		}
+
+		private boolean endEvent() {
+			state = STATE_DONE;
+			unhiliteTapZone();
+			currentTapHandler = new TapHandler();
+			return true;
 		}
 
 		public boolean isInitialState() {
@@ -1985,6 +1986,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						//plotn - some strange behavior with mIsPageMode
 						//int dir = mIsPageMode ? x - start_x : y - start_y;
 						int dir = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
+						boolean isHorz = adx > ady;
 						boolean menuShown = false;
 						//int dir = x - start_x;
 						if (mGesturePageFlipSwipeN == 1) {
@@ -1999,8 +2001,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								) {
 									menuShown = true;
 									mActivity.showReaderMenu();
+									return endEvent();
 								} else
-									return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
+									if (isHorz)
+										return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
+									else
+										return endEvent();
 							}
 							startAnimation(start_x, start_y, width, height, x, y);
 							updateAnimation(x, y);
@@ -2018,6 +2024,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								(!menuShown)
 						) {
 							mActivity.showReaderMenu();
+							return endEvent();
 						}
 						return true;
 					case STATE_FLIPPING:
@@ -3457,7 +3464,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
 				break;
 			case DCMD_OPTIONS_DIALOG_FILTERED:
-				showFilterDialog();
+				mActivity.showFilterDialog();
 				break;
 			case DCMD_READER_MENU:
 				mActivity.showReaderMenu();
@@ -4529,6 +4536,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				ArrayList<String> sButtons = new ArrayList<String>();
 				sButtons.add("*"+mActivity.getString(R.string.warn_hang)+" "+bmk.bookFile);
 				sButtons.add(mActivity.getString(R.string.str_yes));
+				sButtons.add(mActivity.getString(R.string.safe_mode_clear_cache));
 				sButtons.add(mActivity.getString(R.string.str_no));
 				SomeButtonsToolbarDlg.showDialog(mActivity, mActivity.getReaderView().getSurface(), 10, true,
 						mActivity.getString(R.string.options_app_safe_mode),
@@ -4537,6 +4545,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								(btnPressed.equals(getActivity().getString(R.string.str_yes))) ||
 								(btnPressed.equals("{{timeout}}"))
 							) {
+								postLoadTask(fileInfo, doneHandler, errorHandler);
+							} else
+							if (btnPressed.equals(getActivity().getString(R.string.safe_mode_clear_cache))) {
+								File fSett = mActivity.getSettingsFileF(0);
+								File fCR3E = fSett.getParentFile();
+								if (fCR3E != null) {
+									File[] allContents = fCR3E.listFiles();
+									for (File file : allContents) {
+										if ((file.getName().equals("cache")) && (file.isDirectory())) Utils.deleteDirectory(file);
+									}
+								}
 								postLoadTask(fileInfo, doneHandler, errorHandler);
 							} else {
 								mActivity.showRootWindow();
@@ -4599,6 +4618,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				ArrayList<String> sButtons = new ArrayList<String>();
 				sButtons.add("*"+mActivity.getString(R.string.warn_hang)+" (stream)");
 				sButtons.add(mActivity.getString(R.string.str_yes));
+				sButtons.add(mActivity.getString(R.string.safe_mode_clear_cache));
 				sButtons.add(mActivity.getString(R.string.str_no));
 				SomeButtonsToolbarDlg.showDialog(mActivity, mActivity.getReaderView().getSurface(), 10, true,
 						mActivity.getString(R.string.options_app_safe_mode),
@@ -4608,6 +4628,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 											(btnPressed.equals("{{timeout}}"))
 							) {
 								postLoadTaskStream(inputStream, fileInfo, doneHandler, errorHandler);
+							} else
+								if (btnPressed.equals(getActivity().getString(R.string.safe_mode_clear_cache))) {
+								File fSett = mActivity.getSettingsFileF(0);
+								File fCR3E = fSett.getParentFile();
+								if (fCR3E != null) {
+									File[] allContents = fCR3E.listFiles();
+									for (File file : allContents) {
+										if ((file.getName().equals("cache")) && (file.isDirectory())) Utils.deleteDirectory(file);
+									}
+								}
+								postLoadTask(fileInfo, doneHandler, errorHandler);
 							} else {
 								mActivity.showRootWindow();
 								if (doc != null) {
@@ -8523,37 +8554,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			index = 0;
 		saveSetting(PROP_FONT_FACE, mFontFaces[index]);
 		syncViewSettings(getSettings(), true, true);
-	}
-
-	public void showInputDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final InputHandler handler) {
-		BackgroundThread.instance().executeGUI(() -> {
-			final InputDialog dlg = new InputDialog(mActivity, title, prompt, isNumberEdit, minValue, maxValue, lastValue, handler);
-			dlg.show();
-		});
-	}
-
-	public void showFilterDialog() {
-		showInputDialog(mActivity.getString(R.string.mi_filter_option), mActivity.getString(R.string.mi_filter_option),
-				false,
-				1, 2, 3,
-				new InputDialog.InputHandler() {
-					@Override
-					public boolean validate(String s) {
-						return true;
-					}
-					@Override
-					public boolean validateNoCancel(String s) {
-						return true;
-					}
-					@Override
-					public void onOk(String s) {
-						mActivity.optionsFilter = s;
-						mActivity.showOptionsDialog(OptionsDialog.Mode.READER);
-					}
-					@Override
-					public void onCancel() {
-					}
-				});
 	}
 
 	public void showGoToPageDialog(final String title, final String prompt, final boolean isNumberEdit, final int minValue, final int maxValue, final int lastValue, final GotoPageDialog.GotoPageHandler handler) {

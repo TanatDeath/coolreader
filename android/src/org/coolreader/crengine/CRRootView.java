@@ -1,7 +1,6 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -1155,6 +1154,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			ReaderAction.USER_MANUAL,
 			ReaderAction.OPTIONS,
 			ReaderAction.SAVE_LOGCAT,
+			ReaderAction.INIT_APP_DIALOG,
 			ReaderAction.HIDE,
 			ReaderAction.EXIT,
 		};
@@ -1182,6 +1182,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				return true;
 			} else if (item == ReaderAction.SAVE_LOGCAT) {
 				mActivity.createLogcatFile();
+				return true;
+			} else if (item == ReaderAction.INIT_APP_DIALOG) {
+				InitAppDialog iad = new InitAppDialog(mActivity);
+				iad.show();
 				return true;
 			}
 			return false;

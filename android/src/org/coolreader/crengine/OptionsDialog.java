@@ -5857,9 +5857,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			super.updateItemContents(layout, item, listView, position);
 			ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
+			TextView tv = (TextView) layout.findViewById(R.id.option_value_text);
 			List<DictInfo> dicts = Dictionaries.getDictList(mActivity);
 			for (DictInfo dict : dicts) {
 				if (item.value.equals(dict.id)) {
+					if (tv != null) {
+						if (dict.isOnline) tv.setTextColor(themeColors.get(R.attr.colorThemeGreen));
+						if (dict.internal == 4) tv.setTextColor(themeColors.get(R.attr.colorThemeBlue));
+						else if ((!dict.isOnline) && (dict.internal != 4)) tv.setTextColor(themeColors.get(R.attr.colorIcon));
+					}
 					if (dict.dicIcon !=0)
 						img.setImageDrawable(mActivity.getResources().getDrawable(dict.dicIcon));
 					else
@@ -6581,6 +6587,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		String sprof = activity.getCurrentProfileName();
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		this.upperText = sprof + sF;
+		this.searchEnabled = true;
 		mActivity = activity;
 		mReaderView = readerView;
 		mFontFaces = fontFaces;
@@ -8115,6 +8122,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	@Override
 	protected void onNegativeButtonClick() {
 		onPositiveButtonClick();
+	}
+
+	@Override
+	protected void onSearchClick() {
+		BackgroundThread.instance().postGUI(() -> {
+			((CoolReader)activity).showFilterDialog();
+		}, 500);
+		dismiss();
 	}
 
 	@Override

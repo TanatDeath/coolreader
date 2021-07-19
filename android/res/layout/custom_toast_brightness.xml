@@ -80,6 +80,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="3"
                     android:text="@string/save_brightness"
+                    android:textColor="?attr/colorIcon"
                     />
             <Button
                     android:id="@+id/save_brightness_1"
@@ -145,6 +146,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="3"
                     android:text="@string/load_brightness"
+                    android:textColor="?attr/colorIcon"
                     />
             <Button
                     android:id="@+id/load_brightness_1"

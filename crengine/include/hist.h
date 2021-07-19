@@ -35,6 +35,8 @@ private:
     lString32 _commenttext;
     time_t    _timestamp;
     int       _page;
+    int       _isCustomColor;
+    lUInt32   _customColor;
 public:
 	static lString32 getChapterName( ldomXPointer p );
 
@@ -50,6 +52,8 @@ public:
     , _commenttext(lString32::empty_str)
     , _timestamp(time_t(0))
     ,_page(0)
+    ,_isCustomColor(0)
+    ,_customColor(0)
     {
     }
     CRBookmark(const CRBookmark & v )
@@ -63,6 +67,8 @@ public:
     , _commenttext(v._commenttext)
     , _timestamp(v._timestamp)
     , _page(v._page)
+    , _isCustomColor(v._isCustomColor)
+    , _customColor(v._customColor)
     {
     }
     CRBookmark & operator = (const CRBookmark & v )
@@ -77,6 +83,8 @@ public:
         _commenttext = v._commenttext;
         _timestamp = v._timestamp;
         _page = v._page;
+        _isCustomColor = v._isCustomColor;
+        _customColor = v._customColor;
         return *this;
     }
     CRBookmark() : _percent(0), _type(0), _shortcut(0), _timestamp(0), _page(0) { }
@@ -89,6 +97,8 @@ public:
     int getShortcut() { return _shortcut; }
     int getType() { return _type; }
     int getPercent() { return _percent; }
+    int getIsCustomColor() { return _isCustomColor; }
+    lUInt32 getCustomColor() { return _customColor; }
     time_t getTimestamp() { return _timestamp; }
     void setStartPos(const lString32 & s ) { _startpos = s; }
     void setEndPos(const lString32 & s ) { _endpos = s; }
@@ -100,6 +110,8 @@ public:
     void setPercent( int n ) { _percent = n; }
     void setTimestamp( time_t t ) { _timestamp = t; }
     void setBookmarkPage( int page ) { _page = page; }
+    void setIsCustomColor( int isCustomColor ) { _isCustomColor = isCustomColor; }
+    void setCustomColor( lUInt32 customColor ) { _customColor = customColor; }
     int getBookmarkPage() { return _page; }
     bool isValid() {
         if (_type < bmkt_lastpos || _type >bmkt_correction)

@@ -15,6 +15,9 @@ import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.OptionsDialog;
 import org.coolreader.crengine.ProgressDialog;
+import org.coolreader.crengine.ReaderView;
+import org.coolreader.crengine.Selection;
+import org.coolreader.crengine.SelectionToolbarDlg;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
@@ -2042,7 +2045,17 @@ public class Dictionaries {
 		case 4:
 			Intent intent4 = new Intent(android.content.Intent.ACTION_SEND);
 			intent4.setType("text/plain");
-			intent4.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
+			ReaderView rv = ((CoolReader) mActivity).getReaderView();
+			String subj = "";
+			if (rv != null)
+				if (rv.getBookInfo() != null) {
+					String chapt = "";
+					if (SelectionToolbarDlg.stSel != null) {
+						chapt = Utils.getBookInfoToSend(SelectionToolbarDlg.stSel);
+					}
+					subj = rv.getBookInfo().getFileInfo().getAuthors() + " " + rv.getBookInfo().getFileInfo().getTitle() + ": " + chapt;
+			}
+			intent4.putExtra(android.content.Intent.EXTRA_SUBJECT, subj);
 			intent4.putExtra(android.content.Intent.EXTRA_TEXT, s);
 			intent4.setComponent(new ComponentName(curDict.packageName, curDict.className));
 			try

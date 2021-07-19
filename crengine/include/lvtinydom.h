@@ -1893,26 +1893,28 @@ class ldomXRange {
     //  0x11, 0x12, 0x13:  enhanced drawing (will make multiple segmented ldomMarkedRange,
     //                     each spanning a single line)
     lUInt32 _flags;
+    int _isCustomColor;
+    lUInt32 _customColor;
 public:
     ldomXRange()
         : _flags(0)
     {
     }
-    ldomXRange( const ldomXPointerEx & start, const ldomXPointerEx & end, lUInt32 flags=0 )
-    : _start( start ), _end( end ), _flags(flags)
+    ldomXRange( const ldomXPointerEx & start, const ldomXPointerEx & end, lUInt32 flags=0, int isCustomColor=0, lUInt32 customColor=0 )
+    : _start( start ), _end( end ), _flags(flags), _isCustomColor(isCustomColor), _customColor(customColor)
     {
     }
-    ldomXRange( const ldomXPointer & start, const ldomXPointer & end )
-    : _start( start ), _end( end ), _flags(0)
+    ldomXRange( const ldomXPointer & start, const ldomXPointer & end, int isCustomColor=0, lUInt32 customColor=0 )
+    : _start( start ), _end( end ), _flags(0), _isCustomColor(isCustomColor), _customColor(customColor)
     {
     }
     /// copy constructor
     ldomXRange( const ldomXRange & v )
-    : _start( v._start ), _end( v._end ), _flags(v._flags)
+    : _start( v._start ), _end( v._end ), _flags(v._flags), _isCustomColor(v._isCustomColor), _customColor(v._customColor)
     {
     }
     ldomXRange( const ldomWord & word )
-        : _start( word.getStartXPointer() ), _end( word.getEndXPointer() ), _flags(1)
+        : _start( word.getStartXPointer() ), _end( word.getEndXPointer() ), _flags(1), _isCustomColor(0), _customColor(0)
     {
     }
     /// if start is after end, swap start and end
@@ -1964,6 +1966,9 @@ public:
     void setEnd( ldomXPointerEx & end ) { _end = end; }
     /// returns flags value
     lUInt32 getFlags() { return _flags; }
+    /// costom color
+    int getIsCustomColor() { return _isCustomColor; }
+    lUInt32 getCustomColor() { return _customColor; }
     /// sets new flags value
     void setFlags( lUInt32 flags ) { _flags = flags; }
     /// returns true if this interval intersects specified interval
@@ -2040,9 +2045,12 @@ public:
     //  0: not shown
     //  1,2,3: legacy drawing (a single mark may spans multiple lines, assuming full width
     //         LTR paragraphs) (2 & 3 might be used for crengine internal bookmarks,
+    //         LTR paragraphs) (2 & 3 might be used for crengine internal bookmarks,
     //         see hist.h for enum bmk_type)
     //  0x11, 0x12, 0x13:  enhanced drawing (segmented mark, spanning a single line)
     lUInt32   flags;
+    int isCustomColor;
+    lUInt32 customColor;
     bool empty()
     {
         return ( start.y>end.y || ( start.y == end.y && start.x >= end.x ) );
@@ -2054,8 +2062,8 @@ public:
     /// returns true if intersects specified line rectangle
     bool intersects( lvRect & rc, lvRect & intersection );
     /// constructor
-    ldomMarkedRange( lvPoint _start, lvPoint _end, lUInt32 _flags )
-    : start(_start), end(_end), flags(_flags)
+    ldomMarkedRange( lvPoint _start, lvPoint _end, lUInt32 _flags, int _isCustomColor, lUInt32 _customColor )
+    : start(_start), end(_end), flags(_flags), isCustomColor(_isCustomColor), customColor(_customColor)
     {
     }
     /// constructor
@@ -2064,10 +2072,12 @@ public:
         ldomXPointer endPos(word.getNode(), word.getEnd() );
         start = startPos.toPoint();
         end = endPos.toPoint();
+        isCustomColor = 0;
+        customColor = 0;
     }
     /// copy constructor
     ldomMarkedRange( const ldomMarkedRange & v )
-    : start(v.start), end(v.end), flags(v.flags)
+    : start(v.start), end(v.end), flags(v.flags), isCustomColor(v.isCustomColor), customColor(v.customColor)
     {
     }
 };

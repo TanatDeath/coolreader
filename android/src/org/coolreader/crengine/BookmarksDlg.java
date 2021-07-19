@@ -116,7 +116,7 @@ public class BookmarksDlg  extends BaseDialog {
 					{R.attr.colorIcon});
 			colorIcon = a.getColor(0, Color.GRAY);
 			a.recycle();
-
+			View colorCell = view.findViewById(R.id.color_cell);
 			TextView labelView = view.findViewById(R.id.bookmark_item_shortcut);
 			if (labelView!=null) labelView.setTextColor(colorIcon);
 			TextView posTextView = view.findViewById(R.id.bookmark_item_pos_text);
@@ -136,6 +136,12 @@ public class BookmarksDlg  extends BaseDialog {
 					labelView.setText(String.valueOf(position+1));
 			}
 			if ( b!=null ) {
+				if (colorCell != null) {
+					if (b.isCustomColor != 0)
+						colorCell.setBackgroundColor(b.icustomColor);
+					else
+						colorCell.setBackgroundColor(Color.argb(0, Color.red(Color.GRAY),Color.green(Color.GRAY),Color.blue(Color.GRAY)));
+				}
 				String percentString = Utils.formatPercent(b.getPercent());
 				String s1 = b.getTitleText();
 				String s2 = b.getPosText();
@@ -412,7 +418,7 @@ public class BookmarksDlg  extends BaseDialog {
 		case R.id.bookmark_send:
 			if ( mBookInfo.getBookmarkCount()>0 ) {
 				String s = mBookInfo.getBookmarksExportText();
-				mCoolReader.sendBookFragment(mBookInfo, s);
+				mCoolReader.sendBookFragment(mBookInfo, "", s);
 			}
 			dismiss();
 			return true;

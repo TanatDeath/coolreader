@@ -307,6 +307,8 @@ static void putBookmark( LVStream * stream, CRBookmark * bmk )
     putTagValue( stream, 4, "header-text", bmk->getTitleText() );
     putTagValue( stream, 4, "selection-text", bmk->getPosText() );
     putTagValue( stream, 4, "comment-text", bmk->getCommentText() );
+    putTagValue( stream, 4, "is-custom-color", lString32::itoa( bmk->getIsCustomColor()) );
+    putTagValue( stream, 4, "custom-color", lString32::itoa( bmk->getCustomColor()) );
     putTag(stream, 3, "/bookmark");
 }
 
@@ -587,6 +589,8 @@ CRBookmark::CRBookmark (ldomXPointer ptr )
 , _commenttext(lString32::empty_str)
 , _timestamp(time_t(0))
 , _page(0)
+, _isCustomColor(0)
+, _customColor(0)
 {
     //
     if ( ptr.isNull() )
@@ -651,6 +655,8 @@ lString32 CRFileHistRecord::getLastTimeString( bool longFormat )
 #define TITLE_TEXT_TAG       "TITLETEXT"
 #define POS_TEXT_TAG         "POSTEXT"
 #define COMMENT_TEXT_TAG     "COMMENTTEXT"
+#define IS_CUSTOM_COLOR      "ISCUSTOMCOLOR"
+#define CUSTOM_COLOR         "CUSTOMCOLOR"
 
 static lString8 encodeText(lString32 text32) {
     if (text32.empty())
@@ -749,6 +755,8 @@ lString8 ChangeInfo::toString() {
         buf << TITLE_TEXT_TAG << "=" << encodeText(_bookmark->getTitleText()) << "\n";
         buf << POS_TEXT_TAG << "=" << encodeText(_bookmark->getPosText()) << "\n";
         buf << COMMENT_TEXT_TAG << "=" << encodeText(_bookmark->getCommentText()) << "\n";
+        buf << IS_CUSTOM_COLOR << "=" << encodeText(lString32::itoa(_bookmark->getIsCustomColor())) << "\n";
+        buf << CUSTOM_COLOR << "=" << encodeText(lString32::itoa(_bookmark->getCustomColor())) << "\n";
     }
     buf << END_TAG << "\n";
     return buf;
@@ -790,6 +798,10 @@ ChangeInfo * ChangeInfo::fromString(lString8 s) {
             bmk.setPosText(decodeText(value));
         } else if (name == COMMENT_TEXT_TAG) {
             bmk.setCommentText(decodeText(value));
+        } else if (name == IS_CUSTOM_COLOR) {
+            bmk.setIsCustomColor(decodeText(value).atoi());
+        } else if (name == CUSTOM_COLOR) {
+            bmk.setCustomColor(decodeText(value).atoi());
         }
     }
     if (bmk.isValid())

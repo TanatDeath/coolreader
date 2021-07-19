@@ -491,12 +491,12 @@ public class TTSToolbarDlg implements Settings {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			Bundle bundle = new Bundle();
 			bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-			mTTS.speak(selection.text, TextToSpeech.QUEUE_ADD, bundle, CR3_UTTERANCE_ID);
+			mTTS.speak(clearText, TextToSpeech.QUEUE_ADD, bundle, CR3_UTTERANCE_ID);
 		} else {
 			HashMap<String, String> params = new HashMap<String, String>();
 			params.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
 			params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, CR3_UTTERANCE_ID);
-			mTTS.speak(selection.text, TextToSpeech.QUEUE_ADD, params);
+			mTTS.speak(clearText, TextToSpeech.QUEUE_ADD, params);
 		}
 		final String finalClearText = clearText;
 		runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, finalClearText));

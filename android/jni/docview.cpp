@@ -2371,8 +2371,14 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_hilightBookmarksInte
     	    CRStringField startPos(bmk, "startPos");
     	    CRStringField endPos(bmk, "endPos");
     	    CRIntField type(bmk, "type");
-    	    CRBookmark * bookmark = new CRBookmark(startPos.get(), endPos.get());
+			CRIntField isCustomColor(bmk, "isCustomColor");
+            CRIntField icustomColor(bmk, "icustomColor");
+            CRBookmark * bookmark = new CRBookmark(startPos.get(), endPos.get());
     	    bookmark->setType(type.get());
+			bookmark->setIsCustomColor(isCustomColor.get());
+			if (isCustomColor.get() != 0) {
+			    bookmark->setCustomColor(icustomColor.get());
+			}
     	    bookmarks.add(bookmark);
     	    env->DeleteLocalRef(obj);
     	}

@@ -26,6 +26,15 @@
                 android:singleLine="false"
                 android:textColor="?attr/colorIcon"
                 android:text="Test"/>
+        <ImageButton android:id="@+id/find_btn"
+                android:src="?attr/cr3_viewer_find_drawable"
+                android:tag="tint"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:background="@null"
+                android:layout_weight="1"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/base_dlg_button_panel"

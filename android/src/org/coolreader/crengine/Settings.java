@@ -179,6 +179,9 @@ public interface Settings {
 	public static final String PROP_APP_DICTIONARY_5 = "app.dictionary5.current";
 	public static final String PROP_APP_DICTIONARY_6 = "app.dictionary6.current";
 	public static final String PROP_APP_DICTIONARY_7 = "app.dictionary7.current";
+	public static final String PROP_APP_DICT_TYPE_SELECTED0 = "app.dict.type.selected0";
+	public static final String PROP_APP_DICT_TYPE_SELECTED1 = "app.dict.type.selected1";
+	public static final String PROP_APP_DICT_TYPE_SELECTED2 = "app.dict.type.selected2";
     public static final String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
 	public static final String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
     public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
