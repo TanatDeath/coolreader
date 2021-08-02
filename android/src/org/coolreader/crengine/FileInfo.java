@@ -336,6 +336,10 @@ public class FileInfo {
 	public boolean getFlag( int flag ) {
 		return (flags & flag)!=0;
 	}
+
+	public int getFlags() {
+		return flags;
+	}
 	
 	public int getProfileId() {
         return getBitValue(PROFILE_ID_SHIFT,PROFILE_ID_MASK);

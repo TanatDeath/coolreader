@@ -1153,6 +1153,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text
 	};
 
+	int[] mScanDepths = new int[] {
+			0, 2, 1
+	};
+
+	int[] mScanDepthTitles = new int[] {
+			R.string.scan_depth0, R.string.scan_depth1,
+			R.string.scan_depth2
+	};
+
+	int[] mScanDepthAddInfos = new int[] {
+			R.string.scan_depth0_add_info, R.string.scan_depth1_add_info,
+			R.string.scan_depth2_add_info
+	};
 
 	ViewGroup mContentView;
 	TabHost mTabs;
@@ -3085,7 +3098,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 										}
 									}
 									if (dfi != null) {
-										((CoolReader)mActivity).editBookTransl(false, view, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+										((CoolReader)mActivity).editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+												view, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON
+												, null);
 									} else {
 										mActivity.showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 									}
@@ -3345,10 +3360,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					PROP_APP_BOOK_PROPERTY_SCAN_ENABLED,
 					getString(R.string.options_app_scan_book_props_add_info), this.lastFilteredValue).
 					setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties));
-			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
-					getString(R.string.options_app_browser_hide_empty_dirs_add_info), this.lastFilteredValue).
-					//setComment(getString(R.string.options_hide_empty_dirs_slowdown)).
-					setDefaultValue("0").noIcon());
+			listView.add(new ListOption(mOwner, getString(R.string.scan_depth),
+					PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS, getString(R.string.scan_depth_add_info), this.lastFilteredValue).
+					add(mScanDepths, mScanDepthTitles, mScanDepthAddInfos).
+					setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_folder_scan, R.drawable.icons8_folder_scan));
+//			listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_dirs), PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS,
+//					getString(R.string.options_app_browser_hide_empty_dirs_add_info), this.lastFilteredValue).
+//					//setComment(getString(R.string.options_hide_empty_dirs_slowdown)).
+//					setDefaultValue("0").noIcon());
 			//CR implementation
 			//listView.add(new BoolOption(mOwner, getString(R.string.options_app_browser_hide_empty_genres), PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
 			//		getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
@@ -3392,10 +3411,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					add(mBrowserMaxGroupItems).setDefaultValue("8").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
 			listView.add(new ListOption(mOwner, getString(R.string.browser_tap_option_tap), PROP_APP_FILE_BROWSER_TAP_ACTION,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("0").noIcon());
+					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("0").
+					setIconIdByAttr(R.attr.attr_icons8_book_tap, R.drawable.icons8_book_tap));
 			listView.add(new ListOption(mOwner, getString(R.string.browser_tap_option_longtap), PROP_APP_FILE_BROWSER_LONGTAP_ACTION,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("1").noIcon());
+					add(mBrowserAction, mBrowserActionTitles, mBrowserActionAddInfos).setDefaultValue("1").
+					setIconIdByAttr(R.attr.attr_icons8_book_long_tap, R.drawable.icons8_book_long_tap));
 			listView.add(new ListOption(mOwner, getString(R.string.sec_group_common), PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					add(mSecGroupCommon, mSecGroupCommonTitles, mSecGroupCommonTitlesAddInfos).setDefaultValue("0").
@@ -3560,6 +3581,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_app_tts_stop_motion_timeout_add_info), this.lastFilteredValue).
 					add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
 					setIconIdByAttr(R.attr.attr_icons8_moving_sensor_n,R.drawable.icons8_moving_sensor));
+			listView.add(new BoolOption(mOwner, getString(R.string.tts_page_mode_dont_change), PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
+					getString(R.string.tts_page_mode_dont_change_add_info), this.lastFilteredValue).setDefaultValue("0").
+					setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
 			listView.add(new ListOption(mOwner, getString(R.string.force_tts_koef),
 					PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), this.lastFilteredValue).
 					add(mForceTTS, mForceTTSTitles, mForceTTSAddInfos).
@@ -3621,6 +3645,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			this.updateFilteredMark(getString(R.string.sel_panel_background_1));
 			this.updateFilteredMark(getString(R.string.sel_panel_background_2));
 			this.updateFilteredMark(getString(R.string.sel_panel_background_3));
+			this.updateFilteredMark(getString(R.string.tts_page_mode_dont_change), PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
+					getString(R.string.tts_page_mode_dont_change_add_info));
 			return this.lastFiltered;
 		}
 		public String getValueLabel() { return ">"; }
@@ -5074,7 +5100,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						((list.get(i).value.toLowerCase()).contains(sText.toLowerCase()))||
 						((list.get(i).addInfo.toLowerCase()).contains(sText.toLowerCase()))
 					) {
-					OptionsDialog.Three item = new OptionsDialog.Three(
+					Three item = new Three(
 							list.get(i).value, list.get(i).label, list.get(i).addInfo);
 					listFiltered.add(item);
 				}
@@ -5153,6 +5179,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if (selItem < 0)
 				selItem = 0;
 			listView.setAdapter(listAdapter);
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//				Utils.setScrollBarsFadeOff(listView);
+//			}
 			listAdapter.notifyDataSetChanged();
 			listView.setSelection(selItem);
 		}
@@ -7543,8 +7572,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		//mFontHintingOption.setEnabled(nativeWeightsArray.contains(base_weight));
 	}
 
-	//asdf: строчка 2254 нового файла , 2501 старого
-
 	private void setupReaderOptions(String filter)
 	{
         mInflater = LayoutInflater.from(getContext());
@@ -7805,6 +7832,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				.setIconIdByAttr(R.attr.attr_icons8_physics, R.drawable.icons8_physics);
 		((RareOption)sbO6).updateFilterEnd();
 		mOptionsApplication.add(sbO6);
+		mOptionsApplication.add(new ClickOption(this, getString(R.string.init_app),
+				PROP_APP_INIT, "", filter,
+				view ->
+				{
+					InitAppDialog iad = new InitAppDialog((CoolReader) mActivity);
+					iad.show();
+				}, true).setDefaultValue(getString(R.string.init_app_add_info)).
+				setIconIdByAttr(R.attr.attr_icons8_delete_database, R.drawable.icons8_delete_database));
 
 //		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 //			boolean gdriveSyncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);

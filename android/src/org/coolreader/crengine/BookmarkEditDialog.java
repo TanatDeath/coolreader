@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.TranslationDirectionDialog;
 
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -35,6 +36,8 @@ public class BookmarkEditDialog extends BaseDialog {
 	private final boolean mIsNew;
 	private final String cbtextFull;
 	final TextView lblSetComment;
+	final TextView lblTransl1;
+	final TextView lblTransl2;
 	final TextView lblBookmarkLink;
 	BookInfo mBookInfo;
 	final EditText commentEdit;
@@ -214,7 +217,9 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnUserDic.setBackgroundColor(colorGrayCT);
 		btnInternalLink.setBackgroundColor(colorGrayCT);
 		btnCitation.setBackgroundColor(colorGrayCT);
-		lblSetComment.setTextColor(colorGrayCT2);
+		//lblSetComment.setTextColor(colorGrayCT2);
+		lblTransl1.setTextColor(colorGrayCT2);
+		lblTransl2.setTextColor(colorGrayCT2);
 		lblBookmarkLink.setTextColor(colorIcon);
 		btnSendTo1.setBackgroundColor(colorGrayCT);
 		btnSendTo2.setBackgroundColor(colorGrayCT);
@@ -341,6 +346,75 @@ public class BookmarkEditDialog extends BaseDialog {
 		return StrUtils.getNonEmptyStr(text2, true);
 	}
 
+	private void doTranslate(boolean isPosText, boolean withLangSel, View anchor) {
+		if (!FlavourConstants.PREMIUM_FEATURES) {
+			mCoolReader.showToast(R.string.only_in_premium);
+			return;
+		}
+		String posText = posEdit.getText().toString();
+		if (!isPosText) posText = edtContext.getText().toString();
+		if ((currentDic != null) && (!StrUtils.isEmptyStr(posText))) {
+			mCoolReader.mDictionaries.setAdHocDict(currentDic);
+
+			if (withLangSel) {
+				String finalPosText = posText;
+				mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK,
+						anchor, mReaderView.getBookInfo().getFileInfo().parent,
+						mBookInfo.getFileInfo(),
+						StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true),
+						StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to, true),
+						"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
+							//mCoolReader.showToast(s);
+							mCoolReader.findInDictionary(finalPosText, null, new CoolReader.DictionaryCallback() {
+
+								@Override
+								public boolean showDicToast() {
+									return false;
+								}
+
+								@Override
+								public boolean saveToHist() {
+									return true;
+								}
+
+								@Override
+								public void done(String result) {
+									commentEdit.setText(result);
+								}
+
+								@Override
+								public void fail(Exception e, String msg) {
+									mCoolReader.showToast(msg);
+								}
+							});
+						});
+			} else {
+				mCoolReader.findInDictionary(posText, null, new CoolReader.DictionaryCallback() {
+
+					@Override
+					public boolean showDicToast() {
+						return false;
+					}
+
+					@Override
+					public boolean saveToHist() {
+						return true;
+					}
+
+					@Override
+					public void done(String result) {
+						commentEdit.setText(result);
+					}
+
+					@Override
+					public void fail(Exception e, String msg) {
+						mCoolReader.showToast(msg);
+					}
+				});
+			}
+		}
+	}
+
 	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType, String commentText)
 	{
 		super("BookmarkEditDialog", activity, "", true, false);
@@ -449,10 +523,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		edtContext = view.findViewById(R.id.context_text);
 		int colorIcon = themeColors.get(R.attr.colorIcon);
 		((TextView) view.findViewById(R.id.lbl_rb_descr)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
-		((TextView) view.findViewById(R.id.lbl_selection_text)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
-		((TextView) view.findViewById(R.id.lbl_comment_text)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
-		((TextView) view.findViewById(R.id.lbl_context_text)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
-
+		
 		final CoolReader cr = activity;
 
 		commentLabel.setOnClickListener(v -> {
@@ -467,6 +538,8 @@ public class BookmarkEditDialog extends BaseDialog {
 
 		final ImageButton btnSetComment = (ImageButton)view.findViewById(R.id.base_dlg_btn_add);
 		lblSetComment = view.findViewById(R.id.lbl_comment_from_cb);
+		lblTransl1 = view.findViewById(R.id.lbl_transl_sel);
+		lblTransl2 = view.findViewById(R.id.lbl_context_transl);
 		lblBookmarkLink = view.findViewById(R.id.lbl_bookmark_link);
 		String sL = mBookmark.getLinkPos();
 		if (StrUtils.isEmptyStr(sL)) lblBookmarkLink.setText(""); else
@@ -514,7 +587,9 @@ public class BookmarkEditDialog extends BaseDialog {
 			if ((mIsNew)&&(mBookmark.getType()==Bookmark.TYPE_INTERNAL_LINK))
 				activity.showBookmarksDialog(true, BookmarkEditDialog.this);
 		});
-		commentEdit = (EditText)view.findViewById(R.id.comment_edit);
+		commentEdit = view.findViewById(R.id.comment_edit);
+		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
+		commentEdit.setHintTextColor(colorIcon128);
 		String postext = mBookmark.getPercent()/100 + "%";
 		if ( mBookmark.getTitleText()!=null )
 			postext = postext + "  " + mBookmark.getTitleText();
@@ -694,66 +769,18 @@ public class BookmarkEditDialog extends BaseDialog {
 			}
 		});
 		btnTransl.setOnClickListener(v -> {
-			if (!FlavourConstants.PREMIUM_FEATURES) {
-				mCoolReader.showToast(R.string.only_in_premium);
-				return;
-			}
-			if ((currentDic != null) && (!StrUtils.isEmptyStr(posEdit.getText().toString()))) {
-				mCoolReader.mDictionaries.setAdHocDict(currentDic);
-				mCoolReader.findInDictionary(posEdit.getText().toString(), null, new CoolReader.DictionaryCallback() {
-
-					@Override
-					public boolean showDicToast() {
-						return false;
-					}
-
-					@Override
-					public boolean saveToHist() {
-						return true;
-					}
-
-					@Override
-					public void done(String result) {
-						commentEdit.setText(result);
-					}
-
-					@Override
-					public void fail(Exception e, String msg) {
-						mCoolReader.showToast(msg);
-					}
-				});
-			}
+			doTranslate(true, false, btnTransl);
+		});
+		btnTransl.setOnLongClickListener(v -> {
+			doTranslate(true, true, btnTransl);
+			return true;
 		});
 		btnTransl2.setOnClickListener(v -> {
-			if (!FlavourConstants.PREMIUM_FEATURES) {
-				mCoolReader.showToast(R.string.only_in_premium);
-				return;
-			}
-			if ((currentDic != null) && (!StrUtils.isEmptyStr(posEdit.getText().toString()))) {
-				mCoolReader.mDictionaries.setAdHocDict(currentDic);
-				mCoolReader.findInDictionary(edtContext.getText().toString(), null, new CoolReader.DictionaryCallback() {
-
-					@Override
-					public boolean showDicToast() {
-						return false;
-					}
-
-					@Override
-					public boolean saveToHist() {
-						return true;
-					}
-
-					@Override
-					public void done(String result) {
-						commentEdit.setText(result);
-					}
-
-					@Override
-					public void fail(Exception e, String msg) {
-						mCoolReader.showToast(msg);
-					}
-				});
-			}
+			doTranslate(false, false, btnTransl2);
+		});
+		btnTransl2.setOnLongClickListener(v -> {
+			doTranslate(false, true, btnTransl2);
+			return true;
 		});
 		int selAction = -1;
 		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;

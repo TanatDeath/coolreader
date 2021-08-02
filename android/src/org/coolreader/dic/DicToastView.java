@@ -559,7 +559,8 @@ public class DicToastView {
                         dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
                     }
                     if (dfi != null) {
-                        cr.editBookTransl(false, null, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+                        cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, "", null,
+                                TranslationDirectionDialog.FOR_COMMON, null);
                     }
                 };
                 window.dismiss();
@@ -645,7 +646,8 @@ public class DicToastView {
                             dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
                         }
                         if (dfi != null) {
-                            cr.editBookTransl(false, null, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON);
+                            cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, "", null,
+                                    TranslationDirectionDialog.FOR_COMMON, null);
                         }
                     };
                     window.dismiss();

@@ -23,9 +23,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class BrowserViewLayout extends ViewGroup {
-	private BaseActivity activity;
+	private CoolReader activity;
 	private FileBrowser contentView;
 	private View titleView;
 	private View filterView;
@@ -36,6 +37,21 @@ public class BrowserViewLayout extends ViewGroup {
 	private LinearLayout bottomBarLitres;
 	private Button btnPop;
 	private Button btnNew;
+
+	private Button btnStateDir;
+	private Button btnStateNoMark;
+	private Button btnStateToRead;
+	private Button btnStateReading;
+	private Button btnStateFinished;
+
+	private boolean bStateDir = true;
+	private boolean bStateNoMark = true;
+	private boolean bStateToRead = true;
+	private boolean bStateReading = true;
+	private boolean bStateFinished = true;
+
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
 	private boolean newBooks = true;
 
@@ -77,9 +93,44 @@ public class BrowserViewLayout extends ViewGroup {
 		}
 	}
 
+	private void paintStateButtons() {
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		activity.tintViewIcons(btnStateDir, PorterDuff.Mode.CLEAR,true);
+		activity.tintViewIcons(btnStateNoMark, PorterDuff.Mode.CLEAR,true);
+		activity.tintViewIcons(btnStateToRead, PorterDuff.Mode.CLEAR,true);
+		activity.tintViewIcons(btnStateReading, PorterDuff.Mode.CLEAR,true);
+		activity.tintViewIcons(btnStateFinished, PorterDuff.Mode.CLEAR,true);
+		if (bStateDir) {
+			btnStateDir.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnStateDir,true);
+		} else btnStateDir.setBackgroundColor(colorGrayCT);
+		if (bStateNoMark) {
+			btnStateNoMark.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnStateNoMark,true);
+		} else btnStateNoMark.setBackgroundColor(colorGrayCT);
+		if (bStateToRead) {
+			btnStateToRead.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnStateToRead,true);
+		}  else btnStateToRead.setBackgroundColor(colorGrayCT);
+		if (bStateReading) {
+			btnStateReading.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnStateReading,true);
+		} else btnStateReading.setBackgroundColor(colorGrayCT);
+		if (bStateFinished) {
+			btnStateFinished.setBackgroundColor(colorGrayCT2);
+			activity.tintViewIcons(btnStateFinished,true);
+		} else btnStateFinished.setBackgroundColor(colorGrayCT);
+	}
+
+	private void refreshCurrentDir() {
+		activity.showDirectory(dir, "");
+	}
+
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
-		this.activity = context;
+		this.activity = (CoolReader) context;
 		this.contentView = contentView;
 		this.titleView = titleView;
 		this.titleView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
@@ -88,6 +139,13 @@ public class BrowserViewLayout extends ViewGroup {
 		this.addView(titleView);
 		this.addView(toolbarView);
 		this.addView(contentView);
+		bStateDir = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_DIR, true);
+		bStateNoMark = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_NO_MARK, true);
+		bStateToRead = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_TO_READ, true);
+		bStateReading = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_READING, true);
+		bStateFinished = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_FINISHED, true);
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		bottomBar = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar, null);
 		bottomBar1Btn = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar_1btn, null);
@@ -113,6 +171,7 @@ public class BrowserViewLayout extends ViewGroup {
 		if (btnMenu2 != null)
 			btnMenu2.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		this.addView(bottomBar);
+
 		this.onThemeChanged(context.getCurrentTheme());
 		titleView.setFocusable(false);
 		titleView.setFocusableInTouchMode(false);
@@ -186,6 +245,83 @@ public class BrowserViewLayout extends ViewGroup {
 
 	public void setBrowserTitle(String title, FileInfo dir) {
 		this.browserTitle = title;
+
+		btnStateDir  = titleView.findViewById(R.id.book_state_dir);
+		btnStateDir.setOnClickListener(v -> {
+			bStateDir = !bStateDir;
+			paintStateButtons();
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_SHOW_FILES_DIR, bStateDir?"1":"0");
+			activity.setSettings(props, -1, true);
+			refreshCurrentDir();
+		});
+		btnStateNoMark  = titleView.findViewById(R.id.book_state_nomark);
+		btnStateNoMark.setOnClickListener(v -> {
+			bStateNoMark = !bStateNoMark;
+			paintStateButtons();
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_SHOW_FILES_NO_MARK, bStateNoMark?"1":"0");
+			activity.setSettings(props, -1, true);
+			refreshCurrentDir();
+		});
+		btnStateToRead  = titleView.findViewById(R.id.book_state_toread);
+		btnStateToRead.setOnClickListener(v -> {
+			bStateToRead = !bStateToRead;
+			paintStateButtons();
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_SHOW_FILES_TO_READ, bStateToRead?"1":"0");
+			activity.setSettings(props, -1, true);
+			refreshCurrentDir();
+		});
+		btnStateReading  = titleView.findViewById(R.id.book_state_reading);
+		btnStateReading.setOnClickListener(v -> {
+			bStateReading = !bStateReading;
+			paintStateButtons();
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_SHOW_FILES_READING, bStateReading?"1":"0");
+			activity.setSettings(props, -1, true);
+			refreshCurrentDir();
+		});
+		btnStateFinished  = titleView.findViewById(R.id.book_state_finished);
+		btnStateFinished.setOnClickListener(v -> {
+			bStateFinished = !bStateFinished;
+			paintStateButtons();
+			Properties props = new Properties(activity.settings());
+			props.setProperty(Settings.PROP_APP_SHOW_FILES_FINISHED, bStateFinished?"1":"0");
+			activity.setSettings(props, -1, true);
+			refreshCurrentDir();
+		});
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img1 = img.getConstantState().newDrawable().mutate();
+		Drawable img2 = img.getConstantState().newDrawable().mutate();
+		Drawable img3 = img.getConstantState().newDrawable().mutate();
+		Drawable img4 = img.getConstantState().newDrawable().mutate();
+		Drawable img5 = img.getConstantState().newDrawable().mutate();
+		btnStateDir.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		btnStateNoMark.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+		btnStateToRead.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
+		btnStateReading.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
+		btnStateFinished.setCompoundDrawablesWithIntrinsicBounds(img5, null, null, null);
+
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		int colorBlue = themeColors.get(R.attr.colorThemeBlue);
+		int colorGreen = themeColors.get(R.attr.colorThemeGreen);
+		int colorGray = themeColors.get(R.attr.colorThemeGray);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+
+		btnStateDir.setTextColor(colorIcon);
+		btnStateNoMark.setTextColor(colorIcon);
+		btnStateReading.setTextColor(colorGreen);
+		btnStateToRead.setTextColor(colorBlue);
+		btnStateFinished.setTextColor(colorGray);
+		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+//		btnStateDir.setBackgroundColor(colorGrayCT);
+//		btnStateNoMark.setBackgroundColor(colorGrayCT);
+//		btnStateToRead.setBackgroundColor(colorGrayCT);
+//		btnStateReading.setBackgroundColor(colorGrayCT);
+//		btnStateFinished.setBackgroundColor(colorGrayCT);
+		paintStateButtons();
+
 		if (filterIsShown) switchFilter(false);
 		if (dir!=null) this.dir = dir;
 		((TextView)titleView.findViewById(R.id.title)).setText(title);
@@ -200,10 +336,6 @@ public class BrowserViewLayout extends ViewGroup {
 		arrLblPaths.add(titleView.findViewById(R.id.path8));
 		arrLblPaths.add(titleView.findViewById(R.id.path9));
 		arrLblPaths.add(titleView.findViewById(R.id.path10));
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorIcon});
-		int colorIcon = a.getColor(0, Color.GRAY);
-		a.recycle();
 
 		int i = 0;
 		FileInfo dir1 = this.dir;
@@ -217,8 +349,8 @@ public class BrowserViewLayout extends ViewGroup {
 				if ((dir2 != null)&&(!dir2.isRootDir())) {
 					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 					final FileInfo dir3 = dir2;
-					tv.setText(FileInfo.getDisplayName((CoolReader) activity, String.valueOf(dir2.getFilename())));
-					tv.setOnClickListener(v -> ((CoolReader)activity).showDirectory(dir3, ""));
+					tv.setText(FileInfo.getDisplayName(activity, String.valueOf(dir2.getFilename())));
+					tv.setOnClickListener(v -> activity.showDirectory(dir3, ""));
 				} else
 					if (i==1) {
 						if (this.dir != null)
@@ -332,11 +464,12 @@ public class BrowserViewLayout extends ViewGroup {
 		int w = MeasureSpec.getSize(widthMeasureSpec);
 		int h = MeasureSpec.getSize(heightMeasureSpec);
 
-		boolean v = toolbarView.isVertical();
+		//boolean v = toolbarView.isVertical();
+		boolean v = w > h;
 		boolean needChange = true;
 
 		if ((prevH!=0) && (prevW!=0)) {
-			if (prevW==w) {
+			if ((prevW==w) && (prevH == h)) {
 				needChange = false;
 			}
 		}
@@ -349,21 +482,23 @@ public class BrowserViewLayout extends ViewGroup {
 		toolbarView.setVertical(v);
 		if (v) {
 			// landscape
-			toolbarView.setVertical(true);
+			//toolbarView.setVertical(true);
 			toolbarView.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),
 					MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
 			int tbWidth = toolbarView.getMeasuredWidth();
-			titleView.measure(MeasureSpec.makeMeasureSpec(w - tbWidth, MeasureSpec.AT_MOST),
+			//titleView.measure(MeasureSpec.makeMeasureSpec(w - tbWidth, MeasureSpec.AT_MOST),
+			//		MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+			titleView.measure(widthMeasureSpec - tbWidth,
 					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 			int titleHeight = titleView.getMeasuredHeight();
-			bottomBar.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),
+			bottomBar.measure(MeasureSpec.makeMeasureSpec(w - tbWidth, MeasureSpec.AT_MOST),
 					MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
 			int bottomHeight = bottomBar.getMeasuredHeight();
 			contentView.measure(MeasureSpec.makeMeasureSpec(w - tbWidth, MeasureSpec.AT_MOST),
 					MeasureSpec.makeMeasureSpec(h - titleHeight - bottomHeight, MeasureSpec.AT_MOST));
 		} else {
 			// portrait
-			toolbarView.setVertical(false);
+			//toolbarView.setVertical(false);
 			toolbarView.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST),
 					MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
 			int tbHeight = toolbarView.getMeasuredHeight();

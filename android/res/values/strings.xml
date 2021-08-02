@@ -662,6 +662,7 @@
     <string name="book_marked_reading">Book was marked as \"Reading\"</string>
     <string name="book_state_reading">Reading</string>
     <string name="book_state_none">No mark</string>
+    <string name="book_state_dir">Dir</string>
     <string name="book_state_finished">Finished</string>
     <string name="book_info_rating">Rate</string>
     <string name="options_page_show_titlebar_hidden">None</string>
@@ -881,6 +882,7 @@
     <string name="set_comment_from_cb_capt">Save with comment from clipboard</string>
     <string name="set_comment_from_cb">Set comment ...</string>
     <string name="clipb_contents">Clipboard contents (click to paste):</string>
+    <string name="clipb_contents_s">Clipboard contents</string>
     <string name="fonts_menu">Fonts menu</string>
     <string name="copied_to_cb">Copied to clipboard</string>
     <string name="options_app_dict_word_correction">Word correction before dictionary</string>
@@ -1264,6 +1266,7 @@
     <string name="opened_doc_props_fonts">Embedded fonts (which override selected)</string>
     <string name="opened_doc_props_text">Text autoformat</string>
     <string name="str_change">Change ...</string>
+    <string name="str_disable_this_dialog">Disable this dialog</string>
     <string name="later_css">You always can do it later - in CSS settings tab</string>
     <string name="ynd_autolang"># - auto (Yandex online only)</string>
     <string name="new_fonts">Archive contains new fonts (%1$s). Copy them to fonts folder?</string>
@@ -1684,6 +1687,7 @@
     <string name="dic_online">Online</string>
     <string name="dic_application">App</string>
     <string name="init_app">Init app dialog</string>
+    <string name="init_app_add_info">Clear cache, reset settings or/and delete books database</string>
     <string name="init_app_clear_cache">Clear cache folder</string>
     <string name="init_app_clear_cache_add_info">This is safe operation. Sometimes cache can become broken, you can completely clear it - in some situations this may help</string>
     <string name="init_app_clear_settings">Reset setting</string>
@@ -1699,4 +1703,20 @@
     <string name="safe_mode_clear_cache">Clear cache folder, then open</string>
     <string name="folder_exists">Folder exists</string>
     <string name="folder_not_exists">Folder not exists</string>
+    <string name="scan_depth">Folder scan depth</string>
+    <string name="scan_depth_add_info">You can specify folder scan strategy</string>
+    <string name="scan_depth0">Moderate (2 levels)</string>
+    <string name="scan_depth1">Fast (only current folder)</string>
+    <string name="scan_depth2">Full (hide folders without books)</string>
+    <string name="scan_depth0_add_info">Engine will scan current folder and two levels of each folder inside it</string>
+    <string name="scan_depth1_add_info">Engine will scan only current folder</string>
+    <string name="scan_depth2_add_info">Engine will scan full tree of folders and hide those, that not contain books</string>
+    <string name="bmk_pos">Bookmark position</string>
+    <string name="bmk_type">Bookmark type</string>
+    <string name="bmk_color">Bookmark color</string>
+    <string name="bmk_transl_sel">Translate and put in comment:</string>
+    <string name="bmk_actions">Bookmark actions</string>
+    <string name="dlg_type_text">Type text here</string>
+    <string name="tts_page_mode_dont_change">Do not change page mode to scroll when TTS is active</string>
+    <string name="tts_page_mode_dont_change_add_info">When scroll is enabled, book text is scrolled by sentences, when pages - by pages</string>
 </resources>

@@ -99,6 +99,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				//mActivity.showToast(item.filename);
 				if (item == null)
 					return false;
+				if (currDirectory != null)
+					if (!StrUtils.isEmptyStr(currDirectory.pathname)) {
+						if (mActivity.mCurrentFrame == mActivity.mBrowserFrame) {
+							mListPosCache.put(currDirectory.pathname, position);
+							log.i("scroll mListPosCache.put("+ currDirectory.pathname +", "+ position +");");
+						}
+					}
 				//openContextMenu(_this);
 				//mActivity.loadDocument(item);
 				selectedItem = item;
@@ -155,8 +162,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (currDirectory != null)
 						if (!StrUtils.isEmptyStr(currDirectory.pathname)) {
 							if (mActivity.mCurrentFrame == mActivity.mBrowserFrame) {
-								int i = firstVisibleItem + (visibleItemCount / 3);
+								//int i = firstVisibleItem + (visibleItemCount / 3);
+								int i = firstVisibleItem;
+								mListPosCache.put("##visibleItemCount##", visibleItemCount);
 								mListPosCache.put(currDirectory.pathname, i);
+								log.i("scroll mListPosCache.put("+ currDirectory.pathname + ", "+ i +");");
 							}
 						}
 				}
@@ -258,6 +268,13 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo item = (FileInfo) getAdapter().getItem(position);
 			if (item == null)
 				return false;
+			if (currDirectory != null)
+				if (!StrUtils.isEmptyStr(currDirectory.pathname)) {
+					if (mActivity.mCurrentFrame == mActivity.mBrowserFrame) {
+						mListPosCache.put(currDirectory.pathname, position);
+						log.i("scroll mListPosCache.put("+ currDirectory.pathname +", "+ position +");");
+					}
+				}
 			if (item.isLitresSpecialDir()) {
 				if (item.isLitresPagination())
 					showDirectory(item.parent, null, "", item.lsp);
@@ -738,8 +755,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int state = selectedItem.getReadingState();
 				int newState = FileInfo.STATE_NEW;
 				boolean modified = state != newState;
+				if (modified) mActivity.setBookState(selectedItem, FileInfo.STATE_NEW);
 				selectedItem.setReadingState(FileInfo.STATE_NEW);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_to_read:
@@ -748,8 +766,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int state = selectedItem.getReadingState();
 				int newState = FileInfo.STATE_TO_READ;
 				boolean modified = state != newState;
+				if (modified) mActivity.setBookState(selectedItem, FileInfo.STATE_TO_READ);
 				selectedItem.setReadingState(FileInfo.STATE_TO_READ);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_reading:
@@ -758,8 +777,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int state = selectedItem.getReadingState();
 				int newState = FileInfo.STATE_READING;
 				boolean modified = state != newState;
+				if (modified) mActivity.setBookState(selectedItem, FileInfo.STATE_READING);
 				selectedItem.setReadingState(FileInfo.STATE_READING);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_finished:
@@ -768,8 +788,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int state = selectedItem.getReadingState();
 				int newState = FileInfo.STATE_FINISHED;
 				boolean modified = state != newState;
+				if (modified) mActivity.setBookState(selectedItem, FileInfo.STATE_FINISHED);
 				selectedItem.setReadingState(FileInfo.STATE_FINISHED);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_rate_5:
@@ -778,8 +799,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int rate = selectedItem.getRate();
 				int newRate = 5;
 				boolean modified = rate != newRate;
+				if (modified) mActivity.setBookRate(selectedItem, newRate);
 				selectedItem.setRate(newRate);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_rate_4:
@@ -788,8 +810,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int rate = selectedItem.getRate();
 				int newRate = 4;
 				boolean modified = rate != newRate;
+				if (modified) mActivity.setBookRate(selectedItem, newRate);
 				selectedItem.setRate(newRate);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_rate_3:
@@ -798,8 +821,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int rate = selectedItem.getRate();
 				int newRate = 3;
 				boolean modified = rate != newRate;
+				if (modified) mActivity.setBookRate(selectedItem, newRate);
 				selectedItem.setRate(newRate);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_rate_2:
@@ -808,8 +832,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int rate = selectedItem.getRate();
 				int newRate = 2;
 				boolean modified = rate != newRate;
+				if (modified) mActivity.setBookRate(selectedItem, newRate);
 				selectedItem.setRate(newRate);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_rate_1:
@@ -818,8 +843,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int rate = selectedItem.getRate();
 				int newRate = 1;
 				boolean modified = rate != newRate;
+				if (modified) mActivity.setBookRate(selectedItem, newRate);
 				selectedItem.setRate(newRate);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.book_rate_0:
@@ -828,8 +854,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int rate = selectedItem.getRate();
 				int newRate = 0;
 				boolean modified = rate != newRate;
+				if (modified) mActivity.setBookRate(selectedItem, newRate);
 				selectedItem.setRate(newRate);
-				if (modified) saveBookInfo();
+				mListView.invalidateViews();
 			}
 			return true;
 		case R.id.folder_series_authors:
@@ -891,22 +918,36 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 	}
 
-	public void scrollToLastPos() {
+	public void scrollToLastPos(boolean doStore) {
 		// try to restore position
 		if (currDirectory!=null) {
 			if (currDirectory.isLitresPrefix()) return;
-			Integer firstVisibleItem1 = mListPosCache.get(currDirectory.pathname);
-			if (firstVisibleItem1 == null) firstVisibleItem1 = 0;
+			if (doStore) {
+				firstVisibleItem = mListPosCache.get(currDirectory.pathname);
+				visibleItemCount = mListPosCache.get("##visibleItemCount##");
+				log.i("mListPosCache.get store firstVisibleItem = " + firstVisibleItem);
+				return;
+			}
+			log.i("mListPosCache.get set firstVisibleItem = " + firstVisibleItem);
+			if (firstVisibleItem == null) firstVisibleItem = 0;
+			if (visibleItemCount == null) visibleItemCount = 0;
 			Integer firstVisibleItem2 = 0;
 			if (mListPosCacheOld != null) {
 				firstVisibleItem2 = mListPosCacheOld.get(currDirectory.pathname);
 				if (firstVisibleItem2 == null) firstVisibleItem2 = 0;
-				if ((firstVisibleItem2 > 0) && (firstVisibleItem1 == 0))
-					firstVisibleItem1 = firstVisibleItem2;
+				if ((firstVisibleItem2 > 0) && (firstVisibleItem == 0))
+					firstVisibleItem = firstVisibleItem2;
 				mListPosCacheOld = null;
 			}
-			if (firstVisibleItem1 > 0) {
-				mListView.setSelection(firstVisibleItem1);
+			if (firstVisibleItem > 0) {
+				if (visibleItemCount == 0)
+					mListView.setSelection(firstVisibleItem);
+				else {
+					int fiv = firstVisibleItem;
+					//fiv = fiv - visibleItemCount / 4;
+					//if (fiv < 0) fiv = 0;
+					mListView.setSelection(fiv);
+				}
 			}
 		}
 	}
@@ -940,12 +981,20 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		//showDirectory( mScanner.mRoot, null );
 		mListView.setSelection(0);
 	}
-	
+
 	private FileInfo currDirectory;
 	private FileInfo currDirectoryFiltered;
+	Integer firstVisibleItem = 0;
+	Integer visibleItemCount = 0;
 
 	public void filterUpdated(String text) {
-		if (StrUtils.isEmptyStr(text)) {
+		boolean bStateDir = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_DIR, true);
+		boolean bStateNoMark = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_NO_MARK, true);
+		boolean bStateToRead = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_TO_READ, true);
+		boolean bStateReading = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_READING, true);
+		boolean bStateFinished = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_FINISHED, true);
+		if ((StrUtils.isEmptyStr(text))
+				&& (bStateDir) && (bStateNoMark) && (bStateToRead) && (bStateReading) && (bStateFinished)) {
 			currDirectoryFiltered = currDirectory;
 		} else {
 			ArrayList<FileInfo> filesN = new ArrayList<FileInfo>();// files
@@ -953,11 +1002,33 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			currDirectoryFiltered = new FileInfo(currDirectory);
 			if (currDirectory.dirs != null)
 				for (FileInfo dir: currDirectory.dirs) {
-					if (dir.contains(text)) dirsN.add(dir);
+					boolean bOk = false;
+					if (!StrUtils.isEmptyStr(text)) {
+						if (dir.contains(text)) bOk = true;
+					} else bOk = true;
+					if (bOk)
+						if (bStateDir)
+							dirsN.add(dir);
 				}
 			if (currDirectory.files != null)
 				for (FileInfo file: currDirectory.files) {
-					if (file.contains(text)) filesN.add(file);
+					boolean bOk = true;
+					if (!StrUtils.isEmptyStr(text))
+						if (!file.contains(text)) bOk = false;
+					if (bOk) {
+						bOk = false;
+						int rs = file.getReadingState();
+						if (
+						    ((rs == 0) && (bStateNoMark))
+							||
+						    ((rs == FileInfo.STATE_TO_READ) && (bStateToRead))
+						    ||
+						    ((rs == FileInfo.STATE_READING) && (bStateReading))
+						    ||
+						    ((rs == FileInfo.STATE_FINISHED) && (bStateFinished))
+						) bOk = true;
+					}
+					if (bOk) filesN.add(file);
 				}
 			log.i("finding: "+text);
 			log.i("dir_cnt "+dirsN.size());
@@ -1902,6 +1973,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (dir.allowSorting())
 						dir.sort(mSortOrder);
 					showDirectoryInternal(dir, file);
+					scrollToLastPos(true);
 					mActivity.setBrowserProgressStatus(true);
 				}, (scanControl) -> {
 					if (!scanControl.isStopped()) {
@@ -1911,7 +1983,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					}
 					mActivity.setBrowserProgressStatus(false);
 					// try to restore position
-					scrollToLastPos();
+					scrollToLastPos(false);
 				}, false, mScanControl);
 			}
 		} else
@@ -2837,6 +2909,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				title = FileInfo.getDisplayName(mActivity, title);
 			}
 		}
+		filterUpdated("");
 		mActivity.setBrowserTitle(title, dir);
 		mListView.setAdapter(currentListAdapter);
 		currentListAdapter.notifyDataSetChanged();

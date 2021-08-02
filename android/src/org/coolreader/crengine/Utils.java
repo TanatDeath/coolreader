@@ -47,8 +47,10 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.coolreader.R;
@@ -1244,6 +1246,11 @@ public class Utils {
 	public static String getBookInfoToSend(Selection sel) {
 		if (sel.chapter != null && sel.chapter.length() > 0) return "\"" + sel.chapter + "\"";
 		return "";
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+	public static void setScrollBarsFadeOff(ListView lv) {
+		lv.setScrollBarFadeDuration(0);
 	}
 
 }

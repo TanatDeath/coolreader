@@ -250,6 +250,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -399,6 +402,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -573,6 +579,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>
@@ -721,6 +730,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>

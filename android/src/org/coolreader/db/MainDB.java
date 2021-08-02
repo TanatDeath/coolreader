@@ -2393,13 +2393,17 @@ public class MainDB extends BaseDB {
 		sortItems(list, new ItemGroupTitleExtractor(), true);
 		// remove duplicate titles
 		for (int i=list.size() - 1; i>0; i--) {
-			String title = list.get(i).title;
-			if (title == null) {
+			String title = StrUtils.getNonEmptyStr(list.get(i).title, true);
+			String pathname = StrUtils.getNonEmptyStr(list.get(i).pathname, true);
+			String filename = StrUtils.getNonEmptyStr(list.get(i).getFilename(), true);
+			if (StrUtils.isEmptyStr(title) && StrUtils.isEmptyStr(filename) && (!pathname.startsWith("@"))) {
 				list.remove(i);
 				continue;
 			}
-			String prevTitle = list.get(i - 1).title;
-			if (title.equals(prevTitle))
+			String prevTitle = StrUtils.getNonEmptyStr(list.get(i - 1).title, true);
+			String prevPathname = StrUtils.getNonEmptyStr(list.get(i - 1).pathname, true);
+			String prevFilename = StrUtils.getNonEmptyStr(list.get(i - 1).getFilename(), true);
+			if ((title.equals(prevTitle)) && (pathname.equals(prevPathname)) && (filename.equals(prevFilename)))
 				list.remove(i);
 		}
 		//addGroupedItems(parent, list, 0, list.size(), FileInfo.TITLE_GROUP_PREFIX, 1+lev+1, new ItemGroupTitleExtractor());

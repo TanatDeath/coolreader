@@ -62,7 +62,7 @@
 	        android:layout_marginBottom="2dip"
 	        android:layout_marginLeft="1dip"
 	        android:layout_marginRight="1dip"
-	        android:src="?attr/attr_icons8_bookmark_simple"
+	        android:src="?attr/attr_icons8_bookmark_simple_add"
             android:tag="tint"
 	        android:contentDescription="@string/options_selection_action_bookmark"/>
         <ImageButton android:id="@+id/selection_email"

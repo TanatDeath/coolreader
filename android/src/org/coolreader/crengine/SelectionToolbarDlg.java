@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import org.coolreader.CoolReader;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
+import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.layouts.FlowLayout;
 
 import android.app.SearchManager;
@@ -467,6 +468,49 @@ public class SelectionToolbarDlg {
 				diAllDicts.add(di);
 			}
 			ArrayList<String> added = new ArrayList<>();
+			// add lang pos
+			String sFrom = mReaderView.mBookInfo.getFileInfo().lang_from;
+			String sTo = mReaderView.mBookInfo.getFileInfo().lang_to;
+			if ((!StrUtils.isEmptyStr(sFrom)) || (!StrUtils.isEmptyStr(sTo))) {
+				String sFromTo = StrUtils.getNonEmptyStr(sFrom, true) + " -> " +
+						StrUtils.getNonEmptyStr(sTo, true);
+				Button dicButton = new Button(mCoolReader);
+				dicButton.setText(sFromTo);
+				dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+				//dicButton.setHeight(dicButton.getHeight()-4);
+				dicButton.setTextColor(colorIcon);
+				if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+				else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+				dicButton.setPadding(10, 10, 10, 10);
+				//dicButton.setBackground(null);
+				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+						ViewGroup.LayoutParams.WRAP_CONTENT,
+						ViewGroup.LayoutParams.WRAP_CONTENT);
+				llp.setMargins(8, 4, 4, 8);
+				dicButton.setLayoutParams(llp);
+				//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
+				dicButton.setMaxLines(1);
+				dicButton.setEllipsize(TextUtils.TruncateAt.END);
+				llRecentDics.addView(dicButton);
+				dicButton.setOnClickListener(v -> {
+					mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+							mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
+							mReaderView.getBookInfo().getFileInfo(),
+							StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
+							StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
+							"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
+								dicButton.setText(s);
+							});
+				});
+				TextView tv = new TextView(mCoolReader);
+				tv.setText(" ");
+				tv.setPadding(10, 10, 10, 10);
+				tv.setLayoutParams(llp);
+				tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+				tv.setTextColor(colorIcon);
+				llRecentDics.addView(tv);
+			}
+			//\
 			for (final Dictionaries.DictInfo di: diAllDicts) {
 				if (!added.contains(di.id)) {
 					added.add(di.id);
@@ -506,6 +550,23 @@ public class SelectionToolbarDlg {
 						if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 							mReaderView.clearSelection();
 						closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+					});
+					dicButton.setOnLongClickListener(v -> {
+						mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK,
+								mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
+								mReaderView.getBookInfo().getFileInfo(),
+								StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
+								StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
+								"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
+									//mCoolReader.showToast(s);
+									mCoolReader.mDictionaries.setAdHocDict(di);
+									String sSText = selection.text;
+									mCoolReader.findInDictionary(sSText, null);
+									if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
+										mReaderView.clearSelection();
+									closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+								});
+						return true;
 					});
 				}
 			}

@@ -21,7 +21,6 @@ import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudSync;
 
-import org.coolreader.crengine.InputDialog.InputHandler;
 import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
@@ -1852,7 +1851,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						if (fontSizeToSet >= 0) {
 							state = STATE_DONE;
 							Properties props = new Properties(mActivity.settings());
-							props = new Properties(mActivity.settings());
 							props.setProperty(Settings.PROP_FONT_SIZE, "" + fontSizeToSet);
 							mActivity.setSettings(props, -1, true);
 						}
@@ -1945,6 +1943,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					dy2 = now_y2 - start_y2;
 				int dragThreshold = mActivity.getPalmTipPixels();
 				int dragThresholdK = mActivity.getPalmTipPixelsK(mGesturePageFlipSensivity);
+				boolean isVertical = (Math.abs(start_x - x) * 2) < Math.abs(start_y - y);
+				boolean isVerticalStrict = (Math.abs(start_x - x) * 3) < Math.abs(start_y - y);
 				switch (state) {
 					case STATE_DOWN_1:
 						if (distance < Math.min(dragThreshold, dragThresholdK))
@@ -1955,8 +1955,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							// backlight control enabled
 							boolean bLeftCold = getBacklightEnabled(isBacklightControlFlick, true, true);
 							boolean bRightCold = getBacklightEnabled(isBacklightControlFlick, false, true);
-							if (start_x < dragThreshold * 170 / 100 && bLeftCold
-									|| start_x > width - dragThreshold * 170 / 100 && bRightCold) {
+							if (
+									(start_x < dragThreshold * 170 / 100 && bLeftCold
+									|| start_x > width - dragThreshold * 170 / 100 && bRightCold) && (isVertical)
+								) {
 								// brightness
 								state = STATE_BRIGHTNESS;
 								brightness_side = BRIGHTNESS_TYPE_RIGHT_SIDE;
@@ -1969,8 +1971,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 							// warm backlight control enabled
 							boolean bLeftWarm = getBacklightEnabled(isBacklightControlFlick, true, false);
 							boolean bRightWarm = getBacklightEnabled(isBacklightControlFlick, false, false);
-							if (start_x < dragThreshold * 170 / 100 && bLeftWarm
-									|| start_x > width - dragThreshold * 170 / 100 && bRightWarm) {
+							if ((start_x < dragThreshold * 170 / 100 && bLeftWarm
+									|| start_x > width - dragThreshold * 170 / 100 && bRightWarm)
+									&& (isVertical)) {
 								// warm backlight brightness
 								state = STATE_BRIGHTNESS;
 								brightness_side = BRIGHTNESS_TYPE_RIGHT_SIDE;
@@ -1986,7 +1989,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						//plotn - some strange behavior with mIsPageMode
 						//int dir = mIsPageMode ? x - start_x : y - start_y;
 						int dir = viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
-						boolean isHorz = adx > ady;
+						boolean isPageTurnSwipe = adx > ((ady * 10) / 17);
 						boolean menuShown = false;
 						//int dir = x - start_x;
 						if (mGesturePageFlipSwipeN == 1) {
@@ -1997,13 +2000,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 										(x >= (width / 2) - dragThresholdK) &&
 										(start_x <= (width / 2) + dragThresholdK) &&
 										(start_x >= (width / 2) - dragThresholdK) &&
-										(Math.abs(start_x - x) < Math.abs(start_y - y))
+										isVerticalStrict // x shoud be three times shorter than y
 								) {
 									menuShown = true;
 									mActivity.showReaderMenu();
 									return endEvent();
 								} else
-									if (isHorz)
+									if (isPageTurnSwipe)
 										return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
 									else
 										return endEvent();
@@ -2020,7 +2023,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								(x >= (width / 2) - dragThresholdK) &&
 								(start_x <= (width / 2) + dragThresholdK) &&
 								(start_x >= (width / 2) - dragThresholdK) &&
-								(Math.abs(start_x - x) < Math.abs(start_y - y)) &&
+								((Math.abs(start_x - x) * 2) < Math.abs(start_y - y)) &&
 								(!menuShown)
 						) {
 							mActivity.showReaderMenu();
@@ -7306,6 +7309,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 						sButtons.add(mActivity.getString(R.string.str_change));
 						sButtons.add("*"+mActivity.getString(R.string.later_css));
+						sButtons.add(mActivity.getString(R.string.str_disable_this_dialog));
 						SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), 10, true,
 								mActivity.getString(R.string.opened_doc_props),
 								sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
@@ -7314,6 +7318,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 										if (btnPressed.equals(mActivity.getString(R.string.str_change))) {
 											mActivity.optionsFilter = "";
 											mActivity.showOptionsDialogTab(OptionsDialog.Mode.READER, 1);
+										}
+										if (btnPressed.equals(mActivity.getString(R.string.str_disable_this_dialog))) {
+											mActivity.settings().setBool(Settings.PROP_APP_HIDE_CSS_WARNING, true);
 										}
 									}
 								});
@@ -7356,7 +7363,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			this.errorHandler = errorHandler;
 			//FileInfo fileInfo = new FileInfo(filename);
 			disableInternalStyles = mBookInfo.getFileInfo().getFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG);
-			if (mBookInfo.getFileInfo().flags == 0) {
+			if (mBookInfo.getFileInfo().getFlags() == 0) {
 				boolean embed = mSettings.getBool(PROP_EMBEDDED_STYLES_DEF, false);
 				disableInternalStyles = !embed;
 				mBookInfo.getFileInfo().setFlag(FileInfo.DONT_USE_DOCUMENT_STYLES_FLAG, disableInternalStyles);

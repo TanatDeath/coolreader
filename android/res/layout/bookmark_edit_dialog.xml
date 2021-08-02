@@ -9,6 +9,52 @@
 		android:layout_height="wrap_content"
 		android:orientation="vertical">
 
+		<TableLayout
+				android:id="@+id/tl_sep1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+				android:layout_weight="1"
+				>
+				<View
+						android:id="@+id/view_sep11"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						 />
+				<TextView
+						android:id="@+id/tv_bmk_text"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/bmk_pos" />
+				<View
+					android:id="@+id/view_sep12"
+					android:layout_width="0dip"
+					android:layout_height="4dip"
+					android:checked="true"
+					android:layout_weight="1"
+					android:layout_gravity="center_vertical"
+					android:tag="tint"
+					android:background="?attr/colorIcon"
+					/>
+			</TableRow>
+		</TableLayout>
+
 		<TextView
 			android:id="@+id/lbl_position"
 			style="@style/TextAppearance.Medium"
@@ -19,6 +65,171 @@
 			android:singleLine="false"
 			android:textColor="?attr/colorIcon"
 			android:text="Page 34/1024 (25%) Chapter 1" />
+
+		<TableLayout
+				android:id="@+id/tl_sep2"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<View
+						android:id="@+id/view_sep21"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/tv_bmk_type"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/bmk_type" />
+				<View
+						android:id="@+id/view_sep22"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+			</TableRow>
+		</TableLayout>
+
+		<TableLayout
+			android:id="@+id/rg_type"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:stretchColumns="1"
+			android:orientation="vertical">
+
+			<TableRow
+				android:layout_weight="1"
+				>
+				<ImageButton
+					android:id="@+id/rb_comment"
+					android:layout_width="0dip"
+					android:checked="true"
+					android:layout_weight="1"
+					android:src="?attr/attr_icons8_bookmark_simple"
+                                        android:tag="tint"
+					android:contentDescription="@string/dlg_bookmark_type_comment"
+					android:text="@null" />
+				<ImageButton
+					android:id="@+id/rb_correction"
+					android:layout_width="0dip"
+					android:checked="false"
+					android:layout_weight="1"
+					android:src="?attr/attr_icons8_edit_row_2"
+                                        android:tag="tint"
+					android:contentDescription="@string/dlg_bookmark_type_correction"
+					android:text="@null" />
+				<ImageButton
+					android:id="@+id/rb_internal_link"
+					android:layout_width="0dip"
+					android:checked="false"
+					android:layout_weight="1"
+					android:src="?attr/attr_icons8_bookmark_link"
+                                        android:tag="tint"
+					android:contentDescription="@string/dlg_bookmark_internal_link"
+					android:text="@null" />
+				<ImageButton
+					android:id="@+id/rb_user_dic"
+					android:layout_width="0dip"
+					android:checked="false"
+					android:layout_weight="1"
+					android:src="?attr/attr_icons8_google_translate_user"
+                                        android:tag="tint"
+					android:contentDescription="@string/dlg_bookmark_user_dic"
+					android:text="@null" />
+				<ImageButton
+					android:id="@+id/rb_citation"
+					android:layout_width="0dip"
+					android:checked="false"
+					android:layout_weight="1"
+					android:src="?attr/attr_icons8_quote_2"
+                                        android:tag="tint"
+					android:contentDescription="@string/dlg_bookmark_citation"
+					android:text="@null" />
+			</TableRow>
+			<TableRow
+				android:id="@+id/tr_rb_descr"
+				android:layout_weight="1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+				<TextView
+					android:id="@+id/lbl_rb_descr"
+					style="@style/TextAppearance.Small"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:maxLines="1"
+					android:singleLine="true"
+					android:textColor="?attr/colorIcon"
+					android:text="_" />
+			</TableRow>
+		</TableLayout>
+
+		<TableLayout
+				android:id="@+id/tl_sep3"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<View
+						android:id="@+id/view_sep31"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/tv_bmk_color"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/bmk_color" />
+				<View
+						android:id="@+id/view_sep32"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+			</TableRow>
+		</TableLayout>
 
 		<TableLayout
 				android:id="@+id/tl_bmk_color"
@@ -197,79 +408,6 @@
 			</TableRow>
 		</TableLayout>
 
-		<TableLayout
-			android:id="@+id/rg_type"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:stretchColumns="1"
-			android:orientation="vertical">
-
-			<TableRow
-				android:layout_weight="1"
-				>
-				<ImageButton
-					android:id="@+id/rb_comment"
-					android:layout_width="0dip"
-					android:checked="true"
-					android:layout_weight="1"
-					android:src="?attr/attr_icons8_bookmark_simple"
-                                        android:tag="tint"
-					android:contentDescription="@string/dlg_bookmark_type_comment"
-					android:text="@null" />
-				<ImageButton
-					android:id="@+id/rb_correction"
-					android:layout_width="0dip"
-					android:checked="false"
-					android:layout_weight="1"
-					android:src="?attr/attr_icons8_edit_row_2"
-                                        android:tag="tint"
-					android:contentDescription="@string/dlg_bookmark_type_correction"
-					android:text="@null" />
-				<ImageButton
-					android:id="@+id/rb_internal_link"
-					android:layout_width="0dip"
-					android:checked="false"
-					android:layout_weight="1"
-					android:src="?attr/attr_icons8_bookmark_link"
-                                        android:tag="tint"
-					android:contentDescription="@string/dlg_bookmark_internal_link"
-					android:text="@null" />
-				<ImageButton
-					android:id="@+id/rb_user_dic"
-					android:layout_width="0dip"
-					android:checked="false"
-					android:layout_weight="1"
-					android:src="?attr/attr_icons8_google_translate_user"
-                                        android:tag="tint"
-					android:contentDescription="@string/dlg_bookmark_user_dic"
-					android:text="@null" />
-				<ImageButton
-					android:id="@+id/rb_citation"
-					android:layout_width="0dip"
-					android:checked="false"
-					android:layout_weight="1"
-					android:src="?attr/attr_icons8_quote_2"
-                                        android:tag="tint"
-					android:contentDescription="@string/dlg_bookmark_citation"
-					android:text="@null" />
-			</TableRow>
-			<TableRow
-				android:id="@+id/tr_rb_descr"
-				android:layout_weight="1"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
-				<TextView
-					android:id="@+id/lbl_rb_descr"
-					style="@style/TextAppearance.Small"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:maxLines="1"
-					android:singleLine="true"
-					android:textColor="?attr/colorIcon"
-					android:text="_" />
-			</TableRow>
-		</TableLayout>
-
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			android:id="@+id/layout_fake"
 			android:orientation="horizontal"
@@ -289,15 +427,52 @@
 				android:text="@null" />
 		</LinearLayout>
 
-		<TextView
-			android:id="@+id/lbl_selection_text"
-			style="@style/TextAppearance.Medium"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:maxLines="3"
-			android:singleLine="false"
-			android:textColor="?attr/colorIcon"
-			android:text="@string/dlg_bookmark_edit_range_text" />
+		<TableLayout
+				android:id="@+id/tl_sep4"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<View
+						android:id="@+id/view_sep41"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/lbl_selection_text"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/dlg_bookmark_edit_range_text"
+						/>
+				<View
+						android:id="@+id/view_sep42"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+			</TableRow>
+		</TableLayout>
 
 		<EditText
 			android:id="@+id/position_text"
@@ -318,29 +493,76 @@
 			<TableRow
 					android:layout_weight="1"
 					>
+
 				<TextView
-						android:id="@+id/lbl_comment_text"
-						style="@style/TextAppearance.Medium"
+						android:id="@+id/lbl_transl_sel"
 						android:layout_width="0dip"
-						android:layout_height="wrap_content"
-						android:maxLines="3"
-						android:layout_weight="2"
-						android:clickable="true"
-						android:singleLine="false"
+						android:checked="false"
+						android:layout_weight="1"
+						android:tag="tint"
+						android:layout_gravity="center_vertical"
 						android:textColor="?attr/colorIcon"
-						android:text="@string/dlg_bookmark_edit_comment" />
+						android:text="@string/bmk_transl_sel"
+						style="@style/TextAppearance.Small" />
 
 				<Button
 						android:id="@+id/btn_transl"
 						android:layout_height="wrap_content"
 						android:layout_width="0dip"
 						android:checked="false"
-						android:layout_weight="3"
+						android:layout_weight="1"
 						android:drawableLeft="?attr/attr_icons8_drop_down_no_frame_small"
 						android:tag="tint"
 						android:textColor="?attr/colorIcon"
-						style="@style/TextAppearance.Medium"
+						style="@style/TextAppearance.Small"
 						android:text="@null" />
+			</TableRow>
+		</TableLayout>
+
+		<TableLayout
+				android:id="@+id/tl_sep5"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<View
+						android:id="@+id/view_sep51"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/lbl_comment_text"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/dlg_bookmark_edit_comment"
+						/>
+				<View
+						android:id="@+id/view_sep52"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
 			</TableRow>
 		</TableLayout>
 
@@ -351,8 +573,150 @@
 			android:layout_height="wrap_content"
 			android:editable="true"
 			android:singleLine="false"
+			android:background="?attr/colorThemeGray2Contrast"
+			android:hint="@string/dlg_type_text"
 			android:text="comment text" />
 
+		<TableLayout
+				android:id="@+id/tl_sep7"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<View
+						android:id="@+id/view_sep71"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/lbl_context_text"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/dlg_bookmark_edit_context_text"
+						/>
+				<View
+						android:id="@+id/view_sep72"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+			</TableRow>
+		</TableLayout>
+
+		<EditText
+				android:id="@+id/context_text"
+				style="@style/TextAppearance.Widget.EditText"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:inputType="none"
+				android:singleLine="false"
+				android:maxLines="4"
+				android:hint="@string/dlg_type_text"
+				android:text="" />
+
+		<TableLayout
+				android:id="@+id/tl_context_and_dic"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical">
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<TextView
+						android:id="@+id/lbl_context_transl"
+						style="@style/TextAppearance.Small"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:maxLines="3"
+						android:singleLine="false"
+						android:textColor="?attr/colorIcon"
+						android:text="@string/bmk_transl_sel" />
+
+				<Button
+						android:id="@+id/btn_transl2"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="1"
+						android:layout_height="wrap_content"
+						android:drawableLeft="?attr/attr_icons8_drop_up_no_frame_small"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Small"
+						android:text="@null" />
+			</TableRow>
+		</TableLayout>
+
+		<TableLayout
+				android:id="@+id/tl_sep6"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:stretchColumns="1"
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
+
+			<TableRow
+					android:layout_weight="1"
+					>
+				<View
+						android:id="@+id/view_sep61"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/lbl_bmk_actions"
+						android:layout_width="0dip"
+						android:checked="false"
+						android:layout_weight="2"
+						android:tag="tint"
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/bmk_actions"
+						/>
+				<View
+						android:id="@+id/view_sep62"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+			</TableRow>
+		</TableLayout>
 		<TableLayout
 				android:id="@+id/tl_send_to"
 				android:layout_width="match_parent"
@@ -372,7 +736,7 @@
 						android:drawableLeft="?attr/attr_icons8_share"
 						android:tag="tint"
 						android:textColor="?attr/colorIcon"
-						style="@style/TextAppearance.Medium"
+						style="@style/TextAppearance.Small"
 						android:text="@string/bmk_send_to" />
 				<Button
 						android:id="@+id/btn_sent_to2"
@@ -383,55 +747,57 @@
 						android:drawableLeft="?attr/attr_icons8_share"
 						android:tag="tint"
 						android:textColor="?attr/colorIcon"
-						style="@style/TextAppearance.Medium"
+						style="@style/TextAppearance.Small"
 						android:text="@null" />
 			</TableRow>
 		</TableLayout>
 
 		<TableLayout
-				android:id="@+id/tl_context_and_dic"
+				android:id="@+id/tl_sep8"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:stretchColumns="1"
-				android:orientation="vertical">
+				android:orientation="vertical"
+				android:layout_margin="5dip"
+				>
 
 			<TableRow
 					android:layout_weight="1"
 					>
-				<TextView
-						android:id="@+id/lbl_context_text"
-						style="@style/TextAppearance.Medium"
+				<View
+						android:id="@+id/view_sep81"
 						android:layout_width="0dip"
-						android:layout_height="wrap_content"
-						android:layout_weight="2"
-						android:maxLines="3"
-						android:singleLine="false"
-						android:textColor="?attr/colorIcon"
-						android:text="@string/dlg_bookmark_edit_context_text" />
-
-				<Button
-						android:id="@+id/btn_transl2"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
+				<TextView
+						android:id="@+id/lbl_clipb"
 						android:layout_width="0dip"
 						android:checked="false"
-						android:layout_weight="3"
-						android:layout_height="wrap_content"
-						android:drawableLeft="?attr/attr_icons8_drop_up_no_frame_small"
+						android:layout_weight="2"
 						android:tag="tint"
-						android:textColor="?attr/colorIcon"
-						style="@style/TextAppearance.Medium"
-						android:text="@null" />
+						android:textColor="?attr/colorIconL"
+						android:background="?attr/colorIcon"
+						android:gravity="center"
+						style="@style/TextAppearance.Smaller"
+						android:text="@string/clipb_contents_s"
+						/>
+				<View
+						android:id="@+id/view_sep82"
+						android:layout_width="0dip"
+						android:layout_height="4dip"
+						android:checked="true"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:tag="tint"
+						android:background="?attr/colorIcon"
+						/>
 			</TableRow>
 		</TableLayout>
-
-		<EditText
-				android:id="@+id/context_text"
-				style="@style/TextAppearance.Widget.EditText"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:inputType="none"
-				android:singleLine="false"
-				android:maxLines="4"
-				android:text="" />
 
 		<TextView
 			android:id="@+id/lbl_comment_from_cb"

@@ -91,6 +91,11 @@ my %ic_actions_list=(
         'icons8_group2.svg' => 'icons8_group2.png',
         'icons8_airplane_mode_on.svg' => 'icons8_airplane_mode_on.png',
         'icons8_delete_database.svg' => 'icons8_delete_database.png',
+        'icons8_book_scan.svg' => 'icons8_book_scan.png',
+        'icons8_book_long_tap.svg' => 'icons8_book_long_tap.png',
+        'icons8_book_tap.svg' => 'icons8_book_tap.png',
+        'icons8_bookmark_simple_fast_add.svg' => 'icons8_bookmark_simple_fast_add.png',
+        'icons8_bookmark_simple_add.svg' => 'icons8_bookmark_simple_add.png'
 );
 
 my %ic_menu_list=(

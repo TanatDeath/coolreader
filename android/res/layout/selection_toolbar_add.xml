@@ -10,7 +10,7 @@
     <ImageButton android:id="@+id/btn_quick_bookmark"
             android:layout_width="0dip" android:layout_weight="3"
             android:layout_height="match_parent"
-            android:src="?attr/attr_icons8_bookmark_plus_q"
+            android:src="?attr/attr_icons8_bookmark_simple_fast_add"
             android:tag="tint"
             android:minHeight="?android:attr/listPreferredItemHeight"
             android:minWidth="?android:attr/listPreferredItemHeight"

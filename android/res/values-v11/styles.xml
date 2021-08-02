@@ -361,6 +361,8 @@
         <item name="attr_icons8_position_info">@drawable/icons8_position_info</item>
         <item name="attr_icons8_switch_profile">@drawable/icons8_switch_profile</item>
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
+        <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
+        <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
         <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
@@ -535,6 +537,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -772,6 +777,8 @@
         <item name="attr_icons8_position_info">@drawable/icons8_position_info</item>
         <item name="attr_icons8_switch_profile">@drawable/icons8_switch_profile</item>
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
+        <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
+        <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
         <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
@@ -946,6 +953,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -1168,6 +1178,8 @@
         <item name="attr_icons8_position_info">@drawable/icons8_position_info</item>
         <item name="attr_icons8_switch_profile">@drawable/icons8_switch_profile</item>
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
+        <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
+        <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
         <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
@@ -1513,6 +1525,8 @@
         <item name="attr_icons8_position_info">@drawable/icons8_position_info</item>
         <item name="attr_icons8_switch_profile">@drawable/icons8_switch_profile</item>
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
+        <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
+        <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
         <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
@@ -1679,11 +1693,11 @@
         <!-- item name="android:textColor">@android:color/black</item -->
         <item name="android:listViewStyle">@style/ListView.White</item>
         <item name="android:listViewWhiteStyle">@style/ListView.White</item>
-        <item name="android:checkboxStyle">@style/CheckBox.HC.Light</item>
-        <item name="android:radioButtonStyle">@style/RadioButton.HC.Light</item>
-        <item name="android:buttonStyle">@style/Button.HC.Light</item>
-        <item name="android:buttonStyleSmall">@style/Button.HC.Light.Small</item>
-        <item name="android:imageButtonStyle">@style/ImageButton.HC.Light</item>
+        <item name="android:checkboxStyle">@android:style/Widget.Holo.CompoundButton.CheckBox</item>
+        <item name="android:radioButtonStyle">@android:style/Widget.Holo.CompoundButton.RadioButton</item>
+        <item name="android:buttonStyle">@android:style/Widget.Button</item>
+        <item name="android:buttonStyleSmall">@android:style/Widget.Button.Small</item>
+        <item name="android:imageButtonStyle">@android:style/Widget.ImageButton</item>
         <item name="android:textAppearanceSmall">@style/TextAppearance.Small</item>
         <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
         <item name="android:textAppearanceLarge">@style/TextAppearance.MediumLarge</item>
@@ -1873,6 +1887,8 @@
         <item name="attr_icons8_position_info">@drawable/icons8_position_info</item>
         <item name="attr_icons8_switch_profile">@drawable/icons8_switch_profile</item>
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
+        <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
+        <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
         <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
@@ -2047,6 +2063,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>
@@ -2091,11 +2110,11 @@
         <!-- item name="android:textColor">@android:color/white</item-->
         <item name="android:listViewStyle">@style/ListView.Black</item>
         <item name="android:listViewWhiteStyle">@style/ListView.Black</item>
-        <item name="android:checkboxStyle">@style/CheckBox.HC.Dark</item>
-        <item name="android:radioButtonStyle">@style/RadioButton.HC.Dark</item>
-        <item name="android:buttonStyle">@style/Button.HC.Dark</item>
-        <item name="android:buttonStyleSmall">@style/Button.HC.Dark.Small</item>
-        <item name="android:imageButtonStyle">@style/ImageButton.HC.Dark</item>
+        <item name="android:checkboxStyle">@android:style/Widget.Holo.CompoundButton.CheckBox</item>
+        <item name="android:radioButtonStyle">@android:style/Widget.Holo.CompoundButton.RadioButton</item>
+        <item name="android:buttonStyle">@android:style/Widget.Button</item>
+        <item name="android:buttonStyleSmall">@android:style/Widget.Button.Small</item>
+        <item name="android:imageButtonStyle">@android:style/Widget.ImageButton</item>
         <item name="android:textAppearanceSmall">@style/TextAppearance.Small</item>
         <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
         <item name="android:textAppearanceLarge">@style/TextAppearance.MediumLarge</item>
@@ -2285,6 +2304,8 @@
         <item name="attr_icons8_position_info">@drawable/icons8_position_info</item>
         <item name="attr_icons8_switch_profile">@drawable/icons8_switch_profile</item>
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
+        <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
+        <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
         <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
@@ -2455,6 +2476,9 @@
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
         <item name="attr_icons8_delete_database">@drawable/icons8_delete_database</item>
+        <item name="attr_icons8_book_scan">@drawable/icons8_book_scan</item>
+        <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
+        <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>

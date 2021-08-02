@@ -1,11 +1,13 @@
 package org.coolreader.crengine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
+import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -23,7 +25,9 @@ public class BookSearchDialog extends BaseDialog {
 	final EditText filenameEdit;
 	final TextView statusText;
 	public final SearchCallback callback;
-	
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
+
 	private int searchTaskId = 0;
 	private boolean searchActive = false;
 	private boolean closing = false;
@@ -31,6 +35,8 @@ public class BookSearchDialog extends BaseDialog {
 	public BookSearchDialog(CoolReader activity, SearchCallback callback)
 	{
 		super("BookSearchDialog", activity, activity.getString( R.string.dlg_book_search), true, false);
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(activity, isEInk);
 		mCoolReader = activity;
 		this.callback = callback;
 		setTitle(mCoolReader.getString( R.string.dlg_book_search));
@@ -40,6 +46,13 @@ public class BookSearchDialog extends BaseDialog {
 		titleEdit = view.findViewById(R.id.search_text_title);
 		seriesEdit = view.findViewById(R.id.search_text_series);
 		filenameEdit = view.findViewById(R.id.search_text_filename);
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
+		authorEdit.setHintTextColor(colorIcon128);
+		titleEdit.setHintTextColor(colorIcon128);
+		seriesEdit.setHintTextColor(colorIcon128);
+		filenameEdit.setHintTextColor(colorIcon128);
+
 		statusText = view.findViewById(R.id.search_status);
 		TextWatcher watcher = new TextWatcher() {
 

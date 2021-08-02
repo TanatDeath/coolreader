@@ -368,14 +368,15 @@ public class TTSToolbarDlg implements Settings {
 	// plotn: NB!!! same fix as we did, but in other way. Check if it works
 	private void setReaderMode()
 	{
-		String oldViewSetting = mReaderView.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
-		if ( "1".equals(oldViewSetting) ) {
+		String oldViewSetting = mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE);
+		moveSelection( ReaderCommand.DCMD_SELECT_FIRST_SENTENCE );
+		if (("1".equals(oldViewSetting)) &&
+				(!("1".equals(mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE))))) {
 			changedPageMode = true;
 			//mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE, "0");
 			//mReaderView.setSetting(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, "1");
 			mReaderView.setViewModeNonPermanent(ViewMode.SCROLL);
 		}
-		moveSelection( ReaderCommand.DCMD_SELECT_FIRST_SENTENCE );
 	}
 	
 	private void restoreReaderMode()

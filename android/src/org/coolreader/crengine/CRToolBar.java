@@ -203,7 +203,7 @@ public class CRToolBar extends ViewGroup {
 
 			//first priority
 			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.ABOUT)) {
+				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)) {
 					int aVis = 0;
 					try {
 						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
@@ -215,7 +215,7 @@ public class CRToolBar extends ViewGroup {
 				}
 			//second priority
 			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.ABOUT)) {
+				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)) {
 					int aVis = 0;
 					try {
 						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
@@ -256,10 +256,13 @@ public class CRToolBar extends ViewGroup {
 				}
 			}
 			;
-			if (!this.actions.contains(ReaderAction.ABOUT)) this.actions.add(ReaderAction.ABOUT);
+			if (!this.actions.contains(ReaderAction.OPTIONS)) this.actions.add(ReaderAction.OPTIONS);
+			if (!this.actions.contains(ReaderAction.FILE_BROWSER_ROOT)) this.actions.add(ReaderAction.FILE_BROWSER_ROOT);
 			if (!this.actions.contains(ReaderAction.EXIT)) this.actions.add(ReaderAction.EXIT);
-			if (!this.actionsMore.contains(ReaderAction.ABOUT))
-				this.actionsMore.add(ReaderAction.ABOUT);
+			if (!this.actionsMore.contains(ReaderAction.OPTIONS))
+				this.actionsMore.add(ReaderAction.OPTIONS);
+			if (!this.actionsMore.contains(ReaderAction.FILE_BROWSER_ROOT))
+				this.actionsMore.add(ReaderAction.FILE_BROWSER_ROOT);
 			if (!this.actionsMore.contains(ReaderAction.EXIT))
 				this.actionsMore.add(ReaderAction.EXIT);
 		}
@@ -1001,7 +1004,8 @@ public class CRToolBar extends ViewGroup {
 	}
 
 	public static PopupWindow showPopup(BaseActivity context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
-		return showPopup(context, anchor, anchor, true, actions, onActionHandler, onOverflowHandler, maxLines, popupLocationDummy);
+		// it seems that big value in maxlines should not affect anything
+		return showPopup(context, anchor, anchor, true, actions, onActionHandler, onOverflowHandler, 100 /*maxLines*/, popupLocationDummy);
 	}
 
 	public static PopupWindow showPopup(BaseActivity context, View anchor, View parentAnchor, boolean isRootAnchor,

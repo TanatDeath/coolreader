@@ -193,6 +193,8 @@
     <attr name="attr_icons8_position_info" format="reference" />
     <attr name="attr_icons8_switch_profile" format="reference" />
     <attr name="attr_icons8_bookmark_simple" format="reference" />
+    <attr name="attr_icons8_bookmark_simple_add" format="reference" />
+    <attr name="attr_icons8_bookmark_simple_fast_add" format="reference" />
     <attr name="attr_icons8_manual_2" format="reference" />
     <attr name="attr_icons8_google_translate_switch" format="reference" />
     <attr name="attr_icons8_position_to_gd" format="reference" />
@@ -377,6 +379,9 @@
     <attr name="attr_icons8_group2" format="reference" />
     <attr name="attr_icons8_airplane_mode_on" format="reference" />
     <attr name="attr_icons8_delete_database" format="reference" />
+    <attr name="attr_icons8_book_scan" format="reference" />
+    <attr name="attr_icons8_book_tap" format="reference" />
+    <attr name="attr_icons8_book_long_tap" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

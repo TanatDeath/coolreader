@@ -2245,7 +2245,7 @@ public class BaseActivity extends Activity implements Settings {
 				.postBackground(() -> BackgroundThread.instance()
 						.postGUI(() -> setScreenBacklightLevel(n))), 100);
         } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
-        	Services.getScanner().setHideEmptyDirs(flg);
+        	Services.getScanner().setHideEmptyDirs(Utils.parseInt(value, 0));
         } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
 			iCutoutMode = Utils.parseInt(value, 0);
         	setCutoutMode(iCutoutMode);

@@ -55,6 +55,7 @@ public interface Settings {
 	public static final String PROP_EXT_FULLSCREEN_MOD   ="crengine.ext.fullscreen.mod";
 	public static final String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
     public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
+	public static final String PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change"; // when tts
     public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
 	public static final String PROP_PAGE_ANIMATION_SPEED    ="crengine.page.animation.speed";
 	public static final String PROP_DOUBLE_CLICK_INTERVAL    ="crengine.double.click.interval";
@@ -230,6 +231,12 @@ public interface Settings {
 	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
 	public static final String PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND = "app.options.tts.toolbar.background";
 	public static final String PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.tts.toolbar.transp.buttons";
+	public static final String PROP_APP_INIT = "app.init";
+	public static final String PROP_APP_SHOW_FILES_DIR = "app.show.files.dir";
+	public static final String PROP_APP_SHOW_FILES_NO_MARK = "app.show.files.no.mark";
+	public static final String PROP_APP_SHOW_FILES_TO_READ = "app.show.files.to.read";
+	public static final String PROP_APP_SHOW_FILES_READING = "app.show.files.reading";
+	public static final String PROP_APP_SHOW_FILES_FINISHED = "app.show.files.finished";
 
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";

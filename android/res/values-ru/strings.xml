@@ -649,6 +649,7 @@
     <string name="book_marked_reading">Книга отмечена как \"Читаю\"</string>
     <string name="book_state_reading">Читаю</string>
     <string name="book_state_none">Нет пометки</string>
+    <string name="book_state_dir">Папка</string>
     <string name="book_state_finished">Прочитана</string>
     <string name="book_info_rating">Оценка</string>
     <string name="options_page_show_titlebar_hidden">Не показывать</string>
@@ -905,6 +906,7 @@
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
     <string name="clipb_contents">Буфер обмена (нажмите чтобы вставить):</string>
+    <string name="clipb_contents_s">Буфер обмена</string>
     <string name="fonts_menu">Меню шрифтов</string>
     <string name="copied_to_cb">Скопировано в буфер обмена</string>
     <string name="options_app_dict_word_correction">Обработка слова перед словарем</string>
@@ -1240,6 +1242,7 @@
     <string name="opened_doc_props_fonts">Встроенные шрифты (переопределяют выбранный)</string>
     <string name="opened_doc_props_text">Автоформатирование текста</string>
     <string name="str_change">Изменить ...</string>
+    <string name="str_disable_this_dialog">Отключить этот диалог</string>
     <string name="later_css">Вы всегда можете это сделать потом - на вкладке CSS в настройках</string>
     <string name="ynd_autolang"># - авто (только Я-онлайн)</string>
     <string name="new_fonts">В архиве содержатся новые шрифты (%1$s). Скопировать их в папку шрифтов?</string>
@@ -1374,6 +1377,9 @@
     <string name="lingvo_settings">Настройки Lingvo онлайн</string>
     <string name="lingvo_settings_add_info">Использовать ваш токен lingvo онлайн (если указан)</string>
     <string name="lingvo_token">Токен lingvo онлайн</string>
+    <string name="deepl_settings">настройки Deepl.com</string>
+    <string name="deepl_settings_add_info">Укажите ваш Deepl.com токен</string>
+    <string name="deepl_token">Deepl.com токен</string>
     <string name="lingvo_unauth">Lingvo онлайн - авторизация не успешна. Проверьте токен</string>
     <string name="deepl_unauth">Deepl.com - авторизация не успешна. Проверьте токен</string>
     <string name="deepl_quoata">Deepl.com - превышена квота. Проверьте состояние аккаунта</string>
@@ -1650,6 +1656,7 @@
     <string name="dic_online">Онлайн</string>
     <string name="dic_application">Приложения</string>
     <string name="init_app">Инициализация приложения</string>
+    <string name="init_app_add_info">Очистка кэша, сброс настроек и/или удаление базы данных книг</string>
     <string name="init_app_clear_cache">Очистить кэш</string>
     <string name="init_app_clear_cache_add_info">Это безопасная операция. Иногда случаях кэш становится поврежден, вы можете полностью очистить его - в некоторых ситуациях это может помочь</string>
     <string name="init_app_clear_settings">Сбросить настройки</string>
@@ -1665,5 +1672,21 @@
     <string name="safe_mode_clear_cache">Очистить кэш, затем открыть</string>
     <string name="folder_exists">Папка существует</string>
     <string name="folder_not_exists">Папка не существует</string>
+    <string name="scan_depth">Глубина сканирования папок</string>
+    <string name="scan_depth_add_info">Вы можете задать стратегию сканирования папок</string>
+    <string name="scan_depth0">Умеренная (2 уровня)</string>
+    <string name="scan_depth1">Быстрая (только текущая папка)</string>
+    <string name="scan_depth2">Полная (прятать папки не содержащие книг)</string>
+    <string name="scan_depth0_add_info">При входе в папку она будет просканирована, а также будут просканированы ее подпапки на 2 уровня вложенности</string>
+    <string name="scan_depth1_add_info">Сканирование будет ограничено только текущей папкой</string>
+    <string name="scan_depth2_add_info">Будет просканировано все дерево папок от текущей, папки, в которых не найдены книги - будут скрыты</string>
+    <string name="bmk_pos">Позиция закладки</string>
+    <string name="bmk_type">Тип закладки</string>
+    <string name="bmk_color">Цвет закладки</string>
+    <string name="bmk_transl_sel">Перевести и поместить в комментарий:</string>
+    <string name="bmk_actions">Действия над закладкой</string>
+    <string name="dlg_type_text">Введите текст здесь</string>
+    <string name="tts_page_mode_dont_change">Не менять режим страницы на свиток при активном TTS</string>
+    <string name="tts_page_mode_dont_change_add_info">Когда активен свиток, текст книги прокручивается по предложениям, когда страницы - по страницам</string>
 </resources>
 

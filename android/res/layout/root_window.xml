@@ -176,42 +176,45 @@
                 android:layout_width="0dip"
                 android:layout_marginTop="2dip"
                 android:layout_marginBottom="2dip"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="1dip"
                 android:layout_weight="1"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:ellipsize="none"
                 android:contentDescription="@string/book_state_toread"
                 android:drawableLeft="@drawable/icons8_toc_item_normal"
-                android:text="@string/book_state_toread" />
+                style="@style/TextAppearance.Smaller"
+                android:text="@string/book_state_toread"
+                android:singleLine="true" />
             <Button
                 android:id="@+id/book_recent_reading"
                 android:layout_width="0dip"
                 android:layout_marginTop="2dip"
                 android:layout_marginBottom="2dip"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="1dip"
                 android:layout_weight="1"
                 android:src="@null"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:ellipsize="none"
                 android:contentDescription="@string/book_state_reading"
                 android:drawableLeft="@drawable/icons8_toc_item_normal"
-                android:text="@string/book_state_reading" />
+                style="@style/TextAppearance.Smaller"
+                android:text="@string/book_state_reading"
+                android:singleLine="true" />
             <Button
                 android:id="@+id/book_recent_finished"
                 android:layout_width="0dip"
                 android:layout_marginTop="2dip"
                 android:layout_marginBottom="2dip"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="0dip"
                 android:layout_weight="1"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:ellipsize="none"
                 android:src="@null"
                 android:contentDescription="@string/book_state_finished"
                 android:drawableLeft="@drawable/icons8_toc_item_normal"
-                android:text="@string/book_state_finished" />
+                style="@style/TextAppearance.Smaller"
+                android:text="@string/book_state_finished"
+                android:singleLine="true" />
         </TableRow>
     </TableLayout>
 
@@ -324,6 +327,7 @@
                         android:layout_weight="1"
                         android:text="@string/root_item_library"
                         android:textColor="?attr/colorIcon"
+                        android:layout_gravity="center_vertical|left"
                         android:layout_height="wrap_content"/>
             </LinearLayout>
             <Button
@@ -331,40 +335,43 @@
                 android:layout_width="0dip"
                 android:layout_marginTop="2dip"
                 android:layout_marginBottom="2dip"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="1dip"
                 android:layout_weight="2"
                 android:src="@null"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:ellipsize="none"
                 android:contentDescription="@string/book_state_toread"
-                android:text="@string/book_state_toread" />
+                style="@style/TextAppearance.Smaller"
+                android:text="@string/book_state_toread"
+                android:singleLine="true" />
             <Button
                 android:id="@+id/book_state_reading"
                 android:layout_width="0dip"
                 android:layout_marginTop="2dip"
                 android:layout_marginBottom="2dip"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="1dip"
                 android:layout_weight="2"
                 android:src="@null"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:ellipsize="none"
                 android:contentDescription="@string/book_state_reading"
-                android:text="@string/book_state_reading" />
+                style="@style/TextAppearance.Smaller"
+                android:text="@string/book_state_reading"
+                android:singleLine="true" />
             <Button
                 android:id="@+id/book_state_finished"
                 android:layout_width="0dip"
                 android:layout_marginTop="2dip"
                 android:layout_marginBottom="2dip"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginRight="0dip"
                 android:layout_weight="2"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:ellipsize="none"
                 android:src="@null"
                 android:contentDescription="@string/book_state_finished"
-                android:text="@string/book_state_finished" />
+                style="@style/TextAppearance.Smaller"
+                android:text="@string/book_state_finished"
+                android:singleLine="true" />
         </TableRow>
     </TableLayout>
 

@@ -1978,7 +1978,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mCurrentFrame == mBrowserFrame) {
 				// update recent books directory
 				mBrowser.refreshDirectory(Services.getScanner().getRecentDir(), null);
-				mBrowser.scrollToLastPos();
+				//mBrowser.scrollToLastPos(true);
+				//mBrowser.scrollToLastPos(false);
 			} else {
 				if (null != mBrowser)
 					mBrowser.stopCurrentScan();
@@ -2809,11 +2810,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						"",
 					sButtons, null, (o22, btnPressed) -> {
 							if (btnPressed.equals(getString(R.string.str_yes))) {
-								setBookStateFinished(book1);
+								setBookState(book1, FileInfo.STATE_FINISHED);
 								AskBookStars(book1);
 							}
 							if (btnPressed.equals(getString(R.string.str_yes_and_del_pos))) {
-								setBookStateFinished(book1);
+								setBookState(book1, FileInfo.STATE_FINISHED);
 								AskBookStars(book1);
 								CloudSync.loadFromJsonInfoFileList(this,
 										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.DELETE_FILES, false);
@@ -2824,14 +2825,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		checkAskReading(book, props,13, false);
 	}
 
-	private void setBookStateFinished(FileInfo book1) {
+	public void setBookState(FileInfo book1, int state) {
 		Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
-			book1.setReadingState(FileInfo.STATE_FINISHED);
+			book1.setReadingState(state);
 			BookInfo bi = new BookInfo(book1);
 			getDB().saveBookInfo(bi);
 			getDB().flush();
 			if (bookInfo.getFileInfo() != null) {
-				bookInfo.getFileInfo().setReadingState(FileInfo.STATE_FINISHED);
+				bookInfo.getFileInfo().setReadingState(state);
 				if (bookInfo.getFileInfo().parent != null)
 					directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
 			}
@@ -2841,7 +2842,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		});
 	}
 
-	private void setBookRate(FileInfo book1, int rate) {
+	public void setBookRate(FileInfo book1, int rate) {
 		Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
 			book1.setRate(rate);
 			BookInfo bi = new BookInfo(book1);
@@ -3244,23 +3245,33 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}));
 	}
 
-	public void editBookTransl(final boolean noQuick,
+	public static int EDIT_BOOK_TRANSL_NORMAL = 0;
+	public static int EDIT_BOOK_TRANSL_NO_QUICK = 1;
+	public static int EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK = 2;
+
+	public interface EditBookTranslCallback {
+		void done(String s);
+	}
+
+	public void editBookTransl(final int trType,
 							   final View anchor,
 							   final FileInfo currDirectory, final FileInfo item,
 							   final String lang_from, final String lang_to, final String search_text,
-							   BookInfoEditDialog bied, int iType) {
-		if (!noQuick) {
+							   BookInfoEditDialog bied, int iType, EditBookTranslCallback editBookTranslCallback) {
+		if (trType != EDIT_BOOK_TRANSL_NO_QUICK) {
 			String sQuickDirs = settings().getProperty(Settings.PROP_APP_QUICK_TRANSLATION_DIRS);
-			if (!StrUtils.isEmptyStr(sQuickDirs)) {
+			boolean isEmprtyQuick = StrUtils.isEmptyStr(StrUtils.getNonEmptyStr(sQuickDirs,true).replace(";",""));
+			if (!isEmprtyQuick) {
 				String[] sQuickDirsArr = sQuickDirs.split(";");
 				int iCnt = 0;
 				ArrayList<String> sButtons = new ArrayList<>();
-				sButtons.add(getString(R.string.all_languages));
+				if ((trType != EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK) && (editBookTranslCallback == null)) sButtons.add(getString(R.string.all_languages));
 				for (String s: sQuickDirsArr)
 					if (s.contains("=")) {
 						sButtons.add(s.replace("=", " -> "));
 						iCnt++;
 					}
+				sButtons.add(getString(R.string.dictionary_settings));
 				if (iCnt > 0) {
 					View anch = anchor;
 					if (anch == null) {
@@ -3271,14 +3282,23 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							getString(R.string.select_transl_dir),
 							sButtons, null, (o22, btnPressed) -> {
 								if (btnPressed.equals(getString(R.string.all_languages))) {
-									editBookTransl(true,
-										anchor, currDirectory, item, lang_from, lang_to, search_text, bied, iType);
+									editBookTransl(EDIT_BOOK_TRANSL_NO_QUICK,
+										anchor, currDirectory, item, lang_from, lang_to, search_text, bied, iType, editBookTranslCallback);
 									return;
+								}
+								if (btnPressed.equals(getString(R.string.dictionary_settings))) {
+									optionsFilter = "";
+									showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
 								}
 								if (btnPressed.contains("->")) {
 									String[] pair = btnPressed.replace(" -> ", "=").split("=");
 									String l_from = pair[0];
 									String l_to = pair[1];
+									if (trType == EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK) {
+										mDictionaries.setAdHocFromTo(l_from, l_to);
+										if (editBookTranslCallback != null) editBookTranslCallback.done(l_from + " -> " + l_to);
+										return;
+									}
 									waitForCRDBService(() -> Services.getHistory().getOrCreateBookInfo(getDB(), item, bookInfo -> {
 											if (bookInfo == null) bookInfo = new BookInfo(item);
 											BookInfo bookInfoF = bookInfo;
@@ -3306,6 +3326,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 												}
 												if (!StrUtils.isEmptyStr(search_text))
 													findInDictionary(search_text, null, null);
+												if (editBookTranslCallback != null) editBookTranslCallback.done(l_from + " -> " + l_to);
 											}
 										}
 									));

@@ -34,6 +34,8 @@ public class FindNextDlg {
 	SeekBar mSeekBar;
 	final String pattern;
 	final boolean caseInsensitive;
+	boolean isEInk = false;
+
 	static public void showDialog( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
 	{
 		FindNextDlg dlg = new FindNextDlg(coolReader, readerView, pattern, caseInsensitive, skim);
@@ -49,6 +51,7 @@ public class FindNextDlg {
 	{
 		this.pattern = pattern;
 		this.caseInsensitive = caseInsensitive;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		//mCoolReader = coolReader;
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
@@ -133,7 +136,7 @@ public class FindNextDlg {
 		a.recycle();
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
-		c.setAlpha(130);
+		if (!isEInk) c.setAlpha(130);
 		mPanel.findViewById(R.id.search_btn_prev).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.search_btn_prev).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_plus_1).setBackgroundDrawable(c);

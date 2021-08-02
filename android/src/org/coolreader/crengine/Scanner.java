@@ -23,9 +23,9 @@ public class Scanner extends FileInfoChangeSource {
 //	ArrayList<FileInfo> mFilesForParsing = new ArrayList<FileInfo>();
 	FileInfo mRoot;
 	
-	boolean mHideEmptyDirs = true;
+	int mHideEmptyDirs = -1;
 	
-	public void setHideEmptyDirs( boolean flgHide ) {
+	public void setHideEmptyDirs( int flgHide ) {
 		mHideEmptyDirs = flgHide;
 	}
 
@@ -420,18 +420,26 @@ public class Scanner extends FileInfoChangeSource {
 		listDirectory(baseDir, true, false);
 		if (null != initialUpdateCallback)
 			initialUpdateCallback.run();
-		listSubtreeBg(baseDir, mHideEmptyDirs ? Integer.MAX_VALUE : 2, scanControl, () -> {
-			if ( (!getDirScanEnabled() || baseDir.isScanned) && !recursiveScan || scanControl.isStopped() ) {
+		int scanDepth = 2;
+		if (mHideEmptyDirs == 2) scanDepth = 0;
+		if (mHideEmptyDirs == 1) scanDepth = Integer.MAX_VALUE;
+		//plotn - надо бы разобраться потом с кодом CR, следующий сканер у меня портит все свойства книг, поэтому я убрал
+		// *|| baseDir.isScanned*/
+		listSubtreeBg(baseDir, scanDepth, scanControl, () -> {
+			if ( (!getDirScanEnabled() /*|| baseDir.isScanned*/) && !recursiveScan || scanControl.isStopped() ) {
 				readyListener.onComplete(scanControl);
 				return;
 			}
-			Engine.ProgressControl progress = engine.createProgress(recursiveScan ? 0 : R.string.progress_scanning, scanControl);
+			Engine.ProgressControl progress = null;
+			if (!hideProgress) progress = engine.createProgress(recursiveScan ? 0 : R.string.progress_scanning, scanControl);
+			Engine.ProgressControl finalProgress = progress;
 			scanDirectoryFiles(db, baseDir, scanControl, hideProgress ? null : progress, () -> {
 				// GUI thread
 				onDirectoryContentChanged(baseDir);
 				try {
 					if (scanControl.isStopped()) {
 						// scan is stopped
+						if (finalProgress != null) finalProgress.hide();
 						readyListener.onComplete(scanControl);
 					} else {
 						baseDir.isScanned = true;
@@ -439,6 +447,7 @@ public class Scanner extends FileInfoChangeSource {
 						if ( recursiveScan ) {
 							if (scanControl.isStopped()) {
 								// scan is stopped
+								if (finalProgress != null) finalProgress.hide();
 								readyListener.onComplete(scanControl);
 								return;
 							}
@@ -454,6 +463,7 @@ public class Scanner extends FileInfoChangeSource {
 								public void onComplete(ScanControl scanControl) {
 									// process next directory from list
 									if (dirsToScan.size() == 0 || scanControl.isStopped()) {
+										if (finalProgress != null) finalProgress.hide();
 										readyListener.onComplete(scanControl);
 										return;
 									}
@@ -465,11 +475,13 @@ public class Scanner extends FileInfoChangeSource {
 							};
 							dirIterator.onComplete(scanControl);
 						} else {
+							if (finalProgress != null) finalProgress.hide();
 							readyListener.onComplete(scanControl);
 						}
 					}
 				} catch (Exception e) {
 					// treat as finished
+					if (finalProgress != null) finalProgress.hide();
 					readyListener.onComplete(scanControl);
 				}
 			});
@@ -978,7 +990,7 @@ public class Scanner extends FileInfoChangeSource {
 				if (scanControl.isStopped())
 					break;
 			}
-			if (fullDepthScan && mHideEmptyDirs) {
+			if (fullDepthScan && (mHideEmptyDirs == 1)) {
 				if (dir.removeEmptyDirs()) {
 					BackgroundThread.instance().postGUI(() -> {
 						// make a copy to update in GUI

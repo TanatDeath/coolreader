@@ -52,7 +52,7 @@ public class InitAppDialog extends BaseDialog {
 
 	public InitAppDialog(CoolReader activity)
 	{
-		super("InitAppDialog", activity, activity.getString(R.string.init_app), true, false);
+		super("InitAppDialog", activity, activity.getString(R.string.init_app), false, false);
 		mCoolReader = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
@@ -130,7 +130,8 @@ public class InitAppDialog extends BaseDialog {
 	private void performSelected() {
 		iErrCnt = 0;
 		if ((!clearCache) && (!clearSettings) && (!clearDB)) {
-			mCoolReader.showToast(mCoolReader.getString(R.string.actions_selected)+" 0.");
+			mCoolReader.showToast(mCoolReader.getString(R.string.actions_selected)+" 0. ");
+			return;
 		}
 		int selected = 0;
 		if (clearCache) selected++;

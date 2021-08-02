@@ -148,6 +148,11 @@ public class Dictionaries {
 		this.currentDictionaryTmp = dict;
 	}
 
+	public void setAdHocFromTo(String sFrom, String sTo) {
+		this.currentFromLangTmp = sFrom;
+		this.currentToLangTmp = sTo;
+	}
+
 	private Integer iDic2IsActive = 0;
 
 	public Dictionaries(Activity activity) {
@@ -166,6 +171,8 @@ public class Dictionaries {
 	public DictInfo currentDictionary;
 	public DictInfo currentDictionary2;
 	public DictInfo currentDictionaryTmp;
+	public String currentFromLangTmp;
+	public String currentToLangTmp;
 	public DictInfo currentDictionary3;
 	public DictInfo currentDictionary4;
 	public DictInfo currentDictionary5;
@@ -520,6 +527,8 @@ public class Dictionaries {
 	private DictInfo saveCurrentDictionary;
 	private DictInfo saveCurrentDictionary2;
 	private DictInfo saveCurrentDictionaryTmp;
+	private String saveFromLangTmp;
+	private String saveToLangTmp;
 	private int saveIDic2IsActive;
 
 	private void checkLangCodes() {
@@ -1561,7 +1570,8 @@ public class Dictionaries {
 											dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 										}
 										if (dfi != null) {
-											cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+											cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+													TranslationDirectionDialog.FOR_LINGVO, null);
 										}
 									}
 									;
@@ -1941,11 +1951,22 @@ public class Dictionaries {
 		saveCurrentDictionary = currentDictionary;
 		saveCurrentDictionary2 = currentDictionary2;
 		saveCurrentDictionaryTmp = currentDictionaryTmp;
+		saveFromLangTmp = currentFromLangTmp;
+		saveToLangTmp = currentToLangTmp;
 		saveIDic2IsActive = iDic2IsActive;
 		//
 		DictInfo curDict = getCurDict();
 		currentDictionaryTmp = null;
+		String sFromLang = StrUtils.getNonEmptyStr(currentFromLangTmp, true);
+		currentFromLangTmp = null;
+		String sToLang = StrUtils.getNonEmptyStr(currentToLangTmp, true);
+		currentToLangTmp = null;
 		log.i("Chosen dic = "+getCDinfo(curDict));
+		BookInfo book = ((CoolReader)mActivity).getReaderView().getBookInfo();
+		String lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
+		String langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
+		if (!StrUtils.isEmptyStr(sToLang)) lang = sToLang;
+		if (!StrUtils.isEmptyStr(sFromLang)) langf = sFromLang;
 		// play with network availability
 		if (!((CoolReader)mActivity).isNetworkAvailable()) {
 			String sConformity = ((CoolReader)mActivity).settings().getProperty(Settings.PROP_APP_ONLINE_OFFLINE_DICS);
@@ -2082,9 +2103,6 @@ public class Dictionaries {
 						selectionX2 = cr.getReaderView().lastSelection.endX;
 					}
 					if (cr.getReaderView().getBookInfo()!=null) {
-						BookInfo book = cr.getReaderView().getBookInfo();
-						String lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
-						String langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
 						if (StrUtils.isEmptyStr(langf)) {
 							String sLang = StrUtils.getNonEmptyStr(book.getFileInfo().language,true);
 							if (sLang.toUpperCase().contains("РУССК")) sLang = "ru";
@@ -2104,8 +2122,11 @@ public class Dictionaries {
 									currentDictionary = saveCurrentDictionary;
 									currentDictionary2 = saveCurrentDictionary2;
 									currentDictionaryTmp = saveCurrentDictionaryTmp;
+									currentFromLangTmp = saveFromLangTmp;
+									currentToLangTmp = saveToLangTmp;
 									iDic2IsActive = saveIDic2IsActive;
-									cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+									cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+											TranslationDirectionDialog.FOR_LINGVO, null);
 								}
 							};
 							return;
@@ -2258,9 +2279,6 @@ public class Dictionaries {
 				cr.showToast(R.string.only_in_premium);
 				return;
 			}
-			BookInfo book = cr.getReaderView().getBookInfo();
-			String lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
-			String langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
 			if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
 			if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
 				if (cr.getReaderView().mBookInfo!=null) {
@@ -2283,8 +2301,11 @@ public class Dictionaries {
 						currentDictionary = saveCurrentDictionary;
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionaryTmp = saveCurrentDictionaryTmp;
+						currentToLangTmp = saveToLangTmp;
+						currentFromLangTmp = saveFromLangTmp;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_YND);
+						cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+								TranslationDirectionDialog.FOR_YND, null);
 					} else {
 						((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 					}
@@ -2302,9 +2323,6 @@ public class Dictionaries {
 				return;
 			}
 			checkLangCodes();
-			book = cr.getReaderView().getBookInfo();
-			lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
-			langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
 			if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
 			if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
 				if (cr.getReaderView().mBookInfo!=null) {
@@ -2317,8 +2335,11 @@ public class Dictionaries {
 						currentDictionary = saveCurrentDictionary;
 						currentDictionary2 = saveCurrentDictionary2;
 						currentDictionaryTmp = saveCurrentDictionaryTmp;
+						currentToLangTmp = saveToLangTmp;
+						currentFromLangTmp = saveFromLangTmp;
 						iDic2IsActive = saveIDic2IsActive;
-						cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_LINGVO);
+						cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+								TranslationDirectionDialog.FOR_LINGVO, null);
 					}
 				};
 				return;
@@ -2380,9 +2401,6 @@ public class Dictionaries {
 					return;
 				}
 				checkLangCodes();
-				book = cr.getReaderView().getBookInfo();
-				lang = StrUtils.getNonEmptyStr(book.getFileInfo().lang_to,true);
-				langf = StrUtils.getNonEmptyStr(book.getFileInfo().lang_from, true);
 				if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
 				if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
 					if (cr.getReaderView().mBookInfo!=null) {
@@ -2395,8 +2413,11 @@ public class Dictionaries {
 							currentDictionary = saveCurrentDictionary;
 							currentDictionary2 = saveCurrentDictionary2;
 							currentDictionaryTmp = saveCurrentDictionaryTmp;
+							currentFromLangTmp = saveFromLangTmp;
+							currentToLangTmp = saveToLangTmp;
 							iDic2IsActive = saveIDic2IsActive;
-							cr.editBookTransl(false, null, dfi, fi, langf, lang, s, null, TranslationDirectionDialog.FOR_COMMON);
+							cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+									TranslationDirectionDialog.FOR_COMMON, null);
 						}
 					};
 					return;
@@ -2409,11 +2430,8 @@ public class Dictionaries {
 					cr.showToast(R.string.only_in_premium);
 					return;
 				}
-				BookInfo book12 = cr.getReaderView().getBookInfo();
-				String lang12 = StrUtils.getNonEmptyStr(book12.getFileInfo().lang_to,true);
-				String langf12 = StrUtils.getNonEmptyStr(book12.getFileInfo().lang_from, true);
-				if (StrUtils.isEmptyStr(langf12)) langf = book12.getFileInfo().language;
-				if (StrUtils.isEmptyStr(lang12)||StrUtils.isEmptyStr(langf12)) {
+				if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
+				if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
 					if (cr.getReaderView().mBookInfo!=null) {
 						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 						FileInfo dfi = fi.parent;
@@ -2434,25 +2452,25 @@ public class Dictionaries {
 							currentDictionary = saveCurrentDictionary;
 							currentDictionary2 = saveCurrentDictionary2;
 							currentDictionaryTmp = saveCurrentDictionaryTmp;
+							currentFromLangTmp = saveFromLangTmp;
+							currentToLangTmp = saveToLangTmp;
 							iDic2IsActive = saveIDic2IsActive;
-							cr.editBookTransl(false, null, dfi, fi, langf12, lang12, s, null, TranslationDirectionDialog.FOR_COMMON);
+							cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+									TranslationDirectionDialog.FOR_COMMON, null);
 						} else {
 							((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 						}
 					};
 					return;
 				}
-				dictCCTranslate(s, dictccGetDefLangCode(langf12), dictccGetDefLangCode(lang12), curDict, view, null, dcb);
+				dictCCTranslate(s, dictccGetDefLangCode(langf), dictccGetDefLangCode(lang), curDict, view, null, dcb);
 			case 13:
 				if (!FlavourConstants.PREMIUM_FEATURES) {
 					cr.showToast(R.string.only_in_premium);
 					return;
 				}
-				BookInfo book13 = cr.getReaderView().getBookInfo();
-				String lang13 = StrUtils.getNonEmptyStr(book13.getFileInfo().lang_to,true);
-				String langf13 = StrUtils.getNonEmptyStr(book13.getFileInfo().lang_from, true);
-				if (StrUtils.isEmptyStr(langf13)) langf = book13.getFileInfo().language;
-				if (StrUtils.isEmptyStr(lang13)||StrUtils.isEmptyStr(langf13)) {
+				if (StrUtils.isEmptyStr(langf)) langf = book.getFileInfo().language;
+				if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
 					if (cr.getReaderView().mBookInfo!=null) {
 						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 						FileInfo dfi = fi.parent;
@@ -2473,15 +2491,18 @@ public class Dictionaries {
 							currentDictionary = saveCurrentDictionary;
 							currentDictionary2 = saveCurrentDictionary2;
 							currentDictionaryTmp = saveCurrentDictionaryTmp;
+							currentFromLangTmp = saveFromLangTmp;
+							currentToLangTmp = saveToLangTmp;
 							iDic2IsActive = saveIDic2IsActive;
-							cr.editBookTransl(false, null, dfi, fi, langf13, lang13, s, null, TranslationDirectionDialog.FOR_COMMON);
+							cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+									TranslationDirectionDialog.FOR_COMMON, null);
 						} else {
 							((CoolReader) mActivity).showToast(((CoolReader) mActivity).getString(R.string.file_not_found)+": "+fi.getFilename());
 						}
 					};
 					return;
 				}
-				googleTranslate(s, googleGetDefLangCode(langf13), googleGetDefLangCode(lang13), curDict, view, null, dcb);
+				googleTranslate(s, googleGetDefLangCode(langf), googleGetDefLangCode(lang), curDict, view, null, dcb);
 		}
 	}
 
