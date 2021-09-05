@@ -369,7 +369,7 @@ public class TTSToolbarDlg implements Settings {
 	private void setReaderMode()
 	{
 		String oldViewSetting = mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE);
-		moveSelection( ReaderCommand.DCMD_SELECT_FIRST_SENTENCE );
+		moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE);
 		if (("1".equals(oldViewSetting)) &&
 				(!("1".equals(mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE))))) {
 			changedPageMode = true;
@@ -388,7 +388,7 @@ public class TTSToolbarDlg implements Settings {
 		}
 	}
 	
-	private void moveSelection( ReaderCommand cmd )
+	private void moveSelection(ReaderCommand cmd)
 	{
 		mReaderView.moveSelection(cmd, 0, new ReaderView.MoveSelectionCallback() {
 			
@@ -450,7 +450,7 @@ public class TTSToolbarDlg implements Settings {
 		});
 	}
 	
-	private void say( Selection selection ) {
+	private void say(Selection selection) {
 		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
 				"speaking: "+selection.text);
 		dWordCountThis = 0.0f;

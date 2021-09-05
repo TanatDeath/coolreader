@@ -44,7 +44,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	HashMap<Integer, Integer> themeColors;
 	public boolean needRefreshOnlineCatalogs = false;
 	private final CoolReader mActivity;
-	private ViewGroup mView;
+	public ViewGroup mView;
 	private LinearLayout mRecentBooksScroll;
 	private TextView mTextFilesystem;
 	private ImageView mImgFilesystem;
@@ -1149,6 +1149,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	public void showMenu(View anchor, View parentAnchor) {
 		ReaderAction[] actions = {
 			ReaderAction.ABOUT,
+			ReaderAction.SHOW_DICTIONARY,
 			ReaderAction.CURRENT_BOOK,
 			ReaderAction.RECENT_BOOKS,
 			ReaderAction.USER_MANUAL,
@@ -1167,6 +1168,10 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				return true;
 			} else if (item == ReaderAction.ABOUT) {
 				mActivity.showAboutDialog();
+				return true;
+			} else if (item == ReaderAction.SHOW_DICTIONARY) {
+				DictsDlg dlg = new DictsDlg(mActivity, mActivity.getmReaderView(), "", null, true);
+				dlg.show();
 				return true;
 			} else if (item == ReaderAction.RECENT_BOOKS) {
 				mActivity.showRecentBooks();

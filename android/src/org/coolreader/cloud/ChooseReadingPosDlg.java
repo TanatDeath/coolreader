@@ -92,9 +92,9 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			View view;
 			int res = R.layout.conf_file_item;
 			view = mInflater.inflate(res, null);
-			TextView labelView = (TextView)view.findViewById(R.id.conf_file_shortcut);
-			TextView titleTextView = (TextView)view.findViewById(R.id.conf_file_title);
-			TextView addTextView = (TextView)view.findViewById(R.id.conf_file_pos_text);
+			TextView labelView = view.findViewById(R.id.conf_file_shortcut);
+			TextView titleTextView = view.findViewById(R.id.conf_file_title);
+			TextView addTextView = view.findViewById(R.id.conf_file_pos_text);
 		 	CloudFileInfo md = null;
 			if (mReadingPosList!=null)
 				if (mReadingPosList.size()>position)

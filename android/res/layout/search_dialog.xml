@@ -13,23 +13,16 @@
 				android:orientation="vertical"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content">
-			<Button
-					android:id="@+id/btn_skim"
-					android:layout_width="match_parent"
-					android:checked="true"
-					android:layout_weight="1"
-					android:drawableLeft="?attr/attr_icons8_skim"
-					android:tag="tint"
-					android:textColor="?attr/colorIcon"
-					style="@style/TextAppearance.Medium"
-					android:text="@string/skim_document" />
 
 			<EditText
 				android:id="@+id/search_text"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text=""
+				android:paddingBottom="4dp"
+				android:paddingTop="4dp"
 				style="@style/TextAppearance.Widget.EditText"
+				android:background="?attr/colorThemeGray2Contrast"
 				android:editable="true" android:hint="@string/dlg_search_hint" android:singleLine="true"
 			/>
 			</LinearLayout>
@@ -110,6 +103,50 @@
 						android:textColor="?attr/colorIcon"
 						style="@style/TextAppearance.Medium"
 						android:text="@string/search_pages" />
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="10dip">
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/ll_search_buttons2"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+				<Button
+						android:id="@+id/btn_do_search_web"
+						android:layout_width="0dip"
+						android:layout_height="match_parent"
+						android:checked="true"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/attr_icons8_web_search"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						android:textStyle="bold"
+						style="@style/TextAppearance.Medium"
+						android:text="@string/mi_search_web" />
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="10dip">
+			</LinearLayout>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/ll_search_buttons3"
+					android:orientation="horizontal"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+				<Button
+						android:id="@+id/btn_skim"
+						android:layout_width="match_parent"
+						android:checked="true"
+						android:layout_weight="1"
+						android:drawableLeft="?attr/attr_icons8_skim"
+						android:tag="tint"
+						android:textColor="?attr/colorIcon"
+						style="@style/TextAppearance.Medium"
+						android:text="@string/skim_document" />
 			</LinearLayout>
 			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 					android:id="@+id/ll_spacing"

@@ -9,6 +9,8 @@ import java.util.List;
 import org.coolreader.CoolReader;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
+import org.coolreader.dic.TranslationDirectionDialog;
+import org.coolreader.layouts.FlowLayout;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -18,7 +20,9 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +31,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -41,10 +46,15 @@ public class DictsDlg extends BaseDialog {
 	private Button btnDictType0;
 	private Button btnDictType1;
 	private Button btnDictType2;
+	private Button btnDontClose;
+	private EditText edtLangFrom;
+	private EditText edtLangTo;
+	private FlowLayout flQuickTransl;
 	boolean isEInk = false;
 	boolean bDictType0 = true;
 	boolean bDictType1 = true;
 	boolean bDictType2 = false;
+	boolean bDontClose = false;
 	HashMap<Integer, Integer> themeColors;
 
 	List<Dictionaries.DictInfo> dictInfoList;
@@ -191,13 +201,24 @@ public class DictsDlg extends BaseDialog {
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
 			if (dictInfoList == null) fillDictListInfo();
+			Dictionaries.DictInfo di = dictInfoList.get(position);
+			boolean dontClose = false;
+			if (di != null)
+				if ((!di.isOnline) && (bDontClose)) dontClose = true;
 			mCoolReader.mDictionaries.setAdHocDict(dictInfoList.get(position));
+			mCoolReader.mDictionaries.setAdHocFromTo(edtLangFrom.getText().toString(), edtLangTo.getText().toString());
 			String sSText = mSearchText.trim();
 			if (selEdit!=null) sSText = selEdit.getText().toString().trim();
+			if (bDontClose) {
+				mCoolReader.lastDicText = sSText;
+				mCoolReader.lastDicLangFrom = edtLangFrom.getText().toString();
+				mCoolReader.lastDicLangTo = edtLangTo.getText().toString();
+			}
 			mCoolReader.findInDictionary(sSText, mCallerView);
-			if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
-				mReaderView.clearSelection();
-			dismiss();
+			if (mReaderView != null)
+				if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
+					mReaderView.clearSelection();
+			if (!dontClose) dismiss();
 			return true;
 		}
 	}
@@ -209,6 +230,7 @@ public class DictsDlg extends BaseDialog {
 		mCoolReader.tintViewIcons(btnDictType0, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDictType1, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDictType2, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnDontClose, PorterDuff.Mode.CLEAR,true);
 		if (bDictType0) {
 			btnDictType0.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDictType0,true);
@@ -221,9 +243,71 @@ public class DictsDlg extends BaseDialog {
 			btnDictType2.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDictType2,true);
 		} else btnDictType2.setBackgroundColor(colorGrayCT);
+		if (bDontClose) {
+			btnDontClose.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnDontClose,true);
+		} else btnDontClose.setBackgroundColor(colorGrayCT);
 	}
 
-	public DictsDlg( CoolReader activity, ReaderView readerView, String search_text, View view )
+	private void fillQuickButtons(String quickDirs) {
+		String[] sQuickDirsArr = quickDirs.split(";");
+		int iCnt = 0;
+		ArrayList<String> sButtons = new ArrayList<>();
+		for (String s: sQuickDirsArr)
+			if (s.contains("=")) {
+				sButtons.add(s.replace("=", " -> "));
+				iCnt++;
+			}
+		for (final String button: sButtons) {
+			if (button.contains("->")) {
+				String from = button.split("->")[0];
+				String to = button.split("->")[1];
+				String langFrom = edtLangFrom.getText().toString();
+				if (StrUtils.isEmptyStr(langFrom)) {
+					edtLangFrom.setText(from.trim());
+					edtLangTo.setText(to.trim());
+				}
+			}
+			Button dicButton = new Button(mCoolReader);
+			dicButton.setText(button);
+			int newTextSize = mCoolReader.settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+			dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+			int colorIcon = themeColors.get(R.attr.colorIcon);
+			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+			dicButton.setTextColor(colorIcon);
+			dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+			dicButton.setPadding(10, 10, 10, 10);
+			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			llp = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			llp.setMargins(8, 4, 4, 8);
+			dicButton.setLayoutParams(llp);
+			//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
+			dicButton.setMaxLines(1);
+			dicButton.setEllipsize(TextUtils.TruncateAt.END);
+			TextView tv = new TextView(mCoolReader);
+			tv.setText(" ");
+			tv.setPadding(10, 10, 10, 10);
+			tv.setLayoutParams(llp);
+			tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+			tv.setTextColor(colorIcon);
+			flQuickTransl.addView(dicButton);
+			flQuickTransl.addView(tv);
+			dicButton.setOnClickListener(v -> {
+				if (button.contains("->")) {
+					String from = button.split("->")[0];
+					String to = button.split("->")[1];
+					edtLangFrom.setText(from.trim());
+					edtLangTo.setText(to.trim());
+				}
+			});
+		}
+	}
+
+	public DictsDlg(CoolReader activity, ReaderView readerView, String search_text, View view, boolean dontClose)
 	{
 		super("DictsDlg", activity, activity.getResources().getString(R.string.win_title_dicts), true, true);
 		mInflater = LayoutInflater.from(getContext());
@@ -236,12 +320,48 @@ public class DictsDlg extends BaseDialog {
 		View frame = mInflater.inflate(R.layout.dict_dialog, null);
 		ImageButton btnMinus1 = frame.findViewById(R.id.dict_dlg_minus1_btn);
 		ImageButton btnMinus2 = frame.findViewById(R.id.dict_dlg_minus2_btn);
+		ImageButton btnClear = frame.findViewById(R.id.dict_dlg_clear_btn);
 		btnDictType0 = frame.findViewById(R.id.btn_dic_type_0);
 		btnDictType1 = frame.findViewById(R.id.btn_dic_type_1);
 		btnDictType2 = frame.findViewById(R.id.btn_dic_type_2);
+		btnDontClose = frame.findViewById(R.id.btn_dont_hide);
+		edtLangFrom = frame.findViewById(R.id.lang_from);
+		edtLangFrom.setText("");
+		edtLangTo = frame.findViewById(R.id.lang_to);
+		edtLangTo.setText("");
+		if (!StrUtils.isEmptyStr(mCoolReader.lastDicLangFrom)) {
+			edtLangFrom.setText(mCoolReader.lastDicLangFrom);
+			edtLangTo.setText(mCoolReader.lastDicLangTo);
+		}
+		mCoolReader.lastDicText = "";
+		mCoolReader.lastDicLangFrom = "";
+		mCoolReader.lastDicLangTo = "";
+		mCoolReader.lastDicSkip = false;
+		if (StrUtils.isEmptyStr(edtLangFrom.getText().toString()))
+			if (mCoolReader.mDictionaries != null) {
+				if (!StrUtils.isEmptyStr(mCoolReader.mDictionaries.currentFromLangTmp)) {
+					edtLangFrom.setText(mCoolReader.mDictionaries.currentFromLangTmp);
+					edtLangTo.setText(mCoolReader.mDictionaries.currentToLangTmp);
+				}
+			}
+		if (StrUtils.isEmptyStr(edtLangFrom.getText().toString())) {
+			if (mReaderView != null)
+				if (mReaderView.mBookInfo != null) {
+					edtLangFrom.setText(mReaderView.mBookInfo.getFileInfo().lang_from);
+					edtLangTo.setText(mReaderView.mBookInfo.getFileInfo().lang_to);
+				}
+		}
+		flQuickTransl = frame.findViewById(R.id.fl_quick_trasl);
+		String sQuickDirs = mCoolReader.settings().getProperty(Settings.PROP_APP_QUICK_TRANSLATION_DIRS);
+		boolean isEmprtyQuick = StrUtils.isEmptyStr(StrUtils.getNonEmptyStr(sQuickDirs,true).replace(";",""));
+		if (!isEmprtyQuick)
+			fillQuickButtons(sQuickDirs);
+		else
+			Utils.hideView(flQuickTransl);
 		bDictType0 = mCoolReader.settings().getBool(Settings.PROP_APP_DICT_TYPE_SELECTED0, true);
 		bDictType1 = mCoolReader.settings().getBool(Settings.PROP_APP_DICT_TYPE_SELECTED1, true);
 		bDictType2 = mCoolReader.settings().getBool(Settings.PROP_APP_DICT_TYPE_SELECTED2, false);
+		bDontClose = dontClose;
 		btnDictType0.setOnClickListener(v -> {
 			bDictType0 = !bDictType0;
 			Properties props = new Properties(activity.settings());
@@ -269,6 +389,13 @@ public class DictsDlg extends BaseDialog {
 			listUpdated();
 			paintDictTypeButtons();
 		});
+		Drawable imgC = getContext().getResources().getDrawable(R.drawable.icons8_check_no_frame);
+		Drawable imgC1 = imgC.getConstantState().newDrawable().mutate();
+		btnDontClose.setCompoundDrawablesWithIntrinsicBounds(imgC1, null, null, null);
+		btnDontClose.setOnClickListener(v -> {
+			bDontClose = !bDontClose;
+			paintDictTypeButtons();
+		});
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
@@ -279,7 +406,7 @@ public class DictsDlg extends BaseDialog {
 		BackgroundThread.instance().postBackground(() ->
 				BackgroundThread.instance().postGUI(() -> paintDictTypeButtons(), 200));
 		mCoolReader.tintViewIcons(frame);
-		selEdit = (EditText)frame.findViewById(R.id.selection_text);
+		selEdit = frame.findViewById(R.id.selection_text);
 		selEdit.setText(mSearchText);
 		setPositiveButtonImage(0,0);
 		setThirdButtonImage(
@@ -290,24 +417,22 @@ public class DictsDlg extends BaseDialog {
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_me_smb, R.drawable.icons8_me_smb),
 				//R.drawable.icons8_me_smb,
 				R.string.dlg_button_pronoun_replace);
-		btnMinus1.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				String s = StrUtils.replacePuncts(selEdit.getText().toString(),true);
-				String res = "";
-				String [] arrS = s.split(" ");
-				boolean bFirst = true;
-				for (String ss: arrS) {
-					String repl = StrUtils.replacePuncts(ss.trim().toLowerCase(), false);
-					if (!repl.trim().equals("")) {
-						if (bFirst) {
-							bFirst = false;
-						} else {
-							res=res.trim()+" "+ss.trim();
-						}
+		btnMinus1.setOnClickListener(v -> {
+			String s = StrUtils.replacePuncts(selEdit.getText().toString(),true);
+			String res = "";
+			String [] arrS = s.split(" ");
+			boolean bFirst = true;
+			for (String ss: arrS) {
+				String repl = StrUtils.replacePuncts(ss.trim().toLowerCase(), false);
+				if (!repl.trim().equals("")) {
+					if (bFirst) {
+						bFirst = false;
+					} else {
+						res=res.trim()+" "+ss.trim();
 					}
 				}
-				selEdit.setText(res.trim());
 			}
+			selEdit.setText(res.trim());
 		});
 		btnMinus2.setOnClickListener(v -> {
 			String s = StrUtils.replacePuncts(selEdit.getText().toString(),true);
@@ -328,6 +453,10 @@ public class DictsDlg extends BaseDialog {
 				}
 			}
 			selEdit.setText(res.trim());
+		});
+		btnClear.setOnClickListener(v -> {
+			selEdit.setText("");
+			selEdit.requestFocus();
 		});
 		ViewGroup body = frame.findViewById(R.id.dict_list);
 		mList = new DictList(activity);

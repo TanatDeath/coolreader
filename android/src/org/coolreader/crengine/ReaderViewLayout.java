@@ -200,6 +200,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			toolbarView.setButtonAlpha(activity.getCurrentTheme().getToolbarButtonAlpha());
 			toolbarView.onThemeChanged(activity.getCurrentTheme());
 			this.toolbarView.calcLayout();
+			requestLayout();
 		}
 
 		public void onThemeChanged(InterfaceTheme theme) {

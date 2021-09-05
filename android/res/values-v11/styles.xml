@@ -363,7 +363,7 @@
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
         <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
         <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
-        <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
+        <item name="attr_icons8_manual_2">@drawable/icons8_help</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
         <item name="attr_icons8_position_from_gd">@drawable/icons8_position_from_gd</item>
@@ -779,7 +779,7 @@
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
         <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
         <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
-        <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
+        <item name="attr_icons8_manual_2">@drawable/icons8_help</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
         <item name="attr_icons8_position_from_gd">@drawable/icons8_position_from_gd</item>
@@ -1180,7 +1180,7 @@
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
         <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
         <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
-        <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
+        <item name="attr_icons8_manual_2">@drawable/icons8_help</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
         <item name="attr_icons8_position_from_gd">@drawable/icons8_position_from_gd</item>
@@ -1527,7 +1527,7 @@
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
         <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
         <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
-        <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
+        <item name="attr_icons8_manual_2">@drawable/icons8_help</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
         <item name="attr_icons8_position_from_gd">@drawable/icons8_position_from_gd</item>
@@ -1889,7 +1889,7 @@
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
         <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
         <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
-        <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
+        <item name="attr_icons8_manual_2">@drawable/icons8_help</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
         <item name="attr_icons8_position_from_gd">@drawable/icons8_position_from_gd</item>
@@ -2306,7 +2306,7 @@
         <item name="attr_icons8_bookmark_simple">@drawable/icons8_bookmark_simple</item>
         <item name="attr_icons8_bookmark_simple_add">@drawable/icons8_bookmark_simple_add</item>
         <item name="attr_icons8_bookmark_simple_fast_add">@drawable/icons8_bookmark_simple_fast_add</item>
-        <item name="attr_icons8_manual_2">@drawable/icons8_manual_2</item>
+        <item name="attr_icons8_manual_2">@drawable/icons8_help</item>
         <item name="attr_icons8_google_translate_switch">@drawable/icons8_google_translate_switch</item>
         <item name="attr_icons8_position_to_gd">@drawable/icons8_position_to_gd</item>
         <item name="attr_icons8_position_from_gd">@drawable/icons8_position_from_gd</item>

@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public interface Settings {
     public static final String PROP_PAGE_BACKGROUND_IMAGE       ="background.image";
+	public static final String PROP_PAGE_BACKGROUND_IMAGE_SAVE  ="background.image.save";
     public static final String PROP_PAGE_BACKGROUND_IMAGE_DAY   ="background.image.day";
     public static final String PROP_PAGE_BACKGROUND_IMAGE_NIGHT ="background.image.night";
     public static final String PROP_NIGHT_MODE              ="crengine.night.mode";
@@ -17,6 +18,8 @@ public interface Settings {
     public static final String PROP_BACKGROUND_COLOR_NIGHT  ="background.color.night";
     public static final String PROP_FONT_COLOR              ="font.color.default";
     public static final String PROP_BACKGROUND_COLOR        ="background.color.default";
+	public static final String PROP_BACKGROUND_COLOR_SAVE   ="background.color.save";
+	public static final String PROP_BACKGROUND_COLOR_SAVE_WAS   ="background.color.save.was";
     public static final String PROP_FONT_ANTIALIASING       ="font.antialiasing.mode";
     public static final String PROP_FONT_FACE               ="font.face.default";
     public static final String PROP_FONT_HINTING            ="font.hinting.mode";
@@ -56,6 +59,7 @@ public interface Settings {
 	public static final String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
     public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
 	public static final String PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change"; // when tts
+	public static final String PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change2"; // when sel toolbar
     public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
 	public static final String PROP_PAGE_ANIMATION_SPEED    ="crengine.page.animation.speed";
 	public static final String PROP_DOUBLE_CLICK_INTERVAL    ="crengine.double.click.interval";
@@ -123,6 +127,8 @@ public interface Settings {
     public static final String PROP_IMG_SCALING_ZOOMIN_BLOCK_SCALE = "crengine.image.scaling.zoomin.block.scale";
     public static final String PROP_IMG_SCALING_ZOOMOUT_BLOCK_MODE = "crengine.image.scaling.zoomout.block.mode";
     public static final String PROP_IMG_SCALING_ZOOMOUT_BLOCK_SCALE = "crengine.image.scaling.zoomout.block.scale";
+	public static final String PROP_IMG_CUSTOM_BACKGROUND = "crengine.image.custom.background";
+	public static final String PROP_IMG_CUSTOM_BACKGROUND_COLOR = "crengine.image.custom.background.color";
     
     public static final String PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT = "crengine.style.space.condensing.percent";
 	public static final String PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT = "crengine.style.unused.space.threshold.percent";
@@ -324,6 +330,7 @@ public interface Settings {
 	public static final String PROP_CLOUD_TITLE = "window.cloud.title";
 	public static final String PROP_DICTIONARY_TITLE = "window.dictionary.title";
 	public static final String PROP_FILEBROWSER_TITLE = "window.filebrowser.title";
+	public static final String PROP_FILEBROWSER_SEC_GROUP = "window.filebrowser.sec.group";
 	public static final String PROP_RARE_TITLE = "window.rare.title";
 	public static final String PROP_TTS_TITLE = "window.tts.title";
 	public static final String PROP_BACKLIGHT_TITLE = "window.backlight.title";

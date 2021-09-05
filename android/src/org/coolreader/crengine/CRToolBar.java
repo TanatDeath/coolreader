@@ -196,14 +196,14 @@ public class CRToolBar extends ViewGroup {
 			this.actionsToolbar = actions;
 			this.actionsMore = actions;
 		} else {
-			this.actions = new ArrayList<ReaderAction>();
-			this.actionsToolbar = new ArrayList<ReaderAction>();
-			this.actionsMore = new ArrayList<ReaderAction>();
+			this.actions = new ArrayList<>();
+			this.actionsToolbar = new ArrayList<>();
+			this.actionsMore = new ArrayList<>();
 			ReaderAction[] actions_all = ReaderAction.AVAILABLE_ACTIONS;
 
 			//first priority
 			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)) {
+				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
 					int aVis = 0;
 					try {
 						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
@@ -215,15 +215,39 @@ public class CRToolBar extends ViewGroup {
 				}
 			//second priority
 			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)) {
+				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
 					int aVis = 0;
 					try {
 						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
 					} catch (Exception e) {
 					}
-					if (!((aVis == 4) || (aVis == 5) || (aVis == 6))) this.actions.add(a);
+					if ((aVis == 1) || (aVis == 2) || (aVis == 3)) this.actions.add(a);
 					if ((aVis == 1) || (aVis == 3)) this.actionsToolbar.add(a);
 					if ((aVis == 2) || (aVis == 3)) this.actionsMore.add(a);
+				}
+			//third priority
+			for (ReaderAction a : actions_all)
+				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
+					int aVis = 0;
+					try {
+						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
+					} catch (Exception e) {
+					}
+					if ((aVis == 7) || (aVis == 8) || (aVis == 9)) this.actions.add(a);
+					if ((aVis == 7) || (aVis == 9)) this.actionsToolbar.add(a);
+					if ((aVis == 8) || (aVis == 9)) this.actionsMore.add(a);
+				}
+			//forth priority
+			for (ReaderAction a : actions_all)
+				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
+					int aVis = 0;
+					try {
+						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
+					} catch (Exception e) {
+					}
+					if ((aVis == 10) || (aVis == 11) || (aVis == 12)) this.actions.add(a);
+					if ((aVis == 10) || (aVis == 12)) this.actionsToolbar.add(a);
+					if ((aVis == 11) || (aVis == 12)) this.actionsMore.add(a);
 				}
 			if ((this.actionsToolbar.size() == 0) && (this.actionsMore.size() == 0)) {
 				ReaderAction[] ReaderActionDef =
@@ -255,10 +279,9 @@ public class CRToolBar extends ViewGroup {
 					this.actionsMore.add(act);
 				}
 			}
-			;
-			if (!this.actions.contains(ReaderAction.OPTIONS)) this.actions.add(ReaderAction.OPTIONS);
+			/*if (!this.actions.contains(ReaderAction.OPTIONS)) this.actions.add(ReaderAction.OPTIONS);
 			if (!this.actions.contains(ReaderAction.FILE_BROWSER_ROOT)) this.actions.add(ReaderAction.FILE_BROWSER_ROOT);
-			if (!this.actions.contains(ReaderAction.EXIT)) this.actions.add(ReaderAction.EXIT);
+			if (!this.actions.contains(ReaderAction.EXIT)) this.actions.add(ReaderAction.EXIT);*/
 			if (!this.actionsMore.contains(ReaderAction.OPTIONS))
 				this.actionsMore.add(ReaderAction.OPTIONS);
 			if (!this.actionsMore.contains(ReaderAction.FILE_BROWSER_ROOT))
@@ -296,8 +319,6 @@ public class CRToolBar extends ViewGroup {
 	
 	public void calcLayout() {
 		if (activity instanceof CoolReader) {
-			//Properties settings = ((CoolReader)activity).getReaderView().getSettings();
-			//this.optionAppearance = settings.getInt(ReaderView.PROP_TOOLBAR_APPEARANCE, 0);
 			optionAppearance = Integer.parseInt(((CoolReader)activity).getToolbarAppearance());
 			toolbarScale = 1.0f;
 			grayIcons = false;
@@ -670,23 +691,23 @@ public class CRToolBar extends ViewGroup {
 	}
 
 
-	private ImageButton addButton(Rect rect, final ReaderAction item, boolean left) {
+	private ImageButton addButton(Rect rect, final ReaderAction item, boolean left, int diff) {
 		Rect rc = new Rect(rect);
 		if (isVertical) {
 			if (left) {
-				rc.bottom = rc.top + buttonHeight;
-				rect.top += buttonHeight + BUTTON_SPACING;
+				rc.bottom = rc.top + buttonHeight + diff;
+				rect.top += buttonHeight + BUTTON_SPACING + diff;
 			} else {
-				rc.top = rc.bottom - buttonHeight;
-				rect.bottom -= buttonHeight + BUTTON_SPACING;
+				rc.top = rc.bottom - buttonHeight + diff;
+				rect.bottom -= buttonHeight + BUTTON_SPACING + diff;
 			}
 		} else {
 			if (left) {
-				rc.right = rc.left + buttonWidth;
-				rect.left += buttonWidth + BUTTON_SPACING;
+				rc.right = rc.left + buttonWidth + diff;
+				rect.left += buttonWidth + BUTTON_SPACING + diff;
 			} else {
-				rc.left = rc.right - buttonWidth;
-				rect.right -= buttonWidth + BUTTON_SPACING;
+				rc.left = rc.right - buttonWidth + diff;
+				rect.right -= buttonWidth + BUTTON_SPACING + diff;
 			}
 		}
 		if (rc.isEmpty())
@@ -900,14 +921,22 @@ public class CRToolBar extends ViewGroup {
 		} else {
 			rect.bottom -= BAR_SPACING;
 			int maxWidth = right - left - getPaddingLeft() - getPaddingRight() + BUTTON_SPACING;
-			maxButtonCount = maxWidth / (buttonWidth + BUTTON_SPACING);
+			if ((buttonWidth + BUTTON_SPACING) > 0)
+				maxButtonCount = maxWidth / (buttonWidth + BUTTON_SPACING);
 		}
 		int count = 0;
 		boolean addEllipsis = visibleButtonCount > maxButtonCount || visibleNonButtonCount > 0;
-		if (addEllipsis) {
-			addButton(rect, null, false);
-			maxButtonCount--;
+		if (addEllipsis) maxButtonCount--;
+		int diff = 0;
+		if (maxButtonCount > visibleButtonCount) {
+			diff = maxButtonCount - visibleButtonCount;
+			if (isVertical) diff = diff * (buttonHeight + BUTTON_SPACING);
+				else diff = diff * (buttonWidth + BUTTON_SPACING);
+			if ((visibleButtonCount + (addEllipsis? 1: 0)) > 0)
+				diff = diff / (visibleButtonCount + (addEllipsis? 1: 0));
 		}
+		if (addEllipsis)
+			addButton(rect, null, false, diff);
 		for (int i = 0; i < actions.size(); i++) {
 			ReaderAction item = actions.get(i);
 			if (count >= maxButtonCount) {
@@ -925,7 +954,7 @@ public class CRToolBar extends ViewGroup {
 			if (actionsToolbar.contains(item)) {
 				itemsToShow.add(item);
 				count++;
-				addButton(rect, item, true);
+				addButton(rect, item, true, diff);
 			}
 		}
 	}

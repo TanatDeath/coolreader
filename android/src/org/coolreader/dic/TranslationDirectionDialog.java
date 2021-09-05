@@ -66,6 +66,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 	public static int FOR_COMMON = 0;
 	public static int FOR_YND = 1;
 	public static int FOR_LINGVO = 2;
+	public static int FOR_COMMON_OPTIONS = 3;
 
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
@@ -305,8 +306,9 @@ public class TranslationDirectionDialog extends BaseDialog {
 		mTransl.clear();
 		yndLangs.clear();
 		listType = 2;
-		if (StrUtils.isEmptyStr(Dictionaries.sYandexIAM))
-			mCoolReader.mDictionaries.yandexAuthThenTranslate("", "", "", null, view,
+		if (Dictionaries.yandexTranslate == null) Dictionaries.yandexTranslate = new YandexTranslate();
+		if (StrUtils.isEmptyStr(Dictionaries.yandexTranslate.sYandexIAM))
+			mCoolReader.mDictionaries.yandexTranslate.yandexAuthThenTranslate(mCoolReader,"", "", "", null, view,
 					lst -> {
 						yndLangs = lst;
 						for (Map.Entry<String, String> entry : yndLangs.entrySet()) {
@@ -320,7 +322,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 						}, 100));
 					}, null);
 		else
-			mCoolReader.mDictionaries.yandexTranslate("", "", "", null, view,
+			mCoolReader.mDictionaries.yandexTranslate.yandexTranslate(mCoolReader, "", "", "", null, view,
 					lst -> {
 						yndLangs = lst;
 						for (Map.Entry<String, String> entry : yndLangs.entrySet()) {

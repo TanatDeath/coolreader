@@ -24,10 +24,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -45,12 +48,34 @@ public class SelectionToolbarDlg {
 	View mPanel;
 	public static Selection stSel;
 	Selection selection;
-	boolean isEInk = false;
+	boolean isEInk;
 	HashMap<Integer, Integer> themeColors;
 	public static boolean isVisibleNow = false;
+	boolean showAtTop;
+	int colorGray;
+	int colorGrayC;
+	int colorIcon;
+	ColorDrawable colorButtons;
+	String sTranspButtons;
+	int alphaVal;
+	int [] location = new int[2];
+	int popupY;
+	//buttons
+	ImageButton btnSelectionBookmark;
+	ImageButton btnSelectionCopy;
+	ImageButton btnSelectionDict;
+	ImageButton btnSelectionEmail;
+	ImageButton btnSelectionFind;
+	ImageButton btnSelectionCancel;
+	ImageButton btnSelectionMore;
 
 	static public void showDialog(CoolReader coolReader, ReaderView readerView, final Selection selection)
 	{
+		if (coolReader.getReaderView() != null)
+			if (coolReader.getReaderView().currentImageViewer != null) {
+				coolReader.getReaderView().clearSelection();
+				return;
+			}
 		SelectionToolbarDlg dlg = new SelectionToolbarDlg(coolReader, readerView, selection);
 		//dlg.mWindow.update(dlg.mAnchor, width, height)
 		Log.d("cr3", "popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
@@ -66,12 +91,19 @@ public class SelectionToolbarDlg {
 	{
 		if (pageModeSet)
 			return;
+		if ("1".equals(mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE))) return;
 		//if (DeviceInfo.EINK_SCREEN) { return; } // switching to scroll view doesn't work well on eink screens
 		
-		String oldViewSetting = mReaderView.getSetting( ReaderView.PROP_PAGE_VIEW_MODE );
-		if ( "1".equals(oldViewSetting) ) {
+		String oldViewSetting = mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE);
+		if ("1".equals(oldViewSetting)) {
 			changedPageMode = true;
 			mReaderView.setViewModeNonPermanent(ViewMode.SCROLL);
+			if (showAtTop) {
+				showAtTop = false;
+				BackgroundThread.instance().postGUI(() -> {
+					placeLayouts();
+				}, 500);
+			}
 		}
 		pageModeSet = true;
 	}
@@ -107,6 +139,7 @@ public class SelectionToolbarDlg {
 	private final static int SELECTION_CONTROL_STEP = 10;
 	private final static int SELECTION_SMALL_STEP = 1;
 	private final static int SELECTION_NEXT_SENTENCE_STEP = 999;
+
 	private class BoundControlListener implements OnSeekBarChangeListener {
 
 		public BoundControlListener(SeekBar sb, boolean start) {
@@ -151,10 +184,17 @@ public class SelectionToolbarDlg {
 		mWindow.dismiss();
 	}
 
-	LinearLayout llAddButtonsParent = null;
-	LinearLayout llAddButtons = null;
+	LinearLayout llTopLine;
+	LinearLayout llMiddleContents;
+	LinearLayout llBottomLine;
+	LinearLayout llSliderBottom;
+	LinearLayout llSliderTop;
+	LinearLayout llRecentDics;
+	LinearLayout llAddButtons;
+	LinearLayout llButtonsRow;
+	LinearLayout llButtonsRow2;
 
-	public boolean addButtonEnabled = false;
+	public boolean addButtonEnabled;
 	private Properties props;
 
 	public static void saveUserDic(boolean isCitation, String text, Selection selection, CoolReader mCoolReader, ReaderView mReaderView) {
@@ -246,7 +286,7 @@ public class SelectionToolbarDlg {
 	}
 
 	public void toggleAddButtons(boolean dontChange) {
-		if (llAddButtonsParent == null) return;
+		if (llButtonsRow2 == null) return;
 		if (llAddButtons == null) return;
 		if (!dontChange) {
 			addButtonEnabled = !addButtonEnabled;
@@ -258,8 +298,8 @@ public class SelectionToolbarDlg {
 			}
 		}
 		if (addButtonEnabled) {
-			llAddButtonsParent.removeAllViews();
-			llAddButtonsParent.addView(llAddButtons);
+			llButtonsRow2.removeAllViews();
+			llButtonsRow2.addView(llAddButtons);
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 			ColorDrawable c = new ColorDrawable(colorGrayC);
 			String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
@@ -304,7 +344,7 @@ public class SelectionToolbarDlg {
 			});
 			llAddButtons.findViewById(R.id.btn_dic_list).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_dic_list).setOnClickListener(v -> {
-				DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null);
+				DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null, false);
 				dlg.show();
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
@@ -384,74 +424,183 @@ public class SelectionToolbarDlg {
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
 		} else {
-			llAddButtonsParent.removeAllViews();
+			llButtonsRow2.removeAllViews();
 		}
 		mCoolReader.tintViewIcons(mPanel);
 	}
 
-	public SelectionToolbarDlg(CoolReader coolReader, ReaderView readerView, Selection sel )
-	{
-		this.selection = sel;
-		stSel = selection;
-		mCoolReader = coolReader;
-		props = new Properties(mCoolReader.settings());
-		mReaderView = readerView;
-		mAnchor = readerView.getSurface();
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(coolReader, isEInk);
+	private boolean isShowAtTop() {
+		mAnchor.getLocationOnScreen(location);
+		int selectionTop = 0;
+		int selectionBottom = 0;
+		if (mReaderView.lastSelection != null) {
+			selectionTop = mReaderView.lastSelection.startY;
+			selectionBottom = mReaderView.lastSelection.endY;
+		}
 
-		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar, null));
-		llAddButtons = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_add, null));
+		if (selectionBottom<selectionTop) {
+			int dummy = selectionBottom;
+			selectionBottom = selectionTop;
+			selectionTop = dummy;
+		}
+		popupY = location[1] + mAnchor.getHeight() - mPanel.getHeight();
 
-		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		
-		mWindow = new PopupWindow( mAnchor.getContext() );
-
-		mWindow.setTouchInterceptor((v, event) -> {
-			if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-				closeDialog(true);
+		if (!pageModeSet) // do not show toolbar at top due to switch to scroll mode - selection is moved upper
+			if (
+					(selectionTop > (mReaderView.getSurface().getHeight() / 2)) &&
+							(selectionBottom > (mReaderView.getSurface().getHeight() / 2))
+			)
 				return true;
-			}
-			return false;
-		});
-		//super(panel);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGray = themeColors.get(R.attr.colorThemeGray2);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
+		return false;
+	}
 
-		ColorDrawable c = new ColorDrawable(colorGrayC);
-		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
-		if (!sTranspButtons.equals("0")) c.setAlpha(130);
-			else c.setAlpha(255);
-		mPanel = panel;
-		llAddButtonsParent = panel.findViewById(R.id.ll_sel_add);
+	private void placeLayouts() {
+		if (showAtTop) {
+			llTopLine.removeAllViews();
+			llTopLine.addView(llSliderTop);
+			llTopLine.addView(llRecentDics);
+			llTopLine.addView(llButtonsRow);
+			llBottomLine.removeAllViews();
+			llBottomLine.addView(llSliderBottom);
 
-		String sBkg = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND, "0");
-		if (sBkg.equals("0")) panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		if (sBkg.equals("1")) panel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		if (sBkg.equals("2")) panel.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-//		if (isEInk)
-//			panel.setBackgroundColor(Color.argb(200, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
-//		else
-//			panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-
-		//mPanel.findViewById(R.id.selection_copy).setBackgroundColor(colorGrayC);
-		mPanel.findViewById(R.id.selection_copy).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.selection_copy).setOnClickListener(v -> {
-			mReaderView.copyToClipboard(selection.text);
-			closeDialog(true);
-		});
+		} else {
+			llTopLine.removeAllViews();
+			llTopLine.addView(llSliderTop);
+			llBottomLine.removeAllViews();
+			llBottomLine.addView(llRecentDics);
+			llBottomLine.addView(llButtonsRow);
+			llBottomLine.addView(llSliderBottom);
+		}
+		llSliderTop.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		llSliderBottom.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		llRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		llButtonsRow.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
 		String sExt = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
 		addButtonEnabled = StrUtils.getNonEmptyStr(sExt, true).equals("1");
-
 		if (addButtonEnabled) toggleAddButtons(true);
-		//recent dics
-		FlowLayout llRecentDics = mPanel.findViewById(R.id.recentDics);
-		//llRecentDics.setOrientation(LinearLayout.VERTICAL);
+		initRecentDics();
+		// set up buttons
+		btnSelectionBookmark = llButtonsRow.findViewById(R.id.selection_bookmark);
+		if (btnSelectionBookmark != null)
+			btnSelectionBookmark.setBackgroundDrawable(colorButtons);
+		btnSelectionCopy = llButtonsRow.findViewById(R.id.selection_copy);
+		if (btnSelectionCopy != null)
+			btnSelectionCopy.setBackgroundDrawable(colorButtons);
+		btnSelectionDict = llButtonsRow.findViewById(R.id.selection_dict);
+		if (btnSelectionDict != null)
+			btnSelectionDict.setBackgroundDrawable(colorButtons);
+		btnSelectionEmail = llButtonsRow.findViewById(R.id.selection_email);
+		if (btnSelectionEmail != null)
+			btnSelectionEmail.setBackgroundDrawable(colorButtons);
+		btnSelectionFind = llButtonsRow.findViewById(R.id.selection_find);
+		if (btnSelectionFind != null)
+			btnSelectionFind.setBackgroundDrawable(colorButtons);
+		btnSelectionCancel = llButtonsRow.findViewById(R.id.selection_cancel);
+		if (btnSelectionCancel != null)
+			btnSelectionCancel.setBackgroundDrawable(colorButtons);
+		btnSelectionMore = llButtonsRow.findViewById(R.id.selection_more);
+		if (btnSelectionMore != null)
+			btnSelectionMore.setBackgroundDrawable(null);
+		// set up events
+		setupEvents();
+	}
+
+	private void setupEvents() {
+		if (btnSelectionBookmark != null) {
+			btnSelectionBookmark.setOnClickListener(v -> {
+				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_COMMENT, "");
+				closeDialog(true);
+			});
+
+			btnSelectionBookmark.setOnLongClickListener(v -> {
+				BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
+				dlg.show();
+				closeDialog(true);
+				return true;
+			});
+		}
+		if (btnSelectionCopy != null)
+			btnSelectionCopy.setOnClickListener(v -> {
+				mReaderView.copyToClipboard(selection.text);
+				closeDialog(true);
+			});
+		if (btnSelectionDict != null) {
+			btnSelectionDict.setOnClickListener(v -> {
+				//PositionProperties currpos = mReaderView.getDoc().getPositionProps(null);
+				//Log.e("CURPOS", currpos.pageText);
+				if (mCoolReader.ismDictLongtapChange()) {
+					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null, false);
+					dlg.show();
+					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+				} else {
+					mCoolReader.findInDictionary( selection.text , null);
+					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+				}
+			});
+
+			btnSelectionDict.setOnLongClickListener(v -> {
+				if (!mCoolReader.ismDictLongtapChange()) {
+					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null, false);
+					dlg.show();
+					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+				} else {
+					mCoolReader.findInDictionary( selection.text , null);
+					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+				}
+				return true;
+			});
+
+		}
+		if (btnSelectionEmail != null)
+			btnSelectionEmail.setOnClickListener(v -> {
+				mReaderView.sendQuotationInEmail(selection);
+				closeDialog(true);
+			});
+		if (btnSelectionFind != null) {
+			btnSelectionFind.setOnClickListener(v -> {
+				mReaderView.showSearchDialog(selection.text.trim());
+				closeDialog(true);
+			});
+
+			btnSelectionFind.setOnLongClickListener(v -> {
+				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+				emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
+				mCoolReader.startActivity(emailIntent);
+				closeDialog(true);
+				return true;
+			});
+		}
+		if (btnSelectionCancel != null)
+			btnSelectionCancel.setOnClickListener(v -> closeDialog(true));
+		new BoundControlListener(llSliderTop.findViewById(R.id.selection_bound_control_t), true);
+		new BoundControlListener(llSliderBottom.findViewById(R.id.selection_bound_control_b), false);
+		llSliderTop.findViewById(R.id.btn_next_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, SELECTION_SMALL_STEP)));
+		llSliderTop.findViewById(R.id.btn_prev_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, -SELECTION_SMALL_STEP)));
+		llSliderTop.findViewById(R.id.btn_next_sent_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP)));
+		llSliderTop.findViewById(R.id.btn_prev_sent_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP)));
+
+		llSliderBottom.findViewById(R.id.btn_next_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, SELECTION_SMALL_STEP)));
+		llSliderBottom.findViewById(R.id.btn_prev_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, -SELECTION_SMALL_STEP)));
+		llSliderBottom.findViewById(R.id.btn_next_sent_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP)));
+		llSliderBottom.findViewById(R.id.btn_prev_sent_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP)));
+		if (btnSelectionMore != null)
+			btnSelectionMore.setOnClickListener(v -> toggleAddButtons(false));
+	}
+
+	private void initRecentDics() {
+		FlowLayout flRecentDics = llRecentDics.findViewById(R.id.fl_recent_dics);
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		int iCntRecent = 0;
-		if (llRecentDics!=null) {
+		if (flRecentDics!=null) {
 			for (final Dictionaries.DictInfo di : mCoolReader.mDictionaries.diRecent) {
 				if (!di.equals(mCoolReader.mDictionaries.getCurDictionary())) {
 					iCntRecent++;
@@ -459,7 +608,7 @@ public class SelectionToolbarDlg {
 			}
 		}
 		if (iCntRecent == 0) iCntRecent++;
-		if (llRecentDics!=null) {
+		if (flRecentDics!=null) {
 			List<Dictionaries.DictInfo> diAllDicts = new ArrayList<>();
 			for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.diRecent) {
 				diAllDicts.add(di);
@@ -471,63 +620,66 @@ public class SelectionToolbarDlg {
 			// add lang pos
 			String sFrom = mReaderView.mBookInfo.getFileInfo().lang_from;
 			String sTo = mReaderView.mBookInfo.getFileInfo().lang_to;
-			if ((!StrUtils.isEmptyStr(sFrom)) || (!StrUtils.isEmptyStr(sTo))) {
-				String sFromTo = StrUtils.getNonEmptyStr(sFrom, true) + " -> " +
+			String sFromTo = mCoolReader.getString(R.string.book_info_section_book_translation_langs);
+			if ((!StrUtils.isEmptyStr(sFrom)) || (!StrUtils.isEmptyStr(sTo)))
+				sFromTo = StrUtils.getNonEmptyStr(sFrom, true) + " -> " +
 						StrUtils.getNonEmptyStr(sTo, true);
-				Button dicButton = new Button(mCoolReader);
-				dicButton.setText(sFromTo);
-				dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
-				//dicButton.setHeight(dicButton.getHeight()-4);
-				dicButton.setTextColor(colorIcon);
-				if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
-				else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-				dicButton.setPadding(10, 10, 10, 10);
-				//dicButton.setBackground(null);
-				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-						ViewGroup.LayoutParams.WRAP_CONTENT,
-						ViewGroup.LayoutParams.WRAP_CONTENT);
-				llp.setMargins(8, 4, 4, 8);
-				dicButton.setLayoutParams(llp);
-				//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
-				dicButton.setMaxLines(1);
-				dicButton.setEllipsize(TextUtils.TruncateAt.END);
-				llRecentDics.addView(dicButton);
-				dicButton.setOnClickListener(v -> {
-					mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
-							mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
-							mReaderView.getBookInfo().getFileInfo(),
-							StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
-							StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
-							"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
-								dicButton.setText(s);
-							});
-				});
-				TextView tv = new TextView(mCoolReader);
-				tv.setText(" ");
-				tv.setPadding(10, 10, 10, 10);
-				tv.setLayoutParams(llp);
-				tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-				tv.setTextColor(colorIcon);
-				llRecentDics.addView(tv);
-			}
+			Button dicButton = new Button(mCoolReader);
+			dicButton.setText(sFromTo);
+			dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+			//dicButton.setHeight(dicButton.getHeight()-4);
+			dicButton.setTextColor(colorIcon);
+			if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+			else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+			dicButton.setPadding(10, 10, 10, 10);
+			//dicButton.setBackground(null);
+			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			llp.setMargins(8, 4, 4, 8);
+			dicButton.setLayoutParams(llp);
+			//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
+			dicButton.setMaxLines(1);
+			dicButton.setEllipsize(TextUtils.TruncateAt.END);
+			flRecentDics.addView(dicButton);
+			Button finalDicButton = dicButton;
+			dicButton.setOnClickListener(v -> {
+				mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+						mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
+						mReaderView.getBookInfo().getFileInfo(),
+						StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
+						StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
+						"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
+							finalDicButton.setText(s);
+						});
+			});
+			TextView tv = new TextView(mCoolReader);
+			tv.setText(" ");
+			tv.setPadding(10, 10, 10, 10);
+			tv.setLayoutParams(llp);
+			tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+			tv.setTextColor(colorIcon);
+			flRecentDics.addView(tv);
 			//\
 			for (final Dictionaries.DictInfo di: diAllDicts) {
 				if (!added.contains(di.id)) {
 					added.add(di.id);
-					Button dicButton = new Button(mCoolReader);
+					dicButton = new Button(mCoolReader);
 					String sAdd = di.getAddText(mCoolReader);
+					String sName = di.shortName;
+					if (StrUtils.isEmptyStr(sName)) sName = di.name;
 					if (StrUtils.isEmptyStr(sAdd))
-						dicButton.setText(di.name);
+						dicButton.setText(sName);
 					else
-						dicButton.setText(di.name + ": " + sAdd);
+						dicButton.setText(sName + ": " + sAdd);
 					dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					//dicButton.setHeight(dicButton.getHeight()-4);
 					dicButton.setTextColor(colorIcon);
 					if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
-						else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+					else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 					dicButton.setPadding(10, 10, 10, 10);
 					//dicButton.setBackground(null);
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+					llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.WRAP_CONTENT,
 							ViewGroup.LayoutParams.WRAP_CONTENT);
 					llp.setMargins(8, 4, 4, 8);
@@ -535,14 +687,14 @@ public class SelectionToolbarDlg {
 					//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 					dicButton.setMaxLines(1);
 					dicButton.setEllipsize(TextUtils.TruncateAt.END);
-					TextView tv = new TextView(mCoolReader);
+					tv = new TextView(mCoolReader);
 					tv.setText(" ");
 					tv.setPadding(10, 10, 10, 10);
 					tv.setLayoutParams(llp);
 					tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 					tv.setTextColor(colorIcon);
-					llRecentDics.addView(dicButton);
-					llRecentDics.addView(tv);
+					flRecentDics.addView(dicButton);
+					flRecentDics.addView(tv);
 					dicButton.setOnClickListener(v -> {
 						mCoolReader.mDictionaries.setAdHocDict(di);
 						String sSText = selection.text;
@@ -571,87 +723,80 @@ public class SelectionToolbarDlg {
 				}
 			}
 		}
+	}
 
-		mPanel.findViewById(R.id.selection_dict).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.selection_dict).setOnClickListener(v -> {
-			//PositionProperties currpos = mReaderView.getDoc().getPositionProps(null);
-			//Log.e("CURPOS", currpos.pageText);
-			if (mCoolReader.ismDictLongtapChange()) {
-				DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null);
-				dlg.show();
-				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
-			} else {
-				mCoolReader.findInDictionary( selection.text , null);
-				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+	public SelectionToolbarDlg(CoolReader coolReader, ReaderView readerView, Selection sel)
+	{
+		this.selection = sel;
+		stSel = selection;
+		mCoolReader = coolReader;
+		props = new Properties(mCoolReader.settings());
+		mReaderView = readerView;
+		mAnchor = readerView.getSurface();
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(coolReader, isEInk);
+
+		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar, null));
+		llAddButtons = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_add, null));
+		llSliderBottom = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_bottom, null));
+		llSliderTop = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_top, null));
+		llRecentDics = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_recent_dics, null));
+
+		llButtonsRow = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_buttons_row, null));
+		llButtonsRow2 = llButtonsRow.findViewById(R.id.ll_second_buttons_row);
+
+		llTopLine = panel.findViewById(R.id.top_line);
+		llTopLine.setOnClickListener(v -> {
+		});
+		llMiddleContents = panel.findViewById(R.id.middle_contents);
+		llMiddleContents.setOnClickListener(v -> {
+			closeDialog(true);
+		});
+		llBottomLine = panel.findViewById(R.id.bottom_line);
+		llBottomLine.setOnClickListener(v -> {
+		});
+
+		panel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		
+		mWindow = new PopupWindow(mAnchor.getContext());
+
+		mWindow.setTouchInterceptor((v, event) -> {
+			if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+				closeDialog(true);
+				return true;
 			}
+			return false;
 		});
 
-		mPanel.findViewById(R.id.selection_dict).setOnLongClickListener(v -> {
-			if (!mCoolReader.ismDictLongtapChange()) {
-				DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null);
-				dlg.show();
-				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
-			} else {
-				mCoolReader.findInDictionary( selection.text , null);
-				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
-			}
-			return true;
-		});
+		colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		colorGray = themeColors.get(R.attr.colorThemeGray2);
+		colorIcon = themeColors.get(R.attr.colorIcon);
 
-		mPanel.findViewById(R.id.selection_bookmark).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.selection_bookmark).setOnClickListener(v -> {
-			mReaderView.showNewBookmarkDialog(selection,Bookmark.TYPE_COMMENT, "");
-			closeDialog(true);
-		});
+		colorButtons = new ColorDrawable(colorGrayC);
+		sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
+		if (!sTranspButtons.equals("0")) colorButtons.setAlpha(130);
+			else colorButtons.setAlpha(255);
+		mPanel = panel;
 
-		mPanel.findViewById(R.id.selection_bookmark).setOnLongClickListener(v -> {
-			BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
-			dlg.show();
-			closeDialog(true);
-			return true;
-		});
+		panel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
-		mPanel.findViewById(R.id.selection_email).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.selection_email).setOnClickListener(v -> {
-			mReaderView.sendQuotationInEmail(selection);
-			closeDialog(true);
-		});
-		mPanel.findViewById(R.id.selection_find).setOnClickListener(v -> {
-			mReaderView.showSearchDialog(selection.text.trim());
-			closeDialog(true);
-		});
+		String sBkg = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND, "0");
 
-		mPanel.findViewById(R.id.selection_find).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.selection_find).setOnLongClickListener(v -> {
-			final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-			emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
-			mCoolReader.startActivity(emailIntent);
-			closeDialog(true);
-			return true;
-		});
-		mPanel.findViewById(R.id.selection_cancel).setBackgroundDrawable(c);
-		mPanel.findViewById(R.id.selection_cancel).setOnClickListener(v -> closeDialog(true));
-		new BoundControlListener(mPanel.findViewById(R.id.selection_left_bound_control), true);
-		new BoundControlListener(mPanel.findViewById(R.id.selection_right_bound_control), false);
-		mPanel.findViewById(R.id.selection_more).setBackgroundDrawable(null);
+		alphaVal = 0;
+		if (sBkg.equals("0")) alphaVal = 170;
+		if (sBkg.equals("2")) alphaVal = 255;
 
-		mPanel.findViewById(R.id.btn_next1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, SELECTION_SMALL_STEP)));
-		mPanel.findViewById(R.id.btn_next2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, SELECTION_SMALL_STEP)));
-		mPanel.findViewById(R.id.btn_prev1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, -SELECTION_SMALL_STEP)));
-		mPanel.findViewById(R.id.btn_prev2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, -SELECTION_SMALL_STEP)));
-		mPanel.findViewById(R.id.btn_next_sent1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP)));
-		mPanel.findViewById(R.id.btn_next_sent2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP)));
-		mPanel.findViewById(R.id.btn_prev_sent1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP)));
-		mPanel.findViewById(R.id.btn_prev_sent2).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP)));
-		mPanel.findViewById(R.id.selection_more).setOnClickListener(v -> toggleAddButtons(false));
+		// determine top or bottom aligned toolbar
+		showAtTop = isShowAtTop();
+		// place layouts
+		placeLayouts();
+		// finally show the window
+		mWindow.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+		mWindow.setHeight(WindowManager.LayoutParams.FILL_PARENT);
+		mWindow.setFocusable(true);
+		mWindow.setTouchable(true);
+		mWindow.setOutsideTouchable(true);
+		mWindow.setContentView(panel);
 
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
@@ -660,25 +805,8 @@ public class SelectionToolbarDlg {
 				case KeyEvent.KEYCODE_BACK:
 					closeDialog(true);
 					return true;
-//					case KeyEvent.KEYCODE_DPAD_LEFT:
-//					case KeyEvent.KEYCODE_DPAD_UP:
-//						//mReaderView.findNext(pattern, true, caseInsensitive);
-//						return true;
-//					case KeyEvent.KEYCODE_DPAD_RIGHT:
-//					case KeyEvent.KEYCODE_DPAD_DOWN:
-//					*	//mReaderView.findNext(pattern, false, caseInsensitive);
-//						return true;
 				}
-			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
-					switch ( keyCode ) {
-//						case KeyEvent.KEYCODE_BACK:
-//						case KeyEvent.KEYCODE_DPAD_LEFT:
-//						case KeyEvent.KEYCODE_DPAD_UP:
-//						case KeyEvent.KEYCODE_DPAD_RIGHT:
-//						case KeyEvent.KEYCODE_DPAD_DOWN:
-//							return true;
-					}
-				}
+			}
 			if ( keyCode == KeyEvent.KEYCODE_BACK) {
 				return true;
 			}
@@ -694,90 +822,20 @@ public class SelectionToolbarDlg {
 
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 
-		// plotn - I think this is not needed
-//		if (!DeviceInfo.EINK_SCREEN) {
-//			// transparent
-//			mWindow.setBackgroundDrawable(new BitmapDrawable());
-//		}
-//		else {
-//			// white background with rectangle
-//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-//				mWindow.setBackgroundDrawable(mCoolReader.getDrawable(R.drawable.btn_default_normal_hc_light));
-//			else
-//				mWindow.setBackgroundDrawable(mCoolReader.getResources().getDrawable(R.drawable.btn_default_normal_hc_light));
-//		}
-		//mWindow.setAnimationStyle(android.R.style.Animation_Toast);
-		mWindow.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-		mWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-//		setWidth(panel.getWidth());
-//		setHeight(panel.getHeight());
-		
-		mWindow.setFocusable(true);
-		mWindow.setTouchable(true);
-		mWindow.setOutsideTouchable(true);
-		mWindow.setContentView(panel);
-		
-		
-		int [] location = new int[2];
-		mAnchor.getLocationOnScreen(location);
-		//mWindow.update(location[0], location[1], mPanel.getWidth(), mPanel.getHeight() );
-		//mWindow.setWidth(mPanel.getWidth());
-		//mWindow.setHeight(mPanel.getHeight());
-		int selectionTop = 0;
-		int selectionBottom = 0;
-		if (mReaderView.lastSelection != null) {
-			selectionTop = mReaderView.lastSelection.startY;
-			selectionBottom = mReaderView.lastSelection.endY;
-		}
-		int panelHeight = mPanel.getHeight();
-		int surfaceHeight = mReaderView.getSurface().getHeight();
-
-		if (selectionBottom<selectionTop) {
-			int dummy = selectionBottom;
-			selectionBottom = selectionTop;
-			selectionTop = dummy;
-		}
-		int popupY = location[1] + mAnchor.getHeight() - mPanel.getHeight();
-
-		if (
-				(selectionTop > (mReaderView.getSurface().getHeight() / 2)) &&
-				(selectionBottom > (mReaderView.getSurface().getHeight() / 2))
-						/*&& -- for some reasons, mPanel Height = 0 here :(((
-						((selectionTop > (surfaceHeight - panelHeight)) ||
-						 (selectionBottom > (surfaceHeight - panelHeight)))*/
-		)
+		if (showAtTop)
 			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], 0);
 		else
 			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
-//		if ( mWindow.isShowing() )
-//			mWindow.update(mAnchor, 50, 50);
-		//dlg.mWindow.showAsDropDown(dlg.mAnchor);
-		int y = sel.startY;
-		if (y > sel.endY)
-			y = sel.endY;
-		int maxy = mReaderView.getSurface().getHeight() * 4 / 5;
-		//plotn - since we have a transparent toolbar - this is not nessesary
-//		if (y > maxy) {
-//			setReaderMode(); // selection is overlapped by toolbar: set scroll mode and move
-//			BackgroundThread.instance().postGUI(new Runnable() {
-//				@Override
-//				public void run() {
-//					//mReaderView.doEngineCommand(ReaderCommand.DCMD_REQUEST_RENDER, 0);
-//					BackgroundThread.instance().postBackground(new Runnable() {
-//						@Override
-//						public void run() {
-//							BackgroundThread.instance().postGUI(new Runnable() {
-//								@Override
-//								public void run() {
-//									mReaderView.doEngineCommand(ReaderCommand.DCMD_SCROLL_BY, mReaderView.getSurface().getHeight() / 3);
-//									mReaderView.redraw();
-//								}
-//							});
-//						}
-//					});
-//				}
-//			});
-//		}
+
+
+		mWindow.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+		mWindow.setHeight(WindowManager.LayoutParams.FILL_PARENT);
+
+		if (showAtTop)
+			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], 0);
+		else
+			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+
 		isVisibleNow = true;
 		mReaderView.toggleScreenUpdateModeMode();
 		mCoolReader.tintViewIcons(mPanel);

@@ -1,15 +1,21 @@
 package org.coolreader.crengine;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import org.coolreader.BuildConfig;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 public class HelpFileGenerator {
@@ -28,7 +34,9 @@ public class HelpFileGenerator {
 		this.settings = props;
 		this.version = context.getVersion();
 	}
-	
+
+	private static Field[] drawablesFields;
+
 	private static final String[] settingsUsedInManual = {
 		"app.tapzone.action.tap.long.1",
 		"app.tapzone.action.tap.long.2",
@@ -70,7 +78,7 @@ public class HelpFileGenerator {
 	}
 	
 	public static File getHelpFileName(File dir, String lang) {
-		File fn = new File(dir, "cr3_manual_" + lang + ".fb2");
+		File fn = new File(dir, "kr_manual_" + lang + "_" + BuildConfig.VERSION_NAME.replace(".", "_") + ".fb2");
 		return fn;
 	}
 	
@@ -264,9 +272,27 @@ public class HelpFileGenerator {
 	
 	private boolean appendImage(String name, StringBuilder mainBuf, StringBuilder binBuf) {
 		int res = findImageResIdByName(name);
-		if (res == 0)
-			return false;
-		byte[] data = engine.loadResourceBytes(res);
+		byte[] data = null;
+		if (res == 0) {
+			if (drawablesFields == null)
+				drawablesFields = R.drawable.class.getFields();
+			for (Field field : drawablesFields) {
+				try {
+					if (field.getName().equals(name)) {
+						Drawable d = context.getResources().getDrawable(field.getInt(null));
+						if (d != null) {
+							Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
+							ByteArrayOutputStream stream = new ByteArrayOutputStream();
+							bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+							data = stream.toByteArray();
+						}
+						break;
+					}
+				} catch (Exception e) {
+					// do nothing
+				}
+			}
+		} else data = engine.loadResourceBytes(res);
 		if (data == null || data.length == 0)
 			return false;
 		mainBuf.append("<image l:href=\"#" + name + ".png" + "\"/>");

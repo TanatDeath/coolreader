@@ -95,7 +95,8 @@ my %ic_actions_list=(
         'icons8_book_long_tap.svg' => 'icons8_book_long_tap.png',
         'icons8_book_tap.svg' => 'icons8_book_tap.png',
         'icons8_bookmark_simple_fast_add.svg' => 'icons8_bookmark_simple_fast_add.png',
-        'icons8_bookmark_simple_add.svg' => 'icons8_bookmark_simple_add.png'
+        'icons8_bookmark_simple_add.svg' => 'icons8_bookmark_simple_add.png',
+        'icons8_help.svg' => 'icons8_help.png'
 );
 
 my %ic_menu_list=(

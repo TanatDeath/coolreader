@@ -14,6 +14,7 @@ public class FlowLayout extends ViewGroup {
 	private int mHorizontalSpacing;
 	private int mVerticalSpacing;
 	private Paint mPaint;
+	public int calculatedHeight = 0;
 
 	public FlowLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -108,6 +109,7 @@ public class FlowLayout extends ViewGroup {
 
 		setMeasuredDimension(resolveSize(width, widthMeasureSpec),
 				resolveSize(height, heightMeasureSpec));
+		calculatedHeight = resolveSize(height, heightMeasureSpec);
 	}
 
 	@Override

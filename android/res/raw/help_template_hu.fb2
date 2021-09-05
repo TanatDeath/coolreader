@@ -1,424 +1,959 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Template for KnownReader/Android help file -->
-<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:xlink="http://www.w3.org/1999/xlink">
-	<description>
-		<title-info>
-			<book-title>KnownReader Felhasználói útmutató</book-title>
-		</title-info>
-	</description>
-	<body>
-		<section>
-            <title>
-                <p>Üdvözli a KnownReader <!--cr3:setting version--><br/><!--cr3:image cr3_logo--></p>
-            </title>
-            <p>Ez egy<b><i>elektronikus könyvek</i></b> olvasására szolgáló program, mely a következő formátumokat támogatja: EPUB, FB2, RTF, TXT, HTML, CHM, PDB, MOBI, TCR</p>
-            <p>Mentse el könyveit az SD kártyára és nyissa meg őket a beépített <a href="#filebrowser">Fájl böngészővel</a>, vagy töltsön le új könyveket az <a href="#opds">online katalógusokból</a> (OPDS) közvetlenül a KnownReader-be.</p>
-			<subtitle>Navigáció olvasás közben</subtitle>
-			<p>Különböző módokon lapozhat előre és hátra:</p>
-			<ul>
-				<li>Gesztusokkal: jobbról balra lapozó mozdulattal a következő oldalra, balról jobbra mozdulattal pedig azt előzőre</li>
-				<li>A képernyő érintésével: a jobb szél érintésével a következő, a bal szélével pedig az előző oldalra</li>
-				<!--cr3:if app.controls.volume.keys.enabled--><li>Lapozás a hangerőszabályzóval</li><!--cr3:endif-->
-				<li>Joystick-kel vagy a navigációs gombokkal</li>
-				<!--cr3:if app.trackball.disabled--><li>Lapozás a trackball-lal (ha van ilyen).</li><!--cr3:endif-->
-			</ul>
-			<p>A hivatkozásokra a link hosszú érintésével ugorhat, vissza pedig a Vissza gombbal, vagy pedig a képernyő bal felső sarkának megérintésével</p>
-            <p>Az útmutató fejezetei: <a href="#menu">Menü</a> 
-                | <a href="#settings">Beállítások</a> 
-                | <a href="#filebrowser">Fájl böngésző</a>
-                | <a href="#tapzones">Érintőzónák</a> 
-                | <a href="#bookmarks">Könyvjelzők</a>
-                | <a href="#dict">Szótárak</a>
-                | <a href="#tts">Felolvasás (TTS)</a>
-                | <a href="#autoscroll">Automatikus lapozás</a>
-                | <a href="#viewimages">Képek nagyítása</a>
-                | <a href="#advanced">Haladó beállítások</a>
-                | <a href="#links">Hasznos linkek</a>
-                </p>
-            <p>Egy adott oldalra a Menü / Ugrás / Oldalszámhoz# menüponttal ugorhat.</p>
-            <p>Válassza a Menü / Ugrás / Pozícióhoz% menüpontot egy bizonyos százaléknyi pozícióhoz ugráshoz.</p>
-            <p>A fejezetek közötti navigáláshoz használja a Tartalomjegyzéket: Menü / Ugrás / Tartalomjegyzékhez.</p>
-    		<section id="menu">
-    			<title>
-    				<p>Menü</p>
-    			</title>
-    			<p>Menü elérése:</p>
-    			<ul>
-    				<li>Billentyűvel: a menü gomb rövid megnyomásával</li>
-    				<li>Érintőképernyővel: a kijelző közepének megérintésével</li>
-    			</ul>
-    			<p>Menüpontok:</p>
-    			<ul>
-    				<li><!--cr3:image open_file--> Fájl megnyitása</li>
-    				<li><!--cr3:image goto--> Ugrás... almenü:</li>
-    				<ul>
-    					<li>Oldalszámhoz#...</li>
-    					<li>Pozícióhoz%...</li>
-    					<li>Automatikus lapozás ki/bekapcsolása (a sebesség a hangerőgombokkal, vagy pedig a képernyő bal/jobb alsó sarkainak érintésével)</li>
-    					<li>Tartalomjegyzékhez</li>
-    					<li>Hátra a navigációs előzményekben</li>
-    					<li>Előre a navigációs előzményekben</li>
-    					<li>Előző könyv megnyitása</li>
-    				</ul>
-    				<li><!--cr3:image bookmarks--> Könyvjelzők</li>
-    				<li><!--cr3:image select--> Kijelölés</li>
-    				<li><!--cr3:image options--> Beállítások</li>
-    				<li><!--cr3:image search--> Keresés</li>
-    				<li>"Tovább" almenü:</li>
-    				<ul>
-    					<li>Éjszakai / nappali mód</li>
-    					<li>Dokumentum saját stílus engedélyezése / tiltása</li>
-    					<li>Szöveg automatikus formázás (TXT fájlokhoz)</li>
-    					<li>Felolvasás (TTS / text-to-speech)</li>
-    					<li>Előző könyv megnyitása</li>
-    					<li>Automatikus lapozás be / ki</li>
-    					<li>Kilépés</li>
-    					<li>A KnownReader-ről</li>
-    					<li>Könyv infó (aktuális könyv))</li>
-    					<li>Felhasználói útmutató megjelenítése</li>
-    				</ul>
-    			</ul>
-    		</section>
-    		<section id="settings">
-    			<title>
-    				<p>Beállítások</p>
-    			</title>
-                <p>A <a href="#settings">Beállításokhoz</a> a következőképpen juthat el:</p>
-    			<ul>
-    				<li>Billentyűvel: a menü gomb hosszú megnyomásával</li>
-    				<li>Érintőképernyővel: a kijelző közepének hosszú érintésével</li>
-    				<li><a href="#menu">Főmenüből</a>: a Beállítások menüpont kiválasztásával</li>
-    			</ul>
-                <p>A Beállítások ablaka különböző füleket tartalmaz</p>
-                <ul>
-                    <li><a href="#settings-text">Szöveg beállítások</a></li>
-                    <li><a href="#settings-css">Stílus/CSS beállítások</a></li>
-                    <li><a href="#settings-page">Oldal testreszabása</a></li>
-                    <li><a href="#settings-controls">Vezérlők</a></li>
-                    <li><a href="#settings-application">Alkalmazás</a></li>
-                </ul>
-                <subtitle>Profilok megadása</subtitle>
-                <p>Különböző profilokat is megadhat a beállításoknak, melyek között gyorsan válthat is. Rendelje hozzá a "Profilváltás" műveletet valamelyik érintőzónához, vagy billentyűhöz</p>
-                <subtitle id="settings-text">Szöveg beállítások</subtitle>
-                <ul>
-                    <li>Betűtípus</li>
-                    <li>Betűméret</li>
-                    <li>Betű vastagítása - kövéríti a szöveget</li>
-                    <li>Betű élsimítás - a betűk éleit simítja el</li>
-                    <li>Sorköz - a sorok közötti függőleges távolság a szövegben</li>
-                    <li>Elválasztási szótár - válasszon nyelvet, algoritmikus módot, vagy kapcsolja ki, ha nem szükséges.</li>
-                    <li>Lebegő írásjelek - az írásjelek ne számítsanak bele a szöveg szélességébe.</li>
-                    <li>Betű alávágás - egymást követő karakterek pontosabb illesztése</li>
-                    <li>Kép átméretezés - a szövegbe beszúrt kép megjelenítését szabályozza</li>
-                    <li>Betű gamma érték - kismértékben megváltoztatja a karakterek vastagságát és élsimítását egyes betűtípusoknál.</li>
-                    <li>Minimális szóköz szélesség% - amikor minél több szöveget próbál beilleszteni a program egy sorba, ezzel az értékkel számol a program a szavak között minimális távolság meghatározásához. (Állítsa 100%-ra a funkció kikacsolásához).</li>
-                    <li>Betű olvashatóság javítása - a vektoros karakterek képként történő megjelenítését változtatja meg. Különböző betűtípusoknál más-más módszer ad jobb eredményt.</li>
-                    <li>Másodlagos betűtípus - ezt a betűtípust használja a program abban az estben, ha a megjelenítendő karakter nem szerepel a beállított betűtípusban.</li>
-                </ul>
-                <subtitle id="settings-css">Stílus/CSS beállítások</subtitle>
-                <ul>
-                    <li>Dokumentum saját stílusok engedélyezése - be- / kikapcsolja a dokumentumban megadott stílusokat</li>
-                    <li>Beágyazott betűtípusok - engedélyezi / tiltja a dokumentum beágyazott betűtípusait. Tiltás esetén a programban megadott betűtípust használja a KnownReader.</li>
-                    <li>Szöveg automatikus formázás - automatikus formázás, vagy megjelenítés változatlanul monospace betűtípussal előformázott szövegként</li>
-                    <li>Különböző, alapvető stíluselemek beállításai (alapértelmezett bekezdés, cím, alcím, előformázott szöveg, hivatkozás, idézet, stb.). Ezeknél az elemeknél különböző tulajdonságokat adhat meg, úgymint betűtípus, stílus, szín, sorköz, margók, stb. Tulajdonképpen a program egy alapértelmezett CSS stíluslapot generál a megadott adatok alapján.</li>
-                </ul>
-                <subtitle id="settings-page">Oldal testreszabása</subtitle>
-                <ul>
-                    <li>Teljesképernyős mód - a rendszer állapotsor elrejtése, egyes 3.0 és 4.0 Android verziókon nem működik.</li>
-                    <li>Olvasási mód - lapozás vagy görgetés. A lapozási mód az ajánlott.</li>
-                    <li>Tájolás - fekvő, álló, vagy szenzorvezérelt.</li>
-                    <li>Fekvő tájolás oldalai.</li>
-                    <li>Nappali/Éjszakai mód váltása (két tárolt profil közötti váltás, melyekben megadhatók pl. színek, hátterek, stb. Az éjszakai mód sötét háttéren világos betűket használ.</li>
-                    <li>Szövegszín.</li>
-                    <li>Háttérszín - egyszínű háttér beállítása.</li>
-                    <li>Háttér mintázat - kép, vagy mintázat beállítása háttérként.</li>
-                    <li>Állapotsor beállítások - a program állapotsorának beállítása.</li>
-                    <li>Lábjegyzetek a képernyő alján (jelenleg csak FB2 formátumnál működik).</li>
-                    <li>Lapozás animáció.</li>
-                    <li>Könyvjelzők kiemelése (semmi, egyszínű kiemelés, vagy aláhúzás).</li>
-                    <li>Kijelölés színe.</li>
-                    <li>Megjegyzés és korrektúra színei.</li>
-                    <li>Lap margók.</li>
-                </ul>
-                <subtitle id="settings-controls">Vezérlés beállításai</subtitle>
-                <ul>
-                    <li>Gyorsbillentyűk -- műveletek beállítása a billentyűk normál, hosszú és dupla lenyomásához.</li>
-                    <li><a href="#tapzones">Érintő-zóna</a> műveletek -- műveletek beállítása a képernyő 3x3 zónájához (normál, hosszú és dupla érintés).</li>
-                    <li><a href="#tapzones">Másodlagos érintési művelet</a> típusa (hosszú vagy dupla érintés)</li>
-                    <li>Szövegkijelölés dupla érintésre (vagy hosszú érintésre, az előző beállítástól függően).</li>
-                    <li>A hangerőszabályzó lapoz</li>
-                    <li>Érintésre a zónák felvillantása</li>
-                    <li>Trackball tiltása</li>
-                    <li>Fényerőszabályzás ujjhúzással (letiltva, a képernyő bal ill. jobb szélén).</li>
-                    <li>Lapozó mozdulat engedélyezése / tiltása.</li>
-                    <li>Kijelölési művelet (kijelölési eszköztár, másolás a vágólapra, keresés szótárban, könyvjelző hozzáadása, keresés a szövegben).</li>
-                    <li>Szövegrész kijelölési művelet (kijelölési eszköztár, másolás a vágólapra, keresés szótárban, könyvjelző hozzáadása, keresés a szövegben). Hasznos lehet például az egyszerű (szókijelölést) a szótárban kereséssel, a szövegrész kijelölést pedig a könyvjelző hozzáadásával párosítani.</li>
-                    <li>Szótárazás után maradjon a kijelölés (segít visszatalálni a legutóbbi olvasási pozícióhoz).</li>
-                </ul>
-                <subtitle id="settings-application">Az alkalmazás működésének beállításai</subtitle>
-                <ul>
-                    <li>Kezelőfelület nyelve - használhatja a rendszer nyelvét, vagy választhat a rendelkezésre álló más nyelvek közül is.</li>
-                    <li>Kezelőfelület téma (színséma a kezelőfelülethez).</li>
-                    <li>Háttérvilágítás kikapcsolása - a rendszer beállításának, vagy a megadott időnek a használata.</li>
-                    <li>Háttérvilágítás fényerő - beállítható itt, vagy ujjhúzással, ha az engedélyezve van a vezérlés beállításaiban.</li>
-                    <li>Billentyűzet háttérvilágítás kikapcsolása - hasznos lehet sötétben olvasáskor.</li>
-                    <li>Ikonok a beállítás menüben</li>
-                    <li>Szótár - válassza ki a külső szótár alkalmazást.</li>
-                    <li>Borítók megjelenítése a fájlböngészőben.</li>
-                    <li>A mappában lévő összes könyv tulajdonságainak elemzése.</li>
-                    <li>Könyv nélküli mappák elrejtése.</li>
-                </ul>
-    		</section>
-    		<section id="tapzones">
-    			<title>
-    				<p>Érintő-zónák</p>
-    			</title>
-    			<p>A képernyő egy 3x3-as rácsra van felosztva, ennek a rácsnak a cellái az érintő-zónák.</p>
-    			<p>Minden zónához két műveletet adhat meg. Egyet a rövid, egyet pedig a <!--cr3:if app.touch.secondary.action.type=0-->hosszú<!--cr3:else-->dupla<!--cr3:endif--> érintéshez.</p>
-    			<p>A másodlagos érintés típusa megadható a <a href="#settings-controls">beállításokban</a>.</p>
-    			<p>Az aktuális műveletek (<b>elsődleges</b> / másodlagos):</p>
-    			<table><col width="30%"/><col width="30%"/><col width="30%"/>
-    			<tr>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.1--></b><br/><!--cr3:setting app.tapzone.action.tap.long.1--></td>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.2--></b><br/><!--cr3:setting app.tapzone.action.tap.long.2--></td>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.3--></b><br/><!--cr3:setting app.tapzone.action.tap.long.3--></td>
-    			</tr>
-    			<tr>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.4--></b><br/><!--cr3:setting app.tapzone.action.tap.long.4--></td>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.5--></b><br/><!--cr3:setting app.tapzone.action.tap.long.5--></td>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.6--></b><br/><!--cr3:setting app.tapzone.action.tap.long.6--></td>
-    			</tr>
-    			<tr>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.7--></b><br/><!--cr3:setting app.tapzone.action.tap.long.7--></td>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.8--></b><br/><!--cr3:setting app.tapzone.action.tap.long.8--></td>
-    				<td><b><!--cr3:setting app.tapzone.action.tap.9--></b><br/><!--cr3:setting app.tapzone.action.tap.long.9--></td>
-    			</tr>
-    			</table>
-    		</section>
-            <section>
-                <title id="bookmarks">
-                    <p>Könyvjelzők</p>
-                </title>
-                <p>A KnownReader háromfajta könyvjelzőt támogat:</p>
-                <ul>
-                    <li><b>Pozíció</b> könyvjelzőt: ez az aktuális oldal legfelső sorához kötődik</li>
-                    <li><b>Megjegyzés</b> könyvjelzőt: a kijelölt szövegrészhez adhat hozzá megjegyzéseket</li>
-                    <li><b>Korrektúra</b> könyvjelzőt: a kijelölt szövegrészhez adhat hozzá javított szöveget (hasznos lehet mások dokumentumának ellenőrzésekor)</li>
-                </ul>
-                <!--cr3:if crengine.highlight.bookmarks-->
-                    <p>A megjegyzés és a korrektúra könyvjelzők alászínezettek a szövegben.</p>
-                <!--cr3:else-->
-                    <p>A megjegyzés és a korrektúra könyvjelzők színét a megfelelő menüpontban beállíthatja</p>
-                <!--cr3:endif-->
-                <p>Pozíció könyvjelző hozzáadásához válassza a Menü / Könyvjelzők menüpontot és érintse meg a képernyő felső szélén lévő + jelet. 
-                    Az aktuális oldal hozzáadódik a könyvjelzőkhöz és amikor újra megnyitja a könyvjelzőket, láthatja azt a listában. 
-                    Érintse meg a könyvelzőt az adott pozícióra ugráshoz.</p>
-                <p>Megjegyzés vagy korrektúra könyvjelző hozzáadásához szövegrészt kell kijelölnie.</p>
-                <!--cr3:if app.controls.doubletap.selection-->
-                    <!--cr3:if app.touch.secondary.action.type=0-->
-                        <p>Dupla érintés a szóra a kijelölés megkezdéséhez, majd mozgassa az ujját a szövegrész kijelöléséhez.</p>
-                    <!--cr3:else-->
-                        <p>Hosszú érintés a szóra a kijelölés megkezdéséhez, majd mozgassa az ujját a szövegrész kijelöléséhez.</p>
-                    <!--cr3:endif-->
-                    <p>Ezen felül használhatja a Menü / Kijelölés menüpontot a kijelölési mód megadásához, majd ujjmozdulattal jelölje ki a kívánt szövegrészt.</p>
-                <!--cr3:else-->
-                    <p>Használja a Menü / Kijelölési művelet menüpontot a kijelölési mód megadásához, majd ujjmozdulattal jelölje ki a kívánt szövegrészt.</p>
-                <!--cr3:endif-->
-                <!--cr3:if app.selection.action=0-->
-                    <!--cr3:if app.multyselection.action=0-->
-                        <p>A kijelölés végeztével megjelenik a Kijelölési eszköztár. Érintse meg a Könyvjelző gombot a könyvjelző hozzáadásához.</p>
-                    <!--cr3:else-->
-                        <p>A kijelölés végeztével megjelenik a Kijelölési eszköztár. Érintse meg a Könyvjelző gombot a könyvjelző hozzáadásához.</p>
-                        <p>Az aktuális beállítások alapján nem a Kijelölési eszköztár jelenik meg, hanem a "Szövegrész kijelölése" beállításnál hozzárendelt műveletet hajtja végre a program.</p>
-                    <!--cr3:endif-->
-                <!--cr3:endif-->
-                <!--cr3:if app.selection.action=3-->
-                    <!--cr3:if app.multyselection.action=3-->
-                        <p>A kijelölés végeztével azonnal megjelenik a Könyvjelző hozzáadása ablak. (Ezt megváltoztathatja a Beállítások / Kijelölési művelet menüpontban)</p>
-                    <!--cr3:else-->
-                        <p>A kijelölés végeztével azonnal megjelenik a Könyvjelző hozzáadása ablak.</p>
-                        <p>A jelenlegi beállítások alapján nem a Kijelölési eszköztár jelenik meg, hanem más művelet lesz végrehajtva (Ez beállítható a Beállítások / Szövegrész kijelölési művelet menüpontban).</p>
-                    <!--cr3:endif-->
-                <!--cr3:endif-->
-                <p>A Könyvjelző hozzáadása ablak lehetővé teszi, hogy kiválassza a könyvjelző kívánt típusát (megjegyzés vagy korrektúra). Érintse meg az ablak felső szélén lévő + jelet a hozzáadáshoz, vagy a Vissza gombot az elvetéshez.</p>
-                <!--cr3:if crengine.highlight.bookmarks-->
-                    <p>A megjegyzés és a korrektúra könyvjelzők alászínezettek a szövegben.</p>
-                <!--cr3:else-->
-                    <p>A megjegyzés és a korrektúra könyvjelzők színét a megfelelő menüpontban beállíthatja</p>
-                <!--cr3:endif-->
-                <p>A könyvjelzők listáját a Menü / Könyvjelzők menüvel jelenítheti meg. Ekkor az aktuális könyv könyvjelzői lesznek láthatóak.</p>
-                <p>A könyvjelző rövid érintésére azonnal az adott pozícióhoz ugorhat a könyvben.</p>
-                <p>Hosszú érintésre megjelenik egy almenü:</p>
-                <ul>
-                    <li>Ugrás könyvjelzőre - ugrás az adott pozícióhoz</li>
-                    <li>Hozzáadás - pozíció könyvjelző hozzáadása az aktuális oldalhoz</li>
-                    <li>Szerkesztés - megjegyzés vagy korrektúra könyvjelző szövegének szerkesztése</li>
-                    <li>Törlés</li>
-                    <li>Könyvjelzők exportálása - könyvjelzők mentése szövegfájlba</li>
-                    <li>Küldés - könyvjelzők küldése szövegként pl. e-mailben, stb.</li>
-                </ul>
-            </section>
-            <section>
-                <title id="dict">
-                    <p>Szótár támogatás</p>
-                </title>
-                <p>A KnownReader a kijelölt szavak jelentését le tudja kérdezni külső szótárprogramokból</p>
-                <p>Támogatott, a Google Play-ről is letölthető szótár alkalmazások:</p>
-                <ul>
-                    <li>Fora</li>
-                    <li>Color Dict</li>
-                    <li>Color Dict New / Golden Dict</li>
-                    <li>Aard</li>
-                    <li>Dictan</li>
-                </ul>
-                <p>A kívánt és telepített alkalmazást a Beállítások /Alkalmazás /Szótár menüpontban adhatja meg.</p>
-                <p>Jelölje ki a kívánt szót, majd érintse meg a szótár ikont a megjelenő eszköztáron.</p>
-                <p>A kényelmesebb használat érdekében ezt a műveletet is hozzárendelheti érintő-zónához vagy gyorsbillentyűhöz.</p>
-            </section>
-            <section>
-                <title id="tts">
-                    <p>Felolvasás (TTS)</p>
-                </title>
-                <p>A KnownReader támogatja a szöveg felolvasását a rendszer alapértelmezett Text To Speech (TTS) motorján keeresztül.</p>
-                <p>A felolvasáshoz válassza a Menü / Tovább / Felolvasás (TTS) menüpontot. A gyorsabb eléréshez ezt a műveletet is hozzárendelheti érintő-zónához, vagy gyorsbillentyűhöz.</p>
-                <p>Felovasás közben megjelenik egy vezérlőpult, ahol állítható a sebesség, hangmagasság, elindítás és leállítás.</p>
-            </section>
-            <section>
-                <title id="autoscroll">
-                    <p>Automatikus lapozás</p>
-                </title>
-                <p>Az automatikus lapozáshoz a Menü / Ugrás / Görgetés be-ki menüponttal juthat el (szintén hozzárendelhető érintő-zónához vagy gyorsbillentyűhöz).</p>
-                <p>A sebességet a hangerőszabályzóval vagy képernyő bal ill. jobb alsó sarkának érintésével szabályozhatja.</p>
-                <p>A görgetés leállításához érintse meg bárhol a képernyőt a bal ill. jobb alsó sarok kivételével.</p>
-            </section>
-            <section>
-                <title id="viewimages">
-                    <p>Képek nagyítása</p>
-                </title>
-                <p>Hosszú érintés a képen és az megnyílik a beépített képnézőben.</p>
-                <p>A nagyítást a + és - ikonokkal, vagy a hangerőszabályzóval változtathatja. Görgetéshez használja az érintő képernyőt.</p>
-                <p>A képnéző bezárásához érintse meg a képernyőt bárhol, a + és - ikonok kivételével, vagy nyomja meg a Vissza gombot.</p>
-            </section>
-        </section>
-        <section id="filebrowser">
-            <title>
-                <p>Fájlböngésző</p>
-            </title>
-            <p>Könyvet olvasáshoz a beépített fájlböngészővel választhat.</p>
-            <p>A böngészőt olvasás közben a Menü / Megnyitás menüponttal érheti el. (Vissza a Menü / Jelenlegi könyv menüponttal, vagy a könyv kiválasztásával ugorhat.)</p>
-            <p>A fájlböngésző segítségével elérheti a fájlrendszert, a legutóbb olvasott könyvek listáját, a szerző/sorozat/cím szerint rendezett listákat, valamint az online OPDS katalógusokat a letöltéshez. A fájlböngésző gyökérmappája mindezeket tartalmazza.</p>
-            <p>Bárhol a fájlböngészőn belül használhatja a Menü / Ugrás menüt a gyökérmappához ugráshoz, a <a href="#recent">Legutóbbi könyvek</a> listájához, vagy az Online katalógusokhoz.</p>
-            <p>Az olvasáshoz a könyveknek az eszköz belső tárolójában, vagy az SD kártyára mentve kell lenniük.</p>
-            <p>A KnownReader a metaadatokat (szerző, cím, sorozat, fájlnév, stb.), az utolsó olvasási pozíciót, valamint a könyvjelzőket belső adatbázisában tárolja.</p>
-            <p>Könyvek importálásához elegendő a fájlböngészővel a könyv mappájába lépni, vagy a Menü / Mappa frissítése menüpontot használni.</p>
-            <p>Fájlböngésző témakörök: 
-                <a href="#filesystem">Fájlrendszer</a> 
-                | <a href="#recent">Legutóbbi könyvek</a>
-                | <a href="#opds">Online katalógusok</a>
-                | <a href="#categories">Könyvek szerzők/sorozat/cím szerint rendezve</a>
-                | <a href="#fbmenu">Fájlböngésző menü</a> 
-                | <a href="#fbsettings">Fájlböngésző beállítások</a> 
-                </p>
-            <section id="filesystem">
-                <title>
-                    <p>Fájlrendszer</p>
-                </title>
-                <p>Általában a könyv megnyitása a könyvfájl közvetlen megnyitásával történik.</p>
-                <p>A gyökérmappában láthatóak a belső tároló és az SD kártya fájljai.</p>
-                <p>Navigáljon a mappák között érintéssel. A legfelső elemet megérintve ugorhat vissza egy szintet.</p>
-                <p>A könyvet hosszan megérintve egy újabb, hasznos menü jelenik meg, ahonnan megnyithatja a könyvet, törölheti azt, szerkesztheti bizonyos adatait.</p>
-                <p>A Menüben is többféle lehetőség közül választhat. Visszaugorhat a jelenlegi könyvre, kereshet az adatbázisban, frissítheti a mappában lévő könyvek metaadatait, a gyökérmappára/legutóbbi könyvekre/online katalógusokra ugorhat. Beállíthatja a fájlböngészőt, kiléphet a programból, illetve megtekintheti ezt a felhasználói útmutatót.</p>
-                <p>A megjelenítésnek két módja van: normál (könyvek metaadatai, borító, stb.) és egyszerű (csak fájlnevek).</p>
-                <p>A borítók megjelenítését a Menü / Beállítások / Alkalmazás / Borítók a böngészőben menüpontban szabályozhatja.</p>
-                <p>EPUB és MOBI könyvek esetén a borítók azonnal megjelennek a mappába lépés után. FB2 könyvek borítói csak a könyv egyszeri megnyitása után jelennek meg.</p>
-                <p>A Menü / Keresés menüben metaadatok alapján (szerző/cím/sorozat/fájlnév) kereshet a könyvek és katalógusok között.</p>
-            </section>
-            <section id="recent">
-                <title>
-                    <p>Legutóbbi könyvek</p>
-                </title>
-                <p>A KnownReader tárolja a legutóbb megnyitott könyvek listáját.</p>
-                <p>Ezt a listát a fájlböngésző gyökérmappájából is elérheti, ahol válassza a "Legutóbbi könyvek" elemet, vagy bárhonnan a <a href="#fbmenu">Menü</a> / Ugrás / Legutóbbi könyvek menüből.</p>
-                <p>A könyvet megérintve az megnyílik és az utolsó olvasási pozícióra ugrik.</p>
-                <p>A könyvet hosszan megérintve egy újabb, hasznos menü jelenik meg, ahonnan megnyithatja a könyvet, törölheti azt, szerkesztheti bizonyos adatait.</p>
-            </section>
-            <section id="opds">
-                <title>
-                    <p>OPDS katalógusok</p>
-                </title>
-                <p>A KnownReader lehetővé tesz az online OPDS katalógusok használatát, letöltést ezekből a katalógusokból.</p>
-                <p>Ehhez válassza a fájlböngésző gyökérmappájában az "Online katalógusok" elemet, vagy használja a <a href="#fbmenu">Menü</a> / Ugrás / Online katalógusok menüpontot.</p>
-                <p>Ekkor megjelenik az elérhető katalógusok listája.</p>
-                <p>Egy katalógus-elemet hosszan megérintve hozzáadhat, törölhet és szerkeszthet egy-egy elemet.</p>
-                <p>Válasszon ki egy katalógust, majd keressen benne egy könyvet. A könyvre kattintva elindul a könyv letöltése. Letöltés után a könyv megnyílik.</p>
-                <p>A letöltött könyvek az SD kártya, vagy a belső tároló "Books" mappájába kerülnek a szerző szerinti almappába.</p>
-                <p>FIGYELEM: a biztonságos (SSL) kapcsolatok jelenleg nem támogatottak.</p>
-            </section>
-            <section id="categories">
-                <title>
-                    <p>Könyvek szerzők/sorozat/cím szerint rendezve</p>
-                </title>
-                <p>A KnownReader lehetővé tesz az adatbázisban szereplő könyvek rendezett elérését szerző, cím és sorozat szerint a fájlböngésző gyökérmappájából.</p>
-                <p>A megfelelő elemre kattintva (pl. "Könyvek szerző szerint")láthatja az adatbázis rendezett listáját.</p>
-                <p>A listán belül a darabszámától függően pl. a szerzők első betű(i), teljes neve alapján jelennek meg a könyvek, esetleg maga a könyv.</p>
-                <p>A KnownReader automatikusan kezeli ezeket az almappákat (például 10 szerző esetén mindegyik közvetlenül megjelenik a listában, de 100 szerző már kezdőbetűk szerint csoportosítva lesz).</p>
-                <p>Csak az elemzett (importált) )mappák kerülnek az adatbázisba.</p>
-                <p>Könyvek importálásához elegendő a fájlböngészővel a könyv mappájába lépni, vagy a Menü / Mappa frissítése menüpontot használni.</p>
-            </section>
-            <section id="fbmenu">
-                <title>
-                    <p>Fájlböngésző menü</p>
-                </title>
-                <p>Menüpontok:</p>
-                <ul>
-                    <li>Jelenlegi könyv -- vissza az olvasáshoz</li>
-                    <li>Könyv keresése -- könyv keresése adatok alapján az adatbázisban</li>
-                    <li>Mappa frissítése -- az aktuális és gyermek mappák elemzése</li>
-                    <li>Ugrás -- ugrás a gyökérmappához, a Legutóbbi könyvek listájához, vagy az Online katalógusokhoz.</li>
-                    <li><a href="#fbsettings">Beállítások</a> -- fájlböngésző beállításai.</li>
-                    <li>Tovább: kilépés, felhasználói útmutató megjelenítése</li>
-                </ul>
-            </section>
-            <section id="fbsettings">
-                <title>
-                    <p>Fájlböngésző beállítások</p>
-                </title>
-                <p>Válassza a Menü / Beállítások menüpontot a rendezés, böngészőmód, stb. beállításához. Új betűtípusok érzékeléséhez a program újraindítása szükséges.</p>
-                <p>Egyszerű módban csak a könyvek fájlnevei jelennek meg. Normál módban pedig a metaadatok és a borító is.</p>
-                <p>A böngészőre vonatkozóan találhat beállítási lehetőségeket olvasási módban a Menü / Beállítások /Alkalmazás fülön:</p>
-                <ul>
-                    <li>Borítók a böngészőben</li>
-                    <li>A mappában lévő összes könyv tulajdonságainak elemzése</li>
-                    <li>Könyv nélküli mappák elrejtése</li>
-                </ul>
-            </section>
-        </section>
-        <section id="advanced">
-            <title>
-                <p>Haladó beállítások</p>
-            </title>
-            <subtitle>További betűtípusok</subtitle>
-            <p>Saját betűtípusokat az SD kártya "fonts" mappájába másolt .ttf fájlokkal adhat a programhoz.</p>
-            <subtitle>Külső stílusok, CSS</subtitle>
-            <p>A stílusok finomhangolásához az SD kártya ".cr3" mappájába másolt, formátumnak megfelelő CSS fájlok (fb2.css, epub.css, htm.css, rtf.css, txt.css, chm.css) használhatóak, melyek felülbírálják a csomagban lévő stílusokat. Kiindulásképpen a KnownReader (crengine) SourceForge projekt GIT tárolójában találhatók ilyen fájlok.</p> 
-            <subtitle>További háttérképek</subtitle>
-            <p>Saját képek (.jpg, .png) mozaikszerű háttérként való használata is lehetséges a képfájlok ".cr3/textures/" mappába másolásával az SD kártyára.</p>
-            <p>A ".cr3" (ponttal kezdve) mappa helyett használható a sima "cr3" mappanév is. Külső SD kártya helyett használható a belső tároló, illetve a belső SD tároló is (ha van ilyen). A "."-tal kezdődő mappák esetenként rejtettek a készülék böngészője számára.</p> 
-            <subtitle>Beállítások alaphelyzetbe állítása</subtitle>
-            <p>A beállításokat a ".cr3" mappában található .ini fájlok tartalmazzák. Az alaphelyzetbe állításhoz töröljön minden .ini kiterjesztésű fájlt.</p>
-            <subtitle>Ideiglenes tároló és ideiglenes fájlok törlése</subtitle>
-            <p>Az alkalmazás összeomlásának egyik lehetséges oka a könyvhöz tartozó ideiglenes fájl sérülése. Ezek az ideiglenes fájlok a ".cr3/cache" mappában találhatóak. A mappa törlésével ez a hiba elhárítható.</p>
-        </section>
-        <section id="links">
-            <title>
-                <p>Hasznos linkek</p>
-            </title>
-            <p>(külső internetböngészőben nyílnak meg)</p>
-            <p><a href="http://sourceforge.net/projects/crengine/">KnownReader projekt a  SourceForge-on</a></p>
-            <p><a href="http://sourceforge.net/apps/mediawiki/crengine/index.php?title=Main_Page">Projekt Wiki</a> a SourceForge-on</p>
-            <p><a href="https://sourceforge.net/project/project_donations.php?group_id=191284">A projekt támogatási oldala</a> a SourceForge-on</p>
-            <p>A projektet legegyszerűbben úgy támogathatja, hogy az alkalmazáson belülről (Menü / Tovább / A KnownReader-ről / harmadik fül), vagy közvetlenül a Google Play-ről vásárol VIP, platina, arany, ezüst, bronz, illetve vas támogatási csomagokat.</p>
-            <p>Hibajelentéseit, összeomlás esetén lehetőleg az Android System Info app által gyűjtött hibajelentéssel, az eszköz típusával és az Android verzióval kiegészítve küldje a  buggins@fromru.com e-mail címre. Ha egy könyvet nem sikerül megnyitni, míg más könyveket igen, akkor lehetőség szerint csatolja a meg nem nyitható könyvet is a hatékonyabb hibafelderítés érdekében.</p>
-        </section>
-	</body>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:l="http://www.w3.org/1999/xlink">
+ <description>
+  <title-info>
+   <genre>ref_ref</genre>
+   <author>
+    <first-name>Вадим</first-name>
+    <last-name>Лопатин</last-name>
+   </author>
+   <book-title>Руководство пользователя KnownReader</book-title>
+   <annotation>
+    <subtitle>Добро пожаловать в KnownReader <!--cr3:setting version--></subtitle>
+    <p>KnownReader – больше, чем просто читалка. Это приложение для чтения электронных книг, которое выросло из проекта CoolReader.</p>
+    <p>Мы вложили в него душу и добавили то, что было важно для нас и для вас: изменили навигацию, поменяли оформление, расширили возможности словарей, облачных функций.</p>
+    <p>Этим список не ограничивается. Мы благодарны автору оригинального CoolReader и всем контрибьюторам в его кодовую базу, теперь мы начинаем собственное путешествие.</p>
+    <p>Если у вас возникнут какие-либо вопросы по работе приложения, вы всегда можете обратиться на <a l:href="mailo:support@knownreader.com">support@knownreader.com</a>.</p>
+   </annotation>
+   <date>2021</date>
+   <lang>ru</lang>
+  </title-info>
+  <document-info>
+   <author>
+    <nickname>Buggins</nickname>
+    <email>buggins@fromru.com</email>
+   </author>
+   <program-used>FictionBook Editor Release 2.6.7</program-used>
+   <date value="2021-08-26">26 August 2021</date>
+   <id>F12CF8EA-A0C3-4859-8941-4DFD6FD29045</id>
+   <version>1.0</version>
+  </document-info>
+ </description>
+ <body>
+  <title>
+   <p>Руководство пользователя KnownReader</p><p><!--cr3:image known_reader_flogo--></p>
+  </title>
+  <section>
+   <title>
+    <p>Основные возможности</p><p><!--cr3:image icons8_manual_2--></p>
+   </title>
+   <p>KnownReader предназначен для чтения электронных версий книг в большом количестве форматов: EPUB, FB2, RTF, TXT, HTML, CHM, PDB, MOBI, TCR.</p>
+   <p>Для чтения нужно сохранить книгу во внутреннюю память или на SD-карту вашего устройства, после чего ее можно открывать с помощью <a l:href="#filebrowser">браузера файлов</a>, входящего в состав приложения.</p>
+   <p>Также можно скачивать книги из <a l:href="#opds">OPDS</a> прямо в KnownReader.</p>
+   <empty-line/>
+   <p>В программе реализовано: содержание, закладки, поиск, переключение между последними открытыми книгами, работа со словарем и цитатами, переход на произвольные страницы, просмотр информации о текущем документе, настраиваемые стили отображения текста, возможность работы с онлайн-ресурсами.</p>
+   <p>Программа поддерживает управление подсветкой, а также корректно работает с позволяющими усыплять устройство защитными обложками.</p>
+   <empty-line/>
+   <p><strong>Предупреждение:</strong></p>
+   <p>Описанное в данном руководстве состояние настроек KnownReader может отличаться от текущих предпочтений пользователя.</p>
+   <empty-line/>
+   <p>Ссылки на разделы данного руководства:</p>
+   <cite>
+    <p><a l:href="#navigate">Навигация по книге</a></p>
+    <p><a l:href="#reading">Чтение книги</a></p>
+    <p><a l:href="#menu">Меню чтения</a></p>
+    <p><a l:href="#filebrowser">Браузер файлов</a></p>
+    <p><a l:href="#bookmarks">Работа с закладками</a></p>
+    <p><a l:href="#dict">Поддержка словарей</a></p>
+    <p><a l:href="#tts">Чтение вслух</a></p>
+    <p><a l:href="#autoscroll">Автолистание</a></p>
+    <p><a l:href="#viewimages">Просмотр иллюстраций</a></p>
+    <p><a l:href="#settings">Настройки</a></p>
+    <p><a l:href="#advanced">Дополнительные настройки</a></p>
+    <p><a l:href="#links">Полезные ссылки</a></p>
+   </cite>
+  </section>
+
+  <section id="navigate">
+   <title>
+    <p>Навигация по книге</p><p><!--cr3:image icons8_position--></p>
+   </title>
+   <p>Основным органом управления приложением является сенсорный экран, реагирующий на касания пальцев (чисто кнопочные устройства не поддерживаются).</p>
+   <empty-line/>
+   <p>Нажатие пальцем на экран называется «<strong>тап</strong>», «<strong>тапнуть</strong>».</p>
+   <p>Поддерживается три типа тапов:</p>
+   <cite>
+    <p>• <strong><emphasis>короткий</emphasis></strong> – быстро коснуться экрана;</p>
+    <p>• <strong><emphasis>двойной</emphasis></strong> – дважды коснуться экрана;</p>
+    <p>• <strong><emphasis>длинный</emphasis></strong> – коснуться и удерживать &gt;1 сек.</p>
+   </cite>
+   <p>Упоминание о тапе без уточнения его типа всегда подразумевает короткий; необходимость длинного или двойного тапа указывается в явной форме.</p>
+   <p>Тапами по правой и левой сторонам экрана можно листать страницы вперед / назад.</p>
+   <empty-line/>
+   <p>Для обеспечения основных возможностей чтения площадь экрана в этом режиме разделена на 9 активных областей, называемых «<strong>тап-зонами</strong>».</p>
+   <p>Каждой из тап-зон можно назначить по два действия: на короткий и длинный тап.</p>
+   <p>Служебные окна, меню и диалоги не имеют настраиваемых тап-зон. Их активные графические элементы выполняют строго предопределенные функции, представляя собой разнообразные кнопки, строки меню / списков, поля ввода и т.п.</p>
+   <empty-line/>
+   <p>Возможно управление посредством рисования пальцем на экране простых фигур, называемых «<strong>жест</strong>» или «<strong>свайп</strong>».</p>
+   <p>Поддерживается два типа жестов:</p>
+   <cite>
+    <p>• <strong><emphasis>линия</emphasis></strong> – провести по экрану одним пальцем;</p>
+    <p>• <strong><emphasis>щипок</emphasis></strong> – свести / развести два пальца.</p>
+   </cite>
+   <p>Неизменяемым вертикальным жестом посредине экрана вызывается «<a l:href="#menu">Меню чтения</a>».</p>
+   <p>Вертикальным жестом по краям экрана можно регулировать яркость и теплоту встроенной подсветки.</p>
+   <p>Горизонтальным жестом можно перелистывать страницы читаемой книги.</p>
+   <p>Щипком из соседних тап-зон можно изменять поля страницы.</p>
+   <p>Щипком из диагональных тап-зон можно изменять размер шрифта.</p>
+   <empty-line/>
+   <p>Также можно использовать для листания кнопки навигации, джойстик<!--cr3:if app.controls.volume.keys.enabled-->, громкость<!--cr3:endif--><!--cr3:if app.trackball.disabled--><!--cr3:else-->, трекбол<!--cr3:endif--> или иные имеющиеся на вашем устройстве органы управления.</p>
+  </section>
+
+  <section id="reading">
+   <title>
+    <p>Чтение книги</p><p><!--cr3:image icons8_reading--></p>
+   </title>
+   <p>В верхней части экрана расположен колонтитул. Настройки программы позволяют сформировать его по своему вкусу, переместить вниз или полностью отключить.</p>
+   <p>В колонтитуле может отображаться следующая информация (слева направо):</p>
+   <cite>
+    <p>• автор / название книги (циклически);</p>
+    <p>• текущее время / осталось;</p>
+    <p>• страница / до конца главы / всего;</p>
+    <p>• сколько прочитано (в процентах);</p>
+    <p>• уровень заряда батареи.</p>
+   </cite>
+   <p>Ниже данных сведений находится линия прочитанного, на которой вертикальными штрихами отмечены главы книги.</p>
+   <empty-line/>
+   <p>Под колонтитулом размещается собственно текст книги, в котором могут присутствовать ссылки и сноски (т.е. ссылки на примечания, оптимизированные для вывода на одной странице с основным текстом).</p>
+   <empty-line/>
+   <p>Режим отображения имеющихся на странице сносок задается в настройках программы:</p>
+   <cite>
+    <p>• в виде ссылок на расположенные в конце книги примечания.</p>
+    <p>• полностью в нижней части экрана (не поместившийся на странице текст сноски переносится на следующую).</p>
+   </cite>
+   <p>Длинным тапом по имеющимся в тексте ссылкам можно перейти к месту их расположения в книге.</p>
+   <p>Вернуться к месту чтения можно через «Меню / Назад», длинным тапом по левому верхнему углу экрана или кнопкой «Назад».</p>
+  </section>
+
+  <section id="menu">
+   <title>
+    <p>Меню чтения</p><p><!--cr3:image icons8_calibre--></p>
+   </title>
+   <p>Во время чтения данное меню предоставляет быстрый доступ к основным возможностям программы. При этом его состав может изменяться пользователем в довольно широких пределах – обязательными являются только команды «Настройки», «В корень» и «Выход».</p>
+   <empty-line/>
+   <p>Для доступа к меню в режиме чтения книги используйте один из методов:</p>
+   <cite>
+    <p>• вертикальный жест посредине экрана;</p>
+    <p>• тап по центру экрана.</p>
+   </cite>
+   <subtitle>Пункты меню чтения (по умолчанию)</subtitle>
+   <p><strong>Открыть книгу</strong> – выбрать книгу через браузер файлов.</p>
+   <p><strong>Последние книги</strong> – список читаемых недавно книг.</p>
+   <p><strong>Предыдущая книга</strong> – быстрое переключение между двумя книгами.</p>
+   <p><strong>Содержание</strong> – открыть нужную главу из оглавления книги.</p>
+   <p><strong>Закладки</strong> – список всех закладок читаемой книги.</p>
+   <p><strong>Назад</strong> – перейти назад по истории переходов.</p>
+   <p><strong>Вперед</strong> – вернуться вперед по истории переходов.</p>
+   <p><strong>Перейти на страницу</strong> – перейти на страницу по ее номеру.</p>
+   <p><strong>Перейти на %</strong> – указать приблизительное место для перехода.</p>
+   <p><strong>Режим выделения</strong> – для перевода, копирования, отправки, и т.п.</p>
+   <p><strong>Найти</strong> – поиск нужного текста в читаемой книге.</p>
+   <p><strong>День/ночь</strong> – темный текст на светлом фоне / светлый текст на темном фоне.</p>
+   <p><strong>Читать вслух</strong> – чтение вслух при помощи системного голосового движка.</p>
+   <p><strong>Автолистание</strong> – автоматическое листание страниц с заданным интервалом.</p>
+   <p><strong>Меню шрифтов</strong> – быстрая смена гарнитуры и размера шрифта.</p>
+   <p><strong>В корень</strong> – корневое меню приложения.</p>
+   <p><strong>Настройки</strong> – настройка работы приложения.</p>
+   <p><strong>О книге</strong> – информация о читаемой книге.</p>
+   <p><strong>О программе</strong> – информация о приложении.</p>
+   <p><strong>Свернуть</strong> – перевести приложение в режим ожидания.</p>
+   <p><strong>Выход</strong> – закрыть приложение.</p>
+  </section>
+
+  <section id="filebrowser">
+   <title>
+    <p>Браузер файлов</p><p><!--cr3:image icons8_folder--></p>
+   </title>
+   <p>Для выбора книги для чтения удобно пользоваться встроенным браузером файлов.</p>
+   <p>Вы можете перейти в браузер файлов из режима чтения с помощью «Меню / Открыть книгу». (Для возврата обратно в режим чтения можно будет воспользоваться «Меню / Текущая книга» или просто открыть другую книгу).</p>
+   <p>Браузер файлов позволяет просматривать файлы и папки файловой системы, открывать книги из списка последних книг, выбирать книги из встроенной базы данных по автору / названию / серии, загружать книги из сетевых каталогов (OPDS). «Корневая папка» браузера файлов содержит ссылки на вышеописанные разделы.</p>
+   <p>Из любого места в браузере файлов с помощью «Меню» можно быстро перейти в корневую папку, список <a l:href="#recent">последних открытых книг</a>, сетевые каталоги.</p>
+   <p>Перед чтением книги в KnownReader ее нужно поместить в какую-нибудь папку SD-карты или внутренней памяти.</p>
+   <p>KnownReader сохраняет метаданные книги (автора, название, серию, и т.п.), последнюю позицию, закладки и некоторые настройки в собственной базе данных. Поиск по метаданным возможен только после занесения сведений о книге в базу данных.</p>
+   <p>Для импорта сведений о книгах в папке в базу данных нужно или зайти в эту папку вручную, или выбрать «Меню / Сканировать папку» – для чтения сведений о книгах в текущей папке и всех вложенных папках.</p>
+   <p>Ссылки на подробную информацию по разделам браузера файлов:</p>
+   <cite>
+    <p>• <a l:href="#filesystem">Файловоая система</a></p>
+    <p>• <a l:href="#recent">Последние книги</a></p>
+    <p>• <a l:href="#opds">Сетевые каталоги книг</a></p>
+    <p>• <a l:href="#categories">Книги по авторам / сериям / названиям</a></p>
+    <p>• <a l:href="#fbmenu">Меню браузера файлов</a></p>
+    <p>• <a l:href="#fbsettings">Настройки браузера файлов</a></p>
+   </cite>
+
+   <subtitle id="filesystem"><!--cr3:image icons8_file--> Просмотр файловой системы</subtitle>
+   <p>Обычный способ открытия книг – выбор файлов в дереве файловой системы внутренней памяти или SD-карты.</p>
+   <p>В корневой папке браузера файлов доступны пункты для просмотра файловой системы внутренней памяти и/или SD-карты.</p>
+   <p>При просмотре файловой системы можно увидеть список вложенных подпапок для текущей открытой папки и список книг в ней. Переход по папкам выполняется тапом по соответствующему нужной папке элементу списка. Вернуться на уровень выше позволяет первый пункт списка папок/книг. Тап по книге по умолчанию открывает ее.</p>
+   <p>Длинным тапом по книге можно вызвать ее контекстное меню: с помощью него книгу можно открыть или удалить, изменить порядок сортировки книг, а также быстро перейти в корневую папку, список последних книг или сетевые каталоги.</p>
+   <p>С помощью кнопки «Меню» доступны следующие действия: перейти обратно к чтению текущей открытой книги, найти книгу в базе данных, сканировать свойства книг во вложенных папках, изменить настройки сортировки и режима показа книг в списке (обычный: с автором, названием, и т.п. или упрощенный: только имена файлов), выйти из приложения.</p>
+   <p>Можно использовать два режима просмотра: обычный (с показом свойств книги: автора, названия, серии, обложки) и простой вид (показывать только имена файлов).</p>
+   <p>Обложки показываются только в обычном режиме. Показ обложек можно отключить в настройках, доступных из режима чтения, «Настройки / Приложение».</p>
+   <p>Только для книг в форматах EPUB и MOBY обложки показываются сразу при входе в папку. Для FB2 обложка будет показана только после первого открытия книги.</p>
+   <p>«Меню / Поиск» позволяет найти книгу в базе данных по ее свойствам (метаданным: имени файла, автору, названию, серии). Также список книг из базы данных, сгруппированный по авторам, названиям или сериям доступен из корневой папки.</p>
+
+   <subtitle id="recent"><!--cr3:image icons8_folder_star--> Список последних книг</subtitle>
+   <p>KnownReader хранит список недавно открывавшихся книг.</p>
+   <p>Чтобы посмотреть список последних книг, выберите пункт «Последние книги» в корневой папке браузера файлов или используйте «<a l:href="#fbmenu">Меню</a> / Последние книги» из любой папки браузера файлов.</p>
+   <p>Тап по книге из списка откроет ее. Книга откроется на том месте, в котором вы отложили ее чтение.</p>
+   <p>Длинным тапом можно вызвать контекстное меню со следующими пунктами: перейти к папке с этой книгой в файловой системе, удалить книгу из списка последних, полностью удалить книгу, открыть книгу.</p>
+
+   <subtitle id="opds"><!--cr3:image icons8_opds--> Сетевые каталоги (OPDS)</subtitle>
+   <p>KnownReader позволяет просматривать сетевые каталоги книг стандарта OPDS и загружать из них книги.</p>
+   <p>Для перехода в список сетевых каталогов нажмите строку «Сетевые каталоги» в корневой папке или используйте «<a l:href="#fbmenu">Меню</a> / Онлайн-каталоги» из любой папки браузера файлов.</p>
+   <p>Вы увидите список сетевых каталогов.</p>
+   <p>Вы можете добавлять, удалять и редактировать элементы списка – с помощью контекстного меню по длинному тапу на элементе списка.</p>
+   <p>Выберите каталог, затем пройдите по иерархии папок в каталоге (обычно это классификация по авторам, названию, времени добавления, популярности), и выберите нужную вам книгу. По тапу на книге начнется ее загрузка. Когда книга загрузится, она будет сразу открыта для чтения.</p>
+   <p>Загруженные книги сохраняются в папке Books во внутренней памяти или на SD-карте, в подпапках по имени автора.</p>
+   <p><strong>Примечание:</strong> защищенное соединение (SSL) пока не поддерживается.</p>
+
+   <subtitle id="categories"><!--cr3:image icons8_folder_author--> Книги по авторам / сериям / названиям</subtitle>
+   <p>KnownReader позволяет просматривать список книг из базы данных, сгруппированный по метаданным: автору, названию, серии. Соответствующие пункты доступны в корневой папке браузера файлов.</p>
+   <p>Нажмите на нужный вид классификации (например, «Книги по авторам»: для просмотра списка книг, сгруппированного по авторам).</p>
+   <p>Войдя в категорию, вы можете увидеть список префиксов категорий (например, первые буквы имени автора), список категорий (список авторов), а внутри папок-категорий – сами книги (например, все книги данного автора).</p>
+   <p>KnownReader создает группы автоматически, в зависимости от количества элементов в списке.</p>
+   <p>Только те книги, свойства которых были отсканированы и добавлены в базу будут доступны в списках по категориям или в поиске.</p>
+   <p>Для импорта книг из папки файловой системы и всех вложенных подпапок используйте «Меню / Сканировать свойства книг в папке».</p>
+
+   <subtitle id="fbmenu"><!--cr3:image icons8_menu--> Меню браузера файлов</subtitle>
+   <p>По умолчанию меню отображается в верхней части экрана, в одну строку. Количество доступных кнопок зависит от размеров и разрешения экрана вашего устройства, а открыть меню полностью можно при помощи расположенной справа стрелки вниз.</p>
+   <empty-line/>
+   <p>• <strong>Текущая книга</strong> – вернуться к чтению текущей открытой книги;</p>
+   <p>• <strong><a l:href="#fbsettings">Настройки</a></strong> – изменить некоторые параметры браузера файлов;</p>
+   <p>• <strong>В корень</strong> – перейти в корневую папку;</p>
+   <p>• <strong>Последние книги</strong> – показать список последних книг;</p>
+   <p>• <strong>Перейти в папку</strong> – перейти в выбранную папку;</p>
+   <p>• <strong>Онлайн-каталоги</strong> – перейти в сетевой каталог;</p>
+   <p>• <strong>Найти</strong> – выполнить поиск книги по ее свойствам в базе данных;</p>
+   <p>• <strong>Сканировать книги</strong> – прочитать свойства всех книг в данной папке с подпапками и занести в базу данных;</p>
+   <p>• <strong>Сортировать</strong> – выбрать способ сортировки книг в папках;</p>
+   <p>• <strong>Сохранить журнал</strong> – сохранить лог-файл журнала;</p>
+   <p>• <strong>Выход</strong> – закрыть приложение.</p>
+
+   <subtitle id="fbsettings"><!--cr3:image cr3_menu_options--> Настройки браузера файлов</subtitle>
+   <p>Нажмите «Меню / Настройки» в браузере файлов чтобы изменить некоторые настройки. Вы можете менять порядок сортировки и переключать режим показа книг в списках – обычный или сокращенный (только имя файла).</p>
+   <p>Можно использовать два режима просмотра: обычный (с показом свойств книги – автора, названия, серии, обложки) и простой вид (показывать только имена файлов).</p>
+   <p>Дополнительные настройки находятся в диалоге настроек в режиме чтения. На закладке «Настройки приложения» доступны следующие настройки:</p>
+   <cite>
+    <p>• Показывать обложки в списке книг;</p>
+    <p>• Сканировать свойства книг в папке при входе в папку;</p>
+    <p>• Спрятать папки без книг.</p>
+   </cite>
+  </section>
+
+  <section id="bookmarks">
+   <title>
+    <p>Закладки</p><p><!--cr3:image icons8_bookmark--></p>
+   </title>
+   <p>KnownReader поддерживает 3 типа закладок:</p>
+   <cite>
+    <p>• <strong>Позиция</strong>: при создании привязывается к первой строке текущей страницы.</p>
+    <p>• <strong>Комментарий</strong>: создается для фрагмента текста, можно написать текст комментария.</p>
+    <p>• <strong>Исправление</strong>: создается для фрагмента текста, можно исправить выделенный фрагмент (удобно для вычитки/проверки текста).</p>
+   </cite>
+   <!--cr3:if crengine.highlight.bookmarks-->
+    <p>Закладки типа «комментарии» и «исправления» подсвечиваются в тексте, в соответствии с текущими настройками.</p>
+   <!--cr3:else-->
+    <p>Закладки типа «комментарии» и «исправления» могут подсвечиваться в тексте, если это разрешить в настройках.</p>
+   <!--cr3:endif-->
+   <p>Для добавления закладки на позицию в тексте, откройте список закладок («Меню / Закладки») и нажмите кнопку добавления в верхнем правом углу окна. Текущая страница будет добавлена в список закладок. В следующий раз после открытия списка закладок вы можете перейти к нужной, нажав на нее в списке.</p>
+   <p>Для добавления закладки на фрагмент текста (т.е. комментария или исправления) нужно вначале выделить фрагмент текста.</p>
+   <!--cr3:if app.controls.doubletap.selection-->
+    <!--cr3:if app.touch.secondary.action.type=0-->
+     <p>Начните выделение двойным тапом на первом слове, затем движением пальца выделите весь фрагмент.</p>
+    <!--cr3:else-->
+     <p>Начните выделение длинным тапом на первом слове, затем движением пальца выделите весь фрагмент.</p>
+    <!--cr3:endif-->
+    <p>Также вы можете использовать «Меню / Выделить» для входа в режим выделения. После этого просто выделите нужный фрагмент движением пальца.</p>
+   <!--cr3:else-->
+    <p>Используйте «Меню / Режим выделения», после чего просто выделите нужный фрагмент движением пальца.</p>
+   <!--cr3:endif-->
+   <!--cr3:if app.selection.action=0-->
+    <!--cr3:if app.multyselection.action=0-->
+     <p>Когда выделение нескольких слов завершено, появляется панель инструментов с вариантами действия по выделению и элементами управления для перемещения начала и конца выделения. Нажмите кнопку «Закладка» на панели.</p>
+    <!--cr3:else-->
+     <p>Когда выделение одного слова завершено, появляется панель инструментов с вариантами действия по выделению и элементами управления для перемещения начала и конца выделения. Нажмите кнопку «Закладка» на панели.</p>
+     <p>В соответствии с текущими настройками для выделения нескольких слов панель инструментов не показывается. Вместо этого будет сразу выполнено действие, назначенное в пункте настроек «Действие для нескольких выделенных слов». Это поведение можно поменять в настройках.</p>
+    <!--cr3:endif-->
+   <!--cr3:endif-->
+   <!--cr3:if app.selection.action=3-->
+    <!--cr3:if app.multyselection.action=3-->
+     <p>Когда выделение нескольких слов завершено, сразу появится окно добавления закладки. (Так указано в настройках. Вы можете поменять это поведение в «Настройках / Управление / Действие для выделения» и «Действие для нескольких выделенных слов»).</p>
+    <!--cr3:else-->
+     <p>Когда выделение одного слова завершено, сразу появится окно добавления закладки. (Так указано в настройках. Вы можете поменять это поведение в «Настройках / Управление / Действие для выделения» и «Действие для нескольких выделенных слов»).</p>
+     <p>В данный момент в настройках указано другое действие для нескольких выделенных слов. (Вы можете поменять это поведение в «Настройках / Управление / Действие для выделения» и «Действие для нескольких выделенных слов»).</p>
+    <!--cr3:endif-->
+   <!--cr3:endif-->
+   <p>Окно «Добавить закладку» позволяет указать тип закладки (комментарий или исправление), а также указать текст комментария или исправленный текст (соответственно типу закладки). Для сохранения закладки нажмите кнопку «плюс» в правом верхнем углу окна.</p>
+   <!--cr3:if crengine.highlight.bookmarks-->
+    <p>Комментарии и исправления подсвечены в тексте.</p>
+   <!--cr3:else-->
+    <p>Комментарии и исправления могут быть подсвечены в тексте, если это разрешить в настройках.</p>
+   <!--cr3:endif-->
+   <p>Для открытия списка закладок, нажмите «Меню / Закладки». Появится список закладок.</p>
+   <p>По тапу на закладке из списка произойдет переход на позицию в тексте с этой закладкой.</p>
+   <p>Длинный тап на закладке откроет контекстное меню:</p>
+   <cite>
+    <p>• <strong>Перейти на закладку</strong> – переход на позицию в тексте с этой закладкой</p>
+    <p>• <strong>Добавить закладку</strong> – добавить закладку типа «Позиция» для текущей странице в тексте</p>
+    <p>• <strong>Редактировать закладку</strong> – только для Комментариев и Исправлений – изменить текст</p>
+    <p>• <strong>Удалить закладку</strong></p>
+    <p>• <strong>Экспортировать закладки в файл</strong> – сохранить все закладки в текстовый файл</p>
+    <p>• <strong>Отправить</strong> – послать список закладок в текстовом виде как eMail, SMS, и т.п.</p>
+   </cite>
+  </section>
+
+  <section id="dict">
+   <title>
+    <p>Словари</p><p><!--cr3:image icons8_google_translate--></p>
+   </title>
+   <p>KnownReader может вызывать внешние программы-словари для перевода слов.</p>
+   <p>Поддерживаемые словари (могут быть установлены из Market'а):</p>
+   <cite>
+    <p>Aard</p>
+    <p>ABBYY Lingvo</p>
+    <p>ColorDict new / GoldenDict</p>
+    <p>ColorDict</p>
+    <p>Dictan</p>
+    <p>Fora</p>
+    <p>Google</p>
+    <p>LEO</p>
+    <p>Lingo Quiz</p>
+    <p>MDict</p>
+    <p>Popup</p>
+    <p>Wikipedia</p>
+    <p>Yandex Translate</p>
+   </cite>
+   <p>Выберите программу, которую хотите использовать из списка в «Настройках / Приложение / Словарь». Не забудьте установить его в системе.</p>
+   <p>Выделите слово для перевода (описание выделения смотрите в разделе про закладки). В зависимости от настроек после окончания выделения может появиться панель инструментов. Из нее нужно выбрать пункт «Словарь».</p>
+   <p>Для удобства частого использования словаря назначьте его в «Настройках / Управление / Действие для выделения».</p>
+  </section>
+
+  <section id="tts">
+   <title>
+    <p>Чтение вслух</p><p><!--cr3:image icons8_speaker--></p>
+   </title>
+   <p>KnownReader поддерживает чтение вслух с использованием системного Text to Speech Engine (TTS). Для этого используются движок TTS и голос, выбранные в системе по умолчанию.</p>
+   <p>Для начала чтения вслух нажмите «Меню / Чтение вслух» (для более удобного использования соответствующее действие можно назначить на кнопку или тап-зону экрана).</p>
+   <p>Появляется панель управления чтением вслух. Она позволяет начинать чтение, приостанавливать его, передвигать позицию, и т.п.</p>
+  </section>
+
+  <section id="autoscroll">
+   <title>
+    <p>Автолистание</p><p><!--cr3:image icons8_scroll--></p>
+   </title>
+   <p>Вы можете использовать автоматическое листание. Для начала, нажмите «Меню / Автолистание» (для более удобного использования соответствующее действие можно назначить на кнопку или тап-зону экрана).</p>
+   <p>Изменять скорость листания можно кнопками громкости или тапами по нижним углам экрана.</p>
+   <p>Для остановки автолистания тапните в любом месте экрана, кроме нижних левого и правого углов.</p>
+  </section>
+
+  <section id="viewimages">
+   <title>
+    <p>Иллюстрации</p><p><!--cr3:image icons8_image_file--></p>
+   </title>
+   <p>Вы можете посмотреть иллюстрацию в увеличенном виде. Этот режим активируется длинным тапом на иллюстрации.</p>
+   <p>Изменяйте масштаб кнопками громкости или экранными кнопками +/-. Панорамирование выполняется скольжением пальца.</p>
+   <p>Чтобы выйти из режима просмотра иллюстрации, нажмите кнопку «Назад» или ткните в любое место экрана.</p>
+  </section>
+
+  <section id="settings">
+   <title>
+    <p>Настройки</p><p><!--cr3:image icons8_administrative_tools--></p>
+   </title>
+   <section>
+    <title>
+     <p>Общая информация</p><p><!--cr3:image icons8_info--></p>
+    </title>
+    <p>Данный пункт меню предназначен для изменения различных параметров работы программы, позволяющих добиться максимально качественного для пользователя отображения и обработки текста книг.</p>
+    <p><strong>Примечание:</strong> глобальные настройки выделены <emphasis>курсивом.</emphasis></p>
+    <empty-line/>
+    <p>Для доступа к настройкам приложения используйте один из методов:</p>
+    <cite>
+     <p>• вертикальный жест посредине экрана <strong>&gt;</strong> «Настройки»;</p>
+     <p>• длинный тап по центру экрана.</p>
+    </cite>
+    <p>Все настройки распределены на несколько вкладок:</p>
+    <cite>
+     <p><a l:href="#settings-text">Текст</a></p>
+     <p><a l:href="#settings-css">Стили/CSS</a></p>
+     <p><a l:href="#settings-page">Страницы</a></p>
+     <p><a l:href="#settings-controls">Управление</a></p>
+     <p><a l:href="#settings-application">Приложение</a></p>
+    </cite>
+    <p>Выбор <strong>профиля</strong> настроек производится в диалоге, вызываемом с помощью расположенной над вкладками ссылки:  <strong>…/cr3.ini.profile#</strong></p>
+    <p>Вы можете сохранить несколько наборов настроек, с возможностью быстрого переключения между ними. Для этого назначьте действие «Профиль настроек» на какую-нибудь кнопку или тап-зону.</p>
+   </section>
+ 
+   <section id="settings-text">
+    <title>
+     <p>Текст</p><p><!--cr3:image icons8_type_filled--></p>
+    </title>
+    <p>Данный пункт меню позволяет выполнять настройку оформления текста, включая рендеринг шрифтов, установку интервалов и масштабирование изображений.</p>
+
+    <subtitle><!--cr3:image icons8_font_face--> Шрифт</subtitle>
+    <p>Многостраничный список всех установленных на устройстве шрифтов.</p>
+    <p>Поддерживается фильтрация списка: можно отображать все, системные или пользовательские шрифты.</p>
+    <p>Также список доступен в простом или полном режимах. В полном шрифты отображаются так же, как и в книге.</p>
+    <p><emphasis>Значение:</emphasis> список шрифтов</p>
+
+    <subtitle><!--cr3:image icons8_font_size--> Размер шрифта</subtitle>
+    <p>Список доступных размеров выбранного для чтения шрифта.</p>
+    <p><emphasis>Значение:</emphasis> от 9 до 340</p>
+
+    <subtitle><!--cr3:image icons8_italic--> Курсив (алгоритмически)</subtitle>
+    <p>Принудительный наклон используемого для чтения шрифта.</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_bold--> Насыщенность шрифта</subtitle>
+    <p>Изменение так называемого «веса» (жирности) шрифта. При отсутствии соответствующего весу файла рассчитывается алгоритмически.</p>
+    <p><emphasis>Значение:</emphasis> от 300 до 900 (по умолчанию 400)</p>
+
+    <subtitle><!--cr3:image icons8_font_face--> Резервные шрифты</subtitle>
+    <p>Используется для подстановки символов, отсутствующих в выбранном для чтения шрифте.</p>
+    <p><emphasis>Значение:</emphasis> список шрифтов</p>
+
+    <subtitle><!--cr3:image cr3_option_text_antialias_gray--> Сглаживание шрифта</subtitle>
+    <p>Позволяет устранить эффект «зубчатости» на краях символов.</p>
+    <p><emphasis>Значение:</emphasis> без сглаживания / большие шрифты / все шрифты</p>
+
+    <subtitle><!--cr3:image icons8_document_hang_punct--> Висячая пунктуация</subtitle>
+    <p>Способ набора текста, при котором знаки препинания, маркеры списков, кавычки и дефисы находятся вне текста.</p>
+    <p>При включении по правому краю текста выравниваются только буквы, а знаки препинания выступают за этот край; иначе все символы будут выровнены по правому краю одинаково.</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_document_hyp_dic--> Переносы, рендеринг, мультиязычность, форматирование (epub, txt, html) &gt;</subtitle>
+    <p><strong><emphasis>Опции рендеринга</emphasis></strong></p>
+    <p>В паре со следующим параметром влияет на рендеринг документов, основанных на HTML (включая EPUB).</p>
+    <p><emphasis>Значение:</emphasis> Legasy / Flat / Book / Full</p>
+    <empty-line/>
+    <p><strong><emphasis>Уровень совместимости версии DOM</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> Legasy / Newest</p>
+    <empty-line/>
+    <p><strong><emphasis>Поддержка мультиязычных документов</emphasis></strong></p>
+    <p>Поддержка разного направления письма в одном документе: LTR (слева направо) и RTL (справа налево).</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong><emphasis>Разрешить переносы</emphasis></strong></p>
+    <p>Работает только если первые два параметра выставлены на максимум, а также включена мультиязычность.</p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+    <empty-line/>
+    <p><strong>Словарь переносов</strong></p>
+    <p>Выбор таблицы переносов, алгоритмического режима или отключение переноса слов.</p>
+    <p><emphasis>Значение:</emphasis> нет / алгоритмический / язык</p>
+    <empty-line/>
+    <p><strong><emphasis>Книга: Разрешить встроенные стили документа</emphasis></strong></p>
+    <p>Поддержка таблиц стилей, содержащихся в самом документе.</p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+    <empty-line/>
+    <p><strong><emphasis>Книга: Встроенные шрифты документа</emphasis></strong></p>
+    <p>Поддержка так называемых издательских шрифтов, содержащихся в самом документе.</p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+    <empty-line/>
+    <p><strong>Игнорировать отступы документа</strong></p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+
+    <subtitle><!--cr3:image icons8_ligature--> Тонкие настройки шрифта &gt;</subtitle>
+    <p><strong>Формировщик текста</strong></p>
+    <p>Позволяет задать объем операций рендеринга.</p>
+    <p><emphasis>Значение:</emphasis> простой / легкий /полный</p>
+    <empty-line/>
+    <p><strong>Кернинг</strong></p>
+    <p>Избирательное изменение интервала между буквами в зависимости от их формы для улучшения зрительного восприятия текста.</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Гамма-коррекция</strong></p>
+    <p>Коэффициент, влияющий на прорисовку символов: чем он выше, тем контрастнее изображение и меньше полутонов. Однако при слишком высоком значении буквы приобретают неровные края и теряется эффект от сглаживания.</p>
+    <p><emphasis>Значение:</emphasis> от 0.3 до 1.9 (по умолчанию 1)</p>
+    <empty-line/>
+    <p><strong>Хинтинг</strong></p>
+    <p>Изменение контура шрифта при его растеризации для более четкого отображения мелких шрифтов и оптимизации под устройства с низким разрешением экрана.</p>
+    <p><emphasis>Значение:</emphasis> отключен / байт-код / автохинтинг</p>
+    <empty-line/>
+    <p><strong>Алгоритм отрисовки жирности шрифта</strong></p>
+    <p><emphasis>Значение:</emphasis> по умолчанию / FreeType</p>
+    <empty-line/>
+    <p><strong>Коэффициент толщины символа</strong></p>
+    <p>Альтернативное изменение веса шрифта. Рассчитывается алгоритмически.</p>
+    <p><emphasis>Значение:</emphasis> от -2.0 до 5.0 (по умолчанию 0)</p>
+
+    <subtitle><!--cr3:image icons8_document_space_width--> Расстояния между строками, словами и символами &gt;</subtitle>
+    <p><strong>Межстрочный интервал</strong></p>
+    <p>Равномерное изменение расстояния по вертикали между соседними строками текста.</p>
+    <p><emphasis>Значение:</emphasis> от 70 % до 220 %</p>
+    <empty-line/>
+    <p><strong>Мин. ширина пробела</strong></p>
+    <p>Величина пробела, до которой его можно сжать при форматировании текста, увеличив этим число слов в строке.</p>
+    <p><emphasis>Значение:</emphasis> от 25 % до 100 %</p>
+    <empty-line/>
+    <p><strong>Разреживание слов</strong></p>
+    <p>В некоторых случаях добавляется расстояние между буквами в словах.</p>
+    <p><emphasis>Значение:</emphasis> нет / немного / больше /еще больше</p>
+    <empty-line/>
+    <p><strong>Сжатие расстояний между символами</strong></p>
+    <p>Уменьшение расстояния между символами вне зависимости от их формы. Использовать с осторожностью.</p>
+    <p><emphasis>Значение:</emphasis> от 0 до 15 (по умолчанию 0)</p>
+    <empty-line/>
+    <p><strong>Расстояния между словами - % масштаба</strong></p>
+    <p>Жесткое масштабирование ширины каждого символа пробела во всех шрифтах.</p>
+    <p><emphasis>Значение:</emphasis> от 65 % до 130 % (по умолчанию 100)</p>
+    <empty-line/>
+    <p><strong>Неиспользуемое пространство в строке, %</strong></p>
+    <p>Предназначен для срабатывания переносов или добавления расстояния между буквами (для выравнивания).</p>
+    <p><emphasis>Значение:</emphasis> от 1 % до 70 %</p>
+
+    <subtitle><!--cr3:image cr3_option_images_gray--> Изображения &gt;</subtitle>
+    <p>Выбор режима масштабирования и максимального масштаба содержащихся в книге иллюстраций, расположенных между слов или оформленных как отдельные параграфы.</p>
+    <empty-line/>
+    <p><strong>Режим для изображений</strong></p>
+    <p><emphasis>Значение:</emphasis> нет / в целое число раз / произвольно</p>
+    <empty-line/>
+    <p><strong>Макс. увеличение для изображений</strong></p>
+    <p><emphasis>Значение:</emphasis> авто / 1 / 2 / 3 раза</p>
+    <empty-line/>
+    <p><strong>Режим для изображений между слов</strong></p>
+    <p><emphasis>Значение:</emphasis> нет / в целое число раз / произвольно</p>
+    <empty-line/>
+    <p><strong>Макс. увеличение для изображений между слов</strong></p>
+    <p><emphasis>Значение:</emphasis> авто / 1 / 2 / 3 раза</p>
+    <empty-line/>
+    <p><strong>Установить цвет фона изображений</strong></p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+    <empty-line/>
+    <p><strong>Цвет фона изображений</strong></p>
+    <p><emphasis>Значение:</emphasis> список цветов</p>
+   </section>
+
+   <section id="settings-css">
+    <title>
+     <p>Стили/CSS</p><p><!--cr3:image icons8_css--></p>
+    </title>
+    <p>Данный пункт меню позволяет выполнять индивидуальную настройку отдельных элементов оформления книг, перекрывая общие стили.</p>
+    <p>Учтите, что для получения хорошего результата желательно представлять себе механизм работы каскадных таблиц стилей (CSS).</p>
+
+    <subtitle><emphasis>По умолчанию: Разрешить встроенные стили документа</emphasis></subtitle>
+    <p>Поддержка таблиц стилей, содержащихся в самом документе. Данная настройка применяется для новых книг по умолчанию.</p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+
+    <subtitle><!--cr3:image icons8_css_2--> Настраиваемые элементы CSS</subtitle>
+    <p><strong>Параграф по умолчанию</strong></p>
+    <p><strong>Заголовок</strong></p>
+    <p><strong>Подзаголовок</strong></p>
+    <p><strong>Преформатированный текст / код</strong></p>
+    <p><strong>Ссылка</strong></p>
+    <p><strong>Цитата</strong></p>
+    <p><strong>Эпиграф</strong></p>
+    <p><strong>Стихи</strong></p>
+    <p><strong>Автор текста / эпиграфа</strong></p>
+    <p><strong>Сноска</strong></p>
+    <p><strong>Ссылка на сноску</strong></p>
+    <p><strong>Заголовок сноски</strong></p>
+    <p><strong>Аннотация</strong></p>
+
+    <subtitle><!--cr3:image icons8_skim--> Параметры каждого элемента</subtitle>
+    <p><strong>Выравнивание текста</strong></p>
+    <p><emphasis>Значение:</emphasis> по ширине / влево / по центру / вправо</p>
+    <empty-line/>
+    <p><strong>Отступ первой строки</strong></p>
+    <p><emphasis>Значение:</emphasis> без отступа / маленький отступ (выступ) / большой отступ (выступ)</p>
+    <empty-line/>
+    <p><strong>Гарнитура шрифта</strong></p>
+    <p><emphasis>Значение:</emphasis> список шрифтов</p>
+    <empty-line/>
+    <p><strong>Размер шрифта</strong></p>
+    <p><emphasis>Значение:</emphasis> уменьшить от 90 % до 60 % / увеличить от 110 % до 150 %</p>
+    <empty-line/>
+    <p><strong>Жирность шрифта</strong></p>
+    <p><emphasis>Значение:</emphasis> нормальный / жирный / жирнее / легче</p>
+    <empty-line/>
+    <p><strong>Стиль шрифта</strong></p>
+    <p><emphasis>Значение:</emphasis> обычный / наклонный</p>
+    <empty-line/>
+    <p><strong>Межстрочный интервал</strong></p>
+    <p><emphasis>Значение:</emphasis> от 75 % до 150 %</p>
+    <empty-line/>
+    <p><strong>Подчеркивание</strong></p>
+    <p><emphasis>Значение:</emphasis> нет / подчеркнутый / зачеркнутый / надчеркнутый</p>
+    <empty-line/>
+    <p><strong>Надстрочные / подстрочные индексы</strong></p>
+    <p><emphasis>Значение:</emphasis> нормальный / нижний / верхний</p>
+    <empty-line/>
+    <p><strong>Цвет текста/фона</strong></p>
+    <p><emphasis>Значение:</emphasis> список цветов</p>
+    <empty-line/>
+    <p><strong>Отступ до/после</strong></p>
+    <p><emphasis>Значение:</emphasis> от 0 до 1.5 высоты строки</p>
+    <empty-line/>
+    <p><strong>Отступ слева/справа</strong></p>
+    <p><emphasis>Значение:</emphasis> от 0 до 4 высоты строки / от 5 % до 30 % ширины строки</p>
+   </section>
+
+   <section id="settings-page">
+    <title>
+     <p>Страницы</p><p><!--cr3:image icons8_page--></p>
+    </title>
+    <p>Данный пункт меню позволяет выполнять настройку оформления страниц, включая панели инструментов, отступы, цвета и ориентацию.</p>
+
+    <subtitle><!--cr3:image icons8_ext_fullscreen--> На полный экран</subtitle>
+    <p>Заполнение страницей всего пространства экрана.</p>
+
+    <subtitle><!--cr3:image icons8_navigation_toolbar_top--> Панели инструментов и выделения &gt;</subtitle>
+    <p><strong>Положение панели инструментов</strong></p>
+    <p><emphasis>Значение:</emphasis> один из краев экрана</p>
+    <empty-line/>
+    <p><strong>Полный экран: прятать панель инструментов</strong></p>
+    <p><emphasis>Значение:</emphasis> да / нет</p>
+    <empty-line/>
+    <p><strong>Внешний вид панели инструментов</strong></p>
+    <p><emphasis>Значение:</emphasis> размеры и цвет</p>
+    <empty-line/>
+    <p><strong>Кнопки панели инструментов и меню чтения</strong></p>
+    <p><emphasis>Значение:</emphasis> список действий</p>
+    <empty-line/>
+    <p><strong><emphasis>Панель выделения: расширенный режим</emphasis></strong></p>
+    <p>Добавление второго ряда кнопок на панели выделения.</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong><emphasis>Панель выделения: фон</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> степень прозрачности</p>
+    <empty-line/>
+    <p><strong><emphasis>Панель выделения: прозрачные кнопки</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>В панели выделения не менять режим страницы на свиток</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_document_2pages--> Режим просмотра, ориентация и анимация &gt;</subtitle>
+    <p><strong>Режим просмотра</strong></p>
+    <p><emphasis>Значение:</emphasis> страницы / свиток</p>
+    <empty-line/>
+    <p><strong>Ориентация страницы</strong></p>
+    <p><emphasis>Значение:</emphasis> книжная / альбомная / системная / сенсор</p>
+    <empty-line/>
+    <p><strong>Скрывать панель ориентации через</strong></p>
+    <p><emphasis>Значение:</emphasis> от 0 до 30 сек.</p>
+    <empty-line/>
+    <p><strong>Колонок в альбомном режиме</strong></p>
+    <p><emphasis>Значение:</emphasis> одна / две</p>
+    <empty-line/>
+    <p><strong>Скорость анимации страницы</strong></p>
+    <p><emphasis>Значение:</emphasis> пять скоростей</p>
+    <empty-line/>
+    <p><strong>Анимация листания</strong></p>
+    <p><emphasis>Значение:</emphasis> отключена / тип анимации</p>
+
+    <subtitle><!--cr3:image icons8_texture--> Текстура фона</subtitle>
+    <p>Установка под текст изображения-подложки вместо сплошного цвета страницы (только смартфоны).</p>
+    <p>Для добавления текстуры нужно отправить картинку из программы просмотра изображений в KnownReader.</p>
+
+    <subtitle><!--cr3:image icons8_eink--> Обновление E-Ink экрана &gt;</subtitle>
+    <p><strong>Режим обновления экрана</strong></p>
+    <p>Поддержка тех или иных способов обновления зависит от вашего устройства.</p>
+    <p><emphasis>Значение:</emphasis> Snow Field / качественный / быстрый / A2</p>
+    <empty-line/>
+    <p><strong>Интервал полного обновления</strong></p>
+    <p>Для минимизации артефактов на экранах E-Ink область чтения будет полностью обновляться через каждые N страниц.</p>
+    <p><emphasis>Значение:</emphasis> от 0 до 20 стр.</p>
+    <empty-line/>
+    <p><strong>Интервал принудительной отрисовки черной страницы</strong></p>
+    <p>Для минимизации артефактов на неподдерживаемых устройствах область чтения будет заливаться черным цветом через каждые N страниц.</p>
+    <p><emphasis>Значение:</emphasis> от 0 до 20 стр.</p>
+    <empty-line/>
+    <p><strong>Длительность отрисовки черной страницы</strong></p>
+    <p><emphasis>Значение:</emphasis> от 0 до 5000 мс.</p>
+
+    <subtitle><!--cr3:image icons8_document_r_title--> Колонтитул и полноэкранный режима &gt;</subtitle>
+    <p><strong>Колонтитул</strong></p>
+    <p><emphasis>Значение:</emphasis> расположение и число строк</p>
+    <empty-line/>
+    <p><strong>Шрифт</strong></p>
+    <p><emphasis>Значение:</emphasis> список шрифтов</p>
+    <empty-line/>
+    <p><strong>Размер шрифта</strong></p>
+    <p><emphasis>Значение:</emphasis> список размеров</p>
+    <empty-line/>
+    <p><strong>Цвет текста</strong></p>
+    <p><emphasis>Значение:</emphasis> список цветов</p>
+    <empty-line/>
+    <p><strong>Название книги</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Номер страницы</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Всего страниц</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Осталось страниц до конца главы</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Осталось времени</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Процент прочитанного</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Метки глав</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Заряд батареи в %</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong><emphasis>Отступ (для устройств со скругленными углами)</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> от 0 до 160</p>
+    <empty-line/>
+    <p><strong><emphasis>Положение отступов статусной строки</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> сторона экрана</p>
+    <empty-line/>
+    <p><strong><emphasis>Модификация отступов статусной строки</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> ориентация</p>
+    <empty-line/>
+    <p><strong><emphasis>Отступы статусной строки – только в полноэкранном режиме</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong><emphasis>Расширенный полноэкранный режим</emphasis></strong></p>
+    <p>На устройствах с экранными вырезами растягивать окно на весь экран (Android 9 и новее).</p>
+    <p>Учтите, что вырезы могут частично закрывать рабочие области приложения.</p>
+    <p><emphasis>Значение:</emphasis> отключен / включен / включен с отступами</p>
+    <empty-line/>
+    <p><strong><emphasis>Расширенный полноэкранный режим – модификатор</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> ориентация</p>
+
+    <subtitle><!--cr3:image icons8_book_title2--> Сноски внизу страницы</subtitle>
+    <p>Отображение сносок (если есть) внизу страницы.</p>
+    <p>Только для форматов FB2 и EPUB (версии 3 или новее).</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_bookmark_simple_color--> Подсвечивать закладки</subtitle>
+    <p><emphasis>Значение:</emphasis> нет / цвет фона / подчеркивание</p>
+
+    <subtitle><!--cr3:image icons8_google_translate_user--> Подсвечивать слова пользовательского словаря</subtitle>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_paint_palette1--> Цвета и ночной режим &gt;</subtitle>
+    <p>Цветовые настройки сохраняются отдельно для дневного и ночного режимов.</p>
+    <empty-line/>
+    <p><strong>Ночной режим</strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Цвет текста / колонтитула / фона /выделения / комментария / исправления</strong></p>
+    <p><emphasis>Значение:</emphasis> список цветов</p>
+
+    <subtitle><!--cr3:image icons8_document_left_margin--> Отступы страницы и экрана &gt;</subtitle>
+    <p><strong>Отступ экрана (требуется перезапуск)</strong></p>
+    <p>Зона нечувствительности для устройств с сенсорным экраном и без бортиков.</p>
+    <p><emphasis>Значение:</emphasis> от 0 до 100</p>
+    <empty-line/>
+    <p><strong>Левый / Правый / Верхний / Нижний отступ</strong></p>
+    <p><emphasis>Значение:</emphasis> от 0 до 300</p>
+
+    <subtitle><emphasis><!--cr3:image train_headphones--> В наушниках в транспорте</emphasis></subtitle>
+    <p>Показывать всплывающее сообщение рядом с остановками общественного транспорта или метро. Работает не во всех населенных пунктах.</p>
+    <p><emphasis>Значение:</emphasis> выключено / где сообщать</p>
+   </section>
+
+   <section id="settings-controls">
+    <title>
+     <p>Управление</p><p><!--cr3:image icons8_cursor--></p>
+    </title>
+    <p>Данный пункт меню позволяет выполнять настройку управления чтением, включая сенсорный экран, кнопки и связанные с ними действия.</p>
+
+    <subtitle><!--cr3:image icons8_keyboard--> Кнопки &gt;</subtitle>
+    <p>Можно назначать различные действия для короткого, длинного и двойного нажатия любой из имеющихся на устройстве аппаратных кнопок.</p>
+
+    <subtitle id="tapzones"><!--cr3:image icons8_data_grid_1--> Сенсорный экран &gt;</subtitle>
+    <p>Экран устройства условно разделен на 9 тап-зон – в виде сетки 3x3 клетки. Каждой из них можно назначать различные действия как на обычный тап (основное действие), так и на <!--cr3:if app.touch.secondary.action.type=0-->длинный<!--cr3:else-->двойной<!--cr3:endif--> тап (дополнительное действие).</p>
+    <p>Тип дополнительного действия (длинный или двойной тап) может быть выбран в <a l:href="#settings-controls">настройках</a>.</p>
+    <p><emphasis>Значение:</emphasis> <strong>основное</strong> / дополнительное действия</p>
+    <table><col width="30%"/><col width="30%"/><col width="30%"/>
+     <tr>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.1--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.1--></td>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.2--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.2--></td>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.3--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.3--></td>
+     </tr>
+     <tr>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.4--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.4--></td>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.5--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.5--></td>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.6--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.6--></td>
+     </tr>
+     <tr>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.7--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.7--></td>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.8--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.8--></td>
+      <td align="center"><strong><!--cr3:setting app.tapzone.action.tap.9--></strong><br/><!--cr3:setting app.tapzone.action.tap.long.9--></td>
+     </tr>
+    </table>
+
+    <subtitle><!--cr3:image icons8_double_tap--> Тип нажатия для доп. действия</subtitle>
+    <p>Вызов дополнительного действия при длинном или двойном тапах.</p>
+    <p><emphasis>Значение:</emphasis> длинный / двойной тап</p>
+
+    <subtitle><!--cr3:image icons8_double_click_tap--> Выделение текста по двойному тапу</subtitle>
+    <p>Выделять текст при двойном тапе по экрану (для копирования, сохранения закладки, вызова словаря, отправки и т.п.).</p>
+    <p>Учтите, что включение данного параметра замедляет время реакции на одиночные тапы (на время интервала двойного тапа, заданного ниже).</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><emphasis><!--cr3:image icons8_double_click_tap_interval--> Интервал двойного тапа (мс)</emphasis></subtitle>
+    <p><emphasis>Значение:</emphasis> от 100 до 1000 мс (по умолчанию 400)</p>
+
+    <subtitle><emphasis><!--cr3:image icons8_prevent_accidental_tap_interval--> Защита от случайных нажатий (мс)</emphasis></subtitle>
+    <p>Если второй тап произошел в течение заданного данным параметром времени, то он не учитывается.</p>
+    <p><emphasis>Значение:</emphasis> от 0 (выключено) до 1000 мс</p>
+
+    <subtitle><!--cr3:image icons8_gesture--> Листание &gt;</subtitle>
+    <p><strong><emphasis>Листание кнопками громкости</emphasis></strong></p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+    <empty-line/>
+    <p><strong>Листание жестами</strong></p>
+    <p><emphasis>Значение:</emphasis> отключено / одна / несколько страниц</p>
+    <empty-line/>
+    <p><strong>Листание – количество страниц</strong></p>
+    <p><emphasis>Значение:</emphasis> от 1 до 20</p>
+    <empty-line/>
+    <p><strong>Чувствительность жеста листания</strong></p>
+    <p><emphasis>Значение:</emphasis> нормальный / длинный / еще длиннее / короткий / еще короче</p>
+
+    <subtitle><!--cr3:image icons8_two_fingers--> Отключить жесты двумя пальцами</subtitle>
+    <p>Щипки по вертикали / горизонтали позволяют контролировать поля страницы, а по диагонали – размер шрифта.</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_select_all--> Действия для выделения (одного и нескольких слов) &gt;</subtitle>
+    <p>Настройки выделения для «Обычного режима», «Режима выделения» и «Режима инспектора».</p>
+    <p><emphasis>Значения:</emphasis> список действий</p>
+    <empty-line/>
+    <p><strong>Одно слово</strong></p>
+    <p><strong>Несколько слов</strong></p>
+    <p><strong>Одно слово (длинный тап)</strong></p>
+    <p><strong>Режим выделения: одно слово</strong></p>
+    <p><strong>Режим выделения: несколько слов</strong></p>
+    <p><strong>Режим инспектора: одно слово</strong></p>
+    <p><strong>Режим инспектора: несколько слов</strong></p>
+
+    <subtitle><!--cr3:image icons8_send_to_action--> Действие 'Отправить в' в диалоге закладки</subtitle>
+    <p>Настройка быстрого действия для отправки закладки в словарь или иное стороннее приложение.</p>
+    <p><emphasis>Значение:</emphasis> стороннее приложение</p>
+
+    <subtitle><!--cr3:image icons8_send_to_action_more--> Уточнение действия 'Отправить в'</subtitle>
+    <p>Настройка шаблона выделенного текста, предназначенного для отправки.</p>
+    <p><emphasis>Значение:</emphasis> шаблон текста</p>
+   </section>
+
+   <section id="settings-application">
+    <title>
+     <p>Приложение</p><p><!--cr3:image icons8_settings--></p>
+    </title>
+    <p>Данный пункт меню позволяет выполнять настройку работы KnownReader, включая интерфейс, файловый браузер, словари, Text-to-Speech, облачные службы и поддержку E-Ink.</p>
+
+    <subtitle><emphasis><!--cr3:image icons8_system_lang--> Язык интерфейса</emphasis></subtitle>
+    <p>Можно использовать текущий язык системы или выбрать из списка любой поддерживаемый.</p>
+    <p><emphasis>Значение:</emphasis> список языков</p>
+
+    <subtitle><emphasis><!--cr3:image cr3_logo_button_hc--> Скопировать настройки из CoolReader</emphasis></subtitle>
+    <p>Если на вашем устройстве параллельно установлен CoolReader, можно скопировать из него значения совпадающих параметров. Файлы настроек CoolReader при этом не изменяются.</p>
+    <p><emphasis>Значение:</emphasis> профили</p>
+
+    <subtitle><!--cr3:image icons8_change_theme_1--> Тема оформления</subtitle>
+    <p>Выбор внешнего вида меню, диалогов и настроек из нескольких доступных вариантов.</p>
+    <p><emphasis>Значение:</emphasis> список тем</p>
+
+    <subtitle><emphasis><!--cr3:image icons8_position_to_disk_interval--> Интервал автосохранения позиции чтения</emphasis></subtitle>
+    <p>Позиция чтения будет сохраняться на этом устройстве с указанной периодичностью. Полезно при возникновении проблем с регулярной потерей места чтения на вашем устройстве.</p>
+    <p><emphasis>Значение:</emphasis> от 10 сек. до 95 мин.</p>
+
+    <subtitle><!--cr3:image icons8_google_translate--> Словари &gt;</subtitle>
+    <p>Выбор словарей, направления перевода, сохранения и прочих параметров перевода.</p>
+
+    <subtitle><!--cr3:image icons8_library--> Библиотека и файловый браузер &gt;</subtitle>
+    <p><strong><emphasis>Сортировать</emphasis></strong></p>
+    <p><strong><emphasis>Обложки в списке книг</emphasis></strong></p>
+    <p><strong><emphasis>Размер обложек</emphasis></strong></p>
+    <p><strong><emphasis>Сканировать свойства книг в папке</emphasis></strong></p>
+    <p><strong><emphasis>Глубина сканирования папок</emphasis></strong></p>
+    <p><strong><emphasis>Простой список файлов</emphasis></strong></p>
+    <p><strong><emphasis>Загрузить псевдонимы авторов</emphasis></strong></p>
+    <p><strong><emphasis>Включить псевдонимы авторов</emphasis></strong></p>
+    <p><strong><emphasis>Максимальный размер группы в файловом браузере</emphasis></strong></p>
+    <p><strong><emphasis>Действие на тап по книге</emphasis></strong></p>
+    <p><strong><emphasis>Действие на длинный тап по книге</emphasis></strong></p>
+    <p><strong><emphasis>Вторичная группировка</emphasis></strong></p>
+
+    <subtitle><!--cr3:image icons8_cloud_storage--> Облачные сервисы &gt;</subtitle>
+    <p>Можно настроить параметры DropBox, Литрес, Яндекс, включить облачную синхронизацию и настроить автосохранение места чтения в облачное хранилище.</p>
+
+    <subtitle><!--cr3:image icons8_speaker--> Text-to-Speech &gt;</subtitle>
+    <p>Можно настроить параметры чтения вслух с помощью голосового движка, установленного в качестве системного.</p>
+
+    <subtitle><!--cr3:image icons8_sun--> Яркость экрана и кнопок &gt;</subtitle>
+    <p><strong>Длительность подсветки экрана</strong> (смартфон)</p>
+    <p><strong>Яркость подсветки экрана</strong></p>
+    <p><strong>Яркость теплой подсветки экрана</strong> (E-Ink)</p>
+    <p><strong>Управление яркостью скольжением по экрану</strong></p>
+    <p><strong>Зафиксировать дельту между холодной и теплой подсветкой</strong> (E-Ink)</p>
+    <p><strong>Отключать подсветку кнопок</strong></p>
+    <p><strong><emphasis>Контроль яркости – чувствительность свайпа</emphasis></strong></p>
+
+    <subtitle><!--cr3:image icons8_eink--> Это E-Ink устройство (если не определилось автоматически)</subtitle>
+    <p>Можно указать принудительно в тех случаях, когда KnownReader не определил ваше устройство.</p>
+    <p>Чтобы увидеть настройки для E-Ink, после изменения данного параметра закройте и откройте диалог настроек заново.</p>
+    <p><emphasis>Значение:</emphasis> вкл / выкл</p>
+
+    <subtitle><!--cr3:image icons8_physics--> Редкое и экспериментальное &gt;</subtitle>
+    <p><strong>Не перерисовывать книгу на разрешениях</strong></p>
+    <p><strong>Подсвечивать зону экрана при нажатии</strong></p>
+    <p><strong>Отключить трекболл</strong></p>
+    <p><strong>Не задавать доп. вопросы о смене статусов книги</strong></p>
+    <p><strong>Не показывать диалоги: о css стилях книги, переключения полноэкранного режима</strong></p>
+    <p><strong>Отключить безопасный режим</strong></p>
+    <p><strong>Простой диалог выбора шрифта</strong></p>
+    <p><strong>Пиктограммы в настройках</strong></p>
+    <p><strong>Установить цвет пиктограмм (только для новых)</strong></p>
+    <p><strong>Цвет пиктограмм</strong></p>
+
+    <subtitle><emphasis><!--cr3:image icons8_delete_database--> Инициализация приложения</emphasis></subtitle>
+    <p>Очистка кэша, сброс настроек и/или удаление базы данных книг.</p>
+   </section>
+  </section>
+
+  <section id="advanced">
+   <title>
+    <p>Дополнительные настройки</p><p><!--cr3:image icons8_log--></p>
+   </title>
+   <p>Файлы настроек приложения находятся в папке <emphasis>/cr3e</emphasis> во внутренней памяти устройства или на SD-карте.</p>
+
+   <subtitle>Установка дополнительных шрифтов</subtitle>
+   <p>Можно положить свои ttf-шрифты в папку <emphasis>/fonts</emphasis>, также расположенную во внутренней памяти или на SD-карте.</p>
+   <p>Добавленные шрифты появятся в списке только после перезапуска приложения.</p>
+
+   <subtitle>Внешние файлы стилей CSS</subtitle>
+   <p>Для тонкой настройки стилей отображения книги можно положить в папку <emphasis>/cr3e</emphasis> свои файлы каскадных таблиц стилей (CSS). Имена файлов должны соответствовать принятому формату (fb2.css, epub.css, htm.css, rtf.css, txt.css, chm.css) – в этом случае данные стили будут использоваться вместо встроенных в приложение.</p>
+   <p>За основу можно взять css-файлы из репозитория GIT с исходным кодом KnownReader (crengine) на странице проекта на SourceForge.</p>
+
+   <subtitle>Дополнительные фоновые изображения</subtitle>
+   <p>Для использования своих картинок формата jpg/png в качестве фона страницы их нужно положить в папку <emphasis>/cr3e/textures</emphasis> (режим «замостить») или в <emphasis>/cr3e/backgrounds</emphasis> (режим «растянуть»).</p>
+
+   <subtitle>Как вернуть настройки к значениям по умолчанию</subtitle>
+   <p>Привести приложение в изначальное состояние можно в меню настроек: «Приложение / Инициализация приложения / Сбросить настройки». Также можно удалить ini-файлы из папки <emphasis>/cr3e</emphasis> вручную.</p>
+
+   <subtitle>Очистка кэша последних открытых книг</subtitle>
+   <p>Возможная причина некорректного завершения работы приложения при повторном открытии недавно читаемой книги – повреждение ее кэш-файла.</p>
+   <p>Проблему можно исправить, выполнив очистку кэша из меню настроек: «Приложение / Инициализация приложения / Очистить кэш». Также можно удалить из папки <emphasis>/cr3e</emphasis> подпапку <emphasis>cache</emphasis> вручную.</p>
+  </section>
+
+  <section id="links">
+   <title>
+    <p>Полезные ссылки</p><p><!--cr3:image icons8_internet_folder_2--></p>
+   </title>
+   <p><a l:href="http://www.knownreader.org/">Домашняя страница проекта</a></p>
+   <p><a l:href="https://sourceforge.net/projects/crengine/">Страница проекта на SourceForge</a></p>
+   <p><a l:href="http://sourceforge.net/apps/mediawiki/crengine/index.php?title=Main_Page">Wiki проекта на SourceForge</a></p>
+   <p><a l:href="https://sourceforge.net/project/project_donations.php?group_id=191284">Помощь проекту на SourceForge</a></p>
+   <p><a l:href="https://4pda.ru/forum/index.php?showtopic=191747">Тема на форуме 4PDA</a></p>
+   <p><strong>Примечание:</strong> данные ссылки будут открыты во внешнем браузере.</p>
+   <empty-line/>
+   <p>Вы можете поддержать развитие проекта пожертвованием с помощью покупки «пакета-монетки» (<emphasis>KnownReader Gold Donation, KnownReader Silver Donation</emphasis> или <emphasis>KnownReader Bronze Donation</emphasis>) на Market'е или покупкой монетки прямо в приложении – на третьей вкладке диалога «О программе».</p>
+   <empty-line/>
+   <p>Присылайте свои пожелания и сообщения об ошибках на <a l:href="mailo:support@knownreader.com">support@knownreader.com</a> (не забудьте указать модель устройства и версию Android).</p>
+   <p>В случае некорректного завершения работы приложения могут сильно помочь системные лог-файлы: их можно сохранить с помощью программы Android System Info (доступна на Market'е).</p>
+   <p>Если не удается открыть какую-либо книгу (хотя с другими проблем нет), или вы столкнулись с неправильным определением кодировки книги, рекомендуется приложить файл с книгой к письму.</p>
+  </section>
+ </body>
 </FictionBook>

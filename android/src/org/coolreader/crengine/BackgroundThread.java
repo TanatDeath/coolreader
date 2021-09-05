@@ -215,9 +215,6 @@ public class BackgroundThread extends Thread {
 							//L.v("finished delayed (" + delay + ") task " + id + " " + task);
 						} catch (Throwable e) {
 							Log.e("cr3", "Exception while processing task in GUI thread: " + task, e);
-
-
-
 						}
 					}, delay);
 				} else

@@ -1,11 +1,9 @@
 package org.coolreader.crengine;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -905,7 +903,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION, "");
 				break;
             case SELECTION_ACTION_DICTIONARY_LIST:
-                DictsDlg dlg = new DictsDlg(mActivity, this, sel.text, null);
+                DictsDlg dlg = new DictsDlg(mActivity, this, sel.text, null, false);
                 dlg.show();
                 if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
                     clearSelection();
@@ -1097,7 +1095,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		bookView.draw(false);
 	}
 
-	private ImageViewer currentImageViewer;
+	public ImageViewer currentImageViewer;
 	private class ImageViewer extends SimpleOnGestureListener {
 		private ImageInfo currentImage;
 		final GestureDetector detector;
@@ -1249,11 +1247,88 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return false;
 		}
 
+		private final static int STATE_INITIAL = 0; // no events yet
+		private final static int STATE_DOWN_1 = 1; // down first time
+		private final static int STATE_TWO_POINTERS = 9; // two finger events
+		private final static int STATE_TWO_POINTERS_FONT_SCALE = 12;  // Font scaling
+
+		int state = STATE_INITIAL;
+		int start_x = 0;
+		int start_y = 0;
+		int start_x2 = 0;
+		int start_y2 = 0;
+		int now_x = 0;
+		int now_y = 0;
+		int now_x2 = 0;
+		int now_y2 = 0;
+
+		int width = 0;
+		int height = 0;
+
+		int begDistance = 0;
+		int lastAval = 0;
+
 		public boolean onTouchEvent(MotionEvent event) {
-//			int aindex = event.getActionIndex();
-//			if (event.getAction() == MotionEvent.ACTION_POINTER_DOWN) {
-//				log.v("ACTION_POINTER_DOWN");
-//			}
+			int index = event.getActionIndex();
+			int x = (int)event.getX();
+			int y = (int)event.getY();
+			width = surface.getWidth();
+			height = surface.getHeight();
+			int minSize = ReaderView.this.lastsetWidth;
+			if (height < minSize) minSize = height;
+			int pinchTreshold = (minSize / TapHandler.PINCH_TRESHOLD_COUNT) * 2;
+			if ((event.getPointerCount() > 1) && (state == STATE_DOWN_1) && (!mDisableTwoPointerGestures) &&
+					(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))) {
+				begDistance = 0;
+				lastAval = 0;
+				state = STATE_TWO_POINTERS;
+				x = (int) event.getX(index);
+				y = (int) event.getY(index);
+				if (index == 1) {
+					start_x2 = x;
+					start_y2 = y;
+				}
+				if (index == 0) {
+					start_x = x;
+					start_y = y;
+				}
+				// lets detect pinch type
+				state = STATE_TWO_POINTERS_FONT_SCALE;
+			}
+			if (event.getAction() == MotionEvent.ACTION_DOWN) state = STATE_DOWN_1;
+				else if (event.getAction() == MotionEvent.ACTION_UP) state = STATE_INITIAL;
+					else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+						if (event.getPointerCount()>1) {
+							now_x = (int)event.getX(0);
+							now_y = (int)event.getY(0);
+							now_x2 = (int)event.getX(1);
+							now_y2 = (int)event.getY(1);
+						} else {
+							now_x = x;
+							now_y = y;
+						}
+						if (event.getPointerCount()>1) {
+							int distance1 = (int) (Math.sqrt(Math.abs(start_x2 - start_x) * Math.abs(start_x2 - start_x) +
+									Math.abs(start_y2 - start_y) * Math.abs(start_y2 - start_y)));
+							int distance2 = (int) (Math.sqrt(Math.abs(now_x2 - now_x) * Math.abs(now_x2 - now_x) +
+									Math.abs(now_y2 - now_y) * Math.abs(now_y2 - now_y)));
+							int aval = distance1 - distance2;
+							if (begDistance == 0) {
+								begDistance = aval;
+								lastAval = aval;
+							}
+//							Log.i(TAG, "onTouchEvent distance1 : " + distance1);
+//							Log.i(TAG, "onTouchEvent distance2 : " + distance2);
+//							Log.i(TAG, "onTouchEvent aval : " + aval);
+//							Log.i(TAG, "onTouchEvent begDistance : " + begDistance);
+							//aval = aval / pinchTreshold;
+							if (Math.abs(lastAval - aval)> pinchTreshold) {
+								if (aval < begDistance) zoomIn();
+								if (aval > begDistance) zoomOut();
+								lastAval = aval;
+							}
+						}
+					}
 			return detector.onTouchEvent(event);
 		}
 
@@ -1320,9 +1395,23 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (currentImageViewer == null)
 				return;
 			currentImageViewer = null;
+			Properties settings = getSettings();
 			unlockOrientation();
 			BackgroundThread.instance().postBackground(() -> doc.closeImage());
+			boolean bgWas = settings.getBool(Settings.PROP_BACKGROUND_COLOR_SAVE_WAS, false);
+			if (bgWas) {
+				int col = settings.getColor(Settings.PROP_BACKGROUND_COLOR_SAVE, Color.BLACK);
+				String tx = settings.getProperty(Settings.PROP_PAGE_BACKGROUND_IMAGE_SAVE, "(NONE)");
+				settings.setColor(PROP_BACKGROUND_COLOR, col);
+				settings.setProperty(PROP_PAGE_BACKGROUND_IMAGE, tx);
+				settings.setBool(PROP_BACKGROUND_COLOR_SAVE_WAS, false);
+				mActivity.setSettings(settings, 2000, true);
+			}
 			drawPage();
+			if (mActivity.getmReaderFrame() != null)
+				BackgroundThread.instance().postGUI(() -> {
+					mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
+				}, 300);
 		}
 
 		public BitmapInfo prepareImage() {
@@ -1350,7 +1439,24 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private void startImageViewer(ImageInfo image) {
 		currentImageViewer = new ImageViewer(image);
+		Properties settings = getSettings();
+		boolean custCol = settings.getBool(Settings.PROP_IMG_CUSTOM_BACKGROUND, false);
+		if (custCol) {
+			int col = settings.getColor(Settings.PROP_IMG_CUSTOM_BACKGROUND_COLOR, Color.BLACK);
+			int colBg = settings.getColor(Settings.PROP_BACKGROUND_COLOR, Color.BLACK);
+			String tx = settings.getProperty(Settings.PROP_PAGE_BACKGROUND_IMAGE, "(NONE)");
+			settings.setColor(PROP_BACKGROUND_COLOR, col);
+			settings.setColor(PROP_BACKGROUND_COLOR_SAVE, colBg);
+			settings.setProperty(PROP_PAGE_BACKGROUND_IMAGE_SAVE, tx);
+			settings.setProperty(PROP_PAGE_BACKGROUND_IMAGE, "(NONE)");
+			settings.setBool(PROP_BACKGROUND_COLOR_SAVE_WAS, true);
+			mActivity.setSettings(settings, 2000, true);
+		}
 		drawPage();
+		if (mActivity.getmReaderFrame() != null)
+			BackgroundThread.instance().postGUI(() -> {
+				mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
+			}, 300);
 	}
 
 	private boolean isImageViewMode() {
@@ -1379,8 +1485,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		private final static int STATE_TWO_POINTERS_VERT_MARGINS = 10; // Vertical margins control
 		private final static int STATE_TWO_POINTERS_HORZ_MARGINS = 11; // Horizontal margins control
 		private final static int STATE_TWO_POINTERS_FONT_SCALE = 12;  // Font scaling
-		private final static int STATE_TWO_POINTERS_DOWN = 13;  // Two fingers move down - next chapter
-		private final static int STATE_TWO_POINTERS_UP = 14; // Two fingers move down - previous chapter
+		private final static int STATE_TWO_POINTERS_DOWN = 13;  // Two fingers move down - next chapter (todo)
+		private final static int STATE_TWO_POINTERS_UP = 14; // Two fingers move up - previous chapter (todo)
 		private final static int STATE_THREE_POINTERS = 15; // three finger events
 
 		private final static int PINCH_TRESHOLD_COUNT = 15;
@@ -1652,16 +1758,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								ReaderAction[] actions = {
 										ReaderAction.GO_BACK
 								};
-								mActivity.showActionsPopupMenu(actions, new CRToolBar.OnActionHandler() {
-									@Override
-									public boolean onActionSelected(ReaderAction item) {
-										if (item == ReaderAction.GO_BACK) {
-											goToBookmark(hyplinkBookmark);
-											hyplinkBookmark=null;
-											return true;
-										}
-										return false;
+								mActivity.showActionsPopupMenu(actions, item -> {
+									if (item == ReaderAction.GO_BACK) {
+										goToBookmark(hyplinkBookmark);
+										hyplinkBookmark=null;
+										return true;
 									}
+									return false;
 								});
 							} else {
 								String sL = bookmark.getLinkPos();
@@ -2160,7 +2263,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			public void fail(Exception e) {
 				if (!forUserDic) {
 					BackgroundThread.ensureGUI();
-					mActivity.showToast("Pattern not found");
+					mActivity.showToast(R.string.pattern_not_found);
 				}
 			}
 
@@ -2586,7 +2689,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_left)).setImageDrawable(null);
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
 					}
-					//asdf
 					//TODO: настройки яркости я все равно хочу менять, тут надо будет это пересмотреть
 					if ((isBacklightControlFlick == BACKLIGHT_CONTROL_FLICK_LEFT) || (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT)) {
 						((ImageButton) grid.findViewById(R.id.tap_zone_show_btn_right)).setImageDrawable(null);
@@ -3189,7 +3291,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				changeAutoScrollSpeed(-1);
 				break;
 			case DCMD_SHOW_DICTIONARY:
-				mActivity.showDictionary();
+				DictsDlg dlg = new DictsDlg(mActivity, this, "", null, true);
+				dlg.show();
 				break;
 			case DCMD_OPEN_PREVIOUS_BOOK:
 				mActivity.loadPreviousDocument(() -> {
@@ -3344,7 +3447,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						animatePageFlip(-1, onFinishHandler);
 					else {
 						if ((mActivity.getScreenBlackpageInterval() != 0) &&
-								(curBlackpageInterval > mActivity.getScreenBlackpageInterval() - 1)) {
+								(curBlackpageInterval >= mActivity.getScreenBlackpageInterval() - 1)) {
 							curBlackpageInterval = 0;
 							bookView.draw(false, true);
 							BackgroundThread.instance().postGUI(() -> {
@@ -3834,8 +3937,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					mActivity.showToast(R.string.only_in_pro);
 					break;
 				}
-				UserDicDlg dlg = new UserDicDlg(((CoolReader)mActivity),0);
-				dlg.show();
+				UserDicDlg dlgU = new UserDicDlg(mActivity,0);
+				dlgU.show();
 				break;
 			case DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC:
 				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
@@ -4091,6 +4194,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		doc.applySettings(props);
 		//syncViewSettings(props, save, saveDelayed);
 		drawPage();
+		if (mActivity.getmReaderFrame() != null)
+			BackgroundThread.instance().postGUI(() -> {
+				mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
+			}, 300);
 	}
 
 	public static boolean eq(Object obj1, Object obj2)
@@ -4175,7 +4282,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		String helpFileContentId = mActivity.getCurrentLanguage() + settingsHash + "v" + mActivity.getVersion();
 		String lastHelpFileContentId = mActivity.getLastGeneratedHelpFileSignature();
 		File manual = generator.getHelpFileName(bookDir);
-		if (!manual.exists() || lastHelpFileContentId == null || !lastHelpFileContentId.equals(helpFileContentId)) {
+		if ((!manual.exists()) || (lastHelpFileContentId == null) || (!lastHelpFileContentId.equals(helpFileContentId))) {
 			log.d("Generating help file " + manual.getAbsolutePath());
 			mActivity.setLastGeneratedHelpFileSignature(helpFileContentId);
 			manual = generator.generateHelpFile(bookDir);
@@ -4402,9 +4509,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private void setBackgroundTexture(BackgroundTextureInfo texture, int color) {
 		log.v("setBackgroundTexture(" + texture + ", " + color + ")");
-		if (!currentBackgroundTexture.equals(texture) || currentBackgroundColor != color) {
+		int col = color;
+		if (!currentBackgroundTexture.equals(texture) || currentBackgroundColor != col) {
 			log.d("setBackgroundTexture( " + texture + " )");
-			currentBackgroundColor = color;
+			currentBackgroundColor = col;
 			currentBackgroundTexture = texture;
 			byte[] data = mEngine.getImageData(currentBackgroundTexture);
 			doc.setPageBackgroundTexture(data, texture.tiled ? 1 : 0);
@@ -8144,12 +8252,26 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
+	private String getAddCssValues() {
+		String addV = "";
+		boolean custBk = mActivity.settings().getBool(Settings.PROP_IMG_CUSTOM_BACKGROUND, false);
+		if (custBk) {
+			String col = mActivity.settings().getProperty(Settings.PROP_IMG_CUSTOM_BACKGROUND_COLOR, "0x000000");
+			col = col.replace("0x", "#");
+			addV = addV + "\n" + "image {background-color: " + col + " }";
+		}
+		return addV;
+	}
+
 	private String getCSSForFormat( DocumentFormat fileFormat )
 	{
 		if (fileFormat == null)
 			fileFormat = DocumentFormat.FB2;
 		File[] dataDirs = Engine.getDataDirectories(null, false, false);
 		String defaultCss = mEngine.loadResourceUtf8(fileFormat.getCSSResourceId());
+		String addV = getAddCssValues();
+		if (!StrUtils.isEmptyStr(addV))
+			if (!addV.startsWith("\n")) addV = "\n" + addV;
 		for ( File dir : dataDirs ) {
 			File file = new File( dir, fileFormat.getCssName() );
 			if (file.exists()) {
@@ -8162,10 +8284,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					if (p1 >= 0 && p2 >= 0 && p1 < p2 ) {
 						css = css.substring(0, p1) + "\n" + defaultCss + "\n" + css.substring(p2+2);
 					}
+					if (!StrUtils.isEmptyStr(addV)) css = css + addV;
 					return css;
 				}
 			}
 		}
+		if (!StrUtils.isEmptyStr(addV)) defaultCss = defaultCss + addV;
 		return defaultCss;
 	}
 

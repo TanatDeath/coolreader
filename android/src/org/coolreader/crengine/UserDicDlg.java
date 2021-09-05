@@ -290,13 +290,13 @@ public class UserDicDlg extends BaseDialog {
 					if ((openPage==1)) {
 						if (mCoolReader.getReaderView()==null) return false;
 						final UserDicEntry ude = mUserDic.get(position);
-						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), ude.getDic_word(), arg1);
+						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), ude.getDic_word(), arg1, false);
 						dlg.show();
 					}
 					if ((openPage==2)) {
 						if (mCoolReader.getReaderView()==null) return false;
 						final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
-						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), dshe.getSearch_text(), arg1);
+						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), dshe.getSearch_text(), arg1, false);
 						dlg.show();
 					}
 					return true;
@@ -309,7 +309,7 @@ public class UserDicDlg extends BaseDialog {
 			if (mCoolReader.getReaderView()==null) return false;
 			if (openPage==0) {
 				openContextMenu(UserDicList.this);
-				DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), mUserDic.get(position).getDic_word(), null);
+				DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), mUserDic.get(position).getDic_word(), null, false);
 				dlg.show();
 				dismiss();
 			}

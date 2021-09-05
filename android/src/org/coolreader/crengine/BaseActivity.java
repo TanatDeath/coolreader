@@ -3,7 +3,6 @@ package org.coolreader.crengine;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +25,7 @@ import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.CRDBServiceAccessor;
 import org.coolreader.db.MainDB;
-import org.coolreader.dic.WikiArticle;
+import org.coolreader.dic.wiki.WikiArticle;
 import org.coolreader.genrescollection.GenresCollection;
 import org.coolreader.geo.GeoToastView;
 import org.coolreader.geo.MetroStation;
@@ -63,7 +62,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -77,8 +75,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.dropbox.core.v2.team.BaseDfbReport;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
@@ -344,8 +340,8 @@ public class BaseActivity extends Activity implements Settings {
 		return mIsStarted;
 	}
 	
-	private String mVersion = "3.1";
-	
+	private String mVersion = "";
+
 	public String getVersion() {
 		return mVersion;
 	}
@@ -1709,12 +1705,38 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void showDicToast(String s, String msg, int dicT, String dicName) {
 		boolean bShown = false;
-		if (this instanceof CoolReader)
-			if (((CoolReader) this).getReaderView() != null)
+		if (this instanceof CoolReader) {
+			if (((CoolReader) this).getReaderView() != null) {
 				if (((CoolReader) this).getReaderView().getSurface() != null) {
 					bShown = true;
 					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), dicT, dicName);
 				}
+			} else {
+				bShown = true;
+				showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).mHomeFrame, dicT, dicName);
+			}
+		}
+		if (!bShown) {
+			showToast(msg);
+		}
+	}
+
+	public void showDicToastExt(String s, String msg, int dicT, String dicName, Dictionaries.DictInfo curDict, Object dicStructObject) {
+		boolean bShown = false;
+		if (this instanceof CoolReader) {
+			if (((CoolReader) this).getReaderView() != null)
+				if (((CoolReader) this).getReaderView().getSurface() != null) {
+					bShown = true;
+					showDicToastExt(s, msg, Toast.LENGTH_LONG,
+							((CoolReader) this).getReaderView().getSurface(), dicT, dicName, curDict, dicStructObject);
+				}
+			if (!bShown)
+				if (((CoolReader) this).mHomeFrame != null) {
+					bShown = true;
+					showDicToastExt(s, msg, Toast.LENGTH_LONG,
+						((CoolReader) this).mHomeFrame, dicT, dicName, curDict, dicStructObject);
+				}
+		}
 		if (!bShown) {
 			showToast(msg);
 		}
@@ -1725,6 +1747,14 @@ public class BaseActivity extends Activity implements Settings {
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showToast(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName);
+	}
+
+	public void showDicToastExt(String s, String msg, int duration, View view, int dicT, String dicName,
+								Dictionaries.DictInfo curDict, Object dicStructObject) {
+		log.v("showing toast: " + msg);
+		View view1 = view;
+		if (view1 == null) view1 = getContentView();
+		DicToastView.showToastExt(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName, curDict, dicStructObject);
 	}
 
 	public void showDicToastWiki(String s, String msg, int duration, View view, int dicT, String dicName,
@@ -3104,6 +3134,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_BLOCK_SCALE, "0");
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMOUT_INLINE_SCALE, "0");
 			props.applyDefault(ReaderView.PROP_IMG_SCALING_ZOOMIN_INLINE_SCALE, "0");
+			props.applyDefault(ReaderView.PROP_IMG_CUSTOM_BACKGROUND, "0");
 			
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_LEFT, hmargin);
 			props.applyDefault(ReaderView.PROP_PAGE_MARGIN_RIGHT, hmargin);

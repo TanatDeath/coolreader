@@ -4,7 +4,9 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
 
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
@@ -36,6 +38,7 @@ public class SearchDlg extends BaseDialog {
 	BookInfo mBookInfo;
 	Button mSkim;
 	Button mDoSearch;
+	Button mDoSearchWeb;
 	Button mSearchPages;
 	Button mBtnCaseSentitive;
 	Button mBtnSearchReverse;
@@ -233,6 +236,7 @@ public class SearchDlg extends BaseDialog {
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		int colorGrayC = a.getColor(1, Color.GRAY);
+		int colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
@@ -245,6 +249,8 @@ public class SearchDlg extends BaseDialog {
         mInflater = LayoutInflater.from(getContext());
         mDialogView = mInflater.inflate(R.layout.search_dialog, null);
     	mEditView = mDialogView.findViewById(R.id.search_text);
+		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
+		mEditView.setHintTextColor(colorIcon128);
     	if (initialText != null)
     		mEditView.setText(initialText);
 		mSkim = mDialogView.findViewById(R.id.btn_skim);
@@ -254,6 +260,7 @@ public class SearchDlg extends BaseDialog {
 			cancel();
 		});
 		mSkim.setBackgroundColor(colorGrayCT2);
+		Utils.setDashedButton(mSkim);
 		mSearchPages = mDialogView.findViewById(R.id.btn_search_pages);
     	mSearchPages.setOnClickListener(v -> searchPagesClick());
 		mSearchPages.setBackgroundColor(colorGrayCT2);
@@ -262,8 +269,22 @@ public class SearchDlg extends BaseDialog {
 		mDoSearch.setOnClickListener(v -> onPositiveButtonClick());
 		mDoSearch.setBackgroundColor(colorGrayCT2);
 		Utils.setDashedButton(mDoSearch);
+		mDoSearchWeb = mDialogView.findViewById(R.id.btn_do_search_web);
+		mDoSearchWeb.setOnClickListener(v -> onPositiveButtonClick());
+		mDoSearchWeb.setBackgroundColor(colorGrayCT2);
+		mDoSearchWeb.setOnClickListener(v -> {
+			final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+			emailIntent.putExtra(SearchManager.QUERY, mEditView.getText().toString().trim());
+			try {
+				mCoolReader.startActivity(emailIntent);
+			} catch (Exception e) {
+				mCoolReader.showToast(mCoolReader.getString(R.string.intent_error)+": "+e.getMessage());
+			}
+		});
+		Utils.setDashedButton(mDoSearchWeb);
 		Button btnMinus1 = mDialogView.findViewById(R.id.search_dlg_clear_hist_btn);
 		btnMinus1.setBackgroundColor(colorGrayCT2);
+		Utils.setDashedButton(btnMinus1);
 
 		btnMinus1.setOnClickListener(v -> {
 			activity.getDB().clearSearchHistory(mBookInfo);
@@ -296,6 +317,7 @@ public class SearchDlg extends BaseDialog {
 			body.addView(mList);
 		});
 		mCoolReader.tintViewIcons(mDialogView);
+		BackgroundThread.instance().postGUI(() -> mEditView.requestFocus(), 200);
 		//setView(mDialogView);
 		//setFlingHandlers(mList, null, null);
 		// setup buttons

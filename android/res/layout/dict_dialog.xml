@@ -15,6 +15,69 @@
 	android:layout_marginRight="0dip"
 	>
 
+	<TableLayout
+			android:id="@+id/tl_dont_hide"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:stretchColumns="1"
+			android:orientation="vertical">
+		<TableRow
+				android:layout_weight="1"
+				>
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					android:layout_width="0dip"
+					android:layout_weight="1"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical|center_horizontal"
+					android:orientation="horizontal">
+				<EditText
+						android:id="@+id/lang_from"
+						style="@style/TextAppearance.Widget.EditText"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:inputType="none"
+						android:singleLine="true"
+						android:text="en" />
+				<TextView
+						style="@style/TextAppearance.Medium"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:singleLine="true"
+						android:textColor="?attr/colorIcon"
+						android:text="->" />
+				<EditText
+						android:id="@+id/lang_to"
+						style="@style/TextAppearance.Widget.EditText"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:inputType="none"
+						android:singleLine="true"
+						android:text="ru" />
+			</LinearLayout>
+			<Button
+					android:id="@+id/btn_dont_hide"
+					android:layout_width="0dip"
+					android:checked="true"
+					android:layout_weight="2"
+					android:tag="tint"
+					android:maxLines="3"
+					android:textColor="?attr/colorIcon"
+					android:drawableLeft="@drawable/icons8_toc_item_normal"
+					android:text="@string/dont_close_dialog" />
+		</TableRow>
+	</TableLayout>
+
+	<org.coolreader.layouts.FlowLayout
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/fl_quick_trasl"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_margin="1dip"
+			android:paddingLeft="3dip"
+			android:paddingRight="3dip"
+			android:orientation="vertical"
+			/>
+
 	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
@@ -65,9 +128,26 @@
 
 			</RelativeLayout>
 			<ImageButton
+					android:id="@+id/dict_dlg_clear_btn"
+					android:src="?attr/attr_icons8_file"
+					android:tag="tint"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="5dip"
+					android:layout_marginBottom="5dip"
+					android:layout_marginLeft="5dip"
+					android:layout_marginRight="5dip"
+					android:focusable="true"
+					android:focusableInTouchMode="true"
+					android:background="@null"
+					android:layout_gravity="center_vertical"
+					android:gravity="center_vertical"
+					android:contentDescription="@string/dlg_button_delete_word"
+					/>
+			<ImageButton
 				android:id="@+id/dict_dlg_minus2_btn"
 				android:src="?attr/attr_icons8_scissors"
-                                android:tag="tint"
+                android:tag="tint"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="5dip"
@@ -79,7 +159,7 @@
 				android:background="@null"
 				android:layout_gravity="center_vertical"
 				android:gravity="center_vertical"
-				android:contentDescription="@string/dlg_button_delete_word"
+				android:contentDescription="@string/button_clear"
 				/>
 		</LinearLayout>
 

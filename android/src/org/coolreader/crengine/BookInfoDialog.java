@@ -53,7 +53,7 @@ public class BookInfoDialog extends BaseDialog {
 
 	public final static int BOOK_INFO = 0;
 	public final static int OPDS_INFO = 1;
-		public final static int OPDS_FINAL_INFO = 2;
+	public final static int OPDS_FINAL_INFO = 2;
 
 	private final CoolReader mCoolReader;
 	private final BookInfo mBookInfo;
@@ -95,6 +95,8 @@ public class BookInfoDialog extends BaseDialog {
 	TextView tvML;
 	Button btnCalc;
 	ScrollView mainView;
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
 	private static int DM_FRAGMENT = 1;
 	private static int DM_FULL = 2;
@@ -190,6 +192,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.title", R.string.book_info_book_title);
 		mLabelMap.put("book.date", R.string.book_info_book_date);
 		mLabelMap.put("book.series", R.string.book_info_book_series_name);
+		mLabelMap.put("book.status", R.string.book_info_book_status);
 		//mLabelMap.put("book.genres", R.string.book_info_genres); // CR implementation
 		mLabelMap.put("book.language", R.string.book_info_book_language);
 		mLabelMap.put("book.genre", R.string.book_info_book_genre);
@@ -301,6 +304,22 @@ public class BookInfoDialog extends BaseDialog {
 		TextView valueView = (TextView)tableRow.findViewById(R.id.value);
 		nameView.setText(name);
 		valueView.setText(value);
+		if (item.infoTitle.equals("book.status")) {
+			int colorBlue = themeColors.get(R.attr.colorThemeBlue);
+			int colorGreen = themeColors.get(R.attr.colorThemeGreen);
+			int colorGray = themeColors.get(R.attr.colorThemeGray);
+			int colorIcon = themeColors.get(R.attr.colorIcon);
+			valueView.setTextColor(colorIcon);
+			if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
+					contains("[" + mCoolReader.getString(R.string.book_state_reading) + "]"))
+				valueView.setTextColor(colorGreen);
+			else if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
+					contains("[" + mCoolReader.getString(R.string.book_state_toread) + "]"))
+				valueView.setTextColor(colorBlue);
+			else if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
+					contains("[" + mCoolReader.getString(R.string.book_state_finished) + "]"))
+				valueView.setTextColor(colorGray);
+		}
 		valueView.setTag(name);
 		if (name.equals(activity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
 		if (name.equals(activity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
@@ -421,9 +440,12 @@ public class BookInfoDialog extends BaseDialog {
 					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 				}
 				if (dfi != null) {
-					cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, translButton, dfi, fi, langf, lang, "", null,
-							TranslationDirectionDialog.FOR_COMMON
-							, null);
+					FileInfo finalDfi = dfi;
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
+							() -> cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, translButton, finalDfi,
+									fi, langf, lang, "", null,
+									TranslationDirectionDialog.FOR_COMMON
+									, null), 200));
 				}
 				dismiss();
 			});
@@ -633,6 +655,8 @@ public class BookInfoDialog extends BaseDialog {
 				}
 			}
 		mCoolReader = (CoolReader) activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mBookInfo = bi;
 		mActionType = actionType;
 		mFileInfoCloud = fiOPDS;

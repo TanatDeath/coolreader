@@ -29,6 +29,7 @@ import org.coolreader.cloud.yandex.YndCloudSettings;
 import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.CalibreCatalogEditDialog;
+import org.coolreader.crengine.DictsDlg;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.InputDialog;
@@ -108,6 +109,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -159,6 +161,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         public int wasY;
         public int cnt;
     }
+
+	public String lastDicText; // when the dic is in "dont hide mode"
+	public String lastDicLangFrom;
+	public String lastDicLangTo;
+	public boolean lastDicSkip = false;
+	//public DictsDlg lastDicDlg;
 
     //move to flavor
     public GeoLastData geoLastData = new GeoLastData(this);
@@ -228,7 +236,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private CRToolBar mBrowserToolBar;
 	public BrowserViewLayout mBrowserFrame;
 	public CRRootView mHomeFrame;
-	private Engine mEngine;
+	public Engine mEngine;
 	public PictureReceived picReceived = null;
 
 	public HashMap<String, UserDicEntry> getmUserDic() {
@@ -1609,8 +1617,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 				showRootWindow();
 				setSystemUiVisibility();
-
+				//asdf
 				notifySettingsChanged();
+				// prevent if background was set temporarily
+				if (settings() != null) {
+					boolean bgWas = settings().getBool(Settings.PROP_BACKGROUND_COLOR_SAVE_WAS, false);
+					if (bgWas) {
+						int col = settings().getColor(Settings.PROP_BACKGROUND_COLOR_SAVE, Color.BLACK);
+						String tx = settings().getProperty(Settings.PROP_PAGE_BACKGROUND_IMAGE_SAVE, "(NONE)");
+						settings().setColor(PROP_BACKGROUND_COLOR, col);
+						settings().setProperty(PROP_PAGE_BACKGROUND_IMAGE, tx);
+						settings().setBool(PROP_BACKGROUND_COLOR_SAVE_WAS, false);
+						setSettings(settings(), 2000, true);
+					}
+				}
 
 				showNotifications();
 			});
@@ -1997,9 +2017,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void showRootWindow() {
 		if (null != mBrowser)
 			mBrowser.stopCurrentScan();
-		if ((mCurrentFrame != mReaderFrame) || (mReaderFrame == null)) {
+		if ((mCurrentFrame != mReaderFrame) || (mReaderFrame == null) ||
+				(DeviceInfo.isEinkScreen(getScreenForceEink()))) {
 			setCurrentFrame(mHomeFrame);
 		} else {
+			// this hack (with empty window) was needed for some phone - root window was black
 			ArrayList<String[]> vl = new ArrayList<String[]>();
 			final AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
 					this,
@@ -2365,6 +2387,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void showDictionary() {
 		findInDictionaryInternal(null, null, null);
+
 	}
 	
 	@Override
@@ -3265,13 +3288,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				String[] sQuickDirsArr = sQuickDirs.split(";");
 				int iCnt = 0;
 				ArrayList<String> sButtons = new ArrayList<>();
-				if ((trType != EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK) && (editBookTranslCallback == null)) sButtons.add(getString(R.string.all_languages));
+				if ((trType != EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK)
+						&& ((editBookTranslCallback == null) || (iType == TranslationDirectionDialog.FOR_COMMON_OPTIONS)))
+					sButtons.add(getString(R.string.all_languages));
 				for (String s: sQuickDirsArr)
 					if (s.contains("=")) {
 						sButtons.add(s.replace("=", " -> "));
 						iCnt++;
 					}
-				sButtons.add(getString(R.string.dictionary_settings));
+				if (iType != TranslationDirectionDialog.FOR_COMMON_OPTIONS)
+					sButtons.add(getString(R.string.dictionary_settings));
 				if (iCnt > 0) {
 					View anch = anchor;
 					if (anch == null) {
@@ -3381,6 +3407,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								if (!StrUtils.isEmptyStr(search_text))
 									findInDictionary(search_text, null, null);
 							}
+							if (editBookTranslCallback != null) editBookTranslCallback.done(file.lang_from + " -> " + file.lang_to);
 						}
 					});
 			dlgA.show();
@@ -3675,6 +3702,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					}
 				}
 				if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
+				itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
+				itemsBook.add(new BookInfoEntry("book.status", Utils.formatReadingState(CoolReader.this, fi),"text"));
 				if (!StrUtils.isEmptyStr(fi.language)) {
 					itemsBook.add(new BookInfoEntry("book.language",fi.language,"text"));
 				}
