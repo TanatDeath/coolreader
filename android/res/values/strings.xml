@@ -462,7 +462,7 @@
     <string name="dlg_catalog_edit_onion_def_proxy">Set proxy to 127.0.0.1:8118 for onion links</string>
     <string name="dlg_calibre_catalog_edit_title">Calibre library</string>
     <string name="dlg_catalog_is_local">Local</string>
-    <string name="dlg_catalog_is_remote_yd">Remote (Yandex disc)</string>
+    <string name="dlg_catalog_is_remote_yd">Remote (Yandex.Disk)</string>
     <string name="dlg_catalog_local_folder">Local folder</string>
     <string name="dlg_catalog_remote_folder">Remote folder</string>
     <string name="options_format_min_space_width_percent" formatted="false">Min space width %</string>
@@ -874,13 +874,13 @@
     <string name="save_bookmarks_to_cloud">Save bookmarks to cloud storage</string>
     <string name="load_bookmarks_from_cloud">Load bookmarks from cloud storage</string>
     <string name="cloud_menu">Cloud storage menu</string>
-    <string name="save_current_book_to_cloud_ynd">Save book to Yandex disc</string>
+    <string name="save_current_book_to_cloud_ynd">Save book to Yandex.Disk</string>
     <string name="save_current_book_to_cloud_ynd2">Save opened book to this folder</string>
     <string name="save_current_book_to_cloud_ynd3">Save to this folder:</string>
     <string name="save_current_book_to_cloud_email">Send book via Email</string>
     <string name="open_book_from_gd">Open book from Google Drive</string>
     <string name="open_book_from_dbx">Open book from Dropbox</string>
-    <string name="open_book_from_ynd">Open book from Yandex disc</string>
+    <string name="open_book_from_ynd">Open book from Yandex.Disk</string>
     <string name="open_book_from_gd_short">Google Drive</string>
     <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="open_book_from_y_short">Yandex</string>
@@ -1114,8 +1114,8 @@
     <string name="dbx_auth_finished_error">Dropbox: authorization error</string>
     <string name="dbx_token_hint">Paste token / URL here</string>
     <string name="ynd_auth">Authorize in Yandex</string>
-    <string name="ynd_auth_finished_ok">Yandex disc: authorization finished successfully</string>
-    <string name="ynd_auth_finished_error">Yandex disc: authorization error</string>
+    <string name="ynd_auth_finished_ok">Yandex.Disk: authorization finished successfully</string>
+    <string name="ynd_auth_finished_error">Yandex.Disk: authorization error</string>
     <string name="ynd_long_tap">You can open this window later via long tap on Yandex icon. Select an action:</string>
     <string name="litres_long_tap">You can open this window later via long tap on Litres icon</string>
     <string name="litres_auth_finished_ok">Litres: authorization finished successfully</string>
@@ -1203,17 +1203,17 @@
     <string name="selectionmodes_settings_add_info">Settings for \"Common mode\", \"Selection mode\" and \"Inspector mode\" selection modes</string>
     <string name="page_color_settings">Colors and night mode</string>
     <string name="page_margins_settings">Page and screen margins</string>
-    <string name="yandex_settings">Yandex disc</string>
-    <string name="yandex_settings_v">Open Yandex disc settings dialog</string>
+    <string name="yandex_settings">Yandex.Disk</string>
+    <string name="yandex_settings_v">Open Yandex.Disk settings dialog</string>
     <string name="dropbox_settings">Dropbox</string>
     <string name="dropbox_settings_v">Open Dropbox settings dialog</string>
     <string name="cloud_sync_variant">Cloud syncronization variant</string>
     <string name="cloud_sync_variant1">Disabled</string>
     <string name="cloud_sync_variant2">Via filesystem</string>
-    <string name="cloud_sync_variant3">Via Yandex disc</string>
+    <string name="cloud_sync_variant3">Via Yandex.Disk</string>
     <string name="cloud_sync_variant1_v">Cloud syncronization is disabled</string>
     <string name="cloud_sync_variant2_v">Syncronization will be done via local filesystem - you need to use external tool to sync cr3e/cloudsync folder across devices</string>
-    <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex disc (folder KnownReader is used)</string>
+    <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex.Disk (folder KnownReader is used)</string>
     <string name="switch_profile_note">Profile switching is enabled only when book is open</string>
     <string name="settings_info">Global settings are italic (other - depends on profile)</string>
     <string name="settings_info_short">(global settings are italic)</string>
@@ -1256,7 +1256,7 @@
     <string name="whole_page_to_dic">Translate whole page</string>
     <string name="settings_saved">Settings were saved</string>
     <string name="no_cloud_files">No files found</string>
-    <string name="ynd_translate_dics_info">Yandex Translate languages</string>
+    <string name="ynd_translate_dics_info">Yandex.Translate languages</string>
     <string name="lingvo_translate_dics_info">Lingvo Online languages</string>
     <string name="translate_dics_switch">Vice versa</string>
     <string name="invalid_dic">Current dictionary are invalid! Set up the dictionary</string>
@@ -1291,7 +1291,7 @@
     <string name="fonts_deleted_full">Font files deleted</string>
     <string name="delete_texture">Delete background file?</string>
     <string name="texture_deleted">Background file deleted...</string>
-    <string name="wd_time_left">Stop TTS after %1$s min</string>
+    <string name="wd_time_left">Stop reading aloud after %1$s min</string>
     <string name="wd_decrease_vol">Device is still, decrease volume from %1$s to %2$s</string>
     <string name="wd_still">Device is still still :), good night!</string>
     <string name="wd_sett">TTS settings</string>
@@ -1339,8 +1339,8 @@
     <string name="category">category / genre</string>
     <string name="ynd_set_def">Set as home folder?</string>
     <string name="warn_hang">Do you want to open last document?</string>
-    <string name="ynd_home_folder">Yandex disc home folder</string>
-    <string name="ynd_home_folder_hint">To change it - open Yandex disc (from main window), locate the folder, then long-tap \"home\" button</string>
+    <string name="ynd_home_folder">Yandex.Disk home folder</string>
+    <string name="ynd_home_folder_hint">To change it - open Yandex.Disk (from main window), locate the folder, then long-tap \"home\" button</string>
     <string name="mi_folder_authors_series">All author\"s series</string>
     <string name="mi_folder_authors_books">All author\"s books</string>
     <string name="mi_folder_series_authors">All series\" authors</string>
@@ -1445,7 +1445,7 @@
     <string name="action_show_onyx_backlight_system_dialog">Show the system dialog for setting the backlight</string>
     <string name="online_dic_exceeded">Sorry, online ditionary limit exceeded. Try again later</string>
     <string name="manual_open_error">Error while opening manual</string>
-    <string name="ynd_translate_settings">Yandex translate</string>
+    <string name="ynd_translate_settings">Yandex.Translate</string>
     <string name="lingvo_settings">Lingvo online</string>
     <string name="lingvo_settings_add_info">Use your own lingvo online token (if specified)</string>
     <string name="lingvo_token">Lingvo online token</string>
@@ -1460,9 +1460,9 @@
     <string name="sync_confirmation_new_reading_position">New reading position found for this book, update?</string>
     <string name="bookmarks_keepalive_">Delete copies of bookmarks older than…</string>
     <string name="read_aloud">Read aloud</string>
-    <string name="ynd_cloud_settings">Yandex cloud settings</string>
-    <string name="ynd_oauth">Yandex cloud OAuth token</string>
-    <string name="ynd_folder_id">Yandex cloud folder id</string>
+    <string name="ynd_cloud_settings">Yandex.Cloud settings</string>
+    <string name="ynd_oauth">Yandex.Cloud OAuth token</string>
+    <string name="ynd_folder_id">Yandex.Cloud folder id</string>
     <string name="authors_aliases_load">Load author\"s aliases</string>
     <string name="authors_aliases_load_add_info">Load author\"s aliases from external file</string>
     <string name="authors_aliases_loading">Author\"s aliases is loading</string>
@@ -1596,7 +1596,7 @@
     <string name="add_opds_catalog">Add OPDS catalog</string>
     <string name="add_remove_litres_catalog">Add / remove Litres catalog</string>
     <string name="add_calibre_catalog_local">Add Calibre local library</string>
-    <string name="add_calibre_catalog_yd">Add Calibre remore (Yandex disc) library</string>
+    <string name="add_calibre_catalog_yd">Add Calibre remore (Yandex.Disk) library</string>
     <string name="calibre_search">Search (calibre)</string>
     <string name="calibre_authors">Authors (calibre)</string>
     <string name="calibre_titles">Titles (calibre)</string>

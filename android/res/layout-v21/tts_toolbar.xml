@@ -152,7 +152,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
-				android:layout_marginBottom="15dp"
+				android:layout_marginBottom="3dp"
 				>
 				<ImageButton android:id="@+id/btn_vol_down"
 					style="@style/TextAppearance.Small"
@@ -197,7 +197,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
-				android:layout_marginBottom="15dp"
+				android:layout_marginBottom="3dp"
 				>
 				<ImageButton android:id="@+id/btn_freq_down"
 					style="@style/TextAppearance.Small"
@@ -234,6 +234,131 @@
 					android:layout_marginRight="3dip"
 					android:src="?attr/attr_icons8_rate_up"
 					/>
+			</LinearLayout>
+		</TableRow>
+		<TableRow>
+			<LinearLayout
+					android:orientation="horizontal"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:baselineAligned="true"
+					android:gravity="center_vertical"
+					android:layout_marginBottom="15dp"
+					>
+				<Button
+						android:id="@+id/load_vol_1"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="1"
+						android:text="1" />
+
+				<Button
+						android:id="@+id/load_vol_2"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="2"
+						android:text="2" />
+				<Button
+						android:id="@+id/load_vol_3"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="3"
+						android:text="3" />
+			</LinearLayout>
+			<LinearLayout
+					android:orientation="horizontal"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:baselineAligned="true"
+					android:gravity="center_vertical"
+					android:layout_marginBottom="15dp"
+					>
+				<Button
+						android:id="@+id/load_speed_1"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="1"
+						android:text="1" />
+				<Button
+						android:id="@+id/load_speed_2"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="2"
+						android:text="2" />
+				<Button
+						android:id="@+id/load_speed_3"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="3"
+						android:text="3" />
 			</LinearLayout>
 		</TableRow>
 	</TableLayout>

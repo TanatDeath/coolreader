@@ -4108,7 +4108,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	EinkScreen.EinkUpdateMode updMode = EinkScreen.EinkUpdateMode.Unspecified;
 	int updInterval = -1;
 
-	boolean skipFallbackWarning = false;
+	public boolean skipFallbackWarning = false;
 
 	private void applySettings(Properties props) {
 		bNeedRedrawOnce = true;

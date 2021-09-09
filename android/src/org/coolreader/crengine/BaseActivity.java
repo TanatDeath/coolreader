@@ -1905,8 +1905,8 @@ public class BaseActivity extends Activity implements Settings {
 				if (load_1 != null) {
 					int vl = settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT1, -1);
 					String sVl = String.valueOf(vl);
-					if (vl == -1) sVl = "s";
-					load_1.setText("1:"+sVl);
+					if (vl == -1) sVl = "?";
+					load_1.setText(sVl);
 					load_1.setBackgroundColor(colorGray);
 					load_1.setOnClickListener((v) -> {
 						rv.skipFallbackWarning = true;
@@ -1922,8 +1922,8 @@ public class BaseActivity extends Activity implements Settings {
 				if (load_2 != null) {
 					int vl = settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT2, -1);
 					String sVl = String.valueOf(vl);
-					if (vl == -1) sVl = "s";
-					load_2.setText("2:"+sVl);
+					if (vl == -1) sVl = "?";
+					load_2.setText(sVl);
 					load_2.setBackgroundColor(colorGray);
 					load_2.setOnClickListener((v) -> {
 						rv.skipFallbackWarning = true;
@@ -1939,8 +1939,8 @@ public class BaseActivity extends Activity implements Settings {
 				if (load_3 != null) {
 					int vl = settings().getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT3, -1);
 					String sVl = String.valueOf(vl);
-					if (vl == -1) sVl = "s";
-					load_3.setText("3:"+sVl);
+					if (vl == -1) sVl = "?";
+					load_3.setText(sVl);
 					load_3.setBackgroundColor(colorGray);
 					load_3.setOnClickListener((v) -> {
 						rv.skipFallbackWarning = true;

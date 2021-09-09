@@ -382,6 +382,8 @@
     <attr name="attr_icons8_book_scan" format="reference" />
     <attr name="attr_icons8_book_tap" format="reference" />
     <attr name="attr_icons8_book_long_tap" format="reference" />
+    <attr name="attr_icons8_save_small" format="reference" />
+    <attr name="attr_icons8_dic_list" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

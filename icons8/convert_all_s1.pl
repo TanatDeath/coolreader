@@ -24,7 +24,8 @@ my %ic_smaller_list=(
         'icons8_css.svg' => 'icons8_css.png',
         'icons8_page.svg' => 'icons8_page.png',
         'icons8_settings.svg' => 'icons8_settings.png',
-        'icons8_cursor.svg' => 'icons8_cursor.png'
+        'icons8_cursor.svg' => 'icons8_cursor.png',
+        'icons8_save_small.svg' => 'icons8_save_small.png'
 );
 
 my %ic_actions_list=(
@@ -96,7 +97,8 @@ my %ic_actions_list=(
         'icons8_book_tap.svg' => 'icons8_book_tap.png',
         'icons8_bookmark_simple_fast_add.svg' => 'icons8_bookmark_simple_fast_add.png',
         'icons8_bookmark_simple_add.svg' => 'icons8_bookmark_simple_add.png',
-        'icons8_help.svg' => 'icons8_help.png'
+        'icons8_help.svg' => 'icons8_help.png',
+        'icons8_dic_list.svg' => 'icons8_dic_list.png'
 );
 
 my %ic_menu_list=(

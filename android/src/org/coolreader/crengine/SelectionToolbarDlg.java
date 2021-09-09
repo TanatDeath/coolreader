@@ -66,7 +66,7 @@ public class SelectionToolbarDlg {
 	ImageButton btnSelectionDict;
 	ImageButton btnSelectionEmail;
 	ImageButton btnSelectionFind;
-	ImageButton btnSelectionCancel;
+	ImageButton btnSelectionCite;
 	ImageButton btnSelectionMore;
 
 	static public void showDialog(CoolReader coolReader, ReaderView readerView, final Selection selection)
@@ -305,26 +305,21 @@ public class SelectionToolbarDlg {
 			String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
 			if (!sTranspButtons.equals("0")) c.setAlpha(130);
 				else c.setAlpha(255);
-			llAddButtons.findViewById(R.id.btn_quick_bookmark).setBackgroundDrawable(c);
-			llAddButtons.findViewById(R.id.btn_quick_bookmark).setOnClickListener(v -> {
-				Bookmark bmk = new Bookmark();
-				bmk.setType(Bookmark.TYPE_COMMENT);
-				bmk.setPosText(selection.text);
-				bmk.setStartPos(selection.startPos);
-				bmk.setEndPos(selection.endPos);
-				bmk.setPercent(selection.percent);
-				bmk.setTitleText(selection.chapter);
-				bmk.setIsCustomColor(0);
-				bmk.setCustomColor(Utils.colorToHex(0));
-				bmk.setShortContext(BookmarkEditDialog.getContextText(mCoolReader, selection.text));
-				bmk.setFullContext(BookmarkEditDialog.getFullContextText(mCoolReader));
-				mReaderView.addBookmark(bmk);
+			llAddButtons.findViewById(R.id.selection_bookmark).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.selection_bookmark).setOnClickListener(v -> {
+				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_COMMENT, "");
 				closeDialog(true);
 			});
-			llAddButtons.findViewById(R.id.btn_cite).setBackgroundDrawable(c);
-			llAddButtons.findViewById(R.id.btn_cite).setOnClickListener(v -> {
-				saveUserDic(true, "", selection, mCoolReader, mReaderView);
+			llAddButtons.findViewById(R.id.selection_bookmark).setOnLongClickListener(v -> {
+				BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
+				dlg.show();
 				closeDialog(true);
+				return true;
+			});
+			llAddButtons.findViewById(R.id.btn_correction).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_correction).setOnClickListener(v -> {
+				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_CORRECTION, selection.text);
+				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
 			llAddButtons.findViewById(R.id.btn_user_dic).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_user_dic).setOnClickListener(v -> {
@@ -481,7 +476,7 @@ public class SelectionToolbarDlg {
 		if (addButtonEnabled) toggleAddButtons(true);
 		initRecentDics();
 		// set up buttons
-		btnSelectionBookmark = llButtonsRow.findViewById(R.id.selection_bookmark);
+		btnSelectionBookmark = llButtonsRow.findViewById(R.id.btn_quick_bookmark);
 		if (btnSelectionBookmark != null)
 			btnSelectionBookmark.setBackgroundDrawable(colorButtons);
 		btnSelectionCopy = llButtonsRow.findViewById(R.id.selection_copy);
@@ -496,9 +491,9 @@ public class SelectionToolbarDlg {
 		btnSelectionFind = llButtonsRow.findViewById(R.id.selection_find);
 		if (btnSelectionFind != null)
 			btnSelectionFind.setBackgroundDrawable(colorButtons);
-		btnSelectionCancel = llButtonsRow.findViewById(R.id.selection_cancel);
-		if (btnSelectionCancel != null)
-			btnSelectionCancel.setBackgroundDrawable(colorButtons);
+		btnSelectionCite = llButtonsRow.findViewById(R.id.selection_cite);
+		if (btnSelectionCite != null)
+			btnSelectionCite.setBackgroundDrawable(colorButtons);
 		btnSelectionMore = llButtonsRow.findViewById(R.id.selection_more);
 		if (btnSelectionMore != null)
 			btnSelectionMore.setBackgroundDrawable(null);
@@ -509,13 +504,23 @@ public class SelectionToolbarDlg {
 	private void setupEvents() {
 		if (btnSelectionBookmark != null) {
 			btnSelectionBookmark.setOnClickListener(v -> {
-				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_COMMENT, "");
+				Bookmark bmk = new Bookmark();
+				bmk.setType(Bookmark.TYPE_COMMENT);
+				bmk.setPosText(selection.text);
+				bmk.setStartPos(selection.startPos);
+				bmk.setEndPos(selection.endPos);
+				bmk.setPercent(selection.percent);
+				bmk.setTitleText(selection.chapter);
+				bmk.setIsCustomColor(0);
+				bmk.setCustomColor(Utils.colorToHex(0));
+				bmk.setShortContext(BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+				bmk.setFullContext(BookmarkEditDialog.getFullContextText(mCoolReader));
+				mReaderView.addBookmark(bmk);
 				closeDialog(true);
 			});
 
 			btnSelectionBookmark.setOnLongClickListener(v -> {
-				BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
-				dlg.show();
+				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_COMMENT, "");
 				closeDialog(true);
 				return true;
 			});
@@ -571,8 +576,11 @@ public class SelectionToolbarDlg {
 				return true;
 			});
 		}
-		if (btnSelectionCancel != null)
-			btnSelectionCancel.setOnClickListener(v -> closeDialog(true));
+		if (btnSelectionCite != null)
+			btnSelectionCite.setOnClickListener(v -> {
+				saveUserDic(true, "", selection, mCoolReader, mReaderView);
+				closeDialog(true);
+			});
 		new BoundControlListener(llSliderTop.findViewById(R.id.selection_bound_control_t), true);
 		new BoundControlListener(llSliderBottom.findViewById(R.id.selection_bound_control_b), false);
 		llSliderTop.findViewById(R.id.btn_next_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,

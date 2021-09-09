@@ -52,6 +52,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -114,6 +115,12 @@ public class TTSToolbarDlg implements Settings {
 	private String mForcedLanguage;
 	private String mForcedVoice;
 	private int mTTSSpeedPercent = 50;		// 50% (normal)
+	private Button mLoadSpeed1;
+	private Button mLoadSpeed2;
+	private Button mLoadSpeed3;
+	private Button mLoadVol1;
+	private Button mLoadVol2;
+	private Button mLoadVol3;
 
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
@@ -902,6 +909,27 @@ public class TTSToolbarDlg implements Settings {
 		}
 	}
 
+	private void updateSaveButtons() {
+		int speed1 = mCoolReader.settings().getInt(PROP_APP_TTS_SPEED_1, -1);
+		int speed2 = mCoolReader.settings().getInt(PROP_APP_TTS_SPEED_2, -1);
+		int speed3 = mCoolReader.settings().getInt(PROP_APP_TTS_SPEED_3, -1);
+		int vol1 = mCoolReader.settings().getInt(PROP_APP_TTS_VOL_1, -1);
+		int vol2 = mCoolReader.settings().getInt(PROP_APP_TTS_VOL_2, -1);
+		int vol3 = mCoolReader.settings().getInt(PROP_APP_TTS_VOL_3, -1);
+		if (speed1 == -1) mLoadSpeed1.setText("?");
+			else mLoadSpeed1.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed1)));
+		if (speed2 == -1) mLoadSpeed2.setText("?");
+			else mLoadSpeed2.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed2)));
+		if (speed3 == -1) mLoadSpeed3.setText("?");
+			else mLoadSpeed3.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed3)));
+		if (vol1 == -1) mLoadVol1.setText("?");
+			else mLoadVol1.setText(String.format(Locale.getDefault(), "%d", vol1));
+		if (vol2 == -1) mLoadVol2.setText("?");
+			else mLoadVol2.setText(String.format(Locale.getDefault(), "%d", vol2));
+		if (vol3 == -1) mLoadVol3.setText("?");
+			else mLoadVol3.setText(String.format(Locale.getDefault(), "%d", vol3));
+	}
+
 	@SuppressLint("ClickableViewAccessibility")
 	public TTSToolbarDlg(CoolReader coolReader, ReaderView readerView, TextToSpeech tts) {
 		mCoolReader = coolReader;
@@ -966,9 +994,9 @@ public class TTSToolbarDlg implements Settings {
 			return true;
 		});
 		backButton.setBackgroundDrawable(c);
-		backButton.setOnClickListener(v -> jumpToSentence( ReaderCommand.DCMD_SELECT_PREV_SENTENCE ));
+		backButton.setOnClickListener(v -> jumpToSentence(ReaderCommand.DCMD_SELECT_PREV_SENTENCE));
 		forwardButton.setBackgroundDrawable(c);
-		forwardButton.setOnClickListener(v -> jumpToSentence( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE ));
+		forwardButton.setOnClickListener(v -> jumpToSentence(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE));
 		stopButton.setBackgroundDrawable(c);
 		stopButton.setOnClickListener(v -> stopAndClose());
 		ImageButton optionsButton = mPanel.findViewById(R.id.tts_options);
@@ -1008,6 +1036,119 @@ public class TTSToolbarDlg implements Settings {
 			}
 			return false;
 		});
+
+		mLoadVol1 = mPanel.findViewById(R.id.load_vol_1);
+		mLoadVol2 = mPanel.findViewById(R.id.load_vol_2);
+		mLoadVol3 = mPanel.findViewById(R.id.load_vol_3);
+		mLoadSpeed1 = mPanel.findViewById(R.id.load_speed_1);
+		mLoadSpeed2 = mPanel.findViewById(R.id.load_speed_2);
+		mLoadSpeed3 = mPanel.findViewById(R.id.load_speed_3);
+		mLoadSpeed1.setOnClickListener((v) -> {
+			int speed = mCoolReader.settings().getInt(PROP_APP_TTS_SPEED_1, -1);
+			if (speed != -1) {
+				mSbSpeed.setProgress(speed);
+				mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
+			} else {
+				mReaderView.skipFallbackWarning = true;
+				mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_1, mTTSSpeedPercent);
+				updateSaveButtons();
+			}
+		});
+		mLoadSpeed1.setOnLongClickListener((v) -> {
+			mReaderView.skipFallbackWarning = true;
+			mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_1, mTTSSpeedPercent);
+			updateSaveButtons();
+			return true;
+		});
+		mLoadSpeed2.setOnClickListener((v) -> {
+			int speed = mCoolReader.settings().getInt(PROP_APP_TTS_SPEED_2, -1);
+			if (speed != -1) {
+				mSbSpeed.setProgress(speed);
+				mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
+			} else {
+				mReaderView.skipFallbackWarning = true;
+				mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_2, mTTSSpeedPercent);
+				updateSaveButtons();
+			}
+		});
+		mLoadSpeed2.setOnLongClickListener((v) -> {
+			mReaderView.skipFallbackWarning = true;
+			mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_2, mTTSSpeedPercent);
+			updateSaveButtons();
+			return true;
+		});
+		mLoadSpeed3.setOnClickListener((v) -> {
+			int speed = mCoolReader.settings().getInt(PROP_APP_TTS_SPEED_3, -1);
+			if (speed != -1) {
+				mSbSpeed.setProgress(speed);
+				mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
+			} else {
+				mReaderView.skipFallbackWarning = true;
+				mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_3, mTTSSpeedPercent);
+				updateSaveButtons();
+			}
+		});
+		mLoadSpeed3.setOnLongClickListener((v) -> {
+			mReaderView.skipFallbackWarning = true;
+			mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_3, mTTSSpeedPercent);
+			updateSaveButtons();
+			return true;
+		});
+		mLoadSpeed1.setBackgroundDrawable(c);
+		mLoadSpeed2.setBackgroundDrawable(c);
+		mLoadSpeed3.setBackgroundDrawable(c);
+		mLoadVol1.setOnClickListener((v) -> {
+			int vol = mCoolReader.settings().getInt(PROP_APP_TTS_VOL_1, -1);
+			if (vol != -1)
+				mSbVolume.setProgress(vol);
+			else {
+				mReaderView.skipFallbackWarning = true;
+				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_1, mCoolReader.getVolume());
+				updateSaveButtons();
+			}
+		});
+		mLoadVol1.setOnLongClickListener((v) -> {
+			mReaderView.skipFallbackWarning = true;
+			mCoolReader.settings().setInt(PROP_APP_TTS_VOL_1, mCoolReader.getVolume());
+			updateSaveButtons();
+			return true;
+		});
+		mLoadVol2.setOnClickListener((v) -> {
+			int vol = mCoolReader.settings().getInt(PROP_APP_TTS_VOL_2, -1);
+			if (vol != -1)
+				mSbVolume.setProgress(vol);
+			else {
+				mReaderView.skipFallbackWarning = true;
+				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_2, mCoolReader.getVolume());
+				updateSaveButtons();
+			}
+		});
+		mLoadVol2.setOnLongClickListener((v) -> {
+			mReaderView.skipFallbackWarning = true;
+			mCoolReader.settings().setInt(PROP_APP_TTS_VOL_2, mCoolReader.getVolume());
+			updateSaveButtons();
+			return true;
+		});
+		mLoadVol3.setOnClickListener((v) -> {
+			int vol = mCoolReader.settings().getInt(PROP_APP_TTS_VOL_3, -1);
+			if (vol != -1)
+				mSbVolume.setProgress(vol);
+			else {
+				mReaderView.skipFallbackWarning = true;
+				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_3, mCoolReader.getVolume());
+				updateSaveButtons();
+			}
+		});
+		mLoadVol3.setOnLongClickListener((v) -> {
+			mReaderView.skipFallbackWarning = true;
+			mCoolReader.settings().setInt(PROP_APP_TTS_VOL_3, mCoolReader.getVolume());
+			updateSaveButtons();
+			return true;
+		});
+		updateSaveButtons();
+		mLoadVol1.setBackgroundDrawable(c);
+		mLoadVol2.setBackgroundDrawable(c);
+		mLoadVol3.setBackgroundDrawable(c);
 
 		mWindow.setOnDismissListener(() -> {
 			mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);

@@ -107,7 +107,7 @@ public class TurengTranslate {
 								sTitle = sTitle + "; " + val1 +
 										(StrUtils.isEmptyStr(lang1)?"": ("(" + lang1 + ") = "))
 										+ val2 +
-										(StrUtils.isEmptyStr(lang2)?"": ("(" + lang2 + ") = "));
+										(StrUtils.isEmptyStr(lang2)?"": ("(" + lang2 + ")"));
 							}
 						}
 					}

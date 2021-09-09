@@ -244,6 +244,13 @@ public interface Settings {
 	public static final String PROP_APP_SHOW_FILES_READING = "app.show.files.reading";
 	public static final String PROP_APP_SHOW_FILES_FINISHED = "app.show.files.finished";
 
+	public static final String PROP_APP_TTS_SPEED_1 = "app.tts.speed.1";
+	public static final String PROP_APP_TTS_SPEED_2 = "app.tts.speed.2";
+	public static final String PROP_APP_TTS_SPEED_3 = "app.tts.speed.3";
+	public static final String PROP_APP_TTS_VOL_1 = "app.tts.vol.1";
+	public static final String PROP_APP_TTS_VOL_2 = "app.tts.vol.2";
+	public static final String PROP_APP_TTS_VOL_3 = "app.tts.vol.3";
+
 	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
 	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
 	public static final String PROP_APP_DISABLE_SAFE_MODE = "app.disable.safe.mode";

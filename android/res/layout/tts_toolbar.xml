@@ -6,7 +6,7 @@
     android:id="@+id/tts_toolbar_body"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:background="?attr/tts_toolbar_background"
+    android:background="?attr/colorThemeGray2"
     android:layout_marginTop="3dip"
     android:layout_marginBottom="3dip"
 	android:layout_marginLeft="3dip"
@@ -35,7 +35,8 @@
 	    android:layout_height="wrap_content"
 	    android:baselineAligned="true"
 	    >
-		<ImageButton android:id="@+id/tts_play_pause"
+
+	    <ImageButton android:id="@+id/tts_play_pause"
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="5dip"
@@ -59,19 +60,7 @@
 			android:focusable="false"
 			android:focusableInTouchMode="false"
 			android:contentDescription="@string/tts_play"/>
-		<ImageButton android:id="@+id/tts_play_pause_ell1"
-				android:layout_width="0dip" android:layout_weight="1"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="5dip"
-				android:layout_marginBottom="5dip"
-				android:layout_marginLeft="2dip"
-				android:layout_marginRight="2dip"
-				android:src="?attr/attr_ic_media_play_ell"
-				android:tag="tint"
-				android:focusable="false"
-				android:focusableInTouchMode="false"
-				android:contentDescription="@string/tts_play"/>
-		<ImageButton android:id="@+id/tts_back"
+	    <ImageButton android:id="@+id/tts_back"
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="5dip"
@@ -91,7 +80,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_ff"
-            android:tag="tint"
+                android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_forward"/>
@@ -103,7 +92,7 @@
 	        android:layout_marginLeft="2dip"
 	        android:layout_marginRight="2dip"
 	        android:src="?attr/attr_ic_media_stop"
-            android:tag="tint"
+                android:tag="tint"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_stop"/>
@@ -154,6 +143,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical">
+		>
 		<TableRow>
 			<LinearLayout
 				android:orientation="horizontal"
@@ -162,7 +152,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
-				android:layout_marginBottom="15dp"
+				android:layout_marginBottom="3dp"
 				>
 				<ImageButton android:id="@+id/btn_vol_down"
 					style="@style/TextAppearance.Small"
@@ -205,7 +195,7 @@
 				android:layout_weight="1"
 				android:baselineAligned="true"
 				android:gravity="center_vertical"
-				android:layout_marginBottom="15dp"
+				android:layout_marginBottom="3dp"
 				>
 				<ImageButton android:id="@+id/btn_freq_down"
 					style="@style/TextAppearance.Small"
@@ -240,6 +230,132 @@
 					android:layout_marginRight="3dip"
 					android:src="?attr/attr_icons8_rate_up"
 					/>
+			</LinearLayout>
+		</TableRow>
+		<TableRow>
+			<LinearLayout
+					android:orientation="horizontal"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:baselineAligned="true"
+					android:gravity="center_vertical"
+					android:layout_marginBottom="15dp"
+					>
+				<Button
+						android:id="@+id/load_vol_1"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="1"
+						android:text="1" />
+
+				<Button
+						android:id="@+id/load_vol_2"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="2"
+						android:text="2" />
+				<Button
+						android:id="@+id/load_vol_3"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="3"
+						android:text="3" />
+			</LinearLayout>
+			<LinearLayout
+					android:orientation="horizontal"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:baselineAligned="true"
+					android:gravity="center_vertical"
+					android:layout_marginBottom="15dp"
+					>
+				<Button
+						android:id="@+id/load_speed_1"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="1"
+						android:text="1" />
+
+				<Button
+						android:id="@+id/load_speed_2"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="2"
+						android:text="2" />
+				<Button
+						android:id="@+id/load_speed_3"
+						android:minHeight="?android:attr/listPreferredItemHeightSmall"
+						android:layout_width="0dip"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="1dip"
+						android:layout_marginBottom="1dip"
+						android:layout_marginLeft="1dip"
+						android:layout_marginRight="1dip"
+						android:layout_weight="1"
+						android:maxLines="2"
+						android:ellipsize="end"
+						android:background="@null"
+						android:hint="tint"
+						android:textColor="?attr/colorIcon"
+						android:contentDescription="3"
+						android:text="3" />
 			</LinearLayout>
 		</TableRow>
 	</TableLayout>
