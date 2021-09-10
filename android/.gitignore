@@ -8,6 +8,7 @@ obj
 /local.properties
 /.idea
 /.idea/
+/.idea/*
 /.idea/workspace.xml
 /.idea/gradle.xml
 /.idea/libraries
