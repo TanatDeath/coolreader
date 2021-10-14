@@ -118,6 +118,17 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	@Override
+	public void setNeedBypass(int needBypass) {
+		if (needBypass == 1) mNeedCallByPass = true;
+		if (needBypass == 2) mNeedCallByPass = false;
+	}
+
+	@Override
+	public void setExtraDelayFullRefresh(int extraDelayFullRefresh) {
+		if (extraDelayFullRefresh >= 0) mExtraDelayFullRefresh = extraDelayFullRefresh;
+	}
+
+	@Override
 	public void prepareController(View view, boolean isPartially) {
 		if (mIsAppOptimizationEnabled)
 			return;

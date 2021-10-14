@@ -419,8 +419,8 @@
     <string name="options_screen_update_mode_fast">Быстрый</string>
     <string name="options_screen_update_mode_fast2">Быстрый 2</string>
     <string name="options_screen_update_interval">Интервал полного обновления</string>
-    <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы</string>
-    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на E-Ink экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
+    <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы, мс</string>
+    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на (неподдеживаемых) E-Ink экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
     <string name="options_screen_blackpage_duration">Длительность отрисовки черной страницы</string>
     <string name="options_screen_blackpage_duration_add_info">Время (в мс) на которое будет показана черная заливка области чтения</string>
     <string name="options_screen_force_eink">Оптимизация для E-Ink</string>
@@ -1627,6 +1627,7 @@
     <string name="brightness_swipe_sensivity_3">Быстро</string>
     <string name="brightness_swipe_sensivity_4">Еще быстрее</string>
     <string name="try_to_move_to_books">Переместить книгу в папку \"Books\"</string>
+    <string name="move_to_books">Вы действительно хотите переместить эту книгу в папку \"Books\" ?</string>
     <string name="try_to_move_to_books_then_open">Переместить книгу в папку \"Books\", после чего открыть</string>
     <string name="cannot_move_to_books">Невозможно переместить книгу в папку \"Books\"</string>
     <string name="moved_to_books">Книга успешно перенесена в папку \"Books\"</string>
@@ -1731,5 +1732,31 @@
     <string name="main_window">Главное окно</string>
     <string name="external_doc_came_dialog_timeout">Таймаут диалога внешнего документа, сек</string>
     <string name="external_doc_came_dialog_timeout_add_info">Вы можете задать таймаут вызова действия по умолчанию (открыть книгу) в диалоге внешнего документа. Установите 0, если хотите отключить этот диалог</string>
+    <string name="profile">Профиль</string>
+    <string name="succ_finished">Успешно завершено</string>
+    <string name="eink_onyx_bypass">Оптимизировать обновления экрана</string>
+    <string name="eink_onyx_bypass_add_info">Режим обновления \'SNOW Field\' не будет работать без этой опции (при включенной оптимизации приложения). Однако, это может привести к мерцанию когда оптимизация приложения включена: экран очищается и затем изображение восстанавливается. Также, изображение не обновляется на rk3288 с прошивками 2.1 и 3.0 без этой опции</string>
+    <string name="eink_onyx_bypass0">Авто</string>
+    <string name="eink_onyx_bypass1">Включено</string>
+    <string name="eink_onyx_bypass2">Выключено</string>
+    <string name="eink_onyx_add_delay_full_refresh">Дополнительная задержка перед полным обновлением экрана</string>
+    <string name="eink_onyx_add_delay_full_refresh_auto">Авто</string>
+    <string name="eink_onyx_add_delay_full_refresh_0">Отключено</string>
+    <string name="eink_onyx_add_delay_full_refresh_10">10 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_20">20 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_40">40 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_60">60 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_80">80 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_100">100 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_120">120 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_140">140 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_160">160 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_180">180 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_200">200 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_230">230 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_260">260 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_300">300 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_400">400 миллисекунд</string>
+    <string name="eink_onyx_add_delay_full_refresh_500">500 миллисекунд</string>
 </resources>
 

@@ -76,6 +76,7 @@ public class Dictionaries {
 	public static GramotaTranslate gramotaTranslate = null;
 	public static GlosbeTranslate glosbeTranslate = null;
 	public static TurengTranslate turengTranslate = null;
+	public static UrbanTranslate urbanTranslate = null;
 
 	public static OkHttpClient client = new OkHttpClient.Builder().
 		connectTimeout(20,TimeUnit.SECONDS).
@@ -347,6 +348,8 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 16, R.drawable.glosbe, null, GLOSBE_ONLINE, true, "GlosbeO"),
 		new DictInfo("Tureng (online)", "Tureng (online)", "", "",
 				Intent.ACTION_SEND, 17, R.drawable.tureng, null, TURENG_ONLINE, true, "TurengO"),
+		new DictInfo("Urban dictionary (online)", "Urban dictionary (online)", "", "",
+				Intent.ACTION_SEND, 18, R.drawable.urban_dict, null, URBAN_ONLINE, true, "UrbanO"),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -368,7 +371,7 @@ public class Dictionaries {
 		}
 		return null;
 	}
-	
+
 	public static DictInfo defaultDictionary() {
 		if (DeviceInfo.EINK_ONYX)
 			return findById(DEFAULT_ONYX_DICTIONARY_ID, null);
@@ -488,7 +491,7 @@ public class Dictionaries {
 		if (d != null)
 			currentDictionary7 = d;
 	}
-	
+
 	public boolean isPackageInstalled(String packageName) {
         PackageManager pm = mActivity.getPackageManager();
         try
@@ -503,15 +506,15 @@ public class Dictionaries {
     }
 
 	private final static int DICTAN_ARTICLE_REQUEST_CODE = 100;
-	
+
 	private final static String DICTAN_ARTICLE_WORD = "article.word";
-	
+
 	private final static String DICTAN_ERROR_MESSAGE = "error.message";
 
 	private final static int FLAG_ACTIVITY_CLEAR_TASK = 0x00008000;
-	
+
 	public static final Logger log = L.create("cr3dict");
-	
+
 	@SuppressWarnings("serial")
 	public static class DictionaryException extends Exception {
 		public DictionaryException(String msg) {
@@ -1229,6 +1232,14 @@ public class Dictionaries {
 				}
 				if (turengTranslate == null) turengTranslate = new TurengTranslate();
 				turengTranslate.turengTranslate(cr, s, langf, lang, curDict, view, null, dcb);
+				break;
+			case 18:
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					cr.showToast(R.string.only_in_premium);
+					return;
+				}
+				if (urbanTranslate == null) urbanTranslate = new UrbanTranslate();
+				urbanTranslate.urbanTranslate(cr, s, curDict, view, null, dcb);
 				break;
 			}
 	}

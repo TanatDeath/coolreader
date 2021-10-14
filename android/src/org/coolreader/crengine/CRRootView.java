@@ -740,6 +740,8 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
 			if (item.isRescanShortcut())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_scan, R.drawable.icons8_folder_scan));
+			if (item.isCalcLibraryStatsShortcut())
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_db_stats, R.drawable.icons8_db_stats));
 			if (item.isSearchShortcut())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_find_drawable, R.drawable.cr3_browser_find));
 			else if (item.isBooksByRatingRoot())
@@ -769,7 +771,11 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					ScanLibraryDialog sld = new ScanLibraryDialog(mActivity);
 					sld.show();
 				} else
-					mActivity.showDirectory(item, "");
+					if (item.isCalcLibraryStatsShortcut()) {
+						mActivity.getDB().getLibraryCategStats(o -> {
+							mActivity.showToast(R.string.succ_finished);
+						});
+					} else mActivity.showDirectory(item, "");
 			});
 			mLibraryScroll.addView(view);
 		}

@@ -1,5 +1,6 @@
 package org.coolreader.crengine;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.*;
@@ -694,6 +696,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			log.d("book_edit menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
 				mActivity.editBookInfo(currDirectory, selectedItem);
+			}
+			return true;
+		case R.id.move_to_books:
+			log.d("move_to_books menu item selected");
+			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
+				mActivity.askMoveBook(selectedItem);
 			}
 			return true;
 		case R.id.book_set_custom_cover:
@@ -1958,6 +1966,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		final FileInfo dir = fileOrDir!=null && !fileOrDir.isDirectory ? mScanner.findParent(file, mScanner.getRoot()) : fileOrDir;
 		if (dir != null) {
 			if (dir.isSpecialDir()) {
+				if (dir.allowSorting())
+					dir.sort(mSortOrder);
 				showDirectoryInternal(dir, file);
 			} else {
 				showDirectoryLoadingStub();
@@ -2211,6 +2221,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				}
 			}
 
+			@SuppressLint("ResourceType")
 			void setItem(final FileInfo item, FileInfo parentItem)
 			{
 				int colorIcon;

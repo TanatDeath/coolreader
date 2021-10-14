@@ -270,6 +270,7 @@ public class BookInfoEditDialog extends BaseDialog {
 	TextView tvProfile;
 	TextView tvFileName;
     EditText edTitle;
+	EditText edLanguage;
     EditText edSeriesName;
     EditText edSeriesNumber;
 	AuthorList authors;
@@ -392,6 +393,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		tvProfile = mainView.findViewById(R.id.profile);
 		tvFileName = mainView.findViewById(R.id.file_name);
 		edTitle = mainView.findViewById(R.id.book_title);
+		edLanguage = mainView.findViewById(R.id.book_language);
         edSeriesName = mainView.findViewById(R.id.book_series_name);
         edSeriesNumber = mainView.findViewById(R.id.book_series_number);
    		edLangFrom = mainView.findViewById(R.id.book_lang_from);
@@ -473,9 +475,11 @@ public class BookInfoEditDialog extends BaseDialog {
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
 		TextView prof = (TextView) mainView.findViewById(R.id.lbl_profile);
 		String sprof = activity.getCurrentProfileName();
+		if (StrUtils.isEmptyStr(sprof)) sprof = activity.getString(R.string.profile)+" "+activity.getCurrentProfile();
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		tvProfile.setText(sprof + sF);
 		edTitle.setText(file.title);
+		edLanguage.setText(Engine.getHumanReadableLocaleName(file.language));
         //edAuthor.setText(file.authors);
         edSeriesName.setText(file.series);
 		if (file.series != null && file.series.trim().length() > 0 && file.seriesNumber > 0)

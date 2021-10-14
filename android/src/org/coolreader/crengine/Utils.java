@@ -810,19 +810,24 @@ public class Utils {
 
 	/**
 	 * Compares two strings - with numbers sorted by value.
-	 * @param str1
-	 * @param str2
+	 * @param st1
+	 * @param st2
 	 * @return
 	 */
-	public static int cmp( String str1, String str2 )
+	public static int cmp( String st1, String st2 )
 	{
-		if ( str1==null && str2==null )
+		if ( st1==null && st2==null )
 			return 0;
-		if ( str1==null )
+		if ( st1==null )
 			return -1;
-		if ( str2==null )
+		if ( st2==null )
 			return 1;
-	
+
+		String str1 = st1;
+		if (str1.endsWith("...")) str1 = str1.substring(0,str1.length()-3);
+		String str2 = st2;
+		if (str2.endsWith("...")) str2 = str2.substring(0,str2.length()-3);
+
 		str1 = str1.toLowerCase();
 		str2 = str2.toLowerCase();
 		int p1 = 0;

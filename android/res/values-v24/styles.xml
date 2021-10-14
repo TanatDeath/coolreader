@@ -490,6 +490,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -912,6 +913,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -2030,6 +2032,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -2449,6 +2452,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>

@@ -1079,16 +1079,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private long lastTimeTap = 0L;
 	private long lastTimeKey = 0L;
 
+	// on the latest codebase this, possible is not needed anymore, and it is buggy
 	public void toggleScreenUpdateModeMode() {
-		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
-			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
-			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
-			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.A2, surface); //fast2
-			mActivity.setScreenUpdateInterval(999, surface);
-		} else {
-			if (updMode != EinkScreen.EinkUpdateMode.Unspecified) mActivity.setScreenUpdateMode(updMode, surface); //fast
-			if (updInterval != -1) mActivity.setScreenUpdateInterval(updInterval, surface);
-		}
+//		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
+//			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
+//			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
+//			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.A2, surface); //fast2
+//			mActivity.setScreenUpdateInterval(999, surface);
+//		} else {
+//			if (updMode != EinkScreen.EinkUpdateMode.Unspecified) mActivity.setScreenUpdateMode(updMode, surface); //fast
+//			if (updInterval != -1) mActivity.setScreenUpdateInterval(updInterval, surface);
+//		}
 	}
 
 	public void toggleSelectionMode() {
@@ -3636,6 +3637,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			} catch (Exception e) {
 //				log.e("exec error: " + e.getMessage());
 //			}
+//				mActivity.showToast("millis: " + StrUtils.parseDate("2008"));
+//			mActivity.showToast("millis: " + StrUtils.parseDateLong("2008"));
+			//java.util.Date d = StrUtils.parseDate("2008");
+			//mActivity.showToast("d: " + d.getTime());
 			toggleDayNightMode();
 //			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
 //					0, true);
@@ -4286,7 +4291,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public Properties getSettings()
 	{
-		return new Properties(mSettings);
+		return mActivity.settings(); //new Properties(mSettings); // it was slow )
 	}
 
 	static public int stringToInt(String value, int defValue) {

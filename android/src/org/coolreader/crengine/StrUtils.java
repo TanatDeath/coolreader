@@ -298,7 +298,7 @@ public class StrUtils {
     }
 
     public static long parseDateLong(String sDate) {
-        TimeZone tz = java.util.TimeZone.getDefault();
+        TimeZone tz = java.util.TimeZone.getTimeZone("UTC");
         Calendar c = Calendar.getInstance(tz);
         java.util.Date d = parseDate(sDate);
         if (d==null) return 0;
@@ -315,6 +315,7 @@ public class StrUtils {
             boolean passed1 = true;
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat(sDateFormat);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 sdf.setLenient(false);
                 d = sdf.parse(sDate);
             } catch (ParseException e) {
@@ -323,6 +324,7 @@ public class StrUtils {
             boolean passed2 = true;
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat(sDateFormat);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 sdf.setLenient(true);
                 d = sdf.parse(sDate);
             } catch (ParseException e) {
@@ -339,6 +341,7 @@ public class StrUtils {
                     passed1 = true;
                     try {
                         SimpleDateFormat sdf = new SimpleDateFormat(sDateFormat2);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                         sdf.setLenient(false);
                         d = sdf.parse(sDate);
                         return d;

@@ -973,7 +973,7 @@ public class Engine {
 			long start = android.os.SystemClock.uptimeMillis();
 			boolean res = scanBookPropertiesInternal(info);
 			long duration = android.os.SystemClock.uptimeMillis() - start;
-			L.v("scanBookProperties took " + duration + " ms for " + info.getPathName());
+			L.v("scanBookProperties took " + duration + " ms, result " + res + ", for " + info.getPathName());
 			return res;
 		}
 	}

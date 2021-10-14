@@ -40,7 +40,7 @@ public class Scanner extends FileInfoChangeSource {
 		this.dirScanEnabled = dirScanEnabled;
 	}
 	
-	private FileInfo scanZip(FileInfo zip)
+	public FileInfo scanZip(FileInfo zip)
 	{
 		try {
 			File zf = new File(zip.pathname);
@@ -165,9 +165,10 @@ public class Scanner extends FileInfoChangeSource {
 							// skip mount root
 							continue;
 						}
-						//asdf - !! может из за этого все и тормозит?
+						// this was in CR, but it is very slow way, so we use our own
 						//boolean isArc = Engine.isArchive(pathName) && (!pathName.toLowerCase().endsWith("fb3.zip"));
-						boolean isArc = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
+						//boolean isArc = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
+						boolean isArc = FileUtils.isArchive(f) && (!pathName.toLowerCase().endsWith("fb3.zip"));
 						FileInfo item = !rescan ? mFileList.get(pathName) : null;
 						boolean isNew = false;
 						if (item == null) {
@@ -542,6 +543,8 @@ public class Scanner extends FileInfoChangeSource {
 			return createOPDSRoot();
 		else if (FileInfo.RESCAN_LIBRARY_TAG.equals(path))
 			return createRescanRoot();
+		else if (FileInfo.CALC_LIBRARY_STATS_TAG.equals(path))
+			return createLibraryStatsRoot();
 		else if (FileInfo.SEARCH_SHORTCUT_TAG.equals(path))
 			return createSearchRoot();
 		else if (FileInfo.RECENT_DIR_TAG.equals(path))
@@ -693,6 +696,20 @@ public class Scanner extends FileInfoChangeSource {
 
 	private void addRescanRoot() {
 		addRoot(createRescanRoot());
+	}
+
+	public FileInfo createLibraryStatsRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.CALC_LIBRARY_STATS_TAG;
+		dir.setFilename(mActivity.getString(R.string.calc_stats));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addLibraryStatsRoot() {
+		addRoot(createLibraryStatsRoot());
 	}
 
 	public FileInfo createAuthorsRoot() {
@@ -1113,6 +1130,7 @@ public class Scanner extends FileInfoChangeSource {
 	public ArrayList<FileInfo> getLibraryItems() {
 		ArrayList<FileInfo> result = new ArrayList<FileInfo>();
 		result.add(pathToFileInfo(FileInfo.RESCAN_LIBRARY_TAG));
+		result.add(pathToFileInfo(FileInfo.CALC_LIBRARY_STATS_TAG));
 		result.add(pathToFileInfo(FileInfo.SEARCH_SHORTCUT_TAG));
 		//result.add(pathToFileInfo(FileInfo.GENRES_TAG)); //CR genres implementation
 		result.add(pathToFileInfo(FileInfo.AUTHORS_TAG));

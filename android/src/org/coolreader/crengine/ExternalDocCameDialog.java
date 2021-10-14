@@ -446,50 +446,14 @@ public class ExternalDocCameDialog extends BaseDialog {
 		}
 	}
 
-	private static FileInfo getFileProps(File file, FileInfo fileDir) {
-		FileInfo fi = new FileInfo(file);
-		boolean isArch = FileUtils.isArchive(file);
-		FileInfo dir = Services.getScanner().findParent(fi, fileDir);
-		String sPath = file.getAbsolutePath();
-		String sPathZ = sPath;
-		if ((isArch) && (!sPathZ.toLowerCase().endsWith(".zip"))
-				&&(!sPathZ.toLowerCase().endsWith(".epub"))
-				&&(!sPathZ.toLowerCase().endsWith(".docx"))
-				&&(!sPathZ.toLowerCase().endsWith(".odt"))
-				&&(!sPathZ.toLowerCase().endsWith(".ods"))
-				&&(!sPathZ.toLowerCase().endsWith(".odp"))
-				&&(!sPathZ.toLowerCase().endsWith(".fb3"))) {
-			int i = 0;
-			sPathZ = sPath + ".zip";
-			File fileZ = new File(sPathZ);
-			boolean bExists = fileZ.exists();
-			while (bExists) {
-				i++;
-				sPathZ = sPath + " ("+i+").zip";
-				fileZ = new File(sPathZ);
-				bExists = fileZ.exists();
-			}
-			file.renameTo(fileZ);
-		}
-		if (dir != null) {
-			FileInfo item1 = dir.findItemByPathName(sPathZ);
-			if (item1 == null) {
-				Services.getScanner().listDirectory(dir);
-				item1 = dir.findItemByPathName(sPathZ);
-			}
-			if (item1 == null) item1 = new FileInfo(sPathZ);
-			return item1;
-		}
-		return new FileInfo(file);
-	}
-
 	public static void tryToMoveThenOpen(String logRoot, BaseActivity cr, String fNameThis, String downlD, String sUr) {
 		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
 				"BEGIN tryToMoveThenOpen");
-		FileInfo fileOrDir = getFileProps(new File(fNameThis), new FileInfo(downlD));
+		FileInfo fileOrDir = FileUtils.getFileProps(new File(fNameThis), new FileInfo(downlD), true);
+		//FileInfo fileOrDir = new FileInfo(new File(fNameThis));
 		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
 				"step 1");
-		Services.getEngine().scanBookProperties(fileOrDir);
+		if (StrUtils.isEmptyStr(fileOrDir.getAuthors())) Services.getEngine().scanBookProperties(fileOrDir);
 		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
 				"step 2");
 		FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
@@ -529,7 +493,11 @@ public class ExternalDocCameDialog extends BaseDialog {
 					"step 9");
 			if (f.renameTo(result)) {
 				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
-						"step 10");
+						"step 10, renamed to "+result);
+				File nF = new File(fNameThis);
+				if (nF.exists())
+					CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+							"step 10.1, renamed, but exists: "+fNameThis);
 				downloadDir.findItemByPathName(result.getAbsolutePath());
 				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
 						"step 11");
@@ -801,8 +769,8 @@ public class ExternalDocCameDialog extends BaseDialog {
 			if (uri != null) {
 				if (stype.equals("application/zip")) {
 					ContentResolver contentResolver = mActivity.getContentResolver();
-					InputStream inputStream = null;
-					ArrayList<String> arcFontNames = new ArrayList<String>();
+					InputStream inputStream;
+					ArrayList<String> arcFontNames;
 					try {
 						inputStream = contentResolver.openInputStream(uri);
 						ByteArrayOutputStream baos = Utils.inputStreamToBaos(inputStream);

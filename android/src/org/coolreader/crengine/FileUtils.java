@@ -423,4 +423,45 @@ public class FileUtils {
         return null;
     }
 
+    public static FileInfo getFileProps(File file, FileInfo fileDir, boolean noDirScan) {
+        FileInfo fi = new FileInfo(file);
+        String sPath = file.getAbsolutePath();
+        String sPathZ = sPath;
+        boolean isArch = FileUtils.isArchive(file);
+        if ((isArch) && (noDirScan)) { // We'll try to scan file without directory rescan
+            FileInfo fiArc = Services.getScanner().scanZip(fi);
+            if (Services.getEngine().scanBookProperties(fiArc)) return fiArc;
+        }
+        FileInfo dir = Services.getScanner().findParent(fi, fileDir);
+        if ((isArch) && (!sPathZ.toLowerCase().endsWith(".zip"))
+                &&(!sPathZ.toLowerCase().endsWith(".epub"))
+                &&(!sPathZ.toLowerCase().endsWith(".docx"))
+                &&(!sPathZ.toLowerCase().endsWith(".odt"))
+                &&(!sPathZ.toLowerCase().endsWith(".ods"))
+                &&(!sPathZ.toLowerCase().endsWith(".odp"))
+                &&(!sPathZ.toLowerCase().endsWith(".fb3"))) {
+            int i = 0;
+            sPathZ = sPath + ".zip";
+            File fileZ = new File(sPathZ);
+            boolean bExists = fileZ.exists();
+            while (bExists) {
+                i++;
+                sPathZ = sPath + " ("+i+").zip";
+                fileZ = new File(sPathZ);
+                bExists = fileZ.exists();
+            }
+            file.renameTo(fileZ);
+        }
+        if (dir != null) {
+            FileInfo item1 = dir.findItemByPathName(sPathZ);
+            if (item1 == null) {
+                Services.getScanner().listDirectory(dir);
+                item1 = dir.findItemByPathName(sPathZ);
+            }
+            if (item1 == null) item1 = new FileInfo(sPathZ);
+            return item1;
+        }
+        return new FileInfo(file);
+    }
+
 }

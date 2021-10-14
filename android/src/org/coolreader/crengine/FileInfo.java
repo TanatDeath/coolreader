@@ -77,6 +77,7 @@ public class FileInfo implements Parcelable {
 	public final static String ROOT_WINDOW_TAG = "@rootwindow";
 	public final static String QSEARCH_SHORTCUT_TAG = "@qsearch";
 	public final static String RESCAN_LIBRARY_TAG = "@rescan";
+	public final static String CALC_LIBRARY_STATS_TAG = "@calcstats";
 	public final static String LITRES_GENRE_TAG = "@litresGenreRoot";
 	public final static String LITRES_PERSON_TAG = "@litresPersonRoot";
 	public final static String LITRES_PREFIX = "@litres";
@@ -94,6 +95,18 @@ public class FileInfo implements Parcelable {
 	public final static String LITRES_COLLECTION_TAG = "@litresCollectionRoot";
 	public final static String LITRES_COLLECTION_PREFIX = "@litresCollection:";
 	public final static String LITRES_COLLECTION_GROUP_PREFIX = "@litresCollectionGroup:";
+
+	public final static String[] sortTags = {AUTHORS_TAG, AUTHOR_GROUP_PREFIX,
+			CALIBRE_AUTHOR_GROUP_PREFIX, AUTHOR_PREFIX, CALIBRE_PREFIX, CALIBRE_AUTHOR_PREFIX,
+			SERIES_TAG, SERIES_GROUP_PREFIX, SERIES_PREFIX, BOOK_DATE_TAG, BOOK_DATE_GROUP_PREFIX,
+			BOOK_DATE_PREFIX, DOC_DATE_TAG, DOC_DATE_GROUP_PREFIX, DOC_DATE_PREFIX,
+		 	PUBL_YEAR_TAG, PUBL_YEAR_GROUP_PREFIX, PUBL_YEAR_PREFIX,
+			FILE_DATE_TAG, FILE_DATE_GROUP_PREFIX, FILE_DATE_PREFIX,
+			GENRE_TAG, GENRE_GROUP_PREFIX, GENRE_PREFIX, RATING_TAG, STATE_TAG,
+			STATE_TO_READ_TAG, STATE_READING_TAG, STATE_FINISHED_TAG,
+			TITLE_TAG, TITLE_TAG_LEVEL, TITLE_GROUP_PREFIX, SEARCH_SHORTCUT_TAG,
+			ROOT_WINDOW_TAG, QSEARCH_SHORTCUT_TAG
+	};
 
 
 	public Long id; // db id
@@ -558,12 +571,14 @@ public class FileInfo implements Parcelable {
 		need_to_update_ver = false;
 		domVersion = Engine.DOM_VERSION_CURRENT;
 		blockRenderingFlags = Engine.BLOCK_RENDERING_FLAGS_WEB;
+		fileCreateTime = System.currentTimeMillis();
 	}
 
 	/// doesn't copy parent and children
 	public FileInfo(FileInfo v)
 	{
 		assign(v);
+		if (fileCreateTime == 0L) fileCreateTime = System.currentTimeMillis();
 		need_to_update_ver = false;
 	}
 
@@ -625,6 +640,7 @@ public class FileInfo implements Parcelable {
         publseries = v.publseries;
         publseriesNumber = v.publseriesNumber;
         fileCreateTime = v.fileCreateTime;
+		if (fileCreateTime == 0L) fileCreateTime = System.currentTimeMillis();
         opdsLink = v.opdsLink;
         wordCount = v.wordCount;
 		symCount = v.symCount;
@@ -1021,6 +1037,11 @@ public class FileInfo implements Parcelable {
 	public boolean isRescanShortcut()
 	{
 		return RESCAN_LIBRARY_TAG.equals(pathname);
+	}
+
+	public boolean isCalcLibraryStatsShortcut()
+	{
+		return CALC_LIBRARY_STATS_TAG.equals(pathname);
 	}
 
 	public boolean isBooksByAuthorDir()
@@ -2163,7 +2184,7 @@ public class FileInfo implements Parcelable {
 					}
 		}
 		if ( files!=null ) {
-			ArrayList<FileInfo> newFiles = new ArrayList<FileInfo>(files);
+			ArrayList<FileInfo> newFiles = new ArrayList<>(files);
 			Collections.sort( newFiles, SortOrder.getComparator() );
 			files = newFiles;
 		}
@@ -2400,7 +2421,15 @@ public class FileInfo implements Parcelable {
 	}
 	
 	public boolean allowSorting() {
-		return isDirectory && !isRecentDir();
+		boolean res = isDirectory && !isRecentDir();
+		if ((res) && isSpecialDir()) {
+			for (String s: sortTags) {
+				if ((pathname.startsWith(s)) || (pathname.equals(s.replace(":", ""))))
+					return true;
+			}
+			return false;
+		}
+		return res;
 //		&& !isRootDir() && !isRecentDir() && !isOPDSDir() && !isBooksBySeriesDir()
 //				&& !isBooksByBookdateDir()&& !isBooksByDocdateDir()&& !isBooksByPublyearDir()
 //				&& !isBooksByFiledateDir();

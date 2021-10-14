@@ -99,7 +99,8 @@ my %ic_actions_list=(
         'icons8_bookmark_simple_fast_add.svg' => 'icons8_bookmark_simple_fast_add.png',
         'icons8_bookmark_simple_add.svg' => 'icons8_bookmark_simple_add.png',
         'icons8_help.svg' => 'icons8_help.png',
-        'icons8_dic_list.svg' => 'icons8_dic_list.png'
+        'icons8_dic_list.svg' => 'icons8_dic_list.png',
+        'icons8_db_stats.svg' => 'icons8_db_stats.png'
 );
 
 my %ic_menu_list=(

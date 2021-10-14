@@ -438,6 +438,13 @@ public class DicToastView {
         tvFull.setBackgroundColor(colr2);
         Button tvFullWeb = window.getContentView().findViewById(R.id.upper_row_tv_full_web);
         tvFullWeb.setBackgroundColor(colr2);
+        TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+        if (tvLblDic != null) {
+            if (t.mCurDict != null)
+                tvLblDic.setText(t.mCurDict.shortName);
+            else
+                tvLblDic.setText(t.mDicName);
+        }
         //tvMore.setPaintFlags(tvMore.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvMore.setOnClickListener(v -> {
             String ss = sFindText;
@@ -776,6 +783,13 @@ public class DicToastView {
         //tvMore.setBackgroundColor(colorGray);
         Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
         tvClose.setBackgroundColor(colr2);
+        TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+        if (tvLblDic != null) {
+            if (t.mCurDict != null)
+                tvLblDic.setText(t.mCurDict.shortName);
+            else
+                tvLblDic.setText(t.mDicName);
+        }
         //tvMore.setPaintFlags(tvMore.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvMore.setOnClickListener(v -> {
             Dictionaries dicts = new Dictionaries(mActivity);
@@ -1007,6 +1021,13 @@ public class DicToastView {
         Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
         tvClose.setBackgroundColor(colr2);
         tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
+        TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+        if (tvLblDic != null) {
+            if (t.mCurDict != null)
+                tvLblDic.setText(t.mCurDict.shortName);
+            else
+                tvLblDic.setText(t.mDicName);
+        }
         ViewGroup body = window.getContentView().findViewById(R.id.items_list);
         CoolReader cr= mActivity;
         if (cr.getReaderView() != null) {

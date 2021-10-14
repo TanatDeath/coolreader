@@ -43,6 +43,16 @@ public class EinkScreenNook implements EinkScreen {
 	}
 
 	@Override
+	public void setNeedBypass(int needBypass) {
+
+	}
+
+	@Override
+	public void setExtraDelayFullRefresh(int extraDelayFullRefresh) {
+
+	}
+
+	@Override
 	public void prepareController(View view, boolean isPartially) {
 		//System.err.println("Sleep = " + isPartially);
 		if (isPartially || mIsSleep != isPartially) {

@@ -1570,23 +1570,38 @@ public class BaseActivity extends Activity implements Settings {
 
 
 	private EinkScreen.EinkUpdateMode mScreenUpdateMode = EinkScreen.EinkUpdateMode.Clear;
+	private int mEinkOnyxNeedBypass = 0;
+	private int mEinkOnyxExtraDelayFullRefresh = -1;
 
 	public EinkScreen.EinkUpdateMode getScreenUpdateMode() {
 		return mScreenUpdateMode;
 	}
 
 	public void setScreenUpdateMode(EinkScreen.EinkUpdateMode screenUpdateMode, View view) {
-		//if (mReaderView != null) {
 		if (null != mEinkScreen) {
 			mScreenUpdateMode = screenUpdateMode;
 			if (mEinkScreen.getUpdateMode() != screenUpdateMode || mEinkScreen.getUpdateMode() == EinkScreen.EinkUpdateMode.Active) {
 				mEinkScreen.setupController(mScreenUpdateMode, mScreenUpdateInterval, view);
 			}
 		}
-		//}
+	}
+
+	public void setScreenNeedBypass(int needBypass) {
+		if (null != mEinkScreen) {
+			mEinkOnyxNeedBypass = needBypass;
+			mEinkScreen.setNeedBypass(needBypass);
+		}
+	}
+
+	public void setScreenExtraDelayFullRefresh(int extraDelayFullRefresh) {
+		if (null != mEinkScreen) {
+			mEinkOnyxExtraDelayFullRefresh = extraDelayFullRefresh;
+			mEinkScreen.setExtraDelayFullRefresh(extraDelayFullRefresh);
+		}
 	}
 
 	private int mScreenUpdateInterval = 0;
+
 	public int getScreenUpdateInterval() {
 		return mScreenUpdateInterval;
 	}
@@ -2268,7 +2283,11 @@ public class BaseActivity extends Activity implements Settings {
 			setNightMode(flg);
         } else if (key.equals(PROP_APP_SCREEN_UPDATE_MODE)) {
 			setScreenUpdateMode(EinkScreen.EinkUpdateMode.byCode(Utils.parseInt(value, 0)), getContentView());
-        } else if (key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL)) {
+        } else if (key.equals(PROP_APP_EINK_ONYX_NEED_BYPASS)) {
+			setScreenNeedBypass(Utils.parseInt(value, 0));
+		} else if (key.equals(PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH)) {
+			setScreenExtraDelayFullRefresh(Utils.parseInt(value, -1));
+		} else if (key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL)) {
 			setScreenUpdateInterval(Utils.parseInt(value, 10), getContentView());
 		} else if (key.equals(PROP_APP_SCREEN_BLACKPAGE_INTERVAL)) {
 			setScreenBlackpageInterval(Utils.parseInt(value, 0));
@@ -2648,8 +2667,8 @@ public class BaseActivity extends Activity implements Settings {
 						if (key.equals(PROP_TOOLBAR_APPEARANCE)) {
 							((CoolReader) this).setToolbarAppearance(value);
 						}
-						((CoolReader) this).getmReaderFrame().updateCRToolbar(((CoolReader) this));
 					}
+					((CoolReader) this).getmReaderFrame().updateCRToolbar(((CoolReader) this));
 				}
 		} catch (Exception e) {
 		}

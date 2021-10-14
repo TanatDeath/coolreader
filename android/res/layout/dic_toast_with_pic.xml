@@ -71,6 +71,17 @@
                         android:textColor="?attr/colorIcon"
                         android:text="@string/close"
                         />
+                <TextView
+                        android:id="@+id/lbl_dic"
+                        style="@style/TextAppearance.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dip"
+                        android:singleLine="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:textColor="?attr/colorIcon"
+                        android:text="" />
             </LinearLayout>
         </TableRow>
         <TableRow xmlns:android="http://schemas.android.com/apk/res/android"

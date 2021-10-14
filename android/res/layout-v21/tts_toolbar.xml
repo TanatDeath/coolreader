@@ -13,8 +13,7 @@
 	android:layout_marginRight="3dip"
 	android:baselineAligned="true" android:layout_height="wrap_content">
 
-	<LinearLayout
-			android:orientation="vertical"
+	<RelativeLayout
 			android:layout_height="wrap_content"
 			android:layout_width="match_parent">
 		<TextView
@@ -25,8 +24,21 @@
 				android:layout_margin="5dip"
 				android:singleLine="true"
 				android:textColor="?attr/colorIcon"
+				android:layout_alignParentLeft="true"
+				android:layout_alignParentTop="true"
 				android:text="" />
-	</LinearLayout>
+		<TextView
+				android:id="@+id/lbl_lang"
+				style="@style/TextAppearance.Small"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dip"
+				android:singleLine="true"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentTop="true"
+				android:textColor="?attr/colorIcon"
+				android:text="" />
+	</RelativeLayout>
 
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/tts_toolbar_buttons"

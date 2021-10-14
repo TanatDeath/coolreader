@@ -8,14 +8,12 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 
 	public class SwitchProfileDialog extends BaseDialog implements Settings {
@@ -38,7 +36,9 @@ import java.util.ArrayList;
 	public SwitchProfileDialog(CoolReader coolReader, ReaderView readerView, OptionsDialog od)
 	{
 		super("SwitchProfileDialog", coolReader, coolReader.getResources().getString(R.string.action_switch_settings_profile), false, false);
-        setCancelable(true);
+		for (int i = 0; i < 7; i++)
+			profileNames[i] = coolReader.getString(R.string.profile)+" "+(i+1);
+		setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
 		this.optionsDialog = od;
@@ -152,8 +152,24 @@ import java.util.ArrayList;
 			}
 			ImageView cb = view.findViewById(R.id.option_value_check);
 			TextView title = view.findViewById(R.id.option_value_text);
-			ImageView iv = view.findViewById(R.id.btn_option_add_info);
-			iv.setVisibility(view.INVISIBLE);
+			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
+			btnOptionAddInfo.setImageDrawable(
+					activity.getResources().getDrawable(Utils.resolveResourceIdByAttr(activity,
+							R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
+			activity.tintViewIcons(btnOptionAddInfo);
+			final View view1 = view;
+			if (btnOptionAddInfo != null)
+				btnOptionAddInfo.setOnClickListener(v -> {
+					String sF = "?";
+					try {
+						File f = activity.getSettingsFileF(position+1);
+						sF = f.getAbsolutePath();
+						sF = sF.replace("/storage/", "/s/").replace("/emulated/", "/e/");
+					} catch (Exception e) {
+
+					}
+					activity.showToast(sF, Toast.LENGTH_LONG, view1, true, 0);
+				});
 			setChecked(cb, isCurrentItem);
 			cb.setFocusable(false);
 			cb.setFocusableInTouchMode(false);

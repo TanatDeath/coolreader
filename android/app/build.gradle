@@ -13,8 +13,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202110171
-        versionName "2021.10.17.1"
+        versionCode 202111071
+        versionName "2021.11.07.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -39,26 +39,31 @@ android {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "org.coolreader.knownreader"
+            manifestPlaceholders = [appLabel:"@string/app_name_free"]
         }
         free_wo_gsuite {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "false"
             applicationId "org.coolreader.knownreader"
+            manifestPlaceholders = [appLabel:"@string/app_name_free"]
         }
         premium {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "org.knownreader.premium"
+            manifestPlaceholders = [appLabel:"@string/app_name_premium"]
         }
         premium_wo_gsuite {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "false"
             applicationId "org.knownreader.premium"
+            manifestPlaceholders = [appLabel:"@string/app_name_premium"]
         }
         experimental {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "org.knownreader.experimental"
+            manifestPlaceholders = [appLabel:"@string/app_name_exp"]
         }
     }
 

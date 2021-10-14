@@ -6,8 +6,19 @@ import android.view.View;
 import java.util.List;
 
 public class EinkScreenDummy implements EinkScreen {
+
 	@Override
 	public void setupController(EinkUpdateMode mode, int updateInterval, View view) {
+	}
+
+	@Override
+	public void setNeedBypass(int needBypass) {
+
+	}
+
+	@Override
+	public void setExtraDelayFullRefresh(int extraDelayFullRefresh) {
+
 	}
 
 	@Override

@@ -128,7 +128,6 @@ import android.os.Debug;
 import org.coolreader.tts.OnTTSCreatedListener;
 import org.coolreader.tts.TTSControlBinder;
 import org.coolreader.tts.TTSControlServiceAccessor;
-import org.coolreader.tts.TTSToolbarDlg;
 
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
@@ -448,23 +447,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		// For TTS volume control
 		//  See TTSControlService
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-		//==========================================
-		//plotn - possibly this code hungs the start of application with no internet
-		// Donations related code
-//		try {
-//
-//			mDonationService = new CRDonationService(this);
-//			mDonationService.bind();
-//    		SharedPreferences pref = getSharedPreferences(DONATIONS_PREF_FILE, 0);
-//    		try {
-//    			mTotalDonations = pref.getFloat(DONATIONS_PREF_TOTAL_AMOUNT, 0.0f);
-//    		} catch (Exception e) {
-//    			log.e("exception while reading total donations from preferences", e);
-//    		}
-//		} catch (VerifyError e) {
-//			log.e("Exception while trying to initialize billing service for donations");
-//		}
 
 		N2EpdController.n2MainActivity = this;
 
@@ -2726,9 +2708,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     	return mTotalDonations;
     }
 
-	private static String DONATIONS_PREF_FILE = "cr3donations";
-	private static String DONATIONS_PREF_TOTAL_AMOUNT = "total";
-
 	public void initTTS(TTSControlServiceAccessor.Callback callback) {
 		if (!phoneStateChangeHandlerInstalled) {
 			// TODO: Investigate the need to tracking state of the phone, while we already respect the audio focus.
@@ -2786,7 +2765,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			});
 		});
 	}
-	
+
 	public void showOptionsDialog(final OptionsDialog.Mode mode)
 	{
 		if (mode == OptionsDialog.Mode.BROWSER) {
@@ -3133,6 +3112,39 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					showToast(R.string.could_not_delete_file, file);
 				}
 			}
+		});
+	}
+
+	public void askMoveBook(final FileInfo item) {
+		askConfirmation(R.string.move_to_books, () -> {
+			closeBookIfOpened(item);
+			FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+			String subdir = null;
+			if (!StrUtils.isEmptyStr(item.getAuthors())) {
+				subdir = Utils.transcribeFileName(item.getAuthors());
+				if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
+					subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
+			} else {
+				subdir = "NoAuthor";
+			}
+			File resultDir = new File(downloadDir.getPathName());
+			resultDir = new File(resultDir, subdir);
+			resultDir.mkdirs();
+			String bookFolder = resultDir.getAbsolutePath();
+			waitForCRDBService(() -> {
+				getDB().moveBookToFolder(item, bookFolder, o -> {
+					if ((boolean) o)
+						BackgroundThread.instance().postGUI(() -> {
+							showToast(R.string.moved_to_books);
+							directoryUpdated(item.parent, null);
+						}, 700);
+					else
+						BackgroundThread.instance().postGUI(() -> {
+							showToast(R.string.cannot_move_to_books);
+							directoryUpdated(item.parent, null);
+						}, 700);
+				});
+			});
 		});
 	}
 

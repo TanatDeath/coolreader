@@ -35,8 +35,8 @@ public class ReaderAction {
 	}
 
 	public int getIsVisibleOnToolbar(ReaderView rv) {
-        return rv.getSettings().getInt(Settings.PROP_TOOLBAR_BUTTONS+"."+String.valueOf(this.cmd.nativeId)
-				+"."+String.valueOf(this.param),0);
+		return rv.getActivity().settings().getInt(Settings.PROP_TOOLBAR_BUTTONS+"."+this.cmd.nativeId
+				+"."+this.param,0);
     }
 
 	public int getIconIdWithDef(BaseActivity activity) {

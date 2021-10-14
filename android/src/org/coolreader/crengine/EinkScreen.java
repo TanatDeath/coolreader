@@ -33,6 +33,10 @@ public interface EinkScreen {
 
 	void setupController(EinkUpdateMode mode, int updateInterval, View view);
 
+	void setNeedBypass(int needBypass);
+
+	void setExtraDelayFullRefresh(int extraDelayFullRefresh);
+
 	void prepareController(View view, boolean isPartially);
 
 	void updateController(View view, boolean isPartially);

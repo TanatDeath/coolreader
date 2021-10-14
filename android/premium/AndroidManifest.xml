@@ -4,6 +4,7 @@
         android:installLocation="auto">
 
     <application
+            android:label="${appLabel}"
             tools:node="merge"
             >
         <provider

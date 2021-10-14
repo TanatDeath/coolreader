@@ -888,11 +888,33 @@ public class CRDBService extends BaseService {
 	}
 
 	public void getLibraryStats(final ObjectCallback callback, final Handler handler) {
-		execTask(new Task("deleteCloudEntries") {
+		execTask(new Task("getLibraryStats") {
 			@Override
 			public void work() {
 				LibraryStats ls = mainDB.getLibraryStats();
 				sendTask(handler, () -> callback.onObjectLoaded(ls));
+			}
+		});
+		flush();
+	}
+
+	public void getLibraryCategStats(final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("getLibraryCategStats") {
+			@Override
+			public void work() {
+				boolean b = mainDB.getLibraryCategStats();
+				sendTask(handler, () -> callback.onObjectLoaded(b));
+			}
+		});
+		flush();
+	}
+
+	public void moveBookToFolder(final FileInfo bookFile, final String toFolder, ObjectCallback callback, final Handler handler) {
+		execTask(new Task("moveBookToFolder") {
+			@Override
+			public void work() {
+				boolean b = mainDB.moveBookToFolder(bookFile, toFolder);
+				sendTask(handler, () -> callback.onObjectLoaded(b));
 			}
 		});
 		flush();
@@ -1168,6 +1190,14 @@ public class CRDBService extends BaseService {
 
 		public void getLibraryStats(ObjectCallback callback) {
 			getService().getLibraryStats(callback, new Handler());
+		}
+
+		public void getLibraryCategStats(ObjectCallback callback) {
+			getService().getLibraryCategStats(callback, new Handler());
+		}
+
+		public void moveBookToFolder(final FileInfo bookFile, final String toFolder, ObjectCallback callback) {
+			getService().moveBookToFolder(bookFile, toFolder, callback, new Handler());
 		}
 
 		public void loadFileInfos(ArrayList<String> pathNames, FileInfoLoadingCallback fileInfoLoadingCallback) {

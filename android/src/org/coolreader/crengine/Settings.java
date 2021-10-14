@@ -354,6 +354,9 @@ public interface Settings {
 	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
 	public static final String PROP_PAGE_FLIP_TITLE = "window.page.flip.title";
 
+	public static final String PROP_APP_EINK_ONYX_NEED_BYPASS   ="app.eink.onyx.need.bypass";
+	public static final String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
+
 	// available options for PROP_APP_SELECTION_ACTION setting
 	public static final int SELECTION_ACTION_SAME_AS_COMMON = -1;
 	public static final int SEND_TO_ACTION_NONE = -1;

@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
 
     <application
+            android:label="${appLabel}"
             android:process="org.coolreader.knownreader"
             tools:replace="android:process"
             tools:node="merge"

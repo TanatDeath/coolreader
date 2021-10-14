@@ -11,6 +11,7 @@ import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.dic.struct.DictEntry;
+import org.coolreader.dic.struct.ExampleLine;
 import org.coolreader.dic.struct.Lemma;
 import org.coolreader.dic.struct.TranslLine;
 import org.jsoup.Jsoup;
@@ -30,7 +31,7 @@ public class UrbanTranslate {
 
 	public static final Logger log = L.create("cr3dict_urban");
 
-	public void urbanTranslate(CoolReader cr, String s, String langf, String lang, Dictionaries.DictInfo curDict, View view,
+	public void urbanTranslate(CoolReader cr, String s, Dictionaries.DictInfo curDict, View view,
 								Dictionaries.LangListCallback llc, CoolReader.DictionaryCallback dcb) {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -43,11 +44,11 @@ public class UrbanTranslate {
 		BackgroundThread.instance().postBackground(() -> {
 			try {
 				if (llc == null) {
-					String sTitle = "";
+					String sTitle = s;
 					DicStruct dsl = new DicStruct();
 					Lemma lemma = null;
 					Document docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
-					Elements resDivs = docJsoup.select("div.def-panel ");
+					Elements resDivs = docJsoup.select("div.def-panel");
 					for (Element resDiv: resDivs) {
 						String sWord = "";
 						Elements wordsD = resDiv.select("div.def-header");
@@ -64,6 +65,7 @@ public class UrbanTranslate {
 							if (StrUtils.isEmptyStr(sMeaning)) sMeaning = meaning.text();
 							else sMeaning += ", " + meaning.text();
 						}
+						sTitle = sTitle + sMeaning;
 						String sContributor = "";
 						Elements contributors = resDiv.select("div.contributor");
 						for (Element contributor: contributors) {
@@ -72,53 +74,22 @@ public class UrbanTranslate {
 						}
 						String sExample = "";
 						Elements examples = resDiv.select("div.example");
+						TranslLine tl = new TranslLine();
 						for (Element example: examples) {
 							if (StrUtils.isEmptyStr(sExample)) sExample = examples.text();
 							else sExample += ", " + examples.text();
+							ExampleLine el = new ExampleLine(StrUtils.getNonEmptyStr(examples.text(), true));
+							tl.exampleLines.add(el);
 						}
 
-						//		Element meaning =
-
-						Elements trs = null; // tb.select("tr");
-						for (Element tr: trs) {
-							Elements tds = tr.select("td");
-							int i = 0;
-							String categ = "";
-							String lang1 = "";
-							String val1 = "";
-							String lang2 = "";
-							String val2 = "";
-							for (Element td: tds) {
-								if (i == 1) categ = td.text();
-								if (i == 2) {
-									lang1 = td.attr("lang");
-									val1 = td.text();
-								}
-								if (i == 3) {
-									lang2 = td.attr("lang");
-									val2 = td.text();
-								}
-								i++;
-							}
-							if ((!StrUtils.isEmptyStr(val1)) &&
-								(!StrUtils.isEmptyStr(val2))) {
-								lemma = new Lemma();
-								DictEntry de = new DictEntry();
-								de.dictLinkText = StrUtils.getNonEmptyStr(val1, true);
-								de.tagType = StrUtils.getNonEmptyStr(lang1, true);
-								lemma.dictEntry.add(de);
-								TranslLine tl = new TranslLine();
-								tl.transText = StrUtils.getNonEmptyStr(val2, true);
-								tl.transGroup = categ;
-								tl.transType = lang2;
-								lemma.translLine.add(tl);
-								dsl.lemmas.add(lemma);
-								sTitle = sTitle + "; " + val1 +
-										(StrUtils.isEmptyStr(lang1)?"": ("(" + lang1 + ") = "))
-										+ val2 +
-										(StrUtils.isEmptyStr(lang2)?"": ("(" + lang2 + ")"));
-							}
-						}
+						lemma = new Lemma();
+						DictEntry de = new DictEntry();
+						de.dictLinkText = StrUtils.getNonEmptyStr(sWord, true);
+						de.tagType = StrUtils.getNonEmptyStr(sContributor, true);
+						lemma.dictEntry.add(de);
+						tl.transText = StrUtils.getNonEmptyStr(sMeaning, true);
+						lemma.translLine.add(tl);
+						dsl.lemmas.add(lemma);
 					}
 					if (StrUtils.getNonEmptyStr(sTitle, true).startsWith("; "))
 						sTitle = sTitle.substring(2);

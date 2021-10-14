@@ -66,12 +66,28 @@ public class Properties extends java.util.Properties {
 		setProperty(key, value);
 	}
 
+	public void setDouble(String key, double v) {
+		String value = String.valueOf(v);
+		setProperty(key, value);
+	}
+
 	public int getInt(String key, int def) {
 		String value = getProperty(key);
 		int res = def;
 		try {
 			if (value != null)
 				res = Integer.valueOf(value);
+		} catch (Exception e) {
+		}
+		return res;
+	}
+
+	public double getDouble(String key, double def) {
+		String value = getProperty(key);
+		double res = def;
+		try {
+			if (value != null)
+				res = Double.valueOf(value);
 		} catch (Exception e) {
 		}
 		return res;

@@ -507,11 +507,11 @@
 					android:layout_weight="1"
 					android:orientation="horizontal">
 					<TextView
-						android:id="@+id/lbl_book_title"
+						android:id="@+id/lbl_book_language"
 						style="@style/TextAppearance.Small"
 						android:singleLine="false"
 						android:maxLines="3"
-						android:text="@string/book_info_book_title"
+						android:text="@string/book_info_book_language"
 						android:textColor="?attr/colorIcon"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"/>
@@ -523,14 +523,52 @@
 					android:layout_weight="3"
 					android:orientation="horizontal">
 					<EditText
-						android:id="@+id/book_title"
+						android:id="@+id/book_language"
 						android:layout_width="fill_parent"
 						android:layout_height="wrap_content"
-						android:text="Book title"
+						android:text="Book language"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
+						android:editable="false"
 						android:singleLine="true"
 					/>
+				</LinearLayout>
+			</TableRow>
+			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+					android:layout_margin="2dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					>
+				<LinearLayout
+						android:layout_width="0dip"
+						android:layout_height="fill_parent"
+						android:gravity="left|center_vertical"
+						android:layout_weight="1"
+						android:orientation="horizontal">
+					<TextView
+							android:id="@+id/lbl_book_title"
+							style="@style/TextAppearance.Small"
+							android:singleLine="false"
+							android:maxLines="3"
+							android:text="@string/book_info_book_title"
+							android:textColor="?attr/colorIcon"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"/>
+				</LinearLayout>
+				<LinearLayout
+						android:layout_width="0dip"
+						android:layout_height="fill_parent"
+						android:gravity="left"
+						android:layout_weight="3"
+						android:orientation="horizontal">
+					<EditText
+							android:id="@+id/book_title"
+							android:layout_width="fill_parent"
+							android:layout_height="wrap_content"
+							android:text="Book title"
+							style="@style/TextAppearance.Widget.EditText"
+							android:singleLine="true"
+							/>
 				</LinearLayout>
 			</TableRow>
 			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
@@ -573,7 +611,6 @@
 							android:layout_height="wrap_content"
 							android:text="Book title"
 							style="@style/TextAppearance.Widget.EditText"
-							android:editable="true"
 							android:singleLine="true"
 						/>
 				   </LinearLayout>
@@ -619,7 +656,6 @@
 								android:layout_weight="4"
 								android:text="Series"
 								style="@style/TextAppearance.Widget.EditText"
-								android:editable="true"
 								android:singleLine="true"
 							/>
 							<TextView
@@ -640,7 +676,6 @@
 								android:layout_weight="2"
 								android:text="10"
 								style="@style/TextAppearance.Widget.EditText"
-								android:editable="true"
 								android:singleLine="true"
 							/>
 						</TableRow>
@@ -687,7 +722,6 @@
 								android:layout_weight="3"
 								android:text="en"
 								style="@style/TextAppearance.Widget.EditText"
-								android:editable="true"
 								android:singleLine="true"
 								android:backgroundTint="@color/greenLighter"
 								/>
@@ -710,7 +744,6 @@
 								android:text="ru"
 								android:backgroundTint="@color/greenLighter"
 								style="@style/TextAppearance.Widget.EditText"
-								android:editable="true"
 								android:singleLine="true"
 								/>
 							<Button
@@ -761,7 +794,6 @@
 						android:layout_height="wrap_content"
 						android:text="genre"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -800,7 +832,6 @@
 						android:layout_height="wrap_content"
 						android:text="annotation"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="false"
 						android:maxLines="8"
 						android:scrollbars="vertical"
@@ -841,7 +872,6 @@
 						android:layout_height="wrap_content"
 						android:text="srclang"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -880,7 +910,6 @@
 						android:layout_height="wrap_content"
 						android:text="bookdate"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -919,7 +948,6 @@
 						android:layout_height="wrap_content"
 						android:text="translator"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -977,7 +1005,6 @@
 						android:layout_height="wrap_content"
 						android:text="docauthor"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1016,7 +1043,6 @@
 						android:layout_height="wrap_content"
 						android:text="docprogram"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1055,7 +1081,6 @@
 						android:layout_height="wrap_content"
 						android:text="docdate"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1094,7 +1119,6 @@
 						android:layout_height="wrap_content"
 						android:text="docsrcurl"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1133,7 +1157,6 @@
 						android:layout_height="wrap_content"
 						android:text="docsrcocr"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1172,7 +1195,6 @@
 						android:layout_height="wrap_content"
 						android:text="docversion"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1230,7 +1252,6 @@
 						android:layout_height="wrap_content"
 						android:text="publname"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1269,7 +1290,6 @@
 						android:layout_height="wrap_content"
 						android:text="publisher"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1308,7 +1328,6 @@
 						android:layout_height="wrap_content"
 						android:text="publcity"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1347,7 +1366,6 @@
 						android:layout_height="wrap_content"
 						android:text="publyear"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1386,7 +1404,6 @@
 						android:layout_height="wrap_content"
 						android:text="publisbn"
 						style="@style/TextAppearance.Widget.EditText"
-						android:editable="true"
 						android:singleLine="true"
 						/>
 				</LinearLayout>
@@ -1431,7 +1448,6 @@
 								android:layout_weight="4"
 								android:text="publseries"
 								style="@style/TextAppearance.Widget.EditText"
-								android:editable="true"
 								android:singleLine="true"
 								/>
 							<TextView
@@ -1452,7 +1468,6 @@
 								android:layout_weight="2"
 								android:text="10"
 								style="@style/TextAppearance.Widget.EditText"
-								android:editable="true"
 								android:singleLine="true"
 								/>
 						</TableRow>

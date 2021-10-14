@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudAction;
@@ -65,7 +64,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -1185,6 +1183,70 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	int [] mExternalDocumentCameDialogTimeout = new int[] {
 			0, 1, 2, 3, 4, 5, 8, 10, 15, 20, 30, 45, 60
 	};
+
+	int[] mEinkOnyxNeedBypass = new int[] {
+			0, 1, 2
+	};
+
+	int[] mEinkOnyxNeedBypassTitles = new int[] {
+			R.string.eink_onyx_bypass0,
+			R.string.eink_onyx_bypass1,
+			R.string.eink_onyx_bypass2
+	};
+
+	int[] mEinkOnyxNeedBypassAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	int[] mEinkOnyxExtraDelayFullRefresh = new int[] {
+			-1, 0, 10, 20, 40, 80, 100, 120, 140, 160, 180, 200, 230, 260, 300, 400, 500
+	};
+
+	int[] mEinkOnyxExtraDelayFullRefreshTitles = new int[] {
+			R.string.eink_onyx_add_delay_full_refresh_auto,
+			R.string.eink_onyx_add_delay_full_refresh_0,
+			R.string.eink_onyx_add_delay_full_refresh_10,
+			R.string.eink_onyx_add_delay_full_refresh_20,
+			R.string.eink_onyx_add_delay_full_refresh_40,
+			R.string.eink_onyx_add_delay_full_refresh_80,
+			R.string.eink_onyx_add_delay_full_refresh_100,
+			R.string.eink_onyx_add_delay_full_refresh_120,
+			R.string.eink_onyx_add_delay_full_refresh_140,
+			R.string.eink_onyx_add_delay_full_refresh_160,
+			R.string.eink_onyx_add_delay_full_refresh_180,
+			R.string.eink_onyx_add_delay_full_refresh_200,
+			R.string.eink_onyx_add_delay_full_refresh_230,
+			R.string.eink_onyx_add_delay_full_refresh_260,
+			R.string.eink_onyx_add_delay_full_refresh_300,
+			R.string.eink_onyx_add_delay_full_refresh_400,
+			R.string.eink_onyx_add_delay_full_refresh_500
+	};
+
+	int[] mEinkOnyxExtraDelayFullRefreshAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	public static final String PROP_APP_EINK_ONYX_NEED_BYPASS   ="app.eink.onyx.need.bypass";
+	public static final String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
+
 
 	ViewGroup mContentView;
 	TabHost mTabs;
@@ -4406,6 +4468,21 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					optionMode = optionMode.add(mOnyxScreenUpdateModes[3], mOnyxScreenUpdateModesTitles[3], R.string.option_add_info_empty_text);
 					listView.add(optionMode.setDefaultValue(String.valueOf(DeviceInfo.EINK_SCREEN_REGAL ? EinkScreen.EinkUpdateMode.Regal.code : EinkScreen.EinkUpdateMode.Clear.code))
 							.setDisabledNote(getString(R.string.options_eink_app_optimization_enabled)));
+
+					OptionBase optionNeedBypass =
+							new ListOption(mOwner, getString(R.string.eink_onyx_bypass), PROP_APP_EINK_ONYX_NEED_BYPASS,
+							getString(R.string.eink_onyx_bypass_add_info), this.lastFilteredValue).
+							add(mEinkOnyxNeedBypass, mEinkOnyxNeedBypassTitles, mEinkOnyxNeedBypassAddInfos).
+							setDefaultValue("0");
+					listView.add(optionNeedBypass);
+
+					OptionBase optionExtraDelayFullRefresh =
+							new ListOption(mOwner, getString(R.string.eink_onyx_add_delay_full_refresh), PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH,
+							getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+							add(mEinkOnyxExtraDelayFullRefresh, mEinkOnyxExtraDelayFullRefreshTitles, mEinkOnyxExtraDelayFullRefreshAddInfos).
+							setDefaultValue("-1");
+					listView.add(optionExtraDelayFullRefresh);
+
 				} else {
 					optionMode = new ListOption(mOwner, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE,
 							getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
@@ -4448,6 +4525,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.options_screen_blackpage_interval_add_info));
 			this.updateFilteredMark(getString(R.string.options_screen_blackpage_duration), PROP_APP_SCREEN_BLACKPAGE_DURATION,
 					getString(R.string.options_screen_blackpage_duration_add_info));
+			this.updateFilteredMark(getString(R.string.eink_onyx_bypass), PROP_APP_EINK_ONYX_NEED_BYPASS,
+					getString(R.string.eink_onyx_bypass_add_info));
+			for (int i: mEinkOnyxNeedBypassTitles) if (i > 0) this.updateFilteredMark(activity.getString(i));
+			this.updateFilteredMark(getString(R.string.eink_onyx_add_delay_full_refresh), PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH,
+					getString(R.string.option_add_info_empty_text));
+			for (int i: mEinkOnyxExtraDelayFullRefreshTitles) if (i > 0) this.updateFilteredMark(activity.getString(i));
 			return this.lastFiltered;
 		}
 
@@ -6985,13 +7068,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		String filter = "";
 		if (activity instanceof CoolReader) filter = ((CoolReader)activity).optionsFilter;
-		File f = activity.getSettingsFileF(activity.getCurrentProfile());
-		String sF = f.getAbsolutePath();
-		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
-		sF = sF + "\n"+getString(R.string.settings_info_short);
-		if (!filter.trim().equals("")) sF = sF + "\n"+getString(R.string.mi_filter_option) + ": "+filter;
+// 		removed due to https://github.com/plotn/coolreader/issues/520, make it simple
+//		File f = activity.getSettingsFileF(activity.getCurrentProfile());
+//		String sF = f.getAbsolutePath();
+//		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
 		String sprof = activity.getCurrentProfileName();
-		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
+		if (StrUtils.isEmptyStr(sprof)) sprof = getString(R.string.profile)+" "+activity.getCurrentProfile();
+		String sF = "\n"+getString(R.string.settings_info_short);
+		if (!filter.trim().equals("")) sF = sF + "\n"+getString(R.string.mi_filter_option) + ": "+filter;
 		this.upperText = sprof + sF;
 		this.searchEnabled = true;
 		mActivity = activity;
