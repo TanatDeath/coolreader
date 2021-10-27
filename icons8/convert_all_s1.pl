@@ -25,7 +25,8 @@ my %ic_smaller_list=(
         'icons8_page.svg' => 'icons8_page.png',
         'icons8_settings.svg' => 'icons8_settings.png',
         'icons8_cursor.svg' => 'icons8_cursor.png',
-        'icons8_save_small.svg' => 'icons8_save_small.png'
+        'icons8_save_small.svg' => 'icons8_save_small.png',
+        'icons8_menu.svg' => 'icons8_menu_small.png'
 );
 
 my %ic_actions_list=(

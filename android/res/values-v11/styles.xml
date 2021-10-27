@@ -348,6 +348,7 @@
         <item name="attr_icons8_document_down_ch">@drawable/icons8_document_down_ch</item>
         <item name="attr_icons8_document_up_ch">@drawable/icons8_document_up_ch</item>
         <item name="attr_icons8_menu">@drawable/icons8_menu</item>
+        <item name="attr_icons8_menu_small">@drawable/icons8_menu_small</item>
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
@@ -766,6 +767,7 @@
         <item name="attr_icons8_document_down_ch">@drawable/icons8_document_down_ch</item>
         <item name="attr_icons8_document_up_ch">@drawable/icons8_document_up_ch</item>
         <item name="attr_icons8_menu">@drawable/icons8_menu</item>
+        <item name="attr_icons8_menu_small">@drawable/icons8_menu_small</item>
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
@@ -1169,6 +1171,7 @@
         <item name="attr_icons8_document_down_ch">@drawable/icons8_document_down_ch</item>
         <item name="attr_icons8_document_up_ch">@drawable/icons8_document_up_ch</item>
         <item name="attr_icons8_menu">@drawable/icons8_menu</item>
+        <item name="attr_icons8_menu_small">@drawable/icons8_menu_small</item>
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
@@ -1516,6 +1519,7 @@
         <item name="attr_icons8_document_down_ch">@drawable/icons8_document_down_ch</item>
         <item name="attr_icons8_document_up_ch">@drawable/icons8_document_up_ch</item>
         <item name="attr_icons8_menu">@drawable/icons8_menu</item>
+        <item name="attr_icons8_menu_small">@drawable/icons8_menu_small</item>
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
@@ -1878,6 +1882,7 @@
         <item name="attr_icons8_document_down_ch">@drawable/icons8_document_down_ch</item>
         <item name="attr_icons8_document_up_ch">@drawable/icons8_document_up_ch</item>
         <item name="attr_icons8_menu">@drawable/icons8_menu</item>
+        <item name="attr_icons8_menu_small">@drawable/icons8_menu_small</item>
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
@@ -2297,6 +2302,7 @@
         <item name="attr_icons8_document_down_ch">@drawable/icons8_document_down_ch</item>
         <item name="attr_icons8_document_up_ch">@drawable/icons8_document_up_ch</item>
         <item name="attr_icons8_menu">@drawable/icons8_menu</item>
+        <item name="attr_icons8_menu_small">@drawable/icons8_menu_small</item>
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>

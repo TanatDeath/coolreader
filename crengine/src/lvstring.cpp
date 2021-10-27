@@ -1291,8 +1291,8 @@ lString32 & lString32::insert(size_type p0, size_type count, lChar32 ch)
     if (p0>pchunk->len)
         p0 = pchunk->len;
     reserve( pchunk->len+count );
-    for (size_type i=pchunk->len+count; i>p0; i--)
-        pchunk->buf32[i] = pchunk->buf32[i-1];
+    for (size_type i=pchunk->len-1; i>=p0; i--)
+        pchunk->buf32[i+count] = pchunk->buf32[i];
     _lStr_memset(pchunk->buf32+p0, ch, count);
     pchunk->len += count;
     pchunk->buf32[pchunk->len] = 0;
@@ -1305,8 +1305,8 @@ lString32 & lString32::insert(size_type p0, const lString32 & str)
         p0 = pchunk->len;
     int count = str.length();
     reserve( pchunk->len+count );
-    for (size_type i=pchunk->len+count; i>p0; i--)
-        pchunk->buf32[i] = pchunk->buf32[i-1];
+    for (size_type i=pchunk->len-1; i>=p0; i--)
+        pchunk->buf32[i+count] = pchunk->buf32[i];
     _lStr_memcpy(pchunk->buf32 + p0, str.c_str(), count);
     pchunk->len += count;
     pchunk->buf32[pchunk->len] = 0;
@@ -1539,6 +1539,88 @@ bool lString32::atoi( lInt64 &n ) const
     if ( sgn<0 )
         n = -n;
     return *s=='\0' || *s==' ' || *s=='\t';
+}
+
+double lString32::atod() const {
+    double d = 0.0;
+    bool res = atod(d, '.');
+    return res ? d : 0.0;
+}
+
+bool lString32::atod( double &d, char dp ) const {
+    // Simplified implementation without overflow checking
+    int sign = 1;
+    unsigned long intg = 0;
+    unsigned long frac = 0;
+    unsigned long frac_div = 1;
+    unsigned int exp = 0;
+    int exp_sign = 1;
+    bool res = false;
+    const value_type * s = c_str();
+    while (*s == ' ' || *s == '\t')
+        s++;
+    if (*s == '-') {
+        sign = -1;
+        s++;
+    }
+    else if (*s == '+') {
+        s++;
+    }
+    if (*s>='0' && *s<='9') {
+        res = true;
+        while (*s>='0' && *s<='9') {
+            intg = intg * 10 + ( (*s)-'0' );
+            s++;
+        }
+    }
+    if (res && *s == dp) {
+        // decimal point found
+        s++;
+        res = false;
+        if (*s>='0' && *s<='9') {
+            res = true;
+            while (*s>='0' && *s<='9') {
+                frac = frac * 10 + ( (*s)-'0' );
+                s++;
+                frac_div *= 10;
+            }
+        }
+    }
+    if (res && (*s == 'e' || *s == 'E')) {
+        // exponent part
+        s++;
+        if (*s == '-') {
+            exp_sign = -1;
+            s++;
+        }
+        else if (*s == '+') {
+            s++;
+        }
+        res = false;
+        if (*s>='0' && *s<='9') {
+            res = true;
+            while (*s>='0' && *s<='9') {
+                exp = exp * 10 + ( (*s)-'0' );
+                s++;
+            }
+        }
+    }
+    if (res && (*s != '\0' && *s != ' ' && *s != '\t')) {
+        // unprocessed characters left
+        res = false;
+    }
+    d = (double)intg;
+    if (frac_div > 1)
+        d += ((double)frac)/((double)frac_div);
+    if (exp > 1) {
+        double pwr = exp_sign > 0 ? 10.0 : 0.1;
+        for (unsigned int i = 0; i < exp; i++) {
+            d *= pwr;
+        }
+    }
+    if (sign < 0)
+        d = -d;
+    return res;
 }
 
 #define STRING_HASH_MULT 31
@@ -2722,8 +2804,8 @@ lString8 & lString8::insert(size_type p0, size_type count, lChar8 ch)
     if (p0>pchunk->len)
         p0 = pchunk->len;
     reserve( pchunk->len+count );
-    for (size_type i=pchunk->len+count; i>p0; i--)
-        pchunk->buf8[i] = pchunk->buf8[i-1];
+    for (size_type i=pchunk->len-1; i>=p0; i--)
+        pchunk->buf8[i+count] = pchunk->buf8[i];
     //_lStr_memset(pchunk->buf8+p0, ch, count);
     memset(pchunk->buf8+p0, ch, count);
     pchunk->len += count;
@@ -3164,6 +3246,7 @@ lInt64 lString8::atoi64() const
     while (*s>='0' && *s<='9')
     {
         n = n * 10 + ( (*s)-'0' );
+        s++;
     }
     return (sgn>0) ? n : -n;
 }
@@ -5455,7 +5538,45 @@ inline lUInt16 getCharProp(lChar32 ch) {
              (ch>=UNICODE_GENERAL_PUNCTUATION_BEGIN && ch<=UNICODE_GENERAL_PUNCTUATION_END) ||
              (ch>=UNICODE_CJK_PUNCTUATION_HALF_AND_FULL_WIDTH_BEGIN && ch<=UNICODE_CJK_PUNCTUATION_HALF_AND_FULL_WIDTH_END))
         return CH_PROP_PUNCT;
-    return 0;
+
+    // Try to guess a few other things about other chars we don't handle above
+    lUInt16 prop = 0;
+#if (USE_UTF8PROC==1)
+    // For other less known ranges, fallback to detecting letters with utf8proc,
+    // which is enough to be able to ensure hyphenation for Armenian and Georgian.
+    utf8proc_category_t cat = utf8proc_category(ch);
+    switch (cat) {
+        case UTF8PROC_CATEGORY_LU:
+        case UTF8PROC_CATEGORY_LT:
+            prop |= CH_PROP_UPPER;
+            break;
+        case UTF8PROC_CATEGORY_LL:
+        case UTF8PROC_CATEGORY_LM:
+        case UTF8PROC_CATEGORY_LO:
+            prop |= CH_PROP_LOWER;
+            break;
+        default:
+            break;
+    }
+#endif
+    // Detect RTL (details in lvtextfm.cpp)
+    if ( ch >= 0x0590 && ch <= 0x08FF ) // Hebrew, Arabic, Syriac, Thaana, Nko, Samaritan...
+        prop |= CH_PROP_RTL;
+    else if ( ch >= 0xFB1D ) { // Try to balance the searches
+        if ( ch <= 0xFDFF )     // FB1D>FDFF Hebrew and Arabic presentation forms
+            prop |= CH_PROP_RTL;
+        else if ( ch <= 0xFEFF ) {
+            if ( ch >= 0xFE70)   // FE70>FEFF Arabic presentation forms
+                prop |= CH_PROP_RTL;
+        }
+        else if ( ch <= 0x1EEBB ) {
+            if (ch >= 0x1E800)   // 1E800>1EEBB Other rare scripts possibly RTL
+                prop |= CH_PROP_RTL;
+            else if ( ch <= 0x10FFF && ch >= 0x10800 ) // 10800>10FFF Other rare scripts possibly RTL
+                prop |= CH_PROP_RTL;
+        }
+    }
+    return prop;
 }
 
 void lStr_getCharProps( const lChar32 * str, int sz, lUInt16 * props )
@@ -5500,9 +5621,10 @@ bool lStr_isWordSeparator( lChar32 ch )
 }
 
 /// find alpha sequence bounds
-void lStr_findWordBounds( const lChar32 * str, int sz, int pos, int & start, int & end )
+void lStr_findWordBounds( const lChar32 * str, int sz, int pos, int & start, int & end, bool & has_rtl )
 {
     int hwStart, hwEnd;
+    has_rtl = false;
 
     // 20180615: don't split anymore on UNICODE_SOFT_HYPHEN_CODE, consider
     // it like an alpha char of zero width not drawn.
@@ -5537,7 +5659,7 @@ void lStr_findWordBounds( const lChar32 * str, int sz, int pos, int & start, int
     {
         lChar32 ch = str[hwStart];
         lUInt16 props = getCharProp(ch);
-        if ( props & CH_PROP_ALPHA || props & CH_PROP_HYPHEN )
+        if ( props & (CH_PROP_ALPHA|CH_PROP_HYPHEN) )
             break;
     }
     if ( hwStart<0 ) {
@@ -5551,7 +5673,10 @@ void lStr_findWordBounds( const lChar32 * str, int sz, int pos, int & start, int
     {
         lChar32 ch = str[hwStart];
         //int lastAlpha = -1;
-        if ( getCharProp(ch) & CH_PROP_ALPHA || getCharProp(ch) & CH_PROP_HYPHEN ) {
+        lUInt16 props = getCharProp(ch);
+        if ( props & (CH_PROP_ALPHA|CH_PROP_HYPHEN) ) {
+            if ( props & CH_PROP_RTL )
+                has_rtl = true;
             //lastAlpha = hwStart;
         } else {
             hwStart++;
@@ -5566,7 +5691,8 @@ void lStr_findWordBounds( const lChar32 * str, int sz, int pos, int & start, int
     for (hwEnd=hwStart+1; hwEnd<sz; hwEnd++) // 20080404
     {
         lChar32 ch = str[hwEnd];
-        if (!(getCharProp(ch) & CH_PROP_ALPHA) && !(getCharProp(ch) & CH_PROP_HYPHEN))
+        lUInt16 props = getCharProp(ch);
+        if ( !(props & (CH_PROP_ALPHA|CH_PROP_HYPHEN)) )
             break;
         ch = str[hwEnd-1];
         if ( ch==' ' ) // || ch==UNICODE_SOFT_HYPHEN_CODE) )
@@ -5889,6 +6015,16 @@ lString8 & lString8::replace(size_type p0, size_type n0, const lString8 & str) {
     lString8 s1 = substr( 0, p0 );
     lString8 s2 = length() - p0 - n0 > 0 ? substr( p0+n0, length()-p0-n0 ) : lString8::empty_str;
     *this = s1 + str + s2;
+    return *this;
+}
+
+lString8 & lString8::replace(value_type before, value_type after) {
+    value_type* ptr = modify();
+    while (*ptr) {
+        if (*ptr == before)
+            *ptr = after;
+        ++ptr;
+    }
     return *this;
 }
 

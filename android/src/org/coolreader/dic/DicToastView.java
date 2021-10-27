@@ -74,6 +74,7 @@ public class DicToastView {
     public static int IS_GRAMOTA = 7;
     public static int IS_GLOSBE = 8;
     public static int IS_TURENG = 9;
+    public static int IS_URBAN = 10;
 
     public static int mColorIconL = Color.GRAY;
     public static PopupWindow curWindow = null;

@@ -271,6 +271,8 @@ public class BookInfoDialog extends BaseDialog {
 //			if ( title!=null )
 //				name = title;
 		} else {
+			if ("book.language".equals(name))
+				value = Engine.getHumanReadableLocaleName(value);
 			Integer id = mLabelMap.get(name);
 			String title = id!=null ? getContext().getString(id) : name;
 			if (title != null)
@@ -883,14 +885,12 @@ public class BookInfoDialog extends BaseDialog {
 						}
 					}
 			} else {
-				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), file, bmp, new CoverpageManager.CoverpageBitmapReadyListener() {
-					@Override
-					public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
+				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), file, bmp, false,
+					(file1, bitmap) -> {
 						mBookCover = bitmap;
 						BitmapDrawable drawable = new BitmapDrawable(bitmap);
 						image.setImageDrawable(drawable);
-					}
-				});
+					});
 			}
 		}
 		TableLayout table = mainView.findViewById(R.id.table);

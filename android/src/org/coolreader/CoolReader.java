@@ -29,11 +29,11 @@ import org.coolreader.cloud.yandex.YndCloudSettings;
 import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.CalibreCatalogEditDialog;
-import org.coolreader.crengine.DictsDlg;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.InputDialog;
 import org.coolreader.crengine.OPDSUtil;
+import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.dic.Dictionaries;
@@ -84,8 +84,10 @@ import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
-import org.coolreader.donations.CRDonationService;
 import org.coolreader.sync2.OnSyncStatusListener;
+import org.coolreader.sync2.SyncOptions;
+import org.coolreader.sync2.SyncService;
+import org.coolreader.sync2.SyncServiceAccessor;
 import org.coolreader.sync2.Synchronizer;
 import org.coolreader.sync2.googledrive.GoogleDriveRemoteAccess;
 import org.coolreader.crengine.UserDicEntry;
@@ -123,13 +125,15 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.speech.tts.TextToSpeech;
 import org.coolreader.tts.OnTTSCreatedListener;
+import org.coolreader.tts.TTSControlBinder;
+import org.coolreader.tts.TTSControlServiceAccessor;
 import org.coolreader.tts.TTSToolbarDlg;
 
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -275,18 +279,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public ViewGroup mCurrentFrame;
 	public ViewGroup mPreviousFrame;
 
-	private boolean mSyncGoogleDriveEnabled = false;
+	private final SyncOptions mGoogleDriveSyncOpts = new SyncOptions();
 	private boolean mSyncGoogleDriveEnabledPrev = false;
-	private boolean mCloudSyncAskConfirmations = true;
-	private boolean mSyncGoogleDriveEnabledSettings = false;
-	private boolean mSyncGoogleDriveEnabledBookmarks = false;
-	private boolean mSyncGoogleDriveEnabledCurrentBookInfo = false;
-	private boolean mSyncGoogleDriveEnabledCurrentBookBody = false;
-	private int mCloudSyncBookmarksKeepAlive = 14;
-	private int mSyncGoogleDriveAutoSavePeriod = 0;
 	private int mSyncGoogleDriveErrorsCount = 0;
-	private Synchronizer mGoogleDriveSync;
+	private Synchronizer mGoogleDriveSync = null;
+	private OnSyncStatusListener mGoogleDriveSyncStatusListener = null;
 	private Timer mGoogleDriveAutoSaveTimer = null;
+	private SyncServiceAccessor syncServiceAccessor = null;
 	// can be add more synchronizers
 	private boolean mSuppressSettingsCopyToCloud;
 
@@ -300,19 +299,25 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private int mOpenDocumentTreeCommand = ODT_CMD_NO_SPEC;
 	private FileInfo mOpenDocumentTreeArg = null;
 
+	private boolean phoneStateChangeHandlerInstalled = false;
+	private int initialBatteryState = ReaderView.BATTERY_STATE_NO_BATTERY;
+	private int initialBatteryChargeConn = ReaderView.BATTERY_CHARGER_NO;
+	private int initialBatteryLevel = 0;
+
 	private boolean isFirstStart = true;
 	private int settingsCanBeMigratedLastInd = -1;
 	public int settingsMayBeMigratedLastInd = -1;
 	private int reserveSettingsLastInd = -1;
 	private int currentSettingsLastInd = -1;
-	private boolean phoneStateChangeHandlerInstalled = false;
-	private int initialBatteryState = -1;
-	private BroadcastReceiver intentReceiver;
 
 	private boolean justCreated = false;
 	private boolean activityIsRunning = false;
+	private boolean isInterfaceCreated = false;
 
 	private boolean dataDirIsRemoved = false;
+
+	private String ttsEnginePackage = "";
+	public TTSControlServiceAccessor ttsControlServiceAccessor = null;
 
 	private static final int REQUEST_CODE_STORAGE_PERM = 1;
 	private static final int REQUEST_CODE_READ_PHONE_STATE_PERM = 2;
@@ -327,6 +332,58 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int ODT_CMD_DEL_FILE = 1;
 	private static final int ODT_CMD_DEL_FOLDER = 2;
 	private static final int ODT_CMD_SAVE_LOGCAT = 3;
+
+	private final BroadcastReceiver batteryChangeReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO: When minSDK increases to 5 or higher replace string constants:
+			//  "status" -> BatteryManager.EXTRA_STATUS
+			//  "plugged" -> BatteryManager.EXTRA_PLUGGED
+			//  "level" -> BatteryManager.EXTRA_LEVEL
+			int status = intent.getIntExtra("status", 0);
+			int plugged = intent.getIntExtra("plugged", 0);
+			int level = intent.getIntExtra("level", 0);
+			// Translate android values to cr3 values
+			switch (plugged) {
+				case BatteryManager.BATTERY_PLUGGED_AC:
+					plugged = ReaderView.BATTERY_CHARGER_AC;
+					break;
+				case BatteryManager.BATTERY_PLUGGED_USB:
+					plugged = ReaderView.BATTERY_CHARGER_USB;
+					break;
+				case BatteryManager.BATTERY_PLUGGED_WIRELESS:
+					plugged = ReaderView.BATTERY_CHARGER_WIRELESS;
+					break;
+				default:
+					plugged = ReaderView.BATTERY_CHARGER_NO;
+			}
+			switch (status) {
+				case BatteryManager.BATTERY_STATUS_CHARGING:
+					status = ReaderView.BATTERY_STATE_CHARGING;
+					break;
+				case BatteryManager.BATTERY_STATUS_DISCHARGING:
+				default:
+					status = ReaderView.BATTERY_STATE_DISCHARGING;
+					break;
+			}
+			if (mReaderView != null)
+				mReaderView.setBatteryState(status, plugged, level);
+			else {
+				initialBatteryState = status;
+				initialBatteryChargeConn = plugged;
+				initialBatteryLevel = level;
+			}
+		}
+	};
+
+	private BroadcastReceiver timeTickReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (activityIsRunning && null != mReaderView) {
+				mReaderView.onTimeTickReceived();
+			}
+		}
+	};
 
 	public String getAndroid_id() {
 		return android_id;
@@ -355,6 +412,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		isFirstStart = true;
 		justCreated = true;
 		activityIsRunning = false;
+		isInterfaceCreated = false;
 
 		//AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); -- к сожалению не работает ((
 
@@ -377,44 +435,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mEngine = Engine.getInstance(this);
 
 		//requestWindowFeature(Window.FEATURE_NO_TITLE);
-    	
-		//==========================================
-    	// Battery state listener
-		intentReceiver = new BroadcastReceiver() {
 
-			@Override
-			public void onReceive(Context context, Intent intent) {
+		// Get battery level
+		// ACTION_BATTERY_CHANGED is a sticky broadcast & we pass null instead of receiver, then
+		// no receiver is registered -- the function simply returns the sticky Intent that matches filter.
+		Intent intent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+		if (null != intent) {
+			// and process this Intent: save received values
+			batteryChangeReceiver.onReceive(null, intent);
+		}
 
-				// Are we charging / charged?
-				int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-				boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-						status == BatteryManager.BATTERY_STATUS_FULL;
-
-				// How are we charging?
-				int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-				boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-				boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
-				boolean wirelessCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
-
-				int level = intent.getIntExtra("level", 0);
-
-				if (usbCharge) level += 10000; else
-					if (acCharge) level += 20000; else
-						if (wirelessCharge) level += 30000;
-
-				if (mReaderView != null)
-					mReaderView.setBatteryState(level);
-				else
-					initialBatteryState = level;
-			}
-			
-		};
-		registerReceiver(intentReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        
+		// For TTS volume control
+		//  See TTSControlService
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		
-		if (initialBatteryState >= 0 && mReaderView != null)
-			mReaderView.setBatteryState(initialBatteryState);
 
 		//==========================================
 		//plotn - possibly this code hungs the start of application with no internet
@@ -487,14 +520,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (!CLOSE_BOOK_ON_STOP && mReaderView != null)
 			mReaderView.close();
 
-		if (tts != null) {
-			tts.shutdown();
-			tts = null;
-			ttsInitialized = false;
-			ttsError = false;
+		// Shutdown TTS service if running
+		if (null != ttsControlServiceAccessor) {
+			ttsControlServiceAccessor.unbind();
+			ttsControlServiceAccessor = null;
 		}
-		
-		
+
+		// Unbind from Cloud Sync service
+		if (null != syncServiceAccessor) {
+			syncServiceAccessor.unbind();
+			syncServiceAccessor = null;
+		}
+
 		if (mHomeFrame != null)
 			mHomeFrame.onClose();
 		mDestroyed = true;
@@ -512,15 +549,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //		}
 			
 		//mEngine = null;
-		if (intentReceiver != null) {
-			unregisterReceiver(intentReceiver);
-			intentReceiver = null;
-		}
-		
+
 		//===========================
 		// Donations support code
-		if (mDonationService != null)
-			mDonationService.unbind();
+		//if (mDonationService != null)
+		//	mDonationService.unbind();
 
 		if (mReaderView != null) {
 			mReaderView.destroy();
@@ -535,6 +568,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	
 	public ReaderView getReaderView() {
 		return mReaderView;
+	}
+
+	// Absolute screen rotation
+	int screenRotation = Surface.ROTATION_0;
+
+	@Override
+	protected void onScreenRotationChanged(int rotation) {
+		screenRotation = rotation;
+		if (null != mReaderView) {
+			mReaderView.doEngineCommand(ReaderCommand.DCMD_SET_ROTATION_INFO_FOR_AA, rotation);
+		}
 	}
 
 	@Override
@@ -583,39 +627,39 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         		mBrowser.setSimpleViewMode(flg);
         } else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveEnabledPrev = mSyncGoogleDriveEnabled;
-				mSyncGoogleDriveEnabled = flg;
+				mSyncGoogleDriveEnabledPrev = mGoogleDriveSyncOpts.Enabled;
+				mGoogleDriveSyncOpts.Enabled = flg;
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_CONFIRMATIONS)) {
-			mCloudSyncAskConfirmations = flg;
+			mGoogleDriveSyncOpts.AskConfirmations = flg;
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveEnabledSettings = flg;
+				mGoogleDriveSyncOpts.SyncSettings = flg;
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveEnabledBookmarks = flg;
+				mGoogleDriveSyncOpts.SyncBookmarks = flg;
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveEnabledCurrentBookInfo = flg;
+				mGoogleDriveSyncOpts.SyncCurrentBookInfo = flg;
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_BODY)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveEnabledCurrentBookBody = flg;
+				mGoogleDriveSyncOpts.SyncCurrentBookBody = flg;
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				mSyncGoogleDriveAutoSavePeriod = Utils.parseInt(value, 0, 0, 30);
+				mGoogleDriveSyncOpts.AutoSavePeriod = Utils.parseInt(value, 0, 0, 30);
 				updateGoogleDriveSynchronizer();
 			}
 		} else if (key.equals(PROP_APP_CLOUDSYNC_DATA_KEEPALIVE)) {
-			mCloudSyncBookmarksKeepAlive = Utils.parseInt(value, 14, 0, 365);
+			mGoogleDriveSyncOpts.DataKeepAlive = Utils.parseInt(value, 14, 0, 365);
 			updateGoogleDriveSynchronizer();
 		} else if (key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS)) {
 			// already in super method:
@@ -632,26 +676,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			mAppUseEinkFrontlight = StrUtils.getNonEmptyStr(value,true).equals("1");
 		} else if (key.equals(PROP_APP_TTS_ENGINE)) {
 			ttsEnginePackage = value;
-			if (null != mReaderView && mReaderView.isTTSActive() && null != tts) {
-				// Stop current TTS process & create new
-				mReaderView.stopTTS();
-				if (tts != null) {
-					// Cleanup previous TTS
-					tts.shutdown();
-					tts = null;
-					ttsInitialized = false;
-					ttsError = false;
-				}
-				initTTS(tts -> {
-					TTSToolbarDlg dlg = mReaderView.getTTSToolbar();
-					dlg.changeTTS(tts);
-				});
+			if (null != mReaderView && mReaderView.isTTSActive()) {
+				// Set new TTS engine if running
+				initTTS(null);
 			}
 		}
 		//
 	}
 
 	private void buildGoogleDriveSynchronizer() {
+		if (!BuildConfig.GSUITE_AVAILABLE)
+			return;
 		if (null != mGoogleDriveSync)
 			return;
 		// build synchronizer instance
@@ -659,7 +694,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			GoogleDriveRemoteAccess googleDriveRemoteAccess = new GoogleDriveRemoteAccess(this, 30);
 			mGoogleDriveSync = new Synchronizer(this, googleDriveRemoteAccess, getString(R.string.app_name), REQUEST_CODE_GOOGLE_DRIVE_SIGN_IN);
-			mGoogleDriveSync.setOnSyncStatusListener(new OnSyncStatusListener() {
+			mGoogleDriveSyncStatusListener = new OnSyncStatusListener() {
 				@Override
 				public void onSyncStarted(Synchronizer.SyncDirection direction, boolean showProgress, boolean interactively) {
 					if (Synchronizer.SyncDirection.SyncFrom == direction) {
@@ -702,7 +737,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							mReaderView.hideCloudSyncProgress();
 						}
 					}
-					if (mSyncGoogleDriveEnabled)
+					if (mGoogleDriveSyncOpts.Enabled)
 						mSyncGoogleDriveErrorsCount = 0;
 				}
 
@@ -716,12 +751,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						showToast(R.string.googledrive_sync_failed_with, errorString);
 					else
 						showToast(R.string.googledrive_sync_failed);
-					if (mSyncGoogleDriveEnabled) {
+					if (mGoogleDriveSyncOpts.Enabled) {
 						mSyncGoogleDriveErrorsCount++;
 						if (mSyncGoogleDriveErrorsCount >= 3) {
 							showToast(R.string.googledrive_sync_failed_disabled);
 							log.e("More than 3 sync failures in a row, auto sync disabled.");
-							mSyncGoogleDriveEnabled = false;
+							mGoogleDriveSyncOpts.Enabled = false;
 						}
 					}
 				}
@@ -750,8 +785,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						int currentPos = -1;
 						if (null != mReaderView) {
 							currentBook = mReaderView.getBookInfo();
-							if (null != currentBook)
-								currentPos = currentBook.getLastPosition().getPercent();
+							if (null != currentBook) {
+								Bookmark lastPos = currentBook.getLastPosition();
+								if (null != lastPos)
+									currentPos = lastPos.getPercent();
+							}
 						}
 						Services.getHistory().updateBookInfo(bookInfo);
 						getDB().saveBookInfo(bookInfo);
@@ -814,38 +852,58 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						docInfo += " (" + fileInfo.getFilename() + ")";
 					showToast(R.string.sync_info_no_such_document, docInfo);
 				}
-
-			});
+			};
 		}
 	}
 
+	private void checkNinitSyncService() {
+		if (null == syncServiceAccessor) {
+			syncServiceAccessor = new SyncServiceAccessor(this);
+		}
+		// If the sync service is destroyed for any reason,
+		//  we must assign the synchronizer object & status listener again.
+		syncServiceAccessor.bind(sync -> {
+			sync.setSynchronizer(mGoogleDriveSync);
+			sync.setOnSyncStatusListener(mGoogleDriveSyncStatusListener);
+		});
+	}
+
 	private void updateGoogleDriveSynchronizer() {
+		if (!BuildConfig.GSUITE_AVAILABLE)
+			return;
 		// DeviceInfo.getSDKLevel() not applicable here -> lint error about Android API compatibility
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			if (mSyncGoogleDriveEnabled) {
+			if (mGoogleDriveSyncOpts.Enabled) {
 				if (null == mGoogleDriveSync) {
 					log.d("Google Drive sync is enabled.");
 					buildGoogleDriveSynchronizer();
 				}
-				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.SETTINGS, mSyncGoogleDriveEnabledSettings);
-				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.BOOKMARKS, mSyncGoogleDriveEnabledBookmarks);
-				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKINFO, mSyncGoogleDriveEnabledCurrentBookInfo);
-				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKBODY, mSyncGoogleDriveEnabledCurrentBookBody);
-				mGoogleDriveSync.setBookmarksKeepAlive(mCloudSyncBookmarksKeepAlive);
+				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.SETTINGS, mGoogleDriveSyncOpts.SyncSettings);
+				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.BOOKMARKS, mGoogleDriveSyncOpts.SyncBookmarks);
+				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKINFO, mGoogleDriveSyncOpts.SyncCurrentBookInfo);
+				mGoogleDriveSync.setTarget(Synchronizer.SyncTarget.CURRENTBOOKBODY, mGoogleDriveSyncOpts.SyncCurrentBookBody);
+				mGoogleDriveSync.setBookmarksKeepAlive(mGoogleDriveSyncOpts.DataKeepAlive);
 				if (null != mGoogleDriveAutoSaveTimer) {
 					mGoogleDriveAutoSaveTimer.cancel();
 					mGoogleDriveAutoSaveTimer = null;
 				}
-				if (mSyncGoogleDriveAutoSavePeriod > 0) {
+				if (mGoogleDriveSyncOpts.AutoSavePeriod > 0) {
 					mGoogleDriveAutoSaveTimer = new Timer();
 					mGoogleDriveAutoSaveTimer.schedule(new TimerTask() {
 						@Override
 						public void run() {
 							if (activityIsRunning && null != mGoogleDriveSync) {
-								mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+								//mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY);
+								checkNinitSyncService();
+								Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCTO, Uri.EMPTY, CoolReader.this, SyncService.class);
+								Bundle data = new Bundle();
+								data.putParcelable("bookInfo", getCurrentBookInfo());
+								data.putInt("flags", Synchronizer.SYNC_FLAG_QUIETLY);
+								syncIntent.putExtras(data);
+								startService(syncIntent);
 							}
 						}
-					}, mSyncGoogleDriveAutoSavePeriod * 60000, mSyncGoogleDriveAutoSavePeriod * 60000);
+					}, mGoogleDriveSyncOpts.AutoSavePeriod * 60000L, mGoogleDriveSyncOpts.AutoSavePeriod * 60000L);
 				}
 			} else {
 				if (null != mGoogleDriveAutoSaveTimer) {
@@ -886,20 +944,37 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void forceSyncToGoogleDrive() {
+		if (!BuildConfig.GSUITE_AVAILABLE)
+			return;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (null == mGoogleDriveSync)
 				buildGoogleDriveSynchronizer();
-			mGoogleDriveSync.setBookmarksKeepAlive(mCloudSyncBookmarksKeepAlive);
-			mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | Synchronizer.SYNC_FLAG_ASK_CHANGED);
+			mGoogleDriveSync.setBookmarksKeepAlive(mGoogleDriveSyncOpts.DataKeepAlive);
+			//mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | Synchronizer.SYNC_FLAG_ASK_CHANGED);
+			checkNinitSyncService();
+			Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCTO, Uri.EMPTY, CoolReader.this, SyncService.class);
+			Bundle data = new Bundle();
+			data.putParcelable("bookInfo", getCurrentBookInfo());
+			data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | Synchronizer.SYNC_FLAG_ASK_CHANGED);
+			syncIntent.putExtras(data);
+			startService(syncIntent);
 		}
 	}
 
 	public void forceSyncFromGoogleDrive() {
+		if (!BuildConfig.GSUITE_AVAILABLE)
+			return;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (null == mGoogleDriveSync)
 				buildGoogleDriveSynchronizer();
-			mGoogleDriveSync.setBookmarksKeepAlive(mCloudSyncBookmarksKeepAlive);
-			mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | Synchronizer.SYNC_FLAG_ASK_CHANGED);
+			mGoogleDriveSync.setBookmarksKeepAlive(mGoogleDriveSyncOpts.DataKeepAlive);
+			//mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | Synchronizer.SYNC_FLAG_ASK_CHANGED);
+			checkNinitSyncService();
+			Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCFROM, Uri.EMPTY, this, SyncService.class);
+			Bundle data = new Bundle();
+			data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_FORCE | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | Synchronizer.SYNC_FLAG_ASK_CHANGED);
+			syncIntent.putExtras(data);
+			startService(syncIntent);
 		}
 	}
 
@@ -1091,14 +1166,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			waitForCRDBService(() -> showDirectory(dir, ""));
 			return true;
 		}
-		if (fileToOpen.equals(FileInfo.SEARCH_SHORTCUT_TAG)) {
-			final FileInfo dir = new FileInfo();
-			dir.isDirectory = true;
-			dir.pathname = fileToOpen;
-			dir.setFilename(this.getString(R.string.dlg_book_search));
-			dir.isListed = true;
-			dir.isScanned = true;
-			waitForCRDBService(() -> showDirectory(dir, ""));
+		if (fileToOpen.equals(FileInfo.ROOT_WINDOW_TAG)) {
+			waitForCRDBService(() -> showRootWindow());
 			return true;
 		}
 		return false;
@@ -1223,11 +1292,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			loadDocumentExt(fileToOpen, "");
 			return true;
 		} else if (null != uri) {
-			// TODO: calculate fingerprint for uri and find fileInfo in DB
 			log.d("URI_TO_OPEN = " + uri);
 			final String uriString = uri.toString();
 			mFileToOpenFromExt = uriString;
-			loadDocumentFromUriExt(uri, uriString);
+			loadDocumentFromUri(uri, null, () -> BackgroundThread.instance().postGUI(() -> {
+				// if document not loaded show error & then root window
+				ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error), CoolReader.this.getString(R.string.cant_open_file, uriString));
+				errDialog.setOnDismissListener(dialog -> showRootWindow());
+				errDialog.show();
+			}, 500));
 			return true;
 		} else {
 			log.d("No file to open");
@@ -1320,10 +1393,27 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mBrowser != null) {
 			mBrowser.stopCurrentScan();
 		}
+		try {
+			unregisterReceiver(batteryChangeReceiver);
+		} catch (IllegalArgumentException e) {
+			log.e("Failed to unregister receiver: " + e.toString());
+		}
+		try {
+			unregisterReceiver(timeTickReceiver);
+		} catch (IllegalArgumentException e) {
+			log.e("Failed to unregister receiver: " + e.toString());
+		}
 		Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null && !mGoogleDriveSync.isBusy()) {
-				mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+		if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if (mGoogleDriveSyncOpts.Enabled && mGoogleDriveSync != null) {
+				//mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+				checkNinitSyncService();
+				Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCTO, Uri.EMPTY, CoolReader.this, SyncService.class);
+				Bundle data = new Bundle();
+				data.putParcelable("bookInfo", getCurrentBookInfo());
+				data.putInt("flags", Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+				syncIntent.putExtras(data);
+				startService(syncIntent);
 			}
 		}
 		super.onPause();
@@ -1366,7 +1456,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), magnetometer, SensorManager.SENSOR_DELAY_UI);
 
 		int iGeo = settings().getInt(Settings.PROP_APP_GEO, 0);
-		if (iGeo>1) {
+		if (iGeo > 1) {
 			geoLastData.gpsStart();
 			geoLastData.netwStart();
 		}
@@ -1378,12 +1468,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		//Properties props = SettingsManager.instance(this).get();
 		
-		if (mReaderView != null) {
+		if (mReaderView != null)
 			mReaderView.onAppResume();
-//			if (mCurrentFrame == mReaderFrame)
-//				setCutoutMode(this.iCutoutMode);
+
+		// ACTION_BATTERY_CHANGED: This is a sticky broadcast containing the charging state, level, and other information about the battery.
+		Intent intent = registerReceiver(batteryChangeReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+		if (null != intent) {
+			// process this Intent
+			batteryChangeReceiver.onReceive(null, intent);
 		}
-		
+		// ACTION_TIME_TICK: The current time has changed. Sent every minute.
+		registerReceiver(timeTickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+
 		if (DeviceInfo.isEinkScreen(getScreenForceEink())) {
             if (DeviceInfo.EINK_SONY) {
                 SharedPreferences pref = getSharedPreferences(PREF_FILE, 0);
@@ -1398,18 +1494,28 @@ public class CoolReader extends BaseActivity implements SensorEventListener
                 }
             }
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			if (mSyncGoogleDriveEnabled && mGoogleDriveSync != null) {
+		if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if (mGoogleDriveSyncOpts.Enabled && mGoogleDriveSync != null) {
 				// when the program starts, the local settings file is already updated, so the local file is always newer than the remote one
 				// Therefore, the synchronization mode is quiet, i.e. without comparing modification times and without prompting the user for action.
 				// If the file is opened from an external file manager, we must disable the "currently reading book" sync operation with google drive.
-				if (!mGoogleDriveSync.isBusy()) {
-					if (null == mFileToOpenFromExt)
-						mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mCloudSyncAskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0) );
-					else
-						mGoogleDriveSync.startSyncFromOnly(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mCloudSyncAskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0), Synchronizer.SyncTarget.SETTINGS, Synchronizer.SyncTarget.BOOKMARKS);
+				if (null == mFileToOpenFromExt) {
+					//mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mGoogleDriveSyncOpts.AskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0));
+					checkNinitSyncService();
+					Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCFROM, Uri.EMPTY, this, SyncService.class);
+					Bundle data = new Bundle();
+					data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mGoogleDriveSyncOpts.AskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0));
+					syncIntent.putExtras(data);
+					startService(syncIntent);
 				} else {
-					log.d("Synchronizer is busy!");
+					//mGoogleDriveSync.startSyncFromOnly(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mGoogleDriveSyncOpts.AskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0), Synchronizer.SyncTarget.SETTINGS, Synchronizer.SyncTarget.BOOKMARKS);
+					checkNinitSyncService();
+					Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCFROM_ONLY, Uri.EMPTY, this, SyncService.class);
+					Bundle data = new Bundle();
+					data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mGoogleDriveSyncOpts.AskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0));
+					data.putIntArray("targets", new int[]{ Synchronizer.SyncTarget.SETTINGS.ordinal(), Synchronizer.SyncTarget.BOOKMARKS.ordinal() });
+					syncIntent.putExtras(data);
+					startService(syncIntent);
 				}
 			}
 		}
@@ -1633,6 +1739,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				}
 
 				showNotifications();
+				isInterfaceCreated = true;
 			});
 		}
 
@@ -1819,7 +1926,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				log.i("read phone state permission is GRANTED, registering phone activity handler...");
 				PhoneStateReceiver.setPhoneActivityHandler(() -> {
 					if (mReaderView != null) {
-						mReaderView.stopTTS();
+						mReaderView.pauseTTS();
 						mReaderView.save();
 					}
 				});
@@ -1926,33 +2033,47 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		// Show/Hide soft navbar after OptionDialog is closed.
 		applyFullscreen(getWindow());
-		validateSettings();
-		if (!justCreated) {
+		if (!justCreated && isInterfaceCreated) {
 			// Only after onStart()!
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-				if (mSyncGoogleDriveEnabled && !mSyncGoogleDriveEnabledPrev && null != mGoogleDriveSync) {
+			if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				if (mGoogleDriveSyncOpts.Enabled && !mSyncGoogleDriveEnabledPrev && null != mGoogleDriveSync) {
 					// if cloud sync has just been enabled in options dialog
-					mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mCloudSyncAskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0) );
-					mSyncGoogleDriveEnabledPrev = mSyncGoogleDriveEnabled;
+					//mGoogleDriveSync.startSyncFrom(Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mGoogleDriveSyncOpts.AskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0) );
+					checkNinitSyncService();
+					Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCFROM, Uri.EMPTY, this, SyncService.class);
+					Bundle data = new Bundle();
+					data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS | (mGoogleDriveSyncOpts.AskConfirmations ? Synchronizer.SYNC_FLAG_ASK_CHANGED : 0));
+					syncIntent.putExtras(data);
+					startService(syncIntent);
+					mSyncGoogleDriveEnabledPrev = mGoogleDriveSyncOpts.Enabled;
 					return;
 				}
 				if (changedProps.size() > 0) {
 					// After options dialog is closed, sync new settings to the cloud with delay
 					BackgroundThread.instance().postGUI(() -> {
-						if (mSyncGoogleDriveEnabled && mSyncGoogleDriveEnabledSettings && null != mGoogleDriveSync) {
+						if (mGoogleDriveSyncOpts.Enabled && mGoogleDriveSyncOpts.SyncSettings && null != mGoogleDriveSync) {
 							if (mSuppressSettingsCopyToCloud) {
 								// Immediately after downloading settings from Google Drive
 								// prevent uploading settings file
 								mSuppressSettingsCopyToCloud = false;
-							} else if (!mGoogleDriveSync.isBusy()) {
+							} else {
 								// After setting changed in OptionsDialog
 								log.d("Some settings is changed, uploading to cloud...");
-								mGoogleDriveSync.startSyncToOnly(null, Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS, Synchronizer.SyncTarget.SETTINGS);
+								//mGoogleDriveSync.startSyncToOnly(null, Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS, Synchronizer.SyncTarget.SETTINGS);
+								checkNinitSyncService();
+								Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCTO_ONLY, Uri.EMPTY, CoolReader.this, SyncService.class);
+								Bundle data = new Bundle();
+								data.putParcelable("bookInfo", null);
+								data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+								data.putIntArray("targets", new int[]{ Synchronizer.SyncTarget.SETTINGS.ordinal() });
+								syncIntent.putExtras(data);
+								startService(syncIntent);
 							}
 						}
 					}, 500);
 				}
 			}
+			validateSettings();
 		}
 	}
 
@@ -1960,7 +2081,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     	// override to force higher brightness in non-reading mode (to avoid black screen on some devices when brightness level set to small value)
     	return mCurrentFrame == mReaderFrame;
     }
-    
 
 	public ViewGroup getPreviousFrame() {
 		return mPreviousFrame;
@@ -2038,11 +2158,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				setCurrentFrame(mHomeFrame);
 			}, 200);
 		}
-		if (activityIsRunning) {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+		if (isInterfaceCreated) {
+			if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				// Save bookmarks and current reading position on the cloud
-				if (mSyncGoogleDriveEnabled && null != mGoogleDriveSync && !mGoogleDriveSync.isBusy()) {
-					mGoogleDriveSync.startSyncToOnly(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY, Synchronizer.SyncTarget.BOOKMARKS);
+				if (mGoogleDriveSyncOpts.Enabled && null != mGoogleDriveSync) {
+					//mGoogleDriveSync.startSyncToOnly(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY, Synchronizer.SyncTarget.BOOKMARKS);
+					checkNinitSyncService();
+					Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCTO_ONLY, Uri.EMPTY, CoolReader.this, SyncService.class);
+					Bundle data = new Bundle();
+					data.putParcelable("bookInfo", getCurrentBookInfo());
+					data.putInt("flags", Synchronizer.SYNC_FLAG_QUIETLY);
+					data.putIntArray("targets", new int[]{ Synchronizer.SyncTarget.BOOKMARKS.ordinal() });
+					syncIntent.putExtras(data);
+					startService(syncIntent);
 				}
 			}
 		}
@@ -2077,8 +2205,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					mReaderView.getSurface().setFocusableInTouchMode(true);
 					mReaderView.getSurface().requestFocus();
 				}
-				if (initialBatteryState >= 0)
-					mReaderView.setBatteryState(initialBatteryState);
+				mReaderView.setBatteryState(initialBatteryState, initialBatteryChargeConn, initialBatteryLevel);
+				mReaderView.doEngineCommand(ReaderCommand.DCMD_SET_ROTATION_INFO_FOR_AA, screenRotation);
 			}
 		});
 		
@@ -2192,16 +2320,31 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		runInReader(() -> mReaderView.loadDocument(item, fileLink, forceSync ? () -> {
 			if (null != doneCallback)
 				doneCallback.run();
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				// Save last opened document on cloud
-				if (mSyncGoogleDriveEnabled && null != mGoogleDriveSync && !mGoogleDriveSync.isBusy()) {
+				if (mGoogleDriveSyncOpts.Enabled && null != mGoogleDriveSync) {
 					ArrayList<Synchronizer.SyncTarget> targets = new ArrayList<Synchronizer.SyncTarget>();
-					if (mSyncGoogleDriveEnabledCurrentBookInfo)
+					if (mGoogleDriveSyncOpts.SyncCurrentBookInfo)
 						targets.add(Synchronizer.SyncTarget.CURRENTBOOKINFO);
-					if (mSyncGoogleDriveEnabledCurrentBookBody)
+					if (mGoogleDriveSyncOpts.SyncCurrentBookBody)
 						targets.add(Synchronizer.SyncTarget.CURRENTBOOKBODY);
-					if (!targets.isEmpty())
-						mGoogleDriveSync.startSyncToOnly(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_SHOW_SIGN_IN, targets.toArray(new Synchronizer.SyncTarget[0]));
+					if (!targets.isEmpty()) {
+						//mGoogleDriveSync.startSyncToOnly(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS, targets.toArray(new Synchronizer.SyncTarget[0]));
+						checkNinitSyncService();
+						Intent syncIntent = new Intent(SyncService.SYNC_ACTION_SYNCTO_ONLY, Uri.EMPTY, CoolReader.this, SyncService.class);
+						Bundle data = new Bundle();
+						data.putParcelable("bookInfo", getCurrentBookInfo());
+						data.putInt("flags", Synchronizer.SYNC_FLAG_SHOW_SIGN_IN | Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
+						int [] targets_int = new int[targets.size()];
+						int i = 0;
+						for (Synchronizer.SyncTarget target : targets) {
+							targets_int[i] = target.ordinal();
+							i++;
+						}
+						data.putIntArray("targets", targets_int);
+						syncIntent.putExtras(data);
+						startService(syncIntent);
+					}
 				}
 			}
 		} : doneCallback, errorCallback));
@@ -2217,6 +2360,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			ContentResolver contentResolver = getContentResolver();
 			try {
 				InputStream inputStream = contentResolver.openInputStream(uri);
+				// TODO: Fix this
 				// Don't save the last opened document from the stream in the cloud, since we still cannot open it later in this program.
 				mReaderView.loadDocumentFromStream(inputStream, uri.getPath(), doneCallback, errorCallback);
 			} catch (Exception e) {
@@ -2397,9 +2541,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} catch (DictionaryException e) {
 			showToast(e.getMessage());
 		}
-    	if (mDonationService != null) {
-    		mDonationService.onActivityResult(requestCode, resultCode, intent);
-    	}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (null != mGoogleDriveSync) {
@@ -2560,18 +2701,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	
-    private CRDonationService mDonationService = null;
+    //private CRDonationService mDonationService = null;
     private DonationListener mDonationListener = null;
     private double mTotalDonations = 0;
     
-    public CRDonationService getDonationService() {
-    	return mDonationService;
-    }
-
-    public boolean isDonationSupported() {
-    	if (mDonationService == null) return false;
-    	return mDonationService.isBillingSupported();
-    }
+//    public CRDonationService getDonationService() {
+//    	return mDonationService;
+//    }
+//
+//    public boolean isDonationSupported() {
+//    	if (mDonationService == null) return false;
+//    	return mDonationService.isBillingSupported();
+//    }
 
     public void setDonationListener(DonationListener listener) {
     	mDonationListener = listener;
@@ -2585,47 +2726,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     	return mTotalDonations;
     }
 
-    public boolean makeDonation(final double amount) {
-		final String itemName = "donation" + (amount >= 1 ? String.valueOf((int)amount) : String.valueOf(amount));
-    	log.i("makeDonation is called, itemName=" + itemName);
-    	if (!mDonationService.isBillingSupported())
-    		return false;
-    	BackgroundThread.instance().postBackground(() -> mDonationService.purchase(itemName,
-				(success, productId, totalDonations) -> BackgroundThread.instance().postGUI(() -> {
-					try {
-						if (success) {
-							log.i("Donation purchased: " + productId + ", total amount: " + mTotalDonations);
-							mTotalDonations += amount;
-							SharedPreferences pref = getSharedPreferences(DONATIONS_PREF_FILE, 0);
-							pref.edit().putString(DONATIONS_PREF_TOTAL_AMOUNT, String.valueOf(mTotalDonations)).commit();
-						} else {
-							showToast("Donation purchase failed");
-						}
-						if (mDonationListener != null)
-							mDonationListener.onDonationTotalChanged(mTotalDonations);
-					} catch (Exception e) {
-						// ignore
-					}
-				})));
-    	return true;
-    }
-    
 	private static String DONATIONS_PREF_FILE = "cr3donations";
 	private static String DONATIONS_PREF_TOTAL_AMOUNT = "total";
 
-
-    // ========================================================================================
-    // TTS
-	public TextToSpeech tts;
-	public boolean ttsInitialized;
-	private boolean ttsError;
-	private String ttsEnginePackage;
-	private Timer initTTSTimer;
-
-	private final static long INIT_TTS_TIMEOUT = 10000;		// 10 sec.
-
-	public boolean initTTS(final OnTTSCreatedListener listener) {
+	public void initTTS(TTSControlServiceAccessor.Callback callback) {
 		if (!phoneStateChangeHandlerInstalled) {
+			// TODO: Investigate the need to tracking state of the phone, while we already respect the audio focus.
 			boolean readPhoneStateIsAvailable;
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				readPhoneStateIsAvailable = checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
@@ -2640,7 +2746,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				log.i("read phone state permission already GRANTED, registering phone activity handler...");
 				PhoneStateReceiver.setPhoneActivityHandler(() -> {
 					if (mReaderView != null) {
-						mReaderView.stopTTS();
+						mReaderView.pauseTTS();
 						mReaderView.save();
 					}
 				});
@@ -2648,72 +2754,37 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 
-		// here we will try to reinitialize
-		if (ttsInitialized && tts != null) {
-			BackgroundThread.instance().executeGUI(() -> listener.onCreated(tts));
-			return true;
-		}
 		showToast("Initializing TTS");
-		TextToSpeech.OnInitListener onInitListener = status -> {
-			//tts.shutdown();
-			if (initTTSTimer != null) initTTSTimer.cancel();
-			initTTSTimer = null;
-			L.i("TTS init status: " + status);
-			if (status == TextToSpeech.SUCCESS) {
-				ttsInitialized = true;
-				BackgroundThread.instance().executeGUI(() -> listener.onCreated(tts));
-			} else {
-				ttsError = true;
-				BackgroundThread.instance().executeGUI(() -> showToast("Cannot initialize TTS"));
-			}
-		};
-		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH && null != ttsEnginePackage && ttsEnginePackage.length() > 0)
-			tts = new TextToSpeech(this, onInitListener, ttsEnginePackage);
-		else
-			tts = new TextToSpeech(this, onInitListener);
-		initTTSTimer = new Timer();
-		initTTSTimer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				// TTS engine init hangs, remove it from settings
-				log.e("TTS engine \"" + ttsEnginePackage + "\" init failure, disabling!");
-				BackgroundThread.instance().executeGUI(() -> showToast(R.string.tts_init_failure, ttsEnginePackage));
-				setSetting(PROP_APP_TTS_ENGINE, "", false);
-				ttsEnginePackage = "";
-				try {
-					mReaderView.getTTSToolbar().stopAndClose();
-				} catch (Exception ignored) {}
-				initTTSTimer.cancel();
-				initTTSTimer = null;
-			}
-		}, INIT_TTS_TIMEOUT);
-		return true;
-	}
+		if (null == ttsControlServiceAccessor)
+			ttsControlServiceAccessor = new TTSControlServiceAccessor(this);
+		ttsControlServiceAccessor.bind(ttsbinder -> {
+			ttsbinder.initTTS(ttsEnginePackage, new OnTTSCreatedListener() {
+				@Override
+				public void onCreated() {
+					if (null != callback)
+						callback.run(ttsControlServiceAccessor);
+				}
 
-    // ============================================================
-	private AudioManager am;
-	private int maxVolume;
-	public AudioManager getAudioManager() {
-		if (am == null) {
-			am = (AudioManager)getSystemService(AUDIO_SERVICE);
-			maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		}
-		return am;
-	}
-	
-	public int getVolume() {
-		AudioManager am = getAudioManager();
-		if (am!=null) {
-			return am.getStreamVolume(AudioManager.STREAM_MUSIC) * 100 / maxVolume;
-		}
-		return 0;
-	}
-	
-	public void setVolume( int volume ) {
-		AudioManager am = getAudioManager();
-		if (am!=null) {
-			am.setStreamVolume(AudioManager.STREAM_MUSIC, volume * maxVolume / 100, 0);
-		}
+				@Override
+				public void onFailed() {
+					BackgroundThread.instance().executeGUI(() -> showToast("Cannot initialize TTS"));
+				}
+
+				@Override
+				public void onTimedOut() {
+					// TTS engine init hangs, remove it from settings
+					log.e("TTS engine \"" + ttsEnginePackage + "\" init failure, disabling!");
+					BackgroundThread.instance().executeGUI(() -> {
+						showToast(R.string.tts_init_failure, ttsEnginePackage);
+						setSetting(PROP_APP_TTS_ENGINE, "", false);
+						ttsEnginePackage = "";
+						try {
+							mReaderView.getTTSToolbar().stopAndClose();
+						} catch (Exception ignored) {}
+					});
+				}
+			});
+		});
 	}
 	
 	public void showOptionsDialog(final OptionsDialog.Mode mode)
@@ -2728,7 +2799,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				BackgroundThread.instance().executeGUI(() -> {
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
-					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null);
+					if (ttsControlServiceAccessor == null) initTTS(null);
+					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null,
+							ttsControlServiceAccessor);
 					dlg.show();
 				});
 			});
@@ -2744,7 +2817,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFaces = Engine.getFontFaceList();
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(() -> {
-					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null);
+					if (ttsControlServiceAccessor == null) initTTS(null);
+					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles,
+							null, ttsControlServiceAccessor);
 					dlg.selectedTab = tab;
 					dlg.show();
 				});
@@ -2756,7 +2831,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		showOptionsDialogExt(mode, selectOption, null);
 	}
 
-	public void showOptionsDialogExt(final OptionsDialog.Mode mode, final String selectOption, TextToSpeech tts)
+	public void showOptionsDialogExt(final OptionsDialog.Mode mode, final String selectOption, TTSControlBinder tts)
 	{
 		BackgroundThread.instance().postBackground(() -> {
 			final String[] mFontFaces = Engine.getFontFaceList();
@@ -2766,7 +2841,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 				}
-				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts);
+				if (ttsControlServiceAccessor == null) initTTS(null);
+				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts,
+						ttsControlServiceAccessor);
 				dlg.selectedOption = selectOption;
 				dlg.show();
 			});
@@ -4166,7 +4243,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void readResizeHistory()
 	{
         log.d("Reading rh.json");
-		String rh = Utils.readFileToString(getSettingsFileF(0).getParent() + "/rh.json");
+		String rh = Utils.readFileToStringOrEmpty(getSettingsFileF(0).getParent() + "/rh.json");
+		if (StrUtils.isEmptyStr(rh)) return;
 		try {
 			setResizeHist(new ArrayList<>(StrUtils.stringToArray(rh, ResizeHistory[].class)));
 		} catch (Exception e) {
@@ -4194,7 +4272,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public Bookmark readCurPosFile(boolean is0)
 	{
 		log.d("Reading cur_pos.json");
-		String cur_pos = Utils.readFileToString(getSettingsFileF(0).getParent() + "/cur_pos"+(is0? "0":"")+".json");
+		String cur_pos = Utils.readFileToStringOrEmpty(getSettingsFileF(0).getParent() + "/cur_pos"+(is0? "0":"")+".json");
+		if (StrUtils.isEmptyStr(cur_pos)) return null;
 		try {
 			final File fJson = new File(getSettingsFileF(0).getParent() + "/cur_pos"+(is0? "0":"")+".json");
 			if (!fJson.exists()) return null;
@@ -4215,7 +4294,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public YndCloudSettings readYndCloudSettings()
 	{
 		log.d("Reading ynd_cloud_settings.json");
-		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json");
+		String s = Utils.readFileToStringOrEmpty(getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json");
+		if (StrUtils.isEmptyStr(s)) return null;
 		try {
 			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd_cloud_settings.json");
 			if (!fJson.exists()) return null;
@@ -4237,7 +4317,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public LingvoCloudSettings readLingvoCloudSettings()
 	{
 		log.d("Reading lingvo_cloud_settings.json");
-		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/lingvo_cloud_settings.json");
+		String s = Utils.readFileToStringOrEmpty(getSettingsFileExt("[DEFAULT]",0).getParent() + "/lingvo_cloud_settings.json");
+		if (StrUtils.isEmptyStr(s)) return null;
 		try {
 			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/lingvo_cloud_settings.json");
 			if (!fJson.exists()) return null;
@@ -4259,7 +4340,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public DeeplCloudSettings readDeeplCloudSettings()
 	{
 		log.d("Reading deepl_cloud_settings.json");
-		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/deepl_cloud_settings.json");
+		String s = Utils.readFileToStringOrEmpty(getSettingsFileExt("[DEFAULT]",0).getParent() + "/deepl_cloud_settings.json");
+		if (StrUtils.isEmptyStr(s)) return null;
 		try {
 			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/deepl_cloud_settings.json");
 			if (!fJson.exists()) return null;
@@ -4281,7 +4363,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public LitresCloudSettings readLitresCloudSettings()
 	{
 		log.d("Reading litres_cloud_settings.json");
-		String s = Utils.readFileToString(getSettingsFileExt("[DEFAULT]",0).getParent() + "/litres_cloud_settings.json");
+		String s = Utils.readFileToStringOrEmpty(getSettingsFileExt("[DEFAULT]",0).getParent() + "/litres_cloud_settings.json");
+		if (StrUtils.isEmptyStr(s)) return null;
 		try {
 			final File fJson = new File(getSettingsFileExt("[DEFAULT]",0).getParent() + "/litres_cloud_settings.json");
 			if (!fJson.exists()) return null;
@@ -4443,14 +4526,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				intent = new Intent(Intent.ACTION_SEND);
 				intent.setPackage(FlavourConstants.MAIN_CLASS_NAME);
 				intent.setType("text/plain");
-				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.SEARCH_SHORTCUT_TAG);
+				intent.putExtra(android.content.Intent.EXTRA_SUBJECT, FileInfo.ROOT_WINDOW_TAG);
 
-				ShortcutInfo shortcut5 = new ShortcutInfo.Builder(this, "id_search")
-						.setShortLabel(this.getString(R.string.dlg_book_search))
-						.setLongLabel(this.getString(R.string.dlg_book_search))
+				ShortcutInfo shortcut5 = new ShortcutInfo.Builder(this, "id_root_window")
+						.setShortLabel(this.getString(R.string.main_window))
+						.setLongLabel(this.getString(R.string.main_window))
 						.setIcon(Icon.createWithResource(getApplicationContext(),
 								//R.drawable.cr3_browser_find_hc
-								Utils.resolveResourceIdByAttr(this, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search)
+								Utils.resolveResourceIdByAttr(this, R.attr.cr3_browser_folder_root_drawable, R.drawable.icons8_home)
 						))
 						.setIntent(intent)
 						.build();

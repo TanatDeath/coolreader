@@ -165,12 +165,14 @@ public class Scanner extends FileInfoChangeSource {
 							// skip mount root
 							continue;
 						}
-						boolean isZip = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
+						//asdf - !! может из за этого все и тормозит?
+						//boolean isArc = Engine.isArchive(pathName) && (!pathName.toLowerCase().endsWith("fb3.zip"));
+						boolean isArc = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
 						FileInfo item = !rescan ? mFileList.get(pathName) : null;
 						boolean isNew = false;
 						if (item == null) {
 							item = new FileInfo(f);
-							if (scanzip && isZip) {
+							if (scanzip && isArc) {
 								item = scanZip(item);
 								if (item == null)
 									continue;
@@ -904,11 +906,8 @@ public class Scanner extends FileInfoChangeSource {
 				return found;
 		}
 		for ( int i=0; i<root.fileCount(); i++ ) {
-			Log.i("ASDF", "findParentInternal, root: " + root.getFilename());
-			String s1 = root.getFile(i).getPathName();
-			String s2 = file.getPathName();
-			Log.i("ASDF", "findParentInternal, s1: " + s1);
-			Log.i("ASDF", "findParentInternal, s2: " + s2);
+//			String s1 = root.getFile(i).getPathName();
+//			String s2 = file.getPathName();
 			if (root.getFile(i).getPathName().equals(file.getPathName()) ||
 					root.isOnSDCard() && root.getFile(i).getPathName().equalsIgnoreCase(file.getPathName()))
 				return root;
@@ -934,6 +933,8 @@ public class Scanner extends FileInfoChangeSource {
 			parent = findParentInternal(file, root);
 			if (parent == null)
 				parent = findParentInternal(file, new FileInfo(mActivity.getFilesDir()));
+			if (parent == null)
+				parent = findParentInternal(file, new FileInfo(mActivity.getCacheDir()));
 			if (parent == null) {
 				L.e("Cannot find root directory for file " + file.pathname);
 				return null;
@@ -980,7 +981,7 @@ public class Scanner extends FileInfoChangeSource {
 		if (maxDepth <= 0 || scanControl.isStopped())
 			return false;
 		// full rescan to scan zip-files
-		boolean res = listDirectory(dir, true, true, !dir.isSpecialDir());
+		boolean res = listDirectory(dir, true, true, !dir.isSpecialDir() && !dir.isArchive);
 		if (res) {
 			for (int i = dir.dirCount() - 1; i >= -0; i--) {
 				res = listSubtreeBg_impl(dir.getDir(i), maxDepth - 1, scanControl);
@@ -1039,8 +1040,8 @@ public class Scanner extends FileInfoChangeSource {
 			existingResults.addFile(item);
 		return existingResults;
 	}
-	
-	public void initRoots(Map<String, String> fsRoots) {
+
+	public void initRoots(Map<String, String> fsRoots, Map<String, String> privateDirs) {
 		Log.d("cr3", "Scanner.initRoots(" + fsRoots + ")");
 		mRoot.clear();
 		// create recent books dir
@@ -1048,6 +1049,10 @@ public class Scanner extends FileInfoChangeSource {
 
 		// create system dirs
 		for (Map.Entry<String, String> entry : fsRoots.entrySet())
+			addRoot( entry.getKey(), entry.getValue(), true);
+
+		// App private dirs
+		for (Map.Entry<String, String> entry : privateDirs.entrySet())
 			addRoot( entry.getKey(), entry.getValue(), true);
 
 		// create OPDS dir

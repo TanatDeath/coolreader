@@ -93,6 +93,14 @@ JNIEXPORT jintArray JNICALL Java_org_coolreader_crengine_Engine_getAvailableSynt
 
 /*
  * Class:     org_coolreader_crengine_Engine
+ * Method:    isArchiveInternal
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_isArchiveInternal
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     org_coolreader_crengine_Engine
  * Method:    getArchiveItemsInternal
  * Signature: (Ljava/lang/String;)[Ljava/lang/String;
  */
@@ -142,10 +150,10 @@ JNIEXPORT jbyteArray JNICALL Java_org_coolreader_crengine_Engine_scanBookCoverIn
 /*
  * Class:     org_coolreader_crengine_Engine
  * Method:    drawBookCoverInternal
- * Signature: (Landroid/graphics/Bitmap;[BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II)V
+ * Signature: (Landroid/graphics/Bitmap;[BZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II)V
  */
 JNIEXPORT void JNICALL Java_org_coolreader_crengine_Engine_drawBookCoverInternal
-  (JNIEnv *, jclass, jobject, jbyteArray, jstring, jstring, jstring, jstring, jint, jint);
+  (JNIEnv *, jclass, jobject, jbyteArray, jboolean, jstring, jstring, jstring, jstring, jint, jint);
 
 /*
  * Class:     org_coolreader_crengine_Engine
@@ -157,19 +165,19 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_Engine_suspendLongOperationI
 
 /*
  * Class:     org_coolreader_crengine_Engine
- * Method:    haveFcLangCodeInternal
- * Signature: (Ljava/lang/String;)Z
+ * Method:    checkFontLanguageCompatibilityInternal
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)I
  */
-JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_haveFcLangCodeInternal
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT jint JNICALL Java_org_coolreader_crengine_Engine_checkFontLanguageCompatibilityInternal
+  (JNIEnv *, jclass, jstring, jstring);
 
 /*
  * Class:     org_coolreader_crengine_Engine
- * Method:    checkFontLanguageCompatibilityInternal
- * Signature: (Ljava/lang/String;Ljava/lang/String;)Z
+ * Method:    getHumanReadableLocaleNameInternal
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_checkFontLanguageCompatibilityInternal
-  (JNIEnv *, jclass, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_org_coolreader_crengine_Engine_getHumanReadableLocaleNameInternal
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     org_coolreader_crengine_Engine

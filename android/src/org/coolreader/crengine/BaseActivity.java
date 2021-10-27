@@ -174,6 +174,14 @@ public class BaseActivity extends Activity implements Settings {
 		float heightInches = (float)dm.heightPixels / (float)densityDpi;
 		diagonalInches = (float) Math.sqrt(widthInches * widthInches + heightInches * heightInches);
 		log.i("diagonal=" + diagonalInches + "  isSmartphone=" + isSmartphone());
+
+		int sz = dm.widthPixels;
+		if (sz > dm.heightPixels)
+			sz = dm.heightPixels;
+		minFontSize = 5*densityDpi/72;			// 5pt
+		//maxFontSize = 100*densityDpi/72;		// 100pt
+		maxFontSize = sz/8;
+
 		// create settings
     	mSettingsManager = new SettingsManager(this);
     	// create rest of settings
@@ -330,6 +338,12 @@ public class BaseActivity extends Activity implements Settings {
 		mPaused = false;
 		mIsStarted = true;
 		backlightControl.onUserActivity();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+			if (null != display) {
+				onScreenRotationChanged(display.getRotation());
+			}
+		}
 		super.onResume();
 	}
 	
@@ -457,17 +471,7 @@ public class BaseActivity extends Activity implements Settings {
 //				getWindow().setBackgroundDrawable(Utils.solidColorDrawable(clBackground));
 		}
 		a.recycle();
-		Display display = getWindowManager().getDefaultDisplay();
-        int sz = display.getWidth();
-        if (sz > display.getHeight())
-            sz = display.getHeight();
-        minFontSize = sz / 45;
-        maxFontSize = sz / 8;
-        if (maxFontSize > 340)
-            maxFontSize = 340;
-        if (minFontSize < 9)
-            minFontSize = 9;
-        }
+	}
 
 	@SuppressWarnings("ResourceType")
 	public void updateActionsIcons() {
@@ -912,6 +916,12 @@ public class BaseActivity extends Activity implements Settings {
 	public void onConfigurationChanged(Configuration newConfig) {
 		// pass
 		orientationFromSensor = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 1 : 0;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+			if (null != display) {
+				onScreenRotationChanged(display.getRotation());
+			}
+		}
 		//final int orientation = newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 //		if ( orientation!=screenOrientation ) {
 //			log.d("Screen orientation has been changed: ask for change");
@@ -935,7 +945,12 @@ public class BaseActivity extends Activity implements Settings {
 		super.onConfigurationChanged(newConfig);
 	}
 
+	protected void onScreenRotationChanged(int rotation) {
+		// Override this...
+	}
+
 	private boolean mFullscreen = false;
+
 	public boolean isFullscreen() {
 		return mFullscreen;
 	}
@@ -2284,7 +2299,11 @@ public class BaseActivity extends Activity implements Settings {
 		// On e-ink in ReaderView gesture handlers setScreenBacklightLevel() & setScreenWarmBacklightLevel() called directly
 	}
 
+	private boolean noticeDialogVisible = false;
+
 	public void validateSettings() {
+		if (noticeDialogVisible)
+			return;
 		Properties props = settings();
 		boolean menuKeyActionFound = false;
 		for (SettingsManager.DefKeyAction ka : SettingsManager.DEF_KEY_ACTIONS) {
@@ -2302,23 +2321,26 @@ public class BaseActivity extends Activity implements Settings {
 			if (ReaderAction.READER_MENU.id.equals(value))
 				menuTapActionFound = true;
 		}
-		boolean toolbarEnabled = props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE;
-		if (isFullscreen()) toolbarEnabled = toolbarEnabled && (!props.getBool(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false));
-		// KR - disabling this, seems to work with bugs
+		boolean propToolbarEnabled = props.getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_NONE) != Settings.VIEWER_TOOLBAR_NONE;
+		boolean toolbarEnabled = ((propToolbarEnabled && !isFullscreen())
+				|| (propToolbarEnabled && isFullscreen() && !props.getBool(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false)));
+// KR - disabling this, seems to work with bugs (maybe fixed later, but we do not use it - bad design
 //		if (!menuTapActionFound && !menuKeyActionFound && !toolbarEnabled) {
 //			showNotice(R.string.inconsistent_options,
 //					R.string.inconsistent_options_toolbar, () -> {
 //						// enabled toolbar
-//						setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), true);
+//						setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
 //						setSetting(PROP_TOOLBAR_HIDE_IN_FULLSCREEN, String.valueOf(0), true);
 //					},
 //					R.string.inconsistent_options_tap_reading_menu, () -> {
 //						String paramName = ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + ".5";
 //						setSetting(paramName, ReaderAction.READER_MENU.id, true);
-//					}
+//					},
+//					() -> noticeDialogVisible = false
 //			);
+//			noticeDialogVisible = true;
 //		}
-		// TODO: check any other options for compatibility
+		// TODO: check any other options for compatibility (not KR TODO!)
 	}
 
 	@TargetApi(28)
@@ -2380,7 +2402,12 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void showNotice(int questionResourceId, int button1TextRes, final Runnable button1Runnable,
 						   int button2TextRes, final Runnable button2Runnable) {
-		NoticeDialog dlg = new NoticeDialog(this, "", button1TextRes, button1Runnable, button2TextRes, button2Runnable);
+		showNotice(questionResourceId, button1TextRes, button1Runnable, button2TextRes, button2Runnable, null);
+	}
+
+	public void showNotice(int questionResourceId, int button1TextRes, final Runnable button1Runnable,
+						   int button2TextRes, final Runnable button2Runnable, final Runnable dismissRunnable) {
+		NoticeDialog dlg = new NoticeDialog(this, "", button1TextRes, button1Runnable, button2TextRes, button2Runnable, dismissRunnable);
 		dlg.setMessage(questionResourceId);
 		dlg.show();
 	}
@@ -2661,14 +2688,12 @@ public class BaseActivity extends Activity implements Settings {
 
 		public static final Logger log = L.create("cr");
 		
-		private BaseActivity mActivity;
+		private final BaseActivity mActivity;
 		private Properties mSettings;
-
-	    private final DisplayMetrics displayMetrics = new DisplayMetrics();
 	    private final File defaultSettingsDir;
+
 		public SettingsManager(BaseActivity activity) {
 			this.mActivity = activity;
-		    activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 		    defaultSettingsDir = activity.getDir("settings", Context.MODE_PRIVATE);
 		    mSettings = loadSettings();
 		}
@@ -2910,7 +2935,7 @@ public class BaseActivity extends Activity implements Settings {
 			boolean res = false;
 			res = applyDefaultFont(props, ReaderView.PROP_FONT_FACE, DeviceInfo.DEF_FONT_FACE) || res;
 			res = applyDefaultFont(props, ReaderView.PROP_STATUS_FONT_FACE, DeviceInfo.DEF_FONT_FACE) || res;
-			res = applyDefaultFallbackFontList(props, ReaderView.PROP_FALLBACK_FONT_FACES, "Droid Sans Fallback; Noto Sans CJK SC; Noto Sans Arabic UI; Noto Sans Devanagari UI; Roboto; FreeSans; FreeSerif; Noto Serif; Noto Sans; Arial Unicode MS") || res;
+			res = applyDefaultFallbackFontList(props, ReaderView.PROP_FALLBACK_FONT_FACES, "Noto Color Emoji; Droid Sans Fallback; Noto Sans CJK SC; Noto Sans Arabic UI; Noto Sans Devanagari UI; Roboto; FreeSans; FreeSerif; Noto Serif; Noto Sans; Arial Unicode MS") || res;
 			return res;
 		}
 
@@ -3006,8 +3031,11 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_PAGE_ANIMATION_SPEED, 300);
 
 	        props.applyDefault(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
-	        
-	        props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
+
+			// By default enable workaround to disable processing of abbreviations at the end of a sentence when using "Google Speech Services".
+			props.applyDefault(ReaderView.PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, "1");
+
+			props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
 	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
 	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "BLACK" : "DARK");
 	        props.applyDefault(ReaderView.PROP_APP_SELECTION_PERSIST, "0");
@@ -3015,46 +3043,17 @@ public class BaseActivity extends Activity implements Settings {
 	        if ("1".equals(props.getProperty(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK)))
 	            props.setProperty(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK, "3");
 	        props.applyDefault(ReaderView.PROP_APP_MOTION_TIMEOUT, "0");
+			props.applyDefault(ReaderView.PROP_APP_BOUNCE_TAP_INTERVAL, "-1");
 	        props.applyDefault(ReaderView.PROP_APP_BOOK_PROPERTY_SCAN_ENABLED, "1");
 	        props.applyDefault(ReaderView.PROP_APP_KEY_BACKLIGHT_OFF, DeviceInfo.SAMSUNG_BUTTONS_HIGHLIGHT_PATCH ? "0" : "1");
 	        props.applyDefault(ReaderView.PROP_LANDSCAPE_PAGES, DeviceInfo.ONE_COLUMN_IN_LANDSCAPE ? "0" : "1");
 			//props.applyDefault(ReaderView.PROP_TOOLBAR_APPEARANCE, "0");
 			// autodetect best initial font size based on display resolution
-	        int screenHeight = displayMetrics.heightPixels;
-	        int screenWidth = displayMetrics.widthPixels;//getWindowManager().getDefaultDisplay().getWidth();
-	        if (screenWidth > screenHeight)
-    	        screenWidth = screenHeight;
-	        int fontSize = 20;
-	        int statusFontSize = 16;
-	        String hmargin = "4";
-	        String vmargin = "2";
-	        if (screenWidth <= 320) {
-	        	fontSize = 20;
-	        	statusFontSize = 16;
-	            hmargin = "4";
-	            vmargin = "2";
-	        } else if (screenWidth <= 400) {
-	        	fontSize = 24;
-	        	statusFontSize = 20;
-	            hmargin = "10";
-	            vmargin = "4";
-	        } else if (screenWidth <= 600) {
-	        	fontSize = 28;
-	        	statusFontSize = 24;
-	            hmargin = "20";
-	            vmargin = "8";
-	        } else if (screenWidth <= 800) {
-	        	fontSize = 32;
-	        	statusFontSize = 28;
-	            hmargin = "25";
-	            vmargin = "15";
-	        } else {
-	        	fontSize = 48;
-	        	statusFontSize = 32;
-	            hmargin = "30";
-	            vmargin = "20";
-	        }
-	        if (DeviceInfo.DEF_FONT_SIZE != null)
+			int fontSize = 12*activity.densityDpi/72;			// 12pt
+			int statusFontSize = 8*activity.densityDpi/72;		// 8pt
+			int hmargin = activity.densityDpi/16;
+			int vmargin = activity.densityDpi/32;
+			if (DeviceInfo.DEF_FONT_SIZE != null)
 	        	fontSize = DeviceInfo.DEF_FONT_SIZE;
 
 			int statusLocation = props.getInt(PROP_STATUS_LOCATION, VIEWER_STATUS_PAGE_HEADER);

@@ -88,97 +88,6 @@
 							/>
 				</LinearLayout>
 			</TableRow>
-			<TableRow
-					android:id="@+id/trow_text_or_html">
-                <Button
-                        android:id="@+id/btn_as_html"
-                        android:layout_width="0dip"
-                        android:layout_weight="1"
-                        android:layout_height="fill_parent"
-                        android:layout_marginBottom="2dip"
-                        android:tag="tint"
-                        android:textColor="?attr/colorIcon"
-                        android:contentDescription="@null"
-						android:drawableLeft="@drawable/icons8_toc_item_normal"
-                        android:text="@string/open_as_html" />
-                <Button
-                        android:id="@+id/btn_as_text"
-                        android:layout_width="0dip"
-                        android:layout_weight="1"
-                        android:layout_height="fill_parent"
-                        android:layout_marginBottom="2dip"
-                        android:textColor="?attr/colorIcon"
-                        android:tag="tint"
-                        android:contentDescription="@null"
-						android:drawableLeft="@drawable/icons8_toc_item_normal"
-                        android:text="@string/open_as_text" />
-			</TableRow>
-            <TableRow android:id="@+id/trow_text_or_html2">
-                <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="fill_parent"
-                        android:gravity="left"
-                        android:layout_weight="2"
-                        android:orientation="vertical">
-                    <TextView
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/open_as_html_add_info"
-                            android:maxLines="5"
-                            android:ellipsize="middle"
-                            style="@style/TextAppearance.Small"
-                            android:textColor="?attr/colorIcon"
-                            android:singleLine="false"
-                            />
-                </LinearLayout>
-            </TableRow>
-            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-					android:id="@+id/trow_from_stream1"
-					android:layout_margin="2dip"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:background="#60808080"
-					>
-				<TextView
-						android:layout_margin="5dp"
-						style="@style/TextAppearance.Small"
-						android:text="@string/external_doc_option1"
-						android:textStyle="bold"
-						android:singleLine="false"
-						android:maxLines="3"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:textColor="?attr/colorIcon"
-						/>
-			</TableRow>
-			<TableRow android:id="@+id/trow_from_stream2">
-				<LinearLayout
-						android:layout_width="0dip"
-						android:layout_height="fill_parent"
-						android:gravity="left"
-						android:layout_weight="2"
-						android:orientation="vertical">
-					<Button
-							android:id="@+id/btn_open_from_stream"
-							android:layout_width="fill_parent"
-							android:layout_height="wrap_content"
-							android:text="@string/doc_open_from_stream"
-							android:layout_margin="3dip"
-							android:textColor="?attr/colorIcon"
-							style="@style/TextAppearance.Widget.EditText"
-							/>
-					<TextView
-							android:layout_width="fill_parent"
-							android:layout_height="wrap_content"
-							android:text="@string/doc_open_from_stream_addinfo"
-							android:maxLines="5"
-							android:ellipsize="middle"
-							style="@style/TextAppearance.Small"
-							android:textColor="?attr/colorIcon"
-							android:singleLine="false"
-							/>
-				</LinearLayout>
-			</TableRow>
 			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
 					android:id="@+id/trow_file_exists1"
 					android:layout_margin="2dip"
@@ -256,7 +165,7 @@
 							android:text="@string/open_existing"
 							android:layout_margin="3dip"
 							android:textColor="?attr/colorIcon"
-							style="@style/TextAppearance.Widget.EditText"
+							style="@style/TextAppearance.Medium"
 							/>
 					<Button
 							android:id="@+id/btn_move_to_books_then_open"
@@ -267,6 +176,97 @@
 							android:textColor="?attr/colorIcon"
 							android:contentDescription="@null"
 							android:text="@string/try_to_move_to_books_then_open" />
+				</LinearLayout>
+			</TableRow>
+			<TableRow
+					android:id="@+id/trow_text_or_html">
+                <Button
+                        android:id="@+id/btn_as_html"
+                        android:layout_width="0dip"
+                        android:layout_weight="1"
+                        android:layout_height="fill_parent"
+                        android:layout_marginBottom="2dip"
+                        android:tag="tint"
+                        android:textColor="?attr/colorIcon"
+                        android:contentDescription="@null"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+                        android:text="@string/open_as_html" />
+                <Button
+                        android:id="@+id/btn_as_text"
+                        android:layout_width="0dip"
+                        android:layout_weight="1"
+                        android:layout_height="fill_parent"
+                        android:layout_marginBottom="2dip"
+                        android:textColor="?attr/colorIcon"
+                        android:tag="tint"
+                        android:contentDescription="@null"
+						android:drawableLeft="@drawable/icons8_toc_item_normal"
+                        android:text="@string/open_as_text" />
+			</TableRow>
+            <TableRow android:id="@+id/trow_text_or_html2">
+                <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="fill_parent"
+                        android:gravity="left"
+                        android:layout_weight="2"
+                        android:orientation="vertical">
+                    <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/open_as_html_add_info"
+                            android:maxLines="5"
+                            android:ellipsize="middle"
+                            style="@style/TextAppearance.Small"
+                            android:textColor="?attr/colorIcon"
+                            android:singleLine="false"
+                            />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+					android:id="@+id/trow_from_stream1"
+					android:layout_margin="2dip"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:background="#60808080"
+					>
+				<TextView
+						android:layout_margin="5dp"
+						style="@style/TextAppearance.Small"
+						android:text="@string/external_doc_option1"
+						android:textStyle="bold"
+						android:singleLine="false"
+						android:maxLines="3"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="?attr/colorIcon"
+						/>
+			</TableRow>
+			<TableRow android:id="@+id/trow_from_stream2">
+				<LinearLayout
+						android:layout_width="0dip"
+						android:layout_height="fill_parent"
+						android:gravity="left"
+						android:layout_weight="2"
+						android:orientation="vertical">
+					<Button
+							android:id="@+id/btn_open_from_stream"
+							android:layout_width="fill_parent"
+							android:layout_height="wrap_content"
+							android:text="@string/doc_open_from_stream"
+							android:layout_margin="3dip"
+							android:textColor="?attr/colorIcon"
+							style="@style/TextAppearance.Medium"
+							/>
+					<TextView
+							android:layout_width="fill_parent"
+							android:layout_height="wrap_content"
+							android:text="@string/doc_open_from_stream_addinfo"
+							android:maxLines="5"
+							android:ellipsize="middle"
+							style="@style/TextAppearance.Small"
+							android:textColor="?attr/colorIcon"
+							android:singleLine="false"
+							/>
 				</LinearLayout>
 			</TableRow>
 			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
@@ -416,7 +416,7 @@
 							android:text="@string/doc_save_to_device"
 							android:layout_margin="3dip"
 							android:textColor="?attr/colorIcon"
-							style="@style/TextAppearance.Widget.EditText"
+							style="@style/TextAppearance.Medium"
 							/>
 				</LinearLayout>
 			</TableRow>

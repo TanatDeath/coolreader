@@ -1,7 +1,5 @@
 package org.coolreader.crengine;
 
-import org.coolreader.geo.GeoLastData;
-
 public class FlavourConstants {
 	public static boolean PRO_FEATURES = true;
 	public static boolean PREMIUM_FEATURES = PRO_FEATURES;

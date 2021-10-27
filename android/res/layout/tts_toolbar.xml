@@ -48,18 +48,6 @@
 	        android:focusable="false"
             android:focusableInTouchMode="false"
             android:contentDescription="@string/tts_play"/>
-		<ImageButton android:id="@+id/tts_play_pause_ell"
-			android:layout_width="0dip" android:layout_weight="1"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="5dip"
-			android:layout_marginBottom="5dip"
-			android:layout_marginLeft="2dip"
-			android:layout_marginRight="2dip"
-			android:src="?attr/attr_ic_media_play_ell"
-			android:tag="tint"
-			android:focusable="false"
-			android:focusableInTouchMode="false"
-			android:contentDescription="@string/tts_play"/>
 	    <ImageButton android:id="@+id/tts_back"
             android:layout_width="0dip" android:layout_weight="1"
 	        android:layout_height="wrap_content"
@@ -258,7 +246,7 @@
 						android:hint="tint"
 						android:textColor="?attr/colorIcon"
 						android:contentDescription="1"
-						android:text="1" />
+						android:text="\?" />
 
 				<Button
 						android:id="@+id/load_vol_2"
@@ -276,7 +264,7 @@
 						android:hint="tint"
 						android:textColor="?attr/colorIcon"
 						android:contentDescription="2"
-						android:text="2" />
+						android:text="\?" />
 				<Button
 						android:id="@+id/load_vol_3"
 						android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -293,7 +281,7 @@
 						android:hint="tint"
 						android:textColor="?attr/colorIcon"
 						android:contentDescription="3"
-						android:text="3" />
+						android:text="\?" />
 			</LinearLayout>
 			<LinearLayout
 					android:orientation="horizontal"
@@ -320,7 +308,7 @@
 						android:hint="tint"
 						android:textColor="?attr/colorIcon"
 						android:contentDescription="1"
-						android:text="1" />
+						android:text="\?" />
 
 				<Button
 						android:id="@+id/load_speed_2"
@@ -338,7 +326,7 @@
 						android:hint="tint"
 						android:textColor="?attr/colorIcon"
 						android:contentDescription="2"
-						android:text="2" />
+						android:text="\?" />
 				<Button
 						android:id="@+id/load_speed_3"
 						android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -355,7 +343,7 @@
 						android:hint="tint"
 						android:textColor="?attr/colorIcon"
 						android:contentDescription="3"
-						android:text="3" />
+						android:text="\?" />
 			</LinearLayout>
 		</TableRow>
 	</TableLayout>

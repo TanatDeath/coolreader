@@ -187,8 +187,10 @@ public class YandexTranslate {
 					unauthCntY++;
 					yandexAuthThenTranslate(cr, s, langf, lang, curDict, view, llc, dcb);
 				} else {
-					cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-							DicToastView.IS_YANDEX, "");
+					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+						cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
+							DicToastView.IS_YANDEX, "")
+					));
 					unauthCntY = 0;
 				}
 			}

@@ -1,9 +1,10 @@
 package org.coolreader.crengine;
 
-
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Bookmark {
+public class Bookmark implements Parcelable {
 
 	public Bookmark()
 	{
@@ -29,6 +30,36 @@ public class Bookmark {
 		shortContext=v.shortContext;
 		fullContext=v.fullContext;
 	}
+
+	protected Bookmark(Parcel in) {
+		if (in.readByte() == 0) {
+			id = null;
+		} else {
+			id = in.readLong();
+		}
+		type = in.readInt();
+		percent = in.readInt();
+		shortcut = in.readInt();
+		startPos = in.readString();
+		endPos = in.readString();
+		titleText = in.readString();
+		posText = in.readString();
+		commentText = in.readString();
+		timeStamp = in.readLong();
+		timeElapsed = in.readLong();
+	}
+
+	public static final Creator<Bookmark> CREATOR = new Creator<Bookmark>() {
+		@Override
+		public Bookmark createFromParcel(Parcel in) {
+			return new Bookmark(in);
+		}
+
+		@Override
+		public Bookmark[] newArray(int size) {
+			return new Bookmark[size];
+		}
+	};
 	
 	@Override
 	public int hashCode() {
@@ -350,4 +381,28 @@ public class Bookmark {
 		return "Bookmark[t=" + type + ", start=" + startPos + "]";
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		if (id == null) {
+			dest.writeByte((byte) 0);
+		} else {
+			dest.writeByte((byte) 1);
+			dest.writeLong(id);
+		}
+		dest.writeInt(type);
+		dest.writeInt(percent);
+		dest.writeInt(shortcut);
+		dest.writeString(startPos);
+		dest.writeString(endPos);
+		dest.writeString(titleText);
+		dest.writeString(posText);
+		dest.writeString(commentText);
+		dest.writeLong(timeStamp);
+		dest.writeLong(timeElapsed);
+	}
 }

@@ -1,19 +1,16 @@
 package org.coolreader.tts;
 
 import android.annotation.SuppressLint;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
-import android.media.AudioManager;
-import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
@@ -25,22 +22,19 @@ import org.coolreader.crengine.RepeatOnTouchListener;
 import org.coolreader.crengine.Selection;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.crengine.Utils;
 import org.coolreader.crengine.ViewMode;
 
 import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,28 +53,21 @@ import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
-import android.speech.tts.Voice;
 
 import com.s_trace.motion_watchdog.HandlerThread;
 import com.s_trace.motion_watchdog.MotionWatchdogHandler;
 
 public class TTSToolbarDlg implements Settings {
-	public static final Logger log = L.create("ttssrv");
+	public static final Logger log = L.create("ttsdlg");
 
-	private static final String CR3_UTTERANCE_ID = "cr3UtteranceId";
-	private static final int MAX_CONTINUOUS_ERRORS = 3;
+	public static final int MEDIA_COVER_WIDTH = 300;
+	public static final int MEDIA_COVER_HEIGHT = 400;
 
 	private final PopupWindow mWindow;
 	private final CoolReader mCoolReader;
-	private String mLogFileRoot = "";
-	private int mForceTTSKoef = 0;
 	private final ReaderView mReaderView;
-	private String mBookTitle;
 	public View mPanel;
-	private TextToSpeech mTTS;
-	private TTSControlServiceAccessor mTTSControl;
+	private final TTSControlServiceAccessor mTTSControl;
 	private int mCurPage = -1;
 	private String mCurPageText;
 	private String mCurPageTextPrev;
@@ -88,32 +75,33 @@ public class TTSToolbarDlg implements Settings {
 	private String mCurPageTextNext;
 	private String mCurPageTextNext2;
 	private static NotificationChannel channel;
-	private ImageButton mPlayPauseButton;
-	private ImageButton mPlayPauseButtonEll;
-	private TextView mVolumeTextView;
-	private TextView mSpeedTextView;
-	private ImageView ivVolDown;
-	private ImageView ivVolUp;
-	private ImageView ivFreqDown;
-	private ImageView ivFreqUp;
-	private SeekBar mSbSpeed;
-	private SeekBar mSbVolume;
+	private final ImageButton mPlayPauseButton;
+	private final TextView mVolumeTextView;
+	private final TextView mSpeedTextView;
+	private final ImageView btnDecVolume;
+	private final ImageView btnIncVolume;
+	private final ImageView btnDecSpeed;
+	private final ImageView btnIncSpeed;
+	private final SeekBar mSbSpeed;
+	private final SeekBar mSbVolume;
 	private TextView lblMotionWd;
 	private HandlerThread mMotionWatchdog;
-	private HandlerThread mTimerHandler;
-	private static String CHANNEL_ID = "KnownReader_channel";
-	private static int MIN_FORCE_TTS_START_TIME = 5000;
-	private int mContinuousErrors = 0;
 	private Runnable mOnCloseListener;
 	private boolean mClosed;
 	private Selection mCurrentSelection;
 	private boolean isSpeaking;
 	private long startTTSTime;
-	private Runnable mOnStopRunnable;
 	private int mMotionTimeout;
 	private boolean mAutoSetDocLang;
+	private String mBookAuthors;
+	private String mBookTitle;
+	private Bitmap mBookCover;
+	private String mBookLanguage;
 	private String mForcedLanguage;
 	private String mForcedVoice;
+	private String mCurrentLanguage;
+	private String mCurrentVoiceName;
+	private boolean mGoogleTTSAbbreviationWorkaround;
 	private int mTTSSpeedPercent = 50;		// 50% (normal)
 	private Button mLoadSpeed1;
 	private Button mLoadSpeed2;
@@ -126,199 +114,10 @@ public class TTSToolbarDlg implements Settings {
 	HashMap<Integer, Integer> themeColors;
 
 	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
-	// For TTS notification:
-	private static final int TTS_NOTIFICATION_ID = 0; // Use same ID for all TTS notifications
-	private static final int COVER_HEIGHT = 256;
-	private static final int COVER_WIDTH = 256;
-	private FileInfo mFileInfo = null;
-	public Bitmap mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
 
-	BroadcastReceiver mTTSControlButtonReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			log.d("received action: " + action);
-			if (null != action) {
-				switch (action) {
-					case TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE:
-						toggleStartStopExt(false);
-						break;
-					case TTSControlService.TTS_CONTROL_ACTION_NEXT:
-						jumpToSentence(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
-						break;
-					case TTSControlService.TTS_CONTROL_ACTION_PREV:
-						jumpToSentence(ReaderCommand.DCMD_SELECT_PREV_SENTENCE);
-						break;
-					case TTSControlService.TTS_CONTROL_ACTION_DONE:
-						stopAndClose();
-						break;
-				}
-			}
-		}
-	};
-
-	public NotificationChannel createNotificationChannel() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			if (channel == null) {
-				NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "CoolReader", NotificationManager.IMPORTANCE_LOW);
-				channel.enableLights(false);
-				channel.enableVibration(false);
-				NotificationManager notificationManager = mCoolReader.getSystemService(NotificationManager.class);
-				notificationManager.createNotificationChannel(channel);
-			}
-		}
-		return channel;
-	}
-
-	private void jumpToSentence(ReaderCommand dcmdSelectSentence) {
-		if ( isSpeaking ) {
-			stop(() -> {
-				isSpeaking = true;
-				moveSelection(dcmdSelectSentence);
-			});
-		} else moveSelection(dcmdSelectSentence);
-	}
-
-	class TimerHandler extends Handler {
-		private static final int MSG_TIMER  = 0;
-		private final CoolReader mCoolReader;
-		private final TTSToolbarDlg mTTSToolbarDlg;
-		private HandlerThread mHandlerThread;
-		private final int mTimeout;
-		private boolean mIsStopping;
-		private boolean mIsStopped;
-
-		public TimerHandler(TTSToolbarDlg ttsToolbarDlg, CoolReader coolReader,
-									 com.s_trace.motion_watchdog.HandlerThread handlerThread, int timeout) {
-			mHandlerThread = handlerThread;
-			mCoolReader = coolReader;
-			mTTSToolbarDlg = ttsToolbarDlg;
-			mTimeout = timeout;
-			Message message = Message.obtain();
-			message.what = MSG_TIMER;
-			sendMessage(message);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			if (mHandlerThread.isInterrupted()) {
-				Log.i(TAG, "handleMessage: mHandlerThread.isInterrupted() for msg=" + msg);
-				handleInterrupt();
-				return;
-			}
-			CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-					"timer event - every 5 sec");
-
-			long curTimeSpan = System.currentTimeMillis() - lastSaveSpeakTime;
-			long curTimeSpanRestart = System.currentTimeMillis() - lastRestartTime;
-			double avgWordTimeSpan = 0;
-			if (dWordCount>0) {
-				avgWordTimeSpan = ((double)lTimeSpan) / dWordCount;
-			}
-			double thisPhraseExpectedTime = avgWordTimeSpan * dWordCountThis;
-			double avgWordTimeSpanThis = 0;
-			if (dWordCountThis>0) {
-				avgWordTimeSpanThis = ((double)curTimeSpan) / dWordCountThis;
-			}
-			if ((avgWordTimeSpan>0) && (mForceTTSKoef>0)) {
-				//mCoolReader.showToast("checking force "+curTimeSpan);
-				boolean needForce = isSpeaking && (iSentenceCount > 20);
-				boolean needForceBase = needForce;
-				// if there is enough time spent
-				if (mForceTTSKoef > 9) {
-					if (needForce)
-						needForce = needForce &&
-								curTimeSpan > thisPhraseExpectedTime + (mForceTTSKoef * 1000);
-				} else {
-					if (needForce)
-						needForce = needForce &&
-								curTimeSpan > thisPhraseExpectedTime + (mForceTTSKoef * avgWordTimeSpan * 3);
-				}
-				//		(avgWordTimeSpanThis > avgWordTimeSpan * ((double)mForceTTSKoef));
-				// end min time has reached
-				if (needForce)
-					needForce = needForce && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
-				// if current sentence is empty - just wait min time
-				//if (avgWordTimeSpanThis < 0.1)
-				//	needForce = needForceBase && (curTimeSpan > MIN_FORCE_TTS_START_TIME);
-				//if (mForceTTSKoef>9)
-				//	needForce = (curTimeSpan>(mForceTTSKoef * 1000));
-				if (needForce) {
-                    CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
-                            "possibly tts unexpectedly stopped...");
-                    mCoolReader.showToast("Trying to force restart TTS");
-					iSentenceCount = 0;
-					dWordCount = 0.0f;
-					lTimeSpan = 0L;
-					if (mCurrentSelection != null) {
-                        if (isSpeaking) {
-                            if (
-                            	 (isAlwaysStop)&&
-							       (
-								      (curTimeSpanRestart > MIN_FORCE_TTS_START_TIME)||
-										  (lastRestartTime==0)
-							       )
-							   )
-                            {
-								lastRestartTime = System.currentTimeMillis();
-                                //mTTS.stop();
-								mCoolReader.tts = null;
-								mCoolReader.ttsInitialized = false;
-
-								CustomLog.doLog(mLogFileRoot + (isAlwaysStop ? "log_tts_type1.log" : "log_tts_type0.log"),
-                                        "stop tts between reading of sentences");
-                            }
-                            say(mCurrentSelection);
-                        }
-                    } else {
-                        moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE);
-                    }
-                }
-			}
-			CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-					"timer event, avgWordTimeSpan = "+avgWordTimeSpan+", avgWordTimeSpanThis = "+avgWordTimeSpanThis+
-					", dWordCountThis = "+dWordCountThis+", curTimeSpan = "+curTimeSpan);
-
-			Log.d(TAG, "handleMessage: msg=" + msg);
-			if (mCoolReader == null || mIsStopped) {
-				return;
-			}
-			switch (msg.what) {
-				case MSG_TIMER:
-					mIsStopping = false;
-					this.removeMessages(MSG_TIMER);
-
-					Message message = Message.obtain();
-					message.what = MSG_TIMER;
-					this.sendMessageDelayed(message, mTimeout);
-					break;
-			}
-		}
-
-		private void handleStop() {
-			if (mHandlerThread.isInterrupted()) {
-				Log.i(TAG, "handleStop: mHandlerThread.isInterrupted()");
-				handleInterrupt();
-				return;
-			}
-
-			Message message = Message.obtain();
-			message.what = MSG_TIMER;
-			this.sendMessageDelayed(message, mTimeout);
-			return;
-
-		}
-
-		private void handleInterrupt() {
-			Log.i(TAG, "handleInterrupt()");
-			removeMessages(TimerHandler.MSG_TIMER);
-			mHandlerThread.quitSafely();
-		}
-	}
-
-	static public TTSToolbarDlg showDialog( CoolReader coolReader, ReaderView readerView, TextToSpeech tts)
+	static public TTSToolbarDlg showDialog(CoolReader coolReader, ReaderView readerView, TTSControlServiceAccessor ttsacc)
 	{
-		TTSToolbarDlg dlg = new TTSToolbarDlg(coolReader, readerView, tts);
+		TTSToolbarDlg dlg = new TTSToolbarDlg(coolReader, readerView, ttsacc);
 		log.d("popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 		return dlg;
 	}
@@ -346,37 +145,44 @@ public class TTSToolbarDlg implements Settings {
 	}
 
 	public void stopAndClose() {
-		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-				"stop tts (direct)");
+//		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
+//				"stop tts (direct)");
 		if (mClosed)
 			return;
 		isSpeaking = false;
 		mClosed = true;
-		BackgroundThread.instance().executeGUI(() -> {
-			stop();
-			mCoolReader.unregisterReceiver(mTTSControlButtonReceiver);
-			if (null != mTTSControl)
-				mTTSControl.unbind();
-			Intent intent = new Intent(mCoolReader, TTSControlService.class);
-			mCoolReader.stopService(intent);
-			restoreReaderMode();
-			mReaderView.clearSelection();
-			if (mOnCloseListener != null)
-				mOnCloseListener.run();
-			if ( mWindow.isShowing() )
-				mWindow.dismiss();
-			mReaderView.save();
+		mTTSControl.bind(ttsbinder -> {
+			ttsbinder.stop(result -> {
+				BackgroundThread.instance().postGUI(() -> {
+					if (null != mTTSControl)
+						mTTSControl.unbind();
+					Intent intent = new Intent(mCoolReader, TTSControlService.class);
+					mCoolReader.stopService(intent);
+					restoreReaderMode();
+					mReaderView.clearSelection();
+					if (mOnCloseListener != null)
+						mOnCloseListener.run();
+					if ( mWindow.isShowing() )
+						mWindow.dismiss();
+					mReaderView.save();
+				});
+			});
 		});
-		runInTTSControlService(tts -> tts.notifyStopMediaSession());
 	}
-	
+
 	private boolean changedPageMode;
+
+	public void pause() {
+		mTTSControl.bind(ttsbinder -> {
+			ttsbinder.pause(null);
+		});
+	}
 
 	// plotn: NB!!! same fix as we did, but in other way. Check if it works
 	private void setReaderMode()
 	{
 		String oldViewSetting = mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE);
-		moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE);
+		moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, null);
 		if (("1".equals(oldViewSetting)) &&
 				(!("1".equals(mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE))))) {
 			changedPageMode = true;
@@ -394,8 +200,14 @@ public class TTSToolbarDlg implements Settings {
 			mReaderView.setViewModeNonPermanent(ViewMode.PAGES);
 		}
 	}
-	
-	private void moveSelection(ReaderCommand cmd)
+
+	/**
+	 * Select next or previous sentence. ONLY the selection changes and the specified callback is called!
+	 * Not affected to speech synthesis process.
+	 * @param cmd move command. DCMD_SELECT_NEXT_SENTENCE, DCMD_SELECT_PREV_SENTENCE, DCMD_SELECT_FIRST_SENTENCE.
+	 * @param callback optional completion callback
+	 */
+	private void moveSelection(ReaderCommand cmd, ReaderView.MoveSelectionCallback callback)
 	{
 		mReaderView.moveSelection(cmd, 0, new ReaderView.MoveSelectionCallback() {
 			
@@ -407,8 +219,8 @@ public class TTSToolbarDlg implements Settings {
 				if (interv == 0)
                     interv = mReaderView.getDefSavePositionInterval();
 				if (curTime - lastSaveCurPosTime > interv) {
-					CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-							"it is time to save position");
+//					CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
+//							"it is time to save position");
 					lastSaveCurPosTime = curTime;
 					try {
 						final Bookmark bmk = mReaderView.getCurrentPositionBookmark();
@@ -439,37 +251,36 @@ public class TTSToolbarDlg implements Settings {
 					}
 				}
 				mCurrentSelection = selection;
-				if ( isSpeaking ) {
-					if (isAlwaysStop) {
-						mTTS.stop();
-						CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-								"stop tts between reading of sentences");
-					}
-					say(mCurrentSelection);
-				}
+				if (null != callback)
+					callback.onNewSelection(mCurrentSelection);
 			}
 			
 			@Override
 			public void onFail() {
 				log.e("fail()");
-				stop();
+				if (isSpeaking) {
+					mTTSControl.bind(ttsbinder ->
+							ttsbinder.stop(result ->
+									log.e("speech synthesis process stopped!")));
+				}
+				if (null != callback)
+					callback.onFail();
 			}
 		});
 	}
-	
-	private void say(Selection selection) {
-		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-				"speaking: "+selection.text);
-		dWordCountThis = 0.0f;
-		for (String sWord: selection.text.split(" ")) {
-			if (sWord.length()<4) dWordCountThis = dWordCountThis + 0.8d;
-				else if (sWord.length()<7) dWordCountThis = dWordCountThis + 1d;
-			else dWordCountThis = dWordCountThis + 1.2d;
-			if (sWord.replaceAll("\\p{Punct}", "").length()==0) dWordCountThis = 0;
+
+	private String preprocessUtterance(String utterance) {
+		String newUtterance = utterance;
+		if (mGoogleTTSAbbreviationWorkaround) {
+			// Add space before last char if it's dot.
+			int len = newUtterance.length();
+			if (len > 1) {
+				if (newUtterance.charAt(len - 1) == '.') {
+					newUtterance = newUtterance.substring(0, len - 1);
+					newUtterance += " .";
+				}
+			}
 		}
-		lastSaveSpeakTime = System.currentTimeMillis();
-		// text clearance
-		String clearText = selection.text;
 		if ((mCoolReader.getmReaderFrame()!=null) && (mCoolReader.getReaderView() != null))
 			if ((mCoolReader.getmReaderFrame().getUserDicPanel()!=null)&&
 					(mCoolReader.getReaderView().getDoc() !=null)) {
@@ -482,44 +293,25 @@ public class TTSToolbarDlg implements Settings {
 					mCurPageTextNext2 = mCoolReader.getmReaderFrame().getUserDicPanel().getCurPageText(2,true);
 					mCurPage = curPage;
 				}
-				if ((mCurPageText.contains("["+clearText+"]")) || (mCurPageText.contains("{"+clearText+"}")))
-					clearText = "";
-				if ((mCurPageTextPrev.contains("["+clearText+"]")) || (mCurPageTextPrev.contains("{"+clearText+"}")))
-					clearText = "";
-				if ((mCurPageTextNext.contains("["+clearText+"]")) || (mCurPageTextNext.contains("{"+clearText+"}")))
-					clearText = "";
-				if ((mCurPageTextPrev2.contains("["+clearText+"]")) || (mCurPageTextPrev2.contains("{"+clearText+"}")))
-					clearText = "";
-				if ((mCurPageTextNext2.contains("["+clearText+"]")) || (mCurPageTextNext2.contains("{"+clearText+"}")))
-					clearText = "";
+				if ((mCurPageText.contains("["+newUtterance+"]")) || (mCurPageText.contains("{"+newUtterance+"}")))
+					newUtterance = "";
+				if ((mCurPageTextPrev.contains("["+newUtterance+"]")) || (mCurPageTextPrev.contains("{"+newUtterance+"}")))
+					newUtterance = "";
+				if ((mCurPageTextNext.contains("["+newUtterance+"]")) || (mCurPageTextNext.contains("{"+newUtterance+"}")))
+					newUtterance = "";
+				if ((mCurPageTextPrev2.contains("["+newUtterance+"]")) || (mCurPageTextPrev2.contains("{"+newUtterance+"}")))
+					newUtterance = "";
+				if ((mCurPageTextNext2.contains("["+newUtterance+"]")) || (mCurPageTextNext2.contains("{"+newUtterance+"}")))
+					newUtterance = "";
 			}
 		// this won't work but I let it...
-		clearText = clearText.replaceAll("\\[\\d+\\]", "");
-		clearText = clearText.replaceAll("\\{\\d+\\}", "");
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			Bundle bundle = new Bundle();
-			bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-			mTTS.speak(clearText, TextToSpeech.QUEUE_ADD, bundle, CR3_UTTERANCE_ID);
-		} else {
-			HashMap<String, String> params = new HashMap<String, String>();
-			params.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
-			params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, CR3_UTTERANCE_ID);
-			mTTS.speak(clearText, TextToSpeech.QUEUE_ADD, params);
-		}
-		final String finalClearText = clearText;
-		runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, finalClearText));
-	}
-	
-	private void start() {
-		if (mCurrentSelection == null)
-			return;
-		startMotionWatchdog();
-		isSpeaking = true;
-		startTTSTime = System.currentTimeMillis();
-		say(mCurrentSelection);
+		newUtterance = newUtterance.replaceAll("\\[\\d+\\]", "");
+		newUtterance = newUtterance.replaceAll("\\{\\d+\\}", "");
+		return newUtterance;
 	}
 
 	private void startMotionWatchdog(){
+		startTTSTime = System.currentTimeMillis();
 		String TAG = "MotionWatchdog";
 		log.d("startMotionWatchdog() enter");
 		if (mMotionTimeout == 0) {
@@ -532,7 +324,6 @@ public class TTSToolbarDlg implements Settings {
 		Log.d(TAG, "startMotionWatchdog() exit");
 	}
 
-	private boolean isAlwaysStop;
 	private int iSentenceCount;
 	private double dWordCount;
 	private double dWordCountThis;
@@ -541,83 +332,6 @@ public class TTSToolbarDlg implements Settings {
 	private long lastSaveSpeakTime = System.currentTimeMillis();
 	private long lastRestartTime = 0;
 	private long lastSaveCurPosTime = System.currentTimeMillis();
-
-	private void stop() {
-		stop(null);
-	}
-
-	private void stop(Runnable runnable) {
-		isSpeaking = false;
-		mOnStopRunnable = runnable;
-		if ( mTTS.isSpeaking() ) {
-			mTTS.stop();
-		}
-		if (mMotionWatchdog != null) {
-			mMotionWatchdog.interrupt();
-		}
-	}
-
-	public void pause() {
-		if (isSpeaking)
-			toggleStartStopExt(false);
-	}
-
-	private void toggleStartStopExt(boolean b) {
-		isAlwaysStop = b;
-		toggleStartStop();
-	}
-
-	private void toggleStartStop() {
-
-		iSentenceCount = 0;
-		dWordCount = 0.0f;
-		lTimeSpan = 0L;
-
-		CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-				isSpeaking?"stop tts":"start tts");
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		ColorDrawable c = new ColorDrawable(colorGrayC);
-		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS, "0");
-		if (!sTranspButtons.equals("0")) c.setAlpha(130);
-		else c.setAlpha(255);
-
-		if ( isSpeaking ) {
-			mPlayPauseButton.setImageResource(
-					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
-					//R.drawable.ic_media_play
-			);
-			mPlayPauseButtonEll.setImageResource(
-					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
-					//R.drawable.ic_media_play
-			);
-			mPlayPauseButton.setBackgroundDrawable(c);
-			mPlayPauseButtonEll.setBackgroundDrawable(c);
-			runInTTSControlService(tts -> tts.notifyPause(mBookTitle));
-			stop();
-		} else {
-			if (null != mCurrentSelection) {
-				mPlayPauseButton.setImageResource(
-						Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
-						//R.drawable.ic_media_pause
-				);
-				mPlayPauseButtonEll.setImageResource(
-						Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause)
-						//R.drawable.ic_media_pause
-				);
-				mPlayPauseButton.setBackgroundDrawable(c);
-				mPlayPauseButtonEll.setBackgroundDrawable(c);
-				runInTTSControlService(tts -> tts.notifyPlay(mBookTitle, mCurrentSelection.text));
-				start();
-			}
-		}
-	}
-
-	private void runInTTSControlService(TTSControlBinder.Callback callback) {
-		if (null == mTTSControl) {
-			mTTSControl = new TTSControlServiceAccessor(mCoolReader);
-		}
-		mTTSControl.bind(callback);
-	}
 
 	public void repaintButtons()
 	{
@@ -631,19 +345,11 @@ public class TTSToolbarDlg implements Settings {
 
 		if (mPanel!=null) {
 			mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
-			mPanel.findViewById(R.id.tts_play_pause_ell).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_options).setBackgroundDrawable(c);
 		}
-	}
-
-	public void changeTTS(TextToSpeech tts) {
-		pause();
-		mTTS = tts;
-		setupTTSVoice();
-		setupTTSHandlers();
 	}
 
 	/**
@@ -687,8 +393,12 @@ public class TTSToolbarDlg implements Settings {
 		// Apply settings
 		setupTTSVoice();
 		if (oldTTSSpeed != mTTSSpeedPercent) {
-			mTTS.setSpeechRate(speechRateFromPercent(mTTSSpeedPercent));
-			mSbSpeed.setProgress(mTTSSpeedPercent);
+			mTTSControl.bind(ttsbinder -> {
+				ttsbinder.setSpeechRate(speechRateFromPercent(mTTSSpeedPercent), result -> {
+					if (result)
+						BackgroundThread.instance().postGUI(() -> mSbSpeed.setProgress(mTTSSpeedPercent));
+				});
+			});
 		}
 	}
 
@@ -714,6 +424,8 @@ public class TTSToolbarDlg implements Settings {
 			case PROP_APP_TTS_VOICE:
 				mForcedVoice = value;
 				break;
+			case PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR:
+				mGoogleTTSAbbreviationWorkaround = flg;
 			case PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS:
 				int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 				ColorDrawable c = new ColorDrawable(colorGrayC);
@@ -721,15 +433,14 @@ public class TTSToolbarDlg implements Settings {
 				if (val1 != 0) c.setAlpha(130);
 					else c.setAlpha(255);
 				mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
-				mPanel.findViewById(R.id.tts_play_pause_ell).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_options).setBackgroundDrawable(c);
-				ivVolDown.setBackgroundDrawable(c);
-				ivVolUp.setBackgroundDrawable(c);
-				ivFreqDown.setBackgroundDrawable(c);
-				ivFreqUp.setBackgroundDrawable(c);
+				btnDecVolume.setBackgroundDrawable(c);
+				btnIncVolume.setBackgroundDrawable(c);
+				btnDecSpeed.setBackgroundDrawable(c);
+				btnIncSpeed.setBackgroundDrawable(c);
 				break;
 			case PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND:
 				int val = Utils.parseInt(value, 0, 0, 2);
@@ -744,169 +455,148 @@ public class TTSToolbarDlg implements Settings {
 	private void setupTTSVoice() {
 		if (mAutoSetDocLang) {
 			// set language for TTS based on book's language
-			log.d("Setting language according book's language");
-			Locale locale = null;
-			BookInfo bookInfo = mReaderView.getBookInfo();
-			if (null != bookInfo) {
-				FileInfo fileInfo = bookInfo.getFileInfo();
-				if (null != fileInfo) {
-					log.d("book language is \"" + fileInfo.language + "\"");
-					if (null != fileInfo.language && fileInfo.language.length() > 0) {
-						locale = new Locale(fileInfo.language);
-					}
-				}
-			}
-			if (null != locale) {
-				log.d("trying to set TTS language to \"" + locale.getDisplayLanguage() + "\"");
-				mTTS.setLanguage(locale);
+			if (null != mBookLanguage && mBookLanguage.length() > 0 && !mBookLanguage.equals(mCurrentLanguage)) {
+				log.d("trying to set TTS language to \"" + mBookLanguage + "\"");
+				mTTSControl.bind(ttsbinder -> {
+					ttsbinder.setLanguage(mBookLanguage, result -> {
+						mCurrentLanguage = mBookLanguage;
+						if (result)
+							log.d("setting TTS language to \"" + mBookLanguage + "\" successful.");
+						else
+							log.d("Failed to set TTS language to \"" + mBookLanguage + "\".");
+					});
+				});
 			} else {
-				log.e("Failed to detect book's language, using system default!");
+				log.e("Failed to detect book's language, will be used system default!");
 			}
 		} else {
 			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-				// Update voices list
-				Set<Voice> voices;
-				if (null != mTTS)
-					voices = mTTS.getVoices();
-				else
-					voices = null;
-				// Filter voices for given language
-				log.d("Trying to find voice for language \"" + mForcedLanguage + "\"");
-				Voice sel_voice = null;
-				if (null != voices && null != mForcedLanguage && mForcedLanguage.length() > 0) {
-					ArrayList<Voice> acceptable_voices = new ArrayList<>();
-					for (Voice voice : voices) {
-						Locale locale = voice.getLocale();
-						if (mForcedLanguage.toLowerCase().equals(locale.toString().toLowerCase())) {
-							acceptable_voices.add(voice);
-						}
-					}
-					if (acceptable_voices.size() > 0) {
-						// Select one specific voice
-						boolean found = false;
-						for (Voice voice : acceptable_voices) {
-							if (voice.getName().equals(mForcedVoice))
-							{
-								sel_voice = voice;
-								found = true;
-								break;
+				if (null != mForcedVoice && mForcedVoice.length() > 0 && !mForcedVoice.equals(mCurrentVoiceName)) {
+					mTTSControl.bind(ttsbinder -> {
+						ttsbinder.setVoice(mForcedVoice, result -> {
+							mCurrentVoiceName = mForcedVoice;
+							if (result) {
+								log.d("Set voice \"" + mForcedVoice + "\" successful");
+							} else {
+								log.e("Failed to set voice \"" + mForcedVoice + "\"!");
 							}
-						}
-						if (found) {
-							log.d("Voice \"" + mForcedVoice + "\" is found");
-						} else {
-							sel_voice = acceptable_voices.get(0);
-							log.e("Voice \"" + mForcedVoice + "\" NOT found, using \"" + sel_voice.getName() + "\"");
-						}
-					}
-				}
-				if (sel_voice != null) {
-					log.d("Setting voice: " + sel_voice.getName());
-					mTTS.setVoice(sel_voice);
-				} else {
-					log.e("Failed to find voice for language \"" + mForcedLanguage + "\"!");
+						});
+					});
 				}
 			}
 		}
-
 	}
 
-	private void setupTTSHandlers() {
-		if (null != mTTS) {
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-				mTTS.setOnUtteranceCompletedListener(utteranceId -> {
-					if (null != mOnStopRunnable) {
-						mOnStopRunnable.run();
-						mOnStopRunnable = null;
+	private void setupSpeechStatusHandler() {
+		mTTSControl.bind(ttsbinder -> {
+			ttsbinder.setStatusListener(new OnTTSStatusListener() {
+				@Override
+				public void onUtteranceStart() {
+					isSpeaking = true;
+				}
+
+				@Override
+				public void onUtteranceDone() {
+				}
+
+				@Override
+				public void onError(int errorCode) {
+					BackgroundThread.instance().postGUI(() -> mCoolReader.showToast(R.string.tts_failed));
+				}
+
+				@Override
+				public void onStateChanged(TTSControlService.State state) {
+					switch (state) {
+						case PLAYING:
+							isSpeaking = true;
+							BackgroundThread.instance().postGUI(() ->
+							{
+								mPlayPauseButton.setImageResource(Utils.resolveResourceIdByAttr(
+										mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause));
+								repaintButtons();
+							});
+							startMotionWatchdog();
+							break;
+						case PAUSED:
+						case STOPPED:
+							isSpeaking = false;
+							BackgroundThread.instance().postGUI(() ->
+							{
+								mPlayPauseButton.setImageResource(Utils.resolveResourceIdByAttr(
+										mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play));
+								repaintButtons();
+							});
+							if (mMotionWatchdog != null)
+								mMotionWatchdog.interrupt();
+							break;
+					}
+				}
+
+				@Override
+				public void onVolumeChanged(int currentVolume, int maxVolume) {
+					BackgroundThread.instance().postGUI(() -> {
+						mSbVolume.setMax(maxVolume);
+						mSbVolume.setProgress(currentVolume);
+					});
+				}
+
+				@Override
+				public void onAudioFocusLost() {
+				}
+
+				@Override
+				public void onAudioFocusRestored() {
+				}
+
+				@Override
+				public void onCurrentSentenceRequested(TTSControlBinder ttsbinder) {
+					if (null != mCurrentSelection) {
+						ttsbinder.say(preprocessUtterance(mCurrentSelection.text), null);
+					}
+				}
+
+				@Override
+				public void onNextSentenceRequested(TTSControlBinder ttsbinder) {
+					if (isSpeaking) {
+						moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE, new ReaderView.MoveSelectionCallback() {
+							@Override
+							public void onNewSelection(Selection selection) {
+								ttsbinder.say(preprocessUtterance(selection.text), null);
+							}
+
+							@Override
+							public void onFail() {
+							}
+						});
 					} else {
-						if ( isSpeaking )
-							moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
+						moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE, null);
 					}
-				});
-			} else {
-				mTTS.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-					@Override
-					public void onStart(String utteranceId) {
-						// nothing...
-					}
+				}
 
-					@Override
-					public void onDone(String utteranceId) {
-						if (null != mOnStopRunnable) {
-							mOnStopRunnable.run();
-							mOnStopRunnable = null;
-						} else {
-							if ( isSpeaking )
-								moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
-						}
-						mContinuousErrors = 0;
-					}
-
-					@Override
-					public void onError(String utteranceId) {
-						log.e("TTS error");
-						mContinuousErrors++;
-						if (mContinuousErrors > MAX_CONTINUOUS_ERRORS) {
-							BackgroundThread.instance().executeGUI(() -> {
-								toggleStartStop();
-								mCoolReader.showToast(R.string.tts_failed);
-							});
-						} else {
-							if (null != mOnStopRunnable) {
-								mOnStopRunnable.run();
-								mOnStopRunnable = null;
-							} else {
-								if ( isSpeaking )
-									moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
+				@Override
+				public void onPreviousSentenceRequested(TTSControlBinder ttsbinder) {
+					if (isSpeaking) {
+						moveSelection(ReaderCommand.DCMD_SELECT_PREV_SENTENCE, new ReaderView.MoveSelectionCallback() {
+							@Override
+							public void onNewSelection(Selection selection) {
+								ttsbinder.say(preprocessUtterance(selection.text), null);
 							}
-						}
-					}
 
-					// API 21
-					@Override
-					public void onError(String utteranceId, int errorCode) {
-						log.e("TTS error, code=" + errorCode);
-						mContinuousErrors++;
-						if (mContinuousErrors > MAX_CONTINUOUS_ERRORS) {
-							BackgroundThread.instance().executeGUI(() -> {
-								toggleStartStop();
-								mCoolReader.showToast(R.string.tts_failed);
-							});
-						} else {
-							if (null != mOnStopRunnable) {
-								mOnStopRunnable.run();
-								mOnStopRunnable = null;
-							} else {
-								if ( isSpeaking )
-									moveSelection( ReaderCommand.DCMD_SELECT_NEXT_SENTENCE );
+							@Override
+							public void onFail() {
 							}
-						}
+						});
+					} else {
+						moveSelection(ReaderCommand.DCMD_SELECT_PREV_SENTENCE, null);
 					}
+				}
 
-					// API 23
-					@Override
-					public void onStop(String utteranceId, boolean interrupted) {
-						if (null != mOnStopRunnable) {
-							mOnStopRunnable.run();
-							mOnStopRunnable = null;
-						}
-					}
-
-					// API 24
-					public void onAudioAvailable(String utteranceId, byte[] audio) {
-						// nothing...
-					}
-
-					// API 24
-					public void onBeginSynthesis(String utteranceId,
-												 int sampleRateInHz,
-												 int audioFormat,
-												 int channelCount) {
-						// nothing...
-					}
-				});
-			}
-		}
+				@Override
+				public void onStopRequested(TTSControlBinder ttsbinder) {
+					stopAndClose();
+				}
+			});
+		});
 	}
 
 	private void updateSaveButtons() {
@@ -922,29 +612,30 @@ public class TTSToolbarDlg implements Settings {
 			else mLoadSpeed2.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed2)));
 		if (speed3 == -1) mLoadSpeed3.setText("?");
 			else mLoadSpeed3.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed3)));
-		if (vol1 == -1) mLoadVol1.setText("?");
-			else mLoadVol1.setText(String.format(Locale.getDefault(), "%d", vol1));
-		if (vol2 == -1) mLoadVol2.setText("?");
-			else mLoadVol2.setText(String.format(Locale.getDefault(), "%d", vol2));
-		if (vol3 == -1) mLoadVol3.setText("?");
-			else mLoadVol3.setText(String.format(Locale.getDefault(), "%d", vol3));
+		mLoadVol1.setText("?");
+		mLoadVol2.setText("?");
+		mLoadVol3.setText("?");
+		if (mSbVolume != null) {
+			int seekbarMax = mSbVolume.getMax();
+			if (seekbarMax > 0) {
+				if (vol1 != -1)
+					mLoadVol1.setText(String.format(Locale.getDefault(), "%d", 100 * vol1 / seekbarMax));
+				if (vol2 != -1)
+					mLoadVol2.setText(String.format(Locale.getDefault(), "%d", 100 * vol2 / seekbarMax));
+				if (vol3 != -1)
+					mLoadVol3.setText(String.format(Locale.getDefault(), "%d", 100 * vol3 / seekbarMax));
+			}
+		}
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
-	public TTSToolbarDlg(CoolReader coolReader, ReaderView readerView, TextToSpeech tts) {
+	public TTSToolbarDlg(CoolReader coolReader, ReaderView readerView, TTSControlServiceAccessor ttsacc) {
 		mCoolReader = coolReader;
-        mLogFileRoot = mCoolReader.getSettingsFileF(0).getParent() + "/";
-        mForceTTSKoef = readerView.getSettings().getInt(Settings.PROP_APP_TTS_FORCE_KOEF, 0);
         mReaderView = readerView;
+		mTTSControl = ttsacc;
 		View anchor = readerView.getSurface();
-		mTTS = tts;
 		themeColors = Utils.getThemeColors(coolReader, isEInk);
-		setupTTSHandlers();
 		Context context = anchor.getContext();
-
-		mTimerHandler = new HandlerThread("TimerHandler");
-		mTimerHandler.start();
-		new TimerHandler(this, mCoolReader, mTimerHandler, 5000);
 
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGray = themeColors.get(R.attr.colorThemeGray2);
@@ -958,20 +649,18 @@ public class TTSToolbarDlg implements Settings {
 		lblMotionWd = mPanel.findViewById(R.id.lbl_motion_wd);
 		lblMotionWd.setText(R.string.wd_sett);
 		lblMotionWd.setPaintFlags(lblMotionWd.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-		lblMotionWd.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, mTTS));
+		lblMotionWd.setOnClickListener(
+				v -> mTTSControl.bind(ttsbinder -> {
+					mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, ttsbinder);
+				})
+		);
 		mPlayPauseButton = mPanel.findViewById(R.id.tts_play_pause);
 		mPlayPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
 				//R.drawable.ic_media_play
 		);
 		mPlayPauseButton.setBackgroundDrawable(c);
-		mPlayPauseButtonEll = mPanel.findViewById(R.id.tts_play_pause_ell);
-		mPlayPauseButtonEll.setImageResource(
-				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_ell, R.drawable.icons8_play_ell)
-				//R.drawable.ic_media_play
-		);
-		mPlayPauseButtonEll.setBackgroundDrawable(c);
-		mPanel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
 		ImageButton backButton = mPanel.findViewById(R.id.tts_back);
 		ImageButton forwardButton = mPanel.findViewById(R.id.tts_forward);
 		ImageButton stopButton = mPanel.findViewById(R.id.tts_stop);
@@ -979,29 +668,80 @@ public class TTSToolbarDlg implements Settings {
 		mWindow = new PopupWindow(anchor.getContext());
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 		mPlayPauseButton.setBackgroundDrawable(c);
-		mPlayPauseButton.setOnClickListener(v -> toggleStartStopExt(false));
-		mPlayPauseButtonEll.setOnClickListener(v -> toggleStartStopExt(true));
-		mPlayPauseButton.setOnLongClickListener(v -> {
-			mCoolReader.tts = null;
-			mCoolReader.ttsInitialized = false;
-			mCoolReader.showToast("Re-initializing TTS");
-			return true;
-		});
-		mPlayPauseButtonEll.setOnLongClickListener(v -> {
-			mCoolReader.tts = null;
-			mCoolReader.ttsInitialized = false;
-			mCoolReader.showToast("Re-initializing TTS");
-			return true;
-		});
+		mPlayPauseButton.setOnClickListener(
+				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE)));
 		backButton.setBackgroundDrawable(c);
-		backButton.setOnClickListener(v -> jumpToSentence(ReaderCommand.DCMD_SELECT_PREV_SENTENCE));
+		backButton.setOnClickListener(
+				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PREV)));
 		forwardButton.setBackgroundDrawable(c);
-		forwardButton.setOnClickListener(v -> jumpToSentence(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE));
+		forwardButton.setOnClickListener(
+				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_NEXT)));
 		stopButton.setBackgroundDrawable(c);
 		stopButton.setOnClickListener(v -> stopAndClose());
 		ImageButton optionsButton = mPanel.findViewById(R.id.tts_options);
 		optionsButton.setBackgroundDrawable(c);
-		optionsButton.setOnClickListener(v -> mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, mTTS));
+		optionsButton.setOnClickListener(
+		v -> mTTSControl.bind(ttsbinder -> {
+			mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, ttsbinder);
+		}));
+
+		// setup speed && volume seek bars
+		mVolumeTextView = mPanel.findViewById(R.id.tts_lbl_volume);
+		mSpeedTextView = mPanel.findViewById(R.id.tts_lbl_speed);
+		mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), speechRateFromPercent(50)));
+
+		mSbSpeed = mPanel.findViewById(R.id.tts_sb_speed);
+		mSbVolume = mPanel.findViewById(R.id.tts_sb_volume);
+
+		btnDecVolume = mPanel.findViewById(R.id.btn_vol_down);
+		btnIncVolume = mPanel.findViewById(R.id.btn_vol_up);
+		btnDecSpeed = mPanel.findViewById(R.id.btn_freq_down);
+		btnIncSpeed = mPanel.findViewById(R.id.btn_freq_up);
+		btnDecVolume.setBackgroundDrawable(c);
+		btnIncVolume.setBackgroundDrawable(c);
+		btnDecSpeed.setBackgroundDrawable(c);
+		btnIncSpeed.setBackgroundDrawable(c);
+
+		mSbSpeed.setMax(100);
+		mSbSpeed.setProgress(50);
+		mSbVolume.setMax(100);
+		mSbVolume.setProgress(0);
+
+		btnDecSpeed.setOnTouchListener(new RepeatOnTouchListener(500, 150, view -> {
+			mSbSpeed.setProgress(mSbSpeed.getProgress() - 1);
+			mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mSbSpeed.getProgress()), true);
+		}));
+		btnIncSpeed.setOnTouchListener(new RepeatOnTouchListener(500, 150, view -> {
+			mSbSpeed.setProgress(mSbSpeed.getProgress() + 1);
+			mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mSbSpeed.getProgress()), true);
+		}));
+
+		mSbSpeed.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			int mProgress;
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				mProgress = progress;
+				float rate = speechRateFromPercent(progress);
+				mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), rate));
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
+			}
+		});
+
+		btnDecVolume.setOnTouchListener(new RepeatOnTouchListener(500, 150, view ->
+				mSbVolume.setProgress(mSbVolume.getProgress() - 1)));
+		btnIncVolume.setOnTouchListener(new RepeatOnTouchListener(500, 150, view ->
+				mSbVolume.setProgress(mSbVolume.getProgress() + 1)));
+
+		mCoolReader.tintViewIcons(mPanel);
+
 		mPanel.setFocusable(true);
 		mPanel.setEnabled(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
@@ -1017,16 +757,16 @@ public class TTSToolbarDlg implements Settings {
 			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
 				switch ( keyCode ) {
 				case KeyEvent.KEYCODE_VOLUME_DOWN: {
-					int p = mSbVolume.getProgress() - 5;
+					int p = mSbVolume.getProgress() - 1;
 					if ( p<0 )
 						p = 0;
 					mSbVolume.setProgress(p);
 					return true;
 				}
 				case KeyEvent.KEYCODE_VOLUME_UP:
-					int p = mSbVolume.getProgress() + 5;
-					if ( p>100 )
-						p = 100;
+					int p = mSbVolume.getProgress() + 1;
+					if ( p > mSbVolume.getMax() )
+						p = mSbVolume.getMax();
 					mSbVolume.setProgress(p);
 					return true;
 				}
@@ -1051,12 +791,14 @@ public class TTSToolbarDlg implements Settings {
 			} else {
 				mReaderView.skipFallbackWarning = true;
 				mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_1, mTTSSpeedPercent);
+				mCoolReader.showToast(R.string.value_saved);
 				updateSaveButtons();
 			}
 		});
 		mLoadSpeed1.setOnLongClickListener((v) -> {
 			mReaderView.skipFallbackWarning = true;
 			mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_1, mTTSSpeedPercent);
+			mCoolReader.showToast(R.string.value_saved);
 			updateSaveButtons();
 			return true;
 		});
@@ -1068,12 +810,14 @@ public class TTSToolbarDlg implements Settings {
 			} else {
 				mReaderView.skipFallbackWarning = true;
 				mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_2, mTTSSpeedPercent);
+				mCoolReader.showToast(R.string.value_saved);
 				updateSaveButtons();
 			}
 		});
 		mLoadSpeed2.setOnLongClickListener((v) -> {
 			mReaderView.skipFallbackWarning = true;
 			mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_2, mTTSSpeedPercent);
+			mCoolReader.showToast(R.string.value_saved);
 			updateSaveButtons();
 			return true;
 		});
@@ -1085,12 +829,14 @@ public class TTSToolbarDlg implements Settings {
 			} else {
 				mReaderView.skipFallbackWarning = true;
 				mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_3, mTTSSpeedPercent);
+				mCoolReader.showToast(R.string.value_saved);
 				updateSaveButtons();
 			}
 		});
 		mLoadSpeed3.setOnLongClickListener((v) -> {
 			mReaderView.skipFallbackWarning = true;
 			mCoolReader.settings().setInt(PROP_APP_TTS_SPEED_3, mTTSSpeedPercent);
+			mCoolReader.showToast(R.string.value_saved);
 			updateSaveButtons();
 			return true;
 		});
@@ -1103,14 +849,20 @@ public class TTSToolbarDlg implements Settings {
 				mSbVolume.setProgress(vol);
 			else {
 				mReaderView.skipFallbackWarning = true;
-				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_1, mCoolReader.getVolume());
-				updateSaveButtons();
+				mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+					mCoolReader.settings().setInt(PROP_APP_TTS_VOL_1, current);
+					mCoolReader.showToast(R.string.value_saved);
+					updateSaveButtons();
+				}));
 			}
 		});
 		mLoadVol1.setOnLongClickListener((v) -> {
 			mReaderView.skipFallbackWarning = true;
-			mCoolReader.settings().setInt(PROP_APP_TTS_VOL_1, mCoolReader.getVolume());
-			updateSaveButtons();
+			mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_1, current);
+				mCoolReader.showToast(R.string.value_saved);
+				updateSaveButtons();
+			}));
 			return true;
 		});
 		mLoadVol2.setOnClickListener((v) -> {
@@ -1119,14 +871,20 @@ public class TTSToolbarDlg implements Settings {
 				mSbVolume.setProgress(vol);
 			else {
 				mReaderView.skipFallbackWarning = true;
-				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_2, mCoolReader.getVolume());
-				updateSaveButtons();
+				mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+					mCoolReader.settings().setInt(PROP_APP_TTS_VOL_2, current);
+					mCoolReader.showToast(R.string.value_saved);
+					updateSaveButtons();
+				}));
 			}
 		});
 		mLoadVol2.setOnLongClickListener((v) -> {
 			mReaderView.skipFallbackWarning = true;
-			mCoolReader.settings().setInt(PROP_APP_TTS_VOL_2, mCoolReader.getVolume());
-			updateSaveButtons();
+			mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_2, current);
+				mCoolReader.showToast(R.string.value_saved);
+				updateSaveButtons();
+			}));
 			return true;
 		});
 		mLoadVol3.setOnClickListener((v) -> {
@@ -1135,24 +893,30 @@ public class TTSToolbarDlg implements Settings {
 				mSbVolume.setProgress(vol);
 			else {
 				mReaderView.skipFallbackWarning = true;
-				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_3, mCoolReader.getVolume());
+				mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+					mCoolReader.settings().setInt(PROP_APP_TTS_VOL_3, current);
+					mCoolReader.showToast(R.string.value_saved);
+				}));
 				updateSaveButtons();
 			}
 		});
 		mLoadVol3.setOnLongClickListener((v) -> {
 			mReaderView.skipFallbackWarning = true;
-			mCoolReader.settings().setInt(PROP_APP_TTS_VOL_3, mCoolReader.getVolume());
-			updateSaveButtons();
+			mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+				mCoolReader.settings().setInt(PROP_APP_TTS_VOL_3, current);
+				mCoolReader.showToast(R.string.value_saved);
+				updateSaveButtons();
+			}));
 			return true;
 		});
-		updateSaveButtons();
 		mLoadVol1.setBackgroundDrawable(c);
 		mLoadVol2.setBackgroundDrawable(c);
 		mLoadVol3.setBackgroundDrawable(c);
 
+		mPanel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
 		mWindow.setOnDismissListener(() -> {
-			mBookCover = Bitmap.createBitmap(COVER_WIDTH, COVER_HEIGHT, Bitmap.Config.RGB_565);
-			if (!mClosed)
+			if ( !mClosed)
 				stopAndClose();
 		});
 
@@ -1177,112 +941,67 @@ public class TTSToolbarDlg implements Settings {
 
 		setReaderMode();
 
-		// setup speed && volume seek bars
-		int volume = mCoolReader.getVolume();
-		mVolumeTextView = mPanel.findViewById(R.id.tts_lbl_volume);
-		mVolumeTextView.setText(String.format(Locale.getDefault(), "%s (%d%%)", context.getString(R.string.tts_volume), volume));
-		mSpeedTextView = mPanel.findViewById(R.id.tts_lbl_speed);
-		mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), speechRateFromPercent(50)));
-
-		mSbSpeed = mPanel.findViewById(R.id.tts_sb_speed);
-		mSbVolume = mPanel.findViewById(R.id.tts_sb_volume);
-
-		ivVolDown = mPanel.findViewById(R.id.btn_vol_down);
-		ivVolUp = mPanel.findViewById(R.id.btn_vol_up);
-		ivFreqDown = mPanel.findViewById(R.id.btn_freq_down);
-		ivFreqUp = mPanel.findViewById(R.id.btn_freq_up);
-		ivVolDown.setBackgroundDrawable(c);
-		ivVolUp.setBackgroundDrawable(c);
-		ivFreqDown.setBackgroundDrawable(c);
-		ivFreqUp.setBackgroundDrawable(c);
-
-		mSbSpeed.setMax(100);
-		mSbSpeed.setProgress(50);
-		mSbVolume.setMax(100);
-		mSbVolume.setProgress(volume);
-
-		ivFreqDown.setOnTouchListener(new RepeatOnTouchListener(500, 150, view -> {
-			mSbSpeed.setProgress(mSbSpeed.getProgress() - 1);
-			mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
-		}));
-		ivFreqUp.setOnTouchListener(new RepeatOnTouchListener(500, 150, view -> {
-			mSbSpeed.setProgress(mSbSpeed.getProgress() + 1);
-			mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
-		}));
-
-		mSbSpeed.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				mTTSSpeedPercent = progress;
-				mTTS.setSpeechRate(speechRateFromPercent(mTTSSpeedPercent));
-				mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), speechRateFromPercent(progress)));
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mTTSSpeedPercent), true);
-			}
-		});
-
-		ivVolDown.setOnTouchListener(new RepeatOnTouchListener(500, 150, view -> mSbVolume.setProgress(mSbVolume.getProgress() - 1)));
-		ivVolUp.setOnTouchListener(new RepeatOnTouchListener(500, 150, view -> mSbVolume.setProgress(mSbVolume.getProgress() + 1)));
-
-		mSbVolume.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				mCoolReader.setVolume(progress);
-				mVolumeTextView.setText(String.format(Locale.getDefault(), "%s (%d%%)", context.getString(R.string.tts_volume), progress));
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-			}
-		});
-		mCoolReader.tintViewIcons(mPanel);
-		//mPanel.requestFocus();
-		BookInfo bookInfo = mReaderView.getBookInfo();
-		if (null != bookInfo) {
-			FileInfo fileInfo = bookInfo.getFileInfo();
-			if (null != fileInfo) {
-				mBookTitle = fileInfo.title;
-				// set language for TTS based on book's language
-				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), fileInfo, mBookCover,
-						(file, bitmap) -> {
-							mBookCover = bitmap;
-							runInTTSControlService(tts1 -> tts1.notifyStartMediaSession(bookInfo, bitmap));
-						}
-				);
-			}
-		}
 		if (null == mBookTitle)
 			mBookTitle = "";
+		if (null == mBookAuthors)
+			mBookAuthors = "";
+		if (null == mBookLanguage) {
+			log.e("Failed to detect book's language!");
+		}
 		// Start the foreground service to make this app also foreground,
 		// even if the main activity is in the background.
 		// https://developer.android.com/about/versions/oreo/background#services
-		Intent intent = new Intent(coolReader, TTSControlService.class);
+		Intent intent = new Intent(TTSControlService.TTS_CONTROL_ACTION_PREPARE, Uri.EMPTY, coolReader, TTSControlService.class);
 		Bundle data = new Bundle();
+		data.putString("bookAuthors", mBookAuthors);
 		data.putString("bookTitle", mBookTitle);
 		intent.putExtras(data);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 			coolReader.startForegroundService(intent);
 		else
 			coolReader.startService(intent);
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE);
-		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_NEXT);
-		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_PREV);
-		filter.addAction(TTSControlService.TTS_CONTROL_ACTION_DONE);
-		mCoolReader.registerReceiver(mTTSControlButtonReceiver, filter);
+
 		mPanel.requestFocus();
+
+		// All tasks bellow after service start
+		// Fetch book's metadata
+		BookInfo bookInfo = mReaderView.getBookInfo();
+		if (null != bookInfo) {
+			FileInfo fileInfo = bookInfo.getFileInfo();
+			if (null != fileInfo) {
+				mBookAuthors = fileInfo.authors;
+				mBookTitle = fileInfo.title;
+				mBookLanguage = fileInfo.language;
+				mBookCover = Bitmap.createBitmap(MEDIA_COVER_WIDTH, MEDIA_COVER_HEIGHT, Bitmap.Config.RGB_565);
+				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), fileInfo, mBookCover, true,
+						(file, bitmap) -> mTTSControl.bind(ttsbinder -> ttsbinder.setMediaItemInfo(mBookAuthors, mBookTitle, bitmap)));
+			}
+		}
+		// Show volume
+		mTTSControl.bind(ttsbinder -> ttsbinder.retrieveVolume((current, max) -> {
+			mSbVolume.setMax(max);
+			mSbVolume.setProgress(current);
+			updateSaveButtons();
+		}));
+		mSbVolume.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+										  boolean fromUser) {
+				if (mSbVolume.getMax() < 1)
+					return;
+				mTTSControl.bind(ttsbinder -> ttsbinder.setVolume(progress));
+				mVolumeTextView.setText(String.format(Locale.getDefault(), "%s (%d%%)", context.getString(R.string.tts_volume), 100*progress/seekBar.getMax()));
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
+		});
+		// And finally, setup status change handler
+		setupSpeechStatusHandler();
 	}
 }

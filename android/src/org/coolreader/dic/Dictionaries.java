@@ -64,6 +64,7 @@ public class Dictionaries {
 	public static final String GRAMOTA_RU_ONLINE = "http://www.gramota.ru/slovari/dic?lop=x&bts=x&ro=x&zar=x&ag=x&ab=x&sin=x&lv=x&az=x&pe=x";
 	public static final String GLOSBE_ONLINE = "https://glosbe.com/{src_lang}/{dst_lang}/";
 	public static final String TURENG_ONLINE = "https://tureng.com/en/{langpair}";
+	public static final String URBAN_ONLINE = "https://urbandictionary.com/define.php";
 
 	public static DeeplTranslate deeplTranslate = null;
 	public static DictCCTranslate dictCCTranslate = null;

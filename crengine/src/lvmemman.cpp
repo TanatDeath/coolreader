@@ -15,6 +15,7 @@
 #include "../include/lvmemman.h"
 #include "../include/lvref.h"
 #include "../include/lvtinydom.h"
+#include "../include/lvstreamutils.h"
 #include "../include/crlog.h"
 
 #ifdef _LINUX
@@ -39,7 +40,7 @@ void crSetFileToRemoveOnFatalError(const char * filename) {
 #ifdef _LINUX
 static struct sigaction old_sa[NSIG];
 
-#if FOR_ANDROID == 1
+#ifdef ANDROID
 //#define ANDROID_BACKTRACE
 #endif
 

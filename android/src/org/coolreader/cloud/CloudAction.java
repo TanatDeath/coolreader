@@ -600,10 +600,11 @@ public class CloudAction {
                         FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
                         if (dir == null)
                             dir = downloadDir;
-                        Services.getScanner().listDirectory(dir);
+                        FileInfo item1 = dir.findItemByPathName(fBook.getAbsolutePath());
+                        if (item1 == null) Services.getScanner().listDirectory(dir);
                         final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
                         final File fPath = new File(downloadDir.pathname+"/Dropbox");
-                        ExternalDocCameDialog.tryToMoveThenOpen(cr, fBook.getAbsolutePath(),
+                        ExternalDocCameDialog.tryToMoveThenOpen("", cr, fBook.getAbsolutePath(),
                                 fPath.getAbsolutePath(), "");
 //                        FileInfo item = dir.findItemByPathName(fBook.getAbsolutePath());
 //                        if (item != null)
@@ -724,10 +725,13 @@ public class CloudAction {
                                 FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
                                 if (dir == null)
                                     dir = downloadDir;
-                                Services.getScanner().listDirectory(dir);
+
+                                FileInfo item1 = dir.findItemByPathName(fBook.getAbsolutePath());
+                                if (item1 == null) Services.getScanner().listDirectory(dir);
+
                                 final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
                                 final File fPath = new File(downloadDir.pathname+"/YandexDisc");
-                                ExternalDocCameDialog.tryToMoveThenOpen(cr, fBook.getAbsolutePath(),
+                                ExternalDocCameDialog.tryToMoveThenOpen("", cr, fBook.getAbsolutePath(),
                                         fPath.getAbsolutePath(), "");
 //                                if (item != null)
 //                                    cr.loadDocument(item, true);

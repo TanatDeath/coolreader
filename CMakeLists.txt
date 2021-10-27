@@ -46,7 +46,7 @@ if(MSVC)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Update if necessary
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-long-long -pedantic -std=gnu11 -fPIC -Wno-misleading-indentation")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -std=c++11 -fPIC -Wno-misleading-indentation -Wno-reorder")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -std=c++11 -fPIC -Wno-misleading-indentation -Wno-reorder -Wno-format-overflow")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fomit-frame-pointer")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
 endif()
@@ -134,6 +134,8 @@ endif (NOT DEFINED ENABLE_DBUS_VIEWER_EVENTS)
 SET (CRGUI_DEFS -DCOLOR_BACKBUFFER=0 -DLDOM_USE_OWN_MEM_MAN=0 -DGRAY_BACKBUFFER_BITS=${GRAY_BACKBUFFER_BITS}
 	  -DENABLE_DBUS_VIEWER_EVENTS=${ENABLE_DBUS_VIEWER_EVENTS})
 SET (DESKTOP_DEFS -DCOLOR_BACKBUFFER=1 -DLDOM_USE_OWN_MEM_MAN=1 -DUSE_FREETYPE=1 )
+# Uncomment to test e-ink style color palette on Desktop
+#SET (DESKTOP_DEFS -DCOLOR_BACKBUFFER=0 -DGRAY_BACKBUFFER_BITS=4 -DLDOM_USE_OWN_MEM_MAN=1 -DUSE_FREETYPE=1 )
 
 if( ${GUI} STREQUAL QT )
 FIND_PACKAGE( Qt4 REQUIRED )
@@ -213,6 +215,7 @@ endif(NOT MAC)
 
 if (NOT ${GUI} STREQUAL FB2PROPS )
 if (NOT MAC)
+
 if (NOT MSVC AND NOT CR3_PNG)
 FIND_PACKAGE(PNG)
 endif (NOT MSVC AND NOT CR3_PNG)
@@ -237,8 +240,8 @@ if (NOT JPEG_FOUND)
 endif (NOT JPEG_FOUND)
 
 if (NOT MSVC AND NOT CR3_FREETYPE)
-FIND_PACKAGE(Freetype)
-FIND_PACKAGE(HarfBuzz)
+FIND_PACKAGE(Freetype 2.10.0)
+FIND_PACKAGE(HarfBuzz 2.6.0)
 endif (NOT MSVC AND NOT CR3_FREETYPE)
 
 ADD_SUBDIRECTORY(thirdparty_unman/qimagescale)
@@ -246,14 +249,19 @@ ADD_SUBDIRECTORY(thirdparty_unman/qimagescale)
 if (NOT FREETYPE_FOUND)
   message("System FREETYPE not found, will build local one\n")
   if (NOT HarfBuzz_FOUND)
-	SET(HARFBUZZ_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${REPO_HARFBUZZ_SRCDIR}/src CACHE PATH "" FORCE)
-	SET(HARFBUZZ_LIBRARIES harfbuzz)
+    SET(HarfBuzz_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${REPO_HARFBUZZ_SRCDIR}/src CACHE PATH "" FORCE)
+    SET(HarfBuzz_INCLUDE_DIRS ${HarfBuzz_INCLUDE_DIR} CACHE PATH "" FORCE)
+    SET(HarfBuzz_LIBRARIES harfbuzz CACHE PATH "" FORCE)
+    SET(HARFBUZZ_INCLUDE_DIR ${HarfBuzz_INCLUDE_DIR} CACHE PATH "" FORCE)
+    SET(HARFBUZZ_INCLUDE_DIRS ${HarfBuzz_INCLUDE_DIRS} CACHE PATH "" FORCE)
+    SET(HARFBUZZ_LIBRARIES ${HarfBuzz_LIBRARIES} CACHE PATH "" FORCE)
   endif (NOT HarfBuzz_FOUND)
   SET(FT_WITH_ZLIB ON CACHE BOOL "Use system zlib instead of internal library." FORCE)
   SET(FT_WITH_PNG ON CACHE BOOL "Support PNG compressed OpenType embedded bitmaps." FORCE)
   SET(ZLIB_LIBRARY ${ZLIB_LIBRARIES})
   SET(PNG_PNG_INCLUDE_DIR ${PNG_INCLUDE_DIR} CACHE PATH "" FORCE)
   SET(PNG_LIBRARY ${PNG_LIBRARIES})
+  SET(SKIP_INSTALL_ALL ON CACHE BOOL "Don't install anything" FORCE)
   ADD_SUBDIRECTORY(thirdparty/${REPO_FREETYPE_SRCDIR})
   SET(FREETYPE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${REPO_FREETYPE_SRCDIR}/include CACHE PATH "" FORCE)
   SET(FREETYPE_LIBRARIES freetype)
@@ -264,25 +272,24 @@ if (NOT HarfBuzz_FOUND)
   SET(HB_HAVE_FREETYPE ON CACHE BOOL "Enable freetype interop helpers" FORCE)
   SET(HB_BUILD_TESTS OFF CACHE BOOL "Build harfbuzz tests" FORCE)
   SET(FREETYPE_LIBRARY ${FREETYPE_LIBRARIES})
+  SET(SKIP_INSTALL_ALL ON CACHE BOOL "Don't install anything" FORCE)
   ADD_SUBDIRECTORY(thirdparty/${REPO_HARFBUZZ_SRCDIR})
-  SET(HARFBUZZ_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${REPO_HARFBUZZ_SRCDIR}/src CACHE PATH "" FORCE)
-  SET(HARFBUZZ_LIBRARY harfbuzz)
+  SET(HarfBuzz_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${REPO_HARFBUZZ_SRCDIR}/src CACHE PATH "" FORCE)
+  SET(HarfBuzz_LIBRARY harfbuzz)
 endif (NOT HarfBuzz_FOUND)
 
 if (NOT MSVC)
-	find_package(FontConfig)
+	find_package(FontConfig 2.11.0)
 endif(NOT MSVC)
 
 if (FONTCONFIG_FOUND)
-	message("System FontConfig found")
 	set(DESKTOP_DEFS ${DESKTOP_DEFS} -DUSE_FONTCONFIG=1)
 else()
-	message("System FontConfig not found")
 	set(DESKTOP_DEFS ${DESKTOP_DEFS} -DUSE_FONTCONFIG=0)
 endif (FONTCONFIG_FOUND)
 
 if (NOT MSVC)
-find_package(FriBidi)
+find_package(FriBidi 1.0.0)
 if (NOT FRIBIDI_FOUND)
   message("System FriBidi not found, will build local one\n")
   ADD_SUBDIRECTORY(thirdparty/${REPO_FRIBIDI_SRCDIR})
@@ -294,7 +301,7 @@ endif(NOT MSVC)
 
 
 if (NOT MSVC)
-	find_package(libunibreak)
+	find_package(libunibreak 4.0)
 endif(NOT MSVC)
 
 if (NOT LIBUNIBREAK_FOUND)
@@ -304,6 +311,28 @@ if (NOT LIBUNIBREAK_FOUND)
   SET(LIBUNIBREAK_LIBRARIES unibreak)
 endif (NOT LIBUNIBREAK_FOUND)
 
+find_package(ZSTD 1.4.0)
+if (NOT ZSTD_FOUND)
+    message("\nSystem zstd not found, will build local one\n")
+    set(ZSTD_LEGACY_SUPPORT OFF CACHE BOOL "LEGACY SUPPORT" FORCE)
+    set(ZSTD_MULTITHREAD_SUPPORT OFF CACHE BOOL "MULTITHREADING SUPPORT" FORCE)
+    set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "BUILD PROGRAMS" FORCE)
+    set(ZSTD_BUILD_CONTRIB OFF CACHE BOOL "BUILD CONTRIB" FORCE)
+    set(ZSTD_BUILD_TESTS OFF CACHE BOOL "BUILD TESTS" FORCE)
+    set(ZSTD_BUILD_STATIC ON CACHE BOOL "BUILD STATIC LIBRARIES" FORCE)
+    set(ZSTD_BUILD_SHARED OFF CACHE BOOL "BUILD SHARED LIBRARIES" FORCE)
+    add_subdirectory(thirdparty/${REPO_ZSTD_SRCDIR}/build/cmake)
+    SET(ZSTD_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${REPO_ZSTD_SRCDIR}/lib CACHE PATH "Include directories needed to use ZSTD" FORCE)
+    SET(ZSTD_LIBRARIES libzstd_static CACHE FILEPATH "Libraries needed to link to ZSTD" FORCE)
+endif(NOT ZSTD_FOUND)
+
+find_package(utf8proc)
+
+if (UTF8PROC_FOUND)
+	set(DESKTOP_DEFS ${DESKTOP_DEFS} -DUSE_UTF8PROC=1)
+else()
+	set(DESKTOP_DEFS ${DESKTOP_DEFS} -DUSE_UTF8PROC=0)
+endif (UTF8PROC_FOUND)
 
 endif (NOT MAC)
 
@@ -332,11 +361,12 @@ INCLUDE_DIRECTORIES(
   ${JPEG_INCLUDE_DIR}
   ${ZLIB_INCLUDE_DIR}
   ${FREETYPE_INCLUDE_DIRS}
-  ${HARFBUZZ_INCLUDE_DIR}
+  ${HarfBuzz_INCLUDE_DIRS}
   ${ANTIWORD_INCLUDE_DIR}
   ${CHM_INCLUDE_DIR}
   ${FRIBIDI_INCLUDE_DIR}
   ${LIBUNIBREAK_INCLUDE_DIR}
+  ${ZSTD_INCLUDE_DIRS}
 )
 
 if ( ${GUI} STREQUAL FB2PROPS )
@@ -347,7 +377,7 @@ else()
 SET(STD_LIBS
   ${JPEG_LIBRARIES}
   ${FREETYPE_LIBRARIES}
-  ${HARFBUZZ_LIBRARY}
+  ${HarfBuzz_LIBRARY}
   ${PNG_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${CHM_LIBRARIES}
@@ -355,11 +385,15 @@ SET(STD_LIBS
   ${ANTIWORD_LIBRARIES}
   ${FRIBIDI_LIBRARIES}
   ${LIBUNIBREAK_LIBRARIES}
+  ${ZSTD_LIBRARIES}
   qimagescale
 )
 if (FONTCONFIG_FOUND)
 	set(STD_LIBS ${STD_LIBS} ${FONTCONFIG_LIBRARIES})
 endif (FONTCONFIG_FOUND)
+if (UTF8PROC_FOUND)
+	set(STD_LIBS ${STD_LIBS} ${UTF8PROC_LIBRARIES})
+endif (UTF8PROC_FOUND)
 include_directories(${FT_INCLUDE_PATH})
 endif ( ${GUI} STREQUAL FB2PROPS )
 
@@ -371,8 +405,6 @@ message("Will make tinydict library - .dict format support")
 ADD_SUBDIRECTORY(tinydict)
 endif ( NOT ${GUI} STREQUAL FB2PROPS )
 
-
-include(FindPkgConfig)
 
 if ( ${GUI} STREQUAL CRGUI_XCB )
   message("Will make CR3GUI for XCB")
@@ -424,14 +456,10 @@ elseif ( ${GUI} STREQUAL WX )
   message("Will make CR3/WX")
   ADD_DEFINITIONS( ${DESKTOP_DEFS} -DCR_WX_SUPPORT=1 )
   SET(wxWidgets_USE_LIBS base core )
-  FIND_PACKAGE(wxWidgets 2.8)
-  IF (wxWidgets_FOUND)
-	INCLUDE(${wxWidgets_USE_FILE})
-	include_directories( ${wxWidgets_INCLUDE_DIRS} )
-	message( "WX include: ${wxWidgets_INCLUDE_DIRS}" )
-  ELSE (wxWidgets_FOUND)
-	message("wxWidgets library not found!")
-  ENDIF (wxWidgets_FOUND)
+  FIND_PACKAGE(wxWidgets 2.8 REQUIRED)
+  INCLUDE(${wxWidgets_USE_FILE})
+  include_directories( ${wxWidgets_INCLUDE_DIRS} )
+  message( "WX include: ${wxWidgets_INCLUDE_DIRS}" )
   ADD_SUBDIRECTORY(crengine)
   ADD_SUBDIRECTORY(cr3wx)
 elseif ( ${GUI} STREQUAL CRGUI_PB )

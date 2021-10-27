@@ -170,6 +170,7 @@ public interface Settings {
     public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
     public static final String PROP_APP_SCREEN_BACKLIGHT_NIGHT ="app.screen.backlight.night";
     public static final String PROP_APP_DOUBLE_TAP_SELECTION     ="app.controls.doubletap.selection";
+	public static final String PROP_APP_BOUNCE_TAP_INTERVAL   ="app.controls.bounce.interval";
     public static final String PROP_APP_TAP_ZONE_ACTIONS_TAP     ="app.tapzone.action.tap";
     public static final String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
     public static final String PROP_APP_TRACKBALL_DISABLED    ="app.trackball.disabled";
@@ -287,6 +288,7 @@ public interface Settings {
 	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_STATE = "app.browser.sec.group.state";
 	public static final String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD = "app.browser.authors.aliases.load";
 	public static final String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED = "app.browser.authors.aliases.enabled";
+	public static final String PROP_APP_EXT_DOC_CAME_TIMEOUT = "app.ext.doc.came.timeout";
 
     public static final String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
     public static final String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";
@@ -329,6 +331,7 @@ public interface Settings {
 	String PROP_APP_TTS_USE_DOC_LANG = "app.tts.use.doc.lang";		// The TTS language is set according to the language of the book.
 	String PROP_APP_TTS_FORCE_LANGUAGE = "app.tts.force.lang";		// Force use specified language
 	String PROP_APP_TTS_VOICE = "app.tts.voice";
+	String PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR = "app.tts.google.end-of-sentence-abbreviation.workaround";	// Use a workaround to disable processing of abbreviations at the end of a sentence when using "Google Speech Services"
 
 	String PROP_APP_VIEW_ANIM_DURATION ="app.view.anim.duration";
 

@@ -1,8 +1,13 @@
 #include "../include/crsetup.h"
-#include "../include/lvstream.h"
 //#define CHM_SUPPORT_ENABLED 1
 #if CHM_SUPPORT_ENABLED==1
 #include "../include/chmfmt.h"
+#include "../include/lvnamedstream.h"
+#include "../include/lvstreamutils.h"
+#include "../include/lvnamedcontainer.h"
+#include "../include/crtxtenc.h"
+#include "../include/lvxmlutils.h"
+#include "../include/lvhtmlparser.h"
 #include "../include/crlog.h"
 #include <chm_lib.h>
 
@@ -820,7 +825,7 @@ public:
     }
 
     lString32 getContentsFileName() {
-        if ( _binaryTOCURLTableId!=0 ) {
+        if ( _binaryTOCURLTableId!=0 && _urlTable != NULL ) {
             lString8 url = _urlTable->urlById(_binaryTOCURLTableId);
             if ( !url.empty() )
                 return decodeString(url);
@@ -856,15 +861,15 @@ public:
     }
 };
 
-ldomDocument * LVParseCHMHTMLStream( LVStreamRef stream, lString32 defEncodingName )
+ldomDocument * LVParseCHMHTMLStream( LVStreamRef stream, lString32 defEncodingName, ldomDocument * parent_doc )
 {
     if ( stream.isNull() )
         return NULL;
 
+#if 0
     // detect encondig
     stream->SetPos(0);
 
-#if 0
     ldomDocument * encDetectionDoc = LVParseHTMLStream( stream );
     int encoding = 0;
     if ( encDetectionDoc!=NULL ) {
@@ -900,11 +905,12 @@ ldomDocument * LVParseCHMHTMLStream( LVStreamRef stream, lString32 defEncodingNa
     ldomDocument * doc;
     doc = new ldomDocument();
     doc->setDocFlags( 0 );
+    doc->setAllTypesFrom(parent_doc);
 
     ldomDocumentWriterFilter writerFilter(doc, false, HTML_AUTOCLOSE_TABLE);
     writerFilter.setFlags(writerFilter.getFlags() | TXTFLG_CONVERT_8BIT_ENTITY_ENCODING);
 
-    /// FB2 format
+    /// HTML format
     LVFileFormatParser * parser = new LVHTMLParser(stream, &writerFilter);
     if ( !defEncodingName.empty() )
         parser->SetCharset(defEncodingName.c_str());
@@ -1098,17 +1104,17 @@ public:
                 CRLog::error("CHM: Cannot open .hhc");
                 return false;
             }
-            ldomDocument * doc = LVParseCHMHTMLStream( tocStream, defEncodingName );
+            ldomDocument * doc = LVParseCHMHTMLStream( tocStream, defEncodingName, _doc );
             if ( !doc ) {
                 CRLog::error("CHM: Cannot parse .hhc");
                 return false;
             }
 
-    #if DUMP_CHM_DOC==1
-        LVStreamRef out = LVOpenFileStream(U"/tmp/chm-toc.html", LVOM_WRITE);
-        if ( !out.isNull() )
-            doc->saveToStream( out, NULL, true );
-    #endif
+#if DUMP_CHM_DOC==1
+            LVStreamRef out = LVOpenFileStream(U"chm-toc.xml", LVOM_WRITE);
+            if ( !out.isNull() )
+                doc->saveToStream( out, NULL, true );
+#endif
 
             ldomNode * body = doc->getRootNode(); //doc->createXPointer(cs32("/html[1]/body[1]"));
             bool res = false;

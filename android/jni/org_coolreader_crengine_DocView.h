@@ -136,10 +136,10 @@ JNIEXPORT jobject JNICALL Java_org_coolreader_crengine_DocView_getPositionPropsI
 /*
  * Class:     org_coolreader_crengine_DocView
  * Method:    updateBookInfoInternal
- * Signature: (Lorg/coolreader/crengine/BookInfo;)V
+ * Signature: (Lorg/coolreader/crengine/BookInfo;Z)V
  */
 JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_updateBookInfoInternal
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jobject, jboolean);
 
 /*
  * Class:     org_coolreader_crengine_DocView
@@ -168,10 +168,10 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_findTextInternal
 /*
  * Class:     org_coolreader_crengine_DocView
  * Method:    setBatteryStateInternal
- * Signature: (I)V
+ * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_setBatteryStateInternal
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jint, jint, jint);
 
 /*
  * Class:     org_coolreader_crengine_DocView
@@ -348,6 +348,14 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_getPageImageTextureI
  */
 JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftInternal
         (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_coolreader_crengine_DocView
+ * Method:    isTimeChangedInternal
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_isTimeChangedInternal
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

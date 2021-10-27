@@ -1626,7 +1626,7 @@ public class MainDB extends BaseDB {
 	static int MAX_GROUP_LEVEL = 30;
 
 	public static void addGroupedItems2(FileInfo parent, String filter,
-								  ArrayList<FileInfo> items, String groupPrefixTag, final ItemGroupExtractor extractor, int lev) {
+										ArrayList<FileInfo> items, String groupPrefixTag, final ItemGroupExtractor extractor, int lev) {
 		int iMaxItemsCount = iMaxGroupSize;
 //		log.i("addGroupedItems2 called, filter = "+filter);
 //		log.i("groupPrefixTag = "+groupPrefixTag);
@@ -1634,8 +1634,8 @@ public class MainDB extends BaseDB {
 //		log.i("iMaxItemsCount = "+iMaxItemsCount);
 		if (iMaxItemsCount<8) iMaxItemsCount = 8;
 		if (parent.isLitresPrefix()) iMaxItemsCount = 999; // All litres without subgrouping - better
-			//if (items.size() > 0)
-			//	if (items.get(0).isLitresPagination()) iMaxItemsCount = 999; // LitRes with paging will not be grouped
+		//if (items.size() > 0)
+		//	if (items.get(0).isLitresPagination()) iMaxItemsCount = 999; // LitRes with paging will not be grouped
 		if (lev >= MAX_GROUP_LEVEL) {
 			//int ii = 0;
 			//log.i("case1");
@@ -1661,11 +1661,10 @@ public class MainDB extends BaseDB {
 		int level = 1; // initial level
 		int prevSize = 0;
 		if (!StrUtils.isEmptyStr(filter)) level = filter.length();
-		boolean br = false;
+		boolean breakScan = false;
 		HashMap<String, Integer> grouped = null;
-		while ((level <= MAX_GROUP_LEVEL) && (!br)) {
+		while ((level <= MAX_GROUP_LEVEL) && (!breakScan)) {
 			HashMap<String, Integer> groupedCur = new HashMap<>();
-			HashMap<String, Integer> groupedCur2 = new HashMap<>();
 			for (int i=0; i<items.size(); i++) {
 				String prevfirstLetter = "";
 				boolean prevEq = false;
@@ -1675,30 +1674,50 @@ public class MainDB extends BaseDB {
 				}
 				String firstLetter = extractor.getItemFirstLetters(items.get(i), level);
 				boolean b = firstLetter.toUpperCase().startsWith(filter.toUpperCase());
+				// if the item shorter than filter - need check, commenting
+//				if ((!b) && (!StrUtils.isEmptyStr(filter))) {
+//					if ((firstLetter.length() < filter.length()) && (filter.startsWith(firstLetter))) b = true;
+//				}
 				if (b || (StrUtils.isEmptyStr(filter))) {
-					Integer cnt = groupedCur.get(firstLetter);
-					if (cnt == null) cnt = 0;
-					groupedCur.put(firstLetter, cnt + 1);
-				}
-				if (!((!prevfirstLetter.equals("")) && (prevEq) && (!prevfirstLetter.equals(firstLetter))))
-					if (b || (StrUtils.isEmptyStr(filter))) {
-						Integer cnt = groupedCur2.get(firstLetter);
-						if (cnt == null) cnt = 0;
-						groupedCur2.put(firstLetter, cnt + 1);
+					String skey = firstLetter;
+					// find existing group, that "eats" this
+					for (Map.Entry<String, Integer> entry : groupedCur.entrySet()) {
+						String key = entry.getKey();
+						if (firstLetter.toUpperCase().startsWith(key.toUpperCase())) {
+							skey = key;
+							break;
+						}
 					}
+					Integer cnt = groupedCur.get(skey);
+					if (cnt == null) cnt = 0;
+					groupedCur.put(skey, cnt + 1);
+				}
+				// I have forgot what I mean by groupedCur2, but it works incorrect
+//				if (!((!prevfirstLetter.equals("")) && (prevEq) && (!prevfirstLetter.equals(firstLetter))))
+//					if (b || (StrUtils.isEmptyStr(filter))) {
+//						Integer cnt = groupedCur2.get(firstLetter);
+//						if (cnt == null) cnt = 0;
+//						groupedCur2.put(firstLetter, cnt + );
+//					}
 			}
-			if (((groupedCur.size()<=iMaxItemsCount) || (curLevel == 0)  || (prevSize == 1)) && (groupedCur2.size() > 0)) {
+			breakScan = groupedCur.size() > iMaxItemsCount;
+			boolean needSwithDeeper = (groupedCur.size() <= iMaxItemsCount) || (curLevel == 0);
+			if ((breakScan) && (!needSwithDeeper)) {
+				if (grouped != null)
+					if (grouped.size() == 1)
+						needSwithDeeper = true;
+			}
+
+			if (needSwithDeeper) {
 				curLevel = level;
 				grouped = groupedCur;
 				prevSize = grouped.size();
 			}
-			else
-				br = true;
 			level = level + 1;
 		}
 		if (grouped==null) {
-			//int ii = 0;
-			//log.i("case3");
+//			int ii = 0;
+//			log.i("case3");
 //			for (FileInfo fi: items) {
 //				ii++;
 //				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
@@ -1707,8 +1726,8 @@ public class MainDB extends BaseDB {
 			return;
 		}
 		if (grouped.size()==1) { // grouping failed :)
-			//int ii = 0;
-			//log.i("case4");
+//			int ii = 0;
+//			log.i("case4");
 //			for (FileInfo fi: items) {
 //				ii++;
 //				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
@@ -1719,8 +1738,8 @@ public class MainDB extends BaseDB {
 		// we have found maximum allowable group level
 		int curSize = grouped.size();
 		for (Map.Entry<String, Integer> entry : grouped.entrySet()) {
-			String key = (String) entry.getKey();
-			Integer value = (Integer) entry.getValue();
+			String key = entry.getKey();
+			Integer value = entry.getValue();
 			if ((curSize-1+value <= iMaxItemsCount)&&(value>1)) { // this group can be "linearized"
 				for (int i=0; i<items.size(); i++) {
 					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
@@ -1758,7 +1777,7 @@ public class MainDB extends BaseDB {
 			}
 		}
 	}
-	
+
 	private void addGroupedItems(FileInfo parent,
 				ArrayList<FileInfo> items, int start, int end, String groupPrefixTag, int level, final ItemGroupExtractor extractor) {
 		boolean bNoGroups = true;

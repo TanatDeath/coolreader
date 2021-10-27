@@ -729,12 +729,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				int w = mWindowSize * 4 / 10;
 				int h = w * 4 / 3;
 				Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
-				Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), selectedItem, bmp, new CoverpageManager.CoverpageBitmapReadyListener() {
-					@Override
-					public void onCoverpageReady(CoverpageManager.ImageItem file, Bitmap bitmap) {
-						mActivity.createBookShortcut(selectedItem,bitmap);
-					}
-				});
+				Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), selectedItem, bmp, false,
+						(file, bitmap) -> mActivity.createBookShortcut(selectedItem,bitmap));
 			}
 			return true;
 		case R.id.book_to_gd:

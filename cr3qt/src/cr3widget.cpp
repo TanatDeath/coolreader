@@ -9,6 +9,7 @@
 #include <qglobal.h>
 #if QT_VERSION >= 0x050000
 #include <QResizeEvent>
+#include <QtGui/QScreen>
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QStyleFactory>
@@ -30,8 +31,6 @@
 #include <QDesktopServices>
 #include <QLocale>
 
-#include "fc-lang-cat.h"
-
 /// to hide non-qt implementation, place all crengine-related fields here
 class CR3View::DocViewData
 {
@@ -41,7 +40,9 @@ class CR3View::DocViewData
     CRPropRef _props;
 };
 
+#if USE_LIMITED_FONT_SIZES_SET
 DECL_DEF_CR_FONT_SIZES;
+#endif
 
 static void replaceColor( char * str, lUInt32 color )
 {
@@ -82,8 +83,6 @@ static LVRefVec<LVImageSource>& getBatteryIcons( lUInt32 color )
         "   .0.....................0.",
         "....0.XXXX.XXXX.XXXX.XXXX.0.",
         ".0000.XXXX.XXXX.XXXX.XXXX.0.",
-        ".0..0.XXXX.XXXX.XXXX.XXXX.0.",
-        ".0..0.XXXX.XXXX.XXXX.XXXX.0.",
         ".0..0.XXXX.XXXX.XXXX.XXXX.0.",
         ".0..0.XXXX.XXXX.XXXX.XXXX.0.",
         ".0..0.XXXX.XXXX.XXXX.XXXX.0.",
@@ -310,7 +309,10 @@ CR3View::CR3View( QWidget *parent)
         : QWidget( parent, Qt::WindowFlags() ), _scroll(NULL), _propsCallback(NULL)
         , _normalCursor(Qt::ArrowCursor), _linkCursor(Qt::PointingHandCursor)
         , _selCursor(Qt::IBeamCursor), _waitCursor(Qt::WaitCursor)
-        , _selecting(false), _selected(false), _editMode(false), _lastBatteryState(CR_BATTERY_STATE_NO_BATTERY)
+        , _selecting(false), _selected(false), _editMode(false)
+        , _lastBatteryState(CR_BATTERY_STATE_NO_BATTERY)
+        , _lastBatteryChargingConn(CR_BATTERY_CHARGER_NO)
+        , _lastBatteryChargeLevel(0)
 {
 #if WORD_SELECTOR_ENABLED==1
     _wordSelector = NULL;
@@ -326,11 +328,13 @@ CR3View::CR3View( QWidget *parent)
     ldomXPointerEx p2;
     _selRange.setStart(p1);
     _selRange.setEnd(p2);
+#if USE_LIMITED_FONT_SIZES_SET
     LVArray<int> sizes( cr_font_sizes, sizeof(cr_font_sizes)/sizeof(int) );
     _docview->setFontSizes( sizes, false );
+#endif
 
     _docview->setBatteryIcons( getBatteryIcons(0x000000) );
-    _docview->setBatteryState(CR_BATTERY_STATE_NO_BATTERY); // don't show battery
+    _docview->setBatteryState(CR_BATTERY_STATE_NO_BATTERY, CR_BATTERY_CHARGER_NO, 0); // don't show battery
     //_docview->setBatteryState( 75 ); // 75%
 //    LVStreamRef stream;
 //    stream = LVOpenFileStream("/home/lve/.cr3/textures/old_paper.png", LVOM_READ);
@@ -358,6 +362,14 @@ void CR3View::updateDefProps()
     _data->_props->setStringDef( PROP_WINDOW_SHOW_STATUSBAR, "0" );
     _data->_props->setStringDef( PROP_APP_START_ACTION, "0" );
 
+    if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)) {
+        QScreen* screen = QGuiApplication::primaryScreen();
+        lString32 str;
+        str.appendDecimal((int)screen->logicalDotsPerInch());
+        _data->_props->setString( PROP_RENDER_DPI, str );
+        // But we don't apply PROP_RENDER_SCALE_FONT_WITH_DPI property,
+        // since for now we are setting the font size in pixels.
+    }
 
     QStringList styles = QStyleFactory::keys();
     QStyle * s = QApplication::style();
@@ -518,21 +530,31 @@ void CR3View::resizeEvent ( QResizeEvent * event )
     _docview->Resize( sz.width(), sz.height() );
 }
 
-int getBatteryState()
+static bool getBatteryState(int& state, int& chargingConn, int& level)
 {
 #ifdef _WIN32
     // update battery state
     SYSTEM_POWER_STATUS bstatus;
     BOOL pow = GetSystemPowerStatus(&bstatus);
-    if (bstatus.BatteryFlag & 128)
-        return CR_BATTERY_STATE_NO_BATTERY; // no system battery
-	if (bstatus.ACLineStatus==8 && bstatus.BatteryLifePercent<100 )
-		return CR_BATTERY_STATE_CHARGING; // charging
-    if (bstatus.BatteryLifePercent>=0 && bstatus.BatteryLifePercent<=100)
-		return bstatus.BatteryLifePercent;
-    return CR_BATTERY_STATE_NO_BATTERY;
+    if (pow) {
+        state = CR_BATTERY_STATE_DISCHARGING;
+        if (bstatus.BatteryFlag & 128)
+            state = CR_BATTERY_STATE_NO_BATTERY;  // no system battery
+        else if (bstatus.BatteryFlag & 8)
+            state = CR_BATTERY_STATE_CHARGING;    // charging
+        chargingConn = CR_BATTERY_CHARGER_NO;
+        if (bstatus.ACLineStatus==1)
+            chargingConn = CR_BATTERY_CHARGER_AC; // AC power charging connected
+        if (bstatus.BatteryLifePercent>=0 && bstatus.BatteryLifePercent<=100)
+            level = bstatus.BatteryLifePercent;
+        return true;
+    }
+    return false;
 #else
-	return CR_BATTERY_STATE_NO_BATTERY;
+    state = CR_BATTERY_STATE_NO_BATTERY;
+    chargingConn = CR_BATTERY_CHARGER_NO;
+    level = 0;
+    return true;
 #endif
 }
 
@@ -540,11 +562,18 @@ void CR3View::paintEvent ( QPaintEvent * event )
 {
     QPainter painter(this);
     QRect rc = rect();
-	int newBatteryState = getBatteryState();
-	if (_lastBatteryState != newBatteryState) {
-		_docview->setBatteryState( newBatteryState );
-		_lastBatteryState = newBatteryState;
-	}
+    int newBatteryState;
+    int newChargingConn;
+    int newChargeLevel;
+    if (getBatteryState(newBatteryState, newChargingConn, newChargeLevel) &&
+            (_lastBatteryState != newBatteryState ||
+             _lastBatteryChargingConn != newChargingConn ||
+             _lastBatteryChargeLevel != newChargeLevel)) {
+        _docview->setBatteryState( newBatteryState, newChargingConn, newChargeLevel );
+        _lastBatteryState = newBatteryState;
+        _lastBatteryChargingConn = newChargingConn;
+        _lastBatteryChargeLevel = newChargeLevel;
+    }
     LVDocImageRef ref = _docview->getPageImage(0);
     if ( ref.isNull() ) {
         //painter.fillRect();
@@ -1085,6 +1114,7 @@ bool CR3View::updateSelection( ldomXPointer p )
 
 void CR3View::checkFontLanguageCompatibility()
 {
+#if USE_LOCALE_DATA==1
     lString32 fontFace;
     lString32 fileName;
     _data->_props->getString(PROP_FONT_FACE, fontFace);
@@ -1097,106 +1127,29 @@ void CR3View::checkFontLanguageCompatibility()
         return;
     }
     if (fontFace_u8.length() > 0) {
-        lString8 fcLang = findCompatibleFcLangCode(langCode_u8);
-        if (!fcLang.empty()) {
-            bool res = fontMan->checkFontLangCompat(fontFace_u8, fcLang);
-            CRLog::debug("Checking font \"%s\" for compatibility with language \"%s\": %d", fontFace_u8.c_str(), langCode_u8.c_str(), res);
-            if (!res)
-            {
-                QMessageBox::warning(this, tr("Warning"), 
-                                            tr("Font \"%1\" isn't compatible with language \"%2\". Instead will be used fallback font.").arg(fontFace_u8.c_str()).arg(langCode_u8.c_str()), 
-                                            QMessageBox::Ok);
+        QString langDescr = getHumanReadableLocaleName(langCode);
+        if (!langDescr.isEmpty()) {
+            font_lang_compat compat = fontMan->checkFontLangCompat(fontFace_u8, langCode_u8);
+            CRLog::debug("Checking font \"%s\" for compatibility with language \"%s\": %d", fontFace_u8.c_str(), langCode_u8.c_str(), (int)compat);
+            switch (compat) {
+                case font_lang_compat_invalid_tag:
+                    CRLog::warn("Can't find compatible language code in embedded FontConfig catalog: language=\"%s\", filename=\"%s\"", langCode_u8.c_str(), LCSTR(fileName));
+                    break;
+                case font_lang_compat_none:
+                case font_lang_compat_partial:
+                    QMessageBox::warning(this, tr("Warning"), 
+                                         tr("Font \"%1\" isn't compatible with language \"%2\". Instead will be used fallback font.").arg(fontFace_u8.c_str()).arg(langDescr), 
+                                         QMessageBox::Ok);
+                    break;
+                case font_lang_compat_full:
+                    // good, do nothing
+                    break;
             }
         } else {
-            CRLog::warn("Can't find compatible language code in embedded FontConfig catalog: language=\"%s\", filename=\"%s\"", langCode_u8.c_str(), LCSTR(fileName));
+            CRLog::warn("Invalid language tag: \"%s\", filename=\"%s\"", langCode_u8.c_str(), LCSTR(fileName));
         }
     }
-}
-
-lString8 CR3View::findCompatibleFcLangCode(lString8 language)
-{
-    lString8 langCode;
-
-    lString8 lang_part;
-    lString8 country_part;
-    lString8 testLang;
-
-    language = language.lowercase();
-    
-    // Split language and country codes
-    int pos = language.pos('-');
-    if (-1 == pos)
-        pos = language.pos('_');
-    if (pos > 0) {
-        lang_part = language.substr(0, pos);
-        if (pos < language.length() - 1)
-            country_part = language.substr(pos + 1);
-        else
-            country_part = "";
-    } else {
-        lang_part = language;
-        country_part = "";
-    }
-    lang_part = lang_part.lowercase();
-    country_part = country_part.lowercase();
-
-    if (country_part.length() > 0)
-        testLang = lang_part + "_" + country_part;
-    else
-        testLang = lang_part;
-    // 1. Check if testLang is already language code accepted by FontConfig languages symbols database
-    if (haveFcLangCode(testLang))
-        langCode = testLang;
-    else {
-        // TODO: convert three letter language code to two-letter language code
-        // TODO: convert three letter country code to two-letter country code
-        // TODO: test with two letter codes
-        // See android/src: org.coolreader.crengine.Engine.findCompatibleFcLangCode()
-        if (langCode.empty()) {
-            // 2. test lang_part
-            testLang = lang_part;
-            if (haveFcLangCode(testLang))
-                langCode = testLang;
-        }
-    }
-    if (langCode.empty()) {
-        QString match_lang;
-        // 3. Try to find by full language name
-        QList<QLocale> allLocales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript, QLocale::AnyCountry);
-        QList<QLocale>::const_iterator it;
-        for (it = allLocales.begin(); it != allLocales.end(); ++it) {
-            const QLocale& loc = *it;
-            QString full_lang = QLocale::languageToString(loc.language()).toLower();
-            if (language.compare(full_lang.toLatin1().data()) == 0) {
-                match_lang = loc.name();
-                pos = match_lang.indexOf('_');
-                if (pos > 0)
-                    match_lang = match_lang.mid(0, pos);
-            }
-        }
-        if (!match_lang.isEmpty()) {
-            testLang = lString8(match_lang.toLatin1().data());
-            if (haveFcLangCode(testLang))
-                langCode = testLang;
-        }
-    }
-    return langCode;
-}
-
-bool CR3View::haveFcLangCode(lString8 langCode)
-{
-    bool res = false;
-    if (!langCode.empty()) {
-        struct fc_lang_catalog* lang_ptr = fc_lang_cat;
-        for (int i = 0; i < fc_lang_cat_sz; i++) {
-            if (langCode.compare(lang_ptr->lang_code) == 0) {
-                res = true;
-                break;
-            }
-            lang_ptr++;
-        }
-    }
-    return res;
+#endif
 }
 
 void CR3View::mousePressEvent ( QMouseEvent * event )

@@ -5,6 +5,8 @@ import android.net.Uri;
 import  androidx.documentfile.provider.DocumentFile;
 
 import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
@@ -20,7 +22,7 @@ import java.util.Comparator;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
-public class FileInfo {
+public class FileInfo implements Parcelable {
 
 	public final static String RECENT_DIR_TAG = "@recent";
 	public final static String SEARCH_RESULT_DIR_TAG = "@searchResults";
@@ -72,6 +74,7 @@ public class FileInfo {
 	public final static String TITLE_TAG_LEVEL = "@titlesLevel";
 	public final static String TITLE_GROUP_PREFIX = "@titleGroup:";
 	public final static String SEARCH_SHORTCUT_TAG = "@search";
+	public final static String ROOT_WINDOW_TAG = "@rootwindow";
 	public final static String QSEARCH_SHORTCUT_TAG = "@qsearch";
 	public final static String RESCAN_LIBRARY_TAG = "@rescan";
 	public final static String LITRES_GENRE_TAG = "@litresGenreRoot";
@@ -127,10 +130,10 @@ public class FileInfo {
 	public long bookDateN; //converted to nubmer from string
 	public long docDateN;
 	public long publYearN;
-	public String path; // path to directory where file or archive is located
+	public String path; // path to directory where file is located
 	private String filename; // file name w/o path for normal file, with optional path for file inside archive
-	public String pathname; // full path+arcname+filename
-	public String arcname; // archive file name w/o path
+	public String pathname; // full path+filename
+	public String arcname; // archive file name with path
 	public String language; // document language
 	public String description;	// book description, CR implementation (KR use annotation instead)
 	public String name_crc32; // crc32 of filename
@@ -247,6 +250,18 @@ public class FileInfo {
 	// bitmask for field 'tag' when obtained genres list as special folders
 	public static final int GENRE_DATA_INCCHILD_MASK = 0x80000000;
 	public static final int GENRE_DATA_BOOKCOUNT_MASK = 0x00FFFFFF;
+
+	public static final Creator<FileInfo> CREATOR = new Creator<FileInfo>() {
+		@Override
+		public FileInfo createFromParcel(Parcel in) {
+			return new FileInfo(in);
+		}
+
+		@Override
+		public FileInfo[] newArray(int size) {
+			return new FileInfo[size];
+		}
+	};
 
 	public long getCreateTime() {
 		return createTime;
@@ -388,7 +403,43 @@ public class FileInfo {
 		}
 		return res;
 	}
-	
+
+	protected FileInfo(Parcel in) {
+		if (in.readByte() == 0) {
+			id = null;
+		} else {
+			id = in.readLong();
+		}
+		title = in.readString();
+		authors = in.readString();
+		series = in.readString();
+		seriesNumber = in.readInt();
+		genres = in.readString();
+		path = in.readString();
+		filename = in.readString();
+		pathname = in.readString();
+		arcname = in.readString();
+		language = in.readString();
+		description = in.readString();
+		username = in.readString();
+		password = in.readString();
+		size = in.readLong();
+		arcsize = in.readLong();
+		createTime = in.readLong();
+		lastAccessTime = in.readLong();
+		flags = in.readInt();
+		isArchive = in.readByte() != 0;
+		isDirectory = in.readByte() != 0;
+		isListed = in.readByte() != 0;
+		isScanned = in.readByte() != 0;
+		crc32 = in.readLong();
+		domVersion = in.readInt();
+		blockRenderingFlags = in.readInt();
+		parent = in.readParcelable(FileInfo.class.getClassLoader());
+		files = in.createTypedArrayList(FileInfo.CREATOR);
+		dirs = in.createTypedArrayList(FileInfo.CREATOR);
+	}
+
 	public FileInfo( String pathName )
 	{
 		if (pathName.startsWith(FileInfo.OPDS_DIR_PREFIX)) {
@@ -1919,6 +1970,49 @@ public class FileInfo {
 		dirs = null;
 		files = null;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		if (id == null) {
+			dest.writeByte((byte) 0);
+		} else {
+			dest.writeByte((byte) 1);
+			dest.writeLong(id);
+		}
+		dest.writeString(title);
+		dest.writeString(authors);
+		dest.writeString(series);
+		dest.writeInt(seriesNumber);
+		dest.writeString(genres);
+		dest.writeString(path);
+		dest.writeString(filename);
+		dest.writeString(pathname);
+		dest.writeString(arcname);
+		dest.writeString(language);
+		dest.writeString(description);
+		dest.writeString(username);
+		dest.writeString(password);
+		dest.writeLong(size);
+		dest.writeLong(arcsize);
+		dest.writeLong(createTime);
+		dest.writeLong(lastAccessTime);
+		dest.writeInt(flags);
+		dest.writeByte((byte) (isArchive ? 1 : 0));
+		dest.writeByte((byte) (isDirectory ? 1 : 0));
+		dest.writeByte((byte) (isListed ? 1 : 0));
+		dest.writeByte((byte) (isScanned ? 1 : 0));
+		dest.writeLong(crc32);
+		dest.writeInt(domVersion);
+		dest.writeInt(blockRenderingFlags);
+		dest.writeParcelable(parent, flags);
+		dest.writeTypedList(files);
+		dest.writeTypedList(dirs);
+	}
 	
 	public static enum SortOrder {
 		FILENAME(R.string.mi_book_sort_order_filename, (f1, f2) -> {
@@ -2213,13 +2307,12 @@ public class FileInfo {
 				return false;
 		} else if (!title.equals(other.title))
 			return false;
-		if (crc32 != other.crc32)
-			return false;
 		if (domVersion != other.domVersion)
 			return false;
 		if (blockRenderingFlags != other.blockRenderingFlags)
 			return false;
-		return true;
+		// Base check: fingerprint (for now only crc32)
+		return crc32 == other.crc32;
 	}
 
 	public boolean baseEquals(FileInfo other) {
@@ -2227,27 +2320,22 @@ public class FileInfo {
 			return true;
 		if (other == null)
 			return false;
-		if (arcname == null) {
-			if (other.arcname != null)
-				return false;
-		} else if (!arcname.equals(other.arcname))
-			return false;
 		if (arcsize != other.arcsize)
 			return false;
 		if (authors == null) {
-			if (other.authors != null)
+			if (other.authors.length() > 0)
 				return false;
-		} else if (!authors.equals(other.authors))
+		} else if ( ! ( authors.equals(other.authors) || (authors.length() == 0 && other.authors == null) ) )
 			return false;
+		// TODO: potentially filename may not match. Perhaps we need to remove this check.
 		if (filename == null) {
 			if (other.filename != null)
 				return false;
 		} else if (!filename.equals(other.filename))
 			return false;
-		if (flags != other.flags)
-			return false;
 		if (format != other.format)
 			return false;
+		// TODO: potentially isArchive may not match. Perhaps we need to remove this check.
 		if (isArchive != other.isArchive)
 			return false;
 		if (isDirectory != other.isDirectory)
@@ -2269,16 +2357,6 @@ public class FileInfo {
 		} else if (!description.equals(other.description))
 			return false;
 		if (name_crc32 != other.name_crc32) return false;
-		if (path == null) {
-			if (other.path != null)
-				return false;
-		} else if (!path.equals(other.path))
-			return false;
-		if (pathname == null) {
-			if (other.pathname != null)
-				return false;
-		} else if (!pathname.equals(other.pathname))
-			return false;
 		if (series == null) {
 			if (other.series != null && other.series.length() != 0)
 				return false;
@@ -2293,16 +2371,15 @@ public class FileInfo {
 				return false;
 		} else if (!title.equals(other.title))
 			return false;
-		if (crc32 != other.crc32)
-			return false;
-		return true;
+		// Base check: fingerprint (for now only crc32)
+		return crc32 == other.crc32;
 	}
 
 	// CR implementation
 	private static boolean eqGenre(String g1, String g2) {
 		if (g1 == null) {
-			if (g2 != null && g2.length() != 0)
-				return false;
+				if (g2 != null && g2.length() != 0)
+					return false;
 		}
 		if (g1.equals(g2))
 			return true;

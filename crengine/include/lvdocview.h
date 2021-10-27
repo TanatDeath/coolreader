@@ -20,6 +20,7 @@
 #include "lvtinydom.h"
 #include "lvpagesplitter.h"
 #include "lvdrawbuf.h"
+#include "lvcolordrawbuf.h"
 #include "hist.h"
 #include "lvthread.h"
 #include "lvdocviewcmd.h"
@@ -34,11 +35,21 @@ typedef enum {
     txt_format_auto  // autodetect format
 } txt_format_t;
 
-/// no battery
+/// Battery state: no battery
 #define CR_BATTERY_STATE_NO_BATTERY -2
-/// battery is charging
+/// Battery state: battery is charging
 #define CR_BATTERY_STATE_CHARGING -1
-// values 0..100 -- battery life percent
+/// Battery state: battery is discharging
+#define CR_BATTERY_STATE_DISCHARGING -3
+
+/// Battery charger connection: no connection
+#define CR_BATTERY_CHARGER_NO 1
+/// Battery charger connection: AC adapter
+#define CR_BATTERY_CHARGER_AC 2
+/// Battery charger connection: USB
+#define CR_BATTERY_CHARGER_USB 3
+/// Battery charger connection: Wireless
+#define CR_BATTERY_CHARGER_WIRELESS 4
 
 #ifndef CR_ENABLE_PAGE_IMAGE_CACHE
 #ifdef ANDROID
@@ -262,6 +273,8 @@ private:
     ldomXPointer _posBookmark; // bookmark for current position
 
     int m_battery_state;
+    int m_battery_charging_conn;
+    int m_battery_charge_level;
     int m_requested_font_size;
     int m_font_size; // = m_requested_font_size, possibly scaled according to DPI
     int m_status_font_size;
@@ -276,8 +289,8 @@ private:
     bool m_is_rendered;
 
     LVDocViewMode m_view_mode; // DVM_SCROLL, DVM_PAGES
-    inline bool isPageMode() { return m_view_mode==DVM_PAGES; }
-    inline bool isScrollMode() { return m_view_mode==DVM_SCROLL; }
+    inline bool isPageMode() const { return m_view_mode==DVM_PAGES; }
+    inline bool isScrollMode() const { return m_view_mode==DVM_SCROLL; }
 
     /*
 #if (COLOR_BACKBUFFER==1)
@@ -334,6 +347,9 @@ private:
 
 #if CR_INTERNAL_PAGE_ORIENTATION==1
     cr_rotate_angle_t m_rotateAngle;
+#endif
+#ifdef ANDROID
+    cr_rotate_angle_t m_rotateAngleInfo;
 #endif
 
     CRFileHist m_hist;
@@ -397,13 +413,6 @@ private:
     void updateDocStyleSheet();
 
 protected:
-    // deprecated: ready to remove
-    virtual void drawNavigationBar( LVDrawBuf * drawbuf, int pageIndex, int percent );
-    // deprecated: ready to remove
-    virtual void getNavigationBarRectangle( lvRect & rc );
-    // deprecated: ready to remove
-    virtual void getNavigationBarRectangle( int pageIndex, lvRect & rc );
-
     /// returns document offset for next page
     int getNextPageOffset();
     /// returns document offset for previous page
@@ -416,10 +425,12 @@ protected:
     bool getCursorDocRect( ldomXPointer ptr, lvRect & rc );
     /// load document from stream (internal)
     bool loadDocumentInt( LVStreamRef stream, bool metadataOnly = false );
+    /// get section bounds for specific root node and specific section depth level, in 1/100 of percent
+    void getSectionBoundsInt( LVArray<int>& bounds, ldomNode* node , lUInt16 section_id, int target_level, int level );
 public:
     lString32 m_time_left;
     /// get outer (before margins are applied) page rectangle
-    virtual void getPageRectangle( int pageIndex, lvRect & pageRect );
+    virtual void getPageRectangle( int pageIndex, lvRect & pageRect ) const;
     /// get screen rectangle for specified cursor position, returns false if not visible
     bool getCursorRect( ldomXPointer ptr, lvRect & rc, bool scrollToCursor = false );
     /// set status bar and clock mode
@@ -431,7 +442,7 @@ public:
     void Draw( LVDrawBuf & drawbuf, int pageTopPosition, int pageNumber, bool rotate, bool autoresize = true);
     /// ensure current position is set to current bookmark value
     void checkPos();
-    LVFontRef getBatteryFont() { return m_batteryFont; }
+    LVFontRef getBatteryFont() const { return m_batteryFont; }
     void setBatteryFont( LVFontRef font ) { m_batteryFont=font; }
 
     /// draw current page to specified buffer
@@ -449,7 +460,7 @@ public:
         return getCursorRect( m_cursorPos, rc, scrollToCursor );
     }
     /// returns cursor position
-    ldomXPointer getCursorPos() { return m_cursorPos; }
+    ldomXPointer getCursorPos() const { return m_cursorPos; }
     /// set cursor position
     void setCursorPos( ldomXPointer ptr ) { m_cursorPos = ptr; }
     /// try swappping of document to cache, if size is big enough, and no swapping attempt yet done
@@ -475,7 +486,7 @@ public:
     /// navigate to history path URL
     bool navigateTo( lString32 historyPath );
     /// packs current file path and name
-    lString32 getNavigationPath();
+    lString32 getNavigationPath() const;
     /// returns pointer to bookmark/last position containter of currently opened file
     CRFileHistRecord * getCurrentFileHistRecord();
 	/// -1 moveto previous chapter, 0 to current chaoter first pae, 1 to next chapter
@@ -499,7 +510,7 @@ public:
     /// find bookmark by window point, return NULL if point doesn't belong to any bookmark
     CRBookmark * findBookmarkByPoint(lvPoint pt);
     /// returns true if coverpage display is on
-    bool getShowCover() { return  m_showCover; }
+    bool getShowCover() const { return  m_showCover; }
     /// sets coverpage display flag
     void setShowCover( bool show ) { m_showCover = show; }
     /// returns true if page image is available (0=current, -1=prev, 1=next)
@@ -538,9 +549,9 @@ public:
     /// set text format options
     void setTextFormatOptions( txt_format_t fmt );
     /// get text format options
-    txt_format_t getTextFormatOptions();
+    txt_format_t getTextFormatOptions() const;
     /// get current document format
-    doc_format_t getDocFormat() { return m_doc_format; }
+    doc_format_t getDocFormat() const { return m_doc_format; }
 
     // Links and selections functions
     /// sets selection for whole element, clears previous selection
@@ -588,11 +599,11 @@ public:
     virtual void createHtmlDocument(lString32 code);
 
     /// returns default font face
-    lString8 getDefaultFontFace() { return m_defaultFontFace; }
+    lString8 getDefaultFontFace() const { return m_defaultFontFace; }
     /// set default font face
     void setDefaultFontFace( const lString8 & newFace );
     /// returns status bar font face
-    lString8 getStatusFontFace() { return m_statusFontFace; }
+    lString8 getStatusFontFace() const { return m_statusFontFace; }
     /// set status bar font face
     void setStatusFontFace( const lString8 & newFace );
     /// invalidate formatted data, request render
@@ -625,9 +636,9 @@ public:
     /// returns number of images on given page
     int getPageImageCount(LVRef<ldomXRange>& range);
     /// calculate page header rectangle
-    virtual void getPageHeaderRectangle( int pageIndex, lvRect & headerRc );
+    virtual void getPageHeaderRectangle( int pageIndex, lvRect & headerRc ) const;
     /// calculate page header height
-    virtual int getPageHeaderHeight( );
+    virtual int getPageHeaderHeight() const;
     /// calculate can page header be 2 lines
     virtual bool isPageHeader2lines( );
     /// set list of icons to display at left side of header
@@ -643,33 +654,39 @@ public:
 #if CR_INTERNAL_PAGE_ORIENTATION==1
     /// sets rotate angle
     void SetRotateAngle( cr_rotate_angle_t angle );
+    /// Select appropriate AA LCD subpixel rendering mode for chosen rotate angle
+    font_antialiasing_t rotateFontAntialiasMode(font_antialiasing_t aa_mode, cr_rotate_angle_t angle);
 #endif
     /// rotate rectangle by current angle, winToDoc==false for doc->window translation, true==ccw
-    lvRect rotateRect( lvRect & rc, bool winToDoc );
+    lvRect rotateRect( lvRect & rc, bool winToDoc ) const;
     /// rotate point by current angle, winToDoc==false for doc->window translation, true==ccw
-    lvPoint rotatePoint( lvPoint & pt, bool winToDoc );
+    lvPoint rotatePoint( lvPoint & pt, bool winToDoc ) const;
 #if CR_INTERNAL_PAGE_ORIENTATION==1
     /// returns rotate angle
-    cr_rotate_angle_t GetRotateAngle() { return m_rotateAngle; }
+    cr_rotate_angle_t GetRotateAngle() const { return m_rotateAngle; }
 #endif
     /// returns true if document is opened
     bool isDocumentOpened();
     /// returns section bounds, in 1/100 of percent
-    LVArray<int> & getSectionBounds( bool for_external_update=false );
+    LVArray<int> & getSectionBounds( int max_count, int depth, bool for_external_update=false );
     /// returns section bounds, in 1/100 of percent * 10
     LVArray<int> & getSectionBounds4Levels( );
     /// returns section bounds, in pages
     LVArray<int> & getSectionBounds4LevelsPages( );
     /// sets battery state
-    virtual bool setBatteryState( int newState );
+    virtual bool setBatteryState( int newState, int newChargingConn, int newChargeLevel );
     /// returns battery state
-    int getBatteryState( ) { return m_battery_state; }
+    int getBatteryState() const { return m_battery_state; }
+    /// returns battery charging connection
+    int getBatteryChargingConn() const { return m_battery_charging_conn; }
+    /// returns battery charge level
+    int getBatteryChargeLevel() const { return m_battery_charge_level; }
     /// returns current time representation string
-    virtual lString32 getTimeString();
+    virtual lString32 getTimeString() const;
     /// returns true if time changed since clock has been last drawed
     bool isTimeChanged();
     /// returns if Render has been called
-    bool IsRendered() { return m_is_rendered; }
+    bool IsRendered() const { return m_is_rendered; }
     /// returns file list with positions/bookmarks
     CRFileHist * getHistory() { return &m_hist; }
     /// returns formatted page list
@@ -688,40 +705,37 @@ public:
     /// set view mode (pages/scroll) - DVM_SCROLL/DVM_PAGES
     void setViewMode( LVDocViewMode view_mode, int visiblePageCount=-1 );
     /// get view mode (pages/scroll)
-    LVDocViewMode getViewMode();
+    LVDocViewMode getViewMode() const;
     /// toggle pages/scroll view mode
     void toggleViewMode();
     /// returns current pages visible setting value (independent on window and font size)
-    int getPagesVisibleSetting();
+    int getPagesVisibleSetting() const;
     /// get window visible page count (1 or 2)
-    int getVisiblePageCount();
+    int getVisiblePageCount() const;
     /// set window visible page count (1 or 2)
     void setVisiblePageCount( int n );
     /// set window visible page count, to use exact value independent of font size and window sides
     void overrideVisiblePageCount(int n);
 
     /// get page header position
-    int getPageheaderPosition() { return m_pageHeaderPos; }
+    int getPageheaderPosition() const { return m_pageHeaderPos; }
     /// set page header position
     void setPageHeaderPosition( int pos );
     /// get page header info mask
-    int getPageHeaderInfo() { return m_pageHeaderInfo; }
+    int getPageHeaderInfo() const { return m_pageHeaderInfo; }
     /// set page header info mask
     void setPageHeaderInfo( int hdrFlags );
     /// get info line font
-    font_ref_t getInfoFont() { return m_infoFont; }
+    font_ref_t getInfoFont() const { return m_infoFont; }
     /// set info line font
     void setInfoFont( font_ref_t font ) { m_infoFont = font; }
     /// draw page header to buffer
     virtual void drawPageHeader( LVDrawBuf * drawBuf, const lvRect & headerRc, int pageIndex, int headerInfoFlags, int pageCount );
     /// draw battery state to buffer
-    virtual void drawBatteryState( LVDrawBuf * drawBuf, const lvRect & rc, bool isVertical );
+    virtual void drawBatteryState(LVDrawBuf * drawBuf, const lvRect & rc);
 
     /// returns background color
-    lUInt32 getBackgroundColor()
-    {
-        return m_backgroundColor;
-    }
+    lUInt32 getBackgroundColor() const { return m_backgroundColor; }
     /// sets background color
     void setBackgroundColor( lUInt32 cl )
     {
@@ -729,10 +743,7 @@ public:
         clearImageCache();
     }
     /// returns text color
-    lUInt32 getTextColor()
-    {
-        return m_textColor;
-    }
+    lUInt32 getTextColor() const { return m_textColor; }
     /// sets text color
     void setTextColor( lUInt32 cl )
     {
@@ -742,10 +753,7 @@ public:
     }
 
     /// returns text color
-    lUInt32 getStatusColor()
-    {
-        return m_statusColor;
-    }
+    lUInt32 getStatusColor() const { return m_statusColor; }
     /// sets text color
     void setStatusColor( lUInt32 cl )
     {
@@ -768,7 +776,7 @@ public:
     bool docToWindowPoint( lvPoint & pt, bool isRectBottom=false, bool fitToPage=false );
 
     /// returns document
-    ldomDocument * getDocument() {
+    ldomDocument * getDocument() const {
     	if (NULL == m_doc)
     	    CRLog::error("attempt to return NULL pointer as document!");
     	return m_doc;
@@ -776,17 +784,17 @@ public:
     /// return document properties
     CRPropRef getDocProps() { return m_doc_props; }
     /// returns book title
-    lString32 getTitle() { return m_doc_props->getStringDef(DOC_PROP_TITLE); }
+    lString32 getTitle() const { return m_doc_props->getStringDef(DOC_PROP_TITLE); }
     /// returns book language
-    lString32 getLanguage() { return m_doc_props->getStringDef(DOC_PROP_LANGUAGE); }
+    lString32 getLanguage() const { return m_doc_props->getStringDef(DOC_PROP_LANGUAGE); }
     /// returns book author(s)
-    lString32 getAuthors() { return m_doc_props->getStringDef(DOC_PROP_AUTHORS); }
+    lString32 getAuthors() const { return m_doc_props->getStringDef(DOC_PROP_AUTHORS); }
     /// returns book description
-    lString32 getDescription() { return m_doc_props->getStringDef(DOC_PROP_DESCRIPTION); }
+    lString32 getDescription() const { return m_doc_props->getStringDef(DOC_PROP_DESCRIPTION); }
     /// returns book keywords (separated by "; ")
-    lString32 getKeywords() { return m_doc_props->getStringDef(DOC_PROP_KEYWORDS); }
+    lString32 getKeywords() const { return m_doc_props->getStringDef(DOC_PROP_KEYWORDS); }
     /// returns book series name and number (series name #1)
-    lString32 getSeries()
+    lString32 getSeries() const
     {
         lString32 name = m_doc_props->getStringDef(DOC_PROP_SERIES_NAME);
         lString32 number = m_doc_props->getStringDef(DOC_PROP_SERIES_NUMBER);
@@ -795,13 +803,13 @@ public:
         return name;
     }
     /// returns book series name and number (series name #1)
-    lString32 getSeriesName()
+    lString32 getSeriesName() const
     {
         lString32 name = m_doc_props->getStringDef(DOC_PROP_SERIES_NAME);
         return name;
     }
     /// returns book series name and number (series name #1)
-    int getSeriesNumber()
+    int getSeriesNumber() const
     {
         lString32 name = m_doc_props->getStringDef(DOC_PROP_SERIES_NAME);
         lString32 number = m_doc_props->getStringDef(DOC_PROP_SERIES_NUMBER);
@@ -810,7 +818,7 @@ public:
         return 0;
     }
     /// returns book content CRC32
-    lUInt32 getFileCRC32() {
+    lUInt32 getFileCRC32() const {
         return (lUInt32)m_doc_props->getIntDef(DOC_PROP_FILE_CRC32, 0);
     }
 
@@ -870,15 +878,15 @@ public:
     /// change font size, if rollCyclic is true, largest font is followed by smallest and vice versa
     void ZoomFont( int delta );
     /// retrieves current base font size
-    int  getFontSize() { return m_font_size; }
+    int  getFontSize() const { return m_font_size; }
     /// retrieves requested font size (before scaling for DPI)
-    int  getRequestedFontSize() { return m_requested_font_size; }
+    int  getRequestedFontSize() const { return m_requested_font_size; }
     /// scale font size according to gRenderDPI
     int scaleFontSizeForDPI( int fontSize );
     /// sets new base font size
     void setFontSize( int newSize );
     /// retrieves current status bar font size
-    int  getStatusFontSize() { return m_status_font_size; }
+    int  getStatusFontSize() const { return m_status_font_size; }
     /// sets new status bar font size
     void setStatusFontSize( int newSize );
 
@@ -898,9 +906,9 @@ public:
     /// resize view
     void Resize( int dx, int dy );
     /// get view height
-    int GetHeight();
+    int GetHeight() const;
     /// get view width
-    int GetWidth();
+    int GetWidth() const;
 
     /// get full document height
     int GetFullHeight();
@@ -913,16 +921,16 @@ public:
     int SetPos( int pos, bool savePos=true, bool allowScrollAfterEnd = false);
 
     // get page start y (in full document height)
-    int getPageStartY(int pageIndex);
+    int getPageStartY(int pageIndex) const;
     // get page height
-    int getPageHeight(int pageIndex);
+    int getPageHeight(int pageIndex) const;
 
     /// get number of current page
     int getCurPage();
     /// move to specified page
     bool goToPage(int page, bool updatePosBookmark = true, bool regulateTwoPages = true);
     /// returns page count
-    int getPageCount();
+    int getPageCount() const;
     /// get the flow the specified page belongs to
     int getPageFlow(int pageIndex);
     /// returns whether there are any flows besides the linear flow 0
@@ -946,7 +954,7 @@ public:
     void setOriginalFilename( const lString32 & fn ) {
         m_originalFilename = fn;
     }
-    const lString32 & getOriginalFilename() {
+    const lString32 & getOriginalFilename() const {
         return m_originalFilename;
     }
     void setMinFileSizeToCache( int size ) {
@@ -958,6 +966,11 @@ public:
     void Render( int dx=0, int dy=0, LVRendPageList * pages=NULL );
     /// set properties before rendering
     void setRenderProps( int dx, int dy );
+    /// Return a hash accounting for the rendering and the pages layout
+    /// A changed hash let frontends know their cached values of some document
+    /// properties (full height, TOC pages...) may have changed and that they
+    /// need to fetch them again
+    lUInt32 getDocumentRenderingHash() const;
 
     /// Constructor
     LVDocView( int bitsPerPixel=-1, bool noDefaultDocument=false );
@@ -994,6 +1007,6 @@ public:
 
 
 /// draw book cover, either from image, or generated from title/authors
-void LVDrawBookCover(LVDrawBuf & buf, LVImageSourceRef image, lString8 fontFace, lString32 title, lString32 authors, lString32 seriesName, int seriesNumber);
+void LVDrawBookCover(LVDrawBuf & buf, LVImageSourceRef image, bool respectAspectRatio, lString8 fontFace, lString32 title, lString32 authors, lString32 seriesName, int seriesNumber);
 
 #endif

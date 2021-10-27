@@ -204,11 +204,15 @@ public class LingvoTranslate {
 					lingvoAuthThenTranslate(cr, s, langf, lang, extended, curDict, view, dcb);
 				} else {
 					if (dcb == null)
-						cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "");
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "")
+						));
 					else {
 						dcb.fail(e, e.getMessage());
 						if (dcb.showDicToast())
-							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "");
+							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+								cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "")
+							));
 					}
 					unauthCnt = 0;
 				}

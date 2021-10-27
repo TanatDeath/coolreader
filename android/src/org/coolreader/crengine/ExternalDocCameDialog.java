@@ -10,8 +10,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -35,6 +37,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
@@ -51,14 +54,17 @@ public class ExternalDocCameDialog extends BaseDialog {
 	private CoolReader mActivity;
 	private int mWindowSize;
 
+	private String mLogFileRoot = "";
+
 	private LayoutInflater mInflater;
 	private String stype;
 	private Uri uri;
 	private InputStream istream = null;
 	private InputStream istreamTxt = null;
 	private String sUri = "";
+	private String sUriUpd = "";
 	private String downlDir = "";
-	private String sExistingName = "";
+	public String sExistingName = "";
 	private Document docJsoup = null;
 	private Boolean bThisIsHTML = true;
 	private Boolean bMoveToBooks = true;
@@ -189,6 +195,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
 		this.mActivity = activity;
+		mLogFileRoot = activity.getSettingsFileF(0).getParent() + "/";
 		this.stype = stype;
 		this.uri = null;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
@@ -226,12 +233,40 @@ public class ExternalDocCameDialog extends BaseDialog {
 	private String queryName(ContentResolver resolver, Uri uri) {
 		Cursor returnCursor =
 				resolver.query(uri, null, null, null, null);
-		assert returnCursor != null;
+		if (returnCursor == null) return "";
 		int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 		returnCursor.moveToFirst();
 		String name = returnCursor.getString(nameIndex);
 		returnCursor.close();
 		return name;
+	}
+
+	private String queryPath(ContentResolver resolver, Uri uri) {
+		Cursor returnCursor =
+				resolver.query(uri, null, null, null, null);
+		if (returnCursor == null) return uri.getPath();
+		returnCursor.moveToFirst();
+		try {
+			int idx = returnCursor
+					.getColumnIndex(MediaStore.Files.FileColumns.DATA);
+			return returnCursor.getString(idx);
+		} catch (Exception e) {
+		}
+		return "";
+	}
+
+	private String queryPathM(ContentResolver resolver, Uri uri) {
+		Cursor returnCursor =
+				resolver.query(uri, null, null, null, null);
+		if (returnCursor == null) return uri.getPath();
+		returnCursor.moveToFirst();
+		try {
+			int idx = returnCursor
+					.getColumnIndex(MediaStore.MediaColumns.DATA);
+			return returnCursor.getString(idx);
+		} catch (Exception e) {
+		}
+		return "";
 	}
 
 	private void hideExistingFileControls(ViewGroup view) {
@@ -385,13 +420,13 @@ public class ExternalDocCameDialog extends BaseDialog {
 	int secondCountdown;
 	boolean stopCount = false;
 
-	private void openExistingClick(boolean doMove) {
+	public void openExistingClick(boolean doMove) {
 		if (!doMove) {
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-					((CoolReader) activity).loadDocumentExt(sExistingName, sUri), 500));
+					((CoolReader) activity).loadDocumentExt(sExistingName, sUriUpd), 500));
 			onPositiveButtonClick();
 		} else {
-			tryToMoveThenOpen(activity, sExistingName, downlDir, sUri);
+			tryToMoveThenOpen(mLogFileRoot, activity, sExistingName, downlDir, sUriUpd);
 			onPositiveButtonClick();
 		}
 	}
@@ -417,7 +452,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		FileInfo dir = Services.getScanner().findParent(fi, fileDir);
 		String sPath = file.getAbsolutePath();
 		String sPathZ = sPath;
-		if ((isArch)&&(!sPathZ.toLowerCase().endsWith(".zip"))
+		if ((isArch) && (!sPathZ.toLowerCase().endsWith(".zip"))
 				&&(!sPathZ.toLowerCase().endsWith(".epub"))
 				&&(!sPathZ.toLowerCase().endsWith(".docx"))
 				&&(!sPathZ.toLowerCase().endsWith(".odt"))
@@ -436,16 +471,30 @@ public class ExternalDocCameDialog extends BaseDialog {
 			}
 			file.renameTo(fileZ);
 		}
-		Services.getScanner().listDirectory(dir);
-		FileInfo item1 = dir.findItemByPathName(sPathZ);
-		if (item1 == null) item1 = new FileInfo(sPathZ);
-		return item1;
+		if (dir != null) {
+			FileInfo item1 = dir.findItemByPathName(sPathZ);
+			if (item1 == null) {
+				Services.getScanner().listDirectory(dir);
+				item1 = dir.findItemByPathName(sPathZ);
+			}
+			if (item1 == null) item1 = new FileInfo(sPathZ);
+			return item1;
+		}
+		return new FileInfo(file);
 	}
 
-	public static void tryToMoveThenOpen(BaseActivity cr, String fNameThis, String downlD, String sUr) {
+	public static void tryToMoveThenOpen(String logRoot, BaseActivity cr, String fNameThis, String downlD, String sUr) {
+		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+				"BEGIN tryToMoveThenOpen");
 		FileInfo fileOrDir = getFileProps(new File(fNameThis), new FileInfo(downlD));
+		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+				"step 1");
 		Services.getEngine().scanBookProperties(fileOrDir);
+		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+				"step 2");
 		FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
+		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+				"step 3");
 		String subdir = null;
 		if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
 			subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
@@ -454,22 +503,40 @@ public class ExternalDocCameDialog extends BaseDialog {
 		} else {
 			subdir = "NoAuthor";
 		}
+		CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+				"step 4");
 		if (downloadDir == null) {
 			BackgroundThread.instance().postGUI(() ->
 			{
+				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+						"step 5");
 				cr.showToast(R.string.cannot_move_to_books);
 				((CoolReader) cr).loadDocumentExt(fNameThis, sUr);
+				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+						"step 6");
 			}, 500);
 		} else {
+			CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+					"step 7");
 			File f = new File(fNameThis);
 			File resultDir = new File(downloadDir.getPathName());
 			resultDir = new File(resultDir, subdir);
 			resultDir.mkdirs();
+			CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+					"step 8");
 			File result = new File(resultDir.getAbsolutePath() + "/" + f.getName());
+			CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+					"step 9");
 			if (f.renameTo(result)) {
+				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+						"step 10");
 				downloadDir.findItemByPathName(result.getAbsolutePath());
+				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+						"step 11");
 				File resF = result;
 				cr.showToast(R.string.moved_to_books);
+				CustomLog.doLog(logRoot, "log_move_to_books_then_open.log",
+						"step 12");
 				BackgroundThread.instance().postGUI(() -> ((CoolReader) cr).
 						loadDocumentExt(resF.getAbsolutePath(), sUr), 500);
 			} else {
@@ -492,12 +559,66 @@ public class ExternalDocCameDialog extends BaseDialog {
         
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		tvExtPath = view.findViewById(R.id.ext_path);
-		if (uri != null) sUri = StrUtils.getNonEmptyStr(uri.toString(),false);
+		sExistingName = "";
+		String sBaseName = "";
+		String sQueryPath = "";
+		sUri = "";
+		sUriUpd = "";
+		downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+		if (uri != null) {
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"DOC CAME, Uri is: "+StrUtils.getNonEmptyStr(uri.toString(),false));
+			sUri = java.net.URLDecoder.decode(StrUtils.getNonEmptyStr(uri.toString(),false));
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Uri encoded is: "+sUri);
+			sUriUpd = sUri;
+			if (sUriUpd.contains("file://")) { // X-plore File Manager support
+				sUriUpd = sUriUpd.substring(sUriUpd.indexOf("file://") + "file://".length());
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Uri contains 'file://', updated uri: "+sUriUpd);
+				sUriUpd = java.net.URLDecoder.decode(sUriUpd);
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Uri contains 'file://', updated uri decoded: "+sUriUpd);
+			}
+			sBaseName = StrUtils.getNonEmptyStr(queryName(activity.getApplicationContext().getContentResolver(), uri), true);
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"BaseName is: "+sBaseName);
+			sQueryPath = StrUtils.getNonEmptyStr(queryPath(activity.getApplicationContext().getContentResolver(), uri), true);
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"QueryPath1 is: "+sQueryPath);
+			File f = FileUtils.getFile(sQueryPath);
+			if (f != null) {
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"file found by QueryPath1");
+				sUriUpd = sQueryPath;
+				sExistingName = f.getAbsolutePath();
+				downlDir = f.getParent();
+			}
+			if (StrUtils.isEmptyStr(sExistingName)) {
+				sQueryPath = StrUtils.getNonEmptyStr(queryPathM(activity.getApplicationContext().getContentResolver(), uri), true);
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"QueryPath2 is: "+sQueryPath);
+				f = FileUtils.getFile(sQueryPath);
+				if (f != null) {
+					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+							"file found by QueryPath2");
+					sUriUpd = sQueryPath;
+					sExistingName = f.getAbsolutePath();
+					downlDir = f.getParent();
+				}
+			}
+			if (StrUtils.isEmptyStr(sExistingName))
+				if (sUriUpd.contains(sBaseName)) {
+					sUriUpd = sUriUpd.substring(0, sUriUpd.indexOf(sBaseName) + sBaseName.length()); // X-plore File Manager support
+					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+							"Uri updated due to found value of baseName, new uri is = " + sUriUpd);
+				}
+			if (sBaseName.endsWith(".")) sBaseName = sBaseName.substring(0,sBaseName.length()-1);
+		}
 		tvExtPath.setText(sUri);
 		tvDocType = view.findViewById(R.id.doc_type);
 		tvDocType.setText(stype);
 		tvDownloadPath = view.findViewById(R.id.download_path);
-		downlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
 		tvDownloadPath.setText(downlDir);
 		edtFileName = view.findViewById(R.id.file_name);
 		edtFileName.setOnFocusChangeListener((view1, hasFocus) -> {
@@ -505,42 +626,150 @@ public class ExternalDocCameDialog extends BaseDialog {
 				stopCount = true;
 			}
 		});
-		String sBaseName = "";
-		if (uri != null) {
-			sBaseName = StrUtils.getNonEmptyStr(queryName(activity.getApplicationContext().getContentResolver(), uri), true);
-			if (sBaseName.endsWith(".")) sBaseName = sBaseName.substring(0,sBaseName.length()-1);
-		}
 		String sDocFormat = DocumentFormat.extByMimeType(stype);
 		if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = Utils.getFileExtension(sBaseName);
-		if (StrUtils.getNonEmptyStr(sUri, true).startsWith("http")) {
-			if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = DocumentFormat.nameEndWithExt(sUri);
+		if (StrUtils.getNonEmptyStr(sUriUpd, true).startsWith("http")) {
+			if (StrUtils.isEmptyStr(sDocFormat)) sDocFormat = DocumentFormat.nameEndWithExt(sUriUpd);
 			if (StrUtils.isEmptyStr(sDocFormat)) {
 				if (bThisIsHTML)
 					sDocFormat = "html";
 				else
 					sDocFormat = "txt";
-				//sDocFormat = Utils.getFileExtension(sUri);
 			}
-			if (StrUtils.isEmptyStr(sBaseName)) sBaseName = extractSuggestedName(sUri);
+			if (StrUtils.isEmptyStr(sBaseName)) sBaseName = extractSuggestedName(sUriUpd);
 		}
 		sDocFormat = StrUtils.getNonEmptyStr(sDocFormat,true);
 		if (sBaseName.toLowerCase().endsWith("."+sDocFormat)) {
 			sBaseName = sBaseName.substring(0, sBaseName.length() - sDocFormat.length() - 1);
 		}
 		if ((uri == null) && (StrUtils.isEmptyStr(sDocFormat))) sDocFormat = "html";
-		final String sFDocFormat = sDocFormat;
 		if (sBaseName.endsWith("."+sDocFormat)) sBaseName = sBaseName.substring(0,sBaseName.length()-1-sDocFormat.length());
-		sExistingName = "";
 		if (StrUtils.isEmptyStr(sBaseName)) sBaseName = "KnownReader_Downloaded";
-		else {
-			if (!StrUtils.isEmptyStr(sDocFormat)) {
-				File f = new File(downlDir + "/" + sBaseName + "." + sDocFormat);
-				if (f.exists()) sExistingName = downlDir + "/" + sBaseName + "." + sDocFormat;
-			} else {
-				File f = new File(downlDir + "/" + sBaseName);
-				if (f.exists()) sExistingName = downlDir + "/" + sBaseName;
+		// try to detect file from file provider
+		if (StrUtils.isEmptyStr(sExistingName) && (sUriUpd.contains("fileprovider/root"))) {
+			String path = sUriUpd.substring(sUriUpd.indexOf("fileprovider/root") + "fileprovider/root".length());
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Try to find file (fileprovider/root) = " + path);
+			File f = FileUtils.getFile(path);
+			if (f != null) {
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Found file (fileprovider/root) = " + path);
+				sUriUpd = path;
+				sExistingName = f.getAbsolutePath();
+				downlDir = f.getParent();
 			}
 		}
+		if (StrUtils.isEmptyStr(sExistingName) && (sUriUpd.contains("fileprovider"))) {
+			String path = sUriUpd.substring(sUriUpd.indexOf("fileprovider") + "fileprovider".length());
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Try to find file (fileprovider) = " + path);
+			File f = FileUtils.getFile(path);
+			if (f != null) {
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Found file (fileprovider) = " + path);
+				sUriUpd = path;
+				sExistingName = f.getAbsolutePath();
+				downlDir = f.getParent();
+			}
+		}
+		if (StrUtils.isEmptyStr(sExistingName) && (sUriUpd.contains("storage/emulated"))) {
+			String path = "/" + sUriUpd.substring(sUriUpd.indexOf("storage/emulated") );
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Try to find file (storage/emulated) = " + path);
+			File f = FileUtils.getFile(path);
+			if (f != null) {
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Found file (storage/emulated) = " + path);
+				sUriUpd = path;
+				sExistingName = f.getAbsolutePath();
+				downlDir = f.getParent();
+			}
+		}
+		if (StrUtils.isEmptyStr(sExistingName) && (!StrUtils.isEmptyStr(sUriUpd))) {
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Try to find file (sUriUpd) = " + sUriUpd);
+			try {
+				File f = FileUtils.getFile(sUriUpd);
+				if (f != null) {
+					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+							"Found file (sUriUpd) = " + sUriUpd);
+					sExistingName = f.getAbsolutePath();
+					downlDir = f.getParent();
+				}
+			} catch (Exception e) {
+				//do nothing
+			}
+		}
+		//ArrayList<FileInfo> folders1 = Services.getFileSystemFolders().getFileSystemFolders();
+		try {
+			if ((StrUtils.isEmptyStr(sExistingName) && (sUriUpd.contains("fileprovider/external")))) {
+				String path = sUriUpd.substring(sUriUpd.indexOf("fileprovider/external") + "fileprovider/external".length());
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Try to find file (fileprovider/external) = " + path);
+				ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
+				if (folders != null) {
+					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+							"Got getFileSystemFolders, count = " + folders.size());
+					for (FileInfo fi : folders) {
+						if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
+							String path2 = fi.getPathName() + "/" + path;
+							CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+									"Try to find file (fileprovider/external, path2) = " + path2);
+							File f = FileUtils.getFile(path2);
+							if (f != null) {
+								CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+										"Found file (fileprovider/external, path2) = " + path2);
+								sExistingName = f.getAbsolutePath();
+								downlDir = f.getParent();
+								break;
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+
+		}
+		if ((StrUtils.isEmptyStr(sExistingName) && (sUriUpd.contains("fileprovider/external")))) {
+			String path = sUriUpd.substring(sUriUpd.indexOf("fileprovider/external") + "fileprovider/external".length());
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Try to find file (fileprovider/external) se0 = " + path);
+			String path2 = "/storage/emulated/0/" + path;
+			CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+					"Try to find file (fileprovider/external, path2, se0) = " + path2);
+			File f = FileUtils.getFile(path2);
+			if (f != null) {
+				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+						"Found file (fileprovider/external, path2, se0) = " + path2);
+				sExistingName = f.getAbsolutePath();
+				downlDir = f.getParent();
+			}
+		}
+		if (StrUtils.isEmptyStr(sExistingName) && (!sBaseName.equals("KnownReader_Downloaded"))) {
+			if (StrUtils.isEmptyStr(sExistingName)) {
+				if (!StrUtils.isEmptyStr(sDocFormat)) {
+					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+							"Try to find file = " + downlDir + "/" + sBaseName + "." + sDocFormat);
+					File f = FileUtils.getFile(downlDir + "/" + sBaseName + "." + sDocFormat);
+					if (f != null) {
+						sExistingName = f.getAbsolutePath();
+						CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+								"File found by (3) = " + downlDir + "/" + sBaseName + "." + sDocFormat);
+					}
+				} else {
+					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+							"Try to find file = " + downlDir + "/" + sBaseName);
+					File f = FileUtils.getFile(downlDir + "/" + sBaseName);
+					if (f != null) {
+						sExistingName = f.getAbsolutePath();
+						CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
+								"File found by (2) = " + downlDir + "/" + sBaseName);
+					}
+				}
+			}
+		}
+		//if (!sUriUpd.equals(sUri)) tvExtPath.setText(sUriUpd);
+		//\
 		int i = 0;
 		Boolean exs = true;
 		String sBName = sBaseName;
@@ -566,6 +795,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnOpenFromStream = view.findViewById(R.id.btn_open_from_stream);
 		Utils.setDashedButton(btnOpenFromStream);
 		//btnOpenFromStream.setBackgroundColor(colorGrayC);
+		String finalSUriUpd = sUriUpd;
 		btnOpenFromStream.setOnClickListener(v -> {
 			stopCount = true;
 			if (uri != null) {
@@ -581,7 +811,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 						if (arcFontNames.size()==0) {
 							final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
 							BackgroundThread.instance().postBackground(() ->
-									BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
+									BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(is2, finalSUriUpd), 500));
 							onPositiveButtonClick();
 						} else {
 							final ArrayList<String> arcFontNamesF = arcFontNames;
@@ -597,7 +827,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 									}, () -> {
 										final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
 										BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-												((CoolReader) activity).loadDocumentFromStreamExt(is2, sUri), 500));
+												((CoolReader) activity).loadDocumentFromStreamExt(is2, finalSUriUpd), 500));
 										onPositiveButtonClick();
 									});
 						}
@@ -605,18 +835,18 @@ public class ExternalDocCameDialog extends BaseDialog {
 					}
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-							((CoolReader) activity).loadDocumentFromUriExt(uri, sUri), 500));
+							((CoolReader) activity).loadDocumentFromUriExt(uri, finalSUriUpd), 500));
 					onPositiveButtonClick();
 				}
 			}
 			else {
 				if ((istream != null) && (bThisIsHTML)) {
 					BackgroundThread.instance().postBackground(() ->
-							BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istream, sUri), 500));
+							BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istream, finalSUriUpd), 500));
 				}
 				if ((istreamTxt != null) && (!bThisIsHTML)) {
 					BackgroundThread.instance().postBackground(() ->
-							BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, sUri), 500));
+							BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentFromStreamExt(istreamTxt, finalSUriUpd), 500));
 				}
 				onPositiveButtonClick();
 			}
@@ -657,9 +887,9 @@ public class ExternalDocCameDialog extends BaseDialog {
 								BackgroundThread.instance().postBackground(() ->
 									{
 										if (bMoveToBooks) {
-											tryToMoveThenOpen(activity, fName, downlDir, sUri);
+											tryToMoveThenOpen(mLogFileRoot, activity, fName, downlDir, finalSUriUpd);
 										} else
-											BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, sUri), 500);
+											BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).loadDocumentExt(fName, finalSUriUpd), 500);
 									}
 								);
 							}
@@ -688,13 +918,20 @@ public class ExternalDocCameDialog extends BaseDialog {
 			stopCount = true;
 			openExistingClick(true);
 		});
+		boolean immediateClose = false;
 		if (StrUtils.isEmptyStr(sExistingName))
 			hideExistingFileControls(view);
 		else {
-			secondCountdown = 10;
+			secondCountdown = mActivity.settings().getInt(Settings.PROP_APP_EXT_DOC_CAME_TIMEOUT, 0);
+			int sec = 1000;
+			if (secondCountdown == 0) {
+				sec = 300;
+				immediateClose = true;
+			}
+			int finalSec = sec;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 					countdownTick(),
-					1000));
+					finalSec));
 		}
 
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
@@ -726,9 +963,9 @@ public class ExternalDocCameDialog extends BaseDialog {
 		btnMoveToBooks.setOnClickListener(v -> { stopCount = true; switchMoveToBooks(!bMoveToBooks);});
 		BackgroundThread.instance().postBackground(() ->
 				BackgroundThread.instance().postGUI(() -> switchMoveToBooks(bMoveToBooks), 200));
-		setView(view);
+		if (!immediateClose) setView(view);
 		// if link is http
-		if (uri==null) doDownloadHttp(sUri);
+		if (uri==null) doDownloadHttp(sUriUpd);
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.crengine.CoverpageManager.CoverpageBitmapReadyListener;
 import org.coolreader.dic.TranslationDirectionDialog;
 
 import android.content.res.TypedArray;
@@ -442,7 +441,7 @@ public class BookInfoEditDialog extends BaseDialog {
         image.setMinimumWidth(w);
         image.setMaxWidth(w);
         Bitmap bmp = Bitmap.createBitmap(w, h, Config.RGB_565);
-        Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), file, bmp, (file1, bitmap) -> {
+        Services.getCoverpageManager().drawCoverpageFor(mActivity.getDB(), file, bmp, false, (file1, bitmap) -> {
 			BitmapDrawable drawable = new BitmapDrawable(bitmap);
 			mBookCover = bitmap;
 			image.setImageDrawable(drawable);

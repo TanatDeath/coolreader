@@ -353,8 +353,11 @@ public class FileUtils {
                 }
                 file.renameTo(fileZ);
             }
-        mScanner.listDirectory(dir);
         FileInfo item1 = dir.findItemByPathName(sPathZ);
+        if (item1 == null) {
+            mScanner.listDirectory(dir);
+            item1 = dir.findItemByPathName(sPathZ);
+        }
         if (item1 == null) item1 = new FileInfo(sPathZ);
         final FileInfo item = item1;
         log.d("onDownloadEnd: sPathZ = " + sPathZ);
@@ -408,6 +411,16 @@ public class FileUtils {
         }
         else
             mActivity.loadDocument(fi, true);
+    }
+
+    public static File getFile(String fname) {
+        if (StrUtils.isEmptyStr(fname)) return null;
+        try {
+            File f = new File(fname);
+            if (f.exists() && f.isFile()) return f;
+        } catch (Exception e) {
+        }
+        return null;
     }
 
 }

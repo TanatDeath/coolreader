@@ -5,11 +5,9 @@ import java.util.Iterator;
 import java.util.Random;
 
 import org.coolreader.CoolReader;
-import org.coolreader.CoolReader.DonationListener;
 import org.coolreader.R;
 
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -70,7 +68,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 			btn.setOnClickListener(v -> installPackage(packageName));
 		}
 	}
-	
+
 	private void setupInAppDonationButton( final Button btn, final double amount ) {
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
@@ -79,11 +77,11 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		int colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		btn.setText("$" + amount);
-		btn.setOnClickListener(v -> mCoolReader.makeDonation(amount));
 		btn.setBackgroundColor(colorGrayC);
 		btn.setTextColor(colorIcon);
+		Utils.hideView(btn);
 	}
-	
+
 	private void updateTotalDonations() {
 		double amount = mCoolReader.getTotalDonations();
 		if (isPackageInstalled("org.coolreader.donation.gold"))
@@ -198,7 +196,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		mLicenseTab = inflater.inflate(R.layout.about_dialog_license, null);
 		String license = Engine.getInstance(mCoolReader).loadResourceUtf8(R.raw.license);
 		((TextView)mLicenseTab.findViewById(R.id.license)).setText(license);
-        boolean billingSupported = mCoolReader.isDonationSupported() && !isFork;
+        boolean billingSupported = false; //mCoolReader.isDonationSupported() && !isFork;
 		mDonationTab = inflater.inflate(billingSupported ? R.layout.about_dialog_donation2 : R.layout.about_dialog_donation, null);
 
 		if (billingSupported) {

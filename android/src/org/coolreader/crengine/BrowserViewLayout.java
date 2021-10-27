@@ -165,6 +165,33 @@ public class BrowserViewLayout extends ViewGroup {
 		if (btnMenu != null) {
 			btnMenu.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		}
+		ImageButton btnScrollUp = bottomBar1Btn.findViewById(R.id.btn_scroll_up);
+
+		if (btnScrollUp != null) {
+			btnScrollUp.setOnClickListener(v -> {
+					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+					int diff = lastVisiblePosition - firstVisiblePosition;
+					if (isEInk)
+						contentView.mListView.setSelection(firstVisiblePosition - ((diff / 4) * 3));
+					else
+						contentView.mListView.smoothScrollToPosition(firstVisiblePosition - ((diff / 4) * 3));
+				}
+			);
+		}
+		ImageButton btnScrollDown = bottomBar1Btn.findViewById(R.id.btn_scroll_down);
+		if (btnScrollDown != null) {
+			btnScrollDown.setOnClickListener(v -> {
+					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
+					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
+					int diff = lastVisiblePosition - firstVisiblePosition;
+					if (isEInk)
+						contentView.mListView.setSelection(lastVisiblePosition+ ((diff/4) * 3));
+					else
+						contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
+				}
+			);
+		}
 		if (bottomBar != null)
 			bottomBar.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		ImageButton btnMenu2 = bottomBarLitres.findViewById(R.id.btn_show_menu);
@@ -367,11 +394,13 @@ public class BrowserViewLayout extends ViewGroup {
 		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
 			if (btnQpNext != null)
 				btnQpNext.setOnClickListener(v -> {
-
 					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
 					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
 					int diff = lastVisiblePosition - firstVisiblePosition;
-					contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
+					if (isEInk)
+						contentView.mListView.setSelection(lastVisiblePosition+ ((diff/4) * 3));
+					else
+						contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
 				});
 		activity.tintViewIcons(btnQpNext,true);
 		ImageButton btnQpPrev = (ImageButton)titleView.findViewById(R.id.btn_qp_prev1);
@@ -381,7 +410,10 @@ public class BrowserViewLayout extends ViewGroup {
 					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
 					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
 					int diff = lastVisiblePosition - firstVisiblePosition;
-					contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
+					if (isEInk)
+						contentView.mListView.setSelection(firstVisiblePosition-((diff/4) * 3));
+					else
+						contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
 				});
 		activity.tintViewIcons(btnQpPrev,true);
 		LinearLayout llButtons = titleView.findViewById(R.id.llButtons);

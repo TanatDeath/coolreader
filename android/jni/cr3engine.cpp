@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "org_coolreader_crengine_Engine.h"
 #include "org_coolreader_crengine_DocView.h"
@@ -26,16 +27,15 @@
 #include "../../crengine/include/docxfmt.h"
 #include "../../crengine/include/odtfmt.h"
 #include "../../crengine/include/lvstream.h"
-
+#include "../../crengine/include/lvxmlparser.h"
+#include "../../crengine/include/lvxmlutils.h"
 
 #include <../../crengine/include/fb2def.h>
-
-#include "fc-lang-cat.h"
 
 #define XS_IMPLEMENT_SCHEME 1
 #include <../../crengine/include/fb2def.h>
-#include <sys/stat.h>
-#include <lvopc.h>
+
+#include "../../crengine/include/crlocaledata.h"
 
 #if defined(__arm__) || defined(__aarch64__) || defined(__i386__) || defined(__mips__)
 #define USE_COFFEECATCH 1
@@ -602,6 +602,295 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
     return true;
 }
 
+class JNICDRLogger : public CRLog {
+public:
+	JNICDRLogger() {
+		curr_level = CRLog::LL_DEBUG;
+	}
+
+protected:
+
+	virtual void log(const char *lvl, const char *msg, va_list args) {
+#define MAX_LOG_MSG_SIZE 1024
+		static char buffer[MAX_LOG_MSG_SIZE + 1];
+		vsnprintf(buffer, MAX_LOG_MSG_SIZE, msg, args);
+		int level = ANDROID_LOG_DEBUG;
+		//LOGD("CRLog::log is called with LEVEL %s, pattern %s", lvl, msg);
+		if (!strcmp(lvl, "FATAL"))
+			level = ANDROID_LOG_FATAL;
+		else if (!strcmp(lvl, "ERROR"))
+			level = ANDROID_LOG_ERROR;
+		else if (!strcmp(lvl, "WARN"))
+			level = ANDROID_LOG_WARN;
+		else if (!strcmp(lvl, "INFO"))
+			level = ANDROID_LOG_INFO;
+		else if (!strcmp(lvl, "DEBUG"))
+			level = ANDROID_LOG_DEBUG;
+		else if (!strcmp(lvl, "TRACE"))
+			level = ANDROID_LOG_VERBOSE;
+		__android_log_write(level, LOG_TAG, buffer);
+	}
+};
+
+void cr3androidFatalErrorHandler(int errorCode, const char *errorText) {
+	LOGE("CoolReader Fatal Error #%d: %s", errorCode, errorText);
+	LOGASSERTFAILED("CoolReader Fatal Error", "CoolReader Fatal Error #%d: %s", errorCode,
+					errorText);
+	//static char str[1001];
+	//snprintf(str, 1000, "CoolReader Fatal Error #%d: %s", errorCode, errorText);
+	//LOGE("CoolReader Fatal Error #%d: %s", errorCode, errorText);
+	//LOGASSERTFAILED(errorText, "CoolReader Fatal Error #%d: %s", errorCode, errorText);
+}
+
+jboolean initInternal(JNIEnv *penv, jclass obj, jobjectArray fontArray, jint sdk_int) {
+
+	CRJNIEnv::sdk_int = sdk_int;
+
+	CRJNIEnv env(penv);
+
+	// to catch crashes and remove current cache file on crash (SIGSEGV etc.)
+	crSetSignalHandler();
+
+	LOGI("initInternal called");
+	// set fatal error handler
+	crSetFatalErrorHandler(&cr3androidFatalErrorHandler);
+	LOGD("Redirecting CDRLog to Android");
+	CRLog::setLogger(new JNICDRLogger());
+	CRLog::setLogLevel(CRLog::LL_TRACE);
+	CRLog::info("CREngine log redirected");
+	CRLog::info("CRENGINE version %s %s", CR_ENGINE_VERSION, CR_ENGINE_BUILD_DATE);
+
+	CRLog::info("initializing hyphenation manager");
+	HyphMan::initDictionaries(lString32::empty_str); //don't look for dictionaries
+	HyphMan::activateDictionary(lString32(HYPH_DICT_ID_NONE));
+	CRLog::info("creating font manager");
+	InitFontManager(lString8::empty_str);
+	CRLog::debug("converting fonts array: %d items", (int) env->GetArrayLength(fontArray));
+	lString32Collection fonts;
+	env.fromJavaStringArray(fontArray, fonts);
+	int len = fonts.length();
+	CRLog::debug("registering fonts: %d fonts in list", len);
+	for (int i = 0; i < len; i++) {
+		lString8 fontName = UnicodeToUtf8(fonts[i]);
+		CRLog::debug("registering font %s", fontName.c_str());
+		if (!fontMan->RegisterFont(fontName))
+			CRLog::error("cannot load font %s", fontName.c_str());
+	}
+	CRLog::info("%d fonts registered", fontMan->GetFontCount());
+	return fontMan->GetFontCount() ? JNI_TRUE : JNI_FALSE;
+}
+
+void drawBookCoverInternal(JNIEnv * _env, jclass _engine, jobject bitmap, jbyteArray _data, jboolean respectAspectRatio, jstring _fontFace, jstring _title, jstring _authors, jstring _seriesName, jint seriesNumber, jint bpp)
+{
+	CRJNIEnv env(_env);
+	CRLog::debug("drawBookCoverInternal called");
+	lString8 fontFace = UnicodeToUtf8(env.fromJavaString(_fontFace));
+	lString32 title = env.fromJavaString(_title);
+	lString32 authors = env.fromJavaString(_authors);
+	lString32 seriesName = env.fromJavaString(_seriesName);
+	LVStreamRef stream;
+	LVDrawBuf * drawbuf = BitmapAccessorInterface::getInstance()->lock(_env, bitmap);
+	if (drawbuf != NULL) {
+		LVImageSourceRef image;
+		if (_data != NULL && _env->GetArrayLength(_data) > 0) {
+			CRLog::debug("drawBookCoverInternal : cover image from array");
+			stream = env.jbyteArrayToStream(_data);
+			if (!stream.isNull())
+				image = LVCreateStreamImageSource(stream);
+		}
+
+		int factor = 1;
+		int dx = drawbuf->GetWidth();
+		int dy = drawbuf->GetHeight();
+		int MIN_WIDTH = 300;
+		int MIN_HEIGHT = 400;
+		if (dx < MIN_WIDTH || dy < MIN_HEIGHT) {
+			if (dx * 2 < MIN_WIDTH || dy * 2 < MIN_HEIGHT) {
+				dx *= 3;
+				dy *= 3;
+				factor = 3;
+			} else {
+				dx *= 2;
+				dy *= 2;
+				factor = 2;
+			}
+		}
+		LVDrawBuf * drawbuf2 = drawbuf;
+		if (factor > 1)
+			drawbuf2 = new LVColorDrawBuf(dx, dy, drawbuf->GetBitsPerPixel());
+
+		if (bpp >= 16) {
+			// native color resolution
+			CRLog::debug("drawBookCoverInternal : calling LVDrawBookCover");
+			LVDrawBookCover(*drawbuf2, image, respectAspectRatio, fontFace, title, authors, seriesName, seriesNumber);
+			image.Clear();
+		} else {
+			LVGrayDrawBuf grayBuf(drawbuf2->GetWidth(), drawbuf2->GetHeight(), bpp);
+			LVDrawBookCover(grayBuf, image, respectAspectRatio, fontFace, title, authors, seriesName, seriesNumber);
+			image.Clear();
+			grayBuf.DrawTo(drawbuf2, 0, 0, 0, NULL);
+		}
+
+		if (factor > 1) {
+			CRLog::debug("drawBookCoverInternal : rescaling");
+			drawbuf->DrawRescaled(drawbuf2, 0, 0, drawbuf->GetWidth(), drawbuf->GetHeight(), 0);
+			delete drawbuf2;
+		}
+
+		//CRLog::trace("getPageImageInternal calling bitmap->unlock");
+		BitmapAccessorInterface::getInstance()->unlock(_env, bitmap, drawbuf);
+	} else {
+		CRLog::error("bitmap accessor is invalid");
+	}
+	CRLog::debug("drawBookCoverInternal finished");
+}
+
+jbyteArray scanBookCoverInternal(JNIEnv *_env, jclass _class, jstring _path) {
+	CRJNIEnv env(_env);
+	lString32 path = env.fromJavaString(_path);
+	CRLog::debug("scanBookCoverInternal(%s) called", LCSTR(path));
+	lString32 arcname, item;
+	LVStreamRef res;
+	jbyteArray array = NULL;
+	LVContainerRef arc;
+	if (!LVSplitArcName(path, arcname, item)) {
+		// not in archive
+		LVStreamRef stream = LVOpenFileStream(path.c_str(), LVOM_READ);
+		if (!stream.isNull()) {
+			arc = LVOpenArchieve(stream);
+			if (!arc.isNull()) {
+				// ZIP-based format
+				if (DetectEpubFormat(stream)) {
+					// EPUB
+					// extract coverpage from epub
+					res = GetEpubCoverpage(arc);
+				}
+			} else {
+				res = GetFB2Coverpage(stream);
+				if (res.isNull()) {
+					doc_format_t fmt;
+					if (DetectPDBFormat(stream, fmt)) {
+						res = GetPDBCoverpage(stream);
+					}
+				}
+			}
+		}
+	} else {
+		CRLog::debug("scanBookCoverInternal() : is archive, item=%s, arc=%s", LCSTR(item),
+					 LCSTR(arcname));
+		LVStreamRef arcstream = LVOpenFileStream(arcname.c_str(), LVOM_READ);
+		if (!arcstream.isNull()) {
+			arc = LVOpenArchieve(arcstream);
+			if (!arc.isNull()) {
+				LVStreamRef stream = arc->OpenStream(item.c_str(), LVOM_READ);
+				if (!stream.isNull()) {
+					CRLog::debug("scanBookCoverInternal() : archive stream opened ok, parsing");
+					res = GetFB2Coverpage(stream);
+					if (res.isNull()) {
+						doc_format_t fmt;
+						if (DetectPDBFormat(stream, fmt)) {
+							res = GetPDBCoverpage(stream);
+						}
+					}
+				}
+			}
+		}
+	}
+	if (!res.isNull())
+		array = env.streamToJByteArray(res);
+	if (array != NULL)
+		CRLog::debug("scanBookCoverInternal() : returned cover page array");
+	else
+		CRLog::debug("scanBookCoverInternal() : cover page data not found");
+	return array;
+}
+
+class HyphDataLoaderProxy : public HyphDataLoader {
+	JavaVM *mJavaVM;
+public:
+	HyphDataLoaderProxy(JavaVM *jvm) :
+			HyphDataLoader(), mJavaVM(jvm) {
+	}
+
+	virtual ~HyphDataLoaderProxy() {}
+
+	virtual LVStreamRef loadData(lString32 id) {
+		JNIEnv *penv = NULL;
+		bool attached = false;
+		mJavaVM->GetEnv((void **) &penv, JNI_VERSION_1_6);
+		if (NULL == penv) {
+			// caller thread is not attached yet
+			mJavaVM->AttachCurrentThread(&penv, NULL);
+			attached = true;
+		}
+		LVStreamRef stream = LVStreamRef();
+		jclass pjcEngine = penv->FindClass("org/coolreader/crengine/Engine");
+		if (NULL == pjcEngine)
+			return stream;
+		jmethodID pjmEngine_loadHyphDictData = penv->GetStaticMethodID(pjcEngine,
+																	   "loadHyphDictData",
+																	   "(Ljava/lang/String;)[B");
+		if (NULL == pjmEngine_loadHyphDictData)
+			return stream;
+		CRJNIEnv env(penv);
+		jstring jid = env.toJavaString(id);
+		jbyteArray data = static_cast<jbyteArray>(penv->CallStaticObjectMethod(pjcEngine,
+																			   pjmEngine_loadHyphDictData,
+																			   jid));
+		stream = env.jbyteArrayToStream(data);
+		if (attached)
+			mJavaVM->DetachCurrentThread();
+		return stream;
+	}
+};
+
+jboolean initDictionaries(JNIEnv *penv, jclass clazz, jobjectArray dictArray) {
+	jclass pjcHyphDict = penv->FindClass("org/coolreader/crengine/Engine$HyphDict");
+	if (NULL == pjcHyphDict)
+		return JNI_FALSE;
+	jfieldID pjfHyphDict_type = penv->GetFieldID(pjcHyphDict, "type", "I");
+	if (NULL == pjfHyphDict_type)
+		return JNI_FALSE;
+	jfieldID pjfHyphDict_code = penv->GetFieldID(pjcHyphDict, "code", "Ljava/lang/String;");
+	if (NULL == pjfHyphDict_code)
+		return JNI_FALSE;
+
+	int len = penv->GetArrayLength(dictArray);
+	HyphDictionary *dict;
+	CRJNIEnv env(penv);
+	HyphDictType dict_type;
+	for (int i = 0; i < len; i++) {
+		jobject obj = penv->GetObjectArrayElement(dictArray, i);
+		int type = penv->GetIntField(obj, pjfHyphDict_type);
+		jstring code = static_cast<jstring>(penv->GetObjectField(obj, pjfHyphDict_code));
+		switch (type) {     // convert org/coolreader/crengine/Engine$HyphDict$type into HyphDictType
+			case 0:         // org/coolreader/crengine/Engine$HYPH_NONE
+				dict_type = HDT_NONE;
+				break;
+			case 1:         // org/coolreader/crengine/Engine$HYPH_ALGO
+				dict_type = HDT_ALGORITHM;
+				break;
+			case 2:         // org/coolreader/crengine/Engine$HYPH_DICT
+				dict_type = HDT_DICT_TEX;
+				break;
+			default:
+				dict_type = HDT_NONE;
+				break;
+		}
+		lString32 dict_code = env.fromJavaString(code);
+		dict = new HyphDictionary(dict_type, dict_code, dict_code, dict_code);
+		if (!HyphMan::addDictionaryItem(dict))
+			delete dict;
+	}
+	JavaVM *jvm;
+	env->GetJavaVM(&jvm);
+	HyphMan::setDataLoader(new HyphDataLoaderProxy(jvm));
+	return JNI_TRUE;
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * Class:     org_coolreader_crengine_Engine
@@ -726,152 +1015,15 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_updateFileCRC32In
 	return JNI_TRUE;
 }
 
-
-void drawBookCoverInternal(JNIEnv * _env, jclass _engine, jobject bitmap, jbyteArray _data, jstring _fontFace, jstring _title, jstring _authors, jstring _seriesName, jint seriesNumber, jint bpp)
-{
-	CRJNIEnv env(_env);
-	CRLog::debug("drawBookCoverInternal called");
-	lString8 fontFace = UnicodeToUtf8(env.fromJavaString(_fontFace));
-	lString32 title = env.fromJavaString(_title);
-	lString32 authors = env.fromJavaString(_authors);
-	lString32 seriesName = env.fromJavaString(_seriesName);
-	LVStreamRef stream;
-	LVDrawBuf * drawbuf = BitmapAccessorInterface::getInstance()->lock(_env, bitmap);
-	if (drawbuf != NULL) {
-		LVImageSourceRef image;
-		if (_data != NULL && _env->GetArrayLength(_data) > 0) {
-			CRLog::debug("drawBookCoverInternal : cover image from array");
-			stream = env.jbyteArrayToStream(_data);
-			if (!stream.isNull())
-				image = LVCreateStreamImageSource(stream);
-		}
-
-		int factor = 1;
-		int dx = drawbuf->GetWidth();
-		int dy = drawbuf->GetHeight();
-		int MIN_WIDTH = 300;
-		int MIN_HEIGHT = 400;
-		if (dx < MIN_WIDTH || dy < MIN_HEIGHT) {
-			if (dx * 2 < MIN_WIDTH || dy * 2 < MIN_HEIGHT) {
-				dx *= 3;
-				dy *= 3;
-				factor = 3;
-			} else {
-				dx *= 2;
-				dy *= 2;
-				factor = 2;
-			}
-		}
-		LVDrawBuf * drawbuf2 = drawbuf;
-		if (factor > 1)
-			drawbuf2 = new LVColorDrawBuf(dx, dy, drawbuf->GetBitsPerPixel());
-
-		if (bpp >= 16) {
-			// native color resolution
-			CRLog::debug("drawBookCoverInternal : calling LVDrawBookCover");
-			LVDrawBookCover(*drawbuf2, image, fontFace, title, authors, seriesName, seriesNumber);
-			image.Clear();
-		} else {
-			LVGrayDrawBuf grayBuf(drawbuf2->GetWidth(), drawbuf2->GetHeight(), bpp);
-			LVDrawBookCover(grayBuf, image, fontFace, title, authors, seriesName, seriesNumber);
-			image.Clear();
-			grayBuf.DrawTo(drawbuf2, 0, 0, 0, NULL);
-		}
-
-		if (factor > 1) {
-			CRLog::debug("drawBookCoverInternal : rescaling");
-			drawbuf->DrawRescaled(drawbuf2, 0, 0, drawbuf->GetWidth(), drawbuf->GetHeight(), 0);
-			delete drawbuf2;
-		}
-
-		//CRLog::trace("getPageImageInternal calling bitmap->unlock");
-		BitmapAccessorInterface::getInstance()->unlock(_env, bitmap, drawbuf);
-	} else {
-		CRLog::error("bitmap accessor is invalid");
-	}
-	CRLog::debug("drawBookCoverInternal finished");
-}
-
 /*
  * Class:     org_coolreader_crengine_Engine
  * Method:    drawBookCoverInternal
- * Signature: (Landroid/graphics/Bitmap;[BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II)V
+ * Signature: (Landroid/graphics/Bitmap;[BZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II)V
  */
 JNIEXPORT void JNICALL Java_org_coolreader_crengine_Engine_drawBookCoverInternal
-  (JNIEnv * _env, jclass _engine, jobject bitmap, jbyteArray _data, jstring _fontFace, jstring _title, jstring _authors, jstring _seriesName, jint seriesNumber, jint bpp)
+		(JNIEnv * _env, jclass _engine, jobject bitmap, jbyteArray _data, jboolean respectAspectRatio, jstring _fontFace, jstring _title, jstring _authors, jstring _seriesName, jint seriesNumber, jint bpp)
 {
-	COFFEE_TRY_JNI(_env, drawBookCoverInternal(_env, _engine, bitmap, _data, _fontFace, _title, _authors, _seriesName, seriesNumber, bpp));
-}
-
-jbyteArray scanBookCoverInternal
-  (JNIEnv * _env, jclass _class, jstring _path)
-{
-	CRJNIEnv env(_env);
-	lString32 path = env.fromJavaString(_path);
-	CRLog::debug("scanBookCoverInternal(%s) called", LCSTR(path));
-	lString32 arcname, item;
-    LVStreamRef res;
-    jbyteArray array = NULL;
-    LVContainerRef arc;
-	if (!LVSplitArcName(path, arcname, item)) {
-		// not in archive
-		LVStreamRef stream = LVOpenFileStream(path.c_str(), LVOM_READ);
-		if (!stream.isNull()) {
-			arc = LVOpenArchieve(stream);
-			if (!arc.isNull()) {
-				// ZIP-based format
-				if (DetectEpubFormat(stream)) {
-					// EPUB
-					// extract coverpage from epub
-					res = GetEpubCoverpage(arc);
-				}
-				if (DetectFb3Format(stream)) {
-					// FB3
-					// extract coverpage from FB3
-					res = GetFb3Coverpage(arc);
-				}
-				if (DetectDocXFormat(stream)) {
-					// Docx
-					// extract coverpage from Docx
-					res = GetDocxCoverpage(arc);
-				}
-			} else {
-				res = GetFB2Coverpage(stream);
-				if (res.isNull()) {
-					doc_format_t fmt;
-					if (DetectPDBFormat(stream, fmt)) {
-						res = GetPDBCoverpage(stream);
-					}
-				}
-			}
-		}
-	} else {
-    	CRLog::debug("scanBookCoverInternal() : is archive, item=%s, arc=%s", LCSTR(item), LCSTR(arcname));
-		LVStreamRef arcstream = LVOpenFileStream(arcname.c_str(), LVOM_READ);
-		if (!arcstream.isNull()) {
-			arc = LVOpenArchieve(arcstream);
-			if (!arc.isNull()) {
-				LVStreamRef stream = arc->OpenStream(item.c_str(), LVOM_READ);
-				if (!stream.isNull()) {
-			    	CRLog::debug("scanBookCoverInternal() : archive stream opened ok, parsing");
-					res = GetFB2Coverpage(stream);
-					if (res.isNull()) {
-						doc_format_t fmt;
-						if (DetectPDBFormat(stream, fmt)) {
-							res = GetPDBCoverpage(stream);
-						}
-					}
-				}
-			}
-		}
-	}
-	if (!res.isNull())
-		array = env.streamToJByteArray(res);
-    if (array != NULL)
-    	CRLog::debug("scanBookCoverInternal() : returned cover page array");
-    else
-    	CRLog::debug("scanBookCoverInternal() : cover page data not found");
-    return array;
+	COFFEE_TRY_JNI(_env, drawBookCoverInternal(_env, _engine, bitmap, _data, respectAspectRatio, _fontFace, _title, _authors, _seriesName, seriesNumber, bpp));
 }
 
 /*
@@ -880,10 +1032,36 @@ jbyteArray scanBookCoverInternal
  * Signature: (Ljava/lang/String;)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_org_coolreader_crengine_Engine_scanBookCoverInternal
-  (JNIEnv * _env, jclass _class, jstring _path)
+		(JNIEnv * _env, jclass _class, jstring _path)
 {
 	jbyteArray res = NULL;
 	COFFEE_TRY_JNI(_env, res = scanBookCoverInternal( _env, _class, _path));
+	return res;
+}
+
+/*
+ * Class:     org_coolreader_crengine_Engine
+ * Method:    isArchiveInternal
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_isArchiveInternal
+		(JNIEnv * _env, jclass, jstring jarcName)
+{
+	jboolean res = JNI_FALSE;
+	CRJNIEnv env(_env);
+	lString32 arcName = env.fromJavaString(jarcName);
+	LVStreamRef stream = LVOpenFileStream(arcName.c_str(), LVOM_READ);
+	if (!stream.isNull()) {
+		LVContainerRef arc = LVOpenArchieve(stream);
+		if (!arc.isNull()) {
+			if (!DetectEpubFormat(stream) &&
+				!DetectFb3Format(stream) &&
+				!DetectDocXFormat(stream) &&
+				!DetectOpenDocumentFormat(stream)) {
+				res = JNI_TRUE;
+			}
+		}
+	}
 	return res;
 }
 
@@ -893,7 +1071,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_coolreader_crengine_Engine_scanBookCoverIn
  * Signature: (Ljava/lang/String;)[Ljava/lang/String;
  */
 JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getArchiveItemsInternal
-  (JNIEnv * _env, jclass, jstring jarcName)
+		(JNIEnv * _env, jclass, jstring jarcName)
 {
     CRJNIEnv env(_env);
     lString32 arcName = env.fromJavaString(jarcName);
@@ -917,92 +1095,6 @@ JNIEXPORT jobjectArray JNICALL Java_org_coolreader_crengine_Engine_getArchiveIte
     return env.toJavaStringArray(list);
 }
 
-
-class JNICDRLogger : public CRLog
-{
-public:
-    JNICDRLogger()
-    {
-    	curr_level = CRLog::LL_DEBUG;
-    }
-protected:
-  
-	virtual void log( const char * lvl, const char * msg, va_list args)
-	{
-	    #define MAX_LOG_MSG_SIZE 1024
-		static char buffer[MAX_LOG_MSG_SIZE+1];
-		vsnprintf(buffer, MAX_LOG_MSG_SIZE, msg, args);
-		int level = ANDROID_LOG_DEBUG;
-		//LOGD("CRLog::log is called with LEVEL %s, pattern %s", lvl, msg);
-		if ( !strcmp(lvl, "FATAL") )
-			level = ANDROID_LOG_FATAL;
-		else if ( !strcmp(lvl, "ERROR") )
-			level = ANDROID_LOG_ERROR;
-		else if ( !strcmp(lvl, "WARN") )
-			level = ANDROID_LOG_WARN;
-		else if ( !strcmp(lvl, "INFO") )
-			level = ANDROID_LOG_INFO;
-		else if ( !strcmp(lvl, "DEBUG") )
-			level = ANDROID_LOG_DEBUG;
-		else if ( !strcmp(lvl, "TRACE") )
-			level = ANDROID_LOG_VERBOSE;
-		__android_log_write(level, LOG_TAG, buffer);
-	}
-};
-
-//typedef void (lv_FatalErrorHandler_t)(int errorCode, const char * errorText );
-
-void cr3androidFatalErrorHandler(int errorCode, const char * errorText )
-{
-	LOGE("CoolReader Fatal Error #%d: %s", errorCode, errorText);
-	LOGASSERTFAILED("CoolReader Fatal Error", "CoolReader Fatal Error #%d: %s", errorCode, errorText);
-	//static char str[1001];
-	//snprintf(str, 1000, "CoolReader Fatal Error #%d: %s", errorCode, errorText);
-	//LOGE("CoolReader Fatal Error #%d: %s", errorCode, errorText);
-	//LOGASSERTFAILED(errorText, "CoolReader Fatal Error #%d: %s", errorCode, errorText);
-}
-
-/// set fatal error handler
-void crSetFatalErrorHandler( lv_FatalErrorHandler_t * handler );
-
-jboolean initInternal(JNIEnv * penv, jclass obj, jobjectArray fontArray, jint sdk_int) {
-
-	CRJNIEnv::sdk_int = sdk_int;
-
-	CRJNIEnv env(penv);
-
-	// to catch crashes and remove current cache file on crash (SIGSEGV etc.)
-	crSetSignalHandler();
-
-	LOGI("initInternal called");
-	// set fatal error handler
-	crSetFatalErrorHandler( &cr3androidFatalErrorHandler );
-	LOGD("Redirecting CDRLog to Android");
-	CRLog::setLogger( new JNICDRLogger() );
-	CRLog::setLogLevel( CRLog::LL_TRACE );
-	CRLog::info("CREngine log redirected");
-	CRLog::info("CRENGINE version %s %s", CR_ENGINE_VERSION, CR_ENGINE_BUILD_DATE);
-	
-	CRLog::info("initializing hyphenation manager");
-    HyphMan::initDictionaries(lString32::empty_str); //don't look for dictionaries
-	HyphMan::activateDictionary(lString32(HYPH_DICT_ID_NONE));
-	CRLog::info("creating font manager");
-    InitFontManager(lString8::empty_str);
-	CRLog::debug("converting fonts array: %d items", (int)env->GetArrayLength(fontArray));
-	lString32Collection fonts;
-	env.fromJavaStringArray(fontArray, fonts);
-	int len = fonts.length();
-	CRLog::debug("registering fonts: %d fonts in list", len);
-	for ( int i=0; i<len; i++ ) {
-		lString8 fontName = UnicodeToUtf8(fonts[i]);
-		CRLog::debug("registering font %s", fontName.c_str());
-		if ( !fontMan->RegisterFont( fontName ) )
-			CRLog::error("cannot load font %s", fontName.c_str());
-	}
-    CRLog::info("%d fonts registered", fontMan->GetFontCount());
-	return fontMan->GetFontCount() ? JNI_TRUE : JNI_FALSE;
-}
-
 /*
  * Class:     org_coolreader_crengine_Engine
  * Method:    initInternal
@@ -1016,87 +1108,7 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_initInternal
 	return res;
 }
 
-class HyphDataLoaderProxy : public HyphDataLoader {
-	JavaVM *mJavaVM;
-public:
-	HyphDataLoaderProxy(JavaVM *jvm) :
-			HyphDataLoader(), mJavaVM(jvm) {
-	}
-
-	virtual ~HyphDataLoaderProxy() {}
-
-	virtual LVStreamRef loadData(lString32 id) {
-		JNIEnv *penv = NULL;
-		bool attached = false;
-		mJavaVM->GetEnv((void **) &penv, JNI_VERSION_1_6);
-		if (NULL == penv) {
-			// caller thread is not attached yet
-			mJavaVM->AttachCurrentThread(&penv, NULL);
-			attached = true;
-		}
-		LVStreamRef stream = LVStreamRef();
-		jclass pjcEngine = penv->FindClass("org/coolreader/crengine/Engine");
-		if (NULL == pjcEngine)
-			return stream;
-		jmethodID pjmEngine_loadHyphDictData = penv->GetStaticMethodID(pjcEngine, "loadHyphDictData", "(Ljava/lang/String;)[B");
-		if (NULL == pjmEngine_loadHyphDictData)
-			return stream;
-		CRJNIEnv env(penv);
-		jstring jid = env.toJavaString(id);
-		jbyteArray data = static_cast<jbyteArray>(penv->CallStaticObjectMethod(pjcEngine, pjmEngine_loadHyphDictData, jid));
-		stream = env.jbyteArrayToStream(data);
-		if (attached)
-			mJavaVM->DetachCurrentThread();
-		return stream;
-	}
-};
-
-jboolean initDictionaries(JNIEnv *penv, jclass clazz, jobjectArray dictArray) {
-	jclass pjcHyphDict = penv->FindClass("org/coolreader/crengine/Engine$HyphDict");
-	if (NULL == pjcHyphDict)
-		return JNI_FALSE;
-	jfieldID pjfHyphDict_type = penv->GetFieldID(pjcHyphDict, "type", "I");
-	if (NULL == pjfHyphDict_type)
-		return JNI_FALSE;
-    jfieldID pjfHyphDict_code = penv->GetFieldID(pjcHyphDict, "code", "Ljava/lang/String;");
-    if (NULL == pjfHyphDict_code)
-        return JNI_FALSE;
-
-	int len = penv->GetArrayLength(dictArray);
-	HyphDictionary *dict;
-	CRJNIEnv env(penv);
-	HyphDictType dict_type;
-	for (int i = 0; i < len; i++) {
-		jobject obj = penv->GetObjectArrayElement(dictArray, i);
-		int type = penv->GetIntField(obj, pjfHyphDict_type);
-		jstring code = static_cast<jstring>(penv->GetObjectField(obj, pjfHyphDict_code));
-		switch (type) {     // convert org/coolreader/crengine/Engine$HyphDict$type into HyphDictType
-			case 0:         // org/coolreader/crengine/Engine$HYPH_NONE
-				dict_type = HDT_NONE;
-				break;
-			case 1:         // org/coolreader/crengine/Engine$HYPH_ALGO
-				dict_type = HDT_ALGORITHM;
-				break;
-			case 2:         // org/coolreader/crengine/Engine$HYPH_DICT
-				dict_type = HDT_DICT_TEX;
-				break;
-			default:
-				dict_type = HDT_NONE;
-				break;
-		}
-		lString32 dict_code = env.fromJavaString(code);
-		dict = new HyphDictionary(dict_type, dict_code, dict_code, dict_code);
-		if (!HyphMan::addDictionaryItem(dict))
-		    delete dict;
-	}
-	JavaVM *jvm;
-	env->GetJavaVM(&jvm);
-	HyphMan::setDataLoader(new HyphDataLoaderProxy( jvm ));
-	return JNI_TRUE;
-}
-
-JNIEXPORT jboolean JNICALL
-Java_org_coolreader_crengine_Engine_initDictionaries
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_initDictionaries
  (JNIEnv * penv, jclass clazz, jobjectArray dictArray)
 {
     jboolean res = JNI_FALSE;
@@ -1226,49 +1238,55 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_setCacheDirectory
 
 /*
  * Class:     org_coolreader_crengine_Engine
- * Method:    haveFcLangCodeInternal
- * Signature: (Ljava/lang/String;)Z
- */
-JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_haveFcLangCodeInternal
-		(JNIEnv *env, jclass cls, jstring langCode)
-{
-	jboolean res = JNI_FALSE;
-	const char* langCode_ptr = env->GetStringUTFChars(langCode, 0);
-	if (langCode_ptr) {
-		struct fc_lang_catalog* lang_ptr = fc_lang_cat;
-		for (int i = 0; i < fc_lang_cat_sz; i++)
-		{
-			if (strcmp(lang_ptr->lang_code, langCode_ptr) == 0)
-			{
-				res = JNI_TRUE;
-				break;
-			}
-			lang_ptr++;
-		}
-		env->ReleaseStringUTFChars(langCode, langCode_ptr);
-	}
-	return res;
-}
-
-
-/*
- * Class:     org_coolreader_crengine_Engine
  * Method:    checkFontLanguageCompatibilityInternal
  * Signature: (Ljava/lang/String;Ljava/lang/String;)Z
  */
-JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_Engine_checkFontLanguageCompatibilityInternal
-		(JNIEnv *env, jclass cls, jstring fontFace, jstring langCode)
+JNIEXPORT jint JNICALL Java_org_coolreader_crengine_Engine_checkFontLanguageCompatibilityInternal
+		(JNIEnv *env, jclass cls, jstring fontFace, jstring langTag)
 {
-	jboolean res = JNI_TRUE;
+	font_lang_compat res = font_lang_compat_invalid_tag;
 	const char* fontFace_ptr = env->GetStringUTFChars(fontFace, 0);
-	const char* langCode_ptr = env->GetStringUTFChars(langCode, 0);
-	if (fontFace_ptr && langCode_ptr) {
-		res = fontMan->checkFontLangCompat(lString8(fontFace_ptr), lString8(langCode_ptr)) ? JNI_TRUE : JNI_FALSE;
+	const char* langTag_ptr = env->GetStringUTFChars(langTag, 0);
+	if (fontFace_ptr && langTag_ptr) {
+		res = fontMan->checkFontLangCompat(lString8(fontFace_ptr), lString8(langTag_ptr));
 	}
-	if (langCode_ptr)
-		env->ReleaseStringUTFChars(langCode, langCode_ptr);
+	if (langTag_ptr)
+		env->ReleaseStringUTFChars(langTag, langTag_ptr);
 	if (fontFace_ptr)
 		env->ReleaseStringUTFChars(fontFace, fontFace_ptr);
+	return (jint)res;
+}
+
+/*
+ * Class:     org_coolreader_crengine_Engine
+ * Method:    getHumanReadableLocaleNameInternal
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_coolreader_crengine_Engine_getHumanReadableLocaleNameInternal
+		(JNIEnv *env, jclass cls, jstring langTag)
+{
+	jstring res = NULL;
+	const char* langTag_ptr = NULL;
+	if (langTag)
+		langTag_ptr = env->GetStringUTFChars(langTag, 0);
+	if (langTag_ptr) {
+		CRLocaleData loc(langTag_ptr);
+		if (loc.isValid()) {
+			lString8 langDescr = loc.langName();
+			if (loc.scriptNumeric() > 0) {
+				langDescr.append("-");
+				langDescr.append(loc.scriptName());
+			}
+			if (loc.regionNumeric() > 0) {
+				langDescr.append(" (");
+				langDescr.append(loc.regionAlpha3());
+				langDescr.append(")");
+			}
+			jstring str = env->NewStringUTF(langDescr.c_str());
+			res = (jstring)env->NewGlobalRef(str);
+		}
+		env->ReleaseStringUTFChars(langTag, langTag_ptr);
+	}
 	return res;
 }
 
@@ -1402,6 +1420,10 @@ JNIEXPORT jint JNICALL Java_org_coolreader_crengine_Engine_getDomVersionCurrent
 	return gDOMVersionCurrent;
 }
 
+#ifdef __cplusplus
+}
+#endif
+
 //=====================================================================
 
 static JNINativeMethod sEngineMethods[] = {
@@ -1417,14 +1439,15 @@ static JNINativeMethod sEngineMethods[] = {
   {"setCacheDirectoryInternal", "(Ljava/lang/String;I)Z", (void*)Java_org_coolreader_crengine_Engine_setCacheDirectoryInternal},
   {"scanBookPropertiesInternal", "(Lorg/coolreader/crengine/FileInfo;)Z", (void*)Java_org_coolreader_crengine_Engine_scanBookPropertiesInternal},
   {"updateFileCRC32Internal", "(Lorg/coolreader/crengine/FileInfo;)Z", (void*)Java_org_coolreader_crengine_Engine_updateFileCRC32Internal},
+  {"isArchiveInternal", "(Ljava/lang/String;)Z", (void*)Java_org_coolreader_crengine_Engine_isArchiveInternal},
   {"getArchiveItemsInternal", "(Ljava/lang/String;)[Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_getArchiveItemsInternal},
   {"isLink", "(Ljava/lang/String;)Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_isLink},
   {"suspendLongOperationInternal", "()V", (void*)Java_org_coolreader_crengine_Engine_suspendLongOperationInternal},
   {"setKeyBacklightInternal", "(I)Z", (void*)Java_org_coolreader_crengine_Engine_setKeyBacklightInternal},
   {"scanBookCoverInternal", "(Ljava/lang/String;)[B", (void*)Java_org_coolreader_crengine_Engine_scanBookCoverInternal},
-  {"drawBookCoverInternal", "(Landroid/graphics/Bitmap;[BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II)V", (void*)Java_org_coolreader_crengine_Engine_drawBookCoverInternal},
-  {"haveFcLangCodeInternal", "(Ljava/lang/String;)Z", (void*)Java_org_coolreader_crengine_Engine_haveFcLangCodeInternal},
-  {"checkFontLanguageCompatibilityInternal", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)Java_org_coolreader_crengine_Engine_checkFontLanguageCompatibilityInternal},
+  {"drawBookCoverInternal", "(Landroid/graphics/Bitmap;[BZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II)V", (void*)Java_org_coolreader_crengine_Engine_drawBookCoverInternal},
+  {"checkFontLanguageCompatibilityInternal", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)Java_org_coolreader_crengine_Engine_checkFontLanguageCompatibilityInternal},
+  {"getHumanReadableLocaleNameInternal", "(Ljava/lang/String;)Ljava/lang/String;", (void*)Java_org_coolreader_crengine_Engine_getHumanReadableLocaleNameInternal},
   {"listFilesInternal", "(Ljava/io/File;)[Ljava/io/File;", (void*)Java_org_coolreader_crengine_Engine_listFilesInternal},
   {"getDomVersionCurrent", "()I", (void*)Java_org_coolreader_crengine_Engine_getDomVersionCurrent}
 };
@@ -1446,11 +1469,11 @@ static JNINativeMethod sDocViewMethods[] = {
   {"getCurrentPageBookmarkInternal", "()Lorg/coolreader/crengine/Bookmark;", (void*)Java_org_coolreader_crengine_DocView_getCurrentPageBookmarkInternal},
   {"goToPositionInternal", "(Ljava/lang/String;Z)Z", (void*)Java_org_coolreader_crengine_DocView_goToPositionInternal},
   {"getPositionPropsInternal", "(Ljava/lang/String;Z)Lorg/coolreader/crengine/PositionProperties;", (void*)Java_org_coolreader_crengine_DocView_getPositionPropsInternal},
-  {"updateBookInfoInternal", "(Lorg/coolreader/crengine/BookInfo;)V", (void*)Java_org_coolreader_crengine_DocView_updateBookInfoInternal},
+  {"updateBookInfoInternal", "(Lorg/coolreader/crengine/BookInfo;Z)V", (void*)Java_org_coolreader_crengine_DocView_updateBookInfoInternal},
   {"getTOCInternal", "()Lorg/coolreader/crengine/TOCItem;", (void*)Java_org_coolreader_crengine_DocView_getTOCInternal},
   {"clearSelectionInternal", "()V", (void*)Java_org_coolreader_crengine_DocView_clearSelectionInternal},
   {"findTextInternal", "(Ljava/lang/String;III)Z", (void*)Java_org_coolreader_crengine_DocView_findTextInternal},
-  {"setBatteryStateInternal", "(I)V", (void*)Java_org_coolreader_crengine_DocView_setBatteryStateInternal},
+  {"setBatteryStateInternal", "(III)V", (void*)Java_org_coolreader_crengine_DocView_setBatteryStateInternal},
   {"getCoverPageDataInternal", "()[B", (void*)Java_org_coolreader_crengine_DocView_getCoverPageDataInternal},
   {"setPageBackgroundTextureInternal", "([BI)V", (void*)Java_org_coolreader_crengine_DocView_setPageBackgroundTextureInternal},
   {"updateSelectionInternal", "(Lorg/coolreader/crengine/Selection;)V", (void*)Java_org_coolreader_crengine_DocView_updateSelectionInternal},
@@ -1464,6 +1487,7 @@ static JNINativeMethod sDocViewMethods[] = {
   {"hilightBookmarksInternal", "([Lorg/coolreader/crengine/Bookmark;)V", (void*)Java_org_coolreader_crengine_DocView_hilightBookmarksInternal},
   {"checkBookmarkInternal", "(IILorg/coolreader/crengine/Bookmark;)Z", (void*)Java_org_coolreader_crengine_DocView_checkBookmarkInternal},
   {"isRenderedInternal", "()Z", (void*)Java_org_coolreader_crengine_DocView_isRenderedInternal},
+  {"isTimeChangedInternal", "()Z", (void*)Java_org_coolreader_crengine_DocView_isTimeChangedInternal},
   {"setTimeLeftInternal", "(Ljava/lang/String;)Z", (void*)Java_org_coolreader_crengine_DocView_setTimeLeftInternal}
 };
 

@@ -29,6 +29,9 @@ import org.coolreader.geo.TransportStop;
 import org.coolreader.layouts.FlowLayout;
 import org.coolreader.library.AuthorAlias;
 import org.coolreader.plugins.OnlineStorePluginManager;
+import org.coolreader.tts.OnTTSCreatedListener;
+import org.coolreader.tts.TTSControlBinder;
+import org.coolreader.tts.TTSControlServiceAccessor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -100,8 +103,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	String[] mFontFaces;
 	String[] mFontFacesFiles;
-	TextToSpeech mTTS;
-	boolean mTemporaryTTS;
+	TTSControlServiceAccessor mTTSControl;
+	TTSControlBinder mTTSBinder;
 	ClickOption optBT;
 
 	public static int[] mFontSizes = new int[] {
@@ -736,7 +739,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
 	};
-
+	// possible values see in crengine/include/lvfont.h: enum font_antialiasing_t
 	int[] mAntialias = new int[] {
 			0, 1, 2
 		};
@@ -1179,6 +1182,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.scan_depth2_add_info
 	};
 
+	int [] mExternalDocumentCameDialogTimeout = new int[] {
+			0, 1, 2, 3, 4, 5, 8, 10, 15, 20, 30, 45, 60
+	};
+
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -1191,7 +1198,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	OptionsListView mOptionsApplication;
 	OptionsListView mOptionsControls;
 	OptionsListView mOptionsBrowser;
-	OptionsListView mOptionsCloudSync;
+	OptionsListView mOptionsCloudSync = null;
 	OptionsListView mOptionsTTS;
 
 	// Disable options
@@ -1209,11 +1216,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	OptionBase mCloudSyncAskConfirmationsOption;
 	OptionBase mGoogleDriveAutoSavePeriodOption;
 	OptionBase mCloudSyncDataKeepAliveOptions;
+	ListOption mTTSEngineOption;
 	OptionBase mTTSUseDocLangOption;
 	ListOption mTTSLanguageOption;
 	ListOption mTTSVoiceOption;
 	ListOption mFontWeightOption;
 	OptionBase mFontHintingOption;
+	ListOption mBounceProtectionOption; //KR: We have our own implementation, but name is the same
 
 	public final static int OPTION_VIEW_TYPE_NORMAL = 0;
 	public final static int OPTION_VIEW_TYPE_BOOLEAN = 1;
@@ -1246,6 +1255,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public String label;
 		public String property;
 		public String defaultValue;
+		public String disabledNote;
 		public String addInfo;
 		public ArrayList<String> quickFilters = new ArrayList<String>();
 		public HashMap<String, String> usefulLinks = new HashMap<String, String>();
@@ -1362,6 +1372,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return this;
 		}
 
+		public OptionBase setDisabledNote(String note) {
+			disabledNote = note;
+			return this;
+		}
+
 		public OptionBase setOnChangeHandler( Runnable handler ) {
 			onChangeHandler = handler;
 			return this;
@@ -1463,7 +1478,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				else
 					view = mInflater.inflate(R.layout.option_item, null);
 				if (view != null) {
-					TextView label = (TextView) view.findViewById(R.id.option_label);
+					TextView label = view.findViewById(R.id.option_label);
 					if (label != null)
 						if (mOwner instanceof OptionsDialog) {
 							if (!isSettingBelongToProfile(property)) {
@@ -1527,7 +1542,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				labelView.setTextColor(enabledColor);
 			if (valueView != null) {
 				String valueLabel = getValueLabel();
-				if (valueLabel != null && valueLabel.length() > 0) {
+				if (!enabled && null != disabledNote && disabledNote.length() > 0) {
+					if (null != valueLabel && valueLabel.length() > 0)
+						valueLabel = valueLabel + " (" + disabledNote + ")";
+					else
+						valueLabel = disabledNote;
+				}
+				if (null != valueLabel && valueLabel.length() > 0) {
 					valueView.setText(valueLabel);
 					valueView.setVisibility(View.VISIBLE);
 				} else {
@@ -1666,9 +1687,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsPage.refresh();
 			mOptionsApplication.refresh();
 			mOptionsControls.refresh();
-//			if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//				mOptionsCloudSync.refresh();
-//			}
+			if (null != mOptionsCloudSync) {
+				mOptionsCloudSync.refresh();
+			}
 		}
 	}
 
@@ -1722,7 +1743,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				final View view1 = view;
 				if (btnOptionAddInfo != null)
 					btnOptionAddInfo.setOnClickListener(v -> {
-						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+						String commentLabel = addInfo;
+						if (!enabled && null != disabledNote && disabledNote.length() > 0) {
+							if (null != commentLabel && commentLabel.length() > 0)
+								commentLabel = commentLabel + " (" + disabledNote + ")";
+							else
+								commentLabel = disabledNote;
+						}
+						mActivity.showToast(commentLabel, Toast.LENGTH_LONG, view1, true, 0);
 					});
 			}
 			labelView.setText(label);
@@ -1793,7 +1821,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				commentView.setTextColor(colorIcon);
 			ImageView valueView = view.findViewById(R.id.option_value_cb);
 			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
-			if (addInfo.trim().equals("")) {
+			String commentLabel = addInfo;
+			if (!enabled && null != disabledNote && disabledNote.length() > 0) {
+				if (null != commentLabel && commentLabel.length() > 0)
+					commentLabel = commentLabel + " (" + disabledNote + ")";
+				else
+					commentLabel = disabledNote;
+			}
+			if (StrUtils.isEmptyStr(commentLabel)) {
 				btnOptionAddInfo.setVisibility(View.INVISIBLE);
 			} else {
 				btnOptionAddInfo.setImageDrawable(
@@ -1801,12 +1836,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
 				mActivity.tintViewIcons(btnOptionAddInfo);
 				final View view1 = view;
-				if (btnOptionAddInfo != null)
+				if (btnOptionAddInfo != null) {
+					String finalCommentLabel = commentLabel;
 					btnOptionAddInfo.setOnClickListener(v -> {
 						//Toast toast = Toast.makeText(mActivity, addInfo, Toast.LENGTH_LONG);
 						//toast.show();
-						mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
+						mActivity.showToast(finalCommentLabel, Toast.LENGTH_LONG, view1, true, 0);
 					});
+				}
 			}
 			labelView.setText(label);
 			if (labelView.isEnabled()) enabledColor = labelView.getCurrentTextColor();
@@ -2074,7 +2111,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					ViewGroup layout;
 					final Three item = listFiltered.get(position);
 					if (convertView == null) {
-						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
+						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(), null);
 						//view = new TextView(getContext());
 					} else {
 						layout = (ViewGroup)convertView;
@@ -2217,7 +2254,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				mProperties.setProperty(property, ReaderAction.NONE.id);
 		}
 
-		protected int getItemLayoutId(int position, final Three item) {
+		protected int getItemLayoutId() {
 			return R.layout.option_value;
 		}
 
@@ -3552,6 +3589,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new FilebrowserSecGroupOption(mOwner, getString(R.string.sec_group),
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
+			listView.add(new ListOption(mOwner, getString(R.string.external_doc_came_dialog_timeout),
+					PROP_APP_EXT_DOC_CAME_TIMEOUT, getString(R.string.external_doc_came_dialog_timeout_add_info), this.lastFilteredValue).
+					add(mExternalDocumentCameDialogTimeout).
+					setDefaultValue("0").noIcon());
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3614,35 +3655,45 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					PROP_SAVE_POS_SPEAK_TIMEOUT, getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					add(mMotionTimeoutsSec, mMotionTimeoutsTitlesSec, mMotionTimeoutsAddInfosSec).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_position_to_disk_interval, R.drawable.icons8_position_to_disk_interval));
-			if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) && (mTTS != null)) {
-				ListOption engineOption = new ListOption(mOwner, getString(R.string.options_tts_engine), PROP_APP_TTS_ENGINE,
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				mTTSEngineOption = new ListOption(mOwner, getString(R.string.options_tts_engine), PROP_APP_TTS_ENGINE,
 						getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
-				List<TextToSpeech.EngineInfo> engines = mTTS.getEngines();
-				String currentEngine = mTTS.getDefaultEngine();
-				for (TextToSpeech.EngineInfo info : engines) {
-					engineOption.add(info.name, info.label, "");
-				}
-				engineOption.setDefaultValue(currentEngine);
-				engineOption.setIconIdByAttr(R.attr.attr_icons8_tts_engine, R.drawable.icons8_tts_engine);
-				listView.add(engineOption);
-				// onchange handler
-				engineOption.setOnChangeHandler(() -> {
-					if (mTemporaryTTS && null != mTTS) {
-						mTTS.shutdown();
-					}
-					// update languages & voices list
-					String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
-					mTTS = new TextToSpeech(mActivity, status -> {
-						if (TextToSpeech.SUCCESS == status) {
-							if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-								fillTTSLanguages(mTTSLanguageOption);
-								mTTSVoiceOption.clear();
-							}
-						} else {
-							mTTSLanguageOption.clear();
+				mTTSBinder.retrieveAvailableEngines(list -> {
+					BackgroundThread.instance().executeGUI(() -> {
+						for (TextToSpeech.EngineInfo info : list) {
+							mTTSEngineOption.add(info.name, info.label, "");
 						}
-					}, tts_package);
-					mTemporaryTTS = true;
+						String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
+						mTTSEngineOption.setDefaultValue(tts_package);
+						mTTSEngineOption.refreshList();
+					});
+				});
+				listView.add(mTTSEngineOption.noIcon());
+				mTTSEngineOption.setOnChangeHandler(() -> {
+					String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
+					mTTSBinder.initTTS(tts_package, new OnTTSCreatedListener() {
+						@Override
+						public void onCreated() {
+							if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+								BackgroundThread.instance().executeGUI(() -> {
+									if (null != mTTSLanguageOption)
+										fillTTSLanguages(mTTSLanguageOption);
+									if (null != mTTSVoiceOption)
+										mTTSVoiceOption.clear();
+								});
+							}
+						}
+						@Override
+						public void onFailed() {
+							if (null != mTTSLanguageOption)
+								mTTSLanguageOption.clear();
+						}
+						@Override
+						public void onTimedOut() {
+							if (null != mTTSLanguageOption)
+								mTTSLanguageOption.clear();
+						}
+					});
 				});
 			}
 			mTTSUseDocLangOption = new BoolOption(mOwner, getString(R.string.options_tts_use_doc_lang), PROP_APP_TTS_USE_DOC_LANG,
@@ -3654,7 +3705,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 				fillTTSLanguages(mTTSLanguageOption);
 				mTTSLanguageOption.setEnabled(!useDocLang);
-				mTTSLanguageOption.setIconIdByAttr(R.attr.attr_icons8_tts_lang, R.drawable.icons8_tts_lang);
 				listView.add(mTTSLanguageOption);
 				// onchange handler
 				String lang = mProperties.getProperty (PROP_APP_TTS_FORCE_LANGUAGE, "");
@@ -3672,7 +3722,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						PROP_APP_TTS_VOICE, getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 				fillTTSVoices(mTTSVoiceOption, lang);
 				mTTSVoiceOption.setEnabled(!useDocLang);
-				mTTSVoiceOption.setIconIdByAttr(R.attr.attr_icons8_voice, R.drawable.icons8_voice);
 				listView.add(mTTSVoiceOption);
 			}
 			listView.add(new ListOption(mOwner, getString(R.string.tts_panel_background), PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND,
@@ -3682,6 +3731,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new BoolOption(mOwner, getString(R.string.tts_panel_transp_buttons), PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS,
 					getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_transp_buttons,R.drawable.icons8_transp_buttons));
+			listView.add(new BoolOption(mOwner, getString(R.string.options_tts_google_abbr_workaround),
+					PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, getString(R.string.options_tts_google_abbr_workaround_comment), lastFilteredValue)
+					.setDefaultValue("1").noIcon());
 			listView.add(new ListOption(mOwner, getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT,
 					getString(R.string.options_app_tts_stop_motion_timeout_add_info), this.lastFilteredValue).
 					add(mMotionTimeouts, mMotionTimeoutsTitles, mMotionTimeoutsAddInfos).setDefaultValue(Integer.toString(mMotionTimeouts[0])).
@@ -3689,11 +3741,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			listView.add(new BoolOption(mOwner, getString(R.string.tts_page_mode_dont_change), PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
 					getString(R.string.tts_page_mode_dont_change_add_info), this.lastFilteredValue).setDefaultValue("0").
 					setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
-			listView.add(new ListOption(mOwner, getString(R.string.force_tts_koef),
-					PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), this.lastFilteredValue).
-					add(mForceTTS, mForceTTSTitles, mForceTTSAddInfos).
-					setDefaultValue("0").
-					setIconIdByAttr(R.attr.attr_icons8_speaker_koef, R.drawable.icons8_speaker_koef));
+			// plotn - disabled, since removed from tts code
+//			listView.add(new ListOption(mOwner, getString(R.string.force_tts_koef),
+//					PROP_APP_TTS_FORCE_KOEF, getString(R.string.force_tts_koef_add_info), this.lastFilteredValue).
+//					add(mForceTTS, mForceTTSTitles, mForceTTSAddInfos).
+//					setDefaultValue("0").
+//					setIconIdByAttr(R.attr.attr_icons8_speaker_koef, R.drawable.icons8_speaker_koef));
 			dlg.setView(listView);
 			dlg.show();
 		}
@@ -3701,16 +3754,33 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		public void onSelect() {
 			if (!enabled)
 				return;
-			if (mTTS == null) mTTS = ((CoolReader) mActivity).tts;
-			if (mTTS == null) {
-				if (!((CoolReader) mActivity).initTTS(tts -> {
-					mTTS = ((CoolReader) mActivity).tts;
-					whenSelect();
-				})) {
+			String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
+			mTTSBinder.initTTS(tts_package, new OnTTSCreatedListener() {
+				@Override
+				public void onCreated() {
+					if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+						BackgroundThread.instance().executeGUI(() -> {
+							if (null != mTTSLanguageOption)
+								fillTTSLanguages(mTTSLanguageOption);
+							if (null != mTTSVoiceOption)
+								mTTSVoiceOption.clear();
+						});
+					}
 					whenSelect();
 				}
-			} else
-				whenSelect();
+				@Override
+				public void onFailed() {
+					if (null != mTTSLanguageOption)
+						mTTSLanguageOption.clear();
+					whenSelect();
+				}
+				@Override
+				public void onTimedOut() {
+					if (null != mTTSLanguageOption)
+						mTTSLanguageOption.clear();
+					whenSelect();
+				}
+			});
 		}
 
 		public boolean updateFilterEnd() {
@@ -3719,6 +3789,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					getString(R.string.option_add_info_empty_text));
 			this.updateFilteredMark(getString(R.string.force_tts_koef), PROP_APP_TTS_FORCE_KOEF,
 					getString(R.string.force_tts_koef_add_info));
+			this.updateFilteredMark(getString(R.string.options_tts_google_abbr_workaround), PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR,
+					getString(R.string.options_tts_google_abbr_workaround_comment));
 			this.updateFilteredMark(getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT,
 					getString(R.string.options_app_tts_stop_motion_timeout_add_info));
 			for (String s: mMotionTimeoutsTitles) this.updateFilteredMark(s);
@@ -3727,11 +3799,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			for (int i: mForceTTSAddInfos) this.updateFilteredMark(getString(i));
 			this.updateFilteredMark(getString(R.string.options_tts_engine), PROP_APP_TTS_ENGINE,
 					getString(R.string.option_add_info_empty_text));
-			if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) && (mTTS != null)) {
-				List<TextToSpeech.EngineInfo> engines = mTTS.getEngines();
-				for (TextToSpeech.EngineInfo info : engines) {
-					this.updateFilteredMark(info.name);
-					this.updateFilteredMark(info.label);
+			if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) && (mTTSEngineOption != null)) {
+				for (Three t: mTTSEngineOption.list) {
+					this.updateFilteredMark(t.label);
+					this.updateFilteredMark(t.value);
+					this.updateFilteredMark(t.addInfo);
 				}
 			}
 			this.updateFilteredMark(getString(R.string.options_tts_use_doc_lang), PROP_APP_TTS_USE_DOC_LANG,
@@ -4231,15 +4303,18 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						mEnableHyphOption.setEnabled(value);
 					});
 			mEnableMultiLangOption.enabled = !legacyRender;
+			mEnableMultiLangOption.setDisabledNote(getString(R.string.options_legacy_rendering_enabled));
 			listView.add(mEnableMultiLangOption);
 			mEnableHyphOption = new BoolOption(mOwner, getString(R.string.options_style_enable_hyphenation), PROP_TEXTLANG_HYPHENATION_ENABLED,
 					getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").
 					setIconIdByAttr(R.attr.cr3_option_text_hyphenation_drawable, R.drawable.cr3_option_text_hyphenation);
 			mEnableHyphOption.enabled = !legacyRender && mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
+			mEnableHyphOption.setDisabledNote(getString(R.string.options_multilingual_disabled));
 			listView.add(mEnableHyphOption);
 			mHyphDictOption = new HyphenationOptions(mOwner, getString(R.string.options_hyphenation_dictionary),getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 					setIconIdByAttr(R.attr.cr3_option_text_hyphenation_drawable, R.drawable.cr3_option_text_hyphenation);
 			mHyphDictOption.enabled = legacyRender || !mProperties.getBool(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
+			mHyphDictOption.setDisabledNote(getString(R.string.options_multilingual_enabled));
 			listView.add(mHyphDictOption);
 			if (mReaderView != null) {
 				listView.add(new BoolOption(mOwner, getString(R.string.mi_book_styles_enable), PROP_EMBEDDED_STYLES,
@@ -4247,16 +4322,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 						.setOnChangeHandler(() -> {
 							boolean value = mProperties.getBool(PROP_EMBEDDED_STYLES, false);
 							mEmbedFontsOptions.setEnabled(isEpubFormat && value);
+							mEmbedFontsOptions.setDisabledNote(getString(R.string.options_disabled_document_styles));
 							mIgnoreDocMargins.setEnabled(isFormatWithEmbeddedStyle && value);
+							mIgnoreDocMargins.setDisabledNote(getString(R.string.options_disabled_document_styles));
 						}) );
 				mEmbedFontsOptions = new BoolOption(mOwner, getString(R.string.options_font_embedded_document_font_enabled), PROP_EMBEDDED_FONTS,
 						getString(R.string.mi_book_styles_enable_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon();
 				boolean value = mProperties.getBool(PROP_EMBEDDED_STYLES, false);
 				mEmbedFontsOptions.setEnabled(isEpubFormat && value);
+				mEmbedFontsOptions.setDisabledNote(getString(R.string.options_disabled_document_styles));
 				listView.add(mEmbedFontsOptions);
 				mIgnoreDocMargins = new StyleBoolOption(mOwner, getString(R.string.options_ignore_document_margins), "styles.body.margin", "", this.lastFilteredValue,
 						"margin: 0em !important", "").setDefaultValueBoolean(false).noIcon();
 				mIgnoreDocMargins.setEnabled(isFormatWithEmbeddedStyle && value);
+				mIgnoreDocMargins.setDisabledNote(getString(R.string.options_disabled_document_styles));
 				listView.add(mIgnoreDocMargins);
 //				OptionBase tmp = new StyleBoolOption(mOwner, getString(R.string.more), "styles.image.background-color", "", this.lastFilteredValue,
 //						"#c8c8c8", "#ffffff").setDefaultValueBoolean(false).noIcon();
@@ -4316,27 +4395,32 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			//if (DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED) {
 			//if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			if (DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED) {
+				ListOption optionMode;
 				if ( DeviceInfo.EINK_ONYX ) {
-					ListOption option = new ListOption(mOwner, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE,
+					optionMode = new ListOption(mOwner, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE,
 							getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
-					if (DeviceInfo.EINK_SCREEN_REGAL) {
-						option = option.add(mOnyxScreenUpdateModes[0], mOnyxScreenUpdateModesTitles[0], R.string.option_add_info_empty_text);
-					}
-					option = option.add(mOnyxScreenUpdateModes[1], mOnyxScreenUpdateModesTitles[1], R.string.option_add_info_empty_text);
-					option = option.add(mOnyxScreenUpdateModes[2], mOnyxScreenUpdateModesTitles[2], R.string.option_add_info_empty_text);
-					option = option.add(mOnyxScreenUpdateModes[3], mOnyxScreenUpdateModesTitles[3], R.string.option_add_info_empty_text);
-					listView.add(option.setDefaultValue(String.valueOf(DeviceInfo.EINK_SCREEN_REGAL ? EinkScreen.EinkUpdateMode.Regal.code : EinkScreen.EinkUpdateMode.Clear.code)));
+					if (DeviceInfo.EINK_SCREEN_REGAL)
+						optionMode = optionMode.add(mOnyxScreenUpdateModes[0], mOnyxScreenUpdateModesTitles[0], R.string.option_add_info_empty_text);
+					optionMode = optionMode.add(mOnyxScreenUpdateModes[1], mOnyxScreenUpdateModesTitles[1], R.string.option_add_info_empty_text);
+					optionMode = optionMode.add(mOnyxScreenUpdateModes[2], mOnyxScreenUpdateModesTitles[2], R.string.option_add_info_empty_text);
+					optionMode = optionMode.add(mOnyxScreenUpdateModes[3], mOnyxScreenUpdateModesTitles[3], R.string.option_add_info_empty_text);
+					listView.add(optionMode.setDefaultValue(String.valueOf(DeviceInfo.EINK_SCREEN_REGAL ? EinkScreen.EinkUpdateMode.Regal.code : EinkScreen.EinkUpdateMode.Clear.code))
+							.setDisabledNote(getString(R.string.options_eink_app_optimization_enabled)));
 				} else {
-					OptionBase option = new ListOption(mOwner, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE,
-							getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
-							.add(mScreenUpdateModes, mScreenUpdateModesTitles, mScreenUpdateModesAddInfos).setDefaultValue("0");
-					listView.add(option);
+					optionMode = new ListOption(mOwner, getString(R.string.options_screen_update_mode), PROP_APP_SCREEN_UPDATE_MODE,
+							getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
+					optionMode.add(mScreenUpdateModes, mScreenUpdateModesTitles, mScreenUpdateModesAddInfos).setDefaultValue("0")
+							.setDisabledNote(getString(R.string.options_eink_app_optimization_enabled));
+					listView.add(optionMode);
 				}
-				OptionBase option = new ListOption(mOwner, getString(R.string.options_screen_update_interval), PROP_APP_SCREEN_UPDATE_INTERVAL,
+				OptionBase optionInterval = new ListOption(mOwner, getString(R.string.options_screen_update_interval), PROP_APP_SCREEN_UPDATE_INTERVAL,
 						getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add("0",
 						getString(R.string.options_screen_update_interval_none), getString(R.string.option_add_info_empty_text)).
-						add(mScreenFullUpdateInterval).setDefaultValue("10");
-				listView.add(option);
+						add(mScreenFullUpdateInterval).setDefaultValue("10").
+						setDisabledNote(getString(R.string.options_eink_app_optimization_enabled));
+				listView.add(optionInterval);
+				optionMode.setEnabled(!activity.getEinkScreen().isAppOptimizationEnabled());
+				optionInterval.setEnabled(!activity.getEinkScreen().isAppOptimizationEnabled());
 			}
 			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 				listView.addExt(new ListOption(mOwner, getString(R.string.options_screen_blackpage_interval), PROP_APP_SCREEN_BLACKPAGE_INTERVAL,
@@ -4917,6 +5001,78 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public static class ListOption extends OptionBase {
 		protected ArrayList<Three> list = new ArrayList<>();
 		protected ArrayList<Three> listFiltered = new ArrayList<>();
+
+		class ListOptionAdapter extends BaseAdapter {
+
+			private final ListView mListView;
+			private final List<Three> mListFiltered;
+
+			ListOptionAdapter(ListView listView, List<Three> listFiltered) {
+				super();
+				mListView = listView;
+				mListFiltered = listFiltered;
+			}
+
+			public boolean areAllItemsEnabled() {
+				return true;
+			}
+
+			public boolean isEnabled(int position) {
+				return true;
+			}
+
+			public int getCount() {
+				return mListFiltered.size();
+			}
+
+			public Object getItem(int position) {
+				return mListFiltered.get(position);
+			}
+
+			public long getItemId(int position) {
+				return position;
+			}
+
+			public int getItemViewType(int position) {
+				return 0;
+			}
+
+			public View getView(final int position, View convertView, ViewGroup parent) {
+				ViewGroup layout;
+				if ( convertView==null ) {
+					layout = (ViewGroup)mInflater.inflate(getItemLayoutId(), null);
+				} else {
+					layout = (ViewGroup)convertView;
+				}
+				final Three item = mListFiltered.get(position);
+				updateItemContents(layout, item, mListView, position);
+				return layout;
+			}
+
+			public int getViewTypeCount() {
+				return 1;
+			}
+
+			public boolean hasStableIds() {
+				return true;
+			}
+
+			public boolean isEmpty() {
+				return mListFiltered.size()==0;
+			}
+
+			private ArrayList<DataSetObserver> observers = new ArrayList<>();
+
+			public void registerDataSetObserver(DataSetObserver observer) {
+				observers.add(observer);
+			}
+
+			public void unregisterDataSetObserver(DataSetObserver observer) {
+				observers.remove(observer);
+			}
+
+		};
+
 		protected BaseAdapter listAdapter;
 		protected ListView listView;
 
@@ -5161,7 +5317,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void closed() {
 		}
 		
-		protected int getItemLayoutId(int position, final Three item) {
+		protected int getItemLayoutId() {
 			return R.layout.option_value; 
 		}
 
@@ -5202,10 +5358,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			//cb.setChecked(isSelected);
 			setCheckedValue(cb, isSelected);
 			cb.setOnClickListener(v -> {
-				listView.getOnItemClickListener().onItemClick(listView, listView, position, 0);
-//					mProperties.setProperty(property, item.value);
-//					dismiss();
-//					optionsListView.refresh();
+				AdapterView.OnItemClickListener listener = listView.getOnItemClickListener();
+				if (null != listener)
+					listener.onItemClick(listView, listView, position, 0);
 			});
 		}
 		
@@ -5224,76 +5379,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					listFiltered.add(item);
 				}
 			}
-			listAdapter = new BaseAdapter() {
-
-				public boolean areAllItemsEnabled() {
-					return true;
-				}
-
-				public boolean isEnabled(int position) {
-					return true;
-				}
-
-				public int getCount() {
-					return listFiltered.size();
-				}
-
-				public Object getItem(int position) {
-					return listFiltered.get(position);
-				}
-
-				public long getItemId(int position) {
-					return position;
-				}
-
-				public int getItemViewType(int position) {
-					return 0;
-				}
-
-				public View getView(final int position, View convertView,
-									ViewGroup parent) {
-					ViewGroup layout;
-					final Three item = listFiltered.get(position);
-					if (convertView == null) {
-						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
-						//view = new TextView(getContext());
-					} else {
-						layout = (ViewGroup)convertView;
-					}
-					updateItemContents( layout, item, listView, position );
-					//cb.setClickable(false);
-//					cb.setOnClickListener(new View.OnClickListener() {
-//						@Override
-//						public void onClick(View v) {
-//
-//						}
-//					});
-					return layout;
-				}
-
-				public int getViewTypeCount() {
-					return 1;
-				}
-
-				public boolean hasStableIds() {
-					return true;
-				}
-
-				public boolean isEmpty() {
-					return listFiltered.size()==0;
-				}
-
-				private ArrayList<DataSetObserver> observers = new ArrayList<>();
-
-				public void registerDataSetObserver(DataSetObserver observer) {
-					observers.add(observer);
-				}
-
-				public void unregisterDataSetObserver(DataSetObserver observer) {
-					observers.remove(observer);
-				}
-
-			};
+			listAdapter = new ListOptionAdapter(listView, list);
 			int selItem = getSelectedItemIndex();
 			if (selItem < 0)
 				selItem = 0;
@@ -5424,6 +5510,141 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				optionsListView.refresh();
 		}
 	}
+
+	protected interface FontScanCompleted {
+		void onComplete(ArrayList<Three> list, boolean canceled);
+	}
+
+	// KR - since we have our own font select dialog we'll disable this - maybe later
+	/*
+	protected class FontSelectOption extends ListOption {
+		protected ArrayList<Pair> sourceList;
+		private String langTag;
+		private String langDescr;
+		private ListOptionAdapter listAdapter;
+
+		public FontSelectOption(OptionOwner owner, String label, String property ) {
+			super(owner, label, property);
+			langTag = null;
+			langDescr = null;
+			BookInfo bookInfo = mReaderView.getBookInfo();
+			if (null != bookInfo) {
+				FileInfo fileInfo = bookInfo.getFileInfo();
+				if (null != fileInfo) {
+					langTag = fileInfo.language;
+					langDescr = Engine.getHumanReadableLocaleName(langTag);
+				}
+			}
+		}
+
+		private void asyncFilterFontsByLanguage(String langTag, FontScanCompleted onComplete) {
+			BackgroundThread.ensureGUI();
+			final Scanner.ScanControl control = new Scanner.ScanControl();
+			final Engine.ProgressControl progress = Services.getEngine().createProgress(R.string.scanning_font_files, control);
+			final ArrayList<Pair> filtered = new ArrayList<Pair>();
+			BackgroundThread.instance().postBackground(() -> {
+				int i = 0;
+				for (Pair pair : list) {
+					if (control.isStopped())
+						break;
+					String faceName = pair.value;
+					Engine.font_lang_compat status = Engine.checkFontLanguageCompatibility(faceName, langTag);
+					switch (status) {
+						case font_lang_compat_full:
+						case font_lang_compat_partial:
+							filtered.add(new Pair(faceName, faceName));
+							break;
+						default:
+							break;
+					}
+					i++;
+					progress.setProgress(10000*i/list.size());
+				}
+				onComplete.onComplete(filtered, control.isStopped());
+				progress.hide();
+			});
+		}
+
+		public void onSelect() {
+			if (!enabled)
+				return;
+			final BaseDialog dlg = new BaseDialog(mActivity, label, false, false);
+
+			LinearLayout layout = new LinearLayout(mActivity);
+			layout.setOrientation(LinearLayout.VERTICAL);
+
+			View panel = mInflater.inflate(R.layout.option_lang_filter, null);
+			layout.addView(panel);
+			CompoundButton filter_by_lang = panel.findViewById(R.id.filter_by_lang);
+			if (null != langDescr && langDescr.length() > 0) {
+				filter_by_lang.setText(mActivity.getString(R.string.filter_by_book_language_s, langDescr));
+			} else {
+				filter_by_lang.setText(mActivity.getString(R.string.filter_by_book_language_s, mActivity.getString(R.string.undetermined)));
+				filter_by_lang.setEnabled(false);
+			}
+			final ListView listView = new BaseListView(mActivity, false);
+			listAdapter = new ListOptionAdapter(listView, list);
+			int selItem = getSelectedItemIndex();
+			if ( selItem<0 )
+				selItem = 0;
+			listView.setAdapter(listAdapter);
+			listView.setSelection(selItem);
+			layout.addView(listView);
+
+			listView.setOnItemClickListener((adapter, listview, position, id) -> {
+				Pair item = (Pair) listAdapter.getItem(position);
+				onClick(item);
+				dlg.dismiss();
+				closed();
+			});
+
+			filter_by_lang.setOnCheckedChangeListener((buttonView, isChecked) -> {
+				if (isChecked) {
+					asyncFilterFontsByLanguage(langTag, (list, canceled) -> {
+						if (!canceled) {
+							BackgroundThread.instance().executeGUI(() -> {
+								FontSelectOption.this.sourceList = FontSelectOption.this.list;
+								FontSelectOption.this.list = list;
+								listAdapter = new ListOptionAdapter(listView, list);
+								int selindex = getSelectedItemIndex();
+								if ( selindex<0 )
+									selindex = 0;
+								listView.setAdapter(listAdapter);
+								listView.setSelection(selindex);
+							});
+						} else {
+							BackgroundThread.instance().executeGUI(() -> {
+								filter_by_lang.setChecked(false);
+							});
+						}
+					});
+				} else {
+					if (null != sourceList) {
+						list = sourceList;
+						listAdapter = new ListOptionAdapter(listView, list);
+						int selindex = getSelectedItemIndex();
+						if (selindex < 0)
+							selindex = 0;
+						listView.setAdapter(listAdapter);
+						listView.setSelection(selindex);
+					}
+				}
+			});
+
+			dlg.setOnDismissListener(dialog -> closed());
+
+			// TODO: set checked for for filter_by_lang (save in settings)
+
+			dlg.setView(layout);
+			dlg.show();
+		}
+
+		protected void closed() {
+			if (null != sourceList)
+				list = sourceList;
+		}
+	}
+	*/
 
 	public static String updDicValue(String value, Properties mProperties, CoolReader mActivity, boolean isShort) {
 		String sfind = mActivity.getString(R.string.options_selection_action_dictionary);
@@ -5640,7 +5861,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		}
 
-		protected int getItemLayoutId(int position, final Three item) {
+		protected int getItemLayoutId() {
 			return R.layout.option_value;
 		}
 
@@ -5786,7 +6007,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					ViewGroup layout;
 					final Three item = list.get(position);
 					if (convertView == null) {
-						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(position, item), null);
+						layout = (ViewGroup)mInflater.inflate(getItemLayoutId(), null);
 						//view = new TextView(getContext());
 					} else {
 						layout = (ViewGroup)convertView;
@@ -6024,7 +6245,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			}
 		}
 
-		protected int getItemLayoutId(int position, final Three item) {
+		protected int getItemLayoutId() {
 			return R.layout.option_value;
 		}
 
@@ -6209,7 +6430,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			textureSampleCache.clear();
 		}
 
-		protected int getItemLayoutId(int position, final Three item) {
+		protected int getItemLayoutId() {
 			return R.layout.option_value_image; 
 		}
 
@@ -6449,7 +6670,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		}
 
-		protected int getItemLayoutId(int position, final Three item) {
+		protected int getItemLayoutId() {
             return R.layout.option_value_fonts;
 		}
 
@@ -6484,7 +6705,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		protected void updateItemContents( final View layout, final Three item, final ListView listView, final int position ) {
 			super.updateItemContents(layout, item, listView, position);
 			ImageView cb = layout.findViewById(R.id.option_value_check);
-			ImageView iv = (ImageView)layout.findViewById(R.id.option_value_del);
+			ImageView iv = layout.findViewById(R.id.option_value_del);
 			if (cb.getTag().equals("1")) iv.setVisibility(View.INVISIBLE);
 			else {
 				String[] arrFonts = item.addInfo.split("~");
@@ -6731,9 +6952,20 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		return found;
 	}
 
-	public OptionsDialog(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles, TextToSpeech tts)
-	{
+	public OptionsDialog(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles, TTSControlBinder ttsbinder) {
 		super("OptionsDialog", activity, null, false, false);
+		init(activity, mode, readerView, fontFaces, fontFacesFiles, ttsbinder, null);
+	}
+
+	public OptionsDialog(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles,
+						 TTSControlBinder ttsbinder, TTSControlServiceAccessor ttscontrol) {
+		super("OptionsDialog", activity, null, false, false);
+		init(activity, mode, readerView, fontFaces, fontFacesFiles, ttsbinder, ttscontrol);
+	}
+
+	private void init(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles,
+						 TTSControlBinder ttsbinder, TTSControlServiceAccessor ttscontrol)
+	{
 //		Log.i("cr3optionsdlg", "EINK_SCREEN = " + DeviceInfo.EINK_SCREEN);
 //		Log.i("cr3optionsdlg", "SCREEN_CAN_CONTROL_BRIGHTNESS = " + DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS);
 //		Log.i("cr3optionsdlg", "ONYX_BRIGHTNESS_FILE = " + DeviceInfo.ONYX_BRIGHTNESS_FILE);
@@ -6766,8 +6998,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mReaderView = readerView;
 		mFontFaces = fontFaces;
 		mFontFacesFiles = fontFacesFiles;
-		mTTS = tts;
-		mTemporaryTTS = false;
+		mTTSControl = ttscontrol;
+		if (ttsbinder == null) {
+			if (mTTSControl != null)
+				mTTSControl.bind(ttsb -> {
+					mTTSBinder = ttsb;
+				});
+		} else mTTSBinder = ttsbinder;
 		mProperties = new Properties(mActivity.settings()); //  readerView.getSettings();
 		mFilteredProps = filterProfileSettings(mProperties);
 		mOldProperties = new Properties(mProperties);
@@ -6861,7 +7098,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			if ((sText.equals(""))&&(mOptions.size()==0)) mOptionsThis = mOptions;
 			mAdapter = new BaseAdapter() {
 				public boolean areAllItemsEnabled() {
-					return false;
+					return true;
 				}
 
 				public boolean isEnabled(int position) {
@@ -6937,13 +7174,25 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
-			if (mOptionsThis!=null) {
-				mOptionsThis.get(position).onSelect();
+			try {
+				if (mOptionsThis != null) {
+					OptionBase option = mOptionsThis.get(position);
+					if (option.enabled) {
+						option.onSelect();
+						return true;
+					}
+				}
+				else {
+					OptionBase option = mOptions.get(position);
+					if (option.enabled) {
+						option.onSelect();
+						return true;
+					}
+				}
+			} catch (Exception ignored) {
+				//asdf - do not ignore exception
 			}
-			else {
-				mOptions.get(position).onSelect();
-			}
-			return true;
+			return false;
 		}
 
 		public int size() {
@@ -6966,10 +7215,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			return mOptionsControls;
 		else if ("Page".equals(tag))
 			return mOptionsPage;
-//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//			if ("Clouds".equals(tag))
+		// KR: CR's sync is not implemented since we have our own via Yandex.Disk and DropBox
+//		if ( "Clouds".equals(tag) )
+//			if (null != mOptionsCloudSync) {
 //				return mOptionsCloudSync;
-//		}
+//			}
 		return null;
 	}
 
@@ -7486,68 +7736,48 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void fillTTSLanguages(ListOption listOption) {
 		listOption.clear();
-		if (null != mTTS) {
-			Set<Voice> voices = mTTS.getVoices();
-			HashMap<Locale, String> languagesMap = new HashMap<>();
-			for (Voice voice : voices) {
-				Locale locale = voice.getLocale();
-				String language = locale.getDisplayLanguage();
-				String country = locale.getDisplayCountry();
-				if (country.length() > 0)
-					language += " (" + country + ")";
-				languagesMap.put(locale, language);
-			}
-			ArrayList<Three> list = new ArrayList<>();
-			for (Map.Entry<Locale, String> entry : languagesMap.entrySet()) {
-				list.add(new Three(entry.getKey().toString(), entry.getValue(), ""));
-			}
-			Collections.sort(list, (o1, o2) -> o1.label.compareTo(o2.label));
-			for (Three three : list) {
-				listOption.add(three.value, three.label, "");
-			}
-			Voice defaultVoice = mTTS.getVoice();
-			if (null != defaultVoice) {
-				Locale locale = defaultVoice.getLocale();
-				listOption.setDefaultValue(locale.toString());
-			}
-			listOption.noIcon();
+		if (null != mTTSBinder) {
+			mTTSBinder.retrieveAvailableLocales(list -> {
+				BackgroundThread.instance().executeGUI(() -> {
+					for (Locale locale : list) {
+						String language = locale.getDisplayLanguage();
+						String country = locale.getDisplayCountry();
+						if (country.length() > 0)
+							language += " (" + country + ")";
+						listOption.add(locale.toString(), language, "");
+					}
+					listOption.noIcon();
+					listOption.refreshList();
+				});
+			});
 		}
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void fillTTSVoices(ListOption listOption, String language) {
 		listOption.clear();
-		if (null != mTTS) {
-			Set<Voice> voices = mTTS.getVoices();
-			ArrayList<Three> list = new ArrayList<>();
-			for (Voice voice : voices) {
-				Locale locale = voice.getLocale();
-				String langCode = locale.toString();
-				String quality;
-				int qualityInt = voice.getQuality();
-				if (qualityInt >= Voice.QUALITY_VERY_HIGH)
-					quality = getString(R.string.options_tts_voice_quality_very_high);
-				else if (qualityInt >= Voice.QUALITY_HIGH)
-					quality = getString(R.string.options_tts_voice_quality_high);
-				else if (qualityInt >= Voice.QUALITY_NORMAL)
-					quality = getString(R.string.options_tts_voice_quality_normal);
-				else if (qualityInt >= Voice.QUALITY_LOW)
-					quality = getString(R.string.options_tts_voice_quality_low);
-				else
-					quality = getString(R.string.options_tts_voice_quality_very_low);
-				if (langCode.toLowerCase().equals(language.toLowerCase()))
-					//list.add(new Three(voice.getName(), voice.getName() + " (" + quality + ")", ""));
-					list.add(new Three(voice.getName(), voice.getName(), quality));
-			}
-			Collections.sort(list, (o1, o2) -> o1.label.compareTo(o2.label));
-			for (Three three : list) {
-				listOption.add(three.value, three.label, "");
-			}
-			Voice defaultVoice = mTTS.getVoice();
-			if (null != defaultVoice) {
-				listOption.setDefaultValue(defaultVoice.getName());
-			}
-			listOption.noIcon();
+		if (null != mTTSBinder) {
+			mTTSBinder.retrieveAvailableVoices(new Locale(language), list -> {
+				BackgroundThread.instance().executeGUI(() -> {
+					for (Voice voice : list) {
+						String quality;
+						int qualityInt = voice.getQuality();
+						if (qualityInt >= Voice.QUALITY_VERY_HIGH)
+							quality = getString(R.string.options_tts_voice_quality_very_high);
+						else if (qualityInt >= Voice.QUALITY_HIGH)
+							quality = getString(R.string.options_tts_voice_quality_high);
+						else if (qualityInt >= Voice.QUALITY_NORMAL)
+							quality = getString(R.string.options_tts_voice_quality_normal);
+						else if (qualityInt >= Voice.QUALITY_LOW)
+							quality = getString(R.string.options_tts_voice_quality_low);
+						else
+							quality = getString(R.string.options_tts_voice_quality_very_low);
+						listOption.add(voice.getName(), voice.getName(), quality);
+					}
+					listOption.noIcon();
+					listOption.refreshList();
+				});
+			});
 		}
 	}
 
@@ -7560,33 +7790,44 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		mOptionsTTS = new OptionsListView(getContext(), null);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			ListOption engineOption = new ListOption(this, getString(R.string.options_tts_engine), PROP_APP_TTS_ENGINE,
+			mTTSEngineOption = new ListOption(this, getString(R.string.options_tts_engine), PROP_APP_TTS_ENGINE,
 					getString(R.string.option_add_info_empty_text), filter);
-			List<TextToSpeech.EngineInfo> engines = mTTS.getEngines();
-			String currentEngine = mTTS.getDefaultEngine();
-			for (TextToSpeech.EngineInfo info : engines) {
-				engineOption.add(info.name, info.label, "");
-			}
-			engineOption.setDefaultValue(currentEngine);
-			mOptionsTTS.add(engineOption.noIcon());
-			// onchange handler
-			engineOption.setOnChangeHandler(() -> {
-				if (mTemporaryTTS && null != mTTS) {
-					mTTS.shutdown();
-				}
-				// update languages & voices list
-				String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
-				mTTS = new TextToSpeech(mActivity, status -> {
-					if (TextToSpeech.SUCCESS == status) {
-						if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-							fillTTSLanguages(mTTSLanguageOption);
-							mTTSVoiceOption.clear();
-						}
-					} else {
-						mTTSLanguageOption.clear();
+			mTTSBinder.retrieveAvailableEngines(list -> {
+				BackgroundThread.instance().executeGUI(() -> {
+					for (TextToSpeech.EngineInfo info : list) {
+						mTTSEngineOption.add(info.name, info.label, "");
 					}
-				}, tts_package);
-				mTemporaryTTS = true;
+					String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
+					mTTSEngineOption.setDefaultValue(tts_package);
+					mTTSEngineOption.refreshList();
+				});
+			});
+			mOptionsTTS.add(mTTSEngineOption.noIcon());
+			mTTSEngineOption.setOnChangeHandler(() -> {
+				String tts_package = mProperties.getProperty(PROP_APP_TTS_ENGINE, "");
+				mTTSBinder.initTTS(tts_package, new OnTTSCreatedListener() {
+					@Override
+					public void onCreated() {
+						if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+							BackgroundThread.instance().executeGUI(() -> {
+								if (null != mTTSLanguageOption)
+									fillTTSLanguages(mTTSLanguageOption);
+								if (null != mTTSVoiceOption)
+									mTTSVoiceOption.clear();
+							});
+						}
+					}
+					@Override
+					public void onFailed() {
+						if (null != mTTSLanguageOption)
+							mTTSLanguageOption.clear();
+					}
+					@Override
+					public void onTimedOut() {
+						if (null != mTTSLanguageOption)
+							mTTSLanguageOption.clear();
+					}
+				});
 			});
 		}
 		mTTSUseDocLangOption = new BoolOption(this, getString(R.string.options_tts_use_doc_lang), PROP_APP_TTS_USE_DOC_LANG,
@@ -7617,6 +7858,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mTTSVoiceOption.setEnabled(!useDocLang);
 			mOptionsTTS.add(mTTSVoiceOption);
 		}
+		mOptionsTTS.add(new BoolOption(this, getString(R.string.options_tts_google_abbr_workaround),
+				PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, getString(R.string.options_tts_google_abbr_workaround_comment), filter).
+				setDefaultValue("1").noIcon());
 		mOptionsTTS.add(new ListOption(this, getString(R.string.options_app_tts_stop_motion_timeout), PROP_APP_MOTION_TIMEOUT,
 				getString(R.string.option_add_info_empty_text), filter).
 				add(mMotionTimeouts, mMotionTimeoutsTitles).setDefaultValue(Integer.toString(mMotionTimeouts[0])).noIcon());
@@ -7782,6 +8026,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			String faceName = mProperties.getProperty(PROP_FONT_FACE, "");
 			updateFontWeightValues(mFontWeightOption, faceName);
 		});
+		/*
 		mFontWeightOption.setOnChangeHandler(() -> {
 			// enable/disable font hinting option
 			String faceName = mProperties.getProperty(PROP_FONT_FACE, "");
@@ -7794,6 +8039,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				//mFontHintingOption.setEnabled(nativeWeightsArray.contains(base_weight));
 			}
 		});
+		 */
 		OptionBase sbFFO = new FallbackFontsOptions(this, getString(R.string.options_font_fallback_faces), getString(R.string.option_add_info_empty_text), filter)
 			.setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face);
 		((FallbackFontsOptions)sbFFO).updateFilterEnd();
@@ -7873,6 +8119,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsControls.add(kmO);
 		mOptionsControls.add(new TapZoneOption(this, getString(R.string.options_app_tapzones_normal), PROP_APP_TAP_ZONE_ACTIONS_TAP,
 				getString(R.string.options_app_tapzones_normal_add_info), filter).setIconIdByAttr(R.attr.cr3_option_controls_tapzones_drawable, R.drawable.cr3_option_controls_tapzones));
+		Runnable doubleTapOnChange = () -> {
+			int type = mProperties.getInt(PROP_APP_SECONDARY_TAP_ACTION_TYPE, TAP_ACTION_TYPE_LONGPRESS);
+			boolean dblText = mProperties.getBool(PROP_APP_DOUBLE_TAP_SELECTION, false);
+			mBounceProtectionOption.setEnabled(type == TAP_ACTION_TYPE_LONGPRESS && !dblText);
+		};
 		mOptionsControls.add(new ListOption(this, getString(R.string.options_controls_tap_secondary_action_type), PROP_APP_SECONDARY_TAP_ACTION_TYPE,
 				getString(R.string.options_controls_tap_secondary_action_type_add_info), filter).add(mTapSecondaryActionType, mTapSecondaryActionTypeTitles, mTapSecondaryActionTypeAddInfos).setDefaultValue(String.valueOf(TAP_ACTION_TYPE_LONGPRESS)).
 				setIconIdByAttr(R.attr.attr_icons8_double_tap, R.drawable.icons8_double_tap));
@@ -7884,10 +8135,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).
 				add(mDoubleClickIntervals).
 				setDefaultValue("400").setIconIdByAttr(R.attr.attr_icons8_double_click_tap_interval, R.drawable.icons8_double_click_tap_interval));
-		mOptionsControls.add(new ListOption(this, getString(R.string.prevent_tap_interval), PROP_PREVENT_CLICK_INTERVAL,
-				getString(R.string.prevent_tap_interval_add_info), filter).
-				add(mPreventClickIntervals).
-				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_prevent_accidental_tap_interval, R.drawable.icons8_prevent_accidental_tap_interval));
+		mBounceProtectionOption = new ListOption(this, getString(R.string.prevent_tap_interval), PROP_PREVENT_CLICK_INTERVAL,
+				getString(R.string.prevent_tap_interval_add_info), filter);
+		mBounceProtectionOption.add(mPreventClickIntervals).
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_prevent_accidental_tap_interval, R.drawable.icons8_prevent_accidental_tap_interval);
+		mOptionsControls.add(mBounceProtectionOption);
+		doubleTapOnChange.run();
 		//if ( !DeviceInfo.EINK_SCREEN  || DeviceInfo.EINK_HAVE_FRONTLIGHT ) // nook glowlight has this option. 20201022 Still commented, not tested
 		//asdf TODO: work with backlight
 //		mBacklightControl2 = new ListOption(this, getString(R.string.options_controls_flick_brightness), PROP_APP_FLICK_BACKLIGHT_CONTROL,
@@ -7987,40 +8240,34 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}, true).setDefaultValue(getString(R.string.init_app_add_info)).
 				setIconIdByAttr(R.attr.attr_icons8_delete_database, R.drawable.icons8_delete_database));
 
-//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//			boolean gdriveSyncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
-//			boolean gdriveSyncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
+//		if (BuildConfig.GSUITE_AVAILABLE && DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 //			mOptionsCloudSync = new OptionsListView(getContext());
+//			Runnable onGoogleDriveEnable = () -> {
+//				boolean syncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
+//				boolean syncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
+//				mCloudSyncAskConfirmationsOption.setEnabled(syncEnabled);
+//				mGoogleDriveEnableSettingsOption.setEnabled(syncEnabled);
+//				mGoogleDriveEnableBookmarksOption.setEnabled(syncEnabled);
+//				mGoogleDriveEnableCurrentBookInfoOption.setEnabled(syncEnabled);
+//				mGoogleDriveEnableCurrentBookBodyOption.setEnabled(syncEnabled && syncBookInfoEnabled);
+//				mGoogleDriveAutoSavePeriodOption.setEnabled(syncEnabled);
+//				// mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
+//			};
 //			mOptionsCloudSync.add(new BoolOption(this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED).setDefaultValue("0").noIcon()
-//					.setOnChangeHandler(() -> {
-//						boolean syncEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED, false);
-//						boolean syncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
-//						mCloudSyncAskConfirmationsOption.setEnabled(syncEnabled);
-//						mGoogleDriveEnableSettingsOption.setEnabled(syncEnabled);
-//						mGoogleDriveEnableBookmarksOption.setEnabled(syncEnabled);
-//						mGoogleDriveEnableCurrentBookInfoOption.setEnabled(syncEnabled);
-//						mGoogleDriveEnableCurrentBookBodyOption.setEnabled(syncEnabled && syncBookInfoEnabled);
-//						mGoogleDriveAutoSavePeriodOption.setEnabled(syncEnabled);
-//						// mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
-//					}));
+//					.setOnChangeHandler(onGoogleDriveEnable));
 //			mCloudSyncAskConfirmationsOption = new BoolOption(this, getString(R.string.options_app_cloudsync_confirmations), PROP_APP_CLOUDSYNC_CONFIRMATIONS).setDefaultValue("1").noIcon();
-//			mCloudSyncAskConfirmationsOption.enabled = gdriveSyncEnabled;
 //			mGoogleDriveEnableSettingsOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_settings), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS).setDefaultValue("0").noIcon();
-//			mGoogleDriveEnableSettingsOption.enabled = gdriveSyncEnabled;
 //			mGoogleDriveEnableBookmarksOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_bookmarks), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_BOOKMARKS).setDefaultValue("0").noIcon();
-//			mGoogleDriveEnableBookmarksOption.enabled = gdriveSyncEnabled;
 //			mGoogleDriveEnableCurrentBookInfoOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook_info), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO).setDefaultValue("0").noIcon();
-//			mGoogleDriveEnableCurrentBookInfoOption.enabled = gdriveSyncEnabled;
 //			mGoogleDriveEnableCurrentBookInfoOption.setOnChangeHandler(() -> {
 //				boolean syncBookInfoEnabled = mProperties.getBool(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_INFO, false);
 //				mGoogleDriveEnableCurrentBookBodyOption.setEnabled(syncBookInfoEnabled);
 //			});
 //			mGoogleDriveEnableCurrentBookBodyOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_currentbook_body), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_CURRENTBOOK_BODY).setDefaultValue("0").noIcon();
-//			mGoogleDriveEnableCurrentBookBodyOption.enabled = gdriveSyncEnabled && gdriveSyncBookInfoEnabled;
+//			mGoogleDriveEnableCurrentBookInfoOption.onChangeHandler.run();
 //			mGoogleDriveAutoSavePeriodOption = new ListOption(this, getString(R.string.autosave_period), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_AUTOSAVEPERIOD).add(mGoogleDriveAutoSavePeriod, mGoogleDriveAutoSavePeriodTitles).setDefaultValue(Integer.valueOf(5).toString()).noIcon();
-//			mGoogleDriveAutoSavePeriodOption.enabled = gdriveSyncEnabled;
 //			mCloudSyncDataKeepAliveOptions = new ListOption(this, getString(R.string.sync_data_keepalive_), PROP_APP_CLOUDSYNC_DATA_KEEPALIVE).add(mCloudBookmarksKeepAlive, mCloudBookmarksKeepAliveTitles).setDefaultValue(Integer.valueOf(14).toString()).noIcon();
-//			// mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
+//			onGoogleDriveEnable.run();
 //			mOptionsCloudSync.add(mCloudSyncAskConfirmationsOption);
 //			mOptionsCloudSync.add(mGoogleDriveEnableSettingsOption);
 //			mOptionsCloudSync.add(mGoogleDriveEnableBookmarksOption);
@@ -8036,9 +8283,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mOptionsCSS.refresh();
 		mOptionsPage.refresh();
 		mOptionsApplication.refresh();
-//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//			mOptionsCloudSync.refresh();
-//		}
+		if (null != mOptionsCloudSync) {
+			mOptionsCloudSync.refresh();
+		}
 
 		addTab("Styles",
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_type_filled, R.drawable.icons8_type_filled));
@@ -8050,9 +8297,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_cursor, R.drawable.icons8_cursor));
 		addTab("App",
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_settings, R.drawable.icons8_settings));
-//		if (DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//			addTab("Clouds", R.drawable.cr3_tab_clouds);
-//		}
+		if (null != mOptionsCloudSync) {
+			addTab("Clouds", R.drawable.cr3_tab_clouds);
+		}
 		setView(mTabs);
 		((CoolReader)activity).tintViewIcons(mTabs);
 		mTabs.invalidate();
@@ -8318,10 +8565,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		//L.d("OptionsDialog.onStop() : calling gc()");
 		//System.gc();
 		super.onStop();
-		if (mTemporaryTTS && null != mTTS) {
-			mTTS.shutdown();
-			mTTS = null;
-		}
 	}
 
 	@Override

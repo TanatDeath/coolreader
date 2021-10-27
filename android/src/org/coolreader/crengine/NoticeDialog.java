@@ -30,7 +30,8 @@ public class NoticeDialog extends Dialog {
 		init(activity, sText, R.string.dlg_button_ok, onOkButton, R.string.dlg_button_cancel, onCancelButton);
 	}
 
-	public NoticeDialog(BaseActivity activity, String sText, int button1TextRes, final Runnable button1Runnable, int button2TextRes, final Runnable button2Runnable) {
+	public NoticeDialog(BaseActivity activity, String sText, int button1TextRes, final Runnable button1Runnable, int button2TextRes, final Runnable button2Runnable,
+			final Runnable dismissRunnable) {
 		super(activity, activity.getCurrentTheme().getThemeId());
 		init(activity, sText, button1TextRes, button1Runnable, button2TextRes, button2Runnable);
 	}
