@@ -2770,6 +2770,8 @@ private:
 
     lString32 htmlDir;
     lString32 htmlLang;
+    lString32 htmlStyle;
+    lString32 htmlClass;
     bool insideHtmlTag;
 
     bool m_nonlinear = false;

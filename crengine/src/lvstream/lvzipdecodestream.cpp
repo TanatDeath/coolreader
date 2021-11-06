@@ -323,12 +323,10 @@ LVStream *LVZipDecodeStream::Create(LVStreamRef stream, lvpos_t pos, lString32 n
         return NULL;
     lUInt32 packSize = hdr.getPackSize();
     lUInt32 unpSize = hdr.getUnpSize();
-    if ( packSize==0 && unpSize==0 ) {
-        // Can happen when local header does not carry these sizes
-        // Use the ones provided that come from zip central directory
-        packSize = srcPackSize;
-        unpSize = srcUnpSize;
-    }
+    // When local header does not carry these sizes, use the ones
+    // that come from zip central directory
+    if ( packSize==0 ) packSize = srcPackSize;
+    if ( unpSize==0 ) unpSize = srcUnpSize;
     if ((lvpos_t)(pos + packSize) > (lvpos_t)stream->GetSize())
         return NULL;
     if (hdr.getMethod() == 0)

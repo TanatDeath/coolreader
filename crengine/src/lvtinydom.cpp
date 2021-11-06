@@ -84,8 +84,8 @@
 extern const int gDOMVersionCurrent = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
-#define CACHE_FILE_FORMAT_VERSION "3.12.80"
-
+// increment to force complete reload/reparsing of old file
+#define CACHE_FILE_FORMAT_VERSION "3.12.81"
 /// increment following value to force re-formatting of old book after load
 #define FORMATTING_VERSION_ID 0x0027
 
@@ -13805,6 +13805,10 @@ void ldomDocumentFragmentWriter::OnAttribute( const lChar32 * nsname, const lCha
                 htmlDir = attrvalue;
             else if ( !lStr_cmp(attrname, "lang") )
                 htmlLang = attrvalue;
+            else if ( !lStr_cmp(attrname, "style") )
+                htmlStyle = attrvalue;
+            else if ( !lStr_cmp(attrname, "class") )
+                htmlClass = attrvalue;
         }
         else if ( styleDetectionState ) {
             if ( !lStr_cmp(attrname, "rel") && lString32(attrvalue).lowercase() == U"stylesheet" )
@@ -13848,6 +13852,8 @@ ldomNode * ldomDocumentFragmentWriter::OnTagOpen( const lChar32 * nsname, const 
             insideHtmlTag = true;
             htmlDir.clear();
             htmlLang.clear();
+            htmlStyle.clear();
+            htmlClass.clear();
         }
     }
 
@@ -13887,6 +13893,10 @@ ldomNode * ldomDocumentFragmentWriter::OnTagOpen( const lChar32 * nsname, const 
                 parent->OnAttribute(U"", U"dir", htmlDir.c_str() );
             if ( !htmlLang.empty() ) // add attribute <DocFragment lang="ar" from <html lang="ar"> tag
                 parent->OnAttribute(U"", U"lang", htmlLang.c_str() );
+            if ( !htmlStyle.empty() ) // add attribute <DocFragment style="..." from <html style="..."> tag
+                parent->OnAttribute(U"", U"style", htmlStyle.c_str() );
+            if ( !htmlClass.empty() ) // add attribute <DocFragment class="..." from <html class="..."> tag
+                parent->OnAttribute(U"", U"class", htmlClass.c_str() );
             if (this->m_nonlinear)
                 parent->OnAttribute(U"", U"NonLinear", U"" );
 
