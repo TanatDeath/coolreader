@@ -315,8 +315,8 @@ public class BookInfoEditDialog extends BaseDialog {
         btnOpenBook.setOnClickListener(v -> onPositiveButtonClick());
         ImageButton btnDeleteBook = mainView.findViewById(R.id.book_delete);
         btnDeleteBook.setOnClickListener(v -> {
-		mActivity.askDeleteBook(mBookInfo.getFileInfo());
-		dismiss();
+			mActivity.askDeleteBook(mBookInfo.getFileInfo(), null);
+			dismiss();
 		});
         ImageButton btnCustomCover = mainView.findViewById(R.id.book_custom_cover);
 		btnCustomCover.setOnClickListener(v -> {
@@ -385,7 +385,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		attrStarFilled = a.getResourceId(5, 0);
 		colorGrayC = a.getColor(6, Color.GRAY);
 
-		btnStateNone.setTextColor(colorIcon);
+		btnStateNone.setTextColor(activity.getTextColor(colorIcon));
 		btnStateReading.setTextColor(colorGreen);
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
@@ -561,7 +561,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		});
 
 		Button translButton = mainView.findViewById(R.id.transl_button);
-		translButton.setTextColor(colorIcon);
+		translButton.setTextColor(activity.getTextColor(colorIcon));
 		translButton.setBackgroundColor(colorGrayC);
 
 		translButton.setOnClickListener(v -> {

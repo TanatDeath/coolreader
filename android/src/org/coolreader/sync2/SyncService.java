@@ -503,8 +503,8 @@ public class SyncService extends BaseService {
 				builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
 				// create notification channel
 				if (!mChannelCreated) {
-					NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "CoolReader TTS", NotificationManager.IMPORTANCE_LOW);
-					channel.setDescription("CoolReader TTS control");
+					NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "KnownReader sync", NotificationManager.IMPORTANCE_LOW);
+					channel.setDescription("KnownReader sync control");
 					channel.setSound(null, null);
 					// Register the channel with the system; you can't change the importance
 					// or other notification behaviors after this

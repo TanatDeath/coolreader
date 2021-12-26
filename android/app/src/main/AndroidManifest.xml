@@ -1305,6 +1305,19 @@
             </intent-filter>
         </receiver>
 
+        <!-- TTS control service -->
+        <service
+                android:name=".tts.legacy.TTSControlServiceLegacy"
+                android:enabled="true"
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback" />
+        <!-- Stop TTS on incoming call -->
+        <receiver android:name=".PhoneStateReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

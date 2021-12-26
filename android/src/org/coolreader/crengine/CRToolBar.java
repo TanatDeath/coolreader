@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.options.OptionsDialog;
 
 import android.graphics.Bitmap;
 import android.content.res.TypedArray;
@@ -179,7 +181,7 @@ public class CRToolBar extends ViewGroup {
 					{R.attr.colorIcon});
 			colorIcon = a.getColor(0, Color.GRAY);
 			a.recycle();
-			label.setTextColor(colorIcon);
+			label.setTextColor(activity.getTextColor(colorIcon));
 		}
 		icon.setImageResource(action != null ? action.getIconIdWithDef(activity) : Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
 		//icon.setMinimumHeight(buttonHeight);
@@ -201,84 +203,35 @@ public class CRToolBar extends ViewGroup {
 			this.actionsMore = new ArrayList<>();
 			ReaderAction[] actions_all = ReaderAction.AVAILABLE_ACTIONS;
 
-			//first priority
-			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
-					int aVis = 0;
-					try {
-						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
-					} catch (Exception e) {
-					}
-					if ((aVis == 4) || (aVis == 5) || (aVis == 6)) this.actions.add(a);
-					if ((aVis == 4) || (aVis == 6)) this.actionsToolbar.add(a);
-					if ((aVis == 5) || (aVis == 6)) this.actionsMore.add(a);
-				}
-			//second priority
-			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
-					int aVis = 0;
-					try {
-						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
-					} catch (Exception e) {
-					}
-					if ((aVis == 1) || (aVis == 2) || (aVis == 3)) this.actions.add(a);
-					if ((aVis == 1) || (aVis == 3)) this.actionsToolbar.add(a);
-					if ((aVis == 2) || (aVis == 3)) this.actionsMore.add(a);
-				}
-			//third priority
-			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
-					int aVis = 0;
-					try {
-						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
-					} catch (Exception e) {
-					}
-					if ((aVis == 7) || (aVis == 8) || (aVis == 9)) this.actions.add(a);
-					if ((aVis == 7) || (aVis == 9)) this.actionsToolbar.add(a);
-					if ((aVis == 8) || (aVis == 9)) this.actionsMore.add(a);
-				}
-			//forth priority
-			for (ReaderAction a : actions_all)
-				if ((a != ReaderAction.NONE) /*&& (a != ReaderAction.EXIT) && (a != ReaderAction.OPTIONS) && (a != ReaderAction.FILE_BROWSER_ROOT)*/) {
-					int aVis = 0;
-					try {
-						aVis = a.getIsVisibleOnToolbar(((CoolReader) activity).getReaderView());
-					} catch (Exception e) {
-					}
-					if ((aVis == 10) || (aVis == 11) || (aVis == 12)) this.actions.add(a);
-					if ((aVis == 10) || (aVis == 12)) this.actionsToolbar.add(a);
-					if ((aVis == 11) || (aVis == 12)) this.actionsMore.add(a);
-				}
-			if ((this.actionsToolbar.size() == 0) && (this.actionsMore.size() == 0)) {
-				ReaderAction[] ReaderActionDef =
-						new ReaderAction[]{
-								ReaderAction.GO_BACK,
-								ReaderAction.TOC,
-								ReaderAction.BOOK_INFO,
-								ReaderAction.FONTS_MENU,
-								ReaderAction.SEARCH,
-								ReaderAction.OPTIONS,
-								ReaderAction.BOOKMARKS,
-								ReaderAction.FILE_BROWSER_ROOT,
-								ReaderAction.TOGGLE_DAY_NIGHT,
-								ReaderAction.TOGGLE_SELECTION_MODE,
-								ReaderAction.GO_PAGE,
-								ReaderAction.GO_PERCENT,
-								ReaderAction.FILE_BROWSER,
-								ReaderAction.TTS_PLAY,
-								ReaderAction.GO_FORWARD,
-								ReaderAction.RECENT_BOOKS,
-								ReaderAction.OPEN_PREVIOUS_BOOK,
-								ReaderAction.TOGGLE_AUTOSCROLL,
-								ReaderAction.ABOUT,
-								ReaderAction.HIDE
-						};
+			String toolbarButtons = activity.settings().getProperty(BaseActivity.PROP_TOOLBAR_BUTTONS, "");
+			String menuButtons = activity.settings().getProperty(BaseActivity.PROP_READING_MENU_BUTTONS, "");
 
-				for (ReaderAction act : ReaderActionDef) {
-					this.actionsToolbar.add(act);
-					this.actionsMore.add(act);
+			if (StrUtils.isEmptyStr(toolbarButtons)) {
+				for (ReaderAction ra : ReaderAction.getDefReaderActions()) {
+					if (!this.actions.contains(ra)) this.actions.add(ra);
+					if (!this.actionsToolbar.contains(ra)) this.actionsToolbar.add(ra);
 				}
-			}
+			} else
+				for (String btn: toolbarButtons.split(",")) {
+					for (ReaderAction ra : actions_all)
+						if ((ra.cmd.nativeId +"."+ ra.param).equals(btn)) {
+							if (!this.actions.contains(ra)) this.actions.add(ra);
+							if (!this.actionsToolbar.contains(ra)) this.actionsToolbar.add(ra);
+						}
+				}
+			if (StrUtils.isEmptyStr(menuButtons)) {
+				for (ReaderAction ra : ReaderAction.getDefReaderActions()) {
+					if (!this.actions.contains(ra)) this.actions.add(ra);
+					if (!this.actionsMore.contains(ra)) this.actionsMore.add(ra);
+				}
+			} else
+				for (String btn: menuButtons.split(",")) {
+					for (ReaderAction ra : actions_all)
+						if ((ra.cmd.nativeId +"."+ ra.param).equals(btn)) {
+							if (!this.actions.contains(ra)) this.actions.add(ra);
+							if (!this.actionsMore.contains(ra)) this.actionsMore.add(ra);
+						}
+				}
 			/*if (!this.actions.contains(ReaderAction.OPTIONS)) this.actions.add(ReaderAction.OPTIONS);
 			if (!this.actions.contains(ReaderAction.FILE_BROWSER_ROOT)) this.actions.add(ReaderAction.FILE_BROWSER_ROOT);
 			if (!this.actions.contains(ReaderAction.EXIT)) this.actions.add(ReaderAction.EXIT);*/

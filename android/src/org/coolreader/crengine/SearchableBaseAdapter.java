@@ -7,6 +7,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 
 import org.coolreader.CoolReader;
+import org.coolreader.options.OptionsDialog;
 
 import java.util.ArrayList;
 

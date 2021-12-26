@@ -1,7 +1,5 @@
 package org.coolreader.crengine;
 
-import android.app.SearchManager;
-import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -12,24 +10,19 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
-import android.widget.PopupWindow.OnDismissListener;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.options.OptionsDialog;
 
 public class OrientationToolbarDlg {
-	PopupWindow mWindow;
+	public PopupWindow mWindow;
 	View mAnchor;
 	CoolReader mCoolReader;
 	ReaderView mReaderView;

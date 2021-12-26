@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.litres.LitresSearchParams;
+import org.coolreader.readerview.ReadingStat;
 import org.coolreader.plugins.OnlineStoreBook;
 
 import java.io.File;

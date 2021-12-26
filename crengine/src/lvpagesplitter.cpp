@@ -12,6 +12,7 @@
 
 #include "../include/lvpagesplitter.h"
 #include "../include/lvtinydom.h"
+#include "crlog.h"
 #include <time.h>
 
 // Uncomment to use old page splitter code

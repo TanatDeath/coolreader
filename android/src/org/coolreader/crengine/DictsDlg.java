@@ -7,10 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
-import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.layouts.FlowLayout;
+import org.coolreader.userdic.UserDicDlg;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -274,7 +275,7 @@ public class DictsDlg extends BaseDialog {
 			dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 			int colorIcon = themeColors.get(R.attr.colorIcon);
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-			dicButton.setTextColor(colorIcon);
+			dicButton.setTextColor(activity.getTextColor(colorIcon));
 			dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 			dicButton.setPadding(10, 10, 10, 10);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
@@ -293,7 +294,7 @@ public class DictsDlg extends BaseDialog {
 			tv.setPadding(10, 10, 10, 10);
 			tv.setLayoutParams(llp);
 			tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-			tv.setTextColor(colorIcon);
+			tv.setTextColor(activity.getTextColor(colorIcon));
 			flQuickTransl.addView(dicButton);
 			flQuickTransl.addView(tv);
 			dicButton.setOnClickListener(v -> {
@@ -353,8 +354,8 @@ public class DictsDlg extends BaseDialog {
 		}
 		flQuickTransl = frame.findViewById(R.id.fl_quick_trasl);
 		String sQuickDirs = mCoolReader.settings().getProperty(Settings.PROP_APP_QUICK_TRANSLATION_DIRS);
-		boolean isEmprtyQuick = StrUtils.isEmptyStr(StrUtils.getNonEmptyStr(sQuickDirs,true).replace(";",""));
-		if (!isEmprtyQuick)
+		boolean isEmptyQuick = StrUtils.isEmptyStr(StrUtils.getNonEmptyStr(sQuickDirs,true).replace(";",""));
+		if (!isEmptyQuick)
 			fillQuickButtons(sQuickDirs);
 		else
 			Utils.hideView(flQuickTransl);

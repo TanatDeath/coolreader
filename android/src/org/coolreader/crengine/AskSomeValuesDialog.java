@@ -102,7 +102,7 @@ public class AskSomeValuesDialog extends BaseDialog {
 				et = view.findViewById(R.id.some_value_edit10);
 			}
 		//	et.setBackgroundColor(colorGrayCT);
-			et.setTextColor(colorIcon);
+			et.setTextColor(activity.getTextColor(colorIcon));
 			et.setHintTextColor(colorIcon128);
 			if (tr != null) {
 				textViews.add(tv);

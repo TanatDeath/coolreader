@@ -207,10 +207,10 @@ public class ChooseConfFileDlg extends BaseDialog {
 		} else {
 			btnThisDevice.setBackgroundColor(colorGrayCT);
 		}
-		btnThisDevice.setTextColor(colorIcon);
+		btnThisDevice.setTextColor(activity.getTextColor(colorIcon));
 		mCoolReader.tintViewIcons(btnDeleteAll,true);
 		btnDeleteAll.setBackgroundColor(colorGrayCT2);
-		btnDeleteAll.setTextColor(colorIcon);
+		btnDeleteAll.setTextColor(activity.getTextColor(colorIcon));
 	}
 
 	public void setButtonsState() {

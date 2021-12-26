@@ -270,6 +270,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	}
 
 	private void hideExistingFileControls(ViewGroup view) {
+		//if (1==1) return; //asdf
 		TableLayout tl = view.findViewById(R.id.table);
 		TableRow trowExists1 = view.findViewById(R.id.trow_file_exists1);
 		TableRow trowExists2 = view.findViewById(R.id.trow_file_exists2);
@@ -280,6 +281,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	}
 
 	private void hideExistingHttpControls(ViewGroup view) {
+		//if (1==1) return; //asdf
 		TableLayout tl = view.findViewById(R.id.table);
 		TableRow trowExists1 = view.findViewById(R.id.trow_text_or_html);
 		TableRow trowExists2 = view.findViewById(R.id.trow_text_or_html2);
@@ -288,6 +290,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 	}
 
 	private void hideExistingFromStreamControls(ViewGroup view) {
+		//if (1==1) return; //asdf
 		TableLayout tl = view.findViewById(R.id.table);
 		TableRow trowExists1 = view.findViewById(R.id.trow_from_stream1);
 		TableRow trowExists2 = view.findViewById(R.id.trow_from_stream2);

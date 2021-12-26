@@ -437,6 +437,8 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_up_small">@drawable/icons8_up_small</item>
+        <item name="attr_icons8_down_small">@drawable/icons8_down_small</item>
         <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
         <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
         <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
@@ -472,6 +474,7 @@
         <item name="attr_icons8_battery_percent">@drawable/icons8_battery_percent</item>
         <item name="attr_icons8_book_title2">@drawable/icons8_book_title2</item>
         <item name="attr_icons8_fav_star">@drawable/icons8_fav_star</item>
+        <item name="attr_icons8_goback">@drawable/icons8_goback</item>
         <item name="attr_icons8_fav_star_filled">@drawable/icons8_fav_star_filled</item>
         <item name="attr_icons8_disable_toolbar">@drawable/icons8_disable_toolbar</item>
         <item name="attr_icons8_fix_landsc">@drawable/icons8_fix_landsc</item>
@@ -543,6 +546,7 @@
         <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
         <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
         <item name="attr_icons8_save_small">@drawable/icons8_save_small</item>
+        <item name="attr_icons8_font_scale">@drawable/icons8_font_scale</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -856,6 +860,8 @@
     	<item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_up_small">@drawable/icons8_up_small</item>
+        <item name="attr_icons8_down_small">@drawable/icons8_down_small</item>
         <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
         <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
         <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
@@ -891,6 +897,7 @@
         <item name="attr_icons8_battery_percent">@drawable/icons8_battery_percent</item>
         <item name="attr_icons8_book_title2">@drawable/icons8_book_title2</item>
         <item name="attr_icons8_fav_star">@drawable/icons8_fav_star</item>
+        <item name="attr_icons8_goback">@drawable/icons8_goback</item>
         <item name="attr_icons8_fav_star_filled">@drawable/icons8_fav_star_filled</item>
         <item name="attr_icons8_disable_toolbar">@drawable/icons8_disable_toolbar</item>
         <item name="attr_icons8_fix_landsc">@drawable/icons8_fix_landsc</item>
@@ -962,6 +969,7 @@
         <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
         <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
         <item name="attr_icons8_save_small">@drawable/icons8_save_small</item>
+        <item name="attr_icons8_font_scale">@drawable/icons8_font_scale</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play</item>
@@ -1260,6 +1268,8 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_up_small">@drawable/icons8_up_small</item>
+        <item name="attr_icons8_down_small">@drawable/icons8_down_small</item>
         <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
         <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
         <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
@@ -1295,6 +1305,7 @@
         <item name="attr_icons8_battery_percent">@drawable/icons8_battery_percent</item>
         <item name="attr_icons8_book_title2">@drawable/icons8_book_title2</item>
         <item name="attr_icons8_fav_star">@drawable/icons8_fav_star</item>
+        <item name="attr_icons8_goback">@drawable/icons8_goback</item>
         <item name="attr_icons8_fav_star_filled">@drawable/icons8_fav_star_filled</item>
         <item name="attr_icons8_disable_toolbar">@drawable/icons8_disable_toolbar</item>
         <item name="attr_icons8_fix_landsc">@drawable/icons8_fix_landsc</item>
@@ -1608,6 +1619,8 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_up_small">@drawable/icons8_up_small</item>
+        <item name="attr_icons8_down_small">@drawable/icons8_down_small</item>
         <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
         <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
         <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
@@ -1643,6 +1656,7 @@
         <item name="attr_icons8_battery_percent">@drawable/icons8_battery_percent</item>
         <item name="attr_icons8_book_title2">@drawable/icons8_book_title2</item>
         <item name="attr_icons8_fav_star">@drawable/icons8_fav_star</item>
+        <item name="attr_icons8_goback">@drawable/icons8_goback</item>
         <item name="attr_icons8_fav_star_filled">@drawable/icons8_fav_star_filled</item>
         <item name="attr_icons8_disable_toolbar">@drawable/icons8_disable_toolbar</item>
         <item name="attr_icons8_fix_landsc">@drawable/icons8_fix_landsc</item>
@@ -1971,6 +1985,8 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_up_small">@drawable/icons8_up_small</item>
+        <item name="attr_icons8_down_small">@drawable/icons8_down_small</item>
         <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
         <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
         <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
@@ -2006,6 +2022,7 @@
         <item name="attr_icons8_battery_percent">@drawable/icons8_battery_percent</item>
         <item name="attr_icons8_book_title2">@drawable/icons8_book_title2</item>
         <item name="attr_icons8_fav_star">@drawable/icons8_fav_star</item>
+        <item name="attr_icons8_goback">@drawable/icons8_goback</item>
         <item name="attr_icons8_fav_star_filled">@drawable/icons8_fav_star_filled</item>
         <item name="attr_icons8_disable_toolbar">@drawable/icons8_disable_toolbar</item>
         <item name="attr_icons8_fix_landsc">@drawable/icons8_fix_landsc</item>
@@ -2077,6 +2094,7 @@
         <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
         <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
         <item name="attr_icons8_save_small">@drawable/icons8_save_small</item>
+        <item name="attr_icons8_font_scale">@drawable/icons8_font_scale</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>
@@ -2391,6 +2409,8 @@
 	    <item name="attr_icons8_share">@drawable/icons8_share</item>
         <item name="attr_icons8_back_small">@drawable/icons8_back_small</item>
         <item name="attr_icons8_forward_small">@drawable/icons8_forward_small</item>
+        <item name="attr_icons8_up_small">@drawable/icons8_up_small</item>
+        <item name="attr_icons8_down_small">@drawable/icons8_down_small</item>
         <item name="attr_icons8_plus_small">@drawable/icons8_plus_small</item>
         <item name="attr_icons8_plus_plus_small">@drawable/icons8_plus_plus_small</item>
         <item name="attr_icons8_minus_small">@drawable/icons8_minus_small</item>
@@ -2422,6 +2442,7 @@
         <item name="attr_icons8_battery_percent">@drawable/icons8_battery_percent</item>
         <item name="attr_icons8_book_title2">@drawable/icons8_book_title2</item>
         <item name="attr_icons8_fav_star">@drawable/icons8_fav_star</item>
+        <item name="attr_icons8_goback">@drawable/icons8_goback</item>
         <item name="attr_icons8_fav_star_filled">@drawable/icons8_fav_star_filled</item>
         <item name="attr_icons8_disable_toolbar">@drawable/icons8_disable_toolbar</item>
         <item name="attr_icons8_fix_landsc">@drawable/icons8_fix_landsc</item>
@@ -2493,6 +2514,7 @@
         <item name="attr_icons8_book_tap">@drawable/icons8_book_tap</item>
         <item name="attr_icons8_book_long_tap">@drawable/icons8_book_long_tap</item>
         <item name="attr_icons8_save_small">@drawable/icons8_save_small</item>
+        <item name="attr_icons8_font_scale">@drawable/icons8_font_scale</item>
 
         <item name="ic_media_ff_drawable">@drawable/ic_media_ff_hc</item>
         <item name="ic_media_play_drawable">@drawable/ic_media_play_hc</item>

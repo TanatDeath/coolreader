@@ -2,8 +2,12 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.options.SelectionModesOption;
+import org.coolreader.userdic.UserDicEntry;
 
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -220,7 +224,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		//lblSetComment.setTextColor(colorGrayCT2);
 		lblTransl1.setTextColor(colorGrayCT2);
 		lblTransl2.setTextColor(colorGrayCT2);
-		lblBookmarkLink.setTextColor(colorIcon);
+		lblBookmarkLink.setTextColor(activity.getTextColor(colorIcon));
 		btnSendTo1.setBackgroundColor(colorGrayCT);
 		btnSendTo2.setBackgroundColor(colorGrayCT);
 		btnTransl.setBackgroundColor(colorGrayCT);
@@ -531,12 +535,12 @@ public class BookmarkEditDialog extends BaseDialog {
 				cr.showToast(R.string.dlg_bookmark_info);
 		});
 
-		posEdit = (EditText)view.findViewById(R.id.position_text);
+		posEdit = view.findViewById(R.id.position_text);
 		final KeyListener keyList;
 		keyList = posEdit.getKeyListener();
 		posEdit.setKeyListener(null);
 
-		final ImageButton btnSetComment = (ImageButton)view.findViewById(R.id.base_dlg_btn_add);
+		final ImageButton btnSetComment = view.findViewById(R.id.base_dlg_btn_add);
 		lblSetComment = view.findViewById(R.id.lbl_comment_from_cb);
 		lblTransl1 = view.findViewById(R.id.lbl_transl_sel);
 		lblTransl2 = view.findViewById(R.id.lbl_context_transl);
@@ -738,7 +742,7 @@ public class BookmarkEditDialog extends BaseDialog {
 				mCoolReader.showToast("Dictionary is not installed. ");
 				return;
 			}
-			int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
+			int titleSendTo =  SelectionModesOption.getSelectionActionTitle(selAction);
 			Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
 			if (curDict == null) {
 				mCoolReader.showToast("Dictionary is not installed. ");
@@ -786,7 +790,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
 		if (selAction == -1) Utils.hideView(btnSendTo2);
 		else {
-			int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
+			int titleSendTo =  SelectionModesOption.getSelectionActionTitle(selAction);
 			String sText = "[undefined]";
 			Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
 			if (curDict != null) sText = curDict.name;
@@ -794,7 +798,7 @@ public class BookmarkEditDialog extends BaseDialog {
 			btnSendTo2.setText(sText);
 			if (sText.endsWith("NONE")) Utils.hideView(btnSendTo2);
 		}
-		setView( view );
+		setView(view);
 		btnFake.requestFocus();
 	}
 

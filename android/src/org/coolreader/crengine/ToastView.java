@@ -138,7 +138,7 @@ public class ToastView {
                 ((CoolReader)mActivity).getmReaderView().disableTouch = true;
             window.dismiss();
         });
-        tv.setTextColor(colorIcon);
+        tv.setTextColor(mActivity.getTextColor(colorIcon));
         tv.setGravity(Gravity.CENTER);
         toast_ll.setOnClickListener((v) -> {
             if (((CoolReader)mActivity).getmReaderView() != null)

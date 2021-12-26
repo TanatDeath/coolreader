@@ -1,10 +1,8 @@
 // Main Class
 package org.coolreader;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -35,6 +33,7 @@ import org.coolreader.crengine.InputDialog;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReadingStatRes;
+import org.coolreader.crengine.ResizeHistory;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -73,13 +72,13 @@ import org.coolreader.crengine.LogcatSaver;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.N2EpdController;
 import org.coolreader.crengine.OPDSCatalogEditDialog;
-import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.PictureReceived;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderAction;
-import org.coolreader.crengine.ReaderView;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
@@ -90,10 +89,9 @@ import org.coolreader.sync2.SyncService;
 import org.coolreader.sync2.SyncServiceAccessor;
 import org.coolreader.sync2.Synchronizer;
 import org.coolreader.sync2.googledrive.GoogleDriveRemoteAccess;
-import org.coolreader.crengine.UserDicEntry;
+import org.coolreader.userdic.UserDicEntry;
 import org.coolreader.crengine.Utils;
 import org.coolreader.db.BaseDB;
-import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.geo.GeoLastData;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
@@ -110,6 +108,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
@@ -131,6 +130,8 @@ import org.coolreader.tts.TTSControlServiceAccessor;
 
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
+
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -155,15 +156,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public LitresCredentialsDialog litresCredentialsDialog = null;
 
 	private ReaderView mReaderView;
-
-    public class ResizeHistory {
-        public int X;
-        public int Y;
-        public long lastSet;
-        public int wasX;
-        public int wasY;
-        public int cnt;
-    }
 
 	public String lastDicText; // when the dic is in "dont hide mode"
 	public String lastDicLangFrom;
@@ -244,6 +236,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public HashMap<String, UserDicEntry> getmUserDic() {
 		return mUserDic;
+	}
+
+	public void updateUserDicWords() {
+		if (getmReaderFrame() != null)
+			if (getmReaderFrame().getUserDicPanel() != null)
+				getmReaderFrame().getUserDicPanel().updateUserDicWords();
 	}
 
 	private HashMap<String, UserDicEntry> mUserDic;
@@ -479,18 +477,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			log.e("exception while init genre list", e);
 		}
 			log.i("CoolReader.onCreate() exiting");
-		// working with ssl - needed for nook
-//		try {
-//			ProviderInstaller.installIfNeeded(getApplicationContext());
-//			SSLContext sslContext;
-//			sslContext = SSLContext.getInstance("TLSv1.2");
-//			sslContext.init(null, null, null);
-//			sslContext.createSSLEngine();
-//		} catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException
-//				| NoSuchAlgorithmException | KeyManagementException e) {
-//			log.e("CoolReader.onCreate() sslContext error: " + e.getMessage());
-//		}
     }
+
+	public  void adjustFontScale(Configuration configuration, float scale) {
+		configuration.fontScale = scale;
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+		wm.getDefaultDisplay().getMetrics(metrics);
+		metrics.scaledDensity = configuration.fontScale * metrics.density;
+		getBaseContext().getResources().updateConfiguration(configuration, metrics);
+	}
 
 	public final static boolean CLOSE_BOOK_ON_STOP = false;
 	
@@ -518,25 +514,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			mHomeFrame.onClose();
 		mDestroyed = true;
 		
-		//if ( mReaderView!=null )
-		//	mReaderView.close();
-		
-		//if ( mHistory!=null && mDB!=null ) {
-			//history.saveToDB();
-		//}
-
-		
-//		if ( BackgroundThread.instance()!=null ) {
-//			BackgroundThread.instance().quit();
-//		}
-			
-		//mEngine = null;
-
-		//===========================
-		// Donations support code
-		//if (mDonationService != null)
-		//	mDonationService.unbind();
-
 		if (mReaderView != null) {
 			mReaderView.destroy();
 		}
@@ -662,8 +639,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				// Set new TTS engine if running
 				initTTS(null);
 			}
+		} else if (key.equals(PROP_APP_FONT_SCALE)) {
+			adjustFontScale(getResources().getConfiguration(), ((float) Utils.parseInt(value, 10)) / 10F);
 		}
-		//
 	}
 
 	private void buildGoogleDriveSynchronizer() {
@@ -2681,32 +2659,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		AboutDialog dlg = new AboutDialog(this);
 		dlg.show();
 	}
-	
-	
-    //private CRDonationService mDonationService = null;
-    private DonationListener mDonationListener = null;
-    private double mTotalDonations = 0;
-    
-//    public CRDonationService getDonationService() {
-//    	return mDonationService;
-//    }
-//
-//    public boolean isDonationSupported() {
-//    	if (mDonationService == null) return false;
-//    	return mDonationService.isBillingSupported();
-//    }
 
-    public void setDonationListener(DonationListener listener) {
-    	mDonationListener = listener;
-    }
-
-    public static interface DonationListener {
-    	void onDonationTotalChanged(double total);
-    }
-    
-    public double getTotalDonations() {
-    	return mTotalDonations;
-    }
+	// TTS
+	private final static long INIT_TTS_TIMEOUT = 10000;		// 10 sec.
 
 	public void initTTS(TTSControlServiceAccessor.Callback callback) {
 		if (!phoneStateChangeHandlerInstalled) {
@@ -3074,7 +3029,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mReaderView.closeIfOpened(book);
 	}
 
-	public void askDeleteBook(final FileInfo item) {
+	public void askDeleteBook(final FileInfo item, FileBrowser.FileInfoCallbackExt cb) {
 		askConfirmation(R.string.win_title_confirm_book_delete, () -> {
 			closeBookIfOpened(item);
 			FileInfo file = Services.getScanner().findFileInTree(item);
@@ -3084,7 +3039,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (file.deleteFile()) {
 				waitForCRDBService(() -> {
 					Services.getHistory().removeBookInfo(getDB(), finalFile, true, true);
-					BackgroundThread.instance().postGUI(() -> directoryUpdated(finalFile.parent, null), 700);
+					BackgroundThread.instance().postGUI(() -> {
+						if (cb != null)
+							cb.onComplete(finalFile);
+						else
+							directoryUpdated(finalFile.parent, null);
+					}
+					, 500);
 				});
 			} else {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -3096,7 +3057,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						if (documentFile.delete()) {
 							waitForCRDBService(() -> {
 								Services.getHistory().removeBookInfo(getDB(), finalFile, true, true);
-								BackgroundThread.instance().postGUI(() -> directoryUpdated(finalFile.parent), 700);
+								BackgroundThread.instance().postGUI(() ->
+								{
+									if (cb != null)
+										cb.onComplete(finalFile);
+									else
+										directoryUpdated(finalFile.parent);
+								}, 500);
 							});
 						} else {
 							showToast(R.string.could_not_delete_file, file);
@@ -3109,13 +3076,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
 					}
 				} else {
+					if (cb != null) cb.onError(item, null);
 					showToast(R.string.could_not_delete_file, file);
 				}
 			}
 		});
 	}
 
-	public void askMoveBook(final FileInfo item) {
+	public void askMoveBook(final FileInfo item, FileBrowser.FileInfoCallbackExt cb) {
 		askConfirmation(R.string.move_to_books, () -> {
 			closeBookIfOpened(item);
 			FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
@@ -3136,13 +3104,23 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					if ((boolean) o)
 						BackgroundThread.instance().postGUI(() -> {
 							showToast(R.string.moved_to_books);
-							directoryUpdated(item.parent, null);
-						}, 700);
+							{
+								if (cb != null)
+									cb.onComplete(item);
+								else
+									directoryUpdated(item.parent);
+							}
+						}, 500);
 					else
 						BackgroundThread.instance().postGUI(() -> {
 							showToast(R.string.cannot_move_to_books);
-							directoryUpdated(item.parent, null);
-						}, 700);
+							{
+								if (cb != null)
+									cb.onError(item, null);
+								else
+									directoryUpdated(item.parent);
+							}
+						}, 500);
 				});
 			});
 		});

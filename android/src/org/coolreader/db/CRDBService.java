@@ -1,6 +1,5 @@
 package org.coolreader.db;
 
-import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -10,11 +9,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.dropbox.core.v1.DbxEntry;
-
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
 import org.coolreader.library.AuthorAlias;
+import org.coolreader.userdic.UserDicDlg;
+import org.coolreader.userdic.UserDicEntry;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -1117,9 +1116,7 @@ public class CRDBService extends BaseService {
         	if (action == DicSearchHistoryEntry.ACTION_SAVE) {
 				UserDicDlg.mDicSearchHistoryAll.add(0, dshe);
 			}
-			if (act.getmReaderFrame() != null)
-        		if (act.getmReaderFrame().getUserDicPanel()!=null)
-					act.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+			act.updateUserDicWords();
 			getService().updateDicSearchHistory(dshe, action);
 		}
 

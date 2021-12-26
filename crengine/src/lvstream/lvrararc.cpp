@@ -64,7 +64,7 @@ int LVRarArc::ReadContents()
     lvsize_t sz = 0;
     if (m_stream->GetSize( &sz )!=LVERR_OK)
         return 0;
-    lvsize_t m_FileSize = (unsigned)sz;
+    lvsize_t fileSize = sz;
     
     return m_list.length();
 }

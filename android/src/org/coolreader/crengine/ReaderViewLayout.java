@@ -7,6 +7,8 @@ import android.widget.LinearLayout;
 
 import org.coolreader.BuildConfig;
 import org.coolreader.CoolReader;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.userdic.UserDicPanel;
 
 import java.util.ArrayList;
 
@@ -130,7 +132,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 					ReaderAction.TOGGLE_DAY_NIGHT,
 					ReaderAction.TOGGLE_SELECTION_MODE,
 					ReaderAction.GO_PAGE,
-					ReaderAction.GO_PERCENT,
+					//ReaderAction.GO_PERCENT,
 					ReaderAction.FILE_BROWSER,
 					ReaderAction.TTS_PLAY,
 					ReaderAction.GO_FORWARD,

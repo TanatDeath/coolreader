@@ -10,7 +10,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.Engine;
-import org.coolreader.crengine.ReaderView;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;

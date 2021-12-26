@@ -32,12 +32,13 @@ public class YNDConfig {
         // Create ynd client
         final File fYND = new File(cr.getSettingsFileExt("[DEFAULT]",0).getParent() + "/ynd.token");
         if (!fYND.exists()) {
-            if ((!didAuthWarn) || (!bQuiet))  {
-                cr.showCloudToast(cr.getString(R.string.cloud_need_authorization) + ": Yandex Disc",true);
-                cr.yndInputTokenDialog = new YNDInputTokenDialog(cr);
-                cr.yndInputTokenDialog.show();
-            }
-            didAuthWarn = true;
+            if (!bQuiet)
+                if (!didAuthWarn)  {
+                    cr.showCloudToast(cr.getString(R.string.cloud_need_authorization) + ": Yandex Disc",true);
+                    didAuthWarn = true;
+                    cr.yndInputTokenDialog = new YNDInputTokenDialog(cr);
+                    cr.yndInputTokenDialog.show();
+                }
             return false;
         } else {
             if ((!didLogin)||(StrUtils.isEmptyStr(yndToken))) {

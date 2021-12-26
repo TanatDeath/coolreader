@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.coolreader.CoolReader;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.Dictionaries.DictInfo;
@@ -30,6 +31,7 @@ import org.coolreader.genrescollection.GenresCollection;
 import org.coolreader.geo.GeoToastView;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
+import org.coolreader.options.OptionsDialog;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -661,8 +663,8 @@ public class BaseActivity extends Activity implements Settings {
 			ReaderAction.TOGGLE_SELECTION_MODE.setIconId(optionTouchDrawableRes);
 		if (btnGoPageDrawableRes != 0)
 			ReaderAction.GO_PAGE.setIconId(btnGoPageDrawableRes);
-		if (btnGoPercentDrawableRes != 0)
-			ReaderAction.GO_PERCENT.setIconId(btnGoPercentDrawableRes);
+		//if (btnGoPercentDrawableRes != 0)
+		//	ReaderAction.GO_PERCENT.setIconId(btnGoPercentDrawableRes);
 		if (brFolderDrawableRes != 0)
 			ReaderAction.FILE_BROWSER.setIconId(brFolderDrawableRes);
 		if (btnTtsDrawableRes != 0)
@@ -1846,7 +1848,7 @@ public class BaseActivity extends Activity implements Settings {
 				if (millis >= 0) scheduleHideWindowCenterPopup(millis);
 				simplePopup = true;
 				TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-				tv.setTextColor(colorIcon);
+				tv.setTextColor(getTextColor(colorIcon));
 				tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
 				tv.setText(val);
 				return;
@@ -1989,7 +1991,7 @@ public class BaseActivity extends Activity implements Settings {
 					((CoolReader)this).getmReaderView().disableTouch = true;
 				windowCenterPopup.dismiss();
 			});
-			tv.setTextColor(colorIcon);
+			tv.setTextColor(getTextColor(colorIcon));
 			tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
 			tv.setText(val);
 			Display d = getWindowManager().getDefaultDisplay();
@@ -2080,11 +2082,11 @@ public class BaseActivity extends Activity implements Settings {
 			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
 			toast_ll.setBackgroundColor(colorGrayC);
 			TextView tv = windowCenterPopup.getContentView().findViewById(R.id.toast_wrap);
-			tv.setTextColor(colorIcon);
+			tv.setTextColor(getTextColor(colorIcon));
 			tv.setTextSize(24); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
 			tv.setText(val);
 			TextView tv2 = windowCenterPopup.getContentView().findViewById(R.id.toast_2nd_line);
-			tv2.setTextColor(colorIcon);
+			tv2.setTextColor(getTextColor(colorIcon));
 			tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
 			tv2.setText(val2);
 			Typeface tf = getReaderFont();
@@ -2310,6 +2312,8 @@ public class BaseActivity extends Activity implements Settings {
 						.postGUI(() -> setScreenBacklightLevel(n))), 100);
         } else if ( key.equals(PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS) ) {
         	Services.getScanner().setHideEmptyDirs(Utils.parseInt(value, 0));
+		} else if ( key.equals(PROP_APP_FILE_BROWSER_ZIP_SCAN) ) {
+			Services.getScanner().setZipScan(Utils.parseInt(value, 0));
         } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
 			iCutoutMode = Utils.parseInt(value, 0);
         	setCutoutMode(iCutoutMode);
@@ -2534,11 +2538,11 @@ public class BaseActivity extends Activity implements Settings {
 		Button btn2 = adlg.getButton(AlertDialog.BUTTON_NEUTRAL);
 		TextView tv = adlg.findViewById(R.id.message);
 		if (tv != null) {
-			tv.setTextColor(colorIcon);
+			tv.setTextColor(getTextColor(colorIcon));
 			tv.setMaxLines(10);
 		}
 		if (btn0 != null) {
-			btn0.setTextColor(colorIcon);
+			btn0.setTextColor(getTextColor(colorIcon));
 			btn0.setBackgroundColor(colorGrayCT2);
 			ViewGroup vg = (ViewGroup) btn0.getParent();
 			if (vg != null) {
@@ -2565,11 +2569,11 @@ public class BaseActivity extends Activity implements Settings {
 			}
 		}
 		if (btn1 != null) {
-			btn1.setTextColor(colorIcon);
+			btn1.setTextColor(getTextColor(colorIcon));
 			btn1.setBackgroundColor(colorGrayCT2);
 		}
 		if (btn2 != null) {
-			btn2.setTextColor(colorIcon);
+			btn2.setTextColor(getTextColor(colorIcon));
 			btn2.setBackgroundColor(colorGrayCT2);
 		}
 	}
@@ -3498,6 +3502,19 @@ public class BaseActivity extends Activity implements Settings {
 			tintViewIcons(o, mode, forceTint, false, 0);
 	}
 
+	public int getTextColor(int setColor) {
+		Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
+		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
+		int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
+		TypedArray a = this.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.isTintedIcons, R.attr.colorIcon});
+		int isTintedIcons = a.getInt(0, 0);
+		int colorIcon = a.getColor(1, Color.argb(255, 128, 128, 128));
+		a.recycle();
+		if (custIcons) return custColor;
+		return setColor;
+	}
+
 	public void tintViewIcons(Object o, PorterDuff.Mode mode, boolean forceTint, boolean doSetColor, int setColor) {
 		if (o == null) return;
 		Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
@@ -3531,6 +3548,9 @@ public class BaseActivity extends Activity implements Settings {
 						//if (vc instanceof ImageView) ((ImageView) vc).setColorFilter(col);
 						//if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(col);
 					}
+					// we'll paint texts always
+					if (vc instanceof TextView) ((TextView) vc).setTextColor(getTextColor(colorIcon));
+					if (vc instanceof Button) ((Button) vc).setTextColor(getTextColor(colorIcon));
 				}
 			}
 			if (o instanceof Drawable) {

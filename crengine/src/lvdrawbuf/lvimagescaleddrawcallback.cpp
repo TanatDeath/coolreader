@@ -220,7 +220,7 @@ bool LVImageScaledDrawCallback::OnLineDecoded(LVImageSource *, int y, lUInt32 *d
                 int xx = x + dst_x;
                 lUInt32 alpha = (cl >> 24)&0xFF;
                 
-                if ( xx<clip.left || xx>=clip.right ) {
+                if (xx<clip.left || xx>=clip.right) {
                     // OOB, don't plot it!
                     continue;
                 }

@@ -291,7 +291,9 @@ vSubstring2Diagram(diagram_type *pDiag,
 {
     lString32 s( szString, (int)tStringLength);
 #ifdef _LINUX
-    TRACE("antiword::vSubstring2Diagram(%s)", LCSTR(s));
+    //TRACE("antiword::vSubstring2Diagram(%s)", LCSTR(s)); //plotn: i dont know why but it lead to crash on some documents, and I dont know
+    //how to fix it other way
+    TRACE("antiword::vSubstring2Diagram()");
 #else
     TRACE("antiword::vSubstring2Diagram()");
 #endif

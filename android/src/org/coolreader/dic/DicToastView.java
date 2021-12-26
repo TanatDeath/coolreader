@@ -42,7 +42,7 @@ import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.MaxHeightLinearLayout;
 import org.coolreader.crengine.MaxHeightScrollView;
-import org.coolreader.crengine.ReaderView;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
@@ -442,8 +442,10 @@ public class DicToastView {
         if (tvLblDic != null) {
             if (t.mCurDict != null)
                 tvLblDic.setText(t.mCurDict.shortName);
-            else
-                tvLblDic.setText(t.mDicName);
+            else {
+                if (StrUtils.getNonEmptyStr(t.mDicName, true).equals("[HIDE]")) tvLblDic.setText("");
+                else tvLblDic.setText(t.mDicName);
+            }
         }
         //tvMore.setPaintFlags(tvMore.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvMore.setOnClickListener(v -> {
@@ -520,8 +522,8 @@ public class DicToastView {
             }
             new DownloadImageTask(iv).execute(t.mPicAddr);
         }
-        if (tv != null) tv.setTextColor(colorIcon);
-        if (tv2 != null) tv2.setTextColor(colorIcon);
+        if (tv != null) tv.setTextColor(mActivity.getTextColor(colorIcon));
+        if (tv2 != null) tv2.setTextColor(mActivity.getTextColor(colorIcon));
         //toast_ll.setBackgroundColor(colorGrayC);
         int tSize = mActivity.settings().getInt(ReaderView.PROP_FONT_SIZE, 20);
         if (tSize>0) {
@@ -758,6 +760,7 @@ public class DicToastView {
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);
         int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
+        mActivity.tintViewIcons(window,false);
         window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
        // mHandler.postDelayed(handleDismiss, t.duration == 0 ? 3000 : 5000);
     }
@@ -819,6 +822,7 @@ public class DicToastView {
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);
         int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
+        mActivity.tintViewIcons(window,false);
         window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
     }
 
@@ -1042,6 +1046,7 @@ public class DicToastView {
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);
         int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
+        mActivity.tintViewIcons(window,false);
         window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
     }
 }

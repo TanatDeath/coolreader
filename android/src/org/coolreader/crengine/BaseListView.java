@@ -6,6 +6,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
 
+import org.coolreader.readerview.ReaderView;
+
 public class BaseListView  extends ListView {
 	public BaseListView(Context context, boolean fastScrollEnabled) {
 		super(context);
@@ -47,9 +49,7 @@ public class BaseListView  extends ListView {
             }
                       
             int nextPos = ( dir > 0 ) ? Math.min(lastPos + 1, count - 1) : Math.max(0, firstPos - (lastPos - firstPos) + delta);
-            
-            // Log.w("CoolReader", "first =" + firstPos + " last = " + lastPos + " next = " + nextPos + " count = " + count);
-            
+
             setSelection(nextPos);  
             clearFocus();
             

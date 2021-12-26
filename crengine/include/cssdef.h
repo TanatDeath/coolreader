@@ -348,7 +348,8 @@ enum css_line_break_t {
     css_lb_normal,
     css_lb_loose,
     css_lb_strict,
-    css_lb_anywhere
+    css_lb_anywhere,
+    css_lb_cr_loose // private value "line-break: -cr-loose" to ignore &nbsp;
 };
 
 /// word-break property values
@@ -358,6 +359,13 @@ enum css_word_break_t {
     css_wb_break_word, // legacy, handled as "normal" (and "overflow-wrap: anywhere", which is our default behaviour)
     css_wb_break_all,
     css_wb_keep_all
+};
+
+/// box-sizing property values
+enum css_box_sizing_t {
+    css_bs_inherit,
+    css_bs_content_box,
+    css_bs_border_box
 };
 
 enum css_generic_value_t {

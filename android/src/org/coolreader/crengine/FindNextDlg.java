@@ -1,28 +1,22 @@
 package org.coolreader.crengine;
 
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
-import android.widget.PopupWindow.OnDismissListener;
 import android.widget.SeekBar;
-
-import androidx.annotation.RequiresApi;
 
 public class FindNextDlg {
 	PopupWindow mWindow;
@@ -36,9 +30,9 @@ public class FindNextDlg {
 	final boolean caseInsensitive;
 	boolean isEInk = false;
 
-	static public void showDialog( BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
+	static public void showDialog(Bookmark fromPage, BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim)
 	{
-		FindNextDlg dlg = new FindNextDlg(coolReader, readerView, pattern, caseInsensitive, skim);
+		FindNextDlg dlg = new FindNextDlg(fromPage, coolReader, readerView, pattern, caseInsensitive, skim);
 		//dlg.mWindow.update(dlg.mAnchor, width, height)
 		Log.d("cr3", "popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 		//dlg.update();
@@ -47,7 +41,7 @@ public class FindNextDlg {
 		//dlg.update();
 	}
 
-	public FindNextDlg(BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim )
+	public FindNextDlg(Bookmark fromPage, BaseActivity coolReader, ReaderView readerView, final String pattern, final boolean caseInsensitive, final boolean skim)
 	{
 		this.pattern = pattern;
 		this.caseInsensitive = caseInsensitive;
@@ -127,6 +121,11 @@ public class FindNextDlg {
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1)));
 
+		mPanel.findViewById(R.id.search_goback).setOnClickListener(v -> {
+			mReaderView.goToBookmark(fromPage);
+			mWindow.dismiss();
+		});
+
 		int colorGrayC;
 		int colorGray;
 		TypedArray a = mReaderView.getActivity().getTheme().obtainStyledAttributes(new int[]
@@ -157,6 +156,9 @@ public class FindNextDlg {
 		mPanel.findViewById(R.id.search_btn_minus_ch).setPadding(6, 15, 6, 15);
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setBackgroundDrawable(c);
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setPadding(6, 15, 6, 15);
+
+		mPanel.findViewById(R.id.search_goback).setPadding(6, 15, 6, 15);
+		mPanel.findViewById(R.id.search_goback).setBackgroundDrawable(c);
 
 		if (skim) {
 			Utils.hideView(mPanel.findViewById(R.id.search_btn_prev));

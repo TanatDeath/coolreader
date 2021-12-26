@@ -6,17 +6,14 @@ import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -30,7 +27,7 @@ import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
 import org.coolreader.crengine.Utils;
@@ -45,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -190,10 +186,10 @@ public class TranslationDirectionDialog extends BaseDialog {
 					}
 					if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(sArrS[2]);
 				});
-				btnFrom.setTextColor(colorIcon);
+				btnFrom.setTextColor(activity.getTextColor(colorIcon));
 				Button btnTo = view.findViewById(R.id.transl_item_lanf_to);
 				btnTo.setBackgroundColor(colorGrayCT2);
-				btnTo.setTextColor(colorIcon);
+				btnTo.setTextColor(activity.getTextColor(colorIcon));
 				btnTo.setOnClickListener(v -> {
 					String s = "";
 					if (sArrS.length > 2) s = sArrS[2];
@@ -434,7 +430,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 						int colorIcon = a.getColor(1, Color.GRAY);
 						a.recycle();
 						tv1.setMaxLines(2);
-						tv1.setTextColor(colorIcon);
+						tv1.setTextColor(activity.getTextColor(colorIcon));
 						tv1.setOnClickListener(v -> editTexts.get(0).setText("#"));
 						if (mCoolReader.getReaderView() != null)
 						  if (mCoolReader.getReaderView().getLastsetWidth()>0)
@@ -509,7 +505,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 		swButton.setLayoutParams(llp1);
 		swButton.setText(mCoolReader.getString(R.string.translate_dics_switch));
 		swButton.setBackgroundColor(colorGrayCT2);
-		swButton.setTextColor(colorIcon);
+		swButton.setTextColor(activity.getTextColor(colorIcon));
 		ll.addView(swButton);
 		swButton.setOnClickListener(v -> {
 			String s = editTexts.get(0).getText().toString();
@@ -524,13 +520,13 @@ public class TranslationDirectionDialog extends BaseDialog {
 		yndButton.setLayoutParams(llp);
 		yndButton.setText(mCoolReader.getString(R.string.ynd_translate_dics_info));
 		yndButton.setBackgroundColor(colorGrayCT2);
-		yndButton.setTextColor(colorIcon);
+		yndButton.setTextColor(activity.getTextColor(colorIcon));
 		ll.addView(yndButton);
 		yndButton.setOnClickListener(v -> yndButtonClick());
 		Button lingvoButton = new Button(mCoolReader);
 		lingvoButton.setText(mCoolReader.getString(R.string.lingvo_translate_dics_info));
 		lingvoButton.setBackgroundColor(colorGrayCT2);
-		lingvoButton.setTextColor(colorIcon);
+		lingvoButton.setTextColor(activity.getTextColor(colorIcon));
 		lingvoButton.setLayoutParams(llp);
 		ll.addView(lingvoButton);
 		lingvoButton.setOnClickListener(v -> lingvoButtonClick());

@@ -1,8 +1,7 @@
 package org.coolreader.crengine;
 
-import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.db.CRDBService;
+import org.coolreader.readerview.ReaderView;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -17,11 +16,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -61,7 +57,7 @@ public class SearchDlg extends BaseDialog {
 		    activity.getDB().saveSearchHistory(mBookInfo,
 				    mEditView.getText().toString());
 			BackgroundThread.instance().postGUI(() -> {
-				mReaderView.findText(mEditView.getText().toString(), bReverse, !bCaseSensitive);
+				mReaderView.findText(mReaderView.doc.getCurrentPageBookmark(), mEditView.getText().toString(), bReverse, !bCaseSensitive);
 			}, 500);
 	    }
         cancel();
@@ -117,11 +113,11 @@ public class SearchDlg extends BaseDialog {
 			if ( labelView!=null ) {
 				labelView.setText(String.valueOf(position+1));
 			}
-			if ( s!=null ) {
-				if ( titleTextView!=null )
+			if (s!=null) {
+				if (titleTextView!=null)
 					titleTextView.setText(s);
 			} else {
-				if ( titleTextView!=null )
+				if (titleTextView!=null)
 					titleTextView.setText("");
 			}
 			return view;
@@ -176,13 +172,13 @@ public class SearchDlg extends BaseDialog {
 					int pageNumber = 0;
 
 					@Override
-					public boolean validate(String s) {
+					public boolean validate(String s, boolean isPercent) {
 						pageNumber = Integer.valueOf(s);
 						return pageNumber > 0; // && pageNumber <= mReaderView.props.pageCount;
 					}
 
 					@Override
-					public void onOk(String s) {
+					public void onOk(String s, boolean isPercent) {
 						mReaderView.goToPage(pageNumber);
 					}
 
@@ -233,6 +229,7 @@ public class SearchDlg extends BaseDialog {
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
+		//bm = doc.getCurrentPageBookmark();
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		int colorGrayC = a.getColor(1, Color.GRAY);

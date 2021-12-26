@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import android.os.Handler;
 
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.genrescollection.GenresCollection;
 
 public class Services {

@@ -336,8 +336,8 @@ public class BrowserViewLayout extends ViewGroup {
 		int colorGray = themeColors.get(R.attr.colorThemeGray);
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 
-		btnStateDir.setTextColor(colorIcon);
-		btnStateNoMark.setTextColor(colorIcon);
+		btnStateDir.setTextColor(activity.getTextColor(colorIcon));
+		btnStateNoMark.setTextColor(activity.getTextColor(colorIcon));
 		btnStateReading.setTextColor(colorGreen);
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
@@ -372,7 +372,7 @@ public class BrowserViewLayout extends ViewGroup {
 				i++;
 				if (dir2!=null) dir2 = dir2.parent;
 				tv.setText("");
-				tv.setTextColor(colorIcon);
+				tv.setTextColor(activity.getTextColor(colorIcon));
 				if ((dir2 != null)&&(!dir2.isRootDir())) {
 					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 					final FileInfo dir3 = dir2;

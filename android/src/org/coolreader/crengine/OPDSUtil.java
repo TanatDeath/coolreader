@@ -134,16 +134,16 @@ xml:base="http://lib.ololo.cc/opds/">
 			title = attributes.getValue("title");
 			href = convertHref( baseURL, attributes.getValue("href") );
 		}
-		public static String convertHref( URL baseURL, String href ) {
+		public static String convertHref(URL baseURL, String href) {
 			if ( href==null )
 				return href;
 			String port = "";
 			if (baseURL.getPort() != 80 && baseURL.getPort() > 0)
 				port = ":" + baseURL.getPort();
 			String hostPort = baseURL.getHost() + port;
-			if ( href.startsWith("//") )
+			if (href.startsWith("//"))
 				return baseURL.getProtocol() + ":" + href;
-			if ( href.startsWith("/") )
+			if (href.startsWith("/"))
 				return baseURL.getProtocol() + "://" + hostPort + href;
 			if ( !href.startsWith("http://") && !href.startsWith("https://") ) {
 				return baseURL.getProtocol() + "://" + hostPort + dirPath(baseURL.getPath()) + "/" + href;

@@ -43,6 +43,25 @@
 					android:textColor="?attr/colorIcon"
 					style="@style/TextAppearance.Small"
 					android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+			<TextView android:text="@string/this_is_fork_add"
+					android:id="@+id/this_is_fork_add"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Small"
+					android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+			<TextView android:text="@string/about_icons8"
+					android:id="@+id/thirdparty6"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Small"
+					android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+			<TextView android:text="https://icons8.com" android:id="@+id/www_icons8"
+					style="@style/TextAppearance.Small"
+					android:textColor="?attr/colorIcon"
+					android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
+			<TextView android:text="@string/with_the_help"
+					android:id="@+id/thirdparty7"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Small"
+					android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 			<TextView android:text="@string/third_party_components_used"
 				android:id="@+id/thirdparty"
 				android:textColor="?attr/colorIcon"
@@ -68,20 +87,6 @@
 				android:textColor="?attr/colorIcon"
             	style="@style/TextAppearance.Small"
             	android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
-			<TextView android:text="Metro vector icon set by"
-				android:id="@+id/thirdparty6"
-				android:textColor="?attr/colorIcon"
-				style="@style/TextAppearance.Small"
-				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
-			<TextView android:text="https://icons8.com" android:id="@+id/www_icons8"
-				style="@style/TextAppearance.Small"
-				android:textColor="?attr/colorIcon"
-				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
-			<TextView android:text="@string/with_the_help"
-				android:id="@+id/thirdparty7"
-				android:textColor="?attr/colorIcon"
-				style="@style/TextAppearance.Small"
-				android:layout_margin="2dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>

@@ -68,6 +68,7 @@
     <string name="mi_bookmark_goto">Go to bookmark</string>
     <string name="mi_goto_page">Go to page #</string>
     <string name="mi_goto_percent">Go to position %</string>
+    <string name="mi_goto_value">Go to value</string>
     <string name="mi_filter_option">Find in options</string>
     <string name="mi_no_options">No options found for:</string>
     <string name="mi_goto_toc">Table of Contents</string>
@@ -377,7 +378,7 @@
     <string name="toast_bookmark_export_ok">Bookmarks were saved to </string>
     <string name="toast_bookmark_export_failed">Error while saving bookmarks to </string>
     <string name="mi_book_scan_recursive">Scan books in folder</string>
-    <string name="mi_book_rescan">Scan library</string>
+    <string name="mi_book_rescan">Maintenance</string>
     <string name="dlg_scan_title">Scanning folders</string>
     <string name="dlg_scan_message">It may take several minutes to finish</string>
     <string name="dlg_book_search">Find book</string>
@@ -441,9 +442,9 @@
     <string name="options_screen_update_mode_onyx_a2">A2</string>
     <string name="options_screen_update_mode_quality">Quality</string>
     <string name="options_screen_update_interval">Full screen update interval</string>
-    <string name="options_screen_blackpage_interval">Force black page paint interval, ms</string>
+    <string name="options_screen_blackpage_interval">Force black page paint interval</string>
     <string name="options_screen_blackpage_interval_add_info">This option will enable filling reading area with black color every N pages (suitable for unsupported E-Ink screens)</string>
-    <string name="options_screen_blackpage_duration">Black page paint duration</string>
+    <string name="options_screen_blackpage_duration">Black page paint duration, ms</string>
     <string name="options_screen_blackpage_duration_add_info">Time (in ms) the black filled area will be shown</string>
     <string name="options_screen_force_eink">This device has E-Ink screen (when not autodetected)</string>
     <string name="options_screen_force_eink_add_info">You can force set E-Ink settings, when it was now detected by KnownReader. You must close and reopen options dialog when changing this value - to see these options</string>
@@ -593,8 +594,8 @@
     <string name="options_css_text_align_right">Right</string>
     <string name="action_switch_settings_profile">Switch profile (long tap to rename)</string>
     <string name="options_app_settings_icons">Icons in settings</string>
-    <string name="options_app_settings_icons_is_custom_color">Set custom icons color (only modern icons)</string>
-    <string name="options_app_settings_icons_custom_color">Custom icons color</string>
+    <string name="options_app_settings_icons_is_custom_color">Set custom icons (only modern icons) and interface text color</string>
+    <string name="options_app_settings_icons_custom_color">Custom icons and interface text color</string>
     <string name="mi_text_autoformat_enable">Enable text autoformat</string>
     <string name="mi_text_autoformat_disable">Disable text autoformat</string>
     <string name="action_toggle_text_autoformat">Toggle text autoformat</string>
@@ -676,6 +677,8 @@
     <string name="options_app_cover_page_size">Cover page size</string>
     <string name="dlg_goto_current_position">Current page:</string>
     <string name="dlg_goto_input_page_number">Input page number to go:</string>
+    <string name="dlg_goto_input_value">Input value to go:</string>
+    <string name="number">Number</string>
     <string name="dlg_goto_input_percent">Input position percent to go:</string>
     <string name="book_state_toread">To read</string>
     <string name="book_mark_toread">Mark as \"To read\"</string>
@@ -806,6 +809,7 @@
     <string name="black_list_enforced">Cannot add this URL since it is added to black list of catalogs which may violate DMCA by request of LitRes.ru</string>
     <string name="black_list_warning">WARNING: this URL is added to black list of catalogs which may violate DMCA by request of LitRes.ru Do you really want to add this catalog?</string>
     <string name="error">Error</string>
+    <string name="unhandled_error">Unhandled error</string>
     <string name="cant_open_file">Can\"t open file \"%s\"!</string>
     <string name="opened_from_stream">Document opened from stream, file location unknown. Unable to save information about the last opened file!</string>
     <string name="options_app_tts_stop_motion_timeout">Stop reading aloud on motion sensor timeout</string>
@@ -1003,6 +1007,7 @@
     <string name="pages_per_full_swipe_m19">"19 pages (left-to-right)"</string>
     <string name="pages_per_full_swipe_m20">"20 pages (left-to-right)"</string>
     <string name="txt_seen">seen:</string>
+    <string name="txt_any">any</string>
 
     <string name="options_app_locale_add_info">If necessary, allows you to select a language other than the language installed in the system (System is selected by default)</string>
     <string name="options_app_ui_theme_add_info">Selecting the appearance of the menu and settings from several options (Black, White, Dark, Light, etc.)</string>
@@ -1098,6 +1103,8 @@
     <string name="third_party_components_used">"Third party components used: zlib, libpng, libjpeg, freetype, harfbuzz, chmlib, antiword, Nook EPD utils by DairyKnight "
     </string>
     <string name="this_is_fork">KnownReader project is a fork of known reader application - CoolReader. KnownReader offers rich UI and number of unique features.</string>
+    <string name="this_is_fork_add">KnownReader team expresses gratitude to everyone who contributed and continues to contribute to the CoolReader project: the author of the original project - Vadim Lopatin; the developer of the \"new era\" (2018 - 2021) of the project - virxkane (the person who actually revived the project), pkbo, S-trace and others; to the KOReader team, which has been making a significant contribution to the development of the project engine for years. We also want to say thanks to the community at 4pda - for a lot of interesting ideas, testing, updating the help, especially its most active members: Sergey_TSA, SvyatKV, kaznelson</string>
+    <string name="about_icons8">\"Windows Metro\" vector icon set by</string>
     <string name="third_party_farm_fresh_icon_set">Farm-Fresh icon set from http://www.fatcow.com/free-icons</string>
     <string name="open_previously_downloaded">Book was already downloaded, open it instead of new download?</string>
     <string name="open_previously_downloaded_fragment">Fragment was already downloaded, open it instead of new download? (choose \"Cancel\" to proceed to purchase)</string>
@@ -1284,7 +1291,7 @@
     <string name="knownreader_donate_line3">https://knownreader.com/</string>
     <string name="knownreader_donate_line4">2. Write us on 4pda forum:</string>
     <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
-    <string name="with_the_help">With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook, Koreader</string>
+    <string name="with_the_help">With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook, KOReader</string>
     <string name="options_choose_texture">Chose background pic / texture</string>
     <string name="only_in_pro">This feature is availble in Premium version only</string>
     <string name="only_in_premium">This feature is availble in Premium version only</string>
@@ -1682,8 +1689,9 @@
     <string name="page_flipping_type">Gesture page flipping</string>
     <string name="page_flipping_type_add_info">You can flip pages by gestures - if more than one page specified, value of pages turned depends on gesture length</string>
     <string name="page_flipping_type_0">Disabled</string>
-    <string name="page_flipping_type_1">One page</string>
-    <string name="page_flipping_type_2">Number of pages</string>
+    <string name="page_flipping_type_1">One page - simple gesture</string>
+    <string name="page_flipping_type_2">One page - with tracking</string>
+    <string name="page_flipping_type_3">Number of pages - with tracking</string>
     <string name="page_flipping_sensivity">Flipping gesture sensivity</string>
     <string name="page_flipping_sensivity_add_info">You can specify koefficient to determine which gesture length is recognized as flipping gesture</string>
     <string name="page_flipping_sensivity_1">longer</string>
@@ -1785,18 +1793,56 @@
     <string name="eink_onyx_add_delay_full_refresh_0">Disabled</string>
     <string name="eink_onyx_add_delay_full_refresh_10">10 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_20">20 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_30">30 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_40">40 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_50">50 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_60">60 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_70">70 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_80">80 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_90">90 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_100">100 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_110">110 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_120">120 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_130">130 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_140">140 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_150">150 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_160">160 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_170">170 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_180">180 msec</string>
+    <string name="eink_onyx_add_delay_full_refresh_190">190 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_200">200 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_230">230 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_260">260 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_300">300 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_400">400 msec</string>
     <string name="eink_onyx_add_delay_full_refresh_500">500 msec</string>
+    <string name="ud_word">Word or phrase</string>
+    <string name="ud_word_translate">Translation</string>
+    <string name="ud_lang">Language</string>
+    <string name="ud_is_ud">User dic entry</string>
+    <string name="ud_is_dshe">Dic search history entry</string>
+    <string name="ud_is_cite">Citation</string>
+    <string name="ud_seen_count">Seen count</string>
+    <string name="ud_title">User dic entry edit</string>
+    <string name="ud_create_time">Create time</string>
+    <string name="ud_last_access_time">Last seen time</string>
+    <string name="ud_short_context">Context</string>
+    <string name="ud_full_context">Full context</string>
+    <string name="ui_font_scale">UI Font scale</string>
+    <string name="ui_font_scale_restart_app">App restart required</string>
+    <string name="detect_zip">Detect zip files</string>
+    <string name="detect_zip_add_info">Warning: directory browsing may be slow when \"by content\" is chosen</string>
+    <string name="detect_zip_0">Via file extension (zip)</string>
+    <string name="detect_zip_1">By content (method 1)</string>
+    <string name="detect_zip1_add_info">Warning: directory browsing may be slow</string>
+    <string name="detect_zip_2">By content (method 2)</string>
+    <string name="long_tap">long tap</string>
+    <string name="all_actions">All actions</string>
+    <string name="toolbar_actions">Toolbar</string>
+    <string name="menu_actions">Reading menu</string>
+    <string name="to_toolbar_action">+ to toolbar</string>
+    <string name="to_menu_action">+ to menu</string>
+    <string name="def">Default</string>
+    <string name="clear">Clear</string>
+    <string name="non_sensitive">Border non sensitive areas</string>
 </resources>

@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.userdic;
 
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -10,6 +10,16 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.DicSearchHistoryEntry;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.InterfaceTheme;
+import org.coolreader.crengine.PositionProperties;
+import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.Settings;
+import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class UserDicPanel extends LinearLayout implements Settings {
-		private CoolReader activity;
+		private CoolReader mCoolReader;
 		private LinearLayout content;
 		private TextView lblWordFound;
 		private TextView lblStar;
@@ -53,12 +63,12 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			nightMode = props.getBool(PROP_NIGHT_MODE, false);
 			this.color = props.getColor(Settings.PROP_STATUS_FONT_COLOR, 0);
 			lblWordFound.setTextColor(0xFF000000 | color);
-			Typeface tf = activity.getReaderFont();
+			Typeface tf = mCoolReader.getReaderFont();
 			if (tf != null) {
 				lblWordFound.setTypeface(tf);
 				lblStar.setTypeface(tf);
 			}
-			int fontSize = activity.settings().getInt(Settings.PROP_FONT_SIZE_USER_DIC, 0);
+			int fontSize = mCoolReader.settings().getInt(Settings.PROP_FONT_SIZE_USER_DIC, 0);
 			if (fontSize != 0) textSize = fontSize;
 			for (TextView tv: arrLblWords) {
 				tv.setTextColor(0xFF000000 | color);
@@ -83,13 +93,13 @@ public class UserDicPanel extends LinearLayout implements Settings {
 
 		public UserDicPanel(CoolReader context) {
 			super(context);
-			this.activity = context;
+			this.mCoolReader = context;
 			setOrientation(VERTICAL);
 			
 			this.color = context.settings().getColor(Settings.PROP_STATUS_FONT_COLOR, 0);
 			
-			LayoutInflater inflater = LayoutInflater.from(activity);
-			int showUD = activity.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
+			LayoutInflater inflater = LayoutInflater.from(mCoolReader);
+			int showUD = mCoolReader.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
 			if (showUD == 2)
 				content = (LinearLayout)inflater.inflate(R.layout.user_dic_panel_scroll, null);
 			else
@@ -99,9 +109,9 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			lblStar.setText("#");
             lblStar.setTextColor(0xFF000000 | color);
             lblStar.setOnClickListener(v -> {
-				if (activity.getReaderView()!=null)
-					activity.getReaderView().scheduleSaveCurrentPositionBookmark(1);
-					activity.showToast(activity.getString(R.string.pos_saved));
+				if (mCoolReader.getReaderView()!=null)
+					mCoolReader.getReaderView().scheduleSaveCurrentPositionBookmark(1);
+					mCoolReader.showToast(mCoolReader.getString(R.string.pos_saved));
 			});
 			arrLblWords.clear();
 			arrUdeWords.clear();
@@ -132,7 +142,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
             lblWordFound.setPaintFlags(lblWordFound.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
 			lblWordFound.setOnClickListener(v -> {
-				UserDicDlg dlg = new UserDicDlg(activity,0);
+				UserDicDlg dlg = new UserDicDlg(mCoolReader,0);
 				dlg.show();
 			});
 
@@ -140,45 +150,39 @@ public class UserDicPanel extends LinearLayout implements Settings {
 
 			for (TextView tv: arrLblWords) {
 				i++;
-				tv.setText(String.valueOf(""));
+				tv.setText("");
 				tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
 				tv.setTextColor(0xFF000000 | color);
 				tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 				tv.setOnClickListener(v -> {
-						if (v instanceof TextView) {
-							String sWord = ((TextView) v).getText().toString();
-							for (UserDicEntry ude: arrUdeWords) {
-								String sKey = ude.getDic_word();
-								try {
-									String[] arrKey = sKey.split("~");
-									sKey = arrKey[0];
-									sKey = sKey.replace("|", "");
-								} catch (Exception e) {
+					if (v instanceof TextView) {
+						String sWord = ((TextView) v).getText().toString();
+						for (UserDicEntry ude: arrUdeWords) {
+							String sKey = ude.getDic_word();
+							try {
+								String[] arrKey = sKey.split("~");
+								sKey = arrKey[0];
+								sKey = sKey.replace("|", "");
+							} catch (Exception e) {
 
-								}
-								if (sKey.equals(sWord)) {
-									activity.showSToast("*"+StrUtils.updateText(ude.getDic_word_translate(),true), sWord);
-									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_UPDATE_CNT);
-									break;
-								}
+							}
+							if (sKey.equals(sWord)) {
+								mCoolReader.showSToast("*"+ StrUtils.updateText(ude.getDic_word_translate(),true), sWord);
+								mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_UPDATE_CNT);
+								ude.setSeen_count(ude.getSeen_count() + 1);
+								ude.setLast_access_time(System.currentTimeMillis());
+								break;
 							}
 						}
-					});
+					}
+				});
 				tv.setOnLongClickListener(v -> {
 					if (v instanceof TextView) {
 						String sWord = ((TextView) v).getText().toString();
 						for (final UserDicEntry ude: arrUdeWords) {
 							if (ude.getDic_word().equals(sWord)) {
-								activity.askConfirmation(R.string.win_title_confirm_ude_delete, (Runnable) () -> {
-									if (ude.getThisIsDSHE()) {
-										DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
-										dshe.setSearch_text(ude.getDic_word());
-										activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, activity);
-									}
-									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
-									activity.getmUserDic().remove(ude.getIs_citation()+ude.getDic_word());
-									activity.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-								});
+								UserDicEditDialog uded = new UserDicEditDialog(mCoolReader, ude, null);
+								uded.show();
 								break;
 							}
 						}
@@ -218,28 +222,17 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			this.book = book != null ? new FileInfo(book) : null;
 			this.position = position != null ? new Bookmark(position) : null;
 			this.props = props != null ? new PositionProperties(props) : null;
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					updateUserDicWords();
-				}
-			}, 500);
+			BackgroundThread.instance().postGUI(() -> updateUserDicWords(), 500);
 		}
 
 		public void updateSavingMark(final String mark) {
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					lblStar.setTextColor(0xFF000000 | color);
-					lblStar.setText(mark);
-				}
+			BackgroundThread.instance().postGUI(() -> {
+				lblStar.setTextColor(0xFF000000 | color);
+				lblStar.setText(mark);
 			}, 500);
-			BackgroundThread.instance().postGUI(new Runnable() {
-				@Override
-				public void run() {
-					lblStar.setText("#");
-                    lblStar.setTextColor(0xFF000000 | color);
-				}
+			BackgroundThread.instance().postGUI(() -> {
+				lblStar.setText("#");
+lblStar.setTextColor(0xFF000000 | color);
 			}, 3000);
 		}
 
@@ -248,18 +241,12 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		}
 
 		public String getCurPageText(int offset, boolean toLower) {
-			int curPage = activity.getReaderView().getDoc().getCurPage() + offset;
-			//activity.getReaderView().CheckAllPagesLoad();
+			int curPage = mCoolReader.getReaderView().getDoc().getCurPage() + offset;
 			String sPrevPage = "";
 			String sPageText = "";
-			sPageText = activity.getReaderView().getPageTextFromEngine(curPage);
+			sPageText = mCoolReader.getReaderView().getPageTextFromEngine(curPage);
 			if (curPage > 0)
-				sPrevPage = activity.getReaderView().getPageTextFromEngine(curPage - 1);
-//			if ((activity.getReaderView().getArrAllPages().size()>curPage)&&(curPage>=0)) {
-//				sPageText = activity.getReaderView().getArrAllPages().get(curPage);
-//				if (curPage > 0)
-//					sPrevPage = activity.getReaderView().getArrAllPages().get(curPage - 1);
-//			}
+				sPrevPage = mCoolReader.getReaderView().getPageTextFromEngine(curPage - 1);
 			if (sPageText==null) sPageText = "";
 			if (sPrevPage==null) sPrevPage = "";
 			int iLen = 300;
@@ -302,11 +289,10 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		}
 
 		public void updateUserDicWords() {
-			//PositionProperties currpos = activity.getReaderView().getDoc().getPositionProps(null);
 			this.wc = 0;
 			this.arrUdeWords.clear();
 			String sCurPage = getCurPageText();
-			Iterator it = activity.getmUserDic().entrySet().iterator();
+			Iterator it = mCoolReader.getmUserDic().entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry)it.next();
 				String sKey = pair.getKey().toString().toLowerCase();
@@ -336,7 +322,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					}
 				}
 			}
-			String sContent = activity.settings().getProperty(Settings.PROP_APP_SHOW_USER_DIC_CONTENT, "0");
+			String sContent = mCoolReader.settings().getProperty(Settings.PROP_APP_SHOW_USER_DIC_CONTENT, "0");
 			if (sContent.equals("0"))
 				// check recent translates
 				for (DicSearchHistoryEntry dshe: UserDicDlg.mDicSearchHistoryAll) {
@@ -374,6 +360,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 										ude.setLast_access_time(dshe.getLast_access_time());
 										ude.setDic_from_book(dshe.getSearch_from_book());
 										ude.setLanguage(dshe.getLanguage_from());
+										ude.setSeen_count(dshe.getSeen_count());
 										ude.setThisIsDSHE(true);
 										this.arrUdeWords.add(ude);
 									}
@@ -393,23 +380,24 @@ public class UserDicPanel extends LinearLayout implements Settings {
 				return 0;
 			});
 			updateViews();
-			int showUD = activity.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
+			int showUD = mCoolReader.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
 			if ((!arrUdeWords.isEmpty()) && (showUD > 0)) {
 				String wrds = "";
 				for (int i = 0; i < arrUdeWords.size(); i++) {
 					wrds = wrds + (((i == 0) ? "": "~" ) + arrUdeWords.get(i).getDic_word());
 				}
-				if (activity.getmReaderView() != null) {
-					if (activity.getmReaderView().flgHighlightUserDic) {
-						activity.getmReaderView().clearSelection();
-						activity.getmReaderView().findText("{{curPage}}" + wrds, false, true, true);
+				if (mCoolReader.getmReaderView() != null) {
+					if (mCoolReader.getmReaderView().flgHighlightUserDic) {
+						mCoolReader.getmReaderView().clearSelection();
+						mCoolReader.getmReaderView().findText(mCoolReader.getmReaderView().getCurrentPositionBookmark(),
+								"{{curPage}}" + wrds, false, true, true);
 					}
 				}
 			}
 		}
 
 		private void updateViews() {
-			String sWC = activity.getString(R.string.wc) +": "+String.valueOf(this.wc);
+			String sWC = mCoolReader.getString(R.string.wc) +": "+String.valueOf(this.wc);
 			if (this.wc == 0) sWC="";
 			String sAll = this.lblWordFound.getText().toString();
 			for (TextView tv: arrLblWords) {
@@ -432,7 +420,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 						String[] arrKey = sKey.split("~");
 						sKey = arrKey[0];
 						arrLblWords.get(i).setText(sKey.replace("|", ""));
-						Typeface tf = activity.getReaderFont();
+						Typeface tf = mCoolReader.getReaderFont();
 						if (ude.getThisIsDSHE())
 							arrLblWords.get(i).setTypeface(tf, Typeface.ITALIC);
 						else

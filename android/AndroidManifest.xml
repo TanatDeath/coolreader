@@ -169,6 +169,17 @@
             </intent-filter>
         </service>
 
+        <!-- TTS control service - legacy -->
+        <service
+                android:name=".tts.legacy.TTSControlServiceLegacy"
+                android:enabled="true"
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
         <!-- Cloud sync service -->
         <service
                 android:name=".sync2.SyncService"
