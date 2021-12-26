@@ -82,8 +82,8 @@ extern const int gDOMVersionCurrent;
 
 #define DOC_STRING_HASH_SIZE  256
 #define RESERVED_DOC_SPACE    4096
-#define MAX_TYPE_ID           1024 // max of element, ns, attr
-#define MAX_ELEMENT_TYPE_ID   1024
+#define MAX_TYPE_ID          32768 // max of element, ns, attr (for safety)
+#define MAX_ELEMENT_TYPE_ID   1024 // initial maxsize of these maps (will grow if needed)
 #define MAX_NAMESPACE_TYPE_ID 64
 #define MAX_ATTRIBUTE_TYPE_ID 1024
 #define UNKNOWN_ELEMENT_TYPE_ID   (MAX_ELEMENT_TYPE_ID>>1)
@@ -2384,6 +2384,8 @@ private:
     lUInt32 _last_docflags;
     int _page_height;
     int _page_width;
+    int _screen_height;
+    int _screen_width;
     bool _parsing;
     bool _rendered;
     bool _just_rendered_from_cache;
@@ -2515,6 +2517,15 @@ public:
     int getPageHeight() { return _page_height; }
     /// returns page width setting
     int getPageWidth() { return _page_width; }
+
+    /// Get/set the device screen size, which  is only used to support CSS media queries
+    /// like "@media (min-device-width:300px) or (max-device-aspect-ratio:4/3)"
+    /// set screen size
+    void setScreenSize(int width, int height) { _screen_width = width; _screen_height = height; }
+    /// returns screen height info
+    int getScreenHeight() { return _screen_height; }
+    /// returns screen width info
+    int getScreenWidth() { return _screen_width; }
 #endif
     /// saves document contents as XML to stream with specified encoding
     bool saveToStream( LVStreamRef stream, const char * codepage, bool treeLayout=false );
@@ -2648,6 +2659,7 @@ protected:
     bool _inHeadStyle;
     lString32 _headStyleText;
     lString32Collection _stylesheetLinks;
+    lString32Collection _stylesheetLinksMediaConditions;
 #if MATHML_SUPPORT==1
     MathMLHelper _mathMLHelper;
 #endif
@@ -2755,9 +2767,10 @@ private:
     lString32 codeBase;
     lString32 filePathName;
     lString32 codeBasePrefix;
-    lString32 stylesheetFile;
-    lString32 tmpStylesheetFile;
+    lString32 tmpStylesheetLink;
+    lString32 tmpStylesheetMediaCondition;
     lString32Collection stylesheetLinks;
+    lString32Collection stylesheetLinksMediaConditions;
     bool insideTag;
     int styleDetectionState;
     LVHashTable<lString32, lString32> pathSubstitutions;

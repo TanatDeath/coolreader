@@ -25,8 +25,14 @@ public class Scanner extends FileInfoChangeSource {
 	
 	int mHideEmptyDirs = -1;
 	
-	public void setHideEmptyDirs( int flgHide ) {
+	public void setHideEmptyDirs(int flgHide) {
 		mHideEmptyDirs = flgHide;
+	}
+
+	int mZipScan = 0;
+
+	public void setZipScan(int zipScan) {
+		mZipScan = zipScan;
 	}
 
 	private boolean dirScanEnabled = true;
@@ -116,12 +122,13 @@ public class Scanner extends FileInfoChangeSource {
 	 */
 	public boolean listDirectory(FileInfo baseDir, boolean onlySupportedFormats, boolean scanzip, boolean rescan)
 	{
+		boolean rrescan = rescan;
 		Set<String> knownItems = null;
 		if ( baseDir.isListed ) {
-			if (rescan) {
+			if (rrescan) {
 				baseDir.clear();
 			} else {
-				knownItems = new HashSet<String>();
+				knownItems = new HashSet<>();
 				for (int i = baseDir.itemCount() - 1; i >= 0; i--) {
 					FileInfo item = baseDir.getItem(i);
 					if (!item.exists()) {
@@ -165,11 +172,14 @@ public class Scanner extends FileInfoChangeSource {
 							// skip mount root
 							continue;
 						}
-						// this was in CR, but it is very slow way, so we use our own
-						//boolean isArc = Engine.isArchive(pathName) && (!pathName.toLowerCase().endsWith("fb3.zip"));
-						//boolean isArc = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
-						boolean isArc = FileUtils.isArchive(f) && (!pathName.toLowerCase().endsWith("fb3.zip"));
-						FileInfo item = !rescan ? mFileList.get(pathName) : null;
+						// warning: CR code does not contain fb3.zip condition
+						boolean isArc = false;
+						if (mZipScan == 0) isArc = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
+							else
+								if (mZipScan == 1) isArc = FileUtils.isArchive(f) && (!pathName.toLowerCase().endsWith("fb3.zip"));
+								else
+									if (mZipScan == 2) isArc = Engine.isArchive(pathName) && (!pathName.toLowerCase().endsWith("fb3.zip"));
+						FileInfo item = !rrescan ? mFileList.get(pathName) : null;
 						boolean isNew = false;
 						if (item == null) {
 							item = new FileInfo(f);
@@ -427,9 +437,11 @@ public class Scanner extends FileInfoChangeSource {
 		if (mHideEmptyDirs == 2) scanDepth = 0;
 		if (mHideEmptyDirs == 1) scanDepth = Integer.MAX_VALUE;
 		//plotn - надо бы разобраться потом с кодом CR, следующий сканер у меня портит все свойства книг, поэтому я убрал
+		//20211127 upd - дошел до того, что в вызовах listSubtreeBg есть повторный вызов listDirectory с полным ресканом, он свойства и портит
+		// непонятно, как при этом работают зип архивы, но проверим
 		// *|| baseDir.isScanned*/
 		listSubtreeBg(baseDir, scanDepth, scanControl, () -> {
-			if ( (!getDirScanEnabled() /*|| baseDir.isScanned*/) && !recursiveScan || scanControl.isStopped() ) {
+			if ( (!getDirScanEnabled() || baseDir.isScanned) && !recursiveScan || scanControl.isStopped() ) {
 				readyListener.onComplete(scanControl);
 				return;
 			}
@@ -446,7 +458,6 @@ public class Scanner extends FileInfoChangeSource {
 						readyListener.onComplete(scanControl);
 					} else {
 						baseDir.isScanned = true;
-
 						if ( recursiveScan ) {
 							if (scanControl.isStopped()) {
 								// scan is stopped
@@ -998,7 +1009,8 @@ public class Scanner extends FileInfoChangeSource {
 		if (maxDepth <= 0 || scanControl.isStopped())
 			return false;
 		// full rescan to scan zip-files
-		boolean res = listDirectory(dir, true, true, !dir.isSpecialDir() && !dir.isArchive);
+		//plotn - I dont understand why there is rescan is needed - everything could be solved via knownitems :( swithed off
+		boolean res = listDirectory(dir, true, true, false /*!dir.isSpecialDir() && !dir.isArchive*/);
 		if (res) {
 			for (int i = dir.dirCount() - 1; i >= -0; i--) {
 				res = listSubtreeBg_impl(dir.getDir(i), maxDepth - 1, scanControl);

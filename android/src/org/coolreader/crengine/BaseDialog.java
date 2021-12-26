@@ -27,10 +27,10 @@ public class BaseDialog extends Dialog {
 	ViewGroup buttonsLayout;
 	public ViewGroup upperTextLayout;
 	ViewGroup contentsLayout;
-	BaseActivity activity;
+	public BaseActivity activity;
 	String title;
-	String upperText;
-	boolean searchEnabled;
+	public String upperText;
+	public boolean searchEnabled;
 	boolean needCancelButton;
 	String dlgName;
 	int positiveButtonImage;

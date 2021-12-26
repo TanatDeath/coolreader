@@ -194,7 +194,7 @@ enum glyph_extra_metric_t
 };
 
 // Changing this enum also update method LVDocView::rotateFontAntialiasMode()
-// & org.coolreader.crengine.OptionsDialog.mAntialias array.
+// & org.coolreader.options.OptionsDialog.mAntialias array.
 enum font_antialiasing_t {
     font_aa_none = 0,
     font_aa_big,

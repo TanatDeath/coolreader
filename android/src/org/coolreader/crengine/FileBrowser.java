@@ -2,15 +2,12 @@ package org.coolreader.crengine;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.*;
@@ -26,8 +23,10 @@ import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.crengine.OPDSUtil.DocInfo;
 import org.coolreader.crengine.OPDSUtil.DownloadCallback;
 import org.coolreader.crengine.OPDSUtil.EntryInfo;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
+import org.coolreader.options.ListOption;
 import org.coolreader.plugins.*;
 
 import java.io.File;
@@ -573,6 +572,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				mActivity.directoryUpdated(selectedItem.parent, selectedItem);
 		});
 	}
+
+	public interface FileInfoCallbackExt {
+		void onComplete(FileInfo fi);
+		void onError(FileInfo fi, Exception e);
+	}
 	
 	public boolean onContextItemSelected(MenuItem item) {
 		
@@ -635,7 +639,27 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			return true;
 		case R.id.book_delete:
 			log.d("book_delete menu item selected");
-			mActivity.askDeleteBook(selectedItem);
+			mActivity.askDeleteBook(selectedItem, new FileInfoCallbackExt() {
+				@Override
+				public void onComplete(FileInfo fi) {
+					String ss1 = StrUtils.getNonEmptyStr(fi.arcname, true);
+					String ss2 = StrUtils.getNonEmptyStr(fi.pathname, true);
+					for (int i = 0; i < currDirectoryFiltered.fileCount(); i++) {
+						String s1 = StrUtils.getNonEmptyStr(currDirectoryFiltered.getFile(i).arcname, true);
+						String s2 = StrUtils.getNonEmptyStr(currDirectoryFiltered.getFile(i).pathname, true);
+						if ((s1.equals(ss1)) && (s2.equals(ss2))) {
+							currDirectoryFiltered.files.remove(i);
+							break;
+						}
+					}
+					currentListAdapter.notifyDataSetChanged();
+				}
+
+				@Override
+				public void onError(FileInfo fi, Exception e) {
+
+				}
+			});
 			return true;
 		case R.id.book_recent_goto:
 			log.d("book_recent_goto menu item selected");
@@ -701,7 +725,27 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		case R.id.move_to_books:
 			log.d("move_to_books menu item selected");
 			if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
-				mActivity.askMoveBook(selectedItem);
+				mActivity.askMoveBook(selectedItem, new FileInfoCallbackExt() {
+					@Override
+					public void onComplete(FileInfo fi) {
+						String ss1 = StrUtils.getNonEmptyStr(fi.arcname, true);
+						String ss2 = StrUtils.getNonEmptyStr(fi.pathname, true);
+						for (int i = 0; i < currDirectoryFiltered.fileCount(); i++) {
+							String s1 = StrUtils.getNonEmptyStr(currDirectoryFiltered.getFile(i).arcname, true);
+							String s2 = StrUtils.getNonEmptyStr(currDirectoryFiltered.getFile(i).pathname, true);
+							if ((s1.equals(ss1)) && (s2.equals(ss2))) {
+								currDirectoryFiltered.files.remove(i);
+								break;
+							}
+						}
+						currentListAdapter.notifyDataSetChanged();
+					}
+
+					@Override
+					public void onError(FileInfo fi, Exception e) {
+
+					}
+				});
 			}
 			return true;
 		case R.id.book_set_custom_cover:
@@ -1336,7 +1380,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				R.string.option_add_info_empty_text,
 				R.string.option_add_info_empty_text,
 		};
-		OptionsDialog.ListOption dlg = new OptionsDialog.ListOption(
+		ListOption dlg = new ListOption(
 			new OptionOwner() {
 				public BaseActivity getActivity() { return mActivity; }
 				public Properties getProperties() { return properties; }
@@ -2639,10 +2683,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						if (field1 != null) {
 							if (fieldState == null)	{
 								field1.setText(onlineBookInfo + "  " + state + " " + Utils.formatFileInfo(mActivity, item));
-								field1.setTextColor(colorIcon);
+								field1.setTextColor(mActivity.getTextColor(colorIcon));
 							} else {
 								field1.setText(onlineBookInfo + " " + Utils.formatFileInfo(mActivity, item));
-								field1.setTextColor(colorIcon);
+								field1.setTextColor(mActivity.getTextColor(colorIcon));
 							}
 						}
 						if (fieldState != null) {
@@ -2674,7 +2718,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						//field2.setText(formatDate(pos!=null ? pos.getTimeStamp() : item.createTime));
 						if (field2 != null) {
 							field2.setText(Utils.formatLastPosition(mActivity, mHistory.getLastPos(item)));
-							field2.setTextColor(colorIcon);
+							field2.setTextColor(mActivity.getTextColor(colorIcon));
 							field2.setBackgroundColor(colorGrayCT);
 						}
 						TextView fld = linkToFile;
@@ -2698,7 +2742,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								fld.setText(fS);
 								//log.i("Setting linked file for: " + item.pathname + " to " +
 								//		item.pathnameR);
-								fld.setTextColor(colorIcon);
+								fld.setTextColor(mActivity.getTextColor(colorIcon));
 								fld.setBackgroundColor(colorGrayCT2);
 							}
 						}

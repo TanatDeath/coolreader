@@ -27,6 +27,7 @@ import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
 import org.coolreader.layouts.FlowLayout;
+import org.coolreader.options.OptionsDialog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -261,7 +262,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				mActivity.tintViewIcons(cover,true);
 				if (label != null) {
 					label.setText("More...");
-					label.setTextColor(colorIcon);
+					label.setTextColor(mActivity.getTextColor(colorIcon));
 				}
 				view.setOnClickListener(v -> mActivity.showRecentBooks());
 			} else {
@@ -279,7 +280,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					else if (!Utils.empty(authors))
 						s = authors;
 					label.setText(s != null ? s : "");
-					label.setTextColor(colorIcon);
+					label.setTextColor(mActivity.getTextColor(colorIcon));
                     int n = item.getReadingState();
                     if (n == FileInfo.STATE_READING)
                         label.setTextColor(colorGreen);
@@ -378,12 +379,12 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_opds_add_drawable, R.drawable.cr3_browser_folder_opds_add));
                 mActivity.tintViewIcons(icon,true);
 				label.setText("Add");
-				label.setTextColor(colorIcon);
+				label.setTextColor(mActivity.getTextColor(colorIcon));
 				view.setOnClickListener(v -> showAddCatalogMenu(icon, mView));
 			} else if (item.isLitresDir()) {
 				setImageResourceSmall(icon, R.drawable.litres);
 				label.setText(item.getFilename());
-				label.setTextColor(colorIcon);
+				label.setTextColor(mActivity.getTextColor(colorIcon));
 				view.setOnLongClickListener(v -> {
 					mActivity.litresCredentialsDialog = new LitresCredentialsDialog(mActivity);
 					mActivity.litresCredentialsDialog.show();
@@ -441,7 +442,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 						label.setTextColor(colorIconL);
 					}
 					else
-						label.setTextColor(colorIcon);
+						label.setTextColor(mActivity.getTextColor(colorIcon));
 					label.setMaxWidth(coverWidth * 3 / 2);
 				}
 
@@ -513,7 +514,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 //			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
 //			mActivity.tintViewIcons(icon,true);
 //			label.setText(R.string.open_book_from_gd_short);
-//			label.setTextColor(colorIcon);
+//			label.setTextColor(mActivity.getTextColor(colorIcon));
 //			label.setMaxWidth(coverWidth * 25 / 10);
 //			view.setOnClickListener(new OnClickListener() {
 //				@Override
@@ -531,7 +532,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
 			mActivity.tintViewIcons(iconGD,true);
 			labelGD.setText(R.string.open_book_from_gd_short);
-			labelGD.setTextColor(colorIcon);
+			labelGD.setTextColor(mActivity.getTextColor(colorIcon));
 			labelGD.setMaxWidth(coverWidth * 25 / 10);
 			viewGD.setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -558,7 +559,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
 			mActivity.tintViewIcons(iconDBX,true);
 			labelDBX.setText(R.string.open_book_from_dbx_short);
-			labelDBX.setTextColor(colorIcon);
+			labelDBX.setTextColor(mActivity.getTextColor(colorIcon));
 			labelDBX.setMaxWidth(coverWidth * 25 / 10);
 			viewDBX.setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -585,7 +586,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 					R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
 			mActivity.tintViewIcons(iconYandex,true);
 			labelYandex.setText(R.string.open_book_from_y_short);
-			labelYandex.setTextColor(colorIcon);
+			labelYandex.setTextColor(mActivity.getTextColor(colorIcon));
 			labelYandex.setMaxWidth(coverWidth * 25 / 10);
 			viewYandex.setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -630,12 +631,12 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				else
                     labText = item.pathname; //  filename
 				label.setMaxWidth(coverWidth * 25 / 10);
-				label.setTextColor(colorIcon);
+				label.setTextColor(mActivity.getTextColor(colorIcon));
 				view.setOnClickListener(v -> mActivity.showDirectory(item, ""));
 				String[] arrLab = labText.split("/");
 				if (arrLab.length>2) labText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
                 label.setText(labText);
-				label.setTextColor(colorIcon);
+				label.setTextColor(mActivity.getTextColor(colorIcon));
 				view.setOnLongClickListener(view1 -> {
 					registerFoldersContextMenu(item);
 					return false;
@@ -761,7 +762,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
             mActivity.tintViewIcons(image,true);
 			if (label != null) {
 				label.setText(item.getFilename());
-				label.setTextColor(colorIcon);
+				label.setTextColor(mActivity.getTextColor(colorIcon));
 				label.setMinWidth(coverWidth);
 				label.setMaxWidth(coverWidth * 2);
 			}

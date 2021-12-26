@@ -14,6 +14,7 @@
 
 #include "lvfilestream.h"
 #include "crlog.h"
+#include <errno.h>
 
 #if (USE_ANSI_FILES==1)
 
@@ -511,12 +512,39 @@ lverror_t LVFileStream::OpenFile(lString32 fname, int mode)
         return LVERR_FAIL;
     }
     struct stat stat;
-    if ( fstat( m_fd, &stat ) ) {
-        CRLog::error( "Cannot get file size for %s", fn8.c_str() );
+    if ( fstat( m_fd, &stat ) < 0 ) {
+#if defined(HAVE_STAT64) && defined(_LINUX)
+        if (errno == EOVERFLOW) {
+                CRLog::debug( "File require LFS support, fallback to stat64" );
+                struct stat64 stat64;
+                if ( fstat64( m_fd, &stat64 ) < 0 ) {
+                    CRLog::error( "Cannot get file size for %s, errno=%d, msg=%s", fn8.c_str(), errno, strerror( errno )  );
+                    return LVERR_FAIL;
+                } else {
+                    if (stat64.st_size >= INT_MIN && stat64.st_size <= INT_MAX) {
+                        m_mode = (lvopen_mode_t)mode;
+                        m_size = (lvsize_t) stat64.st_size;
+                    } else {
+                        CRLog::error( "File is too big to open %s");
+                        return LVERR_FAIL;
+                    }
+                }
+            } else {
+                CRLog::error( "Cannot get file size for %s, errno=%d, msg=%s", fn8.c_str(), errno, strerror( errno )  );
+                return LVERR_FAIL;
+            }
+#else
+#ifdef _LINUX
+        CRLog::error( "Cannot get file size for %s, errno=%d, msg=%s", fn8.c_str(), errno, strerror( errno )  );
+#else
+        CRLog::error( "Cannot get file size for %s", fn8.c_str()  );
+#endif
         return LVERR_FAIL;
+#endif
+    } else {
+        m_mode = (lvopen_mode_t)mode;
+        m_size = (lvsize_t) stat.st_size;
     }
-    m_mode = (lvopen_mode_t)mode;
-    m_size = (lvsize_t) stat.st_size;
 #endif
     
     SetName(fname.c_str());

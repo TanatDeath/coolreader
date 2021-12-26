@@ -2,20 +2,16 @@ package org.coolreader.db;
 
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
-import android.graphics.Color;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
-import org.coolreader.R;
 import org.coolreader.crengine.*;
 import org.coolreader.crengine.Scanner;
-import org.coolreader.genrescollection.GenresCollection;
 import org.coolreader.library.AuthorAlias;
+import org.coolreader.userdic.UserDicEntry;
 
 import java.io.File;
 import java.util.*;
@@ -1066,6 +1062,7 @@ public class MainDB extends BaseDB {
 					}
 				} else {
 					// need insert
+
 					execSQL("INSERT INTO user_dic " +
 							"(dic_word, dic_word_translate, dic_from_book, create_time, last_access_time, language, seen_count, is_citation) " +
 							"values (" + quoteSqlString(sWord) + ", " +
@@ -1074,23 +1071,31 @@ public class MainDB extends BaseDB {
 							System.currentTimeMillis() + ", " +
 							System.currentTimeMillis() + ", " +
 							quoteSqlString(ude.getLanguage()) + ", " +
-							"0, " +
+							ude.getSeen_count() + ", " +
 							is_cit +
 							")"
 					);
 				}
 			}
 			if (action == UserDicEntry.ACTION_DELETE) {
-//				Log.i("sql","DELETE FROM user_dic " +
-//						" where dic_word = " + quoteSqlString(sWord) + " and coalesce(is_citation,0) = "+is_cit);
-				execSQL("DELETE FROM user_dic " +
-						" where dic_word = " + quoteSqlString(sWord) + " and coalesce(is_citation,0) = " + is_cit);
+				if (ude.getThisIsDSHE())
+					execSQL("DELETE FROM dic_search_history " +
+							" where search_text = " + quoteSqlString(sWord));
+				else
+					execSQL("DELETE FROM user_dic " +
+							" where dic_word = " + quoteSqlString(sWord) + " and coalesce(is_citation,0) = " + is_cit);
 			}
 			if (action == UserDicEntry.ACTION_UPDATE_CNT) {
-				execSQL("UPDATE user_dic SET " +
-						" last_access_time = " + System.currentTimeMillis() + ", " +
-						" seen_count = seen_count + 1 " +
-						" WHERE dic_word = " + quoteSqlString(sWord) + " and coalesce(is_citation,0) = " + is_cit);
+				if (ude.getThisIsDSHE())
+					execSQL("UPDATE dic_search_history SET " +
+							" last_access_time = " + System.currentTimeMillis() + ", " +
+							" seen_count = coalesce(seen_count, 0) + 1 " +
+							" WHERE search_text = " + quoteSqlString(sWord));
+				else
+					execSQL("UPDATE user_dic SET " +
+							" last_access_time = " + System.currentTimeMillis() + ", " +
+							" seen_count = coalesce(seen_count, 0) + 1 " +
+							" WHERE dic_word = " + quoteSqlString(sWord) + " and coalesce(is_citation,0) = " + is_cit);
 			}
 		} catch (Exception e) {
 			Log.e("cr3", "exception while saving user dic", e);

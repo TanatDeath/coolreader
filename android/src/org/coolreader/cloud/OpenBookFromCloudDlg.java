@@ -632,7 +632,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		btnSaveOpenedBook.setBackgroundColor(colorGrayCT2);
-		btnSaveOpenedBook.setTextColor(colorIcon);
+		btnSaveOpenedBook.setTextColor(activity.getTextColor(colorIcon));
 		btnSaveOpenedBook.setOnClickListener(new Button.OnClickListener() {
 			public void onClick(View v) {
 				if (bookToSave != null) {

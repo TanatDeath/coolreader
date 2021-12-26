@@ -86,7 +86,7 @@ public class CoverDB extends BaseDB {
 				stmt.execute();
 				Log.v("cr3", "db: saved " + data.length + " bytes of cover page for book " + bookId);
 			}
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			Log.e("cr3", "Exception while trying to save cover page to DB: " + e.getMessage() );
 		} finally {
 			if ( stmt!=null )
@@ -108,7 +108,7 @@ public class CoverDB extends BaseDB {
 				return rs.getBlob(0);
 			}
 			return null;
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			Log.e("cr3", "error while reading coverpage for book " + bookId + ": " + e.getMessage());
 			return null;
 		} finally {

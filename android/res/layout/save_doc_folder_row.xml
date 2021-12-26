@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow  xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tr_doc_save_folder"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        >
+    <Button
+            android:id="@+id/btn_folder"
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="2dip"
+            android:tag="tint"
+            android:textColor="?attr/colorIcon"
+            android:contentDescription="@null"
+            android:drawableLeft="@drawable/icons8_check_no_frame"
+            android:text="@string/open_as_html" />
+    <TextView
+            android:id="@+id/txt_folder"
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="2dip"
+            android:textColor="?attr/colorIcon"
+            android:tag="tint"
+            android:maxLines="2"
+            android:gravity="center_vertical"
+            android:contentDescription="@null"
+            android:ellipsize="middle"
+            android:text="@string/open_as_text" />
+</TableRow>

@@ -4,14 +4,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
-import android.text.Spannable;
-import android.text.SpannableString;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
-import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -21,20 +19,31 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GotoPageDialog extends BaseDialog {
 
+	HashMap<Integer, Integer> themeColors = null;
+	boolean isEInk;
+
 	public interface GotoPageHandler {
-		boolean validate(String s) throws Exception;
-		void onOk(String s) throws Exception;
+		boolean validate(String s, boolean isPercent) throws Exception;
+		void onOk(String s, boolean isPercent) throws Exception;
 		void onOkPage(String s) throws Exception;
 		void onCancel();
 	};
 
 	private GotoPageHandler handler;
 	private EditText input;
+	private EditText inputPerc;
+	private boolean inTextChange;
+	private boolean inSeekChange;
+	private TextWatcher watcher;
+	private TextWatcher watcherPerc;
+	private SeekBar seekBar;
 	int minValue;
 	int maxValue;
 	int mColorIconL =Color.GRAY;
@@ -163,7 +172,7 @@ public class GotoPageDialog extends BaseDialog {
 				if (labelView != null) value = String.valueOf(Integer.valueOf(labelView.getText().toString().trim())+1);
 			}
 			try {
-				if ( handler.validate(value) )
+				if ( handler.validate(value, false) )
 					handler.onOkPage(value);
 				else
 					handler.onCancel();
@@ -180,6 +189,8 @@ public class GotoPageDialog extends BaseDialog {
 	public GotoPageDialog(BaseActivity activity, final String title, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final GotoPageHandler handler )
 	{
 		super("GotoPageDialog", activity, title, true, false);
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
 		this.arrFound = null;
 		this.handler = handler;
 		this.minValue = minValue;
@@ -188,7 +199,73 @@ public class GotoPageDialog extends BaseDialog {
 		this.mReaderView.CheckAllPagesLoadVisual();
         this.mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_dlg, null);
-        input = layout.findViewById(R.id.input_field);
+        watcher = new TextWatcher() {
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+										  int after) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+									  int count) {
+				if (inTextChange) return;
+				int val = 0;
+				try {
+					val = Integer.parseInt(s.toString());
+				} catch (Exception e) {
+					val = 0;
+				}
+				mList.setSelection(val-1);
+				int perc = (val * 100)/maxValue;
+				inTextChange = true;
+				inputPerc.setText("" + perc);
+				inTextChange = false;
+				inSeekChange = true;
+				seekBar.setProgress(val);
+				inSeekChange = false;
+			}
+		};
+		input = layout.findViewById(R.id.input_field);
+		watcherPerc = new TextWatcher() {
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+										  int after) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+									  int count) {
+				if (inTextChange) return;
+				int val = 0;
+				try {
+					val = Integer.parseInt(s.toString());
+				} catch (Exception e) {
+					val = 0;
+				}
+				int pageNumber = maxValue * val / 100;
+				mList.setSelection(pageNumber-1);
+				inTextChange = true;
+				input.setText("" + pageNumber);
+				inTextChange = false;
+				inSeekChange = true;
+				seekBar.setProgress(pageNumber);
+				inSeekChange = false;
+			}
+		};
+		inputPerc = layout.findViewById(R.id.input_field_perc);
+		inputPerc.addTextChangedListener(watcherPerc);
+		input.addTextChangedListener(watcher);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
         TextView promptView = layout.findViewById(R.id.lbl_prompt);
         if (promptView != null) {
         	promptView.setText(prompt);
@@ -197,7 +274,7 @@ public class GotoPageDialog extends BaseDialog {
 		mList = new GotoPageDialog.BookPagesList(activity, false);
 		body.addView(mList);
 
-        SeekBar seekBar = layout.findViewById(R.id.goto_position_seek_bar);
+        seekBar = layout.findViewById(R.id.goto_position_seek_bar);
         if (seekBar != null) {
         	seekBar.setMax(maxValue - minValue);
         	seekBar.setProgress(currentValue);
@@ -213,11 +290,18 @@ public class GotoPageDialog extends BaseDialog {
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress,
 						boolean fromUser) {
+					if (inSeekChange) return;
 					if (fromUser) {
 						String value = String.valueOf(progress + GotoPageDialog.this.minValue);
 						try {
-							if (handler.validate(value))
+							if (handler.validate(value, false)) {
+								inTextChange = true;
 								input.setText(value);
+								mList.setSelection(Integer.parseInt(value)-1);
+								int perc = (Integer.parseInt(value) * 100)/maxValue;
+								inputPerc.setText("" + perc);
+								inTextChange = false;
+							}
 						} catch (Exception e) {
 							// ignore
 						}
@@ -282,14 +366,15 @@ public class GotoPageDialog extends BaseDialog {
         cancel();
         handler.onCancel();
 	}
+
 	@Override
 	protected void onPositiveButtonClick() {
 		if (input != null)
 			if (input.getText() != null) {
 				String value = input.getText().toString().trim();
 				try {
-					if (handler.validate(value)) {
-						handler.onOk(value);
+					if (handler.validate(value, false)) {
+						handler.onOk(value, false);
 					} else
 						handler.onCancel();
 				} catch (Exception e) {

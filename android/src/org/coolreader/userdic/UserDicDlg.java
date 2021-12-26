@@ -1,7 +1,6 @@
-package org.coolreader.crengine;
+package org.coolreader.userdic;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -15,26 +14,30 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.db.CRDBService;
+import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DicSearchHistoryEntry;
+import org.coolreader.crengine.DictsDlg;
+import org.coolreader.crengine.StrUtils;
+import org.coolreader.crengine.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.CRC32;
 
@@ -62,7 +65,7 @@ public class UserDicDlg extends BaseDialog {
 
 	public final static int ITEM_POSITION=0;
 
-	private void listUpdated() {
+	void listUpdated() {
 		mList.updateAdapter(new UserDicAdapter());
 	}
 
@@ -146,25 +149,22 @@ public class UserDicDlg extends BaseDialog {
 						if (ude.getThisIsDSHE()) {
 							DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
 							dshe.setSearch_text(ude.getDic_word());
-							activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
+							mCoolReader.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, mCoolReader);
 						} else
-							activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
+							mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
 						mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
 						mUserDic.remove(ude);
 						listUpdated();
-						mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+						mCoolReader.updateUserDicWords();
 					});
 				}
 				if (openPage==2) {
 					final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
-					mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-						@Override
-						public void run() {
-							activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
-							mDicSearchHistory.remove(dshe);
-							listUpdated();
-							mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-						}
+					mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, () -> {
+						mCoolReader.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, mCoolReader);
+						mDicSearchHistory.remove(dshe);
+						listUpdated();
+						mCoolReader.updateUserDicWords();
 					});
 				}
 			});
@@ -205,8 +205,8 @@ public class UserDicDlg extends BaseDialog {
 					String sLangTo = dshe.getLanguage_to();
 					String sLang = "";
 					if ((!StrUtils.isEmptyStr(sLangFrom))||(!StrUtils.isEmptyStr(sLangTo))) {
-						if (StrUtils.isEmptyStr(sLangFrom)) sLangFrom = "any";
-						if (StrUtils.isEmptyStr(sLangTo)) sLangTo = "any";
+						if (StrUtils.isEmptyStr(sLangFrom)) sLangFrom = mCoolReader.getString(R.string.txt_any);
+						if (StrUtils.isEmptyStr(sLangTo)) sLangTo = mCoolReader.getString(R.string.txt_any);
 						sLang = "[" +sLangFrom+" > "+sLangTo + "] ";
 					}
 					if (wordView != null)
@@ -214,7 +214,7 @@ public class UserDicDlg extends BaseDialog {
 					sLang = sLang + StrUtils.textShrinkLines(dshe.getText_translate(), true);
 					if (!sLang.trim().equals("")) sLang = sLang +"; ";
 							wordTranslateView.setText(sLang+
-							mCoolReader.getString(R.string.txt_seen)+ " "+String.valueOf(dshe.getSeen_count()));
+							mCoolReader.getString(R.string.txt_seen)+ " "+ dshe.getSeen_count());
 				} else {
 					if (wordView != null)
 						wordView.setText("");
@@ -261,46 +261,36 @@ public class UserDicDlg extends BaseDialog {
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
 			setAdapter(new UserDicAdapter());
-			setOnItemLongClickListener(new OnItemLongClickListener() {
-				@Override
-				public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-						int position, long arg3) {
-					if (openPage==0) {
-						if (mUserDic == null)
-							return true;
-						final UserDicEntry ude = mUserDic.get(position);
-						final UserDicDlg thisDlg = uDDlg;
-						mCoolReader.askConfirmation(R.string.win_title_confirm_ude_delete, new Runnable() {
-							@Override
-							public void run() {
-								if (ude.getThisIsDSHE()) {
-									DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
-									dshe.setSearch_text(ude.getDic_word());
-									activity.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, (CoolReader) activity);
-								} else
-									activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_DELETE);
-								mCoolReader.getmUserDic().remove(ude.getIs_citation() + ude.getDic_word());
-								mUserDic.remove(ude);
-								if (thisDlg != null)
-									thisDlg.listUpdated();
-								mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
-							}
-						});
-					}
-					if ((openPage==1)) {
-						if (mCoolReader.getReaderView()==null) return false;
-						final UserDicEntry ude = mUserDic.get(position);
-						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), ude.getDic_word(), arg1, false);
-						dlg.show();
-					}
-					if ((openPage==2)) {
-						if (mCoolReader.getReaderView()==null) return false;
-						final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
-						DictsDlg dlg = new DictsDlg(mCoolReader, mCoolReader.getReaderView(), dshe.getSearch_text(), arg1, false);
-						dlg.show();
-					}
-					return true;
+			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
+				if (openPage==0) {
+					if (mUserDic == null)
+						return true;
+					final UserDicEntry ude = mUserDic.get(position);
+					UserDicEditDialog uded = new UserDicEditDialog(mCoolReader, ude, uDDlg);
+					uded.show();
 				}
+				if ((openPage==1)) {
+					if (mCoolReader.getReaderView()==null) return false;
+					final UserDicEntry ude = mUserDic.get(position);
+					UserDicEditDialog uded = new UserDicEditDialog(mCoolReader, ude, uDDlg);
+					uded.show();
+				}
+				if ((openPage==2)) {
+					if (mCoolReader.getReaderView()==null) return false;
+					final DicSearchHistoryEntry dshe = mDicSearchHistory.get(position);
+					UserDicEntry ude = new UserDicEntry();
+					ude.setDic_word(dshe.getSearch_text());
+					ude.setDic_word_translate(dshe.getText_translate());
+					ude.setCreate_time(dshe.getCreate_time());
+					ude.setLast_access_time(dshe.getLast_access_time());
+					ude.setDic_from_book(dshe.getSearch_from_book());
+					ude.setLanguage(dshe.getLanguage_from());
+					ude.setSeen_count(dshe.getSeen_count());
+					ude.setThisIsDSHE(true);
+					UserDicEditDialog uded = new UserDicEditDialog(mCoolReader, ude, uDDlg);
+					uded.show();
+				}
+				return true;
 			});
 		}
 
@@ -354,7 +344,7 @@ public class UserDicDlg extends BaseDialog {
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		rb_descr.setText(btn.getContentDescription()+" ");
 		btnPage2.setEnabled(true);
-		btnPage2.setTextColor(colorIcon);
+		btnPage2.setTextColor(activity.getTextColor(colorIcon));
 		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_bookmark_user_dic))) {
 			openPage = 0;
 		}
@@ -402,7 +392,7 @@ public class UserDicDlg extends BaseDialog {
 		return false;
 	}
 
-	private void checkedCallback(Button btn) {
+	void checkedCallback(Button btn) {
 		boolean bPageC = getCheckedFromTag(btnPage2.getTag());
 		boolean bBookC = getCheckedFromTag(btnBook2.getTag());
 		boolean bAllC = getCheckedFromTag(btnAll2.getTag());
@@ -528,26 +518,22 @@ public class UserDicDlg extends BaseDialog {
 								)
 						)
 					mUserDic.add(ude);
-			//mCoolReader.showToast(ude.getDic_word()+" "+ude.getIs_citation());
 		}
-		Collections.sort(mUserDic, new Comparator<UserDicEntry>() {
-			@Override
-			public int compare(UserDicEntry lhs, UserDicEntry rhs) {
-				// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-				// here we need alphabetical sort!!! - not for page
-				return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());
-				//if (lhs.getLast_access_time() > rhs.getLast_access_time()) return -1;
-				//if (lhs.getLast_access_time() < rhs.getLast_access_time()) return 1;
-				//return 0;
-			}
+		Collections.sort(mUserDic, (lhs, rhs) -> {
+			// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+			// here we need alphabetical sort!!! - not for page
+			return lhs.getDic_word().compareToIgnoreCase(rhs.getDic_word());
+			//if (lhs.getLast_access_time() > rhs.getLast_access_time()) return -1;
+			//if (lhs.getLast_access_time() < rhs.getLast_access_time()) return 1;
+			//return 0;
 		});
 		listUpdated();
 	}
 
 	private void updDicSearchHistory(final String sCRC) {
 		mDicSearchHistory.clear();
-		if (activity instanceof CoolReader) {
-			CoolReader cr = (CoolReader)activity;
+		if (mCoolReader instanceof CoolReader) {
+			CoolReader cr = mCoolReader;
 			cr.getDB().loadDicSearchHistory(list -> {
 				ArrayList<DicSearchHistoryEntry> list1 = (ArrayList<DicSearchHistoryEntry>) list;
 				for (DicSearchHistoryEntry dshe: list1) {

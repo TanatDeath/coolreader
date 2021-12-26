@@ -1,10 +1,14 @@
 package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.layouts.FlowLayout;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.options.SelectionModesOption;
+import org.coolreader.userdic.UserDicEntry;
 
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -15,7 +19,6 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
-import android.os.Build;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -24,13 +27,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -43,7 +44,7 @@ import java.util.zip.CRC32;
 public class SelectionToolbarDlg {
 	PopupWindow mWindow;
 	View mAnchor;
-	CoolReader mCoolReader;
+	CoolReader mActivity;
 	ReaderView mReaderView;
 	View mPanel;
 	public static Selection stSel;
@@ -197,12 +198,12 @@ public class SelectionToolbarDlg {
 	public boolean addButtonEnabled;
 	private Properties props;
 
-	public static void saveUserDic(boolean isCitation, String text, Selection selection, CoolReader mCoolReader, ReaderView mReaderView) {
+	public static void saveUserDic(boolean isCitation, String text, Selection selection, CoolReader mActivity, ReaderView mReaderView) {
 		UserDicEntry ude = new UserDicEntry();
 		ude.setId(0L);
 		ude.setDic_word(selection.text);
 		if (isCitation)
-			ude.setDic_word_translate(BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+			ude.setDic_word_translate(BookmarkEditDialog.getContextText(mActivity, selection.text));
 		else
 			ude.setDic_word_translate(text);
 		final String sBookFName = mReaderView.mBookInfo.getFileInfo().getFilename();
@@ -212,72 +213,72 @@ public class SelectionToolbarDlg {
 		ude.setCreate_time(System.currentTimeMillis());
 		ude.setLast_access_time(System.currentTimeMillis());
 		ude.setLanguage(mReaderView.mBookInfo.getFileInfo().language);
-		ude.setShortContext(BookmarkEditDialog.getContextText(mCoolReader, text));
-		ude.setFullContext(BookmarkEditDialog.getFullContextText(mCoolReader));
+		ude.setShortContext(BookmarkEditDialog.getContextText(mActivity, text));
+		ude.setFullContext(BookmarkEditDialog.getFullContextText(mActivity));
 		ude.setIsCustomColor(0);
 		ude.setCustomColor(Utils.colorToHex(0));
 		ude.setSeen_count(0L);
 		ude.setIs_citation(isCitation? 1 : 0);
-		mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
-		mCoolReader.getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
+		mActivity.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
+		mActivity.getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
 		BackgroundThread.instance().postGUI(() -> {
 			if (isCitation)
-				mCoolReader.showToast(R.string.citation_created);
+				mActivity.showToast(R.string.citation_created);
 			else
-				mCoolReader.showToast(R.string.user_dic_entry_created);
-			mCoolReader.getmReaderFrame().getUserDicPanel().updateUserDicWords();
+				mActivity.showToast(R.string.user_dic_entry_created);
+			mActivity.updateUserDicWords();
 		}, 1000);
 	}
 
-	public static void sendTo1(String text, Selection selection, CoolReader mCoolReader) {
+	public static void sendTo1(String text, Selection selection, CoolReader mActivity) {
 		final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-		String text1 = BookmarkEditDialog.getSendToText1(mCoolReader,
+		String text1 = BookmarkEditDialog.getSendToText1(mActivity,
 				selection.text,
-				BookmarkEditDialog.getContextText(mCoolReader, selection.text));
-		String text2 = BookmarkEditDialog.getSendToText2(mCoolReader,
+				BookmarkEditDialog.getContextText(mActivity, selection.text));
+		String text2 = BookmarkEditDialog.getSendToText2(mActivity,
 				selection.text,
 				text,
-				BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+				BookmarkEditDialog.getContextText(mActivity, selection.text));
 		emailIntent.setType("text/plain");
 		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, text1);
 		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text2);
-		mCoolReader.startActivity(Intent.createChooser(emailIntent, null));
+		mActivity.startActivity(Intent.createChooser(emailIntent, null));
 	}
 
-	public static void sendTo2(String text, Selection selection, CoolReader mCoolReader) {
+	public static void sendTo2(String text, Selection selection, CoolReader mActivity) {
 		final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 		int selAction = -1;
-		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
+		if (mActivity.getReaderView() != null) selAction = mActivity.getReaderView().mBookmarkActionSendTo;
 		if (selAction == -1) {
-			sendTo1(text, selection, mCoolReader);
+			sendTo1(text, selection, mActivity);
 			return;
 		}
-		int titleSendTo =  OptionsDialog.getSelectionActionTitle(selAction);
-		Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader);
+		int titleSendTo =  SelectionModesOption.getSelectionActionTitle(selAction);
+		Dictionaries.DictInfo curDict = OptionsDialog.getDicValue(mActivity.getString(titleSendTo), mActivity.settings(), mActivity);
 		if (curDict == null) {
-			sendTo1(text, selection, mCoolReader);
+			sendTo1(text, selection, mActivity);
 			return;
 		}
-		String text1 = BookmarkEditDialog.getSendToText1(mCoolReader,
+		String text1 = BookmarkEditDialog.getSendToText1(mActivity,
 			selection.text,
-			BookmarkEditDialog.getContextText(mCoolReader, selection.text));
-		String text2 = BookmarkEditDialog.getSendToText2(mCoolReader,
+			BookmarkEditDialog.getContextText(mActivity, selection.text));
+		String text2 = BookmarkEditDialog.getSendToText2(mActivity,
 				selection.text,
 				text,
-				BookmarkEditDialog.getContextText(mCoolReader, selection.text));
+				BookmarkEditDialog.getContextText(mActivity, selection.text));
 		emailIntent.setType("text/plain");
 		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, text1);
 		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text2);
-		for (ResolveInfo resolveInfo : mCoolReader.getPackageManager().queryIntentActivities(emailIntent, 0)) {
+		for (ResolveInfo resolveInfo : mActivity.getPackageManager().queryIntentActivities(emailIntent, 0)) {
 			if( resolveInfo.activityInfo.packageName.contains(curDict.packageName)){
 				emailIntent.setComponent(new ComponentName(
 						resolveInfo.activityInfo.packageName,
 						resolveInfo.activityInfo.name));
 				try
 				{
-					mCoolReader.startActivity(emailIntent);
+					mActivity.startActivity(emailIntent);
 				} catch ( ActivityNotFoundException e ) {
-					sendTo1(text, selection, mCoolReader);
+					sendTo1(text, selection, mActivity);
 					return;
 				}
 			}
@@ -291,10 +292,10 @@ public class SelectionToolbarDlg {
 		if (!dontChange) {
 			addButtonEnabled = !addButtonEnabled;
 			if (props != null) {
-				mCoolReader.getReaderView().skipFallbackWarning = true;
+				mActivity.getReaderView().skipFallbackWarning = true;
 				props.setProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, addButtonEnabled ? "1" : "0");
-				mCoolReader.getReaderView().skipFallbackWarning = true;
-				mCoolReader.setSettings(props, -1, true);
+				mActivity.getReaderView().skipFallbackWarning = true;
+				mActivity.setSettings(props, -1, true);
 			}
 		}
 		if (addButtonEnabled) {
@@ -302,7 +303,7 @@ public class SelectionToolbarDlg {
 			llButtonsRow2.addView(llAddButtons);
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 			ColorDrawable c = new ColorDrawable(colorGrayC);
-			String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
+			String sTranspButtons = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
 			if (!sTranspButtons.equals("0")) c.setAlpha(130);
 				else c.setAlpha(255);
 			llAddButtons.findViewById(R.id.selection_bookmark).setBackgroundDrawable(c);
@@ -311,7 +312,7 @@ public class SelectionToolbarDlg {
 				closeDialog(true);
 			});
 			llAddButtons.findViewById(R.id.selection_bookmark).setOnLongClickListener(v -> {
-				BookmarksDlg dlg = new BookmarksDlg(mCoolReader, mReaderView, false, null);
+				BookmarksDlg dlg = new BookmarksDlg(mActivity, mReaderView, false, null);
 				dlg.show();
 				closeDialog(true);
 				return true;
@@ -331,29 +332,29 @@ public class SelectionToolbarDlg {
 				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
 				emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
 				try {
-					mCoolReader.startActivity(emailIntent);
+					mActivity.startActivity(emailIntent);
 				} catch (Exception e) {
-					mCoolReader.showToast(mCoolReader.getString(R.string.intent_error)+": "+e.getMessage());
+					mActivity.showToast(mActivity.getString(R.string.intent_error)+": "+e.getMessage());
 				}
 				closeDialog(true);
 			});
 			llAddButtons.findViewById(R.id.btn_dic_list).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_dic_list).setOnClickListener(v -> {
-				DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null, false);
+				DictsDlg dlg = new DictsDlg(mActivity, mReaderView, selection.text, null, false);
 				dlg.show();
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
 			llAddButtons.findViewById(R.id.btn_combo).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_combo).setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mCoolReader.showToast(R.string.only_in_premium);
+					mActivity.showToast(R.string.only_in_premium);
 					return;
 				}
-				Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
+				Dictionaries.DictInfo di = mActivity.getCurOrFirstOnlineDic();
 				if (di != null) {
 					if (!StrUtils.isEmptyStr(selection.text)) {
-						mCoolReader.mDictionaries.setAdHocDict(di);
-						mCoolReader.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
+						mActivity.mDictionaries.setAdHocDict(di);
+						mActivity.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
 
 							@Override
 							public boolean showDicToast() {
@@ -367,13 +368,13 @@ public class SelectionToolbarDlg {
 
 							@Override
 							public void done(String result) {
-								saveUserDic(false, result, selection, mCoolReader, mReaderView);
+								saveUserDic(false, result, selection, mActivity, mReaderView);
 								closeDialog(true);
 							}
 
 							@Override
 							public void fail(Exception e, String msg) {
-								mCoolReader.showToast(msg);
+								mActivity.showToast(msg);
 							}
 						});
 					}
@@ -383,14 +384,14 @@ public class SelectionToolbarDlg {
 			llAddButtons.findViewById(R.id.btn_super_combo).setBackgroundDrawable(c);
 			llAddButtons.findViewById(R.id.btn_super_combo).setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mCoolReader.showToast(R.string.only_in_premium);
+					mActivity.showToast(R.string.only_in_premium);
 					return;
 				}
-				Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
+				Dictionaries.DictInfo di = mActivity.getCurOrFirstOnlineDic();
 				if (di != null) {
 					if (!StrUtils.isEmptyStr(selection.text)) {
-						mCoolReader.mDictionaries.setAdHocDict(di);
-						mCoolReader.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
+						mActivity.mDictionaries.setAdHocDict(di);
+						mActivity.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
 
 							@Override
 							public boolean showDicToast() {
@@ -404,14 +405,14 @@ public class SelectionToolbarDlg {
 
 							@Override
 							public void done(String result) {
-								saveUserDic(false, result, selection, mCoolReader, mReaderView);
-								sendTo2(result, selection, mCoolReader);
+								saveUserDic(false, result, selection, mActivity, mReaderView);
+								sendTo2(result, selection, mActivity);
 								closeDialog(true);
 							}
 
 							@Override
 							public void fail(Exception e, String msg) {
-								mCoolReader.showToast(msg);
+								mActivity.showToast(msg);
 							}
 						});
 					}
@@ -421,7 +422,7 @@ public class SelectionToolbarDlg {
 		} else {
 			llButtonsRow2.removeAllViews();
 		}
-		mCoolReader.tintViewIcons(mPanel);
+		mActivity.tintViewIcons(mPanel);
 	}
 
 	private boolean isShowAtTop() {
@@ -471,7 +472,7 @@ public class SelectionToolbarDlg {
 		llRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 		llButtonsRow.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
-		String sExt = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
+		String sExt = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
 		addButtonEnabled = StrUtils.getNonEmptyStr(sExt, true).equals("1");
 		if (addButtonEnabled) toggleAddButtons(true);
 		initRecentDics();
@@ -513,8 +514,8 @@ public class SelectionToolbarDlg {
 				bmk.setTitleText(selection.chapter);
 				bmk.setIsCustomColor(0);
 				bmk.setCustomColor(Utils.colorToHex(0));
-				bmk.setShortContext(BookmarkEditDialog.getContextText(mCoolReader, selection.text));
-				bmk.setFullContext(BookmarkEditDialog.getFullContextText(mCoolReader));
+				bmk.setShortContext(BookmarkEditDialog.getContextText(mActivity, selection.text));
+				bmk.setFullContext(BookmarkEditDialog.getFullContextText(mActivity));
 				mReaderView.addBookmark(bmk);
 				closeDialog(true);
 			});
@@ -534,23 +535,23 @@ public class SelectionToolbarDlg {
 			btnSelectionDict.setOnClickListener(v -> {
 				//PositionProperties currpos = mReaderView.getDoc().getPositionProps(null);
 				//Log.e("CURPOS", currpos.pageText);
-				if (mCoolReader.ismDictLongtapChange()) {
-					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null, false);
+				if (mActivity.ismDictLongtapChange()) {
+					DictsDlg dlg = new DictsDlg(mActivity, mReaderView, selection.text, null, false);
 					dlg.show();
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				} else {
-					mCoolReader.findInDictionary( selection.text , null);
+					mActivity.findInDictionary( selection.text , null);
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				}
 			});
 
 			btnSelectionDict.setOnLongClickListener(v -> {
-				if (!mCoolReader.ismDictLongtapChange()) {
-					DictsDlg dlg = new DictsDlg(mCoolReader, mReaderView, selection.text, null, false);
+				if (!mActivity.ismDictLongtapChange()) {
+					DictsDlg dlg = new DictsDlg(mActivity, mReaderView, selection.text, null, false);
 					dlg.show();
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				} else {
-					mCoolReader.findInDictionary( selection.text , null);
+					mActivity.findInDictionary( selection.text , null);
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				}
 				return true;
@@ -571,14 +572,14 @@ public class SelectionToolbarDlg {
 			btnSelectionFind.setOnLongClickListener(v -> {
 				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
 				emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
-				mCoolReader.startActivity(emailIntent);
+				mActivity.startActivity(emailIntent);
 				closeDialog(true);
 				return true;
 			});
 		}
 		if (btnSelectionCite != null)
 			btnSelectionCite.setOnClickListener(v -> {
-				saveUserDic(true, "", selection, mCoolReader, mReaderView);
+				saveUserDic(true, "", selection, mActivity, mReaderView);
 				closeDialog(true);
 			});
 		new BoundControlListener(llSliderTop.findViewById(R.id.selection_bound_control_t), true);
@@ -609,8 +610,8 @@ public class SelectionToolbarDlg {
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		int iCntRecent = 0;
 		if (flRecentDics!=null) {
-			for (final Dictionaries.DictInfo di : mCoolReader.mDictionaries.diRecent) {
-				if (!di.equals(mCoolReader.mDictionaries.getCurDictionary())) {
+			for (final Dictionaries.DictInfo di : mActivity.mDictionaries.diRecent) {
+				if (!di.equals(mActivity.mDictionaries.getCurDictionary())) {
 					iCntRecent++;
 				}
 			}
@@ -618,33 +619,33 @@ public class SelectionToolbarDlg {
 		if (iCntRecent == 0) iCntRecent++;
 		if (flRecentDics!=null) {
 			List<Dictionaries.DictInfo> diAllDicts = new ArrayList<>();
-			for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.diRecent) {
+			for (final Dictionaries.DictInfo di: mActivity.mDictionaries.diRecent) {
 				diAllDicts.add(di);
 			}
-			for (final Dictionaries.DictInfo di: mCoolReader.mDictionaries.getAddDicts()) {
+			for (final Dictionaries.DictInfo di: mActivity.mDictionaries.getAddDicts()) {
 				diAllDicts.add(di);
 			}
 			ArrayList<String> added = new ArrayList<>();
 			// add lang pos
 			String sFrom = mReaderView.mBookInfo.getFileInfo().lang_from;
 			String sTo = mReaderView.mBookInfo.getFileInfo().lang_to;
-			String sFromTo = mCoolReader.getString(R.string.book_info_section_book_translation_langs);
+			String sFromTo = mActivity.getString(R.string.book_info_section_book_translation_langs);
 			if ((!StrUtils.isEmptyStr(sFrom)) || (!StrUtils.isEmptyStr(sTo)))
 				sFromTo = StrUtils.getNonEmptyStr(sFrom, true) + " -> " +
 						StrUtils.getNonEmptyStr(sTo, true);
-			Button dicButton = new Button(mCoolReader);
+			Button dicButton = new Button(mActivity);
 			dicButton.setText(sFromTo);
 			dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 			//dicButton.setHeight(dicButton.getHeight()-4);
-			dicButton.setTextColor(colorIcon);
+			dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 			if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 			else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-			dicButton.setPadding(10, 10, 10, 10);
+			dicButton.setPadding(10, 20, 10, 20);
 			//dicButton.setBackground(null);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
-			llp.setMargins(8, 4, 4, 8);
+			llp.setMargins(8, 4, 4, 4);
 			dicButton.setLayoutParams(llp);
 			//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 			dicButton.setMaxLines(1);
@@ -652,7 +653,7 @@ public class SelectionToolbarDlg {
 			flRecentDics.addView(dicButton);
 			Button finalDicButton = dicButton;
 			dicButton.setOnClickListener(v -> {
-				mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+				mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
 						mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
 						mReaderView.getBookInfo().getFileInfo(),
 						StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
@@ -661,19 +662,19 @@ public class SelectionToolbarDlg {
 							finalDicButton.setText(s);
 						});
 			});
-			TextView tv = new TextView(mCoolReader);
+			TextView tv = new TextView(mActivity);
 			tv.setText(" ");
 			tv.setPadding(10, 10, 10, 10);
 			tv.setLayoutParams(llp);
 			tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-			tv.setTextColor(colorIcon);
+			tv.setTextColor(mActivity.getTextColor(colorIcon));
 			flRecentDics.addView(tv);
 			//\
 			for (final Dictionaries.DictInfo di: diAllDicts) {
 				if (!added.contains(di.id)) {
 					added.add(di.id);
-					dicButton = new Button(mCoolReader);
-					String sAdd = di.getAddText(mCoolReader);
+					dicButton = new Button(mActivity);
+					String sAdd = di.getAddText(mActivity);
 					String sName = di.shortName;
 					if (StrUtils.isEmptyStr(sName)) sName = di.name;
 					if (StrUtils.isEmptyStr(sAdd))
@@ -682,10 +683,10 @@ public class SelectionToolbarDlg {
 						dicButton.setText(sName + ": " + sAdd);
 					dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					//dicButton.setHeight(dicButton.getHeight()-4);
-					dicButton.setTextColor(colorIcon);
+					dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 					if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 					else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-					dicButton.setPadding(10, 10, 10, 10);
+					dicButton.setPadding(10, 20, 10, 20);
 					//dicButton.setBackground(null);
 					llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -695,33 +696,33 @@ public class SelectionToolbarDlg {
 					//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 					dicButton.setMaxLines(1);
 					dicButton.setEllipsize(TextUtils.TruncateAt.END);
-					tv = new TextView(mCoolReader);
+					tv = new TextView(mActivity);
 					tv.setText(" ");
 					tv.setPadding(10, 10, 10, 10);
 					tv.setLayoutParams(llp);
 					tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-					tv.setTextColor(colorIcon);
+					tv.setTextColor(mActivity.getTextColor(colorIcon));
 					flRecentDics.addView(dicButton);
 					flRecentDics.addView(tv);
 					dicButton.setOnClickListener(v -> {
-						mCoolReader.mDictionaries.setAdHocDict(di);
+						mActivity.mDictionaries.setAdHocDict(di);
 						String sSText = selection.text;
-						mCoolReader.findInDictionary(sSText, null);
+						mActivity.findInDictionary(sSText, null);
 						if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 							mReaderView.clearSelection();
 						closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 					});
 					dicButton.setOnLongClickListener(v -> {
-						mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK,
+						mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK,
 								mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
 								mReaderView.getBookInfo().getFileInfo(),
 								StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
 								StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
 								"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
-									//mCoolReader.showToast(s);
-									mCoolReader.mDictionaries.setAdHocDict(di);
+									//mActivity.showToast(s);
+									mActivity.mDictionaries.setAdHocDict(di);
 									String sSText = selection.text;
-									mCoolReader.findInDictionary(sSText, null);
+									mActivity.findInDictionary(sSText, null);
 									if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 										mReaderView.clearSelection();
 									closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
@@ -737,8 +738,8 @@ public class SelectionToolbarDlg {
 	{
 		this.selection = sel;
 		stSel = selection;
-		mCoolReader = coolReader;
-		props = new Properties(mCoolReader.settings());
+		mActivity = coolReader;
+		props = new Properties(mActivity.settings());
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
@@ -781,14 +782,14 @@ public class SelectionToolbarDlg {
 		colorIcon = themeColors.get(R.attr.colorIcon);
 
 		colorButtons = new ColorDrawable(colorGrayC);
-		sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
+		sTranspButtons = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
 		if (!sTranspButtons.equals("0")) colorButtons.setAlpha(130);
 			else colorButtons.setAlpha(255);
 		mPanel = panel;
 
 		panel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 
-		String sBkg = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND, "0");
+		String sBkg = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND, "0");
 
 		alphaVal = 0;
 		if (sBkg.equals("0")) alphaVal = 170;
@@ -846,7 +847,7 @@ public class SelectionToolbarDlg {
 
 		isVisibleNow = true;
 		mReaderView.toggleScreenUpdateModeMode();
-		mCoolReader.tintViewIcons(mPanel);
+		mActivity.tintViewIcons(mPanel);
 	}
 
 }

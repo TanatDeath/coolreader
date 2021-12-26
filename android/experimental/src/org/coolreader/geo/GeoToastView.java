@@ -27,7 +27,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.DeviceInfo;
-import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.geo.GeoLastData;
@@ -199,7 +199,7 @@ public class GeoToastView {
             for (Button btn: btns) {
                 btn.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
                 //dicButton.setHeight(dicButton.getHeight()-4);
-                btn.setTextColor(colorIcon);
+                btn.setTextColor(mActivity.getTextColor(colorIcon));
                 btn.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
                 btn.setPadding(3, 3, 3, 3);
                 //dicButton.setBackground(null);
@@ -223,7 +223,7 @@ public class GeoToastView {
             TextView tv = (TextView) window.getContentView().findViewById(R.id.center_station_name);
             tv.setTextSize(fontSize);
             if (!t.sameStation)
-                tv.setTextColor(colorIcon);
+                tv.setTextColor(mActivity.getTextColor(colorIcon));
             else
                 tv.setTextColor(updColor(colorIcon));
             tv.setGravity(Gravity.CENTER);
@@ -309,7 +309,7 @@ public class GeoToastView {
             s = s.replaceAll("\\([0-9]*\\)","").trim();
             tv.setTextSize(fontSize-2);
             if (!t.sameStop)
-                tv.setTextColor(colorIcon);
+                tv.setTextColor(mActivity.getTextColor(colorIcon));
             else
                 tv.setTextColor(updColor(colorIcon));
             tv.setGravity(Gravity.CENTER);

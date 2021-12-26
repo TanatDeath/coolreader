@@ -36,7 +36,7 @@ public class ScanLibraryDialog extends BaseDialog {
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
 
-	private final CoolReader mCoolReader;
+	private final CoolReader mActivity;
 	private final LayoutInflater mInflater;
 	private final TableLayout tlScanLibrary;
 	private final LinearLayout llScanLibrary;
@@ -114,13 +114,13 @@ public class ScanLibraryDialog extends BaseDialog {
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
-		mCoolReader.tintViewIcons(mBtnScanWholeDevice, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(mBtnScanWholeDevice, PorterDuff.Mode.CLEAR,true);
 		for (Button btnCard: cardButtons) {
-			mCoolReader.tintViewIcons(btnCard, PorterDuff.Mode.CLEAR,true);
+			mActivity.tintViewIcons(btnCard, PorterDuff.Mode.CLEAR,true);
 		}
-		mCoolReader.tintViewIcons(mBtnScanBooks, PorterDuff.Mode.CLEAR,true);
-		mCoolReader.tintViewIcons(mBtnScanFav, PorterDuff.Mode.CLEAR,true);
-		mCoolReader.tintViewIcons(mBtnScanDownl, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(mBtnScanBooks, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(mBtnScanFav, PorterDuff.Mode.CLEAR,true);
+		mActivity.tintViewIcons(mBtnScanDownl, PorterDuff.Mode.CLEAR,true);
 
 		if (btn == mBtnScanWholeDevice) {
 			if (bScanWholeDevice) {
@@ -200,31 +200,31 @@ public class ScanLibraryDialog extends BaseDialog {
 
 		if (bScanWholeDevice) {
 			mBtnScanWholeDevice.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(mBtnScanWholeDevice,true);
+			mActivity.tintViewIcons(mBtnScanWholeDevice,true);
 		}
 		for (Button btnCard: cardButtons) {
 			if (cardButtonsSelected.get(btnCard.getContentDescription().toString())) {
 				btnCard.setBackgroundColor(colorGrayCT2);
-				mCoolReader.tintViewIcons(btnCard,true);
+				mActivity.tintViewIcons(btnCard,true);
 			}
 		}
 		if (bScanBooks) {
 			mBtnScanBooks.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(mBtnScanBooks,true);
+			mActivity.tintViewIcons(mBtnScanBooks,true);
 		}
 		if (bScanFav) {
 			mBtnScanFav.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(mBtnScanFav,true);
+			mActivity.tintViewIcons(mBtnScanFav,true);
 		}
 		if (bScanDownl) {
 			mBtnScanDownl.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(mBtnScanDownl,true);
+			mActivity.tintViewIcons(mBtnScanDownl,true);
 		}
 	}
 
 	private void scanFromStack() {
 		if ((toScan.size() == 0) || (needInterrupt)) {
-			mCoolReader.getDB().getLibraryStats(o -> {
+			mActivity.getDB().getLibraryStats(o -> {
 				if (progressDlg != null)
 					if (progressDlg.isShowing()) progressDlg.dismiss();
 				if (o != null) {
@@ -240,11 +240,11 @@ public class ScanLibraryDialog extends BaseDialog {
 						entries = cntBecome.entriesCnt = cntBecome.entriesCnt - cntWas.entriesCnt;
 						series = cntBecome.seriesCnt = cntBecome.seriesCnt - cntWas.seriesCnt;
 					}
-					mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " +
-							mCoolReader.getString(R.string.cnt_entries) + " " + entries + "; " +
-							mCoolReader.getString(R.string.cnt_authors) + " " + authors + "; " +
-							mCoolReader.getString(R.string.cnt_series) + " " + series + "; " +
-							mCoolReader.getString(R.string.cnt_genres) + " " + genres
+					mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " +
+							mActivity.getString(R.string.cnt_entries) + " " + entries + "; " +
+							mActivity.getString(R.string.cnt_authors) + " " + authors + "; " +
+							mActivity.getString(R.string.cnt_series) + " " + series + "; " +
+							mActivity.getString(R.string.cnt_genres) + " " + genres
 							);
 					if (windowCenterPopup != null)
 						if (windowCenterPopup.isShowing()) {
@@ -275,7 +275,7 @@ public class ScanLibraryDialog extends BaseDialog {
 					if (arrLab.length>2) pathText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
 					Log.i("SCANDLG", "scanDirectoryRecursive started (all)");
 					final Scanner.ScanControl control = new Scanner.ScanControl();
-					Services.getScanner().scanDirectory(mCoolReader.getDB(), new FileInfo(s), () -> {
+					Services.getScanner().scanDirectory(mActivity.getDB(), new FileInfo(s), () -> {
 					}, (scanControl) -> {
 						Log.i("SCANDLG","scanDirectoryRecursive (all) : finish handler");
 						scanFromStack();
@@ -310,9 +310,9 @@ public class ScanLibraryDialog extends BaseDialog {
 	}
 
 	private void addTextToLL(String txt, LinearLayout ll) {
-		Button pathButton = new Button(mCoolReader);
+		Button pathButton = new Button(mActivity);
 		pathButton.setText(txt);
-		Properties props = new Properties(mCoolReader.settings());
+		Properties props = new Properties(mActivity.settings());
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		pathButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 		//pathButton.setHeight(pathButton.getHeight()-4);
@@ -360,11 +360,11 @@ public class ScanLibraryDialog extends BaseDialog {
 		ArrayList<FileInfo> folders = Services.getFileSystemFolders().getFileSystemFolders();
 		for (FileInfo fi : folders) {
 			if (fi.getType() == FileInfo.TYPE_FS_ROOT) {
-				Button cardButton = new Button(mCoolReader);
+				Button cardButton = new Button(mActivity);
 				if (StrUtils.getNonEmptyStr(fi.title, true).toUpperCase().contains("EXT SD"))
-					cardButton.setText(mCoolReader.getString(R.string.scan_external_sd)+": "+fi.pathname);
+					cardButton.setText(mActivity.getString(R.string.scan_external_sd)+": "+fi.pathname);
 				else
-					cardButton.setText(mCoolReader.getString(R.string.scan_internal_storage)+": "+fi.pathname);
+					cardButton.setText(mActivity.getString(R.string.scan_internal_storage)+": "+fi.pathname);
 				cardButton.setContentDescription(fi.pathname);
 				cardButtonsSelected.put(cardButton.getContentDescription().toString(),false);
 				int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
@@ -379,7 +379,7 @@ public class ScanLibraryDialog extends BaseDialog {
 						ViewGroup.LayoutParams.WRAP_CONTENT);
 				llp.setMargins(8, 8, 8, 8);
 				cardButton.setLayoutParams(llp);
-				cardButton.setTextColor(colorIcon);
+				cardButton.setTextColor(activity.getTextColor(colorIcon));
 				//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 				cardButton.setMaxLines(3);
 				cardButton.setEllipsize(TextUtils.TruncateAt.END);
@@ -425,12 +425,9 @@ public class ScanLibraryDialog extends BaseDialog {
 	PopupWindow windowCenterPopup = null;
 
 	public void showFoldersPopup() {
-		boolean isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		HashMap<Integer, Integer> themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		BackgroundThread.instance().executeGUI(() -> {
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 			int colorGray = themeColors.get(R.attr.colorThemeGray2);
-			int colorIcon = themeColors.get(R.attr.colorIcon);
 			int fontSize = 24;
 			windowCenterPopup = new PopupWindow(this.getContext());
 			windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
@@ -441,7 +438,7 @@ public class ScanLibraryDialog extends BaseDialog {
 			windowCenterPopup.setBackgroundDrawable(null);
 			LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			windowCenterPopup.setContentView(inflater.inflate(R.layout.scan_library_toast, null, true));
-			Display d = mCoolReader.getWindowManager().getDefaultDisplay();
+			Display d = mActivity.getWindowManager().getDefaultDisplay();
 			DisplayMetrics m = new DisplayMetrics();
 			d.getMetrics(m);
 			int screenHeight = m.heightPixels;
@@ -458,7 +455,7 @@ public class ScanLibraryDialog extends BaseDialog {
 				mPercent = windowCenterPopup.getContentView().findViewById(R.id.percent_title);
 				if (mBtnInterrupt != null) {
 					mBtnInterrupt.setBackgroundColor(colorGray);
-					mCoolReader.tintViewIcons(toast_ll, true);
+					mActivity.tintViewIcons(toast_ll, true);
 					//toast_btn.setPadding(6, 6, 6, 6);
 					mBtnInterrupt.setOnClickListener((v) -> {
 						needInterrupt = true;
@@ -500,9 +497,9 @@ public class ScanLibraryDialog extends BaseDialog {
 			mGenresCnt.setText("");
 			MaxHeightScrollView sv =  windowCenterPopup.getContentView().findViewById(R.id.dic_scrollV);
 			sv.setMaxHeight(d.getHeight() * 3 / 4);
-			if (mCoolReader.getReaderView() != null)
-				if (mCoolReader.getReaderView().getSurface() != null) {
-					sv.setMaxHeight(mCoolReader.getReaderView().getSurface().getHeight() * 3 / 4);
+			if (mActivity.getReaderView() != null)
+				if (mActivity.getReaderView().getSurface() != null) {
+					sv.setMaxHeight(mActivity.getReaderView().getSurface().getHeight() * 3 / 4);
 				}
 			windowCenterPopup.showAtLocation(mDialog, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
 		});
@@ -511,11 +508,11 @@ public class ScanLibraryDialog extends BaseDialog {
 	public ScanLibraryDialog(CoolReader activity)
 	{
 		super("ScanLibraryDialog", activity, activity.getString( R.string.scan_library), true, false);
-		mCoolReader = activity;
+		mActivity = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
+		themeColors = Utils.getThemeColors(mActivity, isEInk);
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		setTitle(mCoolReader.getString(R.string.scan_library));
+		setTitle(mActivity.getString(R.string.scan_library));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.scan_library_dialog, null);
 		mDialog = (ViewGroup) view;
@@ -584,7 +581,7 @@ public class ScanLibraryDialog extends BaseDialog {
 			if (bScanDownl)
 				toScan.add(Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS + "/");
 			if (toScan.isEmpty()) {
-				mCoolReader.showToast(R.string.library_maint_list_is_empty);
+				mActivity.showToast(R.string.library_maint_list_is_empty);
 				return;
 			}
 			updateToScanFolders();
@@ -592,7 +589,7 @@ public class ScanLibraryDialog extends BaseDialog {
 			needInterrupt = false;
 			initialSize = toScan.size();
 			showFoldersPopup();
-			mCoolReader.getDB().getLibraryStats(o -> {
+			mActivity.getDB().getLibraryStats(o -> {
 				if (progressDlg != null)
 					if (progressDlg.isShowing()) progressDlg.dismiss();
 				if (o != null) {
@@ -624,32 +621,32 @@ public class ScanLibraryDialog extends BaseDialog {
 			if (bScanDownl)
 				toRemove.add(Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS + "/");
 			if (toRemove.isEmpty()) {
-				mCoolReader.showToast(R.string.library_maint_list_is_empty);
+				mActivity.showToast(R.string.library_maint_list_is_empty);
 				return;
 			}
 			if (bScanWholeDevice) {
-				mCoolReader.showToast(R.string.whole_device_cannot_proceed);
+				mActivity.showToast(R.string.whole_device_cannot_proceed);
 				return;
 			}
-			mCoolReader.askConfirmation(R.string.are_you_sure, () -> {
-				progressDlg = ProgressDialog.show(mCoolReader,
-						mCoolReader.getString(R.string.long_op),
-						mCoolReader.getString(R.string.long_op),
+			mActivity.askConfirmation(R.string.are_you_sure, () -> {
+				progressDlg = ProgressDialog.show(mActivity,
+						mActivity.getString(R.string.long_op),
+						mActivity.getString(R.string.long_op),
 						true, true, null);
-				mCoolReader.getDB().deleteBookEntries(toRemove, o -> {
+				mActivity.getDB().deleteBookEntries(toRemove, o -> {
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
 					if (o != null) {
 						Long cnt = (Long) o;
 						BackgroundThread.instance().postGUI(() -> {
 							if (cnt == 0L) {
-								mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " + cnt);
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt);
 							} else {
-								mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
-										mCoolReader.getString(R.string.library_maint_done_need_restart));
-								mCoolReader.askConfirmation(mCoolReader.getString(R.string.proceeded) + ": " + cnt + ". " +
-										mCoolReader.getString(R.string.restart_app), () -> {
-									mCoolReader.finish();
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
+										mActivity.getString(R.string.library_maint_done_need_restart));
+								mActivity.askConfirmation(mActivity.getString(R.string.proceeded) + ": " + cnt + ". " +
+										mActivity.getString(R.string.restart_app), () -> {
+									mActivity.finish();
 								});
 							}
 						});
@@ -665,25 +662,25 @@ public class ScanLibraryDialog extends BaseDialog {
 		mBtnMaintRemoveOrphans.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnMaintRemoveOrphans);
 		mBtnMaintRemoveOrphans.setOnClickListener(v -> {
-			mCoolReader.askConfirmation(R.string.are_you_sure, () -> {
-				progressDlg = ProgressDialog.show(mCoolReader,
-						mCoolReader.getString(R.string.long_op),
-						mCoolReader.getString(R.string.long_op),
+			mActivity.askConfirmation(R.string.are_you_sure, () -> {
+				progressDlg = ProgressDialog.show(mActivity,
+						mActivity.getString(R.string.long_op),
+						mActivity.getString(R.string.long_op),
 						true, true, null);
-				mCoolReader.getDB().deleteOrphanEntries(o -> {
+				mActivity.getDB().deleteOrphanEntries(o -> {
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
 					if (o != null) {
 						Long cnt = (Long) o;
 						BackgroundThread.instance().postGUI(() -> {
 							if (cnt == 0L) {
-								mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " + cnt);
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt);
 							} else {
-								mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
-										mCoolReader.getString(R.string.library_maint_done_need_restart));
-								mCoolReader.askConfirmation(mCoolReader.getString(R.string.proceeded) + ": " + cnt + ". " +
-										mCoolReader.getString(R.string.restart_app), () -> {
-									mCoolReader.finish();
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
+										mActivity.getString(R.string.library_maint_done_need_restart));
+								mActivity.askConfirmation(mActivity.getString(R.string.proceeded) + ": " + cnt + ". " +
+										mActivity.getString(R.string.restart_app), () -> {
+									mActivity.finish();
 								});
 							}
 						});
@@ -696,25 +693,25 @@ public class ScanLibraryDialog extends BaseDialog {
 		mBtnMaintRemoveCloud.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnMaintRemoveCloud);
 		mBtnMaintRemoveCloud.setOnClickListener(v -> {
-			mCoolReader.askConfirmation(R.string.are_you_sure, () -> {
-				progressDlg = ProgressDialog.show(mCoolReader,
-						mCoolReader.getString(R.string.long_op),
-						mCoolReader.getString(R.string.long_op),
+			mActivity.askConfirmation(R.string.are_you_sure, () -> {
+				progressDlg = ProgressDialog.show(mActivity,
+						mActivity.getString(R.string.long_op),
+						mActivity.getString(R.string.long_op),
 						true, true, null);
-				mCoolReader.getDB().deleteCloudEntries(o -> {
+				mActivity.getDB().deleteCloudEntries(o -> {
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
 					if (o != null) {
 						Long cnt = (Long) o;
 						BackgroundThread.instance().postGUI(() -> {
 							if (cnt == 0L) {
-								mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " + cnt);
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt);
 							} else {
-								mCoolReader.showToast(mCoolReader.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
-										mCoolReader.getString(R.string.library_maint_done_need_restart));
-								mCoolReader.askConfirmation(mCoolReader.getString(R.string.proceeded) + ": " + cnt + ". " +
-										mCoolReader.getString(R.string.restart_app), () -> {
-									mCoolReader.finish();
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
+										mActivity.getString(R.string.library_maint_done_need_restart));
+								mActivity.askConfirmation(mActivity.getString(R.string.proceeded) + ": " + cnt + ". " +
+										mActivity.getString(R.string.restart_app), () -> {
+									mActivity.finish();
 								});
 							}
 						});

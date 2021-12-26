@@ -362,15 +362,15 @@ mActivity.setSettings(props, -1, true);
 		a.recycle();
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		ibPicCopy.setBackgroundColor(colorGrayCT);
-		ibPicCopy.setTextColor(colorIcon);
+		ibPicCopy.setTextColor(activity.getTextColor(colorIcon));
 		Utils.setDashedButton(ibPicCopy);
 		ibPicCopyAct.setBackgroundColor(colorGrayCT);
-		ibPicCopyAct.setTextColor(colorIcon);
+		ibPicCopyAct.setTextColor(activity.getTextColor(colorIcon));
 		Utils.setDashedButton(ibPicCopyAct);
-		ibPicTexture.setTextColor(colorIcon);
-		ibPicBackground.setTextColor(colorIcon);
+		ibPicTexture.setTextColor(activity.getTextColor(colorIcon));
+		ibPicBackground.setTextColor(activity.getTextColor(colorIcon));
 		ibPicRememberForLater.setBackgroundColor(colorGrayCT);
-		ibPicRememberForLater.setTextColor(colorIcon);
+		ibPicRememberForLater.setTextColor(activity.getTextColor(colorIcon));
 		Utils.setDashedButton(ibPicRememberForLater);
 		imageCame.setMinimumHeight(h);
 		imageCame.setMaxHeight(h);
@@ -555,7 +555,7 @@ mActivity.setSettings(props, -1, true);
 				);
 				if (label != null) {
 					label.setText("More...");
-					label.setTextColor(colorIcon);
+					label.setTextColor(activity.getTextColor(colorIcon));
 				}
 				view.setOnClickListener(v -> ((CoolReader)mActivity).showRecentBooks());
 			} else {
@@ -573,7 +573,7 @@ mActivity.setSettings(props, -1, true);
 					else if (!Utils.empty(authors))
 						s = authors;
 					label.setText(s != null ? s : "");
-					label.setTextColor(colorIcon);
+					label.setTextColor(activity.getTextColor(colorIcon));
 					int n = item.getReadingState();
 					if (n == FileInfo.STATE_READING)
 						label.setTextColor(colorGreen);

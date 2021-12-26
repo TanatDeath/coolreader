@@ -32,6 +32,7 @@
             android:singleLine="false"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:maxLines="5"
+            android:textStyle="bold"
             android:textColor="?attr/textColorOptionLabel"
         />
         <TextView android:id="@+id/option_label2"
@@ -40,21 +41,36 @@
             android:singleLine="false"
             android:layout_below="@id/option_label"
             android:layout_alignLeft="@id/option_label"
+            android:textStyle="italic"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:maxLines="5"
             />
         <!--android:ellipsize="marquee"
             android:fadingEdge="horizontal"
          -->
-        <TextView android:id="@+id/option_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/option_label2"
-            android:layout_alignLeft="@id/option_label2"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"
-            android:maxLines="6" />
-
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/option_label2"
+                android:orientation="horizontal"
+            >
+            <Button
+                    android:id="@+id/btn_to_toolbar"
+                    android:layout_margin="2dip"
+                    android:textColor="?attr/colorIcon"
+                    android:text="@string/to_toolbar_action"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:layout_width="wrap_content"/>
+            <Button
+                    android:id="@+id/btn_to_menu"
+                    android:layout_margin="2dip"
+                    android:textColor="?attr/colorIcon"
+                    android:background="@null"
+                    android:text="@string/to_menu_action"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+        </LinearLayout>
     </RelativeLayout>
     <ImageView android:id="@+id/btn_option_add_info"
         android:layout_width="wrap_content"

@@ -1,4 +1,6 @@
-package org.coolreader.crengine;
+package org.coolreader.userdic;
+
+import org.coolreader.crengine.StrUtils;
 
 public class UserDicEntry {
 
@@ -43,7 +45,7 @@ public class UserDicEntry {
     }
 
     public String getDic_word() {
-        return dic_word;
+        return StrUtils.getNonEmptyStr(dic_word, false);
     }
 
     public void setDic_word(String dic_word) {
@@ -91,7 +93,7 @@ public class UserDicEntry {
     }
 
     public void setThisIsDSHE(boolean b) {
-        this.thisIsDSHE = true;
+        this.thisIsDSHE = b;
     }
 
     public boolean getThisIsDSHE() {
@@ -99,11 +101,15 @@ public class UserDicEntry {
     }
 
     public Long getSeen_count() {
+        if (seen_count == null) return 0L;
         return seen_count;
     }
 
     public void setSeen_count(Long seen_count) {
-        this.seen_count = seen_count;
+        if (seen_count == null)
+            this.seen_count = 0L;
+        else
+            this.seen_count = seen_count;
     }
 
     public int getIsCustomColor() {

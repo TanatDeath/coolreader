@@ -11,18 +11,40 @@
         android:baselineAligned="true"
         >
 
-    <SeekBar android:id="@+id/page_seek"
-            android:layout_height="wrap_content"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_weight="1"
-            android:layout_marginTop="2dip"
-            android:layout_marginBottom="2dip"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
-            android:min="0"
-            android:max="100"
-            android:progress="50"
-            />
+            android:layout_height="wrap_content"
+            android:baselineAligned="true"
+            >
+
+        <ImageButton android:id="@+id/search_goback"
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="?attr/attr_icons8_goback"
+                android:tag="tint"
+                android:background="@null"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="2dip"
+                />
+
+        <SeekBar android:id="@+id/page_seek"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_weight="10"
+                android:layout_marginTop="15dip"
+                android:layout_marginBottom="2dip"
+                android:layout_marginLeft="2dip"
+                android:layout_marginRight="2dip"
+                android:min="0"
+                android:max="100"
+                android:progress="50"
+                />
+
+    </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/ll_buttons"

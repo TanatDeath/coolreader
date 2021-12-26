@@ -15,10 +15,10 @@ import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
-import org.coolreader.crengine.ReaderView;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.RepeatOnTouchListener;
 import org.coolreader.crengine.Selection;
 import org.coolreader.crengine.Services;
@@ -33,7 +33,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -138,7 +137,7 @@ public class TTSToolbarDlg implements Settings {
 			}
 		}, 200));
 	}
-	
+
 	public void setOnCloseListener(Runnable handler) {
 		mOnCloseListener = handler;
 	}
@@ -190,7 +189,7 @@ public class TTSToolbarDlg implements Settings {
 			mReaderView.setViewModeNonPermanent(ViewMode.SCROLL);
 		}
 	}
-	
+
 	private void restoreReaderMode()
 	{
 		if ( changedPageMode ) {
@@ -209,17 +208,15 @@ public class TTSToolbarDlg implements Settings {
 	private void moveSelection(ReaderCommand cmd, ReaderView.MoveSelectionCallback callback)
 	{
 		mReaderView.moveSelection(cmd, 0, new ReaderView.MoveSelectionCallback() {
-			
+
 			@Override
 			public void onNewSelection(Selection selection) {
 				log.d("onNewSelection: " + selection.text);
 				curTime = System.currentTimeMillis();
 				long interv = mReaderView.getDefSavePositionIntervalSpeak();
 				if (interv == 0)
-                    interv = mReaderView.getDefSavePositionInterval();
+					interv = mReaderView.getDefSavePositionInterval();
 				if (curTime - lastSaveCurPosTime > interv) {
-//					CustomLog.doLog(mLogFileRoot+(isAlwaysStop?"log_tts_type1.log":"log_tts_type0.log"),
-//							"it is time to save position");
 					lastSaveCurPosTime = curTime;
 					try {
 						final Bookmark bmk = mReaderView.getCurrentPositionBookmark();
@@ -253,7 +250,7 @@ public class TTSToolbarDlg implements Settings {
 				if (null != callback)
 					callback.onNewSelection(mCurrentSelection);
 			}
-			
+
 			@Override
 			public void onFail() {
 				log.e("fail()");
@@ -431,7 +428,7 @@ public class TTSToolbarDlg implements Settings {
 				ColorDrawable c = new ColorDrawable(colorGrayC);
 				int val1 = Utils.parseInt(value, 0);
 				if (val1 != 0) c.setAlpha(130);
-					else c.setAlpha(255);
+				else c.setAlpha(255);
 				mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
@@ -626,11 +623,11 @@ public class TTSToolbarDlg implements Settings {
 		int vol2 = (int) Math.round(mCoolReader.settings().getDouble(PROP_APP_TTS_VOL_2, -1));
 		int vol3 = (int) Math.round(mCoolReader.settings().getDouble(PROP_APP_TTS_VOL_3, -1));
 		if (speed1 == -1) mLoadSpeed1.setText("?");
-			else mLoadSpeed1.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed1)));
+		else mLoadSpeed1.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed1)));
 		if (speed2 == -1) mLoadSpeed2.setText("?");
-			else mLoadSpeed2.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed2)));
+		else mLoadSpeed2.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed2)));
 		if (speed3 == -1) mLoadSpeed3.setText("?");
-			else mLoadSpeed3.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed3)));
+		else mLoadSpeed3.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(speed3)));
 		mLoadVol1.setText("?");
 		mLoadVol2.setText("?");
 		mLoadVol3.setText("?");
@@ -664,7 +661,7 @@ public class TTSToolbarDlg implements Settings {
 	@SuppressLint("ClickableViewAccessibility")
 	public TTSToolbarDlg(CoolReader coolReader, ReaderView readerView, TTSControlServiceAccessor ttsacc) {
 		mCoolReader = coolReader;
-        mReaderView = readerView;
+		mReaderView = readerView;
 		mLogFileRoot = coolReader.getSettingsFileF(0).getParent() + "/";
 		mTTSControl = ttsacc;
 		View anchor = readerView.getSurface();
@@ -716,9 +713,9 @@ public class TTSToolbarDlg implements Settings {
 		ImageButton optionsButton = mPanel.findViewById(R.id.tts_options);
 		optionsButton.setBackgroundDrawable(c);
 		optionsButton.setOnClickListener(
-		v -> mTTSControl.bind(ttsbinder -> {
-			mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, ttsbinder);
-		}));
+				v -> mTTSControl.bind(ttsbinder -> {
+					mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, ttsbinder);
+				}));
 
 		// setup speed && volume seek bars
 		mVolumeTextView = mPanel.findViewById(R.id.tts_lbl_volume);
@@ -783,28 +780,28 @@ public class TTSToolbarDlg implements Settings {
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
 			if ( event.getAction()==KeyEvent.ACTION_UP ) {
 				switch ( keyCode ) {
-				case KeyEvent.KEYCODE_VOLUME_DOWN:
-				case KeyEvent.KEYCODE_VOLUME_UP:
-					return true;
-				case KeyEvent.KEYCODE_BACK:
-					stopAndClose();
-					return true;
+					case KeyEvent.KEYCODE_VOLUME_DOWN:
+					case KeyEvent.KEYCODE_VOLUME_UP:
+						return true;
+					case KeyEvent.KEYCODE_BACK:
+						stopAndClose();
+						return true;
 				}
 			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
 				switch ( keyCode ) {
-				case KeyEvent.KEYCODE_VOLUME_DOWN: {
-					int p = mSbVolume.getProgress() - 1;
-					if ( p<0 )
-						p = 0;
-					mSbVolume.setProgress(p);
-					return true;
-				}
-				case KeyEvent.KEYCODE_VOLUME_UP:
-					int p = mSbVolume.getProgress() + 1;
-					if ( p > mSbVolume.getMax() )
-						p = mSbVolume.getMax();
-					mSbVolume.setProgress(p);
-					return true;
+					case KeyEvent.KEYCODE_VOLUME_DOWN: {
+						int p = mSbVolume.getProgress() - 1;
+						if ( p<0 )
+							p = 0;
+						mSbVolume.setProgress(p);
+						return true;
+					}
+					case KeyEvent.KEYCODE_VOLUME_UP:
+						int p = mSbVolume.getProgress() + 1;
+						if ( p > mSbVolume.getMax() )
+							p = mSbVolume.getMax();
+						mSbVolume.setProgress(p);
+						return true;
 				}
 				if ( keyCode == KeyEvent.KEYCODE_BACK) {
 					return true;
@@ -896,7 +893,7 @@ public class TTSToolbarDlg implements Settings {
 				mReaderView.skipFallbackWarning = true;
 				mCoolReader.settings().setDouble(PROP_APP_TTS_VOL_1, getVolPercent(mSbVolume.getProgress()));
 				CustomLog.doLog(mLogFileRoot, "log_volume.log",
-					"Save volume to: " + getVolPercent(mSbVolume.getProgress()) + ", in absolute = " + mSbVolume.getProgress());
+						"Save volume to: " + getVolPercent(mSbVolume.getProgress()) + ", in absolute = " + mSbVolume.getProgress());
 				mCoolReader.showToast(R.string.value_saved);
 				updateSaveButtons();
 			}

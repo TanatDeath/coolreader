@@ -30,7 +30,7 @@
     - margin-top
     - margin-bottom
     - margin
-    
+
 
     (c) Vadim Lopatin, 2000-2006
     This source code is distributed under the terms of
@@ -44,6 +44,7 @@
 #ifndef __LVSTSHEET_H_INCLUDED__
 #define __LVSTSHEET_H_INCLUDED__
 
+#include "lvtypes.h"
 #include "cssdef.h"
 #include "lvstyles.h"
 #include "textlang.h"
@@ -52,7 +53,7 @@ class lxmlDocBase;
 struct ldomNode;
 
 /** \brief CSS property declaration
-    
+
     Currently supports only subset of properties.
 
     Properties supported:
@@ -78,12 +79,17 @@ struct ldomNode;
 class LVCssDeclaration {
 private:
     int * _data;
+    bool _check_if_supported;
 public:
     void apply( css_style_rec_t * style );
     bool empty() { return _data==NULL; }
-    bool parse( const char * & decl, lUInt32 domVersionRequested, bool higher_importance=false, lxmlDocBase * doc=NULL, lString32 codeBase=lString32::empty_str );
+    bool parse( const char * & decl, bool higher_importance=false, lxmlDocBase * doc=NULL, lString32 codeBase=lString32::empty_str );
+    bool parseAndCheckIfSupported( const char * & decl, lxmlDocBase * doc=NULL ) {
+        _check_if_supported = true; // will tweak parse() behaviour and meaning of return value
+        return parse(decl, false, doc);
+    }
     lUInt32 getHash();
-    LVCssDeclaration() : _data(NULL) { }
+    LVCssDeclaration() : _data(NULL), _check_if_supported(false) { }
     ~LVCssDeclaration() { if (_data) delete[] _data; }
 };
 
@@ -143,7 +149,7 @@ public:
 };
 
 /** \brief simple CSS selector
-    
+
     Currently supports only element name and universal selector.
 
     - * { } - universal selector
@@ -166,7 +172,7 @@ public:
     LVCssSelector( LVCssSelector & v );
     LVCssSelector() : _id(0), _specificity(0), _pseudo_elem(0),  _next(NULL), _rules(NULL) { }
     LVCssSelector(int specificity) : _id(0), _specificity(specificity), _pseudo_elem(0), _next(NULL), _rules(NULL) { }
-    ~LVCssSelector() { if (_next) delete _next; if (_rules) delete _rules; }
+    ~LVCssSelector() { if (_next) delete _next; if (_rules) delete _rules; } // NOLINT(clang-analyzer-cplusplus.NewDelete)
     bool parse( const char * &str, lxmlDocBase * doc );
     lUInt16 getElementNameId() { return _id; }
     bool check( const ldomNode * node ) const;
@@ -194,7 +200,7 @@ public:
 
 
 /** \brief stylesheet
-    
+
     Can parse stylesheet and apply compiled rules.
 
     Currently supports only subset of CSS features.
@@ -204,6 +210,7 @@ public:
 */
 class LVStyleSheet {
     lxmlDocBase * _doc;
+    bool _nested;
 
     int _selector_count;
     LVArray <int> _selector_count_stack;
@@ -227,7 +234,6 @@ class LVStyleSheet {
 
     void set(LVPtrVector<LVCssSelector> & v );
 public:
-
 
     // save current state of stylesheet
     void push()
@@ -262,11 +268,16 @@ public:
     /// set document to retrieve ID values from
     void setDocument( lxmlDocBase * doc ) { _doc = doc; }
     /// constructor
-    LVStyleSheet( lxmlDocBase * doc = NULL ) : _doc(doc), _selector_count(0) { }
+    LVStyleSheet( lxmlDocBase * doc=NULL, bool nested=false ) : _doc(doc) , _nested(nested) , _selector_count(0) { }
     /// copy constructor
     LVStyleSheet( LVStyleSheet & sheet );
     /// parse stylesheet, compile and add found rules to sheet
-    bool parse( const char * str, bool higher_importance=false, lString32 codeBase=lString32::empty_str );
+    bool parseAndAdvance( const char * &str, bool higher_importance=false, lString32 codeBase=lString32::empty_str );
+    bool parse( const char * str, bool higher_importance=false, lString32 codeBase=lString32::empty_str ) {
+        // (Need this wrapper for 'const char * &str' to work with string litteral/LCSTR()/c_str())
+        const char * s = str;
+        return parseAndAdvance(s, higher_importance, codeBase);
+    }
     /// parse @charset rule
     bool parseCharsetRule( const char * &str );
     /// apply stylesheet to node style
@@ -282,6 +293,7 @@ bool parse_number_value( const char * & str, css_length_t & value,
                                     bool accept_auto=false,
                                     bool accept_none=false,
                                     bool accept_normal=false,
+                                    bool accept_unspecified=false,
                                     bool accept_contain_cover=false,
                                     bool is_font_size=false );
 
@@ -295,8 +307,8 @@ void update_style_content_property( css_style_rec_t * style, ldomNode * node );
 lString32 get_applied_content_property( ldomNode * node );
 
 /// extract @import filename from beginning of CSS
-bool LVProcessStyleSheetImport( const char * &str, lString8 & import_file );
-/// load stylesheet from file, with processing of import
+bool LVProcessStyleSheetImport( const char * &str, lString8 & import_file, lxmlDocBase * doc=NULL );
+/// load stylesheet from file, with processing of first @import only
 bool LVLoadStylesheetFile( lString32 pathName, lString8 & css );
 
 #endif // __LVSTSHEET_H_INCLUDED__

@@ -8,11 +8,9 @@ import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.OptionsDialog;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.StrUtils;
-import org.coolreader.dic.DicToastView;
-import org.coolreader.dic.Dictionaries;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +28,7 @@ import okhttp3.Response;
 public class YandexTranslate {
 
 	public static String sYandexIAM = "";
+	public static String sYandexMessage = "";
 	public static String sYandexIAMexpiresAt = "";
 	public static int unauthCntY = 0;
 
@@ -66,19 +65,25 @@ public class YandexTranslate {
 				return;
 			}
 		}
+		String mes = sYandexMessage;
+		if (!StrUtils.isEmptyStr(mes)) mes = ": " + mes;
 		if ((StrUtils.isEmptyStr(sYandexIAM))) {
+			String finalMes = mes;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization),
+					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization)+ " " + finalMes,
 							DicToastView.IS_YANDEX, ""), 100));
-			cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			BackgroundThread.instance().postBackground(() ->
+					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE), 3000);
 			return;
 		}
 		if (StrUtils.isEmptyStr(cr.yndCloudSettings.folderId)) cr.readYndCloudSettings();
 		if (StrUtils.isEmptyStr(cr.yndCloudSettings.folderId)) {
+			String finalMes1 = mes;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization),
+					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization) + finalMes1,
 							DicToastView.IS_YANDEX, ""), 100));
-			cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			BackgroundThread.instance().postBackground(() ->
+				cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE), 3000);
 			return;
 		}
 		HttpUrl.Builder urlBuilder;
@@ -223,6 +228,7 @@ public class YandexTranslate {
 				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 					try {
 						JSONObject jso = new JSONObject(sBody);
+						if (jso.has("message")) sYandexMessage = jso.getString("message");
 						if (jso.has("iamToken")) sYandexIAM = jso.getString("iamToken");
 						if (jso.has("expiresAt")) sYandexIAMexpiresAt = jso.getString("expiresAt");
 						yandexTranslate(cr, s, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict ,view, llc, dcb);

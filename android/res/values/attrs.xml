@@ -272,6 +272,8 @@
     <attr name="attr_icons8_share" format="reference" />
     <attr name="attr_icons8_back_small" format="reference" />
     <attr name="attr_icons8_forward_small" format="reference" />
+    <attr name="attr_icons8_up_small" format="reference" />
+    <attr name="attr_icons8_down_small" format="reference" />
     <attr name="attr_icons8_plus_small" format="reference" />
     <attr name="attr_icons8_plus_plus_small" format="reference" />
     <attr name="attr_icons8_minus_small" format="reference" />
@@ -307,6 +309,7 @@
     <attr name="attr_icons8_battery_percent" format="reference" />
     <attr name="attr_icons8_book_title2" format="reference" />
     <attr name="attr_icons8_fav_star" format="reference" />
+    <attr name="attr_icons8_goback" format="reference" />
     <attr name="attr_icons8_fav_star_filled" format="reference" />
     <attr name="attr_icons8_disable_toolbar" format="reference" />
     <attr name="attr_icons8_fix_landsc" format="reference" />
@@ -385,8 +388,11 @@
     <attr name="attr_icons8_book_tap" format="reference" />
     <attr name="attr_icons8_book_long_tap" format="reference" />
     <attr name="attr_icons8_save_small" format="reference" />
+    <attr name="attr_icons8_font_scale" format="reference" />
     <attr name="attr_icons8_dic_list" format="reference" />
     <attr name="attr_icons8_db_stats" format="reference" />
+    <attr name="attr_icons8_eink_snow" format="reference" />
+    <attr name="attr_icons8_eink_sett" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

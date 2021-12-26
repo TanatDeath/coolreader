@@ -64,7 +64,7 @@ public enum ReaderCommand
 	DCMD_SEARCH(2004),
 	DCMD_EXIT(3005),
 	DCMD_BOOKMARKS(2005),
-	DCMD_GO_PERCENT_DIALOG(2006),
+	//DCMD_GO_PERCENT_DIALOG(2006),
 	DCMD_GO_PAGE_DIALOG(2007),
 	DCMD_TOC_DIALOG(2008),
 	DCMD_FILE_BROWSER(2009),
@@ -158,7 +158,7 @@ public enum ReaderCommand
 	DCMD_INIT_APP_DIALOG(2201),
 	;
 	
-	final int nativeId;
+	final public int nativeId;
 	private ReaderCommand( int nativeId )
 	{
 		this.nativeId = nativeId;

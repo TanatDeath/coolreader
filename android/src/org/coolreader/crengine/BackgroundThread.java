@@ -3,7 +3,7 @@ package org.coolreader.crengine;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import org.coolreader.crengine.ReaderView.Sync;
+import org.coolreader.readerview.ReaderView.Sync;
 
 import android.os.Build;
 import android.os.Handler;
@@ -297,10 +297,10 @@ public class BackgroundThread extends Thread {
     public <T> T callBackground( final Callable<T> srcTask )
     {
     	final Callable<T> task = srcTask; //guard(srcTask);
-    	if ( isBackgroundThread() ) {
+    	if (isBackgroundThread()) {
     		try {
     			return task.call();
-    		} catch ( Exception e ) {
+    		} catch (Exception e) {
     			return null;
     		}
     	}
@@ -310,8 +310,8 @@ public class BackgroundThread extends Thread {
 		postBackground(() -> {
 			if(DBG) L.d("callBackground : inside background thread " + Thread.currentThread().getName());
 			try {
-				sync.set( task.call() );
-			} catch ( Exception e ) {
+				sync.set(task.call());
+			} catch (Exception e) {
 				sync.set( null );
 			}
 		});

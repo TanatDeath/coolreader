@@ -3308,10 +3308,12 @@ void LVDocView::setRenderProps(int dx, int dy) {
 		dy = m_pageRects[0].height() - m_pageMargins.top - m_pageMargins.bottom
 				- getPageHeaderHeight();
 
-    updateDocStyleSheet();
-
+	// updateDocStyleSheet(); // moved after next line as possible CSS media queries like "(orientation:portrait)"
+							  // need these props to be available and accurate in m_doc
     m_doc->setRenderProps(dx, dy, m_showCover, m_showCover ? dy
             + m_pageMargins.bottom * 4 : 0, m_font, m_def_interline_space, m_props);
+	updateDocStyleSheet();
+
     text_highlight_options_t h;
     h.bookmarkHighlightMode = m_props->getIntDef(PROP_HIGHLIGHT_COMMENT_BOOKMARKS, highlight_mode_underline);
     h.selectionColor = (m_props->getColorDef(PROP_HIGHLIGHT_SELECTION_COLOR, 0xC0C0C0) & 0xFFFFFF);
@@ -4084,6 +4086,8 @@ void LVDocView::setStatusFontSize(int newSize) {
 	m_status_font_size = newSize;
 	if (oldSize != newSize) {
 		propsGetCurrent()->setInt(PROP_STATUS_FONT_SIZE, m_status_font_size);
+		m_infoFont = fontMan->GetFont(m_status_font_size, 400, false,
+									  DEFAULT_FONT_FAMILY, m_statusFontFace);
         REQUEST_RENDER("setStatusFontSize")
 	}
 	//goToBookmark(_posBookmark);
@@ -4124,6 +4128,7 @@ void LVDocView::setFontSize(int newSize) {
         propsGetCurrent()->setInt(PROP_FONT_SIZE, m_requested_font_size);
         m_font_size = scaleFontSizeForDPI(m_requested_font_size);
         CRLog::debug("New requested font size: %d (asked: %d)", m_requested_font_size, newSize);
+		updateLayout(); // when 2 visible pages, the middle margin width depends on this font size
         REQUEST_RENDER("setFontSize")
     }
     //goToBookmark(_posBookmark);
@@ -4136,6 +4141,8 @@ void LVDocView::setDefaultFontFace(const lString8 & newFace) {
 
 void LVDocView::setStatusFontFace(const lString8 & newFace) {
 	m_statusFontFace = newFace;
+	m_infoFont = fontMan->GetFont(m_status_font_size, 400, false,
+								  DEFAULT_FONT_FAMILY, m_statusFontFace);
     REQUEST_RENDER("setStatusFontFace")
 }
 
@@ -4314,6 +4321,7 @@ void LVDocView::Resize(int dx, int dy) {
 	clearImageCache();
 	//m_drawbuf.Resize(dx, dy);
 	if (m_doc) {
+		m_doc->setScreenSize(m_dx, m_dy); // only used for CSS @media queries
 		//ldomXPointer bm = getBookmark();
 		if (dx != m_dx || dy != m_dy || m_view_mode != DVM_SCROLL
 				|| !m_is_rendered) {
@@ -5290,6 +5298,7 @@ void LVDocView::createEmptyDocument() {
         m_doc->setInterlineScaleFactor(INTERLINE_SCALE_FACTOR_NO_SCALE);
     else
         m_doc->setInterlineScaleFactor(INTERLINE_SCALE_FACTOR_NO_SCALE * m_def_interline_space / 100);
+	m_doc->setScreenSize(m_dx, m_dy); // only used for CSS @media queries
 
     m_doc->setContainer(m_container);
     // This sets the element names default style (display, whitespace)

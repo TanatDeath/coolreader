@@ -2,6 +2,8 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.options.OptionsDialog;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;

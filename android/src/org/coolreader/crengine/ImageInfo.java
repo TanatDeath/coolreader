@@ -1,16 +1,16 @@
 package org.coolreader.crengine;
 
 public class ImageInfo {
-	int width;
-	int height;
-	int scaledWidth;
-	int scaledHeight;
-	int x;
-	int y;
-	int bufWidth;
-	int bufHeight;
-	int bufDpi;
-	int rotation;
+	public int width;
+	public int height;
+	public int scaledWidth;
+	public int scaledHeight;
+	public int x;
+	public int y;
+	public int bufWidth;
+	public int bufHeight;
+	public int bufDpi;
+	public int rotation;
 
 	public ImageInfo() {
 		

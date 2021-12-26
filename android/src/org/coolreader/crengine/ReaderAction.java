@@ -1,16 +1,46 @@
 package org.coolreader.crengine;
 
 import android.os.Build;
+import android.view.View;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 
 import org.coolreader.BuildConfig;
+import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.readerview.ReaderView;
 
 public class ReaderAction {
 	final public String id;
 	final public int nameId;
 	final public int addInfoR;
+
+	public static ReaderAction[] getDefReaderActions() {
+		return new ReaderAction[] {
+				ReaderAction.GO_BACK,
+				ReaderAction.TOC,
+				ReaderAction.BOOK_INFO,
+				ReaderAction.FONTS_MENU,
+				ReaderAction.SEARCH,
+				ReaderAction.OPTIONS,
+				ReaderAction.BOOKMARKS,
+				ReaderAction.FILE_BROWSER_ROOT,
+				ReaderAction.TOGGLE_DAY_NIGHT,
+				ReaderAction.TOGGLE_SELECTION_MODE,
+				ReaderAction.GO_PAGE,
+				//ReaderAction.GO_PERCENT,
+				ReaderAction.FILE_BROWSER,
+				ReaderAction.TTS_PLAY,
+				ReaderAction.GO_FORWARD,
+				ReaderAction.RECENT_BOOKS,
+				ReaderAction.OPEN_PREVIOUS_BOOK,
+				ReaderAction.TOGGLE_AUTOSCROLL,
+				ReaderAction.ABOUT,
+				ReaderAction.HIDE
+		};
+	}
 
 	public void setMirrorAction(ReaderAction mirrorAction) {
 		this.mirrorAction = mirrorAction;
@@ -34,11 +64,6 @@ public class ReaderAction {
 		return iconId;
 	}
 
-	public int getIsVisibleOnToolbar(ReaderView rv) {
-		return rv.getActivity().settings().getInt(Settings.PROP_TOOLBAR_BUTTONS+"."+this.cmd.nativeId
-				+"."+this.param,0);
-    }
-
 	public int getIconIdWithDef(BaseActivity activity) {
 		if (iconId == 0) {
 			if (activity==null)
@@ -48,7 +73,22 @@ public class ReaderAction {
 		return iconId;
 	}
 
-	public int    iconId;
+	public void setupIconView(BaseActivity activity, ImageView icon) {
+		if (null == icon)
+			return;
+		int resId = iconId;
+		if (resId != 0) {
+			icon.setImageResource(resId);
+			icon.setVisibility(View.VISIBLE);
+			activity.tintViewIcons(icon,true);
+		} else {
+			icon.setImageResource(R.drawable.icons8_more);
+			icon.setVisibility(View.VISIBLE);
+			activity.tintViewIcons(icon,true);
+		}
+	}
+
+	public int iconId;
 	final public ReaderCommand cmd;
 	final public int param;
 	final public int menuItemId;
@@ -113,7 +153,7 @@ public class ReaderAction {
 	public final static ReaderAction TOC = new ReaderAction("TOC", R.string.action_toc, ReaderCommand.DCMD_TOC_DIALOG, 0, R.id.cr3_go_toc, BOOKMARKS, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_viewer_toc);
 	public final static ReaderAction SEARCH = new ReaderAction("SEARCH", R.string.action_search, ReaderCommand.DCMD_SEARCH, 0, R.id.cr3_mi_search, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_viewer_find);
 	public final static ReaderAction GO_PAGE = new ReaderAction("GO_PAGE", R.string.action_go_page, ReaderCommand.DCMD_GO_PAGE_DIALOG, 0, R.id.cr3_mi_go_page, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_go_page);
-	public final static ReaderAction GO_PERCENT = new ReaderAction("GO_PERCENT", R.string.action_go_percent, ReaderCommand.DCMD_GO_PERCENT_DIALOG, 0, R.id.cr3_mi_go_percent, GO_PAGE, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_go_percent);
+	//public final static ReaderAction GO_PERCENT = new ReaderAction("GO_PERCENT", R.string.action_go_percent, ReaderCommand.DCMD_GO_PERCENT_DIALOG, 0, R.id.cr3_mi_go_percent, GO_PAGE, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_go_percent);
 	public final static ReaderAction FIRST_PAGE = new ReaderAction("FIRST_PAGE", R.string.action_go_first_page, ReaderCommand.DCMD_BEGIN, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_1);
 	public final static ReaderAction LAST_PAGE = new ReaderAction("LAST_PAGE", R.string.action_go_last_page, ReaderCommand.DCMD_END, 0 , FIRST_PAGE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_z);
 	public final static ReaderAction OPTIONS = new ReaderAction("OPTIONS", R.string.action_options, ReaderCommand.DCMD_OPTIONS_DIALOG, 0, R.id.cr3_mi_options , null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_viewer_settings);
@@ -250,38 +290,38 @@ public class ReaderAction {
 	public final static int DOUBLE = 2;
 	public final static String[] TYPE_PROP_SUBPATH = new String[] {NORMAL_PROP, LONG_PROP, DOUBLECLICK_PROP};
 
-	public static String getTypeString( int type ) {
+	public static String getTypeString(int type) {
 		return TYPE_PROP_SUBPATH[type];
 	}
 	
-	public static String getTapZoneProp( int tapZoneNumber, int type ) {
+	public static String getTapZoneProp(int tapZoneNumber, int type) {
 		return ReaderView.PROP_APP_TAP_ZONE_ACTIONS_TAP + getTypeString(type) + tapZoneNumber;
 	}
-	public static String getKeyProp( int keyCode, int type ) {
+	public static String getKeyProp(int keyCode, int type) {
 		return ReaderView.PROP_APP_KEY_ACTIONS_PRESS + getTypeString(type) + keyCode;
 	}
-	public static ReaderAction findForTap( int tapZoneNumber, Properties settings ) {
-		String id = settings.getProperty( getTapZoneProp( tapZoneNumber, NORMAL ) );
+	public static ReaderAction findForTap(int tapZoneNumber, Properties settings) {
+		String id = settings.getProperty(getTapZoneProp(tapZoneNumber, NORMAL));
 		return findById(id);
 	}
-	public static ReaderAction findForLongTap( int tapZoneNumber, Properties settings ) {
-		String id = settings.getProperty( getTapZoneProp( tapZoneNumber, LONG ) );
+	public static ReaderAction findForLongTap(int tapZoneNumber, Properties settings) {
+		String id = settings.getProperty(getTapZoneProp(tapZoneNumber, LONG));
 		return findById(id);
 	}
-	public static ReaderAction findForDoubleTap( int tapZoneNumber, Properties settings ) {
-		String id = settings.getProperty( getTapZoneProp( tapZoneNumber, DOUBLE ) );
+	public static ReaderAction findForDoubleTap(int tapZoneNumber, Properties settings) {
+		String id = settings.getProperty(getTapZoneProp(tapZoneNumber, DOUBLE));
 		return findById(id);
 	}
 	public static ReaderAction findForKey( int keyCode, Properties settings ) {
-		String id = settings.getProperty( getKeyProp( keyCode, NORMAL ) );
+		String id = settings.getProperty(getKeyProp(keyCode, NORMAL));
 		return findById(id);
 	}
 	public static ReaderAction findForLongKey( int keyCode, Properties settings ) {
-		String id = settings.getProperty( getKeyProp( keyCode, LONG ) );
+		String id = settings.getProperty(getKeyProp(keyCode, LONG));
 		return findById(id);
 	}
-	public static ReaderAction findForDoubleKey( int keyCode, Properties settings ) {
-		String id = settings.getProperty( getKeyProp( keyCode, DOUBLE ) );
+	public static ReaderAction findForDoubleKey(int keyCode, Properties settings ) {
+		String id = settings.getProperty(getKeyProp(keyCode, DOUBLE));
 		return findById(id);
 	}
 	
@@ -305,7 +345,7 @@ public class ReaderAction {
 				PREV_CHAPTER,
 				TOC,
 				GO_PAGE,
-				GO_PERCENT,
+				//GO_PERCENT,
 				BOOKMARKS,
 				SEARCH,
 				OPTIONS,

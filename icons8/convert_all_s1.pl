@@ -26,7 +26,10 @@ my %ic_smaller_list=(
         'icons8_settings.svg' => 'icons8_settings.png',
         'icons8_cursor.svg' => 'icons8_cursor.png',
         'icons8_save_small.svg' => 'icons8_save_small.png',
-        'icons8_menu.svg' => 'icons8_menu_small.png'
+        'icons8_menu.svg' => 'icons8_menu_small.png',
+        'icons8_goback.svg' => 'icons8_goback.png',
+        'icons8_down_small.svg' => 'icons8_down_small.png',
+        'icons8_up_small.svg' => 'icons8_up_small.png'
 );
 
 my %ic_actions_list=(
@@ -100,7 +103,10 @@ my %ic_actions_list=(
         'icons8_bookmark_simple_add.svg' => 'icons8_bookmark_simple_add.png',
         'icons8_help.svg' => 'icons8_help.png',
         'icons8_dic_list.svg' => 'icons8_dic_list.png',
-        'icons8_db_stats.svg' => 'icons8_db_stats.png'
+        'icons8_db_stats.svg' => 'icons8_db_stats.png',
+        'icons8_eink_snow.svg' => 'icons8_eink_snow.png',
+        'icons8_eink_sett.svg' => 'icons8_eink_sett.png',
+        'icons8_font_scale.svg' => 'icons8_font_scale.png'
 );
 
 my %ic_menu_list=(

@@ -11,9 +11,9 @@ import java.util.Map;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.CloudSync;
 import org.coolreader.cloud.litres.LitresConfig;
 import org.coolreader.cloud.litres.LitresSearchParams;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.TranslationDirectionDialog;
 
 import android.app.SearchManager;
@@ -311,7 +311,7 @@ public class BookInfoDialog extends BaseDialog {
 			int colorGreen = themeColors.get(R.attr.colorThemeGreen);
 			int colorGray = themeColors.get(R.attr.colorThemeGray);
 			int colorIcon = themeColors.get(R.attr.colorIcon);
-			valueView.setTextColor(colorIcon);
+			valueView.setTextColor(activity.getTextColor(colorIcon));
 			if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
 					contains("[" + mCoolReader.getString(R.string.book_state_reading) + "]"))
 				valueView.setTextColor(colorGreen);
@@ -343,7 +343,7 @@ public class BookInfoDialog extends BaseDialog {
 					Button countButton = new Button(mCoolReader);
 					btnCalc = countButton;
 					countButton.setText(activity.getString(R.string.calc_stats));
-					countButton.setTextColor(colorIcon);
+					countButton.setTextColor(activity.getTextColor(colorIcon));
 					countButton.setBackgroundColor(colorGrayC);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.MATCH_PARENT,
@@ -423,7 +423,7 @@ public class BookInfoDialog extends BaseDialog {
 			a.recycle();
 			Button translButton = new Button(mCoolReader);
 			translButton.setText(activity.getString(R.string.specify_translation_dir));
-			translButton.setTextColor(colorIcon);
+			translButton.setTextColor(activity.getTextColor(colorIcon));
 			translButton.setBackgroundColor(colorGrayC);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
@@ -484,7 +484,7 @@ public class BookInfoDialog extends BaseDialog {
 				colorIcon = a.getColor(2, Color.BLACK);
 				a.recycle();
 				valueView.setLinkTextColor(colorIcon);
-				valueView.setTextColor(colorIcon);
+				valueView.setTextColor(activity.getTextColor(colorIcon));
 			}
 		} else
 		if (typ.startsWith("series_authors")) {
@@ -813,7 +813,7 @@ public class BookInfoDialog extends BaseDialog {
 
 		ImageButton btnDeleteBook = mainView.findViewById(R.id.book_delete);
 		btnDeleteBook.setOnClickListener(v -> {
-			((CoolReader)activity).askDeleteBook(mBookInfo.getFileInfo());
+			((CoolReader)activity).askDeleteBook(mBookInfo.getFileInfo(), null);
 			dismiss();
 		});
 
@@ -924,7 +924,7 @@ public class BookInfoDialog extends BaseDialog {
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
 		colorIcon = a.getColor(2, Color.GRAY);
-		txtAnnot.setTextColor(colorIcon);
+		txtAnnot.setTextColor(activity.getTextColor(colorIcon));
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
 
 		tlLitresDownl =  mainView.findViewById(R.id.tl_downl_book);

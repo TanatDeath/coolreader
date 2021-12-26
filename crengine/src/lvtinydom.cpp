@@ -85,7 +85,7 @@ extern const int gDOMVersionCurrent = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.81"
+#define CACHE_FILE_FORMAT_VERSION "3.12.82"
 /// increment following value to force re-formatting of old book after load
 #define FORMATTING_VERSION_ID 0x0029
 
@@ -4123,6 +4123,8 @@ ldomDocument::ldomDocument()
 , _last_docflags(0)
 , _page_height(0)
 , _page_width(0)
+, _screen_height(0)
+, _screen_width(0)
 , _parsing(false)
 , _rendered(false)
 , _just_rendered_from_cache(false)
@@ -4172,6 +4174,8 @@ ldomDocument::ldomDocument( ldomDocument & doc )
 , _last_docflags(doc._last_docflags)
 , _page_height(doc._page_height)
 , _page_width(doc._page_width)
+, _screen_height(doc._screen_height)
+, _screen_width(doc._screen_width)
 #endif
 , _container(doc._container)
 , lists(100)
@@ -4760,20 +4764,21 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString32Collection
             }
             else {
                 // We need to parse the stylesheet tag text to extract css files path.
-                // We write its content without indentation and add a \n for readability.
+                // We write its content without indentation and add \n at start and
+                // end for readability.
                 lString8 txt = node->getText8();
-                int txtlen = txt.length();
-                if (txtlen && txt.substr(txtlen-1) != "\n") {
-                    txt << "\n";
-                }
+                if ( txt.firstChar() != '\n' )
+                    *stream << "\n";
                 *stream << txt;
+                if ( txt.lastChar() != '\n' )
+                    *stream << "\n";
                 // Parse @import'ed files to gather linked css files (we don't really need to
                 // do recursive parsing of @import, which are very rare, we just want to get
                 // the 2nd++ linked css files that were put there by crengine).
                 const char * s = txt.c_str();
                 while (true) {
                     lString8 import_file;
-                    if ( ! LVProcessStyleSheetImport( s, import_file ) ) {
+                    if ( ! LVProcessStyleSheetImport( s, import_file, node->getDocument() ) ) {
                         break;
                     }
                     lString32 cssFile = LVCombinePaths( node->getAttributeValue(attr_href), Utf8ToUnicode(import_file) );
@@ -4843,7 +4848,7 @@ static void writeNodeEx( LVStream * stream, ldomNode * node, lString32Collection
                             const char * s = txt.c_str();
                             while (true) {
                                 lString8 import_file;
-                                if ( ! LVProcessStyleSheetImport( s, import_file ) ) {
+                                if ( ! LVProcessStyleSheetImport( s, import_file, node->getDocument() ) ) {
                                     break;
                                 }
                                 lString32 cssFile = LVCombinePaths( pnode->getAttributeValue(attr_href), Utf8ToUnicode(import_file) );
@@ -4941,7 +4946,7 @@ public:
         while (_nestingLevel < 11) { //arbitrary limit
             lString8 import_file;
 
-            if ( LVProcessStyleSheetImport( s, import_file ) ) {
+            if ( LVProcessStyleSheetImport( s, import_file, _document ) ) {
                 lString32 importFilename = LVCombinePaths( codeBase, Utf8ToUnicode(import_file) );
                 if ( !importFilename.empty() && !_inProgress.contains(importFilename) ) {
                     ret = Parse(importFilename) || ret;
@@ -6138,20 +6143,25 @@ ldomNode * ldomNode::boxWrapChildren( int startIndex, int endIndex, lUInt16 elem
 {
     if ( !isElement() )
         return NULL;
+    css_style_ref_t style = getStyle();
+    bool pre = ( style->white_space >= css_ws_pre_line );
+
     int firstNonEmpty = startIndex;
     int lastNonEmpty = endIndex;
 
-    while ( firstNonEmpty<=endIndex && getChildNode(firstNonEmpty)->isText() ) {
-        lString32 s = getChildNode(firstNonEmpty)->getText();
-        if ( !IsEmptySpace(s.c_str(), s.length() ) )
-            break;
-        firstNonEmpty++;
-    }
-    while ( lastNonEmpty>=endIndex && getChildNode(lastNonEmpty)->isText() ) {
-        lString32 s = getChildNode(lastNonEmpty)->getText();
-        if ( !IsEmptySpace(s.c_str(), s.length() ) )
-            break;
-        lastNonEmpty--;
+    if (!pre) {
+        while ( firstNonEmpty<=endIndex && getChildNode(firstNonEmpty)->isText() ) {
+            lString32 s = getChildNode(firstNonEmpty)->getText();
+            if ( !IsEmptySpace(s.c_str(), s.length() ) )
+                break;
+            firstNonEmpty++;
+        }
+        while ( lastNonEmpty>=endIndex && getChildNode(lastNonEmpty)->isText() ) {
+            lString32 s = getChildNode(lastNonEmpty)->getText();
+            if ( !IsEmptySpace(s.c_str(), s.length() ) )
+                break;
+            lastNonEmpty--;
+        }
     }
 
     // printf("boxWrapChildren %d>%d | %d<%d\n", startIndex, firstNonEmpty, lastNonEmpty, endIndex);
@@ -6178,8 +6188,9 @@ ldomNode * ldomNode::boxWrapChildren( int startIndex, int endIndex, lUInt16 elem
 // init table element render methods
 // states: 0=table, 1=colgroup, 2=rowgroup, 3=row, 4=cell
 // returns table cell count
-// When BLOCK_RENDERING_COMPLETE_INCOMPLETE_TABLES, we follow rules
-// from the "Generate missing child wrappers" section in:
+// When BLOCK_RENDERING_COMPLETE_INCOMPLETE_TABLES, we follow rules from
+// the sections "Generate missing child wrappers" and "Remove irrelevant
+// boxes" in:
 //   https://www.w3.org/TR/CSS22/tables.html#anonymous-boxes
 //   https://www.w3.org/TR/css-tables-3/#fixup (clearer than previous one)
 // and we wrap unproper children in a tabularBox element.
@@ -6196,25 +6207,40 @@ int initTableRendMethods( ldomNode * enode, int state )
     int i;
     int first_unproper = -1; // keep track of consecutive unproper children that
     int last_unproper = -1;  // must all be wrapped in a single wrapper
+    ldomNode * prev_whitespace = NULL; // white space only node, handling depends on surrounding
     for (i=0; i<cnt; i++) {
         ldomNode * child = enode->getChildNode( i );
         css_display_t d;
+        // Whitespace only text node around table elements may have been stripped
+        // out by the XML parsers, or removed or ignored by initNodeRendMethod(),
+        // but in some cases, it may have been kept and even autoBoxed (i.e. when
+        // the table has "white-space: pre").
+        // Depending on their surrounding, these whitespace nodes should be ignored
+        // here when at start or end, or solely between 2 table sub elements (even
+        // if white-space:pre) and by the table rendering algorithm - or should be
+        // kept when near unproper children and should be wrapped with them.
+        bool is_whitespace = false;
         if ( child->isElement() ) {
             d = child->getStyle()->display;
+            if ( child->getNodeId() == el_autoBoxing && child->getChildCount() == 1 && child->getChildNode(0)->isText()) {
+                // A text node wrapped in an <autoBoxing> because it was surrounded
+                // by non-inline elements (the other table subelements)
+                lString32 s = child->getChildNode(0)->getText();
+                if ( IsEmptySpace(s.c_str(), s.length()) ) {
+                    is_whitespace = true;
+                }
+            }
         }
         else { // text node
             d = css_d_inline;
-            // Not sure about what to do with whitespace only text nodes:
-            // we shouldn't meet any alongside real elements (as whitespace
-            // around and at start/end of block nodes are discarded), but
-            // we may in case of style changes (inline > table) after
-            // a book has been loaded.
-            // Not sure if we should handle them differently when no unproper
-            // elements yet (they will be discarded by the table render algo),
-            // and when among unpropers (they could find their place in the
-            // wrapped table cell).
-            // Note that boxWrapChildren() called below will remove
-            // them at start or end of an unproper elements sequence.
+            // Most text around table sub elements should have been stripped
+            // by the XML parsers, but we may see some when completing
+            // incomplete tables or when white-space:pre, or in case of
+            // style changes (inline > table) after a book has been loaded.
+            lString32 s = child->getText();
+            if ( IsEmptySpace(s.c_str(), s.length()) ) {
+                is_whitespace = true;
+            }
         }
         bool is_last = (i == cnt-1);
         bool is_proper = false;
@@ -6290,7 +6316,7 @@ int initTableRendMethods( ldomNode * enode, int state )
             if ( d==css_d_table_cell ) {
                 // This will set the rend method of the cell to either erm_block
                 // or erm_final, depending on its content.
-                child->initNodeRendMethodRecursive();
+                child->initNodeRendMethod();
                 cellCount++;
                 is_proper = true;
             }
@@ -6305,7 +6331,7 @@ int initTableRendMethods( ldomNode * enode, int state )
                 #endif
                 // This will set the rend method of the cell to either erm_block
                 // or erm_final, depending on its content.
-                child->initNodeRendMethodRecursive();
+                child->initNodeRendMethod();
                 cellCount++;
                 is_proper = true;
             }
@@ -6326,6 +6352,43 @@ int initTableRendMethods( ldomNode * enode, int state )
         else { // shouldn't be reached
             crFatalError(151, "initTableRendMethods state unexpected");
             // child->setRendMethod( erm_final );
+        }
+
+        if ( is_whitespace && prev_whitespace ) {
+            // consecutive whitespaces: both become unproper
+            is_proper = false;
+            if ( first_unproper < 0 )
+                first_unproper = i-1;
+            is_whitespace = false;
+            prev_whitespace = NULL;
+        }
+        if ( is_whitespace ) {
+            if ( first_unproper >= 0 ) {
+                // already some unproper, keep this whitespace with it/them
+                is_proper = false;
+            }
+            else {
+                // either first node, or following a proper
+                is_proper = true; // don't handle it until we see what comes next
+                if ( i == cnt-1 ) { // last (or single) node: nothing comes next
+                    child->setRendMethod( erm_invisible );
+                }
+                else {
+                    prev_whitespace = child; // remember it for later
+                }
+            }
+        }
+        else if ( prev_whitespace ) {
+            if ( is_proper ) {
+                // whitespace between 2 proper: does not need to be wrapped
+                prev_whitespace->setRendMethod( erm_invisible );
+            }
+            else {
+                // unproper, bring prev whitespace into this set of unpropers
+                if ( first_unproper < 0 )
+                    first_unproper = i-1;
+            }
+            prev_whitespace = NULL;
         }
 
         // Check and deal with unproper children
@@ -6386,21 +6449,44 @@ int initTableRendMethods( ldomNode * enode, int state )
                     // be remembered and re-used when styles change, and just
                     // setting the appropriate rendering method is all that is
                     // needed for rendering after this.
-                    // tbox->setAttributeValue(LXML_NS_NONE, enode->getDocument()->getAttrNameIndex(U"style"), U"display: table-row");
+                    // tbox->setAttributeValue(LXML_NS_NONE, attr_style, U"display: table-row");
+                    tbox->setAttributeValue(LXML_NS_NONE, attr_T, U"MissingChildRow");
                     tbox->initNodeStyle();
                     tbox->setRendMethod( erm_table_row );
                     cellCount += initTableRendMethods( tbox, 3 ); // > row
                 }
-                else if ( state==3 ) {
+                else if ( state==3 ) { // in row: tbox is a table cell
+                    tbox->setAttributeValue(LXML_NS_NONE, attr_T, U"MissingChildCell");
                     tbox->initNodeStyle();
                     // This will set the rend method of the cell to either erm_block
                     // or erm_final, depending on its content.
-                    tbox->initNodeRendMethodRecursive();
+                    tbox->initNodeRendMethod();
                     cellCount++;
                 }
                 else if ( state==1 ) { // should not happen, see above
+                    tbox->setAttributeValue(LXML_NS_NONE, attr_T, U"MissingChildColumn");
                     tbox->initNodeStyle();
                     tbox->setRendMethod( erm_table_column );
+                }
+                if ( state != 3 ) {
+                    // We may have included in the wrap whitespace-only text nodes,
+                    // that are irrelevant to the table rendering algorithm.
+                    // But on a next re-rendering, when initNodeRendMethod() will
+                    // meet this tabularBox as initially a regular block element,
+                    // it may want to autoboxChildren() these inline text elements
+                    // mixed among other table elements or tabularBoxes, which
+                    // would autobox them and cause a style hash mismatch.
+                    // So, autobox them now.
+                    int tbcnt = tbox->getChildCount();
+                    for (int j=0; j<tbcnt; j++) {
+                        if ( tbox->getChildNode(j)->isText() ) {
+                            ldomNode * abox = tbox->boxWrapChildren(j, j, el_autoBoxing);
+                            if ( abox && !abox->isNull() ) {
+                                abox->initNodeStyle();
+                                abox->setRendMethod(erm_invisible);
+                            }
+                        }
+                    }
                 }
             }
             // If tbox is NULL, all unproper have been removed, and no element added
@@ -6957,7 +7043,8 @@ void ldomNode::initNodeRendMethod()
         // which were handled just like erm_inline with ugly side effects...)
         // So, best to introduce a decicated element: <tabularBox>.
         //
-        // We follow rules from section "Generate missing parents" in:
+        // We follow rules from the sections "Generate missing parents" and
+        // "Remove irrelevant boxes" in:
         //   https://www.w3.org/TR/CSS22/tables.html#anonymous-boxes
         //   https://www.w3.org/TR/css-tables-3/#fixup (clearer than previous one)
         // Note: we do that not in the order given by the specs... As we walk
@@ -6975,13 +7062,19 @@ void ldomNode::initNodeRendMethod()
             // Look if we have css_d_table_cell that we must wrap in a proper erm_table_row
             int last_table_cell = -1;
             int first_table_cell = -1;
-            int last_visible_child = -1;
+            int nb_irrelevant = 0;
             bool did_wrap = false;
             int len = getChildCount();
             for ( int i=len-1; i>=0; i-- ) {
                 ldomNode * child = getChildNode(i);
                 int cd = child->getStyle()->display;
                 int cm = child->getRendMethod();
+                int is_whitespace = false;
+                if ( child->getNodeId() == el_autoBoxing && child->getChildCount() == 1 && child->getChildNode(0)->isText() ) {
+                    lString32 s = child->getChildNode(0)->getText();
+                    if ( IsEmptySpace(s.c_str(), s.length()) )
+                        is_whitespace = true;
+                }
                 if ( cd == css_d_table_cell ) {
                     if ( last_table_cell < 0 ) {
                         last_table_cell = i;
@@ -6998,8 +7091,7 @@ void ldomNode::initNodeRendMethod()
                     }
                     if ( i == 0 )
                         first_table_cell = 0;
-                    if ( last_visible_child < 0 )
-                        last_visible_child = i;
+                    nb_irrelevant = 0; // reset (include passed-by irrelevants in the wrap)
                 }
                 else if ( last_table_cell >= 0 && child->getNodeId()==el_tabularBox ) {
                     // We've seen a css_d_table_cell and we're seeing a tabularBox:
@@ -7007,27 +7099,23 @@ void ldomNode::initNodeRendMethod()
                     // children of a css_d_table_row: make it part of the row
                     if ( i == 0 )
                         first_table_cell = 0;
-                    if ( last_visible_child < 0 )
-                        last_visible_child = i;
+                    nb_irrelevant = 0; // reset (include passed-by irrelevants in the wrap)
                 }
-                else if ( cd == css_d_none || cm == erm_invisible ) {
-                    // Can be left inside or outside the wrap
-                    if ( i == 0 && last_table_cell >= 0 ) {
-                        // Include it if first and we're wrapping
-                        first_table_cell = 0;
+                else if ( cd == css_d_none || cm == erm_invisible || is_whitespace ) {
+                    // Will be wrapped or left as is depending on what we see next
+                    nb_irrelevant++;
+                    if ( i == 0 && last_table_cell >= 0 ) { // first node:
+                        first_table_cell = nb_irrelevant;   // left it out
                     }
                 }
-                else {
+                else { // non cell, non irrelevant, must be left out with the irrelevants not included
                     if ( last_table_cell >= 0)
-                        first_table_cell = i+1;
-                    if ( last_visible_child < 0 )
-                        last_visible_child = i;
+                        first_table_cell = i+1+nb_irrelevant; // exclude the irrelevants from the wrap
                 }
                 if ( first_table_cell >= 0 ) {
-                    if ( first_table_cell == 0 && last_table_cell == last_visible_child
-                                && getNodeId()==el_tabularBox && !did_wrap ) {
-                        // All children are table cells, and we're not css_d_table_row,
-                        // but we are a tabularBox!
+                    if ( i==0 && getNodeId()==el_tabularBox && !did_wrap ) {
+                        // We didn't have to wrap: all children are table cells or irrelevants,
+                        // and we're not css_d_table_row, but we are a tabularBox!
                         // We were most probably created here in a previous rendering,
                         // so just set us to be the anonymous table row.
                         #ifdef DEBUG_INCOMPLETE_TABLE_COMPLETION
@@ -7043,6 +7131,7 @@ void ldomNode::initNodeRendMethod()
                         #endif
                         ldomNode * tbox = boxWrapChildren(first_table_cell, last_table_cell, el_tabularBox);
                         if ( tbox && !tbox->isNull() ) {
+                            tbox->setAttributeValue(LXML_NS_NONE, attr_T, U"MissingParentRow");
                             tbox->initNodeStyle();
                             tbox->setRendMethod( erm_table_row );
                         }
@@ -7050,6 +7139,7 @@ void ldomNode::initNodeRendMethod()
                     }
                     last_table_cell = -1;
                     first_table_cell = -1;
+                    nb_irrelevant = 0;
                 }
             }
         }
@@ -7060,13 +7150,19 @@ void ldomNode::initNodeRendMethod()
         // style->display among css_d_table*. Let's do as litterally as the specs.
         int last_misparented = -1;
         int first_misparented = -1;
-        int last_visible_child = -1;
+        int nb_irrelevant = 0;
         bool did_wrap = false;
         int len = getChildCount();
         for ( int i=len-1; i>=0; i-- ) {
             ldomNode * child = getChildNode(i);
             int cd = child->getStyle()->display;
             int cm = child->getRendMethod();
+            int is_whitespace = false;
+            if ( child->getNodeId() == el_autoBoxing && child->getChildCount() == 1 && child->getChildNode(0)->isText() ) {
+                lString32 s = child->getChildNode(0)->getText();
+                if ( IsEmptySpace(s.c_str(), s.length()) )
+                    is_whitespace = true;
+            }
             bool is_misparented = false;
             if ( (cd == css_d_table_row || cm == erm_table_row)
                             && d != css_d_table && d != css_d_table_row_group
@@ -7102,34 +7198,29 @@ void ldomNode::initNodeRendMethod()
                 }
                 if (i == 0)
                     first_misparented = 0;
-                if ( last_visible_child < 0 )
-                    last_visible_child = i;
+                nb_irrelevant = 0; // reset (include passed-by irrelevants in the wrap)
             }
             else if ( last_misparented >= 0 && child->getNodeId()==el_tabularBox ) {
                 // As above for table cells: include tabularBox siblings in the wrap
                 if (i == 0)
                     first_misparented = 0;
-                if ( last_visible_child < 0 )
-                    last_visible_child = i;
+                nb_irrelevant = 0; // reset (include passed-by irrelevants in the wrap)
             }
-            else if ( cd == css_d_none || cm == erm_invisible ) {
-                // Can be left inside or outside the wrap
-                if ( i == 0 && last_misparented >= 0 ) {
-                    // Include it if first and we're wrapping
-                    first_misparented = 0;
+            else if ( cd == css_d_none || cm == erm_invisible || is_whitespace ) {
+                // Will be wrapped or left as is depending on what we see next
+                nb_irrelevant++;
+                if ( i == 0 && last_misparented >= 0 ) { // first node:
+                    first_misparented = nb_irrelevant;   // left it out
                 }
             }
-            else {
+            else { // non misparented, non irrelevant, must be left out with the irrelevants not included
                 if ( last_misparented >= 0 )
-                    first_misparented = i+1;
-                if ( last_visible_child < 0 )
-                    last_visible_child = i;
+                    first_misparented = i+1+nb_irrelevant; // exclude the irrelevants from the wrap
             }
             if ( first_misparented >= 0 ) {
-                if ( first_misparented == 0 && last_misparented == last_visible_child
-                            && getNodeId()==el_tabularBox && !did_wrap ) {
-                    // All children are misparented, and we're not css_d_table,
-                    // but we are a tabularBox!
+                if ( i==0 && getNodeId()==el_tabularBox && !did_wrap ) {
+                    // We didn't have to wrap: all children are table cells or irrelevants,
+                    // and we're not css_d_table, but we are a tabularBox!
                     // We were most probably created here in a previous rendering,
                     // so just set us to be the anonymous table.
                     #ifdef DEBUG_INCOMPLETE_TABLE_COMPLETION
@@ -7146,6 +7237,7 @@ void ldomNode::initNodeRendMethod()
                     #endif
                     ldomNode * tbox = boxWrapChildren(first_misparented, last_misparented, el_tabularBox);
                     if ( tbox && !tbox->isNull() ) {
+                        tbox->setAttributeValue(LXML_NS_NONE, attr_T, U"MissingParentTable");
                         tbox->initNodeStyle();
                         tbox->setRendMethod( erm_table );
                         initTableRendMethods( tbox, 0 );
@@ -7154,6 +7246,7 @@ void ldomNode::initNodeRendMethod()
                 }
                 last_misparented = -1;
                 first_misparented = -1;
+                nb_irrelevant = 0;
                 // Note:
                 //   https://www.w3.org/TR/css-tables-3/#fixup
                 //   "An anonymous table or inline-table box must be generated
@@ -8044,11 +8137,17 @@ void ldomDocumentWriter::OnTagBody()
         for (int i = 0; i < _stylesheetLinks.length(); i++) {
             lString32 import("@import url(\"");
             import << _stylesheetLinks.at(i);
-            import << "\");\n";
+            import << "\")";
+            if ( !_stylesheetLinksMediaConditions.at(i).empty() ) {
+                import << " ";
+                import << _stylesheetLinksMediaConditions.at(i);
+            }
+            import << ";\n";
             imports << import;
         }
         lString32 styleText = imports + _headStyleText.c_str();
         _stylesheetLinks.clear();
+        _stylesheetLinksMediaConditions.clear();
         _headStyleText.clear();
 
         // It's only at this point that we push() the previous stylesheet state
@@ -8220,9 +8319,8 @@ void ldomDocumentWriter::OnTagClose( const lChar32 *, const lChar32 * tagname, b
     // (duplicated in ldomDocumentWriterFilter::OnTagClose)
     if ( id == el_link && curNodeId == el_link ) { // link node
         ldomNode * n = _currNode->getElement();
-        if ( n->getParentNode() && n->getParentNode()->getNodeId() == el_head &&
-                 lString32(n->getAttributeValue("rel")).lowercase() == U"stylesheet" &&
-                 lString32(n->getAttributeValue("type")).lowercase() == U"text/css" ) {
+        if ( n->getParentNode() && n->getParentNode()->getNodeId() == el_head && n->getAttributeValueLC(attr_rel) == U"stylesheet"
+             && ( n->getAttributeValueLC(attr_type) == U"text/css" || n->getAttributeValueLC(attr_type).empty() ) ) {
             lString32 href = n->getAttributeValue("href");
             lString32 stylesheetFile = LVCombinePaths( _document->getCodeBase(), href );
             CRLog::debug("Internal stylesheet file: %s", LCSTR(stylesheetFile));
@@ -8230,6 +8328,7 @@ void ldomDocumentWriter::OnTagClose( const lChar32 *, const lChar32 * tagname, b
             // _document->setDocStylesheetFileName(stylesheetFile);
             // _document->applyDocumentStyleSheet();
             _stylesheetLinks.add(stylesheetFile);
+            _stylesheetLinksMediaConditions.add( n->getAttributeValue(attr_media) ); // empty string if no attribute
         }
     }
 
@@ -8360,6 +8459,7 @@ ldomDocumentWriter::ldomDocumentWriter(ldomDocument * document, bool headerOnly)
 {
     _headStyleText.clear();
     _stylesheetLinks.clear();
+    _stylesheetLinksMediaConditions.clear();
     _stopTagId = 0xFFFE;
     IS_FIRST_BODY = true;
     _document->_parsing = true;
@@ -13780,7 +13880,6 @@ void ldomDocumentFragmentWriter::setCodeBase( lString32 fileName )
         CRLog::trace("codeBasePrefix is empty for path %s", LCSTR(fileName));
         codeBasePrefix = pathSubstitutions.get(fileName);
     }
-    stylesheetFile.clear();
 }
 
 /// called on attribute
@@ -13811,28 +13910,28 @@ void ldomDocumentFragmentWriter::OnAttribute( const lChar32 * nsname, const lCha
                 htmlClass = attrvalue;
         }
         else if ( styleDetectionState ) {
-            if ( !lStr_cmp(attrname, "rel") && lString32(attrvalue).lowercase() == U"stylesheet" )
-                styleDetectionState |= 2;
-            else if ( !lStr_cmp(attrname, "type") ) {
-                if ( lString32(attrvalue).lowercase() == U"text/css")
-                    styleDetectionState |= 4;
+            // We won't include this <link/> element in the DOM, but we'll include the
+            // stylesheet href in an inner element. We need to analyze and remember some
+            // attributes as we meet them here to decide if it is a valid stylesheet link
+            // when done with it in OnTagBody().
+            if ( !lStr_cmp(attrname, "rel") ) { // rel="stylesheet" required
+                if ( lString32(attrvalue).lowercase() == U"stylesheet" )
+                    styleDetectionState |= 0x02; // bit 2 required
                 else
-                    styleDetectionState = 0;  // text/css type supported only
-            } else if ( !lStr_cmp(attrname, "href") ) {
-                styleDetectionState |= 8;
-                lString32 href = attrvalue;
-                if ( stylesheetFile.empty() )
-                    tmpStylesheetFile = LVCombinePaths( codeBase, href );
-                else
-                    tmpStylesheetFile = href;
+                    styleDetectionState |= 0x80; // not a stylesheet (bit 8 set)
             }
-            if (styleDetectionState == 15) {
-                if ( !stylesheetFile.empty() )
-                    stylesheetLinks.add(tmpStylesheetFile);
-                else
-                    stylesheetFile = tmpStylesheetFile;
-                styleDetectionState = 0;
-                CRLog::trace("CSS file href: %s", LCSTR(stylesheetFile));
+            else if ( !lStr_cmp(attrname, "type") ) { // type="text/css" optional, but any other value is invalid
+                if ( lString32(attrvalue).lowercase() != U"text/css")
+                    styleDetectionState |= 0x80; // not a stylesheet (bit 8 set)
+            }
+            else if ( !lStr_cmp(attrname, "href") ) { // href= required
+                styleDetectionState |= 0x04; // bit 4 required
+                lString32 href = attrvalue;
+                tmpStylesheetLink = href;
+            }
+            else if ( !lStr_cmp(attrname, "media") ) { // media= optional
+                lString32 media = attrvalue;
+                tmpStylesheetMediaCondition = media;
             }
         }
     }
@@ -13844,8 +13943,11 @@ ldomNode * ldomDocumentFragmentWriter::OnTagOpen( const lChar32 * nsname, const 
     if ( insideTag ) {
         return parent->OnTagOpen(nsname, tagname);
     } else {
-        if ( !lStr_cmp(tagname, "link") )
-            styleDetectionState = 1;
+        if ( !lStr_cmp(tagname, "link") ) {
+            styleDetectionState = 1; // See OnAttribute() above: bit 1 required
+            tmpStylesheetLink.clear();
+            tmpStylesheetMediaCondition.clear();
+        }
         else if ( !lStr_cmp(tagname, "style") )
             headStyleState = 1;
         else if ( !lStr_cmp(tagname, "html") ) {
@@ -13864,7 +13966,7 @@ ldomNode * ldomDocumentFragmentWriter::OnTagOpen( const lChar32 * nsname, const 
     //   <DocFragment StyleSheet="OEBPS/Styles/main.css" id="_doc_fragment_2">
     //     <stylesheet href="OEBPS/Text/">
     //       @import url("../Styles/other.css");
-    //       @import url(path_to_3rd_css_file)
+    //       @import url(path_to_3rd_css_file) screen and (color);
     //       here is <HEAD><STYLE> content
     //     </stylesheet>
     //     <body>
@@ -13882,10 +13984,18 @@ ldomNode * ldomDocumentFragmentWriter::OnTagOpen( const lChar32 * nsname, const 
         if ( !baseTagReplacement.empty() ) { // with EPUBs: baseTagReplacement="DocFragment"
             baseElement = parent->OnTagOpen(U"", baseTagReplacement.c_str()); // start <DocFragment
             lastBaseElement = baseElement;
-            if ( !stylesheetFile.empty() ) {
-                // add attribute <DocFragment StyleSheet="path_to_css_1st_file"
+            if ( stylesheetLinks.length() > 0 && stylesheetLinksMediaConditions[0].empty() ) {
+                // First <link rel="stylesheet"> has no media= condition: we can add it as an
+                // attribute to our DocFragment, so we may avoid creating a child element
+                // for 2nd++ stylesheets if there aren't any, to save creating a text node
+                // and just use an attribute (but if it has a media=, we'll need to put it
+                // inside the child <stylesheet> element).
+                // Add attribute <DocFragment StyleSheet="path_to_css_1st_file"
+                lString32 stylesheetFile = LVCombinePaths( codeBase, stylesheetLinks[0] );
                 parent->OnAttribute(U"", U"StyleSheet", stylesheetFile.c_str() );
                 CRLog::debug("Setting StyleSheet attribute to %s for document fragment", LCSTR(stylesheetFile) );
+                stylesheetLinks.erase(0, 1);
+                stylesheetLinksMediaConditions.erase(0, 1);
             }
             if ( !codeBasePrefix.empty() ) // add attribute <DocFragment id="..html_file_name"
                 parent->OnAttribute(U"", U"id", codeBasePrefix.c_str() );
@@ -13905,19 +14015,27 @@ ldomNode * ldomDocumentFragmentWriter::OnTagOpen( const lChar32 * nsname, const 
                 // add stylesheet element as child of <DocFragment>: <stylesheet href="...">
                 parent->OnTagOpen(U"", U"stylesheet");
                 parent->OnAttribute(U"", U"href", codeBase.c_str() );
+                // Add all other <link> stylesheets as @import url() in this element,
+                // before the original <head><style> content.
                 lString32 imports;
                 for (int i = 0; i < stylesheetLinks.length(); i++) {
                     lString32 import("@import url(\"");
                     import << stylesheetLinks.at(i);
-                    import << "\");\n";
+                    import << "\")";
+                    if ( !stylesheetLinksMediaConditions.at(i).empty() ) {
+                        import << " ";
+                        import << stylesheetLinksMediaConditions.at(i);
+                    }
+                    import << ";\n";
                     imports << import;
                 }
                 stylesheetLinks.clear();
+                stylesheetLinksMediaConditions.clear();
                 lString32 styleText = imports + headStyleText.c_str();
                 // Add it to <DocFragment><stylesheet>, so it becomes:
                 //   <stylesheet href="...">
-                //     @import url(path_to_css_2nd_file)
-                //     @import url(path_to_css_3rd_file)
+                //     @import url(path_to_css_2nd_file);
+                //     @import url(path_to_css_3rd_file) screen and (color);
                 //     here is <HEAD><STYLE> content
                 //   </stylesheet>
                 parent->OnTagBody();
@@ -13971,15 +14089,14 @@ void ldomDocumentFragmentWriter::OnTagBody()
     else if ( insideHtmlTag ) {
         insideHtmlTag = false;
     }
-    if ( styleDetectionState == 11 ) {
-        // incomplete <link rel="stylesheet", href="..." />; assuming type="text/css"
-        if ( !stylesheetFile.empty() )
-            stylesheetLinks.add(tmpStylesheetFile);
-        else
-            stylesheetFile = tmpStylesheetFile;
+    if ( styleDetectionState ) { // <link.../> closing
+        // Check we have meet all required attributes, and that nothing made it invalid
+        if ((styleDetectionState & 0x07) && !(styleDetectionState & 0x80)) {
+            stylesheetLinks.add(tmpStylesheetLink);
+            stylesheetLinksMediaConditions.add(tmpStylesheetMediaCondition);
+        }
         styleDetectionState = 0;
-    } else
-        styleDetectionState = 0;
+    }
 }
 
 
@@ -15036,9 +15153,8 @@ void ldomDocumentWriterFilter::OnTagClose( const lChar32 * /*nsname*/, const lCh
     // (duplicated in ldomDocumentWriter::OnTagClose)
     if ( id == el_link && curNodeId == el_link ) { // link node
         ldomNode * n = _currNode->getElement();
-        if ( n->getParentNode() && n->getParentNode()->getNodeId() == el_head &&
-                 lString32(n->getAttributeValue("rel")).lowercase() == U"stylesheet" &&
-                 lString32(n->getAttributeValue("type")).lowercase() == U"text/css" ) {
+        if ( n->getParentNode() && n->getParentNode()->getNodeId() == el_head && n->getAttributeValueLC(attr_rel) == U"stylesheet"
+             && ( n->getAttributeValueLC(attr_type) == U"text/css" || n->getAttributeValueLC(attr_type).empty() ) ) {
             lString32 href = n->getAttributeValue("href");
             lString32 stylesheetFile = LVCombinePaths( _document->getCodeBase(), href );
             CRLog::debug("Internal stylesheet file: %s", LCSTR(stylesheetFile));
@@ -15046,6 +15162,7 @@ void ldomDocumentWriterFilter::OnTagClose( const lChar32 * /*nsname*/, const lCh
             // _document->setDocStylesheetFileName(stylesheetFile);
             // _document->applyDocumentStyleSheet();
             _stylesheetLinks.add(stylesheetFile);
+            _stylesheetLinksMediaConditions.add( n->getAttributeValue(attr_media) ); // empty string if no attribute
         }
     }
 

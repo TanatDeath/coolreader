@@ -222,12 +222,12 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			mCoolReader.tintViewIcons(btnPercentSort, true);
 			btnDateSort.setBackgroundColor(colorGrayCT);
 		}
-		btnThisDevice.setTextColor(colorIcon);
-		btnDateSort.setTextColor(colorIcon);
-		btnPercentSort.setTextColor(colorIcon);
+		btnThisDevice.setTextColor(activity.getTextColor(colorIcon));
+		btnDateSort.setTextColor(activity.getTextColor(colorIcon));
+		btnPercentSort.setTextColor(activity.getTextColor(colorIcon));
 		mCoolReader.tintViewIcons(btnDeleteAll,true);
 		btnDeleteAll.setBackgroundColor(colorGrayCT2);
-		btnDeleteAll.setTextColor(colorIcon);
+		btnDeleteAll.setTextColor(activity.getTextColor(colorIcon));
 	}
 
 	public void sortAndFilterList() {
