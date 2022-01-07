@@ -4,7 +4,6 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -13,12 +12,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class BaseDialog extends Dialog {
@@ -27,7 +24,7 @@ public class BaseDialog extends Dialog {
 	ViewGroup buttonsLayout;
 	public ViewGroup upperTextLayout;
 	ViewGroup contentsLayout;
-	public BaseActivity activity;
+	public CoolReader mActivity;
 	String title;
 	public String upperText;
 	public boolean searchEnabled;
@@ -79,7 +76,7 @@ public class BaseDialog extends Dialog {
 				: activity.getCurrentTheme().getDialogThemeId()
 				));
 		setOwnerActivity(activity);
-		this.activity = activity;
+		this.mActivity = (CoolReader) activity;
 		this.title = title;
 		this.needCancelButton = showNegativeButton;
 		this.dlgName = dlgName;
@@ -107,8 +104,8 @@ public class BaseDialog extends Dialog {
 
 	protected void whenShow() {
 		// when dialog is shown
-		if (activity instanceof CoolReader) {
-			CoolReader cr = (CoolReader)activity;
+		if (mActivity instanceof CoolReader) {
+			CoolReader cr = (CoolReader) mActivity;
 			cr.getmBaseDialog().put(this.dlgName,this);
 			Window wnd = cr.getWindow();
 			if (wnd != null) {
@@ -132,7 +129,7 @@ public class BaseDialog extends Dialog {
 		}
 		contentsLayout.removeAllViews();
 		if (null != view) {
-			activity.tintViewIcons(view);
+			mActivity.tintViewIcons(view);
 			contentsLayout.addView(view);
 		}
 	}
@@ -174,19 +171,19 @@ public class BaseDialog extends Dialog {
 		ImageButton negativeButton = layout.findViewById(R.id.base_dlg_btn_negative);
 		ImageButton backButton = layout.findViewById(R.id.base_dlg_btn_back);
 		ImageButton addButton = layout.findViewById(R.id.base_dlg_btn_add);
-		activity.tintViewIcons(layout);
+		mActivity.tintViewIcons(layout);
 		if (positiveButtonImage != 0) {
 			positiveButton.setImageResource(positiveButtonImage);
 			if (positiveButtonContentDescriptionId != 0)
 				Utils.setContentDescription(positiveButton, getContext().getString(positiveButtonContentDescriptionId));
 			//backButton.setImageResource(positiveButtonImage);
-			activity.tintViewIcons(positiveButton,true);
+			mActivity.tintViewIcons(positiveButton,true);
 		}
 		if (thirdButtonImage != 0) {
 			negativeButton.setImageResource(thirdButtonImage);
 			if (thirdButtonContentDescriptionId != 0)
 				Utils.setContentDescription(negativeButton, getContext().getString(thirdButtonContentDescriptionId));
-			activity.tintViewIcons(negativeButton,true);
+			mActivity.tintViewIcons(negativeButton,true);
 		}
 		if (addButtonImage != 0) {
 			addButton.setImageResource(addButtonImage);
@@ -194,7 +191,7 @@ public class BaseDialog extends Dialog {
 				Utils.setContentDescription(addButton, getContext().getString(addButtonContentDescriptionId));
 				addButton.setOnClickListener(v -> onAddButtonClick());
 			}
-			activity.tintViewIcons(addButton,true);
+			mActivity.tintViewIcons(addButton,true);
 		}
 		if (negativeButtonImage != 0) {
 			if (thirdButtonImage == 0) {
@@ -278,7 +275,7 @@ public class BaseDialog extends Dialog {
 				if (searchEnabled) {
 					ib.setVisibility(View.VISIBLE);
 					ib.setOnClickListener(v -> onSearchClick());
-					activity.tintViewIcons((View) ib.getParent());
+					mActivity.tintViewIcons((View) ib.getParent());
 				}
 				else ib.setVisibility(View.INVISIBLE);
 			}
@@ -289,7 +286,7 @@ public class BaseDialog extends Dialog {
 			boolean left, boolean top, boolean right, boolean bottom) {
 		if (v == null) return;
 		ViewGroup.LayoutParams lp = v.getLayoutParams();
-		int globalMargins = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		int globalMargins = mActivity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
 		if (globalMargins > 0)
 			if (lp instanceof ViewGroup.MarginLayoutParams) {
 				if (top) ((ViewGroup.MarginLayoutParams) lp).topMargin = globalMargins;
@@ -335,13 +332,13 @@ public class BaseDialog extends Dialog {
 	protected void onCreate() {
 		// when dialog is created
 		Log.d("DLG","BaseDialog.onCreate()");
-		activity.onDialogCreated(this);
+		mActivity.onDialogCreated(this);
 	}
 	
 	protected void onClose() {
 		// when dialog is closed
-		if (activity instanceof CoolReader) {
-			CoolReader cr = (CoolReader)activity;
+		if (mActivity instanceof CoolReader) {
+			CoolReader cr = (CoolReader) mActivity;
 			cr.mLastDialogClosed = System.currentTimeMillis();
 			cr.getmBaseDialog().remove(this.dlgName);
 		}
@@ -351,7 +348,7 @@ public class BaseDialog extends Dialog {
 			onNegativeButtonClick();
 		else if (buttonsLayout != null)
 			onPositiveButtonClick();
-		activity.onDialogClosed(this);
+		mActivity.onDialogClosed(this);
 	}
 
 	
@@ -390,8 +387,8 @@ public class BaseDialog extends Dialog {
 				float velocityY) {
 			if (e1 == null || e2 == null)
 				return false;
-			int thresholdDistance = activity.getPalmTipPixels() * 2;
-			int thresholdVelocity = activity.getPalmTipPixels();
+			int thresholdDistance = mActivity.getPalmTipPixels() * 2;
+			int thresholdVelocity = mActivity.getPalmTipPixels();
 			int x1 = (int)e1.getX();
 			int x2 = (int)e2.getX();
 			int y1 = (int)e1.getY();
@@ -425,7 +422,7 @@ public class BaseDialog extends Dialog {
 	
 	@Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-		activity.onUserActivity();
+		mActivity.onUserActivity();
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			return true;
 		}

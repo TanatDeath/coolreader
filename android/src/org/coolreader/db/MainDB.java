@@ -25,7 +25,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 54;
+	public static final int DB_VERSION = 55;
 
 	@Override
 	protected boolean upgradeSchema() {
@@ -316,7 +316,6 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publcity VARCHAR DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publyear VARCHAR DEFAULT NULL");
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN publisbn VARCHAR DEFAULT NULL");
-				//addOPDSCatalogs(DEF_OPDS_URLS3);
 
 				execSQL("CREATE TABLE IF NOT EXISTS dic_search_history (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -661,6 +660,10 @@ public class MainDB extends BaseDB {
 								"GROUP BY substr(b.title_upper,1,3) ");
 			}
 
+			if (currentVersion < 55) {
+				addOPDSCatalogs(DEF_OPDS_URLS4);
+			}
+
 			//==============================================================
 			// add more updates above this line
 
@@ -835,6 +838,13 @@ public class MainDB extends BaseDB {
 			"http://www.bokselskap.no/wp-content/themes/bokselskap/tekster/opds/root.xml", "Bokselskap (no)",
 			"http://asmodei.org/opds", "asmodei.org",
 			"http://fb.litlib.net/", "litlib",
+	};
+
+	private final static String[] DEF_OPDS_URLS4 = {
+			"https://coollib.net/opds/", "coollib.net catalog",
+			"https://iknigi.net/opds/", "Книги iknigi.net",
+			"http://www.zone4iphone.ru/catalog.php", "ZONE4IPHONE",
+			"https://dimonvideo.ru/lib.xml", "DimonVideo.ru - крупнейший каталог книг",
 	};
 
 	private void addOPDSCatalogs(String[] catalogs) {

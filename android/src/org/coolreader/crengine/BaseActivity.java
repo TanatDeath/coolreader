@@ -3549,8 +3549,20 @@ public class BaseActivity extends Activity implements Settings {
 						//if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(col);
 					}
 					// we'll paint texts always
-					if (vc instanceof TextView) ((TextView) vc).setTextColor(getTextColor(colorIcon));
-					if (vc instanceof Button) ((Button) vc).setTextColor(getTextColor(colorIcon));
+					if (vc instanceof TextView) {
+						TextView tv = ((TextView) vc);
+						String ttag = "";
+						if (tv.getTag() != null) ttag = StrUtils.getNonEmptyStr(tv.getTag().toString(), true);
+						if (!ttag.contains("notint"))
+							tv.setTextColor(getTextColor(colorIcon));
+					}
+					if (vc instanceof Button) {
+						Button b = ((Button) vc);
+						String ttag = "";
+						if (b.getTag() != null) ttag = StrUtils.getNonEmptyStr(b.getTag().toString(), true);
+						if (!ttag.contains("notint"))
+							b.setTextColor(getTextColor(colorIcon));
+					}
 				}
 			}
 			if (o instanceof Drawable) {

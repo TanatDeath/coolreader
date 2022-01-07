@@ -182,6 +182,7 @@
                 android:drawableLeft="@drawable/icons8_toc_item_normal"
                 style="@style/TextAppearance.Smaller"
                 android:text="@string/book_state_toread"
+                android:tag="notint"
                 android:singleLine="true" />
             <Button
                 android:id="@+id/book_recent_reading"
@@ -197,6 +198,7 @@
                 android:drawableLeft="@drawable/icons8_toc_item_normal"
                 style="@style/TextAppearance.Smaller"
                 android:text="@string/book_state_reading"
+                android:tag="notint"
                 android:singleLine="true" />
             <Button
                 android:id="@+id/book_recent_finished"
@@ -212,6 +214,7 @@
                 android:drawableLeft="@drawable/icons8_toc_item_normal"
                 style="@style/TextAppearance.Smaller"
                 android:text="@string/book_state_finished"
+                android:tag="notint"
                 android:singleLine="true" />
         </TableRow>
     </TableLayout>
@@ -341,6 +344,7 @@
                 android:contentDescription="@string/book_state_toread"
                 style="@style/TextAppearance.Smaller"
                 android:text="@string/book_state_toread"
+                android:tag="notint"
                 android:singleLine="true" />
             <Button
                 android:id="@+id/book_state_reading"
@@ -355,6 +359,7 @@
                 android:contentDescription="@string/book_state_reading"
                 style="@style/TextAppearance.Smaller"
                 android:text="@string/book_state_reading"
+                android:tag="notint"
                 android:singleLine="true" />
             <Button
                 android:id="@+id/book_state_finished"
@@ -369,6 +374,7 @@
                 android:contentDescription="@string/book_state_finished"
                 style="@style/TextAppearance.Smaller"
                 android:text="@string/book_state_finished"
+                android:tag="notint"
                 android:singleLine="true" />
         </TableRow>
     </TableLayout>

@@ -56,7 +56,7 @@ public class FindNextDlg {
 		
 		//mReaderView.getS
 		
-		mWindow = new PopupWindow( mAnchor.getContext() );
+		mWindow = new PopupWindow(mAnchor.getContext());
 		mWindow.setTouchInterceptor((v, event) -> {
 			if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
 				mReaderView.clearSelection();
@@ -173,28 +173,35 @@ public class FindNextDlg {
 		coolReader.tintViewIcons(mPanel,true);
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
-			if ( event.getAction()==KeyEvent.ACTION_UP ) {
-				switch ( keyCode ) {
+			if (event.getAction() == KeyEvent.ACTION_UP) {
+				if (keyCode == 0)
+					keyCode = event.getScanCode();
+				keyCode = mReaderView.translateKeyCode(keyCode);
+				switch (keyCode) {
 					case KeyEvent.KEYCODE_BACK:
 						mReaderView.clearSelection();
 						mWindow.dismiss();
 						return true;
 					case KeyEvent.KEYCODE_DPAD_LEFT:
+					case KeyEvent.KEYCODE_VOLUME_UP:
 					case KeyEvent.KEYCODE_DPAD_UP:
 						mReaderView.findNext(pattern, true, caseInsensitive);
 						return true;
 					case KeyEvent.KEYCODE_DPAD_RIGHT:
+					case KeyEvent.KEYCODE_VOLUME_DOWN:
 					case KeyEvent.KEYCODE_DPAD_DOWN:
 						mReaderView.findNext(pattern, false, caseInsensitive);
 						return true;
 				}
-			} else if ( event.getAction()==KeyEvent.ACTION_DOWN ) {
-				switch ( keyCode ) {
+			} else if (event.getAction() == KeyEvent.ACTION_DOWN) {
+				switch (keyCode) {
 					case KeyEvent.KEYCODE_BACK:
 					case KeyEvent.KEYCODE_DPAD_LEFT:
 					case KeyEvent.KEYCODE_DPAD_UP:
 					case KeyEvent.KEYCODE_DPAD_RIGHT:
 					case KeyEvent.KEYCODE_DPAD_DOWN:
+					case KeyEvent.KEYCODE_VOLUME_UP:
+					case KeyEvent.KEYCODE_VOLUME_DOWN:
 						return true;
 				}
 			}
@@ -204,33 +211,21 @@ public class FindNextDlg {
 		mWindow.setOnDismissListener(() -> mReaderView.clearSelection());
 		
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
-		//mWindow.setAnimationStyle(android.R.style.Animation_Toast);
 		mWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
 		mWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-//		setWidth(panel.getWidth());
-//		setHeight(panel.getHeight());
-		
+
 		mWindow.setFocusable(true);
 		mWindow.setTouchable(true);
 		mWindow.setOutsideTouchable(true);
 		panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 		mWindow.setContentView(panel);
+		mWindow.getContentView().setFocusableInTouchMode(true);
+		mWindow.getContentView().requestFocus();
 		
-		
-		//int [] location = new int[2];
-		//mAnchor.getLocationOnScreen(location);
-		//mWindow.update(location[0], location[1], mPanel.getWidth(), mPanel.getHeight() );
-		//mWindow.setWidth(mPanel.getWidth());
-		//mWindow.setHeight(mPanel.getHeight());
 		mWindow.setWidth(mReaderView.getSurface().getWidth());
 		mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL,
 				mReaderView.locationFindNext[0],
 				mAnchorHeight - mPanel.getHeight());
-				//mReaderView.locationFindNext[1] + mReaderView.heightFindNext - mPanel.getHeight());
-//		if ( mWindow.isShowing() )
-//			mWindow.update(mAnchor, 50, 50);
-		//dlg.mWindow.showAsDropDown(dlg.mAnchor);
-	
 	}
 	
 }

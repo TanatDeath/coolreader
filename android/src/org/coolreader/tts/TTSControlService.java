@@ -90,6 +90,7 @@ public class TTSControlService extends BaseService {
 
 	public static final String TTS_CONTROL_ACTION_PREPARE = "org.knownreader.tts.prepare";
 	public static final String TTS_CONTROL_ACTION_PLAY_PAUSE = "org.knownreader.tts.tts_play_pause";
+	public static final String TTS_CONTROL_ACTION_PLAY_LOCK = "org.knownreader.tts.tts_play_lock";
 	public static final String TTS_CONTROL_ACTION_NEXT = "org.knownreader.tts.tts_next";
 	public static final String TTS_CONTROL_ACTION_PREV = "org.knownreader.tts.tts_prev";
 	public static final String TTS_CONTROL_ACTION_STOP = "org.knownreader.tts.tts_stop";
@@ -127,6 +128,7 @@ public class TTSControlService extends BaseService {
 	private MediaPlayer mMediaPlayer;
 	private VolumeSettingsContentObserver mVolumeSettingsContentObserver;
 	private final Object mLocker = new Object();
+	private boolean mAudioFocusLocked;
 
 	final private BroadcastReceiver mTTSControlActionReceiver = new BroadcastReceiver() {
 		@Override
@@ -135,7 +137,22 @@ public class TTSControlService extends BaseService {
 			log.d("received action: " + action);
 			if (null != action) {
 				switch (action) {
+					case TTSControlService.TTS_CONTROL_ACTION_PLAY_LOCK:
+						mAudioFocusLocked = true;
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+							if (State.PLAYING == mState)
+								mMediaSessionCallback.onPause();
+							else
+								mMediaSessionCallback.onPlay();
+						} else {
+							if (State.PLAYING == mState)
+								pauseWrapper_api_less_than_21();
+							else
+								playWrapper_api_less_than_21();
+						}
+						break;
 					case TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE:
+						mAudioFocusLocked = false;
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 							if (State.PLAYING == mState)
 								mMediaSessionCallback.onPause();
@@ -198,6 +215,7 @@ public class TTSControlService extends BaseService {
 	};
 
 	final private AudioManager.OnAudioFocusChangeListener mAudioFocusChangeListener = focusChange -> {
+		if (mAudioFocusLocked) return;
 		switch (focusChange) {
 			case AudioManager.AUDIOFOCUS_GAIN:
 				log.d("audio focus gain");
@@ -474,6 +492,7 @@ public class TTSControlService extends BaseService {
 		}
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(TTS_CONTROL_ACTION_PLAY_PAUSE);
+		filter.addAction(TTS_CONTROL_ACTION_PLAY_LOCK);
 		filter.addAction(TTS_CONTROL_ACTION_NEXT);
 		filter.addAction(TTS_CONTROL_ACTION_PREV);
 		filter.addAction(TTS_CONTROL_ACTION_STOP);
@@ -1350,6 +1369,11 @@ public class TTSControlService extends BaseService {
 					Notification.Action.Builder actionBld = new Notification.Action.Builder(mState == State.PAUSED ? R.drawable.icons8_play : R.drawable.icons8_pause, "", playPauseIntent);
 					Notification.Action actionPlayPause = actionBld.build();
 					builder = builder.addAction(actionPlayPause);
+					// lock
+					PendingIntent playLockIntent = PendingIntent.getBroadcast(this, 0, new Intent(TTS_CONTROL_ACTION_PLAY_LOCK), 0);
+					actionBld = new Notification.Action.Builder(mState == State.PAUSED ? R.drawable.icons8_play_lock : R.drawable.icons8_pause, "", playLockIntent);
+					Notification.Action actionPlayLock = actionBld.build();
+					builder = builder.addAction(actionPlayLock);
 					// prev
 					PendingIntent prevIntent = PendingIntent.getBroadcast(this, 0, new Intent(TTS_CONTROL_ACTION_PREV), 0);
 					actionBld = new Notification.Action.Builder(R.drawable.icons8_rewind, "", prevIntent);

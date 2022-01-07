@@ -1,18 +1,12 @@
 package org.coolreader.crengine;
 
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -21,22 +15,11 @@ import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.zip.CRC32;
 
-import okhttp3.HttpUrl;
-
-public class CalibreCatalogEditDialog extends BaseDialog {
+public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelectedCallback {
 
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
@@ -135,7 +118,7 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 			chooserIntent.putExtra(
 					DirectoryChooserActivity.EXTRA_CONFIG,
 					config);
-			mCoolReader.cced=this;
+			mCoolReader.dirChosenCallback=this;
 			mCoolReader.startActivityForResult(chooserIntent, CoolReader.REQUEST_CODE_CHOOSE_DIR);
 		});
 		edtRemoteFolderYD = view.findViewById(R.id.catalog_remote_folder);
@@ -155,7 +138,7 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 	
 	private void save() {
 		boolean isLocal = getCheckedFromTag(btnIsLocal.getTag());
-		activity.getDB().saveCalibreCatalog(mItem.id,
+		mActivity.getDB().saveCalibreCatalog(mItem.id,
 				nameEdit.getText().toString(),
 				isLocal,
 				edtLocalFolder.getText().toString(),
@@ -175,5 +158,9 @@ public class CalibreCatalogEditDialog extends BaseDialog {
 		super.onThirdButtonClick();
 	}
 
-	
+
+	@Override
+	public void folderSelected(String path) {
+		edtLocalFolder.setText(path);
+	}
 }

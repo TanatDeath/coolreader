@@ -205,12 +205,12 @@
 				android:orientation="horizontal"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:layout_margin="5dip"
+				android:layout_margin="2dip"
 				android:gravity="center_vertical"
 				>
 			<Button
-					android:layout_margin="5dip"
-					android:id="@+id/btn_mark_toread"
+					android:layout_margin="2dip"
+					android:id="@+id/btn_set_add_marks"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_marginLeft="3dip"
@@ -220,9 +220,33 @@
 					android:ellipsize="end"
 					android:drawableLeft="@drawable/icons8_toc_item_normal"
 					android:textColor="?attr/colorIcon"
-					android:contentDescription="@string/book_mark_toread"
-					android:text="@string/book_mark_toread" />
-		</LinearLayout>>
+					android:contentDescription="@string/set_add_marks"
+					android:text="@string/set_add_marks" />
+		</LinearLayout>
+
+		<LinearLayout
+				android:id="@+id/info_panel"
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_margin="2dip"
+				android:gravity="center_vertical|center_horizontal"
+				>
+			<TextView
+					android:layout_margin="2dip"
+					android:id="@+id/tv_info_mess"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="3dip"
+					android:layout_marginRight="3dip"
+					android:src="@null"
+					android:maxLines="5"
+					android:ellipsize="end"
+					android:textColor="?attr/colorIcon"
+					style="@style/TextAppearance.Medium"
+					android:textStyle="bold"
+					android:text="..." />
+		</LinearLayout>
 
 		<uk.co.deanwild.flowtextview.FlowTextView
 			android:id="@+id/lbl_annotation"

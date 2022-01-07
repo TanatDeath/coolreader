@@ -29,6 +29,9 @@ public class ImageViewer extends GestureDetector.SimpleOnGestureListener {
 	final ReaderView mReaderView;
 
 	public ImageViewer(CoolReader activity, ReaderView rv, ImageInfo image) {
+		currentImage = image;
+		mActivity = activity;
+		mReaderView = rv;
 		lockOrientation();
 		detector = new GestureDetector(this);
 		if (image.bufHeight / image.height >= 2 && image.bufWidth / image.width >= 2) {
@@ -36,9 +39,6 @@ public class ImageViewer extends GestureDetector.SimpleOnGestureListener {
 			image.scaledWidth *= 2;
 		}
 		centerIfLessThanScreen(image);
-		currentImage = image;
-		mActivity = activity;
-		mReaderView = rv;
 	}
 
 	private void lockOrientation() {

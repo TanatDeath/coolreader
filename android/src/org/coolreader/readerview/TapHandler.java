@@ -637,8 +637,8 @@ public class TapHandler {
 						return true;
 					int nonSensL = mActivity.settings().getInt(Settings.PROP_APP_TAP_ZONE_NON_SENS_LEFT, 0);
 					nonSensL = nonSensL * width / 2000;
-					int nonSensR = mActivity.settings().getInt(Settings.PROP_APP_TAP_ZONE_NON_SENS_LEFT, 0);
-					nonSensR = nonSensL * width / 2000;
+					int nonSensR = mActivity.settings().getInt(Settings.PROP_APP_TAP_ZONE_NON_SENS_RIGHT, 0);
+					nonSensR = nonSensR * width / 2000;
 					if ((!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ||
 							DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS ||
 							DeviceInfo.EINK_HAVE_FRONTLIGHT) && mReaderView.isBacklightControlFlick != mReaderView.BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {
@@ -646,7 +646,7 @@ public class TapHandler {
 						boolean bLeftCold = mReaderView.getBacklightEnabled(mReaderView.isBacklightControlFlick, true, true);
 						boolean bRightCold = mReaderView.getBacklightEnabled(mReaderView.isBacklightControlFlick, false, true);
 						boolean leftOk = (start_x >= nonSensL) && (start_x < nonSensL + (dragThreshold * 170 / 100));
-						boolean rightOk = (start_x <= nonSensR) && (start_x > (width - dragThreshold * 170 / 100 - nonSensR));
+						boolean rightOk = (start_x <= width - nonSensR) && (start_x > (width - (dragThreshold * 170 / 100) - nonSensR));
 						if (
 							((leftOk && bLeftCold) || (rightOk && bRightCold)) && (isVertical)
 						) {
@@ -663,7 +663,7 @@ public class TapHandler {
 						boolean bLeftWarm = mReaderView.getBacklightEnabled(mReaderView.isBacklightControlFlick, true, false);
 						boolean bRightWarm = mReaderView.getBacklightEnabled(mReaderView.isBacklightControlFlick, false, false);
 						boolean leftOk = (start_x >= nonSensL) && (start_x < nonSensL + (dragThreshold * 170 / 100));
-						boolean rightOk = (start_x <= nonSensR) && (start_x > (width - dragThreshold * 170 / 100 - nonSensR));
+						boolean rightOk = (start_x <= width - nonSensR) && (start_x > (width - (dragThreshold * 170 / 100) - nonSensR));
 						if (
 								((leftOk && bLeftWarm) || (rightOk && bRightWarm)) && (isVertical)
 						) {

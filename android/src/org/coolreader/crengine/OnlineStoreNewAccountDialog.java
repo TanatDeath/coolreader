@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -64,7 +63,7 @@ public class OnlineStoreNewAccountDialog extends BaseDialog {
 		int colorGray;
 		int colorGrayC;
 		int colorIcon;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = this.mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);

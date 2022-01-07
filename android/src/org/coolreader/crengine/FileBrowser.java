@@ -449,6 +449,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 
 	CoverpageManager.CoverpageReadyListener coverpageListener;
+
 	public FileBrowser(CoolReader activity, Engine engine, Scanner scanner, History history, boolean hideEmptyGenres) {
 		super(activity);
 		this.mActivity = activity;
@@ -1399,7 +1400,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		dlg.onSelect();
 	}
 
-	public void showOPDSDir( final FileInfo fileOrDir, final FileInfo itemToSelect, final String annot ) {
+	public void showOPDSDir(final FileInfo fileOrDir, final FileInfo itemToSelect, final String annot) {
 		
 		if (fileOrDir.fileCount() > 0 || fileOrDir.dirCount() > 0) {
 			// already downloaded
@@ -1543,7 +1544,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								showDirectoryInternal(fileOrDir, null);
 						} else {
 							if (notifyNoEntries)
-								mActivity.showToast("No OPDS entries found");
+								mActivity.showToast(R.string.no_entries_found);
 						}
 						return true;
 					}
@@ -1588,7 +1589,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						result = new File(result, subdir);
 						result.mkdirs();
 						downloadDir.findItemByPathName(result.getAbsolutePath());
-						log.d("onDownloadStart: returning " + result.getAbsolutePath() );
+						log.d("onDownloadStart: returning " + result.getAbsolutePath());
 						return result;
 					}
 
@@ -2529,7 +2530,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							mActivity.showBrowser(FileInfo.LITRES_TAG, lsp);
 						});
 					}
-					//asdf
 				} else {
 					boolean isSimple = (viewType == VIEW_TYPE_FILE_SIMPLE);
 					if (image != null) {
@@ -2705,6 +2705,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							colorGreen = a.getColor( 1, Color.GREEN);
 							colorGray = a.getColor(2, Color.GRAY);
                             a.recycle();
+							fieldState.setTag("notint");
 							if (state.contains(mActivity.getString(R.string.book_state_reading))) {
 								fieldState.setTextColor(colorGreen);
 							}

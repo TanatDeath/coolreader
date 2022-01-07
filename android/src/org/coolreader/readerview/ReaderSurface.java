@@ -25,6 +25,7 @@ public class ReaderSurface extends SurfaceView implements ReaderView.BookView {
 
 	final ReaderView mReaderView;
 	final CoolReader mActivity;
+
 	public ReaderSurface(ReaderView rv, Context context) {
 		super(context);
 		mReaderView = rv;

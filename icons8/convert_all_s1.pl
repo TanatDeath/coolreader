@@ -106,7 +106,8 @@ my %ic_actions_list=(
         'icons8_db_stats.svg' => 'icons8_db_stats.png',
         'icons8_eink_snow.svg' => 'icons8_eink_snow.png',
         'icons8_eink_sett.svg' => 'icons8_eink_sett.png',
-        'icons8_font_scale.svg' => 'icons8_font_scale.png'
+        'icons8_font_scale.svg' => 'icons8_font_scale.png',
+        'icons8_play_lock.svg' => 'icons8_play_lock.png'
 );
 
 my %ic_menu_list=(

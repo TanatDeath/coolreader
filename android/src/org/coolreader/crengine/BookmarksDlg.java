@@ -118,13 +118,13 @@ public class BookmarksDlg  extends BaseDialog {
 			a.recycle();
 			View colorCell = view.findViewById(R.id.color_cell);
 			TextView labelView = view.findViewById(R.id.bookmark_item_shortcut);
-			if (labelView!=null) labelView.setTextColor(activity.getTextColor(colorIcon));
+			if (labelView!=null) labelView.setTextColor(mActivity.getTextColor(colorIcon));
 			TextView posTextView = view.findViewById(R.id.bookmark_item_pos_text);
-			if (posTextView!=null) posTextView.setTextColor(activity.getTextColor(colorIcon));
+			if (posTextView!=null) posTextView.setTextColor(mActivity.getTextColor(colorIcon));
 			TextView titleTextView = view.findViewById(R.id.bookmark_item_title);
-			if (titleTextView!=null) titleTextView.setTextColor(activity.getTextColor(colorIcon));
+			if (titleTextView!=null) titleTextView.setTextColor(mActivity.getTextColor(colorIcon));
 			TextView commentTextView = view.findViewById(R.id.bookmark_item_comment_text);
-			if (commentTextView!=null) commentTextView.setTextColor(activity.getTextColor(colorIcon));
+			if (commentTextView!=null) commentTextView.setTextColor(mActivity.getTextColor(colorIcon));
 			if ( type==ITEM_CORRECTION && posTextView!=null )
 				posTextView.setPaintFlags(posTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG );
 				
@@ -146,7 +146,7 @@ public class BookmarksDlg  extends BaseDialog {
 				String s1 = b.getTitleText();
 				String s2 = b.getPosText();
 				String s3 = b.getCommentText();
-				String s4 = Utils.formatDateFixed(b.getTimeStamp()) + " " + Utils.formatTime(activity, b.getTimeStamp());
+				String s4 = Utils.formatDateFixed(b.getTimeStamp()) + " " + Utils.formatTime(mActivity, b.getTimeStamp());
 				if ( s1!=null && s2!=null ) {
 					s1 = percentString + "   " + s1 + " (" + s4 + ")";
 				} else if ( s1!=null ) {
@@ -171,7 +171,7 @@ public class BookmarksDlg  extends BaseDialog {
 				if ( posTextView!=null )
 					posTextView.setText("");
 			}
-			activity.tintViewIcons(view);
+			mActivity.tintViewIcons(view);
 			return view;
 		}
 
@@ -322,7 +322,7 @@ public class BookmarksDlg  extends BaseDialog {
             mReaderView.addBookmark(0);
             dismiss();
         } else {
-            activity.showToast("Not in selection mode");
+            mActivity.showToast("Not in selection mode");
         }
 	}
 

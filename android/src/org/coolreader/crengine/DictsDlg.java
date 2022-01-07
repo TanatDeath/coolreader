@@ -275,7 +275,7 @@ public class DictsDlg extends BaseDialog {
 			dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 			int colorIcon = themeColors.get(R.attr.colorIcon);
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-			dicButton.setTextColor(activity.getTextColor(colorIcon));
+			dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 			dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 			dicButton.setPadding(10, 10, 10, 10);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
@@ -294,7 +294,7 @@ public class DictsDlg extends BaseDialog {
 			tv.setPadding(10, 10, 10, 10);
 			tv.setLayoutParams(llp);
 			tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-			tv.setTextColor(activity.getTextColor(colorIcon));
+			tv.setTextColor(mActivity.getTextColor(colorIcon));
 			flQuickTransl.addView(dicButton);
 			flQuickTransl.addView(tv);
 			dicButton.setOnClickListener(v -> {

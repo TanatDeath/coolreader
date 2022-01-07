@@ -70,7 +70,7 @@ public class BookInfoEditDialog extends BaseDialog {
 									  boolean left, boolean top, boolean right, boolean bottom) {
 		if (v == null) return;
 		ViewGroup.LayoutParams lp = v.getLayoutParams();
-		int globalMargins = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		int globalMargins = this.mActivity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
 		if (globalMargins > 0)
 			if (lp instanceof ViewGroup.MarginLayoutParams) {
 				if (top) ((ViewGroup.MarginLayoutParams) lp).topMargin = globalMargins;
@@ -322,12 +322,12 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnCustomCover.setOnClickListener(v -> {
 			if (mActivity.picReceived!=null) {
 				if (mActivity.picReceived.bmpReceived!=null) {
-					PictureCameDialog dlg = new PictureCameDialog(((CoolReader) activity),
+					PictureCameDialog dlg = new PictureCameDialog(((CoolReader) this.mActivity),
 							mBookInfo, "", "");
 					dlg.show();
 				}
 			} else {
-				activity.showToast(R.string.pic_no_pic);
+				this.mActivity.showToast(R.string.pic_no_pic);
 			}
 		});
 
@@ -385,7 +385,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		attrStarFilled = a.getResourceId(5, 0);
 		colorGrayC = a.getColor(6, Color.GRAY);
 
-		btnStateNone.setTextColor(activity.getTextColor(colorIcon));
+		btnStateNone.setTextColor(this.mActivity.getTextColor(colorIcon));
 		btnStateReading.setTextColor(colorGreen);
 		btnStateToRead.setTextColor(colorBlue);
 		btnStateFinished.setTextColor(colorGray);
@@ -421,6 +421,9 @@ public class BookInfoEditDialog extends BaseDialog {
 		if (state == FileInfo.STATE_TO_READ) setChecked(btnStateToRead);
 		if (state == FileInfo.STATE_READING) setChecked(btnStateReading);
 		if (state == FileInfo.STATE_FINISHED) setChecked(btnStateFinished);
+		BackgroundThread.instance().postGUI(() -> {
+			setChecked(null);
+		}, 300);
 		mChosenState = state;
 		btnStateNone.setOnClickListener(v -> setChecked(btnStateNone));
 		btnStateToRead.setOnClickListener(v -> setChecked(btnStateToRead));
@@ -470,12 +473,12 @@ public class BookInfoEditDialog extends BaseDialog {
         String sPath = StrUtils.getNonEmptyStr(file.pathname, true)
 				.replace("/storage/emulated", "/s/e");
         tvFileName.setText(sPath);
-		File f = activity.getSettingsFileF(activity.getCurrentProfile());
+		File f = this.mActivity.getSettingsFileF(this.mActivity.getCurrentProfile());
 		String sF = f.getAbsolutePath();
 		sF = sF.replace("/storage/","/s/").replace("/emulated/","/e/");
 		TextView prof = (TextView) mainView.findViewById(R.id.lbl_profile);
-		String sprof = activity.getCurrentProfileName();
-		if (StrUtils.isEmptyStr(sprof)) sprof = activity.getString(R.string.profile)+" "+activity.getCurrentProfile();
+		String sprof = this.mActivity.getCurrentProfileName();
+		if (StrUtils.isEmptyStr(sprof)) sprof = this.mActivity.getString(R.string.profile)+" "+ this.mActivity.getCurrentProfile();
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		tvProfile.setText(sprof + sF);
 		edTitle.setText(file.title);
@@ -561,7 +564,7 @@ public class BookInfoEditDialog extends BaseDialog {
 		});
 
 		Button translButton = mainView.findViewById(R.id.transl_button);
-		translButton.setTextColor(activity.getTextColor(colorIcon));
+		translButton.setTextColor(this.mActivity.getTextColor(colorIcon));
 		translButton.setBackgroundColor(colorGrayC);
 
 		translButton.setOnClickListener(v -> {
@@ -701,12 +704,12 @@ public class BookInfoEditDialog extends BaseDialog {
 	}
 
 	private void setChecked(Button btn) {
+    	Button bbtn = btn;
 		if (btn == btnStateNone) {
 			mChosenState = FileInfo.STATE_NEW;
 		}
 		if (btn == btnStateToRead) {
 			mChosenState = FileInfo.STATE_TO_READ;
-
 		}
 		if (btn == btnStateReading) {
 			mChosenState = FileInfo.STATE_READING;
@@ -714,6 +717,10 @@ public class BookInfoEditDialog extends BaseDialog {
 		if (btn == btnStateFinished) {
 			mChosenState = FileInfo.STATE_FINISHED;
 		}
+		if (mChosenState == FileInfo.STATE_NEW) bbtn = btnStateNone;
+		if (mChosenState == FileInfo.STATE_TO_READ) bbtn = btnStateToRead;
+		if (mChosenState == FileInfo.STATE_READING) bbtn = btnStateReading;
+		if (mChosenState == FileInfo.STATE_FINISHED) bbtn = btnStateFinished;
 		int colorGrayC;
 		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2Contrast});
@@ -730,8 +737,10 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateToRead.setBackgroundColor(colorGrayCT);
 		btnStateReading.setBackgroundColor(colorGrayCT);
 		btnStateFinished.setBackgroundColor(colorGrayCT);
-		btn.setBackgroundColor(colorGrayCT2);
-		mActivity.tintViewIcons(btn,true);
+		if (bbtn != null) {
+			bbtn.setBackgroundColor(colorGrayCT2);
+			mActivity.tintViewIcons(bbtn, true);
+		}
 	}
 
 	private void setRate(ImageButton btn) {

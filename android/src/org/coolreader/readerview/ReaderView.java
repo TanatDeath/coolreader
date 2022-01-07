@@ -538,7 +538,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private boolean repeatActionActive = false;
 	private SparseArray<Long> keyDownTimestampMap = new SparseArray<Long>();
 
-	private int translateKeyCode(int keyCode) {
+	public int translateKeyCode(int keyCode) {
 		if (DeviceInfo.REVERT_LANDSCAPE_VOLUME_KEYS && (mActivity.getScreenOrientation() & 1) != 0) {
 			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
 				return KeyEvent.KEYCODE_VOLUME_UP;
@@ -1222,9 +1222,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void toggleDayNightMode() {
-//		SaveDocDialog dlg = new SaveDocDialog(mActivity);
-//		dlg.show();
-//		if (1==1) return; //asdf
+		//if (1==1) return;
 		Properties settings = getSettings();
 		OptionsDialog.toggleDayNightMode(settings);
 		//setSettings(settings, mActivity.settings());
@@ -5914,9 +5912,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (isAutoScrollActive())
 			return true; // autoscroll will be stopped in onKeyUp
 
-		keyCode = overrideKey( keyCode );
-		ReaderAction action = ReaderAction.findForKey( keyCode, mSettings );
-		ReaderAction longAction = ReaderAction.findForLongKey( keyCode, mSettings );
+		keyCode = overrideKey(keyCode);
+		ReaderAction action = ReaderAction.findForKey(keyCode, mSettings);
+		ReaderAction longAction = ReaderAction.findForLongKey(keyCode, mSettings);
 		//ReaderAction dblAction = ReaderAction.findForDoubleKey( keyCode, mSettings );
 
 		if (event.getRepeatCount() == 0) {
@@ -6144,7 +6142,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		this.mActivity = activity;
 		surface = new ReaderSurface(ReaderView.this, activity);
 
-		bookView = (BookView)surface;
+		bookView = (BookView) surface;
 		surface.setOnTouchListener(this);
 		surface.setOnKeyListener(this);
 		surface.setOnFocusChangeListener(this);

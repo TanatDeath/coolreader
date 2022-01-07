@@ -198,6 +198,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			int colorGray = themeColors.get(R.attr.colorThemeGray);
 			TextView tvInfo = mView.findViewById(R.id.lbl_book_info1);
 			int n = item.getReadingState();
+			tvInfo.setTag("notint");
 			if (n == FileInfo.STATE_READING)
 				tvInfo.setTextColor(colorGreen);
 			else if (n == FileInfo.STATE_TO_READ)
@@ -1068,6 +1069,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 
 		removeAllViews();
 		addView(mView);
+		mActivity.tintViewIcons(mView);
 		//setFocusable(false);
 		//setFocusableInTouchMode(false);
 //		requestFocus();

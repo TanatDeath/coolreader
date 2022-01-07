@@ -5,7 +5,6 @@ import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.Voice;
 
-import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
@@ -51,15 +50,15 @@ public class TTSOption extends SubmenuOption {
 						String quality;
 						int qualityInt = voice.getQuality();
 						if (qualityInt >= Voice.QUALITY_VERY_HIGH)
-							quality = od.activity.getString(R.string.options_tts_voice_quality_very_high);
+							quality = od.mActivity.getString(R.string.options_tts_voice_quality_very_high);
 						else if (qualityInt >= Voice.QUALITY_HIGH)
-							quality = od.activity.getString(R.string.options_tts_voice_quality_high);
+							quality = od.mActivity.getString(R.string.options_tts_voice_quality_high);
 						else if (qualityInt >= Voice.QUALITY_NORMAL)
-							quality = od.activity.getString(R.string.options_tts_voice_quality_normal);
+							quality = od.mActivity.getString(R.string.options_tts_voice_quality_normal);
 						else if (qualityInt >= Voice.QUALITY_LOW)
-							quality = od.activity.getString(R.string.options_tts_voice_quality_low);
+							quality = od.mActivity.getString(R.string.options_tts_voice_quality_low);
 						else
-							quality = od.activity.getString(R.string.options_tts_voice_quality_very_low);
+							quality = od.mActivity.getString(R.string.options_tts_voice_quality_very_low);
 						listOption.add(voice.getName(), voice.getName(), quality);
 					}
 					listOption.noIcon();

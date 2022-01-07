@@ -54,7 +54,7 @@ public class SearchDlg extends BaseDialog {
     	else if ( mBookInfo == null )
     		Log.e("search", "No opened book!");
     	else {
-		    activity.getDB().saveSearchHistory(mBookInfo,
+		    mActivity.getDB().saveSearchHistory(mBookInfo,
 				    mEditView.getText().toString());
 			BackgroundThread.instance().postGUI(() -> {
 				mReaderView.findText(mReaderView.doc.getCurrentPageBookmark(), mEditView.getText().toString(), bReverse, !bCaseSensitive);
@@ -167,7 +167,7 @@ public class SearchDlg extends BaseDialog {
 	public void searchPagesClick() {
 		final String sText = mEditView.getText().toString().trim();
 		mReaderView.CheckAllPagesLoadVisual();
-		final GotoPageDialog dlg = new GotoPageDialog(activity, title, sText, bCaseSensitive,
+		final GotoPageDialog dlg = new GotoPageDialog(mActivity, title, sText, bCaseSensitive,
 				new GotoPageDialog.GotoPageHandler() {
 					int pageNumber = 0;
 
@@ -230,7 +230,7 @@ public class SearchDlg extends BaseDialog {
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
 		//bm = doc.getCurrentPageBookmark();
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		int colorGrayC = a.getColor(1, Color.GRAY);
 		int colorIcon = a.getColor(2, Color.GRAY);
@@ -240,7 +240,7 @@ public class SearchDlg extends BaseDialog {
 
 		this.mBookInfo = mReaderView.getBookInfo();
 		setPositiveButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),
+				Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),
 				//R.drawable.icons8_search,
 				R.string.action_search);
         mInflater = LayoutInflater.from(getContext());
@@ -284,7 +284,7 @@ public class SearchDlg extends BaseDialog {
 		Utils.setDashedButton(btnMinus1);
 
 		btnMinus1.setOnClickListener(v -> {
-			activity.getDB().clearSearchHistory(mBookInfo);
+			mActivity.getDB().clearSearchHistory(mBookInfo);
 			mCoolReader.showToast(mCoolReader.getString(R.string.search_hist_will_be_cleared));
 			dismiss();
 		});
@@ -307,10 +307,10 @@ public class SearchDlg extends BaseDialog {
 		mBtnCaseSentitive.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		mBtnSearchReverse.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 
-		activity.getDB().loadSearchHistory(this.mBookInfo, searches -> {
+		mActivity.getDB().loadSearchHistory(this.mBookInfo, searches -> {
 			mSearches = searches;
 			ViewGroup body = mDialogView.findViewById(R.id.history_list);
-			mList = new SearchList(activity, false);
+			mList = new SearchList(mActivity, false);
 			body.addView(mList);
 		});
 		mCoolReader.tintViewIcons(mDialogView);

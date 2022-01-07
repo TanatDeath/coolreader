@@ -385,6 +385,7 @@ public class CoverpageManager {
 
 	private Runnable lastCheckCacheTask = null;
 	private Runnable lastScanFileTask = null;
+
 	private BitmapCacheItem setItemState(ImageItem file, State state) {
 		synchronized(LOCK) {
 			BitmapCacheItem item = mCache.getItem(file);
@@ -498,18 +499,55 @@ public class CoverpageManager {
 				}
 				if (file != null) {
 					final ImageItem fileInfo = file;
-					if (fileInfo.file.format.canParseCoverpages) {
-						BackgroundThread.instance().postBackground(() -> {
-							byte[] data = Services.getEngine().scanBookCover(fileInfo.file.getPathName());
-							if (data == null)
-								data = new byte[] {};
-							if (fileInfo.file.format.needCoverPageCaching())
-								db.saveBookCoverpage(fileInfo.file, data);
-							coverpageLoaded(fileInfo, data);
-						});
-					} else {
-						coverpageLoaded(fileInfo, new byte[] {});
-					}
+					// try to download image
+					if ((fileInfo.file.getPathName().startsWith("@")) &&
+							((fileInfo.file.links.size() > 0) || (!StrUtils.isEmptyStr(fileInfo.file.cover_href)) ||
+							(!StrUtils.isEmptyStr(fileInfo.file.cover_href2)))) {
+						if ((!StrUtils.isEmptyStr(fileInfo.file.cover_href)) ||
+								(!StrUtils.isEmptyStr(fileInfo.file.cover_href2))) {
+							if (!StrUtils.isEmptyStr(fileInfo.file.cover_href)) new DownloadImageTask(bmp -> {
+								if (bmp != null) {
+									byte[] bytes = Utils.bitmapToPNG(bmp);
+									//db.saveBookCoverpage(fileInfo.file, bytes);
+									coverpageLoaded(fileInfo, bytes);
+								} else
+									coverpageLoaded(fileInfo, new byte[] {});
+							}).execute(fileInfo.file.cover_href);
+							if (!StrUtils.isEmptyStr(fileInfo.file.cover_href2)) new DownloadImageTask(bmp -> {
+								if (bmp != null) {
+									byte[] bytes = Utils.bitmapToPNG(bmp);
+									//db.saveBookCoverpage(fileInfo.file, bytes);
+									coverpageLoaded(fileInfo, bytes);
+								} else
+									coverpageLoaded(fileInfo, new byte[] {});
+							}).execute(fileInfo.file.cover_href2);
+						} else
+							for (OPDSUtil.LinkInfo link : fileInfo.file.links) {
+								if (link.type.contains("image")) {
+									new DownloadImageTask(bmp -> {
+										if (bmp != null) {
+											byte[] bytes = Utils.bitmapToPNG(bmp);
+											//db.saveBookCoverpage(fileInfo.file, bytes);
+											coverpageLoaded(fileInfo, bytes);
+										} else
+											coverpageLoaded(fileInfo, new byte[] {});
+									}).execute(link.href);
+									break;
+								}
+							}
+					} else
+						if (fileInfo.file.format.canParseCoverpages) {
+							BackgroundThread.instance().postBackground(() -> {
+								byte[] data = Services.getEngine().scanBookCover(fileInfo.file.getPathName());
+								if (data == null)
+									data = new byte[] {};
+								if (fileInfo.file.format.needCoverPageCaching())
+									db.saveBookCoverpage(fileInfo.file, data);
+								coverpageLoaded(fileInfo, data);
+							});
+						} else {
+							coverpageLoaded(fileInfo, new byte[] {});
+						}
 					scheduleScanFile(db);
 				}
 			}
@@ -519,12 +557,18 @@ public class CoverpageManager {
 
 	private void queueForDrawing(final CRDBService.LocalBinder db, ImageItem file) {
 		synchronized (LOCK) {
-			if (file == null || file.file == null || file.file.format == null)
+			if (file == null || file.file == null)
 				return;
+			boolean isCloud = ((file.file.getPathName().startsWith("@")) &&
+					((file.file.links.size() > 0) || (!StrUtils.isEmptyStr(file.file.cover_href)) ||
+							(!StrUtils.isEmptyStr(file.file.cover_href2))));
+			if ((!isCloud) && (file.file.format == null)) return;
 			BitmapCacheItem item = mCache.getItem(file);
 			if (item != null && (item.state == State.READY || item.state == State.DRAWING))
 				return;
-			if (file.file.format.needCoverPageCaching()) {
+			boolean needCaching = false;
+			if (file.file.format != null) needCaching = file.file.format.needCoverPageCaching();
+			if (needCaching) {
 				if (mCheckFileCacheQueue.addOnTop(file)) {
 					log.v("Scheduled coverpage DB lookup for " + file);
 					scheduleCheckCache(db);

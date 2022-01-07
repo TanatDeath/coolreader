@@ -3,7 +3,6 @@ package org.coolreader.crengine;
 import org.coolreader.R;
 import org.coolreader.plugins.AuthenticationCallback;
 import org.coolreader.plugins.OnlineStoreWrapper;
-import org.coolreader.plugins.litres.LitresPlugin;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -55,7 +54,7 @@ public class OnlineStoreLoginDialog extends BaseDialog {
 		int colorGray;
 		int colorGrayC;
 		int colorIcon;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = this.mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);

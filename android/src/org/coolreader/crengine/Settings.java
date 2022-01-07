@@ -229,7 +229,7 @@ public interface Settings {
 	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
     public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
     public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
-    public static final String PROP_APP_MARK_DOWNLOADED_TO_READ = "app.mark.downloaded.toread";
+    public static final String PROP_APP_DOWNLOADED_SET_ADD_MARKS = "app.downloaded.set.add.marks";
     public static final String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
 	public static final String PROP_APP_CLOUD_POS_DATE_SORT = "app.cloudpos.date.sort";
 	public static final String PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV = "app.cloudpos.hide.current.dev";
@@ -248,6 +248,7 @@ public interface Settings {
 	public static final String PROP_APP_SHOW_FILES_TO_READ = "app.show.files.to.read";
 	public static final String PROP_APP_SHOW_FILES_READING = "app.show.files.reading";
 	public static final String PROP_APP_SHOW_FILES_FINISHED = "app.show.files.finished";
+	public static final String PROP_APP_SAVE_DOC_EXT_CONTROLS_SHOW = "app.save.doc.ext.controls.show";
 
 	public static final String PROP_APP_TTS_SPEED_1 = "app.tts.speed.1";
 	public static final String PROP_APP_TTS_SPEED_2 = "app.tts.speed.2";

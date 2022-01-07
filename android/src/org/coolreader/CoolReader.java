@@ -29,11 +29,13 @@ import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.CalibreCatalogEditDialog;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FlavourConstants;
+import org.coolreader.crengine.FolderSelectedCallback;
 import org.coolreader.crengine.InputDialog;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.ResizeHistory;
+import org.coolreader.crengine.SaveDocDialog;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -322,7 +324,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int REQUEST_CODE_OPEN_DOCUMENT_TREE = 11;
 	public static final int REQUEST_CODE_CHOOSE_DIR = 10012;
 
-	public CalibreCatalogEditDialog cced = null; // for callback
+	public FolderSelectedCallback dirChosenCallback = null; // for callback
 
 	// open document tree activity commands
 	private static final int ODT_CMD_NO_SPEC = -1;
@@ -541,7 +543,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	@Override
-	public void applyAppSetting( String key, String value )
+	public void applyAppSetting(String key, String value)
 	{
 		super.applyAppSetting(key, value);
 		boolean flg = "1".equals(value);
@@ -951,7 +953,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	@Override
-	public void setFullscreen( boolean fullscreen )
+	public void setFullscreen(boolean fullscreen)
 	{
 		super.setFullscreen(fullscreen);
 		if (mReaderFrame != null)
@@ -1055,12 +1057,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		showToast("Not implemented yet");
 	}
 
-	public void processIntentContent(String stype, Object obj) {
+	public void processIntentContent(String stype, Object obj, String fileToOpen) {
 		if (stype.startsWith("image/")) {
 			PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, obj, stype, "");
 			dlg.show();
 		} else {
-			ExternalDocCameDialog dlg = new ExternalDocCameDialog(CoolReader.this, stype, obj);
+			ExternalDocCameDialog dlg = new ExternalDocCameDialog(CoolReader.this, stype, obj, fileToOpen);
 			dlg.show();
 		}
 	}
@@ -1120,7 +1122,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			final FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = fileToOpen;
-			dir.setFilename( this.getString(R.string.folder_name_books_by_state_finished));
+			dir.setFilename(this.getString(R.string.folder_name_books_by_state_finished));
 			dir.isListed = true;
 			dir.isScanned = true;
 			waitForCRDBService(() -> showDirectory(dir, ""));
@@ -1195,11 +1197,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					showToast(R.string.only_in_premium);
 					return true;
 				}
-				processIntentContent("", sUri);
+				processIntentContent("", sUri, "");
 				return true;
 			}
 			if ((sUri.startsWith("content")) && (StrUtils.isEmptyStr(fileToOpen))) {
-				processIntentContent(stype, uri);
+				processIntentContent(stype, uri, "");
 				return true;
 			}
 		}
@@ -1220,7 +1222,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					showToast(R.string.only_in_premium);
 					return true;
 				}
-				processIntentContent("", sText);
+				processIntentContent("", sText, "");
 				return true;
 			}
 			if (StrUtils.getNonEmptyStr(intent.getType(),false).startsWith("image/")) {
@@ -1249,7 +1251,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			log.d("FILE_TO_OPEN = " + fileToOpen);
 			if (checkOpenDocumentFormat(fileToOpen)) return true;
 			if (checkPictureExtension(fileToOpen)) return true;
-			loadDocumentExt(fileToOpen, "");
+			String stype = StrUtils.getNonEmptyStr(intent.getType(),false);
+			processIntentContent(stype, uri, fileToOpen);
+			//loadDocumentExt(fileToOpen, "");
 			return true;
 		} else if (null != uri) {
 			log.d("URI_TO_OPEN = " + uri);
@@ -1444,7 +1448,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
             if (DeviceInfo.EINK_SONY) {
                 SharedPreferences pref = getSharedPreferences(PREF_FILE, 0);
                 String res = pref.getString(PREF_LAST_BOOK, null);
-                if( res != null && res.length() > 0 ) {
+                if(res != null && res.length() > 0) {
                     SonyBookSelector selector = new SonyBookSelector(this);
                     long l = selector.getContentId(res);
                     if(l != 0) {
@@ -1899,17 +1903,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	private static Debug.MemoryInfo info = new Debug.MemoryInfo();
 	private static Field[] infoFields = Debug.MemoryInfo.class.getFields();
-	private static String dumpFields( Field[] fields, Object obj) {
+	private static String dumpFields(Field[] fields, Object obj) {
 		StringBuilder buf = new StringBuilder();
 		try {
-			for ( Field f : fields ) {
+			for (Field f : fields) {
 				if (buf.length() > 0)
 					buf.append(", ");
 				buf.append(f.getName());
 				buf.append("=");
 				buf.append(f.get(obj));
 			}
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			
 		}
 		return buf.toString();
@@ -1958,10 +1962,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			if (mReaderView != null)
 				mReaderView.updateSettings(props);
 		}
-		for ( Map.Entry<Object, Object> entry : changedProps.entrySet() ) {
+		for (Map.Entry<Object, Object> entry : changedProps.entrySet()) {
     		String key = (String)entry.getKey();
     		final String value = (String)entry.getValue();
-    		applyAppSetting( key, value );
+    		applyAppSetting(key, value);
     		if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE)) {
 				waitForCRDBService(() -> {
 					BaseDB db = Services.getHistory().getMainDB(getDB());
@@ -2593,7 +2597,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	 	  else if (requestCode == REQUEST_CODE_CHOOSE_DIR) {
 	 	  	try {
 	 	  		if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-					cced.edtLocalFolder.setText(intent.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR));
+	 	  			if (dirChosenCallback != null)
+						dirChosenCallback.folderSelected(intent.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR));
 				}
 			} finally {
 	 	  		// do nothing
@@ -2601,31 +2606,31 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 	
-	public void setDict( String id ) {
+	public void setDict(String id) {
 		mDictionaries.setDict(id, this);
 	}
 
-	public void setDict2( String id ) {
+	public void setDict2(String id) {
 		mDictionaries.setDict2(id, this);
 	}
 
-	public void setDict3( String id ) {
+	public void setDict3(String id) {
 		mDictionaries.setDict3(id, this);
 	}
 
-	public void setDict4( String id ) {
+	public void setDict4(String id) {
 		mDictionaries.setDict4(id, this);
 	}
 
-	public void setDict5( String id ) {
+	public void setDict5(String id) {
 		mDictionaries.setDict5(id, this);
 	}
 
-	public void setDict6( String id ) {
+	public void setDict6(String id) {
 		mDictionaries.setDict6(id, this);
 	}
 
-	public void setDict7( String id ) {
+	public void setDict7(String id) {
 		mDictionaries.setDict7(id, this);
 	}
 
@@ -2647,7 +2652,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			mDictLongtapChange = true;
 	}
 
-	public void setToolbarAppearance( String id ) {
+	public void setToolbarAppearance(String id) {
 		mOptionAppearance = id;
 	}
 
@@ -3008,7 +3013,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							}
 						}
 						if (btnPressed.equals(getString(R.string.open_url_kr))) {
-							processIntentContent("", url);
+							processIntentContent("", url, "");
 							return;
 						}
 					});
@@ -3494,7 +3499,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 
-	private void execute( Engine.EngineTask task )
+	private void execute(Engine.EngineTask task)
 	{
 		mEngine.execute(task);
 	}
@@ -3715,7 +3720,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				itemsBook.add(new BookInfoEntry("file.opds_link",fi.opdsLink,"text"));
 			}
 		}
-		execute( new Task() {
+		execute(new Task() {
 			Bookmark bm;
 			@Override
 			public void work() {

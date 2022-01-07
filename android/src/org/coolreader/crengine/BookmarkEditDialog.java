@@ -71,7 +71,7 @@ public class BookmarkEditDialog extends BaseDialog {
 
 	private void paintColorCheckButton() {
 		int colorGrayC;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2Contrast});
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
@@ -134,10 +134,10 @@ public class BookmarkEditDialog extends BaseDialog {
 			ude.setSeen_count(0L);
 			ude.setIs_citation(0);
 			if (mBookmark.getType() == Bookmark.TYPE_CITATION) ude.setIs_citation(1);
-			activity.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
-			if (activity instanceof CoolReader) {
-				((CoolReader) activity).getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
-				BackgroundThread.instance().postGUI(() -> ((CoolReader) activity).getmReaderFrame().getUserDicPanel().updateUserDicWords(), 1000);
+			mActivity.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
+			if (mActivity instanceof CoolReader) {
+				((CoolReader) mActivity).getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
+				BackgroundThread.instance().postGUI(() -> ((CoolReader) mActivity).getmReaderFrame().getUserDicPanel().updateUserDicWords(), 1000);
 			}
 		} else {
 			if (mIsNew) {
@@ -170,9 +170,9 @@ public class BookmarkEditDialog extends BaseDialog {
 			String s2 = bm.getPosText();
 			String s3 = bm.getCommentText();
 			lblBookmarkLink.setText("");
-			if (!StrUtils.isEmptyStr(s1)) lblBookmarkLink.setText(activity.getString(R.string.dlg_bookmark_link) +": " +s1);
-			else if (!StrUtils.isEmptyStr(s2)) lblBookmarkLink.setText(activity.getString(R.string.dlg_bookmark_link) +": " +s2);
-			else if (!StrUtils.isEmptyStr(s3)) lblBookmarkLink.setText(activity.getString(R.string.dlg_bookmark_link) +": " + s3);
+			if (!StrUtils.isEmptyStr(s1)) lblBookmarkLink.setText(mActivity.getString(R.string.dlg_bookmark_link) +": " +s1);
+			else if (!StrUtils.isEmptyStr(s2)) lblBookmarkLink.setText(mActivity.getString(R.string.dlg_bookmark_link) +": " +s2);
+			else if (!StrUtils.isEmptyStr(s3)) lblBookmarkLink.setText(mActivity.getString(R.string.dlg_bookmark_link) +": " + s3);
 			mBookmark.setLinkPos(bm.getStartPos());
 		} else {
 			mBookmark.setLinkPos("");
@@ -182,23 +182,23 @@ public class BookmarkEditDialog extends BaseDialog {
 
 	private void setChecked(ImageButton btn) {
 		rb_descr.setText(btn.getContentDescription()+" ");
-		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_type_comment))) {
+		if (btn.getContentDescription().equals(mActivity.getString(R.string.dlg_bookmark_type_comment))) {
 			mChosenType = Bookmark.TYPE_COMMENT;
 			commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		}
-		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_type_correction))) {
+		if (btn.getContentDescription().equals(mActivity.getString(R.string.dlg_bookmark_type_correction))) {
 			mChosenType = Bookmark.TYPE_CORRECTION;
 			commentLabel.setText(R.string.dlg_bookmark_edit_correction);
 		}
-		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_internal_link))) {
+		if (btn.getContentDescription().equals(mActivity.getString(R.string.dlg_bookmark_internal_link))) {
 			mChosenType = Bookmark.TYPE_INTERNAL_LINK;
 			commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		}
-		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_user_dic))) {
+		if (btn.getContentDescription().equals(mActivity.getString(R.string.dlg_bookmark_user_dic))) {
 			mChosenType = Bookmark.TYPE_USER_DIC;
 			commentLabel.setText(R.string.dlg_bookmark_edit_translation);
 		}
-		if (btn.getContentDescription().equals(activity.getString(R.string.dlg_bookmark_citation))) {
+		if (btn.getContentDescription().equals(mActivity.getString(R.string.dlg_bookmark_citation))) {
 			mChosenType = Bookmark.TYPE_CITATION;
 			commentLabel.setText(R.string.dlg_bookmark_edit_comment);
 		}
@@ -224,7 +224,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		//lblSetComment.setTextColor(colorGrayCT2);
 		lblTransl1.setTextColor(colorGrayCT2);
 		lblTransl2.setTextColor(colorGrayCT2);
-		lblBookmarkLink.setTextColor(activity.getTextColor(colorIcon));
+		lblBookmarkLink.setTextColor(mActivity.getTextColor(colorIcon));
 		btnSendTo1.setBackgroundColor(colorGrayCT);
 		btnSendTo2.setBackgroundColor(colorGrayCT);
 		btnTransl.setBackgroundColor(colorGrayCT);

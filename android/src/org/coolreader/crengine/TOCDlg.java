@@ -132,18 +132,18 @@ public class TOCDlg extends BaseDialog {
 				if ( item.getChildCount()>0 ) {
 					if ( item.getExpanded() ) {
 						expandImageView.setImageResource(
-								Utils.resolveResourceIdByAttr(activity, R.attr.attr_cr3_toc_item_expanded, R.drawable.cr3_toc_item_expanded)
+								Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_cr3_toc_item_expanded, R.drawable.cr3_toc_item_expanded)
 								//R.drawable.cr3_toc_item_expanded
 						);
 					} else {
 						expandImageView.setImageResource(
-								Utils.resolveResourceIdByAttr(activity, R.attr.attr_cr3_toc_item_collapsed, R.drawable.cr3_toc_item_collapsed)
+								Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_cr3_toc_item_collapsed, R.drawable.cr3_toc_item_collapsed)
 								//R.drawable.cr3_toc_item_collapsed
 						);
 					}
 				} else {
 					expandImageView.setImageResource(
-							Utils.resolveResourceIdByAttr(activity, R.attr.attr_cr3_toc_item_normal, R.drawable.cr3_toc_item_normal)
+							Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_cr3_toc_item_normal, R.drawable.cr3_toc_item_normal)
 							//R.drawable.cr3_toc_item_normal
 					);
 				}
@@ -152,14 +152,13 @@ public class TOCDlg extends BaseDialog {
 				pageTextView.setText(String.valueOf(item.getPage()+1));
 				final int pn = item.getPage()+1;
 				imgShowPage.setOnClickListener(v -> {
-					//activity.showDicToast("asdf"+pn, false, "");
-					int iPageCnt = ((CoolReader)activity).getReaderView().getDoc().getPageCount();
+					int iPageCnt = mActivity.getReaderView().getDoc().getPageCount();
 					if (pn<=iPageCnt) {
-						String sPage = ((CoolReader)activity).getReaderView().getDoc().getPageText(false, pn - 1);
-						activity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO, "[HIDE]");
+						String sPage = mActivity.getReaderView().getDoc().getPageText(false, pn - 1);
+						mActivity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO, "[HIDE]");
 					}
 				});
-				activity.tintViewIcons(view);
+				mActivity.tintViewIcons(view);
 				return view;
 			}
 

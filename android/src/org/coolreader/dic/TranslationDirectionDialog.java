@@ -186,10 +186,10 @@ public class TranslationDirectionDialog extends BaseDialog {
 					}
 					if (!StrUtils.isEmptyStr(s)) editTexts.get(0).setText(sArrS[2]);
 				});
-				btnFrom.setTextColor(activity.getTextColor(colorIcon));
+				btnFrom.setTextColor(mActivity.getTextColor(colorIcon));
 				Button btnTo = view.findViewById(R.id.transl_item_lanf_to);
 				btnTo.setBackgroundColor(colorGrayCT2);
-				btnTo.setTextColor(activity.getTextColor(colorIcon));
+				btnTo.setTextColor(mActivity.getTextColor(colorIcon));
 				btnTo.setOnClickListener(v -> {
 					String s = "";
 					if (sArrS.length > 2) s = sArrS[2];

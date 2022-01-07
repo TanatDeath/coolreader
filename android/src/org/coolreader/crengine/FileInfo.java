@@ -645,6 +645,7 @@ public class FileInfo implements Parcelable {
         opdsLink = v.opdsLink;
         wordCount = v.wordCount;
 		symCount = v.symCount;
+		links = v.links;
 //		public long bookDateN; //converted to number from string
 //		public long docDateN;
 //		public long publYearN;
@@ -669,8 +670,8 @@ public class FileInfo implements Parcelable {
 //		public String proxy_passw;
 //		public int onion_def_proxy;
 //		// Litres related
-//		public String cover_href;
-//		public String cover_href2;
+		cover_href = v.cover_href;
+		cover_href2 = v.cover_href2;
 //		public String fragment_href;
 //		public Double finalPrice = 0D;
 //		public int free = 0;
@@ -898,7 +899,7 @@ public class FileInfo implements Parcelable {
 		return pathname!=null && pathname.startsWith(LITRES_COLLECTION_PREFIX);
 	}
 
-	private OPDSUtil.EntryInfo getOPDSEntryInfo() {
+	public OPDSUtil.EntryInfo getOPDSEntryInfo() {
 		if (tag !=null && tag instanceof OPDSUtil.EntryInfo)
 			return (OPDSUtil.EntryInfo)tag;
 		return null;

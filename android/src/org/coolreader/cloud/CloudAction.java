@@ -26,12 +26,12 @@ import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.ExternalDocCameDialog;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FileUtils;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.SaveDocDialog;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
@@ -595,15 +595,10 @@ public class CloudAction {
                     if (PictureCameDialog.isFileIsPicture(fName)) {
                         cr.pictureCame(fName);
                     } else {
-//                        FileInfo fi = new FileInfo(fBook);
-//                        FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
-//                        if (dir == null) dir = downloadDir;
-//                        FileInfo item1 = dir.findItemByPathName(fBook.getAbsolutePath());
-//                        if (item1 == null) Services.getScanner().listDirectory(dir);
                         final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
                         final File fPath = new File(downloadDir.pathname+"/Dropbox");
-                        ExternalDocCameDialog.tryToMoveThenOpen("", cr, fBook.getAbsolutePath(),
-                                fPath.getAbsolutePath(), "");
+                        SaveDocDialog.tryToMoveThenOpen(null, cr, fBook.getAbsolutePath(),
+                                fPath.getAbsolutePath(), "", "");
                     }
                 }
 
@@ -714,15 +709,10 @@ public class CloudAction {
                             if (PictureCameDialog.isFileIsPicture(fName)) {
                                 cr.pictureCame(fName);
                             } else {
-//                                FileInfo fi = new FileInfo(fBook);
-//                                FileInfo dir = Services.getScanner().findParent(fi, downloadDir);
-//                                if (dir == null) dir = downloadDir;
-//                                FileInfo item1 = dir.findItemByPathName(fBook.getAbsolutePath());
-//                                if (item1 == null) Services.getScanner().listDirectory(dir);
                                 final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
                                 final File fPath = new File(downloadDir.pathname+"/YandexDisc");
-                                ExternalDocCameDialog.tryToMoveThenOpen("", cr, fBook.getAbsolutePath(),
-                                        fPath.getAbsolutePath(), "");
+                                SaveDocDialog.tryToMoveThenOpen(null, cr, fBook.getAbsolutePath(),
+                                        fPath.getAbsolutePath(), "", "");
                             }
                         }, 200);
                     }

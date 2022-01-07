@@ -309,7 +309,7 @@ public class BrowserViewLayout extends ViewGroup {
 			activity.setSettings(props, -1, true);
 			refreshCurrentDir();
 		});
-		btnStateFinished  = titleView.findViewById(R.id.book_state_finished);
+		btnStateFinished = titleView.findViewById(R.id.book_state_finished);
 		btnStateFinished.setOnClickListener(v -> {
 			bStateFinished = !bStateFinished;
 			paintStateButtons();
@@ -338,9 +338,6 @@ public class BrowserViewLayout extends ViewGroup {
 
 		btnStateDir.setTextColor(activity.getTextColor(colorIcon));
 		btnStateNoMark.setTextColor(activity.getTextColor(colorIcon));
-		btnStateReading.setTextColor(colorGreen);
-		btnStateToRead.setTextColor(colorBlue);
-		btnStateFinished.setTextColor(colorGray);
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 //		btnStateDir.setBackgroundColor(colorGrayCT);
 //		btnStateNoMark.setBackgroundColor(colorGrayCT);
@@ -348,6 +345,9 @@ public class BrowserViewLayout extends ViewGroup {
 //		btnStateReading.setBackgroundColor(colorGrayCT);
 //		btnStateFinished.setBackgroundColor(colorGrayCT);
 		paintStateButtons();
+		btnStateReading.setTextColor(colorGreen);
+		btnStateToRead.setTextColor(colorBlue);
+		btnStateFinished.setTextColor(colorGray);
 
 		if (filterIsShown) switchFilter(false);
 		if (dir!=null) this.dir = dir;

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -127,24 +126,24 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 
 		if (ibPicTexture!=null) {
 			ibPicTexture.setBackgroundColor(colorGrayCT);
-			activity.tintViewIcons(ibPicTexture, PorterDuff.Mode.CLEAR,true);
+			this.mActivity.tintViewIcons(ibPicTexture, PorterDuff.Mode.CLEAR,true);
 		}
 		if (ibPicBackground!=null) {
 			ibPicBackground.setBackgroundColor(colorGrayCT);
-			activity.tintViewIcons(ibPicBackground, PorterDuff.Mode.CLEAR,true);
+			this.mActivity.tintViewIcons(ibPicBackground, PorterDuff.Mode.CLEAR,true);
 		}
 		if ((ibPicTexture!=null)&&(bThisIsTexture)) {
 			ibPicTexture.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(ibPicTexture, true);
+			this.mActivity.tintViewIcons(ibPicTexture, true);
 		}
 		if ((ibPicBackground!=null)&&(!bThisIsTexture)) {
 			ibPicBackground.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(ibPicBackground, true);
+			this.mActivity.tintViewIcons(ibPicBackground, true);
 		}
 	}
 
 	private void proceedTexture(final boolean needToActivate) {
-		PictureReceived pic = ((CoolReader)activity).picReceived;
+		PictureReceived pic = ((CoolReader) this.mActivity).picReceived;
 		if (pic.bmpReceived!=null) {
 			String filename = "texture";
 			if ((pic.uri!=null)||(!StrUtils.isEmptyStr(pic.fileName))) {
@@ -186,7 +185,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 			final String sDir1 = sDir;
 			BackgroundThread.instance().executeGUI((Runnable) () -> {
 				final InputDialog dlg = new InputDialog(mActivity, title,
-						((CoolReader)activity).getString(R.string.pic_filename)+" "+
+						((CoolReader) this.mActivity).getString(R.string.pic_filename)+" "+
 						sDir1.replace("/storage/","/s/").replace("/emulated/","/e/")+":"
 						, fname1,
 						new InputDialog.InputHandler() {
@@ -194,7 +193,7 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 							public boolean validateNoCancel(String s) {
 								File f = new File(sDir1+s);
 								if (f.exists()) {
-									((CoolReader)activity).showToast(R.string.pic_file_exists);
+									((CoolReader) PictureCameDialog.this.mActivity).showToast(R.string.pic_file_exists);
 									return false;
 								}
 								return true;
@@ -214,9 +213,9 @@ public class PictureCameDialog extends BaseDialog implements Settings {
 									OutputStream fOut = new FileOutputStream(file);
 									if ((s.toLowerCase().endsWith(".jpg")) ||
 											(s.toLowerCase().endsWith(".jpeg")))
-										((CoolReader) activity).picReceived.bmpReceived.
+										((CoolReader) PictureCameDialog.this.mActivity).picReceived.bmpReceived.
 											compress(Bitmap.CompressFormat.JPEG,100,fOut);
-									else ((CoolReader) activity).picReceived.bmpReceived.
+									else ((CoolReader) PictureCameDialog.this.mActivity).picReceived.bmpReceived.
 											compress(Bitmap.CompressFormat.PNG,100,fOut);
 									fOut.flush();
 									fOut.close();
@@ -232,7 +231,7 @@ mActivity.setSettings(props, -1, true);
 }
 									dismiss();
 								} catch (Exception e) {
-									((CoolReader)activity).showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
+									((CoolReader) PictureCameDialog.this.mActivity).showToast( ((CoolReader) PictureCameDialog.this.mActivity).getString(R.string.pic_problem)+" "+
 											e.getMessage());
 								}
 							}
@@ -243,7 +242,7 @@ mActivity.setSettings(props, -1, true);
 				dlg.show();
 			});
 		} else {
-			((CoolReader)activity).showToast(R.string.pic_problem);
+			((CoolReader) this.mActivity).showToast(R.string.pic_problem);
 		}
 	}
 
@@ -415,11 +414,11 @@ mActivity.setSettings(props, -1, true);
 				if (f.exists()) f.delete();
 				File file = new File(sDir + sFName);
 				OutputStream fOut = new FileOutputStream(file);
-				((CoolReader) activity).picReceived.bmpReceived.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+				((CoolReader) this.mActivity).picReceived.bmpReceived.compress(Bitmap.CompressFormat.PNG, 100, fOut);
 				fOut.flush();
 				fOut.close();
 			} catch (Exception e) {
-			((CoolReader)activity).showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
+			((CoolReader) this.mActivity).showToast( ((CoolReader) this.mActivity).getString(R.string.pic_problem)+" "+
 					e.getMessage());
 			}
 		}
@@ -439,10 +438,10 @@ mActivity.setSettings(props, -1, true);
 			try {
 				final File f = new File(sDir + sFName);
 				if (f.exists())
-					activity.askConfirmation(R.string.pic_delete_cover, (Runnable) () -> f.delete());
-				else activity.showToast( ((CoolReader)activity).getString(R.string.pic_no_custom_cover));
+					this.mActivity.askConfirmation(R.string.pic_delete_cover, (Runnable) () -> f.delete());
+				else this.mActivity.showToast( ((CoolReader) this.mActivity).getString(R.string.pic_no_custom_cover));
 			} catch (Exception e) {
-				activity.showToast( ((CoolReader)activity).getString(R.string.pic_problem)+" "+
+				this.mActivity.showToast( ((CoolReader) this.mActivity).getString(R.string.pic_problem)+" "+
 					e.getMessage());
 			}
 		}
@@ -488,6 +487,7 @@ mActivity.setSettings(props, -1, true);
 			colorIcon = a.getColor(3, Color.GRAY);
 			a.recycle();
 			TextView tvInfo = (TextView)mView.findViewById(R.id.lbl_book_info1);
+			tvInfo.setTag("notint");
 			int n = item.getReadingState();
 			if (n == FileInfo.STATE_READING)
 				tvInfo.setTextColor(colorGreen);
@@ -555,7 +555,7 @@ mActivity.setSettings(props, -1, true);
 				);
 				if (label != null) {
 					label.setText("More...");
-					label.setTextColor(activity.getTextColor(colorIcon));
+					label.setTextColor(this.mActivity.getTextColor(colorIcon));
 				}
 				view.setOnClickListener(v -> ((CoolReader)mActivity).showRecentBooks());
 			} else {
@@ -573,7 +573,7 @@ mActivity.setSettings(props, -1, true);
 					else if (!Utils.empty(authors))
 						s = authors;
 					label.setText(s != null ? s : "");
-					label.setTextColor(activity.getTextColor(colorIcon));
+					label.setTextColor(this.mActivity.getTextColor(colorIcon));
 					int n = item.getReadingState();
 					if (n == FileInfo.STATE_READING)
 						label.setTextColor(colorGreen);
@@ -598,7 +598,7 @@ mActivity.setSettings(props, -1, true);
 	}
 
 	public void refreshRecentBooks() {
-		activity.waitForCRDBService(() -> BackgroundThread.instance().postGUI(() -> {
+		this.mActivity.waitForCRDBService(() -> BackgroundThread.instance().postGUI(() -> {
 			if (Services.getHistory() != null && mActivity.getDB() != null) {
 				Services.getHistory().getOrLoadRecentBooks(mActivity.getDB(), new CRDBService.RecentBooksLoadingCallback() {
 

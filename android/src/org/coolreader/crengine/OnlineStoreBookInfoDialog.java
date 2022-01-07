@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.crengine.CoverpageManager.CoverpageBitmapReadyListener;
 import org.coolreader.plugins.BookInfoCallback;
 import org.coolreader.plugins.DownloadBookCallback;
 import org.coolreader.plugins.OnlineStoreBook;
@@ -92,7 +91,7 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 		int colorGray;
 		int colorGrayC;
 		int colorIcon;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = this.mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		colorGray = a.getColor(0, Color.GRAY);
 		colorGrayC = a.getColor(1, Color.GRAY);
@@ -309,19 +308,24 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 					File savedFileName) {
 				progress.hide();
 				final FileInfo item = new FileInfo(savedFileName);
-                if ((item!=null) && (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false))) {
-                    Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, bookInfo -> {
-						item.setReadingState(FileInfo.STATE_TO_READ);
-						BookInfo bi = new BookInfo(item);
-						mActivity.getDB().saveBookInfo(bi);
-						mActivity.getDB().flush();
-						if (bookInfo.getFileInfo() != null) {
-							bookInfo.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
-						}
-						mActivity.showToast(item.pathname+" is marked as 'to read'");
-					});
+                if ((item!=null) && (mActivity.settings().getBool(Settings.PROP_APP_DOWNLOADED_SET_ADD_MARKS, false))) {
+					SaveDocDialog dlg = new SaveDocDialog(mActivity, true,
+							savedFileName.getParent(), savedFileName.getAbsolutePath(),
+							item.getFilename(), Utils.getFileExtension(item.getFilename()),
+							savedFileName.getAbsolutePath(), null, null);
+					dlg.show();
+//                    Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, bookInfo -> {
+//						item.setReadingState(FileInfo.STATE_TO_READ);
+//						BookInfo bi = new BookInfo(item);
+//						mActivity.getDB().saveBookInfo(bi);
+//						mActivity.getDB().flush();
+//						if (bookInfo.getFileInfo() != null) {
+//							bookInfo.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
+//						}
+//						mActivity.showToast(item.pathname+" is marked as 'to read'");
+//					});
                 }
-				openBook(trial);
+				//openBook(trial);
 			}
 		});
 	}

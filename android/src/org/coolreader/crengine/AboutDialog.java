@@ -61,10 +61,10 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 			btn.setEnabled(false);
 			btn.setText(R.string.dlg_about_donation_installed);
 			btn.setBackgroundColor(colorGrayC);
-			btn.setTextColor(activity.getTextColor(colorIcon));
+			btn.setTextColor(this.mActivity.getTextColor(colorIcon));
 		} else {
 			btn.setBackgroundColor(colorGrayC);
-			btn.setTextColor(activity.getTextColor(colorIcon));
+			btn.setTextColor(this.mActivity.getTextColor(colorIcon));
 			btn.setOnClickListener(v -> installPackage(packageName));
 		}
 	}
@@ -74,7 +74,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		int colorIcon = themeColors.get(R.attr.colorIcon);
 		btn.setText("$" + amount);
 		btn.setBackgroundColor(colorGrayC);
-		btn.setTextColor(activity.getTextColor(colorIcon));
+		btn.setTextColor(this.mActivity.getTextColor(colorIcon));
 		Utils.hideView(btn);
 	}
 

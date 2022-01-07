@@ -316,7 +316,7 @@ public class ScanLibraryDialog extends BaseDialog {
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		pathButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 		//pathButton.setHeight(pathButton.getHeight()-4);
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = this.mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
 		int colorGrayC = a.getColor(1, Color.GRAY);
 		int colorIcon = a.getColor(2, Color.GRAY);
@@ -379,7 +379,7 @@ public class ScanLibraryDialog extends BaseDialog {
 						ViewGroup.LayoutParams.WRAP_CONTENT);
 				llp.setMargins(8, 8, 8, 8);
 				cardButton.setLayoutParams(llp);
-				cardButton.setTextColor(activity.getTextColor(colorIcon));
+				cardButton.setTextColor(this.mActivity.getTextColor(colorIcon));
 				//dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
 				cardButton.setMaxLines(3);
 				cardButton.setEllipsize(TextUtils.TruncateAt.END);
@@ -730,6 +730,7 @@ public class ScanLibraryDialog extends BaseDialog {
 
 		mLibraryMaintenance.setOnClickListener(v -> {
 			llScanLibrary.addView(tlm);
+			mActivity.tintViewIcons(tlm);
 			Utils.hideView(mLibraryMaintenance);
 		});
 

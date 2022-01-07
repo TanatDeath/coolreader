@@ -78,7 +78,7 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnBookFolderOpen;
 	ImageButton btnBookShortcut;
 	ImageButton btnBookEdit;
-	Button btnMarkToRead;
+	Button btnSetAddMarks;
 	TableLayout tlLitresDownl;
 	LinearLayout llLitresPurchase;
 	Button btnFragment;
@@ -89,7 +89,7 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnBookDownload;
 	String annot2 = "";
 	ImageButton btnFindAuthors;
-	boolean bMarkToRead;
+	boolean bSetAddMarks;
 	TextView tvWC;
 	TextView tvSC;
 	TextView tvML;
@@ -225,7 +225,7 @@ public class BookInfoDialog extends BaseDialog {
 									  boolean left, boolean top, boolean right, boolean bottom) {
 		if (v == null) return;
 		ViewGroup.LayoutParams lp = v.getLayoutParams();
-		int globalMargins = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		int globalMargins = mActivity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
 		if (globalMargins > 0)
 			if (lp instanceof ViewGroup.MarginLayoutParams) {
 				if (top) ((ViewGroup.MarginLayoutParams) lp).topMargin = globalMargins;
@@ -290,7 +290,7 @@ public class BookInfoDialog extends BaseDialog {
 				if (StrUtils.isEmptyStr(sBookTitle)) sFind = StrUtils.stripExtension(sFileName);
 				if (!StrUtils.isEmptyStr(sAuthors)) sFind = sFind + ", " + sAuthors;
 				btnOptionAddInfo.setImageDrawable(
-						activity.getResources().getDrawable(Utils.resolveResourceIdByAttr(activity,
+						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
 								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
 				final View view1 = view;
 				final String sFind1 = sFind;
@@ -311,24 +311,34 @@ public class BookInfoDialog extends BaseDialog {
 			int colorGreen = themeColors.get(R.attr.colorThemeGreen);
 			int colorGray = themeColors.get(R.attr.colorThemeGray);
 			int colorIcon = themeColors.get(R.attr.colorIcon);
-			valueView.setTextColor(activity.getTextColor(colorIcon));
+			valueView.setTextColor(mActivity.getTextColor(colorIcon));
 			if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
-					contains("[" + mCoolReader.getString(R.string.book_state_reading) + "]"))
+					contains("[" + mCoolReader.getString(R.string.book_state_reading) + "]")) {
+				valueView.setTag("notint");
 				valueView.setTextColor(colorGreen);
+			}
 			else if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
-					contains("[" + mCoolReader.getString(R.string.book_state_toread) + "]"))
+					contains("[" + mCoolReader.getString(R.string.book_state_toread) + "]")) {
+				valueView.setTag("notint");
 				valueView.setTextColor(colorBlue);
+			}
 			else if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
-					contains("[" + mCoolReader.getString(R.string.book_state_finished) + "]"))
+					contains("[" + mCoolReader.getString(R.string.book_state_finished) + "]")) {
+				valueView.setTag("notint");
 				valueView.setTextColor(colorGray);
+			}
 		}
-		valueView.setTag(name);
-		if (name.equals(activity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
-		if (name.equals(activity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
-		if (name.equals(activity.getString(R.string.book_info_stats_minutes_left))) tvML = valueView;
+		String ttag = "";
+		if (valueView.getTag() != null)
+			ttag = valueView.getTag().toString();
+		if (StrUtils.isEmptyStr(ttag))
+			valueView.setTag(name);
+		if (name.equals(mActivity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
+		if (name.equals(mActivity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
+		if (name.equals(mActivity.getString(R.string.book_info_stats_minutes_left))) tvML = valueView;
 		ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
 		if (
-			(name.equals(activity.getString(R.string.book_info_book_symcount))) &&
+			(name.equals(mActivity.getString(R.string.book_info_book_symcount))) &&
 		   (value.equals("0")) && (rv != null)
 		)
 			if ((mBookInfo != null) && (rv.mBookInfo != null))
@@ -342,8 +352,8 @@ public class BookInfoDialog extends BaseDialog {
 					a.recycle();
 					Button countButton = new Button(mCoolReader);
 					btnCalc = countButton;
-					countButton.setText(activity.getString(R.string.calc_stats));
-					countButton.setTextColor(activity.getTextColor(colorIcon));
+					countButton.setText(mActivity.getString(R.string.calc_stats));
+					countButton.setTextColor(mActivity.getTextColor(colorIcon));
 					countButton.setBackgroundColor(colorGrayC);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.MATCH_PARENT,
@@ -412,7 +422,7 @@ public class BookInfoDialog extends BaseDialog {
 					});
 		}
 		if (
-			(name.equals(activity.getString(R.string.book_info_book_translation)))
+			(name.equals(mActivity.getString(R.string.book_info_book_translation)))
 		) {
 			int colorGrayC;
 			int colorIcon;
@@ -422,8 +432,8 @@ public class BookInfoDialog extends BaseDialog {
 			colorIcon = a.getColor(2, Color.BLACK);
 			a.recycle();
 			Button translButton = new Button(mCoolReader);
-			translButton.setText(activity.getString(R.string.specify_translation_dir));
-			translButton.setTextColor(activity.getTextColor(colorIcon));
+			translButton.setText(mActivity.getString(R.string.specify_translation_dir));
+			translButton.setTextColor(mActivity.getTextColor(colorIcon));
 			translButton.setBackgroundColor(colorGrayC);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
@@ -484,7 +494,7 @@ public class BookInfoDialog extends BaseDialog {
 				colorIcon = a.getColor(2, Color.BLACK);
 				a.recycle();
 				valueView.setLinkTextColor(colorIcon);
-				valueView.setTextColor(activity.getTextColor(colorIcon));
+				valueView.setTextColor(mActivity.getTextColor(colorIcon));
 			}
 		} else
 		if (typ.startsWith("series_authors")) {
@@ -557,10 +567,10 @@ public class BookInfoDialog extends BaseDialog {
 			valueView.setOnClickListener(v -> {
 				String text = ((TextView) v).getText().toString();
 				if (text != null && text.length() > 0) {
-					ClipboardManager cm = activity.getClipboardmanager();
+					ClipboardManager cm = mActivity.getClipboardmanager();
 					cm.setText(text);
 					L.i("Setting clipboard text: " + text);
-					activity.showToast(activity.getString(R.string.copied_to_clipboard) + ": " + text, v);
+					mActivity.showToast(mActivity.getString(R.string.copied_to_clipboard) + ": " + text, v);
 				}
 			});
 		}
@@ -570,28 +580,27 @@ public class BookInfoDialog extends BaseDialog {
 	private void paintMarkButton() {
 		int colorGrayC;
 		int colorBlue;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue});
 		colorGrayC = a.getColor(0, Color.GRAY);
 		colorBlue = a.getColor(1, Color.BLUE);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		mCoolReader.tintViewIcons(btnMarkToRead, PorterDuff.Mode.CLEAR,true);
-		if (bMarkToRead) {
-			btnMarkToRead.setBackgroundColor(colorGrayCT2);
-			mCoolReader.tintViewIcons(btnMarkToRead, true);
-			btnMarkToRead.setPaintFlags(btnMarkToRead.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+		mCoolReader.tintViewIcons(btnSetAddMarks, PorterDuff.Mode.CLEAR,true);
+		if (bSetAddMarks) {
+			btnSetAddMarks.setBackgroundColor(colorGrayCT2);
+			mCoolReader.tintViewIcons(btnSetAddMarks, true);
+			btnSetAddMarks.setPaintFlags(btnSetAddMarks.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 		} else {
-			btnMarkToRead.setBackgroundColor(colorGrayCT);
-			btnMarkToRead.setPaintFlags( btnMarkToRead.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+			btnSetAddMarks.setBackgroundColor(colorGrayCT);
+			btnSetAddMarks.setPaintFlags( btnSetAddMarks.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 		}
 		/*if (bMarkToRead) setDashedButton(btnMarkToRead);
 			else {
 				btnMarkToRead.setBackgroundColor(colorGrayCT);
 				btnMarkToRead.setPaintFlags( btnMarkToRead.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 			}*/
-		btnMarkToRead.setTextColor(colorBlue);
 	}
 
 	private void downloadFragment(String format) {
@@ -636,7 +645,7 @@ public class BookInfoDialog extends BaseDialog {
 					onPositiveButtonClick();
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
-					activity.showToast(activity.getString(R.string.not_exists_on_server)+" "+e.getLocalizedMessage());
+					mActivity.showToast(mActivity.getString(R.string.not_exists_on_server)+" "+e.getLocalizedMessage());
 				});
 			}
 		});
@@ -830,17 +839,17 @@ public class BookInfoDialog extends BaseDialog {
 			}
 		});
 
-		btnMarkToRead = mainView.findViewById(R.id.btn_mark_toread);
+		btnSetAddMarks = mainView.findViewById(R.id.btn_set_add_marks);
 
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
-		if (btnMarkToRead!=null) btnMarkToRead.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
-		bMarkToRead = activity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false);
+		if (btnSetAddMarks !=null) btnSetAddMarks.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+		bSetAddMarks = activity.settings().getBool(Settings.PROP_APP_DOWNLOADED_SET_ADD_MARKS, false);
 
-		btnMarkToRead.setOnClickListener(v -> {
-			bMarkToRead = !bMarkToRead;
+		btnSetAddMarks.setOnClickListener(v -> {
+			bSetAddMarks = !bSetAddMarks;
 			Properties props = new Properties(activity.settings());
-			props.setProperty(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, bMarkToRead?"1":"0");
+			props.setProperty(Settings.PROP_APP_DOWNLOADED_SET_ADD_MARKS, bSetAddMarks ?"1":"0");
 			activity.setSettings(props, -1, true);
 			paintMarkButton();
 		});
@@ -895,6 +904,8 @@ public class BookInfoDialog extends BaseDialog {
 		}
 		TableLayout table = mainView.findViewById(R.id.table);
 		FlowTextView txtAnnot = mainView.findViewById(R.id.lbl_annotation);
+		LinearLayout infoPanel = mainView.findViewById(R.id.info_panel);
+		TextView infoText = mainView.findViewById(R.id.tv_info_mess);
 		txtAnnot.setOnClickListener(v -> {
 			String text = ((FlowTextView) v).getText().toString();
 			if (text != null && text.length() > 0) {
@@ -912,18 +923,22 @@ public class BookInfoDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(sprof)) sprof = sprof + " - ";
 		prof.setText(activity.getString(R.string.settings_profile)+": "+sprof + sF);
 		String sss = "";
-		if ((mActionType == OPDS_INFO) && (!isLitres)) sss = "["+mCoolReader.getString(R.string.book_info_action_download1)+"]\n";
-		if (mActionType == OPDS_FINAL_INFO) sss = sss = "["+mCoolReader.getString(R.string.book_info_action_download2)+"]\n";
-		SpannableString ss = new SpannableString(sss+annot);
+		if ((mActionType == OPDS_INFO) && (!isLitres)) sss = mCoolReader.getString(R.string.book_info_action_download1);
+		if (mActionType == OPDS_FINAL_INFO) sss = mCoolReader.getString(R.string.book_info_action_download2);
+		if (StrUtils.isEmptyStr(sss))
+			Utils.hideView(infoPanel);
+		else
+			infoText.setText(sss);
+		SpannableString ss = new SpannableString(annot);
 		txtAnnot.setText(ss);
-		int colorGray;
+		int colorIconL;
 		int colorGrayC;
 		int colorIcon;
 		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		colorGray = a.getColor(0, Color.GRAY);
+				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
 		colorGrayC = a.getColor(1, Color.GRAY);
 		colorIcon = a.getColor(2, Color.GRAY);
+		colorIconL = a.getColor(3, Color.GRAY);
 		txtAnnot.setTextColor(activity.getTextColor(colorIcon));
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
 
@@ -1043,7 +1058,7 @@ public class BookInfoDialog extends BaseDialog {
 				}
 		}
 		if ((!isLitres) || (isPerson)) {
-			if (isPerson) Utils.hideView(btnMarkToRead);
+			if (isPerson) Utils.hideView(btnSetAddMarks);
 			Utils.hideView(tlLitresDownl);
 			Utils.hideView(llLitresPurchase);
 		}
@@ -1053,7 +1068,7 @@ public class BookInfoDialog extends BaseDialog {
 		}
 		if (actionType == BOOK_INFO) {
 			Utils.hideView(btnBookDownload);
-			Utils.hideView(btnMarkToRead);
+			Utils.hideView(btnSetAddMarks);
 		}
 		if (actionType == OPDS_INFO) {
 			Utils.hideView(btnOpenBook);
@@ -1076,7 +1091,7 @@ public class BookInfoDialog extends BaseDialog {
 		}
 		if (actionType == OPDS_FINAL_INFO) {
 			Utils.hideView(btnBookDownload);
-			Utils.hideView(btnMarkToRead);
+			Utils.hideView(btnSetAddMarks);
 			Utils.hideView(btnFindAuthors);
 		}
 		if (isLitres) Utils.hideView(btnBookDownload);

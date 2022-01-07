@@ -156,21 +156,21 @@ import java.util.ArrayList;
 			TextView title = view.findViewById(R.id.option_value_text);
 			ImageView btnOptionAddInfo = view.findViewById(R.id.btn_option_add_info);
 			btnOptionAddInfo.setImageDrawable(
-					activity.getResources().getDrawable(Utils.resolveResourceIdByAttr(activity,
+					mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
 							R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
-			activity.tintViewIcons(btnOptionAddInfo);
+			mActivity.tintViewIcons(btnOptionAddInfo);
 			final View view1 = view;
 			if (btnOptionAddInfo != null)
 				btnOptionAddInfo.setOnClickListener(v -> {
 					String sF = "?";
 					try {
-						File f = activity.getSettingsFileF(position+1);
+						File f = mActivity.getSettingsFileF(position+1);
 						sF = f.getAbsolutePath();
 						sF = sF.replace("/storage/", "/s/").replace("/emulated/", "/e/");
 					} catch (Exception e) {
 
 					}
-					activity.showToast(sF, Toast.LENGTH_LONG, view1, true, 0);
+					mActivity.showToast(sF, Toast.LENGTH_LONG, view1, true, 0);
 				});
 			setChecked(cb, isCurrentItem);
 			cb.setFocusable(false);

@@ -8,8 +8,16 @@ import android.widget.ImageView;
 
 import java.io.InputStream;
 
-public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>  {
+
+	BitmapReadyCallback mBitmapReady;
+
 	ImageView bmImage;
+
+	public DownloadImageTask(BitmapReadyCallback bitmapReady) {
+		this.bmImage = null;
+		mBitmapReady = bitmapReady;
+	}
 
 	public DownloadImageTask(ImageView bmImage) {
 		this.bmImage = bmImage;
@@ -50,6 +58,8 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 	}
 
 	protected void onPostExecute(Bitmap result) {
-		if (result != null) bmImage.setImageBitmap(result);
+		if (result != null)
+			if (bmImage != null) bmImage.setImageBitmap(result);
+		if (mBitmapReady != null) mBitmapReady.bitmapReady(result);
 	}
 }

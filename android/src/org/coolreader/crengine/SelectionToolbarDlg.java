@@ -809,14 +809,14 @@ public class SelectionToolbarDlg {
 
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
-			if ( event.getAction()==KeyEvent.ACTION_UP ) {
-				switch ( keyCode ) {
+			if (event.getAction() == KeyEvent.ACTION_UP) {
+				switch (keyCode) {
 				case KeyEvent.KEYCODE_BACK:
 					closeDialog(true);
 					return true;
 				}
 			}
-			if ( keyCode == KeyEvent.KEYCODE_BACK) {
+			if (keyCode == KeyEvent.KEYCODE_BACK) {
 				return true;
 			}
 			return false;

@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +34,6 @@ import org.coolreader.crengine.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -344,7 +342,7 @@ public class UserDicDlg extends BaseDialog {
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		rb_descr.setText(btn.getContentDescription()+" ");
 		btnPage2.setEnabled(true);
-		btnPage2.setTextColor(activity.getTextColor(colorIcon));
+		btnPage2.setTextColor(mActivity.getTextColor(colorIcon));
 		if (btn.getContentDescription().equals(mCoolReader.getString(R.string.dlg_bookmark_user_dic))) {
 			openPage = 0;
 		}

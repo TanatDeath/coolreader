@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+    >
+    <Button
+            android:id="@+id/book_state_new"
+            android:tag="notint"
+            android:layout_width="wrap_content"
+            android:checked="true"
+            android:layout_height="wrap_content"
+            android:src="@null"
+            android:singleLine="false"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:contentDescription="@string/book_state_none"
+            android:text="@string/book_state_none" />
+    <Button
+            android:id="@+id/book_state_toread"
+            android:tag="notint"
+            android:layout_width="wrap_content"
+            android:checked="true"
+            android:layout_height="wrap_content"
+            android:src="@null"
+            android:singleLine="false"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:contentDescription="@string/book_state_toread"
+            android:text="@string/book_state_toread" />
+    <Button
+            android:id="@+id/book_state_reading"
+            android:tag="notint"
+            android:layout_width="wrap_content"
+            android:checked="true"
+            android:layout_height="wrap_content"
+            android:src="@null"
+            android:singleLine="false"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:contentDescription="@string/book_state_reading"
+            android:text="@string/book_state_reading" />
+    <Button
+            android:id="@+id/book_state_finished"
+            android:tag="notint"
+            android:layout_width="wrap_content"
+            android:checked="true"
+            android:layout_height="wrap_content"
+            android:src="@null"
+            android:singleLine="false"
+            android:drawableLeft="@drawable/icons8_toc_item_normal"
+            android:contentDescription="@string/book_state_finished"
+            android:text="@string/book_state_finished" />
+</LinearLayout>

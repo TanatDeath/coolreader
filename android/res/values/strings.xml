@@ -66,7 +66,7 @@
     <string name="toggle_dict">Toggle dictionary</string>
     <string name="mi_bookmark_set">Set bookmark</string>
     <string name="mi_bookmark_goto">Go to bookmark</string>
-    <string name="mi_goto_page">Go to page #</string>
+    <string name="mi_goto_page">Go to page</string>
     <string name="mi_goto_percent">Go to position %</string>
     <string name="mi_goto_value">Go to value</string>
     <string name="mi_filter_option">Find in options</string>
@@ -682,6 +682,7 @@
     <string name="dlg_goto_input_percent">Input position percent to go:</string>
     <string name="book_state_toread">To read</string>
     <string name="book_mark_toread">Mark as \"To read\"</string>
+    <string name="set_add_marks">Move, set marks - after download</string>
     <string name="book_marked_reading">Book was marked as \"Reading\"</string>
     <string name="book_state_reading">Reading</string>
     <string name="book_state_none">No mark</string>
@@ -1188,7 +1189,7 @@
     <string name="downloaded_from_catalog">Books downloaded:</string>
     <string name="external_doc_came">Incoming external document</string>
     <string name="external_doc_option1">Action - open from stream (or install fonts)</string>
-    <string name="external_doc_option2">Action - save to device</string>
+    <string name="external_doc_option2">Action - add to library</string>
     <string name="external_doc_option3">Action - open existing file</string>
     <string name="conv_doc_option1">Action - convert document</string>
     <string name="conv_doc_option2">Action - open previously converted</string>
@@ -1197,7 +1198,8 @@
     <string name="doc_open_from_stream">Open from stream</string>
     <string name="doc_open_from_stream_addinfo">Document will not be saved to device, will not be accessible in "last books" list. If document archive contains fonts - you could easily install them</string>
     <string name="download_path">Save path</string>
-    <string name="doc_save_to_device">Save to device and open</string>
+    <string name="doc_save_to_library">Save to library</string>
+    <string name="doc_move_to_library">Move to library</string>
     <string name="already_exists">Already exists</string>
     <string name="open_existing">Open existing file</string>
     <string name="converted_path">Converted document path</string>
@@ -1555,7 +1557,7 @@
     <string name="do_scan">Scan selected!</string>
     <string name="do_scan_starting">Scanning is starting...</string>
     <string name="library_maintenance">Library maintenance</string>
-    <string name="library_maint_remove">Remove books\" info, that are NOT RESIDE into selected categories</string>
+    <string name="library_maint_remove">Remove books\" info, that are NOT RESIDE inside selected folders</string>
     <string name="library_maint_remove_non_fav_add_info">Real files will NOT be deleted from your device, there will be removed only information in the internal KnownReader database. You can easily rescan library later (NB: bookmarks of these items will also be removed).</string>
     <string name="library_maint_done_need_restart">Operation performed. It is recommended to restart app</string>
     <string name="library_maint_show_statistics">Show statistics</string>
@@ -1677,6 +1679,15 @@
     <string name="try_to_move_to_books_then_open">Move book to \"Books\" folder, then open</string>
     <string name="cannot_move_to_books">Cannot move book to \"Books\" folder</string>
     <string name="moved_to_books">Successfully moved book to \"Books\" folder</string>
+    <string name="cannot_move_book">Cannot move book</string>
+    <string name="cannot_save_book">Cannot save book</string>
+    <string name="cannot_delete_book">Cannot delete book</string>
+    <string name="cannot_delete_tmp_book">Cannot delete temp file</string>
+    <string name="delete_existing_book">Delete existing book?</string>
+    <string name="replace_existing_book">Replace existing book?</string>
+    <string name="book_is_the_same_marks_set">Destination file is the same, only marks saved</string>
+    <string name="book_is_the_same">Destination file is the same, nothing to do</string>
+    <string name="book_moved">Book was successfully moved</string>
     <string name="quick_translation_dirs">Quick translations direction</string>
     <string name="quick_translation_dirs_info">Specify up to 10 quick translation directions (format \"from_lang=to_lang\")</string>
     <string name="online_offline_dics">Online-offline dics conformity</string>
@@ -1844,5 +1855,21 @@
     <string name="to_menu_action">+ to menu</string>
     <string name="def">Default</string>
     <string name="clear">Clear</string>
-    <string name="non_sensitive">Border non sensitive areas</string>
+    <string name="non_sensitive">Non sensitive areas</string>
+    <string name="select_folder">Select folder</string>
+    <string name="select_format">Select format</string>
+    <string name="select_file_name">Select file name</string>
+    <string name="save_doc_to_library">Save doc to library</string>
+    <string name="additional_marks">Additional marks</string>
+    <string name="no_entries_found">No entries found</string>
+    <string name="uri_error">Exception while trying to open URI</string>
+    <string name="catalog_error">Error occured while reading OPDS catalog</string>
+    <string name="cannot_create_file">Cannot create file</string>
+    <string name="cannot_generate_file_name">Cannot generate file name</string>
+    <string name="move_file">Move file</string>
+    <string name="move_file_then_open">Move, then open file</string>
+    <string name="copy_file">Save file</string>
+    <string name="copy_file_then_open">Save, then open file</string>
+    <string name="add_author_folder">Add author\'s subfolder</string>
+    <string name="do_not_move">Do not move</string>
 </resources>

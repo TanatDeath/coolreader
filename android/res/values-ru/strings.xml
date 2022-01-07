@@ -56,7 +56,7 @@
     <string name="toggle_dict">Переключить словарь</string>
     <string name="mi_bookmark_set">Установить закладку</string>
     <string name="mi_bookmark_goto">Перейти на закладку</string>
-    <string name="mi_goto_page">На страницу №</string>
+    <string name="mi_goto_page">На страницу</string>
     <string name="mi_goto_percent">На позицию %</string>
     <string name="mi_goto_value">На значение</string>
     <string name="mi_filter_option">Поиск в настройках</string>
@@ -660,6 +660,7 @@
     <string name="book_info_book_docversion">Версия документа</string>
     <string name="book_state_toread">К прочтению</string>
     <string name="book_mark_toread">Отметить \"К прочтению\"</string>
+    <string name="set_add_marks">Переместить, установить признаки - после скачивания</string>
     <string name="book_marked_reading">Книга отмечена как \"Читаю\"</string>
     <string name="book_state_reading">Читаю</string>
     <string name="book_state_none">Нет пометки</string>
@@ -1160,7 +1161,7 @@
     <string name="ext_fullscreen_margin_3">Включен, (всегда) 2 текстовые строки в колонтитуле</string>
     <string name="downloaded_from_catalog">Скачано книг:</string>
     <string name="external_doc_option1">Действие - открыть из потока (или установить шрифты)</string>
-    <string name="external_doc_option2">Действие - сохранить на устройство</string>
+    <string name="external_doc_option2">Действие - добавить в библиотеку</string>
     <string name="external_doc_option3">Действие - открыть существующий файл</string>
     <string name="conv_doc_option1">Действие - преобразовать документ</string>
     <string name="conv_doc_option2">Действие - открыть ранее преобразованный документ</string>
@@ -1170,7 +1171,8 @@
     <string name="doc_open_from_stream">Открыть из потока</string>
     <string name="doc_open_from_stream_addinfo">Документ не будет сохранен на устройство, также он не будет доступен в списке последних книг. Если архив содержит шрифты, вы сможете установить их</string>
     <string name="download_path">Путь для сохранения</string>
-    <string name="doc_save_to_device">Сохранить на устройство и открыть</string>
+    <string name="doc_save_to_library">Сохранить в библиотеку</string>
+    <string name="doc_move_to_library">Переместить в библиотеку</string>
     <string name="already_exists">Файл существует</string>
     <string name="open_existing">Открыть существующий файл</string>
     <string name="converted_path">Путь преобразованного документа</string>
@@ -1514,7 +1516,7 @@
     <string name="do_scan">Сканировать выбранное!</string>
     <string name="do_scan_starting">Сканирование запускается...</string>
     <string name="library_maintenance">Обслуживание библиотеки</string>
-    <string name="library_maint_remove">Удалить информацию о книгах, которые НЕ НАХОДЯТСЯ в выбранных категориях</string>
+    <string name="library_maint_remove">Удалить информацию о книгах, которые НЕ НАХОДЯТСЯ в выбранных папках</string>
     <string name="library_maint_remove_non_fav_add_info">Сами файлы НЕ будут удалены с вашего устройства, будет очищена только информация о них во внутренней базе данных KnownReader. Вы можете всегда пересканировать библиотеку впоследствии (Уточнение: но закладки (если создавались в книгах) по удаляемым элементам будут удалены навсегда).</string>
     <string name="library_maint_done_need_restart">Операция выполнена. Рекомендуется перезапустить приложение</string>
     <string name="library_maint_show_statistics">Показать статистику</string>
@@ -1639,6 +1641,15 @@
     <string name="try_to_move_to_books_then_open">Переместить книгу в папку \"Books\", после чего открыть</string>
     <string name="cannot_move_to_books">Невозможно переместить книгу в папку \"Books\"</string>
     <string name="moved_to_books">Книга успешно перенесена в папку \"Books\"</string>
+    <string name="cannot_move_book">Невозможно переместить книгу</string>
+    <string name="cannot_save_book">Невозможно сохранить книгу</string>
+    <string name="cannot_delete_book">Невозможно удалить книгу</string>
+    <string name="cannot_delete_tmp_book">Невозможно удалить временный файл</string>
+    <string name="delete_existing_book">Книга существует, удалить?</string>
+    <string name="replace_existing_book">Книга существует, заменить?</string>
+    <string name="book_is_the_same_marks_set">Файл назначения совпадает, сохранены только отметки</string>
+    <string name="book_is_the_same">Файл назначения совпадает, перемещать нечего</string>
+    <string name="book_moved">Книга успешно перенесена</string>
     <string name="quick_translation_dirs">Быстрые направления перевода</string>
     <string name="quick_translation_dirs_info">Можно указать до 10 быстрых направлений перевода (в формате \"с_языка=на_язык\")</string>
     <string name="online_offline_dics">Соответствие онлайн и офлайн словарей</string>
@@ -1804,6 +1815,22 @@
     <string name="to_menu_action">+ в меню</string>
     <string name="def">По умолчанию</string>
     <string name="clear">Очистить</string>
-    <string name="non_sensitive">Нечуствительные зоны по краям</string>
+    <string name="non_sensitive">Нечувствительные зоны</string>
+    <string name="select_folder">Выбрать папку</string>
+    <string name="select_format">Выбрать формат</string>
+    <string name="select_file_name">Выбрать имя файла</string>
+    <string name="save_doc_to_library">Сохранить в библиотеку</string>
+    <string name="additional_marks">Дополнительные признаки</string>
+    <string name="no_entries_found">Элементы не найдены</string>
+    <string name="uri_error">Ошибка при открытии адреса (URI)</string>
+    <string name="catalog_error">Ошибка при чтении OPDS каталога</string>
+    <string name="cannot_create_file">Невозможно создать файл</string>
+    <string name="cannot_generate_file_name">Невозможно сгенерировать имя файла</string>
+    <string name="move_file">Переместить файл</string>
+    <string name="move_file_then_open">Переместить, а затем открыть файл</string>
+    <string name="copy_file">Сохранить файл</string>
+    <string name="copy_file_then_open">Сохранить, а затем открыть файл</string>
+    <string name="add_author_folder">Добавить подпапку автора</string>
+    <string name="do_not_move">Не перемещать</string>
 </resources>
 

@@ -1,45 +1,21 @@
 package org.coolreader.crengine;
 
-import android.content.ContentResolver;
-import android.content.Intent;
 import android.content.res.TypedArray;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import okhttp3.Call;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class DocConvertDialog extends BaseDialog {
 
@@ -108,7 +84,7 @@ public class DocConvertDialog extends BaseDialog {
 		final String sConvPath = downloadDir.pathname+"/converted/";
 		sConvFile = sConvPath + item.getFilename()+".html";
 		btnOpenExisting.setOnClickListener(v -> {
-			((CoolReader) activity).loadDocumentExt(sConvFile, "");
+			((CoolReader) this.mActivity).loadDocumentExt(sConvFile, "");
 			onPositiveButtonClick();
 		});
 		btnConv.setOnClickListener(v -> {
@@ -117,11 +93,11 @@ public class DocConvertDialog extends BaseDialog {
 				ConvertOdtFormat.convertOdtFile(fileToOpen, sConvPath);
 				File f = new File(sConvFile);
 				if (f.exists()) {
-					((CoolReader) activity).loadDocumentExt(sConvFile, "");
+					((CoolReader) this.mActivity).loadDocumentExt(sConvFile, "");
 					onPositiveButtonClick();
 				}
 			} catch (Exception e) {
-				activity.showToast("exception while converting odt file");
+				this.mActivity.showToast("exception while converting odt file");
 			}
 		});
 		((TextView)view.findViewById(R.id.conv_path)).setText(sConvFile);

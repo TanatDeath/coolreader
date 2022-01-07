@@ -33,6 +33,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.coolreader.CoolReader;
+import org.coolreader.R;
 import org.coolreader.crengine.Engine.DelayedProgress;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -78,29 +79,29 @@ xml:base="http://lib.ololo.cc/opds/">
 		 * @param doc is document
 		 * @param entries is list of entries to add
 		 */
-		public boolean onEntries( DocInfo doc, Collection<EntryInfo> entries );
+		public boolean onEntries(DocInfo doc, Collection<EntryInfo> entries);
 		/**
 		 * All entries are downloaded.
 		 * @param doc is document
 		 * @param entries is list of entries to add
 		 */
-		public boolean onFinish( DocInfo doc, Collection<EntryInfo> entries );
+		public boolean onFinish(DocInfo doc, Collection<EntryInfo> entries);
 		/**
 		 * Before download: request filename to save as.
 		 */
-		public File onDownloadStart( String type, String initial_url, String url );
+		public File onDownloadStart(String type, String initial_url, String url);
 		/**
 		 * Download progress
 		 */
-		public void onDownloadProgress( String type, String url, int percent );
+		public void onDownloadProgress(String type, String url, int percent);
 		/**
 		 * Book is downloaded.
 		 */
-		public void onDownloadEnd( String type, String initial_url, String url, File file );
+		public void onDownloadEnd(String type, String initial_url, String url, File file);
 		/**
 		 * Error occured
 		 */
-		public void onError( String message );
+		public void onError(String message);
 	}
 	
 	public static class DocInfo {
@@ -128,14 +129,14 @@ xml:base="http://lib.ololo.cc/opds/">
 		public String rel;
 		public String title;
 		public String type;
-		public LinkInfo( URL baseURL, Attributes attributes ) {
+		public LinkInfo(URL baseURL, Attributes attributes) {
 			rel = attributes.getValue("rel");
 			type = attributes.getValue("type");
 			title = attributes.getValue("title");
-			href = convertHref( baseURL, attributes.getValue("href") );
+			href = convertHref(baseURL, attributes.getValue("href"));
 		}
 		public static String convertHref(URL baseURL, String href) {
-			if ( href==null )
+			if (href == null)
 				return href;
 			String port = "";
 			if (baseURL.getPort() != 80 && baseURL.getPort() > 0)
@@ -145,7 +146,7 @@ xml:base="http://lib.ololo.cc/opds/">
 				return baseURL.getProtocol() + ":" + href;
 			if (href.startsWith("/"))
 				return baseURL.getProtocol() + "://" + hostPort + href;
-			if ( !href.startsWith("http://") && !href.startsWith("https://") ) {
+			if (!href.startsWith("http://") && !href.startsWith("https://")) {
 				return baseURL.getProtocol() + "://" + hostPort + dirPath(baseURL.getPath()) + "/" + href;
 			}
 			return href;
@@ -154,13 +155,13 @@ xml:base="http://lib.ololo.cc/opds/">
 			return href!=null && href.length()!=0;
 		}
 		public int getPriority() {
-			if ( type==null )
+			if (type == null)
 				return 0;
 			DocumentFormat df = DocumentFormat.byMimeType(type);
-			if ( rel!=null && rel.indexOf("acquisition")<0 && df!=DocumentFormat.FB2 && df!=DocumentFormat.EPUB 
-					&& df!=DocumentFormat.RTF && df!=DocumentFormat.DOC)
+			if (rel != null && rel.indexOf("acquisition") < 0 && df != DocumentFormat.FB2 && df != DocumentFormat.EPUB
+					&& df != DocumentFormat.RTF && df != DocumentFormat.DOC)
 				return 0;
-			return df!=null ? df.getPriority() : 0;
+			return df != null ? df.getPriority() : 0;
 		}
 		@Override
 		public String toString() {
@@ -190,11 +191,11 @@ xml:base="http://lib.ololo.cc/opds/">
 		public LinkInfo getBestAcquisitionLink() {
 			LinkInfo best = null;
 			int bestPriority = 0; 
-			for ( LinkInfo link : links ) {
+			for (LinkInfo link : links) {
 				//boolean isAcquisition = link.rel!=null && link.rel.indexOf("acquisition")>=0;
 				int priority = link.getPriority();
-				if (priority>0 && priority>bestPriority) {
-					if ( link.getPriority()>0 && (best==null || best.getPriority()<link.getPriority()) ) {
+				if (priority > 0 && priority > bestPriority) {
+					if (link.getPriority() > 0 && (best == null || best.getPriority() < link.getPriority())) {
 						best = link;
 						bestPriority = priority;
 					}
@@ -203,11 +204,11 @@ xml:base="http://lib.ololo.cc/opds/">
 			return best;
 		}
 		public String getAuthors() {
-			if ( authors.size()==0 )
+			if (authors.size() == 0)
 				return null;
 			StringBuilder buf = new StringBuilder(100);
-			for ( AuthorInfo a : authors ) {
-				if ( buf.length()>0 )
+			for (AuthorInfo a : authors) {
+				if (buf.length() > 0)
 					buf.append(", ");
 				buf.append(a.name);
 			}
@@ -248,24 +249,24 @@ xml:base="http://lib.ololo.cc/opds/">
 		//2011-05-31T10:28:22+04:00
 		private static SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"); 
 		private static SimpleDateFormat tsFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-		public OPDSHandler( URL url ) {
+		public OPDSHandler(URL url) {
 			this.url = url;
 		}
 		public void setUrl(URL url) {
 			this.url = url;
 		}
-		private long parseTimestamp( String ts ) {
-			if ( ts==null )
+		private long parseTimestamp(String ts) {
+			if (ts == null)
 				return 0;
 			ts = ts.trim();
 			try {
-				if ( ts.length()=="2010-01-10T10:01:10Z".length() )
+				if (ts.length() == "2010-01-10T10:01:10Z".length())
 					return tsFormat2.parse(ts).getTime();
-				if ( ts.length()=="2011-11-11T11:11:11+67:87".length()&& ts.lastIndexOf(":")==ts.length()-3 ) {
+				if (ts.length() == "2011-11-11T11:11:11+67:87".length() && ts.lastIndexOf(":") == ts.length()-3) {
 					ts = ts.substring(0, ts.length()-3) + ts.substring(0, ts.length()-2);
 					return tsFormat.parse(ts).getTime();
 				}
-				if ( ts.length()=="2011-11-11T11:11:11+6787".length()) {
+				if (ts.length() == "2011-11-11T11:11:11+6787".length()) {
 					return tsFormat.parse(ts).getTime();
 				}
 			} catch (ParseException e) {
@@ -288,64 +289,64 @@ xml:base="http://lib.ololo.cc/opds/">
 				throws SAXException {
 			super.characters(ch, start, length);
 			
-			String s = new String( ch, start, length);
+			String s = new String(ch, start, length);
 			s = s.trim();
 			if (s.length()==0 || (s.length()==1 && s.charAt(0) == '\n') )
 				return; // ignore empty line
 			//L.d(tab() + "  {" + s + "}");
 			String currentElement = elements.peek();
-			if ( currentElement==null )
+			if (currentElement == null)
 				return;
-			if ( insideFeed ) {
-				if ( isEntryEq(currentElement, "id") ) {
-					if ( insideEntry )
+			if (insideFeed) {
+				if (isEntryEq(currentElement, "id")) {
+					if (insideEntry)
 						entryInfo.id = s;
 					else
 						docInfo.id = s;
-				} else if ( isEntryEq(currentElement, "updated") ) {
+				} else if (isEntryEq(currentElement, "updated")) {
 					long ts = parseTimestamp(s);
-					if ( insideEntry )
+					if (insideEntry)
 						entryInfo.updated = ts;
 					else
 						docInfo.updated = ts;
-				} else if ( isEntryEq(currentElement, "title") ) {
-					if ( !insideEntry ) {
+				} else if (isEntryEq(currentElement, "title")) {
+					if (!insideEntry) {
 						docInfo.title = s;
 					} else {
 						entryInfo.title = entryInfo.title + s;
 					}
-				} else if ( isEntryEq(currentElement, "summary") ) {
-					if ( insideEntry )
+				} else if (isEntryEq(currentElement, "summary")) {
+					if (insideEntry)
 						entryInfo.summary = entryInfo.summary + s;
-				} else if ( isEntryEq(currentElement, "name") ) {
-					if ( authorInfo != null )
+				} else if (isEntryEq(currentElement, "name")) {
+					if (authorInfo != null)
 						authorInfo.name = s;
-				} else if ( isEntryEq(currentElement, "uri") ) {
-					if ( authorInfo!=null )
+				} else if (isEntryEq(currentElement, "uri")) {
+					if (authorInfo!=null)
 						authorInfo.uri = s;
-				} else if ( isEntryEq(currentElement, "icon") ) {
-					if ( !insideEntry )
+				} else if (isEntryEq(currentElement, "icon")) {
+					if (!insideEntry)
 						docInfo.icon = s;
 					else
 						entryInfo.icon = s;
-				} else if ( isEntryEq(currentElement, "link") ) {
+				} else if (isEntryEq(currentElement, "link")) {
 					// rel, type, title, href
-//					if ( !insideEntry )
+//					if (!insideEntry )
 //						docInfo.icon = s;
 //					else
 //						entryInfo.icon = s;
-				} else if ( isEntryEq(currentElement, "content") ) {
-					if ( insideEntry )
+				} else if (isEntryEq(currentElement, "content")) {
+					if (insideEntry)
 						entryInfo.content = entryInfo.content + s;
-				} else if ( isEntryEq(currentElement, "subtitle") ) {
-					if ( !insideEntry )
+				} else if (isEntryEq(currentElement, "subtitle") ) {
+					if (!insideEntry)
 						docInfo.subtitle = s;
-				} else if ( isEntryEq(currentElement, "language") ) {
-					if ( !insideEntry ) {
+				} else if (isEntryEq(currentElement, "language")) {
+					if (!insideEntry) {
 						docInfo.language = s;
 						entryInfo.otherElements.put(currentElement, s);
 					}
-				} else if ( insideEntryTitle ) {
+				} else if (insideEntryTitle) {
 					if (entryInfo.title.length() > 0)
 						entryInfo.title = entryInfo.title + " ";
 					entryInfo.title = entryInfo.title + s;
@@ -361,16 +362,16 @@ xml:base="http://lib.ololo.cc/opds/">
 			super.endDocument();
 			if (EXTENDED_LOG) L.d("endDocument: " + entries.size() + " entries parsed");
 			if (EXTENDED_LOG) 
-				for ( EntryInfo entry : entries ) {
+				for (EntryInfo entry : entries) {
 					L.d("   " + entry.title + " : " + entry.link.toString());
 				}
 		}
 
 		private String tab() {
-			if ( level<=1 )
+			if (level <= 1)
 				return "";
 			StringBuffer buf = new StringBuffer(level*2);
-			for ( int i=1; i<level; i++ )
+			for (int i=1; i<level; i++)
 				buf.append("  ");
 			return buf.toString();
 		}
@@ -380,42 +381,42 @@ xml:base="http://lib.ololo.cc/opds/">
 				String qName, Attributes attributes)
 				throws SAXException {
 			super.startElement(uri, localName, qName, attributes);
-			if ( qName!=null && qName.length()>0 )
+			if (qName!=null && qName.length()>0)
 				localName = qName;
 			level++;
 			//L.d(tab() + "<" + localName + ">");
 			//currentAttributes = attributes;
 			elements.push(localName);
 			//String currentElement = elements.peek();
-			if ( !insideFeed && "feed".equals(localName) ) {
+			if (!insideFeed && "feed".equals(localName)) {
 				insideFeed = true;
-			} else if ( "entry".equals(localName) ) {
-				if ( !insideFeed ) {
+			} else if ("entry".equals(localName)) {
+				if (!insideFeed) {
 					insideFeed = true;
 					//singleEntry = true;
 				}
 				insideEntry = true;
 				entryInfo = new EntryInfo();
-			} else if ( "category".equals(localName) ) {
-				if ( insideEntry ) {
+			} else if ("category".equals(localName)) {
+				if (insideEntry) {
 					String category = attributes.getValue("label");
 					if ( category!=null )
 						entryInfo.categories.add(category);
 				}
-			} else if ( "id".equals(localName) ) {
+			} else if ("id".equals(localName)) {
 				
-			} else if ( "updated".equals(localName) ) {
+			} else if ("updated".equals(localName)) {
 				
-			} else if ( "title".equals(localName) ) {
+			} else if ("title".equals(localName)) {
 				insideEntryTitle = insideEntry;
-			} else if ( "name".equals(localName) ) {
+			} else if ("name".equals(localName)) {
 
-			} else if ( "link".equals(localName) ) {
+			} else if ("link".equals(localName)) {
 				LinkInfo link = new LinkInfo(url, attributes);
-				if ( link.isValid() && insideFeed ) {
+				if (link.isValid() && insideFeed) {
 					if (EXTENDED_LOG) L.d(tab()+link.toString());
-					if ( insideEntry ) {
-						if ( link.type!=null ) {
+					if (insideEntry) {
+						if (link.type!=null) {
 							entryInfo.links.add(link);
 							int priority = link.getPriority();
 							if ( link.type.startsWith("application/atom+xml") ) {
@@ -431,9 +432,9 @@ xml:base="http://lib.ololo.cc/opds/">
 							}
 						}
 					} else {
-						if ( "self".equals(link.rel) )
+						if ("self".equals(link.rel))
 							docInfo.selfLink = link;
-						else if ( "alternate".equals(link.rel) )
+						else if ("alternate".equals(link.rel))
 							docInfo.alternateLink = link;
 						else if ( "next".equals(link.rel) )
 							docInfo.nextLink = link;
@@ -669,7 +670,8 @@ xml:base="http://lib.ololo.cc/opds/">
 			}
 			return null;
 		}
-		private void downloadBook( final String type, final String initial_url, final String url, InputStream is, int contentLength, final String fileName, final boolean isZip ) throws Exception {
+		private void downloadBook(final String type, final String initial_url, final String url, InputStream is, int contentLength,
+								  final String fileName, final String defFileName, final boolean isZip) throws Exception {
 			L.d("Download requested: " + type + " " + url + " " + contentLength);
 			DocumentFormat fmt = DocumentFormat.byMimeType(type);
 			if ( fmt==null ) {
@@ -681,17 +683,44 @@ xml:base="http://lib.ololo.cc/opds/">
 				L.d("Cannot find writable location for downloaded file " + url);
 				throw new Exception("Cannot save file " + url);
 			}
-			final File outFile = generateFileName( outDir, fileName, type, isZip );
-			if ( outFile==null ) {
-				L.d("Cannot generate file name");
-				throw new Exception("Cannot generate file name");
+			boolean needRetry = false;
+			boolean fileNotCreated = false;
+			// try with file name
+			File outFile = generateFileName(outDir, fileName, type, isZip);
+			try {
+				needRetry = outFile == null;
+				if (!needRetry) {
+					L.d("Creating file: " + outFile.getAbsolutePath());
+					fileNotCreated = (outFile.exists() || !outFile.createNewFile());
+				} else
+					L.d("Cannot generate file name - we'll try def name");
+			} catch (IOException e) {
+				String errMes = StrUtils.getNonEmptyStr(e.getMessage().toString(), true);
+				needRetry = errMes.contains("too long");
+				if (!needRetry) {
+					if (fileNotCreated) {
+						L.d("Cannot create file " + outFile.getAbsolutePath());
+						throw new Exception(coolReader.getString(R.string.cannot_create_file) +
+								" " + outFile.getAbsolutePath());
+					}
+				}
 			}
-			L.d("Creating file: " + outFile.getAbsolutePath());
-			if ( outFile.exists() || !outFile.createNewFile() ) {
-				L.d("Cannot create file " + outFile.getAbsolutePath());
-				throw new Exception("Cannot create file");
+			// try with def file name
+			if (needRetry) {
+				outFile = generateFileName(outDir, defFileName, type, isZip);
+				if (outFile == null) {
+					L.d("Cannot generate file name "+defFileName);
+					throw new Exception(coolReader.getString(R.string.cannot_generate_file_name) +
+							" " + defFileName);
+				}
+				L.d("Creating file: " + outFile.getAbsolutePath());
+				fileNotCreated = (outFile.exists() || !outFile.createNewFile());
+				if (fileNotCreated) {
+					L.d("Cannot create file " + outFile.getAbsolutePath());
+					throw new Exception(coolReader.getString(R.string.cannot_create_file) +
+							" " + outFile.getAbsolutePath());
+				}
 			}
-			
 			L.d("Download started: " + outFile.getAbsolutePath());
 //			long lastTs = System.currentTimeMillis(); 
 //			int lastPercent = -1;
@@ -727,7 +756,8 @@ xml:base="http://lib.ololo.cc/opds/">
 				}
 			}
 			L.d("Download finished");
-			BackgroundThread.instance().executeGUI(() -> callback.onDownloadEnd(type, initial_url, url, outFile));
+			final File outFileF = outFile;
+			BackgroundThread.instance().executeGUI(() -> callback.onDownloadEnd(type, initial_url, url, outFileF));
 		}
 		public static int findSubstring( byte[]buf, String str ) {
 			for ( int i=0; i<buf.length-str.length(); i++ ) {
@@ -853,10 +883,15 @@ xml:base="http://lib.ololo.cc/opds/">
 		            connection.setDoInput(true);
 					String fileName = null;
 		            String disp = connection.getHeaderField("Content-Disposition");
-		            if ( disp!=null ) {
-		            	int p = disp.indexOf("filename=");
-		            	if ( p>0 ) {
+		            if (disp != null) {
+		            	int p = disp.toLowerCase().indexOf("filename=");
+						if (p > 0) {
 		            		fileName = disp.substring(p + 9);
+		            		if (fileName.startsWith("\"")) {
+								fileName = fileName.substring(1);
+								if (fileName.contains("\""))
+									fileName = fileName.substring(0, fileName.indexOf("\""));
+							}
 		            	}
 		            }
 		            //connection.setDoOutput(true);
@@ -904,7 +939,7 @@ xml:base="http://lib.ololo.cc/opds/">
 					if (EXTENDED_LOG) L.d("Entity content length: " + contentLen);
 					if (EXTENDED_LOG) L.d("Entity content type: " + contentType);
 					if (EXTENDED_LOG) L.d("Entity content encoding: " + contentEncoding);
-					setProgressMessage( url.toString(), contentLen );
+					setProgressMessage(url.toString(), contentLen);
 					InputStream is = connection.getInputStream();
 					if (delayedProgress != null)
 						delayedProgress.cancel();
@@ -926,7 +961,7 @@ xml:base="http://lib.ololo.cc/opds/">
 					}
 					if ( contentType.startsWith("application/atom+xml") ) {
 						if (EXTENDED_LOG) L.d("Parsing feed");
-						parseFeed( is );
+						parseFeed(is);
 						itemsLoadedPartially = true;
 						if (handler.docInfo.nextLink!=null && handler.docInfo.nextLink.type.startsWith("application/atom+xml;profile=opds-catalog")) {
 							if (handler.entries.size() < MAX_OPDS_ITEMS) {
@@ -942,23 +977,24 @@ xml:base="http://lib.ololo.cc/opds/">
 						}
 							
 					} else {
-						if ( fileName==null )
+						if (fileName == null)
 							fileName = defaultFileName;
 						L.d("Downloading book: " + contentEncoding);
-						downloadBook(contentType, initial_url.toString(), url.toString(), is, contentLen, fileName, isZip);
+						downloadBook(contentType, initial_url.toString(), url.toString(), is,
+								contentLen, fileName, defaultFileName, isZip);
 						hideProgress();
 						loadNext = false;
 						itemsLoadedPartially = false;
 					}
 				} catch (Exception e) {
-					L.e("Exception while trying to open URI " + url.toString()
+					L.e(coolReader.getString(R.string.uri_error) + " " + url.toString()
 							+" "+e.getMessage(), e);
 					if ( progressShown )
 						Services.getEngine().hideProgress();
 					String sErr = e.getMessage();
 					if (!StrUtils.isEmptyStr(sErr))
 						if (sErr.length()>100) sErr = sErr.substring(0,99);
-					onError("Error occured while reading OPDS catalog: "+sErr);
+					onError(coolReader.getString(R.string.catalog_error) + ": "+sErr);
 					coolReader.getDB().updateOPDSCatalog(catalogURL, "was_error", "1");
 					Log.i("WASERROR", catalogURL+": 1");
 					coolReader.setNeedRefreshOPDS();

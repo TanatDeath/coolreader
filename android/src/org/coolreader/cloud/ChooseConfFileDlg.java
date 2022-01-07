@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -207,10 +206,10 @@ public class ChooseConfFileDlg extends BaseDialog {
 		} else {
 			btnThisDevice.setBackgroundColor(colorGrayCT);
 		}
-		btnThisDevice.setTextColor(activity.getTextColor(colorIcon));
+		btnThisDevice.setTextColor(mActivity.getTextColor(colorIcon));
 		mCoolReader.tintViewIcons(btnDeleteAll,true);
 		btnDeleteAll.setBackgroundColor(colorGrayCT2);
-		btnDeleteAll.setTextColor(activity.getTextColor(colorIcon));
+		btnDeleteAll.setTextColor(mActivity.getTextColor(colorIcon));
 	}
 
 	public void setButtonsState() {

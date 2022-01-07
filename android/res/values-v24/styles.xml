@@ -348,7 +348,7 @@
         <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
-        <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
+        <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
@@ -777,7 +777,7 @@
         <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
-        <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
+        <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
@@ -1188,7 +1188,7 @@
         <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
-        <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
+        <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
@@ -1539,7 +1539,7 @@
         <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
-        <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
+        <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
@@ -1908,7 +1908,7 @@
         <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
-        <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
+        <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
@@ -2338,7 +2338,7 @@
         <item name="attr_cr3_toc_item_expanded">@drawable/icons8_toc_item_expanded</item>
         <item name="attr_cr3_toc_item_normal">@drawable/icons8_toc_item_normal</item>
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
-        <item name="attr_ic_media_play_ell">@drawable/icons8_play_ell</item>
+        <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>

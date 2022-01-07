@@ -5,13 +5,9 @@ import org.coolreader.R;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.parser.Parser;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,11 +16,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -224,7 +218,7 @@ public class OPDSCatalogEditDialog extends BaseDialog {
 	}
 	
 	private void save() {
-		activity.getDB().saveOPDSCatalog(mItem.id,
+		this.mActivity.getDB().saveOPDSCatalog(mItem.id,
 				urlEdit.getText().toString(), nameEdit.getText().toString(), 
 				usernameEdit.getText().toString(), passwordEdit.getText().toString(),
 				proxyaddrEdit.getText().toString(), proxyportEdit.getText().toString(),

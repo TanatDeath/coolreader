@@ -378,23 +378,23 @@ public class FileUtils {
             }
         }
         if (item != null) {
+            String finalSPathZ = sPathZ;
+            if (mActivity.settings().getBool(Settings.PROP_APP_DOWNLOADED_SET_ADD_MARKS, false)) {
+                File f = new File(finalSPathZ);
+                SaveDocDialog dlg = new SaveDocDialog(mActivity, true,
+                        f.getParent(), f.getAbsolutePath(),
+                        item.getFilename(), Utils.getFileExtension(item.getFilename()),
+                        f.getAbsolutePath(), null, null);
+                dlg.show();
+                return;
+            }
             Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item,
                     bookInfo -> {
                         BookInfo bif2 = bookInfo;
-
                         if (bif2 == null) bif2 = new BookInfo(item);
                         final BookInfo bif = bif2;
                         if (StrUtils.isEmptyStr(bif.getFileInfo().annotation))
                             bif.getFileInfo().setAnnotation(annot);
-                        if (bif.getFileInfo().getTitle() != null) {
-                            if (mActivity.settings().getBool(Settings.PROP_APP_MARK_DOWNLOADED_TO_READ, false)) {
-                                bif.getFileInfo().setReadingState(FileInfo.STATE_TO_READ);
-                                mActivity.showToast(item.pathname+" "+
-                                        mActivity.getString(R.string.mi_opds_mark_as_toread));
-                            }
-                            mActivity.getDB().saveBookInfo(bif);
-                            mActivity.getDB().flush();
-                        }
                         FileInfo dir1 =bif.getFileInfo().parent;
                         if (dir1 == null) {
                             dir1 = mScanner.findParent(bif.getFileInfo(), downloadDir);
@@ -408,9 +408,7 @@ public class FileUtils {
                         }
                         mActivity.showBookInfo(bif, BookInfoDialog.OPDS_FINAL_INFO, currDirectory, fileOrDir);
                     });
-        }
-        else
-            mActivity.loadDocument(fi, true);
+        } else mActivity.loadDocument(fi, true);
     }
 
     public static File getFile(String fname) {

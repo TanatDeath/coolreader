@@ -13,7 +13,7 @@ public enum DocumentFormat {
 			new String[] {}),// doc_format_none,
 	FB2("fb2.css", R.raw.fb2, R.drawable.icons8_fb2, true, true, 12,
 			new String[] {".fb2", ".fb2.zip"},
-			new String[] {"application/fb2+zip"}), // doc_format_fb2,
+			new String[] {"application/fb2+zip", "text/fb2+xml"}), // doc_format_fb2,
 	FB3("fb3.css", R.raw.fb3, R.drawable.cr3_browser_book_fb3, true, true, 11,
 			new String[] {".fb3", ".fb3.zip" },
 			new String[] {"application/fb3"}), // doc_format_fb3,
@@ -149,22 +149,22 @@ public enum DocumentFormat {
 		return false;
 	}
 	
-	public static DocumentFormat byExtension( String filename )
+	public static DocumentFormat byExtension(String filename)
 	{
 		String s = filename.toLowerCase();
-		for ( int i=0; i<DocumentFormat.values().length; i++ )
+		for (int i = 0; i < DocumentFormat.values().length; i++)
 			if ( values()[i].matchExtension(s))
 				return values()[i];
 		return null;
 	}
 	
-	public static DocumentFormat byMimeType( String format )
+	public static DocumentFormat byMimeType(String format)
 	{
-		if ( format==null )
+		if (format == null)
 			return null;
 		String s = format.toLowerCase();
-		for ( int i=0; i<DocumentFormat.values().length; i++ )
-			if ( values()[i].matchMimeType(s))
+		for (int i = 0; i < DocumentFormat.values().length; i++)
+			if (values()[i].matchMimeType(s))
 				return values()[i];
 		return null;
 	}

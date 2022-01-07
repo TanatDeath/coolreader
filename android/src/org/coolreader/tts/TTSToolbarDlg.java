@@ -72,6 +72,7 @@ public class TTSToolbarDlg implements Settings {
 	private String mCurPageTextNext;
 	private String mCurPageTextNext2;
 	private final ImageButton mPlayPauseButton;
+	private final ImageButton mPlayLockButton;
 	private final TextView mVolumeTextView;
 	private final TextView mSpeedTextView;
 	private final ImageView btnDecVolume;
@@ -341,6 +342,7 @@ public class TTSToolbarDlg implements Settings {
 
 		if (mPanel!=null) {
 			mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
+			mPanel.findViewById(R.id.tts_play_lock).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 			mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
@@ -430,6 +432,7 @@ public class TTSToolbarDlg implements Settings {
 				if (val1 != 0) c.setAlpha(130);
 				else c.setAlpha(255);
 				mPanel.findViewById(R.id.tts_play_pause).setBackgroundDrawable(c);
+				mPanel.findViewById(R.id.tts_play_lock).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_back).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_forward).setBackgroundDrawable(c);
 				mPanel.findViewById(R.id.tts_stop).setBackgroundDrawable(c);
@@ -526,7 +529,9 @@ public class TTSToolbarDlg implements Settings {
 							BackgroundThread.instance().postGUI(() ->
 							{
 								mPlayPauseButton.setImageResource(Utils.resolveResourceIdByAttr(
-										mCoolReader, R.attr.attr_ic_media_pause, R.drawable.ic_media_pause));
+										mCoolReader, R.attr.attr_ic_media_pause, R.drawable.icons8_pause));
+								mPlayLockButton.setImageResource(Utils.resolveResourceIdByAttr(
+										mCoolReader, R.attr.attr_ic_media_pause, R.drawable.icons8_pause));
 								repaintButtons();
 							});
 							startMotionWatchdog();
@@ -537,7 +542,9 @@ public class TTSToolbarDlg implements Settings {
 							BackgroundThread.instance().postGUI(() ->
 							{
 								mPlayPauseButton.setImageResource(Utils.resolveResourceIdByAttr(
-										mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play));
+										mCoolReader, R.attr.attr_ic_media_play, R.drawable.icons8_play));
+								mPlayLockButton.setImageResource(Utils.resolveResourceIdByAttr(
+										mCoolReader, R.attr.attr_ic_media_play_lock, R.drawable.icons8_play_lock));
 								repaintButtons();
 							});
 							if (mMotionWatchdog != null)
@@ -688,10 +695,17 @@ public class TTSToolbarDlg implements Settings {
 		lblLang = mPanel.findViewById(R.id.lbl_lang);
 		mPlayPauseButton = mPanel.findViewById(R.id.tts_play_pause);
 		mPlayPauseButton.setImageResource(
-				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.ic_media_play)
+				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.icons8_play)
 				//R.drawable.ic_media_play
 		);
 		mPlayPauseButton.setBackgroundDrawable(c);
+
+		mPlayLockButton = mPanel.findViewById(R.id.tts_play_lock);
+		mPlayLockButton.setImageResource(
+				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play_lock, R.drawable.icons8_play_lock)
+				//R.drawable.ic_media_play
+		);
+		mPlayLockButton.setBackgroundDrawable(c);
 
 		ImageButton backButton = mPanel.findViewById(R.id.tts_back);
 		ImageButton forwardButton = mPanel.findViewById(R.id.tts_forward);
@@ -702,6 +716,9 @@ public class TTSToolbarDlg implements Settings {
 		mPlayPauseButton.setBackgroundDrawable(c);
 		mPlayPauseButton.setOnClickListener(
 				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE)));
+		mPlayLockButton.setBackgroundDrawable(c);
+		mPlayLockButton.setOnClickListener(
+				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PLAY_LOCK)));
 		backButton.setBackgroundDrawable(c);
 		backButton.setOnClickListener(
 				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PREV)));
