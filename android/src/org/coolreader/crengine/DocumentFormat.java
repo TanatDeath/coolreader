@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import android.content.Context;
 
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 public enum DocumentFormat {
 	/// lvtinydom.h: source document formats

@@ -18,6 +18,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.coolreader.CoolReader;
+import org.coolreader.eink.EinkScreen;
+import org.coolreader.eink.EinkScreenDummy;
+import org.coolreader.eink.EinkScreenNook;
+import org.coolreader.eink.EinkScreenOnyx;
+import org.coolreader.eink.EinkScreenTolino;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
@@ -32,6 +37,8 @@ import org.coolreader.geo.GeoToastView;
 import org.coolreader.geo.MetroStation;
 import org.coolreader.geo.TransportStop;
 import org.coolreader.options.OptionsDialog;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -535,6 +542,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_log,
 						 R.attr.attr_icons8_sun_auto,
 						 R.attr.attr_icons8_delete_database,
+						 R.attr.attr_icons8_physics,
+						 R.attr.attr_icons8_settings_from_hist,
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -639,6 +648,8 @@ public class BaseActivity extends Activity implements Settings {
 		int btnLogDrawableRes = a.getResourceId(90, 0);
 		int btnLightDrawableRes = a.getResourceId(91, 0);
 		int brDeleteDatabase = a.getResourceId(92, 0);
+		int brPhysics = a.getResourceId(93, 0);
+		int brSettingsFromHist = a.getResourceId(94, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -813,6 +824,8 @@ public class BaseActivity extends Activity implements Settings {
 		if (btnLogDrawableRes != 0) ReaderAction.SAVE_LOGCAT.setIconId(btnLogDrawableRes);
 		if (btnLightDrawableRes != 0) ReaderAction.SHOW_SYSTEM_BACKLIGHT_DIALOG.setIconId(btnLightDrawableRes);
 		if (brDeleteDatabase != 0) ReaderAction.INIT_APP_DIALOG.setIconId(brDeleteDatabase);
+		if (brPhysics != 0) ReaderAction.EXPERIMENAL_FEATURE.setIconId(brPhysics);
+		//if (brSettingsFromHist != 0) // not needed )))
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1573,6 +1586,7 @@ public class BaseActivity extends Activity implements Settings {
 
 	private EinkScreen.EinkUpdateMode mScreenUpdateMode = EinkScreen.EinkUpdateMode.Clear;
 	private int mEinkOnyxNeedBypass = 0;
+	private int mEinkOnyxScreenFullUpdateMethod = 0;
 	private int mEinkOnyxExtraDelayFullRefresh = -1;
 
 	public EinkScreen.EinkUpdateMode getScreenUpdateMode() {
@@ -1592,6 +1606,13 @@ public class BaseActivity extends Activity implements Settings {
 		if (null != mEinkScreen) {
 			mEinkOnyxNeedBypass = needBypass;
 			mEinkScreen.setNeedBypass(needBypass);
+		}
+	}
+
+	public void setScreenFullUpdateMethod(int method) {
+		if (null != mEinkScreen) {
+			mEinkOnyxScreenFullUpdateMethod = method;
+			mEinkScreen.setScreenFullUpdateMethod(method);
 		}
 	}
 
@@ -1875,6 +1896,10 @@ public class BaseActivity extends Activity implements Settings {
 				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap, null, true));
 			else
 				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_brightness, null, true));
+			View v1 = windowCenterPopup.getContentView().findViewById(R.id.sepRow);
+			View v2 = windowCenterPopup.getContentView().findViewById(R.id.sepRow2);
+			if (v1 != null) v1.setBackgroundColor(getTextColor(themeColors.get(R.attr.colorIcon)));
+			if (v2 != null) v2.setBackgroundColor(getTextColor(themeColors.get(R.attr.colorIcon)));
 			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
 			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 				toast_ll.setBackgroundColor(Color.argb(100, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
@@ -2078,6 +2103,10 @@ public class BaseActivity extends Activity implements Settings {
 				windowCenterPopup.setBackgroundDrawable(null);
 				LayoutInflater inflater = (LayoutInflater) surface.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				windowCenterPopup.setContentView(inflater.inflate(R.layout.custom_toast_wrap_2line, null, true));
+				View v1 = windowCenterPopup.getContentView().findViewById(R.id.sepRow);
+				View v2 = windowCenterPopup.getContentView().findViewById(R.id.sepRow2);
+				if (v1 != null) v1.setBackgroundColor(getTextColor(colorIcon));
+				if (v2 != null) v2.setBackgroundColor(getTextColor(colorIcon));
 			}
 			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.toast_ll_wrap);
 			toast_ll.setBackgroundColor(colorGrayC);
@@ -2287,6 +2316,8 @@ public class BaseActivity extends Activity implements Settings {
 			setScreenUpdateMode(EinkScreen.EinkUpdateMode.byCode(Utils.parseInt(value, 0)), getContentView());
         } else if (key.equals(PROP_APP_EINK_ONYX_NEED_BYPASS)) {
 			setScreenNeedBypass(Utils.parseInt(value, 0));
+		} else if (key.equals(PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD)) {
+			setScreenFullUpdateMethod(Utils.parseInt(value, 0));
 		} else if (key.equals(PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH)) {
 			setScreenExtraDelayFullRefresh(Utils.parseInt(value, -1));
 		} else if (key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL)) {
@@ -2662,6 +2693,12 @@ public class BaseActivity extends Activity implements Settings {
 		for (Map.Entry<String, String> entry : saveSett.entrySet()) {
 			loadedSettings.setProperty(entry.getKey(), entry.getValue());
 		}
+		// now we'll go for every loaded setting and merge them into base settings
+		for (Map.Entry<Object, Object> entry : loadedSettings.entrySet()) {
+			String key = (String) entry.getKey();
+			String value = (String) entry.getValue();
+			props.setProperty(key, value);
+		}
 		try {
 			if (this instanceof CoolReader)
 				if (((CoolReader) this).getmReaderFrame()!=null) {
@@ -2676,8 +2713,11 @@ public class BaseActivity extends Activity implements Settings {
 				}
 		} catch (Exception e) {
 		}
-		mSettingsManager.setSettings(loadedSettings, 0, true);
+		//mSettingsManager.setSettings(loadedSettings, 0, true);
+		mSettingsManager.setSettings(props, 0, true);
 		currentProfile = profile;
+		mSettingsManager.saveSettings(0, null);
+		mSettingsManager.saveSettings(currentProfile, null);
 	}
     
 	public void setSetting(String name, String value, boolean notify) {

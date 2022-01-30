@@ -11,6 +11,7 @@ import org.coolreader.plugins.OnlineStoreBookInfo;
 import org.coolreader.plugins.OnlineStorePluginManager;
 import org.coolreader.plugins.OnlineStoreWrapper;
 import org.coolreader.plugins.PurchaseBookCallback;
+import org.coolreader.utils.Utils;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -312,7 +313,7 @@ public class OnlineStoreBookInfoDialog extends BaseDialog {
 					SaveDocDialog dlg = new SaveDocDialog(mActivity, true,
 							savedFileName.getParent(), savedFileName.getAbsolutePath(),
 							item.getFilename(), Utils.getFileExtension(item.getFilename()),
-							savedFileName.getAbsolutePath(), null, null);
+							savedFileName.getAbsolutePath(), null, "");
 					dlg.show();
 //                    Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), item, bookInfo -> {
 //						item.setReadingState(FileInfo.STATE_TO_READ);

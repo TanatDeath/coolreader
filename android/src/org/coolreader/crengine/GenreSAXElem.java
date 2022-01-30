@@ -1,7 +1,5 @@
 package org.coolreader.crengine;
 
-import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,8 +9,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;

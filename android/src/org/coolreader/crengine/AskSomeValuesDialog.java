@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ public class AskSomeValuesDialog extends BaseDialog {
 		setTitle(sTitle);
 		this.callback = callback;
 		mInflater = LayoutInflater.from(getContext());
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
 		View view = mInflater.inflate(R.layout.ask_some_values_dialog, null);
 		TextView someText = (TextView) view.findViewById(R.id.some_text);
@@ -123,54 +126,54 @@ public class AskSomeValuesDialog extends BaseDialog {
 	protected void onPositiveButtonClick() {
 		super.onPositiveButtonClick();
 		ArrayList<String> res = new ArrayList<String>();
-		for (int i = 1; i<10; i++) {
+		for (int i = 1; i <= 10; i++) {
 			if (i == 1) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit1);
+				EditText et = view.findViewById(R.id.some_value_edit1);
 				if (et != null) res.add(et.getText().toString());
 					else res.add("");
 			}
 			if (i == 2) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit2);
+				EditText et = view.findViewById(R.id.some_value_edit2);
 				if (et != null) res.add(et.getText().toString());
 					else res.add("");
 			}
 			if (i == 3) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit3);
+				EditText et = view.findViewById(R.id.some_value_edit3);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 4) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit4);
+				EditText et = view.findViewById(R.id.some_value_edit4);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 5) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit5);
+				EditText et = view.findViewById(R.id.some_value_edit5);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 6) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit6);
+				EditText et = view.findViewById(R.id.some_value_edit6);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 7) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit7);
+				EditText et = view.findViewById(R.id.some_value_edit7);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 8) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit8);
+				EditText et = view.findViewById(R.id.some_value_edit8);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 9) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit9);
+				EditText et = view.findViewById(R.id.some_value_edit9);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}
 			if (i == 10) {
-				EditText et = (EditText) view.findViewById(R.id.some_value_edit10);
+				EditText et = view.findViewById(R.id.some_value_edit10);
 				if (et != null) res.add(et.getText().toString());
 				else res.add("");
 			}

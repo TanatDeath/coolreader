@@ -8,10 +8,9 @@ import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.dic.struct.DictEntry;
-import org.coolreader.dic.struct.ExampleLine;
 import org.coolreader.dic.struct.Lemma;
 import org.coolreader.dic.struct.TranslLine;
 import org.jsoup.Jsoup;
@@ -21,8 +20,6 @@ import org.jsoup.select.Elements;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.HttpUrl;
 

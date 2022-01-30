@@ -20,6 +20,7 @@ import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Settings;
+import org.coolreader.utils.Utils;
 
 import java.util.EnumSet;
 
@@ -107,6 +108,7 @@ public class KeyMapOption extends SubmenuOption {
 		tvSearchText.setTextColor(mActivity.getTextColor(colorIcon));
 		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		tvSearchText.setHintTextColor(colorIcon128);
+		if (isEInk) Utils.setSolidEditEink(tvSearchText);
 
 		if (DeviceInfo.NOOK_NAVIGATION_KEYS) {
 			addKey(listView, ReaderView.KEYCODE_PAGE_TOPLEFT, "Top left navigation button");

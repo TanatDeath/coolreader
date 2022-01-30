@@ -21,7 +21,7 @@ import com.dropbox.core.DbxWebAuth;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;

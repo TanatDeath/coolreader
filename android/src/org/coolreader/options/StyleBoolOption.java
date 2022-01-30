@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import org.coolreader.R;
 import org.coolreader.crengine.OptionOwner;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 public class StyleBoolOption extends OptionBase {
 	private String onValue;

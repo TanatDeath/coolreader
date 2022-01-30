@@ -9,7 +9,7 @@ import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.SearchMatch;
 import com.dropbox.core.v2.files.SearchResult;
 
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.util.ArrayList;
 import java.util.List;

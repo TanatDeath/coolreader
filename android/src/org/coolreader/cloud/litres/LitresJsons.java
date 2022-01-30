@@ -6,8 +6,8 @@ import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.History;
 import org.coolreader.crengine.Services;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +24,7 @@ import java.util.TimeZone;
 
 import okhttp3.HttpUrl;
 
-import static org.coolreader.crengine.Utils.cleanupHtmlTags;
+import static org.coolreader.utils.Utils.cleanupHtmlTags;
 
 public class LitresJsons {
 

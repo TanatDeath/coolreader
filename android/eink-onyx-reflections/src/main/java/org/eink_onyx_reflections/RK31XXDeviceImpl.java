@@ -21,6 +21,7 @@ class RK31XXDeviceImpl implements OnyxEinkDeviceImpl {
 	private static Method sMethodByPass = null;
 	private static Method sMethodSupportRegal = null;
 	private static Method sMethodRepaintEverything = null;
+	private static Method sMethodInvalidate = null;
 	private static Method sMethodEnableA2;
 	private static Method sMethodDisableA2;
 	private static Method sMethodSetDefaultUpdateMode = null;
@@ -74,6 +75,7 @@ class RK31XXDeviceImpl implements OnyxEinkDeviceImpl {
 		sMethodClearApplicationFastMode = Utils.getMethod(viewClass, "clearApplicationFastMode");
 		sMethodEnableScreenUpdate = Utils.getMethod(viewClass, "enableScreenUpdate", Boolean.TYPE);
 		sMethodRepaintEverything = Utils.getMethod(viewClass, "repaintEverything", Integer.TYPE);
+		sMethodInvalidate = Utils.getMethod(viewClass, "invalidate", Integer.TYPE);
 		sMethodEnableA2 = Utils.getMethod(viewClass, "enableA2");
 		sMethodDisableA2 = Utils.getMethod(viewClass, "disableA2");
 	}
@@ -211,6 +213,11 @@ class RK31XXDeviceImpl implements OnyxEinkDeviceImpl {
 	}
 
 	@Override
+	public void invalidate(UpdateMode mode, View view) {
+		Utils.invokeMethod(sMethodInvalidate, view, getUpdateModeValue(mode));
+	}
+
+	@Override
 	public boolean setViewDefaultUpdateMode(View view, UpdateMode mode) {
 		return Utils.invokeMethod(sMethodSetDefaultUpdateMode, view, getUpdateModeValue(mode)) != null;
 	}
@@ -268,4 +275,5 @@ class RK31XXDeviceImpl implements OnyxEinkDeviceImpl {
 		}
 		return value;
 	}
+
 }

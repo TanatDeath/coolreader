@@ -1,8 +1,6 @@
 package org.coolreader.crengine;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +10,8 @@ import java.util.zip.CRC32;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,7 +22,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -42,9 +41,12 @@ public class CoverpageManager {
 
 	public void setmCoolReader(CoolReader mCoolReader) {
 		this.mCoolReader = mCoolReader;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 	}
 
 	private CoolReader mCoolReader;
+
+	boolean isEInk = false;
 
 	public static class ImageItem {
 		public FileInfo file;
@@ -960,19 +962,19 @@ public class CoverpageManager {
 		author = StrUtils.ellipsize(author.replaceAll("\\|",", "), 30);
 
 		TextPaint pNormal = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-		pNormal.setColor(Color.WHITE);
+		pNormal.setColor(isEInk? Color.BLACK: Color.WHITE);
 		pNormal.setTextSize(h / 11);
 
 		TextPaint pBold = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-		pBold.setColor(Color.WHITE);
+		pBold.setColor(isEInk? Color.BLACK: Color.WHITE);
 		pBold.setTextSize(h / 14);
 		pBold.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 
 		Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 		Canvas c = new Canvas(bitmap);
 		c.save();
-		c.drawColor(randomColor((title + author).hashCode()));
-
+		if (!isEInk)
+			c.drawColor(randomColor((title + author).hashCode()));
 		int margin = Dips.dpToPx(10);
 		StaticLayout mTextLayout = new StaticLayout(author, pBold, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
 		c.translate(margin, Dips.dpToPx(10));
@@ -983,7 +985,12 @@ public class CoverpageManager {
 		text2.draw(c);
 
 		Canvas c2 = new Canvas(bitmap);
-		Drawable bookBGWithMark = CoverpageManager.this.getmCoolReader().getApplicationContext().
+		Drawable bookBGWithMark;
+		if (isEInk)
+			bookBGWithMark = CoverpageManager.this.getmCoolReader().getApplicationContext().
+					getResources().getDrawable(R.drawable.bookeffect_eink);
+		else
+			bookBGWithMark = CoverpageManager.this.getmCoolReader().getApplicationContext().
 				getResources().getDrawable(R.drawable.bookeffect_cr);
 		bookBGWithMark.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
 		bookBGWithMark.draw(c2);

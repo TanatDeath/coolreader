@@ -18,7 +18,7 @@ import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;

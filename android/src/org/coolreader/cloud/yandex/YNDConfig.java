@@ -3,7 +3,7 @@ package org.coolreader.cloud.yandex;
 import org.coolreader.BuildConfig;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -7,7 +7,7 @@ import android.widget.LinearLayout;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.OptionOwner;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.layouts.FlowLayout;
 
 public class FlowListOption extends ListOption {
@@ -31,28 +31,31 @@ public class FlowListOption extends ListOption {
 		for (int i = 0; i < list.size(); i++) {
 			ViewGroup opt = (ViewGroup) mInflater.inflate(R.layout.option_flow_value, null);
 			Button dicButton1 = opt.findViewById(R.id.btn_item);
-			Button dicButton = new Button(mActivity);
-			dicButton.setText(list.get(i).label);
-			dicButton.setTextSize(dicButton1.getTextSize());
-			dicButton.setTextColor(mActivity.getTextColor(colorIcon));
+			Button flButton = new Button(mActivity);
+			flButton.setText(list.get(i).label);
+			flButton.setTextSize(dicButton1.getTextSize());
+			flButton.setTextColor(mActivity.getTextColor(colorIcon));
 
 			String currValue = mProperties.getProperty(property);
 			boolean isSelected = list.get(i).value!=null && currValue!=null && list.get(i).value.equals(currValue) ;
-			if (isSelected)
-				dicButton.setBackgroundColor(colorGray);
-			else {
-				dicButton.setBackgroundColor(colorGrayC);
-				Utils.setDashedButton1(dicButton);
+			if (isSelected) {
+				flButton.setBackgroundColor(colorGray);
+				if (isEInk) Utils.setSolidButtonEink(flButton);
+			} else {
+				flButton.setBackgroundColor(colorGrayC);
+				Utils.setDashedButton1(flButton);
+				if (isEInk) Utils.setWhiteButtonEink(flButton);
 			}
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 			llp.setMargins(8, 4, 4, 8);
-			dicButton.setLayoutParams(llp);
-			dicButton.setMaxLines(1);
-			fl.addView(dicButton);
+			flButton.setLayoutParams(llp);
+			flButton.setMaxLines(1);
+
+			fl.addView(flButton);
 			final OptionsDialog.Three item = list.get(i);
-			dicButton.setOnClickListener(v -> {
+			flButton.setOnClickListener(v -> {
 				onClick(item);
 				dlg.dismiss();
 			});

@@ -293,6 +293,9 @@
     <string name="options_selection_action_dictionary_5">Find in dictionary 5</string>
     <string name="options_selection_action_dictionary_6">Find in dictionary 6</string>
     <string name="options_selection_action_dictionary_7">Find in dictionary 7</string>
+    <string name="options_selection_action_dictionary_8">Find in dictionary 8</string>
+    <string name="options_selection_action_dictionary_9">Find in dictionary 9</string>
+    <string name="options_selection_action_dictionary_10">Find in dictionary 10</string>
     <string name="options_selection_action_dictionary_list">Dictionary list</string>
     <string name="options_selection_action_copy">Copy to clipboard</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
@@ -403,6 +406,11 @@
     <string name="dlg_about_textures_dirs">Textures directories:</string>
     <string name="dlg_about_backgrounds_dirs">Backgrounds directories:</string>
     <string name="dlg_about_hyphenations_dirs">Hyphenation dictionaries directories:</string>
+    <string name="dlg_about_offlinedicts_dirs">Offline dictionaries directories:</string>
+    <string name="dlg_about_customcovers_dirs">Custom book covers directories:</string>
+    <string name="dlg_about_download_dirs">Download directories:</string>
+    <string name="dlg_about_cloudsync_dirs">Cloud sync directories:</string>
+    <string name="dlg_about_icons_dirs">Icons directories:</string>
     <string name="dlg_about_copyright">© KnownReader team, 2020</string>
     <string name="dlg_about_contributors_">and contributors…</string>
     <string name="mi_book_browser_normal_mode">Normal mode</string>
@@ -1507,6 +1515,7 @@
     <string name="font_tweaks">Font tweaks</string>
     <string name="spacing_settings">Line, word and symbol spacings</string>
     <string name="migrate_cr_settings">Copy settings from CoolReader</string>
+    <string name="restore_settings">Restore settings</string>
     <string name="migrate_cr_settings_add_info">CoolReader\"s files will not be modified, you will be able to use CoolReader as usual</string>
     <string name="migrate_cr_settings_profiles">Profiles count:</string>
     <string name="migrate_cr_settings_q">Are you sure? Current settings will be replaced</string>
@@ -1695,6 +1704,8 @@
     <string name="online_offline_dics_add_info_ext">You can specify an offline dic using instead of online, while your device is offline. Input dic number</string>
     <string name="lang_pair">Language pair</string>
     <string name="conformity">Conformity</string>
+    <string name="offline_dics_dialog">Offline dictionaries</string>
+    <string name="offline_dics_dialog_add_info">Manage offline dictionaries</string>
     <string name="select_transl_dir">Select translation direction</string>
     <string name="all_languages">Select from all languages</string>
     <string name="page_flipping_type">Gesture page flipping</string>
@@ -1872,4 +1883,22 @@
     <string name="copy_file_then_open">Save, then open file</string>
     <string name="add_author_folder">Add author\'s subfolder</string>
     <string name="do_not_move">Do not move</string>
+    <string name="offline_dics">Offline dics</string>
+    <string name="found_dics">Found dics</string>
+    <string name="imported_dics">Imported dics</string>
+    <string name="options_selection_action_toolbar_short">Dictionary panel</string>
+    <string name="inspector_mode_no_dic_history">Do not save to search history in inspector mode</string>
+    <string name="word_count">word count</string>
+    <string name="convert_dic">convert dic</string>
+    <string name="converted_dic">dic converted</string>
+    <string name="tts_sentence_pause">Pause between sentences, ms</string>
+    <string name="eink_onyx_full_update">Screen full update method</string>
+    <string name="eink_full_update_auto">Auto</string>
+    <string name="eink_onyx_full_update_add_info">Try to change method if full screen update goes with flickering or the screen updates twice</string>
+    <string name="eink_full_update_method1">Method 1</string>
+    <string name="eink_full_update_method2">Method 2</string>
+    <string name="exp_feature">Experimental feature</string>
+    <string name="exp_feature_add_info">This feature is being developed right now - use it only if you are active tester</string>
+    <string name="click_to_restore">Click to restore settings</string>
+    <string name="click_to_restore_warn">Proceed to restore settings? This cannot be undone!</string>
 </resources>

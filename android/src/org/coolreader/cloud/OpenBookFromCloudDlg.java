@@ -30,7 +30,7 @@ import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.util.ArrayList;
 import java.util.Date;

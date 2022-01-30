@@ -147,7 +147,7 @@ public class FilebrowserOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.authors_aliases_load),
 				Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD, mActivity.getString(R.string.authors_aliases_load_add_info), this.lastFilteredValue,
-				view ->
+				(view, optionLabel, optionValue) ->
 				{
 					try {
 						CoolReader cr = (CoolReader) mActivity;

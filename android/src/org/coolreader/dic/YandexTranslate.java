@@ -10,7 +10,7 @@ import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

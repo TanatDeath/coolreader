@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,7 +23,17 @@ import java.util.TimeZone;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FileInfo.SortOrder;
+import org.coolreader.crengine.FileInfoOperationListener;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.OPDSUtil;
+import org.coolreader.crengine.Scanner;
+import org.coolreader.crengine.Selection;
+import org.coolreader.crengine.Services;
 import org.coolreader.db.BaseDB;
 
 import android.annotation.TargetApi;
@@ -45,31 +54,18 @@ import android.text.SpannableString;
 import android.text.format.DateFormat;
 import android.text.style.BackgroundColorSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
-
-import org.coolreader.R;
-import org.coolreader.crengine.FileInfo.SortOrder;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
 
 public class Utils {
 
@@ -896,7 +892,7 @@ public class Utils {
 		return buf.toString();
 	}
 
-	final static OPDSUtil.SubstTable[] substTables = { 
+	final static OPDSUtil.SubstTable[] substTables = {
 		new OPDSUtil.SubstTable(0x430, new String[]{"a", "b", "v", "g", "d", "e", "zh", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "c", "ch", "sh", "sch", "'", "y", "i", "e", "yu", "ya"}),
 		new OPDSUtil.SubstTable(0x410, new String[]{"A", "B", "V", "G", "D", "E", "Zh", "Z", "I", "J", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "F", "H", "C", "Ch", "Sh", "Sch", "'", "Y", "I", "E", "Yu", "Ya"}),
 	};
@@ -1084,8 +1080,21 @@ public class Utils {
 		}
 	}
 
+	public static String getFileNameWOExtension(String fileName) {
+		if (StrUtils.isEmptyStr(fileName)) {
+			return "";
+		} else {
+			int index = fileName.lastIndexOf('.');
+			return index >= 0 ? fileName.substring(0, index) : "";
+		}
+	}
+
 	public static String getFileExtension(File file) {
 		return getFileExtension(file.getName());
+	}
+
+	public static String getFileNameWOExtension(File file) {
+		return getFileNameWOExtension(file.getName());
 	}
 
 	public static void hideView(View l) {
@@ -1111,6 +1120,84 @@ public class Utils {
 			btn.setBackgroundResource(R.drawable.button_bg_dashed_border1);
 		else
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
+	public static void setDashedButtonEink(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_dashed_border_eink);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
+	public static void setSolidButtonEink(ImageView btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_solid_border_eink);
+	}
+
+	public static void setWhiteButtonEink(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundColor(Color.WHITE);
+	}
+
+	public static void setWhiteButtonEink(ImageView btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundColor(Color.WHITE);
+	}
+
+	public static void setSolidButtonEink(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_solid_border_eink);
+		else {
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			btn.setBackgroundColor(Color.WHITE);
+		}
+	}
+
+	public static void setSolidButtonEink(ImageButton btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_solid_border_eink);
+		else
+			btn.setBackgroundColor(Color.WHITE);
+	}
+
+	public static void setSolidLLEink(LinearLayout v) {
+		if (v == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			v.setBackgroundResource(R.drawable.button_bg_solid_border_eink);
+		else
+			v.setBackgroundColor(Color.WHITE);
+	}
+
+	public static void setSolidEditEink(EditText edt) {
+		if (edt == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			edt.setBackgroundResource(R.drawable.edit_bg_solid_border_eink);
+		else {
+			edt.setBackgroundColor(Color.WHITE);
+		}
+	}
+
+	public static void setBtnBackground(Object o, Drawable d, boolean isEInk) {
+		if (o instanceof Button) {
+			Button btn = (Button) o;
+			if (!isEInk)
+				btn.setBackground(d);
+			else
+				Utils.setSolidButtonEink(btn);
+		}
+		if (o instanceof ImageButton) {
+			ImageButton btn = (ImageButton) o;
+			if (!isEInk)
+				btn.setBackground(d);
+			else
+				Utils.setSolidButtonEink(btn);
+		}
 	}
 
 	public static int findNearestIndex(List<Integer> list, int value) {
@@ -1162,12 +1249,14 @@ public class Utils {
 		int colorThemeBlue;
 		int colorThemeGreen;
 		int colorThemeGray;
+		int colorThemeGray2;
 		TypedArray a = cr.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon,
 						R.attr.colorIconL,
 						R.attr.colorThemeBlue,
 						R.attr.colorThemeGreen,
-						R.attr.colorThemeGray});
+						R.attr.colorThemeGray,
+						R.attr.colorThemeGray2});
 		colorGrayC = a.getColor(0, Color.GRAY);
 		colorGray = a.getColor(1, Color.GRAY);
 		colorIcon = a.getColor(2, Color.BLACK);
@@ -1175,6 +1264,7 @@ public class Utils {
 		colorThemeBlue = a.getColor(4, Color.BLUE);
 		colorThemeGreen = a.getColor(5, Color.GREEN);
 		colorThemeGray = a.getColor(6, Color.GRAY);
+		colorThemeGray2 = a.getColor(7, Color.GRAY);
 		a.recycle();
 		if (forEink) {
 			res.put(R.attr.colorThemeGray2Contrast, Color.WHITE);
@@ -1184,6 +1274,7 @@ public class Utils {
 			res.put(R.attr.colorThemeBlue, Color.GRAY);
 			res.put(R.attr.colorThemeGreen, Color.GRAY);
 			res.put(R.attr.colorThemeGray, Color.GRAY);
+			res.put(R.attr.colorThemeGray2, Color.GRAY);
 		}
 		res.put(R.attr.colorThemeGray2Contrast, colorGrayC);
 		res.put(R.attr.colorThemeGray2, colorGray);
@@ -1218,6 +1309,26 @@ public class Utils {
 			return defValue;
 		try {
 			n = Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			n = defValue;
+		}
+		if (n < minValue)
+			n = minValue;
+		else if (n > maxValue)
+			n = maxValue;
+		return n;
+	}
+
+	public static double parseDouble(String str, double defValue) {
+		return parseDouble(str, defValue, Double.MIN_VALUE, Double.MAX_VALUE);
+	}
+
+	public static double parseDouble(String str, double defValue, double minValue, double maxValue) {
+		double n;
+		if (null == str)
+			return defValue;
+		try {
+			n = Double.parseDouble(str);
 		} catch (NumberFormatException e) {
 			n = defValue;
 		}

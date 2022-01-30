@@ -15,7 +15,7 @@ import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.options.SelectionModesOption;
 

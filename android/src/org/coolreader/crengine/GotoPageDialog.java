@@ -20,6 +20,8 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

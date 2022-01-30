@@ -2,6 +2,8 @@ package org.coolreader.crengine;
 
 import android.annotation.TargetApi;
 
+import org.coolreader.utils.StrUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

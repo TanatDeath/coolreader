@@ -8,7 +8,7 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

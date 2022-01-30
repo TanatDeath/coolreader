@@ -6,6 +6,7 @@ import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.plugins.OnlineStorePluginManager;
 import org.coolreader.plugins.OnlineStoreWrapper;
+import org.coolreader.utils.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;

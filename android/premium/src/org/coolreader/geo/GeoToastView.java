@@ -148,7 +148,7 @@ public class GeoToastView {
         Toast t = queue.poll();
         window = new PopupWindow(t.anchor.getContext());
         window.setTouchInterceptor((v, event) -> {
-            if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
+            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                 window.dismiss();
                 return true;
             }

@@ -34,6 +34,7 @@ class SDMDeviceImpl implements OnyxEinkDeviceImpl {
 	private static Method sMethodClearApplicationFastMode = null;
 	private static Method sMethodEnableScreenUpdate = null;
 	private static Method sMethodRepaintEverything_2 = null;
+	private static Method sMethodInvalidate = null;
 	private static Method sMethodGetFrontLightValue;
 	private static Method sMethodSetFrontLightValue;
 	private static Method sMethodSetFrontLightConfigValue;
@@ -95,6 +96,7 @@ class SDMDeviceImpl implements OnyxEinkDeviceImpl {
 		sMethodClearApplicationFastMode = Utils.getMethod(viewClass, "clearApplicationFastMode", Boolean.TYPE);
 		sMethodEnableScreenUpdate = Utils.getMethod(viewClass, "enableScreenUpdate", Boolean.TYPE);
 		sMethodRepaintEverything_2 = Utils.getMethod(viewClass, "repaintEverything", Integer.TYPE);
+		sMethodInvalidate = Utils.getMethod(viewClass, "invalidate", Integer.TYPE);
 		sMethodEnableA2 = Utils.getMethod(viewClass, "enableA2");
 		sMethodDisableA2 = Utils.getMethod(viewClass, "disableA2");
 	}
@@ -238,6 +240,11 @@ class SDMDeviceImpl implements OnyxEinkDeviceImpl {
 	}
 
 	@Override
+	public void invalidate(UpdateMode mode, View view) {
+		Utils.invokeMethod(sMethodInvalidate, view, getUpdateModeValue(mode));
+	}
+
+	@Override
 	public boolean setViewDefaultUpdateMode(View view, UpdateMode mode) {
 		return Utils.invokeMethod(sMethodSetDefaultUpdateMode, view, getUpdateModeValue(mode)) != null;
 	}
@@ -325,4 +332,5 @@ class SDMDeviceImpl implements OnyxEinkDeviceImpl {
 		}
 		return value;
 	}
+
 }

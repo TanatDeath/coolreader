@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 import android.util.TypedValue;
 import android.view.LayoutInflater;

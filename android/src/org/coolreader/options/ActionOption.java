@@ -9,7 +9,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 public class ActionOption extends ListOption {
 

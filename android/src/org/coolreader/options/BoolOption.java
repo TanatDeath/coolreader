@@ -12,8 +12,8 @@ import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 public class BoolOption extends OptionBase {
 

@@ -3,7 +3,7 @@ package org.coolreader.plugins;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 
 public class OnlineStoreBooks implements AsyncResponse {

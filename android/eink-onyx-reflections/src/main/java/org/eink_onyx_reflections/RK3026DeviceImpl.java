@@ -178,6 +178,11 @@ class RK3026DeviceImpl implements OnyxEinkDeviceImpl {
 	}
 
 	@Override
+	public void invalidate(UpdateMode mode, View view) {
+		//Utils.invokeMethod(sMethodInvalidate, view, getUpdateModeValue(mode));
+	}
+
+	@Override
 	public boolean setViewDefaultUpdateMode(View view, UpdateMode mode) {
 		return Utils.invokeMethod(sMethodViewRequestEpdMode, view, getEinkModeFromUpdateMode(mode)) != null;
 	}

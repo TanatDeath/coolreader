@@ -10,7 +10,7 @@ import android.widget.ListAdapter;
 
 import org.coolreader.R;
 import org.coolreader.crengine.BaseListView;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.util.ArrayList;
 

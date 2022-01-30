@@ -2,6 +2,8 @@ package org.coolreader.crengine;
 
 import android.app.Activity;
 
+import org.coolreader.utils.Utils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;

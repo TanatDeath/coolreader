@@ -35,7 +35,6 @@ import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.ResizeHistory;
-import org.coolreader.crengine.SaveDocDialog;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -84,7 +83,7 @@ import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.sync2.OnSyncStatusListener;
 import org.coolreader.sync2.SyncOptions;
 import org.coolreader.sync2.SyncService;
@@ -92,7 +91,7 @@ import org.coolreader.sync2.SyncServiceAccessor;
 import org.coolreader.sync2.Synchronizer;
 import org.coolreader.sync2.googledrive.GoogleDriveRemoteAccess;
 import org.coolreader.userdic.UserDicEntry;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.db.BaseDB;
 import org.coolreader.db.MainDB;
 import org.coolreader.geo.GeoLastData;
@@ -469,6 +468,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				log.e("DataDir removed by other application!");
 			}
 		}
+		CloudSync.saveSettingsFilesToHistory(CoolReader.this);
 		createDynShortcuts();
 		createGeoListener();
 		GenreSAXElem.mActivity = CoolReader.this;
@@ -561,6 +561,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			setDict6(value);
 		} else if (key.equals(PROP_APP_DICTIONARY_7)) {
 			setDict7(value);
+		} else if (key.equals(PROP_APP_DICTIONARY_8)) {
+			setDict8(value);
+		} else if (key.equals(PROP_APP_DICTIONARY_9)) {
+			setDict9(value);
+		} else if (key.equals(PROP_APP_DICTIONARY_10)) {
+			setDict10(value);
 		} else if (key.equals(PROP_APP_DICT_WORD_CORRECTION)) {
 			setDictWordCorrection(value);
 		} else if (key.equals(PROP_APP_SHOW_USER_DIC_PANEL)) {
@@ -1169,6 +1175,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		Uri uri = null;
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 		String processText = intent.getStringExtra("PROCESS_TEXT");
+		if (intentAction.equals("KnownReader.sendText")) {
+			processText = intent.getStringExtra("extraText").replace("\\n", "\n");
+			if ((processText.startsWith("\"")) && (processText.endsWith("\""))) {
+				processText = processText.substring(1, processText.length()-1);
+			}
+		}
 		if (!StrUtils.isEmptyStr(processText)) {
 			boolean allOk = false;
 			if (getReaderView() != null)
@@ -1606,7 +1618,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 	}
-	
+
 	@Override
 	protected void onStart() {
 		log.i("KnownReader.onStart() version=" + getVersion() + ", fileToLoadOnStart=" + fileToLoadOnStart);
@@ -2632,6 +2644,18 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void setDict7(String id) {
 		mDictionaries.setDict7(id, this);
+	}
+
+	public void setDict8(String id) {
+		mDictionaries.setDict8(id, this);
+	}
+
+	public void setDict9(String id) {
+		mDictionaries.setDict9(id, this);
+	}
+
+	public void setDict10(String id) {
+		mDictionaries.setDict10(id, this);
 	}
 
 	public void setDictWordCorrection (String id) {

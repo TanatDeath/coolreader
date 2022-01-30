@@ -9,7 +9,7 @@
             >
         <provider
                 android:name="org.coolreader.GenericFileProvider"
-                android:authorities="org.knownreader.experimental.fileprovider"
+                android:authorities="com.onyx.org.knownreader.experimental.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data

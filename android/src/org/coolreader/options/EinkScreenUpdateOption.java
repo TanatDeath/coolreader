@@ -6,7 +6,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.DeviceInfo;
-import org.coolreader.crengine.EinkScreen;
+import org.coolreader.eink.EinkScreen;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
 
@@ -49,6 +49,22 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 	};
 
 	int[] mEinkOnyxNeedBypassAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	int[] mEinkFullScreenUpdateMode = new int[] {
+			0, 1, 2
+	};
+
+	int[] mEinkFullScreenUpdateModeTitles = new int[] {
+			R.string.eink_full_update_auto,
+			R.string.eink_full_update_method1,
+			R.string.eink_full_update_method2
+	};
+
+	int[] mEinkFullScreenUpdateModeAddInfos = new int[] {
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
@@ -164,6 +180,14 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 								setIconIdByAttr(R.attr.attr_icons8_eink_sett, R.drawable.icons8_eink_sett);
 				listView.add(optionNeedBypass);
 
+				OptionBase optionFSUMethod =
+						new ListOption(mOwner, mActivity.getString(R.string.eink_onyx_full_update), Settings.PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD,
+								mActivity.getString(R.string.eink_onyx_full_update_add_info), this.lastFilteredValue).
+								add(mEinkFullScreenUpdateMode, mEinkFullScreenUpdateModeTitles, mEinkFullScreenUpdateModeAddInfos).
+								setDefaultValue("0").
+								setIconIdByAttr(R.attr.attr_icons8_eink_sett, R.drawable.icons8_eink_sett);
+				listView.add(optionFSUMethod);
+
 				OptionBase optionExtraDelayFullRefresh =
 						new FlowListOption(mOwner, mActivity.getString(R.string.eink_onyx_add_delay_full_refresh), Settings.PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH,
 								mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
@@ -215,6 +239,8 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 		this.updateFilteredMark(mActivity.getString(R.string.eink_onyx_add_delay_full_refresh), Settings.PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH,
 				mActivity.getString(R.string.option_add_info_empty_text));
 		for (int i: mEinkOnyxExtraDelayFullRefreshTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		this.updateFilteredMark(mActivity.getString(R.string.eink_onyx_full_update), Settings.PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD,
+				mActivity.getString(R.string.eink_onyx_full_update_add_info));
 		return this.lastFiltered;
 	}
 

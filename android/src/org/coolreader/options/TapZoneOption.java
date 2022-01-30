@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -11,15 +12,12 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.GotoPageDialog;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.RepeatOnTouchListener;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.readerview.ReaderView;
-
-import java.util.Locale;
 
 public class TapZoneOption extends SubmenuOption {
 
@@ -120,6 +118,7 @@ public class TapZoneOption extends SubmenuOption {
 			option.onSelect();
 			return true;
 		});
+		if (isEInk) Utils.setSolidLLEink((LinearLayout) view);
 	}
 
 	private void setTxtText(TextView txtPerc, int progress, boolean isLeft) {
@@ -150,6 +149,7 @@ public class TapZoneOption extends SubmenuOption {
 		seekLeft = grid.findViewById(R.id.seek_margin_l);
 		seekRight = grid.findViewById(R.id.seek_margin_r);
 		btnMinusLeft = grid.findViewById(R.id.btn_minus_left);
+		if (isEInk) Utils.setSolidButtonEink(btnMinusLeft);
 		btnMinusLeft.setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> {
 					if (screenWidth == 0) return;
@@ -159,6 +159,7 @@ public class TapZoneOption extends SubmenuOption {
 				}
 		));
 		btnMinusRight = grid.findViewById(R.id.btn_minus_right);
+		if (isEInk) Utils.setSolidButtonEink(btnMinusRight);
 		btnMinusRight.setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> {
 					if (screenWidth == 0) return;
@@ -168,6 +169,7 @@ public class TapZoneOption extends SubmenuOption {
 				}
 		));
 		btnPlusLeft = grid.findViewById(R.id.btn_plus_left);
+		if (isEInk) Utils.setSolidButtonEink(btnPlusLeft);
 		btnPlusLeft.setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> {
 					if (screenWidth == 0) return;
@@ -177,6 +179,7 @@ public class TapZoneOption extends SubmenuOption {
 				}
 		));
 		btnPlusRight = grid.findViewById(R.id.btn_plus_right);
+		if (isEInk) Utils.setSolidButtonEink(btnPlusRight);
 		btnPlusRight.setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> {
 					if (screenWidth == 0) return;

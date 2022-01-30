@@ -257,6 +257,7 @@
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
+        <item name="attr_icons8_settings_from_hist">@drawable/icons8_settings_from_hist</item>
         <item name="attr_icons8_position_to_gd_interval">@drawable/icons8_position_to_gd_interval</item>
         <item name="attr_icons8_google_translate">@drawable/icons8_google_translate</item>
         <item name="attr_icons8_google_translate_2">@drawable/icons8_google_translate_2</item>
@@ -395,6 +396,7 @@
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
+        <item name="attr_ic_media_pause_lock">@drawable/icons8_pause_lock</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
         <item name="attr_ic_media_stop">@drawable/icons8_stop</item>
@@ -680,6 +682,7 @@
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
+        <item name="attr_icons8_settings_from_hist">@drawable/icons8_settings_from_hist</item>
         <item name="attr_icons8_position_to_gd_interval">@drawable/icons8_position_to_gd_interval</item>
         <item name="attr_icons8_google_translate">@drawable/icons8_google_translate</item>
         <item name="attr_icons8_google_translate_2">@drawable/icons8_google_translate_2</item>
@@ -818,6 +821,7 @@
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
+        <item name="attr_ic_media_pause_lock">@drawable/icons8_pause_lock</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
         <item name="attr_ic_media_stop">@drawable/icons8_stop</item>
@@ -1088,6 +1092,7 @@
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
+        <item name="attr_icons8_settings_from_hist">@drawable/icons8_settings_from_hist</item>
         <item name="attr_icons8_position_to_gd_interval">@drawable/icons8_position_to_gd_interval</item>
         <item name="attr_icons8_google_translate">@drawable/icons8_google_translate</item>
         <item name="attr_icons8_google_translate_2">@drawable/icons8_google_translate_2</item>
@@ -1226,6 +1231,7 @@
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
+        <item name="attr_ic_media_pause_lock">@drawable/icons8_pause_lock</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
         <item name="attr_ic_media_stop">@drawable/icons8_stop</item>
@@ -1439,6 +1445,7 @@
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
+        <item name="attr_icons8_settings_from_hist">@drawable/icons8_settings_from_hist</item>
         <item name="attr_icons8_position_to_gd_interval">@drawable/icons8_position_to_gd_interval</item>
         <item name="attr_icons8_google_translate">@drawable/icons8_google_translate</item>
         <item name="attr_icons8_google_translate_2">@drawable/icons8_google_translate_2</item>
@@ -1577,6 +1584,7 @@
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
+        <item name="attr_ic_media_pause_lock">@drawable/icons8_pause_lock</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
         <item name="attr_ic_media_stop">@drawable/icons8_stop</item>
@@ -1805,6 +1813,7 @@
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
+        <item name="attr_icons8_settings_from_hist">@drawable/icons8_settings_from_hist</item>
         <item name="attr_icons8_position_to_gd_interval">@drawable/icons8_position_to_gd_interval</item>
         <item name="attr_icons8_google_translate">@drawable/icons8_google_translate</item>
         <item name="attr_icons8_google_translate_2">@drawable/icons8_google_translate_2</item>
@@ -1943,6 +1952,7 @@
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
+        <item name="attr_ic_media_pause_lock">@drawable/icons8_pause_lock</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
         <item name="attr_ic_media_stop">@drawable/icons8_stop</item>
@@ -2229,6 +2239,7 @@
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
+        <item name="attr_icons8_settings_from_hist">@drawable/icons8_settings_from_hist</item>
         <item name="attr_icons8_position_to_gd_interval">@drawable/icons8_position_to_gd_interval</item>
         <item name="attr_icons8_google_translate">@drawable/icons8_google_translate</item>
         <item name="attr_icons8_google_translate_2">@drawable/icons8_google_translate_2</item>
@@ -2367,6 +2378,7 @@
         <item name="attr_ic_media_play">@drawable/icons8_play</item>
         <item name="attr_ic_media_play_lock">@drawable/icons8_play_lock</item>
         <item name="attr_ic_media_pause">@drawable/icons8_pause</item>
+        <item name="attr_ic_media_pause_lock">@drawable/icons8_pause_lock</item>
         <item name="attr_ic_media_rew">@drawable/icons8_rewind</item>
         <item name="attr_ic_media_ff">@drawable/icons8_fast_forward</item>
         <item name="attr_ic_media_stop">@drawable/icons8_stop</item>

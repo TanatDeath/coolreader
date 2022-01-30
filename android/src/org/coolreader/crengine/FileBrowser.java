@@ -28,6 +28,9 @@ import org.coolreader.db.CRDBService;
 import org.coolreader.db.MainDB;
 import org.coolreader.options.ListOption;
 import org.coolreader.plugins.*;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -203,8 +206,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			menu.clear();
 		    MenuInflater inflater = mActivity.getMenuInflater();
 		    if (isRecentDir()) {
-			    inflater.inflate(R.menu.cr3_file_browser_recent_context_menu, menu);
-			    menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_recent_book));
+		    	// highly experimental - for SergeyTSA
+				inflater.inflate(R.menu.cr3_file_browser_file_context_menu, menu);
+				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
+//			    inflater.inflate(R.menu.cr3_file_browser_recent_context_menu, menu);
+//			    menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_recent_book));
 		    } else if (currDirectory.isOPDSRoot()) {
 			    inflater.inflate(R.menu.cr3_file_browser_opds_context_menu, menu);
 			    menu.setHeaderTitle(mActivity.getString(R.string.menu_title_catalog));

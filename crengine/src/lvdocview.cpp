@@ -1409,7 +1409,10 @@ int LVDocView::getPageHeaderHeight() const {
 	if ((iMod == 1)&&(!isPortrait)) iMarg = 0;
 	if ((iMod == 2)&&(isPortrait)) iMarg = 0;
 	if (((iLines == PAGE_HEADER_POS_TOP_2LINES) || (iLines == PAGE_HEADER_POS_BOTTOM_2LINES)) &&(iMarg<h2)) iMarg = h2; //always 2 lines mode
-    return h + (navbarh + ((navbarh * 3) / 2) + hm + 1)/2 + iMarg + twenty;
+	int retV = h + (navbarh + ((navbarh * 3) / 2) + hm + 1)/2 + iMarg + twenty;
+	if ( retV > ((m_pageRects[0].height() - m_pageMargins.top - m_pageMargins.bottom) / 2) )
+		retV = ((m_pageRects[0].height() - m_pageMargins.top - m_pageMargins.bottom) / 2);
+	return retV;
 }
 
 bool LVDocView::isPageHeader2lines() {

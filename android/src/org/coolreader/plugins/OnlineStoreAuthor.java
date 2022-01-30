@@ -1,6 +1,6 @@
 package org.coolreader.plugins;
 
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 public class OnlineStoreAuthor {
 	public String id;

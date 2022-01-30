@@ -4,55 +4,16 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "org.knownreader.experimental",
+  "applicationId": "com.onyx.org.knownreader.experimental",
   "variantName": "experimentalRelease",
   "elements": [
     {
       "type": "UNIVERSAL",
       "filters": [],
       "attributes": [],
-      "versionCode": 202201061,
-      "versionName": "2022.01.06.1",
-      "outputFile": "universal_20220107_1449_KnownReader_2022.01.06.1_release_EXPERIMENTAL.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "arm64-v8a"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 202201067,
-      "versionName": "2022.01.06.1",
-      "outputFile": "arm64-v8a_20220107_1449_KnownReader_2022.01.06.1_release_EXPERIMENTAL.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "x86"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 202201065,
-      "versionName": "2022.01.06.1",
-      "outputFile": "x86_20220107_1449_KnownReader_2022.01.06.1_release_EXPERIMENTAL.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "x86_64"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 202201066,
-      "versionName": "2022.01.06.1",
-      "outputFile": "x86_64_20220107_1449_KnownReader_2022.01.06.1_release_EXPERIMENTAL.apk"
+      "versionCode": 202201161,
+      "versionName": "2022.01.16.1",
+      "outputFile": "universal_20220130_1209_KnownReader_2022.01.16.1_release_EXPERIMENTAL.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -63,9 +24,48 @@
         }
       ],
       "attributes": [],
-      "versionCode": 202201063,
-      "versionName": "2022.01.06.1",
-      "outputFile": "armeabi-v7a_20220107_1449_KnownReader_2022.01.06.1_release_EXPERIMENTAL.apk"
+      "versionCode": 202201163,
+      "versionName": "2022.01.16.1",
+      "outputFile": "armeabi-v7a_20220130_1209_KnownReader_2022.01.16.1_release_EXPERIMENTAL.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "x86_64"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 202201166,
+      "versionName": "2022.01.16.1",
+      "outputFile": "x86_64_20220130_1209_KnownReader_2022.01.16.1_release_EXPERIMENTAL.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "arm64-v8a"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 202201167,
+      "versionName": "2022.01.16.1",
+      "outputFile": "arm64-v8a_20220130_1209_KnownReader_2022.01.16.1_release_EXPERIMENTAL.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "x86"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 202201165,
+      "versionName": "2022.01.16.1",
+      "outputFile": "x86_20220130_1209_KnownReader_2022.01.16.1_release_EXPERIMENTAL.apk"
     }
   ],
   "elementType": "File"

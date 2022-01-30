@@ -1,6 +1,5 @@
 package org.coolreader.options;
 
-import android.app.Service;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.TextUtils;
@@ -28,8 +27,8 @@ import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Scanner;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.coolreader.layouts.FlowLayout;
 import org.coolreader.readerview.ReaderView;
 
@@ -117,6 +116,7 @@ public class FontSelectOption extends ListOption
 			qfButton.setEllipsize(TextUtils.TruncateAt.END);
 			langView.addView(qfButton);
 			qfButton.setOnClickListener(v -> asyncFilterFontsByLanguage(langTag, null));
+			if (isEInk) Utils.setSolidButtonEink(qfButton);
 			TextView tv = new TextView(mActivity);
 			tv.setText(" ");
 			tv.setPadding(10, 10, 10, 10);

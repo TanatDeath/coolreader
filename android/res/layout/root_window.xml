@@ -124,17 +124,33 @@
                     android:layout_height="?android:attr/listPreferredItemHeight"
                     android:contentDescription="@string/mi_options"
                 /-->
-        <ImageButton
-            android:id="@+id/btn_menu"
-            android:layout_width="?android:attr/listPreferredItemHeight"
-            android:layout_height="?android:attr/listPreferredItemHeight"
-            android:layout_gravity="right"
-            android:layout_weight="1"
-            android:background="?attr/cr3_toolbar_button_background_drawable"
-            android:contentDescription="@string/btn_toolbar_more"
-            android:gravity="right"
-            android:src="?attr/cr3_button_more_drawable"
-            android:tag="tint" />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+                <ImageButton
+                    android:id="@+id/btn_menu"
+                    android:layout_width="?android:attr/listPreferredItemHeight"
+                    android:layout_height="?android:attr/listPreferredItemHeight"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
+                    android:background="?attr/cr3_toolbar_button_background_drawable"
+                    android:contentDescription="@string/btn_toolbar_more"
+                    android:gravity="right"
+                    android:src="?attr/cr3_button_more_drawable"
+                    android:tag="tint" />
+                <ImageButton
+                        android:id="@+id/btn_dic"
+                        android:layout_width="?android:attr/listPreferredItemHeight"
+                        android:layout_height="?android:attr/listPreferredItemHeight"
+                        android:layout_gravity="right"
+                        android:layout_weight="1"
+                        android:background="?attr/cr3_toolbar_button_background_drawable"
+                        android:contentDescription="@string/btn_toolbar_more"
+                        android:gravity="right"
+                        android:src="?attr/attr_icons8_google_translate"
+                        android:tag="tint" />
+            </LinearLayout>
           </LinearLayout>
 	    </LinearLayout>
 

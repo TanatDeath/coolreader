@@ -1,11 +1,15 @@
-package org.coolreader.crengine;
+package org.coolreader.eink;
 
 import android.content.Context;
 import android.view.View;
 
+import org.coolreader.eink.EinkScreen;
+
 import java.util.List;
 
 public class EinkScreenDummy implements EinkScreen {
+
+	private boolean mSelectionActive = false;
 
 	@Override
 	public void setupController(EinkUpdateMode mode, int updateInterval, View view) {
@@ -17,7 +21,17 @@ public class EinkScreenDummy implements EinkScreen {
 	}
 
 	@Override
+	public void setSelectionActive(boolean selectionActive) {
+		mSelectionActive = selectionActive;
+	}
+
+	@Override
 	public void setExtraDelayFullRefresh(int extraDelayFullRefresh) {
+
+	}
+
+	@Override
+	public void setScreenFullUpdateMethod(int screenFullUpdateMethod) {
 
 	}
 

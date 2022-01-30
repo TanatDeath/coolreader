@@ -26,8 +26,11 @@ import org.coolreader.cloud.litres.LitresMainDialog;
 import org.coolreader.cloud.yandex.YNDInputTokenDialog;
 import org.coolreader.crengine.CoverpageManager.CoverpageReadyListener;
 import org.coolreader.db.CRDBService;
+import org.coolreader.dic.DictsDlg;
 import org.coolreader.layouts.FlowLayout;
 import org.coolreader.options.OptionsDialog;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -810,14 +813,17 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		if (bRecentToRead) {
 			btnRecentToRead.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(btnRecentToRead,true);
+			if (isEInk) Utils.setSolidButtonEink(btnRecentToRead);
 		} else btnRecentToRead.setBackgroundColor(colorGrayCT);
 		if (bRecentReading) {
 			btnRecentReading.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(btnRecentReading,true);
+			if (isEInk) Utils.setSolidButtonEink(btnRecentReading);
 		} else btnRecentReading.setBackgroundColor(colorGrayCT);
 		if (bRecentFinished) {
 			btnRecentFinished.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(btnRecentFinished,true);
+			if (isEInk) Utils.setSolidButtonEink(btnRecentFinished);
 		} else btnRecentFinished.setBackgroundColor(colorGrayCT);
 	}
 	
@@ -937,7 +943,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 		mOnlineCatalogsScroll = mView.findViewById(R.id.scroll_online_catalogs);
 
         btnStateToRead  = view.findViewById(R.id.book_state_toread);
-		btnStateToRead.setOnClickListener(v -> {
+        btnStateToRead.setOnClickListener(v -> {
 			FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = FileInfo.STATE_TO_READ_TAG;
@@ -957,7 +963,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 			mActivity.showDirectory(dir, "");
 		});
 		btnStateFinished  = view.findViewById(R.id.book_state_finished);
-        btnStateFinished.setOnClickListener(v -> {
+		btnStateFinished.setOnClickListener(v -> {
 			FileInfo dir = new FileInfo();
 			dir.isDirectory = true;
 			dir.pathname = FileInfo.STATE_FINISHED_TAG;
@@ -1032,13 +1038,23 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
         btnStateToRead.setBackgroundColor(colorGrayCT);
         btnStateReading.setBackgroundColor(colorGrayCT);
         btnStateFinished.setBackgroundColor(colorGrayCT);
+		if (isEInk) Utils.setSolidButtonEink(btnStateToRead);
+		if (isEInk) Utils.setSolidButtonEink(btnStateReading);
+		if (isEInk) Utils.setSolidButtonEink(btnStateFinished);
 		paintRecentButtons();
 		edQuickSearch.setBackgroundColor(colorGrayCT);
+		edQuickSearch.setPadding(8,8,8,8);
+		if (isEInk) Utils.setSolidEditEink(edQuickSearch);
 
         updateCurrentBook(Services.getHistory().getLastBook());
 
 		mView.findViewById(R.id.btn_menu).setOnClickListener(v -> showMenu(mView.findViewById(R.id.btn_menu), mView));
+		mView.findViewById(R.id.btn_dic).setOnClickListener(v -> {
+			DictsDlg dlg = new DictsDlg(mActivity, mActivity.getmReaderView(), "", null, true);
+			dlg.show();
+		});
 		mActivity.tintViewIcons(mView.findViewById(R.id.btn_menu),true);
+		mActivity.tintViewIcons(mView.findViewById(R.id.btn_dic),true);
 
 		mView.findViewById(R.id.current_book).setOnClickListener(v -> {
 			if (currentBook != null) {

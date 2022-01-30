@@ -1,6 +1,8 @@
-package org.coolreader.crengine;
+package org.coolreader.eink;
 
 import android.view.View;
+
+import org.coolreader.crengine.TolinoEpdController;
 
 public class EinkScreenTolino extends EinkScreenNook {
 

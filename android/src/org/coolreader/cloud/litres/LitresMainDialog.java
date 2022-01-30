@@ -1,12 +1,9 @@
 package org.coolreader.cloud.litres;
 
-import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,10 +15,9 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 public class LitresMainDialog extends BaseDialog {
 
@@ -127,11 +123,17 @@ public class LitresMainDialog extends BaseDialog {
 			tlLitresMain.addView(trLitresSearchSequences);
 			mBtnStartsWith.setEnabled(true);
 			mBtnSearchText.setCompoundDrawablesWithIntrinsicBounds(mImgSearchExpanded, null, null, null);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchText);
 			mBtnSearchPersons.setCompoundDrawablesWithIntrinsicBounds(mImgSearchPersonsCollapsed, null, null, null);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchPersons);
 			mBtnSearchPersonsExt.setCompoundDrawablesWithIntrinsicBounds(mImgSearchPersonsExtCollapsed, null, null, null);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchPersonsExt);
 			mBtnSearchCollections.setCompoundDrawablesWithIntrinsicBounds(mImgSearchCollectionsCollapsed, null, null, null);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchCollections);
 			mBtnSearchGenres.setCompoundDrawablesWithIntrinsicBounds(mImgSearchGenresCollapsed, null, null, null);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchGenres);
 			mBtnSearchSequences.setCompoundDrawablesWithIntrinsicBounds(mImgSearchSequencesCollapsed, null, null, null);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchSequences);
 			//mSearchText.setText("365 вопросов");
 			mSearchText.setText("");
 			mSearchText.setHint(R.string.search_books);
@@ -298,6 +300,7 @@ public class LitresMainDialog extends BaseDialog {
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT = Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		mCoolReader.tintViewIcons(mBtnContains, PorterDuff.Mode.CLEAR,true);
@@ -309,14 +312,17 @@ public class LitresMainDialog extends BaseDialog {
 		if (curFindMode == SM_CONTAINS) {
 			mBtnContains.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnContains,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnContains);
 		}
 		if (curFindMode == SM_STARTSWITH) {
 			mBtnStartsWith.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnStartsWith,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnStartsWith);
 		}
 		if (curFindMode == SM_STRICT) {
 			mBtnStrict.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnStrict,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnStrict);
 		}
 	}
 
@@ -336,6 +342,7 @@ public class LitresMainDialog extends BaseDialog {
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT = Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		mCoolReader.tintViewIcons(mBtnSearchPersonsModOnlyAuthors, PorterDuff.Mode.CLEAR,true);
@@ -345,10 +352,12 @@ public class LitresMainDialog extends BaseDialog {
 		if (curPersonMode == PM_ONLY_AUTHORS) {
 			mBtnSearchPersonsModOnlyAuthors.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnSearchPersonsModOnlyAuthors,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchPersonsModOnlyAuthors);
 		}
 		if (curPersonMode == PM_ANY_PERSON) {
 			mBtnSearchPersonsModAnyPerson.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnSearchPersonsModAnyPerson,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnSearchPersonsModAnyPerson);
 		}
 	}
 
@@ -454,6 +463,7 @@ public class LitresMainDialog extends BaseDialog {
 		mBtnAuth = viewAuth.findViewById(R.id.btn_auth);
 		mBtnAuth.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnAuth);
+		if (isEInk) Utils.setDashedButtonEink(mBtnAuth);
 		mCoolReader.tintViewIcons(mBtnAuth,true);;
 		mBtnAuth.setOnClickListener(v -> {
 			mCoolReader.litresCredentialsDialog = new LitresCredentialsDialog(mCoolReader);
@@ -464,6 +474,7 @@ public class LitresMainDialog extends BaseDialog {
 		mBtnProfile = viewProfile.findViewById(R.id.btn_profile);
 		mBtnProfile.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnProfile);
+		if (isEInk) Utils.setDashedButtonEink(mBtnProfile);
 		mBtnProfile.setOnClickListener(v -> {
 			try {
 				CloudAction.litresGetProfile(mCoolReader, this);
@@ -475,6 +486,7 @@ public class LitresMainDialog extends BaseDialog {
 		mBtnAddCredit = viewProfile.findViewById(R.id.btn_add_credit);
 		mBtnAddCredit.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnAddCredit);
+		if (isEInk) Utils.setDashedButtonEink(mBtnAddCredit);
 		mBtnAddCredit.setOnClickListener(v -> {
 			try {
 				CloudAction.litresPutMoneyOnAccount(mCoolReader, this);
@@ -489,6 +501,7 @@ public class LitresMainDialog extends BaseDialog {
 		mBtnMyBooks = viewMy.findViewById(R.id.btn_my_books);
 		mBtnMyBooks.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnMyBooks);
+		if (isEInk) Utils.setDashedButtonEink(mBtnMyBooks);
 		mBtnMyBooks.setOnClickListener(v -> {
 			try {
 				LitresSearchParams lsp = new LitresSearchParams(LitresSearchParams.SEARCH_TYPE_MY_BOOKS, 0, 0, 20,"", 0, 0);
@@ -541,6 +554,7 @@ public class LitresMainDialog extends BaseDialog {
 		mBtnSearch = viewSearchBtn.findViewById(R.id.btn_search);
 		mBtnSearch.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnSearch);
+		if (isEInk) Utils.setDashedButtonEink(mBtnSearch);
 		mBtnSearch.setOnClickListener(v -> {
 			doSearch();
 		});
@@ -549,15 +563,18 @@ public class LitresMainDialog extends BaseDialog {
 		mBtnSearchBtnGenres = viewSearchBtnGenres.findViewById(R.id.btn_search);
 		mBtnSearchBtnGenres.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnSearchBtnGenres);
+		if (isEInk) Utils.setDashedButtonEink(mBtnSearchBtnGenres);
 		mBtnSearch2 = viewSearchBtnGenres.findViewById(R.id.btn_search);
 		mBtnSearch2.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnSearch2);
+		if (isEInk) Utils.setDashedButtonEink(mBtnSearch2);
 		mBtnSearch2.setOnClickListener(v -> {
 			doSearch();
 		});
 		mBtnSearchBtnGenresAll = viewSearchBtnGenres.findViewById(R.id.btn_search_all_genres);
 		mBtnSearchBtnGenresAll.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnSearchBtnGenresAll);
+		if (isEInk) Utils.setDashedButtonEink(mBtnSearchBtnGenresAll);
 		mBtnSearchBtnGenresAll.setOnClickListener(v -> {
 			LitresSearchParams lsp = new LitresSearchParams(LitresSearchParams.SEARCH_TYPE_GENRES, 0,0, 20,
 					"", 0, 0);

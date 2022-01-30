@@ -3,7 +3,7 @@ package org.coolreader.cloud.yandex;
 import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudFileInfo;
 import org.coolreader.cloud.CloudSync;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

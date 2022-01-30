@@ -12,8 +12,9 @@ import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.Engine;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -230,7 +231,7 @@ public class CloudSync {
         }
     }
 
-    public static void saveSettingsFilesToCloud(CoolReader cr, boolean bQuiet) {
+    public static String getSettingsFilesText(CoolReader cr) {
         int iSettClount = 1;
         ArrayList<File> arrSett = new ArrayList<File>();
         File fSett = cr.getSettingsFileF(0);
@@ -239,22 +240,68 @@ public class CloudSync {
             fSett = cr.getSettingsFileF(iSettClount);
             iSettClount++;
         }
-        boolean bWasErr = false;
         Log.d(TAG, "Starting save cr3.ini files to drive...");
         final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
         final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
         ArrayList<String> arrSFull = new ArrayList<String>();
+        String sText = "";
         if (arrSett.size()>0) {
-            String sFName = sFName0.toString() + "_settings_" + cr.getAndroid_id()+'_'+iSettClount;
             for (File fS : arrSett) {
                 ArrayList<String> arrS = Utils.readFileToArrayList(fS.getPath());
                 arrSFull.add("~~~ settings: " + fS.getName() + "|" + cr.getAndroid_id() + "|" + cr.getModel());
                 for (String s: arrS) arrSFull.add(s);
             }
-            sFName = sFName + ".txt";
-            String sText = "";
             for (String s: arrSFull) sText = sText + s + "\n";
+        }
+        return sText;
+    }
+
+    public static void saveSettingsFilesToCloud(CoolReader cr, boolean bQuiet) {
+        int iSettClount = 1;
+        File fSett = cr.getSettingsFileF(0);
+        while (fSett.exists()) {
+            fSett = cr.getSettingsFileF(iSettClount);
+            iSettClount++;
+        }
+        final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
+        final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
+        String sText = getSettingsFilesText(cr);
+        if (!StrUtils.isEmptyStr(sText)) {
+            String sFName = sFName0.toString() + "_settings_" + cr.getAndroid_id()+'_'+iSettClount;
+            sFName = sFName + ".txt";
             CloudAction.yndSaveJsonFile(cr, sFName, sText, bQuiet, false);
+        }
+    }
+
+    public static void saveSettingsFilesToHistory(CoolReader cr) {
+        int iSettClount = 1;
+        File fSett = cr.getSettingsFileF(0);
+        while (fSett.exists()) {
+            fSett = cr.getSettingsFileF(iSettClount);
+            iSettClount++;
+        }
+        final android.text.format.DateFormat dfmt = new android.text.format.DateFormat();
+        final CharSequence sFName0 = dfmt.format("yyyy-MM-dd_kkmmss", new java.util.Date());
+        String sText = getSettingsFilesText(cr);
+        if (!StrUtils.isEmptyStr(sText)) {
+            String sFName = sFName0.toString() + "_settings_" + cr.getAndroid_id()+'_'+iSettClount;
+            sFName = sFName + ".txt";
+            File toFile = cr.getSettingsFileExt("[DEFAULT]", 0);
+            File newFile = new File(toFile.getParent(), "settings");
+            if (!newFile.exists()) newFile.mkdir();
+            File newFile2 = new File(newFile, sFName);
+            Utils.saveStringToFileSafe(sText, newFile2.getAbsolutePath());
+            // Clean old files
+            File[] allFiles = newFile.listFiles();
+            ArrayList<File> newFileList = new ArrayList<>();
+            for (File f: allFiles) newFileList.add(f);
+            Comparator<File> compareByName = (o1, o2) -> -(o1.getName().compareTo(o2.getName()));
+            Collections.sort(newFileList, compareByName);
+            int i=0;
+            for (File f: newFileList) {
+                i++;
+                if (i > 50) f.delete();
+            }
         }
     }
 
@@ -269,11 +316,7 @@ public class CloudSync {
         if (!StrUtils.isEmptyStr(sDir)) {
             File fDir = new File(sDir);
             File[] matchingFilesInfo = fDir.listFiles((dir, name) -> name.contains("_cr3_ini_") && (name.endsWith(".info")));
-            File[] matchingFiles = fDir.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.contains("_cr3.ini");
-                }
-            });
+            File[] matchingFiles = fDir.listFiles((dir, name) -> name.contains("_cr3.ini"));
             if (matchingFiles.length == 0) {
                 cr.showToast(cr.getString(R.string.no_cloud_files));
             } else {

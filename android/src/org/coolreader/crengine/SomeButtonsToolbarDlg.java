@@ -23,8 +23,11 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SomeButtonsToolbarDlg {
 	PopupWindow mWindow;
@@ -37,6 +40,8 @@ public class SomeButtonsToolbarDlg {
 	boolean mCloseOnTouchOutside;
 	ArrayList<String> mButtonsOrTexts;
 	Object o;
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors = null;
 
 	public interface ButtonPressedCallback {
 		public void done(Object o, String btnPressed);
@@ -62,6 +67,8 @@ public class SomeButtonsToolbarDlg {
 			String sTitle, ArrayList<String> buttonsOrTexts, Object o, ButtonPressedCallback callback)
 	{
 		mActivity = coolReader;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors((CoolReader) mActivity, isEInk);
 		mTitle = StrUtils.getNonEmptyStr(sTitle, true);
 		mButtonsOrTexts = buttonsOrTexts;
 		mCloseOnTouchOutside = closeOnTouchOutside;
@@ -106,7 +113,7 @@ public class SomeButtonsToolbarDlg {
 		int colr = Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray));
 		panel.setBackgroundColor(colr);
 		int colr2 = Color.argb(170, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
+		if (isEInk) panel.setBackgroundColor(Color.WHITE);
 		LinearLayout llButtonsPanel = mPanel.findViewById(R.id.buttonsPanel);
 		Properties props = new Properties(mActivity.settings());
 		int newTextSize = props.getInt(Settings.PROP_FONT_SIZE, 16)-2;
@@ -122,6 +129,7 @@ public class SomeButtonsToolbarDlg {
 			mViewTitle.setMaxLines(3);
 			mViewTitle.setEllipsize(TextUtils.TruncateAt.END);
 			mViewTitle.setBackgroundColor(colr2);
+			if (isEInk) mViewTitle.setBackgroundColor(Color.WHITE);
 			mViewTitle.setTextColor(mActivity.getTextColor(colorIcon));
 			mViewTitle.setTypeface(Typeface.DEFAULT_BOLD);
 			mViewTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
@@ -150,6 +158,7 @@ public class SomeButtonsToolbarDlg {
 					someButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 					someButton.setTextColor(colorIconL);
 					someButton.setBackgroundColor(colorGray);
+					if (isEInk) Utils.setSolidButtonEink(someButton);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.MATCH_PARENT,
 							ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -165,6 +174,7 @@ public class SomeButtonsToolbarDlg {
 				}
 				LinearLayout llBlank = new LinearLayout(mActivity);
 				llBlank.setBackgroundColor(colr2);
+				if (isEInk) llBlank.setBackgroundColor(Color.WHITE);
 				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 						ViewGroup.LayoutParams.MATCH_PARENT,
 						ViewGroup.LayoutParams.WRAP_CONTENT);

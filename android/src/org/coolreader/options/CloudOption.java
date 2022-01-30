@@ -43,7 +43,7 @@ public class CloudOption extends SubmenuOption {
 		OptionsListView listView = new OptionsListView(mContext, this);
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.yandex_settings),
 				Settings.PROP_CLOUD_YND_SETTINGS, mActivity.getString(R.string.yandex_settings_v), this.lastFilteredValue,
-				view ->
+				(view, optionLabel, optionValue) ->
 				{
 					mActivity.yndInputTokenDialog = new YNDInputTokenDialog(mActivity);
 					mActivity.yndInputTokenDialog.show();
@@ -51,12 +51,13 @@ public class CloudOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.ynd_home_folder),
 				Settings.PROP_CLOUD_YND_HOME_FOLDER, mActivity.getString(R.string.ynd_home_folder_hint), this.lastFilteredValue,
-				view -> mActivity.showToast(mActivity.getString(R.string.ynd_home_folder_hint), Toast.LENGTH_LONG, view, true, 0), false).
+				(view, optionLabel, optionValue) ->
+						mActivity.showToast(mActivity.getString(R.string.ynd_home_folder_hint), Toast.LENGTH_LONG, view, true, 0), false).
 				setDefaultValue("/").
 				setIconIdByAttr(R.attr.cr3_browser_folder_root_drawable, R.drawable.cr3_browser_folder_root));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.dropbox_settings),
 				Settings.PROP_CLOUD_DBX_SETTINGS, mActivity.getString(R.string.dropbox_settings_v), this.lastFilteredValue,
-				view ->
+				(view, optionLabel, optionValue) ->
 				{
 					mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
 					mActivity.dbxInputTokenDialog.show();
@@ -64,14 +65,14 @@ public class CloudOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.litres_settings),
 				Settings.PROP_CLOUD_LITRES_SETTINGS, mActivity.getString(R.string.litres_settings_add_info), this.lastFilteredValue,
-				view ->
+				(view, optionLabel, optionValue) ->
 				{
 					mActivity.litresCredentialsDialog = new LitresCredentialsDialog(mActivity);
 					mActivity.litresCredentialsDialog.show();
 				}, true).setDefaultValue(mActivity.getString(R.string.litres_settings_add_info)).setIconIdByAttr(R.attr.attr_litres_en_logo_2lines, R.drawable.litres_en_logo_2lines));
 		OptionBase optSaveToCloud = new ClickOption(mOwner, mActivity.getString(R.string.save_settings_to_cloud),
 				mActivity.getString(R.string.save_settings_to_cloud_v), mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
-				view -> {
+				(view, optionLabel, optionValue) -> {
 					int iSyncVariant = mProperties.getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
 					if (iSyncVariant == 0) {
 						mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
@@ -83,12 +84,12 @@ public class CloudOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.attr_icons8_settings_to_gd, R.drawable.icons8_settings_to_gd);
 		OptionBase optLoadFromCloud = new ClickOption(mOwner, mActivity.getString(R.string.load_settings_from_cloud),
 				mActivity.getString(R.string.load_settings_from_cloud_v), mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
-				view -> {
+				(view, optionLabel, optionValue) -> {
 					int iSyncVariant = mProperties.getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
 					if (iSyncVariant == 0) {
 						mActivity.showToast(R.string.cloud_sync_variant1_v);
 					} else {
-						if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+						if (iSyncVariant == 1) CloudSync.loadSettingsFiles(mActivity,false);
 						else
 							CloudSync.loadFromJsonInfoFileList(mActivity,
 									CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, CloudAction.NO_SPECIAL_ACTION, false);

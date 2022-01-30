@@ -1,6 +1,7 @@
 package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
+import org.coolreader.utils.Utils;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

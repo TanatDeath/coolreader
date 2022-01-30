@@ -8,6 +8,8 @@ import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.options.SelectionModesOption;
 import org.coolreader.userdic.UserDicEntry;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -214,6 +216,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		a.recycle();
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(100,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
+		if (isEInk) colorGrayCT = Color.WHITE;
 		rb_descr.setBackgroundColor(colorGrayCT);
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnComment.setBackgroundColor(colorGrayCT);
@@ -230,8 +233,15 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnTransl.setBackgroundColor(colorGrayCT);
 		btnTransl2.setBackgroundColor(colorGrayCT);
 		paintColorCheckButton();
+		if (isEInk) {
+			Utils.setSolidButtonEink(btnSendTo1);
+			Utils.setSolidButtonEink(btnSendTo2);
+			Utils.setSolidButtonEink(btnTransl);
+			Utils.setSolidButtonEink(btnTransl2);
+		}
 		btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
 		btn.setBackgroundColor(colorGray);
+		if (isEInk) Utils.setSolidButtonEink(btn);
 	}
 
 	private boolean getChecked(ImageButton btn) {
@@ -594,6 +604,8 @@ public class BookmarkEditDialog extends BaseDialog {
 		commentEdit = view.findViewById(R.id.comment_edit);
 		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		commentEdit.setHintTextColor(colorIcon128);
+		commentEdit.setPadding(8,8,8,8);
+		if (isEInk) Utils.setSolidEditEink(commentEdit);
 		String postext = mBookmark.getPercent()/100 + "%";
 		if ( mBookmark.getTitleText()!=null )
 			postext = postext + "  " + mBookmark.getTitleText();

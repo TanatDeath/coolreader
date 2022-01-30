@@ -14,7 +14,7 @@ import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.ReaderCommand;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 public class AutoScrollAnimation {
 

@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.dic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,8 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.Settings;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.coolreader.readerview.ReaderView;
-import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
 import org.coolreader.layouts.FlowLayout;
 import org.coolreader.userdic.UserDicDlg;
@@ -232,21 +240,26 @@ public class DictsDlg extends BaseDialog {
 		mCoolReader.tintViewIcons(btnDictType1, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDictType2, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDontClose, PorterDuff.Mode.CLEAR,true);
+		if (isEInk) colorGrayCT = Color.WHITE;
 		if (bDictType0) {
 			btnDictType0.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDictType0,true);
+			if (isEInk) Utils.setSolidButtonEink(btnDictType0);
 		} else btnDictType0.setBackgroundColor(colorGrayCT);
 		if (bDictType1) {
 			btnDictType1.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDictType1,true);
+			if (isEInk) Utils.setSolidButtonEink(btnDictType1);
 		} else btnDictType1.setBackgroundColor(colorGrayCT);
 		if (bDictType2) {
 			btnDictType2.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDictType2,true);
+			if (isEInk) Utils.setSolidButtonEink(btnDictType2);
 		} else btnDictType2.setBackgroundColor(colorGrayCT);
 		if (bDontClose) {
 			btnDontClose.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDontClose,true);
+			if (isEInk) Utils.setSolidButtonEink(btnDontClose);
 		} else btnDontClose.setBackgroundColor(colorGrayCT);
 	}
 
@@ -278,6 +291,7 @@ public class DictsDlg extends BaseDialog {
 			dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 			dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 			dicButton.setPadding(10, 10, 10, 10);
+			if (isEInk) Utils.setSolidButtonEink(dicButton);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);

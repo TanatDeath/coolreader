@@ -40,5 +40,50 @@
                   android:id="@+id/hyph_dirs"
                   style="@style/TextAppearance.Small"
                   android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="@string/dlg_about_offlinedicts_dirs"
+                android:id="@+id/offline_dir_header"
+                style="@style/TextAppearance.Large"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="offline_dir"
+                android:textColor="?attr/colorIcon"
+                android:id="@+id/offline_dirs"
+                style="@style/TextAppearance.Small"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="@string/dlg_about_customcovers_dirs"
+                android:id="@+id/customcovers_dir_header"
+                style="@style/TextAppearance.Large"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="customcovers_dir"
+                android:textColor="?attr/colorIcon"
+                android:id="@+id/customcovers_dirs"
+                style="@style/TextAppearance.Small"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="@string/dlg_about_download_dirs"
+                android:id="@+id/download_dir_header"
+                style="@style/TextAppearance.Large"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="download_dir"
+                android:textColor="?attr/colorIcon"
+                android:id="@+id/download_dirs"
+                style="@style/TextAppearance.Small"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="@string/dlg_about_cloudsync_dirs"
+                android:id="@+id/cloudsync_dir_header"
+                style="@style/TextAppearance.Large"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="cloudsync_dir"
+                android:textColor="?attr/colorIcon"
+                android:id="@+id/cloudsync_dirs"
+                style="@style/TextAppearance.Small"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="@string/dlg_about_icons_dirs"
+                android:id="@+id/icons_dir_header"
+                style="@style/TextAppearance.Large"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="icons_dir"
+                android:textColor="?attr/colorIcon"
+                android:id="@+id/icons_dirs"
+                style="@style/TextAppearance.Small"
+                android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 </ScrollView>

@@ -2,15 +2,14 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.app.Dialog;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.HashMap;

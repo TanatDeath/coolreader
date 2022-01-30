@@ -16,8 +16,8 @@ import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.SelectionToolbarDlg;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.coolreader.dic.wiki.WikiSearch;
 
 import android.annotation.SuppressLint;
@@ -77,6 +77,7 @@ public class Dictionaries {
 	public static GlosbeTranslate glosbeTranslate = null;
 	public static TurengTranslate turengTranslate = null;
 	public static UrbanTranslate urbanTranslate = null;
+	public static OfflineDicTranslate offlineTranslate = null;
 
 	public static OkHttpClient client = new OkHttpClient.Builder().
 		connectTimeout(20,TimeUnit.SECONDS).
@@ -149,6 +150,9 @@ public class Dictionaries {
 		currentDictionary5 = noneDictionary();
 		currentDictionary6 = noneDictionary();
 		currentDictionary7 = noneDictionary();
+		currentDictionary8 = noneDictionary();
+		currentDictionary9 = noneDictionary();
+		currentDictionary10 = noneDictionary();
 	}
 
 	public static ProgressDialog progressDlg;
@@ -163,6 +167,9 @@ public class Dictionaries {
 	public DictInfo currentDictionary5;
 	public DictInfo currentDictionary6;
 	public DictInfo currentDictionary7;
+	public DictInfo currentDictionary8;
+	public DictInfo currentDictionary9;
+	public DictInfo currentDictionary10;
 	public List<DictInfo> diRecent = new ArrayList<DictInfo>();
 
 	public List<DictInfo> getAddDicts() {
@@ -181,6 +188,12 @@ public class Dictionaries {
 			if (!currentDictionary6.id.equals("NONE")) diAddDicts.add(currentDictionary6);
 		if (currentDictionary7 != null)
 			if (!currentDictionary7.id.equals("NONE")) diAddDicts.add(currentDictionary7);
+		if (currentDictionary8 != null)
+			if (!currentDictionary8.id.equals("NONE")) diAddDicts.add(currentDictionary8);
+		if (currentDictionary9 != null)
+			if (!currentDictionary9.id.equals("NONE")) diAddDicts.add(currentDictionary9);
+		if (currentDictionary10 != null)
+			if (!currentDictionary10.id.equals("NONE")) diAddDicts.add(currentDictionary10);
 		return diAddDicts;
 	}
 
@@ -268,8 +281,10 @@ public class Dictionaries {
 				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, "", false, "Aard"),
 		new DictInfo("AardDictLookup", "Aard Dictionary Lookup", "aarddict.android", "aarddict.android.Lookup",
 				Intent.ACTION_SEARCH, 0, R.drawable.aarddict, null, "", false, "AardL"),
-		new DictInfo("Aard2", "Aard 2 Dictionary", "itkach.aard2", "aard2.lookup",
-				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null, "", false, "Aard2"),
+		new DictInfo("Aard2 lookup", "Aard 2 Dictionary Lookup", "itkach.aard2", "aard2.lookup",
+				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null, "", false, "Aard2L"),
+		new DictInfo("Aard2 search", "Aard 2 Dictionary Search", "itkach.aard2", "aard2.search",
+				Intent.ACTION_SEARCH, 3, R.drawable.aard2, null, "", false, "Aard2S"),
 		new DictInfo("OnyxDictOld", "ONYX Dictionary (Old)", "com.onyx.dict",
 				"com.onyx.dict.activity.DictMainActivity",
 				Intent.ACTION_VIEW, 0, R.drawable.onyx_dictionary, null, "", false, "OnyxOld")
@@ -350,6 +365,8 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 17, R.drawable.tureng, null, TURENG_ONLINE, true, "TurengO"),
 		new DictInfo("Urban dictionary (online)", "Urban dictionary (online)", "", "",
 				Intent.ACTION_SEND, 18, R.drawable.urban_dict, null, URBAN_ONLINE, true, "UrbanO"),
+		new DictInfo("Offline dictionaries", "Offline dictionaries", "", "",
+				Intent.ACTION_SEND, 19, R.drawable.icons8_offline_dic, null, "", true, "Offline"),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -492,6 +509,24 @@ public class Dictionaries {
 			currentDictionary7 = d;
 	}
 
+	public void setDict8( String id, BaseActivity act ) {
+		DictInfo d = findById(id, act);
+		if (d != null)
+			currentDictionary8 = d;
+	}
+
+	public void setDict9( String id, BaseActivity act ) {
+		DictInfo d = findById(id, act);
+		if (d != null)
+			currentDictionary9 = d;
+	}
+
+	public void setDict10( String id, BaseActivity act ) {
+		DictInfo d = findById(id, act);
+		if (d != null)
+			currentDictionary10 = d;
+	}
+
 	public boolean isPackageInstalled(String packageName) {
         PackageManager pm = mActivity.getPackageManager();
         try
@@ -544,6 +579,9 @@ public class Dictionaries {
 	private DictInfo saveCurrentDictionaryTmp;
 	private String saveFromLangTmp;
 	private String saveToLangTmp;
+	public DictInfo lastDicCalled;
+	public View lastDicView;
+	public CoolReader.DictionaryCallback lastDC;
 	private int saveIDic2IsActive;
 
 	private void checkLangCodes() {
@@ -573,6 +611,8 @@ public class Dictionaries {
 	public static void saveToDicSearchHistory(CoolReader cr, String searchText, String translateT, DictInfo curDict) {
 		if (cr.mCurrentFrame != cr.mReaderFrame) return; // since we have dic on main screen too
 		int iDont = cr.settings().getInt(Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE, 0);
+		boolean bDont2 = cr.settings().getBool(Settings.PROP_INSPECTOR_MODE_NO_DIC_HISTORY, false);
+		if ((cr.getReaderView().inspectorModeActive) && (bDont2)) return;
 		if (iDont>0) {
 			if (StrUtils.getNonEmptyStr(searchText,true).split(" ").length > iDont) return;
 		}
@@ -629,6 +669,9 @@ public class Dictionaries {
 		if (num.equals("5")) return currentDictionary5;
 		if (num.equals("6")) return currentDictionary6;
 		if (num.equals("7")) return currentDictionary7;
+		if (num.equals("8")) return currentDictionary8;
+		if (num.equals("9")) return currentDictionary9;
+		if (num.equals("10")) return currentDictionary10;
 		return curDict;
 	}
 
@@ -656,6 +699,15 @@ public class Dictionaries {
 		if (currentDictionary7 == curDict)
 			if (sConformityArr.length>=6)
 				return curDictByNum(sConformityArr[6], curDict);
+		if (currentDictionary8 == curDict)
+			if (sConformityArr.length>=7)
+				return curDictByNum(sConformityArr[7], curDict);
+		if (currentDictionary9 == curDict)
+			if (sConformityArr.length>=8)
+				return curDictByNum(sConformityArr[8], curDict);
+		if (currentDictionary10 == curDict)
+			if (sConformityArr.length>=9)
+				return curDictByNum(sConformityArr[9], curDict);
 		return curDict;
 	}
 
@@ -732,6 +784,9 @@ public class Dictionaries {
 			String sConformity = ((CoolReader)mActivity).settings().getProperty(Settings.PROP_APP_ONLINE_OFFLINE_DICS);
 			if (!StrUtils.isEmptyStr(sConformity)) curDict = getOfflineDicComformity(sConformity, curDict);
 		}
+		lastDicCalled = curDict;
+		lastDicView = view;
+		lastDC = dcb;
 		//\
 		if (null == curDict) {
 			((CoolReader)mActivity).optionsFilter = "";
@@ -811,9 +866,10 @@ public class Dictionaries {
 				}
 				break;
 			case 3:
-				Intent intent3 = new Intent("aard2.lookup");
+				Intent intent3 = new Intent(curDict.className);
 				intent3.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent3.putExtra(SearchManager.QUERY, s);
+				intent3.putExtra("SENDER_ACTION", "KnownReader.sendText");
 				try
 				{
 					mActivity.startActivity(intent3);
@@ -1241,7 +1297,17 @@ public class Dictionaries {
 				if (urbanTranslate == null) urbanTranslate = new UrbanTranslate();
 				urbanTranslate.urbanTranslate(cr, s, curDict, view, null, dcb);
 				break;
+			case 19:
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					cr.showToast(R.string.only_in_premium);
+					return;
+				}
+				if (offlineTranslate == null) offlineTranslate = new OfflineDicTranslate();
+				offlineTranslate.starDictTranslate(cr, s, langf, lang, curDict, view, null, dcb);
+				break;
 			}
+
+
 	}
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) throws DictionaryException {

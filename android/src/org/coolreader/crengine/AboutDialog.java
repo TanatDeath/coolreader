@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -112,11 +113,11 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		tabs.setOnTabChangedListener(tabId -> {
 			for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
 				tabs.getTabWidget().getChildAt(i)
-						.setBackgroundColor(colorGrayC); // unselected
+						.setBackgroundColor(isEInk? Color.WHITE: colorGrayC); // unselected
 			}
 
 			tabs.getTabWidget().getChildAt(tabs.getCurrentTab())
-					.setBackgroundColor(colorGray); // selected
+					.setBackgroundColor(isEInk? colorGrayC: colorGray); // selected
 		});
 
 		mAppTab = (View)inflater.inflate(R.layout.about_dialog_app, null);
@@ -190,6 +191,72 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		}
 		TextView hyph_dir = mDirsTab.findViewById(R.id.hyph_dirs);
 		hyph_dir.setText(sbuf.toString());
+
+		ArrayList<String> offlineDirs = Engine.getDataDirs(Engine.DataDirType.OfflineDicsDirs);
+		sbuf = new StringBuilder();
+		it = offlineDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView offline_dir = mDirsTab.findViewById(R.id.offline_dirs);
+		offline_dir.setText(sbuf.toString());
+
+		ArrayList<String> customcoversDirs = Engine.getDataDirs(Engine.DataDirType.CustomCoversDirs);
+		sbuf = new StringBuilder();
+		it = customcoversDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView customcovers_dir = mDirsTab.findViewById(R.id.customcovers_dirs);
+		customcovers_dir.setText(sbuf.toString());
+
+		ArrayList<String> downloadDirs = Engine.getDataDirs(Engine.DataDirType.DownloadsDirs);
+		sbuf = new StringBuilder();
+		it = downloadDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView download_dir = mDirsTab.findViewById(R.id.download_dirs);
+		download_dir.setText(sbuf.toString());
+
+		ArrayList<String> cloudsyncDirs = Engine.getDataDirs(Engine.DataDirType.CloudSyncDirs);
+		sbuf = new StringBuilder();
+		it = cloudsyncDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView cloudsync_dir = mDirsTab.findViewById(R.id.cloudsync_dirs);
+		cloudsync_dir.setText(sbuf.toString());
+
+		ArrayList<String> iconsDirs = Engine.getDataDirs(Engine.DataDirType.IconDirs);
+		sbuf = new StringBuilder();
+		it = iconsDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView icons_dir = mDirsTab.findViewById(R.id.icons_dirs);
+		icons_dir.setText(sbuf.toString());
+
 		mActivity.tintViewIcons(mDirsTab,false);
 		mLicenseTab = inflater.inflate(R.layout.about_dialog_license, null);
 		String license = Engine.getInstance(mActivity).loadResourceUtf8(R.raw.license);

@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 public class ProcessTextAct extends Activity {
 

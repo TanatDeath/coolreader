@@ -11,16 +11,16 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.OptionOwner;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.dic.Dictionaries;
 
 import java.util.List;
 
-public class DictOptions extends ListOption
+public class DicListOption extends ListOption
 {
-	public DictOptions(OptionOwner owner, String label, String prop, String addInfo, String filter )
+	public DicListOption(OptionOwner owner, String label, String prop, String addInfo, String filter )
 	{
-		super( owner, label, prop, addInfo, filter );
+		super(owner, label, prop, addInfo, filter);
 		List<Dictionaries.DictInfo> dicts = Dictionaries.getDictList(mActivity);
 		setDefaultValue(dicts.get(0).id);
 		for (Dictionaries.DictInfo dict : dicts) {

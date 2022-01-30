@@ -1,6 +1,7 @@
 package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
+import org.coolreader.dic.DictsDlg;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
@@ -9,6 +10,8 @@ import org.coolreader.layouts.FlowLayout;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.options.SelectionModesOption;
 import org.coolreader.userdic.UserDicEntry;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -44,6 +47,7 @@ import java.util.zip.CRC32;
 public class SelectionToolbarDlg {
 	PopupWindow mWindow;
 	View mAnchor;
+	boolean mIsShort;
 	CoolReader mActivity;
 	ReaderView mReaderView;
 	View mPanel;
@@ -77,13 +81,19 @@ public class SelectionToolbarDlg {
 				coolReader.getReaderView().clearSelection();
 				return;
 			}
-		SelectionToolbarDlg dlg = new SelectionToolbarDlg(coolReader, readerView, selection);
-		//dlg.mWindow.update(dlg.mAnchor, width, height)
+		SelectionToolbarDlg dlg = new SelectionToolbarDlg(coolReader, readerView, selection, false);
 		Log.d("cr3", "popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
-		//dlg.update();
-		//dlg.showAtLocation(readerView, Gravity.LEFT|Gravity.TOP, readerView.getLeft()+50, readerView.getTop()+50);
-		//dlg.showAsDropDown(readerView);
-		//dlg.update();
+	}
+
+	static public void showDialogShort(CoolReader coolReader, ReaderView readerView, final Selection selection)
+	{
+		if (coolReader.getReaderView() != null)
+			if (coolReader.getReaderView().currentImageViewer != null) {
+				coolReader.getReaderView().clearSelection();
+				return;
+			}
+		SelectionToolbarDlg dlg = new SelectionToolbarDlg(coolReader, readerView, selection, true);
+		Log.d("cr3", "popup: " + dlg.mWindow.getWidth() + "x" + dlg.mWindow.getHeight());
 	}
 
 	private boolean pageModeSet = false;
@@ -306,7 +316,8 @@ public class SelectionToolbarDlg {
 			String sTranspButtons = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
 			if (!sTranspButtons.equals("0")) c.setAlpha(130);
 				else c.setAlpha(255);
-			llAddButtons.findViewById(R.id.selection_bookmark).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.selection_bookmark).setBackground(c);
+			if (isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.selection_bookmark), null, isEInk);
 			llAddButtons.findViewById(R.id.selection_bookmark).setOnClickListener(v -> {
 				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_COMMENT, "");
 				closeDialog(true);
@@ -317,17 +328,20 @@ public class SelectionToolbarDlg {
 				closeDialog(true);
 				return true;
 			});
-			llAddButtons.findViewById(R.id.btn_correction).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_correction).setBackground(c);
+			if (isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_correction), null, isEInk);
 			llAddButtons.findViewById(R.id.btn_correction).setOnClickListener(v -> {
 				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_CORRECTION, selection.text);
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
-			llAddButtons.findViewById(R.id.btn_user_dic).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_user_dic).setBackground(c);
+			if (isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_user_dic), null, isEInk);
 			llAddButtons.findViewById(R.id.btn_user_dic).setOnClickListener(v -> {
 				mReaderView.showNewBookmarkDialog(selection, Bookmark.TYPE_USER_DIC, "");
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
-			llAddButtons.findViewById(R.id.btn_web_search).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_web_search).setBackground(c);
+			if (isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_web_search), null, isEInk);
 			llAddButtons.findViewById(R.id.btn_web_search).setOnClickListener(v -> {
 				final Intent emailIntent = new Intent(Intent.ACTION_WEB_SEARCH);
 				emailIntent.putExtra(SearchManager.QUERY, selection.text.trim());
@@ -338,13 +352,15 @@ public class SelectionToolbarDlg {
 				}
 				closeDialog(true);
 			});
-			llAddButtons.findViewById(R.id.btn_dic_list).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_dic_list).setBackground(c);
+			if (isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_dic_list), null, isEInk);
 			llAddButtons.findViewById(R.id.btn_dic_list).setOnClickListener(v -> {
 				DictsDlg dlg = new DictsDlg(mActivity, mReaderView, selection.text, null, false);
 				dlg.show();
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
-			llAddButtons.findViewById(R.id.btn_combo).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_combo).setBackground(c);
+			if (isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_combo), null, isEInk);
 			llAddButtons.findViewById(R.id.btn_combo).setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
@@ -381,7 +397,8 @@ public class SelectionToolbarDlg {
 				}
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
-			llAddButtons.findViewById(R.id.btn_super_combo).setBackgroundDrawable(c);
+			llAddButtons.findViewById(R.id.btn_super_combo).setBackground(c);
+			if (isEInk) Utils.setBtnBackground((ImageButton) llAddButtons.findViewById(R.id.btn_super_combo), null, isEInk);
 			llAddButtons.findViewById(R.id.btn_super_combo).setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
@@ -426,6 +443,7 @@ public class SelectionToolbarDlg {
 	}
 
 	private boolean isShowAtTop() {
+		if (mIsShort) return false;
 		mAnchor.getLocationOnScreen(location);
 		int selectionTop = 0;
 		int selectionBottom = 0;
@@ -453,51 +471,60 @@ public class SelectionToolbarDlg {
 	private void placeLayouts() {
 		if (showAtTop) {
 			llTopLine.removeAllViews();
-			llTopLine.addView(llSliderTop);
+			if (!mIsShort) llTopLine.addView(llSliderTop);
 			llTopLine.addView(llRecentDics);
-			llTopLine.addView(llButtonsRow);
+			if (!mIsShort) llTopLine.addView(llButtonsRow);
 			llBottomLine.removeAllViews();
-			llBottomLine.addView(llSliderBottom);
+			if (!mIsShort) llBottomLine.addView(llSliderBottom);
 
 		} else {
 			llTopLine.removeAllViews();
-			llTopLine.addView(llSliderTop);
+			if (!mIsShort) llTopLine.addView(llSliderTop);
 			llBottomLine.removeAllViews();
 			llBottomLine.addView(llRecentDics);
-			llBottomLine.addView(llButtonsRow);
-			llBottomLine.addView(llSliderBottom);
+			if (!mIsShort) llBottomLine.addView(llButtonsRow);
+			if (!mIsShort) llBottomLine.addView(llSliderBottom);
 		}
-		llSliderTop.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		llSliderBottom.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		llRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-		llButtonsRow.setBackgroundColor(Color.argb(alphaVal, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		int colorFill = colorGray;
+		if (isEInk) colorFill = Color.WHITE;
+		if (!mIsShort) llSliderTop.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		if (!mIsShort) llSliderBottom.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		llRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		if (!mIsShort) llButtonsRow.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
 
 		String sExt = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
 		addButtonEnabled = StrUtils.getNonEmptyStr(sExt, true).equals("1");
-		if (addButtonEnabled) toggleAddButtons(true);
+		if ((addButtonEnabled) && (!mIsShort)) toggleAddButtons(true);
 		initRecentDics();
 		// set up buttons
 		btnSelectionBookmark = llButtonsRow.findViewById(R.id.btn_quick_bookmark);
 		if (btnSelectionBookmark != null)
-			btnSelectionBookmark.setBackgroundDrawable(colorButtons);
+			btnSelectionBookmark.setBackground(colorButtons);
+		if (isEInk) Utils.setBtnBackground(btnSelectionBookmark, null, isEInk);
 		btnSelectionCopy = llButtonsRow.findViewById(R.id.selection_copy);
 		if (btnSelectionCopy != null)
-			btnSelectionCopy.setBackgroundDrawable(colorButtons);
+			btnSelectionCopy.setBackground(colorButtons);
+		if (isEInk) Utils.setBtnBackground(btnSelectionCopy, null, isEInk);
 		btnSelectionDict = llButtonsRow.findViewById(R.id.selection_dict);
 		if (btnSelectionDict != null)
-			btnSelectionDict.setBackgroundDrawable(colorButtons);
+			btnSelectionDict.setBackground(colorButtons);
+		if (isEInk) Utils.setBtnBackground(btnSelectionDict, null, isEInk);
 		btnSelectionEmail = llButtonsRow.findViewById(R.id.selection_email);
 		if (btnSelectionEmail != null)
-			btnSelectionEmail.setBackgroundDrawable(colorButtons);
+			btnSelectionEmail.setBackground(colorButtons);
+		if (isEInk) Utils.setBtnBackground(btnSelectionEmail, null, isEInk);
 		btnSelectionFind = llButtonsRow.findViewById(R.id.selection_find);
 		if (btnSelectionFind != null)
-			btnSelectionFind.setBackgroundDrawable(colorButtons);
+			btnSelectionFind.setBackground(colorButtons);
+		if (isEInk) Utils.setBtnBackground(btnSelectionFind, null, isEInk);
 		btnSelectionCite = llButtonsRow.findViewById(R.id.selection_cite);
 		if (btnSelectionCite != null)
-			btnSelectionCite.setBackgroundDrawable(colorButtons);
+			btnSelectionCite.setBackground(colorButtons);
+		if (isEInk) Utils.setBtnBackground(btnSelectionCite, null, isEInk);
 		btnSelectionMore = llButtonsRow.findViewById(R.id.selection_more);
 		if (btnSelectionMore != null)
-			btnSelectionMore.setBackgroundDrawable(null);
+			btnSelectionMore.setBackground(null);
+		if (isEInk) Utils.setBtnBackground(btnSelectionMore, null, isEInk);
 		// set up events
 		setupEvents();
 	}
@@ -586,21 +613,29 @@ public class SelectionToolbarDlg {
 		new BoundControlListener(llSliderBottom.findViewById(R.id.selection_bound_control_b), false);
 		llSliderTop.findViewById(R.id.btn_next_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(true, SELECTION_SMALL_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_next_t), null, isEInk);
 		llSliderTop.findViewById(R.id.btn_prev_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(true, -SELECTION_SMALL_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_prev_t), null, isEInk);
 		llSliderTop.findViewById(R.id.btn_next_sent_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_next_sent_t), null, isEInk);
 		llSliderTop.findViewById(R.id.btn_prev_sent_t).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_prev_sent_t), null, isEInk);
 
 		llSliderBottom.findViewById(R.id.btn_next_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(false, SELECTION_SMALL_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_next_b), null, isEInk);
 		llSliderBottom.findViewById(R.id.btn_prev_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(false, -SELECTION_SMALL_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_prev_b), null, isEInk);
 		llSliderBottom.findViewById(R.id.btn_next_sent_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_next_sent_b), null, isEInk);
 		llSliderBottom.findViewById(R.id.btn_prev_sent_b).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP)));
+		if (isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_prev_sent_b), null, isEInk);
 		if (btnSelectionMore != null)
 			btnSelectionMore.setOnClickListener(v -> toggleAddButtons(false));
 	}
@@ -652,6 +687,7 @@ public class SelectionToolbarDlg {
 			dicButton.setEllipsize(TextUtils.TruncateAt.END);
 			flRecentDics.addView(dicButton);
 			Button finalDicButton = dicButton;
+			if (isEInk) Utils.setBtnBackground(dicButton, null, isEInk);
 			dicButton.setOnClickListener(v -> {
 				mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
 						mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
@@ -729,12 +765,13 @@ public class SelectionToolbarDlg {
 								});
 						return true;
 					});
+					if (isEInk) Utils.setBtnBackground(dicButton, null, isEInk);
 				}
 			}
 		}
 	}
 
-	public SelectionToolbarDlg(CoolReader coolReader, ReaderView readerView, Selection sel)
+	public SelectionToolbarDlg(CoolReader coolReader, ReaderView readerView, Selection sel, boolean isShort)
 	{
 		this.selection = sel;
 		stSel = selection;
@@ -742,6 +779,7 @@ public class SelectionToolbarDlg {
 		props = new Properties(mActivity.settings());
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
+		mIsShort = isShort;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(coolReader, isEInk);
 

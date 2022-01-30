@@ -4,6 +4,8 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.options.OptionsDialog;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;

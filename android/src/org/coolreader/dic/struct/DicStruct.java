@@ -1,5 +1,5 @@
 package org.coolreader.dic.struct;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.util.ArrayList;
 import java.util.List;

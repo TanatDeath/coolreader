@@ -2,6 +2,8 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

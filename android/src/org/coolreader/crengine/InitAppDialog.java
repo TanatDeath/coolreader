@@ -1,31 +1,17 @@
 package org.coolreader.crengine;
 
-import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Environment;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Display;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.TableLayout;
-import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.BaseDB;
-import org.coolreader.db.MainDB;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,6 +69,7 @@ public class InitAppDialog extends BaseDialog {
 			buttonPressed(mBtnClearDB);
 		});
 		Utils.setDashedButton(mBtnPerformSelected);
+		if (isEInk) Utils.setDashedButtonEink(mBtnPerformSelected);
 		mBtnPerformSelected.setOnClickListener(v -> {
 			performSelected();
 		});
@@ -93,8 +80,8 @@ public class InitAppDialog extends BaseDialog {
 	private void buttonPressed(Button btn) {
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT = Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
 		mCoolReader.tintViewIcons(mBtnClearCache, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnClearSettings, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnClearDB, PorterDuff.Mode.CLEAR,true);
@@ -105,14 +92,17 @@ public class InitAppDialog extends BaseDialog {
 			mBtnClearCache.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnClearCache,true);
 		} else mBtnClearCache.setBackgroundColor(colorGrayCT);
+		if (isEInk) Utils.setSolidButtonEink(mBtnClearCache);
 		if (clearSettings) {
 			mBtnClearSettings.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnClearSettings,true);
 		} else mBtnClearSettings.setBackgroundColor(colorGrayCT);
+		if (isEInk) Utils.setSolidButtonEink(mBtnClearSettings);
 		if (clearDB) {
 			mBtnClearDB.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(mBtnClearDB,true);
 		} else mBtnClearDB.setBackgroundColor(colorGrayCT);
+		if (isEInk) Utils.setSolidButtonEink(mBtnClearDB);
 	}
 
 	boolean deleteDirectory(File directoryToBeDeleted) {

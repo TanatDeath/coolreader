@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -19,7 +20,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -73,6 +73,7 @@ public class BrowserViewLayout extends ViewGroup {
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		activity.tintViewIcons(btnNew, PorterDuff.Mode.CLEAR,true);
@@ -102,25 +103,31 @@ public class BrowserViewLayout extends ViewGroup {
 		activity.tintViewIcons(btnStateToRead, PorterDuff.Mode.CLEAR,true);
 		activity.tintViewIcons(btnStateReading, PorterDuff.Mode.CLEAR,true);
 		activity.tintViewIcons(btnStateFinished, PorterDuff.Mode.CLEAR,true);
+		if (isEInk) colorGrayCT = Color.WHITE;
 		if (bStateDir) {
 			btnStateDir.setBackgroundColor(colorGrayCT2);
 			activity.tintViewIcons(btnStateDir,true);
+			if (isEInk) Utils.setSolidButtonEink(btnStateDir);
 		} else btnStateDir.setBackgroundColor(colorGrayCT);
 		if (bStateNoMark) {
 			btnStateNoMark.setBackgroundColor(colorGrayCT2);
 			activity.tintViewIcons(btnStateNoMark,true);
+			if (isEInk) Utils.setSolidButtonEink(btnStateNoMark);
 		} else btnStateNoMark.setBackgroundColor(colorGrayCT);
 		if (bStateToRead) {
 			btnStateToRead.setBackgroundColor(colorGrayCT2);
 			activity.tintViewIcons(btnStateToRead,true);
+			if (isEInk) Utils.setSolidButtonEink(btnStateToRead);
 		}  else btnStateToRead.setBackgroundColor(colorGrayCT);
 		if (bStateReading) {
 			btnStateReading.setBackgroundColor(colorGrayCT2);
 			activity.tintViewIcons(btnStateReading,true);
+			if (isEInk) Utils.setSolidButtonEink(btnStateReading);
 		} else btnStateReading.setBackgroundColor(colorGrayCT);
 		if (bStateFinished) {
 			btnStateFinished.setBackgroundColor(colorGrayCT2);
 			activity.tintViewIcons(btnStateFinished,true);
+			if (isEInk) Utils.setSolidButtonEink(btnStateFinished);
 		} else btnStateFinished.setBackgroundColor(colorGrayCT);
 	}
 

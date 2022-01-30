@@ -7,10 +7,9 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 
 import org.coolreader.BuildConfig;
-import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.options.OptionsDialog;
 import org.coolreader.readerview.ReaderView;
+import org.coolreader.utils.Utils;
 
 public class ReaderAction {
 	final public String id;
@@ -250,6 +249,7 @@ public class ReaderAction {
 	public final static ReaderAction CALIBRE_SHOW_PUB_DATES = new ReaderAction("CALIBRE_SHOW_PUB_DATES", R.string.calibre_publish_date, ReaderCommand.DCMD_CALIBRE_SHOW_PUB_DATES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_year);
 	public final static ReaderAction CALIBRE_SHOW_TAGS = new ReaderAction("CALIBRE_SHOW_TAGS", R.string.calibre_tags, ReaderCommand.DCMD_CALIBRE_SHOW_TAGS, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_theatre_mask);
 	public final static ReaderAction INIT_APP_DIALOG = new ReaderAction("INIT_APP_DIALOG", R.string.init_app, ReaderCommand.DCMD_INIT_APP_DIALOG, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_delete_database);
+	public final static ReaderAction EXPERIMENAL_FEATURE = new ReaderAction("EXPERIMENAL_FEATURE", R.string.exp_feature, ReaderCommand.DCMD_EXPERIMENTAL_FEATURE, 0, null, R.string.exp_feature_add_info).setIconId(R.drawable.icons8_physics);
 
 	public final static ReaderAction[] AVAILABLE_ACTIONS;
 
@@ -413,7 +413,8 @@ public class ReaderAction {
 				SKIM,
 				ONLINE_COMBO,
 				ONLINE_SUPER_COMBO,
-				SAVE_LOGCAT
+				SAVE_LOGCAT,
+				EXPERIMENAL_FEATURE
 				// calibre will only be available from rootview
 		};
 		if (BuildConfig.GSUITE_AVAILABLE && DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {

@@ -5,7 +5,7 @@ import java.io.File;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;

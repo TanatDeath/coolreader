@@ -20,6 +20,10 @@ public class TTSOption extends SubmenuOption {
 	final BaseActivity mActivity;
 	final OptionsDialog mOptionsDialog;
 
+	int[] mTTSSentencePause = new int[] {
+			0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 1900
+	};
+
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public static void fillTTSLanguages(OptionsDialog od, ListOption listOption) {
 		listOption.clear();
@@ -168,6 +172,11 @@ public class TTSOption extends SubmenuOption {
 		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.tts_page_mode_dont_change), Settings.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.tts_sentence_pause), Settings.PROP_APP_TTS_SENTENCE_PAUSE,
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+				add(mTTSSentencePause).
+				setDefaultValue(Integer.toString(mTTSSentencePause[0])).
+				noIcon());
 		// plotn - disabled, since removed from tts code
 //			listView.add(new ListOption(mOwner, mActivity.getString(R.string.force_tts_koef),
 //					Settings.PROP_APP_TTS_FORCE_KOEF, mActivity.getString(R.string.force_tts_koef_add_info), this.lastFilteredValue).
@@ -251,6 +260,8 @@ public class TTSOption extends SubmenuOption {
 		this.updateFilteredMark(mActivity.getString(R.string.sel_panel_background_3));
 		this.updateFilteredMark(mActivity.getString(R.string.tts_page_mode_dont_change), Settings.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.tts_sentence_pause), Settings.PROP_APP_TTS_SENTENCE_PAUSE,
+				mActivity.getString(R.string.tts_sentence_pause));
 		return this.lastFiltered;
 	}
 	public String getValueLabel() { return ">"; }

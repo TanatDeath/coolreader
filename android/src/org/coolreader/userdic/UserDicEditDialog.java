@@ -15,8 +15,8 @@ import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DicSearchHistoryEntry;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.HashMap;
 
@@ -40,6 +40,7 @@ public class UserDicEditDialog extends BaseDialog {
 	private final boolean isDshe;
 	private final int isCite;
 	private final String word;
+	private final String word_translate;
 
 	private final UserDicEntry mUde;
 
@@ -87,6 +88,7 @@ public class UserDicEditDialog extends BaseDialog {
 		isDshe = ude.getThisIsDSHE();
 		isCite = ude.getIs_citation();
 		word = ude.getDic_word();
+		word_translate = StrUtils.getNonEmptyStr(ude.getDic_word_translate(), true);
 		mCoolReader = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(activity, isEInk);
@@ -157,10 +159,12 @@ public class UserDicEditDialog extends BaseDialog {
 				mCoolReader.getmUserDic().remove(wasKey);
 				UserDicEntry delUde = new UserDicEntry();
 				delUde.setDic_word(word);
+				delUde.setDic_word_translate(word_translate);
 				delUde.setIs_citation(isCite);
 				mCoolReader.getDB().saveUserDic(delUde, UserDicEntry.ACTION_DELETE);
 			}
 			mCoolReader.getDB().saveUserDic(mUde, UserDicEntry.ACTION_NEW);
+			mActivity.getmUserDic().put(mUde.getIs_citation()+mUde.getDic_word(), mUde);
 		}
 		mCoolReader.updateUserDicWords();
 		if (udDlg != null) {
@@ -181,6 +185,7 @@ public class UserDicEditDialog extends BaseDialog {
 			if (mUde.getThisIsDSHE()) {
 				DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
 				dshe.setSearch_text(mUde.getDic_word());
+				dshe.setText_translate(mUde.getDic_word_translate());
 				mCoolReader.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, mCoolReader);
 			}
 			mCoolReader.getDB().saveUserDic(mUde, UserDicEntry.ACTION_DELETE);

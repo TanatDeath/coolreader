@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
+import org.coolreader.utils.Utils;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -136,29 +137,40 @@ public class FindNextDlg {
 
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		if (!isEInk) c.setAlpha(130);
-		mPanel.findViewById(R.id.search_btn_prev).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_prev).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_prev), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_prev).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_plus_1).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_1).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_plus_1), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_plus_1).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_plus_10).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_10).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_plus_10), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_plus_10).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_plus_ch).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_ch).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_plus_ch), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_plus_ch).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_plus_bmk).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_plus_bmk).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_plus_bmk), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_plus_bmk).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_next).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_next).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_next), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_next).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_minus_1).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_1).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_minus_1), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_minus_1).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_minus_10).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_10).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_minus_10), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_minus_10).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_minus_ch).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_ch).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_minus_ch), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_minus_ch).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_btn_minus_bmk).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_minus_bmk).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_minus_bmk), null, isEInk);
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setPadding(6, 15, 6, 15);
 
 		mPanel.findViewById(R.id.search_goback).setPadding(6, 15, 6, 15);
-		mPanel.findViewById(R.id.search_goback).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_goback).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_goback), null, isEInk);
 
 		if (skim) {
 			Utils.hideView(mPanel.findViewById(R.id.search_btn_prev));
@@ -169,7 +181,8 @@ public class FindNextDlg {
 			mReaderView.clearSelection();
 			mWindow.dismiss();
 		});
-		mPanel.findViewById(R.id.search_btn_close).setBackgroundDrawable(c);
+		mPanel.findViewById(R.id.search_btn_close).setBackground(c);
+		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_btn_close), null, isEInk);
 		coolReader.tintViewIcons(mPanel,true);
 		mPanel.setFocusable(true);
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
@@ -217,7 +230,10 @@ public class FindNextDlg {
 		mWindow.setFocusable(true);
 		mWindow.setTouchable(true);
 		mWindow.setOutsideTouchable(true);
-		panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (isEInk)
+			panel.setBackgroundColor(Color.WHITE);
+		else
+			panel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
 		mWindow.setContentView(panel);
 		mWindow.getContentView().setFocusableInTouchMode(true);
 		mWindow.getContentView().requestFocus();

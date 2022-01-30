@@ -7,8 +7,8 @@ import com.google.gson.GsonBuilder;
 
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;

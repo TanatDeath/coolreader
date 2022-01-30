@@ -23,6 +23,8 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;

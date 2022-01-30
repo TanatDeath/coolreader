@@ -1,6 +1,5 @@
 package org.coolreader.cloud.litres;
 
-import android.content.DialogInterface;
 import android.util.Log;
 
 import org.coolreader.BuildConfig;
@@ -12,8 +11,8 @@ import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.crengine.Services;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,7 +34,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okio.Buffer;
 
 public class LitresPerformAction {
 

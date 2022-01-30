@@ -128,7 +128,7 @@ public class TTSControlService extends BaseService {
 	private MediaPlayer mMediaPlayer;
 	private VolumeSettingsContentObserver mVolumeSettingsContentObserver;
 	private final Object mLocker = new Object();
-	private boolean mAudioFocusLocked;
+	public boolean mAudioFocusLocked;
 
 	final private BroadcastReceiver mTTSControlActionReceiver = new BroadcastReceiver() {
 		@Override
@@ -1371,7 +1371,7 @@ public class TTSControlService extends BaseService {
 					builder = builder.addAction(actionPlayPause);
 					// lock
 					PendingIntent playLockIntent = PendingIntent.getBroadcast(this, 0, new Intent(TTS_CONTROL_ACTION_PLAY_LOCK), 0);
-					actionBld = new Notification.Action.Builder(mState == State.PAUSED ? R.drawable.icons8_play_lock : R.drawable.icons8_pause, "", playLockIntent);
+					actionBld = new Notification.Action.Builder(mState == State.PAUSED ? R.drawable.icons8_play_lock : R.drawable.icons8_pause_lock, "", playLockIntent);
 					Notification.Action actionPlayLock = actionBld.build();
 					builder = builder.addAction(actionPlayLock);
 					// prev

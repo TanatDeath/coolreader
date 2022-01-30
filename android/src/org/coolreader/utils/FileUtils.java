@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.utils;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -17,15 +17,29 @@ import android.util.Log;
 import com.google.android.gms.common.util.IOUtils;
 
 import org.coolreader.CoolReader;
-import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookInfoDialog;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.SaveDocDialog;
+import org.coolreader.crengine.Scanner;
+import org.coolreader.crengine.Services;
+import org.coolreader.crengine.Settings;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 
 public class FileUtils {
 
@@ -384,7 +398,7 @@ public class FileUtils {
                 SaveDocDialog dlg = new SaveDocDialog(mActivity, true,
                         f.getParent(), f.getAbsolutePath(),
                         item.getFilename(), Utils.getFileExtension(item.getFilename()),
-                        f.getAbsolutePath(), null, null);
+                        f.getAbsolutePath(), null, "");
                 dlg.show();
                 return;
             }
@@ -460,6 +474,43 @@ public class FileUtils {
             return item1;
         }
         return new FileInfo(file);
+    }
+
+    public static ArrayList<String> readLinesFromFile(String filePath) {
+        ArrayList<String> res = new ArrayList<String>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                res.add(line);
+            }
+        } catch (Exception e) {
+            // do nothing - return empty list
+        }
+        return res;
+    }
+
+    public static ArrayList<File> searchFiles(File fileOrDir, String searchRegex) {
+        ArrayList<File> files = new ArrayList<>();
+        if (fileOrDir.isDirectory()) {
+            File[] arr = fileOrDir.listFiles();
+            for (File f : arr) {
+                if (!fileOrDir.isDirectory()) {
+                    if (fileOrDir.getName().matches(searchRegex))
+                        files.add(fileOrDir);
+                } else {
+                    ArrayList<File> found = searchFiles(f, searchRegex);
+                    for (File ff : found) files.add(ff);
+                }
+            }
+        } else {
+            if (fileOrDir.getName().matches(searchRegex)) {
+                ArrayList<File> file1 = new ArrayList<>();
+                file1.add(fileOrDir);
+                return file1;
+            }
+        }
+        return files;
     }
 
 }

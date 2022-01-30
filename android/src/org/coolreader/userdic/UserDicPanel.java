@@ -18,8 +18,8 @@ import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

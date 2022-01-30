@@ -20,6 +20,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.options.OptionsDialog;
+import org.coolreader.utils.Utils;
 
 public class OrientationToolbarDlg {
 	public PopupWindow mWindow;
@@ -129,7 +130,7 @@ public class OrientationToolbarDlg {
 			btnFixNew.setImageResource(
 					Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_icons8_fix_port, R.drawable.icons8_fix_port)
 			);
-		btnFixNew.setBackgroundDrawable(c);
+		btnFixNew.setBackground(c);
 		btnFixNew.setOnClickListener(v -> {
 			if (DeviceInfo.getSDKLevel() >= 9) {
 				int iSett = mCoolReader.settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
@@ -152,7 +153,7 @@ public class OrientationToolbarDlg {
 						Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_icons8_port_to_landsc, R.drawable.icons8_port_to_landsc)
 				);
 
-			btnFixOld.setBackgroundDrawable(c);
+			btnFixOld.setBackground(c);
 			btnFixOld.setOnClickListener(v -> {
 				if (DeviceInfo.getSDKLevel() >= 9) {
 					int iSett = mCoolReader.settings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);

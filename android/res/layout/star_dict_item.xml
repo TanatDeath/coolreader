@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Book item layout for CR3 file browser
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/dict_item_body"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:baselineAligned="false"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="2dip"
+	android:layout_marginRight="2dip"
+	>
+
+	<LinearLayout android:id="@+id/dict_item_text"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical|fill_horizontal"
+		android:baselineAligned="false">
+
+		<TextView android:id="@+id/dict_item_title"
+			style="@style/TextAppearance.Medium"
+			android:text="10% Title Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:ellipsize="end"
+			android:maxLines="3"
+			android:layout_gravity="left" />
+
+		<TextView android:id="@+id/dict_item_filepath"
+				style="@style/TextAppearance.Small"
+				android:text="10% Title Text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:layout_marginLeft="20dip"
+				android:ellipsize="middle"
+				android:textStyle="bold"
+				android:layout_gravity="left" />
+		<TextView android:id="@+id/dict_item_desc"
+				style="@style/TextAppearance.Small"
+				android:text="10% Title Text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="20dip"
+				android:ellipsize="end"
+				android:maxLines="3"
+				android:layout_gravity="left" />
+		<TextView android:id="@+id/dict_item_version"
+				style="@style/TextAppearance.Small"
+				android:text="10% Title Text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:layout_marginLeft="20dip"
+				android:ellipsize="end"
+				android:layout_gravity="left" />
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/dict_buttons"
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:baselineAligned="false"
+				android:layout_margin="2dip"
+				>
+			<Button
+					android:id="@+id/btn_convert"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="_" />
+			<TextView android:id="@+id/tv_converted"
+					style="@style/TextAppearance.Small"
+					android:text="_"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:ellipsize="end"
+					android:layout_marginLeft="10dip"
+					android:textStyle="bold"
+					android:layout_gravity="left" />
+		</LinearLayout>
+	</LinearLayout>
+</LinearLayout>

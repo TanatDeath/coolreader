@@ -11,8 +11,8 @@ import android.widget.Toast;
 import org.coolreader.R;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 public class ClickOption extends OptionBase {
 	private boolean inverse = false;
@@ -77,14 +77,16 @@ public class ClickOption extends OptionBase {
 		else
 			currValue = mProperties.getProperty(property);
 		valueView.setText(currValue);
-		if (ccb != null)
+		if (ccb != null) {
+			String finalCurrValue = currValue;
 			view.setOnClickListener(v -> {
-				ccb.click(view);
+				ccb.click(view, label, finalCurrValue);
 				refreshList();
 				//final View view1 = view;
 				//mActivity.showToast(addInfo, Toast.LENGTH_LONG, view1, true, 0);
 				return;
 			});
+		}
 		view.setOnLongClickListener(v-> {
 			if (!StrUtils.isEmptyStr(addInfo))
 				mActivity.showToast(addInfo, Toast.LENGTH_LONG, view, true, 0);

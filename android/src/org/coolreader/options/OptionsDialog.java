@@ -23,9 +23,9 @@ import org.coolreader.crengine.Properties;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.crengine.SwitchProfileDialog;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.Dictionaries.DictInfo;
 import org.coolreader.R;
@@ -34,6 +34,7 @@ import org.coolreader.tts.OnTTSCreatedListener;
 import org.coolreader.tts.TTSControlBinder;
 import org.coolreader.tts.TTSControlServiceAccessor;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -180,7 +181,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			ReaderView.SELECTION_ACTION_DICTIONARY_4,
 			ReaderView.SELECTION_ACTION_DICTIONARY_5,
 			ReaderView.SELECTION_ACTION_DICTIONARY_6,
-			ReaderView.SELECTION_ACTION_DICTIONARY_7
+			ReaderView.SELECTION_ACTION_DICTIONARY_7,
+			ReaderView.SELECTION_ACTION_DICTIONARY_8,
+			ReaderView.SELECTION_ACTION_DICTIONARY_9,
+			ReaderView.SELECTION_ACTION_DICTIONARY_10
+
 	};
 
 	static int[] mBookmarkSendToActionMod = new int[] {
@@ -230,10 +235,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.options_selection_action_dictionary_4,
 			R.string.options_selection_action_dictionary_5,
 			R.string.options_selection_action_dictionary_6,
-			R.string.options_selection_action_dictionary_7
+			R.string.options_selection_action_dictionary_7,
+			R.string.options_selection_action_dictionary_8,
+			R.string.options_selection_action_dictionary_9,
+			R.string.options_selection_action_dictionary_10
 	};
 
 	int[] mBookmarkSendToActionAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -432,7 +443,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public Mode mode;
 
 	public interface ClickCallback {
-		void click(View view);
+		void click(View view, String optionLabel, String optionValue);
 	}
 
 	static public void saveColor( Properties mProperties, boolean night )
@@ -740,6 +751,33 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				if (!StrUtils.isEmptyStr(sAdd)) value = value + " (" + sAdd + ")";
 			}
 		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_8))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_8, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+			DictInfo di = Dictionaries.findById(val, mActivity);
+			if (di != null) {
+				String sAdd = di.getAddText(mActivity);
+				if (!StrUtils.isEmptyStr(sAdd)) value = value + " (" + sAdd + ")";
+			}
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_9))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_9, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+			DictInfo di = Dictionaries.findById(val, mActivity);
+			if (di != null) {
+				String sAdd = di.getAddText(mActivity);
+				if (!StrUtils.isEmptyStr(sAdd)) value = value + " (" + sAdd + ")";
+			}
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_10))) {
+			String val = mProperties.getProperty(PROP_APP_DICTIONARY_10, "");
+			if (!StrUtils.isEmptyStr(val)) value = value + ": " + val;
+			DictInfo di = Dictionaries.findById(val, mActivity);
+			if (di != null) {
+				String sAdd = di.getAddText(mActivity);
+				if (!StrUtils.isEmptyStr(sAdd)) value = value + " (" + sAdd + ")";
+			}
+		}
 		if (isShort) value = StrUtils.getNonEmptyStr(value,true).replace(sfind+":","").trim();
 		if (isShort) value = StrUtils.getNonEmptyStr(value,true).replace(sfind,"").trim();
 		return value;
@@ -770,6 +808,15 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_7))) {
 			return mActivity.mDictionaries.currentDictionary7;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_8))) {
+			return mActivity.mDictionaries.currentDictionary8;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_9))) {
+			return mActivity.mDictionaries.currentDictionary9;
+		}
+		if (StrUtils.getNonEmptyStr(value,false).equals(mActivity.getString(R.string.options_selection_action_dictionary_10))) {
+			return mActivity.mDictionaries.currentDictionary10;
 		}
 		return null;
 	}
@@ -1554,14 +1601,14 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			for (int i = 0; i < mTabs.getTabWidget().getChildCount(); i++) {
 				try {
 					mTabs.getTabWidget().getChildAt(i)
-						.setBackgroundColor(colorGrayC); // unselected
+						.setBackgroundColor(isEInk? Color.WHITE: colorGrayC); // unselected
 				} catch (Exception e) {
 					Log.e("OPTIONSDLG", "setupReaderOptions 1", e);
 				}
 			}
 			try {
 				mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
-						.setBackgroundColor(colorGray); // selected
+						.setBackgroundColor(isEInk? colorGrayC: colorGray); // selected
 			} catch (Exception e) {
 				Log.e("OPTIONSDLG", "setupReaderOptions 2", e);
 			}
@@ -1773,9 +1820,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.attr_icons8_library, R.drawable.icons8_library);
 		((FilebrowserOption)sbO5).updateFilterEnd();
 		mOptionsApplication.add(sbO5);
-		OptionBase sbO4 = new DictionaryOption(this.mActivity, OptionsDialog.this,this, getString(R.string.dictionary_settings),
+		OptionBase sbO4 = new DictionariesOption(this.mActivity, OptionsDialog.this,this, getString(R.string.dictionary_settings),
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.attr_icons8_google_translate, R.drawable.icons8_google_translate);
-		((DictionaryOption)sbO4).updateFilterEnd();
+		((DictionariesOption)sbO4).updateFilterEnd();
 		mOptionsApplication.add(sbO4);
 		OptionBase sbO3 = new CloudOption(this.mActivity, getContext(), this, getString(R.string.cloud_settings),
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.attr_icons8_cloud_storage, R.drawable.icons8_cloud_storage);
@@ -1797,7 +1844,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		if (cr.settingsMayBeMigratedLastInd>=0) {
 			mOptionsApplication.add(new ClickOption(this, getString(R.string.migrate_cr_settings),
 					PROP_APP_MIGRATE_SETTINGS, getString(R.string.migrate_cr_settings_add_info), filter,
-					view ->
+					(view1, optionLabel, optionValue) ->
 					{
 						mActivity.askConfirmation(R.string.migrate_cr_settings_q, () -> {
 							ArrayList<CloudFileInfo> afi = new ArrayList<>();
@@ -1815,9 +1862,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					}, true).setDefaultValue(getString(R.string.migrate_cr_settings_profiles) + " " + (cr.settingsMayBeMigratedLastInd + 1)).
 					setIconIdByAttr(R.attr.coolreader_logo_button_drawable, R.drawable.cr3_logo_button));
 		}
+		mOptionsApplication.add(new RestoreSettingsOption(this.mActivity, getContext(), this,
+				getString(R.string.restore_settings), getString(R.string.option_add_info_empty_text), filter).
+				setIconIdByAttr(R.attr.attr_icons8_settings_from_hist, R.drawable.icons8_settings_from_hist));
 		mOptionsApplication.add(new ClickOption(this, getString(R.string.init_app),
 				PROP_APP_INIT, "", filter,
-				view ->
+				(view1, optionLabel, optionValue) ->
 				{
 					InitAppDialog iad = new InitAppDialog((CoolReader) mActivity);
 					iad.show();

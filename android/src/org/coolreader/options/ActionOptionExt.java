@@ -1,26 +1,21 @@
 package org.coolreader.options;
 
-import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.coolreader.R;
-import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -209,7 +204,9 @@ public class ActionOptionExt extends OptionBase {
 		int colorGray;
 		colorGray = themeColors.get(R.attr.colorThemeGray2);
 		toToolbar.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+		if (isEInk) Utils.setSolidButtonEink(toToolbar);
 		toMenu.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+		if (isEInk) Utils.setSolidButtonEink(toMenu);
 		//label = label.replace("~", " / ");
 		setupIconView(view.findViewById(R.id.option_icon));
 		mActivity.tintViewIcons(view,false);

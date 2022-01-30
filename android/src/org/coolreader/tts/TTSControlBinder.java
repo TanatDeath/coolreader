@@ -106,4 +106,8 @@ public class TTSControlBinder extends Binder {
 		mService.setStatusListener(listener);
 	}
 
+	public boolean isAudioFocusLocked() {
+		return mService.mAudioFocusLocked;
+	}
+
 }

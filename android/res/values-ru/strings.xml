@@ -277,6 +277,9 @@
     <string name="options_selection_action_dictionary_5">Найти в словаре 5</string>
     <string name="options_selection_action_dictionary_6">Найти в словаре 6</string>
     <string name="options_selection_action_dictionary_7">Найти в словаре 7</string>
+    <string name="options_selection_action_dictionary_8">Найти в словаре 8</string>
+    <string name="options_selection_action_dictionary_9">Найти в словаре 9</string>
+    <string name="options_selection_action_dictionary_10">Найти в словаре 10</string>
     <string name="options_selection_action_dictionary_list">Список словарей</string>
     <string name="options_selection_action_copy">Копировать</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
@@ -385,6 +388,11 @@
     <string name="dlg_about_textures_dirs">Каталоги текстур:</string>
     <string name="dlg_about_backgrounds_dirs">Каталоги фоновых рисунков:</string>
     <string name="dlg_about_hyphenations_dirs">Каталоги словарей переносов:</string>
+    <string name="dlg_about_offlinedicts_dirs">Каталоги оффлайновых словарей:</string>
+    <string name="dlg_about_customcovers_dirs">Каталоги своих обложек книг:</string>
+    <string name="dlg_about_download_dirs">Каталоги для скачивания:</string>
+    <string name="dlg_about_cloudsync_dirs">Каталоги облачной синхронизации:</string>
+    <string name="dlg_about_icons_dirs">Каталоги для иконок:</string>
     <string name="mi_book_browser_normal_mode">Нормальный режим</string>
     <string name="mi_book_browser_simple_mode">Простой список файлов</string>
     <string name="mi_book_browser_max_group_size">Максимальный размер группы</string>
@@ -1468,6 +1476,7 @@
     <string name="font_tweaks">Тонкие настройки шрифта</string>
     <string name="spacing_settings">Расстояния между строками, словами и символами</string>
     <string name="migrate_cr_settings">Скопировать настройки из CoolReader</string>
+    <string name="restore_settings">Восстановить настройки</string>
     <string name="migrate_cr_settings_add_info">Файлы CoolReader никак не модифицируются, вы сможете пользоваться им как и раньше</string>
     <string name="migrate_cr_settings_profiles">Число профилей:</string>
     <string name="migrate_cr_settings_q">Вы уверены? Текущие настройки будут заменены</string>
@@ -1657,6 +1666,8 @@
     <string name="online_offline_dics_add_info_ext">Можно указать соответствие онлайновому словарю офлайнового, который будет использоваться вместо него, когда вы не в сети. Введите номер словаря</string>
     <string name="lang_pair">Языковая пара</string>
     <string name="conformity">Соответствие</string>
+    <string name="offline_dics_dialog">Оффлайновые словари</string>
+    <string name="offline_dics_dialog_add_info">Управление оффлайновыми словарями</string>
     <string name="select_transl_dir">Выберите направление перевода</string>
     <string name="all_languages">Выбрать из всех языков</string>
     <string name="page_flipping_type">Листание жестами</string>
@@ -1832,5 +1843,23 @@
     <string name="copy_file_then_open">Сохранить, а затем открыть файл</string>
     <string name="add_author_folder">Добавить подпапку автора</string>
     <string name="do_not_move">Не перемещать</string>
+    <string name="offline_dics">Оффлайновые словари</string>
+    <string name="found_dics">Найденные словари</string>
+    <string name="imported_dics">Импортированные словари</string>
+    <string name="options_selection_action_toolbar_short">Панель словарей</string>
+    <string name="inspector_mode_no_dic_history">Не сохранять в историю в режиме инспектора</string>
+    <string name="word_count">число слов</string>
+    <string name="convert_dic">преобразовать словарь</string>
+    <string name="converted_dic">словарь преобразован</string>
+    <string name="tts_sentence_pause">Пауза между предложениями, мс</string>
+    <string name="eink_onyx_full_update">Способ полного обновления экрана</string>
+    <string name="eink_full_update_auto">Авто</string>
+    <string name="eink_onyx_full_update_add_info">Попробуйте поменять метод, если при полном обновлении экрана вы замечаете мерцание или двойное обновление</string>
+    <string name="eink_full_update_method1">Метод 1</string>
+    <string name="eink_full_update_method2">Метод 2</string>
+    <string name="exp_feature">Экспериментальная функция</string>
+    <string name="exp_feature_add_info">Эта функция - то, что в настоящий момент разрабатывается. Если вы решили ее использовать - вы точно знаете что делать</string>
+    <string name="click_to_restore">Нажмите, чтобы восстановить настройки</string>
+    <string name="click_to_restore_warn">Восстановить настройки? Эта операция не может быть отменена!</string>
 </resources>
 

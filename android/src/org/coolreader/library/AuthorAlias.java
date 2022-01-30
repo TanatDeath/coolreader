@@ -1,11 +1,9 @@
 package org.coolreader.library;
 
-import android.util.Log;
-
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.Engine;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.io.BufferedReader;
 import java.io.File;

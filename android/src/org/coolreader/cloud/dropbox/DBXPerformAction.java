@@ -7,7 +7,7 @@ import com.dropbox.core.v2.users.FullAccount;
 
 import org.coolreader.CoolReader;
 import org.coolreader.cloud.CloudAction;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 import java.io.IOException;
 import java.util.List;

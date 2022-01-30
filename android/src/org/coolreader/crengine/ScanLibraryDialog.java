@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -112,6 +114,7 @@ public class ScanLibraryDialog extends BaseDialog {
 	private void buttonPressed(Button btn) {
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT = Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		mActivity.tintViewIcons(mBtnScanWholeDevice, PorterDuff.Mode.CLEAR,true);
@@ -201,24 +204,29 @@ public class ScanLibraryDialog extends BaseDialog {
 		if (bScanWholeDevice) {
 			mBtnScanWholeDevice.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(mBtnScanWholeDevice,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnScanWholeDevice);
 		}
 		for (Button btnCard: cardButtons) {
 			if (cardButtonsSelected.get(btnCard.getContentDescription().toString())) {
 				btnCard.setBackgroundColor(colorGrayCT2);
 				mActivity.tintViewIcons(btnCard,true);
+				if (isEInk) Utils.setSolidButtonEink(btnCard);
 			}
 		}
 		if (bScanBooks) {
 			mBtnScanBooks.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(mBtnScanBooks,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnScanBooks);
 		}
 		if (bScanFav) {
 			mBtnScanFav.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(mBtnScanFav,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnScanFav);
 		}
 		if (bScanDownl) {
 			mBtnScanDownl.setBackgroundColor(colorGrayCT2);
 			mActivity.tintViewIcons(mBtnScanDownl,true);
+			if (isEInk) Utils.setSolidButtonEink(mBtnScanDownl);
 		}
 	}
 
@@ -555,9 +563,11 @@ public class ScanLibraryDialog extends BaseDialog {
 			buttonPressed(mBtnScanDownl);
 		});
 		Utils.setDashedButton(mBtnDoScan);
+		if (isEInk) Utils.setDashedButtonEink(mBtnDoScan);
 		buttonPressed(mBtnScanBooks);
 		mLibraryMaintenance = view.findViewById(R.id.btn_library_maintenance_button);
 		mLibraryMaintenance.setBackgroundColor(colorGrayC);
+		if (isEInk) Utils.setSolidButtonEink(mLibraryMaintenance);
 
 		mBtnDoScan.setOnClickListener(v -> {
 			mBtnDoScan.setText(R.string.do_scan_starting);
@@ -657,10 +667,12 @@ public class ScanLibraryDialog extends BaseDialog {
 		});
 		mBtnMaintRemove.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnMaintRemove);
+		if (isEInk) Utils.setDashedButtonEink(mBtnMaintRemove);
 
 		mBtnMaintRemoveOrphans = view2.findViewById(R.id.btn_maint_remove_orphans);
 		mBtnMaintRemoveOrphans.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnMaintRemoveOrphans);
+		if (isEInk) Utils.setDashedButtonEink(mBtnMaintRemoveOrphans);
 		mBtnMaintRemoveOrphans.setOnClickListener(v -> {
 			mActivity.askConfirmation(R.string.are_you_sure, () -> {
 				progressDlg = ProgressDialog.show(mActivity,
@@ -692,6 +704,7 @@ public class ScanLibraryDialog extends BaseDialog {
 		mBtnMaintRemoveCloud = view2.findViewById(R.id.btn_maint_remove_cloud);
 		mBtnMaintRemoveCloud.setBackgroundColor(colorGrayC);
 		Utils.setDashedButton(mBtnMaintRemoveCloud);
+		if (isEInk) Utils.setDashedButtonEink(mBtnMaintRemoveCloud);
 		mBtnMaintRemoveCloud.setOnClickListener(v -> {
 			mActivity.askConfirmation(R.string.are_you_sure, () -> {
 				progressDlg = ProgressDialog.show(mActivity,

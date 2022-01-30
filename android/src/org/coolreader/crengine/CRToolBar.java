@@ -7,6 +7,8 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.options.OptionsDialog;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.graphics.Bitmap;
 import android.content.res.TypedArray;
@@ -762,7 +764,7 @@ public class CRToolBar extends ViewGroup {
         	//if (popupLocation == Settings.VIEWER_TOOLBAR_BOTTOM) {
 			View separator = new View(activity);
 			//separator.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
-			separator.setBackgroundColor(themeColors.get(R.attr.colorIcon));
+			separator.setBackgroundColor(activity.getTextColor(themeColors.get(R.attr.colorIcon)));
 			addView(separator);
 			separator.layout(left, top, right, top + windowDividerHeight);
 			View separator2 = new View(activity);
@@ -832,7 +834,7 @@ public class CRToolBar extends ViewGroup {
 			addView(separator3);
 			separator3.layout(left, bottom - (2 * windowDividerHeight), right, bottom);
 			View separator4 = new View(activity);
-			separator4.setBackgroundColor(themeColors.get(R.attr.colorIcon));
+			separator4.setBackgroundColor(activity.getTextColor(themeColors.get(R.attr.colorIcon)));
 			addView(separator4);
 			separator4.layout(left, bottom - windowDividerHeight, right, bottom);
         	//}

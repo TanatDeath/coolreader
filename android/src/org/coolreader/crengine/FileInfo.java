@@ -13,6 +13,8 @@ import org.coolreader.R;
 import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.readerview.ReadingStat;
 import org.coolreader.plugins.OnlineStoreBook;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -2133,7 +2135,7 @@ public class FileInfo implements Parcelable {
 			return Utils.cmp(str1, str2);
 		}
 		
-		static int cmp( long n1, long n2 )
+		public static int cmp( long n1, long n2 )
 		{
 			if ( n1<n2 )
 				return -1;

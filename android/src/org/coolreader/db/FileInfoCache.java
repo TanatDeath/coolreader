@@ -3,7 +3,7 @@ package org.coolreader.db;
 import java.util.ArrayList;
 
 import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 public class FileInfoCache {
 

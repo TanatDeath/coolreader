@@ -27,16 +27,17 @@ import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.FileUtils;
+import org.coolreader.utils.FileUtils;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.PictureCameDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.SaveDocDialog;
+import org.coolreader.utils.Utils;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.db.CRDBService;
 
 import java.io.File;
@@ -596,9 +597,14 @@ public class CloudAction {
                         cr.pictureCame(fName);
                     } else {
                         final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-                        final File fPath = new File(downloadDir.pathname+"/Dropbox");
-                        SaveDocDialog.tryToMoveThenOpen(null, cr, fBook.getAbsolutePath(),
-                                fPath.getAbsolutePath(), "", "");
+                        //final File fPath = new File(downloadDir.pathname+"/Dropbox");
+                        SaveDocDialog dlg = new SaveDocDialog(cr, true,
+                                fBook.getParent(), fBook.getAbsolutePath(),
+                                fBook.getName(), Utils.getFileExtension(fBook.getName()),
+                                fBook.getAbsolutePath(), null, "");
+                        dlg.show();
+                        //SaveDocDialog.tryToMoveThenOpen(null, cr, fBook.getAbsolutePath(),
+                        //        fPath.getAbsolutePath(), "", "");
                     }
                 }
 
@@ -710,9 +716,14 @@ public class CloudAction {
                                 cr.pictureCame(fName);
                             } else {
                                 final FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
-                                final File fPath = new File(downloadDir.pathname+"/YandexDisc");
-                                SaveDocDialog.tryToMoveThenOpen(null, cr, fBook.getAbsolutePath(),
-                                        fPath.getAbsolutePath(), "", "");
+                                //final File fPath = new File(downloadDir.pathname+"/YandexDisc");
+                                SaveDocDialog dlg = new SaveDocDialog(cr, true,
+                                        fBook.getParent(), fBook.getAbsolutePath(),
+                                        fBook.getName(), Utils.getFileExtension(fBook.getName()),
+                                        fBook.getAbsolutePath(), null, "");
+                                dlg.show();
+                                //SaveDocDialog.tryToMoveThenOpen(null, cr, fBook.getAbsolutePath(),
+                                //        fPath.getAbsolutePath(), "", "");
                             }
                         }, 200);
                     }
@@ -765,6 +776,40 @@ public class CloudAction {
         }
     }
 
+    public static boolean restoreSettingsFromTxt(CoolReader cr, String data, boolean bQuiet) {
+        String[] lines = data.split("\\r?\\n");
+        boolean fileBegun = false;
+        ArrayList<String> arrCurFile = new ArrayList<String>();
+        String sFName = "";
+        boolean bWasErr = false;
+        for (String line : lines) {
+            if (line.startsWith("~~~ settings: ")) {
+                if (fileBegun) {
+                    if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
+                        if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
+                    arrCurFile.clear();
+                }
+                fileBegun = true;
+                String s = line.replace("~~~ settings: ","");
+                if (s.split("\\|").length>2) {
+                    String[] arrS = s.split("\\|");
+                    String sKnownId = arrS[1];
+                    String sKnownDesc = arrS[2];
+                    s = arrS[0];
+                    if (CloudSync.devicesKnown != null) {
+                        CloudSync.checkKnownDevice(cr, sKnownId, sKnownDesc);
+                    }
+                }
+                sFName = s;
+            } else arrCurFile.add(line);
+        }
+        if (fileBegun) {
+            if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
+                if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
+        }
+        return bWasErr;
+    }
+
     public static void yndLoadJsonFile(CoolReader cr, int iSaveType, String filePath, boolean bQuiet,
                                 String name, int cloudMode) {
         try {
@@ -789,36 +834,7 @@ public class CloudAction {
                                 if (iSaveType != CloudSync.CLOUD_SAVE_SETTINGS) {
                                     CloudSync.applyRPosOrBookmarks(cr, iSaveType, ((String) o), a.mCurAction.param, false);
                                 } else {
-                                    String[] lines = ((String) o).split("\\r?\\n");
-                                    boolean fileBegun = false;
-                                    ArrayList<String> arrCurFile = new ArrayList<String>();
-                                    String sFName = "";
-                                    boolean bWasErr = false;
-                                    for (String line : lines) {
-                                        if (line.startsWith("~~~ settings: ")) {
-                                            if (fileBegun) {
-                                                if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
-                                                    if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
-                                                arrCurFile.clear();
-                                            }
-                                            fileBegun = true;
-                                            String s = line.replace("~~~ settings: ","");
-                                            if (s.split("\\|").length>2) {
-                                                String[] arrS = s.split("\\|");
-                                                String sKnownId = arrS[1];
-                                                String sKnownDesc = arrS[2];
-                                                s = arrS[0];
-                                                if (CloudSync.devicesKnown != null) {
-                                                    CloudSync.checkKnownDevice(cr, sKnownId, sKnownDesc);
-                                                }
-                                            }
-                                            sFName = s;
-                                        } else arrCurFile.add(line);
-                                    }
-                                    if (fileBegun) {
-                                        if ((arrCurFile.size()>0) && (!StrUtils.isEmptyStr(sFName)))
-                                            if (!CloudSync.restoreSettingsFile(cr, sFName, arrCurFile, bQuiet)) bWasErr = true;
-                                    }
+                                    boolean bWasErr = restoreSettingsFromTxt(cr, ((String) o), bQuiet);
                                     if (!bWasErr) {
                                         if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.settings_were_restored));
                                         cr.finish();

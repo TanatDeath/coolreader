@@ -1,14 +1,12 @@
-package org.coolreader.crengine;
+package org.coolreader.utils;
 
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +20,8 @@ public class StrUtils {
         int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
+
+    public static byte UTF8_END_BYTE = 0x00;
 
     public static boolean isEmptyStr(String s) {
         return s == null || s.trim().length() == 0;

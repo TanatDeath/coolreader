@@ -11,9 +11,12 @@ import android.util.Log;
 
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
+import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.library.AuthorAlias;
 import org.coolreader.userdic.UserDicDlg;
 import org.coolreader.userdic.UserDicEntry;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -272,6 +275,31 @@ public class CRDBService extends BaseService {
 			}
 		});
 	}
+
+	//=======================================================================================
+	// StarDict dics access code
+	//=======================================================================================
+	public void convertStartDictDic(String dicPath, String dicName, final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("convertStartDictDic") {
+			@Override
+			public void work() {
+				String doneS = mainDB.convertStartDictDic(dicPath, dicName);
+				sendTask(handler, () -> callback.onObjectLoaded(doneS));
+			}
+		});
+	}
+
+	public void findInStarDictDic(String searchStr, final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("findInStarDictDic") {
+			@Override
+			public void work() {
+				DicStruct ds = mainDB.findInStarDictDic(searchStr);
+				sendTask(handler, () -> callback.onObjectLoaded(ds));
+			}
+		});
+	}
+
+	//=======================================================================================
 
 	public void saveSearchHistory(final BookInfo book, final String sHist) {
 		execTask(new Task("saveSearchHistory") {
@@ -1199,6 +1227,17 @@ public class CRDBService extends BaseService {
 
 		public void loadFileInfos(ArrayList<String> pathNames, FileInfoLoadingCallback fileInfoLoadingCallback) {
 		}
+
+		public void convertStartDictDic(String dicPath, String dicName,
+									final ObjectCallback callback) {
+			getService().convertStartDictDic(dicPath, dicName, callback, new Handler());
+		}
+
+		public void findInStarDictDic(String searchStr,
+										final ObjectCallback callback) {
+			getService().findInStarDictDic(searchStr, callback, new Handler());
+		}
+
 	}
 
     @Override

@@ -1,7 +1,6 @@
 package org.coolreader.plugins;
 
-import org.coolreader.crengine.Utils;
-import org.coolreader.plugins.litres.LitresConnection;
+import org.coolreader.utils.Utils;
 
 public class OnlineStoreBook {
 	public OnlineStoreAuthors authors = new OnlineStoreAuthors();

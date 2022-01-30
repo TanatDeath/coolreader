@@ -13,8 +13,8 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -171,7 +171,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 			CloudFileInfo m = mSettingsList.get(position);
 			if (m != null) {
 				if (cloudMode == Settings.CLOUD_SYNC_VARIANT_FILESYSTEM) {
-					ArrayList<CloudFileInfo> afi = new ArrayList<CloudFileInfo>();
+					ArrayList<CloudFileInfo> afi = new ArrayList<>();
 					String fname = m.name;
 					for (CloudFileInfo fi : mSettingsFile) {
 						String findStr = fname.replace("_cr3_ini_", "_cr3.ini.*").replace(".info", "");
@@ -198,17 +198,20 @@ public class ChooseConfFileDlg extends BaseDialog {
 		colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT = Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
 		if (!bHideThisDevice) {
 			btnThisDevice.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnThisDevice, true);
+			if (isEInk) Utils.setSolidButtonEink(btnThisDevice);
 		} else {
 			btnThisDevice.setBackgroundColor(colorGrayCT);
 		}
 		btnThisDevice.setTextColor(mActivity.getTextColor(colorIcon));
 		mCoolReader.tintViewIcons(btnDeleteAll,true);
 		btnDeleteAll.setBackgroundColor(colorGrayCT2);
+		if (isEInk) Utils.setSolidButtonEink(btnDeleteAll);
 		btnDeleteAll.setTextColor(mActivity.getTextColor(colorIcon));
 	}
 
@@ -307,12 +310,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 			yfile.modified = new Date(f.lastModified());
 			mSettingsList.add(yfile);
 		}
-		Comparator<CloudFileInfo> compareByDate = new Comparator<CloudFileInfo>() {
-			@Override
-			public int compare(CloudFileInfo o1, CloudFileInfo o2) {
-				return -(o1.created.compareTo(o2.created));
-			}
-		};
+		Comparator<CloudFileInfo> compareByDate = (o1, o2) -> -(o1.created.compareTo(o2.created));
 		Collections.sort(mSettingsList, compareByDate);
 		mSettingsFile = new ArrayList<CloudFileInfo>();
 		for (File f: matchingFiles) {

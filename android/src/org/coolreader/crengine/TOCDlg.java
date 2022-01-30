@@ -2,10 +2,10 @@ package org.coolreader.crengine;
 
 import java.util.ArrayList;
 
-import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.DicToastView;
+import org.coolreader.utils.Utils;
 
 import android.database.DataSetObserver;
 import android.graphics.Paint;

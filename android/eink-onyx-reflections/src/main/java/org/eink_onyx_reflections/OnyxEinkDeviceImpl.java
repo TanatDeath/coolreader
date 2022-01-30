@@ -66,6 +66,8 @@ public interface OnyxEinkDeviceImpl {
 
 	void repaintEveryThing(UpdateMode mode);
 
+	void invalidate(UpdateMode mode, View view);
+
 	/**
 	 * Sets the update mode of the view for future updates, so it should be called before update the view.
 	 *

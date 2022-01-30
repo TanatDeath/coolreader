@@ -24,7 +24,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.coolreader.crengine.L;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.db.ServiceThread;
 import org.coolreader.plugins.AsyncResponse;
 import org.coolreader.plugins.ErrorResponse;

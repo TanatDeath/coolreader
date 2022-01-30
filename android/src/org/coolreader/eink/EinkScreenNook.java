@@ -1,8 +1,13 @@
-package org.coolreader.crengine;
+package org.coolreader.eink;
 
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.N2EpdController;
+import org.coolreader.eink.EinkScreen;
 
 import java.util.List;
 
@@ -18,6 +23,8 @@ public class EinkScreenNook implements EinkScreen {
 	protected int mUpdateInterval;
 	protected int mRefreshNumber = -1;
 	protected boolean mIsSleep = false;
+
+	private boolean mSelectionActive = false;
 
 	@Override
 	public void setupController(EinkUpdateMode mode, int updateInterval, View view) {
@@ -49,6 +56,11 @@ public class EinkScreenNook implements EinkScreen {
 
 	@Override
 	public void setExtraDelayFullRefresh(int extraDelayFullRefresh) {
+
+	}
+
+	@Override
+	public void setScreenFullUpdateMethod(int screenFullUpdateMethod) {
 
 	}
 
@@ -197,4 +209,10 @@ public class EinkScreenNook implements EinkScreen {
 				break;
 		}
 	}
+
+	@Override
+	public void setSelectionActive(boolean selectionActive) {
+		mSelectionActive = selectionActive;
+	}
+
 }

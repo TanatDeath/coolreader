@@ -10,7 +10,7 @@ import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.Services;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

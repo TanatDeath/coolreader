@@ -38,7 +38,7 @@ import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Scanner;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.db.CRDBService;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;

@@ -15,6 +15,9 @@ import org.coolreader.cloud.litres.LitresConfig;
 import org.coolreader.cloud.litres.LitresSearchParams;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.TranslationDirectionDialog;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import android.app.SearchManager;
 import android.content.Intent;
@@ -122,6 +125,7 @@ public class BookInfoDialog extends BaseDialog {
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		mCoolReader.tintViewIcons(btnFragment, PorterDuff.Mode.CLEAR,true);
@@ -592,9 +596,13 @@ public class BookInfoDialog extends BaseDialog {
 			btnSetAddMarks.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnSetAddMarks, true);
 			btnSetAddMarks.setPaintFlags(btnSetAddMarks.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+			Utils.setDashedButton(btnSetAddMarks);
+			if (isEInk) Utils.setDashedButtonEink(btnSetAddMarks);
 		} else {
 			btnSetAddMarks.setBackgroundColor(colorGrayCT);
 			btnSetAddMarks.setPaintFlags( btnSetAddMarks.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
+			Utils.setDashedButton(btnSetAddMarks);
+			if (isEInk) Utils.setDashedButtonEink(btnSetAddMarks);
 		}
 		/*if (bMarkToRead) setDashedButton(btnMarkToRead);
 			else {
@@ -798,18 +806,19 @@ public class BookInfoDialog extends BaseDialog {
 
 		btnBookEdit = mainView.findViewById(R.id.book_edit);
 		btnBookEdit.setOnClickListener(v -> {
-		CoolReader cr = (CoolReader) mCoolReader;
-		if (mBookInfo!=null) {
-			FileInfo fi = mBookInfo.getFileInfo();
-			FileInfo dfi = fi.parent;
-			if (dfi == null) {
-				dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
-			}
-			if (dfi != null) {
-				cr.editBookInfo(dfi, fi);
-				dismiss();
-			}
-		} else cr.showToast(R.string.book_info_action_unavailable);
+			CoolReader cr = (CoolReader) mCoolReader;
+			if (mBookInfo!=null) {
+				FileInfo fi = mBookInfo.getFileInfo();
+				FileInfo dfi = fi.parent;
+				if (dfi == null) {
+					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+				}
+				if (dfi != null) {
+					cr.editBookInfo(dfi, fi);
+					dismiss();
+				} else
+					cr.showToast("Cannot find parent for file, contact the developer");
+			} else cr.showToast(R.string.book_info_action_unavailable);
 		});
 
 		ImageButton btnSendByEmail = mainView.findViewById(R.id.save_to_email);
@@ -853,6 +862,7 @@ public class BookInfoDialog extends BaseDialog {
 			activity.setSettings(props, -1, true);
 			paintMarkButton();
 		});
+		Utils.setDashedButton(btnSetAddMarks);
 		paintMarkButton();
 		btnBookDownload = mainView.findViewById(R.id.book_download);
 		annot2 = annot;
@@ -1102,7 +1112,7 @@ public class BookInfoDialog extends BaseDialog {
 			if (name.equals("book.authors")) sAuthors = value.replace("|",", ");
 			if (name.equals("book.title")) sBookTitle = value;
 		}
-		for ( BookInfoEntry item : items ) {
+		for (BookInfoEntry item : items) {
 			addItem(table, item);
 		}
 		buttonsLayout = mainView.findViewById(R.id.base_dlg_button_panel);

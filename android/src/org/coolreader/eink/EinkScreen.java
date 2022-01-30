@@ -1,4 +1,4 @@
-package org.coolreader.crengine;
+package org.coolreader.eink;
 
 import android.content.Context;
 import android.view.View;
@@ -35,7 +35,11 @@ public interface EinkScreen {
 
 	void setNeedBypass(int needBypass);
 
+	void setSelectionActive(boolean selectionActive);
+
 	void setExtraDelayFullRefresh(int extraDelayFullRefresh);
+
+	void setScreenFullUpdateMethod(int screenFullUpdateMethod);
 
 	void prepareController(View view, boolean isPartially);
 

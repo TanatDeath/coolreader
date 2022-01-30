@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CRDBService;
+import org.coolreader.utils.Utils;
 
 import android.graphics.Color;
 import android.text.Editable;

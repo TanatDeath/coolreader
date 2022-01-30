@@ -17,22 +17,26 @@ public class SelectionModesOption extends SubmenuOption {
 			ReaderView.SELECTION_ACTION_COPY,
 			ReaderView.SELECTION_ACTION_DICTIONARY,
 			ReaderView.SELECTION_ACTION_BOOKMARK,
+			ReaderView.SELECTION_ACTION_BOOKMARK_QUICK,
 			ReaderView.SELECTION_ACTION_FIND,
-			ReaderView.SELECTION_ACTION_DICTIONARY_1,
-			ReaderView.SELECTION_ACTION_DICTIONARY_2,
 			ReaderView.SELECTION_ACTION_SEARCH_WEB,
 			ReaderView.SELECTION_ACTION_SEND_TO,
 			ReaderView.SELECTION_ACTION_USER_DIC,
 			ReaderView.SELECTION_ACTION_CITATION,
 			ReaderView.SELECTION_ACTION_DICTIONARY_LIST,
+			ReaderView.SELECTION_ACTION_DICTIONARY_1,
+			ReaderView.SELECTION_ACTION_DICTIONARY_2,
 			ReaderView.SELECTION_ACTION_DICTIONARY_3,
 			ReaderView.SELECTION_ACTION_DICTIONARY_4,
 			ReaderView.SELECTION_ACTION_DICTIONARY_5,
 			ReaderView.SELECTION_ACTION_DICTIONARY_6,
 			ReaderView.SELECTION_ACTION_DICTIONARY_7,
-			ReaderView.SELECTION_ACTION_BOOKMARK_QUICK,
+			ReaderView.SELECTION_ACTION_DICTIONARY_8,
+			ReaderView.SELECTION_ACTION_DICTIONARY_9,
+			ReaderView.SELECTION_ACTION_DICTIONARY_10,
 			ReaderView.SELECTION_ACTION_COMBO,
-			ReaderView.SELECTION_ACTION_SUPER_COMBO
+			ReaderView.SELECTION_ACTION_SUPER_COMBO,
+			ReaderView.SELECTION_ACTION_TOOLBAR_SHORT
 	};
 
 	public static int getSelectionActionTitle(int v) {
@@ -47,22 +51,26 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.options_selection_action_copy,
 			R.string.options_selection_action_dictionary,
 			R.string.options_selection_action_bookmark,
+			R.string.options_selection_action_bookmark_quick,
 			R.string.mi_search,
-			R.string.options_selection_action_dictionary_1,
-			R.string.options_selection_action_dictionary_2,
 			R.string.mi_search_web,
 			R.string.options_selection_action_mail,
 			R.string.mi_user_dic,
 			R.string.mi_citation,
 			R.string.options_selection_action_dictionary_list,
+			R.string.options_selection_action_dictionary_1,
+			R.string.options_selection_action_dictionary_2,
 			R.string.options_selection_action_dictionary_3,
 			R.string.options_selection_action_dictionary_4,
 			R.string.options_selection_action_dictionary_5,
 			R.string.options_selection_action_dictionary_6,
 			R.string.options_selection_action_dictionary_7,
-			R.string.options_selection_action_bookmark_quick,
+			R.string.options_selection_action_dictionary_8,
+			R.string.options_selection_action_dictionary_9,
+			R.string.options_selection_action_dictionary_10,
 			R.string.online_combo,
-			R.string.online_super_combo
+			R.string.online_super_combo,
+			R.string.options_selection_action_toolbar_short
 	};
 
 	int[] mSelectionActionAddInfos = new int[] {
@@ -85,8 +93,12 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
 			R.string.online_combo_add_info,
-			R.string.online_super_combo_add_info
+			R.string.online_super_combo_add_info,
+			R.string.option_add_info_empty_text
 	};
 
 	int[] mMultiSelectionAction = new int[] {
@@ -95,22 +107,26 @@ public class SelectionModesOption extends SubmenuOption {
 			ReaderView.SELECTION_ACTION_COPY,
 			ReaderView.SELECTION_ACTION_DICTIONARY,
 			ReaderView.SELECTION_ACTION_BOOKMARK,
+			ReaderView.SELECTION_ACTION_BOOKMARK_QUICK,
 			ReaderView.SELECTION_ACTION_FIND,
-			ReaderView.SELECTION_ACTION_DICTIONARY_1,
-			ReaderView.SELECTION_ACTION_DICTIONARY_2,
 			ReaderView.SELECTION_ACTION_SEARCH_WEB,
 			ReaderView.SELECTION_ACTION_SEND_TO,
 			ReaderView.SELECTION_ACTION_USER_DIC,
 			ReaderView.SELECTION_ACTION_CITATION,
 			ReaderView.SELECTION_ACTION_DICTIONARY_LIST,
+			ReaderView.SELECTION_ACTION_DICTIONARY_1,
+			ReaderView.SELECTION_ACTION_DICTIONARY_2,
 			ReaderView.SELECTION_ACTION_DICTIONARY_3,
 			ReaderView.SELECTION_ACTION_DICTIONARY_4,
 			ReaderView.SELECTION_ACTION_DICTIONARY_5,
 			ReaderView.SELECTION_ACTION_DICTIONARY_6,
 			ReaderView.SELECTION_ACTION_DICTIONARY_7,
-			ReaderView.SELECTION_ACTION_BOOKMARK_QUICK,
+			ReaderView.SELECTION_ACTION_DICTIONARY_8,
+			ReaderView.SELECTION_ACTION_DICTIONARY_9,
+			ReaderView.SELECTION_ACTION_DICTIONARY_10,
 			ReaderView.SELECTION_ACTION_COMBO,
-			ReaderView.SELECTION_ACTION_SUPER_COMBO
+			ReaderView.SELECTION_ACTION_SUPER_COMBO,
+			ReaderView.SELECTION_ACTION_TOOLBAR_SHORT
 	};
 	int[] mMultiSelectionActionTitles = new int[] {
 			R.string.options_selection_action_same_as_common,
@@ -118,23 +134,28 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.options_selection_action_copy,
 			R.string.options_selection_action_dictionary,
 			R.string.options_selection_action_bookmark,
+			R.string.options_selection_action_bookmark_quick,
 			R.string.mi_search,
-			R.string.options_selection_action_dictionary_1,
-			R.string.options_selection_action_dictionary_2,
 			R.string.mi_search_web,
 			R.string.options_selection_action_mail,
 			R.string.mi_user_dic,
 			R.string.mi_citation,
 			R.string.options_selection_action_dictionary_list,
+			R.string.options_selection_action_dictionary_1,
+			R.string.options_selection_action_dictionary_2,
 			R.string.options_selection_action_dictionary_3,
 			R.string.options_selection_action_dictionary_4,
 			R.string.options_selection_action_dictionary_5,
 			R.string.options_selection_action_dictionary_6,
 			R.string.options_selection_action_dictionary_7,
-			R.string.options_selection_action_bookmark_quick,
+			R.string.options_selection_action_dictionary_8,
+			R.string.options_selection_action_dictionary_9,
+			R.string.options_selection_action_dictionary_10,
 			R.string.online_combo,
-			R.string.online_super_combo
+			R.string.online_super_combo,
+			R.string.options_selection_action_toolbar_short
 	};
+
 	int[] mMultiSelectionActionAddInfo = new int[] {
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -155,8 +176,12 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
 			R.string.online_combo_add_info,
-			R.string.online_super_combo_add_info
+			R.string.online_super_combo_add_info,
+			R.string.option_add_info_empty_text
 	};
 
 	final BaseActivity mActivity;

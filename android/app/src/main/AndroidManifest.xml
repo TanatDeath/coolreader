@@ -57,7 +57,7 @@
     <!-- Needed for making a desision - should we try to use online dictionary, or network is not available -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <application
+    <application tools:replace="android:label"
             android:allowBackup="true"
             android:label="${appLabel}"
             android:allowClearUserData="true"
@@ -90,6 +90,11 @@
                         android:pathPattern=".*code=.*"
                         android:pathPrefix="/plotn/coolreader"
                         android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="KnownReader.sendText" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -228,9 +233,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity> <!-- alias activity to disable PIC -->

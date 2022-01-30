@@ -3,6 +3,8 @@ package org.coolreader.crengine;
 import android.graphics.Rect;
 import android.view.View;
 
+import org.coolreader.eink.EinkScreen;
+
 import de.telekom.epub.utils.ScreenHelper;
 
 public class TolinoEpdController {

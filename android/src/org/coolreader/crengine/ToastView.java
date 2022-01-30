@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,7 +16,11 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.dic.DictsDlg;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
+import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,6 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time: 2:51 PM
  */
 public class ToastView {
+
+    public static boolean isEInk;
+    public static HashMap<Integer, Integer> themeColors;
+
     private static class Toast {
         private View anchor;
         private String msg;
@@ -71,7 +78,9 @@ public class ToastView {
 
         mReaderView = anchor;
         mActivity = act;
-    	fontSize = textSize;
+        isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+        themeColors = Utils.getThemeColors((CoolReader) mActivity, isEInk);
+        fontSize = textSize;
         try {
             queue.put(new Toast(anchor, msg, duration, word));
         } catch (InterruptedException e) {
@@ -114,9 +123,10 @@ public class ToastView {
         ll.addView(tv);*/
         LayoutInflater inflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         window.setContentView(inflater.inflate(R.layout.custom_toast, null, true));
-        LinearLayout toast_ll = (LinearLayout) window.getContentView().findViewById(R.id.toast_ll);
-        toast_ll.setBackgroundColor(colorGrayC);
-        TextView tv = (TextView) window.getContentView().findViewById(R.id.toast);
+        LinearLayout toast_ll = window.getContentView().findViewById(R.id.toast_ll);
+        if (isEInk) toast_ll.setBackgroundColor(Color.WHITE);
+            else toast_ll.setBackgroundColor(colorGrayC);
+        TextView tv = window.getContentView().findViewById(R.id.toast);
         tv.setTextSize(fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
         //tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize); //Integer.valueOf(Services.getSettings().getInt(ReaderView.PROP_FONT_SIZE, 20) ) );
         String msg = t.msg;

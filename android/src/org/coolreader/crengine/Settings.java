@@ -8,321 +8,327 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public interface Settings {
-    public static final String PROP_PAGE_BACKGROUND_IMAGE       ="background.image";
-	public static final String PROP_PAGE_BACKGROUND_IMAGE_SAVE  ="background.image.save";
-    public static final String PROP_PAGE_BACKGROUND_IMAGE_DAY   ="background.image.day";
-    public static final String PROP_PAGE_BACKGROUND_IMAGE_NIGHT ="background.image.night";
-    public static final String PROP_NIGHT_MODE              ="crengine.night.mode";
-    public static final String PROP_FONT_COLOR_DAY          ="font.color.day";
-    public static final String PROP_BACKGROUND_COLOR_DAY    ="background.color.day";
-    public static final String PROP_FONT_COLOR_NIGHT        ="font.color.night";
-    public static final String PROP_BACKGROUND_COLOR_NIGHT  ="background.color.night";
-    public static final String PROP_FONT_COLOR              ="font.color.default";
-    public static final String PROP_BACKGROUND_COLOR        ="background.color.default";
-	public static final String PROP_BACKGROUND_COLOR_SAVE   ="background.color.save";
-	public static final String PROP_BACKGROUND_COLOR_SAVE_WAS   ="background.color.save.was";
-    public static final String PROP_FONT_ANTIALIASING       ="font.antialiasing.mode";
-    public static final String PROP_FONT_FACE               ="font.face.default";
-    public static final String PROP_FONT_HINTING            ="font.hinting.mode";
-	public static final String PROP_FONT_CHAR_SPACE_COMPRESS = "font.char.space.compress";
-    public static final String PROP_FONT_GAMMA              ="font.gamma";
-    public static final String PROP_FONT_GAMMA_DAY          ="font.gamma.day";
-    public static final String PROP_FONT_GAMMA_NIGHT        ="font.gamma.night";
-	public static final String PROP_FONT_WEIGHT_EMBOLDEN_OBSOLETED ="font.face.weight.embolden";	// obsoleted
-	public static final String PROP_FONT_ITALICIZE          ="font.face.italicize";
-	public static final String PROP_FONT_EMBOLDEN_ALG       ="font.face.embolden.alg";
-	public static final String PROP_FONT_FINE_EMBOLDEN      ="font.face.fine.embolden";
-	public static final String PROP_FONT_BASE_WEIGHT        ="font.face.base.weight";        // replaces PROP_FONT_WEIGHT_EMBOLDEN ("font.face.weight.embolden")
-	public static final String PROP_TXT_OPTION_PREFORMATTED ="crengine.file.txt.preformatted";
-    public static final String PROP_LOG_FILENAME            ="crengine.log.filename";
-    public static final String PROP_LOG_LEVEL               ="crengine.log.level";
-    public static final String PROP_LOG_AUTOFLUSH           ="crengine.log.autoflush";
-    public static final String PROP_FONT_SIZE               ="crengine.font.size";
-	public static final String PROP_FONT_SIZE_USER_DIC      ="crengine.font.size.userdic";
-	public static final String PROP_FALLBACK_FONT_FACES     ="crengine.font.fallback.faces";
-	public static final String PROP_STATUS_FONT_COLOR       ="crengine.page.header.font.color";
-    public static final String PROP_STATUS_FONT_COLOR_DAY   ="crengine.page.header.font.color.day";
-    public static final String PROP_STATUS_FONT_COLOR_NIGHT ="crengine.page.header.font.color.night";
-    public static final String PROP_STATUS_FONT_FACE        ="crengine.page.header.font.face";
-    public static final String PROP_STATUS_FONT_SIZE        ="crengine.page.header.font.size";
-    public static final String PROP_STATUS_CHAPTER_MARKS    ="crengine.page.header.chapter.marks";
-    public static final String PROP_PAGE_MARGIN_TOP         ="crengine.page.margin.top";
-    public static final String PROP_PAGE_MARGIN_BOTTOM      ="crengine.page.margin.bottom";
-    public static final String PROP_PAGE_MARGIN_LEFT        ="crengine.page.margin.left";
-    public static final String PROP_PAGE_MARGIN_RIGHT       ="crengine.page.margin.right";
-	public static final String PROP_GLOBAL_MARGIN       	="crengine.global.margin";
-	public static final String PROP_ROUNDED_CORNERS_MARGIN  ="crengine.rounded.corners.margin";
-	public static final String PROP_ROUNDED_CORNERS_MARGIN_POS = "crengine.rounded.corners.margin.pos";
-	public static final String PROP_ROUNDED_CORNERS_MARGIN_MOD = "crengine.rounded.corners.margin.mod";
-	public static final String PROP_ROUNDED_CORNERS_MARGIN_FSCR = "crengine.rounded.corners.margin.fscr";
-	public static final String PROP_EXT_FULLSCREEN_MARGIN   ="crengine.ext.fullscreen.margin";
-	public static final String PROP_EXT_FULLSCREEN_MOD   ="crengine.ext.fullscreen.mod";
-	public static final String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
-    public static final String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
-	public static final String PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change"; // when tts
-	public static final String PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change2"; // when sel toolbar
-    public static final String PROP_PAGE_ANIMATION          ="crengine.page.animation";
-	public static final String PROP_PAGE_ANIMATION_SPEED    ="crengine.page.animation.speed";
-	public static final String PROP_DOUBLE_CLICK_INTERVAL    ="crengine.double.click.interval";
-	public static final String PROP_PREVENT_CLICK_INTERVAL    ="crengine.prevent.click.interval";
-	public static final String PROP_INTERLINE_SPACE         ="crengine.interline.space";
-    public static final String PROP_ROTATE_ANGLE            ="window.rotate.angle";
-    public static final String PROP_EMBEDDED_STYLES         ="crengine.doc.embedded.styles.enabled";
-	public static final String PROP_EMBEDDED_STYLES_DEF     ="crengine.doc.embedded.styles.def.enabled";
-    public static final String PROP_EMBEDDED_FONTS          ="crengine.doc.embedded.fonts.enabled";
-    public static final String PROP_DISPLAY_INVERSE         ="crengine.display.inverse";
-//    public static final String PROP_DISPLAY_FULL_UPDATE_INTERVAL ="crengine.display.full.update.interval";
-//    public static final String PROP_DISPLAY_TURBO_UPDATE_MODE ="crengine.display.turbo.update";
+    String PROP_PAGE_BACKGROUND_IMAGE       ="background.image";
+	String PROP_PAGE_BACKGROUND_IMAGE_SAVE  ="background.image.save";
+    String PROP_PAGE_BACKGROUND_IMAGE_DAY   ="background.image.day";
+    String PROP_PAGE_BACKGROUND_IMAGE_NIGHT ="background.image.night";
+    String PROP_NIGHT_MODE              ="crengine.night.mode";
+    String PROP_FONT_COLOR_DAY          ="font.color.day";
+    String PROP_BACKGROUND_COLOR_DAY    ="background.color.day";
+    String PROP_FONT_COLOR_NIGHT        ="font.color.night";
+    String PROP_BACKGROUND_COLOR_NIGHT  ="background.color.night";
+    String PROP_FONT_COLOR              ="font.color.default";
+    String PROP_BACKGROUND_COLOR        ="background.color.default";
+	String PROP_BACKGROUND_COLOR_SAVE   ="background.color.save";
+	String PROP_BACKGROUND_COLOR_SAVE_WAS   ="background.color.save.was";
+    String PROP_FONT_ANTIALIASING       ="font.antialiasing.mode";
+    String PROP_FONT_FACE               ="font.face.default";
+    String PROP_FONT_HINTING            ="font.hinting.mode";
+	String PROP_FONT_CHAR_SPACE_COMPRESS = "font.char.space.compress";
+    String PROP_FONT_GAMMA              ="font.gamma";
+    String PROP_FONT_GAMMA_DAY          ="font.gamma.day";
+    String PROP_FONT_GAMMA_NIGHT        ="font.gamma.night";
+	String PROP_FONT_WEIGHT_EMBOLDEN_OBSOLETED ="font.face.weight.embolden";	// obsoleted
+	String PROP_FONT_ITALICIZE          ="font.face.italicize";
+	String PROP_FONT_EMBOLDEN_ALG       ="font.face.embolden.alg";
+	String PROP_FONT_FINE_EMBOLDEN      ="font.face.fine.embolden";
+	String PROP_FONT_BASE_WEIGHT        ="font.face.base.weight";        // replaces PROP_FONT_WEIGHT_EMBOLDEN ("font.face.weight.embolden")
+	String PROP_TXT_OPTION_PREFORMATTED ="crengine.file.txt.preformatted";
+    String PROP_LOG_FILENAME            ="crengine.log.filename";
+    String PROP_LOG_LEVEL               ="crengine.log.level";
+    String PROP_LOG_AUTOFLUSH           ="crengine.log.autoflush";
+    String PROP_FONT_SIZE               ="crengine.font.size";
+	String PROP_FONT_SIZE_USER_DIC      ="crengine.font.size.userdic";
+	String PROP_FALLBACK_FONT_FACES     ="crengine.font.fallback.faces";
+	String PROP_STATUS_FONT_COLOR       ="crengine.page.header.font.color";
+    String PROP_STATUS_FONT_COLOR_DAY   ="crengine.page.header.font.color.day";
+    String PROP_STATUS_FONT_COLOR_NIGHT ="crengine.page.header.font.color.night";
+    String PROP_STATUS_FONT_FACE        ="crengine.page.header.font.face";
+    String PROP_STATUS_FONT_SIZE        ="crengine.page.header.font.size";
+    String PROP_STATUS_CHAPTER_MARKS    ="crengine.page.header.chapter.marks";
+    String PROP_PAGE_MARGIN_TOP         ="crengine.page.margin.top";
+    String PROP_PAGE_MARGIN_BOTTOM      ="crengine.page.margin.bottom";
+    String PROP_PAGE_MARGIN_LEFT        ="crengine.page.margin.left";
+    String PROP_PAGE_MARGIN_RIGHT       ="crengine.page.margin.right";
+	String PROP_GLOBAL_MARGIN       	="crengine.global.margin";
+	String PROP_ROUNDED_CORNERS_MARGIN  ="crengine.rounded.corners.margin";
+	String PROP_ROUNDED_CORNERS_MARGIN_POS = "crengine.rounded.corners.margin.pos";
+	String PROP_ROUNDED_CORNERS_MARGIN_MOD = "crengine.rounded.corners.margin.mod";
+	String PROP_ROUNDED_CORNERS_MARGIN_FSCR = "crengine.rounded.corners.margin.fscr";
+	String PROP_EXT_FULLSCREEN_MARGIN   ="crengine.ext.fullscreen.margin";
+	String PROP_EXT_FULLSCREEN_MOD   ="crengine.ext.fullscreen.mod";
+	String PROP_PAGE_VIEW_MODE          ="crengine.page.view.mode"; // pages/scroll
+    String PROP_PAGE_VIEW_MODE_AUTOCHANGED = "crengine.page.view.mode.autochanged"; // when tts
+	String PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change"; // when tts
+	String PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE = "crengine.page.view.mode.tts.dont.change2"; // when sel toolbar
+    String PROP_PAGE_ANIMATION          ="crengine.page.animation";
+	String PROP_PAGE_ANIMATION_SPEED    ="crengine.page.animation.speed";
+	String PROP_DOUBLE_CLICK_INTERVAL    ="crengine.double.click.interval";
+	String PROP_PREVENT_CLICK_INTERVAL    ="crengine.prevent.click.interval";
+	String PROP_INTERLINE_SPACE         ="crengine.interline.space";
+    String PROP_ROTATE_ANGLE            ="window.rotate.angle";
+    String PROP_EMBEDDED_STYLES         ="crengine.doc.embedded.styles.enabled";
+	String PROP_EMBEDDED_STYLES_DEF     ="crengine.doc.embedded.styles.def.enabled";
+    String PROP_EMBEDDED_FONTS          ="crengine.doc.embedded.fonts.enabled";
+    String PROP_DISPLAY_INVERSE         ="crengine.display.inverse";
+//    String PROP_DISPLAY_FULL_UPDATE_INTERVAL ="crengine.display.full.update.interval";
+//    String PROP_DISPLAY_TURBO_UPDATE_MODE ="crengine.display.turbo.update";
 
-    public static final String PROP_STATUS_LOCATION         ="viewer.status.location";
-    public static final String PROP_TOOLBAR_LOCATION        ="viewer.toolbar.location2";
-    public static final String PROP_TOOLBAR_HIDE_IN_FULLSCREEN="viewer.toolbar.fullscreen.hide";
-    public static final String PROP_TOOLBAR_APPEARANCE="viewer.toolbar.appearance";
-    public static final String PROP_TOOLBAR_BUTTONS     ="viewer.toolbar.buttons";
-	public static final String PROP_READING_MENU_BUTTONS     ="viewer.reading.menu.buttons";
-    public static final String PROP_SKIPPED_RES     ="viewer.skipped.resolutions";
+    String PROP_STATUS_LOCATION         ="viewer.status.location";
+    String PROP_TOOLBAR_LOCATION        ="viewer.toolbar.location2";
+    String PROP_TOOLBAR_HIDE_IN_FULLSCREEN="viewer.toolbar.fullscreen.hide";
+    String PROP_TOOLBAR_APPEARANCE      ="viewer.toolbar.appearance";
+    String PROP_TOOLBAR_BUTTONS         ="viewer.toolbar.buttons";
+	String PROP_READING_MENU_BUTTONS    ="viewer.reading.menu.buttons";
+    String PROP_SKIPPED_RES             ="viewer.skipped.resolutions";
+	String PROP_APP_RESTORE_SETTINGS    ="app.restore.settings";
 
-    public static final String PROP_STATUS_LINE             ="window.status.line";
-    public static final String PROP_BOOKMARK_ICONS          ="crengine.bookmarks.icons";
-    public static final String PROP_FOOTNOTES               ="crengine.footnotes";
-    public static final String PROP_SHOW_TIME               ="window.status.clock";
-    public static final String PROP_SHOW_TITLE              ="window.status.title";
-    public static final String PROP_SHOW_BATTERY            ="window.status.battery";
-    public static final String PROP_SHOW_BATTERY_PERCENT    ="window.status.battery.percent";
-    public static final String PROP_SHOW_POS_PERCENT        ="window.status.pos.percent";
-    public static final String PROP_SHOW_PAGE_COUNT         ="window.status.pos.page.count";
-    public static final String PROP_SHOW_PAGE_NUMBER        ="window.status.pos.page.number";
-	public static final String PROP_SHOW_PAGES_TO_CHAPTER   ="window.status.pos.pages.to.chapter";
-	public static final String PROP_SHOW_TIME_LEFT   		="window.status.pos.time.left";
-	public static final String PROP_FONT_SHAPING            ="font.shaping.mode";
-    public static final String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
-    public static final String PROP_FLOATING_PUNCTUATION    ="crengine.style.floating.punctuation.enabled";
-    public static final String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";
-    //public static final String PROP_HYPHENATION_DICT        ="crengine.hyphenation.dictionary.code"; // non-crengine (old)
-	public static final String PROP_HYPHENATION_DICT        = "crengine.hyphenation.directory";
+    String PROP_STATUS_LINE             ="window.status.line";
+    String PROP_BOOKMARK_ICONS          ="crengine.bookmarks.icons";
+    String PROP_FOOTNOTES               ="crengine.footnotes";
+    String PROP_SHOW_TIME               ="window.status.clock";
+    String PROP_SHOW_TITLE              ="window.status.title";
+    String PROP_SHOW_BATTERY            ="window.status.battery";
+    String PROP_SHOW_BATTERY_PERCENT    ="window.status.battery.percent";
+    String PROP_SHOW_POS_PERCENT        ="window.status.pos.percent";
+    String PROP_SHOW_PAGE_COUNT         ="window.status.pos.page.count";
+    String PROP_SHOW_PAGE_NUMBER        ="window.status.pos.page.number";
+	String PROP_SHOW_PAGES_TO_CHAPTER   ="window.status.pos.pages.to.chapter";
+	String PROP_SHOW_TIME_LEFT   		="window.status.pos.time.left";
+	String PROP_FONT_SHAPING            ="font.shaping.mode";
+    String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
+    String PROP_FLOATING_PUNCTUATION    ="crengine.style.floating.punctuation.enabled";
+    String PROP_LANDSCAPE_PAGES         ="window.landscape.pages";
+    //String PROP_HYPHENATION_DICT        ="crengine.hyphenation.dictionary.code"; // non-crengine (old)
+	String PROP_HYPHENATION_DICT        = "crengine.hyphenation.directory";
 
-	public static final String PROP_AUTOSAVE_BOOKMARKS      ="crengine.autosave.bookmarks";
+	String PROP_AUTOSAVE_BOOKMARKS      ="crengine.autosave.bookmarks";
 	// New textlang typography settings:
-	public static final String PROP_TEXTLANG_MAIN_LANG      = "crengine.textlang.main.lang";
-	public static final String PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED = "crengine.textlang.embedded.langs.enabled";
-	public static final String PROP_TEXTLANG_HYPHENATION_ENABLED    = "crengine.textlang.hyphenation.enabled";
-	public static final String PROP_TEXTLANG_HYPH_SOFT_HYPHENS_ONLY = "crengine.textlang.hyphenation.soft.hyphens.only";
-	public static final String PROP_TEXTLANG_HYPH_FORCE_ALGORITHMIC = "crengine.textlang.hyphenation.force.algorithmic";
+	String PROP_TEXTLANG_MAIN_LANG      = "crengine.textlang.main.lang";
+	String PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED = "crengine.textlang.embedded.langs.enabled";
+	String PROP_TEXTLANG_HYPHENATION_ENABLED    = "crengine.textlang.hyphenation.enabled";
+	String PROP_TEXTLANG_HYPH_SOFT_HYPHENS_ONLY = "crengine.textlang.hyphenation.soft.hyphens.only";
+	String PROP_TEXTLANG_HYPH_FORCE_ALGORITHMIC = "crengine.textlang.hyphenation.force.algorithmic";
 
-    public static final String PROP_PROFILE_NUMBER          ="crengine.profile.number"; // current settings profile number
-	public static final String PROP_PROFILE_NAME            ="crengine.profile.name";
-	public static final String PROP_APP_SETTINGS_SHOW_ICONS ="app.settings.show.icons";
-    public static final String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
-    public static final String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
-    public static final String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
-	public static final String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight"; //KR
-	public static final String PROP_APP_BACKLIGHT_SWIPE_SENSIVITY   ="app.backlight.swipe.sensivity";
+    String PROP_PROFILE_NUMBER          ="crengine.profile.number"; // current settings profile number
+	String PROP_PROFILE_NAME            ="crengine.profile.name";
+	String PROP_APP_SETTINGS_SHOW_ICONS ="app.settings.show.icons";
+    String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
+    String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
+    String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
+	String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight"; //KR
+	String PROP_APP_BACKLIGHT_SWIPE_SENSIVITY   ="app.backlight.swipe.sensivity";
 
 	 // image scaling settings
 	 // mode: 0=disabled, 1=integer scaling factors, 2=free scaling
 	 // scale: 0=auto based on font size, 1=no zoom, 2=scale up to *2, 3=scale up to *3
-    public static final String PROP_IMG_SCALING_ZOOMIN_INLINE_MODE = "crengine.image.scaling.zoomin.inline.mode";
-    public static final String PROP_IMG_SCALING_ZOOMIN_INLINE_SCALE = "crengine.image.scaling.zoomin.inline.scale";
-    public static final String PROP_IMG_SCALING_ZOOMOUT_INLINE_MODE = "crengine.image.scaling.zoomout.inline.mode";
-    public static final String PROP_IMG_SCALING_ZOOMOUT_INLINE_SCALE = "crengine.image.scaling.zoomout.inline.scale";
-    public static final String PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE = "crengine.image.scaling.zoomin.block.mode";
-    public static final String PROP_IMG_SCALING_ZOOMIN_BLOCK_SCALE = "crengine.image.scaling.zoomin.block.scale";
-    public static final String PROP_IMG_SCALING_ZOOMOUT_BLOCK_MODE = "crengine.image.scaling.zoomout.block.mode";
-    public static final String PROP_IMG_SCALING_ZOOMOUT_BLOCK_SCALE = "crengine.image.scaling.zoomout.block.scale";
-	public static final String PROP_IMG_CUSTOM_BACKGROUND = "crengine.image.custom.background";
-	public static final String PROP_IMG_CUSTOM_BACKGROUND_COLOR = "crengine.image.custom.background.color";
+    String PROP_IMG_SCALING_ZOOMIN_INLINE_MODE = "crengine.image.scaling.zoomin.inline.mode";
+    String PROP_IMG_SCALING_ZOOMIN_INLINE_SCALE = "crengine.image.scaling.zoomin.inline.scale";
+    String PROP_IMG_SCALING_ZOOMOUT_INLINE_MODE = "crengine.image.scaling.zoomout.inline.mode";
+    String PROP_IMG_SCALING_ZOOMOUT_INLINE_SCALE = "crengine.image.scaling.zoomout.inline.scale";
+    String PROP_IMG_SCALING_ZOOMIN_BLOCK_MODE = "crengine.image.scaling.zoomin.block.mode";
+    String PROP_IMG_SCALING_ZOOMIN_BLOCK_SCALE = "crengine.image.scaling.zoomin.block.scale";
+    String PROP_IMG_SCALING_ZOOMOUT_BLOCK_MODE = "crengine.image.scaling.zoomout.block.mode";
+    String PROP_IMG_SCALING_ZOOMOUT_BLOCK_SCALE = "crengine.image.scaling.zoomout.block.scale";
+	String PROP_IMG_CUSTOM_BACKGROUND = "crengine.image.custom.background";
+	String PROP_IMG_CUSTOM_BACKGROUND_COLOR = "crengine.image.custom.background.color";
     
-    public static final String PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT = "crengine.style.space.condensing.percent";
-	public static final String PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT = "crengine.style.unused.space.threshold.percent";
-	public static final String PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT = "crengine.style.max.added.letter.spacing.percent";
-	public static final String PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT = "crengine.style.space.width.scale.percent";
+    String PROP_FORMAT_MIN_SPACE_CONDENSING_PERCENT = "crengine.style.space.condensing.percent";
+	String PROP_FORMAT_UNUSED_SPACE_THRESHOLD_PERCENT = "crengine.style.unused.space.threshold.percent";
+	String PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT = "crengine.style.max.added.letter.spacing.percent";
+	String PROP_FORMAT_SPACE_WIDTH_SCALE_PERCENT = "crengine.style.space.width.scale.percent";
 
 	// default is 96 (1 css px = 1 screen px)
 	// use 0 for old crengine behaviour (no support for absolute units and 1css px = 1 screen px)
-	public static final String PROP_RENDER_DPI              = "crengine.render.dpi";
-	//public static final String PROP_RENDER_SCALE_FONT_WITH_DPI = "crengine.render.scale.font.with.dpi";
-	public static final String PROP_RENDER_BLOCK_RENDERING_FLAGS = "crengine.render.block.rendering.flags";
-	public static final String PROP_REQUESTED_DOM_VERSION   = "crengine.render.requested_dom_version";
+	String PROP_RENDER_DPI              = "crengine.render.dpi";
+	//String PROP_RENDER_SCALE_FONT_WITH_DPI = "crengine.render.scale.font.with.dpi";
+	String PROP_RENDER_BLOCK_RENDERING_FLAGS = "crengine.render.block.rendering.flags";
+	String PROP_REQUESTED_DOM_VERSION   = "crengine.render.requested_dom_version";
 
-	public static final String PROP_MIN_FILE_SIZE_TO_CACHE  ="crengine.cache.filesize.min";
-    public static final String PROP_FORCED_MIN_FILE_SIZE_TO_CACHE  ="crengine.cache.forced.filesize.min";
-    public static final String PROP_PROGRESS_SHOW_FIRST_PAGE="crengine.progress.show.first.page";
+	String PROP_MIN_FILE_SIZE_TO_CACHE  ="crengine.cache.filesize.min";
+    String PROP_FORCED_MIN_FILE_SIZE_TO_CACHE  ="crengine.cache.forced.filesize.min";
+    String PROP_PROGRESS_SHOW_FIRST_PAGE="crengine.progress.show.first.page";
 
-    public static final String PROP_CONTROLS_ENABLE_VOLUME_KEYS ="app.controls.volume.keys.enabled";
+    String PROP_CONTROLS_ENABLE_VOLUME_KEYS ="app.controls.volume.keys.enabled";
     
-    public static final String PROP_APP_FULLSCREEN          ="app.fullscreen";
-	public static final String PROP_APP_TITLEBAR_NEW = "app.titlebar.new";
-    public static final String PROP_APP_BOOK_PROPERTY_SCAN_ENABLED ="app.browser.fileprops.scan.enabled";
-    public static final String PROP_APP_SHOW_COVERPAGES     ="app.browser.coverpages";
-    public static final String PROP_APP_COVERPAGE_SIZE     ="app.browser.coverpage.size"; // 0==small, 2==BIG
-    public static final String PROP_APP_SCREEN_ORIENTATION  ="app.screen.orientation";
-    public static final String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
-    public static final String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
-	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT    ="app.screen.warm.backlight"; //CR!
-	public static final String PROP_APP_SCREEN_BACKLIGHT1    ="app.screen.backlight1";
-	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT1    ="app.screen.warm.backlight1";
-	public static final String PROP_APP_SCREEN_BACKLIGHT2    ="app.screen.backlight2";
-	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT2    ="app.screen.warm.backlight2";
-	public static final String PROP_APP_SCREEN_BACKLIGHT3    ="app.screen.backlight3";
-	public static final String PROP_APP_SCREEN_WARM_BACKLIGHT3    ="app.screen.warm.backlight3";
+    String PROP_APP_FULLSCREEN          ="app.fullscreen";
+	String PROP_APP_TITLEBAR_NEW = "app.titlebar.new";
+    String PROP_APP_BOOK_PROPERTY_SCAN_ENABLED ="app.browser.fileprops.scan.enabled";
+    String PROP_APP_SHOW_COVERPAGES     ="app.browser.coverpages";
+    String PROP_APP_COVERPAGE_SIZE     ="app.browser.coverpage.size"; // 0==small, 2==BIG
+    String PROP_APP_SCREEN_ORIENTATION  ="app.screen.orientation";
+    String PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION  ="app.screen.orientation.popup.duration";
+    String PROP_APP_SCREEN_BACKLIGHT    ="app.screen.backlight";
+	String PROP_APP_SCREEN_WARM_BACKLIGHT    ="app.screen.warm.backlight"; //CR!
+	String PROP_APP_SCREEN_BACKLIGHT1    ="app.screen.backlight1";
+	String PROP_APP_SCREEN_WARM_BACKLIGHT1    ="app.screen.warm.backlight1";
+	String PROP_APP_SCREEN_BACKLIGHT2    ="app.screen.backlight2";
+	String PROP_APP_SCREEN_WARM_BACKLIGHT2    ="app.screen.warm.backlight2";
+	String PROP_APP_SCREEN_BACKLIGHT3    ="app.screen.backlight3";
+	String PROP_APP_SCREEN_WARM_BACKLIGHT3    ="app.screen.warm.backlight3";
 	//decided to remove and do like in CR
-	//public static final String PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM = "app.screen.get.backlight.from.system";
-	public static final String PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA    = "app.screen.backlight.fix.delta";
-	public static final String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
-    public static final String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
-    public static final String PROP_APP_SCREEN_BACKLIGHT_NIGHT ="app.screen.backlight.night";
-    public static final String PROP_APP_DOUBLE_TAP_SELECTION     ="app.controls.doubletap.selection";
-	public static final String PROP_APP_BOUNCE_TAP_INTERVAL   ="app.controls.bounce.interval";
-    public static final String PROP_APP_TAP_ZONE_ACTIONS_TAP     ="app.tapzone.action.tap";
-	public static final String PROP_APP_TAP_ZONE_NON_SENS_LEFT     ="app.tapzone.non.sens.left";
-	public static final String PROP_APP_TAP_ZONE_NON_SENS_RIGHT     ="app.tapzone.non.sens.right";
-    public static final String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
-    public static final String PROP_APP_TRACKBALL_DISABLED    ="app.trackball.disabled";
-    public static final String PROP_APP_SCREEN_BACKLIGHT_LOCK    ="app.screen.backlight.lock.enabled";
-    public static final String PROP_APP_TAP_ZONE_HILIGHT     ="app.tapzone.hilight";
-    public static final String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
-	//public static final String PROP_APP_FLICK_WARMLIGHT_CONTROL = "app.screen.warmlight.control.flick"; //CR!
-	public static final String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
-	public static final String PROP_APP_TRANSLATE_DIR = "app.translate.dir";
-    public static final String PROP_APP_DICTIONARY = "app.dictionary.current";
-    public static final String PROP_APP_DICTIONARY_2 = "app.dictionary2.current";
-	public static final String PROP_APP_DICTIONARY_3 = "app.dictionary3.current";
-	public static final String PROP_APP_DICTIONARY_4 = "app.dictionary4.current";
-	public static final String PROP_APP_DICTIONARY_5 = "app.dictionary5.current";
-	public static final String PROP_APP_DICTIONARY_6 = "app.dictionary6.current";
-	public static final String PROP_APP_DICTIONARY_7 = "app.dictionary7.current";
-	public static final String PROP_APP_DICT_TYPE_SELECTED0 = "app.dict.type.selected0";
-	public static final String PROP_APP_DICT_TYPE_SELECTED1 = "app.dict.type.selected1";
-	public static final String PROP_APP_DICT_TYPE_SELECTED2 = "app.dict.type.selected2";
-    public static final String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
-	public static final String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
-    public static final String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
-	public static final String PROP_APP_SHOW_USER_DIC_CONTENT = "app.dictionary.user.dic.content";
-	public static final String PROP_APP_QUICK_TRANSLATION_DIRS = "app.quick.translation.dirs";
-	public static final String PROP_APP_ONLINE_OFFLINE_DICS = "app.quick.translation.online.offline.dics";
-	public static final String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
-    public static final String PROP_APP_SELECTION_ACTION = "app.selection.action";
-    public static final String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
-	public static final String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
-	public static final String PROP_APP_BOOKMARK_ACTION_SEND_TO = "app.bookmark.action.send.to";
-	public static final String PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD = "app.bookmark.action.send.to.mod";
-	public static final String PROP_APP_SELECTION2_ACTION = "app.selection2.action";
-	public static final String PROP_APP_SELECTION2_ACTION_LONG = "app.selection2.action.long";
-	public static final String PROP_APP_MULTI_SELECTION2_ACTION = "app.multiselection2.action";
-	public static final String PROP_APP_SELECTION3_ACTION = "app.selection3.action";
-	public static final String PROP_APP_SELECTION3_ACTION_LONG = "app.selection3.action.long";
-	public static final String PROP_APP_MULTI_SELECTION3_ACTION = "app.multiselection3.action";
-	public static final String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
-	public static final String PROP_APP_MIGRATE_SETTINGS = "app.migrate.settings";
-	public static final String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
-	public static final String PROP_CLOUD_YND_HOME_FOLDER = "app.cloud.ynd.home.folder";
-	public static final String PROP_CLOUD_YND_SETTINGS = "app.cloud.ynd.settings";
-	public static final String PROP_CLOUD_DBX_SETTINGS = "app.cloud.dbx.settings";
-	public static final String PROP_CLOUD_WIKI1_ADDR = "app.cloud.wiki1";
-	public static final String PROP_CLOUD_WIKI2_ADDR = "app.cloud.wiki2";
-	public static final String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
-	public static final String PROP_CLOUD_YND_TRANSLATE_OPTIONS = "app.cloud.ynd.translate.options";
-	public static final String PROP_CLOUD_LINGVO_OPTIONS = "app.cloud.lingvo.options";
-	public static final String PROP_CLOUD_DEEPL_OPTIONS = "app.cloud.deepl.options";
-	public static final String PROP_CLOUD_LITRES_SETTINGS = "app.cloud.litres.settings";
-	public static final String PROP_CLOUD_LITRES_DISABLED = "app.cloud.litres.disabled";
-	public static final String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
-    public static final String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
-    public static final String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
-    public static final String PROP_APP_DOWNLOADED_SET_ADD_MARKS = "app.downloaded.set.add.marks";
-    public static final String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
-	public static final String PROP_APP_CLOUD_POS_DATE_SORT = "app.cloudpos.date.sort";
-	public static final String PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV = "app.cloudpos.hide.current.dev";
-	public static final String PROP_APP_ROOT_VIEW_FS_SECTION_HIDE = "app.rootview.fs_section.hide";
-	public static final String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
-	public static final String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
-	public static final String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
-	public static final String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
-	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
-	public static final String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
-	public static final String PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND = "app.options.tts.toolbar.background";
-	public static final String PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.tts.toolbar.transp.buttons";
-	public static final String PROP_APP_INIT = "app.init";
-	public static final String PROP_APP_SHOW_FILES_DIR = "app.show.files.dir";
-	public static final String PROP_APP_SHOW_FILES_NO_MARK = "app.show.files.no.mark";
-	public static final String PROP_APP_SHOW_FILES_TO_READ = "app.show.files.to.read";
-	public static final String PROP_APP_SHOW_FILES_READING = "app.show.files.reading";
-	public static final String PROP_APP_SHOW_FILES_FINISHED = "app.show.files.finished";
-	public static final String PROP_APP_SAVE_DOC_EXT_CONTROLS_SHOW = "app.save.doc.ext.controls.show";
+	//String PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM = "app.screen.get.backlight.from.system";
+	String PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA    = "app.screen.backlight.fix.delta";
+	String PROP_APP_MOTION_TIMEOUT    ="app.motion.timeout";
+    String PROP_APP_SCREEN_BACKLIGHT_DAY   ="app.screen.backlight.day";
+    String PROP_APP_SCREEN_BACKLIGHT_NIGHT ="app.screen.backlight.night";
+    String PROP_APP_DOUBLE_TAP_SELECTION     ="app.controls.doubletap.selection";
+	String PROP_APP_BOUNCE_TAP_INTERVAL   ="app.controls.bounce.interval";
+    String PROP_APP_TAP_ZONE_ACTIONS_TAP     ="app.tapzone.action.tap";
+	String PROP_APP_TAP_ZONE_NON_SENS_LEFT     ="app.tapzone.non.sens.left";
+	String PROP_APP_TAP_ZONE_NON_SENS_RIGHT     ="app.tapzone.non.sens.right";
+    String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
+    String PROP_APP_TRACKBALL_DISABLED    ="app.trackball.disabled";
+    String PROP_APP_SCREEN_BACKLIGHT_LOCK    ="app.screen.backlight.lock.enabled";
+    String PROP_APP_TAP_ZONE_HILIGHT     ="app.tapzone.hilight";
+    String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
+	//String PROP_APP_FLICK_WARMLIGHT_CONTROL = "app.screen.warmlight.control.flick"; //CR!
+	String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
+	String PROP_APP_TRANSLATE_DIR = "app.translate.dir";
+    String PROP_APP_DICTIONARY = "app.dictionary.current";
+    String PROP_APP_DICTIONARY_2 = "app.dictionary2.current";
+	String PROP_APP_DICTIONARY_3 = "app.dictionary3.current";
+	String PROP_APP_DICTIONARY_4 = "app.dictionary4.current";
+	String PROP_APP_DICTIONARY_5 = "app.dictionary5.current";
+	String PROP_APP_DICTIONARY_6 = "app.dictionary6.current";
+	String PROP_APP_DICTIONARY_7 = "app.dictionary7.current";
+	String PROP_APP_DICTIONARY_8 = "app.dictionary8.current";
+	String PROP_APP_DICTIONARY_9 = "app.dictionary9.current";
+	String PROP_APP_DICTIONARY_10 = "app.dictionary10.current";
+	String PROP_APP_DICT_TYPE_SELECTED0 = "app.dict.type.selected0";
+	String PROP_APP_DICT_TYPE_SELECTED1 = "app.dict.type.selected1";
+	String PROP_APP_DICT_TYPE_SELECTED2 = "app.dict.type.selected2";
+    String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
+	String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
+	String PROP_INSPECTOR_MODE_NO_DIC_HISTORY = "app.inspector.mode.no.dic.history";
+    String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
+	String PROP_APP_SHOW_USER_DIC_CONTENT = "app.dictionary.user.dic.content";
+	String PROP_APP_QUICK_TRANSLATION_DIRS = "app.quick.translation.dirs";
+	String PROP_APP_ONLINE_OFFLINE_DICS = "app.quick.translation.online.offline.dics";
+	String PROP_APP_OFFLINE_DICS = "app.offline.dics";
+	String PROP_APP_DICT_LONGTAP_CHANGE = "app.dictionary.longtap.change";
+    String PROP_APP_SELECTION_ACTION = "app.selection.action";
+    String PROP_APP_SELECTION_ACTION_LONG = "app.selection.action.long";
+	String PROP_APP_MULTI_SELECTION_ACTION = "app.multiselection.action";
+	String PROP_APP_BOOKMARK_ACTION_SEND_TO = "app.bookmark.action.send.to";
+	String PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD = "app.bookmark.action.send.to.mod";
+	String PROP_APP_SELECTION2_ACTION = "app.selection2.action";
+	String PROP_APP_SELECTION2_ACTION_LONG = "app.selection2.action.long";
+	String PROP_APP_MULTI_SELECTION2_ACTION = "app.multiselection2.action";
+	String PROP_APP_SELECTION3_ACTION = "app.selection3.action";
+	String PROP_APP_SELECTION3_ACTION_LONG = "app.selection3.action.long";
+	String PROP_APP_MULTI_SELECTION3_ACTION = "app.multiselection3.action";
+	String PROP_APP_SELECTION_PERSIST = "app.selection.persist";
+	String PROP_APP_MIGRATE_SETTINGS = "app.migrate.settings";
+	String PROP_CLOUD_SYNC_VARIANT = "app.cloud.sync.variant";
+	String PROP_CLOUD_YND_HOME_FOLDER = "app.cloud.ynd.home.folder";
+	String PROP_CLOUD_YND_SETTINGS = "app.cloud.ynd.settings";
+	String PROP_CLOUD_DBX_SETTINGS = "app.cloud.dbx.settings";
+	String PROP_CLOUD_WIKI1_ADDR = "app.cloud.wiki1";
+	String PROP_CLOUD_WIKI2_ADDR = "app.cloud.wiki2";
+	String PROP_CLOUD_WIKI_SAVE_HISTORY = "app.cloud.wiki.save.history";
+	String PROP_CLOUD_YND_TRANSLATE_OPTIONS = "app.cloud.ynd.translate.options";
+	String PROP_CLOUD_LINGVO_OPTIONS = "app.cloud.lingvo.options";
+	String PROP_CLOUD_DEEPL_OPTIONS = "app.cloud.deepl.options";
+	String PROP_CLOUD_LITRES_SETTINGS = "app.cloud.litres.settings";
+	String PROP_CLOUD_LITRES_DISABLED = "app.cloud.litres.disabled";
+	String PROP_SAVE_POS_TO_CLOUD_TIMEOUT = "app.autosave.reading.pos.timeout";
+    String PROP_SAVE_POS_TIMEOUT = "app.autosave.reading.pos.timeout.1";
+    String PROP_SAVE_POS_SPEAK_TIMEOUT = "app.autosave.reading.pos.timeout.2";
+    String PROP_APP_DOWNLOADED_SET_ADD_MARKS = "app.downloaded.set.add.marks";
+    String PROP_APP_TTS_FORCE_KOEF = "app.tts.force.koef";
+	String PROP_APP_CLOUD_POS_DATE_SORT = "app.cloudpos.date.sort";
+	String PROP_APP_CLOUD_POS_HIDE_CURRENT_DEV = "app.cloudpos.hide.current.dev";
+	String PROP_APP_ROOT_VIEW_FS_SECTION_HIDE = "app.rootview.fs_section.hide";
+	String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
+	String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
+	String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
+	String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
+	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
+	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
+	String PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND = "app.options.tts.toolbar.background";
+	String PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.tts.toolbar.transp.buttons";
+	String PROP_APP_INIT = "app.init";
+	String PROP_APP_SHOW_FILES_DIR = "app.show.files.dir";
+	String PROP_APP_SHOW_FILES_NO_MARK = "app.show.files.no.mark";
+	String PROP_APP_SHOW_FILES_TO_READ = "app.show.files.to.read";
+	String PROP_APP_SHOW_FILES_READING = "app.show.files.reading";
+	String PROP_APP_SHOW_FILES_FINISHED = "app.show.files.finished";
+	String PROP_APP_SAVE_DOC_EXT_CONTROLS_SHOW = "app.save.doc.ext.controls.show";
 
-	public static final String PROP_APP_TTS_SPEED_1 = "app.tts.speed.1";
-	public static final String PROP_APP_TTS_SPEED_2 = "app.tts.speed.2";
-	public static final String PROP_APP_TTS_SPEED_3 = "app.tts.speed.3";
-	public static final String PROP_APP_TTS_VOL_1 = "app.tts.vol.1";
-	public static final String PROP_APP_TTS_VOL_2 = "app.tts.vol.2";
-	public static final String PROP_APP_TTS_VOL_3 = "app.tts.vol.3";
+	String PROP_APP_TTS_SPEED_1 = "app.tts.speed.1";
+	String PROP_APP_TTS_SPEED_2 = "app.tts.speed.2";
+	String PROP_APP_TTS_SPEED_3 = "app.tts.speed.3";
+	String PROP_APP_TTS_VOL_1 = "app.tts.vol.1";
+	String PROP_APP_TTS_VOL_2 = "app.tts.vol.2";
+	String PROP_APP_TTS_VOL_3 = "app.tts.vol.3";
 
-	public static final String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
-	public static final String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
-	public static final String PROP_APP_DISABLE_SAFE_MODE = "app.disable.safe.mode";
-	public static final String PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG = "app.use.simple.font.select.dialog";
+	String PROP_APP_HIDE_STATE_DIALOGS = "app.hide.state.dialogs";
+	String PROP_APP_HIDE_CSS_WARNING = "app.hide.state.warning";
+	String PROP_APP_DISABLE_SAFE_MODE = "app.disable.safe.mode";
+	String PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG = "app.use.simple.font.select.dialog";
 
-	public static final String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
-	public static final String PROP_APP_HIGHLIGHT_USER_DIC = "crengine.highlight.user.dic";
-	public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
-    public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT = "crengine.highlight.bookmarks.color.comment";
-    public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION = "crengine.highlight.bookmarks.color.correction";
-    public static final String PROP_APP_HIGHLIGHT_BOOKMARKS_DAY = "crengine.highlight.bookmarks.day";
-    public static final String PROP_HIGHLIGHT_SELECTION_COLOR_DAY = "crengine.highlight.selection.color.day";
-    public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_DAY = "crengine.highlight.bookmarks.color.comment.day";
-    public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_DAY = "crengine.highlight.bookmarks.color.correction.day";
-    public static final String PROP_APP_HIGHLIGHT_BOOKMARKS_NIGHT = "crengine.highlight.bookmarks.night";
-    public static final String PROP_HIGHLIGHT_SELECTION_COLOR_NIGHT = "crengine.highlight.selection.color.night";
-    public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_NIGHT = "crengine.highlight.bookmarks.color.comment.night";
-    public static final String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_NIGHT = "crengine.highlight.bookmarks.color.correction.night";
+	String PROP_APP_HIGHLIGHT_BOOKMARKS = "crengine.highlight.bookmarks";
+	String PROP_APP_HIGHLIGHT_USER_DIC = "crengine.highlight.user.dic";
+	String PROP_HIGHLIGHT_SELECTION_COLOR = "crengine.highlight.selection.color";
+    String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT = "crengine.highlight.bookmarks.color.comment";
+    String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION = "crengine.highlight.bookmarks.color.correction";
+    String PROP_APP_HIGHLIGHT_BOOKMARKS_DAY = "crengine.highlight.bookmarks.day";
+    String PROP_HIGHLIGHT_SELECTION_COLOR_DAY = "crengine.highlight.selection.color.day";
+    String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_DAY = "crengine.highlight.bookmarks.color.comment.day";
+    String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_DAY = "crengine.highlight.bookmarks.color.correction.day";
+    String PROP_APP_HIGHLIGHT_BOOKMARKS_NIGHT = "crengine.highlight.bookmarks.night";
+    String PROP_HIGHLIGHT_SELECTION_COLOR_NIGHT = "crengine.highlight.selection.color.night";
+    String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_NIGHT = "crengine.highlight.bookmarks.color.comment.night";
+    String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_NIGHT = "crengine.highlight.bookmarks.color.correction.night";
 
-    public static final String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
-	public static final String PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES = "app.browser.hide.empty.genres";
-	public static final String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
+    String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
+	String PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES = "app.browser.hide.empty.genres";
+	String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
 
-	public static final String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
-	public static final String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
-	public static final String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON = "app.browser.sec.group.common";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR = "app.browser.sec.group.author";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES = "app.browser.sec.group.series";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES = "app.browser.sec.group.genres";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH = "app.browser.sec.group.search";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_DATES = "app.browser.sec.group.dates";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_RATING = "app.browser.sec.group.rating";
-	public static final String PROP_APP_FILE_BROWSER_SEC_GROUP_STATE = "app.browser.sec.group.state";
-	public static final String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD = "app.browser.authors.aliases.load";
-	public static final String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED = "app.browser.authors.aliases.enabled";
-	public static final String PROP_APP_EXT_DOC_CAME_TIMEOUT = "app.ext.doc.came.timeout";
-	public static final String PROP_APP_FILE_BROWSER_ZIP_SCAN = "app.browser.zip.scan";
+	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
+	String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
+	String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON = "app.browser.sec.group.common";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR = "app.browser.sec.group.author";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES = "app.browser.sec.group.series";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES = "app.browser.sec.group.genres";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH = "app.browser.sec.group.search";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_DATES = "app.browser.sec.group.dates";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_RATING = "app.browser.sec.group.rating";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_STATE = "app.browser.sec.group.state";
+	String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD = "app.browser.authors.aliases.load";
+	String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED = "app.browser.authors.aliases.enabled";
+	String PROP_APP_EXT_DOC_CAME_TIMEOUT = "app.ext.doc.came.timeout";
+	String PROP_APP_FILE_BROWSER_ZIP_SCAN = "app.browser.zip.scan";
 
-    public static final String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
-    public static final String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";
-    public static final String PROP_APP_SCREEN_BLACKPAGE_INTERVAL = "app.screen.blackpage.interval";
-    public static final String PROP_APP_SCREEN_BLACKPAGE_DURATION = "app.screen.blackpage.duration";
-    public static final String PROP_APP_SCREEN_FORCE_EINK = "app.screen.force.eink";
+    String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
+    String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";
+    String PROP_APP_SCREEN_BLACKPAGE_INTERVAL = "app.screen.blackpage.interval";
+    String PROP_APP_SCREEN_BLACKPAGE_DURATION = "app.screen.blackpage.duration";
+    String PROP_APP_SCREEN_FORCE_EINK = "app.screen.force.eink";
 
 
-    public static final String PROP_APP_SECONDARY_TAP_ACTION_TYPE = "app.touch.secondary.action.type";
-    public static final String PROP_APP_GESTURE_PAGE_FLIPPING = "app.touch.gesture.page.flipping";
-	public static final String PROP_APP_GESTURE_PAGE_FLIPPING_NEW = "app.touch.gesture.page.flipping.new";
-	public static final String PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY = "app.touch.gesture.page.flipping.sensivity";
-	public static final String PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT = "app.touch.gesture.page.flipping.page.count";
-	public static final String PROP_APP_DISABLE_TWO_POINTER_GESTURES = "app.touch.gesture.twopointer.disable";
+    String PROP_APP_SECONDARY_TAP_ACTION_TYPE = "app.touch.secondary.action.type";
+    String PROP_APP_GESTURE_PAGE_FLIPPING = "app.touch.gesture.page.flipping";
+	String PROP_APP_GESTURE_PAGE_FLIPPING_NEW = "app.touch.gesture.page.flipping.new";
+	String PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY = "app.touch.gesture.page.flipping.sensivity";
+	String PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT = "app.touch.gesture.page.flipping.page.count";
+	String PROP_APP_DISABLE_TWO_POINTER_GESTURES = "app.touch.gesture.twopointer.disable";
 
-    public static final String PROP_APP_VIEW_AUTOSCROLL_SPEED  ="app.view.autoscroll.speed";
-    public static final String PROP_APP_VIEW_AUTOSCROLL_TYPE  ="app.view.autoscroll.type";
+    String PROP_APP_VIEW_AUTOSCROLL_SPEED  ="app.view.autoscroll.speed";
+    String PROP_APP_VIEW_AUTOSCROLL_TYPE  ="app.view.autoscroll.type";
 
-    public static final String PROP_APP_THEME = "app.ui.theme";
-    public static final String PROP_APP_THEME_DAY  = "app.ui.theme.day";
-    public static final String PROP_APP_THEME_NIGHT = "app.ui.theme.night";
-	public static final String PROP_APP_FONT_SCALE = "app.ui.font.scale";
+    String PROP_APP_THEME = "app.ui.theme";
+    String PROP_APP_THEME_DAY  = "app.ui.theme.day";
+    String PROP_APP_THEME_NIGHT = "app.ui.theme.night";
+	String PROP_APP_FONT_SCALE = "app.ui.font.scale";
 
-    public static final String PROP_APP_LOCALE = "app.locale.name";
+    String PROP_APP_LOCALE = "app.locale.name";
     
-    public static final String PROP_APP_STARTUP_ACTION = "app.startup.action";
+    String PROP_APP_STARTUP_ACTION = "app.startup.action";
 
-    public static final String PROP_APP_PLUGIN_ENABLED = "app.plugin.enabled.litres";
+    String PROP_APP_PLUGIN_ENABLED = "app.plugin.enabled.litres";
 
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED = "app.cloudsync.googledrive.enabled";
     String PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS = "app.cloudsync.googledrive.settings";
@@ -339,111 +345,117 @@ public interface Settings {
 	String PROP_APP_TTS_FORCE_LANGUAGE = "app.tts.force.lang";		// Force use specified language
 	String PROP_APP_TTS_VOICE = "app.tts.voice";
 	String PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR = "app.tts.google.end-of-sentence-abbreviation.workaround";	// Use a workaround to disable processing of abbreviations at the end of a sentence when using "Google Speech Services"
+	String PROP_APP_TTS_SENTENCE_PAUSE = "app.tts.sentence.pause";
 
 	String PROP_APP_VIEW_ANIM_DURATION ="app.view.anim.duration";
 
-	public static final String PROP_APP_GEO = "app.geo.locations";
-	public static final String PROP_TOOLBAR_TITLE = "window.toolbar.title";
-	public static final String PROP_CLOUD_TITLE = "window.cloud.title";
-	public static final String PROP_DICTIONARY_TITLE = "window.dictionary.title";
-	public static final String PROP_FILEBROWSER_TITLE = "window.filebrowser.title";
-	public static final String PROP_FILEBROWSER_SEC_GROUP = "window.filebrowser.sec.group";
-	public static final String PROP_RARE_TITLE = "window.rare.title";
-	public static final String PROP_TTS_TITLE = "window.tts.title";
-	public static final String PROP_BACKLIGHT_TITLE = "window.backlight.title";
-	public static final String PROP_SELECTION_MODES_TITLE = "window.selection.modes.title";
-	public static final String PROP_PAGEANDORIENTATION_TITLE = "window.pageandorientation.modes.title";
-	public static final String PROP_FONTTWEAKS_TITLE = "window.font.tweaks.title";
-	public static final String PROP_EINKSCREENUPDATE_TITLE = "window.eink.screen.update.title";
-	public static final String PROP_HYPH_REND_TITLE = "window.hyph.rend.title";
-	public static final String PROP_SPACING_TITLE = "window.spacing.title";
-	public static final String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
-	public static final String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
-	public static final String PROP_PAGE_FLIP_TITLE = "window.page.flip.title";
+	String PROP_APP_GEO = "app.geo.locations";
+	String PROP_TOOLBAR_TITLE = "window.toolbar.title";
+	String PROP_CLOUD_TITLE = "window.cloud.title";
+	String PROP_DICTIONARY_TITLE = "window.dictionary.title";
+	String PROP_FILEBROWSER_TITLE = "window.filebrowser.title";
+	String PROP_FILEBROWSER_SEC_GROUP = "window.filebrowser.sec.group";
+	String PROP_RARE_TITLE = "window.rare.title";
+	String PROP_TTS_TITLE = "window.tts.title";
+	String PROP_BACKLIGHT_TITLE = "window.backlight.title";
+	String PROP_SELECTION_MODES_TITLE = "window.selection.modes.title";
+	String PROP_PAGEANDORIENTATION_TITLE = "window.pageandorientation.modes.title";
+	String PROP_FONTTWEAKS_TITLE = "window.font.tweaks.title";
+	String PROP_EINKSCREENUPDATE_TITLE = "window.eink.screen.update.title";
+	String PROP_HYPH_REND_TITLE = "window.hyph.rend.title";
+	String PROP_SPACING_TITLE = "window.spacing.title";
+	String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
+	String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
+	String PROP_PAGE_FLIP_TITLE = "window.page.flip.title";
 
-	public static final String PROP_APP_EINK_ONYX_NEED_BYPASS   ="app.eink.onyx.need.bypass";
-	public static final String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
+	String PROP_APP_EINK_ONYX_NEED_BYPASS   ="app.eink.onyx.need.bypass";
+	String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
+	String PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD   ="app.eink.onyx.full.screen.update.method";
 
 	// available options for PROP_APP_SELECTION_ACTION setting
-	public static final int SELECTION_ACTION_SAME_AS_COMMON = -1;
-	public static final int SEND_TO_ACTION_NONE = -1;
-	public static final int SELECTION_ACTION_TOOLBAR = 0;
-    public static final int SELECTION_ACTION_COPY = 1;
-    public static final int SELECTION_ACTION_DICTIONARY = 2;
-    public static final int SELECTION_ACTION_BOOKMARK = 3;
-    public static final int SELECTION_ACTION_FIND = 4;
-    public static final int SELECTION_ACTION_DICTIONARY_1 = 5;
-    public static final int SELECTION_ACTION_DICTIONARY_2 = 6;
-    public static final int SELECTION_ACTION_SEARCH_WEB = 7;
-    public static final int SELECTION_ACTION_SEND_TO = 8;
-    public static final int SELECTION_ACTION_USER_DIC = 9;
-    public static final int SELECTION_ACTION_CITATION = 10;
-    public static final int SELECTION_ACTION_DICTIONARY_LIST = 11;
-	public static final int SELECTION_ACTION_DICTIONARY_3 = 12;
-	public static final int SELECTION_ACTION_DICTIONARY_4 = 13;
-	public static final int SELECTION_ACTION_DICTIONARY_5 = 14;
-	public static final int SELECTION_ACTION_DICTIONARY_6 = 15;
-	public static final int SELECTION_ACTION_DICTIONARY_7 = 16;
-	public static final int SELECTION_ACTION_BOOKMARK_QUICK = 17;
-	public static final int SELECTION_ACTION_COMBO = 18;
-	public static final int SELECTION_ACTION_SUPER_COMBO = 19;
+	int SELECTION_ACTION_SAME_AS_COMMON = -1;
+	int SEND_TO_ACTION_NONE = -1;
+	int SELECTION_ACTION_TOOLBAR = 0;
+    int SELECTION_ACTION_COPY = 1;
+    int SELECTION_ACTION_DICTIONARY = 2;
+    int SELECTION_ACTION_BOOKMARK = 3;
+    int SELECTION_ACTION_FIND = 4;
+    int SELECTION_ACTION_DICTIONARY_1 = 5;
+    int SELECTION_ACTION_DICTIONARY_2 = 6;
+    int SELECTION_ACTION_SEARCH_WEB = 7;
+    int SELECTION_ACTION_SEND_TO = 8;
+    int SELECTION_ACTION_USER_DIC = 9;
+    int SELECTION_ACTION_CITATION = 10;
+    int SELECTION_ACTION_DICTIONARY_LIST = 11;
+	int SELECTION_ACTION_DICTIONARY_3 = 12;
+	int SELECTION_ACTION_DICTIONARY_4 = 13;
+	int SELECTION_ACTION_DICTIONARY_5 = 14;
+	int SELECTION_ACTION_DICTIONARY_6 = 15;
+	int SELECTION_ACTION_DICTIONARY_7 = 16;
+	int SELECTION_ACTION_DICTIONARY_8 = 21;
+	int SELECTION_ACTION_DICTIONARY_9 = 22;
+	int SELECTION_ACTION_DICTIONARY_10 = 23;
+	int SELECTION_ACTION_BOOKMARK_QUICK = 17;
+	int SELECTION_ACTION_COMBO = 18;
+	int SELECTION_ACTION_SUPER_COMBO = 19;
+	int SELECTION_ACTION_TOOLBAR_SHORT = 20;
 
 	// available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
-    public static final int TAP_ACTION_TYPE_LONGPRESS = 0;
-    public static final int TAP_ACTION_TYPE_DOUBLE = 1;
-    public static final int TAP_ACTION_TYPE_SHORT = 2;
+    int TAP_ACTION_TYPE_LONGPRESS = 0;
+    int TAP_ACTION_TYPE_DOUBLE = 1;
+    int TAP_ACTION_TYPE_SHORT = 2;
 
     // available options for PROP_APP_FLICK_BACKLIGHT_CONTROL setting
-    public static final int BACKLIGHT_CONTROL_FLICK_NONE = 0;
-    public static final int BACKLIGHT_CONTROL_FLICK_LEFT = 1;
-    public static final int BACKLIGHT_CONTROL_FLICK_RIGHT = 2;
-	public static final int BACKLIGHT_CONTROL_FLICK_BOTH = 3;
-	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM = 4;
-	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD = 5;
-	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM = 6;
-	public static final int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM = 7;
-	public static final int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD = 8;
-	public static final int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD = 9;
-	public static final int BACKLIGHT_CONTROL_FLICK_BOTH_BOTH = 10;
+    int BACKLIGHT_CONTROL_FLICK_NONE = 0;
+    int BACKLIGHT_CONTROL_FLICK_LEFT = 1;
+    int BACKLIGHT_CONTROL_FLICK_RIGHT = 2;
+	int BACKLIGHT_CONTROL_FLICK_BOTH = 3;
+	int BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM = 4;
+	int BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD = 5;
+	int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM = 6;
+	int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM = 7;
+	int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD = 8;
+	int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD = 9;
+	int BACKLIGHT_CONTROL_FLICK_BOTH_BOTH = 10;
 
-	public static final int APP_STARTUP_ACTION_LAST_BOOK = 0;
-    public static final int APP_STARTUP_ACTION_ROOT = 1;
-    public static final int APP_STARTUP_ACTION_RECENT_BOOKS = 2;
-    public static final int APP_STARTUP_ACTION_LAST_BOOK_FOLDER = 3;
+	int APP_STARTUP_ACTION_LAST_BOOK = 0;
+    int APP_STARTUP_ACTION_ROOT = 1;
+    int APP_STARTUP_ACTION_RECENT_BOOKS = 2;
+    int APP_STARTUP_ACTION_LAST_BOOK_FOLDER = 3;
     
-    public static final int VIEWER_STATUS_NONE = 0;
-    public static final int VIEWER_STATUS_TOP = 1;
-    public static final int VIEWER_STATUS_BOTTOM = 2;
+    int VIEWER_STATUS_NONE = 0;
+    int VIEWER_STATUS_TOP = 1;
+    int VIEWER_STATUS_BOTTOM = 2;
 
-	public static final int VIEWER_STATUS_PAGE_HEADER = 3;
-	public static final int VIEWER_STATUS_PAGE_FOOTER = 4;
-    public static final int VIEWER_STATUS_PAGE = 5;
-	public static final int VIEWER_STATUS_PAGE_2LINES_HEADER = 6;
-	public static final int VIEWER_STATUS_PAGE_2LINES_FOOTER = 7;
+	int VIEWER_STATUS_PAGE_HEADER = 3;
+	int VIEWER_STATUS_PAGE_FOOTER = 4;
+    int VIEWER_STATUS_PAGE = 5;
+	int VIEWER_STATUS_PAGE_2LINES_HEADER = 6;
+	int VIEWER_STATUS_PAGE_2LINES_FOOTER = 7;
 
-	public static final int VIEWER_TOOLBAR_NONE = 0;
-    public static final int VIEWER_TOOLBAR_TOP = 1;
-    public static final int VIEWER_TOOLBAR_BOTTOM = 2;
-    public static final int VIEWER_TOOLBAR_LEFT = 3;
-    public static final int VIEWER_TOOLBAR_RIGHT = 4;
-    public static final int VIEWER_TOOLBAR_SHORT_SIDE = 5;
-    public static final int VIEWER_TOOLBAR_LONG_SIDE = 6;
+	int VIEWER_TOOLBAR_NONE = 0;
+    int VIEWER_TOOLBAR_TOP = 1;
+    int VIEWER_TOOLBAR_BOTTOM = 2;
+    int VIEWER_TOOLBAR_LEFT = 3;
+    int VIEWER_TOOLBAR_RIGHT = 4;
+    int VIEWER_TOOLBAR_SHORT_SIDE = 5;
+    int VIEWER_TOOLBAR_LONG_SIDE = 6;
 
-    public static final int VIEWER_TOOLBAR_100 = 0;
-    public static final int VIEWER_TOOLBAR_100_gray = 1;
-    public static final int VIEWER_TOOLBAR_100_inv = 2;
-    public static final int VIEWER_TOOLBAR_75 = 3;
-    public static final int VIEWER_TOOLBAR_75_gray = 4;
-    public static final int VIEWER_TOOLBAR_75_inv = 5;
-    public static final int VIEWER_TOOLBAR_50 = 6;
-    public static final int VIEWER_TOOLBAR_50_gray = 7;
-    public static final int VIEWER_TOOLBAR_50_inv = 8;
+    int VIEWER_TOOLBAR_100 = 0;
+    int VIEWER_TOOLBAR_100_gray = 1;
+    int VIEWER_TOOLBAR_100_inv = 2;
+    int VIEWER_TOOLBAR_75 = 3;
+    int VIEWER_TOOLBAR_75_gray = 4;
+    int VIEWER_TOOLBAR_75_inv = 5;
+    int VIEWER_TOOLBAR_50 = 6;
+    int VIEWER_TOOLBAR_50_gray = 7;
+    int VIEWER_TOOLBAR_50_inv = 8;
 
-	public static final int CLOUD_SYNC_VARIANT_DISABLED = 0;
-	public static final int CLOUD_SYNC_VARIANT_FILESYSTEM = 1;
-	public static final int CLOUD_SYNC_VARIANT_YANDEX = 2;
+	int CLOUD_SYNC_VARIANT_DISABLED = 0;
+	int CLOUD_SYNC_VARIANT_FILESYSTEM = 1;
+	int CLOUD_SYNC_VARIANT_YANDEX = 2;
 
-	public enum Lang {
+	enum Lang {
     	DEFAULT("system", R.string.options_app_locale_system, R.raw.help_template_en),
     	EN("en", R.string.options_app_locale_en, R.raw.help_template_en),
         DE("de", R.string.options_app_locale_de, 0),
@@ -500,7 +512,7 @@ public interface Settings {
     		return DEFAULT;
     	}
     	
-    	private Lang(String code, int nameResId, int helpFileResId) {
+    	Lang(String code, int nameResId, int helpFileResId) {
     		this.code = code;
     		this.nameId = nameResId;
     		this.helpFileResId = helpFileResId;
@@ -511,10 +523,10 @@ public interface Settings {
     };
     
     
-	public final static int MAX_PROFILES = 6;
+	int MAX_PROFILES = 6;
 
 	// settings which depend on profile
-	public final static String[] PROFILE_SETTINGS = {
+	String[] PROFILE_SETTINGS = {
 	    "background.*",
 	    PROP_NIGHT_MODE,
 	    "font.*",
@@ -544,10 +556,14 @@ public interface Settings {
 		PROP_APP_DICTIONARY_5,
 		PROP_APP_DICTIONARY_6,
 		PROP_APP_DICTIONARY_7,
+		PROP_APP_DICTIONARY_8,
+		PROP_APP_DICTIONARY_9,
+		PROP_APP_DICTIONARY_10,
 		PROP_APP_SHOW_USER_DIC_PANEL,
 		PROP_APP_SHOW_USER_DIC_CONTENT,
         PROP_APP_DICT_WORD_CORRECTION,
 		PROP_APP_DICT_DONT_SAVE_IF_MORE,
+		PROP_INSPECTOR_MODE_NO_DIC_HISTORY,
         PROP_APP_DICT_LONGTAP_CHANGE,
 		PROP_CLOUD_SYNC_VARIANT,
 		PROP_CLOUD_WIKI1_ADDR,
@@ -595,11 +611,14 @@ public interface Settings {
 		PROP_APP_USE_EINK_FRONTLIGHT,
 
 		PROP_APP_QUICK_TRANSLATION_DIRS,
-		PROP_APP_ONLINE_OFFLINE_DICS
+		PROP_APP_ONLINE_OFFLINE_DICS,
+		PROP_APP_OFFLINE_DICS,
+
+		PROP_APP_TTS_SENTENCE_PAUSE
 
 	};
 
-	public static boolean isSettingBelongToProfile(String settingName) {
+	static boolean isSettingBelongToProfile(String settingName) {
 		ArrayList<String> props = new ArrayList<String>();
 		boolean found = false;
 		for (String pattern : Settings.PROFILE_SETTINGS) {

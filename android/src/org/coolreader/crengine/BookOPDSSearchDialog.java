@@ -6,6 +6,7 @@ import android.widget.EditText;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
 
 public class BookOPDSSearchDialog extends BaseDialog {
 

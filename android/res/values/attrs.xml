@@ -90,6 +90,7 @@
     <attr name="attr_icons8_font_color" format="reference" />
     <attr name="attr_icons8_settings_to_gd" format="reference" />
     <attr name="attr_icons8_settings_from_gd" format="reference" />
+    <attr name="attr_icons8_settings_from_hist" format="reference" />
     <attr name="attr_icons8_position_to_gd_interval" format="reference" />
     <attr name="attr_icons8_google_translate" format="reference" />
     <attr name="attr_icons8_google_translate_2" format="reference" />
@@ -230,6 +231,7 @@
     <attr name="attr_ic_media_play" format="reference" />
     <attr name="attr_ic_media_play_lock" format="reference" />
     <attr name="attr_ic_media_pause" format="reference" />
+    <attr name="attr_ic_media_pause_lock" format="reference" />
     <attr name="attr_ic_media_rew" format="reference" />
     <attr name="attr_ic_media_ff" format="reference" />
     <attr name="attr_ic_media_stop" format="reference" />

@@ -10,8 +10,17 @@ import android.util.Log;
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.*;
 import org.coolreader.crengine.Scanner;
+import org.coolreader.db.StarDict.StartDictDB;
+import org.coolreader.dic.OfflineDicsDlg;
+import org.coolreader.dic.OfflineInfo;
+import org.coolreader.dic.struct.DicStruct;
+import org.coolreader.dic.struct.DictEntry;
+import org.coolreader.dic.struct.Lemma;
+import org.coolreader.dic.struct.TranslLine;
 import org.coolreader.library.AuthorAlias;
 import org.coolreader.userdic.UserDicEntry;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.*;
@@ -1046,6 +1055,7 @@ public class MainDB extends BaseDB {
 			sWord = sWord.trim().toLowerCase();
 		if (sWord.length() == 0)
 			return false;
+		if (sWordTranslate == null) sWordTranslate = "";
 		sWordTranslate = sWordTranslate.trim();
 		if ((sWordTranslate.length() == 0) && (action == UserDicEntry.ACTION_NEW))
 			return false;
@@ -4627,6 +4637,56 @@ public class MainDB extends BaseDB {
 			return true;
 		}
 		return false;
+	}
+
+	// StarDict work
+	ArrayList<OfflineInfo> starDictInfoList = null;
+
+	public String convertStartDictDic(String dicPath, String dicName) {
+		try {
+			File dicFile = new File(dicPath + "/" + dicName + ".dict");
+			if (!dicFile.exists()) return "[dic_not_exists]";
+			StartDictDB sddb = new StartDictDB();
+			sddb.createDatabase(dicPath + "/" + dicName + ".db");
+			sddb.loadDic(dicPath, dicName);
+			//return word count - for info
+		} catch (Exception e) {
+			return e.getMessage();
+		}
+		return "";
+	}
+
+	public void findInStarDict1Dic(DicStruct dsl, OfflineInfo sdil, String searchStr) {
+		String sql = "SELECT word, meaning FROM main where word like " + quoteSqlString(searchStr + "%");
+		try (Cursor rs = sdil.db.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				do {
+					Lemma le = new Lemma();
+					DictEntry de = new DictEntry();
+					de.dictLinkText = rs.getString(0);
+					le.dictEntry.add(de);
+					TranslLine translLine = new TranslLine();
+					translLine.transText = Utils.cleanupHtmlTags(rs.getString(1));
+					translLine.transGroup = sdil.dicName;
+					le.translLine.add(translLine);
+					dsl.lemmas.add(le);
+				} while (rs.moveToNext());
+			}
+		}
+	}
+
+	public DicStruct findInStarDictDic(String searchStr) {
+		DicStruct dsl = new DicStruct();
+		if (starDictInfoList == null) starDictInfoList = OfflineDicsDlg.fillOfflineDics();
+		for (OfflineInfo sdil: starDictInfoList)
+			if (sdil.dbExists) {
+				if (sdil.db == null) {
+					sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
+				} else
+					if (!sdil.db.isOpen()) sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
+				if (sdil.db.isOpen()) findInStarDict1Dic(dsl, sdil, searchStr);
+			}
+		return dsl;
 	}
 
 }

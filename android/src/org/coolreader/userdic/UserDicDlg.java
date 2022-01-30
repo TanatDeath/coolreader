@@ -28,9 +28,9 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DicSearchHistoryEntry;
-import org.coolreader.crengine.DictsDlg;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.dic.DictsDlg;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,21 +71,25 @@ public class UserDicDlg extends BaseDialog {
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnPage2, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnBook2, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnAll2, PorterDuff.Mode.CLEAR,true);
 		if (getCheckedFromTag(btnPage2.getTag())) {
-			btnPage2.setBackgroundColor(colorGrayCT2);
+			btnPage2.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
 			mCoolReader.tintViewIcons(btnPage2,true);
-		} else btnPage2.setBackgroundColor(colorGrayCT);
+			if (isEInk) Utils.setSolidButtonEink(btnPage2);
+		} else btnPage2.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
 		if (getCheckedFromTag(btnBook2.getTag())) {
-			btnBook2.setBackgroundColor(colorGrayCT2);
+			btnBook2.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
 			mCoolReader.tintViewIcons(btnBook2,true);
-		} else btnBook2.setBackgroundColor(colorGrayCT);
+			if (isEInk) Utils.setSolidButtonEink(btnBook2);
+		} else btnBook2.setBackgroundColor(isEInk? Color.WHITE:colorGrayCT);
 		if (getCheckedFromTag(btnAll2.getTag())) {
-			btnAll2.setBackgroundColor(colorGrayCT2);
+			btnAll2.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
 			mCoolReader.tintViewIcons(btnAll2,true);
-		} else btnAll2.setBackgroundColor(colorGrayCT);
+			if (isEInk) Utils.setSolidButtonEink(btnAll2);
+		} else btnAll2.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
 	}
 
 	class UserDicAdapter extends BaseAdapter {
@@ -368,12 +372,17 @@ public class UserDicDlg extends BaseDialog {
 			openPage = 2;
 		}
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		int colorGrayCT2=colorGrayCT;
+		if (isEInk) colorGrayCT=Color.WHITE;
 		rb_descr.setBackgroundColor(colorGrayCT);
 		//tr_descr.setBackgroundColor(colorGrayC);
 		btnUserDic.setBackgroundColor(colorGrayCT);
 		btnCitation.setBackgroundColor(colorGrayCT);
 		btnDicSearchHistory.setBackgroundColor(colorGrayCT);
-		btn.setBackgroundColor(colorGray);
+		if (isEInk)
+			Utils.setSolidButtonEink(btn);
+		else
+			btn.setBackgroundColor(colorGray);
 		paintScopeButtons();
 	}
 

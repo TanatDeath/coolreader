@@ -173,6 +173,10 @@ class IMX7DeviceImpl implements OnyxEinkDeviceImpl {
 	}
 
 	@Override
+	public void invalidate(UpdateMode mode, View view) {
+	}
+
+	@Override
 	public boolean setViewDefaultUpdateMode(View view, UpdateMode mode) {
 		return Utils.invokeMethod(sMethodSetDefaultUpdateMode, view, getUpdateModeValue(mode)) != null;
 	}
@@ -231,4 +235,5 @@ class IMX7DeviceImpl implements OnyxEinkDeviceImpl {
 		}
 		return res;
 	}
+
 }

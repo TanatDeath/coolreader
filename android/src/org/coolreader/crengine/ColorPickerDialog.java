@@ -3,8 +3,8 @@ package org.coolreader.crengine;
 // based on color picker from 
 // http://www.anddev.org/announce_color_picker_dialog-t10771.html
 
-import org.coolreader.BuildConfig;
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -44,7 +44,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -127,7 +126,7 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 				mPreviewDrawable,
 				res.getDrawable(R.drawable.color_picker_frame),
 		};
-		preview.setBackgroundDrawable(new LayerDrawable(layers));
+		preview.setBackground(new LayerDrawable(layers));
 		
 		mR = (SeekBar) root.findViewById(R.id.r);
 		mG = (SeekBar) root.findViewById(R.id.g);

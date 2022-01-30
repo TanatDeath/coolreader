@@ -11,7 +11,6 @@ import org.coolreader.R;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,13 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 
-import org.coolreader.R;
-
-import android.app.AlertDialog;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Environment;
-import android.util.Log;
+import org.coolreader.utils.Utils;
 
 /**
  * CoolReader Engine class.
@@ -1908,7 +1901,8 @@ public class Engine {
 		CustomCoversDirs,
 		DownloadsDirs,
 		CloudSyncDirs,
-		IconDirs
+		IconDirs,
+		OfflineDicsDirs
 	}
 
 	public static ArrayList<String> getDataDirs(DataDirType dirType) {
@@ -2036,6 +2030,22 @@ public class Engine {
 							res.add(subdirDownloads.getAbsolutePath());
 						else
 							res.add(subdirDownloads.getAbsolutePath() + " [not found]");
+						break;
+					}
+				case OfflineDicsDirs:
+					File subdirOfflineDics = new File(base, "dics");
+					bCreated = false;
+					if ((doCreate) && (!subdirOfflineDics.exists())) {
+						if (subdirOfflineDics.mkdir()) {
+							res.add(subdirOfflineDics.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subdirOfflineDics.isDirectory())
+							res.add(subdirOfflineDics.getAbsolutePath());
+						else
+							res.add(subdirOfflineDics.getAbsolutePath() + " [not found]");
 						break;
 					}
 			}

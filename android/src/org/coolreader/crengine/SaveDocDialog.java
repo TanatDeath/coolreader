@@ -27,6 +27,9 @@ import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.layouts.FlowLayout;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -113,6 +116,12 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	public SaveDocDialog(CoolReader activity, boolean doMove, String fileDir, String existingFileName,
 						 String suggestedFileName, String fileExt, String sUri, Uri uri, String stype) {
 		super("SaveDocDialog", activity, activity.getString(R.string.save_doc_to_library), false, true);
+		// fileDir = /storage/emulated/0/Книги/Мэри Стюарт
+		// existingFileName = /storage/emulated/0/Книги/Мэри Стюарт/Сага о Короле Артуре.fb2.zip
+		// suggestedFileName = KnownReader_Downloaded
+		// fileExt = .
+		// sUri = /storage/emulated/0/Книги/Мэри Стюарт/Сага о Короле Артуре.fb2.zip
+		// stype = ""
 		mDoMove = doMove;
 		mFileDir = fileDir;
 		mExistingFileName = existingFileName;
@@ -290,7 +299,14 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 				if (fi.getType() == FileInfo.TYPE_DOWNLOAD_DIR) {
 					boolean selNotMove = mExistingFileName.startsWith(fi.pathname);
 					addFolderToTL(mainTl, mActivity.getString(R.string.scan_books_folder), fi.pathname, selNotMove);
-				} else{
+				}
+			}
+		}
+		addFolderToTL(mainTl, mActivity.getString(R.string.scan_downloads_folder),
+				Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS, false);
+		for (FileInfo fi: folders) {
+			if (fi.getType() != FileInfo.TYPE_FS_ROOT) {
+				if (fi.getType() != FileInfo.TYPE_DOWNLOAD_DIR) {
 					String labText = StrUtils.getNonEmptyStr(fi.pathname, true);
 					String[] arrLab = labText.split("/");
 					if (arrLab.length>2) labText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
@@ -298,8 +314,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 				}
 			}
 		}
-		addFolderToTL(mainTl, mActivity.getString(R.string.scan_downloads_folder),
-				Environment.getExternalStorageDirectory().toString()+ File.separator + Environment.DIRECTORY_DOWNLOADS, false);
 		addFolderToTL(mainTl, mActivity.getString(R.string.select_folder),
 				"", false);
 		addFolderToTL(mainTl, mActivity.getString(R.string.add_author_folder),

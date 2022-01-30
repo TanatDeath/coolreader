@@ -2,8 +2,10 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 import android.app.Dialog;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -18,10 +20,12 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.util.HashMap;
+
 public class BaseDialog extends Dialog {
 
 	View layoutView;
-	ViewGroup buttonsLayout;
+	public ViewGroup buttonsLayout;
 	public ViewGroup upperTextLayout;
 	ViewGroup contentsLayout;
 	public CoolReader mActivity;
@@ -38,6 +42,8 @@ public class BaseDialog extends Dialog {
 	int thirdButtonContentDescriptionId;
 	int addButtonImage;
 	int addButtonContentDescriptionId;
+	public boolean isEInk;
+	HashMap<Integer, Integer> themeColors;
 
 	public void setPositiveButtonImage(int imageId, int descriptionId) {
 		positiveButtonImage = imageId;
@@ -77,6 +83,8 @@ public class BaseDialog extends Dialog {
 				));
 		setOwnerActivity(activity);
 		this.mActivity = (CoolReader) activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		this.title = title;
 		this.needCancelButton = showNegativeButton;
 		this.dlgName = dlgName;
@@ -120,7 +128,7 @@ public class BaseDialog extends Dialog {
 		}
 	}
 
-	public void setView( View view )
+	public void setView(View view)
 	{
 		this.view = view;
 		if ( layoutView==null ) {
@@ -302,6 +310,7 @@ public class BaseDialog extends Dialog {
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.base_dialog, null);
 		upperTextLayout = layout.findViewById(R.id.base_dlg_upper_text_panel);
 		buttonsLayout = layout.findViewById(R.id.base_dlg_button_panel);
+		if (isEInk) buttonsLayout.setBackgroundColor(Color.WHITE);
 		if (upperText == null) {
 			layout.removeView(upperTextLayout);
 			updateGlobalMargin(buttonsLayout, true, true, true, false);

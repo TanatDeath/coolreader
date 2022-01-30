@@ -116,9 +116,9 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			this.contentView = contentView;
 			this.statusView = new StatusBar(context);
 			statusBackground = contentView.createToolbarBackgroundDrawable();
-			this.statusView.setBackgroundDrawable(statusBackground);
+			this.statusView.setBackground(statusBackground);
 			this.userDicView = new UserDicPanel(context);
-			this.userDicView.setBackgroundDrawable(statusBackground);
+			this.userDicView.setBackground(statusBackground);
 			toolbarBackground = contentView.createToolbarBackgroundDrawable();
 			ArrayList<ReaderAction> actionsList = ReaderAction.createList(
 					ReaderAction.GO_BACK,
@@ -153,7 +153,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			actionsList.add(ReaderAction.ABOUT);
 			actionsList.add(ReaderAction.HIDE);
 			this.toolbarView = new CRToolBar(context, actionsList, false, false, false, false);
-			this.toolbarView.setBackgroundDrawable(toolbarBackground);
+			this.toolbarView.setBackground(toolbarBackground);
 			this.toolbarView.useBackgrColor = true;
 			this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 			this.addView(toolbarView);
@@ -164,22 +164,22 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			llLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			llLeft.setOrientation(LinearLayout.HORIZONTAL);
 			llLeftBackground = contentView.createToolbarBackgroundDrawable();
-			llLeft.setBackgroundDrawable(llLeftBackground);
+			llLeft.setBackground(llLeftBackground);
 			llRight = new LinearLayout(context);
 			llRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			llRight.setOrientation(LinearLayout.HORIZONTAL);
 			llRightBackground = contentView.createToolbarBackgroundDrawable();
-			llRight.setBackgroundDrawable(llRightBackground);
+			llRight.setBackground(llRightBackground);
 			llTop = new LinearLayout(context);
 			llTop.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			llTop.setOrientation(LinearLayout.HORIZONTAL);
 			llTopBackground = contentView.createToolbarBackgroundDrawable();
-			llTop.setBackgroundDrawable(llTopBackground);
+			llTop.setBackground(llTopBackground);
 			llBottom = new LinearLayout(context);
 			llBottom.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			llBottom.setOrientation(LinearLayout.HORIZONTAL);
 			llBottomBackground = contentView.createToolbarBackgroundDrawable();
-			llBottom.setBackgroundDrawable(llBottomBackground);
+			llBottom.setBackground(llBottomBackground);
 			this.addView(llLeft);
 			this.addView(llRight);
 			this.addView(llTop);

@@ -6,6 +6,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.userdic.UserDicDlg;
+import org.coolreader.utils.Utils;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -307,7 +309,8 @@ public class BookmarksDlg  extends BaseDialog {
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
-		frame.findViewById(R.id.btn_user_dic).setBackgroundColor(colorGrayCT2);
+		if (isEInk) Utils.setSolidButtonEink((Button) frame.findViewById(R.id.btn_user_dic));
+		else frame.findViewById(R.id.btn_user_dic).setBackgroundColor(colorGrayCT2);
 
 		mList = new BookmarkList(activity, false);
 		body.addView(mList);

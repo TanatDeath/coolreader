@@ -15,12 +15,12 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.DeviceInfo;
-import org.coolreader.crengine.EinkScreen;
+import org.coolreader.eink.EinkScreen;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

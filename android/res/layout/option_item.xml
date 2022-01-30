@@ -38,6 +38,7 @@
         <!--android:ellipsize="marquee"
             android:fadingEdge="horizontal"
          -->
+
         <TextView android:id="@+id/option_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

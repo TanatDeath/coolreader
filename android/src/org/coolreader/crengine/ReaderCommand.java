@@ -156,6 +156,7 @@ public enum ReaderCommand
 	DCMD_CALIBRE_SHOW_TAGS(2119),
 	DCMD_SAVE_LOGCAT(2200),
 	DCMD_INIT_APP_DIALOG(2201),
+	DCMD_EXPERIMENTAL_FEATURE(2202)
 	;
 	
 	final public int nativeId;

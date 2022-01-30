@@ -1,5 +1,7 @@
 package org.eink_onyx_reflections;
 
+import android.util.Log;
+
 import java.lang.reflect.Method;
 
 public final class Utils {

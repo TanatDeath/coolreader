@@ -36,7 +36,7 @@ import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.DictsDlg;
+import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DownloadImageTask;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
@@ -44,8 +44,8 @@ import org.coolreader.crengine.MaxHeightLinearLayout;
 import org.coolreader.crengine.MaxHeightScrollView;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.dic.struct.DictEntry;
 import org.coolreader.dic.struct.ExampleLine;
@@ -56,6 +56,7 @@ import org.coolreader.dic.wiki.WikiArticles;
 import org.coolreader.dic.wiki.WikiSearch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,14 +76,25 @@ public class DicToastView {
     public static int IS_GLOSBE = 8;
     public static int IS_TURENG = 9;
     public static int IS_URBAN = 10;
+    public static int IS_OFFLINE = 11;
 
     public static int mColorIconL = Color.GRAY;
     public static PopupWindow curWindow = null;
+
+    public static boolean isEInk;
+    public static HashMap<Integer, Integer> themeColors;
 
     private static Dictionaries.DictInfo mListCurDict;
     private static String mListLink;
     private static String mListLink2;
     private static boolean mListUseFirstLink;
+
+    private static void setBtnBackgroundColor(Button btn, int col) {
+        if (!isEInk)
+            btn.setBackgroundColor(col);
+        else
+            Utils.setSolidButtonEink(btn);
+    }
 
     private static class Toast {
         private View anchor;
@@ -303,6 +315,8 @@ public class DicToastView {
 
         mReaderView = anchor;
         mActivity = (CoolReader) act;
+        isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+        themeColors = Utils.getThemeColors(mActivity, isEInk);
         mListCurDict = curDict;
         mListLink = link;
         mListLink2 = link2;
@@ -414,7 +428,7 @@ public class DicToastView {
         TableRow tr1 = window.getContentView().findViewById(R.id.tr_upper_row);
         TableRow tr2 = window.getContentView().findViewById(R.id.tr_upper_sep_row);
         MaxHeightScrollView sv =  window.getContentView().findViewById(R.id.dic_scrollV);
-        CoolReader cr=(CoolReader) mActivity;
+        CoolReader cr = mActivity;
         if (cr.getReaderView() != null) {
             if (cr.getReaderView().getSurface() != null) {
                 sv.setMaxHeight(cr.getReaderView().getSurface().getHeight() * 3 / 4);
@@ -431,13 +445,73 @@ public class DicToastView {
         a.recycle();
         int colr2 = colorGray;
         Button tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
-        tvMore.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvMore, colr2);
         Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
-        tvClose.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvClose, colr2);
+        TextView tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+        if (tvTerm != null) {
+            tvTerm.setText(t.sFindText);
+            tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Button btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
+            setBtnBackgroundColor(tvClose, colr2);
+            Button btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
+            setBtnBackgroundColor(tvClose, colr2);
+            Button btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
+            setBtnBackgroundColor(tvClose, colr2);
+            btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
+            if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
+            else
+                btnRemove1sym.setOnClickListener(v -> {
+                    if (findText.length()>1) {
+                        String findText1 = findText.substring(0, findText.length() - 1);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1,
+                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                        mHandler.postDelayed(handleDismiss, 100);
+                    }
+                });
+            if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
+            else
+                btnRemove2sym.setOnClickListener(v -> {
+                    if (findText.length()>2) {
+                        String findText1 = findText.substring(0, findText.length() - 2);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1,
+                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                        mHandler.postDelayed(handleDismiss, 100);
+                    }
+                });
+            if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
+            else
+                btnRemove3sym.setOnClickListener(v -> {
+                    if (findText.length()>3) {
+                        String findText1 = findText.substring(0, findText.length() - 3);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1,
+                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                        mHandler.postDelayed(handleDismiss, 100);
+                    }
+                });
+        }
         Button tvFull = window.getContentView().findViewById(R.id.upper_row_tv_full);
-        tvFull.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvFull, colr2);
         Button tvFullWeb = window.getContentView().findViewById(R.id.upper_row_tv_full_web);
-        tvFullWeb.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvFullWeb, colr2);
         TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
         if (tvLblDic != null) {
             if (t.mCurDict != null)
@@ -579,7 +653,9 @@ public class DicToastView {
                     break;
                 }
             }
-        toast_ll.setBackgroundColor(Color.argb(255, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+        int colorFill = colorGrayC;
+        if (isEInk) colorFill = Color.WHITE;
+        toast_ll.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
         TableLayout dicTable = (TableLayout) window.getContentView().findViewById(R.id.dic_table);
         if (t.dicType == IS_YANDEX) {
             TableRow getSepRow = (TableRow) mInflater.inflate(R.layout.geo_sep_item, null);
@@ -780,12 +856,14 @@ public class DicToastView {
         colorGray = a.getColor(0, Color.GRAY);
         a.recycle();
         int colr2 = colorGray;
-        ll1.setBackgroundColor(Color.argb(255, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+        int colorFill = colorGrayC;
+        if (isEInk) colorFill = Color.WHITE;
+        ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
         Button tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
-        tvMore.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvMore, colr2);
         //tvMore.setBackgroundColor(colorGray);
         Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
-        tvClose.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvClose, colr2);
         TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
         if (tvLblDic != null) {
             if (t.mCurDict != null)
@@ -1021,9 +1099,11 @@ public class DicToastView {
         colorGray = a.getColor(0, Color.GRAY);
         a.recycle();
         int colr2 = colorGray;
-        ll1.setBackgroundColor(Color.argb(255, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+        int colorFill = colorGrayC;
+        if (isEInk) colorFill = Color.WHITE;
+        ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
         Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
-        tvClose.setBackgroundColor(colr2);
+        setBtnBackgroundColor(tvClose, colr2);
         tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
         TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
         if (tvLblDic != null) {
@@ -1031,6 +1111,66 @@ public class DicToastView {
                 tvLblDic.setText(t.mCurDict.shortName);
             else
                 tvLblDic.setText(t.mDicName);
+        }
+        TextView tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+        if (tvTerm != null) {
+            tvTerm.setText(t.sFindText);
+            tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Button btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
+            setBtnBackgroundColor(tvClose, colr2);
+            Button btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
+            setBtnBackgroundColor(tvClose, colr2);
+            Button btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
+            setBtnBackgroundColor(tvClose, colr2);
+            btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
+            if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
+                else
+                    btnRemove1sym.setOnClickListener(v -> {
+                        if (findText.length()>1) {
+                            String findText1 = findText.substring(0, findText.length() - 1);
+                            mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                            try {
+                                mActivity.mDictionaries.findInDictionary(findText1,
+                                        mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                            } catch (Dictionaries.DictionaryException e) {
+                              // do nothing
+                            }
+                            mHandler.postDelayed(handleDismiss, 100);
+                        }
+                    });
+            if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
+            else
+                btnRemove2sym.setOnClickListener(v -> {
+                    if (findText.length()>2) {
+                        String findText1 = findText.substring(0, findText.length() - 2);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1,
+                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                        mHandler.postDelayed(handleDismiss, 100);
+                    }
+                });
+            if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
+            else
+                btnRemove3sym.setOnClickListener(v -> {
+                    if (findText.length()>3) {
+                        String findText1 = findText.substring(0, findText.length() - 3);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1,
+                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                        mHandler.postDelayed(handleDismiss, 100);
+                    }
+                });
         }
         ViewGroup body = window.getContentView().findViewById(R.id.items_list);
         CoolReader cr= mActivity;

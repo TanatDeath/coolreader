@@ -32,11 +32,11 @@ import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.DelayedExecutor;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
-import org.coolreader.crengine.DictsDlg;
+import org.coolreader.dic.DictsDlg;
 import org.coolreader.crengine.DocProperties;
 import org.coolreader.crengine.DocView;
 import org.coolreader.crengine.DocumentFormat;
-import org.coolreader.crengine.EinkScreen;
+import org.coolreader.eink.EinkScreen;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FindNextDlg;
@@ -53,7 +53,6 @@ import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.ReaderCallback;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ResizeHistory;
-import org.coolreader.crengine.SaveDocDialog;
 import org.coolreader.crengine.Scanner;
 import org.coolreader.crengine.SearchDlg;
 import org.coolreader.crengine.Selection;
@@ -61,15 +60,16 @@ import org.coolreader.crengine.SelectionToolbarDlg;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.crengine.SwitchProfileDialog;
 import org.coolreader.crengine.TOCDlg;
 import org.coolreader.crengine.TOCItem;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 import org.coolreader.crengine.VMRuntimeHack;
 import org.coolreader.crengine.ViewMode;
 import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.OfflineDicsDlg;
 import org.coolreader.options.BacklightOption;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.tts.TTSToolbarDlg;
@@ -654,6 +654,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case SELECTION_ACTION_TOOLBAR:
 				SelectionToolbarDlg.showDialog(mActivity, ReaderView.this, sel);
 				break;
+			case SELECTION_ACTION_TOOLBAR_SHORT:
+				SelectionToolbarDlg.showDialogShort(mActivity, ReaderView.this, sel);
+				break;
 			case SELECTION_ACTION_COPY:
 				copyToClipboardAndToast(sel.text);
 				clearSelection();
@@ -693,6 +696,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case SELECTION_ACTION_DICTIONARY_7:
 				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary7);
+				break;
+			case SELECTION_ACTION_DICTIONARY_8:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary8);
+				break;
+			case SELECTION_ACTION_DICTIONARY_9:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary9);
+				break;
+			case SELECTION_ACTION_DICTIONARY_10:
+				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary10);
 				break;
 			case SELECTION_ACTION_BOOKMARK:
 				clearSelection();
@@ -900,6 +912,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	// on the latest codebase this, possible is not needed anymore, and it is buggy
 	public void toggleScreenUpdateModeMode() {
+		//mEinkScreen.setSelectionActive((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow));
+		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow))
+			mEinkScreen.setupController(EinkScreen.EinkUpdateMode.A2, 999, surface);
+		else {
+			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
+			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
+			mEinkScreen.setupController(updMode, updInterval, surface);
+		}
 //		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
 //			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
 //			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
@@ -1222,7 +1242,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void toggleDayNightMode() {
-		//if (1==1) return;
+//		StarDictDlg sdd = new StarDictDlg(mActivity);
+//		sdd.show();
+//		if (1==1) return;
 		Properties settings = getSettings();
 		OptionsDialog.toggleDayNightMode(settings);
 		//setSettings(settings, mActivity.settings());
@@ -1744,7 +1766,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
 		boolean eink = false;
 		if ((cmd != ReaderCommand.DCMD_NEXT_BOOKMARK) && (cmd != ReaderCommand.DCMD_PREV_BOOKMARK)) lastNavBmkIndex = -1;
-		switch ( cmd ) {
+		switch (cmd) {
 			case DCMD_FILE_BROWSER_ROOT:
 				mActivity.showRootWindow();
 				break;
@@ -1797,6 +1819,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_TOGGLE_DOCUMENT_STYLES:
 				if (isBookLoaded())
 					toggleDocumentStyles();
+				break;
+			case DCMD_EXPERIMENTAL_FEATURE:
+				OfflineDicsDlg sdd = new OfflineDicsDlg(mActivity);
+				sdd.show();
 				break;
 			case DCMD_SHOW_HOME_SCREEN:
 				mActivity.showHomeScreen();
@@ -2047,48 +2073,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.showReaderMenu();
 				break;
 			case DCMD_TOGGLE_DAY_NIGHT_MODE:
-				//ExternalDocCameDialog dlgE = new ExternalDocCameDialog(mActivity,"sd","dsf");
-				//dlgE.show();
-//			ArrayList<String[]> vl = new ArrayList<String[]>();
-//			String[] arrS1 = {"val1", "hint1"};
-//			vl.add(arrS1);
-//			String[] arrS2 = {"val2", "hint2"};
-//			vl.add(arrS2);
-//			AskSomeValuesDialog dlgA = new AskSomeValuesDialog(mActivity, "asd", "asd 2", vl,null);
-//			dlgA.show();
-//			ArrayList<String> sButtons = new ArrayList<String>();
-//			sButtons.add("adfad");
-//			sButtons.add("*adfad2");
-//			sButtons.add("adfad3");
-//			sButtons.add("adfad4");
-//			SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this, true, "title",
-//					sButtons,null);
-				//CloudAction.yndCheckCrFolder(mActivity);
-				//final String sF = s;
-//			mActivity.initSDCV();
-//			try {
-//				String command = mActivity.getSettingsFileF(0).getParent() + "/sdcv";
-//				Process sdcv = Runtime.getRuntime().exec(command);
-//				BufferedReader isr = new BufferedReader(new InputStreamReader(sdcv.getInputStream()));
-//				String line = isr.readLine();
-//				while (line != null) {
-//					log.i("sdcv output: " + line);
-//					line = isr.readLine();
-//				}
-//			} catch (Exception e) {
-//				log.e("exec error: " + e.getMessage());
-//			}
-//				mActivity.showToast("millis: " + StrUtils.parseDate("2008"));
-//			mActivity.showToast("millis: " + StrUtils.parseDateLong("2008"));
-			//java.util.Date d = StrUtils.parseDate("2008");
-			//mActivity.showToast("d: " + d.getTime());
-			toggleDayNightMode();
-//			OrientationToolbarDlg.showDialog(mActivity, ReaderView.this,
-//					0, true);
-
-//			mActivity.geoLastData.lastStation =mActivity.geoLastData.tempStation;
-//			mActivity.geoLastData.lastStop =mActivity.geoLastData.tempStop;
-//			mActivity.geoLastData.doSignal(false,false);
+				toggleDayNightMode();
 				break;
 			case DCMD_TOGGLE_DICT_ONCE:
 				log.i("Next dictionary will be the 2nd for one time");
@@ -2124,7 +2109,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					mActivity.optionsFilter = "";
 					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
 				} else {
-					if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+					if (iSyncVariant2 == 1) CloudSync.loadSettingsFiles((mActivity),false);
 					else
 						CloudSync.loadFromJsonInfoFileList(mActivity,
 								CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
@@ -2898,7 +2883,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		for (Map.Entry<Object, Object> entry : changedSettings.entrySet()) {
 			String key = (String)entry.getKey();
 			String value = (String)entry.getValue();
-			applyAppSetting( key, value );
+			applyAppSetting(key, value);
 			if (PROP_APP_FULLSCREEN.equals(key)) {
 				boolean flg = mSettings.getBool(PROP_APP_FULLSCREEN, false);
 				newSettings.setBool(PROP_SHOW_BATTERY, flg);
@@ -3460,26 +3445,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (requestedWidth > 0 && requestedHeight > 0) {
 				internalDX = requestedWidth;
 				internalDY = requestedHeight;
-				//if (checkNeedRedraw(internalDX, internalDY))
-					doc.resize(internalDX, internalDY);
+				doc.resize(internalDX, internalDY);
 			} else {
 				internalDX = surface.getWidth();
 				internalDY = surface.getHeight();
-				//if (checkNeedRedraw(internalDX, internalDY))
-					doc.resize(internalDX, internalDY);
+				doc.resize(internalDX, internalDY);
 			}
-//			internalDX=200;
-//			internalDY=300;
-//			doc.resize(internalDX, internalDY);
-//			BackgroundThread.instance().postGUI(new Runnable() {
-//				@Override
-//				public void run() {
-//					log.d("invalidating view due to resize");
-//					//ReaderView.this.invalidate();
-//					drawPage(null, false);
-//					//redraw();
-//				}
-//			});
 		}
 
 		if (currentImageViewer != null)
@@ -3519,7 +3490,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			doc.setBatteryState(mBatteryState, mBatteryChargingConn, mBatteryChargeLevel);
 			doc.getPageImage(bi.bitmap);
 			mCurrentPageInfo = bi;
-			//log.v("Prepared new current page image " + mCurrentPageInfo);
 			return mCurrentPageInfo;
 		}
 		if (isPageView) {
@@ -3706,10 +3676,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			requestedHeight = 80;
 		requestedResTime = System.currentTimeMillis();
 		if (!checkNeedRedraw(width,height)) {
-			//getActivity().showToast("requestResize (and skipped): "+width+", "+height);
             if (mActivity.getmReaderFrame()!=null)
                 if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
                     mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.request_resize)+": "+width+", "+height);
+			internalDX = requestedWidth;
+			internalDY = requestedHeight;
 			return;
 		}
 		lastsetWidth = width;
@@ -3800,20 +3771,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					internalDX = requestedWidth;
 					internalDY = requestedHeight;
 					log.d("ResizeTask: resizeInternal(" + internalDX + "," + internalDY + ")");
-					//if (checkNeedRedraw(internalDX, internalDY))
-						doc.resize(internalDX, internalDY);
-//	    		        if (mOpened) {
-//	    					log.d("ResizeTask: done, drawing page");
-//	    			        drawPage();
-//	    		        }
+					doc.resize(internalDX, internalDY);
 				}
 				public void done() {
 					clearImageCache();
 					drawPage(null, false);
-					//redraw();
 				}
 			});
 		};
+
+		boolean needDelay = ((internalDX == 0) && (internalDY == 0));
+		needDelay = needDelay || ((internalDX == 100) && (internalDY == 100)); // hack when we do default resize
 
 		long timeSinceLastResume = System.currentTimeMillis() - lastAppResumeTs;
 		int delay = 300;
@@ -3821,7 +3789,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (timeSinceLastResume < 1000)
 			delay = 1000;
 
-		if (mOpened) {
+		if (mOpened || needDelay) {
 			log.d("scheduling delayed resize task id=" + thisId + " for " + delay + " ms");
 			BackgroundThread.instance().postGUI(task, delay);
 		} else {
@@ -3844,10 +3812,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 
 		surface.invalidate();
-		//if (!isProgressActive())
 		bookView.draw();
-		//requestResize(width, height);
-		//draw();
 	}
 
 	boolean mSurfaceCreated = false;
@@ -4558,10 +4523,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public boolean bNeedRedrawOnce = false;
 
 	private boolean checkNeedRedraw(int x, int y) {
-//		if (bNeedRedrawOnce) {
-//			bNeedRedrawOnce = false;
-//			return true;
-//		}
 		boolean bSkipRedraw = false;
 		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
 		while (it.hasNext()) {
@@ -4622,8 +4583,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		post( new DrawPageTask(ReaderView.this, doneHandler, isPartially) );
 	}
 
-	public int internalDX = 0;
-	public int internalDY = 0;
+	public int internalDX = 300;
+	public int internalDY = 300;
 
 	public byte[] coverPageBytes = null;
 	void findCoverPage()
@@ -5112,8 +5073,26 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		  (getSettings().getInt(ReaderView.PROP_SAVE_POS_SPEAK_TIMEOUT, 0))*1000;
 	}
 
+	private int lastSceduledDelay = 0;
+	private int lastSceduledCloudDelay = 0;
+	private long lastSceduledTime = 0;
+	private long lastSceduledCloudTime = 0;
+
 	public void scheduleSaveCurrentPositionBookmark(final int delayMillis) {
+		long nowTime = System.currentTimeMillis();
+		long millisSpan = delayMillis;
+		if (lastSceduledDelay == delayMillis) {
+			if (lastSceduledTime != 0) {
+				millisSpan = delayMillis - (nowTime - lastSceduledTime);
+				if (millisSpan < 0) millisSpan = 1;
+			}
+			if (lastSceduledTime == 0) lastSceduledTime = nowTime;
+		} else {
+			lastSceduledDelay = delayMillis;
+			lastSceduledTime = nowTime;
+		}
 		// GUI thread required
+		long finalMillisSpan = millisSpan;
 		BackgroundThread.instance().executeGUI(() -> {
 			final int mylastSavePositionTaskId = ++lastSavePositionTaskId;
 			if (isBookLoaded() && mBookInfo != null) {
@@ -5124,8 +5103,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (delayMillis <= 1) {
 					if (bookInfo != null && mActivity.getDB() != null) {
 						log.v("saving last position immediately");
-						savePositionBookmark(bmk);
-						Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+						if (savePositionBookmark(bmk)) {
+							Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+						}
 					}
 				} else {
 					BackgroundThread.instance().postGUI(() -> {
@@ -5135,23 +5115,41 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 								if (!Services.isStopped()) {
 									// this delayed task can be completed after calling CoolReader.onDestroy(),
 									// which in turn calls Services.stopServices().
-									savePositionBookmark(bmk);
-									Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+									if (savePositionBookmark(bmk)) {
+										Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+									}
 								}
 							}
+							lastSceduledTime = 0;
 						}
-					}, delayMillis);
+					}, finalMillisSpan);
 					boolean bNeedSave = !appPaused;
-					if (lastSavedToGdBookmark!=null) {
-						if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
-							bNeedSave = false;
+					int autosaveInterval = 0;
+					if (bNeedSave)
+						if (lastSavedToGdBookmark!=null) {
+							if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+								bNeedSave = false;
+							}
 						}
+					if (bNeedSave) {
+						autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_CLOUD_TIMEOUT, 0)) * 1000 * 60;
+						bNeedSave = autosaveInterval > 0;
 					}
 					if (bNeedSave) {
 						final int mylastSavePositionCloudTaskId = ++lastSavePositionCloudTaskId;
-						int autosaveInterval = (getSettings().getInt(ReaderView.PROP_SAVE_POS_TO_CLOUD_TIMEOUT, 0)) * 1000 * 60;
-						if (autosaveInterval > 0)
-							BackgroundThread.instance().postGUI((Runnable) () -> {
+						long millisCloudSpan = autosaveInterval;
+						if (lastSceduledCloudDelay == autosaveInterval) {
+							if (lastSceduledCloudTime != 0) {
+								millisCloudSpan = autosaveInterval - (nowTime - lastSceduledCloudTime);
+								if (millisCloudSpan < 0) millisCloudSpan = 1;
+							}
+							if (lastSceduledCloudTime == 0) lastSceduledCloudTime = nowTime;
+						} else {
+							lastSceduledCloudDelay = autosaveInterval;
+							lastSceduledCloudTime = nowTime;
+						}
+						if (millisCloudSpan > 0)
+							BackgroundThread.instance().postGUI(() -> {
 								if (mylastSavePositionCloudTaskId == lastSavePositionCloudTaskId) {
 									if (bookInfo != null) {
 										if (!appPaused) {
@@ -5159,13 +5157,15 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 											log.i("Save reading pos to CLOUD");
 											lastSavedToGdBookmark = bmk;
 											int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-											if (iSyncVariant > 0)
+											if (iSyncVariant > 0) {
 												CloudSync.saveJsonInfoFileOrCloud(mActivity,
 														CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
+											}
 										}
 									}
+									lastSceduledCloudTime = 0;
 								}
-							}, autosaveInterval);
+							}, millisCloudSpan);
 					}
 				}
 			}
@@ -5254,7 +5254,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	Bookmark lastSavedBookmark = null;
 
-	public void savePositionBookmark(Bookmark bmk) {
+	public boolean savePositionBookmark(Bookmark bmk) {
 		if (bmk != null && mBookInfo != null && isBookLoaded()) {
 			//setBookPosition();
 			if (lastSavedBookmark == null || !lastSavedBookmark.getStartPos().equals(bmk.getStartPos())) {
@@ -5273,9 +5273,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					mActivity.getDB().flush();
 					lastSavedBookmark = bmk;
 					mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark("*");
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	public Bookmark saveCurrentPositionBookmarkSync(final boolean saveToDB) {

@@ -13,7 +13,7 @@ import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.db.CRDBService;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 import org.coolreader.userdic.UserDicDlg;

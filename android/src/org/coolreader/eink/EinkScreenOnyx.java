@@ -1,10 +1,15 @@
-package org.coolreader.crengine;
+package org.coolreader.eink;
 
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
 import org.coolreader.CoolReader;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
+import org.coolreader.utils.Utils;
 import org.eink_onyx_reflections.OnyxDevice;
 import org.eink_onyx_reflections.OnyxEinkDeviceImpl;
 import org.eink_onyx_reflections.UpdateMode;
@@ -25,8 +30,10 @@ public class EinkScreenOnyx implements EinkScreen {
 	private List<Integer> mWarmLightLevels = null;
 	private UpdateMode mOnyxUpdateMode = UpdateMode.None;
 	private int mExtraDelayFullRefresh = 0;
+	private int mScreenFullUpdateMethod = 0;
 	private boolean mIsAppOptimizationEnabled = false;
 	private boolean mNeedCallByPass = false;
+	private boolean mSelectionActive = false;
 
 	@Override
 	public void setupController(EinkUpdateMode mode, int updateInterval, View view) {
@@ -61,6 +68,7 @@ public class EinkScreenOnyx implements EinkScreen {
 				mExtraDelayFullRefresh = 40;
 				break;
 		}
+		com.onyx.android.sdk.device.Device.currentDevice().enableRegal(false);
 		switch (mode) {
 			case Regal:            // Regal
 				if (mInA2Mode) {
@@ -71,6 +79,7 @@ public class EinkScreenOnyx implements EinkScreen {
 					onyxEinkDevice.applyApplicationFastMode(CoolReader.class.getSimpleName(), false, true);
 					mInFastMode = false;
 				}
+				com.onyx.android.sdk.device.Device.currentDevice().enableRegal(true);
 				mOnyxUpdateMode = UpdateMode.REGAL;
 				break;
 			case Clear:            // Quality
@@ -124,14 +133,25 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	@Override
+	public void setSelectionActive(boolean selectionActive) {
+		mSelectionActive = selectionActive;
+	}
+
+	@Override
 	public void setExtraDelayFullRefresh(int extraDelayFullRefresh) {
 		if (extraDelayFullRefresh >= 0) mExtraDelayFullRefresh = extraDelayFullRefresh;
+	}
+
+	@Override
+	public void setScreenFullUpdateMethod(int screenFullUpdateMethod) {
+		mScreenFullUpdateMethod = screenFullUpdateMethod;
 	}
 
 	@Override
 	public void prepareController(View view, boolean isPartially) {
 		if (mIsAppOptimizationEnabled)
 			return;
+		//if (mSelectionActive) onyxEnableA2Mode(view, true);
 		if (isPartially)
 			return;
 		if (mRefreshNumber == -1) {
@@ -295,8 +315,17 @@ public class EinkScreenOnyx implements EinkScreen {
 			case rk32xx:
 			case rk33xx:
 			case sdm:
-				OnyxDevice.currentDevice().repaintEveryThing(UpdateMode.GC);
-				break;
+				if (mScreenFullUpdateMethod == 1) {
+					OnyxDevice.currentDevice().repaintEveryThing(UpdateMode.GC);
+					break;
+				} else {
+					if (null != view) {
+						OnyxDevice.currentDevice().setViewDefaultUpdateMode(view, UpdateMode.GC);
+						if (invalidate)
+							view.postInvalidate();
+					}
+					break;
+				}
 			default:
 				if (null != view) {
 					OnyxDevice.currentDevice().setViewDefaultUpdateMode(view, UpdateMode.GC);

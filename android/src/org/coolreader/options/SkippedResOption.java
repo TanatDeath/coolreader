@@ -17,7 +17,7 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ResizeHistory;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 public class SkippedResOption extends SubmenuOption {
 
@@ -61,6 +61,7 @@ public class SkippedResOption extends SubmenuOption {
 		tvSearchText.setTextColor(mActivity.getTextColor(colorIcon));
 		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		tvSearchText.setHintTextColor(colorIcon128);
+		if (isEInk) Utils.setSolidEditEink(tvSearchText);
 
 		((CoolReader)mActivity).readResizeHistory();
 		for (ResizeHistory rh: ((CoolReader)mActivity).getResizeHist()) {

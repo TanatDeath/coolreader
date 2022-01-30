@@ -15,6 +15,8 @@ import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 import java.util.HashMap;

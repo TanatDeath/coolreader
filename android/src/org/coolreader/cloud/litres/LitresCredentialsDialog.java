@@ -16,7 +16,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -29,7 +29,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okio.Buffer;
 
 public class LitresCredentialsDialog extends BaseDialog {
 

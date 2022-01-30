@@ -6,6 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
 import java.io.InputStream;
 
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>  {

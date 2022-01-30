@@ -109,6 +109,10 @@ class DeviceStubImpl implements OnyxEinkDeviceImpl {
 	}
 
 	@Override
+	public void invalidate(UpdateMode mode, View view) {
+	}
+
+	@Override
 	public boolean setViewDefaultUpdateMode(View view, UpdateMode mode) {
 		return false;
 	}
@@ -122,4 +126,5 @@ class DeviceStubImpl implements OnyxEinkDeviceImpl {
 	public boolean isAppOptimizationEnabled() {
 		return false;
 	}
+
 }

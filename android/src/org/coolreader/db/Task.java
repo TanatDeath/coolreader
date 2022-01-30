@@ -4,7 +4,7 @@ import android.util.Log;
 
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.Utils;
 
 public abstract class Task implements Runnable {
 	public static final Logger log = L.create("task");

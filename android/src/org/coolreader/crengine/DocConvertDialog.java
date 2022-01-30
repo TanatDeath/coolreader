@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.Utils;
 
 import java.io.File;
 

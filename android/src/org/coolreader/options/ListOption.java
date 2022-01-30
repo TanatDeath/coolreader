@@ -27,8 +27,8 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -471,7 +471,7 @@ public class ListOption extends OptionBase {
 		tvSearchText.setTextColor(mActivity.getTextColor(colorIcon));
 		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		tvSearchText.setHintTextColor(colorIcon128);
-
+		if (isEInk) Utils.setSolidEditEink(tvSearchText);
 		ImageButton ibSearch = (ImageButton)view.findViewById(R.id.btn_search);
 		listView = new BaseListView(mActivity, false);
 		listUpdated("");
@@ -507,7 +507,8 @@ public class ListOption extends OptionBase {
 				qfButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 				qfButton.setTextColor(mActivity.getTextColor(colorIcon));
 				qfButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
-				qfButton.setPadding(1, 1, 1, 1);
+				if (isEInk) Utils.setSolidButtonEink(qfButton);
+				qfButton.setPadding(4, 4, 4, 4);
 				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 						ViewGroup.LayoutParams.WRAP_CONTENT,
 						ViewGroup.LayoutParams.WRAP_CONTENT);

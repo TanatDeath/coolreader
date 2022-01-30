@@ -23,11 +23,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
-import java.util.concurrent.Callable;
-import javax.net.ssl.HostnameVerifier;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.SAXParser;
@@ -35,6 +33,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.Engine.DelayedProgress;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -1130,17 +1130,18 @@ xml:base="http://lib.ololo.cc/opds/">
 		return task;
 	}
 
-	static class SubstTable {
+	public static class SubstTable {
 		private final int startChar;
 		private final String[] replacements;
 		public SubstTable( int startChar, String[] replacements ) {
 			this.startChar = startChar;
 			this.replacements = replacements;
 		}
-		boolean isInRange( char ch ) {
+		public boolean isInRange( char ch ) {
 			return ch>=startChar && ch<startChar + replacements.length;
 		}
-		String get( char ch ) {
+
+		public String get( char ch ) {
 			return (ch>=startChar && ch<startChar + replacements.length) ? replacements[ch - startChar] : "";
 		}
 	}

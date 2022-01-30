@@ -13,7 +13,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
 import org.coolreader.R;
@@ -22,7 +21,8 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 import org.coolreader.layouts.FlowLayout;
 
 import java.util.ArrayList;
@@ -180,6 +180,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 			tvSearchText.setTextColor(mActivity.getTextColor(colorIcon));
 			int colorIcon128 = Color.argb(128, Color.red(colorIcon), Color.green(colorIcon), Color.blue(colorIcon));
 			tvSearchText.setHintTextColor(colorIcon128);
+			if (isEInk) Utils.setSolidEditEink(tvSearchText);
 
 			ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
 
@@ -207,6 +208,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 			int colorGray = themeColors.get(R.attr.colorThemeGray2);
 			Button btnDef = ll.findViewById(R.id.btn_def);
 			btnDef.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+			if (isEInk) Utils.setSolidButtonEink(btnDef);
 			btnDef.setOnClickListener(v -> {
 				addButton("", forMenu, 6);
 				updateButtonsView(forMenu);
@@ -217,6 +219,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 				addButton("", forMenu, 5);
 				updateButtonsView(forMenu);
 			});
+			if (isEInk) Utils.setSolidButtonEink(btnClear);
 			return ll;
 		}
 	}

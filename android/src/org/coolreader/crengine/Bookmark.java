@@ -4,6 +4,9 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
 public class Bookmark implements Parcelable {
 
 	public Bookmark()

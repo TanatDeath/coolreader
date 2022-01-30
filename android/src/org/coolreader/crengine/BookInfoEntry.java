@@ -1,5 +1,7 @@
 package org.coolreader.crengine;
 
+import org.coolreader.utils.StrUtils;
+
 public class BookInfoEntry {
 	public String infoTitle;
 	public String infoValue;

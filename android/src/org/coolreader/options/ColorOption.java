@@ -14,8 +14,8 @@ import org.coolreader.crengine.ColorPickerDialog;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.StrUtils;
-import org.coolreader.crengine.Utils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 public class ColorOption extends OptionBase {
 	final int defColor;

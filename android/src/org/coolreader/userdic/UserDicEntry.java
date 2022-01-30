@@ -1,6 +1,6 @@
 package org.coolreader.userdic;
 
-import org.coolreader.crengine.StrUtils;
+import org.coolreader.utils.StrUtils;
 
 public class UserDicEntry {
 
