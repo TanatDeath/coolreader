@@ -132,6 +132,7 @@ import org.coolreader.tts.TTSControlServiceAccessor;
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -405,7 +406,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     {
     	startServices();
 		log.i("CoolReader.onCreate() entered");
-		super.onCreate(savedInstanceState);
+		supe r.onCreate(savedInstanceState);
 
 		isFirstStart = true;
 		justCreated = true;
@@ -1810,18 +1811,49 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private void requestStoragePermissions() {
 		// check or request permission for storage
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			int readExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-			int writeExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 			ArrayList<String> needPerms = new ArrayList<>();
-			if (PackageManager.PERMISSION_GRANTED != readExtStoragePermissionCheck) {
-				needPerms.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+				int readExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+				int writeExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				if (PackageManager.PERMISSION_GRANTED != readExtStoragePermissionCheck) {
+					needPerms.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+				} else {
+					log.i("READ_EXTERNAL_STORAGE permission already granted.");
+				}
+				if (PackageManager.PERMISSION_GRANTED != writeExtStoragePermissionCheck) {
+					needPerms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				} else {
+					log.i("WRITE_EXTERNAL_STORAGE permission already granted.");
+				}
 			} else {
-				log.i("READ_EXTERNAL_STORAGE permission already granted.");
-			}
-			if (PackageManager.PERMISSION_GRANTED != writeExtStoragePermissionCheck) {
-				needPerms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-			} else {
-				log.i("WRITE_EXTERNAL_STORAGE permission already granted.");
+				if (!Environment.isExternalStorageManager()) {
+					int manageExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE);
+					if (PackageManager.PERMISSION_GRANTED != manageExtStoragePermissionCheck) {
+						Uri uri = Uri.parse("package:" + getApplicationContext().getPackageName());
+						Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+						try {
+							startActivity(intent);
+						} catch (Exception e) {
+							try {
+								Intent intent2 = new Intent();
+								intent2.setAction(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+								startActivity(intent2);
+							} catch (Exception e2) {
+								needPerms.add(Manifest.permission.MANAGE_EXTERNAL_STORAGE);
+							}
+						}
+					} else {
+						log.i("MANAGE_EXTERNAL_STORAGE permission already granted.");
+					}
+				} else {
+					log.i("MANAGE_EXTERNAL_STORAGE permission already granted.");
+				}
+				int queryAllPackages = checkSelfPermission(Manifest.permission.QUERY_ALL_PACKAGES);
+				if (PackageManager.PERMISSION_GRANTED != queryAllPackages) {
+					needPerms.add(Manifest.permission.QUERY_ALL_PACKAGES);
+				} else {
+					log.i("QUERY_ALL_PACKAGES permission already granted.");
+				}
 			}
 			if (!needPerms.isEmpty()) {
 				// TODO: Show an explanation to the user

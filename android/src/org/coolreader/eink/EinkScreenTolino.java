@@ -16,7 +16,7 @@ public class EinkScreenTolino extends EinkScreenNook {
 		}
 		if (mRefreshNumber == -1) {
 			switch (mUpdateMode) {
-				case Clear:
+				case Normal:
 					tolinoSetMode(view, mUpdateMode);
 					break;
 				case Active:
@@ -28,22 +28,22 @@ public class EinkScreenTolino extends EinkScreenNook {
 			mRefreshNumber = 0;
 			return;
 		}
-		if (mUpdateMode == EinkUpdateMode.Clear) {
+		if (mUpdateMode == EinkUpdateMode.Normal) {
 			tolinoSetMode(view, mUpdateMode);
 			return;
 		}
-		if (mUpdateInterval > 0 || mUpdateMode == EinkUpdateMode.Fast) {
-			if (mRefreshNumber == 0 || (mUpdateMode == EinkUpdateMode.Fast && mRefreshNumber < mUpdateInterval)) {
+		if (mUpdateInterval > 0 || mUpdateMode == EinkUpdateMode.FastQuality) {
+			if (mRefreshNumber == 0 || (mUpdateMode == EinkUpdateMode.FastQuality && mRefreshNumber < mUpdateInterval)) {
 				switch (mUpdateMode) {
 					case Active:
 						tolinoSetMode(view, mUpdateMode);
 						break;
-					case Fast:
+					case FastQuality:
 						tolinoSetMode(view, mUpdateMode);
 						break;
 				}
 			} else if (mUpdateInterval <= mRefreshNumber) {
-				tolinoSetMode(view, EinkUpdateMode.Clear);
+				tolinoSetMode(view, EinkUpdateMode.Normal);
 				mRefreshNumber = -1;
 			}
 			if (mUpdateInterval > 0) {
@@ -60,16 +60,16 @@ public class EinkScreenTolino extends EinkScreenNook {
 			mIsSleep = toSleep;
 			if (mIsSleep) {
 				switch (mUpdateMode) {
-					case Clear:
+					case Normal:
 						break;
-					case Fast:
+					case FastQuality:
 						break;
 					case Active:
-						tolinoSetMode(view, EinkUpdateMode.Clear);
+						tolinoSetMode(view, EinkUpdateMode.Normal);
 						mRefreshNumber = -1;
 				}
 			} else {
-				setupController(mUpdateMode, mUpdateInterval, view);
+				setupController(mUpdateMode, mUpdateInterval, view, false);
 			}
 		}
 	}

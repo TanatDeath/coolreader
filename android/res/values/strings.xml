@@ -402,6 +402,8 @@
     <string name="dlg_about_donation_silver">$3: buy Cool Reader Silver Donation</string>
     <string name="dlg_about_donation_gold">$10: buy Cool Reader Gold Donation</string>
     <string name="dlg_about_donation_installed">Installed</string>
+    <string name="dlg_about_ini_location">Settings file:</string>
+    <string name="dlg_about_db_location">Database file:</string>
     <string name="dlg_about_fonts_dirs">Fonts directories:</string>
     <string name="dlg_about_textures_dirs">Textures directories:</string>
     <string name="dlg_about_backgrounds_dirs">Backgrounds directories:</string>
@@ -444,11 +446,11 @@
     <string name="options_format_image_background_add_info">Some images have transparent background - you can set background manually. Restart (or book reopening) is required</string>
     <string name="options_format_image_background_color">Image background color</string>
     <string name="options_screen_update_mode">Screen update mode</string>
-    <string name="options_screen_update_mode_fast">Fast</string>
-    <string name="options_screen_update_mode_fast2">Fast 2</string>
-    <string name="options_screen_update_mode_onyx_regal">SNOW Field</string>
-    <string name="options_screen_update_mode_onyx_a2">A2</string>
-    <string name="options_screen_update_mode_quality">Quality</string>
+    <string name="options_screen_update_mode_normal">Normal</string>
+    <string name="options_screen_update_mode_fast_quality">Fast</string>
+    <string name="options_screen_update_mode_fast">Fast A2</string>
+    <string name="options_screen_update_mode_fast_x">Fast X</string>
+    <string name="options_screen_update_mode_onyx_regal">SNOW Field (Regal)</string>
     <string name="options_screen_update_interval">Full screen update interval</string>
     <string name="options_screen_blackpage_interval">Force black page paint interval</string>
     <string name="options_screen_blackpage_interval_add_info">This option will enable filling reading area with black color every N pages (suitable for unsupported E-Ink screens)</string>
@@ -1810,6 +1812,8 @@
     <string name="eink_onyx_bypass0">Auto</string>
     <string name="eink_onyx_bypass1">On</string>
     <string name="eink_onyx_bypass2">Off</string>
+    <string name="eink_onyx_deepgc">Deep quality full update</string>
+    <string name="eink_onyx_deepgc_add_info">Perform (works on some Onyx models, e.g. Poke 3) higher quality (2 pass) full update</string>
     <string name="eink_onyx_add_delay_full_refresh">Additional delay before full screen update</string>
     <string name="eink_onyx_add_delay_full_refresh_auto">Auto</string>
     <string name="eink_onyx_add_delay_full_refresh_0">Disabled</string>
@@ -1897,8 +1901,10 @@
     <string name="eink_onyx_full_update_add_info">Try to change method if full screen update goes with flickering or the screen updates twice</string>
     <string name="eink_full_update_method1">Method 1</string>
     <string name="eink_full_update_method2">Method 2</string>
+    <string name="eink_full_update_method3">Method 3</string>
     <string name="exp_feature">Experimental feature</string>
     <string name="exp_feature_add_info">This feature is being developed right now - use it only if you are active tester</string>
     <string name="click_to_restore">Click to restore settings</string>
     <string name="click_to_restore_warn">Proceed to restore settings? This cannot be undone!</string>
+    <string name="show_hidden_dirs">Show hidden dirs</string>
 </resources>

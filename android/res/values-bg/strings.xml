@@ -253,9 +253,10 @@
     <string name="options_format_image_scaling_scale_2">*2</string>
     <string name="options_format_image_scaling_scale_1">*1</string>
     <string name="options_screen_update_mode">Режим на опресняване на екрана</string>
-    <string name="options_screen_update_mode_quality">Качество</string>
-    <string name="options_screen_update_mode_fast">Бързина</string>
-    <string name="options_screen_update_mode_fast2">Бързина 2</string>
+    <string name="options_screen_update_mode_normal">Качество</string>
+    <string name="options_screen_update_mode_fast_quality">Бързина</string>
+    <string name="options_screen_update_mode_fast">Бързина A2</string>
+    <string name="options_screen_update_mode_fast_x">Бързина X</string>
     <string name="options_screen_update_interval">Интервал за пълно опресняване</string>
     <string name="options_render_font_gamma">Гама-корекция на шрифта</string>
     <string name="action_toggle_titlebar">Вкл./Изкл. на колонтитула</string>

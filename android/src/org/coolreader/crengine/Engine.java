@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 
+import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 /**
@@ -336,14 +337,14 @@ public class Engine {
 	// }
 	// }
 
-	public void showProgress(final int mainProgress, final int resourceId) {
+	public void showProgress(final int mainProgress, final int resourceId, String progressMsg) {
 		showProgress(mainProgress,
-				mActivity.getResources().getString(resourceId));
+				mActivity.getResources().getString(resourceId), progressMsg);
 	}
 
-	public void showProgress(final int mainProgress, final int resourceId, Scanner.ScanControl scanControl) {
+	public void showProgress(final int mainProgress, final int resourceId, String progressMsg, Scanner.ScanControl scanControl) {
 		showProgress(mainProgress,
-				mActivity.getResources().getString(resourceId), scanControl);
+				mActivity.getResources().getString(resourceId), progressMsg, scanControl);
 	}
 
 	private String mProgressMessage = null;
@@ -374,11 +375,11 @@ public class Engine {
 			});
 		}
 
-		DelayedProgress(final int percent, final String msg, final int delayMillis) {
+		DelayedProgress(final int percent, final String msg, final String progressMsg, final int delayMillis) {
 			this.cancelled = false;
 			BackgroundThread.instance().postGUI(() -> {
 				if (!cancelled) {
-					showProgress(percent, msg);
+					showProgress(percent, msg, progressMsg);
 					shown = true;
 				}
 			}, delayMillis);
@@ -391,11 +392,12 @@ public class Engine {
 	 *
 	 * @param mainProgress is percent*100
 	 * @param msg          is progress message text
+	 * @param progressMsg  is progress custom message text - can be changed during progress
 	 * @param delayMillis  is delay before display of progress
 	 * @return DelayedProgress object which can be use to hide or cancel this schedule
 	 */
-	public DelayedProgress showProgressDelayed(final int mainProgress, final String msg, final int delayMillis) {
-		return new DelayedProgress(mainProgress, msg, delayMillis);
+	public DelayedProgress showProgressDelayed(final int mainProgress, final String msg, final String progressMsg, final int delayMillis) {
+		return new DelayedProgress(mainProgress, msg, progressMsg, delayMillis);
 	}
 
 	/**
@@ -404,8 +406,9 @@ public class Engine {
 	 *
 	 * @param mainProgress is percent*100
 	 * @param msg          is progress message
+     * @param progressMsg  is progress custom message - can be set during progress
 	 */
-	public void showProgress(final int mainProgress, final String msg) {
+	public void showProgress(final int mainProgress, final String msg, String progressMsg) {
 		showProgress(mainProgress, msg, null);
 	}
 
@@ -415,9 +418,10 @@ public class Engine {
 	 *
 	 * @param mainProgress is percent*100
 	 * @param msg          is progress message
+	 * @param progressMsg  is progress custom message - can be set during progress
 	 * @param scanControl  control to interrupt process, can be null.
 	 */
-	public void showProgress(final int mainProgress, final String msg, Scanner.ScanControl scanControl) {
+	public void showProgress(final int mainProgress, final String msg, String progressMsg, Scanner.ScanControl scanControl) {
 		final int progressId = ++nextProgressId;
 		mProgressMessage = msg;
 		mProgressPos = mainProgress;
@@ -453,7 +457,7 @@ public class Engine {
 											.getResources()
 											.getString(
 													R.string.progress_please_wait));
-							mProgress.setMessage(msg);
+							mProgress.setMessage(StrUtils.isEmptyStr(progressMsg) ? msg: progressMsg);
 							mProgress.setOnCancelListener(dialog -> {
 								if (null != scanControl) {
 									log.e("scanControl.stop()");
@@ -472,7 +476,7 @@ public class Engine {
 					}
 				} else {
 					mProgress.setProgress(mainProgress);
-					mProgress.setMessage(msg);
+					mProgress.setMessage(StrUtils.isEmptyStr(progressMsg) ? msg: progressMsg);
 					mProgress.setCancelable(null != scanControl);
 					mProgress.setOnCancelListener(dialog -> {
 						if (null != scanControl) {
@@ -2124,7 +2128,7 @@ public class Engine {
 			shown = false;
 		}
 
-		public void setProgress(int percent) {
+		public void setProgress(int percent, String progressMsg) {
 			if (resourceId == 0)
 				return; // disabled
 			if (Utils.timeInterval(createTime) < PROGRESS_SHOW_INTERVAL)
@@ -2133,7 +2137,7 @@ public class Engine {
 				return;
 			shown = true;
 			lastUpdateTime = Utils.timeStamp();
-			showProgress(percent, resourceId, scanControl);
+			showProgress(percent, resourceId, progressMsg, scanControl);
 		}
 	}
 

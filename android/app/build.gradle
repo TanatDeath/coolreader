@@ -9,12 +9,12 @@ android {
         //applicationId "org.coolreader.knownreader"
         //applicationId "org.knownreader.premium"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 30
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202201161
-        versionName "2022.01.16.1"
+        versionCode 202202061
+        versionName "2022.02.06.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

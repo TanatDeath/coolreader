@@ -20,6 +20,7 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.Scanner;
 import org.coolreader.utils.FileUtils;
 import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.utils.StrUtils;
@@ -36,6 +37,7 @@ public class OfflineDicsDlg extends BaseDialog {
 	View mDialogView;
 	ArrayList<OfflineInfo> mDics;
 	private DictList mList;
+	Scanner.ScanControl mScanControl;
 
 	public static ProgressDialog progressDlg;
 
@@ -111,11 +113,13 @@ public class OfflineDicsDlg extends BaseDialog {
 			tvConverted.setPadding(10, 20, 10, 20);
 			mActivity.tintViewIcons(view);
 			btnConvert.setOnClickListener(v -> {
-				progressDlg = ProgressDialog.show(mActivity,
-						mActivity.getString(R.string.long_op),
-						mActivity.getString(R.string.long_op),
-						true, true, null);
-				mActivity.getDB().convertStartDictDic(sdi.dicPath, sdi.dicNameWOExt, o -> {
+				// TODO: Cancel listener - предлагать удалить недопреобразованное
+//				progressDlg = ProgressDialog.show(mActivity,
+//						mActivity.getString(R.string.long_op),
+//						mActivity.getString(R.string.long_op),
+//						true, true, null);
+				Engine.ProgressControl progress = mActivity.mEngine.createProgress(R.string.progress_scanning, mScanControl);
+				mActivity.getDB().convertStartDictDic(sdi.dicPath, sdi.dicNameWOExt, mScanControl, progress, o -> {
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
 					if (o != null) {
@@ -185,32 +189,39 @@ public class OfflineDicsDlg extends BaseDialog {
 		for (String dir: tDirs) {
 			ArrayList<File> files = FileUtils.searchFiles(new File(dir), ".*\\.dict|.*\\.db");
 			for (File f: files) {
-				OfflineInfo sdi = new OfflineInfo();
-				sdi.dicNameWOExt = Utils.getFileNameWOExtension(f);
-				sdi.dicPath = f.getParent();
-				sdi.dbExists = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".db").exists();
-				File ifo = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".ifo");
-				sdi.ifoExists = ifo.exists();
-				sdi.dictExists = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dict").exists();
-				if (sdi.ifoExists) {
-					List<String> allLines = FileUtils.readLinesFromFile(ifo.getAbsolutePath());
-					for (String s: allLines) {
-						if (s.indexOf("=") > 0) {
-							String s1 = s.substring(0, s.indexOf("="));
-							String s2 = s.substring(s.indexOf("=")+1, s.length());
-							if (s1.equals("bookname")) sdi.dicName = s2;
-							if (s1.equals("date")) sdi.dicDate = StrUtils.parseDate(s2);
-							if (s1.equals("description")) sdi.dicDescription = s2;
-							if (s1.equals("version")) sdi.dicVersion = s2;
-							try {
-								if (s1.equals("wordcount")) sdi.wordCount = Integer.parseInt(s2);
-							} catch (Exception e) {
-								sdi.wordCount = 0;
+				String dicNameWOExt = Utils.getFileNameWOExtension(f);
+				String fileExt = Utils.getFileExtension(f);
+				String dicPath =f.getParent();
+				boolean dictExists = new File(dicPath + "/" + dicNameWOExt + ".dict").exists();
+				if ((!fileExt.equals("db")) || (!dictExists)) {
+					OfflineInfo sdi = new OfflineInfo();
+					sdi.dicNameWOExt = dicNameWOExt;
+					sdi.dicPath = dicPath;
+					sdi.dbExists = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".db").exists();
+					File ifo = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".ifo");
+					sdi.ifoExists = ifo.exists();
+					sdi.dictExists = dictExists;
+					if (sdi.ifoExists) {
+						List<String> allLines = FileUtils.readLinesFromFile(ifo.getAbsolutePath());
+						for (String s : allLines) {
+							if (s.indexOf("=") > 0) {
+								String s1 = s.substring(0, s.indexOf("="));
+								String s2 = s.substring(s.indexOf("=") + 1, s.length());
+								if (s1.equals("bookname")) sdi.dicName = s2;
+								if (s1.equals("date")) sdi.dicDate = StrUtils.parseDate(s2);
+								if (s1.equals("description")) sdi.dicDescription = s2;
+								if (s1.equals("version")) sdi.dicVersion = s2;
+								try {
+									if (s1.equals("wordcount"))
+										sdi.wordCount = Integer.parseInt(s2);
+								} catch (Exception e) {
+									sdi.wordCount = 0;
+								}
 							}
 						}
 					}
+					dics.add(sdi);
 				}
-				dics.add(sdi);
 			}
 		}
 		return dics;
@@ -221,6 +232,7 @@ public class OfflineDicsDlg extends BaseDialog {
 		super("OfflineDicsDlg", coolReader, coolReader.getResources().getString(R.string.offline_dics), true, false);
         setCancelable(true);
 		this.mCoolReader = coolReader;
+		this.mScanControl = new Scanner.ScanControl();
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mDics = fillOfflineDics();

@@ -199,8 +199,6 @@ public class BrowserViewLayout extends ViewGroup {
 				}
 			);
 		}
-		if (bottomBar != null)
-			bottomBar.setOnClickListener(v -> toolbarView.showOverflowMenu());
 		ImageButton btnMenu2 = bottomBarLitres.findViewById(R.id.btn_show_menu);
 		if (btnMenu2 != null)
 			btnMenu2.setOnClickListener(v -> toolbarView.showOverflowMenu());

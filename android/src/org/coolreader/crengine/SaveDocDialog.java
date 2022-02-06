@@ -730,8 +730,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 				(StrUtils.getNonEmptyStr(fn, true).equals(StrUtils.getNonEmptyStr(toName, true)))
 				&&
 				(StrUtils.getNonEmptyStr(fromDir, true).equals(StrUtils.getNonEmptyStr(rdn, true)))
-			) || (StrUtils.isEmptyStr(toDir)))
-			{
+			) || (StrUtils.isEmptyStr(toDir))) {
 				if (setMarks) {
 					doSetMarks(sdd, cr, result);
 					BackgroundThread.instance().postGUI(() ->
@@ -775,6 +774,39 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 
 	private static void doRename(BaseDialog bd, CoolReader cr,
 								 FileInfo downloadDir, File f, File result, boolean setMarks) {
+//		FileInfo item = FileUtils.getFileProps(f, new FileInfo(f.getParent()), true);
+//		if (StrUtils.isEmptyStr(item.getAuthors())) Services.getEngine().scanBookProperties(item);
+//		cr.waitForCRDBService(() -> {
+//			cr.getDB().moveBookToFolder(item, result.getParent(), o -> {
+//				if ((boolean) o) {
+//					downloadDir.findItemByPathName(result.getAbsolutePath());
+//					final File resF = result;
+//					cr.showToast(cr.getString(R.string.book_moved) + ": " + result.getAbsolutePath());
+//					SaveDocDialog sdd = null;
+//					if (bd instanceof SaveDocDialog) sdd = (SaveDocDialog) bd;
+//					if (setMarks) {
+//						doSetMarks(sdd, cr, result);
+//					} else {
+//						FileInfo fiResF = new FileInfo(resF);
+//						if (bd != null) bd.onPositiveButtonClick();
+//						Services.getHistory().getOrCreateBookInfo(cr.getDB(), fiResF,
+//								bookInfo -> {
+//									BookInfo bif2 = bookInfo;
+//									if (bif2 == null) bif2 = new BookInfo(fiResF);
+//									final BookInfo bif = bif2;
+//									FileInfo dir1 = bif.getFileInfo().parent;
+//									cr.showBookInfo(bif, BookInfoDialog.BOOK_INFO, dir1, null);
+//								}
+//						);
+//					}
+//				} else {
+//					BackgroundThread.instance().postGUI(() ->
+//					{
+//						cr.showToast(R.string.cannot_move_book);
+//					}, 500);
+//				}
+//			});
+//		});
 		if (f.renameTo(result)) {
 			downloadDir.findItemByPathName(result.getAbsolutePath());
 			final File resF = result;

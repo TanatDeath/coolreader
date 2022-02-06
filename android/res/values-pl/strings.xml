@@ -259,9 +259,10 @@
     <string name="options_format_image_scaling_scale_2">*2</string>
     <string name="options_format_image_scaling_scale_1">*1</string>
     <string name="options_screen_update_mode">Tryb aktualizacji ekranu</string>
-    <string name="options_screen_update_mode_fast">Szybki</string>
-    <string name="options_screen_update_mode_fast2">Szybki 2</string>
-    <string name="options_screen_update_mode_quality">Wysoka jakość</string>
+    <string name="options_screen_update_mode_normal">Wysoka jakość</string>
+    <string name="options_screen_update_mode_fast_quality">Szybki</string>
+    <string name="options_screen_update_mode_fast">Szybki A2</string>
+    <string name="options_screen_update_mode_fast_x">Szybki X</string>
     <string name="options_screen_update_interval">Interwał pełnego odświeżenia ekranu</string>
     <string name="options_render_font_gamma">Przezroczystość czcionki</string>
     <string name="action_toggle_titlebar">Przełącz pasek tytułowy</string>

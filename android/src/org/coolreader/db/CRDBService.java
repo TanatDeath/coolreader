@@ -1,5 +1,6 @@
 package org.coolreader.db;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -70,8 +71,13 @@ public class CRDBService extends BaseService {
     }
 
     private File getDatabaseDir() {
-		if (Build.VERSION.SDK_INT >= 23) {
+		if ((Build.VERSION.SDK_INT >= 23) && (Build.VERSION.SDK_INT < Build.VERSION_CODES.R))  {
 			if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+				return getFilesDir();
+			}
+		}
+		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.R))  {
+			if (!Environment.isExternalStorageManager()) {
 				return getFilesDir();
 			}
 		}
@@ -279,11 +285,13 @@ public class CRDBService extends BaseService {
 	//=======================================================================================
 	// StarDict dics access code
 	//=======================================================================================
-	public void convertStartDictDic(String dicPath, String dicName, final ObjectCallback callback, final Handler handler) {
+	public void convertStartDictDic(String dicPath, String dicName,
+									final Scanner.ScanControl control, final Engine.ProgressControl progress,
+									final ObjectCallback callback, final Handler handler) {
 		execTask(new Task("convertStartDictDic") {
 			@Override
 			public void work() {
-				String doneS = mainDB.convertStartDictDic(dicPath, dicName);
+				String doneS = mainDB.convertStartDictDic(dicPath, dicName, control, progress);
 				sendTask(handler, () -> callback.onObjectLoaded(doneS));
 			}
 		});
@@ -355,6 +363,10 @@ public class CRDBService extends BaseService {
 				sendTask(handler, () -> callback.onOPDSCatalogsLoaded(list));
 			}
 		});
+	}
+
+	public String getDBPath() {
+    	return mainDB.mDB.getPath();
 	}
 
 	public void loadSearchHistory(final BookInfo book, final SearchHistoryLoadingCallback callback, final Handler handler) {
@@ -970,6 +982,10 @@ public class CRDBService extends BaseService {
     		getService().loadOPDSCatalogs(callback, new Handler());
     	}
 
+		public String getDBPath() {
+			return getService().getDBPath();
+		}
+
     	public void saveOPDSCatalog(final Long id, final String url, final String name,
 									final String username, final String password,
 									final String proxy_addr, final String proxy_port,
@@ -1229,8 +1245,9 @@ public class CRDBService extends BaseService {
 		}
 
 		public void convertStartDictDic(String dicPath, String dicName,
+									final Scanner.ScanControl control, final Engine.ProgressControl progress,
 									final ObjectCallback callback) {
-			getService().convertStartDictDic(dicPath, dicName, callback, new Handler());
+			getService().convertStartDictDic(dicPath, dicName, control, progress, callback, new Handler());
 		}
 
 		public void findInStarDictDic(String searchStr,

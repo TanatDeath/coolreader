@@ -669,7 +669,7 @@ public class Utils {
 		boolean bEmptyF = item.format==null;
 		if (!bEmptyF) bEmptyF = item.format == DocumentFormat.NONE;
 		return formatSize(item.size) + " " + (bEmptyF ? "" : item.format.name().toLowerCase()) + " " +
-				formatDate(activity, item.getCreateTime())+sProf;
+				formatDate(activity, item.getCreateTime()); //+sProf; // decided to unlink
 	}
 
 	public static String formatLastPosition(Activity activity, Bookmark pos) {

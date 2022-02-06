@@ -265,9 +265,10 @@
     <string name="options_format_image_scaling_scale_2">*2</string>
     <string name="options_format_image_scaling_scale_1">*1</string>
     <string name="options_screen_update_mode">画面更新モード</string>
-    <string name="options_screen_update_mode_fast">高速</string>
-    <string name="options_screen_update_mode_fast2">高速 2</string>
-    <string name="options_screen_update_mode_quality">品質</string>
+    <string name="options_screen_update_mode_normal">品質</string>
+    <string name="options_screen_update_mode_fast_quality">高速</string>
+    <string name="options_screen_update_mode_fast">高速 A2</string>
+    <string name="options_screen_update_mode_fast_x">高速 X</string>
     <string name="options_screen_update_interval">全画面更新間隔</string>
     <string name="options_render_font_gamma">フォント ガンマ</string>
     <string name="action_toggle_titlebar">タイトルバーの切り替え</string>

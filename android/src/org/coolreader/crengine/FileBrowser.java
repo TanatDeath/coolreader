@@ -207,10 +207,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		    MenuInflater inflater = mActivity.getMenuInflater();
 		    if (isRecentDir()) {
 		    	// highly experimental - for SergeyTSA
-				inflater.inflate(R.menu.cr3_file_browser_file_context_menu, menu);
-				menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
-//			    inflater.inflate(R.menu.cr3_file_browser_recent_context_menu, menu);
-//			    menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_recent_book));
+				//inflater.inflate(R.menu.cr3_file_browser_file_context_menu, menu);
+				//menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_book));
+			    inflater.inflate(R.menu.cr3_file_browser_recent_context_menu, menu);
+			    menu.setHeaderTitle(mActivity.getString(R.string.context_menu_title_recent_book));
 		    } else if (currDirectory.isOPDSRoot()) {
 			    inflater.inflate(R.menu.cr3_file_browser_opds_context_menu, menu);
 			    menu.setHeaderTitle(mActivity.getString(R.string.menu_title_catalog));
@@ -1612,7 +1612,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					@Override
 					public void onDownloadProgress(String type, String url,
 							int percent) {
-						mEngine.showProgress(percent * 100, "Downloading");
+						mEngine.showProgress(percent * 100, "Downloading", "");
 					}
 
 				};

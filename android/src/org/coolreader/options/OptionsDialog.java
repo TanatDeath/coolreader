@@ -381,10 +381,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text
 	};
 
-	public static final String PROP_APP_EINK_ONYX_NEED_BYPASS   ="app.eink.onyx.need.bypass";
-	public static final String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
-
-
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -460,6 +456,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mProperties.setColor(PROP_HIGHLIGHT_SELECTION_COLOR_NIGHT, mProperties.getColor(PROP_HIGHLIGHT_SELECTION_COLOR, 0xCCCCCC));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_NIGHT, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT, 0xFFFF40));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_NIGHT, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION, 0xFF8000));
+			mProperties.setColor(PROP_APP_ICONS_CUSTOM_COLOR_NIGHT, mProperties.getColor(PROP_APP_ICONS_CUSTOM_COLOR, Color.GRAY));
 		} else {
 			mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE_DAY, mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE, "(NONE)"));
 			mProperties.setColor(PROP_BACKGROUND_COLOR_DAY, mProperties.getColor(PROP_BACKGROUND_COLOR, 0xFFFFFF));
@@ -472,6 +469,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mProperties.setColor(PROP_HIGHLIGHT_SELECTION_COLOR_DAY, mProperties.getColor(PROP_HIGHLIGHT_SELECTION_COLOR, 0xCCCCCC));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_DAY, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT, 0xFFFF40));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_DAY, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION, 0xFF8000));
+			mProperties.setColor(PROP_APP_ICONS_CUSTOM_COLOR_DAY, mProperties.getColor(PROP_APP_ICONS_CUSTOM_COLOR, Color.GRAY));
 		}
 		for (String code : styleCodes) {
 			String styleName = "styles." + code + ".color";
@@ -499,6 +497,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mProperties.setColor(PROP_HIGHLIGHT_SELECTION_COLOR, mProperties.getColor(PROP_HIGHLIGHT_SELECTION_COLOR_NIGHT, 0xCCCCCC));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_NIGHT, 0xFFFF40));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_NIGHT, 0xFF8000));
+			mProperties.setColor(PROP_APP_ICONS_CUSTOM_COLOR, mProperties.getColor(PROP_APP_ICONS_CUSTOM_COLOR_NIGHT, Color.GRAY));
 		} else {
 			mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE, mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE_DAY, "(NONE)"));
 			mProperties.setColor(PROP_BACKGROUND_COLOR, mProperties.getColor(PROP_BACKGROUND_COLOR_DAY, 0xFFFFFF));
@@ -511,6 +510,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mProperties.setColor(PROP_HIGHLIGHT_SELECTION_COLOR, mProperties.getColor(PROP_HIGHLIGHT_SELECTION_COLOR_DAY, 0xCCCCCC));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_DAY, 0xFFFF40));
 			mProperties.setColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION, mProperties.getColor(PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_DAY, 0xFF8000));
+			mProperties.setColor(PROP_APP_ICONS_CUSTOM_COLOR, mProperties.getColor(PROP_APP_ICONS_CUSTOM_COLOR_DAY, Color.GRAY));
 		}
 		for (String code : styleCodes) {
 			String styleName = "styles." + code + ".color";

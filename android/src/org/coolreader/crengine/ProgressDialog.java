@@ -104,8 +104,8 @@ public class ProgressDialog extends AlertDialog {
 //    		}
        } else {
             View view = inflater.inflate(R.layout.progress_dialog, null);
-            mProgress = (ProgressBar) view.findViewById(R.id.progress);
-            mMessageView = (TextView) view.findViewById(R.id.message);
+            mProgress = view.findViewById(R.id.progress);
+            mMessageView = view.findViewById(R.id.message);
             setView(view);
         }
         if (mMax > 0) {

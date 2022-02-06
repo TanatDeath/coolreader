@@ -6,8 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
+import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.Scanner;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -93,36 +95,50 @@ public class StartDictDB {
 		currentDB.execSQL(sql);
 	}
 
-	public boolean loadDic(String dicPath, String dicName) {
+	public boolean loadDic(String dicPath, String dicName,
+			final Scanner.ScanControl control, final Engine.ProgressControl progress) {
 		sdManager = new StardictManager();
 		sdManager.setDictFilesLocation(dicPath, dicName);
 		currentDB = SQLiteDatabase.openOrCreateDatabase(dicPath + "/" + dicName + ".db", null);
 		int count = 0;
 		int totalWords = sdManager.getSynWordCount() + sdManager.getWordCount();
 		log.i("Processing .idx and .dict files...");
+		boolean stopped = false;
 		while (sdManager.nextWordAvailable()) {
+			count++;
+			if (control.isStopped()) {
+				stopped = true;
+				break;
+			}
 			StardictManager.StardictWord word = sdManager.nextStardictWord();
 			insertToMainTable(word.getWord(), word.getDefinition());
-			//setProgress(++count * 100 / totalWords);
+			if (count % 100 == 0)
+				progress.setProgress(9999, "" + count);
 		}
+		if (!stopped)
+			if (sdManager.hasSynFile()) {
+				log.i("Processing .syn file...\n");
+				while (sdManager.nextSynWordAvailable()) {
+					count++;
+					if (control.isStopped()) {
+						stopped = true;
+						break;
+					}
+					StardictManager.SynWord word = sdManager.nextSynWord();
+					insertToSynTable(word.getWord(), word.getSynIndex());
+					if (count % 100 == 0)
+						progress.setProgress(9999, "" + count);
 
-		if (sdManager.hasSynFile()) {
-			log.i("Processing .syn file...\n");
-			while (sdManager.nextSynWordAvailable()) {
-				StardictManager.SynWord word = sdManager.nextSynWord();
-				insertToSynTable(word.getWord(), word.getSynIndex());
-				//setProgress(++count * 100 / totalWords);
-			}
+				}
 		} else if (sdManager.getSynWordCount() > 0)
 			log.i("Missing synonym file!\n");
-
-		//progressBar.setVisible(false);
 		if (currentDB.inTransaction()) currentDB.setTransactionSuccessful();
 		if (currentDB.inTransaction()) currentDB.endTransaction();
 		currentDB.close();
 		log.i("Writing data to disk...\n");
 		log.i("All finished.");
-		return true;
+		progress.setProgress(10000, ""); // hide
+		return stopped;
 	}
 
 }

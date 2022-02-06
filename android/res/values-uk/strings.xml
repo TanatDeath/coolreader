@@ -265,9 +265,10 @@
     <string name="options_format_image_scaling_scale_2">*2</string>
     <string name="options_format_image_scaling_scale_1">*1</string>
     <string name="options_screen_update_mode">Режим поновлення екрану</string>
-    <string name="options_screen_update_mode_fast">Швидкий</string>
-    <string name="options_screen_update_mode_fast2">Швидкий 2</string>
-    <string name="options_screen_update_mode_quality">Якісний</string>
+    <string name="options_screen_update_mode_normal">Якісний</string>
+    <string name="options_screen_update_mode_fast_quality">Швидкий</string>
+    <string name="options_screen_update_mode_fast">Швидкий A2</string>
+    <string name="options_screen_update_mode_fast_x">Швидкий X</string>
     <string name="options_screen_update_interval">Інтервал повного поновлення</string>
     <string name="options_render_font_gamma">Гама-корекція шрифту</string>
     <string name="action_toggle_titlebar">Увім/Вимк колонтитул</string>

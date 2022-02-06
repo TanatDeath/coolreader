@@ -75,6 +75,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
@@ -970,13 +972,23 @@ public class BaseActivity extends Activity implements Settings {
 		return mFullscreen;
 	}
 
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public void paintWhiteStatusBar(Window wnd) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			wnd.addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+			wnd.setStatusBarColor(Color.rgb(255,255,255));
+		}
+	}
+
 	public void applyFullscreen(Window wnd) {
-		if ( mFullscreen ) {
+		if (mFullscreen) {
 			//mActivity.getWindow().requestFeature(Window.)
-			wnd.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			wnd.setFlags(LayoutParams.FLAG_FULLSCREEN,
+				LayoutParams.FLAG_FULLSCREEN);
 		} else {
-			wnd.setFlags(0, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			wnd.setFlags(0, LayoutParams.FLAG_FULLSCREEN);
+			if (DeviceInfo.isEinkScreen(getScreenForceEink()))
+				paintWhiteStatusBar(wnd);
 		}
 		// enforce new window ui visibility flags
 		lastSystemUiVisibility = -1;
@@ -984,9 +996,9 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void setFullscreen(boolean fullscreen) {
-		if ( mFullscreen!=fullscreen ) {
+		if (mFullscreen != fullscreen) {
 			mFullscreen = fullscreen;
-			applyFullscreen( getWindow() );
+			applyFullscreen(getWindow());
 		}
 	}
 	
@@ -1057,6 +1069,8 @@ public class BaseActivity extends Activity implements Settings {
 				else
 					flags |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
 			}
+			if (DeviceInfo.isEinkScreen(getScreenForceEink()))
+				flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 			setSystemUiVisibility(flags);
 //			if (isFullscreen() && DeviceInfo.getSDKLevel() >= DeviceInfo.ICE_CREAM_SANDWICH)
 //				simulateTouch();
@@ -1584,8 +1598,10 @@ public class BaseActivity extends Activity implements Settings {
 
 
 
-	private EinkScreen.EinkUpdateMode mScreenUpdateMode = EinkScreen.EinkUpdateMode.Clear;
+	private EinkScreen.EinkUpdateMode mScreenUpdateMode = EinkScreen.EinkUpdateMode.Normal;
 	private int mEinkOnyxNeedBypass = 0;
+	private boolean mEinkOnyxNeedDeepGC = false;
+	private boolean mEinkOnyxRegal = false;
 	private int mEinkOnyxScreenFullUpdateMethod = 0;
 	private int mEinkOnyxExtraDelayFullRefresh = -1;
 
@@ -1597,7 +1613,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (null != mEinkScreen) {
 			mScreenUpdateMode = screenUpdateMode;
 			if (mEinkScreen.getUpdateMode() != screenUpdateMode || mEinkScreen.getUpdateMode() == EinkScreen.EinkUpdateMode.Active) {
-				mEinkScreen.setupController(mScreenUpdateMode, mScreenUpdateInterval, view);
+				mEinkScreen.setupController(mScreenUpdateMode, mScreenUpdateInterval, view, false);
 			}
 		}
 	}
@@ -1606,6 +1622,20 @@ public class BaseActivity extends Activity implements Settings {
 		if (null != mEinkScreen) {
 			mEinkOnyxNeedBypass = needBypass;
 			mEinkScreen.setNeedBypass(needBypass);
+		}
+	}
+
+	public void setScreenNeedDeepGC(boolean needDeepGC) {
+		if (null != mEinkScreen) {
+			mEinkOnyxNeedDeepGC = needDeepGC;
+			mEinkScreen.setNeedDeepGC(needDeepGC);
+		}
+	}
+
+	public void setScreenRegal(boolean regal) {
+		if (null != mEinkScreen) {
+			mEinkOnyxRegal = regal;
+			mEinkScreen.setRegal(regal);
 		}
 	}
 
@@ -1632,7 +1662,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (null != mEinkScreen) {
 			mScreenUpdateInterval = screenUpdateInterval;
 			if (mEinkScreen.getUpdateInterval() != screenUpdateInterval) {
-				mEinkScreen.setupController(mScreenUpdateMode, screenUpdateInterval, view);
+				mEinkScreen.setupController(mScreenUpdateMode, screenUpdateInterval, view, false);
 			}
 		}
 	}
@@ -2316,6 +2346,10 @@ public class BaseActivity extends Activity implements Settings {
 			setScreenUpdateMode(EinkScreen.EinkUpdateMode.byCode(Utils.parseInt(value, 0)), getContentView());
         } else if (key.equals(PROP_APP_EINK_ONYX_NEED_BYPASS)) {
 			setScreenNeedBypass(Utils.parseInt(value, 0));
+		} else if (key.equals(PROP_APP_EINK_ONYX_NEED_DEEPGC)) {
+			setScreenNeedDeepGC(Utils.parseInt(value, 0) == 0? false : true);
+		} else if (key.equals(PROP_APP_EINK_ONYX_REGAL)) {
+			setScreenRegal(Utils.parseInt(value, 0) == 0? false : true);
 		} else if (key.equals(PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD)) {
 			setScreenFullUpdateMethod(Utils.parseInt(value, 0));
 		} else if (key.equals(PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH)) {
@@ -2345,6 +2379,8 @@ public class BaseActivity extends Activity implements Settings {
         	Services.getScanner().setHideEmptyDirs(Utils.parseInt(value, 0));
 		} else if ( key.equals(PROP_APP_FILE_BROWSER_ZIP_SCAN) ) {
 			Services.getScanner().setZipScan(Utils.parseInt(value, 0));
+		} else if ( key.equals(PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS) ) {
+			Services.getScanner().setShowHiddenDirs(Utils.parseInt(value, 0) == 0? false : true);
         } else if ( key.equals(PROP_EXT_FULLSCREEN_MARGIN) ) {
 			iCutoutMode = Utils.parseInt(value, 0);
         	setCutoutMode(iCutoutMode);
@@ -3212,7 +3248,7 @@ public class BaseActivity extends Activity implements Settings {
 			if (DeviceInfo.EINK_SCREEN_REGAL)
 				props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, String.valueOf(EinkScreen.EinkUpdateMode.Regal.code));
 			else
-				props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, String.valueOf(EinkScreen.EinkUpdateMode.Clear.code));
+				props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_MODE, String.valueOf(EinkScreen.EinkUpdateMode.Normal.code));
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_UPDATE_INTERVAL, "10");
 			props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_INTERVAL, "0");
             props.applyDefault(ReaderView.PROP_APP_SCREEN_BLACKPAGE_DURATION, "300");
@@ -3391,6 +3427,31 @@ public class BaseActivity extends Activity implements Settings {
 			}
 			return res;
 		}
+
+		public static Properties filterNotSaveSettings(Properties settings) {
+			Properties res = new Properties();
+			res.entrySet();
+			for (Object k : settings.keySet()) {
+				String key = (String)k;
+				String value = settings.getProperty(key);
+				boolean found = false;
+				for (String pattern : Settings.NOTSAVE_SETTINGS) {
+					if (pattern.endsWith("*")) {
+						if (key.startsWith(pattern.substring(0, pattern.length()-1))) {
+							found = true;
+							break;
+						}
+					} else if (pattern.equalsIgnoreCase(key)) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					res.setProperty(key, value);
+				}
+			}
+			return res;
+		}
 		
 		public void saveSettings(int profile, Properties settings) {
 			if (settings == null)
@@ -3409,7 +3470,8 @@ public class BaseActivity extends Activity implements Settings {
 			try {
 				log.v("saveSettings()");
 	    		FileOutputStream os = new FileOutputStream(f);
-	    		settings.store(os, "Cool Reader 3 settings");
+	    		Properties props = filterNotSaveSettings(settings);
+				props.store(os, "Cool Reader 3 settings");
 				log.i("Settings successfully saved to file " + f.getAbsolutePath());
 			} catch ( Exception e ) {
 				log.e("exception while saving settings", e);

@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
@@ -48,6 +51,9 @@ public class ChooseReadingPosDlg extends BaseDialog {
 	private YNDListFiles mYMatchingFiles;
 
 	public List<CloudFileInfo> mReadingPosList;
+
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
 	public int cloudMode;
 
@@ -203,6 +209,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT=Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDateSort, PorterDuff.Mode.CLEAR,true);
@@ -210,16 +217,19 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		if (!bHideThisDevice) {
 			btnThisDevice.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnThisDevice, true);
+			if (isEInk) Utils.setSolidButtonEink(btnThisDevice);
 		} else {
 			btnThisDevice.setBackgroundColor(colorGrayCT);
 		}
 		if (bDateSort) {
 			btnDateSort.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnDateSort, true);
+			if (isEInk) Utils.setSolidButtonEink(btnDateSort);
 			btnPercentSort.setBackgroundColor(colorGrayCT);
 		} else {
 			btnPercentSort.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnPercentSort, true);
+			if (isEInk) Utils.setSolidButtonEink(btnPercentSort);
 			btnDateSort.setBackgroundColor(colorGrayCT);
 		}
 		btnThisDevice.setTextColor(mActivity.getTextColor(colorIcon));
@@ -227,6 +237,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		btnPercentSort.setTextColor(mActivity.getTextColor(colorIcon));
 		mCoolReader.tintViewIcons(btnDeleteAll,true);
 		btnDeleteAll.setBackgroundColor(colorGrayCT2);
+		if (isEInk) Utils.setSolidButtonEink(btnDeleteAll);
 		btnDeleteAll.setTextColor(mActivity.getTextColor(colorIcon));
 	}
 
@@ -367,6 +378,8 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mReadingPosList = new ArrayList<>();
 		for (File f: mMatchingFiles) {
 			if (f.getName().endsWith(".json")) {
@@ -420,6 +433,8 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mReadingPosList = mYMatchingFiles.fileList;
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
 		initAddButtons(frame);

@@ -252,9 +252,10 @@
 <string name="options_format_image_scaling_scale_2">"*2"</string>
 <string name="options_format_image_scaling_scale_1">"*1"</string>
 <string name="options_screen_update_mode">"Režim obnovování obrazovky"</string>
-<string name="options_screen_update_mode_fast">"Rychle"</string>
-<string name="options_screen_update_mode_fast2">"Rychle 2"</string>
-<string name="options_screen_update_mode_quality">"Kvalita"</string>
+<string name="options_screen_update_mode_normal">Kvalita</string>
+<string name="options_screen_update_mode_fast_quality">Rychle</string>
+<string name="options_screen_update_mode_fast">Rychle A2</string>
+<string name="options_screen_update_mode_fast_x">Rychle X</string>
 <string name="options_screen_update_interval">"Interval obnovení celé obrazovky"</string>
 <string name="options_render_font_gamma">"Gamma korekce písma"</string>
 <string name="action_toggle_titlebar">"Zapnout/vypnout hlavičku"</string>

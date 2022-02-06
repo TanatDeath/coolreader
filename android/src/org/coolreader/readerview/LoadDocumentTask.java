@@ -69,20 +69,21 @@ public class LoadDocumentTask extends Task {
 		disableTextAutoformat = mReaderView.mBookInfo.getFileInfo().getFlag(FileInfo.DONT_REFLOW_TXT_FILES_FLAG);
 		profileNumber = mReaderView.mBookInfo.getFileInfo().getProfileId();
 		//Properties oldSettings = new Properties(mSettings);
-		// TODO: enable storing of profile per book
-		int curProf = mActivity.getCurrentProfile();
-		if (curProf != profileNumber) {
-			mReaderView.showCenterPopup(mActivity.getString(R.string.settings_profile) + ":" +profileNumber, -1, false);
-		}
-		mActivity.setCurrentProfile(profileNumber);
-		if (profileNumber == 0) { // if there is no book profile, then set it to current
-			if (mActivity.getCurrentProfile() != 0)
-				if (mReaderView.mBookInfo != null && mReaderView.mBookInfo.getFileInfo() != null) {
-					mReaderView.mBookInfo.getFileInfo().setProfileId(mActivity.getCurrentProfile());
-					mActivity.getDB().saveBookInfo(mReaderView.mBookInfo);
-				}
-		}
-		log.v("BookProfileNumber : "+ profileNumber);
+		// it was decided, than there should not be profile switching, depending on book
+		// https://github.com/plotn/coolreader/issues/589
+//		int curProf = mActivity.getCurrentProfile();
+//		if (curProf != profileNumber) {
+//			mReaderView.showCenterPopup(mActivity.getString(R.string.settings_profile) + ":" +profileNumber, -1, false);
+//		}
+//		mActivity.setCurrentProfile(profileNumber);
+//		if (profileNumber == 0) { // if there is no book profile, then set it to current
+//			if (mActivity.getCurrentProfile() != 0)
+//				if (mReaderView.mBookInfo != null && mReaderView.mBookInfo.getFileInfo() != null) {
+//					mReaderView.mBookInfo.getFileInfo().setProfileId(mActivity.getCurrentProfile());
+//					mActivity.getDB().saveBookInfo(mReaderView.mBookInfo);
+//				}
+//		}
+//		log.v("BookProfileNumber : "+ profileNumber);
 		Bookmark lastPos = null;
 		if (mReaderView.mBookInfo != null)
 			lastPos = mReaderView.mBookInfo.getLastPosition();
@@ -100,13 +101,13 @@ public class LoadDocumentTask extends Task {
 		// close existing document
 		log.v("LoadDocumentTask : closing current book");
 		mReaderView.close();
-		final Properties currSettings = new Properties(mReaderView.mSettings);
-		//setAppSettings(props, oldSettings);
-		BackgroundThread.instance().postBackground(() -> {
-			log.v("LoadDocumentTask : switching current profile");
-			mReaderView.applySettings(currSettings); //enforce settings reload
-			log.i("Switching done");
-		});
+		// it was decided, than there should not be profile switching, depending on book
+//		final Properties currSettings = new Properties(mReaderView.mSettings);
+//		BackgroundThread.instance().postBackground(() -> {
+//			log.v("LoadDocumentTask : switching current profile");
+//			mReaderView.applySettings(currSettings); //enforce settings reload
+//			log.i("Switching done");
+//		});
 	}
 
 	@Override

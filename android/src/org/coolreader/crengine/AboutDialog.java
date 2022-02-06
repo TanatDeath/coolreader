@@ -138,7 +138,16 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		if (tv_www_github1 != null) tv_www_github1.setLinkTextColor(activity.getTextColor(colorIcon));
 		if (tv_www_github2 != null) tv_www_github2.setLinkTextColor(activity.getTextColor(colorIcon));
 		mActivity.tintViewIcons(mAppTab,false);
-		mDirsTab = (View)inflater.inflate(R.layout.about_dialog_dirs, null);
+		mDirsTab = inflater.inflate(R.layout.about_dialog_dirs, null);
+
+		TextView ini_location = mDirsTab.findViewById(R.id.ini_location);
+		ini_location.setText(mActivity.getSettingsFile(0));
+
+		TextView db_location = mDirsTab.findViewById(R.id.db_location);
+
+		mActivity.waitForCRDBService(() ->
+				db_location.setText(mActivity.getDB().getDBPath()));
+
 		TextView fonts_dir = mDirsTab.findViewById(R.id.fonts_dirs);
 
 		ArrayList<String> fontsDirs = Engine.getFontsDirs();
