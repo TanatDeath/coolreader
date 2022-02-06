@@ -406,7 +406,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     {
     	startServices();
 		log.i("CoolReader.onCreate() entered");
-		super.onCreate(savedInstanceState);
+		supe r.onCreate(savedInstanceState);
 
 		isFirstStart = true;
 		justCreated = true;
