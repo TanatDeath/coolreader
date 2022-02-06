@@ -384,6 +384,8 @@
     <string name="dlg_about_donation">Cool Reader - бесплатное свободное приложение, и всегда будет оставаться такой. Вы можете поддержать развитие проекта, купив пакет-монетку в Android Market.</string>
     <string name="dlg_about_donation_gold">$10: купить Золотую монетку Cool Reader</string>
     <string name="dlg_about_donation_installed">Установлено</string>
+    <string name="dlg_about_ini_location">Файл настроек:</string>
+    <string name="dlg_about_db_location">Файл базы данных:</string>
     <string name="dlg_about_fonts_dirs">Каталоги шрифтов:</string>
     <string name="dlg_about_textures_dirs">Каталоги текстур:</string>
     <string name="dlg_about_backgrounds_dirs">Каталоги фоновых рисунков:</string>
@@ -424,9 +426,11 @@
     <string name="options_format_image_background_add_info">Некоторые изображения имеют прозрачный фон, для них можно задать фон вручную. Необходим перезапуск или переоткрытие книги</string>
     <string name="options_format_image_background_color">Цвет фона изображений</string>
     <string name="options_screen_update_mode">Режим обновления экрана</string>
-    <string name="options_screen_update_mode_quality">Качественный</string>
-    <string name="options_screen_update_mode_fast">Быстрый</string>
-    <string name="options_screen_update_mode_fast2">Быстрый 2</string>
+    <string name="options_screen_update_mode_normal">Обычный</string>
+    <string name="options_screen_update_mode_fast_quality">Быстрый</string>
+    <string name="options_screen_update_mode_fast">Быстрый A2</string>
+    <string name="options_screen_update_mode_fast_x">Быстрый X</string>
+    <string name="options_screen_update_mode_onyx_regal">SNOW Field (Regal)</string>
     <string name="options_screen_update_interval">Интервал полного обновления</string>
     <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы</string>
     <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на (неподдеживаемых) E-Ink экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
@@ -1770,6 +1774,8 @@
     <string name="eink_onyx_bypass0">Авто</string>
     <string name="eink_onyx_bypass1">Включено</string>
     <string name="eink_onyx_bypass2">Выключено</string>
+    <string name="eink_onyx_deepgc">Глубокое полное обновление</string>
+    <string name="eink_onyx_deepgc_add_info">Полное обновление высокого (в два прохода) качества (работает на некоторых моделя Onyx, например Poke 3)</string>
     <string name="eink_onyx_add_delay_full_refresh">Дополнительная задержка перед полным обновлением экрана</string>
     <string name="eink_onyx_add_delay_full_refresh_auto">Авто</string>
     <string name="eink_onyx_add_delay_full_refresh_0">Отключено</string>
@@ -1857,9 +1863,11 @@
     <string name="eink_onyx_full_update_add_info">Попробуйте поменять метод, если при полном обновлении экрана вы замечаете мерцание или двойное обновление</string>
     <string name="eink_full_update_method1">Метод 1</string>
     <string name="eink_full_update_method2">Метод 2</string>
+    <string name="eink_full_update_method3">Метод 3</string>
     <string name="exp_feature">Экспериментальная функция</string>
     <string name="exp_feature_add_info">Эта функция - то, что в настоящий момент разрабатывается. Если вы решили ее использовать - вы точно знаете что делать</string>
     <string name="click_to_restore">Нажмите, чтобы восстановить настройки</string>
     <string name="click_to_restore_warn">Восстановить настройки? Эта операция не может быть отменена!</string>
+    <string name="show_hidden_dirs">Показывать скрытые папки</string>
 </resources>
 

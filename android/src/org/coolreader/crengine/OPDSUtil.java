@@ -792,7 +792,7 @@ xml:base="http://lib.ololo.cc/opds/">
 					if (!partialDownloadCompleted) {
 						if (delayedProgress != null)
 							delayedProgress.cancel();
-						delayedProgress = Services.getEngine().showProgressDelayed(0, progressMessage, PROGRESS_DELAY_MILLIS);
+						delayedProgress = Services.getEngine().showProgressDelayed(0, progressMessage, "", PROGRESS_DELAY_MILLIS);
 					}
 					URL newURL = url;
 					boolean useOrobotProxy = false;
@@ -1090,7 +1090,7 @@ xml:base="http://lib.ololo.cc/opds/">
 						percent = bytesRead * 100 / totalSize * 100;
 					}
 					if ( !partialDownloadCompleted && (!progressShown || percent!=lastPercent) && (progressShown || percent<maxPercentToStartShowingProgress || delay > TIMEOUT*2 ) ) {
-						Services.getEngine().showProgress(percent, progressMessage);
+						Services.getEngine().showProgress(percent, progressMessage, "");
 						lastPercent = percent;
 						progressShown = true;
 					}

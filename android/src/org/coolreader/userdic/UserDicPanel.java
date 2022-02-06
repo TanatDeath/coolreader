@@ -18,6 +18,7 @@ import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
+import org.coolreader.readerview.ReaderView;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -388,9 +389,16 @@ lblStar.setTextColor(0xFF000000 | color);
 				}
 				if (mCoolReader.getmReaderView() != null) {
 					if (mCoolReader.getmReaderView().flgHighlightUserDic) {
-						mCoolReader.getmReaderView().clearSelection();
-						mCoolReader.getmReaderView().findText(mCoolReader.getmReaderView().getCurrentPositionBookmark(),
-								"{{curPage}}" + wrds, false, true, true);
+						try {
+							mCoolReader.getmReaderView().selectionStarted = true;
+							mCoolReader.getmReaderView().toggleScreenUpdateModeMode();
+							mCoolReader.getmReaderView().clearSelection();
+							mCoolReader.getmReaderView().findText(mCoolReader.getmReaderView().getCurrentPositionBookmark(),
+									"{{curPage}}" + wrds, false, true, true);
+						} finally {
+							mCoolReader.getmReaderView().selectionStarted = true;
+							mCoolReader.getmReaderView().toggleScreenUpdateModeMode();
+						}
 					}
 				}
 			}

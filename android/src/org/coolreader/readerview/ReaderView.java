@@ -130,7 +130,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public long lastSelTime = 0;
 	private int curBlackpageInterval = 0; //for periodic blackpage draw
-    private int blackpageDuration = 300;
+	private int blackpageDuration = 300;
 
 	public ArrayList<String> getArrAllPages() {
 		return arrAllPages;
@@ -139,10 +139,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private ArrayList<String> arrAllPages = null;
 
 	public interface BookView {
-        void draw();
-        void draw(boolean isPartially);
+		void draw();
+		void draw(boolean isPartially);
 		void draw(boolean isPartially, boolean isBlack);
-        void invalidate();
+		void invalidate();
 		void onPause();
 		void onResume();
 	}
@@ -196,11 +196,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return "";
 	}
 
-    public DocView getDoc() {
-        return doc;
-    }
+	public DocView getDoc() {
+		return doc;
+	}
 
-    public DocView doc;
+	public DocView doc;
 
 	// additional key codes for Nook
 	public static final int NOOK_KEY_PREV_LEFT = 96;
@@ -549,9 +549,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private int nextUpdateId = 0;
+
+	public boolean selectionStarted = false;
+
 	void updateSelection(int startX, int startY, int endX, int endY, final boolean isUpdateEnd) {
-		if (isUpdateEnd)
+		if (isUpdateEnd) {
 			lastSelTime = System.currentTimeMillis();
+			selectionStarted = false;
+		} else {
+			if (!selectionStarted) toggleScreenUpdateModeMode();
+			selectionStarted = true;
+		}
 		final Selection sel = new Selection();
 //		getActivity().showToast("upd: "+nextUpdateId+" "+isUpdateEnd);
 //		log.v("upd: "+nextUpdateId+" "+isUpdateEnd);
@@ -578,6 +586,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 			@Override
 			public void done() {
+				selectionStarted = false;
 				if (isUpdateEnd) {
 					String text = sel.text;
 					if (text != null && text.length() > 0) {
@@ -631,7 +640,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private void onSelectionComplete(Selection sel, boolean selMode) {
-
 		//mActivity.showToast("startPos: "+sel.startPos+"; endPos: "+sel.endPos+
 		//		"startX: "+sel.startX+"; startY: "+sel.startY+"; chapter: "+sel.chapter);
 		boolean bSkipDic = mActivity.skipFindInDic;
@@ -668,9 +676,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				} else {
 					if (
 							((!isMultiSelection(sel))&&(!bSkipDic))
-							||
-							(isMultiSelection(sel))
-						)
+									||
+									(isMultiSelection(sel))
+					)
 						mActivity.findInDictionary(sel.text, null);
 				}
 				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
@@ -753,12 +761,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 				showNewBookmarkDialog(sel, Bookmark.TYPE_CITATION, "");
 				break;
-            case SELECTION_ACTION_DICTIONARY_LIST:
-                DictsDlg dlg = new DictsDlg(mActivity, this, sel.text, null, false);
-                dlg.show();
-                if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
-                    clearSelection();
-                break;
+			case SELECTION_ACTION_DICTIONARY_LIST:
+				DictsDlg dlg = new DictsDlg(mActivity, this, sel.text, null, false);
+				dlg.show();
+				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
+					clearSelection();
+				break;
 			case SELECTION_ACTION_COMBO:
 				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mActivity.showToast(R.string.only_in_premium);
@@ -910,25 +918,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public long lastTimeTap = 0L;
 	private long lastTimeKey = 0L;
 
-	// on the latest codebase this, possible is not needed anymore, and it is buggy
 	public void toggleScreenUpdateModeMode() {
-		//mEinkScreen.setSelectionActive((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow));
 		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow))
-			mEinkScreen.setupController(EinkScreen.EinkUpdateMode.A2, 999, surface);
+			mEinkScreen.setupController(EinkScreen.EinkUpdateMode.FastA2, 999, surface, true);
 		else {
-			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
+			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Normal.code));
 			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
-			mEinkScreen.setupController(updMode, updInterval, surface);
+			mEinkScreen.setupController(updMode, updInterval, surface, false);
 		}
-//		if ((selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
-//			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code));
-//			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
-//			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.A2, surface); //fast2
-//			mActivity.setScreenUpdateInterval(999, surface);
-//		} else {
-//			if (updMode != EinkScreen.EinkUpdateMode.Unspecified) mActivity.setScreenUpdateMode(updMode, surface); //fast
-//			if (updInterval != -1) mActivity.setScreenUpdateInterval(updInterval, surface);
-//		}
 	}
 
 	public void toggleSelectionMode() {
@@ -940,7 +937,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(
 						mActivity.getString(selectionModeActive ?
 								R.string.action_toggle_selection_mode_on : R.string.action_toggle_selection_mode_off));
-                bookView.draw(false);
+		bookView.draw(false);
 	}
 
 	public void toggleInspectorMode() {
@@ -1082,7 +1079,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			public void done() {
 				BackgroundThread.ensureGUI();
-//				drawPage();
 				drawPage(true);
 			}
 		});
@@ -1252,12 +1248,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		invalidImages = true;
 		if (getBookInfo() != null)
 			if (getBookInfo().getFileInfo() != null)
-			  if (getBookInfo().getFileInfo().askedShownStylesInfo<3) {
-				  getBookInfo().getFileInfo().askedShownStylesInfo++;
-				  checkOpenBookStyles(true);
-			  }
+				if (getBookInfo().getFileInfo().askedShownStylesInfo<3) {
+					getBookInfo().getFileInfo().askedShownStylesInfo++;
+					checkOpenBookStyles(true);
+				}
 		if (mActivity.getmReaderFrame() != null)
-			 mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
+			mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
 	}
 
 	public boolean isNightMode() {
@@ -1293,7 +1289,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void saveSetting(String name, String value) {
 		bNeedRedrawOnce = true;
-	//	mActivity.showToast("bNeedRedrawOnce");
+		//	mActivity.showToast("bNeedRedrawOnce");
 		setSetting(name, value, true, true, true);
 	}
 
@@ -1302,16 +1298,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		orientation = ( orientation==0 )? 1 : 0;
 		saveSetting(PROP_APP_SCREEN_ORIENTATION, String.valueOf(orientation));
 		bNeedRedrawOnce = true;
-	//	mActivity.showToast("bNeedRedrawOnce");
+		//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setScreenOrientation(orientation);
 	}
 
 	public void toggleFullscreen() {
+		//mEinkScreen.setupController(EinkScreen.EinkUpdateMode.A2, 999, surface);
 		boolean newBool = !mActivity.isFullscreen();
 		String newValue = newBool ? "1" : "0";
 		saveSetting(PROP_APP_FULLSCREEN, newValue);
 		bNeedRedrawOnce = true;
-	//	mActivity.showToast("bNeedRedrawOnce");
+		//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setFullscreen(newBool);
 		boolean bDontAsk = mActivity.settings().getBool(Settings.PROP_APP_HIDE_CSS_WARNING, false);
 		if (!bDontAsk)
@@ -1505,8 +1502,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public void toggleTitlebar() {
 		String sPos = getSetting(PROP_STATUS_LOCATION);
 		if (sPos.equals("0")) sPos = "3";
-			else if (sPos.equals("3")) sPos = "4";
-				else sPos = "0";
+		else if (sPos.equals("3")) sPos = "4";
+		else sPos = "0";
 		mActivity.setSetting(PROP_STATUS_LOCATION, sPos, true);
 	}
 
@@ -2031,10 +2028,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (isBookLoaded())
 					mActivity.showBookmarksDialog(false, null);
 				break;
-		//	case DCMD_GO_PERCENT_DIALOG:
-		//		if (isBookLoaded())
-		//			showGoToPercentDialog();
-		//		break;
+			//	case DCMD_GO_PERCENT_DIALOG:
+			//		if (isBookLoaded())
+			//			showGoToPercentDialog();
+			//		break;
 			case DCMD_GO_PAGE_DIALOG:
 				if (isBookLoaded())
 					showGoToPageDialog();
@@ -2512,7 +2509,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			public void done() {
 				if (res) {
 					invalidImages = true;
-					drawPage( doneHandler, false );
+					drawPage(doneHandler, false);
 				}
 				if (isMoveCommand && isBookLoaded())
 					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
@@ -2609,14 +2606,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			// If this function is called when new settings loaded from the cloud are applied,
 			// we must prohibit changing the e-ink screen refresh mode, as this will lead to
 			// a periodic full screen refresh when drawing the next phase of the progress bar.
-			int updModeCode = props.getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Clear.code);
+			int updModeCode = props.getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Normal.code);
 			int updInterval = props.getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
 			mActivity.setScreenUpdateMode(EinkScreen.EinkUpdateMode.byCode(updModeCode), surface);
 			mActivity.setScreenUpdateInterval(updInterval, surface);
 		}
 
 		int blackpageInterval  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_INTERVAL, 0);
-        blackpageDuration  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_DURATION, 300);
+		blackpageDuration  = props.getInt(PROP_APP_SCREEN_BLACKPAGE_DURATION, 300);
 		mActivity.setScreenBlackpageInterval(blackpageInterval);
 		mActivity.setScreenBlackpageDuration(blackpageDuration);
 
@@ -2667,12 +2664,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 		//skipFallbackWarning = false; // Too often, do it in our way
 		doc.applySettings(props);
+		//if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
+			drawPage();
 		//syncViewSettings(props, save, saveDelayed);
-		drawPage();
-		if (mActivity.getmReaderFrame() != null)
+		if (mActivity.getmReaderFrame() != null) {
 			BackgroundThread.instance().postGUI(() -> {
 				mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
 			}, 300);
+		}
 	}
 
 	public static boolean eq(Object obj1, Object obj2)
@@ -2690,7 +2689,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	/**
-	 * Read JNI view settings, update and save if changed 
+	 * Read JNI view settings, update and save if changed
 	 */
 	private void syncViewSettings(final Properties currSettings, final boolean save, final boolean saveDelayed) {
 		post( new Task() {
@@ -2789,7 +2788,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		} else if (key.equals(PROP_APP_BOUNCE_TAP_INTERVAL)) {
 			mBounceTapInterval = Utils.parseInt(value, -1, 50, 250);
 			//} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING)) {
-		//	mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
+			//	mGesturePageFlipsPerFullSwipe = Integer.valueOf(value);
 		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING_NEW)) {
 			mGesturePageFlipSwipeN = Integer.valueOf(value);
 		} else if (key.equals(PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY)) {
@@ -2865,21 +2864,21 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void setAppSettings(Properties newSettings, Properties oldSettings)
 	{
-		log.v("setAppSettings()"); //|| keyCode == KeyEvent.KEYCODE_DPAD_LEFT 
+		log.v("setAppSettings()"); //|| keyCode == KeyEvent.KEYCODE_DPAD_LEFT
 		BackgroundThread.ensureGUI();
 		if (oldSettings == null)
 			oldSettings = mSettings;
 		Properties changedSettings = newSettings.diff(oldSettings);
 		boolean viewModeAutoChanged = false;
-        for ( Map.Entry<Object, Object> entry : changedSettings.entrySet() ) {
-            String key = (String)entry.getKey();
-            String value = (String)entry.getValue();
-            if (PROP_PAGE_VIEW_MODE_AUTOCHANGED.equals(key)) {
-                viewModeAutoChanged = "1".equals(value);
-                newSettings.setBool(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, false);
-                break;
-            }
-        }
+		for ( Map.Entry<Object, Object> entry : changedSettings.entrySet() ) {
+			String key = (String)entry.getKey();
+			String value = (String)entry.getValue();
+			if (PROP_PAGE_VIEW_MODE_AUTOCHANGED.equals(key)) {
+				viewModeAutoChanged = "1".equals(value);
+				newSettings.setBool(ReaderView.PROP_PAGE_VIEW_MODE_AUTOCHANGED, false);
+				break;
+			}
+		}
 		for (Map.Entry<Object, Object> entry : changedSettings.entrySet()) {
 			String key = (String)entry.getKey();
 			String value = (String)entry.getValue();
@@ -2891,8 +2890,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			} else if (PROP_PAGE_VIEW_MODE.equals(key)) {
 				boolean flg = "1".equals(value);
 				if (viewModeAutoChanged)
-                    viewMode = (!flg) ? ViewMode.PAGES : ViewMode.SCROLL;
-				    else viewMode = flg ? ViewMode.PAGES : ViewMode.SCROLL;
+					viewMode = (!flg) ? ViewMode.PAGES : ViewMode.SCROLL;
+				else viewMode = flg ? ViewMode.PAGES : ViewMode.SCROLL;
 				if (viewModeAutoChanged) {
 					final String sVal = (viewMode == ViewMode.PAGES) ? "1" : "0";
 					BackgroundThread.instance().postGUI(() -> {
@@ -2938,7 +2937,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT.equals(key)
 					|| PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION.equals(key)
 				// TODO: redesign all this mess!
-					) {
+			) {
 				newSettings.setProperty(key, value);
 			}
 		}
@@ -3066,10 +3065,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (
 					StrUtils.getNonEmptyStr(bmk.bookFile,true).equals(
 							StrUtils.getNonEmptyStr(fileInfo.getFilename(),true)) &&
-					StrUtils.getNonEmptyStr(bmk.bookPath,true).equals(
-							StrUtils.getNonEmptyStr(fileInfo.getPathName(),true)) &&
-					StrUtils.getNonEmptyStr(bmk.bookFileArc,true).equals(
-							StrUtils.getNonEmptyStr(fileInfo.getArchiveName(),true))
+							StrUtils.getNonEmptyStr(bmk.bookPath,true).equals(
+									StrUtils.getNonEmptyStr(fileInfo.getPathName(),true)) &&
+							StrUtils.getNonEmptyStr(bmk.bookFileArc,true).equals(
+									StrUtils.getNonEmptyStr(fileInfo.getArchiveName(),true))
 			) {
 				needAsk = true;
 			}
@@ -3085,8 +3084,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						mActivity.getString(R.string.options_app_safe_mode),
 						sButtons, null, (o22, btnPressed) -> {
 							if (
-								(btnPressed.equals(getActivity().getString(R.string.str_yes))) ||
-								(btnPressed.equals("{{timeout}}"))
+									(btnPressed.equals(getActivity().getString(R.string.str_yes))) ||
+											(btnPressed.equals("{{timeout}}"))
 							) {
 								postLoadTask(fileInfo, doneHandler, errorHandler);
 							} else
@@ -3168,8 +3167,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (bmk != null) {
 			if (
 					StrUtils.getNonEmptyStr(bmk.bookFile,true).equals("stream") &&
-					StrUtils.getNonEmptyStr(bmk.bookPath,true).equals("stream") &&
-					StrUtils.getNonEmptyStr(bmk.bookFileArc,true).equals("stream")
+							StrUtils.getNonEmptyStr(bmk.bookPath,true).equals("stream") &&
+							StrUtils.getNonEmptyStr(bmk.bookFileArc,true).equals("stream")
 			) {
 				needAsk = true;
 			}
@@ -3407,18 +3406,21 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private static final VMRuntimeHack runtime = new VMRuntimeHack();
 	BitmapFactory factory = new BitmapFactory(runtime);
 
+	public Bitmap lastCachedBitmap = null;
+
 	public BitmapInfo mCurrentPageInfo;
 	public BitmapInfo mNextPageInfo;
 	/**
 	 * Prepare and cache page image.
-	 * Cache is represented by two slots: mCurrentPageInfo and mNextPageInfo.  
-	 * If page already exists in cache, returns it (if current page requested, 
-	 *  ensures that it became stored as mCurrentPageInfo; if another page requested, 
+	 * Cache is represented by two slots: mCurrentPageInfo and mNextPageInfo.
+	 * If page already exists in cache, returns it (if current page requested,
+	 *  ensures that it became stored as mCurrentPageInfo; if another page requested,
 	 *  no mCurrentPageInfo/mNextPageInfo reordering made).
 	 * @param offset is kind of page: 0==current, -1=previous, 1=next page
 	 * @return page image and properties, null if requested page is unavailable (e.g. requested next/prev page is out of document range)
 	 */
 	BitmapInfo preparePageImage(int offset) {
+		lastCachedBitmap = null;
 		BackgroundThread.ensureBackground();
 		log.v("preparePageImage( "+offset+")");
 		//if (offset == 0) {
@@ -3493,7 +3495,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return mCurrentPageInfo;
 		}
 		if (isPageView) {
-			// PAGES: one of next or prev pages requested, offset is specified as param 
+			// PAGES: one of next or prev pages requested, offset is specified as param
 			int cmd1 = offset > 0 ? ReaderCommand.DCMD_PAGEDOWN.nativeId : ReaderCommand.DCMD_PAGEUP.nativeId;
 			int cmd2 = offset > 0 ? ReaderCommand.DCMD_PAGEUP.nativeId : ReaderCommand.DCMD_PAGEDOWN.nativeId;
 			if (offset < 0)
@@ -3621,14 +3623,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		// check if orientation was switched
 		boolean bSwitched = false;
 		if (
-			   (
-				 ((width>height) && (lastsetWidth<lastsetHeight))
-				 ||
-				 ((width<height) && (lastsetWidth>lastsetHeight))
-			   ) &&
-			   (width != lastsetWidth) &&
-			   (height != lastsetHeight)
-		   ) bSwitched = true;
+				(
+						((width>height) && (lastsetWidth<lastsetHeight))
+								||
+								((width<height) && (lastsetWidth>lastsetHeight))
+				) &&
+						(width != lastsetWidth) &&
+						(height != lastsetHeight)
+		) bSwitched = true;
 		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry)it.next();
@@ -3661,7 +3663,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			boolean isLandscape =
 					(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE) ||
-					(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE_REVERSE);
+							(curOrientation == DeviceOrientation.ORIENTATION_LANDSCAPE_REVERSE);
 			boolean needExtraEdges = false;
 			needExtraEdges = needExtraEdges || (((iExtFSM == 0) || (iExtFSM == 2)) && (iExtFS > 0) && (isLandscape));
 			needExtraEdges = needExtraEdges || (((iExtFSM == 0) || (iExtFSM == 1)) && (iExtFS > 0) && (!isLandscape));
@@ -3676,9 +3678,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			requestedHeight = 80;
 		requestedResTime = System.currentTimeMillis();
 		if (!checkNeedRedraw(width,height)) {
-            if (mActivity.getmReaderFrame()!=null)
-                if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
-                    mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.request_resize)+": "+width+", "+height);
+			if (mActivity.getmReaderFrame()!=null)
+				if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
+					mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.request_resize)+": "+width+", "+height);
 			internalDX = requestedWidth;
 			internalDY = requestedHeight;
 			return;
@@ -3687,8 +3689,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		lastsetHeight = height;
 		lastsetResTime = System.currentTimeMillis();
 		if (bNeed) {
-		    if (mActivity.getmReaderFrame()!=null)
-             	if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
+			if (mActivity.getmReaderFrame()!=null)
+				if (mActivity.getmReaderFrame().getUserDicPanel()!=null)
 					mActivity.getmReaderFrame().getUserDicPanel().updateSavingMark(mActivity.getString(R.string.resizing_to)+": "+width+", "+height);
 		}
 		checkSize();
@@ -4008,43 +4010,43 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	boolean getBacklightEnabled(int backLightSetting, boolean isLeft, boolean isCold) {
 		if ((isLeft) && (isCold))
 			if (
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
+					(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
 			) return true;
 		if ((!isLeft) && (isCold))
 			if (
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
+					(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
 			) return true;
 		if ((isLeft) && (!isCold))
 			if (
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
+					(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_WARM_RIGHT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
 			) return true;
 		if ((!isLeft) && (!isCold))
 			if (
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM) ||
-				(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
+					(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_COLD_RIGHT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_WARM) ||
+							(backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_BOTH)
 			) return true;
 		return false;
 	}
@@ -4078,14 +4080,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {
 				int initialBacklight = mEinkScreen.getFrontLightValue(mActivity);
 				if (initialBacklight != -1) currentBrightnessValueCold = initialBacklight;
-					else currentBrightnessValueCold = mActivity.getScreenBacklightLevel();
+				else currentBrightnessValueCold = mActivity.getScreenBacklightLevel();
 				if (null != mEinkScreen)
 					currentBrightnessValueIndexCold = Utils.findNearestIndex(mEinkScreen.getFrontLightLevels(mActivity), currentBrightnessValueCold);
 			}
 			if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
 				int initialWarmBacklight = mEinkScreen.getWarmLightValue(mActivity);
 				if (initialWarmBacklight != -1) currentBrightnessValueWarm = initialWarmBacklight;
-					else currentBrightnessValueWarm = mActivity.getScreenBacklightLevel();
+				else currentBrightnessValueWarm = mActivity.getScreenBacklightLevel();
 				if (null != mEinkScreen)
 					currentBrightnessValueIndexWarm = Utils.findNearestIndex(mEinkScreen.getWarmLightLevels(mActivity), currentBrightnessValueWarm);
 			}
@@ -4210,7 +4212,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 		if (bOnyxWarmLight)
 			if (indexWarm != currentBrightnessValueIndexWarm) {
-	//			log.i("setting warm from " + currentBrightnessValueIndexWarm + " to " + indexWarm);
+				//			log.i("setting warm from " + currentBrightnessValueIndexWarm + " to " + indexWarm);
 				currentBrightnessValueIndexWarm = indexWarm;
 				currentBrightnessValueWarm = levelListWarm.get(currentBrightnessValueIndexWarm);
 				mActivity.setScreenWarmBacklightLevel(currentBrightnessValueWarm);
@@ -4243,9 +4245,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	void stopBrightnessControl(final int x, final int y, int type) {
 		if (
-			(currentBrightnessValueIndex >= 0) ||
-			(currentBrightnessValueIndexCold >= 0) ||
-			(currentBrightnessValueIndexWarm >= 0)
+				(currentBrightnessValueIndex >= 0) ||
+						(currentBrightnessValueIndexCold >= 0) ||
+						(currentBrightnessValueIndexWarm >= 0)
 		) {
 			if (x >= 0 && y >= 0) {
 				updateBrightnessControl(y, type);
@@ -4384,7 +4386,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		abstract void draw( Canvas canvas );
 	}
 
-//	private Object surfaceLock = new Object(); 
+//	private Object surfaceLock = new Object();
 
 	private static final int[] accelerationShape = new int[] {
 			0, 6, 24, 54, 95, 146, 206, 273, 345, 421, 500, 578, 654, 726, 793, 853, 904, 945, 975, 993, 1000
@@ -4415,7 +4417,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		final SurfaceHolder holder = surface.getHolder();
 		//log.v("before synchronized(surfaceLock)");
 		if (holder != null)
-		//synchronized(surfaceLock) 
+		//synchronized(surfaceLock)
 		{
 			Canvas canvas = null;
 			long startTs = android.os.SystemClock.uptimeMillis();
@@ -4471,7 +4473,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public static int[] SRC_TABLE = new int[SIN_TABLE_SIZE+1];
 	// mapping of 0..1 shift to sin(angle)
 	public static int[] DST_TABLE = new int[SIN_TABLE_SIZE+1];
-	// for dx=0..1 find such alpha (0..pi/2) that alpha - sin(alpha) = dx  
+	// for dx=0..1 find such alpha (0..pi/2) that alpha - sin(alpha) = dx
 	private static double shiftfn( double dx ) {
 		double a = 0;
 		double b = Math.PI/2;
@@ -4545,7 +4547,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		for (ResizeHistory rh: getActivity().getResizeHist()) {
 			if (
 					(rh.X == x) && (rh.Y == y)
-					) {
+			) {
 				bFound = true;
 			}
 		}
@@ -4576,11 +4578,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	{
 		if (!mInitialized)
 			return;
+		if ((nowFormatting) || (docIsLoading))
+			return;
 		log.v("drawPage() : submitting DrawPageTask");
 		// evaluate if we need to redraw page on this resolution
 		if (mOpened)
 			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
-		post( new DrawPageTask(ReaderView.this, doneHandler, isPartially) );
+		post(new DrawPageTask(ReaderView.this, doneHandler, isPartially));
 	}
 
 	public int internalDX = 300;
@@ -4608,7 +4612,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (-1 == savedEinkUpdateInterval) {
 			savedEinkUpdateInterval = mEinkScreen.getUpdateInterval();
 			// current e-ink screen update mode without full refresh
-			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), 0, surface);
+			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), 0, surface, false);
 		}
 		einkModeClients.add(id);
 	}
@@ -4617,7 +4621,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		einkModeClients.remove(id);
 		if (einkModeClients.isEmpty()) {
 			// restore e-ink full screen refresh period
-			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), savedEinkUpdateInterval, surface);
+			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), savedEinkUpdateInterval, surface, false);
 			savedEinkUpdateInterval = -1;
 		}
 	}
@@ -5070,7 +5074,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public int getDefSavePositionIntervalSpeak() {
 		return
-		  (getSettings().getInt(ReaderView.PROP_SAVE_POS_SPEAK_TIMEOUT, 0))*1000;
+				(getSettings().getInt(ReaderView.PROP_SAVE_POS_SPEAK_TIMEOUT, 0))*1000;
 	}
 
 	private int lastSceduledDelay = 0;
@@ -5423,6 +5427,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return defaultCss;
 	}
 
+	public boolean nowFormatting = false;
+	public boolean docIsLoading = false;
+
 	boolean enable_progress_callback = true;
 	ReaderCallback readerCallback = new ReaderCallback() {
 
@@ -5430,16 +5437,20 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			log.d("readerCallback.OnExportProgress " + percent);
 			return true;
 		}
+
 		public void OnExternalLink(String url, String nodeXPath) {
 		}
+
 		public void OnFormatEnd() {
 			log.d("readerCallback.OnFormatEnd");
 			//mEngine.hideProgress();
 			arrAllPages = null;
 			hideProgress();
+			nowFormatting = false;
 			drawPage();
 			scheduleSwapTask();
 		}
+
 		public boolean OnFormatProgress(final int percent) {
 			if (enable_progress_callback) {
 				log.d("readerCallback.OnFormatProgress " + percent);
@@ -5455,13 +5466,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //			});
 			return true;
 		}
+
 		public void OnFormatStart() {
 			log.d("readerCallback.OnFormatStart");
+			nowFormatting = true;
 			arrAllPages = null;
 		}
 
 		public void OnLoadFileEnd() {
 			log.d("readerCallback.OnLoadFileEnd");
+			docIsLoading = false;
 			if (internalDX == 0 && internalDY == 0) {
 				internalDX = requestedWidth;
 				internalDY = requestedHeight;
@@ -5472,11 +5486,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		public void OnLoadFileError(String message) {
 			log.d("readerCallback.OnLoadFileError(" + message + ")");
+			docIsLoading = false;
 			arrAllPages = null;
 		}
+
 		public void OnLoadFileFirstPagesReady() {
 			log.d("readerCallback.OnLoadFileFirstPagesReady");
 		}
+
 		public String OnLoadFileFormatDetected(final DocumentFormat fileFormat) {
 			log.i("readerCallback.OnLoadFileFormatDetected " + fileFormat);
 			if (fileFormat != null) {
@@ -5520,6 +5537,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 
 		public void OnLoadFileStart(String filename) {
+			docIsLoading = true;
 			cancelSwapTask();
 			BackgroundThread.ensureBackground();
 			log.d("readerCallback.OnLoadFileStart " + filename);
@@ -6154,13 +6172,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		holder.addCallback(this);
 
 		BackgroundThread.ensureGUI();
-        this.mEngine = engine;
+		this.mEngine = engine;
 		this.mEinkScreen = activity.getEinkScreen();
 		surface.setFocusable(true);
-        surface.setFocusableInTouchMode(true);
-        // set initial size to exclude java.lang.IllegalArgumentException in Bitmap.createBitmap(0, 0)
-        // surface.getWidth() at this point return 0
-        requestResize(600, 800);
+		surface.setFocusableInTouchMode(true);
+		// set initial size to exclude java.lang.IllegalArgumentException in Bitmap.createBitmap(0, 0)
+		// surface.getWidth() at this point return 0
+		requestResize(600, 800);
 		requestedWidth = 100;
 		requestedHeight = 100;
 

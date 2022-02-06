@@ -36,6 +36,12 @@ public class Scanner extends FileInfoChangeSource {
 		mZipScan = zipScan;
 	}
 
+	boolean mShowHiddenDirs = false;
+
+	public void setShowHiddenDirs(boolean show) {
+		mShowHiddenDirs = show;
+	}
+
 	private boolean dirScanEnabled = true;
 	public boolean getDirScanEnabled()
 	{
@@ -162,7 +168,7 @@ public class Scanner extends FileInfoChangeSource {
 					}
 					if (!f.isDirectory()) {
 						// regular file
-						if (f.getName().startsWith("."))
+						if ((f.getName().startsWith(".")) && (!mShowHiddenDirs))
 							continue; // treat files beginning with '.' as hidden
 						if (f.getName().equalsIgnoreCase("LOST.DIR"))
 							continue; // system directory
@@ -218,7 +224,7 @@ public class Scanner extends FileInfoChangeSource {
 				// process directories 
 				for ( File f : items ) {
 					if (f.isDirectory()) {
-						if (f.getName().startsWith("."))
+						if ((f.getName().startsWith(".")) && (!mShowHiddenDirs))
 							continue; // treat dirs beginning with '.' as hidden
 						FileInfo item = new FileInfo( f );
 						if (knownItems != null && knownItems.contains(item.getPathName()))
@@ -372,7 +378,7 @@ public class Scanner extends FileInfoChangeSource {
 							if (control.isStopped())
 								break;
 							if (progress != null)
-								progress.setProgress((i + count) * 10000 / (2*count));
+								progress.setProgress((i + count) * 10000 / (2*count), "");
 							FileInfo item = filesForParsing.get(i);
 							if (engine.scanBookProperties(item))
 								filesForSave1.add(item);
@@ -381,7 +387,7 @@ public class Scanner extends FileInfoChangeSource {
 							if (control.isStopped())
 								break;
 							if (progress != null)
-								progress.setProgress((i + count) * 10000 / (2*count));
+								progress.setProgress((i + count) * 10000 / (2*count), "");
 							FileInfo item = filesForCRC32Update.get(i);
 							if (Engine.updateFileCRC32(item))
 								filesForSave1.add(item);
@@ -1257,7 +1263,7 @@ public class Scanner extends FileInfoChangeSource {
 		return null;
 	}
 	
-	public Scanner( BaseActivity coolReader, Engine engine )
+	public Scanner(BaseActivity coolReader, Engine engine)
 	{
 		this.engine = engine;
 		this.mActivity = coolReader;

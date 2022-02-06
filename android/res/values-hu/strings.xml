@@ -252,9 +252,10 @@
     <string name="options_format_image_scaling_scale_2">*2</string>
     <string name="options_format_image_scaling_scale_1">*1</string>
     <string name="options_screen_update_mode">Képernyő-frissítés mód</string>
-    <string name="options_screen_update_mode_fast">Gyors</string>
-    <string name="options_screen_update_mode_fast2">Gyors 2</string>
-    <string name="options_screen_update_mode_quality">Minőség</string>
+    <string name="options_screen_update_mode_normal">Minőség</string>
+    <string name="options_screen_update_mode_fast_quality">Gyors</string>
+    <string name="options_screen_update_mode_fast">Gyors A2</string>
+    <string name="options_screen_update_mode_fast_x">Gyors X</string>
     <string name="options_screen_update_interval">Teljes-képernyő frissítési gyakoriság</string>
     <string name="options_render_font_gamma">Betű gamma érték</string>
     <string name="action_toggle_titlebar">Állapotsor ki/be</string>

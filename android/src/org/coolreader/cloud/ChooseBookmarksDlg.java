@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
+import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
@@ -44,6 +47,9 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	private boolean bHideThisDevice = false;
 	private File[] mMatchingFiles;
 	private YNDListFiles mYMatchingFiles;
+
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
 
 	public int cloudMode;
 
@@ -195,11 +201,13 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		colorIcon = a.getColor(2, Color.GRAY);
 		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT=Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
 		if (!bHideThisDevice) {
 			btnThisDevice.setBackgroundColor(colorGrayCT2);
 			mCoolReader.tintViewIcons(btnThisDevice, true);
+			if (isEInk) Utils.setSolidButtonEink(btnThisDevice);
 		} else {
 			btnThisDevice.setBackgroundColor(colorGrayCT);
 		}
@@ -207,6 +215,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		mCoolReader.tintViewIcons(btnDeleteAll,true);
 		btnDeleteAll.setBackgroundColor(colorGrayCT2);
 		btnDeleteAll.setTextColor(mActivity.getTextColor(colorIcon));
+		if (isEInk) Utils.setSolidButtonEink(btnDeleteAll);
 	}
 
 	public void setButtonsState() {
@@ -290,6 +299,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mBookmarksList = new ArrayList<CloudFileInfo>();
 		for (File f: matchingFiles) {
 			if (f.getName().endsWith(".json")) {
@@ -326,6 +337,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mBookmarksList = matchingFiles.fileList;
 		Comparator<CloudFileInfo> compareByDate = (o1, o2) -> -(o1.created.compareTo(o2.created));
 		Collections.sort(mBookmarksList, compareByDate);

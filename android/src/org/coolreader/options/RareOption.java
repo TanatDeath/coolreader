@@ -54,12 +54,6 @@ public class RareOption extends SubmenuOption {
 				mActivity.getString(R.string.options_app_settings_icons), Settings.PROP_APP_SETTINGS_SHOW_ICONS,
 				mActivity.getString(R.string.options_app_settings_icons_add_info), this.lastFilteredValue).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_alligator,R.drawable.icons8_alligator));
-		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-			listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_app_settings_icons_is_custom_color), Settings.PROP_APP_ICONS_IS_CUSTOM_COLOR,
-					mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_paint_palette1, R.drawable.icons8_paint_palette1));
-			listView.add(new ColorOption(mActivity, mOwner, mActivity.getString(R.string.options_app_settings_icons_custom_color), Settings.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000,
-					mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setIconIdByAttr(R.attr.attr_icons8_paint_palette1, R.drawable.icons8_paint_palette1));
-		}
 		dlg.setView(listView);
 		dlg.show();
 	}
@@ -81,10 +75,6 @@ public class RareOption extends SubmenuOption {
 				mActivity.getString(R.string.options_app_disable_safe_mode_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_settings_icons), Settings.PROP_APP_SETTINGS_SHOW_ICONS,
 				mActivity.getString(R.string.options_app_settings_icons_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.options_app_settings_icons_is_custom_color), Settings.PROP_APP_ICONS_IS_CUSTOM_COLOR,
-				mActivity.getString(R.string.option_add_info_empty_text));
-		this.updateFilteredMark(mActivity.getString(R.string.options_app_settings_icons_custom_color), Settings.PROP_APP_ICONS_CUSTOM_COLOR,
-				mActivity.getString(R.string.option_add_info_empty_text));
 		return this.lastFiltered;
 	}
 

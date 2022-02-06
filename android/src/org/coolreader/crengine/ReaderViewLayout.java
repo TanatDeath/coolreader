@@ -317,15 +317,15 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 			toolbarView.layout(toolbarRc.left, toolbarRc.top, toolbarRc.right, toolbarRc.bottom);
 			statusView.layout(statusRc.left, statusRc.top, statusRc.right, statusRc.bottom);
 			userDicView.layout(userDicRc.left, userDicRc.top, userDicRc.right, userDicRc.bottom);
-			
-			if (activity.isFullscreen()) {
-				BackgroundThread.instance().postGUI(() -> {
-					log.v("Invalidating toolbar ++++++++++");
-					toolbarView.forceLayout();
-					contentView.getSurface().invalidate();
-					toolbarView.invalidate();
-				}, 100);
-			}
+			if (!DeviceInfo.EINK_SCREEN)
+				if (activity.isFullscreen()) {
+					BackgroundThread.instance().postGUI(() -> {
+						log.v("Invalidating toolbar ++++++++++");
+						toolbarView.forceLayout();
+						contentView.getSurface().invalidate();
+						toolbarView.invalidate();
+					}, 100);
+				}
 			
 			//			toolbarView.invalidate();
 //			toolbarView.requestLayout();

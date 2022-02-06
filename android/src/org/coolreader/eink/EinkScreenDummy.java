@@ -12,11 +12,21 @@ public class EinkScreenDummy implements EinkScreen {
 	private boolean mSelectionActive = false;
 
 	@Override
-	public void setupController(EinkUpdateMode mode, int updateInterval, View view) {
+	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal) {
 	}
 
 	@Override
 	public void setNeedBypass(int needBypass) {
+
+	}
+
+	@Override
+	public void setNeedDeepGC(boolean needDeepGC) {
+
+	}
+
+	@Override
+	public void setRegal(boolean regal) {
 
 	}
 

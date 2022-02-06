@@ -77,7 +77,7 @@ public class FontSelectOption extends ListOption
 						break;
 				}
 				i++;
-				progress.setProgress(10000*i/list.size());
+				progress.setProgress(10000*i/list.size(), "");
 			}
 			if (onComplete != null)
 				onComplete.onComplete(filtered, control.isStopped());

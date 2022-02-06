@@ -25,10 +25,10 @@ public class TolinoEpdController {
 
 	public static void setMode(View view, EinkScreen.EinkUpdateMode mode) {
 		switch (mode) {
-			case Clear:
+			case Normal:
 				ScreenHelper.FullRefresh();
 				break;
-			case Fast:
+			case FastQuality:
 				partialRefresh(view, ScreenHelper.NATIVE_UPDATE_MODE_FULL, ScreenHelper.NATIVE_WAVEFORM_MODE_GC16);
 				break;
 			case Active:

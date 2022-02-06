@@ -22,20 +22,20 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 			0, 100, 200, 300, 500, 700, 1000, 2000, 3000, 4000, 5000
 	};
 	int[] mScreenUpdateModes = new int[] {
-			EinkScreen.EinkUpdateMode.Clear.code, EinkScreen.EinkUpdateMode.Fast.code, EinkScreen.EinkUpdateMode.Active.code
+			EinkScreen.EinkUpdateMode.Normal.code, EinkScreen.EinkUpdateMode.FastQuality.code, EinkScreen.EinkUpdateMode.Active.code
 	};
 	int[] mScreenUpdateModesTitles = new int[] {
-			R.string.options_screen_update_mode_quality, R.string.options_screen_update_mode_fast, R.string.options_screen_update_mode_fast2
+			R.string.options_screen_update_mode_normal, R.string.options_screen_update_mode_fast_quality, R.string.options_screen_update_mode_fast
 	};
 
 	int[] mOnyxScreenUpdateModes = new int[] {
-			EinkScreen.EinkUpdateMode.Regal.code, EinkScreen.EinkUpdateMode.Clear.code, EinkScreen.EinkUpdateMode.Fast.code, EinkScreen.EinkUpdateMode.A2.code
+			EinkScreen.EinkUpdateMode.Normal.code, EinkScreen.EinkUpdateMode.FastQuality.code, EinkScreen.EinkUpdateMode.FastA2.code, EinkScreen.EinkUpdateMode.FastX.code
 	};
 	int[] mOnyxScreenUpdateModesTitles = new int[] {
-			R.string.options_screen_update_mode_onyx_regal, R.string.options_screen_update_mode_quality, R.string.options_screen_update_mode_fast, R.string.options_screen_update_mode_onyx_a2,
+			R.string.options_screen_update_mode_normal, R.string.options_screen_update_mode_fast_quality, R.string.options_screen_update_mode_fast, R.string.options_screen_update_mode_fast_x
 	};
 	int[] mScreenUpdateModesAddInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 
 	int[] mEinkOnyxNeedBypass = new int[] {
@@ -55,16 +55,18 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 	};
 
 	int[] mEinkFullScreenUpdateMode = new int[] {
-			0, 1, 2
+			0, 1, 2, 3
 	};
 
 	int[] mEinkFullScreenUpdateModeTitles = new int[] {
 			R.string.eink_full_update_auto,
 			R.string.eink_full_update_method1,
-			R.string.eink_full_update_method2
+			R.string.eink_full_update_method2,
+			R.string.eink_full_update_method3
 	};
 
 	int[] mEinkFullScreenUpdateModeAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
@@ -160,6 +162,12 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 					setIconIdByAttr(R.attr.attr_icons8_blackpage_interval, R.drawable.icons8_blackpage_interval);
 			boolean intervalAdded = false;
 			if ( DeviceInfo.EINK_ONYX ) {
+				OptionBase optionRegal =
+						new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_screen_update_mode_onyx_regal), Settings.PROP_APP_EINK_ONYX_REGAL,
+								mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+								setDefaultValue("1").
+								setIconIdByAttr(R.attr.attr_icons8_eink_snow, R.drawable.icons8_eink_snow);
+				listView.add(optionRegal);
 				optionMode = new ListOption(mOwner, mActivity.getString(R.string.options_screen_update_mode), Settings.PROP_APP_SCREEN_UPDATE_MODE,
 						mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 				if (DeviceInfo.EINK_SCREEN_REGAL)
@@ -167,7 +175,7 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 				optionMode = optionMode.add(mOnyxScreenUpdateModes[1], mOnyxScreenUpdateModesTitles[1], R.string.option_add_info_empty_text);
 				optionMode = optionMode.add(mOnyxScreenUpdateModes[2], mOnyxScreenUpdateModesTitles[2], R.string.option_add_info_empty_text);
 				optionMode = optionMode.add(mOnyxScreenUpdateModes[3], mOnyxScreenUpdateModesTitles[3], R.string.option_add_info_empty_text);
-				listView.add(optionMode.setDefaultValue(String.valueOf(DeviceInfo.EINK_SCREEN_REGAL ? EinkScreen.EinkUpdateMode.Regal.code : EinkScreen.EinkUpdateMode.Clear.code))
+				listView.add(optionMode.setDefaultValue(String.valueOf(DeviceInfo.EINK_SCREEN_REGAL ? EinkScreen.EinkUpdateMode.Regal.code : EinkScreen.EinkUpdateMode.Normal.code))
 						.setDisabledNote(mActivity.getString(R.string.options_eink_app_optimization_enabled))
 						.setIconIdByAttr(R.attr.attr_icons8_eink_snow, R.drawable.icons8_eink_snow));
 				intervalAdded = true;
@@ -179,6 +187,14 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 								setDefaultValue("0").
 								setIconIdByAttr(R.attr.attr_icons8_eink_sett, R.drawable.icons8_eink_sett);
 				listView.add(optionNeedBypass);
+
+				OptionBase optionNeedDeepGC =
+						new BoolOption(mActivity, mOwner, mActivity.getString(R.string.eink_onyx_deepgc), Settings.PROP_APP_EINK_ONYX_NEED_DEEPGC,
+								mActivity.getString(R.string.eink_onyx_deepgc_add_info), this.lastFilteredValue).
+								setDefaultValue("0").
+								setIconIdByAttr(R.attr.attr_icons8_eink_sett, R.drawable.icons8_eink_sett);
+				listView.add(optionNeedDeepGC);
+
 
 				OptionBase optionFSUMethod =
 						new ListOption(mOwner, mActivity.getString(R.string.eink_onyx_full_update), Settings.PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD,
@@ -235,6 +251,8 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 				mActivity.getString(R.string.options_screen_blackpage_duration_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.eink_onyx_bypass), Settings.PROP_APP_EINK_ONYX_NEED_BYPASS,
 				mActivity.getString(R.string.eink_onyx_bypass_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.eink_onyx_deepgc), Settings.PROP_APP_EINK_ONYX_NEED_DEEPGC,
+				mActivity.getString(R.string.eink_onyx_deepgc_add_info));
 		for (int i: mEinkOnyxNeedBypassTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		this.updateFilteredMark(mActivity.getString(R.string.eink_onyx_add_delay_full_refresh), Settings.PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH,
 				mActivity.getString(R.string.option_add_info_empty_text));

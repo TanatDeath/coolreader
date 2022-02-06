@@ -9,11 +9,12 @@ public interface EinkScreen {
 
 	enum EinkUpdateMode {
 		Unspecified(-1),
-		Regal(3),				// also known as 'SNOW Field'
-		Clear(0),				// old name CMODE_CLEAR
-		Fast(1),				// old name CMODE_ONESHOT
+		Regal(3),				// also known as 'SNOW Field', in onyx - boolean, can be applied to any mode
+		Normal(0),			// old name CMODE_CLEAR, Onyx = Notmal
+		FastQuality(1),		// old name CMODE_ONESHOT, Onyx = Fast_Quality
 		Active(2),			// old name CMODE_ACTIVE
-		A2(4),				// Fast 'A2' mode
+		FastA2(4),			// Fast 'A2' mode, Onyx = Fast
+		FastX(5),				// Onyx X Mode, Onyx = Fast_X
 		;
 
 		public static EinkUpdateMode byCode(int code) {
@@ -31,9 +32,13 @@ public interface EinkScreen {
 		public final int code;
 	}
 
-	void setupController(EinkUpdateMode mode, int updateInterval, View view);
+	void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal);
 
 	void setNeedBypass(int needBypass);
+
+	void setNeedDeepGC(boolean needDeepGC);
+
+	void setRegal(boolean regal);
 
 	void setSelectionActive(boolean selectionActive);
 

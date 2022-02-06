@@ -200,6 +200,9 @@ public class FilebrowserOption extends SubmenuOption {
 				Settings.PROP_APP_FILE_BROWSER_ZIP_SCAN, mActivity.getString(R.string.detect_zip_add_info), this.lastFilteredValue).
 				add(mZipScan, mZipScanTitles, mZipScanAddInfos).
 				setDefaultValue("0").setIconIdByAttr(R.attr.cr3_browser_folder_zip_drawable, R.drawable.icons8_zip));
+		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.show_hidden_dirs), Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS,
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+				noIcon());
 		dlg.setView(listView);
 		dlg.show();
 	}
@@ -249,6 +252,8 @@ public class FilebrowserOption extends SubmenuOption {
 		this.updateFilteredMark(mActivity.getString(R.string.detect_zip_0), mActivity.getString(R.string.detect_zip_1),
 				mActivity.getString(R.string.detect_zip_2));
 		this.updateFilteredMark(mActivity.getString(R.string.detect_zip_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.show_hidden_dirs), Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS,
+				mActivity.getString(R.string.option_add_info_empty_text));
 		return this.lastFiltered;
 	}
 

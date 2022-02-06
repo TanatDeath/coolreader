@@ -4141,7 +4141,7 @@ public class MainDB extends BaseDB {
 				FileInfo file = findFileInfoByPathname(path, true);
 				if (control.isStopped())
 					break;
-				progress.setProgress(i * 10000 / (2 * count));
+				progress.setProgress(i * 10000 / (2 * count), "");
 				if (file != null)
 					list.add(new FileInfo(file));
 				i++;
@@ -4642,13 +4642,15 @@ public class MainDB extends BaseDB {
 	// StarDict work
 	ArrayList<OfflineInfo> starDictInfoList = null;
 
-	public String convertStartDictDic(String dicPath, String dicName) {
+	public String convertStartDictDic(String dicPath, String dicName,
+				  final Scanner.ScanControl control, final Engine.ProgressControl progress) {
 		try {
 			File dicFile = new File(dicPath + "/" + dicName + ".dict");
 			if (!dicFile.exists()) return "[dic_not_exists]";
 			StartDictDB sddb = new StartDictDB();
 			sddb.createDatabase(dicPath + "/" + dicName + ".db");
-			sddb.loadDic(dicPath, dicName);
+			boolean res = sddb.loadDic(dicPath, dicName, control, progress);
+			if (!res) return "[incomplete]";
 			//return word count - for info
 		} catch (Exception e) {
 			return e.getMessage();

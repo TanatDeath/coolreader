@@ -113,8 +113,6 @@ public interface Settings {
     String PROP_PROFILE_NUMBER          ="crengine.profile.number"; // current settings profile number
 	String PROP_PROFILE_NAME            ="crengine.profile.name";
 	String PROP_APP_SETTINGS_SHOW_ICONS ="app.settings.show.icons";
-    String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
-    String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
     String PROP_APP_KEY_BACKLIGHT_OFF   ="app.key.backlight.disabled";
 	String PROP_APP_USE_EINK_FRONTLIGHT   ="app.use.eink.frontlight"; //KR
 	String PROP_APP_BACKLIGHT_SWIPE_SENSIVITY   ="app.backlight.swipe.sensivity";
@@ -281,8 +279,12 @@ public interface Settings {
     String PROP_HIGHLIGHT_SELECTION_COLOR_NIGHT = "crengine.highlight.selection.color.night";
     String PROP_HIGHLIGHT_BOOKMARK_COLOR_COMMENT_NIGHT = "crengine.highlight.bookmarks.color.comment.night";
     String PROP_HIGHLIGHT_BOOKMARK_COLOR_CORRECTION_NIGHT = "crengine.highlight.bookmarks.color.correction.night";
+	String PROP_APP_ICONS_IS_CUSTOM_COLOR ="app.settings.show.icons.is.custom.color";
+	String PROP_APP_ICONS_CUSTOM_COLOR ="app.settings.show.icons.custom.color";
+	String PROP_APP_ICONS_CUSTOM_COLOR_DAY ="app.settings.show.icons.custom.color.day";
+	String PROP_APP_ICONS_CUSTOM_COLOR_NIGHT ="app.settings.show.icons.custom.color.night";
 
-    String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
+	String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
 	String PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES = "app.browser.hide.empty.genres";
 	String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
 
@@ -301,6 +303,7 @@ public interface Settings {
 	String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED = "app.browser.authors.aliases.enabled";
 	String PROP_APP_EXT_DOC_CAME_TIMEOUT = "app.ext.doc.came.timeout";
 	String PROP_APP_FILE_BROWSER_ZIP_SCAN = "app.browser.zip.scan";
+	String PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS = "app.browser.show.hidden.dirs";
 
     String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
     String PROP_APP_SCREEN_UPDATE_INTERVAL = "app.screen.update.interval";
@@ -368,7 +371,9 @@ public interface Settings {
 	String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
 	String PROP_PAGE_FLIP_TITLE = "window.page.flip.title";
 
-	String PROP_APP_EINK_ONYX_NEED_BYPASS   ="app.eink.onyx.need.bypass";
+	String PROP_APP_EINK_ONYX_NEED_BYPASS = "app.eink.onyx.need.bypass";
+	String PROP_APP_EINK_ONYX_NEED_DEEPGC = "app.eink.onyx.need.deepgc";
+	String PROP_APP_EINK_ONYX_REGAL = "app.eink.onyx.regal";
 	String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
 	String PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD   ="app.eink.onyx.full.screen.update.method";
 
@@ -616,6 +621,26 @@ public interface Settings {
 
 		PROP_APP_TTS_SENTENCE_PAUSE
 
+	};
+
+	// settings which depend on profile
+	String[] NOTSAVE_SETTINGS = {
+		PROP_SKIPPED_RES,
+	    PROP_APP_RESTORE_SETTINGS + "*",
+		PROP_APP_MIGRATE_SETTINGS,
+		PROP_APP_INIT,
+		PROP_CLOUD_YND_SETTINGS,
+		PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD,
+		PROP_CLOUD_YND_HOME_FOLDER,
+		PROP_APP_TRANSLATE_DIR,
+		PROP_APP_OFFLINE_DICS,
+		PROP_APP_QUICK_TRANSLATION_DIRS,
+		PROP_CLOUD_YND_TRANSLATE_OPTIONS,
+		PROP_CLOUD_LINGVO_OPTIONS,
+		PROP_CLOUD_DEEPL_OPTIONS,
+		PROP_CLOUD_YND_SETTINGS,
+		PROP_CLOUD_DBX_SETTINGS,
+		PROP_CLOUD_LITRES_SETTINGS
 	};
 
 	static boolean isSettingBelongToProfile(String settingName) {

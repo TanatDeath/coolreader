@@ -7,7 +7,6 @@ import android.view.View;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.N2EpdController;
-import org.coolreader.eink.EinkScreen;
 
 import java.util.List;
 
@@ -27,20 +26,20 @@ public class EinkScreenNook implements EinkScreen {
 	private boolean mSelectionActive = false;
 
 	@Override
-	public void setupController(EinkUpdateMode mode, int updateInterval, View view) {
+	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal) {
 		mUpdateInterval = updateInterval;
 		if (mUpdateMode.equals(mode))
 			return;
 		log.d("EinkScreenNookTolino.setupController(): mode=" + mode);
 		switch (mode) {
-			case Clear:
+			case Normal:
 				if (mUpdateMode == EinkUpdateMode.Active) {
 					mRefreshNumber = -1;
 				} else {
 					mRefreshNumber = 0;
 				}
 				break;
-			case Fast:
+			case FastQuality:
 				mRefreshNumber = 0;
 				break;
 			default:
@@ -51,6 +50,16 @@ public class EinkScreenNook implements EinkScreen {
 
 	@Override
 	public void setNeedBypass(int needBypass) {
+
+	}
+
+	@Override
+	public void setNeedDeepGC(boolean needDeepGC) {
+
+	}
+
+	@Override
+	public void setRegal(boolean regal) {
 
 	}
 
@@ -74,7 +83,7 @@ public class EinkScreenNook implements EinkScreen {
 		}
 		if (mRefreshNumber == -1) {
 			switch (mUpdateMode) {
-				case Clear:
+				case Normal:
 					nookSetMode(view, mUpdateMode);
 					break;
 				case Active:
@@ -86,22 +95,22 @@ public class EinkScreenNook implements EinkScreen {
 			mRefreshNumber = 0;
 			return;
 		}
-		if (mUpdateMode == EinkUpdateMode.Clear) {
+		if (mUpdateMode == EinkUpdateMode.Normal) {
 			nookSetMode(view, mUpdateMode);
 			return;
 		}
-		if (mUpdateInterval > 0 || mUpdateMode == EinkUpdateMode.Fast) {
-			if (mRefreshNumber == 0 || (mUpdateMode == EinkUpdateMode.Fast && mRefreshNumber < mUpdateInterval)) {
+		if (mUpdateInterval > 0 || mUpdateMode == EinkUpdateMode.FastQuality) {
+			if (mRefreshNumber == 0 || (mUpdateMode == EinkUpdateMode.FastQuality && mRefreshNumber < mUpdateInterval)) {
 				switch (mUpdateMode) {
 					case Active:
 						nookSetMode(view, mUpdateMode);
 						break;
-					case Fast:
+					case FastQuality:
 						nookSetMode(view, mUpdateMode);
 						break;
 				}
 			} else if (mUpdateInterval <= mRefreshNumber) {
-				nookSetMode(view, EinkUpdateMode.Clear);
+				nookSetMode(view, EinkUpdateMode.Normal);
 				mRefreshNumber = -1;
 			}
 			if (mUpdateInterval > 0) {
@@ -173,29 +182,29 @@ public class EinkScreenNook implements EinkScreen {
 			mIsSleep = toSleep;
 			if (mIsSleep) {
 				switch (mUpdateMode) {
-					case Clear:
+					case Normal:
 						break;
-					case Fast:
+					case FastQuality:
 						break;
 					case Active:
-						nookSetMode(view, EinkUpdateMode.Clear);
+						nookSetMode(view, EinkUpdateMode.Normal);
 						mRefreshNumber = -1;
 				}
 			} else {
-				setupController(mUpdateMode, mUpdateInterval, view);
+				setupController(mUpdateMode, mUpdateInterval, view, false);
 			}
 		}
 	}
 
 	private void nookSetMode(View view, EinkUpdateMode mode) {
 		switch (mode) {
-			case Clear:
+			case Normal:
 				N2EpdController.setMode(N2EpdController.REGION_APP_3,
 						N2EpdController.WAVE_GC,
 						N2EpdController.MODE_ONESHOT_ALL);
 //				N2EpdController.MODE_CLEAR, view);
 				break;
-			case Fast:
+			case FastQuality:
 				N2EpdController.setMode(N2EpdController.REGION_APP_3,
 						N2EpdController.WAVE_GU,
 						N2EpdController.MODE_ONESHOT_ALL);

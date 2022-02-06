@@ -869,6 +869,8 @@ public class SelectionToolbarDlg {
 
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 
+		mReaderView.toggleScreenUpdateModeMode();
+
 		if (showAtTop)
 			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], 0);
 		else
@@ -884,7 +886,6 @@ public class SelectionToolbarDlg {
 			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
 
 		isVisibleNow = true;
-		mReaderView.toggleScreenUpdateModeMode();
 		mActivity.tintViewIcons(mPanel);
 	}
 

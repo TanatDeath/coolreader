@@ -1,6 +1,8 @@
 package org.coolreader.readerview;
 
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.DeviceInfo;
 
 public class DrawPageTask extends Task {
 	final int id;
@@ -30,7 +32,17 @@ public class DrawPageTask extends Task {
 		log.e("DrawPageTask.work("+mReaderView.internalDX+","+mReaderView.internalDY+")");
 		bi = mReaderView.preparePageImage(0);
 		if (bi != null) {
-			mReaderView.bookView.draw(isPartially);
+			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				boolean needDraw = true;
+				if (!isPartially)
+					if (mReaderView.lastCachedBitmap != null)
+						if (bi.bitmap.sameAs(mReaderView.lastCachedBitmap)) needDraw = false;
+				if (needDraw) {
+					mReaderView.lastCachedBitmap = bi.bitmap.copy(bi.bitmap.getConfig(), true);
+					mReaderView.bookView.draw(isPartially);
+				} else log.v("Unnessesary redraw skipped");
+			} else
+				mReaderView.bookView.draw(isPartially);
 		}
 	}
 	@Override
