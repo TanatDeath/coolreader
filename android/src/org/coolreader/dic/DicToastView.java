@@ -462,6 +462,16 @@ public class DicToastView {
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
+            Button btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            btnDicExtended.setOnClickListener(v -> {
+                try {
+                    mActivity.mDictionaries.findInDictionary(findText,
+                            mActivity.mDictionaries.lastDicView, true, mActivity.mDictionaries.lastDC);
+                    mHandler.postDelayed(handleDismiss, 100);
+                } catch (Dictionaries.DictionaryException e) {
+                    // do nothing
+                }
+            });
             if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
@@ -470,7 +480,7 @@ public class DicToastView {
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
                             mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
@@ -485,7 +495,7 @@ public class DicToastView {
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
                             mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
@@ -500,7 +510,7 @@ public class DicToastView {
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
                             mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
@@ -706,7 +716,7 @@ public class DicToastView {
                 curWindow = null;
                 showing.compareAndSet(true, false);
             });
-            ImageButton btnToUserDic = (ImageButton) window.getContentView().findViewById(R.id.btn_to_user_dic);
+            ImageButton btnToUserDic = window.getContentView().findViewById(R.id.btn_to_user_dic);
             btnToUserDic.setOnClickListener(v -> {
                 if (cr.getReaderView().mBookInfo!=null) {
                     if (cr.getReaderView().lastSelection!=null) {
@@ -962,6 +972,10 @@ public class DicToastView {
                 if (!StrUtils.isEmptyStr(de.tagWordType))
                     text = text + "; " + de.tagWordType.trim();
                 labelView.setText(text);
+                Button btnOpen = view.findViewById(R.id.dic_more);
+                btnOpen.setPadding(10, 4, 10, 4);
+                Utils.setSolidButton(btnOpen);
+                if (isEInk) Utils.setSolidButtonEink(btnOpen);
                 if (!StrUtils.isEmptyStr(sFindText))
                     Utils.setHighLightedText(labelView, sFindText, mColorIconL);
                 return view;
@@ -1071,9 +1085,9 @@ public class DicToastView {
 
         @Override
         public boolean performItemClick(View view, int position, long id) {
-            Dictionaries.saveToDicSearchHistory((CoolReader) mActivity, findText, dicStruct.getTranslation(position), mListCurDict);
-            if ((((CoolReader) mActivity).getReaderView() == null) ||
-                    (((CoolReader) mActivity).mCurrentFrame != ((CoolReader) mActivity).mReaderFrame)) {
+            Dictionaries.saveToDicSearchHistory(mActivity, findText, dicStruct.getTranslation(position), mListCurDict);
+            if ((mActivity.getReaderView() == null) ||
+                    (mActivity.mCurrentFrame != mActivity.mReaderFrame)) {
                 ClipboardManager cm = mActivity.getClipboardmanager();
                 String s = StrUtils.getNonEmptyStr(findText + ": " + dicStruct.getTranslation(position), true);
                 cm.setText(StrUtils.getNonEmptyStr(s, true));
@@ -1126,6 +1140,16 @@ public class DicToastView {
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
+            Button btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            btnDicExtended.setOnClickListener(v -> {
+                try {
+                    mActivity.mDictionaries.findInDictionary(findText,
+                            mActivity.mDictionaries.lastDicView, true, mActivity.mDictionaries.lastDC);
+                    mHandler.postDelayed(handleDismiss, 100);
+                } catch (Dictionaries.DictionaryException e) {
+                    // do nothing
+                }
+            });
             if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
                 else
                     btnRemove1sym.setOnClickListener(v -> {
@@ -1134,7 +1158,7 @@ public class DicToastView {
                             mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                             try {
                                 mActivity.mDictionaries.findInDictionary(findText1,
-                                        mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                                        mActivity.mDictionaries.lastDicView,false, mActivity.mDictionaries.lastDC);
                             } catch (Dictionaries.DictionaryException e) {
                               // do nothing
                             }
@@ -1149,7 +1173,7 @@ public class DicToastView {
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
                             mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
@@ -1164,7 +1188,7 @@ public class DicToastView {
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
                             mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, mActivity.mDictionaries.lastDC);
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }

@@ -105,17 +105,18 @@ public class ReaderAction {
 	public boolean mayAssignOnTap() { return mayAssignOnTap; }
 	public boolean activateWithLongMenuKey() { return activateWithLongMenuKey; }
 
-	public ReaderAction(String id, int nameId, ReaderCommand cmd, int param, ReaderAction mirrorAction, int addInfoR) {
-		super();
-		this.id = id;
-		this.nameId = nameId;
-		this.cmd = cmd;
-		this.param = param;
-		this.menuItemId = 0;
-		this.iconId = 0;
-		this.mirrorAction = mirrorAction;
-		this.addInfoR = addInfoR;
-	}
+// to avoid hard finding bugs
+//	public ReaderAction(String id, int nameId, ReaderCommand cmd, int param, ReaderAction mirrorAction, int addInfoR) {
+//		super();
+//		this.id = id;
+//		this.nameId = nameId;
+//		this.cmd = cmd;
+//		this.param = param;
+//		this.menuItemId = 0;
+//		this.iconId = 0;
+//		this.mirrorAction = mirrorAction;
+//		this.addInfoR = addInfoR;
+//	}
 
 	public ReaderAction(String id, int nameId, ReaderCommand cmd, int param, int menuItemId, ReaderAction mirrorAction, int addInfoR) {
 		super();
@@ -133,16 +134,16 @@ public class ReaderAction {
 		return id;
 	}
 
-	public final static ReaderAction NONE = new ReaderAction("NONE", R.string.action_none, ReaderCommand.DCMD_NONE, 0 , null, R.string.option_add_info_empty_text);
-	public final static ReaderAction REPEAT = new ReaderAction("REPEAT", R.string.action_repeat, ReaderCommand.DCMD_REPEAT, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_repeat);
-	public final static ReaderAction PAGE_DOWN = new ReaderAction("PAGE_DOWN", R.string.action_pagedown, ReaderCommand.DCMD_PAGEDOWN, 1 , null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_down);
-	public final static ReaderAction PAGE_DOWN_10 = new ReaderAction("PAGE_DOWN_10", R.string.action_pagedown_10, ReaderCommand.DCMD_PAGEDOWN, 10 , null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_down2);
-	public final static ReaderAction PAGE_UP = new ReaderAction("PAGE_UP", R.string.action_pageup, ReaderCommand.DCMD_PAGEUP, 1 , PAGE_DOWN, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_up);
-	public final static ReaderAction PAGE_UP_10 = new ReaderAction("PAGE_UP_10", R.string.action_pageup_10, ReaderCommand.DCMD_PAGEUP, 10 , PAGE_DOWN_10, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_up2);
-	public final static ReaderAction ZOOM_IN = new ReaderAction("ZOOM_IN", R.string.mi_font_size_increase, ReaderCommand.DCMD_ZOOM_IN, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_increase_font_2); //,  R.id.cr3_mi_font_size_increase
-	public final static ReaderAction ZOOM_OUT = new ReaderAction("ZOOM_OUT", R.string.mi_font_size_decrease, ReaderCommand.DCMD_ZOOM_OUT, 1, ZOOM_IN, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_decrease_font_1); //,  R.id.cr3_mi_font_size_decrease
-    public final static ReaderAction FONT_SELECT = new ReaderAction("FONT_SELECT", R.string.mi_font_select, ReaderCommand.DCMD_FONT_SELECT, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_face);
-    public final static ReaderAction FONT_BOLD = new ReaderAction("FONT_BOLD", R.string.mi_font_bold, ReaderCommand.DCMD_FONT_BOLD, 1, FONT_SELECT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bold);
+	public final static ReaderAction NONE = new ReaderAction("NONE", R.string.action_none, ReaderCommand.DCMD_NONE, 0 , 0,null, R.string.option_add_info_empty_text);
+	public final static ReaderAction REPEAT = new ReaderAction("REPEAT", R.string.action_repeat, ReaderCommand.DCMD_REPEAT, 0 , 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_repeat);
+	public final static ReaderAction PAGE_DOWN = new ReaderAction("PAGE_DOWN", R.string.action_pagedown, ReaderCommand.DCMD_PAGEDOWN, 1 , 0, null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_down);
+	public final static ReaderAction PAGE_DOWN_10 = new ReaderAction("PAGE_DOWN_10", R.string.action_pagedown_10, ReaderCommand.DCMD_PAGEDOWN, 10 ,0, null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_down2);
+	public final static ReaderAction PAGE_UP = new ReaderAction("PAGE_UP", R.string.action_pageup, ReaderCommand.DCMD_PAGEUP, 1 , 0, PAGE_DOWN, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_up);
+	public final static ReaderAction PAGE_UP_10 = new ReaderAction("PAGE_UP_10", R.string.action_pageup_10, ReaderCommand.DCMD_PAGEUP, 10 , 0, PAGE_DOWN_10, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_document_up2);
+	public final static ReaderAction ZOOM_IN = new ReaderAction("ZOOM_IN", R.string.mi_font_size_increase, ReaderCommand.DCMD_ZOOM_IN, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_increase_font_2); //,  R.id.cr3_mi_font_size_increase
+	public final static ReaderAction ZOOM_OUT = new ReaderAction("ZOOM_OUT", R.string.mi_font_size_decrease, ReaderCommand.DCMD_ZOOM_OUT, 1, 0, ZOOM_IN, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_decrease_font_1); //,  R.id.cr3_mi_font_size_decrease
+    public final static ReaderAction FONT_SELECT = new ReaderAction("FONT_SELECT", R.string.mi_font_select, ReaderCommand.DCMD_FONT_SELECT, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_face);
+    public final static ReaderAction FONT_BOLD = new ReaderAction("FONT_BOLD", R.string.mi_font_bold, ReaderCommand.DCMD_FONT_BOLD, 1, 0, FONT_SELECT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bold);
 	public final static ReaderAction DOCUMENT_STYLES = new ReaderAction("DOCUMENT_STYLES", R.string.action_toggle_document_styles, ReaderCommand.DCMD_TOGGLE_DOCUMENT_STYLES, 0, R.id.cr3_mi_toggle_document_styles, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.icons8_css_2);
 	public final static ReaderAction TEXT_AUTOFORMAT = new ReaderAction("TEXT_AUTOFORMAT", R.string.action_toggle_text_autoformat, ReaderCommand.DCMD_TOGGLE_TEXT_AUTOFORMAT, 0, R.id.cr3_mi_toggle_text_autoformat, null, R.string.option_add_info_empty_text );
 	public final static ReaderAction BOOKMARKS = new ReaderAction("BOOKMARKS", R.string.action_bookmarks, ReaderCommand.DCMD_BOOKMARKS, 0, R.id.cr3_mi_bookmarks, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_bookmarks);
@@ -153,103 +154,107 @@ public class ReaderAction {
 	public final static ReaderAction SEARCH = new ReaderAction("SEARCH", R.string.action_search, ReaderCommand.DCMD_SEARCH, 0, R.id.cr3_mi_search, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_viewer_find);
 	public final static ReaderAction GO_PAGE = new ReaderAction("GO_PAGE", R.string.action_go_page, ReaderCommand.DCMD_GO_PAGE_DIALOG, 0, R.id.cr3_mi_go_page, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_go_page);
 	//public final static ReaderAction GO_PERCENT = new ReaderAction("GO_PERCENT", R.string.action_go_percent, ReaderCommand.DCMD_GO_PERCENT_DIALOG, 0, R.id.cr3_mi_go_percent, GO_PAGE, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_go_percent);
-	public final static ReaderAction FIRST_PAGE = new ReaderAction("FIRST_PAGE", R.string.action_go_first_page, ReaderCommand.DCMD_BEGIN, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_1);
-	public final static ReaderAction LAST_PAGE = new ReaderAction("LAST_PAGE", R.string.action_go_last_page, ReaderCommand.DCMD_END, 0 , FIRST_PAGE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_z);
+	public final static ReaderAction FIRST_PAGE = new ReaderAction("FIRST_PAGE", R.string.action_go_first_page, ReaderCommand.DCMD_BEGIN, 0 , 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_1);
+	public final static ReaderAction LAST_PAGE = new ReaderAction("LAST_PAGE", R.string.action_go_last_page, ReaderCommand.DCMD_END, 0 , 0, FIRST_PAGE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_z);
 	public final static ReaderAction OPTIONS = new ReaderAction("OPTIONS", R.string.action_options, ReaderCommand.DCMD_OPTIONS_DIALOG, 0, R.id.cr3_mi_options , null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_viewer_settings);
 	public final static ReaderAction OPTIONS_FILTER = new ReaderAction("OPTIONS_FILTER", R.string.action_options_filtered, ReaderCommand.DCMD_OPTIONS_DIALOG_FILTERED, 0, R.id.cr3_mi_options , OPTIONS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_search);
-	public final static ReaderAction READER_MENU = new ReaderAction("READER_MENU", R.string.action_reader_menu, ReaderCommand.DCMD_READER_MENU, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_menu);
+	public final static ReaderAction READER_MENU = new ReaderAction("READER_MENU", R.string.action_reader_menu, ReaderCommand.DCMD_READER_MENU, 0 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_menu);
 	public final static ReaderAction TOGGLE_DAY_NIGHT = new ReaderAction("TOGGLE_DAY_NIGHT", R.string.action_toggle_day_night, ReaderCommand.DCMD_TOGGLE_DAY_NIGHT_MODE, 0, R.id.cr3_mi_toggle_day_night , null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_option_night);
-	public final static ReaderAction RECENT_BOOKS = new ReaderAction("RECENT_BOOKS", R.string.action_recent_books_list, ReaderCommand.DCMD_RECENT_BOOKS_LIST, R.id.book_recent_books, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_browser_folder_recent);
-	public final static ReaderAction OPDS_CATALOGS = new ReaderAction("OPDS_CATALOGS", R.string.mi_book_opds_root, ReaderCommand.DCMD_OPDS_CATALOGS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_opds);
-	public final static ReaderAction FILE_BROWSER_ROOT = new ReaderAction("FILE_BROWSER_ROOT", R.string.mi_book_root, ReaderCommand.DCMD_FILE_BROWSER_ROOT, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_root);
+	public final static ReaderAction RECENT_BOOKS = new ReaderAction("RECENT_BOOKS", R.string.action_recent_books_list, ReaderCommand.DCMD_RECENT_BOOKS_LIST, 0, R.id.book_recent_books, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_browser_folder_recent);
+	public final static ReaderAction OPDS_CATALOGS = new ReaderAction("OPDS_CATALOGS", R.string.mi_book_opds_root, ReaderCommand.DCMD_OPDS_CATALOGS, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_opds);
+	public final static ReaderAction FILE_BROWSER_ROOT = new ReaderAction("FILE_BROWSER_ROOT", R.string.mi_book_root, ReaderCommand.DCMD_FILE_BROWSER_ROOT, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_root);
 	public final static ReaderAction FILE_BROWSER = new ReaderAction("FILE_BROWSER", R.string.action_file_browser, ReaderCommand.DCMD_FILE_BROWSER, 0, R.id.cr3_mi_open_file ,RECENT_BOOKS, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder);
-	public final static ReaderAction FILE_BROWSER_UP = new ReaderAction("FILE_BROWSER_UP", R.string.action_go_back, ReaderCommand.DCMD_FILE_BROWSER_UP, 0, FILE_BROWSER_ROOT, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_prev);
-	public final static ReaderAction CURRENT_BOOK_DIRECTORY = new ReaderAction("DCMD_CURRENT_BOOK_DIRECTORY", R.string.mi_book_recent_goto, ReaderCommand.DCMD_CURRENT_BOOK_DIRECTORY, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_current_book);
-	public final static ReaderAction CURRENT_BOOK = new ReaderAction("DCMD_CURRENT_BOOK", R.string.mi_book_back_to_reading, ReaderCommand.DCMD_CURRENT_BOOK, 0, CURRENT_BOOK_DIRECTORY, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_book_open);
-	public final static ReaderAction FILE_BROWSER_SORT_ORDER = new ReaderAction("FILE_BROWSER_SORT_ORDER", R.string.mi_book_sort_order, ReaderCommand.DCMD_FILE_BROWSER_SORT_ORDER, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_alphabetical_sorting);
-	public final static ReaderAction TOGGLE_DICT_ONCE = new ReaderAction("TOGGLE_DICT_ONCE", R.string.toggle_dict_once, ReaderCommand.DCMD_TOGGLE_DICT_ONCE, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_2);
-	public final static ReaderAction TOGGLE_DICT = new ReaderAction("TOGGLE_DICT", R.string.toggle_dict, ReaderCommand.DCMD_TOGGLE_DICT, 0, TOGGLE_DICT_ONCE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_switch);
-	public final static ReaderAction WHOLE_PAGE_TO_DIC = new ReaderAction("WHOLE_PAGE_TO_DIC", R.string.whole_page_to_dic, ReaderCommand.DCMD_WHOLE_PAGE_TO_DIC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_page_to_dic);
+	public final static ReaderAction FILE_BROWSER_UP = new ReaderAction("FILE_BROWSER_UP", R.string.action_go_back, ReaderCommand.DCMD_FILE_BROWSER_UP, 0, 0, FILE_BROWSER_ROOT, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_prev);
+	public final static ReaderAction CURRENT_BOOK_DIRECTORY = new ReaderAction("DCMD_CURRENT_BOOK_DIRECTORY", R.string.mi_book_recent_goto, ReaderCommand.DCMD_CURRENT_BOOK_DIRECTORY, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_current_book);
+	public final static ReaderAction CURRENT_BOOK = new ReaderAction("DCMD_CURRENT_BOOK", R.string.mi_book_back_to_reading, ReaderCommand.DCMD_CURRENT_BOOK, 0, 0, CURRENT_BOOK_DIRECTORY, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_book_open);
+	public final static ReaderAction FILE_BROWSER_SORT_ORDER = new ReaderAction("FILE_BROWSER_SORT_ORDER", R.string.mi_book_sort_order, ReaderCommand.DCMD_FILE_BROWSER_SORT_ORDER, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_alphabetical_sorting);
+	public final static ReaderAction TOGGLE_DICT_ONCE = new ReaderAction("TOGGLE_DICT_ONCE", R.string.toggle_dict_once, ReaderCommand.DCMD_TOGGLE_DICT_ONCE, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_2);
+	public final static ReaderAction TOGGLE_DICT = new ReaderAction("TOGGLE_DICT", R.string.toggle_dict, ReaderCommand.DCMD_TOGGLE_DICT, 0, 0, TOGGLE_DICT_ONCE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_switch);
+	public final static ReaderAction WHOLE_PAGE_TO_DIC = new ReaderAction("WHOLE_PAGE_TO_DIC", R.string.whole_page_to_dic, ReaderCommand.DCMD_WHOLE_PAGE_TO_DIC, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_page_to_dic);
 
-	public final static ReaderAction FONT_PREVIOUS = new ReaderAction("FONT_PREVIOUS", R.string.mi_font_previous, ReaderCommand.DCMD_FONT_PREVIOUS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_up); //, R.id.cr3_mi_font_previous
-	public final static ReaderAction FONT_NEXT = new ReaderAction("FONT_NEXT", R.string.mi_font_next, ReaderCommand.DCMD_FONT_NEXT, 0, FONT_PREVIOUS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_down); //, R.id.cr3_mi_font_next
-	public final static ReaderAction TOGGLE_TOUCH_SCREEN_LOCK = new ReaderAction("TOGGLE_TOUCH_SCREEN_LOCK", R.string.action_touch_screen_toggle_lock, ReaderCommand.DCMD_TOGGLE_TOUCH_SCREEN_LOCK, 0 , null, R.string.option_add_info_empty_text).dontAssignOnTap().setIconId(R.drawable.icons8_lock_portrait_2);
-	public final static ReaderAction TOGGLE_ORIENTATION = new ReaderAction("TOGGLE_ORIENTATION", R.string.action_toggle_screen_orientation, ReaderCommand.DCMD_TOGGLE_ORIENTATION, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_orientation);
-	public final static ReaderAction TOGGLE_FULLSCREEN = new ReaderAction("TOGGLE_FULLSCREEN", R.string.action_toggle_fullscreen, ReaderCommand.DCMD_TOGGLE_FULLSCREEN, 0 , TOGGLE_ORIENTATION, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_fullscreen);
+	public final static ReaderAction FONT_PREVIOUS = new ReaderAction("FONT_PREVIOUS", R.string.mi_font_previous, ReaderCommand.DCMD_FONT_PREVIOUS, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_up); //, R.id.cr3_mi_font_previous
+	public final static ReaderAction FONT_NEXT = new ReaderAction("FONT_NEXT", R.string.mi_font_next, ReaderCommand.DCMD_FONT_NEXT, 0, 0, FONT_PREVIOUS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_font_down); //, R.id.cr3_mi_font_next
+	public final static ReaderAction TOGGLE_TOUCH_SCREEN_LOCK = new ReaderAction("TOGGLE_TOUCH_SCREEN_LOCK", R.string.action_touch_screen_toggle_lock, ReaderCommand.DCMD_TOGGLE_TOUCH_SCREEN_LOCK, 0 , 0,null, R.string.option_add_info_empty_text).dontAssignOnTap().setIconId(R.drawable.icons8_lock_portrait_2);
+	public final static ReaderAction TOGGLE_ORIENTATION = new ReaderAction("TOGGLE_ORIENTATION", R.string.action_toggle_screen_orientation, ReaderCommand.DCMD_TOGGLE_ORIENTATION, 0 , 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_orientation);
+	public final static ReaderAction TOGGLE_FULLSCREEN = new ReaderAction("TOGGLE_FULLSCREEN", R.string.action_toggle_fullscreen, ReaderCommand.DCMD_TOGGLE_FULLSCREEN, 0 , 0, TOGGLE_ORIENTATION, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_fullscreen);
 	public final static ReaderAction TOGGLE_SELECTION_MODE = new ReaderAction("TOGGLE_SELECTION_MODE", R.string.action_toggle_selection_mode, ReaderCommand.DCMD_TOGGLE_SELECTION_MODE, 0, R.id.cr3_mi_select_text, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_option_touch);
-	public final static ReaderAction TOGGLE_INSPECTOR_MODE = new ReaderAction("TOGGLE_INSPECTOR_MODE", R.string.action_toggle_inspector_mode, ReaderCommand.DCMD_TOGGLE_INSPECTOR_MODE, 0, TOGGLE_SELECTION_MODE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_night_vision);
-	public final static ReaderAction HOME_SCREEN = new ReaderAction("HOME_SCREEN", R.string.action_exit_home_screen, ReaderCommand.DCMD_SHOW_HOME_SCREEN, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_touchscreen);
+	public final static ReaderAction TOGGLE_INSPECTOR_MODE = new ReaderAction("TOGGLE_INSPECTOR_MODE", R.string.action_toggle_inspector_mode, ReaderCommand.DCMD_TOGGLE_INSPECTOR_MODE, 0, 0, TOGGLE_SELECTION_MODE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_night_vision);
+	public final static ReaderAction HOME_SCREEN = new ReaderAction("HOME_SCREEN", R.string.action_exit_home_screen, ReaderCommand.DCMD_SHOW_HOME_SCREEN, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_touchscreen);
 	public final static ReaderAction GO_BACK = new ReaderAction("GO_BACK", R.string.action_go_back, ReaderCommand.DCMD_LINK_BACK, 0, R.id.cr3_go_back, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_prev);
 	public final static ReaderAction GO_FORWARD = new ReaderAction("GO_FORWARD", R.string.action_go_forward, ReaderCommand.DCMD_LINK_FORWARD, 0, R.id.cr3_go_forward, GO_BACK, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_next);
 	public final static ReaderAction TTS_PLAY = new ReaderAction("TTS_PLAY", R.string.mi_tts_play, ReaderCommand.DCMD_TTS_PLAY, 0, R.id.cr3_mi_tts_play, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_tts); //.setActivateWithLongMenuKey()
-	public final static ReaderAction TOGGLE_TITLEBAR = new ReaderAction("TOGGLE_TITLEBAR", R.string.action_toggle_titlebar, ReaderCommand.DCMD_TOGGLE_TITLEBAR, 0 , null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_navigation_toolbar_top);
-	public final static ReaderAction SHOW_POSITION_INFO_POPUP = new ReaderAction("SHOW_POSITION_INFO_POPUP", R.string.action_show_position_info, ReaderCommand.DCMD_SHOW_POSITION_INFO_POPUP, 0 , BOOK_INFO, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_info);
-	public final static ReaderAction SHOW_DICTIONARY = new ReaderAction("SHOW_DICTIONARY", R.string.action_show_dictionary, ReaderCommand.DCMD_SHOW_DICTIONARY, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate);
+	public final static ReaderAction TOGGLE_TITLEBAR = new ReaderAction("TOGGLE_TITLEBAR", R.string.action_toggle_titlebar, ReaderCommand.DCMD_TOGGLE_TITLEBAR, 0 , 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_navigation_toolbar_top);
+	public final static ReaderAction SHOW_POSITION_INFO_POPUP = new ReaderAction("SHOW_POSITION_INFO_POPUP", R.string.action_show_position_info, ReaderCommand.DCMD_SHOW_POSITION_INFO_POPUP, 0, 0, BOOK_INFO, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_info);
+	public final static ReaderAction SHOW_DICTIONARY = new ReaderAction("SHOW_DICTIONARY", R.string.action_show_dictionary, ReaderCommand.DCMD_SHOW_DICTIONARY, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate);
 	public final static ReaderAction OPEN_PREVIOUS_BOOK = new ReaderAction("OPEN_PREVIOUS_BOOK", R.string.action_open_last_book, ReaderCommand.DCMD_OPEN_PREVIOUS_BOOK, 0, R.id.cr3_go_previous_book, BOOK_INFO, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_btn_books_swap);
 	public final static ReaderAction TOGGLE_AUTOSCROLL = new ReaderAction("TOGGLE_AUTOSCROLL", R.string.action_toggle_autoscroll, ReaderCommand.DCMD_TOGGLE_AUTOSCROLL, 0, R.id.cr3_mi_toggle_autoscroll, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_scroll_go);
-	public final static ReaderAction AUTOSCROLL_SPEED_INCREASE = new ReaderAction("AUTOSCROLL_SPEED_INCREASE", R.string.action_autoscroll_speed_increase, ReaderCommand.DCMD_AUTOSCROLL_SPEED_INCREASE, 0, null, R.string.option_add_info_empty_text);
-	public final static ReaderAction AUTOSCROLL_SPEED_DECREASE = new ReaderAction("AUTOSCROLL_SPEED_DECREASE", R.string.action_autoscroll_speed_decrease, ReaderCommand.DCMD_AUTOSCROLL_SPEED_DECREASE, 0, AUTOSCROLL_SPEED_INCREASE, R.string.option_add_info_empty_text);
-	public final static ReaderAction START_SELECTION = new ReaderAction("START_SELECTION", R.string.action_toggle_selection_mode, ReaderCommand.DCMD_START_SELECTION, 0, TOGGLE_SELECTION_MODE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_selection1);
-	public final static ReaderAction SWITCH_PROFILE = new ReaderAction("SWITCH_PROFILE", R.string.action_switch_settings_profile, ReaderCommand.DCMD_SWITCH_PROFILE, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_switch_profile);
-	public final static ReaderAction SCAN_DIRECTORY_RECURSIVE = new ReaderAction("SCAN_DIRECTORY_RECURSIVE", R.string.mi_book_scan_recursive, ReaderCommand.DCMD_SCAN_DIRECTORY_RECURSIVE, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_scan);
-	public final static ReaderAction NEXT_CHAPTER = new ReaderAction("NEXT_CHAPTER", R.string.action_chapter_next, ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_down_ch);
-	public final static ReaderAction PREV_CHAPTER = new ReaderAction("PREV_CHAPTER", R.string.action_chapter_prev, ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1, NEXT_CHAPTER, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_up_ch);
-	public final static ReaderAction SAVE_LOGCAT = new ReaderAction("SAVE_LOGCAT", R.string.action_logcat, ReaderCommand.DCMD_SAVE_LOGCAT, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_log);
+	public final static ReaderAction AUTOSCROLL_SPEED_INCREASE = new ReaderAction("AUTOSCROLL_SPEED_INCREASE", R.string.action_autoscroll_speed_increase, ReaderCommand.DCMD_AUTOSCROLL_SPEED_INCREASE, 0, 0, null, R.string.option_add_info_empty_text);
+	public final static ReaderAction AUTOSCROLL_SPEED_DECREASE = new ReaderAction("AUTOSCROLL_SPEED_DECREASE", R.string.action_autoscroll_speed_decrease, ReaderCommand.DCMD_AUTOSCROLL_SPEED_DECREASE, 0, 0, AUTOSCROLL_SPEED_INCREASE, R.string.option_add_info_empty_text);
+	public final static ReaderAction START_SELECTION = new ReaderAction("START_SELECTION", R.string.action_toggle_selection_mode, ReaderCommand.DCMD_START_SELECTION, 0, 0, TOGGLE_SELECTION_MODE, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_selection1);
+	public final static ReaderAction SWITCH_PROFILE = new ReaderAction("SWITCH_PROFILE", R.string.action_switch_settings_profile, ReaderCommand.DCMD_SWITCH_PROFILE, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_switch_profile);
+	public final static ReaderAction SCAN_DIRECTORY_RECURSIVE = new ReaderAction("SCAN_DIRECTORY_RECURSIVE", R.string.mi_book_scan_recursive, ReaderCommand.DCMD_SCAN_DIRECTORY_RECURSIVE, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_scan);
+	public final static ReaderAction NEXT_CHAPTER = new ReaderAction("NEXT_CHAPTER", R.string.action_chapter_next, ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_down_ch);
+	public final static ReaderAction PREV_CHAPTER = new ReaderAction("PREV_CHAPTER", R.string.action_chapter_prev, ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1, 0, NEXT_CHAPTER, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_document_up_ch);
+	public final static ReaderAction SAVE_LOGCAT = new ReaderAction("SAVE_LOGCAT", R.string.action_logcat, ReaderCommand.DCMD_SAVE_LOGCAT, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_log);
 	public final static ReaderAction EXIT = new ReaderAction("EXIT", R.string.action_exit, ReaderCommand.DCMD_EXIT, 0, R.id.cr3_mi_exit, null , R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_viewer_exit);
 	public final static ReaderAction HIDE = new ReaderAction("HIDE", R.string.action_hide, ReaderCommand.DCMD_HIDE, 0, R.id.cr3_mi_hide, EXIT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_hide);
 
-	public final static ReaderAction SAVE_SETTINGS_TO_CLOUD = new ReaderAction("SAVE_SETTINGS_TO_CLOUD", R.string.save_settings_to_cloud, ReaderCommand.DCMD_SAVE_SETTINGS_TO_CLOUD, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_to_gd);
-	public final static ReaderAction LOAD_SETTINGS_FROM_CLOUD = new ReaderAction("LOAD_SETTINGS_FROM_CLOUD", R.string.load_settings_from_cloud, ReaderCommand.DCMD_LOAD_SETTINGS_FROM_CLOUD, 0, SAVE_SETTINGS_TO_CLOUD, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_from_gd);
-	public final static ReaderAction SAVE_READING_POS = new ReaderAction("SAVE_READING_POS", R.string.save_reading_pos_to_cloud, ReaderCommand.DCMD_SAVE_READING_POS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_to_gd);
-	public final static ReaderAction LOAD_READING_POS = new ReaderAction("LOAD_READING_POS", R.string.load_reading_pos_from_cloud, ReaderCommand.DCMD_LOAD_READING_POS, 0, SAVE_READING_POS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_from_gd);
-	public final static ReaderAction SAVE_BOOKMARKS = new ReaderAction("SAVE_BOOKMARKS", R.string.save_bookmarks_to_cloud, ReaderCommand.DCMD_SAVE_BOOKMARKS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmarks_to_gd);
-	public final static ReaderAction LOAD_BOOKMARKS = new ReaderAction("LOAD_BOOKMARKS", R.string.load_bookmarks_from_cloud, ReaderCommand.DCMD_LOAD_BOOKMARKS, 0, SAVE_BOOKMARKS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmarks_from_gd);
-    public final static ReaderAction CLOUD_MENU = new ReaderAction("CLOUD_MENU", R.string.cloud_menu, ReaderCommand.DCMD_CLOUD_MENU, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_cloud_storage);
-    public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_YND = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_YND", R.string.save_current_book_to_cloud_ynd, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_book_to_gd);
-	public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL", R.string.save_current_book_to_cloud_email, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL, 0, SAVE_CURRENT_BOOK_TO_CLOUD_YND, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_send_by_email);
+	public final static ReaderAction SAVE_SETTINGS_TO_CLOUD = new ReaderAction("SAVE_SETTINGS_TO_CLOUD", R.string.save_settings_to_cloud, ReaderCommand.DCMD_SAVE_SETTINGS_TO_CLOUD, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_to_gd);
+	public final static ReaderAction LOAD_SETTINGS_FROM_CLOUD = new ReaderAction("LOAD_SETTINGS_FROM_CLOUD", R.string.load_settings_from_cloud, ReaderCommand.DCMD_LOAD_SETTINGS_FROM_CLOUD, 0, 0, SAVE_SETTINGS_TO_CLOUD, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_settings_from_gd);
+	public final static ReaderAction SAVE_READING_POS = new ReaderAction("SAVE_READING_POS", R.string.save_reading_pos_to_cloud, ReaderCommand.DCMD_SAVE_READING_POS, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_to_gd);
+	public final static ReaderAction LOAD_READING_POS = new ReaderAction("LOAD_READING_POS", R.string.load_reading_pos_from_cloud, ReaderCommand.DCMD_LOAD_READING_POS, 0, 0, SAVE_READING_POS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_from_gd);
+	public final static ReaderAction SAVE_BOOKMARKS = new ReaderAction("SAVE_BOOKMARKS", R.string.save_bookmarks_to_cloud, ReaderCommand.DCMD_SAVE_BOOKMARKS, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmarks_to_gd);
+	public final static ReaderAction LOAD_BOOKMARKS = new ReaderAction("LOAD_BOOKMARKS", R.string.load_bookmarks_from_cloud, ReaderCommand.DCMD_LOAD_BOOKMARKS, 0, 0, SAVE_BOOKMARKS, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmarks_from_gd);
+    public final static ReaderAction CLOUD_MENU = new ReaderAction("CLOUD_MENU", R.string.cloud_menu, ReaderCommand.DCMD_CLOUD_MENU, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_cloud_storage);
+    public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_YND = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_YND", R.string.save_current_book_to_cloud_ynd, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_YND, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_book_to_gd);
+	public final static ReaderAction SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL = new ReaderAction("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL", R.string.save_current_book_to_cloud_email, ReaderCommand.DCMD_SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL, 0, 0, SAVE_CURRENT_BOOK_TO_CLOUD_YND, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_send_by_email);
 	//public final static ReaderAction OPEN_BOOK_FROM_CLOUD = new ReaderAction("OPEN_BOOK_FROM_GD", R.string.open_book_from_gd, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD, 0, SAVE_CURRENT_BOOK_TO_CLOUD, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_book_from_gd);
-	public final static ReaderAction OPEN_BOOK_FROM_CLOUD_YND = new ReaderAction("OPEN_BOOK_FROM_YND", R.string.open_book_from_ynd, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD_YND, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_yandex_logo);
-	public final static ReaderAction OPEN_BOOK_FROM_CLOUD_DBX = new ReaderAction("OPEN_BOOK_FROM_DBX", R.string.open_book_from_dbx, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD_DBX, 0, OPEN_BOOK_FROM_CLOUD_YND, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_dropbox_filled);
-	public final static ReaderAction FONTS_MENU = new ReaderAction("FONTS_MENU", R.string.fonts_menu, ReaderCommand.DCMD_FONTS_MENU, 0, CLOUD_MENU, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_type_filled_2);
-	public final static ReaderAction SAVE_BOOKMARK_LAST_SEL = new ReaderAction("SAVE_BOOKMARK_LAST_SEL", R.string.save_bookmark_last_sel, ReaderCommand.DCMD_SAVE_BOOKMARK_LAST_SEL, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmark_plus);
-	public final static ReaderAction SAVE_BOOKMARK_LAST_SEL_USER_DIC = new ReaderAction("SAVE_BOOKMARK_LAST_SEL_USER_DIC", R.string.save_bookmark_last_sel_user_dic, ReaderCommand.DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC, 0, SAVE_BOOKMARK_LAST_SEL, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_save);
-	public final static ReaderAction SAVE_BOOKMARK_QUICK = new ReaderAction("SAVE_BOOKMARK_QUICK", R.string.save_bookmark_quick, ReaderCommand.DCMD_SAVE_BOOKMARK_QUICK, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmark_plus_q);
-	public final static ReaderAction SHOW_USER_DIC = new ReaderAction("SHOW_USER_DIC", R.string.win_title_user_dic, ReaderCommand.DCMD_SHOW_USER_DIC, 0, SHOW_DICTIONARY, R.string.options_app_show_user_dic_panel_add_info).setIconId(R.drawable.icons8_google_translate_user);
-	public final static ReaderAction SHOW_CITATIONS = new ReaderAction("SHOW_CITATIONS", R.string.win_title_citations, ReaderCommand.DCMD_SHOW_CITATIONS, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_quote_2);
+	public final static ReaderAction OPEN_BOOK_FROM_CLOUD_YND = new ReaderAction("OPEN_BOOK_FROM_YND", R.string.open_book_from_ynd, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD_YND, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_yandex_logo);
+	public final static ReaderAction OPEN_BOOK_FROM_CLOUD_DBX = new ReaderAction("OPEN_BOOK_FROM_DBX", R.string.open_book_from_dbx, ReaderCommand.DCMD_OPEN_BOOK_FROM_CLOUD_DBX, 0, 0, OPEN_BOOK_FROM_CLOUD_YND, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_dropbox_filled);
+	public final static ReaderAction FONTS_MENU = new ReaderAction("FONTS_MENU", R.string.fonts_menu, ReaderCommand.DCMD_FONTS_MENU, 0, 0, CLOUD_MENU, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_type_filled_2);
+	public final static ReaderAction SAVE_BOOKMARK_LAST_SEL = new ReaderAction("SAVE_BOOKMARK_LAST_SEL", R.string.save_bookmark_last_sel, ReaderCommand.DCMD_SAVE_BOOKMARK_LAST_SEL, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmark_plus);
+	public final static ReaderAction SAVE_BOOKMARK_LAST_SEL_USER_DIC = new ReaderAction("SAVE_BOOKMARK_LAST_SEL_USER_DIC", R.string.save_bookmark_last_sel_user_dic, ReaderCommand.DCMD_SAVE_BOOKMARK_LAST_SEL_USER_DIC, 0, 0, SAVE_BOOKMARK_LAST_SEL, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate_save);
+	public final static ReaderAction SAVE_BOOKMARK_QUICK = new ReaderAction("SAVE_BOOKMARK_QUICK", R.string.save_bookmark_quick, ReaderCommand.DCMD_SAVE_BOOKMARK_QUICK, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_bookmark_plus_q);
+	public final static ReaderAction SHOW_USER_DIC = new ReaderAction("SHOW_USER_DIC", R.string.win_title_user_dic, ReaderCommand.DCMD_SHOW_USER_DIC, 0, 0, SHOW_DICTIONARY, R.string.options_app_show_user_dic_panel_add_info).setIconId(R.drawable.icons8_google_translate_user);
+	public final static ReaderAction SHOW_CITATIONS = new ReaderAction("SHOW_CITATIONS", R.string.win_title_citations, ReaderCommand.DCMD_SHOW_CITATIONS, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_quote_2);
 	public final static ReaderAction TOGGLE_PAGE_VIEW_MODE = new ReaderAction("TOGGLE_PAGE_VIEW_MODE", R.string.options_view_mode,
-			ReaderCommand.DCMD_TOGGLE_PAGE_VIEW_MODE, 0, TOGGLE_AUTOSCROLL,
+			ReaderCommand.DCMD_TOGGLE_PAGE_VIEW_MODE, 0, 0, TOGGLE_AUTOSCROLL,
 			R.string.options_view_mode_add_info).setIconId(R.drawable.cr3_option_view_mode_scroll);
 	public final static ReaderAction CHOOSE_TEXTURE = new ReaderAction("CHOOSE_TEXTURE", R.string.options_choose_texture,
-			ReaderCommand.DCMD_CHOOSE_TEXTURE, 0, FONT_SELECT,
+			ReaderCommand.DCMD_CHOOSE_TEXTURE, 0, 0, FONT_SELECT,
 			R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_texture);
 
 	public final static ReaderAction BACKLIGHT_SET_DEFAULT = new ReaderAction("BACKLIGHT_SET_DEFAULT", R.string.action_backlight_set_default,
-			ReaderCommand.DCMD_BACKLIGHT_SET_DEFAULT, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun_auto);
+			ReaderCommand.DCMD_BACKLIGHT_SET_DEFAULT, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun_auto);
 
 	public final static ReaderAction SHOW_SYSTEM_BACKLIGHT_DIALOG = new ReaderAction("SHOW_SYSTEM_BACKLIGHT_DIALOG", R.string.action_show_onyx_backlight_system_dialog,
-			ReaderCommand.DCMD_SHOW_SYSTEM_BACKLIGHT_DIALOG, 0, BACKLIGHT_SET_DEFAULT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun);
+			ReaderCommand.DCMD_SHOW_SYSTEM_BACKLIGHT_DIALOG, 0, 0, BACKLIGHT_SET_DEFAULT, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_sun);
 
-	public final static ReaderAction SKIM = new ReaderAction("SKIM", R.string.skim_document, ReaderCommand.DCMD_SKIM, 0, SEARCH, R.string.skim_document_add_info).setIconId(R.drawable.icons8_skim);
-	public final static ReaderAction ONLINE_COMBO = new ReaderAction("ONLINE_COMBO", R.string.online_combo, ReaderCommand.DCMD_ONLINE_COMBO, 0, null, R.string.online_combo_add_info).setIconId(R.drawable.icons8_combo);
-	public final static ReaderAction ONLINE_SUPER_COMBO = new ReaderAction("ONLINE_SUPER_COMBO", R.string.online_super_combo, ReaderCommand.DCMD_ONLINE_SUPER_COMBO, 0, ONLINE_COMBO, R.string.online_super_combo_add_info).setIconId(R.drawable.icons8_super_combo);
+	public final static ReaderAction SKIM = new ReaderAction("SKIM", R.string.skim_document, ReaderCommand.DCMD_SKIM, 0, 0, SEARCH, R.string.skim_document_add_info).setIconId(R.drawable.icons8_skim);
+	public final static ReaderAction ONLINE_COMBO = new ReaderAction("ONLINE_COMBO", R.string.online_combo, ReaderCommand.DCMD_ONLINE_COMBO, 0, 0, null, R.string.online_combo_add_info).setIconId(R.drawable.icons8_combo);
+	public final static ReaderAction ONLINE_SUPER_COMBO = new ReaderAction("ONLINE_SUPER_COMBO", R.string.online_super_combo, ReaderCommand.DCMD_ONLINE_SUPER_COMBO, 0, 0, ONLINE_COMBO, R.string.online_super_combo_add_info).setIconId(R.drawable.icons8_super_combo);
 
-	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
-	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
+	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
+	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, 0, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
 
-	public final static ReaderAction ADD_OPDS_CATALOG = new ReaderAction("ADD_OPDS_CATALOG", R.string.add_opds_catalog, ReaderCommand.DCMD_ADD_OPDS_CATALOG, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_opds);
-	public final static ReaderAction ADD_REMOVE_LITRES_CATALOG = new ReaderAction("ADD_REMOVE_LITRES_CATALOG", R.string.add_remove_litres_catalog, ReaderCommand.DCMD_ADD_REMOVE_LITRES_CATALOG, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_litres_en_logo_2lines_big);
-	public final static ReaderAction ADD_CALIBRE_CATALOG_LOCAL = new ReaderAction("ADD_CALIBRE_CATALOG_LOCAL", R.string.add_calibre_catalog_local, ReaderCommand.DCMD_ADD_CALIBRE_CATALOG_LOCAL, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_calibre);
-	public final static ReaderAction ADD_CALIBRE_CATALOG_YD = new ReaderAction("ADD_CALIBRE_CATALOG_YD", R.string.add_calibre_catalog_yd, ReaderCommand.DCMD_ADD_CALIBRE_CATALOG_YD, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_calibre);
+	public final static ReaderAction ADD_OPDS_CATALOG = new ReaderAction("ADD_OPDS_CATALOG", R.string.add_opds_catalog, ReaderCommand.DCMD_ADD_OPDS_CATALOG, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_opds);
+	public final static ReaderAction ADD_REMOVE_LITRES_CATALOG = new ReaderAction("ADD_REMOVE_LITRES_CATALOG", R.string.add_remove_litres_catalog, ReaderCommand.DCMD_ADD_REMOVE_LITRES_CATALOG, 1, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_litres_en_logo_2lines_big);
+	public final static ReaderAction ADD_CALIBRE_CATALOG_LOCAL = new ReaderAction("ADD_CALIBRE_CATALOG_LOCAL", R.string.add_calibre_catalog_local, ReaderCommand.DCMD_ADD_CALIBRE_CATALOG_LOCAL, 1, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_calibre);
+	public final static ReaderAction ADD_CALIBRE_CATALOG_YD = new ReaderAction("ADD_CALIBRE_CATALOG_YD", R.string.add_calibre_catalog_yd, ReaderCommand.DCMD_ADD_CALIBRE_CATALOG_YD, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_calibre);
 
-	public final static ReaderAction CALIBRE_SEARCH = new ReaderAction("CALIBRE_SEARCH", R.string.calibre_search, ReaderCommand.DCMD_CALIBRE_SEARCH, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_find);
-	public final static ReaderAction CALIBRE_SHOW_AUTHORS = new ReaderAction("CALIBRE_SHOW_AUTHORS", R.string.calibre_authors, ReaderCommand.DCMD_CALIBRE_SHOW_AUTHORS, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_author);
-	public final static ReaderAction CALIBRE_SHOW_TITLES = new ReaderAction("CALIBRE_SHOW_TITLES", R.string.calibre_titles, ReaderCommand.DCMD_CALIBRE_SHOW_TITLES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_authors);
-	public final static ReaderAction CALIBRE_SHOW_SERIES = new ReaderAction("CALIBRE_SHOW_SERIES", R.string.calibre_series, ReaderCommand.DCMD_CALIBRE_SHOW_SERIES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_hash);
-	public final static ReaderAction CALIBRE_SHOW_RATING = new ReaderAction("CALIBRE_SHOW_RATING", R.string.calibre_rating, ReaderCommand.DCMD_CALIBRE_SHOW_RATING, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_stars);
-	public final static ReaderAction CALIBRE_SHOW_PUB_DATES = new ReaderAction("CALIBRE_SHOW_PUB_DATES", R.string.calibre_publish_date, ReaderCommand.DCMD_CALIBRE_SHOW_PUB_DATES, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_year);
-	public final static ReaderAction CALIBRE_SHOW_TAGS = new ReaderAction("CALIBRE_SHOW_TAGS", R.string.calibre_tags, ReaderCommand.DCMD_CALIBRE_SHOW_TAGS, 1, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_theatre_mask);
-	public final static ReaderAction INIT_APP_DIALOG = new ReaderAction("INIT_APP_DIALOG", R.string.init_app, ReaderCommand.DCMD_INIT_APP_DIALOG, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_delete_database);
-	public final static ReaderAction EXPERIMENAL_FEATURE = new ReaderAction("EXPERIMENAL_FEATURE", R.string.exp_feature, ReaderCommand.DCMD_EXPERIMENTAL_FEATURE, 0, null, R.string.exp_feature_add_info).setIconId(R.drawable.icons8_physics);
+	public final static ReaderAction CALIBRE_SEARCH = new ReaderAction("CALIBRE_SEARCH", R.string.calibre_search, ReaderCommand.DCMD_CALIBRE_SEARCH, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_find);
+	public final static ReaderAction CALIBRE_SHOW_AUTHORS = new ReaderAction("CALIBRE_SHOW_AUTHORS", R.string.calibre_authors, ReaderCommand.DCMD_CALIBRE_SHOW_AUTHORS, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_author);
+	public final static ReaderAction CALIBRE_SHOW_TITLES = new ReaderAction("CALIBRE_SHOW_TITLES", R.string.calibre_titles, ReaderCommand.DCMD_CALIBRE_SHOW_TITLES, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_browser_folder_authors);
+	public final static ReaderAction CALIBRE_SHOW_SERIES = new ReaderAction("CALIBRE_SHOW_SERIES", R.string.calibre_series, ReaderCommand.DCMD_CALIBRE_SHOW_SERIES, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_hash);
+	public final static ReaderAction CALIBRE_SHOW_RATING = new ReaderAction("CALIBRE_SHOW_RATING", R.string.calibre_rating, ReaderCommand.DCMD_CALIBRE_SHOW_RATING, 1, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_stars);
+	public final static ReaderAction CALIBRE_SHOW_PUB_DATES = new ReaderAction("CALIBRE_SHOW_PUB_DATES", R.string.calibre_publish_date, ReaderCommand.DCMD_CALIBRE_SHOW_PUB_DATES, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_folder_year);
+	public final static ReaderAction CALIBRE_SHOW_TAGS = new ReaderAction("CALIBRE_SHOW_TAGS", R.string.calibre_tags, ReaderCommand.DCMD_CALIBRE_SHOW_TAGS, 1, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_theatre_mask);
+	public final static ReaderAction INIT_APP_DIALOG = new ReaderAction("INIT_APP_DIALOG", R.string.init_app, ReaderCommand.DCMD_INIT_APP_DIALOG, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_delete_database);
+	public final static ReaderAction EXPERIMENAL_FEATURE = new ReaderAction("EXPERIMENAL_FEATURE", R.string.exp_feature, ReaderCommand.DCMD_EXPERIMENTAL_FEATURE, 0, 0,null, R.string.exp_feature_add_info).setIconId(R.drawable.icons8_physics);
+	public final static ReaderAction BRIGHTNESS_DOWN = new ReaderAction("BRIGHTNESS_DOWN", R.string.action_brightness_down, ReaderCommand.DCMD_BRIGHTNESS_DOWN, 1 , 0, null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_down);
+	public final static ReaderAction BRIGHTNESS_DOWN_WARM = new ReaderAction("BRIGHTNESS_DOWN_WARM", R.string.action_brightness_warm_down, ReaderCommand.DCMD_BRIGHTNESS_WARM_DOWN, 1 ,0, null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_warm_down);
+	public final static ReaderAction BRIGHTNESS_UP = new ReaderAction("BRIGHTNESS_UP", R.string.action_brightness_up, ReaderCommand.DCMD_BRIGHTNESS_UP, 1 , 0, BRIGHTNESS_DOWN, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_up);
+	public final static ReaderAction BRIGHTNESS_UP_WARM = new ReaderAction("BRIGHTNESS_UP_WARM", R.string.action_brightness_warm_up, ReaderCommand.DCMD_BRIGHTNESS_WARM_UP, 1 , 0, BRIGHTNESS_DOWN_WARM, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_warm_up);
 
 	public final static ReaderAction[] AVAILABLE_ACTIONS;
 
@@ -414,7 +419,9 @@ public class ReaderAction {
 				ONLINE_COMBO,
 				ONLINE_SUPER_COMBO,
 				SAVE_LOGCAT,
-				EXPERIMENAL_FEATURE
+				EXPERIMENAL_FEATURE,
+				BRIGHTNESS_DOWN,
+				BRIGHTNESS_UP
 				// calibre will only be available from rootview
 		};
 		if (BuildConfig.GSUITE_AVAILABLE && DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -434,6 +441,14 @@ public class ReaderAction {
 				new_array[count] = SHOW_SYSTEM_BACKLIGHT_DIALOG;
 				BASE_ACTIONS = new_array;
 			}
+		}
+		if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
+			int count = BASE_ACTIONS.length;
+			ReaderAction[] new_array = new ReaderAction[count + 2];
+			System.arraycopy(BASE_ACTIONS, 0, new_array, 0, count);
+			new_array[count] = BRIGHTNESS_DOWN_WARM;
+			new_array[count+1] = BRIGHTNESS_UP_WARM;
+			BASE_ACTIONS = new_array;
 		}
 		AVAILABLE_ACTIONS = BASE_ACTIONS;
 	}

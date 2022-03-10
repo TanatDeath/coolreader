@@ -5,14 +5,25 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
-import org.coolreader.crengine.*;
+import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.DicSearchHistoryEntry;
+import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.GenreSAXElem;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.LibraryStats;
+import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.MountPathCorrector;
+import org.coolreader.crengine.OPDSConst;
 import org.coolreader.crengine.Scanner;
 import org.coolreader.db.StarDict.StartDictDB;
-import org.coolreader.dic.OfflineDicsDlg;
-import org.coolreader.dic.OfflineInfo;
+import org.coolreader.dic.OfflineDicInfo;
 import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.dic.struct.DictEntry;
 import org.coolreader.dic.struct.Lemma;
@@ -23,7 +34,19 @@ import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import java.io.File;
-import java.util.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import io.github.eb4j.dsl.DslDictionary;
+import io.github.eb4j.dsl.DslResult;
+import io.github.eb4j.dsl.visitor.HtmlDslVisitor;
+import io.github.eb4j.dsl.visitor.PlainDslVisitor;
 
 public class MainDB extends BaseDB {
 	public static final Logger log = L.create("mdb");
@@ -2810,7 +2833,7 @@ public class MainDB extends BaseDB {
 		if (authorNames == null || authorNames.trim().length() == 0)
 			return null;
 		String[] names = authorNames.split("\\|");
-		String[] namesext = authorNamesExt.split("\\|");
+		String[] namesext = StrUtils.getNonEmptyStr(authorNamesExt, true).split("\\|");
 		if (names == null || names.length == 0)
 			return null;
 		ArrayList<Long> ids = new ArrayList<>(names.length);
@@ -4603,7 +4626,7 @@ public class MainDB extends BaseDB {
 		return true;
 	}
 
-	public boolean moveBookToFolder(final FileInfo bookFile, final String toFolder) {
+	public boolean moveBookToFolder(final FileInfo bookFile, final String toFolder, final boolean alreadyMoved) {
 		if (bookFile == null) return false;
 		boolean isArc = !StrUtils.isEmptyStr(bookFile.arcname);
 		String fieldname = "arcname";
@@ -4626,8 +4649,10 @@ public class MainDB extends BaseDB {
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) wasRec = rs.getLong(0);
 		}
-		if (wasRec > 0) return false;
-		if (fFrom.renameTo(fTo)) {
+		if (wasRec > 0) return alreadyMoved;
+		boolean success = alreadyMoved;
+		if (!success) success = fFrom.renameTo(fTo);
+		if (success) {
 			try {
 				execSQL("update book set " + fieldname + " = " + quoteSqlString(toFolder + slash + fname) +
 						" where " + fieldname + " = " + quoteSqlString(fname1));
@@ -4639,8 +4664,31 @@ public class MainDB extends BaseDB {
 		return false;
 	}
 
+	public int getBookFlags(final FileInfo bookFile) {
+		if (bookFile == null) return 0;
+		String fname = bookFile.getPathName();
+		// calc current qty
+		int flags = 0;
+		String sql = "SELECT flags FROM book where pathname = " + quoteSqlString(fname);
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) flags = rs.getInt(0);
+		}
+		return flags;
+	}
+
 	// StarDict work
-	ArrayList<OfflineInfo> starDictInfoList = null;
+	ArrayList<OfflineDicInfo> offlineDictInfoList = null;
+
+	public void closeAllDics() {
+		if (offlineDictInfoList != null) {
+			for (OfflineDicInfo dic: offlineDictInfoList)
+				if (dic.dbExists)
+					if (dic.db != null)
+						if (dic.db.isOpen())
+							dic.db.close();
+		}
+		offlineDictInfoList = null;
+	}
 
 	public String convertStartDictDic(String dicPath, String dicName,
 				  final Scanner.ScanControl control, final Engine.ProgressControl progress) {
@@ -4658,35 +4706,132 @@ public class MainDB extends BaseDB {
 		return "";
 	}
 
-	public void findInStarDict1Dic(DicStruct dsl, OfflineInfo sdil, String searchStr) {
-		String sql = "SELECT word, meaning FROM main where word like " + quoteSqlString(searchStr + "%");
-		try (Cursor rs = sdil.db.rawQuery(sql, null)) {
-			if (rs.moveToFirst()) {
-				do {
+	public void findInOfflineDict1Dic(DicStruct dsl, OfflineDicInfo sdil, String searchStr,
+									  boolean extended) {
+		if (sdil.dbExists) {
+			String ex = "";
+			if (extended) ex = "%";
+			String sql = "SELECT word, word_orig, meaning FROM main where word like " +
+					quoteSqlString(ex + searchStr.toUpperCase() + "%") +
+					" order by case when word like " + quoteSqlString(searchStr.toUpperCase() + "%") +
+					" then 1 else 2 end, word";
+			try (Cursor rs = sdil.db.rawQuery(sql, null)) {
+				if (rs.moveToFirst()) {
+					do {
+						Lemma le = new Lemma();
+						DictEntry de = new DictEntry();
+						de.dictLinkText = rs.getString(1);
+						le.dictEntry.add(de);
+						TranslLine translLine = new TranslLine();
+						translLine.transText = Utils.cleanupHtmlTags(rs.getString(2));
+						translLine.transGroup = sdil.dicName;
+						le.translLine.add(translLine);
+						dsl.lemmas.add(le);
+					} while (rs.moveToNext());
+				}
+			} catch (Exception e) {
+				log.w("Dictionary lookup failed: " + sdil.dicPath + "\n" + e.getMessage());
+			}
+		}
+		if (((sdil.dslExists) || (sdil.dslDzExists)) && (sdil.dslDic != null) && (sdil.idxExists)) {
+			try {
+				PlainDslVisitor plainDslVisitor = new PlainDslVisitor();
+				//HtmlDslVisitor htmlDslVisitor = new HtmlDslVisitor();
+				DslResult dslResult;
+				if (extended)
+					dslResult = sdil.dslDic.lookupPredictive(searchStr);
+				else
+					dslResult = sdil.dslDic.lookup(searchStr);
+				for (Map.Entry<String, String> entry : dslResult.getEntries(plainDslVisitor)) {
 					Lemma le = new Lemma();
 					DictEntry de = new DictEntry();
-					de.dictLinkText = rs.getString(0);
+					de.dictLinkText = entry.getKey();
 					le.dictEntry.add(de);
 					TranslLine translLine = new TranslLine();
-					translLine.transText = Utils.cleanupHtmlTags(rs.getString(1));
+					translLine.transText = entry.getValue();
 					translLine.transGroup = sdil.dicName;
 					le.translLine.add(translLine);
 					dsl.lemmas.add(le);
-				} while (rs.moveToNext());
+				}
+			} catch (Exception e) {
+				log.w("Dictionary lookup failed: " + sdil.dicPath + "\n" + e.getMessage());
 			}
 		}
 	}
 
-	public DicStruct findInStarDictDic(String searchStr) {
+	Long lastMod = 0L;
+
+	public DicStruct findInOfflineDictDic(String searchStr, String langFrom, String langTo,
+										  boolean extended) {
 		DicStruct dsl = new DicStruct();
-		if (starDictInfoList == null) starDictInfoList = OfflineDicsDlg.fillOfflineDics();
-		for (OfflineInfo sdil: starDictInfoList)
-			if (sdil.dbExists) {
-				if (sdil.db == null) {
-					sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
-				} else
-					if (!sdil.db.isOpen()) sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
-				if (sdil.db.isOpen()) findInStarDict1Dic(dsl, sdil, searchStr);
+		ArrayList<String> tDirs1 = Engine.getDataDirsExt(Engine.DataDirType.OfflineDicsDirs, true);
+		if (tDirs1.size()>0) {
+			File f = new File(tDirs1.get(0) + "/dic_conf.json");
+			if (!f.exists()) return dsl;
+			long newLastMod = f.lastModified();
+			if (newLastMod != lastMod) {
+				closeAllDics();
+				if (offlineDictInfoList != null)
+					for (OfflineDicInfo odi: offlineDictInfoList) {
+						try {
+							odi.db.close();
+						} catch (Exception e) {
+							// do nothing
+						}
+					}
+				String sdicsConf = Utils.readFileToStringOrEmpty(tDirs1.get(0) + "/dic_conf.json");
+				if (!StrUtils.isEmptyStr(sdicsConf))
+					try {
+						offlineDictInfoList = new ArrayList<>(StrUtils.stringToArray(sdicsConf, OfflineDicInfo[].class));
+						for (OfflineDicInfo odi : offlineDictInfoList) odi.fillMarks();
+					} catch (Exception e) {
+					}
+				lastMod = newLastMod;
+			}
+		}
+
+		if (offlineDictInfoList != null)
+			for (OfflineDicInfo sdil: offlineDictInfoList) {
+				String langFromD = StrUtils.getNonEmptyStr(sdil.langFrom.toUpperCase(), true);
+				String langToD = StrUtils.getNonEmptyStr(sdil.langTo.toUpperCase(), true);
+				if (langFromD.length() > 2) langFromD = langFromD.substring(0,2);
+				if (langToD.length() > 2) langToD = langToD.substring(0,2);
+				String langFromS = StrUtils.getNonEmptyStr(langFrom.toUpperCase(), true);
+				String langToS = StrUtils.getNonEmptyStr(langTo.toUpperCase(), true);
+				if (langFromS.length() > 2) langFromS = langFromS.substring(0,2);
+				if (langToS.length() > 2) langToS = langToS.substring(0,2);
+				boolean proceed = langFromD.equals(langFromS) || StrUtils.isEmptyStr(langFromD) || StrUtils.isEmptyStr(langFromS);
+				proceed = proceed && (langToD.equals(langToS) || StrUtils.isEmptyStr(langToD) || StrUtils.isEmptyStr(langToS));
+				if ((sdil.dicEnabled) && (proceed)) {
+					if (sdil.dbExists) {
+						if (sdil.db == null) {
+							sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
+						} else if (!sdil.db.isOpen())
+							sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
+						if (sdil.db.isOpen()) findInOfflineDict1Dic(dsl, sdil, searchStr, false);
+					}
+					if (((sdil.dslExists) || (sdil.dslDzExists)) && (sdil.idxExists)) {
+						if (sdil.dslDic == null) {
+							try {
+								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+									if (sdil.dslDzExists)
+										sdil.dslDic = DslDictionary.loadDictionary(
+												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".dsl.dz"),
+												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".idx")
+										);
+									else
+										sdil.dslDic = DslDictionary.loadDictionary(
+												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".dsl"),
+												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".idx")
+										);
+								}
+							} catch (Exception e) {
+								log.e("Lingvo_DSL index create error: " + e.getMessage());
+							}
+						}
+						if (sdil.dslDic != null) findInOfflineDict1Dic(dsl, sdil, searchStr, extended);
+					}
+				}
 			}
 		return dsl;
 	}

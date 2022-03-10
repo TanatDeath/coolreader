@@ -173,87 +173,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text
 	};
 
-	static int[] mBookmarkSendToAction = new int[] {
-			ReaderView.SEND_TO_ACTION_NONE,
-			ReaderView.SELECTION_ACTION_DICTIONARY_1,
-			ReaderView.SELECTION_ACTION_DICTIONARY_2,
-			ReaderView.SELECTION_ACTION_DICTIONARY_3,
-			ReaderView.SELECTION_ACTION_DICTIONARY_4,
-			ReaderView.SELECTION_ACTION_DICTIONARY_5,
-			ReaderView.SELECTION_ACTION_DICTIONARY_6,
-			ReaderView.SELECTION_ACTION_DICTIONARY_7,
-			ReaderView.SELECTION_ACTION_DICTIONARY_8,
-			ReaderView.SELECTION_ACTION_DICTIONARY_9,
-			ReaderView.SELECTION_ACTION_DICTIONARY_10
-
-	};
-
-	static int[] mBookmarkSendToActionMod = new int[] {
-			0,
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7
-	};
-
-	static int[] mBookmarkSendToActionModTitles = new int[] {
-			R.string.options_bookmark_action_send_to_mod1,
-			R.string.options_bookmark_action_send_to_mod2,
-			R.string.options_bookmark_action_send_to_mod3,
-			R.string.options_bookmark_action_send_to_mod4,
-			R.string.options_bookmark_action_send_to_mod5,
-			R.string.options_bookmark_action_send_to_mod6,
-			R.string.options_bookmark_action_send_to_mod7,
-			R.string.options_bookmark_action_send_to_mod8
-	};
-
-	int[] mBookmarkSendToActionModAddInfos = new int[] {
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text
-	};
-
 	public static int getBookmarkSendToTitle(int v) {
-		for (int i = 0; i < mBookmarkSendToAction.length; i++)
-			if (v == mBookmarkSendToAction[i]) return mBookmarkSendToAction[i];
+		for (int i = 0; i < BookmarkSendToOption.mBookmarkSendToAction.length; i++)
+			if (v == BookmarkSendToOption.mBookmarkSendToAction[i]) return BookmarkSendToOption.mBookmarkSendToAction[i];
 		return 0;
 	}
 
-	static int[] mBookmarkSendToActionTitles = new int[] {
-			R.string.action_none,
-			R.string.options_selection_action_dictionary_1,
-			R.string.options_selection_action_dictionary_2,
-			R.string.options_selection_action_dictionary_3,
-			R.string.options_selection_action_dictionary_4,
-			R.string.options_selection_action_dictionary_5,
-			R.string.options_selection_action_dictionary_6,
-			R.string.options_selection_action_dictionary_7,
-			R.string.options_selection_action_dictionary_8,
-			R.string.options_selection_action_dictionary_9,
-			R.string.options_selection_action_dictionary_10
-	};
-
-	int[] mBookmarkSendToActionAddInfos = new int[] {
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text
-	};
 	// possible values see in crengine/include/lvfont.h: enum font_antialiasing_t
 	int[] mAntialias = new int[] {
 			0, 1, 2
@@ -1785,14 +1710,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.selectionmodes_settings_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_select_all, R.drawable.icons8_select_all);
 		((SelectionModesOption)sb11).updateFilterEnd();
 		mOptionsControls.add(sb11);
-		mOptionsControls.add(new ListOptionAction(this, getString(R.string.options_bookmark_action_send_to),
-				PROP_APP_BOOKMARK_ACTION_SEND_TO, getString(R.string.options_bookmark_action_send_to_add_info), filter).
-				add(mBookmarkSendToAction, mBookmarkSendToActionTitles, mBookmarkSendToActionAddInfos).setDefaultValue("-1").
-				setIconIdByAttr(R.attr.attr_icons8_send_to_action, R.drawable.icons8_send_to_action));
-		mOptionsControls.add(new ListOptionAction(this, getString(R.string.options_bookmark_action_send_to_mod),
-				PROP_APP_BOOKMARK_ACTION_SEND_TO_MOD, getString(R.string.options_bookmark_action_send_to_mod_add_info), filter).
-				add(mBookmarkSendToActionMod, mBookmarkSendToActionModTitles, mBookmarkSendToActionModAddInfos).setDefaultValue("0").
-				setIconIdByAttr(R.attr.attr_icons8_send_to_action_more, R.drawable.icons8_send_to_action_more));
+		OptionBase sbBookmarkSendToOption = new BookmarkSendToOption(this.mActivity, OptionsDialog.this,this, getString(R.string.options_bookmark_action_send_to_option),
+				getString(R.string.option_add_info_empty_text), filter)
+				.setIconIdByAttr(R.attr.attr_icons8_send_to_action, R.drawable.icons8_send_to_action);
+		((BookmarkSendToOption)sbBookmarkSendToOption).updateFilterEnd();
+		mOptionsControls.add(sbBookmarkSendToOption);
 		mOptionsApplication = new OptionsListView(getContext(), null);
 		mOptionsApplication.add(new LangOption(this.mActivity, this, filter).setIconIdByAttr(R.attr.attr_icons8_system_lang, R.drawable.icons8_system_lang));
 		CoolReader cr = (CoolReader)mActivity;

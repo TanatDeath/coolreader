@@ -1,20 +1,30 @@
 // Main Class
 package org.coolreader;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import static android.os.Build.VERSION_CODES.KITKAT;
+import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.N;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudFileInfo;
@@ -37,6 +47,7 @@ import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.ResizeHistory;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.DictsDlg;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.Dictionaries.DictionaryException;
 import org.coolreader.cloud.dropbox.DBXConfig;
@@ -83,6 +94,9 @@ import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.ReaderViewLayout;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.SingletonUsbOtg;
+import org.coolreader.utils.StorageDirectory;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.sync2.OnSyncStatusListener;
 import org.coolreader.sync2.SyncOptions;
@@ -91,6 +105,7 @@ import org.coolreader.sync2.SyncServiceAccessor;
 import org.coolreader.sync2.Synchronizer;
 import org.coolreader.sync2.googledrive.GoogleDriveRemoteAccess;
 import org.coolreader.userdic.UserDicEntry;
+import org.coolreader.utils.UsbOtgRepresentation;
 import org.coolreader.utils.Utils;
 import org.coolreader.db.BaseDB;
 import org.coolreader.db.MainDB;
@@ -117,6 +132,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -129,11 +147,18 @@ import org.coolreader.tts.OnTTSCreatedListener;
 import org.coolreader.tts.TTSControlBinder;
 import org.coolreader.tts.TTSControlServiceAccessor;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 
 import android.os.Environment;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -295,8 +320,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private String fileToLoadOnStart = null;
 	private String mFileToOpenFromExt = null;
 
-	private int mOpenDocumentTreeCommand = ODT_CMD_NO_SPEC;
-	private FileInfo mOpenDocumentTreeArg = null;
+	public int mOpenDocumentTreeCommand = ODT_CMD_NO_SPEC;
+	public FileInfo mOpenDocumentTreeArg = null;
 
 	private boolean phoneStateChangeHandlerInstalled = false;
 	private int initialBatteryState = ReaderView.BATTERY_STATE_NO_BATTERY;
@@ -321,16 +346,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int REQUEST_CODE_STORAGE_PERM = 1;
 	private static final int REQUEST_CODE_READ_PHONE_STATE_PERM = 2;
 	private static final int REQUEST_CODE_GOOGLE_DRIVE_SIGN_IN = 3;
-	private static final int REQUEST_CODE_OPEN_DOCUMENT_TREE = 11;
+	public static final int REQUEST_CODE_OPEN_DOCUMENT_TREE = 11;
 	public static final int REQUEST_CODE_CHOOSE_DIR = 10012;
 
 	public FolderSelectedCallback dirChosenCallback = null; // for callback
 
 	// open document tree activity commands
-	private static final int ODT_CMD_NO_SPEC = -1;
+	public static final int ODT_CMD_NO_SPEC = -1;
 	private static final int ODT_CMD_DEL_FILE = 1;
 	private static final int ODT_CMD_DEL_FOLDER = 2;
 	private static final int ODT_CMD_SAVE_LOGCAT = 3;
+	public static final int ODT_CMD_SELECT_OTG = 4;
 
 	private final BroadcastReceiver batteryChangeReceiver = new BroadcastReceiver() {
 		@Override
@@ -400,6 +426,244 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public String optionsFilter = ""; //filter used for options
 
+	public Map<String, Uri> usbDevices = new HashMap<>();
+
+	//public Map<String, UsbDevice> usbDevices = new HashMap<>();
+
+	/** Updates everything related to USB devices MUST ALWAYS be called after onResume() */
+	/*@RequiresApi(api = Build.VERSION_CODES.KITKAT)
+	private void updateUsbInformation() {
+		boolean isInformationUpdated = false;
+		List<UsbOtgRepresentation> connectedDevices = OTGUtil.getMassStorageDevicesConnected(this);
+
+		if (!connectedDevices.isEmpty()) {
+			if (SingletonUsbOtg.getInstance().getUsbOtgRoot() != null
+					&& OTGUtil.isUsbUriAccessible(this)) {
+				for (UsbOtgRepresentation device : connectedDevices) {
+					if (SingletonUsbOtg.getInstance().checkIfRootIsFromDevice(device)) {
+						isInformationUpdated = true;
+						break;
+					}
+				}
+
+				if (!isInformationUpdated) {
+					SingletonUsbOtg.getInstance().resetUsbOtgRoot();
+				}
+			}
+
+			if (!isInformationUpdated) {
+				SingletonUsbOtg.getInstance().setConnectedDevice(connectedDevices.get(0));
+				isInformationUpdated = true;
+			}
+		}
+
+		if (!isInformationUpdated) {
+			SingletonUsbOtg.getInstance().resetUsbOtgRoot();
+			drawer.refreshDrawer();
+		}
+
+		// Registering intent filter for OTG
+		IntentFilter otgFilter = new IntentFilter();
+		otgFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+		otgFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+		registerReceiver(mOtgReceiver, otgFilter);
+	}
+*/
+	/** Receiver to check if a USB device is connected at the runtime of application */
+	/*BroadcastReceiver mOtgReceiver =
+			new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+						List<UsbOtgRepresentation> connectedDevices =
+								OTGUtil.getMassStorageDevicesConnected(MainActivity.this);
+						if (!connectedDevices.isEmpty()) {
+							SingletonUsbOtg.getInstance().resetUsbOtgRoot();
+							SingletonUsbOtg.getInstance().setConnectedDevice(connectedDevices.get(0));
+							drawer.refreshDrawer();
+						}
+					} else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
+						SingletonUsbOtg.getInstance().resetUsbOtgRoot();
+						drawer.refreshDrawer();
+						goToMain(null);
+					}
+				}
+			};
+*/
+	/**
+	 * @return All available storage volumes (including internal storage, SD-Cards and USB devices)
+	 */
+	@TargetApi(N)
+	public synchronized ArrayList<StorageDirectory> getStorageDirectoriesNew() {
+		// Final set of paths
+		ArrayList<StorageDirectory> volumes = new ArrayList<>();
+		StorageManager sm = getSystemService(StorageManager.class);
+		for (StorageVolume volume : sm.getStorageVolumes()) {
+			if (!volume.getState().equalsIgnoreCase(Environment.MEDIA_MOUNTED)
+					&& !volume.getState().equalsIgnoreCase(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+				continue;
+			}
+			File path = FileUtils.getVolumeDirectory(volume);
+			String name = volume.getDescription(this);
+			if (FileUtils.INTERNAL_SHARED_STORAGE.equalsIgnoreCase(name)) {
+				name = getString(R.string.storage_internal);
+			}
+			int dirType;
+			if (!volume.isRemovable()) {
+				dirType = StorageDirectory.STORAGE_INTERNAL; //R.drawable.ic_phone_android_white_24dp;
+			} else {
+				// HACK: There is no reliable way to distinguish USB and SD external storage
+				// However it is often enough to check for "USB" String
+				if (name.toUpperCase().contains("USB") || path.getPath().toUpperCase().contains("USB")) {
+					dirType = StorageDirectory.STORAGE_USB_CARD; //icon = R.drawable.ic_usb_white_24dp;
+				} else {
+					dirType = StorageDirectory.STORAGE_SD_CARD; //icon = R.drawable.ic_sd_storage_white_24dp;
+				}
+			}
+			volumes.add(new StorageDirectory(path.getPath(), name, dirType));
+		}
+		return volumes;
+	}
+
+	/**
+	 * Returns all available SD-Cards in the system (include emulated)
+	 *
+	 * <p>Warning: Hack! Based on Android source code of version 4.3 (API 18) Because there was no
+	 * standard way to get it before android N
+	 *
+	 * @return All available SD-Cards in the system (include emulated)
+	 */
+	public synchronized ArrayList<StorageDirectory> getStorageDirectoriesLegacy() {
+		List<String> rv = new ArrayList<>();
+		// Primary physical SD-CARD (not emulated)
+		final String rawExternalStorage = System.getenv("EXTERNAL_STORAGE");
+		// All Secondary SD-CARDs (all exclude primary) separated by ":"
+		final String rawSecondaryStoragesStr = System.getenv("SECONDARY_STORAGE");
+		// Primary emulated SD-CARD
+		final String rawEmulatedStorageTarget = System.getenv("EMULATED_STORAGE_TARGET");
+		if (TextUtils.isEmpty(rawEmulatedStorageTarget)) {
+			// Device has physical external storage; use plain paths.
+			if (TextUtils.isEmpty(rawExternalStorage)) {
+				// EXTERNAL_STORAGE undefined; falling back to default.
+				// Check for actual existence of the directory before adding to list
+				if (new File(FileUtils.DEFAULT_FALLBACK_STORAGE_PATH).exists()) {
+					rv.add(FileUtils.DEFAULT_FALLBACK_STORAGE_PATH);
+				} else {
+					// We know nothing else, use Environment's fallback
+					rv.add(Environment.getExternalStorageDirectory().getAbsolutePath());
+				}
+			} else {
+				rv.add(rawExternalStorage);
+			}
+		} else {
+			// Device has emulated storage; external storage paths should have
+			// userId burned into them.
+			final String rawUserId;
+			if (SDK_INT < JELLY_BEAN_MR1) {
+				rawUserId = "";
+			} else {
+				final String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+				final String[] folders = FileUtils.DIR_SEPARATOR.split(path);
+				final String lastFolder = folders[folders.length - 1];
+				boolean isDigit = false;
+				try {
+					Integer.valueOf(lastFolder);
+					isDigit = true;
+				} catch (NumberFormatException ignored) {
+				}
+				rawUserId = isDigit ? lastFolder : "";
+			}
+			// /storage/emulated/0[1,2,...]
+			if (TextUtils.isEmpty(rawUserId)) {
+				rv.add(rawEmulatedStorageTarget);
+			} else {
+				rv.add(rawEmulatedStorageTarget + File.separator + rawUserId);
+			}
+		}
+		// Add all secondary storages
+		if (!TextUtils.isEmpty(rawSecondaryStoragesStr)) {
+			// All Secondary SD-CARDs splited into array
+			final String[] rawSecondaryStorages = rawSecondaryStoragesStr.split(File.pathSeparator);
+			Collections.addAll(rv, rawSecondaryStorages);
+		}
+		if (SDK_INT >= M && checkStoragePermission()) rv.clear();
+		if (SDK_INT >= KITKAT) {
+			String strings[] = FileUtils.getExtSdCardPathsForActivity(this);
+			for (String s : strings) {
+				File f = new File(s);
+				if (!rv.contains(s) && FileUtils.canListFiles(f)) rv.add(s);
+			}
+		}
+		File usb = FileUtils.getUsbDrive();
+		if (usb != null && !rv.contains(usb.getPath())) rv.add(usb.getPath());
+
+		if (SDK_INT >= KITKAT) {
+			if (SingletonUsbOtg.getInstance().isDeviceConnected()) {
+				rv.add(FileInfo.OTG_DIR_PREFIX + "/");
+			}
+		}
+
+		// Assign a label and icon to each directory
+		ArrayList<StorageDirectory> volumes = new ArrayList<>();
+		for (String file : rv) {
+			File f = new File(file);
+			@DrawableRes int icon;
+
+			if ("/storage/emulated/legacy".equals(file)
+					|| "/storage/emulated/0".equals(file)
+					|| "/mnt/sdcard".equals(file)) {
+				icon = StorageDirectory.STORAGE_INTERNAL;
+			} else if ("/storage/sdcard1".equals(file)) {
+				icon = StorageDirectory.STORAGE_SD_CARD;
+			} else if ("/".equals(file)) {
+				icon = StorageDirectory.ROOT;
+			} else {
+				icon = StorageDirectory.NOT_KNOWN;
+			}
+
+			int deviceDescription = FileUtils.getDeviceDescriptionLegacy(f);
+			String name = FileUtils.getNameForDeviceDescription(this, f, deviceDescription);
+
+			volumes.add(new StorageDirectory(file, name, icon));
+		}
+
+		return volumes;
+	}
+
+	/** @return paths to all available volumes in the system (include emulated) */
+	public synchronized ArrayList<StorageDirectory> getStorageDirectories() {
+		ArrayList<StorageDirectory> volumes;
+		if (SDK_INT >= N) {
+			volumes = getStorageDirectoriesNew();
+		} else {
+			volumes = getStorageDirectoriesLegacy();
+		}
+		// I think this is not needed
+//		if (isRootExplorer()) {
+//			volumes.add(
+//					new StorageDirectory(
+//							"/",
+//							getResources().getString(R.string.root_directory),
+//							StorageDirectory.ROOT));
+//		}
+		return volumes;
+	}
+
+//	private void scanUsbOTGDevices() {
+//		usbDevices.clear();
+//		UsbManager usbManager = (UsbManager) getApplicationContext().getSystemService(Context.USB_SERVICE);
+//		if (usbManager != null)
+//			for (Map.Entry<String, UsbDevice> entry : usbManager.getDeviceList().entrySet()) {
+//				String key = entry.getKey();
+//				UsbDevice device = entry.getValue();
+//				for (int i = 0; i < device.getInterfaceCount(); i++) {
+//					if (device.getInterface(i).getInterfaceClass() == UsbConstants.USB_CLASS_MASS_STORAGE) {
+//						usbDevices.put(key, device);
+//					}
+//				}
+//			}
+//	}
+
 	/** Called when the activity is first created. */
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -452,6 +716,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		android_id = Secure.getString(getApplicationContext().getContentResolver(),
 				Secure.ANDROID_ID);
+
+//		too complex, not now
+//		ArrayList<StorageDirectory> arrStorages = getStorageDirectories();
+//		for (StorageDirectory storageDirectory: arrStorages) {
+//			log.i("STORAGE: " + storageDirectory.mName);
+//			log.i("STORAGE:1 " + storageDirectory.mPath);
+//			log.i("STORAGE:2 " + storageDirectory.mDirType);
+//		}
+//		scanUsbOTGDevices();
 
 		String manufacturer = Build.MANUFACTURER;
 		String model = Build.MODEL;
@@ -1182,6 +1455,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				processText = processText.substring(1, processText.length()-1);
 			}
 		}
+		if (Intent.ACTION_TRANSLATE.equals(intentAction)) {
+			String sText = StrUtils.getNonEmptyStr(intent.getStringExtra(Intent.EXTRA_TEXT),false);
+			DictsDlg dlg = new DictsDlg(this, this.getmReaderView(), sText, null, true);
+			dlg.show();
+			return true;
+		}
 		if (!StrUtils.isEmptyStr(processText)) {
 			boolean allOk = false;
 			if (getReaderView() != null)
@@ -1808,6 +2087,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.i("CoolReader.onStop() exiting");
 	}
 
+	public boolean checkStoragePermission() {
+		// Verify that all required contact permissions have been granted.
+		return ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				== PackageManager.PERMISSION_GRANTED;
+	}
+
 	private void requestStoragePermissions() {
 		// check or request permission for storage
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -2323,7 +2608,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 	
 	public static final String OPEN_FILE_PARAM = "FILE_TO_OPEN";
-	public void loadDocument(final String item, final String fileLink, final Runnable doneCallback, final Runnable errorCallback, final boolean forceSync)
+	public void loadDocument(final String item, final Object fileLink, final Runnable doneCallback, final Runnable errorCallback, final boolean forceSync)
 	{
 		runInReader(() -> mReaderView.loadDocument(item, fileLink, forceSync ? () -> {
 			if (null != doneCallback)
@@ -2403,7 +2688,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void loadDocument(FileInfo item, Runnable doneCallback, Runnable errorCallback, boolean forceSync) {
 		log.d("Activities.loadDocument(" + item.pathname + ")");
-		loadDocument(item.getPathName(), "", doneCallback, errorCallback, forceSync);
+		Object link = item.documentFile;
+		if (link == null) link = "";
+		loadDocument(item.getPathName(), link, doneCallback, errorCallback, forceSync);
 	}
 
 	/**
@@ -2517,7 +2804,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private void findInDictionaryInternal(String s, View view, DictionaryCallback dcb) {
 		log.d("lookup in dictionary: " + s);
 		try {
-			mDictionaries.findInDictionary(s, view, dcb);
+			mDictionaries.findInDictionary(s, view, false, dcb);
 		} catch (DictionaryException e) {
 			if (e.getMessage().contains("is not installed")) {
 				optionsFilter = "";
@@ -2630,11 +2917,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								}
 							}
 							break;
-
+						case ODT_CMD_SELECT_OTG:
+							if (mOpenDocumentTreeArg != null) {
+								if (intent.getData() != null) {
+									Uri usbOtgRoot = intent.getData();
+									usbDevices.put(mOpenDocumentTreeArg.pathname, usbOtgRoot);
+									//SingletonUsbOtg.getInstance().setUsbOtgRoot(usbOtgRoot);
+								}
+							}
+							mOpenDocumentTreeArg = null;
+							break;
 
 					}
 					mOpenDocumentTreeArg = null;
-
 				}
 			}
 		} //if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE)
@@ -2648,6 +2943,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	 	  		// do nothing
 			}
 		}
+		requestCode = 0;
 	}
 	
 	public void setDict(String id) {
@@ -2896,7 +3192,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			int iSyncVariant2 = settings().getInt(PROP_CLOUD_SYNC_VARIANT, 0);
 			final FileInfo book1=book;
 			BackgroundThread.instance().postGUI(() -> {
-				ArrayList<String> sButtons = new ArrayList<String>();
+				ArrayList<String> sButtons = new ArrayList<>();
 				sButtons.add("*" + getString(R.string.mark_book_as_read));
 				if (iSyncVariant2 == 2) sButtons.add(getString(R.string.str_yes_and_del_pos)); // only for yandex
 				sButtons.add(getString(R.string.str_yes));
@@ -3161,7 +3457,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			resultDir.mkdirs();
 			String bookFolder = resultDir.getAbsolutePath();
 			waitForCRDBService(() -> {
-				getDB().moveBookToFolder(item, bookFolder, o -> {
+				getDB().moveBookToFolder(item, bookFolder, false, o -> {
 					if ((boolean) o)
 						BackgroundThread.instance().postGUI(() -> {
 							showToast(R.string.moved_to_books);

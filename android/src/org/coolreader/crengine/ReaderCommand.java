@@ -54,6 +54,12 @@ public enum ReaderCommand
 
 	DCMD_SET_ROTATION_INFO_FOR_AA(140),
 
+	// begin new from 500, maybe something would happen in CR
+	DCMD_BRIGHTNESS_DOWN(500),
+	DCMD_BRIGHTNESS_UP(501),
+	DCMD_BRIGHTNESS_WARM_DOWN(502),
+	DCMD_BRIGHTNESS_WARM_UP(503),
+
 	// definitions from android/jni/readerview.h
 	DCMD_OPEN_RECENT_BOOK(2000),
 	DCMD_CLOSE_BOOK(2001),

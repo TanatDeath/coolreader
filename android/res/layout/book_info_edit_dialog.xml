@@ -32,7 +32,7 @@
 					android:id="@+id/tl_buttons_top"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:stretchColumns="1"
+					android:stretchColumns="*"
 					android:orientation="vertical"
 					android:layout_margin="0dip"
 					>
@@ -195,7 +195,7 @@
 			android:id="@+id/tl_cover"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:stretchColumns="1"
+			android:stretchColumns="*"
 			android:orientation="vertical">
 			<TableRow
 					android:layout_weight="1"
@@ -408,7 +408,7 @@
 			style="@style/TextAppearance.Small"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:stretchColumns="1"
+			android:stretchColumns="*"
 			android:layout_weight="10"
 			android:layout_margin="2dp"
 			>
@@ -1488,7 +1488,7 @@
 					android:id="@+id/tl_buttons_bottom"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:stretchColumns="1"
+					android:stretchColumns="*"
 					android:orientation="vertical"
 					android:layout_margin="0dip"
 					>

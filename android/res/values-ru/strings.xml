@@ -186,6 +186,10 @@
     <string name="action_touch_screen_enabled_toast">Сенсорный экран включен</string>
     <string name="action_repeat">(автоповтор)</string>
     <string name="action_logcat">Сохранить журнал</string>
+    <string name="action_brightness_down">Яркость ниже</string>
+    <string name="action_brightness_up">Яркость выше</string>
+    <string name="action_brightness_warm_down">Яркость ниже (теплая)</string>
+    <string name="action_brightness_warm_up">Яроксть выше (теплая)</string>
     <string name="options_app_scan_book_props">Сканировать свойства книг в папке</string>
     <string name="options_page_titlebar">Настройки колонтитула</string>
     <string name="options_page_titlebar_short">колонтитул</string>
@@ -258,8 +262,6 @@
     <string name="options_selection_action">Одно слово</string>
     <string name="options_selection_action_long">Одно слово (длинный тап)</string>
     <string name="options_selection_action_long_add_info">Длинный двойной тап - это действие, которое запускается в момент выделения слова по двойному тапу, в случае если во время второго тапа вы задерживаете и не отпускаете палец более 400мс.</string>
-    <string name="options_bookmark_action_send_to">Действие \"Отправить в\" в диалоге закладки</string>
-    <string name="options_bookmark_action_send_to_add_info">Вы можете настроить быстрое действие для отправки закладки в стороннее приложение</string>
     <string name="options_multi_selection_action">Несколько слов</string>
     <string name="options_selection2_action">Режим выделения: одно слово</string>
     <string name="options_selection2_action_long">Режим выделения: одно слово (длинный тап)</string>
@@ -1085,8 +1087,8 @@
     <string name="orientation_popup_toolbar_hide_short">Скрыть</string>
     <string name="error_while_opening">Ошибка открытия документа \"%s\"</string>
     <string name="datadir_is_removed">Каталог с данными приложения \"%s\" был удален другим приложением!\nВозможно какой-либо оптимизатор дискового пространства?\nК сожалению, все настройки утеряны.</string>
-    <string name="font_compat_partial_with_language">Предупреждение: шрифт \"%s\" содержит не полный набор символов языка \"%s\". Недостающие символы будут получены из резервных шрифтов.</string>
-    <string name="font_not_compat_with_language">Предупреждение: шрифт \"%s\" не содержит ни одного символа языка \"%s\". Всё необходимые символы будут получены из резервных шрифтов.</string>
+    <string name="font_compat_partial_with_language">Предупреждение: шрифт \"%1$s\" содержит не полный набор символов языка \"%2$s\". Недостающие символы будут получены из резервных шрифтов.</string>
+    <string name="font_not_compat_with_language">Предупреждение: шрифт \"%1$s\" не содержит ни одного символа языка \"%2$s\". Всё необходимые символы будут получены из резервных шрифтов.</string>
     <string name="fontconfig_language_orthography_database">Набор символов различных письменностей от Fontconfig:
         https://www.fontconfig.org/
     </string>
@@ -1574,7 +1576,10 @@
     <string name="online_combo_add_info">Онлайн комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре</string>
     <string name="online_super_combo">Онлайн супер комбо</string>
     <string name="online_super_combo_add_info">Онлайн супер комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре, после чего передается во внешнее приложение</string>
-    <string name="options_bookmark_action_send_to_mod">Уточнение действия \"Отправить в\"</string>
+    <string name="options_bookmark_action_send_to_option">Диалог закладки: действие для отправки</string>
+    <string name="options_bookmark_action_send_to">\"Отправить в\"</string>
+    <string name="options_bookmark_action_send_to_add_info">Вы можете настроить быстрое действие для отправки закладки в стороннее приложение</string>
+    <string name="options_bookmark_action_send_to_mod">\"Отправить в\" - уточнение</string>
     <string name="options_bookmark_action_send_to_mod_add_info">Вы можете выбрать, что отправлять - выбранный текст, все предложение, выделенный текст в предложении</string>
     <string name="options_bookmark_action_send_to_mod1">Выбранный текст</string>
     <string name="options_bookmark_action_send_to_mod2">Контекст (все предложение) выбранного текста</string>
@@ -1669,6 +1674,8 @@
     <string name="online_offline_dics_add_info">Можно указать соответствие онлайновому словарю офлайнового, который будет использоваться вместо него, когда вы не в сети</string>
     <string name="online_offline_dics_add_info_ext">Можно указать соответствие онлайновому словарю офлайнового, который будет использоваться вместо него, когда вы не в сети. Введите номер словаря</string>
     <string name="lang_pair">Языковая пара</string>
+    <string name="langs">Языки:</string>
+    <string name="dic_converting">Преобразование словаря</string>
     <string name="conformity">Соответствие</string>
     <string name="offline_dics_dialog">Оффлайновые словари</string>
     <string name="offline_dics_dialog_add_info">Управление оффлайновыми словарями</string>
@@ -1855,8 +1862,8 @@
     <string name="options_selection_action_toolbar_short">Панель словарей</string>
     <string name="inspector_mode_no_dic_history">Не сохранять в историю в режиме инспектора</string>
     <string name="word_count">число слов</string>
-    <string name="convert_dic">преобразовать словарь</string>
-    <string name="converted_dic">словарь преобразован</string>
+    <string name="convert_dic">преобразовать</string>
+    <string name="converted_dic">преобразован</string>
     <string name="tts_sentence_pause">Пауза между предложениями, мс</string>
     <string name="eink_onyx_full_update">Способ полного обновления экрана</string>
     <string name="eink_full_update_auto">Авто</string>
@@ -1869,5 +1876,17 @@
     <string name="click_to_restore">Нажмите, чтобы восстановить настройки</string>
     <string name="click_to_restore_warn">Восстановить настройки? Эта операция не может быть отменена!</string>
     <string name="show_hidden_dirs">Показывать скрытые папки</string>
+    <string name="dict_not_exists">Файл dict не существует. Преобразование невозможно</string>
+    <string name="conversion_incomplete">Преобразование отменено. Словарь может быть неполным</string>
+    <string name="dict_was_converted">Словарь уже был преобразован. Удалить файлы и попробовать снова?</string>
+    <string name="dict_was_not_deleted">Невозможно удалить файлы словаря. Попробуйте перезапустить приложение</string>
+    <string name="cannot_delete_temp_dic_file">Невозможно удалить временный файл словаря. Удалите его вручную</string>
+    <string name="unpack_dic">Распаковка словаря</string>
+    <string name="dic_index_create">Создание индекса словаря</string>
+    <string name="storage_internal">Внутреннее хранилище</string>
+    <string name="storage_sd_card">SD карта</string>
+    <string name="root_directory">Корневая папка</string>
+    <string name="saf_otg_explanation">Сейчас откроется системный диалог файловой системы Android (ограничения безопасности). Выберите USB устройство из списка (слева). Продолжить?</string>
+    <string name="open">Открыть</string>
 </resources>
 

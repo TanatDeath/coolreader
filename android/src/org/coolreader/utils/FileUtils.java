@@ -1,6 +1,7 @@
 package org.coolreader.utils;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -8,16 +9,19 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.storage.StorageVolume;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.android.gms.common.util.IOUtils;
-
 import org.coolreader.CoolReader;
+import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
 import org.coolreader.crengine.DeviceInfo;
@@ -39,7 +43,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class FileUtils {
 
@@ -89,6 +95,17 @@ public class FileUtils {
         if (uri == null) return null;
         String fileName = null;
         String path = uri.getPath();
+        fileName = path;
+        int cut = path.lastIndexOf('/');
+        if (cut != -1) {
+            fileName = path.substring(cut + 1);
+        }
+        return fileName;
+    }
+
+    public static String getFileName(String path) {
+        if (path == null) return null;
+        String fileName = path;
         int cut = path.lastIndexOf('/');
         if (cut != -1) {
             fileName = path.substring(cut + 1);
@@ -321,7 +338,11 @@ public class FileUtils {
         } catch (IOException e) {
             // handle if you like
         } finally {
-            IOUtils.closeQuietly(raf);
+            try {
+                raf.close();
+            } catch (Exception e) {
+                //do nothing
+            }
         }
         return fileSignature == 0x504B0304 || fileSignature == 0x504B0506 || fileSignature == 0x504B0708;
     }
@@ -435,14 +456,17 @@ public class FileUtils {
         return null;
     }
 
-    public static FileInfo getFileProps(File file, FileInfo fileDir, boolean noDirScan) {
+    public static FileInfo getFileProps(FileInfo thisFi, File file, FileInfo fileDir, boolean noDirScan) {
+        if (thisFi != null)
+            if (thisFi.isOTGDir()) return thisFi;
         FileInfo fi = new FileInfo(file);
         String sPath = file.getAbsolutePath();
         String sPathZ = sPath;
         boolean isArch = FileUtils.isArchive(file);
         if ((isArch) && (noDirScan)) { // We'll try to scan file without directory rescan
             FileInfo fiArc = Services.getScanner().scanZip(fi);
-            if (Services.getEngine().scanBookProperties(fiArc)) return fiArc;
+            if (fiArc != null)
+                if (Services.getEngine().scanBookProperties(fiArc)) return fiArc;
         }
         FileInfo dir = Services.getScanner().findParent(fi, fileDir);
         if ((isArch) && (!sPathZ.toLowerCase().endsWith(".zip"))
@@ -512,5 +536,100 @@ public class FileUtils {
         }
         return files;
     }
+
+    // from Amaze file browser
+
+    public static final String DEFAULT_FALLBACK_STORAGE_PATH = "/storage/sdcard0";
+    public static final Pattern DIR_SEPARATOR = Pattern.compile("/");
+    public static final String INTERNAL_SHARED_STORAGE = "Internal shared storage";
+
+    @TargetApi(Build.VERSION_CODES.N)
+    public static File getVolumeDirectory(StorageVolume volume) {
+        try {
+            Field f = StorageVolume.class.getDeclaredField("mPath");
+            f.setAccessible(true);
+            return (File) f.get(volume);
+        } catch (Exception e) {
+            // This shouldn't fail, as mPath has been there in every version
+            throw new RuntimeException(e);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public static String[] getExtSdCardPathsForActivity(Context context) {
+        ArrayList<String> paths = new ArrayList();
+        for (File file: context.getExternalFilesDirs("external")) {
+            if (file != null) {
+                int index = file.getAbsolutePath().lastIndexOf("/Android/data");
+                if (index < 0) {
+                    log.w("Unexpected external file dir: " + file.getAbsolutePath());
+                } else {
+                    String path = file.getAbsolutePath().substring(0, index);
+                    try {
+                        path = new File(path).getCanonicalPath();
+                    } catch (IOException e) {
+                        // Keep non-canonical path.
+                    }
+                    paths.add(path);
+                }
+            }
+        }
+        if (paths.isEmpty()) paths.add("/storage/sdcard1");
+        return paths.toArray(new String[paths.size()]);
+    }
+
+    public static boolean canListFiles(File f) {
+        return f.canRead() && f.isDirectory();
+    }
+
+    public static File getUsbDrive() {
+        File parent = new File("/storage");
+
+        try {
+            for (File f : parent.listFiles())
+                if (f.exists() && f.getName().toLowerCase().contains("usb") && f.canExecute()) return f;
+        } catch (Exception e) {
+        }
+
+        parent = new File("/mnt/sdcard/usbStorage");
+        if (parent.exists() && parent.canExecute()) return parent;
+        parent = new File("/mnt/sdcard/usb_storage");
+        if (parent.exists() && parent.canExecute()) return parent;
+
+        return null;
+    }
+
+    public static int getDeviceDescriptionLegacy(File file) {
+        String path = file.getPath();
+        switch (path) {
+            case "/storage/emulated/legacy":
+            case "/storage/emulated/0":
+            case "/mnt/sdcard":
+                return StorageDirectory.STORAGE_INTERNAL;
+            case "/storage/sdcard":
+            case "/storage/sdcard1":
+                return StorageDirectory.STORAGE_SD_CARD;
+            case "/":
+                return StorageDirectory.ROOT;
+            default:
+                return StorageDirectory.NOT_KNOWN;
+        }
+    }
+
+    public static String getNameForDeviceDescription(BaseActivity activity, File file, int deviceDescription) {
+        switch (deviceDescription) {
+            case StorageDirectory.STORAGE_INTERNAL:
+                return activity.getString(R.string.storage_internal);
+            case StorageDirectory.STORAGE_SD_CARD:
+                return activity.getString(R.string.storage_sd_card);
+            case StorageDirectory.ROOT:
+                return activity.getString(R.string.root_directory);
+            case StorageDirectory.NOT_KNOWN:
+            default:
+                return file.getName();
+        }
+    }
+
+    //\ from Amaze file browser
 
 }

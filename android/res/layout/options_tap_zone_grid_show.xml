@@ -35,7 +35,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -63,7 +63,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -100,7 +100,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -128,7 +128,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -165,7 +165,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -193,7 +193,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -232,7 +232,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -260,7 +260,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -297,7 +297,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -325,7 +325,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -362,7 +362,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -390,7 +390,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -429,7 +429,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -457,7 +457,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -494,7 +494,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -522,7 +522,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -559,7 +559,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout
@@ -587,7 +587,7 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="10"
                     android:layout_gravity="fill_vertical|fill_horizontal"
-                    android:stretchColumns="1"
+                    android:stretchColumns="*"
                     >
                     <TableRow android:layout_weight="1">
                         <LinearLayout

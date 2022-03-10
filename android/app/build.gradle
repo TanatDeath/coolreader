@@ -13,8 +13,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202202061
-        versionName "2022.02.06.1"
+        versionCode 202203011
+        versionName "2022.03.01.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -41,23 +41,17 @@ android {
             applicationId "org.coolreader.knownreader"
             manifestPlaceholders = [appLabel:"@string/app_name_free"]
         }
-        free_wo_gsuite {
-            dimension "version"
-            buildConfigField "boolean", "GSUITE_AVAILABLE", "false"
-            applicationId "org.coolreader.knownreader"
-            manifestPlaceholders = [appLabel:"@string/app_name_free"]
-        }
         premium {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "org.knownreader.premium"
             manifestPlaceholders = [appLabel:"@string/app_name_premium"]
         }
-        premium_wo_gsuite {
+        fdroid {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "false"
-            applicationId "org.knownreader.premium"
-            manifestPlaceholders = [appLabel:"@string/app_name_premium"]
+            applicationId "org.knownreader.fdroid"
+            manifestPlaceholders = [appLabel:"@string/app_name_fdroid"]
         }
         experimental {
             dimension "version"
@@ -76,22 +70,29 @@ android {
         }
 
         free {
-            java.srcDirs = ['../../android/free/src']
-            res.srcDirs = ['../../android/free/res']
-            manifest.srcFile "../../android/free/AndroidManifest.xml"
+            java.srcDirs = ['../../android/flavoured/free/src']
+            res.srcDirs = ['../../android/flavoured/free/res']
+            manifest.srcFile "../../android/flavoured/free/AndroidManifest.xml"
         }
 
         premium {
-            java.srcDirs = ['../../android/premium/src']
-            res.srcDirs = ['../../android/premium/res']
-            manifest.srcFile "../../android/premium/AndroidManifest.xml"
+            java.srcDirs = ['../../android/flavoured/premium/src']
+            res.srcDirs = ['../../android/flavoured/premium/res']
+            manifest.srcFile "../../android/flavoured/premium/AndroidManifest.xml"
+        }
+
+        fdroid {
+            java.srcDirs = ['../../android/flavoured/fdroid/src']
+            res.srcDirs = ['../../android/flavoured/fdroid/res']
+            manifest.srcFile "../../android/flavoured/fdroid/AndroidManifest.xml"
         }
 
         experimental {
-            java.srcDirs = ['../../android/experimental/src']
-            res.srcDirs = ['../../android/experimental/res']
-            manifest.srcFile "../../android/experimental/AndroidManifest.xml"
+            java.srcDirs = ['../../android/flavoured/experimental/src']
+            res.srcDirs = ['../../android/flavoured/experimental/res']
+            manifest.srcFile "../../android/flavoured/experimental/AndroidManifest.xml"
         }
+
     }
     buildTypes {
         release {
@@ -252,30 +253,38 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
-    implementation files('libs/LingvoIntegration_2.5.2.12.jar')
+    //implementation files('libs/LingvoIntegration_2.5.2.12.jar') // done via our own class
     implementation 'androidx.multidex:multidex:2.0.0'
-    implementation 'com.google.android.gms:play-services-identity:15.0.1'
+    //implementation 'com.google.android.gms:play-services-identity:15.0.1' // hm, seems, that not needed (20220213)
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.github.deano2390:FlowTextView:2.0.5'
     implementation 'com.dropbox.core:dropbox-core-sdk:3.0.11'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
-    implementation files('libs/okhttp-3.12.3.jar')
-    implementation files('libs/okio-1.15.0.jar')
-    // plotn - analyze do we need following three?
-    implementation 'org.jetbrains:annotations:15.0'
+    //implementation files('libs/okhttp-3.12.3.jar')
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
+    //implementation files('libs/okio-1.15.0.jar')
+    implementation 'org.jetbrains:annotations:23.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    //implementation 'androidx.constraintlayout:constraintlayout:1.1.3' // what was it ? ...
     // directory chooser
     implementation 'com.github.guardian:Option:-SNAPSHOT'
     implementation 'net.rdrei.android.dirchooser:library:3.2@aar'
     implementation 'org.jsoup:jsoup:1.12.1'
-    // plotn - analyze do we need following three?
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.annotation:annotation:1.0.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     implementation files('libs/commons.jar')
     implementation files('libs/OpenDocument.jar')
+    //implementation files('libs/dsl4j-0.4.5-24-0fd0a0ac9b-SNAPSHOT.jar')
+    implementation 'io.github.dictzip:dictzip:0.12.1'
+    // for dsl4j
+    implementation 'io.github.eb4j:dsl4j:0.5.0'
+//    implementation 'commons-io:commons-io:2.11.0'
+//    implementation 'io.github.eb4j:dsl4j:0.4.5-31-78c49a1bb9-SNAPSHOT'
+//    implementation 'com.google.protobuf:protobuf-java:3.19.4'
+//    implementation 'com.github.takawitter:trie4j:0.9.8'
+    //\
     //implementation project(path: ':onyxsdk-device-1.2.5')
     //implementation 'com.onyx.android.sdk:onyxsdk-device:1.1.8'
-    implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.5'
+    implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.6'
 }

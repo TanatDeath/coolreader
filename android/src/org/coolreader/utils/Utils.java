@@ -1114,6 +1114,14 @@ public class Utils {
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
+	public static void setSolidButton(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_solid_border);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
 	public static void setDashedButton1(Button btn) {
 		if (btn == null) return;
 		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)

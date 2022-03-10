@@ -1,9 +1,11 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
+import android.hardware.usb.UsbDevice;
 import android.net.Uri;
 import  androidx.documentfile.provider.DocumentFile;
 
+import android.os.Build;
 import android.util.Log;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +34,7 @@ public class FileInfo implements Parcelable {
 	public final static String ROOT_DIR_TAG = "@root";
 	public final static String OPDS_LIST_TAG = "@opds";
 	public final static String OPDS_DIR_PREFIX = "@opds:";
+	public static final String OTG_DIR_PREFIX = "@otg:";
 	public final static String CALIBRE_DIR_PREFIX = "@calibre:";
 	public final static String LOADING_STUB_PREFIX = "@loadingstub";
 	public final static String NOT_FOUND_STUB_PREFIX = "@notfoundstub";
@@ -211,6 +214,26 @@ public class FileInfo implements Parcelable {
 	public Long book_downloaded = 0L;
 	public int was_error = 0;
 
+	public DocumentFile documentFile; // For OTG, etc
+	//public String usbDeviceName; // USB OTG Device
+	//public UsbDevice usbDevice; // USB OTG Device
+
+//	public String getUsbDeviceLabel() {
+//		if (usbDevice != null) {
+//			String serial = "";
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//				try {
+//					serial = usbDevice.getSerialNumber();
+//				} catch (SecurityException ifPermissionDenied) {
+//					// May happen when device is running Android 10 or above.
+//				}
+//				if (!StrUtils.isEmptyStr(serial)) return "OTG:" + serial;
+//				return "OTG:" + usbDeviceName;
+//			}
+//		}
+//		return "";
+//	}
+
 	public ArrayList<Integer> arrReadBeg = new ArrayList<Integer>();
 	public ArrayList<FileInfo> files;// files
 	public ArrayList<FileInfo> dirs; // directories
@@ -360,7 +383,7 @@ public class FileInfo implements Parcelable {
 	 */
 	public static final String ARC_SEPARATOR = "@/";
 
-	public void setFlag( int flag, boolean value ) {
+	public void setFlag(int flag, boolean value) {
 		flags = flags & (~flag) | (value? flag : 0);
 	}
 	
@@ -456,7 +479,7 @@ public class FileInfo implements Parcelable {
 		dirs = in.createTypedArrayList(FileInfo.CREATOR);
 	}
 
-	public FileInfo( String pathName )
+	public FileInfo(String pathName)
 	{
 		if (pathName.startsWith(FileInfo.OPDS_DIR_PREFIX)) {
 			filename = pathName;
@@ -587,6 +610,7 @@ public class FileInfo implements Parcelable {
 
 	public void assign(FileInfo v)
 	{
+		if (v == null) return;
 		title = v.title;
 		authors = v.authors;
 		authorext = v.authorext;
@@ -674,6 +698,8 @@ public class FileInfo implements Parcelable {
 //		// Litres related
 		cover_href = v.cover_href;
 		cover_href2 = v.cover_href2;
+		// Content URI related
+		documentFile = v.documentFile;
 //		public String fragment_href;
 //		public Double finalPrice = 0D;
 //		public int free = 0;
@@ -855,6 +881,11 @@ public class FileInfo implements Parcelable {
 	public boolean isOnlineCatalogPluginBook()
 	{
 		return !isDirectory && pathname != null && pathname.startsWith(ONLINE_CATALOG_PLUGIN_PREFIX) && getOnlineStoreBookInfo() != null;
+	}
+
+	public boolean isOTGDir()
+	{
+		return pathname!=null && pathname.startsWith(OTG_DIR_PREFIX);
 	}
 	
 	public boolean isOPDSDir()
@@ -1241,14 +1272,14 @@ public class FileInfo implements Parcelable {
 	 */
 	public String getPathName()
 	{
-		if ( arcname!=null )
+		if (!StrUtils.isEmptyStr(arcname))
 			return arcname + ARC_SEPARATOR + pathname;
 		return pathname;
 	}
 
 	public String getBasePath()
 	{
-		if ( arcname!=null )
+		if (!StrUtils.isEmptyStr(arcname))
 			return arcname;
 		return pathname;
 	}

@@ -1,11 +1,15 @@
 package org.coolreader.db;
 
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.utils.StrUtils;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
+
+import java.io.File;
 
 public class CoverDB extends BaseDB {
 
@@ -92,6 +96,45 @@ public class CoverDB extends BaseDB {
 			if ( stmt!=null )
 				stmt.close();
 		}
+	}
+
+	public boolean changeCoverPath(FileInfo bookFile, final String toFolder) {
+		if (bookFile == null) return false;
+		if (!isOpened())
+			return false;
+		ensureOpened();
+		SQLiteStatement stmt = null;
+		boolean isArc = !StrUtils.isEmptyStr(bookFile.arcname);
+		String fieldname = "arcname";
+		String fname1 = bookFile.arcname;
+		String fname = bookFile.arcname;
+		if (!isArc) {
+			fname1 = bookFile.pathname;
+			fname = bookFile.pathname;
+			fieldname = "pathname";
+		}
+		if (fname.lastIndexOf("/") >= 0) fname = fname.substring(fname.lastIndexOf("/") + 1);
+		if (fname.lastIndexOf("\\") >= 0) fname = fname.substring(fname.lastIndexOf("\\") + 1);
+		String slash = "";
+		if ((!toFolder.endsWith("/")) && (!toFolder.endsWith("\\"))) slash = "/";
+
+		try {
+			if (isArc) {
+				stmt = mDB.compileStatement("update coverpages set book_path = replace(book_path, ?, ?) where book_path like ?");
+				stmt.bindString(1, fname1 + "@/");
+				stmt.bindString(2, toFolder + slash + fname + "@/");
+				stmt.bindString(3, fname1 + "@/%");
+			}
+			else {
+				stmt = mDB.compileStatement("update coverpages set book_path = ? where book_path = ?");
+				stmt.bindString(1, toFolder + slash + fname);
+				stmt.bindString(2, fname1);
+			}
+			stmt.execute();
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
 	}
 
 	public byte[] loadBookCoverpage(String bookId)

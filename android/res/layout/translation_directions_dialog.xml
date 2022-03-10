@@ -6,7 +6,7 @@
         android:layout_marginLeft="4dip"
         android:layout_marginRight="4dip"
         android:layout_margin="4dip"
-        android:stretchColumns="1"
+        android:stretchColumns="*"
         >
     <TextView
             android:id="@+id/some_text"

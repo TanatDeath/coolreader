@@ -32,6 +32,7 @@ import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.DelayedExecutor;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
+import org.coolreader.crengine.ExternalDocCameDialog;
 import org.coolreader.dic.DictsDlg;
 import org.coolreader.crengine.DocProperties;
 import org.coolreader.crengine.DocView;
@@ -107,6 +108,8 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.documentfile.provider.DocumentFile;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -249,6 +252,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public final static int BRIGHTNESS_TYPE_LEFT_SIDE = 0;
 	public final static int BRIGHTNESS_TYPE_RIGHT_SIDE = 1;
+	public final static int BRIGHTNESS_TYPE_COLD_VAL = 2;
+	public final static int BRIGHTNESS_TYPE_WARM_VAL = 3;
 
 	//KR warning! we have our own implementation of this - mmaybe we'll switch to CR's - not sure
 	/// Always sync this constants with crengine/include/lvdocview.h!
@@ -466,18 +471,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			setSetting(PROP_APP_VIEW_ANIM_DURATION, String.valueOf(mAvgDrawAnimationStats.average()), false, true, false);
 		log.i("calling bookView.onPause()");
 		boolean bNeedSave = true;
-		if (lastSavedToGdBookmark != null) {
-			if (bmk.getStartPos() != null)
-				if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
-					bNeedSave = false;
-				}
-		}
-		if (bNeedSave) {
-			int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-			if (iSyncVariant > 0)
-				CloudSync.saveJsonInfoFileOrCloud(((CoolReader)mActivity),
-						CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
-			lastSavedToGdBookmark = bmk;
+		try {
+			if (lastSavedToGdBookmark != null) {
+				if (bmk.getStartPos() != null)
+					if ((bmk.getStartPos().equals(lastSavedToGdBookmark.getStartPos()))) {
+						bNeedSave = false;
+					}
+			}
+			if (bNeedSave) {
+				int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+				if (iSyncVariant > 0)
+					CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+							CloudSync.CLOUD_SAVE_READING_POS, true, iSyncVariant == 1, true);
+				lastSavedToGdBookmark = bmk;
+			}
+		} catch (Exception e) {
+			log.i("onAppPause bookmark exception: " + e.getMessage());
 		}
 		bookView.onPause();
 		appPaused = true;
@@ -2207,112 +2216,109 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND //,
 						//ReaderAction.OPEN_BOOK_FROM_GD
 				};
-				mActivity.showActionsToolbarMenu(actions, new CRToolBar.OnActionHandler() {
-					@Override
-					public boolean onActionSelected(ReaderAction item) {
-						if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
-							log.i("Save settings to CLOUD");
-							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							if (iSyncVariant == 0) {
-								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-							} else {
-								CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant == 1);
-							}
-							return true;
-						} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
-							log.i("Load settings from CLOUD");
-							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							if (iSyncVariant == 0) {
-								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-							} else {
-								if (iSyncVariant == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
-								else
-									CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-											CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant == 1, CloudAction.NO_SPECIAL_ACTION, false);
-							}
-							return true;
-						} else if (item == ReaderAction.SAVE_READING_POS) {
-							log.i("Save reading pos to CLOUD");
-							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							if (iSyncVariant == 0) {
-								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-							} else {
-								CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant == 1, false);
-							}
-							Bookmark bmk = getCurrentPositionBookmark();
-							lastSavedToGdBookmark = bmk;
-							return true;
-						} else if (item == ReaderAction.LOAD_READING_POS) {
-							log.i("Load reading pos from CLOUD");
-							int iSyncVariant2 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							if (iSyncVariant2 == 0) {
-								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-							} else {
+				mActivity.showActionsToolbarMenu(actions, item -> {
+					if (item == ReaderAction.SAVE_SETTINGS_TO_CLOUD) {
+						log.i("Save settings to CLOUD");
+						int iSyncVariant1 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant1 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+						} else {
+							CloudSync.saveSettingsToFilesOrCloud(((CoolReader) mActivity), false, iSyncVariant1 == 1);
+						}
+						return true;
+					} else if (item == ReaderAction.LOAD_SETTINGS_FROM_CLOUD) {
+						log.i("Load settings from CLOUD");
+						int iSyncVariant1 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant1 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+						} else {
+							if (iSyncVariant1 == 1) CloudSync.loadSettingsFiles(((CoolReader)mActivity),false);
+							else
 								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant2 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-							}
-							return true;
-						} else if (item == ReaderAction.SAVE_BOOKMARKS) {
-							log.i("Save bookmarks to CLOUD");
-							int iSyncVariant = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							if (iSyncVariant == 0) {
-								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-							} else {
-								CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant == 1, false);
-							}
-							return true;
-						} else if (item == ReaderAction.LOAD_BOOKMARKS) {
-							log.i("Load bookmarks from CLOUD");
-							int iSyncVariant3 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
-							if (iSyncVariant3 == 0) {
-								mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
-								mActivity.optionsFilter = "";
-								mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
-							} else {
-								CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
-										CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant3 == 1, CloudAction.NO_SPECIAL_ACTION, false);
-							}
-							return true;
-						} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
-							log.i("Save current book to YND");
-							FileInfo fi = mActivity.getReaderView().getBookInfo().getFileInfo();
-							CloudAction.yndOpenBookDialog(mActivity, fi,true);
-							return true;
-						} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
-							log.i("Open book from CLOUD_YND");
-							if (!FlavourConstants.PREMIUM_FEATURES) {
-								mActivity.showToast(R.string.only_in_premium);
-								return true;
-							}
-							CloudAction.yndOpenBookDialog(mActivity, null,true);
-							return true;
-						} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
-							log.i("Open book from CLOUD_DBX");
-							if (!FlavourConstants.PREMIUM_FEATURES) {
-								mActivity.showToast(R.string.only_in_premium);
-								return true;
-							}
-							CloudAction.dbxOpenBookDialog(mActivity);
-							return true;
-						} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL) {
-							log.i("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
-							CloudAction.emailSendBook(mActivity, null);
+										CloudSync.CLOUD_SAVE_SETTINGS, false, iSyncVariant1 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+						}
+						return true;
+					} else if (item == ReaderAction.SAVE_READING_POS) {
+						log.i("Save reading pos to CLOUD");
+						int iSyncVariant1 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant1 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+						} else {
+							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant1 == 1, false);
+						}
+						Bookmark bmk = getCurrentPositionBookmark();
+						lastSavedToGdBookmark = bmk;
+						return true;
+					} else if (item == ReaderAction.LOAD_READING_POS) {
+						log.i("Load reading pos from CLOUD");
+						int iSyncVariant21 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant21 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+						} else {
+							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_READING_POS, false, iSyncVariant21 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+						}
+						return true;
+					} else if (item == ReaderAction.SAVE_BOOKMARKS) {
+						log.i("Save bookmarks to CLOUD");
+						int iSyncVariant1 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant1 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+						} else {
+							CloudSync.saveJsonInfoFileOrCloud(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant1 == 1, false);
+						}
+						return true;
+					} else if (item == ReaderAction.LOAD_BOOKMARKS) {
+						log.i("Load bookmarks from CLOUD");
+						int iSyncVariant31 = mSettings.getInt(PROP_CLOUD_SYNC_VARIANT, 0);
+						if (iSyncVariant31 == 0) {
+							mActivity.showToast(mActivity.getString(R.string.cloud_sync_variant1_v));
+							mActivity.optionsFilter = "";
+							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_CLOUD_TITLE);
+						} else {
+							CloudSync.loadFromJsonInfoFileList(((CoolReader) mActivity),
+									CloudSync.CLOUD_SAVE_BOOKMARKS, false, iSyncVariant31 == 1, CloudAction.NO_SPECIAL_ACTION, false);
+						}
+						return true;
+					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_YND) {
+						log.i("Save current book to YND");
+						FileInfo fi1 = mActivity.getReaderView().getBookInfo().getFileInfo();
+						CloudAction.yndOpenBookDialog(mActivity, fi1,true);
+						return true;
+					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_YND) {
+						log.i("Open book from CLOUD_YND");
+						if (!FlavourConstants.PREMIUM_FEATURES) {
+							mActivity.showToast(R.string.only_in_premium);
 							return true;
 						}
-						return false;
+						CloudAction.yndOpenBookDialog(mActivity, null,true);
+						return true;
+					} else if (item == ReaderAction.OPEN_BOOK_FROM_CLOUD_DBX) {
+						log.i("Open book from CLOUD_DBX");
+						if (!FlavourConstants.PREMIUM_FEATURES) {
+							mActivity.showToast(R.string.only_in_premium);
+							return true;
+						}
+						CloudAction.dbxOpenBookDialog(mActivity);
+						return true;
+					} else if (item == ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL) {
+						log.i("SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL");
+						CloudAction.emailSendBook(mActivity, null);
+						return true;
 					}
+					return false;
 				});
 				break;
 			case DCMD_FONTS_MENU:
@@ -2326,41 +2332,38 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						ReaderAction.FONT_BOLD,
 						ReaderAction.CHOOSE_TEXTURE
 				};
-				mActivity.showActionsToolbarMenu(fonts_actions, new CRToolBar.OnActionHandler() {
-					@Override
-					public boolean onActionSelected(ReaderAction item) {
-						if (item == ReaderAction.FONT_PREVIOUS) {
-							skipFallbackWarning = false;
-							switchFontFace(-1);
-							return true;
-						} else if (item == ReaderAction.FONT_NEXT) {
-							skipFallbackWarning = false;
-							switchFontFace(1);
-							return true;
-						} else if (item == ReaderAction.ZOOM_IN) {
-							doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
-							syncViewSettings(getSettings(), true, true);
-							return true;
-						} else if (item == ReaderAction.ZOOM_OUT) {
-							doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
-							syncViewSettings(getSettings(), true, true);
-							return true;
-						} else if (item == ReaderAction.FONT_SELECT) {
-							mActivity.optionsFilter = "";
-							skipFallbackWarning = false;
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
-							return true;
-						} else if (item == ReaderAction.FONT_BOLD) {
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_BASE_WEIGHT);
-							return true;
-						} else if (item == ReaderAction.CHOOSE_TEXTURE) {
-							mActivity.optionsFilter = "";
-							mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGE_BACKGROUND_IMAGE);
-							return true;
-						}
-						return false;
+				mActivity.showActionsToolbarMenu(fonts_actions, item -> {
+					if (item == ReaderAction.FONT_PREVIOUS) {
+						skipFallbackWarning = false;
+						switchFontFace(-1);
+						return true;
+					} else if (item == ReaderAction.FONT_NEXT) {
+						skipFallbackWarning = false;
+						switchFontFace(1);
+						return true;
+					} else if (item == ReaderAction.ZOOM_IN) {
+						doEngineCommand( ReaderCommand.DCMD_ZOOM_IN, param);
+						syncViewSettings(getSettings(), true, true);
+						return true;
+					} else if (item == ReaderAction.ZOOM_OUT) {
+						doEngineCommand( ReaderCommand.DCMD_ZOOM_OUT, param);
+						syncViewSettings(getSettings(), true, true);
+						return true;
+					} else if (item == ReaderAction.FONT_SELECT) {
+						mActivity.optionsFilter = "";
+						skipFallbackWarning = false;
+						mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_FACE);
+						return true;
+					} else if (item == ReaderAction.FONT_BOLD) {
+						mActivity.optionsFilter = "";
+						mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_FONT_BASE_WEIGHT);
+						return true;
+					} else if (item == ReaderAction.CHOOSE_TEXTURE) {
+						mActivity.optionsFilter = "";
+						mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_PAGE_BACKGROUND_IMAGE);
+						return true;
 					}
+					return false;
 				});
 				break;
 			case DCMD_SAVE_BOOKMARK_LAST_SEL:
@@ -2441,6 +2444,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case DCMD_SAVE_LOGCAT:
 				mActivity.createLogcatFile();
+				break;
+			case DCMD_BRIGHTNESS_DOWN:
+				startBrightnessControl(0,0, BRIGHTNESS_TYPE_COLD_VAL);
+				stopBrightnessControl(0, surface.getHeight() / 20, BRIGHTNESS_TYPE_COLD_VAL);
+				break;
+			case DCMD_BRIGHTNESS_UP:
+				startBrightnessControl(0,surface.getHeight() / 20, BRIGHTNESS_TYPE_COLD_VAL);
+				stopBrightnessControl(0, 0, BRIGHTNESS_TYPE_COLD_VAL);
+				break;
+			case DCMD_BRIGHTNESS_WARM_DOWN:
+				startBrightnessControl(0,0, BRIGHTNESS_TYPE_WARM_VAL);
+				stopBrightnessControl(0, surface.getHeight() / 20, BRIGHTNESS_TYPE_WARM_VAL);
+				break;
+			case DCMD_BRIGHTNESS_WARM_UP:
+				startBrightnessControl(0,surface.getHeight() / 20, BRIGHTNESS_TYPE_WARM_VAL);
+				stopBrightnessControl(0, 0, BRIGHTNESS_TYPE_WARM_VAL);
 				break;
 			default:
 				// do nothing
@@ -3051,6 +3070,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public boolean loadDocument(final FileInfo fileInfo, final Runnable doneHandler, final Runnable errorHandler) {
 		log.v("loadDocument(" + fileInfo.getPathName() + ")");
+		if (fileInfo.documentFile != null) {
+			ExternalDocCameDialog dlg = new ExternalDocCameDialog(mActivity,
+				fileInfo.documentFile.getType(), fileInfo.documentFile.getUri(), "");
+			dlg.show();
+			return true;
+		}
 		if (this.mBookInfo != null && this.mBookInfo.getFileInfo().pathname.equals(fileInfo.pathname) && mOpened) {
 			log.d("trying to load already opened document");
 			mActivity.showReader();
@@ -3216,7 +3241,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return false;
 	}
 
-	public boolean loadDocument(String fileName, String fileLink, final Runnable doneHandler, final Runnable errorHandler) {
+	public boolean loadDocument(String fileName, Object fileLink, final Runnable doneHandler, final Runnable errorHandler) {
 		lastSelection = null;
 		hyplinkBookmark = null;
 		lastSavedToGdBookmark = null;
@@ -3291,10 +3316,19 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			log.v("loadDocument() : item from history : " + fi);
 		}
 		// We'll save the "content" link
-		if (!StrUtils.isEmptyStr(fileLink)) {
-			fi.opdsLink = fileLink;
-			mActivity.getDB().saveBookInfo(new BookInfo(fi));
-			mActivity.getDB().flush();
+		if (fileLink != null) {
+			if (fileLink instanceof String)
+				if (!StrUtils.isEmptyStr((String) fileLink)) {
+					fi.opdsLink = (String) fileLink;
+					mActivity.getDB().saveBookInfo(new BookInfo(fi));
+					mActivity.getDB().flush();
+				}
+			if (fileLink instanceof DocumentFile) {
+				fi.opdsLink = ((DocumentFile) fileLink).getUri().toString();
+				fi.documentFile = (DocumentFile) fileLink;
+				mActivity.getDB().saveBookInfo(new BookInfo(fi));
+				mActivity.getDB().flush();
+			}
 		}
 		return loadDocument(fi, doneHandler, errorHandler);
 	}
@@ -4181,6 +4215,24 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 			}
 		}
+		if (type == BRIGHTNESS_TYPE_COLD_VAL) {
+			indexCold = currentBrightnessValueIndexCold + diffCold;
+			indexWarm = currentBrightnessValueIndexWarm;
+		}
+		if (type == BRIGHTNESS_TYPE_WARM_VAL) {
+			indexCold = currentBrightnessValueIndexCold;
+			indexWarm = currentBrightnessValueIndexWarm + diffWarm;
+		}
+		if ((type == BRIGHTNESS_TYPE_COLD_VAL) || (type == BRIGHTNESS_TYPE_WARM_VAL)) {
+			if (backlightFixDelta) {
+				while ((indexCold < 0) || (indexWarm < 0)) {
+					indexCold++; indexWarm++;
+				}
+				while ((indexCold >= countCold) || (indexWarm >= countWarm)) {
+					indexCold--; indexWarm--;
+				}
+			}
+		}
 		if (indexCold < 0) {
 			indexCold = 0;
 		}
@@ -4220,7 +4272,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		currentBrightnessPrevYPos = y;
 		if ((!bOnyxLight) && (!bOnyxWarmLight)) {
 			if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
-				showCenterPopup(currentBrightnessValue + "%", 2000, true);
+				if ((type != BRIGHTNESS_TYPE_COLD_VAL) && (type != BRIGHTNESS_TYPE_WARM_VAL))
+					showCenterPopup(currentBrightnessValue + "%", 2000, true);
 			// mr Kaz asked to turn off backlight on eink - so let it be
 			//else
 			//	showBottomPopup(currentBrightnessValue + "%");
@@ -4238,7 +4291,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				sVal = sVal + " / " + String.format("%1$.1f%%", percentLevelWarm);
 			else
 				sVal = sVal + " / " + String.format("%1$.0f%%", percentLevelWarm);
-			// mr Kaz asked to turn off backlight on eink - so let it be
+			// mr Katz asked to turn off backlight indication on eink - so let it be
 			// showBottomPopup(sVal);
 		}
 	}

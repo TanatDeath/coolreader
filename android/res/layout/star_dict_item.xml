@@ -15,6 +15,62 @@
 	android:layout_marginRight="2dip"
 	>
 
+	<ImageView android:id="@+id/option_value_cb"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="0dip"
+			android:focusable="false"
+			android:clickable="true"
+			android:layout_centerVertical="true"
+			android:layout_alignParentRight="true"
+			android:layout_marginLeft="4dip"
+			android:layout_marginTop="10dip"
+			android:layout_marginBottom="10dip"
+			android:layout_gravity="center"
+			android:focusableInTouchMode="false"
+			/>
+
+	<LinearLayout android:id="@+id/dict_item_up_down"
+			android:orientation="vertical"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:layout_marginLeft="5dp"
+			android:baselineAligned="false">
+		<ImageView android:id="@+id/btn_up"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="0dip"
+				android:focusable="false"
+				android:clickable="true"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"
+				android:layout_marginLeft="4dip"
+				android:layout_marginTop="10dip"
+				android:layout_marginBottom="10dip"
+				android:layout_gravity="center"
+				android:focusableInTouchMode="false"
+				android:tag="tint"
+				android:src="?attr/attr_icons8_up_small"
+				/>
+		<ImageView android:id="@+id/btn_down"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="0dip"
+				android:focusable="false"
+				android:clickable="true"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"
+				android:layout_marginLeft="4dip"
+				android:layout_marginTop="10dip"
+				android:layout_marginBottom="10dip"
+				android:layout_gravity="center"
+				android:focusableInTouchMode="false"
+				android:tag="tint"
+				android:src="?attr/attr_icons8_down_small"
+				/>
+	</LinearLayout>
+
 	<LinearLayout android:id="@+id/dict_item_text"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
@@ -37,7 +93,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:singleLine="true"
-				android:layout_marginLeft="20dip"
+				android:layout_marginLeft="10dip"
 				android:ellipsize="middle"
 				android:textStyle="bold"
 				android:layout_gravity="left" />
@@ -46,7 +102,7 @@
 				android:text="10% Title Text"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_marginLeft="20dip"
+				android:layout_marginLeft="10dip"
 				android:ellipsize="end"
 				android:maxLines="3"
 				android:layout_gravity="left" />
@@ -56,7 +112,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:singleLine="true"
-				android:layout_marginLeft="20dip"
+				android:layout_marginLeft="10dip"
 				android:ellipsize="end"
 				android:layout_gravity="left" />
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -72,16 +128,35 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="_" />
-			<TextView android:id="@+id/tv_converted"
-					style="@style/TextAppearance.Small"
-					android:text="_"
+			<TextView
+					style="@style/TextAppearance.Medium"
+					android:layout_marginLeft="10dp"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:singleLine="true"
-					android:ellipsize="end"
-					android:layout_marginLeft="10dip"
-					android:textStyle="bold"
-					android:layout_gravity="left" />
+					android:textColor="?attr/colorIcon"
+					android:text="@string/langs" />
+			<EditText
+					android:id="@+id/lang_from"
+					style="@style/TextAppearance.Widget.EditText"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:text="en" />
+			<TextView
+					style="@style/TextAppearance.Medium"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:textColor="?attr/colorIcon"
+					android:text="->" />
+			<EditText
+					android:id="@+id/lang_to"
+					style="@style/TextAppearance.Widget.EditText"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:singleLine="true"
+					android:text="ru" />
 		</LinearLayout>
 	</LinearLayout>
 </LinearLayout>

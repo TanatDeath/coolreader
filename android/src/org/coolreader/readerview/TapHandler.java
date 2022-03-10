@@ -685,6 +685,8 @@ public class TapHandler {
 					boolean isPageTurnSwipe = adx > ((ady * 10) / 17);
 					//log.i("isPageTurnSwipe: " + isPageTurnSwipe);
 					boolean menuShown = false;
+					// to work to poke3 ?
+					//mActivity.showToast(" coords: " + y + " max " + mReaderView.surface.getHeight());
 					//int dir = x - start_x;
 					if (mReaderView.mGesturePageFlipSwipeN == 1) {
 						if ((x <= (width / 2) + dragThresholdK) &&

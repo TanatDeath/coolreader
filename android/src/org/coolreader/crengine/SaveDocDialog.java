@@ -99,6 +99,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	private TableRow trDocAdd1;
 	private TableRow trDocAdd2;
 	private FlowLayout flDocAdd2;
+	private ImageView mIvExpand;
 
 	@Override
 	public void folderSelected(String path) {
@@ -450,34 +451,38 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		mActivity.tintViewIcons(trDocAdd2);
 	}
 
+	private void expandClick(ImageView ivExpand) {
+		if (bAddControls) {
+			trDocAdd1.removeAllViews();
+			flDocAdd2.removeAllViews();
+			Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
+			ivExpand.setImageDrawable(d);
+			mActivity.tintViewIcons(ivExpand);
+			setupStarsButtons();
+			setupStatesButtons();
+			paintButtons();
+		} else {
+			trDocAdd1.removeAllViews();
+			flDocAdd2.removeAllViews();
+			Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_expanded);
+			ivExpand.setImageDrawable(d);
+			mActivity.tintViewIcons(ivExpand);
+		}
+	}
+
 	private void setupAddControls(TableLayout mainTl) {
 		View viewTitle = mInflater.inflate(R.layout.save_doc_title_exp, null);
 		TextView tvTitle = viewTitle.findViewById(R.id.txt_title);
-		ImageView ivExpand = viewTitle.findViewById(R.id.iv_title);
+		mIvExpand = viewTitle.findViewById(R.id.iv_title);
 		View.OnClickListener lstnr = v -> {
 			bAddControls = !bAddControls;
-			if (bAddControls) {
-				trDocAdd1.removeAllViews();
-				flDocAdd2.removeAllViews();
-				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_collapsed);
-				ivExpand.setImageDrawable(d);
-				mActivity.tintViewIcons(ivExpand);
-				setupStarsButtons();
-				setupStatesButtons();
-				paintButtons();
-			} else {
-				trDocAdd1.removeAllViews();
-				flDocAdd2.removeAllViews();
-				Drawable d = mActivity.getResources().getDrawable(R.drawable.icons8_toc_item_expanded);
-				ivExpand.setImageDrawable(d);
-				mActivity.tintViewIcons(ivExpand);
-			}
+			expandClick(mIvExpand);
 			Properties props = new Properties(mActivity.settings());
 			props.setProperty(Settings.PROP_APP_SAVE_DOC_EXT_CONTROLS_SHOW, bAddControls?"1":"0");
 			mActivity.setSettings(props, -1, false);
 		};
 		tvTitle.setOnClickListener(lstnr);
-		ivExpand.setOnClickListener(lstnr);
+		mIvExpand.setOnClickListener(lstnr);
 		tvTitle.setText(mActivity.getString(R.string.additional_marks));
 		mainTl.addView(viewTitle);
 
@@ -517,28 +522,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		Utils.setDashedButton(btn);
 		btn.setTextColor(mActivity.getTextColor(colorIcon));
 		mainTl.addView(viewButton);
-//		View viewButton2 = mInflater.inflate(R.layout.save_doc_button2, null);
-//		Button btn2 = viewButton2.findViewById(R.id.btn_move_doc);
-//		if (mDoMove)
-//			btn2.setText(mActivity.getString(R.string.move_file_then_open));
-//		else
-//			btn2.setText(mActivity.getString(R.string.copy_file_then_open));
-//		btn2.setOnClickListener(v -> {
-//			String toFileName = "";
-//			String toDir = "";
-//			if (selectedFolder != null) {
-//				toDir = selectedFolder.folderLabel.getText().toString();
-//				toFileName = edtFileName.getText().toString() + edtFileExt.getText().toString();
-//			}
-//			if (mDoMove)
-//				tryToMoveThenOpen(this, mActivity, mExistingFileName, mFileDir,
-//						toFileName, toDir, mSUri, true);
-//			else
-//				saveFile(toFileName, toDir, mSUri, mUri, true);
-//		});
-//		Utils.setDashedButton(btn2);
-//		btn2.setTextColor(mActivity.getTextColor(colorIcon));
-//		mainTl.addView(viewButton2);
 	}
 
 	@Override
@@ -567,17 +550,32 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		if (!(bd instanceof SaveDocDialog)) return;
 		SaveDocDialog sdd = (SaveDocDialog) bd;
 		if ((StrUtils.isEmptyStr(sdd.mExistingFileName)) || (StrUtils.isEmptyStr(sdd.mFileDir))) return;
-		FileInfo fileOrDir = FileUtils.getFileProps(new File(sdd.mExistingFileName), new FileInfo(sdd.mFileDir), true);
+		FileInfo fileOrDir = FileUtils.getFileProps(null,
+				new File(sdd.mExistingFileName), new FileInfo(sdd.mFileDir), true);
 		if (StrUtils.isEmptyStr(fileOrDir.getAuthors())) Services.getEngine().scanBookProperties(fileOrDir);
-		String subdir = null;
-		if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
-			subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
-			if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
-				subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
-		} else {
-			subdir = "NoAuthor";
-		}
-		if (sdd.addAuthorsFC != null) sdd.addAuthorsFC.folderLabel.setText(subdir);
+		bd.mActivity.waitForCRDBService(() -> {
+			bd.mActivity.getDB().getBookFlags(fileOrDir, fl -> {
+				String subdir = null;
+				if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
+					subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
+					if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
+						subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
+				} else {
+					subdir = "NoAuthor";
+				}
+				if (sdd.addAuthorsFC != null) sdd.addAuthorsFC.folderLabel.setText(subdir);
+				int flags = (int) fl;
+				fileOrDir.flags = flags;
+				if ((flags != 0) && (bd instanceof SaveDocDialog)) {
+					sdd.bAddControls = true;
+					sdd.mChosenRate = fileOrDir.getRate();
+					sdd.mChosenState = fileOrDir.getReadingState();
+					sdd.paintButtons();
+					if (sdd.mIvExpand != null)
+						sdd.expandClick(sdd.mIvExpand);
+				}
+			});
+		});
 	}
 
 	public void saveFile(String toFileName, String toDir, Uri uri) {
@@ -607,8 +605,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		if (result.exists()) {
 			if (addAuthorsFolder) {
 				if (!result.delete()) {
-					BackgroundThread.instance().postGUI(() ->
-					{
+					BackgroundThread.instance().postGUI(() -> {
 						mActivity.showToast(R.string.cannot_delete_tmp_book);
 					}, 500);
 				} else
@@ -658,7 +655,9 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 						doSetMarks(this, mActivity, new File(sResult));
 					else {
 						onPositiveButtonClick();
-						FileInfo fiResF = new FileInfo(result);
+						//FileInfo fiResF = new FileInfo(result);
+						FileInfo fiResF = FileUtils.getFileProps(null, result, new FileInfo(result.getParent()), true);
+						if (StrUtils.isEmptyStr(fiResF.getAuthors())) Services.getEngine().scanBookProperties(fiResF);
 						Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), fiResF,
 							bookInfo -> {
 								BookInfo bif2 = bookInfo;
@@ -689,7 +688,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		FileInfo downloadDir = StrUtils.isEmptyStr(toDir) ?
 				Services.getScanner().getDownloadDirectory() : new FileInfo(toDir);
 		if (StrUtils.isEmptyStr(subdir)) {
-			FileInfo fileOrDir = FileUtils.getFileProps(new File(fromFileName), new FileInfo(fromDir), true);
+			FileInfo fileOrDir = FileUtils.getFileProps(null, new File(fromFileName), new FileInfo(fromDir), true);
 			if (StrUtils.isEmptyStr(fileOrDir.getAuthors()))
 				Services.getEngine().scanBookProperties(fileOrDir);
 			if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
@@ -741,7 +740,8 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 					BackgroundThread.instance().postGUI(() ->
 					{
 						cr.showToast(R.string.book_is_the_same);
-						FileInfo fiResF = new FileInfo(result);
+						FileInfo fiResF = FileUtils.getFileProps(null, result, new FileInfo(result.getParent()), true);
+						if (StrUtils.isEmptyStr(fiResF.getAuthors())) Services.getEngine().scanBookProperties(fiResF);
 						if (bd != null) bd.onPositiveButtonClick();
 						Services.getHistory().getOrCreateBookInfo(cr.getDB(), fiResF,
 								bookInfo -> {
@@ -774,70 +774,55 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 
 	private static void doRename(BaseDialog bd, CoolReader cr,
 								 FileInfo downloadDir, File f, File result, boolean setMarks) {
-//		FileInfo item = FileUtils.getFileProps(f, new FileInfo(f.getParent()), true);
-//		if (StrUtils.isEmptyStr(item.getAuthors())) Services.getEngine().scanBookProperties(item);
-//		cr.waitForCRDBService(() -> {
-//			cr.getDB().moveBookToFolder(item, result.getParent(), o -> {
-//				if ((boolean) o) {
-//					downloadDir.findItemByPathName(result.getAbsolutePath());
-//					final File resF = result;
-//					cr.showToast(cr.getString(R.string.book_moved) + ": " + result.getAbsolutePath());
-//					SaveDocDialog sdd = null;
-//					if (bd instanceof SaveDocDialog) sdd = (SaveDocDialog) bd;
-//					if (setMarks) {
-//						doSetMarks(sdd, cr, result);
-//					} else {
-//						FileInfo fiResF = new FileInfo(resF);
-//						if (bd != null) bd.onPositiveButtonClick();
-//						Services.getHistory().getOrCreateBookInfo(cr.getDB(), fiResF,
-//								bookInfo -> {
-//									BookInfo bif2 = bookInfo;
-//									if (bif2 == null) bif2 = new BookInfo(fiResF);
-//									final BookInfo bif = bif2;
-//									FileInfo dir1 = bif.getFileInfo().parent;
-//									cr.showBookInfo(bif, BookInfoDialog.BOOK_INFO, dir1, null);
-//								}
-//						);
-//					}
-//				} else {
-//					BackgroundThread.instance().postGUI(() ->
-//					{
-//						cr.showToast(R.string.cannot_move_book);
-//					}, 500);
-//				}
-//			});
-//		});
-		if (f.renameTo(result)) {
-			downloadDir.findItemByPathName(result.getAbsolutePath());
-			final File resF = result;
-			cr.showToast(cr.getString(R.string.book_moved) + ": " + result.getAbsolutePath());
-			SaveDocDialog sdd = null;
-			if (bd instanceof SaveDocDialog) sdd = (SaveDocDialog) bd;
-			if (setMarks) {
-				doSetMarks(sdd, cr, result);
-			} else {
-				FileInfo fiResF = new FileInfo(resF);
-				if (bd != null) bd.onPositiveButtonClick();
-				Services.getHistory().getOrCreateBookInfo(cr.getDB(), fiResF,
-					bookInfo -> {
-						BookInfo bif2 = bookInfo;
-						if (bif2 == null) bif2 = new BookInfo(fiResF);
-						final BookInfo bif = bif2;
-						FileInfo dir1 = bif.getFileInfo().parent;
-						cr.showBookInfo(bif, BookInfoDialog.BOOK_INFO, dir1, null);
+		FileInfo fiOldF = FileUtils.getFileProps(null, f, new FileInfo(f.getParent()), true);
+		if (StrUtils.isEmptyStr(fiOldF.getAuthors())) Services.getEngine().scanBookProperties(fiOldF);
+		cr.waitForCRDBService(() -> {
+			cr.getDB().getBookFlags(fiOldF, fl -> {
+				int flags = (int) fl;
+				fiOldF.flags = flags;
+				if (f.renameTo(result)) {
+					downloadDir.findItemByPathName(result.getAbsolutePath());
+					final File resF = result;
+					SaveDocDialog sdd = null;
+					if (bd instanceof SaveDocDialog) sdd = (SaveDocDialog) bd;
+					if (setMarks) {
+						doSetMarks(sdd, cr, result);
+					} else {
+						FileInfo fiResF = FileUtils.getFileProps(null, resF, new FileInfo(resF.getParent()), true);
+						if (StrUtils.isEmptyStr(fiResF.getAuthors())) Services.getEngine().scanBookProperties(fiResF);
+						fiResF.flags = flags;
+						if (bd != null) bd.onPositiveButtonClick();
+						cr.getDB().moveBookToFolder(fiOldF, result.getParent(), true, o -> {
+							if ((boolean) o)
+								Services.getHistory().getOrCreateBookInfo(cr.getDB(), fiResF,
+										bookInfo -> {
+											BookInfo bif2 = bookInfo;
+											if (bif2 == null) bif2 = new BookInfo(fiResF);
+											final BookInfo bif = bif2;
+											FileInfo dir1 = bif.getFileInfo().parent;
+											bif.getFileInfo().setFlag(flags, false);
+											cr.showToast(cr.getString(R.string.book_moved) + ": " + result.getAbsolutePath());
+											cr.showBookInfo(bif, BookInfoDialog.BOOK_INFO, dir1, null);
+										}
+								);
+							else
+								BackgroundThread.instance().postGUI(() -> {
+									cr.showToast(R.string.cannot_move_book);
+								}, 500);
+						});
 					}
-				);
-			}
-		} else {
-			BackgroundThread.instance().postGUI(() ->
-				{
-					cr.showToast(R.string.cannot_move_book);
-				}, 500);
-		}
+				} else {
+					BackgroundThread.instance().postGUI(() ->
+					{
+						cr.showToast(R.string.cannot_move_book);
+					}, 500);
+				}
+			});
+		});
 	}
 
 	private static void doSetMarks(SaveDocDialog sdd, CoolReader cr, File result) {
-		FileInfo item = FileUtils.getFileProps(result, new FileInfo(result.getParent()), true);
+		FileInfo item = FileUtils.getFileProps(null, result, new FileInfo(result.getParent()), true);
 		if (StrUtils.isEmptyStr(item.getAuthors())) Services.getEngine().scanBookProperties(item);
 		SaveDocDialog finalSdd = sdd;
 		Services.getHistory().getOrCreateBookInfo(cr.getDB(), item,

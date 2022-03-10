@@ -12,36 +12,7 @@
             android:smallScreens="true"
             android:xlargeScreens="true" />
 
-    <uses-sdk tools:overrideLibrary="com.google.android.gms.auth.api,
-                                    com.google.android.gms.auth.api.phone,
-                                    com.google.android.gms.auth,
-                                    com.google.android.gms.base,
-                                    com.google.android.gms.tasks,
-                                    com.google.android.gms.common,
-                                    androidx.arch.core,
-                                    androidx.core,
-                                    androidx.fragment,
-                                    androidx.legacy.coreui,
-                                    androidx.legacy.coreutils,
-                                    androidx.loader,
-                                    androidx.viewpager,
-                                    androidx.coordinatorlayout,
-                                    androidx.drawerlayout,
-                                    androidx.slidingpanelayout,
-                                    androidx.customview,
-                                    androidx.swiperefreshlayout,
-                                    androidx.asynclayoutinflater,
-                                    androidx.versionedparcelable,
-                                    androidx.lifecycle,
-                                    androidx.lifecycle.viewmodel,
-                                    androidx.lifecycle.livedata,
-                                    androidx.lifecycle.livedata.core,
-                                    androidx.interpolator,
-                                    androidx.cursoradapter,
-                                    androidx.documentfile,
-                                    androidx.localbroadcastmanager,
-                                    androidx.print"
-            />
+
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -92,6 +63,10 @@
                         android:pathPattern=".*code=.*"
                         android:pathPrefix="/plotn/coolreader"
                         android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TRANSLATE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="KnownReader.sendText" />
@@ -1300,19 +1275,6 @@
         <!-- TTS control service -->
         <service
                 android:name=".tts.TTSControlService"
-                android:enabled="true"
-                android:exported="false"
-                android:foregroundServiceType="mediaPlayback" />
-        <!-- Stop TTS on incoming call -->
-        <receiver android:name=".PhoneStateReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
-            </intent-filter>
-        </receiver>
-
-        <!-- TTS control service -->
-        <service
-                android:name=".tts.legacy.TTSControlServiceLegacy"
                 android:enabled="true"
                 android:exported="false"
                 android:foregroundServiceType="mediaPlayback" />

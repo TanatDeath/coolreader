@@ -316,6 +316,7 @@ private:
     LVImageSourceRef m_backgroundImage;
     LVRef<LVColorDrawBuf> m_backgroundImageScaled;
     bool m_backgroundTiled;
+    bool m_stylesheetUseMacros;
     bool m_stylesheetNeedsUpdate;
     int m_highlightBookmarks;
     LVPtrVector<LVBookMarkPercentInfo> m_bookmarksPercents;
@@ -870,7 +871,7 @@ public:
     int doCommand( LVDocCmd cmd, int param=0 );
 
     /// set document stylesheet text
-    void setStyleSheet( lString8 css_text );
+    void setStyleSheet( lString8 css_text, bool use_macros=true );
 
     /// set default interline space, percent (100..200)
     void setDefaultInterlineSpace( int percent );

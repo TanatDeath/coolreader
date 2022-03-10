@@ -13,12 +13,14 @@ import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
+import org.coolreader.utils.FileUtils;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.db.CRDBService;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 import org.coolreader.userdic.UserDicDlg;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -51,11 +53,15 @@ public class LoadDocumentTask extends Task {
 			// Is it OK to do this here???  Should we use isScanned?
 			// Should we use another fileInfo flag or a new flag?
 			mReaderView.mEngine.scanBookProperties(fileInfo);
+			if (StrUtils.isEmptyStr(fileInfo.getAuthors()))
+				fileInfo = FileUtils.getFileProps(fileInfo, new File(fileInfo.getBasePath()),
+						new FileInfo(new File(fileInfo.getBasePath()).getParent()), true);
+			if (StrUtils.isEmptyStr(fileInfo.getAuthors())) Services.getEngine().scanBookProperties(fileInfo);
 		}
 		String language = fileInfo.getLanguage();
 		log.v("update hyphenation language: " + language + " for " + fileInfo.getTitle());
 		this.filename = fileInfo.getPathName();
-		this.path = fileInfo.arcname != null ? fileInfo.arcname : fileInfo.pathname;
+		this.path = fileInfo.getBasePath();
 		this.docBuffer = docBuffer;
 		this.doneHandler = doneHandler;
 		this.errorHandler = errorHandler;

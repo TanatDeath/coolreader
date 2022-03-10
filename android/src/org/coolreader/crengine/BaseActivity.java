@@ -546,6 +546,11 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_delete_database,
 						 R.attr.attr_icons8_physics,
 						 R.attr.attr_icons8_settings_from_hist,
+						 R.attr.attr_icons8_brightness_down,
+						 R.attr.attr_icons8_brightness_up,
+						 R.attr.attr_icons8_brightness_warm_down,
+						 R.attr.attr_icons8_brightness_warm_up
+
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -652,6 +657,11 @@ public class BaseActivity extends Activity implements Settings {
 		int brDeleteDatabase = a.getResourceId(92, 0);
 		int brPhysics = a.getResourceId(93, 0);
 		int brSettingsFromHist = a.getResourceId(94, 0);
+
+		int brSettingsBrightnessDown = a.getResourceId(95, 0);
+		int brSettingsBrightnessUp = a.getResourceId(96, 0);
+		int brSettingsBrightnessWarmDown = a.getResourceId(97, 0);
+		int brSettingsBrightnessWarmUp = a.getResourceId(98, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -828,6 +838,12 @@ public class BaseActivity extends Activity implements Settings {
 		if (brDeleteDatabase != 0) ReaderAction.INIT_APP_DIALOG.setIconId(brDeleteDatabase);
 		if (brPhysics != 0) ReaderAction.EXPERIMENAL_FEATURE.setIconId(brPhysics);
 		//if (brSettingsFromHist != 0) // not needed )))
+		if (brSettingsBrightnessDown != 0) ReaderAction.BRIGHTNESS_DOWN.setIconId(brSettingsBrightnessDown);
+		if (brSettingsBrightnessUp != 0) ReaderAction.BRIGHTNESS_UP.setIconId(brSettingsBrightnessUp);
+		if (brSettingsBrightnessWarmDown != 0) ReaderAction.BRIGHTNESS_DOWN_WARM.setIconId(brSettingsBrightnessWarmDown);
+		if (brSettingsBrightnessWarmUp != 0) ReaderAction.BRIGHTNESS_UP_WARM.setIconId(brSettingsBrightnessWarmUp);
+
+
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {

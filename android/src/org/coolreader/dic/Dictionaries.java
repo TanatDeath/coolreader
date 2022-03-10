@@ -33,8 +33,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
-
-import com.abbyy.mobile.lingvo.api.MinicardContract;
+//import com.abbyy.mobile.lingvo.api.MinicardContract;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -744,7 +743,8 @@ public class Dictionaries {
 	}
 
 	@SuppressLint("NewApi")
-	public void findInDictionary(String s, View view, CoolReader.DictionaryCallback dcb) throws DictionaryException {
+	public void findInDictionary(String s, View view, boolean extended,
+								 CoolReader.DictionaryCallback dcb) throws DictionaryException {
 //		log.d("lookup in dictionary: " + s);
 //		log.i("currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
 //				iDic2IsActive+", currentDictionary2" + getCDinfo(currentDictionary2) +
@@ -779,6 +779,7 @@ public class Dictionaries {
 		}
 		if (!StrUtils.isEmptyStr(sToLang)) lang = sToLang;
 		if (!StrUtils.isEmptyStr(sFromLang)) langf = sFromLang;
+		if (StrUtils.isEmptyStr(langf)) langf = sLang;
 		// play with network availability
 		if (!((CoolReader)mActivity).isNetworkAvailable()) {
 			String sConformity = ((CoolReader)mActivity).settings().getProperty(Settings.PROP_APP_ONLINE_OFFLINE_DICS);
@@ -800,8 +801,8 @@ public class Dictionaries {
 		}
 		if (diRecent.contains(curDict)) diRecent.remove(curDict);
 		diRecent.add(0,curDict);
-		if (diRecent.size()>5)
-			while (diRecent.size()>5) diRecent.remove(5);
+		if (diRecent.size() > 5)
+			while (diRecent.size() > 5) diRecent.remove(5);
 		boolean isDouble = false;
 		//save to dic search history
 		CoolReader cr = (CoolReader) mActivity;
@@ -933,8 +934,8 @@ public class Dictionaries {
 								return;
 							}
 							//if (lang.equals("")) lang = "en";
-							intent5.putExtra(MinicardContract.EXTRA_LANGUAGE_TO, lang);
-							intent5.putExtra(MinicardContract.EXTRA_LANGUAGE_FROM, langf);
+							intent5.putExtra(LingvoConstants.EXTRA_LANGUAGE_TO, lang);
+							intent5.putExtra(LingvoConstants.EXTRA_LANGUAGE_FROM, langf);
 						}
 					}
 				}
@@ -953,29 +954,29 @@ public class Dictionaries {
 					if ((selectionX1>(frameMetrics.widthPixels / 2)) &&
 							(selectionX2>(frameMetrics.widthPixels / 2))) iPage = 2;
 					if (iPage == 1) {
-						intent5.putExtra(MinicardContract.EXTRA_WIDTH, frameMetrics.widthPixels / 2);
-						intent5.putExtra(MinicardContract.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.RIGHT);
+						intent5.putExtra(LingvoConstants.EXTRA_WIDTH, frameMetrics.widthPixels / 2);
+						intent5.putExtra(LingvoConstants.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.RIGHT);
 					} else if (iPage  == 2) {
-						intent5.putExtra(MinicardContract.EXTRA_WIDTH, frameMetrics.widthPixels / 2);
-						intent5.putExtra(MinicardContract.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.LEFT);
+						intent5.putExtra(LingvoConstants.EXTRA_WIDTH, frameMetrics.widthPixels / 2);
+						intent5.putExtra(LingvoConstants.EXTRA_GRAVITY, Gravity.BOTTOM | Gravity.LEFT);
 					} else {
-						intent5.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
+						intent5.putExtra(LingvoConstants.EXTRA_GRAVITY, frameMetrics.Gravity);
 						if (
 								((selectionBottom>frameMetrics.HeightMore)&&(selectionTop>frameMetrics.HeightMore)) ||
 								((selectionBottom<(frameMetrics.heightPixels-frameMetrics.HeightMore))&&
 										(selectionTop<(frameMetrics.heightPixels-frameMetrics.HeightMore)))
-						   ) intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.HeightMore); else
-						intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
+						   ) intent5.putExtra(LingvoConstants.EXTRA_HEIGHT, frameMetrics.HeightMore); else
+						intent5.putExtra(LingvoConstants.EXTRA_HEIGHT, frameMetrics.Height);
 					}
 				} else {
-					intent5.putExtra(MinicardContract.EXTRA_GRAVITY, frameMetrics.Gravity);
-					intent5.putExtra(MinicardContract.EXTRA_HEIGHT, frameMetrics.Height);
+					intent5.putExtra(LingvoConstants.EXTRA_GRAVITY, frameMetrics.Gravity);
+					intent5.putExtra(LingvoConstants.EXTRA_HEIGHT, frameMetrics.Height);
 				}
 
-				intent5.putExtra(MinicardContract.EXTRA_FORCE_LEMMATIZATION, true);
-				intent5.putExtra(MinicardContract.EXTRA_TRANSLATE_VARIANTS, true);
-				intent5.putExtra(MinicardContract.EXTRA_ENABLE_SUGGESTIONS, true);
-				//intent5.putExtra(MinicardContract.EXTRA_LIGHT_THEME, true);
+				intent5.putExtra(LingvoConstants.EXTRA_FORCE_LEMMATIZATION, true);
+				intent5.putExtra(LingvoConstants.EXTRA_TRANSLATE_VARIANTS, true);
+				intent5.putExtra(LingvoConstants.EXTRA_ENABLE_SUGGESTIONS, true);
+				//intent5.putExtra(LingvoConstants.EXTRA_LIGHT_THEME, true);
 				intent5.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 				intent5.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				if (curDict.className != null || DeviceInfo.getSDKLevel() == 3) {
@@ -1303,7 +1304,7 @@ public class Dictionaries {
 					return;
 				}
 				if (offlineTranslate == null) offlineTranslate = new OfflineDicTranslate();
-				offlineTranslate.starDictTranslate(cr, s, langf, lang, curDict, view, null, dcb);
+				offlineTranslate.offlineDicTranslate(cr, s, langf, lang, curDict, view, extended, null, dcb);
 				break;
 			}
 

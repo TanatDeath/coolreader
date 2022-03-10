@@ -24,7 +24,7 @@
 			style="@style/TextAppearance.Small"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:stretchColumns="1"
+			android:stretchColumns="*"
 			android:layout_weight="10"
 			android:layout_margin="2dp"
 			>

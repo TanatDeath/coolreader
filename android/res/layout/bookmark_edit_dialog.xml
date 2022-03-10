@@ -13,7 +13,7 @@
 				android:id="@+id/tl_sep1"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -70,7 +70,7 @@
 				android:id="@+id/tl_sep2"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -116,7 +116,7 @@
 			android:id="@+id/rg_type"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:stretchColumns="1"
+			android:stretchColumns="*"
 			android:orientation="vertical">
 
 			<TableRow
@@ -189,7 +189,7 @@
 				android:id="@+id/tl_sep3"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -235,7 +235,7 @@
 				android:id="@+id/tl_bmk_color"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical">
 
 			<TableRow
@@ -431,7 +431,7 @@
 				android:id="@+id/tl_sep4"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -487,7 +487,7 @@
 				android:id="@+id/tl_comment_and_dic"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical">
 
 			<TableRow
@@ -523,7 +523,7 @@
 				android:id="@+id/tl_sep5"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -581,7 +581,7 @@
 				android:id="@+id/tl_sep7"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -639,7 +639,7 @@
 				android:id="@+id/tl_context_and_dic"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical">
 
 			<TableRow
@@ -675,7 +675,7 @@
 				android:id="@+id/tl_sep6"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>
@@ -721,7 +721,7 @@
 				android:id="@+id/tl_send_to"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical">
 
 			<TableRow
@@ -756,7 +756,7 @@
 				android:id="@+id/tl_sep8"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:stretchColumns="1"
+				android:stretchColumns="*"
 				android:orientation="vertical"
 				android:layout_margin="5dip"
 				>

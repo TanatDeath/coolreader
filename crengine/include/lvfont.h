@@ -25,6 +25,14 @@
 #define MAX_LINE_WIDTH 2048
 #define MAX_LETTER_SPACING MAX_LINE_WIDTH/2
 
+// For use by getBulletListItemFont(): list of possibly shipped fonts with consistent glyphs
+// (enough body but not too heavy, normal vertical position, small left and right spacing)
+// for disc (U+2022), circle (U+25E6) and square (U+25AA), to be used instead of the normal
+// list item node font for drawing its marker.
+// FreeSans is preferred as it has these glyphs larger than FreeSerif; both have all of the needed glyphs.
+// (Times New Roman has all three, but the glyphs are a bit too up to be interesting.)
+static const char * PREFERRED_BULLET_FONTS = "FreeSans, FreeSerif";
+
 enum hinting_mode_t {
     HINTING_MODE_DISABLED = 0,
     HINTING_MODE_BYTECODE_INTERPRETOR,
@@ -432,6 +440,11 @@ public:
     
     virtual lUInt32 getFallbackMask() const { return 0; }
     virtual void setFallbackMask(lUInt32 mask) { CR_UNUSED(mask) }
+
+    /// get alternative font for drawing decimal list item numbers (could return same font with OTF tabular-nums)
+    virtual LVFont * getDecimalListItemFont() { return this; }
+    /// get alternative font for drawing disc/circle/square list item markers (could return an other font with better bullet glyphs)
+    virtual LVFont * getBulletListItemFont() { return this; }
 };
 
 /// to compare two fonts

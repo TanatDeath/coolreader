@@ -1,6 +1,5 @@
 package org.coolreader.db;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -297,12 +296,23 @@ public class CRDBService extends BaseService {
 		});
 	}
 
-	public void findInStarDictDic(String searchStr, final ObjectCallback callback, final Handler handler) {
+	public void findInOfflineDictDic(String searchStr, String langFrom, String langTo,
+					 boolean extended, final ObjectCallback callback, final Handler handler) {
 		execTask(new Task("findInStarDictDic") {
 			@Override
 			public void work() {
-				DicStruct ds = mainDB.findInStarDictDic(searchStr);
+				DicStruct ds = mainDB.findInOfflineDictDic(searchStr, langFrom, langTo, extended);
 				sendTask(handler, () -> callback.onObjectLoaded(ds));
+			}
+		});
+	}
+
+	public void closeAllDics(final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("closeAllDics") {
+			@Override
+			public void work() {
+				mainDB.closeAllDics();
+				sendTask(handler, () -> callback.onObjectLoaded(""));
 			}
 		});
 	}
@@ -948,12 +958,28 @@ public class CRDBService extends BaseService {
 		flush();
 	}
 
-	public void moveBookToFolder(final FileInfo bookFile, final String toFolder, ObjectCallback callback, final Handler handler) {
+	public void moveBookToFolder(final FileInfo bookFile, final String toFolder, final boolean alreadyMoved,
+								 ObjectCallback callback, final Handler handler) {
 		execTask(new Task("moveBookToFolder") {
 			@Override
 			public void work() {
-				boolean b = mainDB.moveBookToFolder(bookFile, toFolder);
-				sendTask(handler, () -> callback.onObjectLoaded(b));
+				boolean b = mainDB.moveBookToFolder(bookFile, toFolder, alreadyMoved);
+				if (b)
+					b = coverDB.changeCoverPath(bookFile, toFolder);
+				boolean finalB = b;
+				sendTask(handler, () -> callback.onObjectLoaded(finalB));
+			}
+		});
+		flush();
+	}
+
+	public void getBookFlags(final FileInfo bookFile,
+								 ObjectCallback callback, final Handler handler) {
+		execTask(new Task("getBookFlags") {
+			@Override
+			public void work() {
+				int flags = mainDB.getBookFlags(bookFile);
+				sendTask(handler, () -> callback.onObjectLoaded(flags));
 			}
 		});
 		flush();
@@ -1237,8 +1263,13 @@ public class CRDBService extends BaseService {
 			getService().getLibraryCategStats(callback, new Handler());
 		}
 
-		public void moveBookToFolder(final FileInfo bookFile, final String toFolder, ObjectCallback callback) {
-			getService().moveBookToFolder(bookFile, toFolder, callback, new Handler());
+		public void moveBookToFolder(final FileInfo bookFile, final String toFolder, final boolean alreadyMoved,
+									 ObjectCallback callback) {
+			getService().moveBookToFolder(bookFile, toFolder, alreadyMoved, callback, new Handler());
+		}
+
+		public void getBookFlags(final FileInfo bookFile, ObjectCallback callback) {
+			getService().getBookFlags(bookFile, callback, new Handler());
 		}
 
 		public void loadFileInfos(ArrayList<String> pathNames, FileInfoLoadingCallback fileInfoLoadingCallback) {
@@ -1250,9 +1281,13 @@ public class CRDBService extends BaseService {
 			getService().convertStartDictDic(dicPath, dicName, control, progress, callback, new Handler());
 		}
 
-		public void findInStarDictDic(String searchStr,
-										final ObjectCallback callback) {
-			getService().findInStarDictDic(searchStr, callback, new Handler());
+		public void findInOfflineDictDic(String searchStr, String langFrom, String langTo,
+										boolean extended, final ObjectCallback callback) {
+			getService().findInOfflineDictDic(searchStr, langFrom, langTo, extended, callback, new Handler());
+		}
+
+		public void closeAllDics(final ObjectCallback callback) {
+			getService().closeAllDics(callback, new Handler());
 		}
 
 	}

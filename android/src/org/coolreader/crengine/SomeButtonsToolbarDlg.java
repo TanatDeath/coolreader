@@ -42,6 +42,7 @@ public class SomeButtonsToolbarDlg {
 	Object o;
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors = null;
+	boolean btnPressed = false;
 
 	public interface ButtonPressedCallback {
 		public void done(Object o, String btnPressed);
@@ -84,7 +85,9 @@ public class SomeButtonsToolbarDlg {
 		mWindow.setTouchInterceptor((v, event) -> {
 			if ( event.getAction()==MotionEvent.ACTION_OUTSIDE ) {
 				if (mCloseOnTouchOutside) {
-					if (callback!=null) callback.done(o, "{{cancel}}");
+					if (!btnPressed)
+						if (callback!=null) callback.done(o, "{{cancel}}");
+					btnPressed = true;
 					closeDialog();
 					return true;
 				}
@@ -150,7 +153,8 @@ public class SomeButtonsToolbarDlg {
 					tv.setEllipsize(TextUtils.TruncateAt.END);
 					tv.setBackgroundColor(colr2);
 					tv.setTextColor(mActivity.getTextColor(colorIcon));
-					tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize - 2);
+					tv.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+							(s1.length()>50) ? newTextSize * 2 / 3:newTextSize - 2);
 					llButtonsPanel.addView(tv);
 				} else {
 					Button someButton = new Button(mActivity);
@@ -168,6 +172,7 @@ public class SomeButtonsToolbarDlg {
 					someButton.setEllipsize(TextUtils.TruncateAt.END);
 					llButtonsPanel.addView(someButton);
 					someButton.setOnClickListener(v -> {
+						btnPressed = true;
 						if (callback!=null) callback.done(o, ((Button) v).getText().toString());
 						closeDialog();
 					});
@@ -229,7 +234,9 @@ public class SomeButtonsToolbarDlg {
 
 			handler.postDelayed(() -> {
 				if (mWindow != null) {
-					if (callback != null) callback.done(o, "{{timeout}}");
+					if (!btnPressed)
+						if (callback != null) callback.done(o, "{{timeout}}");
+					btnPressed = true;
 					mWindow.dismiss();
 				}
 			}, closeSecTime * 1000);

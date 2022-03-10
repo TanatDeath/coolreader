@@ -2938,9 +2938,15 @@ void SplitLines( const lString32 & str, lString32Collection & lines )
 // marker_width is updated and can be used to add indent or padding necessary to make
 // room for the marker (what and how to do it depending of list-style_position (inside/outside)
 // is left to the caller)
-lString32 renderListItemMarker( ldomNode * enode, int & marker_width, LFormattedText * txform, int line_h, lUInt32 flags ) {
+// If final_line_h is provided, it is updated with the list item computed line_h (which should
+// be the same value that txform->Format() would return)
+lString32 renderListItemMarker( ldomNode * enode, int & marker_width, int * final_line_h=NULL,
+                                LFormattedText * txform=NULL, lUInt32 flags=0, int line_h=-1 ) {
     lString32 marker;
     marker_width = 0;
+    if ( final_line_h ) {
+        *final_line_h = line_h > 0 ? line_h : 0; // Update it with the provided one
+    }
     ldomDocument* doc = enode->getDocument();
     // The UL > LI parent-child chain may have had some of our boxing elements inserted
     ldomNode * parent = enode->getUnboxedParent();
@@ -2951,9 +2957,9 @@ lString32 renderListItemMarker( ldomNode * enode, int & marker_width, LFormatted
         int maxWidth = 0;
         ldomNode * sibling = parent->getUnboxedFirstChild(true);
         while ( sibling ) {
-            lString32 marker;
+            lString32 sMarker;
             int markerWidth = 0;
-            if ( sibling->getNodeListMarker( counterValue, marker, markerWidth ) ) {
+            if ( sibling->getNodeListMarker( counterValue, sMarker, markerWidth ) ) {
                 if ( markerWidth > maxWidth )
                     maxWidth = markerWidth;
             }
@@ -2965,12 +2971,15 @@ lString32 renderListItemMarker( ldomNode * enode, int & marker_width, LFormatted
     // Note: node->getNodeListMarker() uses font->getTextWidth() without any hint about
     // text direction, so the marker is measured LTR.. We should probably upgrade them
     // to measureText() with the right direction, to get a correct marker_width...
-    // For now, as node->getNodeListMarker() adds some whitespace and padding, we should
-    // be fine with any small error due to different measuring with LTR vs RTL.
+    // For now, as node->getNodeListMarker() adds some whitespace, we should be
+    // fine with any small error due to different measuring with LTR vs RTL.
     int counterValue = 0;
     if ( enode->getNodeListMarker( counterValue, marker, marker_width ) ) {
         if ( !listProps.isNull() )
             marker_width = listProps->maxWidth;
+        if ( !txform && !final_line_h ) {
+            return marker; // nothing more to do
+        }
         css_style_ref_t style = enode->getStyle();
         LVFontRef font = enode->getFont();
         lUInt32 cl = getForegroundColor(style);
@@ -2989,25 +2998,64 @@ lString32 renderListItemMarker( ldomNode * enode, int & marker_width, LFormatted
                 line_h = (line_h * doc->getInterlineScaleFactor()) >> INTERLINE_SCALE_FACTOR_SHIFT;
             if ( STYLE_HAS_CR_HINT(style, STRUT_CONFINED) )
                 flags |= LTEXT_STRUT_CONFINED;
+            if ( final_line_h ) {
+                // When requested, it is to get the min height of the list item block (if it would
+                // have no content). We return this nominal line_h, not the one possible adjusted
+                // below when using getBulletListItemFont().
+                *final_line_h = line_h;
+            }
         }
-        marker += "\t";
-        // That "\t" had some purpose in css_d_list_item_legacy rendering to mark the end
-        // of the marker, and by providing the marker_width as negative indent, so that
-        // the following text can have some constant indent by rendering it just like
-        // negative/hanging text-indent. It has no real use if we provide a 0-indent
-        // like we do below.
-        // But coincidentally, this "\t" acts for fribidi as a text segment separator (SS)
-        // which will bidi-isolate the marker from the followup text, and will ensure,
-        // for example, that:
-        //   <li style="list-style-type: lower-roman; list-style-type: inside">Some text</li>
-        // in a RTL direction context, will be rightly rendered as:
-        //   "Some text   xviii"
-        // and not wrongly (like it would if we were to use a space instead of \t):
-        //   "xviii Some text"
-        // (the "xviii" marker will be in its own LTR segment, and the followup text
-        // in another LTR segment)
         if ( txform ) {
             TextLangCfg * lang_cfg = TextLangMan::getTextLangCfg( enode );
+            flags |= LTEXT_FLAG_PREFORMATTED; // per-specs, avoids suffix space to collapse with spaces at start of content
+            // For some list style types, some variation or alternative font can be preferred (should be
+            // similar to what is done in getNodeListMarker(), so measured width and the drawing match)
+            css_list_style_type_t list_type = style->list_style_type;
+            if ( list_type == css_lst_decimal ) {
+                font = font->getDecimalListItemFont();
+                // Currently, this can only be the same font: no baseline/height differences
+            }
+            else if ( list_type == css_lst_disc || list_type == css_lst_circle || list_type == css_lst_square ) {
+                int orig_font_baseline = font->getBaseline();
+                int orig_font_height = font->getHeight();
+                font = font->getBulletListItemFont();
+                // We might now be using FreeSans instead of the original font. With some rare fonts
+                // (ChareInk, Diavlo, Volkorn), FreeSans can be taller.
+                // With list-style-position:inside, a bullet in FreeSans would increase the formatted line's height,
+                // breaking the steady interline space of the original font for the first line of each list item.
+                // It's less dramatic with With list-style-position:outside, where we would just get the bullet
+                // a bit lower than the baseline.
+                // We can fix these issues by tweaking the line_h provided to AddSourceLine().
+                int font_baseline = font->getBaseline();
+                int font_height = font->getHeight();
+                if ( orig_font_baseline > orig_font_height ) {
+                    // Buggy font (ie. Charter): don't do anything, don't make it worse.
+                    // (size=21 orig font baseline=20 height=16 vs FreeSans baseline=18 height=23)
+                }
+                else if ( font_baseline > orig_font_baseline ) {
+                    // We can compensate the baseline difference by reducing the line_h we provide:
+                    // line_h makes out top_to_baseline in lvtextfm.cpp; we want a line_h that will
+                    // compute for the new font to the value of top_to_baseline we'd get with the
+                    // original font, so that the baseline of the bullet aligns with the baseline
+                    // of the list item text (drawn with the original font).
+                    int orig_half_leading = (line_h - orig_font_height) / 2;
+                    int orig_top_to_baseline = orig_font_baseline + orig_half_leading;
+                    int wanted_half_leading = orig_top_to_baseline - font_baseline;
+                    line_h = 2 * wanted_half_leading + font_height;
+                    // marker[marker.length()-1] = U'.'; // for debugging, to see them
+                    // Note: when baseline differs, height often also differs, but by a smaller difference.
+                    // With the fonts used for testing this case, The half_leading reduction done for aligning
+                    // baselines has always compensated (by more than needed) the height differences.
+                    // In theory, we would need to now look again at heights, but as I couldn't find a font to
+                    // test this case, best to do nothing than working out bad computations in the abstract.
+                }
+                else if ( font_height > orig_font_height ) {
+                    // A positive height difference with no positive baseline difference has only been
+                    // witnessed with "Unifont". Seems simpler to fix:
+                    line_h = line_h - (font_height - orig_font_height);
+                    // marker[marker.length()-1] = U'|'; // for debugging, to see them
+                }
+            }
             txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, 0, 0, enode);
         }
     }
@@ -3020,7 +3068,7 @@ bool renderAsListStylePositionInside( const css_style_ref_t style, bool is_rtl=f
     if ( style->list_style_position == css_lsp_inside ) {
         return true;
     }
-    else if ( style->list_style_position == css_lsp_outside ) {
+    else if ( style->list_style_position >= css_lsp_outside ) {
         // Rendering hack: we do that too when list-style-position = outside AND
         // (with LTR) text-align "right" or "center", as this will draw the marker
         // at the near left of the text (otherwise, the marker would be drawn on
@@ -3576,9 +3624,13 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 lUInt32 cl = getForegroundColor(style);
                 lUInt32 bgcl = getBackgroundColor(style);
                 int margin = 0;
-                if ( sp==css_lsp_outside )
+                if ( sp >= css_lsp_outside )
                     margin = -marker_width; // will ensure negative/hanging indent-like rendering
                 marker += "\t";
+                // That "\t" has some purpose in css_d_list_item_legacy rendering to mark the end
+                // of the marker, and by providing the marker_width as negative indent, so that
+                // the following text can have some constant indent by rendering it just like
+                // negative/hanging text-indent.
                 txform->AddSourceLine( marker.c_str(), marker.length(), cl, bgcl, font.get(), lang_cfg, flags|LTEXT_FLAG_OWNTEXT, line_h, valign_dy,
                                         margin, enode );
                 flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH;
@@ -3592,7 +3644,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             // (we don't draw anything when list-style-type=none)
             if ( renderAsListStylePositionInside(style, is_rtl) && style->list_style_type != css_lst_none ) {
                 int marker_width;
-                lString32 marker = renderListItemMarker( enode, marker_width, txform, line_h, flags );
+                lString32 marker = renderListItemMarker( enode, marker_width, NULL, txform, flags, line_h );
                 if ( marker.length() ) {
                     flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH;
                 }
@@ -3611,7 +3663,7 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
             if ( listPropNodeIndex ) {
                 ldomNode * list_item_block_parent = enode->getDocument()->getTinyNode( listPropNodeIndex );
                 int marker_width;
-                lString32 marker = renderListItemMarker( list_item_block_parent, marker_width, txform, line_h, flags );
+                lString32 marker = renderListItemMarker( list_item_block_parent, marker_width, NULL, txform, flags, line_h );
                 if ( marker.length() ) {
                     flags &= ~LTEXT_FLAG_NEWLINE & ~LTEXT_SRC_IS_CLEAR_BOTH;
                 }
@@ -4744,11 +4796,9 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
                     if ( style->display == css_d_list_item_block ) {
                         // list_item_block rendered as block (containing text and block elements)
                         // Get marker width and height
-                        LFormattedTextRef txform( enode->getDocument()->createFormattedText() );
                         int list_marker_width;
-                        lString32 marker = renderListItemMarker( enode, list_marker_width, txform.get(), -1, 0);
-                        list_marker_height = txform->Format( (lUInt16)(width - list_marker_width), (lUInt16)enode->getDocument()->getPageHeight() );
-                        if ( style->list_style_position == css_lsp_outside &&
+                        renderListItemMarker( enode, list_marker_width, &list_marker_height );
+                        if ( style->list_style_position >= css_lsp_outside &&
                             style->text_align != css_ta_center && style->text_align != css_ta_right) {
                             // When list_style_position = outside, we have to shift the whole block
                             // to the right and reduce the available width, which is done
@@ -4851,12 +4901,12 @@ int renderBlockElementLegacy( LVRendPageContext & context, ldomNode * enode, int
                     if ( style->display == css_d_list_item_block ) {
                         // list_item_block rendered as final (containing only text and inline elements)
                         // Rendering hack: not when text-align "right" or "center", as we treat it just as "inside"
-                        if ( style->list_style_position == css_lsp_outside &&
+                        if ( style->list_style_position >= css_lsp_outside &&
                             style->text_align != css_ta_center && style->text_align != css_ta_right) {
                             // When list_style_position = outside, we have to shift the final block
                             // to the right and reduce its width
                             int list_marker_width;
-                            lString32 marker = renderListItemMarker( enode, list_marker_width, NULL, -1, 0 );
+                            renderListItemMarker( enode, list_marker_width );
                             fmt.setX( fmt.getX() + list_marker_width );
                             width -= list_marker_width;
                         }
@@ -5193,6 +5243,8 @@ private:
     bool avoid_pb_inside_just_toggled_off;
     bool seen_content_since_page_split; // to avoid consecutive page split when only empty or padding in between
     int  last_split_after_flag; // in case we need to adjust upcoming line's flag vs previous line's
+    bool in_non_linear_sequence;
+    bool in_combining_non_linear_sequence;
 
     // vm_* : state of our handling of collapsable vertical margins
     bool vm_has_some;              // true when some vertical margin added, reset to false when pushed
@@ -5228,6 +5280,8 @@ public:
         avoid_pb_inside_just_toggled_off(false),
         seen_content_since_page_split(false),
         last_split_after_flag(RN_SPLIT_AUTO),
+        in_non_linear_sequence(false),
+        in_combining_non_linear_sequence(false),
         vm_has_some(false),
         vm_disabled(false),
         vm_target_node(NULL),
@@ -5311,8 +5365,16 @@ public:
     // "sequence" is what elsewhere we've called "flow",
     // just changing the name here to make it clear that
     // this is not the "flow" of FlowState
-    void newSequence( int nonlinear ) {
+    void newSequence( int nonlinear, bool combining=false ) {
         context.newFlow( nonlinear ) ;
+        in_non_linear_sequence = nonlinear;
+        in_combining_non_linear_sequence = nonlinear && combining;
+    }
+    bool isInNonLinearSequence() {
+        return in_non_linear_sequence;
+    }
+    bool isInCombiningNonLinearSequence() {
+        return in_non_linear_sequence && in_combining_non_linear_sequence;
     }
 
     void setRequestedBaselineType(int baseline_req_type) {
@@ -6816,27 +6878,32 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
     css_style_ref_t style = enode->getStyle();
     lUInt16 nodeElementId = enode->getNodeId();
 
-    // force_pb will force a page break before and after the fragment
-    // this is necessary for non-linear fragments if we want the
-    // possibility of hiding them from the normal paging flow
-    bool force_pb = false;
-    if ( nodeElementId == el_DocFragment) {
-        if ( enode->hasAttribute( attr_NonLinear ) ) {
-            flow->newSequence(true);
-            force_pb = enode->getDocument()->getDocFlag(DOC_FLAG_NONLINEAR_PAGEBREAK);
+    // <DocFragment NonLinear> in EPUBs are set "-cr-hint: non-linear", and so are 2nd++ <body> in FB2,
+    // so they can start a new non-linear sequence/flow, that can be hidden from the normal paging flow.
+    // This hint can also be set on other elements as needed, so we handle this generically.
+    bool is_involded_in_current_non_linear_sequence = false; // if true, checks/work to do when leaving this node
+    bool is_combining_non_linear_sequence = false;
+    bool has_started_non_linear_sequence = false; // will emit page_break_before if true
+    if ( STYLE_HAS_CR_HINT(style, NON_LINEAR) && (m == erm_block || m == erm_final) && flow->isMainFlow() ) {
+        // We only handle "-cr-hint: non-linear*" set on block elements in the main flow.
+        bool is_combining = STYLE_HAS_CR_HINT(style, NON_LINEAR_COMBINING);
+        if ( flow->isInNonLinearSequence() ) {
+            // Already in a non-linear sequence: don't kill it, don't start a nested one
+            if ( is_combining && flow->isInCombiningNonLinearSequence() ) {
+                // Current non-linear sequance started by "-cr-hint: non-linear-combining",
+                // and we are another non-linear-combining: we may need to close this
+                // sequence if not followed by another non-linear-combining.
+                is_involded_in_current_non_linear_sequence = true;
+                is_combining_non_linear_sequence = true;
+            }
+            // Otherwise, it was started by an upper "-cr-hint: non-linear": do nothing
         }
         else {
-            flow->newSequence(false);
-        }
-    }
-    else if ( nodeElementId == el_body ) {
-        // We also set this attribute on 2nd++ BODYs in FB2 documents
-        // (as this attribute is only set on FB2 documents, and all
-        // 2nd++ BODYs get it, no need to check for the doc format and
-        // no need to reset flow sequence when BODY without met.)
-        if ( enode->hasAttribute( attr_NonLinear ) ) {
-            flow->newSequence(true);
-            force_pb = enode->getDocument()->getDocFlag(DOC_FLAG_NONLINEAR_PAGEBREAK);
+            // Start a new non-linear sequence
+            flow->newSequence(true, is_combining);
+            has_started_non_linear_sequence = true;
+            is_involded_in_current_non_linear_sequence = true;
+            is_combining_non_linear_sequence = is_combining;
         }
     }
 
@@ -7551,10 +7618,10 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
     // Note: some test suites seem to indicate that an inner "break-inside: auto"
     // can override an outer "break-inside: avoid". We don't ensure that.
 
-    // enforce page breaks if needed
-    if (force_pb) {
+    if ( has_started_non_linear_sequence && enode->getDocument()->getDocFlag(DOC_FLAG_NONLINEAR_PAGEBREAK) ) {
+        // This flag is set when frontend activates "Hide non-linear fragments": we need such non-linear
+        // sequences to be on individual pages, to be able to hide such pages from the normal paging flow.
         break_before = RN_SPLIT_ALWAYS;
-        break_after = RN_SPLIT_ALWAYS;
     }
 
     if ( no_margin_collapse ) {
@@ -7730,10 +7797,8 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                 if ( style->display == css_d_list_item_block ) {
                     // list_item_block rendered as block (containing text and block elements)
                     // Get marker width and height
-                    LFormattedTextRef txform( enode->getDocument()->createFormattedText() );
                     int list_marker_width;
-                    lString32 marker = renderListItemMarker( enode, list_marker_width, txform.get(), -1, 0);
-                    list_marker_height = txform->Format( (lUInt16)(width - list_marker_width), (lUInt16)enode->getDocument()->getPageHeight(), direction );
+                    renderListItemMarker( enode, list_marker_width, &list_marker_height );
                     if ( ! renderAsListStylePositionInside(style, is_rtl) ) {
                         // When list_style_position = outside, we have to shift the whole block
                         // to the right and reduce the available width, which is done
@@ -8032,6 +8097,25 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                 // if (top_overflow > 0) printf("block top_overflow=%d\n", top_overflow);
                 // if (bottom_overflow > 0) printf("block bottom_overflow=%d\n", bottom_overflow);
 
+                if ( is_involded_in_current_non_linear_sequence ) {
+                    // We started a non-linear sequence (or did not if we are combining), so close it
+                    // (except if we are combining and the followup sibling would combine too).
+                    bool close_sequence = true;
+                    if ( is_combining_non_linear_sequence ) {
+                        ldomNode * sibling = enode->getUnboxedNextSibling(true); // skip text nodes
+                        if ( sibling && !sibling->getStyle().isNull() && STYLE_HAS_CR_HINT(sibling->getStyle(), NON_LINEAR_COMBINING) ) {
+                            // Next sibling is also "-cr-hint: non-linear-combining", don't close it
+                            close_sequence = false;
+                        }
+                    }
+                    if ( close_sequence ) {
+                        flow->newSequence(false);
+                        if ( enode->getDocument()->getDocFlag(DOC_FLAG_NONLINEAR_PAGEBREAK) ) {
+                            break_after = RN_SPLIT_ALWAYS;
+                        }
+                    }
+                }
+
                 flow->addVerticalMargin( enode, margin_bottom, break_after );
                 if ( no_margin_collapse ) {
                     // Push our margin so it does not get collapsed with some later one
@@ -8049,7 +8133,7 @@ void renderBlockElementEnhanced( FlowState * flow, ldomNode * enode, int x, int 
                     if ( ! renderAsListStylePositionInside(style, is_rtl) ) {
                         // When list_style_position = outside, we have to shift the final block
                         // to the right (or to the left if RTL) and reduce its width
-                        lString32 marker = renderListItemMarker( enode, list_marker_padding, NULL, -1, 0 );
+                        renderListItemMarker( enode, list_marker_padding );
                         // With css_lsp_outside, the marker is outside: it shifts x left and reduces width
                         width -= list_marker_padding;
                         fmt.setWidth( width );
@@ -9337,10 +9421,18 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
                     }
 
                     LFormattedTextRef txform( enode->getDocument()->createFormattedText() );
-                    // If RTL, have the marker aligned to the right inside list_marker_width
-                    lUInt32 txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : 0;
+                    // Different marker alignement whether LTR/RTL or outside/-cr-outside
+                    lUInt32 txt_flags;
+                    if ( style->list_style_position == css_lsp_cr_outside ) {
+                        // Legacy "outside": align it on the start of line
+                        txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT;
+                    }
+                    else {
+                        // As browsers do "outside": align it near the following content
+                        txt_flags = is_rtl ? LTEXT_ALIGN_LEFT: LTEXT_ALIGN_RIGHT;
+                    }
                     int list_marker_width;
-                    lString32 marker = renderListItemMarker( enode, list_marker_width, txform.get(), -1, txt_flags);
+                    renderListItemMarker( enode, list_marker_width, NULL, txform.get(), txt_flags);
                     /*
                     lUInt32 h = txform->Format( (lUInt16)list_marker_width, (lUInt16)page_height, direction );
                     lvRect clip;
@@ -9522,10 +9614,18 @@ void DrawDocument( LVDrawBuf & drawbuf, ldomNode * enode, int x0, int y0, int dx
 
                     LFormattedTextRef txform( enode->getDocument()->createFormattedText() );
 
-                    // If RTL, have the marker aligned to the right inside list_marker_width
-                    lUInt32 txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : 0;
+                    // Different marker alignement whether LTR/RTL or outside/-cr-outside
+                    lUInt32 txt_flags;
+                    if ( style->list_style_position == css_lsp_cr_outside ) {
+                        // Legacy "outside": align it on the start of line
+                        txt_flags = is_rtl ? LTEXT_ALIGN_RIGHT : LTEXT_ALIGN_LEFT;
+                    }
+                    else {
+                        // As browsers do "outside": align it near the following content
+                        txt_flags = is_rtl ? LTEXT_ALIGN_LEFT: LTEXT_ALIGN_RIGHT;
+                    }
                     int list_marker_width;
-                    lString32 marker = renderListItemMarker( enode, list_marker_width, txform.get(), -1, txt_flags);
+                    renderListItemMarker( enode, list_marker_width, NULL, txform.get(), txt_flags);
                     /*
                     lUInt32 h = txform->Format( (lUInt16)list_marker_width, (lUInt16)page_height, direction );
                     lvRect clip;
@@ -10539,7 +10639,7 @@ void getRenderedWidths(ldomNode * node, int &maxWidth, int &minWidth, int direct
         bool list_marker_width_as_padding = false;
         if ( style->display == css_d_list_item_block ) {
             LFormattedTextRef txform( node->getDocument()->createFormattedText() );
-            lString32 marker = renderListItemMarker( node, list_marker_width, txform.get(), -1, 0);
+            renderListItemMarker( node, list_marker_width );
             #ifdef DEBUG_GETRENDEREDWIDTHS
                 printf("GRW: list_marker_width: %d\n", list_marker_width);
             #endif

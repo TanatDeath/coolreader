@@ -683,7 +683,7 @@ public class CoverpageManager {
 					final String sBookFName = book.file.getFilename();
 					CRC32 crc = new CRC32();
 					crc.update(sBookFName.getBytes());
-					final String sFName = String.valueOf(crc.getValue()) + "_cover.png";
+					final String sFName = crc.getValue() + "_cover.png";
 					String sDir = "";
 					ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CustomCoversDirs, true);
 					if (tDirs.size()>0) sDir=tDirs.get(0);
@@ -705,7 +705,8 @@ public class CoverpageManager {
 								if (shadowSizePercent > 0) {
 									Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
 									drawShadow(canvas, rc, shadowRect);
-								}isCustomCover = true;
+								}
+								isCustomCover = true;
                                 return;
 							}
 						} catch (Exception e) {

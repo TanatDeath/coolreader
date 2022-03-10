@@ -145,6 +145,10 @@ protected:
      * <any> - A mask with only one bit set, the number of which corresponds to the number in the fallback font chain.
      */
     lUInt32 _fallback_mask;
+    bool           _DecimalListItemFontIsSet;
+    LVFontRef      _DecimalListItemFont;
+    bool           _BulletListItemFontIsSet;
+    LVFontRef      _BulletListItemFont;
     int            _synth_weight; // fake/synthesized weight
     bool           _allowKerning;
     FT_Pos         _synth_weight_strength;   // for emboldening with FT_Outline_Embolden()
@@ -178,6 +182,10 @@ public:
 
     /// get fallback font for this font
     virtual LVFont *getFallbackFont(lUInt32 fallbackPassMask);
+
+    virtual LVFont * getDecimalListItemFont();
+
+    virtual LVFont * getBulletListItemFont();
 
     /// returns font weight
     virtual int getWeight() const { return _synth_weight > 0 ? _synth_weight : _weight; }

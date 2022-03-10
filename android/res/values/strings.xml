@@ -5,6 +5,7 @@
     <string name="app_name_premium" translatable="false">KnownReader premium</string>
     <string name="app_name_free" translatable="false">KnownReader free</string>
     <string name="app_name_exp" translatable="false">KR Exp</string>
+    <string name="app_name_fdroid" translatable="false">KnownReader</string>
     <string name="mi_search">Search</string>
     <string name="mi_search_web">Search on web</string>
     <string name="mi_citation">Save citation</string>
@@ -202,6 +203,10 @@
     <string name="action_touch_screen_enabled_toast">Touch screen is unlocked</string>
     <string name="action_repeat">(autorepeat)</string>
     <string name="action_logcat">Save log</string>
+    <string name="action_brightness_down">Brightness down</string>
+    <string name="action_brightness_up">Brightness up</string>
+    <string name="action_brightness_warm_down">Warm brightness down</string>
+    <string name="action_brightness_warm_up">Warm brightness up</string>
     <string name="options_app_scan_book_props">Scan properties of all books in folder</string>
     <string name="options_page_titlebar">Title bar options</string>
     <string name="options_page_titlebar_short">title bar</string>
@@ -274,8 +279,6 @@
     <string name="options_selection_action">Single word</string>
     <string name="options_selection_action_long">Single word (longtap)</string>
     <string name="options_selection_action_long_add_info">Long double tap is an action, that fires when you doubletapping the word but hold a finger on the second tap more than 400ms.</string>
-    <string name="options_bookmark_action_send_to">\"Send to\" action in bookmark dialog</string>
-    <string name="options_bookmark_action_send_to_add_info">You can define quick action to send your bookmark to external app</string>
     <string name="options_multi_selection_action">Some words</string>
     <string name="options_selection2_action">Selection mode: single word</string>
     <string name="options_selection2_action_long">Selection mode: single word (longtap)</string>
@@ -1106,8 +1109,8 @@
     <string name="orientation_popup_toolbar_hide_short">Hide</string>
     <string name="error_while_opening">Error while opening document \"%s\"</string>
     <string name="datadir_is_removed">Application data directory \"%s\" has been removed by other app.\nPossibly it was some kind of disc space optimizer.\nUnfortunately all the settings were lost.</string>
-    <string name="font_compat_partial_with_language">Warning: font \"%s\" does not contain the full character set of the language \"%s\". Missing characters will be obtained from fallback fonts.</string>
-    <string name="font_not_compat_with_language">Warning: the font \"%s\" does not contain any character of the language \"%s\". All necessary characters will be obtained from the fallback fonts.</string>
+    <string name="font_compat_partial_with_language">Warning: font \"%1$s\" does not contain the full character set of the language \"%2$s\". Missing characters will be obtained from fallback fonts.</string>
+    <string name="font_not_compat_with_language">Warning: the font \"%1$s\" does not contain any character of the language \"%2$s\". All necessary characters will be obtained from the fallback fonts.</string>
     <string name="fontconfig_language_orthography_database">"Languages character set database by Fontconfig:
         https://www.fontconfig.org/ "
     </string>
@@ -1613,7 +1616,10 @@
     <string name="online_combo_add_info">Online combo is the complex action - it allows to translate text (via online dictionary), then save the result to user dic</string>
     <string name="online_super_combo">Online super combo</string>
     <string name="online_super_combo_add_info">Online super combo is the complex action - it allows to translate text (via online dictionary), save the result to user dic, then send it to external app</string>
-    <string name="options_bookmark_action_send_to_mod">\"Send to\" action modifier</string>
+    <string name="options_bookmark_action_send_to_option">Bookmark dialog: send action</string>
+    <string name="options_bookmark_action_send_to">\"Send to\"</string>
+    <string name="options_bookmark_action_send_to_add_info">You can define quick action to send your bookmark to external app</string>
+    <string name="options_bookmark_action_send_to_mod">\"Send to\" modifier</string>
     <string name="options_bookmark_action_send_to_mod_add_info">You can choose what to send - selected text, full sentence, selected text inside sentence</string>
     <string name="options_bookmark_action_send_to_mod1">Selected text</string>
     <string name="options_bookmark_action_send_to_mod2">Context (full sentence) of selected text</string>
@@ -1705,6 +1711,8 @@
     <string name="online_offline_dics_add_info">You can specify an offline dic using instead of online, while your device is offline</string>
     <string name="online_offline_dics_add_info_ext">You can specify an offline dic using instead of online, while your device is offline. Input dic number</string>
     <string name="lang_pair">Language pair</string>
+    <string name="langs">Langs:</string>
+    <string name="dic_converting">Dictionary converting</string>
     <string name="conformity">Conformity</string>
     <string name="offline_dics_dialog">Offline dictionaries</string>
     <string name="offline_dics_dialog_add_info">Manage offline dictionaries</string>
@@ -1907,4 +1915,16 @@
     <string name="click_to_restore">Click to restore settings</string>
     <string name="click_to_restore_warn">Proceed to restore settings? This cannot be undone!</string>
     <string name="show_hidden_dirs">Show hidden dirs</string>
+    <string name="dict_not_exists">Dict file is not exists. Cannot convert</string>
+    <string name="conversion_incomplete">Conversion was cancelled. Dic could be incomplete</string>
+    <string name="dict_was_converted">Dic was already converted. Delete files and try again?</string>
+    <string name="dict_was_not_deleted">Cannot delete dic files. Try to restart app</string>
+    <string name="cannot_delete_temp_dic_file">Cannot delete temp dic file. Delete it manually</string>
+    <string name="unpack_dic">Unzipping dic</string>
+    <string name="dic_index_create">Creating dictionary index</string>
+    <string name="storage_internal">Internal shared storage</string>
+    <string name="storage_sd_card">SD Card</string>
+    <string name="root_directory">Root directory</string>
+    <string name="saf_otg_explanation">You\'ll now go to Android\'s filesystem for security reasons. Please select the USB device from the list on the left. Proceed?</string>
+    <string name="open">Open</string>
 </resources>

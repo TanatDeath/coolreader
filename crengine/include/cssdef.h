@@ -222,7 +222,9 @@ enum css_list_style_type_t {
 enum css_list_style_position_t {
     css_lsp_inherit,
     css_lsp_inside,
-    css_lsp_outside
+    css_lsp_outside,
+    css_lsp_cr_outside // private value "list-style-position: -cr-outside", legacy rendering
+    // of outside, with marker left-aligned instead of right near the content
 };
 
 /// css length value types, see:
@@ -414,6 +416,11 @@ enum css_generic_value_t {
 // To be set on a block element: it is a footnote (must be a full footnote block container),
 // and to be displayed at the bottom of all pages that contain a link to it.
 #define CSS_CR_HINT_FOOTNOTE_INPAGE         0x00080000 // -cr-hint: footnote-inpage
+
+// To be set on a block element: this block makes a non-linear flow that can be hidden from normal flow by frontends.
+// Consecutive siblings all hinted with 'non-linear-combining' combine all into a single flow.
+#define CSS_CR_HINT_NON_LINEAR              0x00100000 // -cr-hint: non-linear
+#define CSS_CR_HINT_NON_LINEAR_COMBINING    0x00300000 // -cr-hint: non-linear-combining  (2 bits flag, includes previous one)
 
 // For footnote popup detection by koreader-base/cre.cpp
 #define CSS_CR_HINT_NOTEREF                 0x01000000 // -cr-hint: noteref         link is to a footnote

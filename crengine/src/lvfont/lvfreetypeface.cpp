@@ -98,6 +98,33 @@ static lChar32 getReplacementChar(lUInt32 code, bool * can_be_ignored = NULL) {
             // some Kindle built-ins) substitute a different zero-width
             // character instead of one with width.
             return UNICODE_ZERO_WIDTH_NO_BREAK_SPACE;
+        case 0x2000: // Other Unicode non-zero-fixed-width spaces
+        case 0x2001:
+        case 0x2002:
+        case 0x2003:
+        case 0x2004:
+        case 0x2005:
+        case 0x2006:
+        case 0x2007:
+        case 0x2008:
+        case 0x2009: // thin space: let's keep using a space rather than zero width
+        case 0x200a: // hair space                        even for these small ones
+        case 0x202f:
+        case 0x205f:
+        case 0x3000:
+            return ' ';
+        case 0x202a: // Unicode BiDi directionnal formatting characters
+        case 0x202b:
+        case 0x202c:
+        case 0x202d:
+        case 0x202e:
+        case 0x2066:
+        case 0x2067:
+        case 0x2068:
+        case 0x2069:
+            if (can_be_ignored)
+                *can_be_ignored = true;
+            return UNICODE_ZERO_WIDTH_SPACE;
         case 0x2010:
         case 0x2011:
         case 0x2012:
@@ -288,6 +315,11 @@ static LVFontGlyphCacheItem *newItem(LVFontLocalGlyphCache *local_cache, lChar32
             if ( gammaIndex!=GAMMA_NO_CORRECTION_INDEX )
                 cr_correct_gamma_buf(item->bmp, bmp_sz, gammaIndex);
             break;
+        case BMP_PIXEL_FORMAT_BGRA:
+        case BMP_PIXEL_FORMAT_MONO:
+        case BMP_PIXEL_FORMAT_GRAY2:
+        case BMP_PIXEL_FORMAT_GRAY4:
+        break;
         }
     }
     item->origin_x = (lInt16) slot->bitmap_left;
@@ -330,6 +362,11 @@ static LVFontGlyphCacheItem *newItem(LVFontLocalGlyphCache *local_cache, lUInt32
             if ( gammaIndex!=GAMMA_NO_CORRECTION_INDEX )
                 cr_correct_gamma_buf(item->bmp, bmp_sz, gammaIndex);
             break;
+        case BMP_PIXEL_FORMAT_BGRA:
+        case BMP_PIXEL_FORMAT_MONO:
+        case BMP_PIXEL_FORMAT_GRAY2:
+        case BMP_PIXEL_FORMAT_GRAY4:
+        break;
         }
     }
     item->origin_x = (lInt16) slot->bitmap_left;
@@ -508,6 +545,66 @@ LVFont *LVFreeTypeFace::getFallbackFont(lUInt32 fallbackPassMask) {
     return res.get();
 }
 
+LVFont *LVFreeTypeFace::getDecimalListItemFont() {
+    if ( _DecimalListItemFontIsSet )
+        return _DecimalListItemFont.get();
+    if ( _shapingMode == SHAPING_MODE_HARFBUZZ && !(getFeatures() & LFNT_OT_FEATURES_P_TNUM) ) {
+        // We can request the same font with OpenType feature "tabular nums", for fixed width
+        // digits and better alignment of decimal list items (no need to do it if this feature
+        // has already been enabled for this font). If the font does not support the feature,
+        // we'll just have another useless instance of the font.
+        _DecimalListItemFont = fontMan->GetFont(
+                getSize(),
+                getWeight(),
+                getItalic(),
+                getFontFamily(),
+                getTypeFace(),
+                getFeatures() | LFNT_OT_FEATURES_P_TNUM,
+                -1, false);
+        if ( _DecimalListItemFont.isNull() ) // shouldn't happen
+            _DecimalListItemFont = LVFontRef(this);
+    }
+    else {
+        // LFNT_OT_FEATURES_P_TNUM won't be used with other kerning modes, so use this same font
+        _DecimalListItemFont = LVFontRef(this);
+    }
+    _DecimalListItemFontIsSet = true;
+    return _DecimalListItemFont.get();
+}
+
+LVFont *LVFreeTypeFace::getBulletListItemFont() {
+    if ( _BulletListItemFontIsSet )
+        return _BulletListItemFont.get();
+    lString8 preferred_bullet_fonts(PREFERRED_BULLET_FONTS);
+    _BulletListItemFont = fontMan->GetFont(
+            getSize(),
+            400,  // regular weight   // bullets stays the regular weight and non-italic, even
+            0,    // no italic        // when their UL and LI are bold and/or italic
+            getFontFamily(),
+            preferred_bullet_fonts,   // We can provide a list, fontMan->GetFont() will split t and look for each
+            0,    // no feature needed
+            -1, false);
+    if ( _BulletListItemFont.isNull() ) { // shouldn't happen
+        _BulletListItemFont = LVFontRef(this);
+    }
+    else {
+        // Be sure the font we get is from our requested list
+        lString8Collection list;
+        splitPropertyValueList(preferred_bullet_fonts.c_str(), list);
+        bool found = false;
+        for (int i = 0; i < list.length(); i++) {
+            if ( list[i] == _BulletListItemFont->getTypeFace() ) {
+                found = true;
+                break;
+            }
+        }
+        if ( !found ) // None found: use this same font
+            _BulletListItemFont = LVFontRef(this);
+    }
+    _BulletListItemFontIsSet = true;
+    return _BulletListItemFont.get();
+}
+
 LVFreeTypeFace::LVFreeTypeFace(LVMutex &mutex, FT_Library library,
                                LVFontGlobalGlyphCache *globalCache)
         : LVFont(),
@@ -520,6 +617,7 @@ LVFreeTypeFace::LVFreeTypeFace(LVMutex &mutex, FT_Library library,
           _hintingMode(HINTING_MODE_AUTOHINT),
           _shapingMode(SHAPING_MODE_FREETYPE),
           _fallbackFontIsSet(false),
+          _DecimalListItemFontIsSet(false), _BulletListItemFontIsSet(false),
           _fallback_mask(0),
           _synth_weight(0),
           _synth_weight_strength(0),
@@ -615,6 +713,7 @@ void LVFreeTypeFace::setHintingMode(hinting_mode_t mode) {
 void LVFreeTypeFace::setShapingMode( shaping_mode_t shapingMode )
 {
     _shapingMode = shapingMode;
+    _DecimalListItemFontIsSet = false;
     _hash = 0; // Force lvstyles.cpp calcHash(font_ref_t) to recompute the hash
 #if USE_HARFBUZZ==1
     setupHBFeatures();

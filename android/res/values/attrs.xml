@@ -87,6 +87,10 @@
     <attr name="attr_icons8_change_theme_1" format="reference" />
     <attr name="attr_icons8_gesture" format="reference" />
     <attr name="attr_icons8_sunrise" format="reference" />
+    <attr name="attr_icons8_brightness_down" format="reference" />
+    <attr name="attr_icons8_brightness_up" format="reference" />
+    <attr name="attr_icons8_brightness_warm_down" format="reference" />
+    <attr name="attr_icons8_brightness_warm_up" format="reference" />
     <attr name="attr_icons8_font_color" format="reference" />
     <attr name="attr_icons8_settings_to_gd" format="reference" />
     <attr name="attr_icons8_settings_from_gd" format="reference" />

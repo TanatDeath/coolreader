@@ -190,6 +190,7 @@ LVDocView::LVDocView(int bitsPerPixel, bool noDefaultDocument) :
 			 */
 			, m_stream(NULL), m_doc(NULL), m_stylesheet(def_stylesheet),
             m_backgroundTiled(true),
+			m_stylesheetUseMacros(true),
             m_stylesheetNeedsUpdate(true),
             m_highlightBookmarks(1),
 			m_pageMargins(DEFAULT_PAGE_MARGIN,
@@ -568,11 +569,12 @@ lString8 substituteCssMacros(lString8 src, CRPropRef props) {
 }
 
 /// set document stylesheet text
-void LVDocView::setStyleSheet(lString8 css_text) {
+void LVDocView::setStyleSheet(lString8 css_text, bool use_macros) {
 	LVLock lock(getMutex());
     REQUEST_RENDER("setStyleSheet")
     //CRLog::trace("LVDocView::setStyleSheet()");
     m_stylesheet = css_text;
+	m_stylesheetUseMacros = use_macros;
     m_stylesheetNeedsUpdate = true;
 }
 
@@ -581,7 +583,10 @@ void LVDocView::updateDocStyleSheet() {
     if (m_is_rendered && !m_stylesheetNeedsUpdate)
         return;
     CRPropRef p = m_props->getSubProps("styles.");
-    m_doc->setStyleSheet(substituteCssMacros(m_stylesheet, p).c_str(), true);
+	if ( m_stylesheetUseMacros )
+		m_doc->setStyleSheet(substituteCssMacros(m_stylesheet, p).c_str(), true);
+	else
+		m_doc->setStyleSheet(m_stylesheet.c_str(), true);
     m_stylesheetNeedsUpdate = false;
 }
 
@@ -5565,10 +5570,16 @@ bool LVDocView::ParseDocument() {
 				m_doc_props->setString(DOC_PROP_LANGUAGE, extractDocLanguage(m_doc));
 			m_doc_props->setString(DOC_PROP_KEYWORDS, extractDocKeywords(m_doc));
 			m_doc_props->setString(DOC_PROP_DESCRIPTION, extractDocDescription(m_doc));
+			/* EPUB returns seriesNumber as a string, which can hold numbers with decimal: do the same
             int seriesNumber = -1;
             lString32 seriesName = extractDocSeries(m_doc, &seriesNumber);
             m_doc_props->setString(DOC_PROP_SERIES_NAME, seriesName);
             m_doc_props->setString(DOC_PROP_SERIES_NUMBER, seriesNumber>0 ? lString32::itoa(seriesNumber) :lString32::empty_str);
+            */
+			lString32 seriesNumber;
+			lString32 seriesName = extractDocSeriesAndNumber(m_doc, seriesNumber);
+			m_doc_props->setString(DOC_PROP_SERIES_NAME, seriesName);
+			m_doc_props->setString(DOC_PROP_SERIES_NUMBER, seriesNumber);
         }
 	}
 	//m_doc->persist();

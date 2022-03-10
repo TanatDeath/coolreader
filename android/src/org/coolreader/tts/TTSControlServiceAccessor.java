@@ -57,7 +57,11 @@ public class TTSControlServiceAccessor {
 		Log.v(TAG, "unbinding TTSControlService");
 		if (mServiceBound) {
 			// Detach our existing connection.
-			mActivity.unbindService(mServiceConnection);
+			try {
+				mActivity.unbindService(mServiceConnection);
+			} catch (Exception e) {
+				// do nothing - trying to handle java.lang.IllegalArgumentException: Service not registered: org.coolreader.tts.TTSControlServiceAccessor$1@fada797
+			}
 			mServiceBound = false;
 			bindIsCalled = false;
 			mServiceBinder = null;

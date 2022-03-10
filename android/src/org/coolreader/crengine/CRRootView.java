@@ -1,6 +1,7 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,6 +9,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.hardware.usb.UsbDevice;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -29,6 +33,9 @@ import org.coolreader.db.CRDBService;
 import org.coolreader.dic.DictsDlg;
 import org.coolreader.layouts.FlowLayout;
 import org.coolreader.options.OptionsDialog;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.SingletonUsbOtg;
+import org.coolreader.utils.StorageDirectory;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -36,6 +43,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.CRC32;
 
 import static org.coolreader.crengine.FileInfo.AUTHORS_TAG;
@@ -504,30 +512,40 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 	private void updateFilesystems(List<FileInfo> dirs) {
 		if (dirs==null) return;
 		int colorIcon = themeColors.get(R.attr.colorIcon);
-		if (dirs.size()!=0) {
+		ArrayList<StorageDirectory> arrStorages = mActivity.getStorageDirectories();
+		for (StorageDirectory storageDirectory: arrStorages) {
+//			fi.usbDeviceName = key;
+//			fi.usbDevice = device;
+			boolean bFound = false;
+			for (FileInfo fi1: dirs)
+				if (fi1.pathname.equals(storageDirectory.mPath)) {
+					bFound = true;
+					break;
+				}
+			if (!bFound) {
+				FileInfo fi = new FileInfo();
+				fi.setFilename("OTG:" + FileUtils.getFileName(storageDirectory.mPath));
+				fi.setTitle("OTG:" + FileUtils.getFileName(storageDirectory.mPath));
+				fi.pathname = FileInfo.OTG_DIR_PREFIX + storageDirectory.mPath;
+				dirs.add(fi);
+			}
+		}
+//		for (Map.Entry<String, UsbDevice> entry : mActivity.usbDevices.entrySet()) {
+//			String key = entry.getKey();
+//			UsbDevice device = entry.getValue();
+//			FileInfo fi = new FileInfo();
+//			fi.usbDeviceName = key;
+//			fi.usbDevice = device;
+//			fi.pathname = fi.getUsbDeviceLabel();
+//			dirs.add(fi);
+//		}
+		if (dirs.size() != 0) {
 			LayoutInflater inflater = LayoutInflater.from(mActivity);
 			mFilesystemScroll.removeAllViews();
 			int idx = 0;
 			ImageView icon;
 			TextView label;
 			View view = null;
-
-//			view = inflater.inflate(R.layout.root_item_dir, null);
-//			icon = view.findViewById(R.id.item_icon);
-//			label = view.findViewById(R.id.item_name);
-//			icon.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2));
-//			mActivity.tintViewIcons(icon,true);
-//			label.setText(R.string.open_book_from_gd_short);
-//			label.setTextColor(mActivity.getTextColor(colorIcon));
-//			label.setMaxWidth(coverWidth * 25 / 10);
-//			view.setOnClickListener(new OnClickListener() {
-//				@Override
-//				public void onClick(View v) {
-//					mActivity.showToast("Coming soon...");
-//					//mActivity.mGoogleDriveTools.signInAndDoAnAction(((CoolReader)mActivity).mGoogleDriveTools.REQUEST_CODE_LOAD_BOOKS_FOLDER_CONTENTS, this);
-//				}
-//			});
-//			mFilesystemScroll.addView(view);
 
 			View viewGD = inflater.inflate(R.layout.root_item_library_h, null);
 			ImageView iconGD = viewGD.findViewById(R.id.item_icon);
@@ -553,7 +571,7 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
 				mActivity.showToast("Coming soon...");
 				return true;
 			});
-			//asdf //not now
+			//plotn //not now
 			//mFilesystemScroll.addView(viewGD);
 
 			View viewDBX = inflater.inflate(R.layout.root_item_library_h, null);
@@ -636,9 +654,41 @@ public class CRRootView extends ViewGroup implements CoverpageReadyListener {
                     labText = item.pathname; //  filename
 				label.setMaxWidth(coverWidth * 25 / 10);
 				label.setTextColor(mActivity.getTextColor(colorIcon));
-				view.setOnClickListener(v -> mActivity.showDirectory(item, ""));
+				//if (labText.startsWith("OTG:"))
+				View finalView = view;
+				view.setOnClickListener(v -> {
+						Uri uri =  mActivity.usbDevices.get(item.pathname);
+						if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) &&
+								(item.isOTGDir())) {
+							// asdf: PREFIX_MEDIA_REMOVABLE
+							//if (SingletonUsbOtg.getInstance().getUsbOtgRoot() == null) {
+							if (uri == null) {
+								ArrayList<String> sButtons = new ArrayList<>();
+								sButtons.add(mActivity.getString(R.string.str_yes));
+								sButtons.add(mActivity.getString(R.string.str_no));
+								sButtons.add(0,"*" + mActivity.getString(R.string.saf_otg_explanation));
+								SomeButtonsToolbarDlg.showDialog(mActivity, finalView, 10,
+									true,
+									"", sButtons, null, (o22, btnPressed) -> {
+										if (btnPressed.equals(mActivity.getString(R.string.str_yes)) ||
+												(btnPressed.equals("{{timeout}}"))) {
+											Intent safIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+											mActivity.mOpenDocumentTreeArg = item;
+											mActivity.mOpenDocumentTreeCommand = mActivity.ODT_CMD_SELECT_OTG;
+											mActivity.startActivityForResult(safIntent, mActivity.REQUEST_CODE_OPEN_DOCUMENT_TREE);
+										}
+									});
+							} else {
+								mActivity.showDirectory(item, "");
+							}
+						} else
+							mActivity.showDirectory(item, "");
+					}
+				);
 				String[] arrLab = labText.split("/");
-				if (arrLab.length>2) labText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
+				if (arrLab.length > 2)
+					if (!labText.startsWith("OTG:")) labText="../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
+					else labText="OTG:../"+arrLab[arrLab.length-2]+"/"+arrLab[arrLab.length-1];
                 label.setText(labText);
 				label.setTextColor(mActivity.getTextColor(colorIcon));
 				view.setOnLongClickListener(view1 -> {

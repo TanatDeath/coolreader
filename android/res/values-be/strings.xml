@@ -39,9 +39,6 @@
     <string name="mi_goto_toc">Змест</string>
     <string name="mi_folder_open">Адкрыць папку</string>
     <string name="mi_folder_to_favorites">Дадаць у абранае</string>
-    <string name="mi_folder_left">Перамясціць улева</string>
-    <string name="mi_folder_right">Перамясціць управа</string>
-    <string name="mi_folder_remove">Прыбраць</string>
     <string name="dir_recent_books">Апошнія кнігі</string>
     <string name="dir_sd_card">SD-карта</string>
     <string name="dir_internal_sd_card">Унутр. SD-карта</string>

@@ -1,6 +1,7 @@
 package org.coolreader.crengine;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
@@ -409,7 +410,7 @@ public class Engine {
      * @param progressMsg  is progress custom message - can be set during progress
 	 */
 	public void showProgress(final int mainProgress, final String msg, String progressMsg) {
-		showProgress(mainProgress, msg, null);
+		showProgress(mainProgress, msg, "", null);
 	}
 
 	/**
@@ -966,6 +967,8 @@ public class Engine {
 	}
 
 	public boolean scanBookProperties(FileInfo info) {
+		if (info != null)
+			if (info.isOTGDir()) return true;
 		synchronized (lock) {
 			long start = android.os.SystemClock.uptimeMillis();
 			boolean res = scanBookPropertiesInternal(info);
@@ -1478,6 +1481,7 @@ public class Engine {
 			"/storage/extSdCard",
 			"/storage/external_SD",
 			"/mnt/sdcard", //Onyx Darwin 5
+			"/mnt/media_rw" // xiaomi mi9 external usb
 		};
 		// collect mount points from all possible sources
 		HashSet<String> mountPointsToAdd = new HashSet<>();
@@ -1502,7 +1506,8 @@ public class Engine {
 			if (point.length() == 0)
 				continue;
 			File dir = new File(point);
-			if (dir.isDirectory() && dir.canRead()) {
+			boolean isDir = dir.isDirectory();
+			if (isDir && dir.canRead()) {
 				String[] files = dir.list();
 				if (files != null && files.length > 0) {
 					String link = isLink(point);

@@ -171,7 +171,7 @@ public class TTSToolbarDlg implements Settings {
 					mReaderView.clearSelection();
 					if (mOnCloseListener != null)
 						mOnCloseListener.run();
-					if ( mWindow.isShowing() )
+					if (mWindow.isShowing())
 						mWindow.dismiss();
 					mReaderView.save();
 				});
@@ -577,8 +577,11 @@ public class TTSToolbarDlg implements Settings {
 
 				@Override
 				public void onStateChanged(TTSControlService.State state) {
-					mPlayPauseButton.setEnabled(true);
-					mPlayLockButton.setEnabled(true);
+					BackgroundThread.instance().postGUI(() ->
+					{
+						mPlayPauseButton.setEnabled(true);
+						mPlayLockButton.setEnabled(true);
+					});
 					switch (state) {
 						case PLAYING:
 							isSpeaking = true;
@@ -586,9 +589,9 @@ public class TTSToolbarDlg implements Settings {
 									mCoolReader, R.attr.attr_ic_media_pause, R.drawable.icons8_pause));
 							mPlayLockButton.setImageResource(Utils.resolveResourceIdByAttr(
 									mCoolReader, R.attr.attr_ic_media_pause_lock, R.drawable.icons8_pause_lock));
-							repaintButtons();
 							BackgroundThread.instance().postGUI(() ->
 							{
+								repaintButtons();
 								mTTSControl.bind(ttsbinder -> {
 									boolean locked = ttsbinder.isAudioFocusLocked();
 									if (locked) {
@@ -1068,7 +1071,7 @@ public class TTSToolbarDlg implements Settings {
 		mPanel.measure(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
 		mWindow.setOnDismissListener(() -> {
-			if ( !mClosed)
+			if (!mClosed)
 				stopAndClose();
 		});
 

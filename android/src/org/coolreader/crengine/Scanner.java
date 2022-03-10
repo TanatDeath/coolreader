@@ -441,7 +441,7 @@ public class Scanner extends FileInfoChangeSource {
 		if (null != initialUpdateCallback)
 			initialUpdateCallback.run();
 		int scanDepth = 2;
-		if (mHideEmptyDirs == 2) scanDepth = 0;
+		if (mHideEmptyDirs == 2) scanDepth = 1;
 		if (mHideEmptyDirs == 1) scanDepth = Integer.MAX_VALUE;
 		//plotn - надо бы разобраться потом с кодом CR, следующий сканер у меня портит все свойства книг, поэтому я убрал
 		//20211127 upd - дошел до того, что в вызовах listSubtreeBg есть повторный вызов listDirectory с полным ресканом, он свойства и портит
