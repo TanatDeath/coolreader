@@ -1448,6 +1448,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mFileToOpenFromExt = null;
 		Uri uri = null;
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
+
+		for (ReaderAction ra: ReaderAction.AVAILABLE_ACTIONS) {
+			String acname = "org.knownreder." + StrUtils.getNonEmptyStr(ra.id, true);
+			if (acname.equals(intentAction)) {
+				mReaderView.onCommand(ra.cmd, ra.param, null);
+				return true;
+			}
+		}
+
 		String processText = intent.getStringExtra("PROCESS_TEXT");
 		if (intentAction.equals("KnownReader.sendText")) {
 			processText = intent.getStringExtra("extraText").replace("\\n", "\n");
@@ -3962,7 +3971,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						}
 					}
 				}
-				;
 			}
 		} catch (Exception e) {
 			log.e("Min left error");

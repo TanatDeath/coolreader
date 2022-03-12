@@ -47,6 +47,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -64,6 +65,9 @@ public class TTSToolbarDlg implements Settings {
 	private final PopupWindow mWindow;
 	private final CoolReader mCoolReader;
 	private final ReaderView mReaderView;
+	LinearLayout llTopLine;
+	LinearLayout llMiddleContents;
+	LinearLayout llBottomLine;
 	public View mPanel;
 	private final TTSControlServiceAccessor mTTSControl;
 	private int mCurPage = -1;
@@ -89,6 +93,7 @@ public class TTSToolbarDlg implements Settings {
 	private boolean mClosed;
 	private Selection mCurrentSelection;
 	private boolean isSpeaking;
+	private boolean controlsIsHidden;
 	private long startTTSTime;
 	private int mMotionTimeout;
 	private boolean mAutoSetDocLang;
@@ -478,9 +483,20 @@ public class TTSToolbarDlg implements Settings {
 				int val = Utils.parseInt(value, 0, 0, 2);
 				int colorGray = themeColors.get(R.attr.colorThemeGray2);
 				if (isEInk) colorGray = Color.WHITE;
-				if (val == 0) mPanel.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-				if (val == 1) mPanel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
-				if (val == 2) mPanel.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				mPanel.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				llMiddleContents.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				if (val == 0) {
+					llTopLine.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+					llBottomLine.setBackgroundColor(Color.argb(170, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				}
+				if (val == 1) {
+					llTopLine.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+					llBottomLine.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				}
+				if (val == 2) {
+					llTopLine.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+					llBottomLine.setBackgroundColor(Color.argb(255, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+				}
 				break;
 			case PROP_APP_TTS_SENTENCE_PAUSE:
 				mSentencePause = Utils.parseInt(value, 0);
@@ -768,6 +784,11 @@ public class TTSToolbarDlg implements Settings {
 		else c.setAlpha(255);
 
 		mPanel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.tts_toolbar, null));
+
+		llTopLine = mPanel.findViewById(R.id.top_line);
+		llMiddleContents = mPanel.findViewById(R.id.middle_contents);
+		llBottomLine = mPanel.findViewById(R.id.bottom_line);
+
 		lblMotionWd = mPanel.findViewById(R.id.lbl_motion_wd);
 		lblMotionWd.setText(R.string.wd_sett);
 		lblMotionWd.setPaintFlags(lblMotionWd.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -796,6 +817,15 @@ public class TTSToolbarDlg implements Settings {
 		ImageButton stopButton = mPanel.findViewById(R.id.tts_stop);
 
 		mWindow = new PopupWindow(anchor.getContext());
+		llMiddleContents.setOnClickListener(v -> {
+			if (!isSpeaking)
+				stopAndClose();
+			else {
+				controlsIsHidden = !controlsIsHidden;
+				llTopLine.setVisibility(controlsIsHidden? View.INVISIBLE: View.VISIBLE);
+				llBottomLine.setVisibility(controlsIsHidden? View.INVISIBLE: View.VISIBLE);
+			}
+		});
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 		mPlayPauseButton.setBackground(c);
 		mPlayPauseButton.setOnClickListener(
@@ -1085,11 +1115,21 @@ public class TTSToolbarDlg implements Settings {
 		String sBkg = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND, "0");
 		int colorFill = colorGray;
 		if (isEInk) colorFill = Color.WHITE;
-		if (sBkg.equals("0")) mPanel.setBackgroundColor(Color.argb(170, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
-		if (sBkg.equals("1")) mPanel.setBackgroundColor(Color.argb(0, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
-		if (sBkg.equals("2")) mPanel.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		mPanel.setBackgroundColor(Color.argb(0, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		llMiddleContents.setBackgroundColor(Color.argb(0, Color.red(colorGray),Color.green(colorGray),Color.blue(colorGray)));
+		if (sBkg.equals("0")) {
+			llTopLine.setBackgroundColor(Color.argb(170, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+			llBottomLine.setBackgroundColor(Color.argb(170, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		}
+		if (sBkg.equals("1")) {
+			llTopLine.setBackgroundColor(Color.argb(0, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+			llBottomLine.setBackgroundColor(Color.argb(0, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		}
+		if (sBkg.equals("2")) {
+			llTopLine.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+			llBottomLine.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		}
 		mWindow.setContentView(mPanel);
-
 
 		int [] location = new int[2];
 		anchor.getLocationOnScreen(location);
