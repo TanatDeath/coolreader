@@ -116,7 +116,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 
 	public SaveDocDialog(CoolReader activity, boolean doMove, String fileDir, String existingFileName,
 						 String suggestedFileName, String fileExt, String sUri, Uri uri, String stype) {
-		super("SaveDocDialog", activity, activity.getString(R.string.save_doc_to_library), false, true);
+		super(activity, activity.getString(R.string.save_doc_to_library), false, true);
 		// fileDir = /storage/emulated/0/Книги/Мэри Стюарт
 		// existingFileName = /storage/emulated/0/Книги/Мэри Стюарт/Сага о Короле Артуре.fb2.zip
 		// suggestedFileName = KnownReader_Downloaded
@@ -780,7 +780,10 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 			cr.getDB().getBookFlags(fiOldF, fl -> {
 				int flags = (int) fl;
 				fiOldF.flags = flags;
-				if (f.renameTo(result)) {
+				boolean copied = f.renameTo(result);
+				if (!copied)
+					copied = Utils.moveFile(f,result);
+				if (copied) {
 					downloadDir.findItemByPathName(result.getAbsolutePath());
 					final File resF = result;
 					SaveDocDialog sdd = null;

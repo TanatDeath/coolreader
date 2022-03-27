@@ -64,7 +64,7 @@ public class GramotaTranslate {
 						for (Element word: words)
 							de.dictLinkText = word.attr("value");
 						if (!StrUtils.isEmptyStr(de.dictLinkText)) {
-							le.dictEntry.add(de);
+							le.dictEntries.add(de);
 							ArrayList<String> h2List = new ArrayList<>();
 							Elements h2s = par.select("h2");
 							for (Element h2 : h2s)
@@ -78,7 +78,7 @@ public class GramotaTranslate {
 									TranslLine tl = new TranslLine();
 									tl.transGroup = h2List.get(i);
 									tl.transText = h2DivList.get(i);
-									le.translLine.add(tl);
+									le.translLines.add(tl);
 								}
 								dsl.lemmas.add(le);
 							}

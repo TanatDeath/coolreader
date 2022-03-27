@@ -78,7 +78,7 @@ public class UserDicEditDialog extends BaseDialog {
 	}
 
 	public UserDicEditDialog(CoolReader activity, UserDicEntry ude, UserDicDlg udd) {
-		super("UserDicEditDialog", activity, activity.getString(R.string.ud_title), true,
+		super(activity, activity.getString(R.string.ud_title), true,
 				false);
 		setThirdButtonImage(
 				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus)

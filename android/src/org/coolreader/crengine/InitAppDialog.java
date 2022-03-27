@@ -38,7 +38,7 @@ public class InitAppDialog extends BaseDialog {
 
 	public InitAppDialog(CoolReader activity)
 	{
-		super("InitAppDialog", activity, activity.getString(R.string.init_app), false, false);
+		super(activity, activity.getString(R.string.init_app), false, false);
 		mCoolReader = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(mCoolReader, isEInk);

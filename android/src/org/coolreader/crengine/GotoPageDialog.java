@@ -190,7 +190,7 @@ public class GotoPageDialog extends BaseDialog {
 	
 	public GotoPageDialog(BaseActivity activity, final String title, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final GotoPageHandler handler )
 	{
-		super("GotoPageDialog", activity, title, true, false);
+		super(activity, title, true, false);
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
 		this.arrFound = null;
@@ -322,7 +322,7 @@ public class GotoPageDialog extends BaseDialog {
 
 	public GotoPageDialog(BaseActivity activity, final String title, final String findtext, final boolean caseSensitive, final GotoPageHandler handler )
 	{
-		super("GotoPageDialog", activity, title, true, false);
+		super(activity, title, true, false);
 		arrFound = new ArrayList<String[]>();
 		mFindText = findtext;
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]

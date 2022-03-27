@@ -1,17 +1,16 @@
 package org.coolreader.dic;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.content.FileProvider;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -37,7 +35,6 @@ import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Engine;
-import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.crengine.ProgressDialog;
@@ -147,9 +144,34 @@ public class OfflineDicsDlg extends BaseDialog {
 			return 4;
 		}
 
+		private void paintFormatButtons() {
+//			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+//			int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+//			int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+//			int colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+//			mCoolReader.tintViewIcons(btnPage2, PorterDuff.Mode.CLEAR,true);
+//			mCoolReader.tintViewIcons(btnBook2, PorterDuff.Mode.CLEAR,true);
+//			mCoolReader.tintViewIcons(btnAll2, PorterDuff.Mode.CLEAR,true);
+//			if (getCheckedFromTag(btnPage2.getTag())) {
+//				btnPage2.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+//				mCoolReader.tintViewIcons(btnPage2,true);
+//				if (isEInk) Utils.setSolidButtonEink(btnPage2);
+//			} else btnPage2.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
+//			if (getCheckedFromTag(btnBook2.getTag())) {
+//				btnBook2.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+//				mCoolReader.tintViewIcons(btnBook2,true);
+//				if (isEInk) Utils.setSolidButtonEink(btnBook2);
+//			} else btnBook2.setBackgroundColor(isEInk? Color.WHITE:colorGrayCT);
+//			if (getCheckedFromTag(btnAll2.getTag())) {
+//				btnAll2.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+//				mCoolReader.tintViewIcons(btnAll2,true);
+//				if (isEInk) Utils.setSolidButtonEink(btnAll2);
+//			} else btnAll2.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
+		}
+
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view;
-			int res = R.layout.star_dict_item;
+			int res = R.layout.offline_dict_item;
 			view = mInflater.inflate(res, null);
 			ImageView valueView = view.findViewById(R.id.option_value_cb);
 			TextView tvTitle = view.findViewById(R.id.dict_item_title);
@@ -157,6 +179,8 @@ public class OfflineDicsDlg extends BaseDialog {
 			TextView tvDesc = view.findViewById(R.id.dict_item_desc);
 			TextView tvVersion = view.findViewById(R.id.dict_item_version);
 			Button btnConvert = view.findViewById(R.id.btn_convert);
+			Button btnAsText =  view.findViewById(R.id.btn_text);
+			Button btnAsHtml =  view.findViewById(R.id.btn_html);
 			EditText langFrom = view.findViewById(R.id.lang_from);
 			langFrom.setPadding(10, 5, 10, 20);
 			EditText langTo = view.findViewById(R.id.lang_to);
@@ -269,7 +293,6 @@ public class OfflineDicsDlg extends BaseDialog {
 					sdi.langFrom = StrUtils.getNonEmptyStr(langFrom.getText().toString(),true);
 					sdi.langTo = StrUtils.getNonEmptyStr(langTo.getText().toString(),true);
 				}
-
 			};
 			if (langFrom != null)
 				langFrom.addTextChangedListener(watcher);
@@ -278,12 +301,55 @@ public class OfflineDicsDlg extends BaseDialog {
 			if ((sdi.dbExists) || (sdi.idxExists && (sdi.dslDzExists || sdi.dslExists))) {
 				btnConvert.setText(R.string.converted_dic);
 				btnConvert.setPaintFlags(btnConvert.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-				//tvConverted.setVisibility(View.VISIBLE);
-				//tvConverted.setPaintFlags(tvConverted.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 			} else {
 				btnConvert.setPaintFlags(btnConvert.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
-				//tvConverted.setVisibility(View.INVISIBLE);
 			}
+			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+			int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+			int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+			int colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+			mCoolReader.tintViewIcons(btnAsHtml, PorterDuff.Mode.CLEAR,true);
+			mCoolReader.tintViewIcons(btnAsText, PorterDuff.Mode.CLEAR,true);
+			Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+			Drawable img1 = img.getConstantState().newDrawable().mutate();
+			Drawable img2 = img.getConstantState().newDrawable().mutate();
+			btnAsText.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
+			btnAsHtml.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
+			btnAsText.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
+			btnAsText.setPadding(15, 10, 15, 10);
+			mCoolReader.tintViewIcons(btnAsText,true);
+			if (isEInk) Utils.setSolidButtonEink(btnAsText);
+			btnAsHtml.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
+			btnAsHtml.setPadding(15, 10, 15, 10);
+			mCoolReader.tintViewIcons(btnAsHtml,true);
+			if (isEInk) Utils.setSolidButtonEink(btnAsHtml);
+			if (StrUtils.getNonEmptyStr(sdi.displayFormat, true).equals("html")) {
+				btnAsHtml.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+				mCoolReader.tintViewIcons(btnAsHtml,true);
+				if (isEInk) Utils.setSolidButtonEink(btnAsHtml);
+				mCoolReader.tintViewIcons(btnAsText, PorterDuff.Mode.CLEAR,true);
+			} else {
+				btnAsText.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+				mCoolReader.tintViewIcons(btnAsText,true);
+				if (isEInk) Utils.setSolidButtonEink(btnAsText);
+				mCoolReader.tintViewIcons(btnAsHtml, PorterDuff.Mode.CLEAR,true);
+			}
+			btnAsText.setOnClickListener(v -> {
+				sdi.displayFormat = "text";
+				btnAsText.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+				btnAsHtml.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
+				mCoolReader.tintViewIcons(btnAsText,true);
+				if (isEInk) Utils.setSolidButtonEink(btnAsText);
+				mCoolReader.tintViewIcons(btnAsHtml, PorterDuff.Mode.CLEAR,true);
+			});
+			btnAsHtml.setOnClickListener(v -> {
+				sdi.displayFormat = "html";
+				btnAsHtml.setBackgroundColor(isEInk? colorGrayE: colorGrayCT2);
+				btnAsText.setBackgroundColor(isEInk? Color.WHITE: colorGrayCT);
+				mCoolReader.tintViewIcons(btnAsHtml,true);
+				if (isEInk) Utils.setSolidButtonEink(btnAsHtml);
+				mCoolReader.tintViewIcons(btnAsText, PorterDuff.Mode.CLEAR,true);
+			});
 			return view;
 		}
 
@@ -574,6 +640,7 @@ public class OfflineDicsDlg extends BaseDialog {
 					}
 					odi2.langFrom = odi.langFrom;
 					odi2.langTo = odi.langTo;
+					odi2.displayFormat = odi.displayFormat;
 					resDics.add(odi2);
 					break;
 				}
@@ -607,7 +674,8 @@ public class OfflineDicsDlg extends BaseDialog {
 
 	public OfflineDicsDlg(CoolReader coolReader)
 	{
-		super("OfflineDicsDlg", coolReader, coolReader.getResources().getString(R.string.offline_dics), true, true);
+		super(coolReader, coolReader.getResources().getString(R.string.offline_dics), true, true);
+		Log.i("ASDF", "OfflineDicsDlg: " + this.getClass().getName());
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mScanControl = new Scanner.ScanControl();
@@ -615,13 +683,12 @@ public class OfflineDicsDlg extends BaseDialog {
 		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mDics = fillOfflineDics();
         mInflater = LayoutInflater.from(getContext());
-        mDialogView = mInflater.inflate(R.layout.star_dicts_dialog, null);
+        mDialogView = mInflater.inflate(R.layout.offline_dicts_dialog, null);
 
 		ViewGroup body = mDialogView.findViewById(R.id.dict_list);
 		mList = new DictList(mActivity, false);
 		body.addView(mList);
 		mCoolReader.tintViewIcons(mDialogView);
-		mCoolReader.getDB().closeAllDics(o -> {});
 	}
 
 	@Override

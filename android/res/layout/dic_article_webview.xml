@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/page_item_body"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="500dp"
+	android:baselineAligned="false"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="2dip"
+	android:layout_marginRight="2dip"
+	>
+
+	<WebView android:id="@+id/dic_article_wview"
+			android:layout_width="fill_parent"
+			android:layout_height="500dp"
+			 />
+
+</LinearLayout>

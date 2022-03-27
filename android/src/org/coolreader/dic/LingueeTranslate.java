@@ -168,7 +168,7 @@ public class LingueeTranslate {
 									de.tagWordType = tag_wordtype.text();
 									Elements tag_type = tag_lemma.select("span.tag_type");
 									de.tagType = tag_type.text();
-									le.dictEntry.add(de);
+									le.dictEntries.add(de);
 								}
 								Elements translation_lines = lemma_content_d.select("div.translation_lines");
 								for (Element translation_line : translation_lines) {
@@ -209,7 +209,7 @@ public class LingueeTranslate {
 									for (Element example_line : example_lines) {
 										translLine.exampleLines.add(new ExampleLine(example_line.text()));
 									}
-									le.translLine.add(translLine);
+									le.translLines.add(translLine);
 								}
 								dsl.lemmas.add(le);
 							}

@@ -61,6 +61,7 @@ import org.coolreader.crengine.SelectionToolbarDlg;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
+import org.coolreader.userdic.UserDicPanel;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.crengine.SwitchProfileDialog;
 import org.coolreader.crengine.TOCDlg;
@@ -2798,6 +2799,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public boolean hiliteTapZoneOnTap = false;
 	private boolean enableVolumeKeys = true;
 	static private final int DEF_PAGE_FLIP_MS = 300;
+
 	public void applyAppSetting(String key, String value) {
 		boolean flg = "1".equals(value);
 		if (key.equals(PROP_APP_TAP_ZONE_HILIGHT)) {
@@ -2875,6 +2877,20 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			mMultiSelection3Action = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
 		} else if (PROP_APP_SELECTION3_ACTION_LONG.equals(key)) {
 			mSelection3ActionLong = Utils.parseInt(value, Settings.SELECTION_ACTION_SAME_AS_COMMON);
+		} else if (PROP_APP_SHOW_USER_DIC_PANEL.equals(key)) {
+			try {
+				mActivity.mReaderFrame.removeView(mActivity.mReaderFrame.userDicView);
+				mActivity.mReaderFrame.userDicView = new UserDicPanel(mActivity);
+				mActivity.mReaderFrame.userDicView.setBackground(mActivity.mReaderFrame.statusBackground);
+				mActivity.mReaderFrame.addView(mActivity.mReaderFrame.userDicView);
+				mActivity.mReaderFrame.userDicView.setVisibility(mActivity.ismShowUserDicPanel() ? View.VISIBLE : View.GONE);
+				BackgroundThread.instance().postGUI(() -> {
+					mActivity.mReaderFrame.userDicView.updateSettings(mActivity.settings());
+					mActivity.updateUserDicWords();
+				}, 500);
+			} catch (Exception e) {
+				//do nothing
+			}
 		} else {
 			//mActivity.applyAppSetting(key, value);
 		}

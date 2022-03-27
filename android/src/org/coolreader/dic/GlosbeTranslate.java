@@ -91,7 +91,7 @@ public class GlosbeTranslate {
 									DictEntry de = new DictEntry();
 									de.dictLinkText = deText;
 									de.tagType = deType;
-									le.dictEntry.add(de);
+									le.dictEntries.add(de);
 								}
 								Elements ps = li.select("p.translation__definition");
 								TranslLine lastTL = null;
@@ -105,7 +105,7 @@ public class GlosbeTranslate {
 									tl.transText = def;
 									if (!StrUtils.isEmptyStr(langT)) tl.transText = tl.transText + ", " + langT;
 									lastTL = tl;
-									le.translLine.add(tl);
+									le.translLines.add(tl);
 								}
 								if (lastTL != null) {
 									Elements divExs = li.select("div.translation__example");
@@ -116,7 +116,7 @@ public class GlosbeTranslate {
 								}
 							}
 						}
-						if ((le.translLine.size()>0) || (le.dictEntry.size()>0)) dsl.lemmas.add(le);
+						if ((le.translLines.size()>0) || (le.dictEntries.size()>0)) dsl.lemmas.add(le);
 					}
 					Elements examples = doc.select("div#examples");
 					for (Element example: examples) {

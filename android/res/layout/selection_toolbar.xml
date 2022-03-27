@@ -33,6 +33,16 @@
 			android:layout_below="@+id/top_line"
 			android:gravity="top"
 			>
+		<ImageButton android:id="@+id/btn_visible"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:src="?attr/attr_icons8_visible"
+				android:tag="tint"
+				android:layout_marginTop="2dip"
+				android:layout_marginBottom="2dip"
+				android:layout_marginLeft="1dip"
+				android:layout_marginRight="1dip"
+				android:contentDescription=""/>
 	</LinearLayout>
 
 	<LinearLayout

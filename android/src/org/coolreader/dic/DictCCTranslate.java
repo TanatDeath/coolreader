@@ -76,7 +76,7 @@ public class DictCCTranslate {
 									lemma = new Lemma();
 									DictEntry de = new DictEntry();
 									de.dictLinkText = StrUtils.getNonEmptyStr(sText, true);
-									lemma.dictEntry.add(de);
+									lemma.dictEntries.add(de);
 								} else {
 									sTitle = sTitle + "; ";
 									TranslLine tl = new TranslLine();
@@ -84,7 +84,7 @@ public class DictCCTranslate {
 									if (sText.startsWith(";")) sText = sText.substring(1);
 									sText = StrUtils.getNonEmptyStr(sText, true);
 									tl.transText = StrUtils.getNonEmptyStr(sText, true);
-									lemma.translLine.add(tl);
+									lemma.translLines.add(tl);
 									dsl.lemmas.add(lemma);
 								}
 								i++;

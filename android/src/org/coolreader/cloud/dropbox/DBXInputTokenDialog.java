@@ -83,7 +83,7 @@ public class DBXInputTokenDialog extends BaseDialog {
 
 	public DBXInputTokenDialog(CoolReader activity)
 	{
-		super("DBXInputTokenDialog", activity, activity.getString( R.string.dbx_auth), true, false);
+		super(activity, activity.getString( R.string.dbx_auth), true, false);
 		mCoolReader = activity;
 		setTitle(mCoolReader.getString( R.string.dbx_auth));
 		mInflater = LayoutInflater.from(getContext());

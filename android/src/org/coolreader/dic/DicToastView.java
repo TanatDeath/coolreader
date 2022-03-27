@@ -47,10 +47,6 @@ import org.coolreader.crengine.Services;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 import org.coolreader.dic.struct.DicStruct;
-import org.coolreader.dic.struct.DictEntry;
-import org.coolreader.dic.struct.ExampleLine;
-import org.coolreader.dic.struct.LinePair;
-import org.coolreader.dic.struct.TranslLine;
 import org.coolreader.dic.wiki.WikiArticle;
 import org.coolreader.dic.wiki.WikiArticles;
 import org.coolreader.dic.wiki.WikiSearch;
@@ -84,7 +80,7 @@ public class DicToastView {
     public static boolean isEInk;
     public static HashMap<Integer, Integer> themeColors;
 
-    private static Dictionaries.DictInfo mListCurDict;
+    public static Dictionaries.DictInfo mListCurDict;
     private static String mListLink;
     private static String mListLink2;
     private static boolean mListUseFirstLink;
@@ -96,13 +92,13 @@ public class DicToastView {
             Utils.setSolidButtonEink(btn);
     }
 
-    private static class Toast {
-        private View anchor;
-        private String sFindText;
+    public static class Toast {
+        public View anchor;
+        public String sFindText;
         private String msg;
         private int duration;
-        private WikiArticles wikiArticles = null;
-        private DicStruct dicStruct = null;
+        public WikiArticles wikiArticles = null;
+        public DicStruct dicStruct = null;
         WikiArticlesList mWikiArticlesList = null;
         ExtDicList mExtDicList = null;
         private int dicType;
@@ -142,12 +138,12 @@ public class DicToastView {
     private static LinkedBlockingQueue<Toast> queue = new LinkedBlockingQueue<Toast>();
     private static Toast curToast = null;
     private static AtomicBoolean showing = new AtomicBoolean(false);
-    private static Handler mHandler = new Handler();
+    public static Handler mHandler = new Handler();
     private static PopupWindow window = null;
     private static int colorGray;
     private static int colorGrayC;
     private static int colorIcon;
-    private static CoolReader mActivity;
+    public static CoolReader mActivity;
     private static LayoutInflater mInflater;
     private static String sFindText;
     private static int mListSkipCount = 0;
@@ -167,7 +163,7 @@ public class DicToastView {
         window.dismiss();
     }
 
-    private static Runnable handleDismiss = () -> {
+    public static Runnable handleDismiss = () -> {
         if (window != null) {
             window.dismiss();
             curWindow=null;
@@ -914,193 +910,9 @@ public class DicToastView {
         window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
     }
 
-    static class ExtDicAdapter extends BaseAdapter {
-        public boolean areAllItemsEnabled() {
-            return true;
-        }
-
-        public boolean isEnabled(int arg0) {
-            return true;
-        }
-
-        public int getCount() {
-            if (curToast == null)
-                return 0;
-            else if (curToast.dicStruct == null)
-                return 0;
-            else
-                return curToast.dicStruct.getCount();
-        }
-
-        public Object getItem(int position) {
-            if (curToast == null)
-                return 0;
-            if (curToast.dicStruct == null)
-                return 0;
-            if (position < 0 || position >= curToast.dicStruct.getCount())
-                return null;
-            return curToast.dicStruct.getByNum(position);
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public final static int ITEM_POSITION=0;
-
-        public int getItemViewType(int position) {
-            return ITEM_POSITION;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View view;
-            //if (mInflater == null) return null;
-            Object o = getItem(position);
-            if (o == null) {
-                int res = R.layout.ext_dic_entry;
-                view = mInflater.inflate(res, null);
-                return view;
-            }
-            if (o instanceof DictEntry) {
-                DictEntry de = (DictEntry) o;
-                int res = R.layout.ext_dic_entry;
-                view = mInflater.inflate(res, null);
-                TextView labelView = view.findViewById(R.id.ext_dic_entry);
-                String text = StrUtils.getNonEmptyStr(de.dictLinkText, true);
-                if (!StrUtils.isEmptyStr(de.tagType))
-                    text = text + "; " + de.tagType.trim();
-                if (!StrUtils.isEmptyStr(de.tagWordType))
-                    text = text + "; " + de.tagWordType.trim();
-                labelView.setText(text);
-                Button btnOpen = view.findViewById(R.id.dic_more);
-                btnOpen.setPadding(10, 4, 10, 4);
-                Utils.setSolidButton(btnOpen);
-                if (isEInk) Utils.setSolidButtonEink(btnOpen);
-                if (!StrUtils.isEmptyStr(sFindText))
-                    Utils.setHighLightedText(labelView, sFindText, mColorIconL);
-                return view;
-            }
-
-            if (o instanceof String) {
-                String s = (String) o;
-                if (s.startsWith("~")) {
-                    int res = R.layout.ext_dic_transl_group;
-                    view = mInflater.inflate(res, null);
-                    TextView labelView = view.findViewById(R.id.ext_dic_transl_group);
-                    String text = StrUtils.getNonEmptyStr(s.substring(1), true);
-                    labelView.setText(text);
-                    if (!StrUtils.isEmptyStr(sFindText))
-                        Utils.setHighLightedText(labelView, sFindText, mColorIconL);
-                    return view;
-                }
-            }
-
-            if (o instanceof TranslLine) {
-                TranslLine tl = (TranslLine) o;
-                int res = R.layout.ext_dic_transl_line;
-                view = mInflater.inflate(res, null);
-                TextView labelView = view.findViewById(R.id.ext_dic_transl_line);
-                String text = StrUtils.getNonEmptyStr(tl.transText, true);
-                if (!StrUtils.isEmptyStr(tl.transType))
-                    text = text + "; " + tl.transType.trim();
-                labelView.setText(text);
-                if (!StrUtils.isEmptyStr(sFindText))
-                    Utils.setHighLightedText(labelView, sFindText, mColorIconL);
-                return view;
-            }
-
-            if (o instanceof ExampleLine) {
-                ExampleLine el = (ExampleLine) o;
-                int res = R.layout.ext_dic_example_line;
-                view = mInflater.inflate(res, null);
-                TextView labelView = view.findViewById(R.id.ext_dic_example_line);
-                String text = StrUtils.getNonEmptyStr(el.line, true);
-                labelView.setText(text);
-                if (!StrUtils.isEmptyStr(sFindText))
-                    Utils.setHighLightedText(labelView, sFindText, mColorIconL);
-                return view;
-            }
-            if (o instanceof LinePair) {
-                LinePair lp = (LinePair) o;
-                int res = R.layout.ext_dic_res_pair;
-                view = mInflater.inflate(res, null);
-                TextView labelView = view.findViewById(R.id.ext_dic_res_pair1);
-                String text = StrUtils.getNonEmptyStr(lp.leftPart, true);
-                labelView.setText(text);
-                if (!StrUtils.isEmptyStr(sFindText))
-                    Utils.setHighLightedText(labelView, sFindText, mColorIconL);
-                TextView labelView2 = view.findViewById(R.id.ext_dic_res_pair2);
-                String text2 = StrUtils.getNonEmptyStr(lp.rightPart, true);
-                labelView2.setText(text2);
-                if (!StrUtils.isEmptyStr(sFindText))
-                    Utils.setHighLightedText(labelView2, sFindText, mColorIconL);
-                return view;
-            }
-
-            int res = R.layout.ext_dic_entry;
-            view = mInflater.inflate(res, null);
-            return view;
-        }
-
-        public boolean hasStableIds() {
-            return true;
-        }
-
-        public boolean isEmpty() {
-            if (curToast == null)
-                return true;
-            else if (curToast.wikiArticles == null)
-                return true;
-            else return curToast.wikiArticles.wikiArticleList.size() == 0;
-        }
-
-        private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
-
-        public void registerDataSetObserver(DataSetObserver observer) {
-            observers.add(observer);
-        }
-
-        public void unregisterDataSetObserver(DataSetObserver observer) {
-            observers.remove(observer);
-        }
-    }
-
-    static class ExtDicList extends BaseListView {
-
-        private DicStruct dicStruct;
-        private String findText;
-
-        public ExtDicList(Context context, DicStruct dsl, String sFindText) {
-            super(context, true);
-            this.dicStruct = dsl;
-            this.findText = sFindText;
-            setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            setLongClickable(true);
-            setAdapter(new ExtDicAdapter());
-            setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
-                //openContextMenu(DictList.this);
-                return true;
-            });
-        }
-
-        @Override
-        public boolean performItemClick(View view, int position, long id) {
-            Dictionaries.saveToDicSearchHistory(mActivity, findText, dicStruct.getTranslation(position), mListCurDict);
-            if ((mActivity.getReaderView() == null) ||
-                    (mActivity.mCurrentFrame != mActivity.mReaderFrame)) {
-                ClipboardManager cm = mActivity.getClipboardmanager();
-                String s = StrUtils.getNonEmptyStr(findText + ": " + dicStruct.getTranslation(position), true);
-                cm.setText(StrUtils.getNonEmptyStr(s, true));
-            }
-            mHandler.postDelayed(handleDismiss, 100);
-            return true;
-        }
-    }
-
     private static void extListToast(Toast t) {
         window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
         window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-        //window.setHeight(10000);
         window.setTouchable(true);
         window.setFocusable(false);
         window.setOutsideTouchable(true);
@@ -1205,7 +1017,7 @@ public class DicToastView {
         } else {
             ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 3 / 4);
         }
-        t.mExtDicList = new ExtDicList(mActivity, t.dicStruct, t.sFindText);
+        t.mExtDicList = new ExtDicList(mActivity, t, null, mHandler, handleDismiss, mColorIconL);
         body.addView(t.mExtDicList);
         int [] location = new int[2];
         t.anchor.getLocationOnScreen(location);

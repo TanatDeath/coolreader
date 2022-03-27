@@ -216,7 +216,7 @@
 					android:layout_marginLeft="3dip"
 					android:layout_marginRight="3dip"
 					android:src="@null"
-					android:maxLines="1"
+					android:maxLines="2"
 					android:ellipsize="end"
 					android:drawableLeft="@drawable/icons8_toc_item_normal"
 					android:textColor="?attr/colorIcon"

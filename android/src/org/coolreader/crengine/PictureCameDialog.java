@@ -261,7 +261,7 @@ mActivity.setSettings(props, -1, true);
 
 	public PictureCameDialog(final BaseActivity activity, Object obj, String objMime, String suggestedName)
 	{
-		super("PictureCameDialog", activity, "", true, false);
+		super(activity, "", true, false);
 		if (obj instanceof BookInfo) {
 			picReceived = ((CoolReader) activity).picReceived;
 			picReceived.book = (BookInfo)obj;

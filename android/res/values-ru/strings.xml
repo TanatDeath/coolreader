@@ -53,7 +53,9 @@
     <string name="mi_book_sort_order_title">По названию</string>
     <string name="mi_book_sort_order_title_desc">По названию (по убыв.)</string>
     <string name="toggle_dict_once">Переключить словарь (однократно)</string>
+    <string name="toggle_dict_once_short">Другой словарь (раз)</string>
     <string name="toggle_dict">Переключить словарь</string>
+    <string name="toggle_dict_short">Другой словарь</string>
     <string name="mi_bookmark_set">Установить закладку</string>
     <string name="mi_bookmark_goto">Перейти на закладку</string>
     <string name="mi_goto_page">На страницу</string>
@@ -151,6 +153,7 @@
     <string name="options_app_backlight_screen_eink">Яркость подсветки экрана - E-Ink метод</string>
     <string name="options_app_backlight_screen_default">Установленная в системе</string>
     <string name="action_backlight_set_default">Яркость подсветки установленная в системе</string>
+    <string name="action_backlight_set_default_short">Системная яркость</string>
     <string name="options_app_tapzones_normal">Сенсорный экран</string>
     <string name="options_app_key_actions">Кнопки</string>
     <string name="options_app_trackball_disable">Отключить трекбол</string>
@@ -174,14 +177,16 @@
     <string name="action_go_page">Перейти на страницу</string>
     <string name="action_go_first_page">На первую страницу</string>
     <string name="action_go_last_page">На последнюю страницу</string>
+    <string name="action_go_last_page_short">В конец книги</string>
     <string name="action_file_browser">Открыть книгу</string>
     <string name="action_options">Настройки</string>
-    <string name="action_options_filtered">Настройки (с фильтрацией)</string>
+    <string name="action_options_filtered">Настройки (с фильтром)</string>
     <string name="action_toggle_day_night">День / ночь</string>
     <string name="action_reader_menu">Меню чтения</string>
     <string name="options_app_tap_action_short">Короткий тап</string>
     <string name="options_app_tap_action_long">Длинный тап</string>
     <string name="action_touch_screen_toggle_lock">Блокировка сенсорного экрана</string>
+    <string name="action_touch_screen_toggle_lock_short">Блокировка экрана</string>
     <string name="action_touch_screen_disabled_toast">Сенсорный экран отключен</string>
     <string name="action_touch_screen_enabled_toast">Сенсорный экран включен</string>
     <string name="action_repeat">(автоповтор)</string>
@@ -210,7 +215,9 @@
     <string name="options_app_double_tap_selection_slowdown">(Замедляет время реакции на одиночные тапы)</string>
     <string name="mi_select_text">Выделить текст</string>
     <string name="action_toggle_selection_mode">Режим выделения текста</string>
+    <string name="action_toggle_selection_mode_short">Выделение текста</string>
     <string name="action_toggle_inspector_mode">Режим инспектора страницы</string>
+    <string name="action_toggle_inspector_mode_short">Инспектор страницы</string>
     <string name="action_toggle_selection_mode_off">Режим выделения текста отключен</string>
     <string name="action_toggle_selection_mode_on">Режим выделения текста. Выделите текст, используя сенсорный экран.</string>
     <string name="action_toggle_inspector_mode_off">Режим инспектора отключен</string>
@@ -218,7 +225,9 @@
     <string name="action_go_forward">Вперед</string>
     <string name="action_go_back">Назад</string>
     <string name="action_toggle_screen_orientation">Переключить ориентацию экрана</string>
+    <string name="action_toggle_screen_orientation_short">Ориентация экрана</string>
     <string name="action_toggle_fullscreen">Переключить полноэкранный режим</string>
+    <string name="action_toggle_fullscreen_short">Полный экран</string>
     <string name="action_exit_home_screen">Домашний экран</string>
     <string name="options_color_r">Красный</string>
     <string name="options_color_g">Зеленый</string>
@@ -257,6 +266,7 @@
     <string name="options_style_floating_punctuation">Висячая пунктуация</string>
     <string name="options_style_document_embedded_styles">Внутренние стили документа</string>
     <string name="action_toggle_document_styles">Включить/выключить стили документа</string>
+    <string name="action_toggle_document_styles_short">Вкл/выкл стили</string>
     <string name="options_selection_action_same_as_common">Совпадает с \"общей\" настройкой</string>
     <string name="options_selection_action_toolbar">Панель инструментов</string>
     <string name="options_selection_action">Одно слово</string>
@@ -583,12 +593,14 @@
     <string name="options_css_text_align_left">По левому краю</string>
     <string name="options_css_text_align_right">По правому краю</string>
     <string name="action_switch_settings_profile">Профиль настроек (переименовать - длинный тап)</string>
+    <string name="action_switch_settings_profile_short">Профиль настроек</string>
     <string name="options_app_settings_icons">Пиктограммы в настройках</string>
     <string name="options_app_settings_icons_is_custom_color">Установить цвет пиктограмм (только для новых) и текста интерфейса</string>
     <string name="options_app_settings_icons_custom_color">Цвет пиктограмм и текста интерфейса</string>
     <string name="mi_text_autoformat_enable">Разрешить автоформатирование текста</string>
     <string name="mi_text_autoformat_disable">Запретить автоформатирование текста</string>
     <string name="action_toggle_text_autoformat">Переключить автоформатирование текста</string>
+    <string name="action_toggle_text_autoformat_short">Автоформат текста</string>
     <string name="options_app_key_backlight_off">Отключать подсветку кнопок</string>
     <string name="action_chapter_next">Следующая глава</string>
     <string name="action_chapter_prev">Предыдущая глава</string>
@@ -902,8 +914,10 @@
     <string name="options_app_ui_theme_hicontrast1">Контрастная белая</string>
     <string name="options_app_ui_theme_hicontrast2">Контрастная черная</string>
     <string name="save_settings_to_cloud">Сохранить настройки на облачное хранилище</string>
+    <string name="save_settings_to_cloud_short">Настройки в облако</string>
     <string name="save_settings_to_cloud_v">Сохранить файл cr3.ini на облачное хранилище в папку KnownReader</string>
     <string name="load_settings_from_cloud">Восстановить настройки с облачного хранилища</string>
+    <string name="load_settings_from_cloud_short">Настройки из облака</string>
     <string name="load_settings_from_cloud_v">Восстановить настройки из файла cr3.ini в облачном хранилище (из папки KnownReader)</string>
     <string name="switched_to_dic">Переключение на словарь</string>
     <string name="next_dict_will_be_2nd">Следующий перевод будет в словаре 2 (однократно)</string>
@@ -913,6 +927,7 @@
     <string name="success_ext">Операция выполнена успешно</string>
     <string name="win_title_conf_file">Выбрать файл конфигурации</string>
     <string name="save_reading_pos_to_cloud">Сохранить позицию чтения в облачное хранилище</string>
+    <string name="save_reading_pos_to_cloud_short">Позицию в облако</string>
     <string name="dlg_button_delete_word">Удалить слово</string>
     <string name="dlg_button_pronoun_replace">Замена местоимений (на smb)</string>
     <string name="dlg_button_clear_hist">Очистить историю</string>
@@ -921,19 +936,27 @@
     <string name="search_hist_will_be_cleared">История поиска очищена</string>
     <string name="win_title_reading_pos">Выберите сохраненную позицию</string>
     <string name="load_reading_pos_from_cloud">Восстановить позицию чтения из облачного хранилища</string>
+    <string name="load_reading_pos_from_cloud_short">Позиция из облака</string>
     <string name="save_pos_to_cloud_timeout">Облачное автосохранение позиции чтения</string>
     <string name="save_pos_timeout">Автосохранение позиции чтения</string>
     <string name="save_pos_timeout_speak">Автосохранение позиции чтения (при чтении вслух)</string>
     <string name="save_bookmarks_to_cloud">Сохранить закладки в облачное хранилище</string>
+    <string name="save_bookmarks_to_cloud_short">Закладки в облако</string>
     <string name="load_bookmarks_from_cloud">Загрузить закладки из облачного хранилища</string>
+    <string name="load_bookmarks_from_cloud_short">Закладки из облака</string>
     <string name="cloud_menu">Меню облачного хранилища</string>
+    <string name="cloud_menu_short">Меню облака</string>
     <string name="save_current_book_to_cloud_ynd">Сохранить книгу на Яндекс.Диск</string>
+    <string name="save_current_book_to_cloud_ynd_short">Книгу на Я.Диск</string>
     <string name="save_current_book_to_cloud_ynd2">Сохранить открытую книгу в эту папку</string>
     <string name="save_current_book_to_cloud_ynd3">Сохранить в эту папку:</string>
     <string name="save_current_book_to_cloud_email">Отправить книгу по Email</string>
+    <string name="save_current_book_to_cloud_email_short">Отправить книгу</string>
     <string name="open_book_from_gd">Открыть книгу с диска Google Drive</string>
     <string name="open_book_from_dbx">Открыть книгу из Dropbox</string>
+    <string name="open_book_from_dbx_short2">Открыть из Dropbox</string>
     <string name="open_book_from_ynd">Открыть книгу с Яндекс.Диска</string>
+    <string name="open_book_from_ynd_short2">Открыть с Я.Диска</string>
     <string name="open_book_from_gd_short">Google Drive</string>
     <string name="set_comment_from_cb_capt">Сохранить с комментарием из буфера обмена</string>
     <string name="set_comment_from_cb">Сохранить с комментарием</string>
@@ -944,12 +967,15 @@
     <string name="options_app_dict_word_correction">Обработка слова перед словарем</string>
     <string name="options_app_dict_word_correction_add_info">Эта функция полезна, когда вы пытаетесь перевести сокращенное слово, например, выделяя \"l\'homme\" в словаре будет найдено \"homme\" и т.д.</string>
     <string name="save_bookmark_last_sel">Сохранить закладку (последнее выделение)</string>
+    <string name="save_bookmark_last_sel_short">Сохранить закладку</string>
     <string name="save_bookmark_quick">Сохранить быструю закладку</string>
+    <string name="save_bookmark_quick_short">Быстрая закладка</string>
     <string name="save_bookmark_last_sel_user_dic">Сохранить в личный словарь (последнее выделение)</string>
+    <string name="save_bookmark_last_sel_user_dic_short">В личный словарь</string>
     <string name="options_app_dict_longtap_change">Кнопка словаря: поменять короткий/длинный тап</string>
     <string name="options_app_dict_longtap_change_add_info">Есть два варианта тапа на кнопку \"словарь\" на \"панели выделения\" (когда вы выделяете текст) - длинный и короткий тапы. Этот параметр позволяет поменять их местами.</string>
     <string name="win_title_user_dic">Личный словарь / цитаты / история поиска</string>
-    <string name="win_title_user_dic_short">Личный словарь (цитаты, ...)</string>
+    <string name="win_title_user_dic_short">Личный словарь / цитаты ...</string>
     <string name="win_title_citations">Цитаты</string>
     <string name="dlg_userdic_page">Страница</string>
     <string name="dlg_userdic_book">Книга</string>
@@ -1200,6 +1226,8 @@
     <string name="convert_to_text_and_open_add_info">Документ будет скачан, преобразован в текст, сохранен, затем открыт</string>
     <string name="open_as_html">Открыть как есть (HTML)</string>
     <string name="open_as_text">Открыть как текст</string>
+    <string name="display_as_html">HTML</string>
+    <string name="display_as_text">Текст</string>
     <string name="error_open_as_text">Функция \"Открыть как текст\" недоступна</string>
     <string name="open_as_html_add_info">Если выбрано \"Открыть как текст\" - документ будет преобразован в обычный текст</string>
     <string name="doc_convert_needed">Необходимо преобразование документа</string>
@@ -1276,6 +1304,7 @@
     <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
     <string name="with_the_help">Использовались примеры кода из проектов (всплывающие окна, ярлыки, намерения): FBReader, Librera, AlReader, PocketBook, KOReader</string>
     <string name="options_choose_texture">Выбрать фоновую картинку / текстуру</string>
+    <string name="options_choose_texture_short">Выбрать фон</string>
     <string name="only_in_pro">Эта функция доступна только в версии Premium</string>
     <string name="only_in_premium">Эта функция доступна только в версии Premium</string>
     <string name="str_yes">да</string>
@@ -1487,8 +1516,8 @@
     <string name="migrate_cr_settings_profiles">Число профилей:</string>
     <string name="migrate_cr_settings_q">Вы уверены? Текущие настройки будут заменены</string>
     <string name="user_dic_panel0">Отключена</string>
-    <string name="user_dic_panel1">Без прокрутки (потребуется перезапуск)</string>
-    <string name="user_dic_panel2">С прокруткой (потребуется перезапуск)</string>
+    <string name="user_dic_panel1">Без прокрутки</string>
+    <string name="user_dic_panel2">С прокруткой</string>
     <string name="dict_dont_save_if_more">Не сохранять в историю переводов в словаре, если слов больше чем (0 = сохранять всегда)</string>
     <string name="litres_empty_login_or_passw">Логин или пароль для Литрес не заданы - укажите их в облачных настройках</string>
     <string name="search_books">Поиск книг</string>
@@ -1570,12 +1599,13 @@
     <string name="bmk_send_to">отправить...</string>
     <string name="bmk_custom_color">Установить цвет</string>
     <string name="skim_document">Беглый просмотр книги</string>
+    <string name="skim_document_short">Беглый просмотр</string>
     <string name="skim_document_add_info">Беглый просмотр книги позволяет быстро просмотреть начала глав, переходить по закладкам и т.д.</string>
     <string name="no_pattern">Не указан шаблон</string>
     <string name="online_combo">Онлайн комбо</string>
     <string name="online_combo_add_info">Онлайн комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре</string>
-    <string name="online_super_combo">Онлайн супер комбо</string>
-    <string name="online_super_combo_add_info">Онлайн супер комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре, после чего передается во внешнее приложение</string>
+    <string name="online_super_combo">Онлайн суперкомбо</string>
+    <string name="online_super_combo_add_info">Онлайн суперкомбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре, после чего передается во внешнее приложение</string>
     <string name="options_bookmark_action_send_to_option">Диалог закладки: действие для отправки</string>
     <string name="options_bookmark_action_send_to">\"Отправить в\"</string>
     <string name="options_bookmark_action_send_to_add_info">Вы можете настроить быстрое действие для отправки закладки в стороннее приложение</string>
@@ -1623,6 +1653,7 @@
     <string name="book_info_genres">Жанр(ы)</string>
     <string name="including_subgenres">(Включая поджанры)</string>
     <string name="action_show_onyx_backlight_system_dialog">Показать системный диалог для настройки подсветки</string>
+    <string name="action_show_onyx_backlight_system_dialog_short">Диалог подсветки</string>
     <string name="confirmation_select_folder_for_log">На следующем экране выберите каталог для сохранения файла журнала</string>
     <string name="notice_log_saved_to_">Файл журнала сохранен в файле \"%s\". Этот файл может содержать личные данные, например, какие книги вы читаете, будьте внимательны. Отправить файл?</string>
     <string name="sel_panel_extended">Панель выделения: расширенный режим</string>
@@ -1668,6 +1699,7 @@
     <string name="book_is_the_same_marks_set">Файл назначения совпадает, сохранены только отметки</string>
     <string name="book_is_the_same">Файл назначения совпадает, перемещать нечего</string>
     <string name="book_moved">Книга успешно перенесена</string>
+    <string name="book_copied_but">Книга успешно скопирована (однако исходный (или временный) файл не был удален)</string>
     <string name="quick_translation_dirs">Быстрые направления перевода</string>
     <string name="quick_translation_dirs_info">Можно указать до 10 быстрых направлений перевода (в формате \"с_языка=на_язык\")</string>
     <string name="online_offline_dics">Соответствие онлайн и офлайн словарей</string>
@@ -1857,6 +1889,7 @@
     <string name="add_author_folder">Добавить подпапку автора</string>
     <string name="do_not_move">Не перемещать</string>
     <string name="offline_dics">Оффлайновые словари</string>
+    <string name="dic_article_dlg">Словарная статья</string>
     <string name="found_dics">Найденные словари</string>
     <string name="imported_dics">Импортированные словари</string>
     <string name="options_selection_action_toolbar_short">Панель словарей</string>
@@ -1872,6 +1905,7 @@
     <string name="eink_full_update_method2">Метод 2</string>
     <string name="eink_full_update_method3">Метод 3</string>
     <string name="exp_feature">Экспериментальная функция</string>
+    <string name="exp_feature_short">Экспериментальное</string>
     <string name="exp_feature_add_info">Эта функция - то, что в настоящий момент разрабатывается. Если вы решили ее использовать - вы точно знаете что делать</string>
     <string name="click_to_restore">Нажмите, чтобы восстановить настройки</string>
     <string name="click_to_restore_warn">Восстановить настройки? Эта операция не может быть отменена!</string>

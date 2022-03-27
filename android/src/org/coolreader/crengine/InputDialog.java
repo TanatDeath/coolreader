@@ -43,7 +43,7 @@ public class InputDialog extends BaseDialog {
 
 	@SuppressLint("ClickableViewAccessibility")
 	public InputDialog(BaseActivity activity, final String title, boolean showNegativeButton, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final InputHandler inputHandler) {
-		super("InputDialog", activity, title, showNegativeButton, false);
+		super(activity, title, showNegativeButton, false);
 		this.mInputHandler = inputHandler;
 		this.mMinValue = minValue;
 		this.mMaxValue = maxValue;

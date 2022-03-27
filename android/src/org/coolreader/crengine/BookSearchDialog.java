@@ -35,7 +35,7 @@ public class BookSearchDialog extends BaseDialog {
 	
 	public BookSearchDialog(CoolReader activity, SearchCallback callback)
 	{
-		super("BookSearchDialog", activity, activity.getString( R.string.dlg_book_search), true, false);
+		super(activity, activity.getString( R.string.dlg_book_search), true, false);
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(activity, isEInk);
 		mCoolReader = activity;

@@ -19,7 +19,7 @@ public class SyncInfoDialog extends BaseDialog {
 	private OnCancelListener m_onCancelListener;
 
 	public SyncInfoDialog(BaseActivity activity, final String title, final String message) {
-		super("SyncInfoDialog", activity, title, false, true);
+		super(activity, title, false, true);
 		LayoutInflater inflater = LayoutInflater.from(getContext());
 		ViewGroup layout = (ViewGroup)inflater.inflate(R.layout.sync_dir_dialog, null);
 		TextView msgTextView = (TextView) layout.findViewById(R.id.msg_textview);

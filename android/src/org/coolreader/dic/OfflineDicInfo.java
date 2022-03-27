@@ -38,6 +38,8 @@ public class OfflineDicInfo {
 	public String langFrom = "";
 	@Expose
 	public String langTo = "";
+	@Expose
+	public String displayFormat = "text";
 
 	public SQLiteDatabase db = null;
 

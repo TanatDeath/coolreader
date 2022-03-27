@@ -73,7 +73,7 @@ public class YNDInputTokenDialog extends BaseDialog {
 
 	public YNDInputTokenDialog(CoolReader activity)
 	{
-		super("YNDInputTokenDialog", activity, activity.getString( R.string.ynd_auth), true, false);
+		super(activity, activity.getString( R.string.ynd_auth), true, false);
 		mCoolReader = activity;
 		setTitle(mCoolReader.getString( R.string.ynd_auth));
 		mInflater = LayoutInflater.from(getContext());

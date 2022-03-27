@@ -12,9 +12,9 @@ public class DicStruct {
 	public int getCount() {
 		int cnt = 0;
 		for (Lemma lemma: lemmas) {
-			cnt += lemma.dictEntry.size();
-			cnt += lemma.translLine.size();
-			for (TranslLine tl: lemma.translLine) {
+			cnt += lemma.dictEntries.size();
+			cnt += lemma.translLines.size();
+			for (TranslLine tl: lemma.translLines) {
 				if (!StrUtils.isEmptyStr(tl.transGroup)) cnt += 1;
 				cnt += tl.exampleLines.size();
 			}
@@ -23,14 +23,39 @@ public class DicStruct {
 		return cnt;
 	}
 
+	public Lemma getLemmaByNum(int num) {
+		int cnt = 0;
+		Lemma l = null;
+		for (Lemma lemma: lemmas) {
+			l = lemma;
+			for (DictEntry de: lemma.dictEntries) {
+				if (num == cnt) return lemma;
+				cnt++;
+			}
+			for (TranslLine tl: lemma.translLines) {
+				if (!StrUtils.isEmptyStr(tl.transGroup)) {
+					if (num == cnt) return lemma;
+					cnt++;
+				}
+				if (num == cnt) return lemma;
+				cnt++;
+				for (ExampleLine el: tl.exampleLines) {
+					if (num == cnt) return lemma;
+					cnt++;
+				}
+			}
+		}
+		return l;
+	}
+
 	public Object getByNum(int num) {
 		int cnt = 0;
 		for (Lemma lemma: lemmas) {
-			for (DictEntry de: lemma.dictEntry) {
+			for (DictEntry de: lemma.dictEntries) {
 				if (num == cnt) return de;
 				cnt++;
 			}
-			for (TranslLine tl: lemma.translLine) {
+			for (TranslLine tl: lemma.translLines) {
 				if (!StrUtils.isEmptyStr(tl.transGroup)) {
 					if (num == cnt) return "~" + tl.transGroup;
 					cnt++;
@@ -71,16 +96,16 @@ public class DicStruct {
 
 	public String getFirstTranslation() {
 		if (lemmas.size() == 0) return "";
-		if (lemmas.get(0).dictEntry.size() == 0) return "";
-		String text = StrUtils.getNonEmptyStr(lemmas.get(0).dictEntry.get(0).dictLinkText, true);
-		if (!StrUtils.isEmptyStr(lemmas.get(0).dictEntry.get(0).tagType))
-			text = text + "; " + lemmas.get(0).dictEntry.get(0).tagType.trim();
-		if (!StrUtils.isEmptyStr(lemmas.get(0).dictEntry.get(0).tagWordType))
-			text = text + "; " + lemmas.get(0).dictEntry.get(0).tagWordType.trim();
-		if (lemmas.get(0).translLine.size() > 0) {
-			text = text + " -> " + lemmas.get(0).translLine.get(0).transText;
-			if (!StrUtils.isEmptyStr(lemmas.get(0).translLine.get(0).transType))
-				text = text + "; " + lemmas.get(0).translLine.get(0).transType.trim();
+		if (lemmas.get(0).dictEntries.size() == 0) return "";
+		String text = StrUtils.getNonEmptyStr(lemmas.get(0).dictEntries.get(0).dictLinkText, true);
+		if (!StrUtils.isEmptyStr(lemmas.get(0).dictEntries.get(0).tagType))
+			text = text + "; " + lemmas.get(0).dictEntries.get(0).tagType.trim();
+		if (!StrUtils.isEmptyStr(lemmas.get(0).dictEntries.get(0).tagWordType))
+			text = text + "; " + lemmas.get(0).dictEntries.get(0).tagWordType.trim();
+		if (lemmas.get(0).translLines.size() > 0) {
+			text = text + " -> " + lemmas.get(0).translLines.get(0).transText;
+			if (!StrUtils.isEmptyStr(lemmas.get(0).translLines.get(0).transType))
+				text = text + "; " + lemmas.get(0).translLines.get(0).transType.trim();
 		}
 		return text;
 	}
@@ -91,12 +116,12 @@ public class DicStruct {
 		TranslLine thisTL = null;
 		boolean needStop = false;
 		for (Lemma lemma: lemmas) {
-			for (DictEntry de: lemma.dictEntry) {
+			for (DictEntry de: lemma.dictEntries) {
 				if (!needStop) thisDE = de;
 				if (num == cnt) needStop = true;
 				cnt++;
 			}
-			for (TranslLine tl: lemma.translLine) {
+			for (TranslLine tl: lemma.translLines) {
 				if ((!needStop) || (thisTL == null)) thisTL = tl;
 				if (!StrUtils.isEmptyStr(tl.transGroup)) {
 					if (num == cnt) needStop = true;
@@ -123,6 +148,10 @@ public class DicStruct {
 				text = text + "; " + thisTL.transType.trim();
 		}
 		return text;
+	}
+
+	public String getAsJSON() {
+		return ""; // to develop
 	}
 
 }

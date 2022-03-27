@@ -64,7 +64,9 @@
     <string name="mi_book_sort_order_title">By title</string>
     <string name="mi_book_sort_order_title_desc">By title (desc)</string>
     <string name="toggle_dict_once">Toggle dictionary (once)</string>
+    <string name="toggle_dict_once_short">Toggle dic (once)</string>
     <string name="toggle_dict">Toggle dictionary</string>
+    <string name="toggle_dict_short">Toggle dic</string>
     <string name="mi_bookmark_set">Set bookmark</string>
     <string name="mi_bookmark_goto">Go to bookmark</string>
     <string name="mi_goto_page">Go to page</string>
@@ -168,6 +170,7 @@
     <string name="options_app_backlight_screen_eink">Screen backlight brightness - E-Ink method</string>
     <string name="options_app_backlight_screen_default">Default</string>
     <string name="action_backlight_set_default">Set the backlight brightness as in the system</string>
+    <string name="action_backlight_set_default_short">System backlight</string>
     <string name="options_app_tapzones_normal">Tap zone actions</string>
     <string name="options_app_key_actions">Key actions</string>
     <string name="options_app_trackball_disable">Disable trackball</string>
@@ -191,6 +194,7 @@
     <string name="action_go_page">Go to Page</string>
     <string name="action_go_first_page">First page</string>
     <string name="action_go_last_page">Last page</string>
+    <string name="action_go_last_page_short">Last page</string>
     <string name="action_file_browser">Open file</string>
     <string name="action_options">Options</string>
     <string name="action_options_filtered">Options (filtered)</string>
@@ -199,6 +203,7 @@
     <string name="options_app_tap_action_short">Tap action</string>
     <string name="options_app_tap_action_long">Long tap action</string>
     <string name="action_touch_screen_toggle_lock">Lock/unlock touch screen</string>
+    <string name="action_touch_screen_toggle_lock_short">Lock screen</string>
     <string name="action_touch_screen_disabled_toast">Touch screen is locked</string>
     <string name="action_touch_screen_enabled_toast">Touch screen is unlocked</string>
     <string name="action_repeat">(autorepeat)</string>
@@ -227,7 +232,9 @@
     <string name="options_app_double_tap_selection_slowdown">(Slows down the reaction time to single taps)</string>
     <string name="mi_select_text">Select text</string>
     <string name="action_toggle_selection_mode">Toggle selection mode</string>
+    <string name="action_toggle_selection_mode_short">Selection mode</string>
     <string name="action_toggle_inspector_mode">Toggle page inspector mode</string>
+    <string name="action_toggle_inspector_mode_short">Inspector mode</string>
     <string name="action_toggle_selection_mode_off">Selection mode is off</string>
     <string name="action_toggle_selection_mode_on">Selection mode is on. Select text using touch screen.</string>
     <string name="action_toggle_inspector_mode_off">Inspector mode is off</string>
@@ -235,7 +242,9 @@
     <string name="action_go_forward">Forward</string>
     <string name="action_go_back">Back</string>
     <string name="action_toggle_screen_orientation">Toggle screen orientation</string>
+    <string name="action_toggle_screen_orientation_short">Screen orientation</string>
     <string name="action_toggle_fullscreen">Toggle fullscreen</string>
+    <string name="action_toggle_fullscreen_short">Fullscreen</string>
     <string name="action_exit_home_screen">Home screen</string>
     <string name="options_color_r">Red</string>
     <string name="options_color_g">Green</string>
@@ -273,6 +282,7 @@
     <string name="action_zoom_out">Decrease font size</string>
     <string name="options_style_floating_punctuation">Floating punctuation</string>
     <string name="action_toggle_document_styles">Toggle document styles</string>
+    <string name="action_toggle_document_styles_short">Toggle styles</string>
     <string name="options_style_document_embedded_styles">Document embedded styles</string>
     <string name="options_selection_action_same_as_common">Same as \"common\" setting</string>
     <string name="options_selection_action_toolbar">Show selection toolbar</string>
@@ -606,12 +616,14 @@
     <string name="options_css_text_align_left">Left</string>
     <string name="options_css_text_align_right">Right</string>
     <string name="action_switch_settings_profile">Switch profile (long tap to rename)</string>
+    <string name="action_switch_settings_profile_short">Switch profile</string>
     <string name="options_app_settings_icons">Icons in settings</string>
     <string name="options_app_settings_icons_is_custom_color">Set custom icons (only modern icons) and interface text color</string>
     <string name="options_app_settings_icons_custom_color">Custom icons and interface text color</string>
     <string name="mi_text_autoformat_enable">Enable text autoformat</string>
     <string name="mi_text_autoformat_disable">Disable text autoformat</string>
     <string name="action_toggle_text_autoformat">Toggle text autoformat</string>
+    <string name="action_toggle_text_autoformat_short">Text autoformat</string>
     <string name="options_app_key_backlight_off">Turn off key backlight</string>
     <string name="action_chapter_next">Next chapter</string>
     <string name="action_chapter_prev">Previous chapter</string>
@@ -884,8 +896,10 @@
     <string name="force_tts_90sec">"1,5 minutes (after phrase)"</string>
     <string name="force_tts_120sec">"2 minutes (after phrase)"</string>
     <string name="save_settings_to_cloud">Save settings to cloud storage</string>
+    <string name="save_settings_to_cloud_short">Settings to cloud</string>
     <string name="save_settings_to_cloud_v">Save cr3.ini file to cloud storage at KnownReader settings folder</string>
     <string name="load_settings_from_cloud">Restore settings from cloud storage</string>
+    <string name="load_settings_from_cloud_short">Settings from cloud</string>
     <string name="load_settings_from_cloud_v">Restore settings from file cr3.ini located in KnownReader settings folder on cloud storage</string>
     <string name="switched_to_dic">Switched to dictionary</string>
     <string name="next_dict_will_be_2nd">Next dictionary will be the 2nd for one time</string>
@@ -895,6 +909,7 @@
     <string name="success_ext">Successfully completed</string>
     <string name="win_title_conf_file">Choose configuration file</string>
     <string name="save_reading_pos_to_cloud">Save reading position to cloud storage</string>
+    <string name="save_reading_pos_to_cloud_short">Position to cloud</string>
     <string name="dlg_button_delete_word">Delete word</string>
     <string name="dlg_button_pronoun_replace">Pronoun replace (to smb)</string>
     <string name="dlg_button_clear_hist">Clear history</string>
@@ -903,19 +918,27 @@
     <string name="search_hist_will_be_cleared">Search history cleared</string>
     <string name="win_title_reading_pos">Choose reading position</string>
     <string name="load_reading_pos_from_cloud">Restore reading pos from cloud storage</string>
+    <string name="load_reading_pos_from_cloud_short">Position from cloud</string>
     <string name="save_pos_to_cloud_timeout">Autosave reading pos to cloud storage timeout</string>
     <string name="save_pos_timeout">Autosave reading pos timeout</string>
     <string name="save_pos_timeout_speak">Autosave reading pos timeout (when TTS is activated)</string>
     <string name="save_bookmarks_to_cloud">Save bookmarks to cloud storage</string>
+    <string name="save_bookmarks_to_cloud_short">Bookmarks to cloud</string>
     <string name="load_bookmarks_from_cloud">Load bookmarks from cloud storage</string>
+    <string name="load_bookmarks_from_cloud_short">Bookmarks from cloud</string>
     <string name="cloud_menu">Cloud storage menu</string>
+    <string name="cloud_menu_short">Cloud menu</string>
     <string name="save_current_book_to_cloud_ynd">Save book to Yandex.Disk</string>
+    <string name="save_current_book_to_cloud_ynd_short">Book to Y.Disk</string>
     <string name="save_current_book_to_cloud_ynd2">Save opened book to this folder</string>
     <string name="save_current_book_to_cloud_ynd3">Save to this folder:</string>
     <string name="save_current_book_to_cloud_email">Send book via Email</string>
+    <string name="save_current_book_to_cloud_email_short">Send book</string>
     <string name="open_book_from_gd">Open book from Google Drive</string>
     <string name="open_book_from_dbx">Open book from Dropbox</string>
+    <string name="open_book_from_dbx_short2">Open from Dropbox</string>
     <string name="open_book_from_ynd">Open book from Yandex.Disk</string>
+    <string name="open_book_from_ynd_short2">Open from Y.Disk</string>
     <string name="open_book_from_gd_short">Google Drive</string>
     <string name="open_book_from_dbx_short">Dropbox</string>
     <string name="open_book_from_y_short">Yandex</string>
@@ -928,12 +951,15 @@
     <string name="options_app_dict_word_correction">Word correction before dictionary</string>
     <string name="options_app_dict_word_correction_add_info">This option allows you to correct shortened words, before it will be sent to dictionary application, e.g. when you select \"l\"homme\" - it will be transformed to \"homme\", etc.</string>
     <string name="save_bookmark_last_sel">Save bookmark (last selection)</string>
+    <string name="save_bookmark_last_sel_short">Save bookmark</string>
     <string name="save_bookmark_quick">Save quick bookmark</string>
+    <string name="save_bookmark_quick_short">Quick bookmark</string>
     <string name="save_bookmark_last_sel_user_dic">Save user dictionary entry (last selection)</string>
+    <string name="save_bookmark_last_sel_user_dic_short">Save to user dic</string>
     <string name="options_app_dict_longtap_change">Dictionary button action: short/long tap</string>
     <string name="options_app_dict_longtap_change_add_info">There are two different actions on a \"dictionary\" button on \"selection toolbar\" (when you select text while reading) - fired by short and long taps. This option allows to swap them.</string>
     <string name="win_title_user_dic">User dic / cites / search history</string>
-    <string name="win_title_user_dic_short">User dic (cites, ...)</string>
+    <string name="win_title_user_dic_short">User dic / cites ...</string>
     <string name="win_title_citations">Citations</string>
     <string name="dlg_userdic_page">Page</string>
     <string name="dlg_userdic_book">Book</string>
@@ -1226,6 +1252,8 @@
     <string name="convert_to_text_and_open_add_info">Document will be downloaded, converted and saved to text, then opened</string>
     <string name="open_as_html">Open as is (as HTML)</string>
     <string name="open_as_text">Open as text</string>
+    <string name="display_as_html">HTML</string>
+    <string name="display_as_text">Text</string>
     <string name="error_open_as_text">Open as text is not accessible</string>
     <string name="open_as_html_add_info">If \"Open as text\" is chosen - document will be converted to plain text</string>
     <string name="doc_convert_needed">Document conversion needed</string>
@@ -1307,7 +1335,8 @@
     <string name="knownreader_donate_line4">2. Write us on 4pda forum:</string>
     <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
     <string name="with_the_help">With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook, KOReader</string>
-    <string name="options_choose_texture">Chose background pic / texture</string>
+    <string name="options_choose_texture">Choose background pic / texture</string>
+    <string name="options_choose_texture_short">Choose background</string>
     <string name="only_in_pro">This feature is availble in Premium version only</string>
     <string name="only_in_premium">This feature is availble in Premium version only</string>
     <string name="str_yes">yes</string>
@@ -1483,6 +1512,7 @@
     <string name="book_info_genres">Genre(s)</string>
     <string name="including_subgenres">(Including subgenres)</string>
     <string name="action_show_onyx_backlight_system_dialog">Show the system dialog for setting the backlight</string>
+    <string name="action_show_onyx_backlight_system_dialog_short">Backlight dialog</string>
     <string name="online_dic_exceeded">Sorry, online ditionary limit exceeded. Try again later</string>
     <string name="manual_open_error">Error while opening manual</string>
     <string name="ynd_translate_settings">Yandex.Translate</string>
@@ -1525,8 +1555,8 @@
     <string name="migrate_cr_settings_profiles">Profiles count:</string>
     <string name="migrate_cr_settings_q">Are you sure? Current settings will be replaced</string>
     <string name="user_dic_panel0">Disabled</string>
-    <string name="user_dic_panel1">Without scroll (restart needed)</string>
-    <string name="user_dic_panel2">With scroll (restart needed)</string>
+    <string name="user_dic_panel1">Without scroll</string>
+    <string name="user_dic_panel2">With scroll</string>
     <string name="dict_dont_save_if_more">Do not save to dictionary search history if more than words (0 = save anyway)</string>
     <string name="litres_empty_login_or_passw">Litres login or password is not specified - set it up in cloud settings</string>
     <string name="search_books">Search books</string>
@@ -1610,6 +1640,7 @@
     <string name="bmk_send_to">send to...</string>
     <string name="bmk_custom_color">Set color</string>
     <string name="skim_document">Skim over book</string>
+    <string name="skim_document_short">Skim over book</string>
     <string name="skim_document_add_info">Skim over book allows make a quick review of a book - switch chapters, bookmarks, etc.</string>
     <string name="no_pattern">No pattern specified</string>
     <string name="online_combo">Online combo</string>
@@ -1705,6 +1736,7 @@
     <string name="book_is_the_same_marks_set">Destination file is the same, only marks saved</string>
     <string name="book_is_the_same">Destination file is the same, nothing to do</string>
     <string name="book_moved">Book was successfully moved</string>
+    <string name="book_copied_but">Book was successfully copied (but source (or temp) file was not deleted)</string>
     <string name="quick_translation_dirs">Quick translations direction</string>
     <string name="quick_translation_dirs_info">Specify up to 10 quick translation directions (format \"from_lang=to_lang\")</string>
     <string name="online_offline_dics">Online-offline dics conformity</string>
@@ -1896,6 +1928,7 @@
     <string name="add_author_folder">Add author\'s subfolder</string>
     <string name="do_not_move">Do not move</string>
     <string name="offline_dics">Offline dics</string>
+    <string name="dic_article_dlg">Dictionary article</string>
     <string name="found_dics">Found dics</string>
     <string name="imported_dics">Imported dics</string>
     <string name="options_selection_action_toolbar_short">Dictionary panel</string>
@@ -1911,6 +1944,7 @@
     <string name="eink_full_update_method2">Method 2</string>
     <string name="eink_full_update_method3">Method 3</string>
     <string name="exp_feature">Experimental feature</string>
+    <string name="exp_feature_short">Experimental</string>
     <string name="exp_feature_add_info">This feature is being developed right now - use it only if you are active tester</string>
     <string name="click_to_restore">Click to restore settings</string>
     <string name="click_to_restore_warn">Proceed to restore settings? This cannot be undone!</string>

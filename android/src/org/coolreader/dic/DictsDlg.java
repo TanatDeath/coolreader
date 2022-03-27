@@ -324,7 +324,7 @@ public class DictsDlg extends BaseDialog {
 
 	public DictsDlg(CoolReader activity, ReaderView readerView, String search_text, View view, boolean dontClose)
 	{
-		super("DictsDlg", activity, activity.getResources().getString(R.string.win_title_dicts), true, true);
+		super(activity, activity.getResources().getString(R.string.win_title_dicts), true, true);
 		mInflater = LayoutInflater.from(getContext());
 		mSearchText = StrUtils.updateText(search_text.trim(),false);
 		mCoolReader = activity;

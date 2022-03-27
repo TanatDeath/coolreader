@@ -103,9 +103,12 @@ public class LitresPerformAction {
             (StrUtils.isEmptyStr(mCoolReader.litresCloudSettings.login)) ||
             (StrUtils.isEmptyStr(mCoolReader.litresCloudSettings.passw))
         ) {
-            BackgroundThread.instance().postBackground(() ->
+            if (mCoolReader.activityIsRunning)
+                BackgroundThread.instance().postBackground(() ->
                     BackgroundThread.instance().postGUI(() ->
-            mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) + ": " + mCoolReader.getString(R.string.litres_empty_login_or_passw), 100)));
+                        mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) +
+                                (mCoolReader.activityIsRunning? "": " (not running)") +
+                                ": " + mCoolReader.getString(R.string.litres_empty_login_or_passw), 100)));
             if (progressDlg != null)
                 if (progressDlg.isShowing()) progressDlg.dismiss();
             return;

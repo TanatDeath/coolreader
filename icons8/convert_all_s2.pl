@@ -11,7 +11,8 @@ my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
 my %ic_smaller_list=(
-        'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png'
+        'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png',
+        'icons8_visible.svg' => 'icons8_visible.png'
 );
 
 my %ic_actions_list=(

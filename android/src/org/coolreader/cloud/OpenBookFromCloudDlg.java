@@ -654,7 +654,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 	public OpenBookFromCloudDlg(final CoolReader activity,
 								List<com.dropbox.core.v2.files.Metadata> lfr)
 	{
-		super("OpenBookFromCloudDlg", activity, activity.getResources().getString(R.string.win_title_open_book_from_cloud)
+		super(activity, activity.getResources().getString(R.string.win_title_open_book_from_cloud)
 				+" - DropBox", false, true);
 		View v = initCommon(activity);
 		BaseListView blv = initForDBX(lfr);
@@ -667,7 +667,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 
 	public OpenBookFromCloudDlg(final CoolReader activity, YNDListFiles lfr, FileInfo bookToS, String homeFolder)
 	{
-		super("OpenBookFromCloudDlg", activity, activity.getResources().getString(R.string.win_title_open_book_from_cloud)
+		super(activity, activity.getResources().getString(R.string.win_title_open_book_from_cloud)
 				+" - Yandex", false, true);
 		bookToSave = bookToS;
 		View v = initCommon(activity);

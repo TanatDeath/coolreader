@@ -2,6 +2,7 @@ package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import android.app.Dialog;
@@ -63,14 +64,26 @@ public class BaseDialog extends Dialog {
 	}
 	
 	public static final boolean DARK_THEME = !DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink());
-	public BaseDialog(String dlgName, BaseActivity activity )
+	public BaseDialog(String dlgName, BaseActivity activity)
 	{
 		this(dlgName, activity, "", false, false );
 	}
+
+	public BaseDialog(BaseActivity activity)
+	{
+		this("", activity, "", false, false );
+	}
+
 	public BaseDialog(String dlgName, BaseActivity activity, String title, boolean showNegativeButton, boolean windowed )
 	{
-		this(dlgName, activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed );
+		this(dlgName, activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed);
 	}
+
+	public BaseDialog(BaseActivity activity, String title, boolean showNegativeButton, boolean windowed )
+	{
+		this("", activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed);
+	}
+
 	public BaseDialog(String dlgName, BaseActivity activity, String title, boolean showNegativeButton, boolean fullscreen, boolean dark, boolean windowed )
 	{
 		//super(activity, fullscreen ? R.style.Dialog_Fullscreen : R.style.Dialog_Normal);
@@ -88,6 +101,7 @@ public class BaseDialog extends Dialog {
 		this.title = title;
 		this.needCancelButton = showNegativeButton;
 		this.dlgName = dlgName;
+		if (StrUtils.isEmptyStr(dlgName)) this.dlgName = this.getClass().getName();
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 //		requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {

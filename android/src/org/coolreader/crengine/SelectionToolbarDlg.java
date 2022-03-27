@@ -65,7 +65,9 @@ public class SelectionToolbarDlg {
 	int alphaVal;
 	int [] location = new int[2];
 	int popupY;
+	boolean isInvisible;
 	//buttons
+	ImageButton btnVisible;
 	ImageButton btnSelectionBookmark;
 	ImageButton btnSelectionCopy;
 	ImageButton btnSelectionDict;
@@ -497,6 +499,30 @@ public class SelectionToolbarDlg {
 		if ((addButtonEnabled) && (!mIsShort)) toggleAddButtons(true);
 		initRecentDics();
 		// set up buttons
+		btnVisible = llMiddleContents.findViewById(R.id.btn_visible);
+		btnVisible.setOnClickListener(v -> {
+			isInvisible = !isInvisible;
+			if (llRecentDics != null) llRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llAddButtons != null) llAddButtons.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llButtonsRow != null) llButtonsRow.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llButtonsRow2 != null) llButtonsRow2.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llSliderTop != null) llSliderTop.setVisibility(View.VISIBLE);
+			if (llSliderBottom != null) llSliderBottom.setVisibility(View.VISIBLE);
+		});
+		btnVisible.setOnLongClickListener(v -> {
+			isInvisible = !isInvisible;
+			if (llRecentDics != null) llRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llAddButtons != null) llAddButtons.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llButtonsRow != null) llButtonsRow.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llButtonsRow2 != null) llButtonsRow2.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llSliderTop != null) llSliderTop.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (llSliderBottom != null) llSliderBottom.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			return true;
+		});
+		ColorDrawable colorButtons130 = new ColorDrawable(colorGrayC);
+		colorButtons130.setAlpha(130);
+		btnVisible.setBackground(colorButtons130);
+		if (isEInk) Utils.setBtnBackground(btnVisible, null, isEInk);
 		btnSelectionBookmark = llButtonsRow.findViewById(R.id.btn_quick_bookmark);
 		if (btnSelectionBookmark != null)
 			btnSelectionBookmark.setBackground(colorButtons);

@@ -97,12 +97,12 @@ public class TurengTranslate {
 								DictEntry de = new DictEntry();
 								de.dictLinkText = StrUtils.getNonEmptyStr(val1, true);
 								de.tagType = StrUtils.getNonEmptyStr(lang1, true);
-								lemma.dictEntry.add(de);
+								lemma.dictEntries.add(de);
 								TranslLine tl = new TranslLine();
 								tl.transText = StrUtils.getNonEmptyStr(val2, true);
 								tl.transGroup = categ;
 								tl.transType = lang2;
-								lemma.translLine.add(tl);
+								lemma.translLines.add(tl);
 								dsl.lemmas.add(lemma);
 								sTitle = sTitle + "; " + val1 +
 										(StrUtils.isEmptyStr(lang1)?"": ("(" + lang1 + ") = "))

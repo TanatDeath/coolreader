@@ -29,7 +29,7 @@ public class DocConvertDialog extends BaseDialog {
 
 	public DocConvertDialog(CoolReader activity, String fileToOpen)
 	{
-		super("DocConvertDialog", activity, activity.getString(R.string.doc_convert_needed), false, true);
+		super(activity, activity.getString(R.string.doc_convert_needed), false, true);
 		this.fileToOpen = fileToOpen;
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);

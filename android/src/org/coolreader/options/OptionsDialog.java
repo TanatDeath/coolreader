@@ -1114,13 +1114,13 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 
 	public OptionsDialog(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles, TTSControlBinder ttsbinder) {
-		super("OptionsDialog", activity, null, false, false);
+		super(activity, null, false, false);
 		init(activity, mode, readerView, fontFaces, fontFacesFiles, ttsbinder, null);
 	}
 
 	public OptionsDialog(BaseActivity activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles,
 						 TTSControlBinder ttsbinder, TTSControlServiceAccessor ttscontrol) {
-		super("OptionsDialog", activity, null, false, false);
+		super(activity, null, false, false);
 		init(activity, mode, readerView, fontFaces, fontFacesFiles, ttsbinder, ttscontrol);
 	}
 

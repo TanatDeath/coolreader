@@ -371,7 +371,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 
 	public ChooseReadingPosDlg(CoolReader activity, File[] matchingFiles)
 	{
-		super("ChooseReadingPosDlg", activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
+		super(activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
 		mMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
 		CloudSync.readKnownDevices(activity);
@@ -427,7 +427,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 
 	public ChooseReadingPosDlg(CoolReader activity, YNDListFiles matchingFiles)
 	{
-		super("ChooseReadingPosDlg", activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
+		super(activity, activity.getResources().getString(R.string.win_title_reading_pos), false, true);
 		mYMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_YANDEX;
 		//mThis = this; // for inner classes

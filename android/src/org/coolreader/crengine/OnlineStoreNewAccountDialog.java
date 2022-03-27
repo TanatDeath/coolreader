@@ -26,7 +26,7 @@ public class OnlineStoreNewAccountDialog extends BaseDialog {
 	private Runnable mOnLoginHandler;
 	public OnlineStoreNewAccountDialog(BaseActivity activity, OnlineStoreWrapper plugin, Runnable onLoginHandler)
 	{
-		super("OnlineStoreNewAccountDialog", activity, null, false, false);
+		super(activity, null, false, false);
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mActivity = activity;

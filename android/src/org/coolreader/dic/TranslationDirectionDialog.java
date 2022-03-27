@@ -396,7 +396,7 @@ public class TranslationDirectionDialog extends BaseDialog {
 	public TranslationDirectionDialog(CoolReader activity, String sTitle, String sSomeText, int iType,
 									  ArrayList<String[]> askValues, ValuesEnteredCallback callback)
 	{
-		super("TranslationDirectionDialog", activity, sTitle, true, false);
+		super(activity, sTitle, true, false);
 		mCoolReader = activity;
 		setTitle(sTitle);
 		this.callback = callback;

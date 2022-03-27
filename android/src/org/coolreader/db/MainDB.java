@@ -4721,11 +4721,12 @@ public class MainDB extends BaseDB {
 						Lemma le = new Lemma();
 						DictEntry de = new DictEntry();
 						de.dictLinkText = rs.getString(1);
-						le.dictEntry.add(de);
+						le.dictEntries.add(de);
 						TranslLine translLine = new TranslLine();
 						translLine.transText = Utils.cleanupHtmlTags(rs.getString(2));
+						translLine.transTextHTML = rs.getString(2);
 						translLine.transGroup = sdil.dicName;
-						le.translLine.add(translLine);
+						le.translLines.add(translLine);
 						dsl.lemmas.add(le);
 					} while (rs.moveToNext());
 				}
@@ -4736,22 +4737,30 @@ public class MainDB extends BaseDB {
 		if (((sdil.dslExists) || (sdil.dslDzExists)) && (sdil.dslDic != null) && (sdil.idxExists)) {
 			try {
 				PlainDslVisitor plainDslVisitor = new PlainDslVisitor();
-				//HtmlDslVisitor htmlDslVisitor = new HtmlDslVisitor();
+				HtmlDslVisitor htmlDslVisitor = new HtmlDslVisitor();
 				DslResult dslResult;
 				if (extended)
 					dslResult = sdil.dslDic.lookupPredictive(searchStr);
 				else
 					dslResult = sdil.dslDic.lookup(searchStr);
-				for (Map.Entry<String, String> entry : dslResult.getEntries(plainDslVisitor)) {
+				for (Map.Entry<String, String> entry: dslResult.getEntries(plainDslVisitor)) {
 					Lemma le = new Lemma();
 					DictEntry de = new DictEntry();
 					de.dictLinkText = entry.getKey();
-					le.dictEntry.add(de);
+					le.dictEntries.add(de);
 					TranslLine translLine = new TranslLine();
 					translLine.transText = entry.getValue();
 					translLine.transGroup = sdil.dicName;
-					le.translLine.add(translLine);
+					le.translLines.add(translLine);
 					dsl.lemmas.add(le);
+				}
+				int i = 0;
+				for (Map.Entry<String, String> entry: dslResult.getEntries(htmlDslVisitor)) {
+					Lemma le = dsl.lemmas.get(i);
+					if (le != null) {
+						le.translLines.get(0).transTextHTML = entry.getValue();
+					}
+					i++;
 				}
 			} catch (Exception e) {
 				log.w("Dictionary lookup failed: " + sdil.dicPath + "\n" + e.getMessage());
@@ -4769,7 +4778,7 @@ public class MainDB extends BaseDB {
 			File f = new File(tDirs1.get(0) + "/dic_conf.json");
 			if (!f.exists()) return dsl;
 			long newLastMod = f.lastModified();
-			if (newLastMod != lastMod) {
+			if ((newLastMod != lastMod) || (offlineDictInfoList == null)) {
 				closeAllDics();
 				if (offlineDictInfoList != null)
 					for (OfflineDicInfo odi: offlineDictInfoList) {

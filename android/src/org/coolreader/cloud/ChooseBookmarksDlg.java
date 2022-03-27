@@ -292,7 +292,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 	public ChooseBookmarksDlg(CoolReader activity, File[] matchingFiles)
 	{
-		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		super(activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
 		mMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
 		CloudSync.readKnownDevices(activity);
@@ -331,7 +331,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 
 	public ChooseBookmarksDlg(CoolReader activity, YNDListFiles matchingFiles)
 	{
-		super("ChooseBookmarksDlg", activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
+		super(activity, activity.getResources().getString(R.string.win_title_bookmarks), false, true);
 		mYMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_YANDEX;
 		//mThis = this; // for inner classes

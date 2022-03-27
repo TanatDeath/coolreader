@@ -335,7 +335,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private int currentSettingsLastInd = -1;
 
 	private boolean justCreated = false;
-	private boolean activityIsRunning = false;
+	public boolean activityIsRunning = false;
 	private boolean isInterfaceCreated = false;
 
 	private boolean dataDirIsRemoved = false;
@@ -1450,7 +1450,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 
 		for (ReaderAction ra: ReaderAction.AVAILABLE_ACTIONS) {
-			String acname = "org.knownreder." + StrUtils.getNonEmptyStr(ra.id, true);
+			String acname = "org.knownreder.cmd." + StrUtils.getNonEmptyStr(ra.id, true);
 			if (acname.equals(intentAction)) {
 				mReaderView.onCommand(ra.cmd, ra.param, null);
 				return true;
@@ -1988,7 +1988,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 				showRootWindow();
 				setSystemUiVisibility();
-				//asdf
 				notifySettingsChanged();
 				// prevent if background was set temporarily
 				if (settings() != null) {
@@ -3893,8 +3892,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					}
 				if (ei.links != null)
 					for (OPDSUtil.LinkInfo li:  ei.links) {
-						itemsAll.add(new BookInfoEntry((StrUtils.isEmptyStr(li.title)?getString(R.string.link):li.title),
-								li.href, "link:"+StrUtils.getNonEmptyStr(li.type,true)));
+						boolean found = false;
+						for (BookInfoEntry bie: itemsAll) {
+							if (
+									(StrUtils.getNonEmptyStr(bie.infoTitle, true).equals((
+											StrUtils.isEmptyStr(li.title)?getString(R.string.link):li.title))) &&
+									(StrUtils.getNonEmptyStr(bie.infoValue, true).equals(li.href)) &&
+									(StrUtils.getNonEmptyStr(bie.infoType, true).equals((
+											"link:"+StrUtils.getNonEmptyStr(li.type,true))))
+							) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) itemsAll.add(new BookInfoEntry((StrUtils.isEmptyStr(li.title)?getString(R.string.link):li.title),
+							li.href, "link:"+StrUtils.getNonEmptyStr(li.type,true)));
 					}
 				if (ei.otherElements != null) {
 					for (Map.Entry<String, String> entry : ei.otherElements.entrySet()) {

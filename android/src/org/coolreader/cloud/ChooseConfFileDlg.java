@@ -288,7 +288,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 
 	public ChooseConfFileDlg(CoolReader activity, File[] matchingFilesInfo, File[] matchingFiles)
 	{
-		super("ChooseConfFileDlg", activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
+		super(activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
 		mMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_FILESYSTEM;
 		//mThis = this; // for inner classes
@@ -341,7 +341,7 @@ public class ChooseConfFileDlg extends BaseDialog {
 
 	public ChooseConfFileDlg(CoolReader activity, YNDListFiles matchingFiles)
 	{
-		super("ChooseConfFileDlg", activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
+		super(activity, activity.getResources().getString(R.string.win_title_conf_file), false, true);
 		mYMatchingFiles = matchingFiles;
 		cloudMode = Settings.CLOUD_SYNC_VARIANT_YANDEX;
 		//mThis = this; // for inner classes

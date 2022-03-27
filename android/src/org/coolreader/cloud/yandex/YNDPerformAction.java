@@ -448,8 +448,11 @@ public class YNDPerformAction {
                 }
             });
         } else {
-            BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error)+" - "+mCoolReader.getString(R.string.cloud_download_error)), 200));
+            if (mCoolReader.activityIsRunning)
+                BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+                    mCoolReader.showToast(mCoolReader.getString(R.string.cloud_error) +
+                        (mCoolReader.activityIsRunning? "": " (not running)") +
+                        " - "+mCoolReader.getString(R.string.cloud_download_error)), 200));
         }
     }
 

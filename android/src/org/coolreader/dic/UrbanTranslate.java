@@ -86,9 +86,9 @@ public class UrbanTranslate {
 						DictEntry de = new DictEntry();
 						de.dictLinkText = StrUtils.getNonEmptyStr(sWord, true);
 						de.tagType = StrUtils.getNonEmptyStr(sContributor, true);
-						lemma.dictEntry.add(de);
+						lemma.dictEntries.add(de);
 						tl.transText = StrUtils.getNonEmptyStr(sMeaning, true);
-						lemma.translLine.add(tl);
+						lemma.translLines.add(tl);
 						dsl.lemmas.add(lemma);
 					}
 					if (StrUtils.getNonEmptyStr(sTitle, true).startsWith("; "))

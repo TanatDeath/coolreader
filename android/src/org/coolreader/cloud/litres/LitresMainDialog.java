@@ -447,7 +447,7 @@ public class LitresMainDialog extends BaseDialog {
 
 	public LitresMainDialog(CoolReader activity, LitresSearchParams lastLsp)
 	{
-		super("LitresMainDialog", activity, activity.getString( R.string.litres_main), true, false);
+		super(activity, activity.getString( R.string.litres_main), true, false);
 		mCoolReader = activity;
 		LitresConfig.init(mCoolReader);
 		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]

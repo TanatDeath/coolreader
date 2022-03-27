@@ -56,7 +56,7 @@ public class LitresCredentialsDialog extends BaseDialog {
 
 	public LitresCredentialsDialog(CoolReader activity)
 	{
-		super("LitresCredentialsDialog", activity, activity.getString( R.string.litres_credentials), true, false);
+		super(activity, activity.getString( R.string.litres_credentials), true, false);
 		mCoolReader = activity;
 		LitresConfig.init(mCoolReader);
 		setTitle(mCoolReader.getString(R.string.litres_credentials));
@@ -119,8 +119,11 @@ public class LitresCredentialsDialog extends BaseDialog {
 						if (le != null)
 							if (!StrUtils.isEmptyStr(le.errorCode)) {
 								LitresError finalLe = le;
-								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-											activity.showToast(activity.getString(R.string.cloud_error) + ": " + finalLe.errorCode + " " + finalLe.errorText);
+								if (activity.activityIsRunning)
+									BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+											activity.showToast(activity.getString(R.string.cloud_error) +
+													(activity.activityIsRunning? "": " (not running)") +
+													": " + finalLe.errorCode + " " + finalLe.errorText);
 										}));
 								LitresConfig.needReAuth = true;
 							}
@@ -129,14 +132,19 @@ public class LitresCredentialsDialog extends BaseDialog {
 								if (LitresJsons.parse_w_create_sid(uniqueID, activity, sBody))
 									saveLitresCreds();
 							} catch (Exception e) {
-								activity.showToast(activity.getString(R.string.cloud_error) + ": " + sBody);
+								if (activity.activityIsRunning)
+									activity.showToast(activity.getString(R.string.cloud_error) +
+										(activity.activityIsRunning? "": " (not running)") + ": " + sBody);
 							}
 						}, 100));
 					}
 					public void onFailure(Call call, IOException e) {
-						BackgroundThread.instance().postBackground(() ->
+						if (activity.activityIsRunning)
+							BackgroundThread.instance().postBackground(() ->
 								BackgroundThread.instance().postGUI(() ->
-										activity.showToast(activity.getString(R.string.cloud_error) + ": " + e.getMessage()), 100));
+									activity.showToast(activity.getString(R.string.cloud_error) +
+										(activity.activityIsRunning? "": " (not running)") +
+										": " + e.getMessage()), 100));
 					}
 				});
 			} catch (Exception e) {

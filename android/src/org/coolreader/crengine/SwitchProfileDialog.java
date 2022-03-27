@@ -39,7 +39,7 @@ import java.util.ArrayList;
 
 	public SwitchProfileDialog(CoolReader coolReader, ReaderView readerView, OptionsDialog od)
 	{
-		super("SwitchProfileDialog", coolReader, coolReader.getResources().getString(R.string.action_switch_settings_profile), false, false);
+		super(coolReader, coolReader.getResources().getString(R.string.action_switch_settings_profile), false, false);
 		for (int i = 0; i < 7; i++)
 			profileNames[i] = coolReader.getString(R.string.profile)+" "+(i+1);
 		setCancelable(true);

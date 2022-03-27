@@ -1495,7 +1495,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 							}
 						}
 						ArrayList<FileInfo> itemsE = new ArrayList<>();
-						for ( EntryInfo entry : entries ) {
+						for (EntryInfo entry : entries) {
 							OPDSUtil.LinkInfo acquisition = entry.getBestAcquisitionLink();
 							if (acquisition != null) {
 								final FileInfo file = new FileInfo();

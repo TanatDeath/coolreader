@@ -68,7 +68,7 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 	}
 
 	public CalibreCatalogEditDialog(CoolReader activity, FileInfo item, Runnable onUpdate) {
-		super("CalibreCatalogEditDialog", activity, activity.getString((item.id == null) ? R.string.dlg_catalog_add_title
+		super(activity, activity.getString((item.id == null) ? R.string.dlg_catalog_add_title
 				: R.string.dlg_calibre_catalog_edit_title), true,
 				false);
 		mCoolReader = activity;

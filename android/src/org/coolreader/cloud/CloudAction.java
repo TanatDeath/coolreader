@@ -191,9 +191,11 @@ public class CloudAction {
         Log.e(e.getClass().getName(), "Cloud operation error: "+res, e);
         final CoolReader crf = cr;
         final String resf = res;
-        BackgroundThread.instance().postGUI(() -> {
-            if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf,true);
-        }, 200);
+        if (crf.activityIsRunning)
+            BackgroundThread.instance().postGUI(() -> {
+                if (crf!=null) crf.showCloudToast(crf.getString(R.string.cloud_error) +
+                        (crf.activityIsRunning? "": " (not running)") + ": "+resf,true);
+            }, 200);
     }
 
     public static void onDBXListFolderResultThenOpenDlg(CoolReader cr,
@@ -244,7 +246,10 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    " "+e.getClass().toString()+" "+e.getMessage(),true);
             System.out.println("DBBOX err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -311,9 +316,12 @@ public class CloudAction {
             else Log.e(e.getClass().getName(), "Cloud operation error: "+res, e);
         final CoolReader crf = cr;
         final String resf = res;
-        if (!a.mCurAction.mErrorQuiet)
+        if ((!a.mCurAction.mErrorQuiet) && (crf.activityIsRunning))
             BackgroundThread.instance().postGUI(() -> {
-                if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf, true);
+                if (crf!=null)
+                    if (crf.activityIsRunning)
+                        crf.showCloudToast(crf.getString(R.string.cloud_error) +
+                        (crf.activityIsRunning? "": " (not running)") + ": "+resf, true);
             }, 200);
     }
 
@@ -343,7 +351,9 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error)+
+                    (cr.activityIsRunning? "": " (not running)") + " " + e.getClass() + " " + e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -376,7 +386,10 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") + " " +
+                    e.getClass() + " " + e.getMessage(),true);
             System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
         }
     }
@@ -472,9 +485,11 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            if (!bErrorQuiet)
-                cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+            if ((!bErrorQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                        (cr.activityIsRunning? "": " (not running)") +
+                        " " + e.getClass() + " " + e.getMessage(),true);
+            System.out.println("YND err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -569,8 +584,11 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("DBBOX err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("DBBOX err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -615,8 +633,10 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            //System.out.println("DBBOX err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
         }
     }
 
@@ -642,8 +662,11 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") + " " +
+                    e.getClass() + " "+e.getMessage(),true);
+            //System.out.println("YND err:" + e.getClass() + " "+e.getMessage());
         }
     }
 
@@ -685,8 +708,11 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("YND err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -737,8 +763,11 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("YND err:"+ e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -747,7 +776,10 @@ public class CloudAction {
 
         final ReaderView rv = cr.getReaderView();
         if ((rv == null)&&(bi == null)) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error) + ": book was not found",true);
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": book was not found",true);
             return;
         }
         try {
@@ -839,7 +871,10 @@ public class CloudAction {
                                         if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.settings_were_restored));
                                         cr.finish();
                                     } else {
-                                        if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+ cr.getString(R.string.settings_restore_error), true);
+                                        if (cr.activityIsRunning)
+                                            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                                                (cr.activityIsRunning? "": " (not running)") +
+                                                ": "+ cr.getString(R.string.settings_restore_error), true);
                                         cr.finish();
                                     }
                                 }
@@ -857,8 +892,11 @@ public class CloudAction {
             });
             a.DoNextAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("YND err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -889,8 +927,11 @@ public class CloudAction {
                 a.DoNextAction();
             }
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("YND err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " "+e.getMessage(),true);
+            System.out.println("YND err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -907,7 +948,10 @@ public class CloudAction {
         LitresConfig.needReAuth = false;
         if (le != null)
             if (!StrUtils.isEmptyStr(le.errorCode)) {
-                cr.showToast(cr.getString(R.string.cloud_error)+": " + le.errorCode + " " + le.errorText);
+                if (cr.activityIsRunning)
+                    cr.showToast(cr.getString(R.string.cloud_error) +
+                        (cr.activityIsRunning? "": " (not running)") +
+                        ": " + le.errorCode + " " + le.errorText);
                 LitresConfig.needReAuth = true;
             }
         if (a.mCurAction.action == LITRES_GET_GENRE_LIST) {
@@ -920,7 +964,10 @@ public class CloudAction {
                     if (LitresPerformAction.progressDlg != null)
                         if (LitresPerformAction.progressDlg.isShowing())
                             LitresPerformAction.progressDlg.dismiss();
-                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                    if (cr.activityIsRunning)
+                        cr.showToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": " + e.getLocalizedMessage());
                 });
             }
             callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_GENRE_GROUP_PREFIX);
@@ -935,7 +982,10 @@ public class CloudAction {
                     if (LitresPerformAction.progressDlg != null)
                         if (LitresPerformAction.progressDlg.isShowing())
                             LitresPerformAction.progressDlg.dismiss();
-                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                    if (cr.activityIsRunning)
+                        cr.showToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": " + e.getLocalizedMessage());
                 });
             }
             callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_BOOKS_GROUP_PREFIX);
@@ -950,7 +1000,10 @@ public class CloudAction {
                     if (LitresPerformAction.progressDlg != null)
                         if (LitresPerformAction.progressDlg.isShowing())
                             LitresPerformAction.progressDlg.dismiss();
-                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                    if (cr.activityIsRunning)
+                        cr.showToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": " + e.getLocalizedMessage());
                 });
             }
             callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_PERSON_GROUP_PREFIX);
@@ -965,7 +1018,9 @@ public class CloudAction {
                     if (LitresPerformAction.progressDlg != null)
                         if (LitresPerformAction.progressDlg.isShowing())
                             LitresPerformAction.progressDlg.dismiss();
-                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                    if (cr.activityIsRunning)
+                        cr.showToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") + ": " + e.getLocalizedMessage());
                 });
             }
             callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_COLLECTION_PREFIX);
@@ -980,7 +1035,10 @@ public class CloudAction {
                     if (LitresPerformAction.progressDlg != null)
                         if (LitresPerformAction.progressDlg.isShowing())
                             LitresPerformAction.progressDlg.dismiss();
-                    cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                    if (cr.activityIsRunning)
+                        cr.showToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": " + e.getLocalizedMessage());
                 });
             }
             callback.onFileInfoListLoaded(arrFi, FileInfo.LITRES_SEQUENCE_PREFIX);
@@ -999,7 +1057,10 @@ public class CloudAction {
                         if (LitresPerformAction.progressDlg != null)
                             if (LitresPerformAction.progressDlg.isShowing())
                                 LitresPerformAction.progressDlg.dismiss();
-                        cr.showToast(cr.getString(R.string.cloud_error)+": " + e.getLocalizedMessage());
+                        if (cr.activityIsRunning)
+                            cr.showToast(cr.getString(R.string.cloud_error) +
+                                (cr.activityIsRunning? "": " (not running)") +
+                                ": " + e.getLocalizedMessage());
                     });
                 }
             }
@@ -1016,7 +1077,10 @@ public class CloudAction {
         final CoolReader crf = cr;
         final String resf = res;
         BackgroundThread.instance().postGUI(() -> {
-            if (crf!=null) crf.showCloudToast(cr.getString(R.string.cloud_error)+": "+resf,true);
+            if (crf!=null)
+                if (crf.activityIsRunning)
+                    crf.showCloudToast(crf.getString(R.string.cloud_error) +
+                    (crf.activityIsRunning? "": " (not running)") + ": "+resf,true);
             if (LitresPerformAction.progressDlg != null)
                 if (LitresPerformAction.progressDlg.isShowing()) LitresPerformAction.progressDlg.dismiss();
         }, 200);
@@ -1060,8 +1124,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresGetProfile err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    " " + e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresGetProfile err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1085,8 +1152,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresPutMoneyOnAccount err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresPutMoneyOnAccount err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1111,8 +1181,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresGetGenreList err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresGetGenreList err:" + e.getClass() + " "+e.getMessage());
         }
     }
 
@@ -1137,8 +1210,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresGetCollectionList err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresGetCollectionList err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1163,8 +1239,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresGetSequenceList err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresGetSequenceList err:"+ e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1189,8 +1268,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresSearchPersonsList err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " "+e.getMessage(),true);
+            System.out.println("LITRES litresSearchPersonsList err:"+ e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1216,8 +1298,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresSearchBooks err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresSearchBooks err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1238,7 +1323,10 @@ public class CloudAction {
                         try {
                             lpi = LitresJsons.parse_w_buy_arts(a.mCurAction.param2, cr, (String) o);
                         } catch (Exception e) {
-                            cr.showCloudToast(cr.getString(R.string.cloud_error)+": "+e.getMessage(),true);
+                            if (cr.activityIsRunning)
+                                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                                    (cr.activityIsRunning? "": " (not running)") +
+                                    ": " + e.getMessage(),true);
                             Log.e("LITRES", e.getMessage());
                         }
                         if ((a.mCurAction.mBookInfoDialog != null) && (lpi != null))
@@ -1259,8 +1347,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresPurchaseBook err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresPurchaseBook err:" + e.getClass() + " " + e.getMessage());
         }
     }
 
@@ -1298,8 +1389,11 @@ public class CloudAction {
             });
             a.DoFirstAction();
         } catch (Exception e) {
-            cr.showCloudToast(cr.getString(R.string.cloud_error)+" "+e.getClass().toString()+" "+e.getMessage(),true);
-            System.out.println("LITRES litresDownloadBook err:"+ e.getClass().toString()+" "+e.getMessage());
+            if (cr.activityIsRunning)
+                cr.showCloudToast(cr.getString(R.string.cloud_error) + " " +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    e.getClass() + " " + e.getMessage(),true);
+            System.out.println("LITRES litresDownloadBook err:" + e.getClass() + " "+e.getMessage());
         }
     }
 }

@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import android.content.Context;
 
 import org.coolreader.R;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 public enum DocumentFormat {
@@ -14,7 +15,7 @@ public enum DocumentFormat {
 			new String[] {}),// doc_format_none,
 	FB2("fb2.css", R.raw.fb2, R.drawable.icons8_fb2, true, true, 12,
 			new String[] {".fb2", ".fb2.zip"},
-			new String[] {"application/fb2+zip", "text/fb2+xml"}), // doc_format_fb2,
+			new String[] {"application/fb2+zip", "text/fb2+xml", "application/fb2"}), // doc_format_fb2,
 	FB3("fb3.css", R.raw.fb3, R.drawable.cr3_browser_book_fb3, true, true, 11,
 			new String[] {".fb3", ".fb3.zip" },
 			new String[] {"application/fb3"}), // doc_format_fb3,
@@ -26,7 +27,7 @@ public enum DocumentFormat {
 			new String[] {}), // doc_format_rtf,
 	EPUB("epub.css", R.raw.epub, R.drawable.icons8_epub_1, true, true, 10,
 			new String[] {".epub"},
-			new String[] {"application/epub+zip"}),// doc_format_epub,
+			new String[] {"application/epub+zip", "application/epub"}),// doc_format_epub,
 	HTML("htm.css", R.raw.htm, R.drawable.cr3_browser_book_html, false, false, 9,
 			new String[] {".htm", ".html", ".shtml", ".xhtml"},
 			new String[] {"text/html"}),// doc_format_html,
@@ -133,19 +134,20 @@ public enum DocumentFormat {
 		return null;
 	}
 	
-	public boolean matchExtension( String filename )
+	public boolean matchExtension(String filename)
 	{
-		for ( String ext : extensions )
-			if ( filename.endsWith(ext) )
+		for (String ext : extensions)
+			if (filename.endsWith(ext))
 				return true;
 		return false;
 	}
 	
-	public boolean matchMimeType( String type )
+	public boolean matchMimeType(String type)
 	{
-		for ( String s : mimeFormats ) {
-			if ( type.equals(s) || type.startsWith(s+";"))
-				return true;
+		for (String s : mimeFormats) {
+			if (!StrUtils.isEmptyStr(s))
+				if ( type.equals(s) || type.startsWith(s+";"))
+					return true;
 		}
 		return false;
 	}

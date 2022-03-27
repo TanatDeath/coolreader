@@ -1,6 +1,7 @@
 package org.coolreader.options;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,8 +40,10 @@ public class TapZoneOption extends SubmenuOption {
 		mReaderView = ((CoolReader) mActivity).getmReaderView();
 		screenWidth = mActivity.getWindowManager().getDefaultDisplay().getWidth();
 		ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
-		for ( ReaderAction a : actions )
+		for (ReaderAction a : actions) {
+			Log.i("TAG", "TapZoneOption: " + a.id);
 			this.updateFilteredMark(a.id, mActivity.getString(a.nameId), mActivity.getString(a.addInfoR));
+		}
 	}
 	View grid;
 	private void initTapZone(View view, final int tapZoneId)

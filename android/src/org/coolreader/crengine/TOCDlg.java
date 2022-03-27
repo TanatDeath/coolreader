@@ -190,7 +190,7 @@ public class TOCDlg extends BaseDialog {
 
 	public TOCDlg(BaseActivity coolReader, ReaderView readerView, TOCItem toc, int currentPage )
 	{
-		super("TOCDlg", coolReader, coolReader.getResources().getString(R.string.win_title_toc), false, false);
+		super(coolReader, coolReader.getResources().getString(R.string.win_title_toc), false, false);
         setCancelable(true);
 //		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;

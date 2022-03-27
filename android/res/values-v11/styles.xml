@@ -258,6 +258,7 @@
         <item name="attr_icons8_brightness_up">@drawable/icons8_brightness_up</item>
         <item name="attr_icons8_brightness_warm_down">@drawable/icons8_brightness_warm_down</item>
         <item name="attr_icons8_brightness_warm_up">@drawable/icons8_brightness_warm_up</item>
+        <item name="attr_icons8_visible">@drawable/icons8_visible</item>
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
@@ -687,6 +688,7 @@
         <item name="attr_icons8_brightness_up">@drawable/icons8_brightness_up</item>
         <item name="attr_icons8_brightness_warm_down">@drawable/icons8_brightness_warm_down</item>
         <item name="attr_icons8_brightness_warm_up">@drawable/icons8_brightness_warm_up</item>
+        <item name="attr_icons8_visible">@drawable/icons8_visible</item>
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
@@ -1101,6 +1103,7 @@
         <item name="attr_icons8_brightness_up">@drawable/icons8_brightness_up</item>
         <item name="attr_icons8_brightness_warm_down">@drawable/icons8_brightness_warm_down</item>
         <item name="attr_icons8_brightness_warm_up">@drawable/icons8_brightness_warm_up</item>
+        <item name="attr_icons8_visible">@drawable/icons8_visible</item>
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
@@ -1458,6 +1461,7 @@
         <item name="attr_icons8_brightness_up">@drawable/icons8_brightness_up</item>
         <item name="attr_icons8_brightness_warm_down">@drawable/icons8_brightness_warm_down</item>
         <item name="attr_icons8_brightness_warm_up">@drawable/icons8_brightness_warm_up</item>
+        <item name="attr_icons8_visible">@drawable/icons8_visible</item>
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
@@ -1830,6 +1834,7 @@
         <item name="attr_icons8_brightness_up">@drawable/icons8_brightness_up</item>
         <item name="attr_icons8_brightness_warm_down">@drawable/icons8_brightness_warm_down</item>
         <item name="attr_icons8_brightness_warm_up">@drawable/icons8_brightness_warm_up</item>
+        <item name="attr_icons8_visible">@drawable/icons8_visible</item>
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>
@@ -2260,6 +2265,7 @@
         <item name="attr_icons8_brightness_up">@drawable/icons8_brightness_up</item>
         <item name="attr_icons8_brightness_warm_down">@drawable/icons8_brightness_warm_down</item>
         <item name="attr_icons8_brightness_warm_up">@drawable/icons8_brightness_warm_up</item>
+        <item name="attr_icons8_visible">@drawable/icons8_visible</item>
         <item name="attr_icons8_font_color">@drawable/icons8_font_color</item>
         <item name="attr_icons8_settings_to_gd">@drawable/icons8_settings_to_gd</item>
         <item name="attr_icons8_settings_from_gd">@drawable/icons8_settings_from_gd</item>

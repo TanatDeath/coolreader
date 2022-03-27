@@ -34,7 +34,7 @@ public class AskSomeValuesDialog extends BaseDialog {
 	public AskSomeValuesDialog(CoolReader activity, String sTitle, String sSomeText,
 							   ArrayList<String[]> askValues, ValuesEnteredCallback callback)
 	{
-		super("AskSomeValuesDialog", activity, sTitle, true, false);
+		super(activity, sTitle, true, false);
 		mCoolReader = activity;
 		setTitle(sTitle);
 		this.callback = callback;

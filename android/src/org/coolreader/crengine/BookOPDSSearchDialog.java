@@ -18,7 +18,7 @@ public class BookOPDSSearchDialog extends BaseDialog {
 
 	public BookOPDSSearchDialog(CoolReader activity, String sText, FileInfo fi, BookSearchDialog.SearchCallback callback)
 	{
-		super("BookOPDSSearchDialog", activity, activity.getString( R.string.dlg_book_search), true, false);
+		super(activity, activity.getString( R.string.dlg_book_search), true, false);
 		mCoolReader = activity;
 		fInfo = fi;
 		setTitle(mCoolReader.getString( R.string.dlg_book_search));

@@ -515,7 +515,7 @@ public class ScanLibraryDialog extends BaseDialog {
 
 	public ScanLibraryDialog(CoolReader activity)
 	{
-		super("ScanLibraryDialog", activity, activity.getString( R.string.scan_library), true, false);
+		super(activity, activity.getString( R.string.scan_library), true, false);
 		mActivity = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(mActivity, isEInk);

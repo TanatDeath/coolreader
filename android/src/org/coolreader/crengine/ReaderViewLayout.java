@@ -19,7 +19,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		private CoolReader activity;
 		private ReaderView contentView;
 		private StatusBar statusView;
-		private UserDicPanel userDicView;
+		public UserDicPanel userDicView;
 		private CRToolBar toolbarView;
 		private LinearLayout llLeft;
 		private LinearLayout llRight;
@@ -32,7 +32,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		private boolean fullscreen;
 		private boolean nightMode;
 		ReaderView.ToolbarBackgroundDrawable toolbarBackground;
-		ReaderView.ToolbarBackgroundDrawable statusBackground;
+		public ReaderView.ToolbarBackgroundDrawable statusBackground;
 		ReaderView.ToolbarBackgroundDrawable llLeftBackground;
 		ReaderView.ToolbarBackgroundDrawable llRightBackground;
 		ReaderView.ToolbarBackgroundDrawable llTopBackground;

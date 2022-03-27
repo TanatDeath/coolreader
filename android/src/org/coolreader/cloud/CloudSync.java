@@ -204,8 +204,10 @@ public class CloudSync {
                     fOut.close();
                 } catch (Exception e) {
                     bWasErr = true;
-                    if (!bQuiet)
-                        cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")",true);
+                    if ((!bQuiet) && (cr.activityIsRunning))
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                                (cr.activityIsRunning? "": " (not running)") +
+                                ": Error saving file (" + e.getClass().getSimpleName() + ")",true);
                 }
             } //for (File fS : arrSett) {
             try {
@@ -220,8 +222,10 @@ public class CloudSync {
                 fOut2.close();
             } catch (Exception e) {
                 bWasErr = true;
-                if (!bQuiet)
-                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": Error saving file (" + e.getClass().getSimpleName() + ")",true);
+                if ((!bQuiet) && (cr.activityIsRunning))
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": Error saving file (" + e.getClass().getSimpleName() + ")",true);
             }
         }
         if (!bWasErr) {
@@ -346,7 +350,10 @@ public class CloudSync {
             File file = new File(sFName + ".bk");
             if (file.exists()){
                 if (!file.delete()) {
-                    if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.delete_file)+" (.bk)",true);
+                    if ((!bQuiet) && (cr.activityIsRunning))
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": " + cr.getString(R.string.delete_file)+" (.bk)",true);
                     bWasErr = true;
                 };
             }
@@ -355,13 +362,18 @@ public class CloudSync {
                     Utils.copyFile(sFName, sFName + ".bk");
                 } catch (Exception e) {
                     bWasErr = true;
-                    if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": " + cr.getString(R.string.copy_current_file_to)+" .bk", true);
+                    if ((!bQuiet) && (cr.activityIsRunning))
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": " + cr.getString(R.string.copy_current_file_to)+" .bk", true);
                 }
             }
             if (!bWasErr) {
                 if (fSett.exists()) {
                     if (!fSett.delete()) {
-                        if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.delete_file)+" - "+fSett.getName(), true);
+                        if ((!bQuiet) && (cr.activityIsRunning)) cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                                (cr.activityIsRunning? "": " (not running)") +
+                                ": "+cr.getString(R.string.delete_file)+" - "+fSett.getName(), true);
                         bWasErr = true;
                     };
                 }
@@ -371,7 +383,10 @@ public class CloudSync {
                     Utils.copyFile(fiSett.path, sFName);
                 } catch (Exception e) {
                     bWasErr = true;
-                    if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+ cr.getString(R.string.copy_new_file_to_current), true);
+                    if ((!bQuiet) && (cr.activityIsRunning))
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": "+ cr.getString(R.string.copy_new_file_to_current), true);
                 }
             }
         }
@@ -379,7 +394,10 @@ public class CloudSync {
             if (!bQuiet) cr.showToast(cr.getString(R.string.success_ext) + ": " + cr.getString(R.string. settings_were_restored));
             cr.finish();
         } else {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.settings_restore_error), true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.settings_restore_error), true);
             cr.finish();
         }
     }
@@ -391,7 +409,10 @@ public class CloudSync {
         boolean bWasErr = false;
         if (file.exists()){
             if (!file.delete()) {
-                if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.delete_file)+" .bk",true);
+                if ((!bQuiet) && (cr.activityIsRunning))
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                        (cr.activityIsRunning? "": " (not running)") +
+                        ": "+cr.getString(R.string.delete_file)+" .bk",true);
                 bWasErr = true;
             };
         }
@@ -402,14 +423,18 @@ public class CloudSync {
                     Utils.copyFile(fDir.getAbsolutePath() + "/" + fileName, fDir.getAbsolutePath() + "/" + fileName + ".bk");
                 } catch (Exception e) {
                     bWasErr = true;
-                    if (!bQuiet)
-                        cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.copy_current_file_to)+" .bk", true);
+                    if ((!bQuiet) && (cr.activityIsRunning))
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                                (cr.activityIsRunning? "": " (not running)") +
+                                ": "+cr.getString(R.string.copy_current_file_to)+" .bk", true);
                 }
             }
             if (!bWasErr) {
                 if (!file.delete()) {
-                    if (!bQuiet)
-                        cr.showCloudToast(cr.getString(R.string.cloud_error) + ": delete " + file.getName() + " file", true);
+                    if ((!bQuiet) && (cr.activityIsRunning))
+                        cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                                (cr.activityIsRunning? "": " (not running)") +
+                                ": delete " + file.getName() + " file", true);
                     bWasErr = true;
                 }
             }
@@ -421,12 +446,17 @@ public class CloudSync {
             }
             writer.close();
         } catch (Exception e) {
-            if (!bQuiet)
-                cr.showCloudToast(cr.getString(R.string.cloud_error) + ": create " + fDir.getAbsolutePath() + "/" + fileName + " file", true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                        (cr.activityIsRunning? "": " (not running)") +
+                        ": create " + fDir.getAbsolutePath() + "/" + fileName + " file", true);
             bWasErr = true;
         }
         if (bWasErr) {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.settings_restore_error), true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.settings_restore_error), true);
             return false;
         }
         return true;
@@ -492,8 +522,10 @@ public class CloudSync {
                 fOut2.close();
             } catch (Exception e) {
                 bWasErr = true;
-                if (!bQuiet)
-                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.error_saving_file)+" (" + e.getClass().getSimpleName() + ")", true);
+                if ((!bQuiet) && (cr.activityIsRunning))
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": "+cr.getString(R.string.error_saving_file)+" (" + e.getClass().getSimpleName() + ")", true);
             }
             if (!bWasErr) {
                 if (!bQuiet)
@@ -518,15 +550,24 @@ public class CloudSync {
 
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.book_was_not_found),true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.book_was_not_found),true);
             return;
         }
         if (rv.getBookInfo() == null) {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.book_was_not_found),true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.book_was_not_found),true);
             return;
         }
         if (rv.getBookInfo().getFileInfo() == null) {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.book_was_not_found),true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.book_was_not_found),true);
             return;
         }
         String prettyJson = "";
@@ -544,8 +585,10 @@ public class CloudSync {
             fileMark = "_rpos_";
             bmk = rv.getCurrentPositionBookmark();
             if (bmk == null) {
-                if (!bQuiet)
-                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.pos_was_not_got),true);
+                if ((!bQuiet) && (cr.activityIsRunning))
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": "+cr.getString(R.string.pos_was_not_got),true);
                 return;
             }
             double dPerc = bmk.getPercent();
@@ -563,8 +606,10 @@ public class CloudSync {
             fileMark = "_bmk_";
             abmk = rv.getBookInfo().getAllBookmarksWOPos();
             if (abmk == null) {
-                if (!bQuiet)
-                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.bookmarks_was_not_got),true);
+                if ((!bQuiet) && (cr.activityIsRunning))
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": "+cr.getString(R.string.bookmarks_was_not_got),true);
                 return;
             }
             if (abmk.isEmpty()) {
@@ -630,8 +675,10 @@ public class CloudSync {
         if (iSaveType != CLOUD_SAVE_SETTINGS) {
             final ReaderView rv = cr.getReaderView();
             if (rv == null) {
-                if (!bQuiet)
-                    cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.book_was_not_found), true);
+                if ((!bQuiet) && (cr.activityIsRunning))
+                    cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                            (cr.activityIsRunning? "": " (not running)") +
+                            ": "+cr.getString(R.string.book_was_not_found), true);
                 return;
             }
             final String sBookFName = rv.getBookInfo().getFileInfo().getFilename();
@@ -683,13 +730,18 @@ public class CloudSync {
                                             String name, boolean bQuiet) {
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.book_was_not_found),true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.book_was_not_found),true);
             return;
         }
 
         if (StrUtils.isEmptyStr(sContent)) {
-            if (!bQuiet)
-                cr.showCloudToast(cr.getString(R.string.cloud_error) + ": json "+cr.getString(R.string.file_was_not_found_or_empty),true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                        (cr.activityIsRunning? "": " (not running)") +
+                        ": json "+cr.getString(R.string.file_was_not_found_or_empty),true);
             return;
         }
 
@@ -738,7 +790,10 @@ public class CloudSync {
 
         final ReaderView rv = cr.getReaderView();
         if (rv == null) {
-            if (!bQuiet) cr.showCloudToast(cr.getString(R.string.cloud_error) + ": "+cr.getString(R.string.book_was_not_found),true);
+            if ((!bQuiet) && (cr.activityIsRunning))
+                cr.showCloudToast(cr.getString(R.string.cloud_error) +
+                    (cr.activityIsRunning? "": " (not running)") +
+                    ": "+cr.getString(R.string.book_was_not_found),true);
             return;
         }
 

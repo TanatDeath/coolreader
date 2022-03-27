@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StorageDirectory;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 import org.jsoup.Jsoup;
@@ -194,7 +196,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 
 	public ExternalDocCameDialog(CoolReader activity, String stype, Object obj, String fileToOpen)
 	{
-		super("ExternalDocCameDialog", activity, activity.getString(R.string.external_doc_came), false, true);
+		super(activity, activity.getString(R.string.external_doc_came), false, true);
 		DisplayMetrics outMetrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
@@ -477,6 +479,16 @@ public class ExternalDocCameDialog extends BaseDialog {
 				sQueryPath = StrUtils.getNonEmptyStr(queryPath(mActivity.getApplicationContext().getContentResolver(), uri), true);
 				CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",
 						"QueryPath1 is: "+sQueryPath);
+				//content://com.amaze.filemanager.debug/storage_root/storage/1CE4-1508/Book1/Zagadka_ryzhej_lisy..fb2.zip
+				if (StrUtils.isEmptyStr(sQueryPath)) {
+					ArrayList<StorageDirectory> arrStorages = mActivity.getStorageDirectories();
+					for (StorageDirectory storageDirectory: arrStorages) {
+						if (sUri.contains(storageDirectory.mPath)) {
+							sQueryPath = sUri.substring(sUri.indexOf(storageDirectory.mPath));
+							break;
+						}
+					}
+				}
 				File f = FileUtils.getFile(sQueryPath);
 				if (f != null) {
 					CustomLog.doLog(mLogFileRoot, "log_ext_doc_came.log",

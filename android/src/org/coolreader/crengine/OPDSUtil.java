@@ -44,7 +44,7 @@ public class OPDSUtil {
 
 	public static final boolean EXTENDED_LOG = false; // set to false for production
     public static final int CONNECT_TIMEOUT = 60000;
-    public static final int READ_TIMEOUT = 60000;
+    public static final int READ_TIMEOUT = 240000; // for very slow OPDS'ses
 	/*
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:relevance="http://a9.com/-/opensearch/extensions/relevance/1.0/" 
@@ -419,12 +419,18 @@ xml:base="http://lib.ololo.cc/opds/">
 						if (link.type!=null) {
 							entryInfo.links.add(link);
 							int priority = link.getPriority();
-							if ( link.type.startsWith("application/atom+xml") ) {
-								if (entryInfo.link == null || !entryInfo.link.type.startsWith("application/atom+xml"))
+							DocumentFormat df = DocumentFormat.byMimeType(link.type);
+							if ((df != null) || (link.type.startsWith("application/atom+xml"))) {
+							//if ( link.type.startsWith("application/atom+xml") ) {
+								//if (entryInfo.link == null || !entryInfo.link.type.startsWith("application/atom+xml"))
+								DocumentFormat df2 = DocumentFormat.byMimeType(link.type);
+								if (entryInfo.link == null || (df2 == null) || !entryInfo.link.type.startsWith("application/atom+xml"))
 									entryInfo.link = link;
-							} else if ( "http://opds-spec.org/cover".equals(link.rel) && "image/jpeg".equals(link.type)) {
+							} else if ( "http://opds-spec.org/cover".equals(link.rel)
+									&& StrUtils.getNonEmptyStr(link.type,true).startsWith("image/")) {
 								entryInfo.icon = link.href;
-							} else if ( "http://opds-spec.org/thumbnail".equals(link.rel) && "image/jpeg".equals(link.type)) {
+							} else if ( "http://opds-spec.org/thumbnail".equals(link.rel)
+									&& StrUtils.getNonEmptyStr(link.type,true).startsWith("image/")) {
 								if (entryInfo.icon == null)
 									entryInfo.icon = link.href;
 							} else if (priority>0 && (entryInfo.link==null || entryInfo.link.getPriority()<priority)) {
@@ -551,7 +557,7 @@ xml:base="http://lib.ololo.cc/opds/">
 				callback.onError(msg);
 			});
 		}
-		private void parseFeed( InputStream is ) throws Exception {
+		private void parseFeed(InputStream is) throws Exception {
 			try {
 				if (handler==null)
 					handler = new OPDSHandler(url);

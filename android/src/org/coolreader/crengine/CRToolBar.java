@@ -173,6 +173,11 @@ public class CRToolBar extends ViewGroup {
 		themeColors = Utils.getThemeColors((CoolReader) context, isEInk);
 	}
 
+	private int getActionNameId(ReaderAction action) {
+		if (action.shortNameId != 0) return action.shortNameId;
+		return action.nameId;
+	}
+
 	private LinearLayout inflateItem(ReaderAction action) {
 		final LinearLayout view = (LinearLayout)inflater.inflate(R.layout.popup_toolbar_item, null);
 		ImageView icon = view.findViewById(R.id.action_icon);
@@ -188,8 +193,8 @@ public class CRToolBar extends ViewGroup {
 		icon.setImageResource(action != null ? action.getIconIdWithDef(activity) :
 				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
 		icon.setMinimumWidth(buttonWidth);
-		Utils.setContentDescription(icon, activity.getString(action != null ? action.nameId : R.string.btn_toolbar_more));
-		label.setText(action != null ? action.nameId : R.string.btn_toolbar_more);
+		Utils.setContentDescription(icon, activity.getString(action != null ? getActionNameId(action) : R.string.btn_toolbar_more));
+		label.setText(action != null ? getActionNameId(action) : R.string.btn_toolbar_more);
 		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 		return view;
 	}
@@ -360,7 +365,7 @@ public class CRToolBar extends ViewGroup {
 	protected void onCreateContextMenu(ContextMenu menu) {
 		int order = 0;
 		for (ReaderAction action : itemsOverflow) {
-			menu.add(0, action.menuItemId, order++, action.nameId);
+			menu.add(0, action.menuItemId, order++, getActionNameId(action));
 		}
 	}
 	
@@ -491,7 +496,7 @@ public class CRToolBar extends ViewGroup {
 					ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
 					paintG.setColorFilter(f);
 				}
-				String sText = activity.getString(item.nameId);
+				String sText = activity.getString(getActionNameId(item));
 				String sTextR = "";
 				if(sText != null){
 					for(int i = 0; i < sText.length(); i++){
@@ -672,7 +677,7 @@ public class CRToolBar extends ViewGroup {
 
 		if (item != null) {
 			if (item.getIconIdWithDef(activity)!=0)	setButtonImageResource(item, ib,item.getIconIdWithDef(activity));
-			Utils.setContentDescription(ib, getContext().getString(item.nameId));
+			Utils.setContentDescription(ib, getContext().getString(getActionNameId(item)));
 			ib.setTag(item);
 		} else {
 			setButtonImageResource(item, ib,Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));

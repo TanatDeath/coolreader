@@ -373,7 +373,7 @@ public class BookInfoDialog extends BaseDialog {
 						int iSymCnt = 0;
 						int iWordCnt = 0;
 						ReaderView rv1 = ((CoolReader) mCoolReader).getReaderView();
-						if ((rv1 != null)&&(mBookInfo!=null)) {
+						if ((rv1 != null) && (mBookInfo!=null)) {
 							if (rv1.getArrAllPages() != null)
 								iPageCnt = rv1.getArrAllPages().size();
 							else {
@@ -394,19 +394,19 @@ public class BookInfoDialog extends BaseDialog {
 							BookInfo bi = new BookInfo(mBookInfo.getFileInfo());
 							bi.getFileInfo().symCount = iSymCnt;
 							bi.getFileInfo().wordCount = iWordCnt;
-							((CoolReader) mCoolReader).getDB().saveBookInfo(bi);
-							((CoolReader) mCoolReader).getDB().flush();
+							mCoolReader.getDB().saveBookInfo(bi);
+							mCoolReader.getDB().flush();
 							Utils.hideView(countButton);
 							if (tvSC != null) tvSC.setText(""+iSymCnt);
 							if (tvWC != null) tvWC.setText(""+iWordCnt);
-							ReadingStatRes sres = ((CoolReader) mCoolReader).getReaderView().getBookInfo().getFileInfo().calcStats();
+							ReadingStatRes sres = mCoolReader.getReaderView().getBookInfo().getFileInfo().calcStats();
 							double speedKoef = sres.val;
 							int pagesLeft;
 							double msecLeft;
 							double msecFivePages;
-							PositionProperties currpos = ((CoolReader) mCoolReader).getReaderView().getDoc().getPositionProps(null, true);
+							PositionProperties currpos = mCoolReader.getReaderView().getDoc().getPositionProps(null, true);
 							if ((bi.getFileInfo().symCount>0) && (speedKoef > 0.000001)) {
-								pagesLeft = ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+								pagesLeft = mCoolReader.getReaderView().getDoc().getPageCount() - currpos.pageNumber;
 								double msecAllPages;
 								msecAllPages = speedKoef * (double) bi.getFileInfo().symCount;
 								msecFivePages = msecAllPages / ((double) ((CoolReader) mCoolReader).getReaderView().getDoc().getPageCount()) * 5.0;
@@ -446,7 +446,7 @@ public class BookInfoDialog extends BaseDialog {
 			translButton.setLayoutParams(llp);
 			translButton.setMaxLines(3);
 			translButton.setEllipsize(TextUtils.TruncateAt.END);
-			final CoolReader cr = (CoolReader) mCoolReader;
+			final CoolReader cr = mCoolReader;
 			translButton.setOnClickListener(v -> {
 				String lang = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to,true);
 				String langf = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true);
@@ -470,7 +470,7 @@ public class BookInfoDialog extends BaseDialog {
 		}
 		if (typ.startsWith("link")) {
 			valueView.setPaintFlags(valueView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-			if (typ.contains("application/atom+xml")) {
+			if (typ.contains("application/")) {
 				valueView.setOnClickListener((View.OnClickListener) v -> {
 					String text = ((TextView) v).getText().toString();
 					if (text != null && text.length() > 0)
@@ -662,7 +662,7 @@ public class BookInfoDialog extends BaseDialog {
 	public BookInfoDialog(final BaseActivity activity, Collection<BookInfoEntry> items, BookInfo bi, final String annt,
 						  int actionType, FileInfo fiOPDS, FileBrowser fb, FileInfo currDir)
 	{
-		super("BookInfoDialog", activity, null, false, false);
+		super(activity, null, false, false);
 		String annot = annt;
 		if (StrUtils.isEmptyStr(annt))
 			if (fiOPDS != null) {
@@ -798,10 +798,10 @@ public class BookInfoDialog extends BaseDialog {
 
 		btnBookShortcut.setOnClickListener(v -> {
 		CoolReader cr = (CoolReader)mCoolReader;
-		if (mBookInfo!=null) {
-			FileInfo fi = mBookInfo.getFileInfo();
-			cr.createBookShortcut(fi,mBookCover);
-		} else cr.showToast(R.string.book_info_action_unavailable);
+			if (mBookInfo!=null) {
+				FileInfo fi = mBookInfo.getFileInfo();
+				cr.createBookShortcut(fi,mBookCover);
+			} else cr.showToast(R.string.book_info_action_unavailable);
 		});
 
 		btnBookEdit = mainView.findViewById(R.id.book_edit);

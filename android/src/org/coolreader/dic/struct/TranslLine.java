@@ -7,6 +7,7 @@ public class TranslLine {
 
 	public String transGroup = "";
 	public String transText = "";
+	public String transTextHTML = "";
 	public String transType = "";
 	public String transLink = "";
 

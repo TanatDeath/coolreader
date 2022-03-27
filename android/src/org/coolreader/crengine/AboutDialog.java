@@ -94,7 +94,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 
 	public AboutDialog( CoolReader activity)
 	{
-		super("AboutDialog", activity);
+		super(activity);
 		mActivity = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(mActivity, isEInk);

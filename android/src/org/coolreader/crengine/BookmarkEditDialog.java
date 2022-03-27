@@ -431,7 +431,7 @@ public class BookmarkEditDialog extends BaseDialog {
 
 	public BookmarkEditDialog(final CoolReader activity, ReaderView readerView, Bookmark bookmark, boolean isNew, int chosenType, String commentText)
 	{
-		super("BookmarkEditDialog", activity, "", true, false);
+		super(activity, "", true, false);
 		mCoolReader = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(mCoolReader, isEInk);

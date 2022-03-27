@@ -94,7 +94,7 @@ public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeList
 	}
 
 	public ColorPickerDialog(BaseActivity activity, OnColorChangedListener listener, int color, String title) {
-		super("ColorPickerDialog", activity, title, true, false);
+		super(activity, title, true, false);
 		mInflater = LayoutInflater.from(getContext());
 		mListener = listener;
 		mActivity = activity;
