@@ -179,8 +179,8 @@ public class OfflineDicsDlg extends BaseDialog {
 			TextView tvDesc = view.findViewById(R.id.dict_item_desc);
 			TextView tvVersion = view.findViewById(R.id.dict_item_version);
 			Button btnConvert = view.findViewById(R.id.btn_convert);
-			Button btnAsText =  view.findViewById(R.id.btn_text);
-			Button btnAsHtml =  view.findViewById(R.id.btn_html);
+			Button btnAsText = view.findViewById(R.id.btn_text);
+			Button btnAsHtml = view.findViewById(R.id.btn_html);
 			EditText langFrom = view.findViewById(R.id.lang_from);
 			langFrom.setPadding(10, 5, 10, 20);
 			EditText langTo = view.findViewById(R.id.lang_to);
@@ -350,6 +350,8 @@ public class OfflineDicsDlg extends BaseDialog {
 				if (isEInk) Utils.setSolidButtonEink(btnAsHtml);
 				mCoolReader.tintViewIcons(btnAsText, PorterDuff.Mode.CLEAR,true);
 			});
+			btnAsText.setVisibility(View.INVISIBLE);
+			btnAsHtml.setVisibility(View.INVISIBLE);
 			return view;
 		}
 

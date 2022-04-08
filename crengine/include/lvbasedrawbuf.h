@@ -25,6 +25,7 @@ protected:
     int _rowsize;
     lvRect _clip;
     unsigned char * _data;
+    void * _drawExtraInfo;
     lUInt32 _backgroundColor;
     lUInt32 _textColor;
     bool _hidePartialGlyphs;
@@ -54,6 +55,10 @@ public:
     virtual void GetClipRect( lvRect * clipRect ) const { *clipRect = _clip; }
     /// sets clip rect
     virtual void SetClipRect( const lvRect * clipRect );
+    /// gets draw extra info oject
+    virtual void * GetDrawExtraInfo() { return _drawExtraInfo; }
+    /// sets draw extra info oject
+    virtual void SetDrawExtraInfo( void * draw_extra_info ) { _drawExtraInfo = draw_extra_info; }
     /// get average pixel value for area (coordinates are fixed floating points *16)
     virtual lUInt32 GetAvgColor(lvRect & rc16) const;
     /// get linearly interpolated pixel value (coordinates are fixed floating points *16)
@@ -70,7 +75,7 @@ public:
     /// Get surface of images drawn on buffer
     int getDrawnImagesSurface() const { return _drawnImagesSurface; }
 
-    LVBaseDrawBuf() : _dx(0), _dy(0), _rowsize(0), _data(NULL), _hidePartialGlyphs(true),
+    LVBaseDrawBuf() : _dx(0), _dy(0), _rowsize(0), _data(NULL), _hidePartialGlyphs(true), _drawExtraInfo(NULL),
                         _invertImages(false), _ditherImages(false), _smoothImages(false),
                         _drawnImagesCount(0), _drawnImagesSurface(0) { }
     virtual ~LVBaseDrawBuf() { }

@@ -414,7 +414,7 @@ xml:base="http://lib.ololo.cc/opds/">
 			} else if ("link".equals(localName)) {
 				LinkInfo link = new LinkInfo(url, attributes);
 				if (link.isValid() && insideFeed) {
-					if (EXTENDED_LOG) L.d(tab()+link.toString());
+					if (EXTENDED_LOG) L.d(tab()+ link);
 					if (insideEntry) {
 						if (link.type!=null) {
 							entryInfo.links.add(link);
@@ -424,7 +424,7 @@ xml:base="http://lib.ololo.cc/opds/">
 							//if ( link.type.startsWith("application/atom+xml") ) {
 								//if (entryInfo.link == null || !entryInfo.link.type.startsWith("application/atom+xml"))
 								DocumentFormat df2 = DocumentFormat.byMimeType(link.type);
-								if (entryInfo.link == null || (df2 == null) || !entryInfo.link.type.startsWith("application/atom+xml"))
+								if (entryInfo.link == null || (df2 != null) || !entryInfo.link.type.startsWith("application/atom+xml"))
 									entryInfo.link = link;
 							} else if ( "http://opds-spec.org/cover".equals(link.rel)
 									&& StrUtils.getNonEmptyStr(link.type,true).startsWith("image/")) {
@@ -442,13 +442,13 @@ xml:base="http://lib.ololo.cc/opds/">
 							docInfo.selfLink = link;
 						else if ("alternate".equals(link.rel))
 							docInfo.alternateLink = link;
-						else if ( "next".equals(link.rel) )
+						else if ("next".equals(link.rel))
 							docInfo.nextLink = link;
-						else if ( "search".equals(link.rel) )
+						else if ("search".equals(link.rel))
 							docInfo.searchLink = link;
 					}
 				}
-			} else if ( "author".equals(localName) ) {
+			} else if ("author".equals(localName)) {
 				authorInfo = new AuthorInfo();
 			}
 		}
@@ -457,25 +457,25 @@ xml:base="http://lib.ololo.cc/opds/">
 		public void endElement(String uri, String localName,
 				String qName) throws SAXException {
 			super.endElement(uri, localName, qName);
-			if ( qName!=null && qName.length()>0 )
+			if (qName!=null && qName.length()>0)
 				localName = qName;
 			//L.d(tab() + "</" + localName + ">");
 			//String currentElement = elements.peek();
-			if ( insideFeed && "feed".equals(localName) ) {
+			if (insideFeed && "feed".equals(localName)) {
 				insideFeed = false;
-			} else if ( "title".equals(localName) ) {
+			} else if ("title".equals(localName)) {
 				insideEntryTitle = false;
-			} else if ( "entry".equals(localName) ) {
-				if ( !insideFeed || !insideEntry )
+			} else if ("entry".equals(localName)) {
+				if (!insideFeed || !insideEntry)
 					throw new SAXException("unexpected element " + localName);
-				if ( entryInfo.link!=null || entryInfo.getBestAcquisitionLink()!=null ) {
+				if (entryInfo.link != null || entryInfo.getBestAcquisitionLink() != null) {
 					entries.add(entryInfo);
 				}
 				insideEntry = false;
 				entryInfo = null;
-			} else if ( "author".equals(localName) ) {
+			} else if ("author".equals(localName)) {
 				if (insideEntry) {
-					if ( authorInfo!=null && authorInfo.name!=null )
+					if (authorInfo != null && authorInfo.name != null)
 						entryInfo.authors.add(authorInfo);
 				}
 				authorInfo = null;

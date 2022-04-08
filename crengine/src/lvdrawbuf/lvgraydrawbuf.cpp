@@ -441,6 +441,9 @@ void LVGrayDrawBuf::FillRect( int x0, int y0, int x1, int y1, lUInt32 color32 )
     if (x0>=x1 || y0>=y1)
         return;
     lUInt8 color = rgbToGrayMask( color32, _bpp );
+    const lUInt8 opacity = ~color32 >> 24;
+    if (opacity == 0) // Fully transparent color
+        return;
 #if (GRAY_INVERSE==1)
     color ^= 0xFF;
 #endif

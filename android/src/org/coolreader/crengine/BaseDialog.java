@@ -34,7 +34,7 @@ public class BaseDialog extends Dialog {
 	public String upperText;
 	public boolean searchEnabled;
 	boolean needCancelButton;
-	String dlgName;
+	public String dlgName;
 	int positiveButtonImage;
 	int positiveButtonContentDescriptionId = R.string.dlg_button_ok;
 	int negativeButtonImage;
@@ -71,15 +71,15 @@ public class BaseDialog extends Dialog {
 
 	public BaseDialog(BaseActivity activity)
 	{
-		this("", activity, "", false, false );
+		this("", activity, "", false, false);
 	}
 
-	public BaseDialog(String dlgName, BaseActivity activity, String title, boolean showNegativeButton, boolean windowed )
+	public BaseDialog(String dlgName, BaseActivity activity, String title, boolean showNegativeButton, boolean windowed)
 	{
 		this(dlgName, activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed);
 	}
 
-	public BaseDialog(BaseActivity activity, String title, boolean showNegativeButton, boolean windowed )
+	public BaseDialog(BaseActivity activity, String title, boolean showNegativeButton, boolean windowed)
 	{
 		this("", activity, title, showNegativeButton, activity.isFullscreen(), activity.isNightMode(), windowed);
 	}

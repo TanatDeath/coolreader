@@ -35,8 +35,10 @@ void LVInkMeasurementDrawBuf::FillRect(int x0, int y0, int x1, int y1, lUInt32 c
     if ( ignore_decorations )
         return;
     // printf("  ink FillRect %d %d %d %d\n", x0, y0, x1, y1);
-    if ( color != GetBackgroundColor() )
-        updateInkBounds(x0, y0, x1, y1);
+    // Don't do this check, as backgroundcolor may not be initialized
+    // (initializing it to white would be a random choice):
+    // if ( color != GetBackgroundColor() )
+    updateInkBounds(x0, y0, x1, y1);
 }
 
 void LVInkMeasurementDrawBuf::FillRectPattern(int x0, int y0, int x1, int y1, lUInt32 color0, lUInt32 color1, lUInt8 *pattern) {

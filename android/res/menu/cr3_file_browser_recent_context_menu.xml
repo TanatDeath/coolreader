@@ -13,10 +13,10 @@
     <item android:title="@string/mi_book_shortcut" android:titleCondensed="@string/mi_book_shortcut" android:id="@+id/book_shortcut"></item>
     <item android:title="@string/mi_book_to_cloud" android:titleCondensed="@string/mi_book_to_cloud" android:id="@+id/book_to_gd"></item>
     <item android:title="@string/mi_book_to_email" android:titleCondensed="@string/mi_book_to_email" android:id="@+id/book_to_email"></item>
-    <item android:title="@string/mi_book_no_mark" android:titleCondensed="@string/mi_book_no_mark" android:id="@+id/book_no_mark"></item>
     <item android:title="@string/mi_book_to_read" android:titleCondensed="@string/mi_book_to_read" android:id="@+id/book_to_read"></item>
     <item android:title="@string/mi_book_reading" android:titleCondensed="@string/mi_book_reading" android:id="@+id/book_reading"></item>
     <item android:title="@string/mi_book_finished" android:titleCondensed="@string/mi_book_finished" android:id="@+id/book_finished"></item>
+    <item android:title="@string/mi_book_no_mark" android:titleCondensed="@string/mi_book_no_mark" android:id="@+id/book_no_mark"></item>
     <item android:title="@string/mi_book_rate_5" android:titleCondensed="@string/mi_book_rate_5" android:id="@+id/book_rate_5"></item>
     <item android:title="@string/mi_book_rate_4" android:titleCondensed="@string/mi_book_rate_4" android:id="@+id/book_rate_4"></item>
     <item android:title="@string/mi_book_rate_3" android:titleCondensed="@string/mi_book_rate_3" android:id="@+id/book_rate_3"></item>

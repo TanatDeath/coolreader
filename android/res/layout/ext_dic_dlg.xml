@@ -129,4 +129,18 @@
 		android:layout_marginRight="4dip"
 		>
 	</org.coolreader.crengine.MaxHeightLinearLayout>
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/items_list2"
+			android:orientation="vertical"
+			android:layout_weight="8"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:baselineAligned="false"
+			android:layout_marginTop="8dip"
+			android:layout_marginBottom="8dip"
+			android:layout_marginLeft="4dip"
+			android:layout_marginRight="4dip"
+			>
+	</LinearLayout>
 </LinearLayout>

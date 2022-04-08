@@ -114,6 +114,16 @@ public:
         { }
 };
 
+// Extra info for drawing that can be stored in DrawBuf
+typedef struct {
+    bool is_page_mode;
+    bool is_left_page;
+    bool is_right_page;
+    bool draw_body_background;
+    lvRect body_background_clip;
+    lvRect content_overflow_clip;
+} draw_extra_info_t;
+
 /// returns true if styles are identical
 bool isSameFontStyle( css_style_rec_t * style1, css_style_rec_t * style2 );
 /// removes format data from node
@@ -185,7 +195,7 @@ int LVRendGetBaseFontWeight();
 int measureBorder(ldomNode *enode,int border);
 int lengthToPx( ldomNode *node, css_length_t val, int base_px, int base_em = -1, bool unspecified_as_em=false );
 int scaleForRenderDPI( int value );
-bool getStyledImageSize( ldomNode * enode, int & img_width, int & img_height, int container_width=-1, int container_height=-1 );
+bool getStyledImageSize( ldomNode * enode, int & img_width, int & img_height, int container_width=-1, int container_height=-1, bool enforce_page_constraints=false );
 
 // Returns ink offsets from the node's RenderRectAccessor (its border box), positive when inward
 bool getInkOffsets( ldomNode * node, lvRect &inkOffsets, bool measure_hidden_content=false,

@@ -14,6 +14,7 @@ import androidx.annotation.ColorInt;
 import android.text.ClipboardManager;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -167,7 +168,7 @@ public class DicToastView {
         if (window != null) {
             window.dismiss();
             curWindow=null;
-            show();
+            show(false);
             if (queue.size() == 0) dismissAndCheckDicList();
         }
     };
@@ -299,7 +300,7 @@ public class DicToastView {
     private static void showToastInternal(BaseActivity act, View anchor, String msg, int duration,
                                  int dicT, String dicName, Object dicStructObject,
                                  Dictionaries.DictInfo curDict, String link, String link2, int curAction,
-                                 boolean useFirstLink, String picAddr) {
+                                 boolean useFirstLink, String picAddr, boolean fullScreen) {
         TypedArray a = act.getTheme().obtainStyledAttributes(new int[]
                 {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
         colorGray = a.getColor(0, Color.GRAY);
@@ -323,33 +324,34 @@ public class DicToastView {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (showing.compareAndSet(false, true)) {
-            show();
+        if (showing.compareAndSet(false, true) || (fullScreen)) {
+            show(fullScreen);
         }
     }
 
     public static void showToast(BaseActivity act, View anchor, String s, String msg, int duration,
-                                 int dicT, String dicName) {
+                                 int dicT, String dicName, boolean fullScreen) {
         sFindText = s;
         showToastInternal(act, anchor, msg, duration, dicT, dicName, null,
-                null, null, null, 0, false, "");
+                null, null, null, 0, false, "", fullScreen);
     }
 
     public static void showToastExt(BaseActivity act, View anchor, String s, String msg, int duration,
-                                 int dicT, String dicName, Dictionaries.DictInfo curDict, Object dicStructObject) {
+                                 int dicT, String dicName, Dictionaries.DictInfo curDict,
+                                    Object dicStructObject, boolean fullScreen) {
         sFindText = s;
         showToastInternal(act, anchor, msg, duration, dicT, dicName, dicStructObject,
-                curDict, null, null, 0, false, "");
+                curDict, null, null, 0, false, "", fullScreen);
     }
 
     public static void showToastWiki(BaseActivity act, View anchor, String s, String msg, int duration,
                                  int dicT, String dicName,
                                  Dictionaries.DictInfo curDict, String link, String link2, int curAction,
                                  boolean useFirstLink,
-                                 String picAddr) {
+                                 String picAddr, boolean fullScreen) {
         sFindText = s;
         showToastInternal(act, anchor, msg, duration, dicT, dicName, null,
-                curDict, link, link2, curAction, useFirstLink, picAddr);
+                curDict, link, link2, curAction, useFirstLink, picAddr, fullScreen);
     }
 
     public static void showWikiListToast(BaseActivity act, View anchor, String s, String msg,
@@ -359,7 +361,8 @@ public class DicToastView {
         sFindText = s;
         mListSkipCount = listSkipCount;
         showToastInternal(act, anchor, msg, android.widget.Toast.LENGTH_LONG, dicT, dicName,
-                arrWA, curDict, link, link2, curAction, useFirstLink, "");
+                arrWA, curDict, link, link2, curAction, useFirstLink, "",
+                !StrUtils.isEmptyStr(mActivity.lastDicText));
     }
 
     @ColorInt
@@ -384,7 +387,7 @@ public class DicToastView {
         }
     }
 
-    private static void show() {
+    private static void show(boolean fullScreen) {
         if (queue.size() == 0) {
             showing.compareAndSet(true, false);
             return;
@@ -404,12 +407,12 @@ public class DicToastView {
             return false;
         });
         curToast = t;
-        if (t.wikiArticles != null) wikiListToast(t);
-            else if (t.dicStruct != null) extListToast(t);
-                else simpleToast(t);
+        if (t.wikiArticles != null) wikiListToast(t, fullScreen);
+            else if (t.dicStruct != null) extListToast(t, fullScreen);
+                else simpleToast(t, fullScreen);
     }
 
-    private static void simpleToast(Toast t) {
+    private static void simpleToast(Toast t, boolean fullScreen) {
         window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
         window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         window.setTouchable(true);
@@ -847,7 +850,7 @@ public class DicToastView {
        // mHandler.postDelayed(handleDismiss, t.duration == 0 ? 3000 : 5000);
     }
 
-    private static void wikiListToast(Toast t) {
+    private static void wikiListToast(Toast t, boolean fullScreen) {
         window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
         window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         window.setTouchable(true);
@@ -910,49 +913,81 @@ public class DicToastView {
         window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
     }
 
-    private static void extListToast(Toast t) {
-        window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-        window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setTouchable(true);
-        window.setFocusable(false);
-        window.setOutsideTouchable(true);
-        window.setBackgroundDrawable(null);
+    private static void extListToast(Toast t, boolean fullScreen) {
         mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        window.setContentView(mInflater.inflate(R.layout.ext_dic_dlg, null, true));
-        LinearLayout ll1 = window.getContentView().findViewById(R.id.items_list_ll1);
-        TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-                {R.attr.colorThemeGray2});
-        colorGray = a.getColor(0, Color.GRAY);
-        a.recycle();
+        View dicContent = mInflater.inflate(R.layout.ext_dic_dlg, null, true);
+        colorGray = themeColors.get(R.attr.colorThemeGray2);
         int colr2 = colorGray;
         int colorFill = colorGrayC;
+        //if (fullScreen) colorFill = colorGray1;
         if (isEInk) colorFill = Color.WHITE;
-        ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
-        Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
+        LinearLayout ll1;
+        LinearLayout upperRow = null;
+        Button tvClose;
+        TextView tvLblDic;
+        TextView tvTerm;
+        Button btnRemove3sym;
+        Button btnRemove2sym;
+        Button btnRemove1sym;
+        Button btnDicExtended;
+        ViewGroup body;
+        ViewGroup body2;
+        DicArticleDlg dad = null;
+        if (fullScreen) {
+            dad = new DicArticleDlg("DicArticleDlg",
+                    DicToastView.mActivity, curToast, -1, dicContent);
+            ll1 = dad.mBody.findViewById(R.id.items_list_ll1);
+            upperRow = dad.mBody.findViewById(R.id.upper_row_ll);
+            tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
+            tvLblDic = dad.mBody.findViewById(R.id.lbl_dic);
+            tvTerm = dad.mBody.findViewById(R.id.lbl_term);
+            btnRemove3sym = dad.mBody.findViewById(R.id.remove3sym);
+            btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
+            btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
+            btnDicExtended = dad.mBody.findViewById(R.id.btnDicExtended);
+            body = dad.mBody.findViewById(R.id.items_list);
+            body2 = dad.mBody.findViewById(R.id.items_list2);
+        } else {
+            window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+            window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setTouchable(true);
+            window.setFocusable(false);
+            window.setOutsideTouchable(true);
+            window.setBackgroundDrawable(null);
+            window.setContentView(dicContent);
+            ll1 = window.getContentView().findViewById(R.id.items_list_ll1);
+            tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
+            tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+            tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+            btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
+            btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
+            btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
+            btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            body = window.getContentView().findViewById(R.id.items_list);
+            body2 = window.getContentView().findViewById(R.id.items_list2);
+        }
+        if (fullScreen)
+            ll1.setBackgroundColor(Color.argb(0, Color.red(colorFill), Color.green(colorFill), Color.blue(colorFill)));
+        else
+            ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill), Color.green(colorFill), Color.blue(colorFill)));
         setBtnBackgroundColor(tvClose, colr2);
         tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-        TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
         if (tvLblDic != null) {
             if (t.mCurDict != null)
                 tvLblDic.setText(t.mCurDict.shortName);
             else
                 tvLblDic.setText(t.mDicName);
         }
-        TextView tvTerm = window.getContentView().findViewById(R.id.lbl_term);
         if (tvTerm != null) {
             tvTerm.setText(t.sFindText);
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Button btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
             setBtnBackgroundColor(tvClose, colr2);
-            Button btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
             setBtnBackgroundColor(tvClose, colr2);
-            Button btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
-            Button btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
                 try {
                     mActivity.mDictionaries.findInDictionary(findText,
@@ -963,24 +998,24 @@ public class DicToastView {
                 }
             });
             if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
-                else
-                    btnRemove1sym.setOnClickListener(v -> {
-                        if (findText.length()>1) {
-                            String findText1 = findText.substring(0, findText.length() - 1);
-                            mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                            try {
-                                mActivity.mDictionaries.findInDictionary(findText1,
-                                        mActivity.mDictionaries.lastDicView,false, mActivity.mDictionaries.lastDC);
-                            } catch (Dictionaries.DictionaryException e) {
-                              // do nothing
-                            }
-                            mHandler.postDelayed(handleDismiss, 100);
+            else
+                btnRemove1sym.setOnClickListener(v -> {
+                    if (findText.length() > 1) {
+                        String findText1 = findText.substring(0, findText.length() - 1);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1,
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
                         }
-                    });
+                        mHandler.postDelayed(handleDismiss, 100);
+                    }
+                });
             if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
             else
                 btnRemove2sym.setOnClickListener(v -> {
-                    if (findText.length()>2) {
+                    if (findText.length() > 2) {
                         String findText1 = findText.substring(0, findText.length() - 2);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
@@ -995,7 +1030,7 @@ public class DicToastView {
             if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
             else
                 btnRemove3sym.setOnClickListener(v -> {
-                    if (findText.length()>3) {
+                    if (findText.length() > 3) {
                         String findText1 = findText.substring(0, findText.length() - 3);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
                         try {
@@ -1008,21 +1043,31 @@ public class DicToastView {
                     }
                 });
         }
-        ViewGroup body = window.getContentView().findViewById(R.id.items_list);
-        CoolReader cr= mActivity;
-        if (cr.getReaderView() != null) {
-            if (cr.getReaderView().getSurface() != null) {
-                ((MaxHeightLinearLayout) body).setMaxHeight(cr.getReaderView().getSurface().getHeight() * 3 / 4);
+        if (!fullScreen)
+            if (mActivity.getReaderView() != null) {
+                if (mActivity.getReaderView().getSurface() != null) {
+                    ((MaxHeightLinearLayout) body).setMaxHeight(mActivity.getReaderView().getSurface().getHeight() * 3 / 4);
+                }
+            } else {
+                ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 3 / 4);
             }
+        t.mExtDicList = new ExtDicList(mActivity, t, null, mHandler, handleDismiss, false);
+        if (fullScreen)
+            body2.addView(t.mExtDicList);
+        else
+            body.addView(t.mExtDicList);
+        if (fullScreen) {
+            mActivity.tintViewIcons(dad.mBody, false);
+            Utils.hideView(upperRow);
+            Utils.hideView(body);
+            dad.show();
         } else {
-            ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 3 / 4);
+            int[] location = new int[2];
+            t.anchor.getLocationOnScreen(location);
+            int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
+            mActivity.tintViewIcons(window, false);
+            Utils.hideView(body2);
+            window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
         }
-        t.mExtDicList = new ExtDicList(mActivity, t, null, mHandler, handleDismiss, mColorIconL);
-        body.addView(t.mExtDicList);
-        int [] location = new int[2];
-        t.anchor.getLocationOnScreen(location);
-        int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
-        mActivity.tintViewIcons(window,false);
-        window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
     }
 }

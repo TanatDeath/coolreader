@@ -165,29 +165,25 @@ void ApplyAlphaRGB565( lUInt16 &dst, lUInt16 src, lUInt32 alpha )
     }
 }
 
-// obsoleted, ready to remove
-void ApplyAlphaGray( lUInt8 &dst, lUInt8 src, lUInt32 alpha, int bpp )
+void ApplyAlphaGray( lUInt8 &dst, lUInt8 src, lUInt8 alpha, int bpp )
 {
     if ( alpha==0 ) {
         dst = src;
     } else if ( alpha < 255 ) {
-        int mask = ((1 << bpp) - 1) << (8 - bpp);
+        const int mask = ((1 << bpp) - 1) << (8 - bpp);
         src &= mask;
-        lUInt32 opaque = alpha ^ 0xFF;
-        lUInt32 n1 = ((dst * alpha + src * opaque) >> 8) & mask;
-        dst = (lUInt8)n1;
+        const lUInt8 opaque = alpha ^ 0xFF;
+        const lUInt8 n1 = ((dst * alpha + src * opaque) >> 8) & mask;
+        dst = n1;
     }
 }
 
-/*
-void ApplyAlphaGray8( lUInt8 &dst, lUInt8 src, lUInt8 alpha )
+inline void ApplyAlphaGray8( lUInt8 &dst, lUInt8 src, lUInt8 alpha, lUInt8 opaque )
 {
     if ( alpha==0 ) {
         dst = src;
     } else if ( alpha < 255 ) {
-        lUInt8 opaque = alpha ^ 0xFF;
-        lUInt8 v = ((dst * alpha + src * opaque) >> 8);
-        dst = (lUInt8) v;
+        const lUInt8 v = ((dst * alpha + src * opaque) >> 8);
+        dst = v;
     }
 }
-*/

@@ -1890,6 +1890,7 @@
     <string name="do_not_move">Не перемещать</string>
     <string name="offline_dics">Оффлайновые словари</string>
     <string name="dic_article_dlg">Словарная статья</string>
+    <string name="dic_article_dlg2">Перевод</string>
     <string name="found_dics">Найденные словари</string>
     <string name="imported_dics">Импортированные словари</string>
     <string name="options_selection_action_toolbar_short">Панель словарей</string>

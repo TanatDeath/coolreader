@@ -896,6 +896,7 @@ public class Utils {
 		new OPDSUtil.SubstTable(0x430, new String[]{"a", "b", "v", "g", "d", "e", "zh", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "c", "ch", "sh", "sch", "'", "y", "i", "e", "yu", "ya"}),
 		new OPDSUtil.SubstTable(0x410, new String[]{"A", "B", "V", "G", "D", "E", "Zh", "Z", "I", "J", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "F", "H", "C", "Ch", "Sh", "Sch", "'", "Y", "I", "E", "Yu", "Ya"}),
 	};
+
 	public static String transcribeWithLimit(String str, int maxLen) {
 		str = transcribeFileName(str);
 		if (str.length() > maxLen)
@@ -1192,6 +1193,7 @@ public class Utils {
 	}
 
 	public static void setBtnBackground(Object o, Drawable d, boolean isEInk) {
+		if (o == null) return;
 		if (o instanceof Button) {
 			Button btn = (Button) o;
 			if (!isEInk)

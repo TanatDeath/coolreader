@@ -908,6 +908,13 @@ public class TTSToolbarDlg implements Settings {
 
 		mPanel.setFocusable(true);
 		mPanel.setEnabled(true);
+		mPanel.setOnClickListener(v -> {
+			if (controlsIsHidden) {
+				controlsIsHidden = false;
+				llTopLine.setVisibility(controlsIsHidden ? View.INVISIBLE : View.VISIBLE);
+				llBottomLine.setVisibility(controlsIsHidden ? View.INVISIBLE : View.VISIBLE);
+			}
+		});
 		mPanel.setOnKeyListener((v, keyCode, event) -> {
 			if ( event.getAction()==KeyEvent.ACTION_UP ) {
 				switch ( keyCode ) {

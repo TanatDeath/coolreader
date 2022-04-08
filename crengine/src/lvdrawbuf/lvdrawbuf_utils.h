@@ -62,9 +62,8 @@ void ApplyAlphaRGB( lUInt32 &dst, lUInt32 src, lUInt32 alpha );
 
 void ApplyAlphaRGB565( lUInt16 &dst, lUInt16 src, lUInt32 alpha );
 
-// obsoleted, ready to remove
-void ApplyAlphaGray( lUInt8 &dst, lUInt8 src, lUInt32 alpha, int bpp );
+void ApplyAlphaGray( lUInt32 &dst, lUInt32 src, lUInt32 alpha, int bpp );
 
-//void ApplyAlphaGray8( lUInt8 &dst, lUInt8 src, lUInt8 alpha );
+void ApplyAlphaGray8( lUInt8 &dst, lUInt8 src, lUInt8 alpha, lUInt8 opaque );
 
 #endif  // __LVDRAWBUF_UTILS_H_INCLUDED__

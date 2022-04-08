@@ -34,6 +34,7 @@ public class ExtDicList extends BaseListView {
 	private Handler mHandler;
 	private Runnable mHandleDismiss;
 	public static int mColorIconL = Color.GRAY;
+	private boolean mFullMode;
 
 	static class ExtDicAdapter extends BaseAdapter {
 
@@ -111,7 +112,9 @@ public class ExtDicList extends BaseListView {
 				Button btnOpen = view.findViewById(R.id.dic_more);
 				btnOpen.setPadding(10, 4, 10, 4);
 				btnOpen.setOnClickListener(v -> {
-					DicArticleDlg dad = new DicArticleDlg(DicToastView.mActivity, curToast, mColorIconL, position, null);
+					DicArticleDlg dad = new DicArticleDlg("DicArticleDlgDetailed",
+							DicToastView.mActivity, curToast,
+							position);
 					dad.show();
 				});
 				Utils.setSolidButton(btnOpen);
@@ -216,7 +219,9 @@ public class ExtDicList extends BaseListView {
 		}
 	}
 
-	public ExtDicList(CoolReader coolReader, DicToastView.Toast t, DicStruct ds, Handler mHandler, Runnable mHandleDismiss, int colorIconL) {
+	public ExtDicList(CoolReader coolReader, DicToastView.Toast t,
+					  DicStruct ds, Handler mHandler, Runnable mHandleDismiss,
+					  boolean articleMode) {
 		super(coolReader, true);
 		this.mCoolReader = coolReader;
 		this.dicStruct = t.dicStruct;
@@ -224,10 +229,10 @@ public class ExtDicList extends BaseListView {
 		this.findText = t.sFindText;
 		this.mHandler = mHandler;
 		this.mHandleDismiss = mHandleDismiss;
-		this.mColorIconL = colorIconL;
+		this.mFullMode = articleMode;
 		setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		setLongClickable(true);
-		setAdapter(new ExtDicAdapter(t, ds, mHandler == null));
+		setAdapter(new ExtDicAdapter(t, ds, articleMode));
 		setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
 			//openContextMenu(DictList.this);
 			return true;
@@ -236,7 +241,8 @@ public class ExtDicList extends BaseListView {
 
 	@Override
 	public boolean performItemClick(View view, int position, long id) {
-		Dictionaries.saveToDicSearchHistory(mCoolReader, findText, dicStruct.getTranslation(position), DicToastView.mListCurDict);
+		Dictionaries.saveToDicSearchHistory(mCoolReader, findText,
+				dicStruct.getTranslation(position), DicToastView.mListCurDict);
 		if ((mCoolReader.getReaderView() == null) ||
 				(mCoolReader.mCurrentFrame != mCoolReader.mReaderFrame)) {
 			ClipboardManager cm = mCoolReader.getClipboardmanager();

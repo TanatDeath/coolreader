@@ -28,6 +28,7 @@ import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.dic.struct.DictEntry;
 import org.coolreader.dic.struct.Lemma;
 import org.coolreader.dic.struct.TranslLine;
+import org.coolreader.dic.struct.dsl4j.DicStructVisitor;
 import org.coolreader.library.AuthorAlias;
 import org.coolreader.userdic.UserDicEntry;
 import org.coolreader.utils.StrUtils;
@@ -57,7 +58,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 55;
+	public static final int DB_VERSION = 56;
 
 	@Override
 	protected boolean upgradeSchema() {
@@ -694,6 +695,17 @@ public class MainDB extends BaseDB {
 
 			if (currentVersion < 55) {
 				addOPDSCatalogs(DEF_OPDS_URLS4);
+			}
+
+			if (currentVersion < 56) {
+				execSQL("CREATE TABLE IF NOT EXISTS book_calendar (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						"book_fk INTEGER NOT NULL REFERENCES book (id), " +
+						"read_date INTEGER, " +
+						"time_spent_sec INTEGER " +
+						")");
+				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+						"book_calendar_index ON book_calendar (book_fk, read_date) ");
 			}
 
 			//==============================================================
@@ -4736,32 +4748,38 @@ public class MainDB extends BaseDB {
 		}
 		if (((sdil.dslExists) || (sdil.dslDzExists)) && (sdil.dslDic != null) && (sdil.idxExists)) {
 			try {
-				PlainDslVisitor plainDslVisitor = new PlainDslVisitor();
-				HtmlDslVisitor htmlDslVisitor = new HtmlDslVisitor();
+				//PlainDslVisitor plainDslVisitor = new PlainDslVisitor();
+				//HtmlDslVisitor htmlDslVisitor = new HtmlDslVisitor();
+				DicStructVisitor dicStructVisitor = new DicStructVisitor();
 				DslResult dslResult;
 				if (extended)
 					dslResult = sdil.dslDic.lookupPredictive(searchStr);
 				else
 					dslResult = sdil.dslDic.lookup(searchStr);
-				for (Map.Entry<String, String> entry: dslResult.getEntries(plainDslVisitor)) {
-					Lemma le = new Lemma();
-					DictEntry de = new DictEntry();
-					de.dictLinkText = entry.getKey();
-					le.dictEntries.add(de);
-					TranslLine translLine = new TranslLine();
-					translLine.transText = entry.getValue();
-					translLine.transGroup = sdil.dicName;
-					le.translLines.add(translLine);
-					dsl.lemmas.add(le);
-				}
-				int i = 0;
-				for (Map.Entry<String, String> entry: dslResult.getEntries(htmlDslVisitor)) {
-					Lemma le = dsl.lemmas.get(i);
-					if (le != null) {
-						le.translLines.get(0).transTextHTML = entry.getValue();
+				for (Map.Entry<String, List<Lemma>> entry: dslResult.getEntries(dicStructVisitor)) {
+					List<Lemma> lemmas = entry.getValue();
+					for (Lemma lemma: lemmas) {
+						DictEntry de = new DictEntry();
+						de.dictLinkText = sdil.dicName;
+						lemma.dictEntries.add(de);
+						for (TranslLine translLine: lemma.translLines) {
+							translLine.transGroup = entry.getKey() + ", " + lemma.lemmaText;
+						}
+						dsl.lemmas.add(lemma);
 					}
-					i++;
 				}
+//				int i = 0;
+//				for (Map.Entry<String, String> entry: dslResult.getEntries(htmlDslVisitor)) {
+//					Lemma le = dsl.lemmas.get(i);
+//					if (le != null) {
+//						le.translLines.get(0).transTextHTML = entry.getValue();
+//					}
+//					i++;
+//				}
+//				for (Map.Entry<String, String> entry: dslResult.getEntries(dicStructVisitor)) {
+//					String s = entry.getValue();
+//					log.w("VISITOR:" + s);
+//				}
 			} catch (Exception e) {
 				log.w("Dictionary lookup failed: " + sdil.dicPath + "\n" + e.getMessage());
 			}
@@ -4817,7 +4835,7 @@ public class MainDB extends BaseDB {
 							sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
 						} else if (!sdil.db.isOpen())
 							sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
-						if (sdil.db.isOpen()) findInOfflineDict1Dic(dsl, sdil, searchStr, false);
+						if (sdil.db.isOpen()) findInOfflineDict1Dic(dsl, sdil, searchStr, extended);
 					}
 					if (((sdil.dslExists) || (sdil.dslDzExists)) && (sdil.idxExists)) {
 						if (sdil.dslDic == null) {

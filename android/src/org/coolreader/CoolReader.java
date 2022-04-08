@@ -46,6 +46,7 @@ import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.ReadingStatRes;
 import org.coolreader.crengine.ResizeHistory;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
+import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.DictsDlg;
 import org.coolreader.dic.TranslationDirectionDialog;
@@ -154,6 +155,7 @@ import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 
 import android.os.Environment;
+import android.os.Handler;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.text.TextUtils;
@@ -3622,7 +3624,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void createLogcatFile() {
-		final SimpleDateFormat format = new SimpleDateFormat("'cr3-'yyyy-MM-dd_HH_mm_ss'.log'", Locale.US);
+		final SimpleDateFormat format = new SimpleDateFormat("'kr-'yyyy-MM-dd_HH_mm_ss'.log'", Locale.US);
 		FileInfo dir = Services.getScanner().getSharedDownloadDirectory();
 		if (null == dir) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -4979,6 +4981,17 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					}
 				});
 	}
+
+// Почему то не работает
+//	@Override
+//	public void onBackPressed() {
+//		if (DicToastView.curWindow != null) {
+//			Handler handler = new Handler();
+//			handler.postDelayed(DicToastView.handleDismiss, 100);
+//		} else {
+//			super.onBackPressed();
+//		}
+//	}
 
 }
 

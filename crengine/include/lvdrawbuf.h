@@ -117,6 +117,10 @@ public:
     virtual void GetClipRect( lvRect * clipRect ) const = 0;
     /// sets clip rect
     virtual void SetClipRect( const lvRect * clipRect ) = 0;
+    /// gets draw extra info object
+    virtual void * GetDrawExtraInfo() = 0;
+    /// sets draw extra info object
+    virtual void SetDrawExtraInfo( void * ) = 0;
     /// wants to be fed hidden content (only LVInkMeasurementDrawBuf may return true)
     virtual bool WantsHiddenContent() const { return false; }
     /// set to true for drawing in Paged mode, false for Scroll mode

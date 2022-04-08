@@ -48,6 +48,7 @@ public class SelectionToolbarDlg {
 	PopupWindow mWindow;
 	View mAnchor;
 	boolean mIsShort;
+	boolean mIsHorz;
 	CoolReader mActivity;
 	ReaderView mReaderView;
 	View mPanel;
@@ -299,7 +300,6 @@ public class SelectionToolbarDlg {
 	}
 
 	public void toggleAddButtons(boolean dontChange) {
-		if (llButtonsRow2 == null) return;
 		if (llAddButtons == null) return;
 		if (!dontChange) {
 			addButtonEnabled = !addButtonEnabled;
@@ -310,9 +310,9 @@ public class SelectionToolbarDlg {
 				mActivity.setSettings(props, -1, true);
 			}
 		}
-		if (addButtonEnabled) {
-			llButtonsRow2.removeAllViews();
-			llButtonsRow2.addView(llAddButtons);
+		if (addButtonEnabled || mIsHorz) {
+			if (llButtonsRow2 != null) llButtonsRow2.removeAllViews();
+			if (llButtonsRow2 != null) llButtonsRow2.addView(llAddButtons);
 			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 			ColorDrawable c = new ColorDrawable(colorGrayC);
 			String sTranspButtons = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS, "0");
@@ -439,7 +439,8 @@ public class SelectionToolbarDlg {
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
 		} else {
-			llButtonsRow2.removeAllViews();
+			if (llButtonsRow2 != null)
+				llButtonsRow2.removeAllViews();
 		}
 		mActivity.tintViewIcons(mPanel);
 	}
@@ -470,7 +471,20 @@ public class SelectionToolbarDlg {
 		return false;
 	}
 
+	private void setVisibile() {
+		if (!isInvisible) return;
+		isInvisible = false;
+		if (llRecentDics != null) llRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+		if (llAddButtons != null) llAddButtons.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+		if (llButtonsRow != null) llButtonsRow.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+		if (llButtonsRow2 != null) llButtonsRow2.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+		if (llSliderTop != null) llSliderTop.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+		if (llSliderBottom != null) llSliderBottom.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+	}
+
 	private void placeLayouts() {
+		llTopLine.setOnClickListener(v -> setVisibile());
+		llBottomLine.setOnClickListener(v -> setVisibile());
 		if (showAtTop) {
 			llTopLine.removeAllViews();
 			if (!mIsShort) llTopLine.addView(llSliderTop);
@@ -496,7 +510,7 @@ public class SelectionToolbarDlg {
 
 		String sExt = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
 		addButtonEnabled = StrUtils.getNonEmptyStr(sExt, true).equals("1");
-		if ((addButtonEnabled) && (!mIsShort)) toggleAddButtons(true);
+		if (((addButtonEnabled) && (!mIsShort)) || (mIsHorz)) toggleAddButtons(true);
 		initRecentDics();
 		// set up buttons
 		btnVisible = llMiddleContents.findViewById(R.id.btn_visible);
@@ -802,6 +816,7 @@ public class SelectionToolbarDlg {
 		this.selection = sel;
 		stSel = selection;
 		mActivity = coolReader;
+		mIsHorz = Dips.isHorizontalAndWide();
 		props = new Properties(mActivity.settings());
 		mReaderView = readerView;
 		mAnchor = readerView.getSurface();
@@ -815,8 +830,14 @@ public class SelectionToolbarDlg {
 		llSliderTop = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_top, null));
 		llRecentDics = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_recent_dics, null));
 
-		llButtonsRow = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_buttons_row, null));
-		llButtonsRow2 = llButtonsRow.findViewById(R.id.ll_second_buttons_row);
+		if (mIsHorz) {
+			llButtonsRow = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_wide_buttons_row, null));
+			llButtonsRow2 = null;
+			llAddButtons = llButtonsRow;
+		} else {
+			llButtonsRow = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_buttons_row, null));
+			llButtonsRow2 = llButtonsRow.findViewById(R.id.ll_second_buttons_row);
+		}
 
 		llTopLine = panel.findViewById(R.id.top_line);
 		llTopLine.setOnClickListener(v -> {

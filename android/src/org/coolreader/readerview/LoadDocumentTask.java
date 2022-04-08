@@ -52,11 +52,16 @@ public class LoadDocumentTask extends Task {
 			// book language.
 			// Is it OK to do this here???  Should we use isScanned?
 			// Should we use another fileInfo flag or a new flag?
-			mReaderView.mEngine.scanBookProperties(fileInfo);
-			if (StrUtils.isEmptyStr(fileInfo.getAuthors()))
-				fileInfo = FileUtils.getFileProps(fileInfo, new File(fileInfo.getBasePath()),
-						new FileInfo(new File(fileInfo.getBasePath()).getParent()), true);
-			if (StrUtils.isEmptyStr(fileInfo.getAuthors())) Services.getEngine().scanBookProperties(fileInfo);
+			try {
+				mReaderView.mEngine.scanBookProperties(fileInfo);
+				if (StrUtils.isEmptyStr(fileInfo.getAuthors()))
+					fileInfo = FileUtils.getFileProps(fileInfo, new File(fileInfo.getBasePath()),
+							new FileInfo(new File(fileInfo.getBasePath()).getParent()), true);
+				if (StrUtils.isEmptyStr(fileInfo.getAuthors()))
+					Services.getEngine().scanBookProperties(fileInfo);
+			} catch (Exception e) {
+				log.v("Error scanning file properties");
+			}
 		}
 		String language = fileInfo.getLanguage();
 		log.v("update hyphenation language: " + language + " for " + fileInfo.getTitle());

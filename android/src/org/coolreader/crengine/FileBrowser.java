@@ -1076,7 +1076,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	Integer visibleItemCount = 0;
 
 	public void filterUpdated(String text) {
-		boolean bStateDir = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_DIR, true);
+		if (currDirectory == null) return;
+ 		boolean bStateDir = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_DIR, true);
 		boolean bStateNoMark = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_NO_MARK, true);
 		boolean bStateToRead = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_TO_READ, true);
 		boolean bStateReading = mActivity.settings().getBool(Settings.PROP_APP_SHOW_FILES_READING, true);

@@ -1808,11 +1808,13 @@ public class BaseActivity extends Activity implements Settings {
 			if (((CoolReader) this).getReaderView() != null) {
 				if (((CoolReader) this).getReaderView().getSurface() != null) {
 					bShown = true;
-					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), dicT, dicName);
+					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(),
+							dicT, dicName);
 				}
 			} else {
 				bShown = true;
-				showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).mHomeFrame, dicT, dicName);
+				showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).mHomeFrame,
+						dicT, dicName);
 			}
 		}
 		if (!bShown) {
@@ -1841,19 +1843,23 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
-	public void showDicToast(String s, String msg, int duration, View view, int dicT, String dicName) {
+	public void showDicToast(String s, String msg, int duration, View view, int dicT,
+							 String dicName) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
-		DicToastView.showToast(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName);
+		DicToastView.showToast(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
+				!StrUtils.isEmptyStr(((CoolReader) this).lastDicText));
 	}
 
 	public void showDicToastExt(String s, String msg, int duration, View view, int dicT, String dicName,
-								Dictionaries.DictInfo curDict, Object dicStructObject) {
+								Dictionaries.DictInfo curDict,
+								Object dicStructObject) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
-		DicToastView.showToastExt(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName, curDict, dicStructObject);
+		DicToastView.showToastExt(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
+				curDict, dicStructObject, !StrUtils.isEmptyStr(((CoolReader) this).lastDicText));
 	}
 
 	public void showDicToastWiki(String s, String msg, int duration, View view, int dicT, String dicName,
@@ -1863,7 +1869,8 @@ public class BaseActivity extends Activity implements Settings {
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showToastWiki(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
-				curDict, link, link2, curAction, useFirstLink, picAddr);
+				curDict, link, link2, curAction, useFirstLink, picAddr,
+				!StrUtils.isEmptyStr(((CoolReader) this).lastDicText));
 	}
 
 	public void showWikiListToast(String s, String msg, View view, int dicT, String dicName, ArrayList<WikiArticle> arrWA,

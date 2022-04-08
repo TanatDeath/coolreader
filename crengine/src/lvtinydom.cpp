@@ -87,7 +87,7 @@ extern const int gDOMVersionCurrent = DOM_VERSION_CURRENT;
 // increment to force complete reload/reparsing of old file
 #define CACHE_FILE_FORMAT_VERSION "3.12.84"
 /// increment following value to force re-formatting of old book after load
-#define FORMATTING_VERSION_ID 0x0029
+#define FORMATTING_VERSION_ID 0x002B
 
 #ifndef DOC_DATA_COMPRESSION_LEVEL
 /// data compression level (0=no compression, 1=fast compressions, 3=normal compression)
@@ -12320,16 +12320,30 @@ inline bool IsUnicodeSpaceOrNull( lChar32 ch )
     return ch==0 || IsUnicodeSpace(ch);
 }
 
+inline bool IsStandaloneWord( lChar32 ch ) {
+    return lStr_isCJK(ch) || (lGetCharProps(ch) & CH_PROP_SIGN);
+}
+
 // Note:
-//  ALL calls to IsUnicodeSpace and IsUnicodeSpaceOrNull in
-//  the *VisibleWord* functions below have been replaced with
-//  calls to IsWordSeparator and IsWordSeparatorOrNull.
-//  The *Sentence* functions have not beed modified, and have not been
-//  tested against this change to the *VisibleWord* functions that
-//  they use (but KOReader does not use these *Sentence* functions).
-//
-// plotn: KnownReader - *Sentence* functions have beed modified and work almost normally
-// thus the selection became not by sentences, but by indents
+//  ALL calls to IsUnicodeSpace and IsUnicodeSpaceOrNull (and to now
+//  removed IsWordSeparator) and to IsStandaloneWord in the *VisibleWord*
+//  functions below have been updated to use IsWordChar and IsWordBoundary.
+//  The *Sentence* and *VisibleWord*InSentence* (used for TTS in CoolReader)
+//  functions have not beed modified.
+
+inline bool IsWordChar( lChar32 ch ) {
+    // Include alpha, diacritic (assuming that they follow an alpha) and digits (multiple
+    // of them can make a word), but also sign/symbols (which each makes a word)
+    return (lGetCharProps(ch) & (CH_PROP_ALPHA|CH_PROP_MODIFIER|CH_PROP_HYPHEN|CH_PROP_DIGIT|CH_PROP_SIGN));
+}
+
+inline bool IsWordBoundary( lChar32 ch ) {
+    // Include spaces, punctuations, but also CJK and sign/symbols (which themselves
+    // are a boundary of the single-char word they are).
+    // (A non-CJK alpha might be a word boundary, but it becomes one only when near one of
+    // the word boundary we are catching here.)
+    return !(lGetCharProps(ch) & (CH_PROP_ALPHA|CH_PROP_MODIFIER|CH_PROP_HYPHEN|CH_PROP_DIGIT)) || lStr_isCJK(ch);
+}
 
 // For better accuracy than IsUnicodeSpace for detecting words
 inline bool IsWordSeparator( lChar32 ch )
@@ -12358,16 +12372,24 @@ bool ldomXPointerEx::isVisibleWordChar() {
         return false;
     ldomNode * node = getNode();
     lString32 text = node->getText();
-    return !IsWordSeparator(text[_data->getOffset()]);
+    return IsWordChar(text[_data->getOffset()]);
 }
 
-/// move to previous visible word beginning
+/// Note about the following (prev|next)VisibleWord(Start|End) functions:
+// The way they are currently used, these function names are to be
+// read as: move to previous "visible word start",
+// NOT as: move to "previous visible word"'s start!
+// If we are inside a word: move to this word's start.
+// If we are already at a word start: move to previous word start.
+
+/// move to previous visible-word-start
 bool ldomXPointerEx::prevVisibleWordStart( bool thisBlockOnly )
 {
     if ( isNull() )
         return false;
     ldomNode * node = NULL;
     lString32 text;
+    bool moved = false;
     for ( ;; ) {
         if ( !isText() || !isVisible() || _data->getOffset()==0 ) {
             // move to previous text
@@ -12377,27 +12399,40 @@ bool ldomXPointerEx::prevVisibleWordStart( bool thisBlockOnly )
             text = node->getText();
             int textLen = text.length();
             _data->setOffset( textLen );
+            moved = true;
         } else {
             node = getNode();
             text = node->getText();
         }
-        bool foundNonSeparator = false;
-        while ( _data->getOffset() > 0 && IsWordSeparator(text[_data->getOffset()-1]) )
-            _data->addOffset(-1); // skip preceeding space if any (we were on a visible word start)
-        while ( _data->getOffset()>0 ) {
-            if ( IsWordSeparator(text[ _data->getOffset()-1 ]) )
+
+        while ( _data->getOffset() >= 0 ) {
+            if ( moved && IsWordChar(text[_data->getOffset()]) ) {
+                // Only if we have previously moved (and so skipped char at original
+                // position if it was already a word start)
+                if ( _data->getOffset() == 0 ) {
+                    // start of text node makes this word char a word start
+                    return true;
+                }
+                if ( IsWordBoundary(text[_data->getOffset()]) ) {
+                    // this word char is a CJK or symbol: it is its own single char word's start
+                    return true;
+                }
+                if ( IsWordBoundary(text[_data->getOffset()-1]) ) {
+                    // previous char is CJK/symbol/punct, and makes this word char a word start
+                    return true;
+                }
+            }
+            if ( _data->getOffset() == 0 ) {
+                // No word char met: go check previous text node
                 break;
-            foundNonSeparator = true;
+            }
             _data->addOffset(-1);
-            if ( canWrapWordBefore( text[_data->getOffset()] ) ) // CJK char
-                break;
+            moved = true;
         }
-        if ( foundNonSeparator )
-            return true;
     }
 }
 
-/// move to previous visible word end
+/// move to previous visible-word-end
 bool ldomXPointerEx::prevVisibleWordEnd( bool thisBlockOnly )
 {
     if ( isNull() )
@@ -12419,33 +12454,33 @@ bool ldomXPointerEx::prevVisibleWordEnd( bool thisBlockOnly )
             node = getNode();
             text = node->getText();
         }
-        // skip separators
-        while ( _data->getOffset() > 0 && IsWordSeparator(text[_data->getOffset()-1]) ) {
+
+        // Note: end/right offset is excluding, so it's the previous char that
+        // we expect to be a word end
+        // We will stop with the offset on the char after such a word end
+        // (the returned offset can't be 0).
+        while ( _data->getOffset() > 0 ) {
+            if ( moved && IsWordChar(text[_data->getOffset()-1]) ) {
+                // Only if we have previously moved (and so skipped char at original
+                // position if it was already a word end)
+                if ( IsWordBoundary(text[_data->getOffset()]) ) {
+                    // current char is CJK/symbol/punct, and makes the previous word char a word end
+                    return true;
+                }
+                if ( IsWordBoundary(text[_data->getOffset()-1]) ) {
+                    // previous word char is a CJK or symbol: it is its own single char word's end
+                    return true;
+                }
+            }
             _data->addOffset(-1);
             moved = true;
         }
-        if ( moved && _data->getOffset()>0 )
-            return true; // found!
-        // skip non-separators
-        while ( _data->getOffset()>0 ) {
-            if ( IsWordSeparator(text[ _data->getOffset()-1 ]) )
-                break;
-            if ( moved && canWrapWordAfter( text[_data->getOffset()] ) ) // We moved to a CJK char
-                return true;
-            moved = true;
-            _data->addOffset(-1);
-        }
-        // skip separators
-        while ( _data->getOffset() > 0 && IsWordSeparator(text[_data->getOffset()-1]) ) {
-            _data->addOffset(-1);
-            moved = true;
-        }
-        if ( moved && _data->getOffset()>0 )
-            return true; // found!
+        // We leave with offset=0 (which can't be a word end):
+        // go check previous text node
     }
 }
 
-/// move to next visible word beginning
+/// move to next visible-word-start
 bool ldomXPointerEx::nextVisibleWordStart( bool thisBlockOnly )
 {
     if ( isNull() )
@@ -12483,65 +12518,36 @@ bool ldomXPointerEx::nextVisibleWordStart( bool thisBlockOnly )
 //        lChar32 nextCh = (i+1)<textLen ? text[i+1] : 0;
 //        lChar32 nextCh2 = (i+2)<textLen ? text[i+2] : 0;
 //        lChar32 nextCh3 = (i+3)<textLen ? text[i+3] : 0;
-        // skip separators
-        while ( _data->getOffset()<textLen && IsWordSeparator(text[ _data->getOffset() ]) ) {
+
+        // The end of a text node can't be a word start
+        // (the returned offset can't be textLen).
+        while ( _data->getOffset() < textLen ) {
+            if ( moved && IsWordChar(text[_data->getOffset()]) ) {
+                // Only if we have previously moved (and so skipped char at original
+                // position if it was already a word start)
+                if ( _data->getOffset() == 0 ) {
+                    // start of text node (so, a new text node, as we have moved) makes
+                    // this word char a word start
+                    return true;
+                }
+                if ( IsWordBoundary(text[_data->getOffset()]) ) {
+                    // this word char is a CJK or symbol: it is its own single char word's start
+                    return true;
+                }
+                if ( IsWordBoundary(text[_data->getOffset()-1]) ) {
+                    // previous char is CJK/symbol/punct, and makes this word char a word start
+                    return true;
+                }
+            }
             _data->addOffset(1);
             moved = true;
         }
-        if ( moved && _data->getOffset()<textLen )
-            return true;
-        // skip non-separators
-        while ( _data->getOffset()<textLen ) {
-            if ( IsWordSeparator(text[ _data->getOffset() ]) )
-                break;
-            if ( moved && canWrapWordBefore( text[_data->getOffset()] ) ) // We moved to a CJK char
-                return true;
-            moved = true;
-            _data->addOffset(1);
-        }
-        // skip separators
-        while ( _data->getOffset()<textLen && IsWordSeparator(text[ _data->getOffset() ]) ) {
-            _data->addOffset(1);
-            moved = true;
-        }
-        if ( moved && _data->getOffset()<textLen )
-            return true;
+        // We leave with offset=textLen (which can't be a word start):
+        // go check next text node
     }
 }
 
-/// move to end of current word
-bool ldomXPointerEx::thisVisibleWordEnd(bool thisBlockOnly)
-{
-    CR_UNUSED(thisBlockOnly);
-    if ( isNull() )
-        return false;
-    ldomNode * node = NULL;
-    lString32 text;
-    int textLen = 0;
-    bool moved = false;
-    if ( !isText() || !isVisible() )
-        return false;
-    node = getNode();
-    text = node->getText();
-    textLen = text.length();
-    if ( _data->getOffset() >= textLen )
-        return false;
-    // skip separators
-    while ( _data->getOffset()<textLen && IsWordSeparator(text[ _data->getOffset() ]) ) {
-        _data->addOffset(1);
-        //moved = true;
-    }
-    // skip non-separators
-    while ( _data->getOffset()<textLen ) {
-        if ( IsWordSeparator(text[ _data->getOffset() ]) )
-            break;
-        moved = true;
-        _data->addOffset(1);
-    }
-    return moved;
-}
-
-/// move to next visible word end
+/// move to next visible-word-end
 bool ldomXPointerEx::nextVisibleWordEnd( bool thisBlockOnly )
 {
     if ( isNull() )
@@ -13325,24 +13331,33 @@ public:
         if ( len>end )
             len = end;
         int beginOfWord = -1;
-        for ( int i=nodeRange->getStart().getOffset(); i <= len; i++ ) {
-            // int alpha = lGetCharProps(text[i]) & CH_PROP_ALPHA;
-            // Also allow digits (years, page numbers) to be considered words
-            // int alpha = lGetCharProps(text[i]) & (CH_PROP_ALPHA|CH_PROP_DIGIT|CH_PROP_HYPHEN);
-            // We use lStr_isWordSeparator() as the other word finding/skipping functions do,
-            // so they all share the same notion of what a word is.
-            int alpha = !lStr_isWordSeparator(text[i]); // alpha, number, CJK char
-            if (alpha && beginOfWord<0 ) {
-                beginOfWord = i;
-            }
-            if ( !alpha && beginOfWord>=0) { // space, punctuation, sign, paren...
+        for ( int i=nodeRange->getStart().getOffset(); i < len; i++ ) {
+            // We follow the same logic as the prev/nextVisibleWordStart/End() functions,
+            // and do as IsWordChar()/IsWordBoundary() that they use.
+            lUInt16 props = lGetCharProps(text[i]);
+            bool is_word_char = props & (CH_PROP_ALPHA|CH_PROP_MODIFIER|CH_PROP_HYPHEN|CH_PROP_DIGIT|CH_PROP_SIGN);
+            bool is_word_boundary = !(props & (CH_PROP_ALPHA|CH_PROP_MODIFIER|CH_PROP_HYPHEN|CH_PROP_DIGIT))
+                                    || lStr_isCJK(text[i]);
+            if ( is_word_boundary && beginOfWord>=0) {
+                // space, punctuation, sign, cjk... do end previous word
                 _list.add( ldomWord( node, beginOfWord, i ) );
                 beginOfWord = -1;
             }
-            if (lGetCharProps(text[i]) == CH_PROP_CJK && i < len) { // a CJK char makes its own word
-                _list.add( ldomWord( node, i, i+1 ) );
-                beginOfWord = -1;
+            if ( is_word_char ) {
+                if ( is_word_boundary ) {
+                    // A CJK char or a sign makes its own word
+                    _list.add( ldomWord( node, i, i+1 ) );
+                }
+                else {
+                    // Consecutive alpha/diacritic/softhyphens/digits will make a word
+                    if ( beginOfWord<0 ) {
+                        beginOfWord = i;
+                    }
+                }
             }
+        }
+        if ( beginOfWord>=0 ) {
+            _list.add( ldomWord( node, beginOfWord, len ) );
         }
     }
     /// called for each found node in range
@@ -19580,7 +19595,9 @@ void ldomDocument::setNodeNumberingProps( lUInt32 nodeDataIndex, ListNumberingPr
 }
 
 /// returns the sum of this node and its parents' top and bottom margins, borders and paddings
-int ldomNode::getSurroundingAddedHeight()
+/// (provide account_height_below_strut_baseline=true for images, as they align on the baseline,
+/// so their container would be larger because of the strut)
+int ldomNode::getSurroundingAddedHeight(bool account_height_below_strut_baseline)
 {
     int h = 0;
     ldomNode * n = this;
@@ -19602,6 +19619,51 @@ int ldomNode::getSurroundingAddedHeight()
             h += lengthToPx( n, style->padding[3], base_width ); // bottom padding
             h += measureBorder(n, 0); // top border
             h += measureBorder(n, 2); // bottom border
+            if ( account_height_below_strut_baseline && rm == erm_final ) {
+                if ( n == this && (getNodeId() == el_img || getNodeId() == el_image) ) {
+                    // We're usually called on an image by lvtextfm.cpp, where lvrend.cpp,
+                    // for erm_final images, provides a strut of (0,0): so, ignore
+                    // any computation from the font associated to this image.
+                }
+                else {
+                    // Get line height as in renderFinalBlock()
+                    int em = n->getFont()->getSize();
+                    int fh = n->getFont()->getHeight();
+                    int fb = n->getFont()->getBaseline();
+                    int line_h;
+                    if (gRenderDPI) {
+                        if ( style->line_height.type == css_val_unspecified &&
+                             style->line_height.value == css_generic_normal ) {
+                            line_h = fh; // line-height: normal
+                        }
+                        else {
+                            line_h = lengthToPx(n, style->line_height, em, em, true);
+                        }
+                    }
+                    else { // legacy (former code used font height for everything)
+                        switch( style->line_height.type ) {
+                            case css_val_percent:
+                            case css_val_em:
+                                line_h = lengthToPx(n, style->line_height, fh, fh);
+                                break;
+                            default: // Use font height (as line_h=16 in former code)
+                                line_h = fh;
+                                break;
+                        }
+                    }
+                    if (line_h < 0) { // shouldn't happen
+                        line_h = n->getFont()->getHeight(); // line-height: normal
+                    }
+                    int f_half_leading = (line_h - fh) / 2;
+                    int baseline_to_bottom = line_h - fb - f_half_leading;
+                    // Account the height below the strut baseline (but not
+                    // if negative, ie. when a small line-height has pushed
+                    // the baseline below the line box)
+                    if ( baseline_to_bottom > 0 ) {
+                        h += baseline_to_bottom;
+                    }
+                }
+            }
         }
         if ( !parent || parent->isNull() )
             break;

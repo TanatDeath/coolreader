@@ -1929,6 +1929,7 @@
     <string name="do_not_move">Do not move</string>
     <string name="offline_dics">Offline dics</string>
     <string name="dic_article_dlg">Dictionary article</string>
+    <string name="dic_article_dlg2">Translation</string>
     <string name="found_dics">Found dics</string>
     <string name="imported_dics">Imported dics</string>
     <string name="options_selection_action_toolbar_short">Dictionary panel</string>
