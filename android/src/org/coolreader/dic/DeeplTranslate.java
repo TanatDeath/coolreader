@@ -23,7 +23,7 @@ public class DeeplTranslate {
 	public static int unauthCntDeepl = 0;
 	public static boolean deeplAuthenticated = false;
 
-	public void deeplAuthThenTranslate(CoolReader cr, String s, String langf, String lang, Dictionaries.DictInfo curDict,
+	public void deeplAuthThenTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang, Dictionaries.DictInfo curDict,
 										View view, CoolReader.DictionaryCallback dcb) {
 		deeplAuthenticated = false;
 		cr.readDeeplCloudSettings();
@@ -49,10 +49,12 @@ public class DeeplTranslate {
 					BackgroundThread.instance().postBackground(() ->
 							BackgroundThread.instance().postGUI(() -> {
 								if (dcb == null)
-									cr.showDicToast(cr.getString(R.string.dict_err), finalSErr, DicToastView.IS_DEEPL, "");
+									cr.showDicToast(cr.getString(R.string.dict_err), finalSErr, DicToastView.IS_DEEPL,
+											"", fullScreen);
 								else {
 									if (dcb.showDicToast())
-										cr.showDicToast(cr.getString(R.string.dict_err), finalSErr, DicToastView.IS_DEEPL, "");
+										cr.showDicToast(cr.getString(R.string.dict_err), finalSErr, DicToastView.IS_DEEPL,
+												"", fullScreen);
 									dcb.fail(null, finalSErr);
 								}
 							}, 100));
@@ -63,11 +65,13 @@ public class DeeplTranslate {
 							BackgroundThread.instance().postGUI(() -> {
 								if (dcb == null)
 									cr.showDicToast(cr.getString(R.string.dict_err),
-											cr.getString(R.string.http_error) + " " + response.code(), DicToastView.IS_DEEPL, "");
+											cr.getString(R.string.http_error) + " " + response.code(), DicToastView.IS_DEEPL,
+											"", fullScreen);
 								else {
 									if (dcb.showDicToast())
 										cr.showDicToast(cr.getString(R.string.dict_err),
-												cr.getString(R.string.http_error) + " " + response.code(), DicToastView.IS_DEEPL, "");
+												cr.getString(R.string.http_error) + " " + response.code(), DicToastView.IS_DEEPL,
+												"", fullScreen);
 									dcb.fail(null, cr.getString(R.string.http_error) + " " + response.code());
 								}
 							}, 100));
@@ -75,7 +79,9 @@ public class DeeplTranslate {
 				}
 				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 					deeplAuthenticated = true;
-					deeplTranslate(cr, s, deeplGetDefLangCode(langf, true), deeplGetDefLangCode(lang, true), curDict, view, dcb);
+					deeplTranslate(cr, s, fullScreen,
+							deeplGetDefLangCode(langf, true), deeplGetDefLangCode(lang, true),
+							curDict, view, dcb);
 				}, 100));
 			}
 			public void onFailure(Call call, IOException e) {
@@ -83,11 +89,11 @@ public class DeeplTranslate {
 						BackgroundThread.instance().postGUI(() -> {
 							if (dcb == null)
 								cr.showDicToast(cr.getString(R.string.dict_err),
-										e.getMessage(), DicToastView.IS_DEEPL, "");
+										e.getMessage(), DicToastView.IS_DEEPL, "", fullScreen);
 							else {
 								if (dcb.showDicToast())
 									cr.showDicToast(cr.getString(R.string.dict_err),
-											e.getMessage(), DicToastView.IS_DEEPL, "");
+											e.getMessage(), DicToastView.IS_DEEPL, "", fullScreen);
 								dcb.fail(e, e.getMessage());
 							}
 						}, 100));
@@ -116,10 +122,11 @@ public class DeeplTranslate {
 		return StrUtils.getNonEmptyStr(langCode, true).toUpperCase();
 	}
 
-	public void deeplTranslate(CoolReader cr, String s, String langf, String lang,
+	public void deeplTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang,
 								Dictionaries.DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		if (!FlavourConstants.PREMIUM_FEATURES) {
-			cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_DEEPL, "");
+			cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
+					DicToastView.IS_DEEPL, "", fullScreen);
 			return;
 		}
 		if ((StrUtils.isEmptyStr(langf))||(StrUtils.isEmptyStr(lang))) {
@@ -127,7 +134,7 @@ public class DeeplTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.translate_lang_not_set)+": ["
 									+langf+"] -> ["+lang + "]",
-							DicToastView.IS_DEEPL, "")
+							DicToastView.IS_DEEPL, "", fullScreen)
 					, 100));
 			return;
 		}
@@ -154,7 +161,7 @@ public class DeeplTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.translate_lang_not_found)+": ["
 									+langf + "] -> ["+lang + "]",
-							DicToastView.IS_DEEPL, ""), 100));
+							DicToastView.IS_DEEPL, "", fullScreen), 100));
 			return;
 		}
 		HttpUrl.Builder urlBuilder;
@@ -184,11 +191,11 @@ public class DeeplTranslate {
 								if (dcb == null)
 									cr.showDicToast(cr.getString(R.string.dict_err),
 											finalSErr,
-											DicToastView.IS_DEEPL, "");
+											DicToastView.IS_DEEPL, "", fullScreen);
 								else {
 									if (dcb.showDicToast()) cr.showDicToast(cr.getString(R.string.dict_err),
 											finalSErr,
-											DicToastView.IS_DEEPL, "");
+											DicToastView.IS_DEEPL, "", fullScreen);
 									dcb.fail(null, finalSErr);
 								}
 							}, 100));
@@ -201,12 +208,12 @@ public class DeeplTranslate {
 								if (dcb == null)
 									cr.showDicToast(cr.getString(R.string.dict_err),
 										cr.getString(R.string.http_error) + " " + response.code(),
-										DicToastView.IS_DEEPL, "");
+										DicToastView.IS_DEEPL, "", fullScreen);
 								else {
 									if (dcb.showDicToast())
 										cr.showDicToast(cr.getString(R.string.dict_err),
 												cr.getString(R.string.http_error) + " " + response.code(),
-												DicToastView.IS_DEEPL, "");
+												DicToastView.IS_DEEPL, "", fullScreen);
 									dcb.fail(null, cr.getString(R.string.http_error) + " " + response.code());
 								}
 							}, 100));
@@ -226,13 +233,13 @@ public class DeeplTranslate {
 									String sTrans = jsoT.getJSONObject(0).getString("text");
 									if (StrUtils.isEmptyStr(sTrans)) sTrans = cr.getString(R.string.not_found);
 									if (dcb == null) {
-										cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic);
+										cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic, fullScreen);
 										if (!sTrans.equals(cr.getString(R.string.not_found)))
 											Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
 									} else {
 										dcb.done(sTrans);
 										if (dcb.showDicToast()) {
-											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic);
+											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic, fullScreen);
 										}
 										if (dcb.saveToHist()) {
 											if (!sTrans.equals(cr.getString(R.string.not_found)))
@@ -243,28 +250,28 @@ public class DeeplTranslate {
 									boolean bShowToast = dcb == null;
 									if (!bShowToast) bShowToast = dcb.showDicToast();
 									if (bShowToast) {
-										cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "");
+										cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "", fullScreen);
 									} else dcb.fail(null, sBody);
 								}
 							} else {
 								boolean bShowToast = dcb == null;
 								if (!bShowToast) bShowToast = dcb.showDicToast();
 								if (bShowToast) {
-									cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "");
+									cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "", fullScreen);
 								} else dcb.fail(null, sBody);
 							}
 						} else {
 							boolean bShowToast = dcb == null;
 							if (!bShowToast) bShowToast = dcb.showDicToast();
 							if (bShowToast) {
-								cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "");
+								cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "", fullScreen);
 							} else dcb.fail(null, sBody);
 						}
 					} catch (Exception e) {
 						boolean bShowToast = dcb == null;
 						if (!bShowToast) bShowToast = dcb.showDicToast();
 						if (bShowToast) {
-							cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "");
+							cr.showDicToast(s, sBody, DicToastView.IS_DEEPL, "", fullScreen);
 						} else dcb.fail(e, e.getMessage());
 					}
 				}, 100));
@@ -274,19 +281,19 @@ public class DeeplTranslate {
 				deeplAuthenticated = false;
 				if (unauthCntDeepl == 0) {
 					unauthCntDeepl++;
-					deeplAuthThenTranslate(cr, s, langf, lang, curDict, view, dcb);
+					deeplAuthThenTranslate(cr, s, fullScreen, langf, lang, curDict, view, dcb);
 				} else {
 					if (dcb == null)
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-								DicToastView.IS_DEEPL, "")
+								DicToastView.IS_DEEPL, "", fullScreen)
 						));
 					else {
 						dcb.fail(e, e.getMessage());
 						if (dcb.showDicToast())
 							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 								cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-									DicToastView.IS_DEEPL, "")
+									DicToastView.IS_DEEPL, "", fullScreen)
 							));
 					}
 					unauthCntDeepl = 0;

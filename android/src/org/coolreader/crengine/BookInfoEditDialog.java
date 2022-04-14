@@ -579,7 +579,7 @@ public class BookInfoEditDialog extends BaseDialog {
 					dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 				}
 				if (dfi != null) {
-					mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+					mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, true,
 							translButton, dfi, fi, langf, lang, "", BookInfoEditDialog.this, TranslationDirectionDialog.FOR_COMMON
 							, null);
 				}

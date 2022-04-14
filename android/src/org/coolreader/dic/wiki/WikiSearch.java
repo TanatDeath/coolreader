@@ -1,5 +1,6 @@
 package org.coolreader.dic.wiki;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -116,17 +117,21 @@ public class WikiSearch {
 	private String wikiTitleText = "";
 	private String wikiLink = "";
 
-	public void wikiTranslate(CoolReader cr, Dictionaries.DictInfo curDict, View view, String s, String link, String link2,
+	public void wikiTranslate(CoolReader cr, boolean fullScreen,
+							  Dictionaries.DictInfo curDict, View view, String s, String link, String link2,
 							  int curAction, boolean useFirstLink, CoolReader.DictionaryCallback dcb) {
-		wikiTranslate(cr, curDict, view, s, link, link2, curAction, 0, useFirstLink, 0, "", dcb);
+		wikiTranslate(cr, fullScreen, curDict, view, s, link, link2, curAction, 0,
+				useFirstLink, 0, "", dcb);
 	}
 
-	public void wikiTranslate(CoolReader cr, Dictionaries.DictInfo curDict, View view, String s, String link, String link2,
+	public void wikiTranslate(CoolReader cr, boolean fullScreen,
+							  Dictionaries.DictInfo curDict, View view, String s, String link, String link2,
 							  int curAction, boolean useFirstLink, int prevAction, String articleText, CoolReader.DictionaryCallback dcb) {
-		wikiTranslate(cr, curDict, view, s, link, link2, curAction, 0, useFirstLink, prevAction, articleText, dcb);
+		wikiTranslate(cr, fullScreen, curDict, view, s, link, link2, curAction, 0,
+				useFirstLink, prevAction, articleText, dcb);
 	}
 
-	public void wikiTranslate(CoolReader cr, Dictionaries.DictInfo curDict, View view, String s, String link, String link2,
+	public void wikiTranslate(CoolReader cr, boolean fullScreen, Dictionaries.DictInfo curDict, View view, String s, String link, String link2,
 							  int curAction, int listSkipCount, boolean useFirstLink,
 							  int prevAction, String articleText, CoolReader.DictionaryCallback dcb) {
 		if (StrUtils.isEmptyStr(link)) return;
@@ -140,6 +145,7 @@ public class WikiSearch {
 		HttpUrl.Builder urlBuilder = wikiUrlBuilder(cr, s, useFirstLink ? sLink : sLink2, curAction,
 				listSkipCount, prevAction);
 		String url = urlBuilder.build().toString();
+		Log.i("WS", "wikiTranslate url: " + url);
 		Request request = new Request.Builder()
 				.url(url)
 				.build();
@@ -173,8 +179,8 @@ public class WikiSearch {
 					if (results.size() > 0) wikiTitleText = results.text(); else
 						wikiTitleText = Utils.cleanupHtmlTags(sBody);
 				}
-				if (StrUtils.isEmptyStr(wikiTitleText))
-					wikiTitleText = crf2.getString(R.string.not_found);
+//				if (StrUtils.isEmptyStr(wikiTitleText))
+//					wikiTitleText = crf2.getString(R.string.not_found);
 				final String sTranslF = wikiTitleText;
 				// if found article
 				if ((!StrUtils.isEmptyStr(wikiTitleText)) &&
@@ -185,7 +191,7 @@ public class WikiSearch {
 //						crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 //								curDict, link, link2, curAction, useFirstLink);
 						if (finalSaveHist) Dictionaries.saveToDicSearchHistory(cr, s, sTranslF, curDict);
-						wikiTranslate(cr, curDict, view, s, link, link2,
+						wikiTranslate(cr, fullScreen, curDict, view, s, link, link2,
 								WIKI_FIND_PIC_INFO, useFirstLink, curAction, sTranslF, dcb);
 					}, 100));
 					return;
@@ -195,7 +201,7 @@ public class WikiSearch {
 						(!StrUtils.isEmptyStr(sLink2)) && (useFirstLink)) {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						wikiLink = link2;
-						wikiTranslate(cr, curDict, view, s, link, link2,
+						wikiTranslate(cr, fullScreen, curDict, view, s, link, link2,
 								(curAction == WIKI_FIND_TITLE) ? WIKI_FIND_TITLE : WIKI_FIND_TITLE_FULL, false, dcb);
 					}, 100));
 					return;
@@ -205,26 +211,27 @@ public class WikiSearch {
 						((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL))
 				) {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-							wikiTranslate(cr, curDict, view, s, link, link2, WIKI_FIND_LIST, true, dcb), 100));
+							wikiTranslate(cr, fullScreen, curDict, view, s, link, link2, WIKI_FIND_LIST, true, dcb), 100));
 					return;
 				}
 				if (curAction == WIKI_FIND_LIST) {
 					Elements results = docJsoup.select("api > query > search > p");
-					ArrayList<WikiArticle> arrWA = new ArrayList<>();
+					WikiArticles arrWA = new WikiArticles();
 					for (Element el: results) {
 						WikiArticle wa = new WikiArticle(el.attr("title"), Long.valueOf(el.attr("pageid")), el.attr("snippet"));
-						arrWA.add(wa);
+						arrWA.wikiArticleList.add(wa);
 					}
-					if (arrWA.size() > 0) {
+					if (arrWA.wikiArticleList.size() > 0) {
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 								crf2.showWikiListToast(s, sTranslF, view, DicToastView.IS_WIKI, wikiLink,
-										arrWA, curDict, link, link2, curAction, listSkipCount, useFirstLink), 100));
+								arrWA, curDict, link, link2, curAction, listSkipCount, useFirstLink, fullScreen), 100));
 						return;
 					} else {
 						if ((curAction == WIKI_FIND_LIST) && (useFirstLink)) {
 							BackgroundThread.instance().postBackground(
 									() -> BackgroundThread.instance().postGUI(() ->
-											wikiTranslate(cr, curDict, view, s, link, link2, WIKI_FIND_LIST, false, dcb), 100)
+											wikiTranslate(cr, fullScreen, curDict, view, s, link, link2,
+													WIKI_FIND_LIST, false, dcb), 100)
 							);
 							return;
 						} else
@@ -246,7 +253,7 @@ public class WikiSearch {
 						if (s.contains("~")) {
 							if (finalSaveHist1) Dictionaries.saveToDicSearchHistory(cr, s.split("~")[1], sTranslF, curDict);
 						}
-						wikiTranslate(cr, curDict, view, s, link, link2,
+						wikiTranslate(cr, fullScreen, curDict, view, s, link, link2,
 								WIKI_FIND_PIC_INFO, useFirstLink, curAction, sTranslF, dcb);
 					}, 100));
 					return;
@@ -261,12 +268,12 @@ public class WikiSearch {
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 							if (dcb == null)
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-										curDict, link, link2, prevAction, useFirstLink, addr);
+										curDict, link, link2, prevAction, useFirstLink, addr, fullScreen);
 							else {
 								dcb.done(articleText);
 								if (dcb.showDicToast()) {
 									crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-											curDict, link, link2, prevAction, useFirstLink, addr);
+											curDict, link, link2, prevAction, useFirstLink, addr, fullScreen);
 								}
 							}
 						}, 100));
@@ -275,12 +282,12 @@ public class WikiSearch {
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 							if (dcb == null)
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-										curDict, link, link2, prevAction, useFirstLink, "");
+										curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
 							else {
 								dcb.done(articleText);
 								if (dcb.showDicToast()) {
 									crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-											curDict, link, link2, prevAction, useFirstLink, "");
+											curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
 								}
 							}
 						}, 100));
@@ -299,12 +306,12 @@ public class WikiSearch {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						if (dcb == null)
 							crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-									curDict, link, link2, prevAction, useFirstLink, "");
+									curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
 						else {
 							dcb.done(articleText);
 							if (dcb.showDicToast())
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
-										curDict, link, link2, prevAction, useFirstLink, "");
+										curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
 						}
 					}, 100));
 				else

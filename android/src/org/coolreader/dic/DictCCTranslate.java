@@ -30,11 +30,12 @@ public class DictCCTranslate {
 
 	public static final Logger log = L.create("cr3dict_dictcc");
 
-	public void dictCCTranslate(CoolReader cr, String s, String langf, String lang, Dictionaries.DictInfo curDict, View view,
+	public void dictCCTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang, Dictionaries.DictInfo curDict, View view,
 								Dictionaries.LangListCallback llc, CoolReader.DictionaryCallback dcb) {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
-				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_DICTCC, "");
+				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_DICTCC,
+						"", fullScreen);
 				return;
 			}
 			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
@@ -42,7 +43,7 @@ public class DictCCTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_DICTCC, "")
+								DicToastView.IS_DICTCC, "", fullScreen)
 						, 100));
 				return;
 			}
@@ -101,13 +102,16 @@ public class DictCCTranslate {
 									if (!StrUtils.isEmptyStr(finalSTitle0))
 										Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict);
 									if (dsl.lemmas.size() > 0) {
-										cr.showDicToastExt(s, finalSTitle, DicToastView.IS_DICTCC, urlBuilder.build().url().toString(), curDict, dsl);
+										cr.showDicToastExt(s, finalSTitle, DicToastView.IS_DICTCC,
+												urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 									} else
-										cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC, urlBuilder.build().url().toString());
+										cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC,
+												urlBuilder.build().url().toString(), fullScreen);
 								} else {
 									dcb.done(finalSTitle);
 									if (dcb.showDicToast()) {
-										cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC, urlBuilder.build().url().toString());
+										cr.showDicToast(s, finalSTitle,
+												DicToastView.IS_DICTCC, urlBuilder.build().url().toString(), fullScreen);
 									}
 									if (dcb.saveToHist())
 										if (!StrUtils.isEmptyStr(finalSTitle0)) {
@@ -118,7 +122,7 @@ public class DictCCTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented),
-								DicToastView.IS_DICTCC, "");
+								DicToastView.IS_DICTCC, "", fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -128,7 +132,7 @@ public class DictCCTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_DICTCC, "");
+							DicToastView.IS_DICTCC, "", fullScreen);
 				}, 100));
 			}
 		});

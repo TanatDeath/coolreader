@@ -31,11 +31,13 @@ public class UrbanTranslate {
 
 	public static final Logger log = L.create("cr3dict_urban");
 
-	public void urbanTranslate(CoolReader cr, String s, Dictionaries.DictInfo curDict, View view,
-								Dictionaries.LangListCallback llc, CoolReader.DictionaryCallback dcb) {
+	public void urbanTranslate(CoolReader cr, String s, boolean fullScreen,
+							   Dictionaries.DictInfo curDict, View view,
+							   Dictionaries.LangListCallback llc, CoolReader.DictionaryCallback dcb) {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
-				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_URBAN, "");
+				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
+						DicToastView.IS_URBAN, "", fullScreen);
 				return;
 			}
 		}
@@ -48,10 +50,10 @@ public class UrbanTranslate {
 					DicStruct dsl = new DicStruct();
 					Lemma lemma = null;
 					Document docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
-					Elements resDivs = docJsoup.select("div.def-panel");
+					Elements resDivs = docJsoup.select("div.definition");
 					for (Element resDiv: resDivs) {
 						String sWord = "";
-						Elements wordsD = resDiv.select("div.def-header");
+						Elements wordsD = resDiv.select("h1");
 						for (Element wordD: wordsD) {
 							Elements words = resDiv.select("a.word");
 							for (Element word: words) {
@@ -100,13 +102,16 @@ public class UrbanTranslate {
 								if (!StrUtils.isEmptyStr(finalSTitle))
 									Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict);
 								if (dsl.lemmas.size() > 0) {
-									cr.showDicToastExt(s, s, DicToastView.IS_URBAN, urlBuilder.build().url().toString(), curDict, dsl);
+									cr.showDicToastExt(s, s, DicToastView.IS_URBAN,
+											urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 								} else
-									cr.showDicToast(s, cr.getString(R.string.not_found), DicToastView.IS_URBAN, urlBuilder.build().url().toString());
+									cr.showDicToast(s, cr.getString(R.string.not_found), DicToastView.IS_URBAN,
+											urlBuilder.build().url().toString(), fullScreen);
 							} else {
 								dcb.done(s);
 								if (dcb.showDicToast()) {
-									cr.showDicToast(s, finalSTitle, DicToastView.IS_URBAN, urlBuilder.build().url().toString());
+									cr.showDicToast(s, finalSTitle, DicToastView.IS_URBAN,
+											urlBuilder.build().url().toString(), fullScreen);
 								}
 								if (dcb.saveToHist())
 									if (!StrUtils.isEmptyStr(finalSTitle)) {
@@ -117,7 +122,7 @@ public class UrbanTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented),
-								DicToastView.IS_URBAN, "");
+								DicToastView.IS_URBAN, "", fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -127,7 +132,7 @@ public class UrbanTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_URBAN, "");
+							DicToastView.IS_URBAN, "", fullScreen);
 				}, 100));
 			}
 		});

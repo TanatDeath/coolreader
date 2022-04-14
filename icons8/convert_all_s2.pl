@@ -20,7 +20,9 @@ my %ic_actions_list=(
         'icons8_brightness_down.svg' => 'icons8_brightness_down.png',
         'icons8_brightness_up.svg' => 'icons8_brightness_up.png',
         'icons8_brightness_warm_down.svg' => 'icons8_brightness_warm_down.png',
-        'icons8_brightness_warm_up.svg' => 'icons8_brightness_warm_up.png'
+        'icons8_brightness_warm_up.svg' => 'icons8_brightness_warm_up.png',
+        'icons8_offline_dics1.svg' => 'icons8_offline_dics1.png',
+        'icons8_offline_dics2.svg' => 'icons8_offline_dics2.png'
 );
 
 my %ic_menu_list=(

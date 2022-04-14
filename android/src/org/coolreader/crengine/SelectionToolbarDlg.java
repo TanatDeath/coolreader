@@ -372,7 +372,8 @@ public class SelectionToolbarDlg {
 				if (di != null) {
 					if (!StrUtils.isEmptyStr(selection.text)) {
 						mActivity.mDictionaries.setAdHocDict(di);
-						mActivity.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
+						mActivity.findInDictionary(selection.text, false, null,
+								new CoolReader.DictionaryCallback() {
 
 							@Override
 							public boolean showDicToast() {
@@ -410,7 +411,8 @@ public class SelectionToolbarDlg {
 				if (di != null) {
 					if (!StrUtils.isEmptyStr(selection.text)) {
 						mActivity.mDictionaries.setAdHocDict(di);
-						mActivity.findInDictionary(selection.text, null, new CoolReader.DictionaryCallback() {
+						mActivity.findInDictionary(selection.text, false,null,
+								new CoolReader.DictionaryCallback() {
 
 							@Override
 							public boolean showDicToast() {
@@ -607,7 +609,7 @@ public class SelectionToolbarDlg {
 					dlg.show();
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				} else {
-					mActivity.findInDictionary( selection.text , null);
+					mActivity.findInDictionary(selection.text, false, null);
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				}
 			});
@@ -618,7 +620,7 @@ public class SelectionToolbarDlg {
 					dlg.show();
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				} else {
-					mActivity.findInDictionary( selection.text , null);
+					mActivity.findInDictionary(selection.text, false, null);
 					closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 				}
 				return true;
@@ -729,7 +731,7 @@ public class SelectionToolbarDlg {
 			Button finalDicButton = dicButton;
 			if (isEInk) Utils.setBtnBackground(dicButton, null, isEInk);
 			dicButton.setOnClickListener(v -> {
-				mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+				mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, false,
 						mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
 						mReaderView.getBookInfo().getFileInfo(),
 						StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
@@ -783,22 +785,21 @@ public class SelectionToolbarDlg {
 					dicButton.setOnClickListener(v -> {
 						mActivity.mDictionaries.setAdHocDict(di);
 						String sSText = selection.text;
-						mActivity.findInDictionary(sSText, null);
+						mActivity.findInDictionary(sSText, false,null);
 						if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 							mReaderView.clearSelection();
 						closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 					});
 					dicButton.setOnLongClickListener(v -> {
-						mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK,
+						mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK, false,
 								mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
 								mReaderView.getBookInfo().getFileInfo(),
 								StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
 								StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
 								"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
-									//mActivity.showToast(s);
 									mActivity.mDictionaries.setAdHocDict(di);
 									String sSText = selection.text;
-									mActivity.findInDictionary(sSText, null);
+									mActivity.findInDictionary(sSText, false, null);
 									if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 										mReaderView.clearSelection();
 									closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));

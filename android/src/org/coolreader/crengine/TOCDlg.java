@@ -155,7 +155,8 @@ public class TOCDlg extends BaseDialog {
 					int iPageCnt = mActivity.getReaderView().getDoc().getPageCount();
 					if (pn<=iPageCnt) {
 						String sPage = mActivity.getReaderView().getDoc().getPageText(false, pn - 1);
-						mActivity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO, "[HIDE]");
+						mActivity.showDicToast("", sPage, Toast.LENGTH_LONG, v, DicToastView.IS_LINGVO,
+								"[HIDE]", false);
 					}
 				});
 				mActivity.tintViewIcons(view);

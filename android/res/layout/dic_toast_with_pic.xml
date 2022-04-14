@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/dic_toast_ll"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent" android:background="?attr/attr_toast_layout_border"
-              android:orientation="horizontal" android:gravity="center"
-    >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/dic_toast_ll"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="?attr/colorThemeGray2"
+        android:baselineAligned="true"
+        >
     <TableLayout
         android:id="@+id/dic_table"
         style="@style/TextAppearance.Small"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:gravity="top"
+        android:layout_alignParentTop="true"
         android:stretchColumns="1"
         android:layout_weight="10"
         android:layout_margin="2dp"
@@ -25,7 +29,7 @@
             <LinearLayout
                     android:id="@+id/upper_row_ll"
                     android:layout_width="0dip"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical|left"
                     android:layout_weight="8"
                     android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -83,32 +87,44 @@
                         android:textColor="?attr/colorIcon"
                         android:text="" />
             </LinearLayout>
-            <TableLayout
+        </TableRow>
+        <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/tr_upper_row2"
+                android:layout_margin="2dip"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                >
+            <RelativeLayout
                     android:id="@+id/tl_term_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:stretchColumns="*"
-                    android:orientation="vertical">
-                <TableRow
-                        android:layout_weight="1"
-                        >
-                    <TextView
-                            android:id="@+id/lbl_term"
-                            android:layout_width="0dip"
-                            android:layout_weight="5"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dip"
-                            android:singleLine="true"
-                            android:textColor="?attr/colorIcon"
-                            style="@style/TextAppearance.Smaller"
-                            android:text="" />
+                    android:layout_width="0dip"
+                    android:layout_weight="8"
+                    android:layout_height="wrap_content" >
+                <TextView
+                        android:id="@+id/lbl_term"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_toLeftOf="@+id/ll_buttons_sym"
+                        android:layout_margin="5dip"
+                        android:singleLine="true"
+                        android:textColor="?attr/colorIcon"
+                        style="@style/TextAppearance.Smaller"
+                        android:layout_gravity="center|left"
+                        android:text="" />
+                <LinearLayout
+                        android:id="@+id/ll_buttons_sym"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:orientation="horizontal">
                     <Button
                             android:id="@+id/remove3sym"
-                            android:layout_weight="1"
                             style="@style/TextAppearance.Small"
                             android:singleLine="true"
                             android:layout_margin="2dip"
-                            android:layout_width="0dip"
+                            android:layout_width="wrap_content"
+                            android:minWidth="?android:attr/listPreferredItemHeightSmall"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorIcon"
                             android:text="&lt;&lt;&lt;"
@@ -117,11 +133,11 @@
                             />
                     <Button
                             android:id="@+id/remove2sym"
-                            android:layout_weight="1"
                             style="@style/TextAppearance.Small"
                             android:singleLine="true"
                             android:layout_margin="2dip"
-                            android:layout_width="0dip"
+                            android:layout_width="wrap_content"
+                            android:minWidth="?android:attr/listPreferredItemHeightSmall"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorIcon"
                             android:text="&lt;&lt;"
@@ -130,11 +146,11 @@
                             />
                     <Button
                             android:id="@+id/remove1sym"
-                            android:layout_weight="1"
                             style="@style/TextAppearance.Small"
                             android:singleLine="true"
                             android:layout_margin="2dip"
-                            android:layout_width="0dip"
+                            android:layout_width="wrap_content"
+                            android:minWidth="?android:attr/listPreferredItemHeightSmall"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorIcon"
                             android:text="&lt;"
@@ -143,19 +159,25 @@
                             />
                     <Button
                             android:id="@+id/btnDicExtended"
-                            android:layout_weight="1"
                             style="@style/TextAppearance.Small"
                             android:singleLine="true"
                             android:layout_margin="2dip"
-                            android:layout_width="0dip"
+                            android:layout_width="wrap_content"
+                            android:minWidth="?android:attr/listPreferredItemHeightSmall"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorIcon"
                             android:text="Ex"
                             android:background="@null"
                             android:padding="4dip"
                             />
-                </TableRow>
-            </TableLayout>
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="?attr/colorIcon"
+                            style="@style/TextAppearance.Smaller"
+                            android:text=" " />
+                </LinearLayout>
+            </RelativeLayout>
         </TableRow>
         <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/tr_upper_sep_row"
@@ -167,7 +189,7 @@
             <LinearLayout
                     android:id="@+id/left_stop_ll"
                     android:layout_width="0dip"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical|center_horizontal"
                     android:layout_weight="1"
                     android:orientation="horizontal">
@@ -179,60 +201,42 @@
                         />
             </LinearLayout>
         </TableRow>
-        <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/dic_row"
-                android:layout_margin="2dip"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                >
-            <LinearLayout
-                    android:id="@+id/dic_ll"
-                    android:layout_width="0dip"
-                    android:layout_height="fill_parent"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:layout_weight="2"
-                    android:orientation="vertical">
-                <org.coolreader.crengine.MaxHeightScrollView
-                        android:id="@+id/dic_scrollV"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content">
-                    <uk.co.deanwild.flowtextview.FlowTextView
-                            android:id="@+id/dic_text_flow"
-                            style="@style/TextAppearance.Small"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dip"
-                            android:layout_marginRight="10dip"
-                            android:textColor="?attr/colorIcon"
-                            >
-
-                        <ImageView
-                                android:id="@+id/dic_pic"
-                                android:scaleType="fitCenter"
-                                android:drawable="?attr/cr3_browser_book_drawable"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dip"
-                                android:layout_marginBottom="5dip"
-                                android:layout_marginLeft="5dip"
-                                android:layout_marginRight="5dip"
-                                />
-                    </uk.co.deanwild.flowtextview.FlowTextView>
-                    <!--<TextView
-                            android:id="@+id/dic_text"
-                            style="@style/TextAppearance.Small"
-                            android:singleLine="false"
-                            android:layout_marginLeft="10dip"
-                            android:layout_marginRight="10dip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="?attr/colorIcon"
-                            />
-                            -->
-                </org.coolreader.crengine.MaxHeightScrollView>
-            </LinearLayout>
-        </TableRow>
     </TableLayout>
+    <LinearLayout
+            android:id="@+id/dic_ll"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/dic_table"
+            android:gravity="top"
+            >
+        <ScrollView
+                android:id="@+id/dic_scrollV"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+            <uk.co.deanwild.flowtextview.FlowTextView
+                    android:id="@+id/dic_text_flow"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dip"
+                    android:layout_marginRight="10dip"
+                    android:textColor="?attr/colorIcon"
+                    >
 
-</LinearLayout>
+                <ImageView
+                        android:id="@+id/dic_pic"
+                        android:scaleType="fitCenter"
+                        android:drawable="?attr/cr3_browser_book_drawable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dip"
+                        android:layout_marginBottom="5dip"
+                        android:layout_marginLeft="5dip"
+                        android:layout_marginRight="5dip"
+                        />
+            </uk.co.deanwild.flowtextview.FlowTextView>
+        </ScrollView>
+    </LinearLayout>
+
+</RelativeLayout>

@@ -186,12 +186,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	private ReaderView mReaderView;
 
-	public String lastDicText; // when the dic is in "dont hide mode"
-	public String lastDicLangFrom;
-	public String lastDicLangTo;
-	public boolean lastDicSkip = false;
-	//public DictsDlg lastDicDlg;
-
     //move to flavor
     public GeoLastData geoLastData = new GeoLastData(this);
 
@@ -2786,11 +2780,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		void fail(Exception e, String msg);
 	}
 
-	public void findInDictionary(String s, View view) {
-		findInDictionary(s, view, null);
+	public void findInDictionary(String s, boolean fullScreen, View view) {
+
+		findInDictionary(s, fullScreen, view, null);
 	}
 
-	public void findInDictionary(String s, View view, DictionaryCallback dcb) {
+	public void findInDictionary(String s, boolean fullScreen, View view, DictionaryCallback dcb) {
 		if (s != null && s.length() != 0) {
 			int start,end;
 			
@@ -2806,15 +2801,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
     			final String pattern = s.substring(start,end+1);
 
 				BackgroundThread.instance().postBackground(() ->
-						BackgroundThread.instance().postGUI(() -> findInDictionaryInternal(pattern, view, dcb), 100));
+						BackgroundThread.instance().postGUI(() ->
+								findInDictionaryInternal(pattern, fullScreen, view, dcb), 100));
 			}
 		}
 	}
 	
-	private void findInDictionaryInternal(String s, View view, DictionaryCallback dcb) {
+	private void findInDictionaryInternal(String s, boolean fullScreen,  View view, DictionaryCallback dcb) {
 		log.d("lookup in dictionary: " + s);
 		try {
-			mDictionaries.findInDictionary(s, view, false, dcb);
+			mDictionaries.findInDictionary(s, fullScreen, view, false, dcb);
 		} catch (DictionaryException e) {
 			if (e.getMessage().contains("is not installed")) {
 				optionsFilter = "";
@@ -2834,8 +2830,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		return null;
 	}
 
-	public void showDictionary() {
-		findInDictionaryInternal(null, null, null);
+	public void showDictionary(boolean fullScreen) {
+		findInDictionaryInternal(null, fullScreen, null, null);
 
 	}
 	
@@ -3711,6 +3707,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void editBookTransl(final int trType,
+							   final boolean fullScreen,
 							   final View anchor,
 							   final FileInfo currDirectory, final FileInfo item,
 							   final String lang_from, final String lang_to, final String search_text,
@@ -3742,7 +3739,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							getString(R.string.select_transl_dir),
 							sButtons, null, (o22, btnPressed) -> {
 								if (btnPressed.equals(getString(R.string.all_languages))) {
-									editBookTransl(EDIT_BOOK_TRANSL_NO_QUICK,
+									editBookTransl(EDIT_BOOK_TRANSL_NO_QUICK, fullScreen,
 										anchor, currDirectory, item, lang_from, lang_to, search_text, bied, iType, editBookTranslCallback);
 									return;
 								}
@@ -3785,7 +3782,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 													directoryUpdated(currDirectory, file);
 												}
 												if (!StrUtils.isEmptyStr(search_text))
-													findInDictionary(search_text, null, null);
+													findInDictionary(search_text, fullScreen, null, null);
 												if (editBookTranslCallback != null) editBookTranslCallback.done(l_from + " -> " + l_to);
 											}
 										}
@@ -3839,7 +3836,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 									directoryUpdated(currDirectory, file);
 								}
 								if (!StrUtils.isEmptyStr(search_text))
-									findInDictionary(search_text, null, null);
+									findInDictionary(search_text, fullScreen, null, null);
 							}
 							if (editBookTranslCallback != null) editBookTranslCallback.done(file.lang_from + " -> " + file.lang_to);
 						}

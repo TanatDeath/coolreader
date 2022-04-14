@@ -119,11 +119,13 @@ public class LingueeTranslate {
 		return lc;
 	}
 
-	public void lingueeTranslate(CoolReader cr, String s, String langf, String lang, Dictionaries.DictInfo curDict, View view,
+	public void lingueeTranslate(CoolReader cr, String s, boolean fullScreen,
+								 String langf, String lang, Dictionaries.DictInfo curDict, View view,
 								 Dictionaries.LangListCallback llc, CoolReader.DictionaryCallback dcb) {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
-				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_LINGUEE, "");
+				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
+						DicToastView.IS_LINGUEE, "", fullScreen);
 				return;
 			}
 			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
@@ -131,7 +133,7 @@ public class LingueeTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_LINGUEE, ""), 100));
+								DicToastView.IS_LINGUEE, "", fullScreen), 100));
 				return;
 			}
 		}
@@ -234,18 +236,22 @@ public class LingueeTranslate {
 							BackgroundThread.instance().postGUI(() -> {
 								if (dcb == null) {
 									if (dsl.getCount() == 0) {
-										cr.showDicToast(s, sTitle, DicToastView.IS_LINGUEE, urlBuilder.build().url().toString());
+										cr.showDicToast(s, sTitle, DicToastView.IS_LINGUEE,
+												urlBuilder.build().url().toString(), fullScreen);
 									} else {
 										Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict);
-										cr.showDicToastExt(s, sTitle, DicToastView.IS_LINGUEE, urlBuilder.build().url().toString(), curDict, dsl);
+										cr.showDicToastExt(s, sTitle, DicToastView.IS_LINGUEE,
+												urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 									}
 								} else {
 									dcb.done(dsl.getFirstTranslation());
 									if (dcb.showDicToast()) {
 										if (dsl.getCount() == 0) {
-											cr.showDicToast(s, sTitle, DicToastView.IS_LINGUEE, urlBuilder.build().url().toString());
+											cr.showDicToast(s, sTitle, DicToastView.IS_LINGUEE,
+													urlBuilder.build().url().toString(), fullScreen);
 										} else {
-											cr.showDicToastExt(s, sTitle, DicToastView.IS_LINGUEE, urlBuilder.build().url().toString(), curDict, dsl);
+											cr.showDicToastExt(s, sTitle, DicToastView.IS_LINGUEE,
+													urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 										}
 									}
 									if (dcb.saveToHist())
@@ -256,7 +262,7 @@ public class LingueeTranslate {
 							}, 100));
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented), DicToastView.IS_LINGUEE, "");
+						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented), DicToastView.IS_LINGUEE, "", fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -264,7 +270,7 @@ public class LingueeTranslate {
 					log.e(cr.getString(R.string.error)+": "+
 							e.getClass().getSimpleName()+" "+e.getMessage());
 					cr.showDicToast(cr.getString(R.string.dict_err), e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_LINGUEE, "");
+							DicToastView.IS_LINGUEE, "", fullScreen);
 				}, 100));
 			}
 		});

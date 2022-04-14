@@ -1123,6 +1123,14 @@ public class Utils {
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
+	public static void setSolidButton1(Button btn) {
+		if (btn == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			btn.setBackgroundResource(R.drawable.button_bg_solid_border1);
+		else
+			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
 	public static void setDashedButton1(Button btn) {
 		if (btn == null) return;
 		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
@@ -1391,6 +1399,19 @@ public class Utils {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
 		return baos.toByteArray();
+	}
+
+	public static boolean copyToClipboard(Context context, String text) {
+		try {
+			android.content.ClipboardManager clipboard =
+					(android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+			android.content.ClipData clip =
+					android.content.ClipData.newPlainText("Path copied to clipboard", text);
+			clipboard.setPrimaryClip(clip);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }

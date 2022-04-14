@@ -93,7 +93,7 @@ public class DictionariesOption extends SubmenuOption {
 									}
 								}
 								if (dfi != null) {
-									((CoolReader)mActivity).editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL,
+									mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, true,
 											view, dfi, fi, langf, lang, "", null, TranslationDirectionDialog.FOR_COMMON_OPTIONS
 											, v -> {
 												FileInfo fi2 = mOptionsDialog.mReaderView.getBookInfo().getFileInfo();
@@ -117,10 +117,10 @@ public class DictionariesOption extends SubmenuOption {
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.offline_dics_dialog),
 				Settings.PROP_APP_OFFLINE_DICS, mActivity.getString(R.string.offline_dics_dialog_add_info), this.lastFilteredValue,
 				(view, optionLabel, optionValue) -> {
-					OfflineDicsDlg sdd = new OfflineDicsDlg((CoolReader) mActivity);
+					OfflineDicsDlg sdd = new OfflineDicsDlg(mCoolReader);
 					sdd.show();
 				}, false).
-				setIconIdByAttr(0, R.drawable.icons8_offline_dic));
+				setIconIdByAttr(0, R.drawable.icons8_offline_dics1));
 		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary), Settings.PROP_APP_DICTIONARY,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setIconIdByAttr(R.attr.attr_icons8_google_translate, R.drawable.icons8_google_translate));
@@ -254,7 +254,7 @@ public class DictionariesOption extends SubmenuOption {
 				Settings.PROP_CLOUD_YND_TRANSLATE_OPTIONS, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 				(view, optionLabel, optionValue) -> {
 					ArrayList<String[]> vl = new ArrayList<>();
-					((CoolReader)mActivity).readYndCloudSettings();
+					mCoolReader.readYndCloudSettings();
 					String[] arrS1 = {mActivity.getString(R.string.ynd_oauth), mActivity.getString(R.string.ynd_oauth),
 							StrUtils.getNonEmptyStr(mCoolReader.yndCloudSettings.oauthToken, true)};
 					vl.add(arrS1);

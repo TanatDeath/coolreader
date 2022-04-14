@@ -14,6 +14,7 @@ import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 import org.coolreader.readerview.ReaderView;
@@ -56,6 +57,7 @@ public class DictsDlg extends BaseDialog {
 	private Button btnDictType1;
 	private Button btnDictType2;
 	private Button btnDontClose;
+	private ImageButton btnDicOptions;
 	private EditText edtLangFrom;
 	private EditText edtLangTo;
 	private FlowLayout flQuickTransl;
@@ -211,23 +213,18 @@ public class DictsDlg extends BaseDialog {
 		public boolean performItemClick(View view, int position, long id) {
 			if (dictInfoList == null) fillDictListInfo();
 			Dictionaries.DictInfo di = dictInfoList.get(position);
-			boolean dontClose = false;
-			if (di != null)
-				if ((!di.isOnline) && (bDontClose)) dontClose = true;
+//			boolean dontClose = false;
+//			if (di != null)
+//				if ((!di.isOnline) && (bDontClose)) dontClose = true;
 			mCoolReader.mDictionaries.setAdHocDict(dictInfoList.get(position));
 			mCoolReader.mDictionaries.setAdHocFromTo(edtLangFrom.getText().toString(), edtLangTo.getText().toString());
 			String sSText = mSearchText.trim();
 			if (selEdit!=null) sSText = selEdit.getText().toString().trim();
-			if (bDontClose) {
-				mCoolReader.lastDicText = sSText;
-				mCoolReader.lastDicLangFrom = edtLangFrom.getText().toString();
-				mCoolReader.lastDicLangTo = edtLangTo.getText().toString();
-			}
-			mCoolReader.findInDictionary(sSText, mCallerView);
+			mCoolReader.findInDictionary(sSText, bDontClose, mCallerView);
 			if (mReaderView != null)
 				if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
 					mReaderView.clearSelection();
-			if (!dontClose) dismiss();
+			if (!bDontClose) dismiss();
 			return true;
 		}
 	}
@@ -340,18 +337,17 @@ public class DictsDlg extends BaseDialog {
 		btnDictType1 = frame.findViewById(R.id.btn_dic_type_1);
 		btnDictType2 = frame.findViewById(R.id.btn_dic_type_2);
 		btnDontClose = frame.findViewById(R.id.btn_dont_hide);
+		btnDicOptions = frame.findViewById(R.id.dic_options);
+		btnDicOptions.setBackground(null);
 		edtLangFrom = frame.findViewById(R.id.lang_from);
 		edtLangFrom.setText("");
 		edtLangTo = frame.findViewById(R.id.lang_to);
+		((TextView) frame.findViewById(R.id.langs_arrow)).setOnClickListener(v -> {
+			String s = edtLangTo.getText().toString();
+			edtLangTo.setText(edtLangFrom.getText());
+			edtLangFrom.setText(s);
+		});
 		edtLangTo.setText("");
-		if (!StrUtils.isEmptyStr(mCoolReader.lastDicLangFrom)) {
-			edtLangFrom.setText(mCoolReader.lastDicLangFrom);
-			edtLangTo.setText(mCoolReader.lastDicLangTo);
-		}
-		mCoolReader.lastDicText = "";
-		mCoolReader.lastDicLangFrom = "";
-		mCoolReader.lastDicLangTo = "";
-		mCoolReader.lastDicSkip = false;
 		if (StrUtils.isEmptyStr(edtLangFrom.getText().toString()))
 			if (mCoolReader.mDictionaries != null) {
 				if (!StrUtils.isEmptyStr(mCoolReader.mDictionaries.currentFromLangTmp)) {
@@ -411,6 +407,11 @@ public class DictsDlg extends BaseDialog {
 			bDontClose = !bDontClose;
 			paintDictTypeButtons();
 		});
+		btnDicOptions.setOnClickListener(v -> {
+				dismiss();
+				mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE);
+			}
+		);
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
@@ -418,8 +419,8 @@ public class DictsDlg extends BaseDialog {
 		btnDictType0.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		btnDictType1.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		btnDictType2.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
-		BackgroundThread.instance().postBackground(() ->
-				BackgroundThread.instance().postGUI(() -> paintDictTypeButtons(), 200));
+//		BackgroundThread.instance().postBackground(() ->
+//				BackgroundThread.instance().postGUI(() -> paintDictTypeButtons(), 50));
 		mCoolReader.tintViewIcons(frame);
 		selEdit = frame.findViewById(R.id.selection_text);
 		selEdit.setText(mSearchText);
@@ -476,6 +477,11 @@ public class DictsDlg extends BaseDialog {
 		ViewGroup body = frame.findViewById(R.id.dict_list);
 		mList = new DictList(activity);
 		body.addView(mList);
+		paintDictTypeButtons();
+		BackgroundThread.instance().postBackground(() ->
+				BackgroundThread.instance().postGUI(() -> {
+					paintDictTypeButtons();
+				}, 100));
 		setView(frame);
 		selEdit.clearFocus();
 		btnMinus2.requestFocus();

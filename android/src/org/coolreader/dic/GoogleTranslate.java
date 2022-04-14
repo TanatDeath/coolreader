@@ -35,13 +35,14 @@ public class GoogleTranslate {
 		return lc;
 	}
 
-	public void googleTranslate(CoolReader cr, String s, String langf, String lang,
+	public void googleTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang,
 								boolean extended,
 								Dictionaries.DictInfo curDict, View view,
 								Dictionaries.LangListCallback llc, CoolReader.DictionaryCallback dcb) {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
-				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_GOOGLE, "");
+				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
+						DicToastView.IS_GOOGLE, "", fullScreen);
 				return;
 			}
 			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
@@ -49,7 +50,7 @@ public class GoogleTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_GOOGLE, ""), 100));
+								DicToastView.IS_GOOGLE, "", fullScreen), 100));
 				return;
 			}
 		}
@@ -140,7 +141,8 @@ public class GoogleTranslate {
 								if (dcb != null) dcb.fail(null, sBody);
 								if (bShowToast)
 									BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-										cr.showDicToast(cr.getString(R.string.dict_err), sBody, DicToastView.IS_GOOGLE, "")
+										cr.showDicToast(cr.getString(R.string.dict_err), sBody, DicToastView.IS_GOOGLE,
+												"", fullScreen)
 									));
 								log.e(e.getMessage());
 								return;
@@ -153,7 +155,8 @@ public class GoogleTranslate {
 							if (dcb == null) {
 								String finalSTrans = sTrans;
 								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-									cr.showDicToast(s, finalSTrans, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE, "Google translate")
+									cr.showDicToast(s, finalSTrans, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE,
+											"Google translate", fullScreen)
 								));
 								Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
 							} else {
@@ -161,7 +164,8 @@ public class GoogleTranslate {
 								if (dcb.showDicToast()) {
 									String finalSTrans1 = sTrans;
 									BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-										cr.showDicToast(s, finalSTrans1, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE, "Google translate")
+										cr.showDicToast(s, finalSTrans1, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE,
+												"Google translate", fullScreen)
 									));
 								}
 								if (dcb.saveToHist()) {
@@ -174,7 +178,8 @@ public class GoogleTranslate {
 							if (dcb != null) dcb.fail(null, sBody);
 							if (bShowToast)
 								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-										cr.showDicToast(cr.getString(R.string.dict_err), sBody, DicToastView.IS_GOOGLE, "")
+										cr.showDicToast(cr.getString(R.string.dict_err), sBody, DicToastView.IS_GOOGLE,
+												"", fullScreen)
 								));
 						}
 					} catch (Exception e) {
@@ -182,7 +187,8 @@ public class GoogleTranslate {
 						if (!bShowToast) bShowToast = dcb.showDicToast();
 						if (bShowToast) {
 							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-								cr.showDicToast(s, sBody, DicToastView.IS_GOOGLE, "Google translate")
+								cr.showDicToast(s, sBody, DicToastView.IS_GOOGLE,
+										"Google translate", fullScreen)
 							));
 						} else dcb.fail(e, e.getMessage());
 					}
@@ -192,13 +198,15 @@ public class GoogleTranslate {
 			public void onFailure(Call call, IOException e) {
 				if (dcb == null)
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-						cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_GOOGLE, "")
+						cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_GOOGLE,
+								"", fullScreen)
 					));
 				else {
 					dcb.fail(e, e.getMessage());
 					if (dcb.showDicToast())
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_GOOGLE, "")
+							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_GOOGLE,
+									"", fullScreen)
 						));
 				}
 			}

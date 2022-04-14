@@ -365,7 +365,7 @@ public class Dictionaries {
 		new DictInfo("Urban dictionary (online)", "Urban dictionary (online)", "", "",
 				Intent.ACTION_SEND, 18, R.drawable.urban_dict, null, URBAN_ONLINE, true, "UrbanO"),
 		new DictInfo("Offline dictionaries", "Offline dictionaries", "", "",
-				Intent.ACTION_SEND, 19, R.drawable.icons8_offline_dic, null, "", true, "Offline"),
+				Intent.ACTION_SEND, 19, R.drawable.icons8_offline_dics2, null, "", true, "Offline"),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -579,6 +579,8 @@ public class Dictionaries {
 	private String saveFromLangTmp;
 	private String saveToLangTmp;
 	public DictInfo lastDicCalled;
+	public String lastDicFromLang;
+	public String lastDicToLang;
 	public View lastDicView;
 	public CoolReader.DictionaryCallback lastDC;
 	private int saveIDic2IsActive;
@@ -726,8 +728,9 @@ public class Dictionaries {
 		return dfi;
 	}
 
-	private void editTransl(CoolReader cr, FileInfo dfi, FileInfo fi, String langf, String lang, String s,
-					   int forWhat) {
+	private void editTransl(CoolReader cr, boolean fullScreen,
+							FileInfo dfi, FileInfo fi, String langf, String lang, String s,
+					   		int forWhat) {
 		if (dfi != null) {
 			currentDictionary = saveCurrentDictionary;
 			currentDictionary2 = saveCurrentDictionary2;
@@ -735,7 +738,7 @@ public class Dictionaries {
 			currentFromLangTmp = saveFromLangTmp;
 			currentToLangTmp = saveToLangTmp;
 			iDic2IsActive = saveIDic2IsActive;
-			cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+			cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, fullScreen, null, dfi, fi, langf, lang, s, null,
 					forWhat, null);
 		} else {
 			cr.showToast(cr.getString(R.string.file_not_found)+": "+fi.getFilename());
@@ -743,7 +746,7 @@ public class Dictionaries {
 	}
 
 	@SuppressLint("NewApi")
-	public void findInDictionary(String s, View view, boolean extended,
+	public void findInDictionary(String s, boolean fullScreen, View view, boolean extended,
 								 CoolReader.DictionaryCallback dcb) throws DictionaryException {
 //		log.d("lookup in dictionary: " + s);
 //		log.i("currentDictionary: "+getCDinfo(currentDictionary)+", iDic2IsActive = "+
@@ -786,6 +789,8 @@ public class Dictionaries {
 			if (!StrUtils.isEmptyStr(sConformity)) curDict = getOfflineDicComformity(sConformity, curDict);
 		}
 		lastDicCalled = curDict;
+		lastDicFromLang = langf;
+		lastDicToLang = lang;
 		lastDicView = view;
 		lastDC = dcb;
 		//\
@@ -929,7 +934,7 @@ public class Dictionaries {
 								if (cr.getReaderView().mBookInfo!=null) {
 									FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 									FileInfo dfi = getFileParent(fi);
-									editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_LINGVO);
+									editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_LINGVO);
 								};
 								return;
 							}
@@ -1081,15 +1086,16 @@ public class Dictionaries {
 					if (cr.getReaderView().mBookInfo != null) {
 						FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 						FileInfo dfi = getFileParent(fi);
-						editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_YND);
+						editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_YND);
 					};
 					return;
 				}
 				if (yandexTranslate == null) yandexTranslate = new YandexTranslate();
 				if (StrUtils.isEmptyStr(yandexTranslate.sYandexIAM))
-					yandexTranslate.yandexAuthThenTranslate(cr, s, langf, lang, curDict, view, null, dcb);
+					yandexTranslate.yandexAuthThenTranslate(cr, s, fullScreen, langf, lang, curDict, view, null, dcb);
 				else
-					yandexTranslate.yandexTranslate(cr, s, yandexTranslate.yndGetDefLangCode(langf), yandexTranslate.yndGetDefLangCode(lang),
+					yandexTranslate.yandexTranslate(cr, s, fullScreen,
+							yandexTranslate.yndGetDefLangCode(langf), yandexTranslate.yndGetDefLangCode(lang),
 							curDict, view, null, dcb);
 				break;
 			case 8:
@@ -1104,14 +1110,16 @@ public class Dictionaries {
 						if (cr.getReaderView().mBookInfo != null) {
 							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 							FileInfo dfi = getFileParent(fi);
-							editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_LINGVO);
+							editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_LINGVO);
 						};
 					return;
 				}
 				if (lingvoTranslate == null) lingvoTranslate = new LingvoTranslate();
 				if (lingvoTranslate.sLingvoToken.equals(""))
-					lingvoTranslate.lingvoAuthThenTranslate(cr, s, langf, lang, curDict.id.contains("Extended"), curDict, view, dcb);
-					else lingvoTranslate.lingvoTranslate(cr, s, lingvoTranslate.lingvoGetDefLangCode(langf), lingvoTranslate.lingvoGetDefLangCode(lang),
+					lingvoTranslate.lingvoAuthThenTranslate(cr, s, fullScreen,
+							langf, lang, curDict.id.contains("Extended"), curDict, view, dcb);
+					else lingvoTranslate.lingvoTranslate(cr, s, fullScreen,
+						lingvoTranslate.lingvoGetDefLangCode(langf), lingvoTranslate.lingvoGetDefLangCode(lang),
 						curDict.id.contains("Extended"), curDict, view, dcb);
 				break;
 			case 9:
@@ -1133,7 +1141,8 @@ public class Dictionaries {
 					}
 				}
 				if (wikiSearch == null) wikiSearch = new WikiSearch();
-				wikiSearch.wikiTranslate(cr, curDict, view, s, sLink, sLink2, wikiSearch.WIKI_FIND_TITLE, true, dcb);
+				wikiSearch.wikiTranslate(cr, fullScreen, curDict, view, s, sLink, sLink2,
+						wikiSearch.WIKI_FIND_TITLE, true, dcb);
 				break;
 			case 10:
 					Intent intent7 = new Intent();
@@ -1161,7 +1170,6 @@ public class Dictionaries {
 						}
 
 					}
-					//intent7.setComponent(new ComponentName(curDict.packageName, curDict.className));
 					break;
 			case 11:
 					if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -1175,13 +1183,14 @@ public class Dictionaries {
 							if (cr.getReaderView().mBookInfo != null) {
 								FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 								FileInfo dfi = getFileParent(fi);
-								editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+								editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
 							};
 						return;
 					}
 					if (deeplTranslate == null) deeplTranslate = new DeeplTranslate();
-					if (!deeplTranslate.deeplAuthenticated) deeplTranslate.deeplAuthThenTranslate(cr, s, langf, lang, curDict, view, dcb);
-					else deeplTranslate.deeplTranslate(cr, s, deeplTranslate.deeplGetDefLangCode(langf, true),
+					if (!deeplTranslate.deeplAuthenticated)
+						deeplTranslate.deeplAuthThenTranslate(cr, s, fullScreen, langf, lang, curDict, view, dcb);
+					else deeplTranslate.deeplTranslate(cr, s, fullScreen, deeplTranslate.deeplGetDefLangCode(langf, true),
 								deeplTranslate.deeplGetDefLangCode(lang, false), curDict, view, dcb);
 					break;
 			case 12:
@@ -1195,12 +1204,12 @@ public class Dictionaries {
 							if (cr.getReaderView().mBookInfo != null) {
 								FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 								FileInfo dfi = getFileParent(fi);
-								editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+								editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
 							};
 						return;
 					}
 					if (dictCCTranslate == null) dictCCTranslate = new DictCCTranslate();
-					dictCCTranslate.dictCCTranslate(cr, s, dictCCTranslate.dictccGetDefLangCode(langf),
+					dictCCTranslate.dictCCTranslate(cr, s, fullScreen, dictCCTranslate.dictccGetDefLangCode(langf),
 							dictCCTranslate.dictccGetDefLangCode(lang), curDict, view, null, dcb);
 					break;
 			case 13:
@@ -1214,12 +1223,12 @@ public class Dictionaries {
 						if (cr.getReaderView().mBookInfo != null) {
 							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 							FileInfo dfi = getFileParent(fi);
-							editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+							editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
 						};
 					return;
 				}
 				if (googleTranslate == null) googleTranslate = new GoogleTranslate();
-				googleTranslate.googleTranslate(cr, s, googleTranslate.googleGetDefLangCode(langf),
+				googleTranslate.googleTranslate(cr, s, fullScreen, googleTranslate.googleGetDefLangCode(langf),
 						googleTranslate.googleGetDefLangCode(lang), curDict.id.contains("Extended"), curDict, view, null, dcb);
 				break;
 			case 14:
@@ -1233,12 +1242,12 @@ public class Dictionaries {
 						if (cr.getReaderView().mBookInfo != null) {
 							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 							FileInfo dfi = getFileParent(fi);
-							editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+							editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
 						};
 					return;
 				}
 				if (lingueeTranslate == null) lingueeTranslate = new LingueeTranslate();
-				lingueeTranslate.lingueeTranslate(cr, s,
+				lingueeTranslate.lingueeTranslate(cr, s, fullScreen,
 						lingueeTranslate.lingueeGetDefLangCode(langf),
 						lingueeTranslate.lingueeGetDefLangCode(lang), curDict, view, null, dcb);
 				break;
@@ -1248,7 +1257,7 @@ public class Dictionaries {
 					return;
 				}
 				if (gramotaTranslate == null) gramotaTranslate = new GramotaTranslate();
-				gramotaTranslate.gramotaTranslate(cr, s,
+				gramotaTranslate.gramotaTranslate(cr, s, fullScreen,
 						"ru",
 						"ru", curDict, view, null, dcb);
 				break;
@@ -1263,12 +1272,12 @@ public class Dictionaries {
 						if (cr.getReaderView().mBookInfo != null) {
 							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 							FileInfo dfi = getFileParent(fi);
-							editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+							editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
 						};
 					return;
 				}
 				if (glosbeTranslate == null) glosbeTranslate = new GlosbeTranslate();
-				glosbeTranslate.glosbeTranslate(cr, s,
+				glosbeTranslate.glosbeTranslate(cr, s, fullScreen,
 						glosbeTranslate.glosbeGetDefLangCode(langf),
 						glosbeTranslate.glosbeGetDefLangCode(lang), curDict, view, null, dcb);
 				break;
@@ -1283,12 +1292,12 @@ public class Dictionaries {
 						if (cr.getReaderView().mBookInfo != null) {
 							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
 							FileInfo dfi = getFileParent(fi);
-							editTransl(cr, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+							editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
 						};
 					return;
 				}
 				if (turengTranslate == null) turengTranslate = new TurengTranslate();
-				turengTranslate.turengTranslate(cr, s, langf, lang, curDict, view, null, dcb);
+				turengTranslate.turengTranslate(cr, s, fullScreen, langf, lang, curDict, view, null, dcb);
 				break;
 			case 18:
 				if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -1296,7 +1305,7 @@ public class Dictionaries {
 					return;
 				}
 				if (urbanTranslate == null) urbanTranslate = new UrbanTranslate();
-				urbanTranslate.urbanTranslate(cr, s, curDict, view, null, dcb);
+				urbanTranslate.urbanTranslate(cr, s, fullScreen, curDict, view, null, dcb);
 				break;
 			case 19:
 				if (!FlavourConstants.PREMIUM_FEATURES) {
@@ -1304,7 +1313,8 @@ public class Dictionaries {
 					return;
 				}
 				if (offlineTranslate == null) offlineTranslate = new OfflineDicTranslate();
-				offlineTranslate.offlineDicTranslate(cr, s, langf, lang, curDict, view, extended, null, dcb);
+				offlineTranslate.offlineDicTranslate(cr, s, fullScreen,
+						langf, lang, curDict, view, extended, null, dcb);
 				break;
 			}
 

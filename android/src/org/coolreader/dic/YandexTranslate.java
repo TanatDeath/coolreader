@@ -49,19 +49,21 @@ public class YandexTranslate {
 		return langCode;
 	}
 
-	public void yandexTranslate(CoolReader cr, String s, String langf, String lang,
+	public void yandexTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang,
 								Dictionaries.DictInfo curDict, View view, Dictionaries.LangListCallback llc,
 								CoolReader.DictionaryCallback dcb) {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
-				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_YANDEX, "");
+				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_YANDEX,
+						"", fullScreen);
 				return;
 			}
 			if (StrUtils.isEmptyStr(lang)) {
 				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
-										+ langf + "] -> [" + lang + "]", DicToastView.IS_YANDEX, ""), 100));
+										+ langf + "] -> [" + lang + "]",
+								DicToastView.IS_YANDEX, "", fullScreen), 100));
 				return;
 			}
 		}
@@ -71,7 +73,7 @@ public class YandexTranslate {
 			String finalMes = mes;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization)+ " " + finalMes,
-							DicToastView.IS_YANDEX, ""), 100));
+							DicToastView.IS_YANDEX, "", fullScreen), 100));
 			BackgroundThread.instance().postBackground(() ->
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE), 3000);
 			return;
@@ -81,7 +83,7 @@ public class YandexTranslate {
 			String finalMes1 = mes;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization) + finalMes1,
-							DicToastView.IS_YANDEX, ""), 100));
+							DicToastView.IS_YANDEX, "", fullScreen), 100));
 			BackgroundThread.instance().postBackground(() ->
 				cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE), 3000);
 			return;
@@ -132,12 +134,12 @@ public class YandexTranslate {
 										sLang = jso2.getString("detectedLanguageCode");
 								}
 								if (dcb == null) {
-									cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang);
+									cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, fullScreen);
 									Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict);
 								} else {
 									dcb.done(sText);
 									if (dcb.showDicToast()) {
-										cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang);
+										cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, fullScreen);
 									}
 									if (dcb.saveToHist()) {
 										Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict);
@@ -145,20 +147,20 @@ public class YandexTranslate {
 								}
 							} else {
 								if (dcb == null)
-									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 								else {
 									dcb.fail(null, sBody);
 									if (dcb.showDicToast())
-										cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+										cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 								}
 							}
 						} catch (Exception e) {
 							if (dcb == null)
-								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 							else {
 								dcb.fail(e, e.getMessage());
 								if (dcb.showDicToast())
-									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 							}
 						}
 					} else {
@@ -178,9 +180,9 @@ public class YandexTranslate {
 									}
 								}
 								llc.click(langs);
-							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 						} catch (Exception e) {
-							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 						}
 					}
 				}, 100));
@@ -190,11 +192,11 @@ public class YandexTranslate {
 				sYandexIAM = "";
 				if (unauthCntY == 0) {
 					unauthCntY++;
-					yandexAuthThenTranslate(cr, s, langf, lang, curDict, view, llc, dcb);
+					yandexAuthThenTranslate(cr, s, fullScreen, langf, lang, curDict, view, llc, dcb);
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 						cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-							DicToastView.IS_YANDEX, "")
+							DicToastView.IS_YANDEX, "", fullScreen)
 					));
 					unauthCntY = 0;
 				}
@@ -202,7 +204,7 @@ public class YandexTranslate {
 		});
 	};
 
-	public void yandexAuthThenTranslate(CoolReader cr, String s, String langf, String lang,
+	public void yandexAuthThenTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang,
 										Dictionaries.DictInfo curDict, View view, Dictionaries.LangListCallback llc,
 										CoolReader.DictionaryCallback dcb)  {
 		cr.readYndCloudSettings();
@@ -231,13 +233,13 @@ public class YandexTranslate {
 						if (jso.has("message")) sYandexMessage = jso.getString("message");
 						if (jso.has("iamToken")) sYandexIAM = jso.getString("iamToken");
 						if (jso.has("expiresAt")) sYandexIAMexpiresAt = jso.getString("expiresAt");
-						yandexTranslate(cr, s, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict ,view, llc, dcb);
+						yandexTranslate(cr, s, fullScreen, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict ,view, llc, dcb);
 					} catch (Exception e) {
 						if (dcb == null)
-							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 						else {
 							if (dcb.showDicToast())
-								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "");
+								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
 							dcb.fail(e, e.getMessage());
 						}
 					}
@@ -247,7 +249,7 @@ public class YandexTranslate {
 				BackgroundThread.instance().postBackground(() ->
 						BackgroundThread.instance().postGUI(() ->
 										cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-												DicToastView.IS_YANDEX, "")
+												DicToastView.IS_YANDEX, "", fullScreen)
 								, 100));
 			}
 		});

@@ -312,7 +312,7 @@ public class UserDicDlg extends BaseDialog {
 				);
 			}
 			if (openPage==2) {
-				mCoolReader.findInDictionary( mDicSearchHistory.get(position).getSearch_text() , view);
+				mCoolReader.findInDictionary(mDicSearchHistory.get(position).getSearch_text(), true, view);
 			}
 			return true;
 		}

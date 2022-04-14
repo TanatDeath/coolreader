@@ -15,11 +15,8 @@
 	<LinearLayout
 			android:id="@+id/upper_row_ll"
 			android:layout_width="match_parent"
-			android:layout_height="fill_parent"
+			android:layout_height="wrap_content"
 			android:gravity="center_vertical|left"
-			android:layout_weight="8"
-			android:minHeight="?android:attr/listPreferredItemHeightSmall"
-			android:maxHeight="?android:attr/listPreferredItemHeightSmall"
 			android:orientation="horizontal">
 		<Button
 				android:id="@+id/upper_row_tv_close"
@@ -43,32 +40,35 @@
 				android:textColor="?attr/colorIcon"
 				android:text="" />
 	</LinearLayout>
-	<TableLayout
+	<RelativeLayout
 			android:id="@+id/tl_term_row"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:stretchColumns="*"
-			android:orientation="vertical">
-		<TableRow
-				android:layout_weight="1"
-				>
-			<TextView
-					android:id="@+id/lbl_term"
-					android:layout_width="0dip"
-					android:layout_weight="5"
-					android:layout_height="wrap_content"
-					android:layout_margin="5dip"
-					android:singleLine="true"
-					android:textColor="?attr/colorIcon"
-					style="@style/TextAppearance.Smaller"
-					android:text="" />
+			android:layout_height="match_parent">
+		<TextView
+				android:id="@+id/lbl_term"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_alignParentLeft="true"
+				android:layout_toLeftOf="@+id/ll_buttons_sym"
+				android:layout_margin="5dip"
+				android:singleLine="true"
+				android:textColor="?attr/colorIcon"
+				style="@style/TextAppearance.Smaller"
+				android:layout_gravity="center|left"
+				android:text="" />
+		<LinearLayout
+				android:id="@+id/ll_buttons_sym"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:orientation="horizontal">
 			<Button
 					android:id="@+id/remove3sym"
-					android:layout_weight="1"
 					style="@style/TextAppearance.Small"
 					android:singleLine="true"
 					android:layout_margin="2dip"
-					android:layout_width="0dip"
+					android:layout_width="wrap_content"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
 					android:layout_height="wrap_content"
 					android:textColor="?attr/colorIcon"
 					android:text="&lt;&lt;&lt;"
@@ -77,11 +77,11 @@
 					/>
 			<Button
 					android:id="@+id/remove2sym"
-					android:layout_weight="1"
 					style="@style/TextAppearance.Small"
 					android:singleLine="true"
 					android:layout_margin="2dip"
-					android:layout_width="0dip"
+					android:layout_width="wrap_content"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
 					android:layout_height="wrap_content"
 					android:textColor="?attr/colorIcon"
 					android:text="&lt;&lt;"
@@ -90,11 +90,11 @@
 					/>
 			<Button
 					android:id="@+id/remove1sym"
-					android:layout_weight="1"
 					style="@style/TextAppearance.Small"
 					android:singleLine="true"
 					android:layout_margin="2dip"
-					android:layout_width="0dip"
+					android:layout_width="wrap_content"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
 					android:layout_height="wrap_content"
 					android:textColor="?attr/colorIcon"
 					android:text="&lt;"
@@ -103,23 +103,22 @@
 					/>
 			<Button
 					android:id="@+id/btnDicExtended"
-					android:layout_weight="1"
 					style="@style/TextAppearance.Small"
 					android:singleLine="true"
 					android:layout_margin="2dip"
-					android:layout_width="0dip"
+					android:layout_width="wrap_content"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
 					android:layout_height="wrap_content"
 					android:textColor="?attr/colorIcon"
 					android:text="Ex"
 					android:background="@null"
 					android:padding="4dip"
 					/>
-		</TableRow>
-	</TableLayout>
+		</LinearLayout>
+	</RelativeLayout>
 	<org.coolreader.crengine.MaxHeightLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/items_list"
 		android:orientation="vertical"
-		android:layout_weight="8"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:baselineAligned="false"
@@ -133,7 +132,6 @@
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			android:id="@+id/items_list2"
 			android:orientation="vertical"
-			android:layout_weight="8"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:baselineAligned="false"

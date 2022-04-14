@@ -26,7 +26,7 @@
 				>
 			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 					android:layout_width="0dip"
-					android:layout_weight="1"
+					android:layout_weight="3"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical|center_horizontal"
 					android:orientation="horizontal">
@@ -40,11 +40,12 @@
 						android:text="en" />
 				<TextView
 						style="@style/TextAppearance.Medium"
+						android:id="@+id/langs_arrow"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:singleLine="true"
 						android:textColor="?attr/colorIcon"
-						android:text="->" />
+						android:text=" -> " />
 				<EditText
 						android:id="@+id/lang_to"
 						style="@style/TextAppearance.Widget.EditText"
@@ -58,12 +59,27 @@
 					android:id="@+id/btn_dont_hide"
 					android:layout_width="0dip"
 					android:checked="true"
-					android:layout_weight="2"
+					android:layout_weight="3"
 					android:tag="tint"
 					android:maxLines="3"
 					android:textColor="?attr/colorIcon"
 					android:drawableLeft="@drawable/icons8_toc_item_normal"
-					android:text="@string/dont_close_dialog" />
+					android:text="@string/show_in_fullscreen" />
+			<ImageButton android:id="@+id/dic_options"
+					android:layout_width="0dip"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_marginTop="5dip"
+					android:layout_marginBottom="5dip"
+					android:layout_marginLeft="2dip"
+					android:layout_marginRight="2dip"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
+					android:maxWidth="?android:attr/listPreferredItemHeightSmall"
+					android:src="?attr/cr3_viewer_settings_drawable"
+					android:focusable="false"
+					android:focusableInTouchMode="false"
+					android:tag="tint"
+					/>
 		</TableRow>
 	</TableLayout>
 

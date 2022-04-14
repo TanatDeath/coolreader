@@ -14,7 +14,6 @@ import androidx.annotation.ColorInt;
 import android.text.ClipboardManager;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,13 +26,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.Bookmark;
@@ -55,8 +55,6 @@ import org.coolreader.dic.wiki.WikiSearch;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import uk.co.deanwild.flowtextview.FlowTextView;
 
@@ -76,7 +74,6 @@ public class DicToastView {
     public static int IS_OFFLINE = 11;
 
     public static int mColorIconL = Color.GRAY;
-    public static PopupWindow curWindow = null;
 
     public static boolean isEInk;
     public static HashMap<Integer, Integer> themeColors;
@@ -136,11 +133,9 @@ public class DicToastView {
     }
 
 	private static View mReaderView;
-    private static LinkedBlockingQueue<Toast> queue = new LinkedBlockingQueue<Toast>();
     private static Toast curToast = null;
-    private static AtomicBoolean showing = new AtomicBoolean(false);
     public static Handler mHandler = new Handler();
-    private static PopupWindow window = null;
+    public static Object toastWindow = null;
     private static int colorGray;
     private static int colorGrayC;
     private static int colorIcon;
@@ -149,28 +144,19 @@ public class DicToastView {
     private static String sFindText;
     private static int mListSkipCount = 0;
 
-    private static void dismissAndCheckDicList() {
-        if (!StrUtils.isEmptyStr(mActivity.lastDicText)) {
-            if (!mActivity.lastDicSkip) {
-                BackgroundThread.instance().postGUI(() -> {
-                            DictsDlg dlg = new DictsDlg(mActivity, mActivity.getReaderView(),
-                                    mActivity.lastDicText, null, true);
-                            dlg.show();
-                        }
-                        , 300);
-            }
-            mActivity.lastDicSkip = false;
+    public static void doDismiss() {
+        if (toastWindow != null) {
+            if (toastWindow instanceof PopupWindow)
+                ((PopupWindow) toastWindow).dismiss();
+            if (toastWindow instanceof DicArticleDlg)
+                ((DicArticleDlg) toastWindow).dismiss();
         }
-        window.dismiss();
+        toastWindow = null;
+        curToast = null;
     }
 
     public static Runnable handleDismiss = () -> {
-        if (window != null) {
-            window.dismiss();
-            curWindow=null;
-            show(false);
-            if (queue.size() == 0) dismissAndCheckDicList();
-        }
+        doDismiss();
     };
 
     static int fontSize = 24;
@@ -263,10 +249,12 @@ public class DicToastView {
     static class WikiArticlesList extends BaseListView {
 
         private List<WikiArticle> arrWA;
+        private boolean fullScreen = false;
 
-        public WikiArticlesList(Context context, List<WikiArticle> arrWA ) {
+        public WikiArticlesList(Context context, List<WikiArticle> arrWA, boolean fullScreen) {
             super(context, true);
             this.arrWA = arrWA;
+            this.fullScreen = fullScreen;
             setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setLongClickable(true);
             setAdapter(new WikiArticlesAdapter());
@@ -280,18 +268,18 @@ public class DicToastView {
         public boolean performItemClick(View view, int position, long id) {
             WikiArticle wa = arrWA.get(position);
             if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
-            ((CoolReader) mActivity).lastDicSkip = true;
-            Dictionaries.wikiSearch.wikiTranslate((CoolReader) mActivity, mListCurDict, null,
+            Dictionaries.wikiSearch.wikiTranslate(mActivity,
+                    fullScreen, mListCurDict, null,
                     wa.pageId +"~"+sFindText, mListLink, mListLink2,
                     Dictionaries.wikiSearch.WIKI_SHOW_PAGE_ID, mListUseFirstLink, null);
-            mHandler.postDelayed(handleDismiss, 100);
+            doDismiss();
             return true;
         }
     }
 
     public static void hideToast(BaseActivity act) {
         try {
-            mHandler.postDelayed(handleDismiss, 100);
+            doDismiss();
         } catch (Exception e) {
 
         }
@@ -301,6 +289,7 @@ public class DicToastView {
                                  int dicT, String dicName, Object dicStructObject,
                                  Dictionaries.DictInfo curDict, String link, String link2, int curAction,
                                  boolean useFirstLink, String picAddr, boolean fullScreen) {
+        doDismiss();
         TypedArray a = act.getTheme().obtainStyledAttributes(new int[]
                 {R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
         colorGray = a.getColor(0, Color.GRAY);
@@ -318,15 +307,12 @@ public class DicToastView {
         mListLink = link;
         mListLink2 = link2;
         mListUseFirstLink = useFirstLink;
-        try {
-            queue.put(new Toast(anchor, sFindText, msg,
-                    duration, dicStructObject, dicT, dicName, curDict, link, link2, curAction, useFirstLink, picAddr));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (showing.compareAndSet(false, true) || (fullScreen)) {
-            show(fullScreen);
-        }
+        String msg1 = msg;
+        if (StrUtils.isEmptyStr(msg1))
+            msg1 = mActivity.getString(R.string.not_found);
+        curToast = new Toast(anchor, sFindText, msg1,
+            duration, dicStructObject, dicT, dicName, curDict, link, link2, curAction, useFirstLink, picAddr);
+        show(fullScreen);
     }
 
     public static void showToast(BaseActivity act, View anchor, String s, String msg, int duration,
@@ -355,14 +341,14 @@ public class DicToastView {
     }
 
     public static void showWikiListToast(BaseActivity act, View anchor, String s, String msg,
-                                         int dicT, String dicName, ArrayList<WikiArticle> arrWA,
+                                         int dicT, String dicName, WikiArticles arrWA,
                                          Dictionaries.DictInfo curDict, String link, String link2, int curAction,
-                                         int listSkipCount, boolean useFirstLink) {
+                                         int listSkipCount, boolean useFirstLink, boolean fullScreen) {
         sFindText = s;
         mListSkipCount = listSkipCount;
         showToastInternal(act, anchor, msg, android.widget.Toast.LENGTH_LONG, dicT, dicName,
                 arrWA, curDict, link, link2, curAction, useFirstLink, "",
-                !StrUtils.isEmptyStr(mActivity.lastDicText));
+                fullScreen);
     }
 
     @ColorInt
@@ -388,102 +374,193 @@ public class DicToastView {
     }
 
     private static void show(boolean fullScreen) {
-        if (queue.size() == 0) {
-            showing.compareAndSet(true, false);
-            return;
+        Toast t = curToast;
+        if (t == null) return;
+        doDismiss();
+        if (!fullScreen) {
+            PopupWindow window = new PopupWindow(t.anchor.getContext());
+            toastWindow = window;
+            window.setTouchInterceptor((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                    if (mActivity.getmReaderView() != null)
+                        mActivity.getmReaderView().disableTouch = true;
+                    doDismiss();
+                    return true;
+                }
+                return false;
+            });
         }
-        Toast t = queue.poll();
-        window = new PopupWindow(t.anchor.getContext());
-        curWindow = window;
-        window.setTouchInterceptor((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                if (mActivity.getmReaderView() != null)
-                    mActivity.getmReaderView().disableTouch = true;
-                dismissAndCheckDicList();
-                curWindow = null;
-                showing.compareAndSet(true, false);
-                return true;
-            }
-            return false;
-        });
         curToast = t;
         if (t.wikiArticles != null) wikiListToast(t, fullScreen);
             else if (t.dicStruct != null) extListToast(t, fullScreen);
                 else simpleToast(t, fullScreen);
     }
 
-    private static void simpleToast(Toast t, boolean fullScreen) {
-        window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-        window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setTouchable(true);
-        window.setFocusable(false);
-        window.setOutsideTouchable(true);
-        window.setBackgroundDrawable(null);
-        mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (StrUtils.isEmptyStr(t.mPicAddr))
-            window.setContentView(mInflater.inflate(R.layout.dic_toast, null, true));
-        else
-            window.setContentView(mInflater.inflate(R.layout.dic_toast_with_pic, null, true));
-        TableRow tr1 = window.getContentView().findViewById(R.id.tr_upper_row);
-        TableRow tr2 = window.getContentView().findViewById(R.id.tr_upper_sep_row);
-        MaxHeightScrollView sv =  window.getContentView().findViewById(R.id.dic_scrollV);
-        CoolReader cr = mActivity;
-        if (cr.getReaderView() != null) {
-            if (cr.getReaderView().getSurface() != null) {
-                sv.setMaxHeight(cr.getReaderView().getSurface().getHeight() * 3 / 4);
-            }
-        } else {
-            sv.setMaxHeight(t.anchor.getHeight() * 3 / 4);
+    private static String updTerm(String s) {
+        if (s == null) return "";
+        if (s.contains("~")) {
+            String[] arrs = s.split("~");
+            return arrs[arrs.length-1];
         }
-        //TableRow tr3 = window.getContentView().findViewById(R.id.dic_row);
-        //LinearLayout dicLL = window.getContentView().findViewById(R.id.dic_ll);
+        return s;
+    }
+
+    private static void simpleToast(Toast t, boolean fullScreen) {
+        mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View dicContent;
+        if (StrUtils.isEmptyStr(t.mPicAddr)) {
+            if (fullScreen)
+                dicContent = mInflater.inflate(R.layout.dic_toast, null, true);
+            else
+                dicContent = mInflater.inflate(R.layout.dic_toast_pop, null, true);
+        }
+        else {
+            if (fullScreen)
+                dicContent = mInflater.inflate(R.layout.dic_toast_with_pic, null, true);
+            else
+                dicContent = mInflater.inflate(R.layout.dic_toast_with_pic_pop, null, true);
+        }
+        DicArticleDlg dad = null;
+        TableRow tr1;
+        TableRow tr2;
+        Button tvMore;
+        Button tvClose;
+        TextView tvTerm;
+        Button btnRemove3sym;
+        Button btnRemove2sym;
+        Button btnRemove1sym;
+        Button btnDicExtended;
+        Button tvFull;
+        Button tvFullWeb;
+        TextView tvLblDic;
+        ViewGroup toast_ll;
+        TextView tv = null;
+        FlowTextView tv2 = null;
+        ImageView iv = null;
+        TableLayout dicTable;
+        View sep;
+        TextView tvYnd1;
+        ImageButton btnToUserDic;
+        ImageButton btnCopyToCb;
+        ImageButton btnTransl;
+        MaxHeightScrollView sv = null;
+        if (fullScreen) {
+            dad = new DicArticleDlg("DicArticleDlg",
+                    DicToastView.mActivity, curToast, -1, dicContent);
+            toastWindow = dad;
+            //ll1 = dad.mBody.findViewById(R.id.items_list_ll1);
+            tr1 = dad.mBody.findViewById(R.id.tr_upper_row);
+            tr2 = dad.mBody.findViewById(R.id.tr_upper_sep_row);
+            tvMore = dad.mBody.findViewById(R.id.upper_row_tv_more);
+            tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
+            tvTerm = dad.mBody.findViewById(R.id.lbl_term);
+            btnRemove3sym = dad.mBody.findViewById(R.id.remove3sym);
+            btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
+            btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
+            btnDicExtended = dad.mBody.findViewById(R.id.btnDicExtended);
+            tvFull = dad.mBody.findViewById(R.id.upper_row_tv_full);
+            tvFullWeb = dad.mBody.findViewById(R.id.upper_row_tv_full_web);
+            tvLblDic = dad.mBody.findViewById(R.id.lbl_dic);
+            toast_ll = dad.mBody.findViewById(R.id.dic_toast_ll);
+            if (StrUtils.isEmptyStr(t.mPicAddr))
+                tv = dad.mBody.findViewById(R.id.dic_text);
+            else {
+                tv2 = dad.mBody.findViewById(R.id.dic_text_flow);
+                iv = dad.mBody.findViewById(R.id.dic_pic);
+            }
+            dicTable = dad.mBody.findViewById(R.id.dic_table);
+        } else {
+            PopupWindow window = (PopupWindow) toastWindow;
+            window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+            window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setTouchable(true);
+            window.setFocusable(false);
+            window.setOutsideTouchable(true);
+            window.setBackgroundDrawable(null);
+            window.setContentView(dicContent);
+            //ll1 = window.getContentView().findViewById(R.id.items_list_ll1);
+            tr1 = window.getContentView().findViewById(R.id.tr_upper_row);
+            tr2 = window.getContentView().findViewById(R.id.tr_upper_sep_row);
+            tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
+            tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
+            tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+            btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
+            btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
+            btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
+            btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            tvFull = window.getContentView().findViewById(R.id.upper_row_tv_full);
+            tvFullWeb = window.getContentView().findViewById(R.id.upper_row_tv_full_web);
+            tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+            toast_ll = window.getContentView().findViewById(R.id.dic_toast_ll);
+            if (StrUtils.isEmptyStr(t.mPicAddr))
+                tv = window.getContentView().findViewById(R.id.dic_text);
+            else {
+                tv2 = window.getContentView().findViewById(R.id.dic_text_flow);
+                iv = window.getContentView().findViewById(R.id.dic_pic);
+            }
+            dicTable = window.getContentView().findViewById(R.id.dic_table);
+            sv =  window.getContentView().findViewById(R.id.dic_scrollV);
+        }
+        CoolReader cr = mActivity;
+        if (!fullScreen) {
+            if (cr.getReaderView() != null) {
+                if (cr.getReaderView().getSurface() != null) {
+                    sv.setMaxHeight(cr.getReaderView().getSurface().getHeight() * 8 / 12);
+                }
+            } else {
+                sv.setMaxHeight(t.anchor.getHeight() * 8 / 12);
+            }
+        }
         int colorGray;
         TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
                 {R.attr.colorThemeGray2});
         colorGray = a.getColor(0, Color.GRAY);
         a.recycle();
         int colr2 = colorGray;
-        Button tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
         setBtnBackgroundColor(tvMore, colr2);
-        Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
         setBtnBackgroundColor(tvClose, colr2);
-        TextView tvTerm = window.getContentView().findViewById(R.id.lbl_term);
         if (tvTerm != null) {
-            tvTerm.setText(t.sFindText);
+            tvTerm.setText(updTerm(t.sFindText));
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Button btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
             setBtnBackgroundColor(tvClose, colr2);
-            Button btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
             setBtnBackgroundColor(tvClose, colr2);
-            Button btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove1sym);
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove2sym);
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove3sym);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
-            Button btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            Utils.setSolidButton1(btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
                 try {
-                    mActivity.mDictionaries.findInDictionary(findText,
+                    mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                    mActivity.mDictionaries.setAdHocFromTo(
+                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                    doDismiss();
+                    mActivity.mDictionaries.findInDictionary(findText, fullScreen,
                             mActivity.mDictionaries.lastDicView, true, mActivity.mDictionaries.lastDC);
-                    mHandler.postDelayed(handleDismiss, 100);
                 } catch (Dictionaries.DictionaryException e) {
                     // do nothing
                 }
             });
+            if (t.dicType != IS_OFFLINE) Utils.hideView(btnDicExtended);
             if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
                     if (findText.length()>1) {
                         String findText1 = findText.substring(0, findText.length() - 1);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
                         try {
-                            mActivity.mDictionaries.findInDictionary(findText1,
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
                                     mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
-                        mHandler.postDelayed(handleDismiss, 100);
                     }
                 });
             if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
@@ -492,13 +569,15 @@ public class DicToastView {
                     if (findText.length()>2) {
                         String findText1 = findText.substring(0, findText.length() - 2);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
                         try {
-                            mActivity.mDictionaries.findInDictionary(findText1,
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
                                     mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
-                        mHandler.postDelayed(handleDismiss, 100);
                     }
                 });
             if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
@@ -507,21 +586,20 @@ public class DicToastView {
                     if (findText.length()>3) {
                         String findText1 = findText.substring(0, findText.length() - 3);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
                         try {
-                            mActivity.mDictionaries.findInDictionary(findText1,
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
                                     mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
-                        mHandler.postDelayed(handleDismiss, 100);
                     }
                 });
         }
-        Button tvFull = window.getContentView().findViewById(R.id.upper_row_tv_full);
         setBtnBackgroundColor(tvFull, colr2);
-        Button tvFullWeb = window.getContentView().findViewById(R.id.upper_row_tv_full_web);
         setBtnBackgroundColor(tvFullWeb, colr2);
-        TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
         if (tvLblDic != null) {
             if (t.mCurDict != null)
                 tvLblDic.setText(t.mCurDict.shortName);
@@ -530,32 +608,30 @@ public class DicToastView {
                 else tvLblDic.setText(t.mDicName);
             }
         }
-        //tvMore.setPaintFlags(tvMore.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvMore.setOnClickListener(v -> {
             String ss = sFindText;
             if (ss.contains("~")) ss = ss.split("~")[1];
             if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
-            cr.lastDicSkip = true;
-            Dictionaries.wikiSearch.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, ss, t.mLink, t.mLink2,
-                     Dictionaries.wikiSearch.WIKI_FIND_LIST, t.mUseFirstLink, null);
-            mHandler.postDelayed(handleDismiss, 100);
+            Dictionaries.wikiSearch.wikiTranslate(mActivity,
+                    fullScreen,
+                    t.mCurDict, mReaderView, ss, t.mLink, t.mLink2,
+                    Dictionaries.wikiSearch.WIKI_FIND_LIST, t.mUseFirstLink, null);
+            doDismiss();
         });
         if (t.dicType != IS_WIKI) ((ViewGroup)tvMore.getParent()).removeView(tvMore);
-        //tvClose.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-        //tvFull.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        tvClose.setOnClickListener(v -> doDismiss());
         tvFull.setOnClickListener(v -> {
             if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
-            ((CoolReader) mActivity).lastDicSkip = true;
             if (t.mCurAction == Dictionaries.wikiSearch.WIKI_FIND_TITLE)
-                Dictionaries.wikiSearch.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, sFindText, t.mLink, t.mLink2,
-                        Dictionaries.wikiSearch.WIKI_FIND_TITLE_FULL, t.mUseFirstLink, null);
+                Dictionaries.wikiSearch.wikiTranslate(mActivity, fullScreen,
+                    t.mCurDict, mReaderView, sFindText, t.mLink, t.mLink2,
+                    Dictionaries.wikiSearch.WIKI_FIND_TITLE_FULL, t.mUseFirstLink, null);
             else
-                Dictionaries.wikiSearch.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, sFindText, t.mLink, t.mLink2,
+                Dictionaries.wikiSearch.wikiTranslate(mActivity, fullScreen,
+                    t.mCurDict, mReaderView, sFindText, t.mLink, t.mLink2,
                     Dictionaries.wikiSearch.WIKI_SHOW_PAGE_FULL_ID, t.mUseFirstLink, null);
-            mHandler.postDelayed(handleDismiss, 100);
+            doDismiss();
         });
-        //tvFullWeb.setPaintFlags(tvClose.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvFullWeb.setOnClickListener(v -> {
             String link =
                     t.mUseFirstLink ? t.mLink : t.mLink2;
@@ -569,7 +645,7 @@ public class DicToastView {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setData(Uri.parse(link));
             mActivity.startActivity(i);
-            mHandler.postDelayed(handleDismiss, 100);
+            doDismiss();
         });
         if (t.dicType != IS_WIKI) ((ViewGroup)tvFullWeb.getParent()).removeView(tvFullWeb);
         if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
@@ -577,31 +653,22 @@ public class DicToastView {
                 (t.mCurAction == Dictionaries.wikiSearch.WIKI_FIND_TITLE_FULL)||
                 (t.dicType != IS_WIKI))
             ((ViewGroup) tvFull.getParent()).removeView(tvFull);
-        //if (t.dicType != IS_WIKI) {
-        //    ((ViewGroup) tr1.getParent()).removeView(tr1);
-        //    ((ViewGroup) tr2.getParent()).removeView(tr2);
-        //}
-        LinearLayout toast_ll = (LinearLayout) window.getContentView().findViewById(R.id.dic_toast_ll);
-        TextView tv = null;
-        FlowTextView tv2 = null;
-        if (StrUtils.isEmptyStr(t.mPicAddr)) {
-            tv = window.getContentView().findViewById(R.id.dic_text);
+        if (tv != null) {
             tv.setText(t.msg);
             if (!StrUtils.isEmptyStr(sFindText)) Utils.setHighLightedText(tv,sFindText, mColorIconL);
-        } else {
-            tv2 = window.getContentView().findViewById(R.id.dic_text_flow);
-            tv2.setText(t.msg);
         }
         if (tv2 != null) {
-            ImageView iv = window.getContentView().findViewById(R.id.dic_pic);
+            tv2.setText(t.msg);
             if (cr.getReaderView() != null) {
                 if (cr.getReaderView().getSurface() != null) {
                     iv.setMinimumWidth(cr.getReaderView().getSurface().getWidth() / 5 * 2);
                     iv.setMinimumHeight(cr.getReaderView().getSurface().getWidth() / 5 * 2);
                 }
             } else {
-                iv.setMinimumWidth(t.anchor.getWidth() / 5 * 2);
-                iv.setMinimumHeight(t.anchor.getWidth() / 5 * 2);
+                int w = t.anchor.getWidth() / 5 * 2;
+                int h = t.anchor.getHeight() / 5 * 2;
+                iv.setMinimumWidth(w);
+                iv.setMinimumHeight(h);
             }
             new DownloadImageTask(iv).execute(t.mPicAddr);
         }
@@ -613,13 +680,6 @@ public class DicToastView {
             if (tv != null) tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, tSize);
             if (tv2 != null) tv2.setTextSize(/*TypedValue.COMPLEX_UNIT_PX,*/ tSize);
         }
-        // SvyatKV - https://github.com/plotn/coolreader/issues/411
-//        if (t.dicType == IS_WIKI) {
-//            if (tv != null)
-//                tv.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-//            if (tv2 != null)
-//                tv2.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-//        }
         String sFace = mActivity.settings().getProperty(ReaderView.PROP_FONT_FACE, "");
         final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
         boolean found = false;
@@ -664,16 +724,21 @@ public class DicToastView {
             }
         int colorFill = colorGrayC;
         if (isEInk) colorFill = Color.WHITE;
-        toast_ll.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
-        TableLayout dicTable = (TableLayout) window.getContentView().findViewById(R.id.dic_table);
+        if (fullScreen)
+            toast_ll.setBackgroundColor(Color.argb(0, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+        else
+            toast_ll.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
         if (t.dicType == IS_YANDEX) {
             TableRow getSepRow = (TableRow) mInflater.inflate(R.layout.geo_sep_item, null);
             dicTable.addView(getSepRow);
-            View sep = window.getContentView().findViewById(R.id.sepRow);
+            sep = dicTable.findViewById(R.id.sepRow);
             sep.setBackgroundColor(updColor(colorIcon));
             TableRow yndRow = (TableRow) mInflater.inflate(R.layout.dic_ynd_item, null);
             dicTable.addView(yndRow);
-            TextView tvYnd1 = (TextView) window.getContentView().findViewById(R.id.ynd_tv1);
+            tvYnd1 = dicTable.findViewById(R.id.ynd_tv1);
+            btnToUserDic = dicTable.findViewById(R.id.btn_to_user_dic);
+            btnCopyToCb = dicTable.findViewById(R.id.btn_copy_to_cb);
+            btnTransl = dicTable.findViewById(R.id.btnTransl);
             Integer tSizeI = tSize;
             Double tSizeD = Double.valueOf(tSizeI.doubleValue() *0.8);
             if (tSize > 0) {
@@ -681,7 +746,7 @@ public class DicToastView {
             }
             tvYnd1.setPaintFlags(tvYnd1.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             tvYnd1.setOnClickListener(v -> {
-                mHandler.postDelayed(handleDismiss, 100);
+                doDismiss();
                 Uri uri = Uri.parse("http://translate.yandex.ru/");
                 Context context = t.anchor.getContext();
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -696,7 +761,6 @@ public class DicToastView {
             if (!StrUtils.isEmptyStr(t.mDicName)) {
                 tvYnd1.setText(t.mDicName + ": " + tvYnd1.getText());
             }
-            ImageButton btnTransl = window.getContentView().findViewById(R.id.btnTransl);
             btnTransl.setOnClickListener(v -> {
                 if (cr.getReaderView().mBookInfo!=null) {
                     String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
@@ -707,39 +771,32 @@ public class DicToastView {
                         dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
                     }
                     if (dfi != null) {
-                        cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, "", null,
+                        cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, fullScreen,
+                                null, dfi, fi, langf, lang, "", null,
                                 TranslationDirectionDialog.FOR_COMMON, null);
                     }
                 };
-                dismissAndCheckDicList();
-                curWindow = null;
-                showing.compareAndSet(true, false);
+                doDismiss();
             });
-            ImageButton btnToUserDic = window.getContentView().findViewById(R.id.btn_to_user_dic);
             btnToUserDic.setOnClickListener(v -> {
                 if (cr.getReaderView().mBookInfo!=null) {
                     if (cr.getReaderView().lastSelection!=null) {
                         if (!cr.getReaderView().lastSelection.isEmpty()) {
                             cr.getReaderView().clearSelection();
-                            cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection, Bookmark.TYPE_USER_DIC, t.msg);
+                            cr.getReaderView().showNewBookmarkDialog(cr.getReaderView().lastSelection,
+                                    Bookmark.TYPE_USER_DIC, t.msg);
                         }
                     }
                 };
-                dismissAndCheckDicList();
-                curWindow = null;
-                showing.compareAndSet(true, false);
+                doDismiss();
             });
-            ImageButton btnCopyToCb = window.getContentView().findViewById(R.id.btn_copy_to_cb);
             btnCopyToCb.setOnClickListener(v -> {
-                ClipboardManager cm = mActivity.getClipboardmanager();
                 String s = StrUtils.getNonEmptyStr(t.msg,true);
                 if (cr.getReaderView().lastSelection != null) {
                     if (s.startsWith(cr.getReaderView().lastSelection.text+":")) s = s.substring(cr.getReaderView().lastSelection.text.length()+1);
                 }
-                cm.setText(StrUtils.getNonEmptyStr(s,true));
-                dismissAndCheckDicList();
-                curWindow = null;
-                showing.compareAndSet(true, false);
+                Utils.copyToClipboard(mActivity, StrUtils.getNonEmptyStr(s,true));
+                doDismiss();
             });
             mActivity.tintViewIcons(yndRow,true);
         } else
@@ -747,14 +804,17 @@ public class DicToastView {
             {
                 TableRow getSepRow = (TableRow) mInflater.inflate(R.layout.geo_sep_item, null);
                 dicTable.addView(getSepRow);
-                View sep = window.getContentView().findViewById(R.id.sepRow);
+                sep = dicTable.findViewById(R.id.sepRow);
                 sep.setBackgroundColor(updColor(colorIcon));
                 TableRow yndRow = (TableRow) mInflater.inflate(R.layout.dic_ynd_item, null);
                 dicTable.addView(yndRow);
-                TextView tvYnd1 = (TextView) window.getContentView().findViewById(R.id.ynd_tv1);
+                tvYnd1 = dicTable.findViewById(R.id.ynd_tv1);
+                btnToUserDic = dicTable.findViewById(R.id.btn_to_user_dic);
+                btnCopyToCb = dicTable.findViewById(R.id.btn_copy_to_cb);
+                btnTransl = dicTable.findViewById(R.id.btnTransl);
                 if ((t.dicType == IS_DICTCC) || (t.dicType == IS_LINGUEE) ||
                         (t.dicType == IS_GRAMOTA) || (t.dicType == IS_GLOSBE) ||
-                        (t.dicType == IS_TURENG)) {
+                        (t.dicType == IS_TURENG) || (t.dicType == IS_URBAN)) {
                     String s = StrUtils.getNonEmptyStr(t.mDicName,true);
                     if (s.contains("?")) s = s.substring(0, s.indexOf("?"));
                     tvYnd1.setText(s);
@@ -767,7 +827,7 @@ public class DicToastView {
                 }
                 tvYnd1.setPaintFlags(tvYnd1.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
                 tvYnd1.setOnClickListener(v -> {
-                    mHandler.postDelayed(handleDismiss, 100);
+                    doDismiss();
                     String sLink = "";
                     if (t.dicType == IS_LINGVO) sLink = "https://developers.lingvolive.com/";
                     if (t.dicType == IS_DEEPL) sLink = "https://www.deepl.com/";
@@ -778,6 +838,7 @@ public class DicToastView {
                     if (t.dicType == IS_GLOSBE) sLink = t.mDicName;
                     if (t.dicType == IS_GOOGLE) sLink = "https://translate.google.com/";
                     if (t.dicType == IS_TURENG) sLink = t.mDicName;
+                    if (t.dicType == IS_URBAN) sLink = t.mDicName;
                     Uri uri = Uri.parse(sLink);
                     Context context = t.anchor.getContext();
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -789,7 +850,6 @@ public class DicToastView {
 
                     }
                 });
-                ImageButton btnTransl = window.getContentView().findViewById(R.id.btnTransl);
                 btnTransl.setOnClickListener(v -> {
                     if (cr.getReaderView().mBookInfo!=null) {
                         String lang = StrUtils.getNonEmptyStr(cr.getReaderView().mBookInfo.getFileInfo().lang_to,true);
@@ -800,17 +860,15 @@ public class DicToastView {
                             dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
                         }
                         if (dfi != null) {
-                            cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, "", null,
+                            cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, fullScreen,
+                                    null, dfi, fi, langf, lang, "", null,
                                     TranslationDirectionDialog.FOR_COMMON, null);
                         }
                     };
-                    dismissAndCheckDicList();
-                    curWindow = null;
-                    showing.compareAndSet(true, false);
+                    doDismiss();
                 });
                 if ((cr.getReaderView() == null) || (cr.mCurrentFrame != cr.mReaderFrame))
                     Utils.hideView(btnTransl);
-                ImageButton btnToUserDic = window.getContentView().findViewById(R.id.btn_to_user_dic);
                 btnToUserDic.setOnClickListener(v -> {
                     if (cr.getReaderView().mBookInfo!=null) {
                         if (cr.getReaderView().lastSelection!=null) {
@@ -821,59 +879,99 @@ public class DicToastView {
                             }
                         }
                     };
-                    dismissAndCheckDicList();
-                    curWindow = null;
-                    showing.compareAndSet(true, false);
+                    doDismiss();
                 });
                 if ((cr.getReaderView() == null) || (cr.mCurrentFrame != cr.mReaderFrame))
                     Utils.hideView(btnToUserDic);
-                ImageButton btnCopyToCb = window.getContentView().findViewById(R.id.btn_copy_to_cb);
                 btnCopyToCb.setOnClickListener(v -> {
-                    ClipboardManager cm = mActivity.getClipboardmanager();
                     String s = StrUtils.getNonEmptyStr(t.msg,true);
                     if (cr.getReaderView() != null)
                         if (cr.getReaderView().lastSelection != null) {
                             if (s.startsWith(cr.getReaderView().lastSelection.text+":")) s = s.substring(cr.getReaderView().lastSelection.text.length()+1);
                         }
-                    cm.setText(StrUtils.getNonEmptyStr(s,true));
-                    dismissAndCheckDicList();
-                    curWindow = null;
-                    showing.compareAndSet(true, false);
+                    Utils.copyToClipboard(mActivity, StrUtils.getNonEmptyStr(s,true));
+                    doDismiss();
                 });
                 mActivity.tintViewIcons(yndRow,true);
             }
-        int [] location = new int[2];
-        t.anchor.getLocationOnScreen(location);
-        int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
-        mActivity.tintViewIcons(window,false);
-        window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
-       // mHandler.postDelayed(handleDismiss, t.duration == 0 ? 3000 : 5000);
+        if (fullScreen) {
+            mActivity.tintViewIcons(dad.mBody, false);
+            dad.show();
+        } else {
+            PopupWindow window = (PopupWindow) toastWindow;
+            int [] location = new int[2];
+            t.anchor.getLocationOnScreen(location);
+            int popupY = location[1] + t.anchor.getHeight() - toast_ll.getHeight();
+            mActivity.tintViewIcons(window,false);
+            window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+        }
     }
 
     private static void wikiListToast(Toast t, boolean fullScreen) {
-        window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
-        window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setTouchable(true);
-        window.setFocusable(false);
-        window.setOutsideTouchable(true);
-        window.setBackgroundDrawable(null);
+        TextView tvTerm;
+        Button btnRemove3sym;
+        Button btnRemove2sym;
+        Button btnRemove1sym;
+        Button btnDicExtended;
         mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        window.setContentView(mInflater.inflate(R.layout.wiki_articles_dlg, null, true));
-        LinearLayout ll1 = window.getContentView().findViewById(R.id.articles_list_ll1);
-        TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-                {R.attr.colorThemeGray2});
-        colorGray = a.getColor(0, Color.GRAY);
-        a.recycle();
+        View dicContent = mInflater.inflate(R.layout.wiki_articles_dlg, null, true);
+        DicArticleDlg dad = null;
+        LinearLayout ll1;
+        colorGray = themeColors.get(R.attr.colorThemeGray2);
+        Button tvMore;
+        Button tvClose;
+        TextView tvLblDic;
+        ViewGroup body;
+        ViewGroup body2;
+        if (fullScreen) {
+            dad = new DicArticleDlg("DicArticleDlg",
+                    DicToastView.mActivity, curToast, -1, dicContent);
+            toastWindow = dad;
+            ll1 = dad.mBody.findViewById(R.id.articles_list_ll1);
+            tvMore = dad.mBody.findViewById(R.id.upper_row_tv_more);
+            tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
+            tvLblDic = dad.mBody.findViewById(R.id.lbl_dic);
+            tvTerm = dad.mBody.findViewById(R.id.lbl_term);
+            btnRemove3sym = dad.mBody.findViewById(R.id.remove3sym);
+            btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
+            btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
+            btnDicExtended = dad.mBody.findViewById(R.id.btnDicExtended);
+            body = dad.mBody.findViewById(R.id.articles_list);
+            body2 = dad.mBody.findViewById(R.id.articles_list2);
+        } else {
+            PopupWindow window = (PopupWindow) toastWindow;
+            window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
+            window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setTouchable(true);
+            window.setFocusable(false);
+            window.setOutsideTouchable(true);
+            window.setBackgroundDrawable(null);
+            window.setContentView(dicContent);
+            ll1 = window.getContentView().findViewById(R.id.articles_list_ll1);
+            tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
+            tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
+            tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+            tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+            btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
+            btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
+            btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
+            btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            body = window.getContentView().findViewById(R.id.articles_list);
+            body2 = window.getContentView().findViewById(R.id.articles_list2);
+        }
         int colr2 = colorGray;
         int colorFill = colorGrayC;
         if (isEInk) colorFill = Color.WHITE;
-        ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
-        Button tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
+        if (fullScreen)
+            ll1.setBackgroundColor(Color.argb(0, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+        else
+            ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
         setBtnBackgroundColor(tvMore, colr2);
-        //tvMore.setBackgroundColor(colorGray);
-        Button tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
         setBtnBackgroundColor(tvClose, colr2);
-        TextView tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
+//        if (fullScreen) {
+//            Utils.setSolidButton1(tvMore);
+//            Utils.setSolidButton1(tvClose);
+//        }
         if (tvLblDic != null) {
             if (t.mCurDict != null)
                 tvLblDic.setText(t.mCurDict.shortName);
@@ -886,31 +984,125 @@ public class DicToastView {
             String ss = sFindText;
             if (ss.contains("~")) ss = ss.split("~")[1];
             if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
-            ((CoolReader) mActivity).lastDicSkip = true;
-            Dictionaries.wikiSearch.wikiTranslate((CoolReader) mActivity, t.mCurDict, mReaderView, ss, t.mLink, t.mLink2,
-                    t.mCurAction, mListSkipCount + t.wikiArticles.wikiArticleList.size(), t.mUseFirstLink, 0 ,"", null);
-            mHandler.postDelayed(handleDismiss, 100);
+            Dictionaries.wikiSearch.wikiTranslate(mActivity, fullScreen, t.mCurDict, mReaderView, ss, t.mLink, t.mLink2,
+                    t.mCurAction, mListSkipCount + t.wikiArticles.wikiArticleList.size(),
+                    t.mUseFirstLink, 0 ,"", null);
+            doDismiss();
         });
         int sz = 0;
         if (t.wikiArticles != null) sz = t.wikiArticles.wikiArticleList.size();
         if (sz == 0) ((ViewGroup) tvMore.getParent()).removeView(tvMore);
-        tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
-        ViewGroup body = window.getContentView().findViewById(R.id.articles_list);
-        CoolReader cr=(CoolReader) mActivity;
-        if (cr.getReaderView() != null) {
-            if (cr.getReaderView().getSurface() != null) {
-                ((MaxHeightLinearLayout) body).setMaxHeight(cr.getReaderView().getSurface().getHeight() * 3 / 4);
+        tvClose.setOnClickListener(v -> doDismiss());
+        CoolReader cr = mActivity;
+        if (!fullScreen)
+            if (cr.getReaderView() != null) {
+                if (cr.getReaderView().getSurface() != null) {
+                    ((MaxHeightLinearLayout) body).setMaxHeight(cr.getReaderView().getSurface().getHeight() * 8 / 12);
+                }
+            } else {
+                ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 8 / 12);
             }
-        } else {
-            ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 3 / 4);
+        t.mWikiArticlesList = new WikiArticlesList(mActivity, t.wikiArticles.wikiArticleList, fullScreen);
+        if (fullScreen)
+            body2.addView(t.mWikiArticlesList);
+        else
+            body.addView(t.mWikiArticlesList);
+        if (tvTerm != null) {
+            tvTerm.setText(updTerm(t.sFindText));
+            tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            setBtnBackgroundColor(tvClose, colr2);
+            setBtnBackgroundColor(tvClose, colr2);
+            setBtnBackgroundColor(tvClose, colr2);
+            btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove1sym);
+            btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove2sym);
+            btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove3sym);
+            final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
+            Utils.setSolidButton1(btnDicExtended);
+            btnDicExtended.setOnClickListener(v -> {
+                try {
+                    mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                    mActivity.mDictionaries.setAdHocFromTo(
+                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                    doDismiss();
+                    mActivity.mDictionaries.findInDictionary(findText, fullScreen,
+                            mActivity.mDictionaries.lastDicView, true,
+                            mActivity.mDictionaries.lastDC);
+                } catch (Dictionaries.DictionaryException e) {
+                    // do nothing
+                }
+            });
+            if (t.dicType != IS_OFFLINE) Utils.hideView(btnDicExtended);
+            if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
+            else
+                btnRemove1sym.setOnClickListener(v -> {
+                    if (findText.length() > 1) {
+                        String findText1 = findText.substring(0, findText.length() - 1);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false,
+                                    mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                    }
+                });
+            if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
+            else
+                btnRemove2sym.setOnClickListener(v -> {
+                    if (findText.length() > 2) {
+                        String findText1 = findText.substring(0, findText.length() - 2);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false,
+                                    mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                    }
+                });
+            if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
+            else
+                btnRemove3sym.setOnClickListener(v -> {
+                    if (findText.length() > 3) {
+                        String findText1 = findText.substring(0, findText.length() - 3);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false,
+                                    mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                    }
+                });
         }
-        t.mWikiArticlesList = new WikiArticlesList(mActivity, t.wikiArticles.wikiArticleList);
-        body.addView(t.mWikiArticlesList);
-        int [] location = new int[2];
-        t.anchor.getLocationOnScreen(location);
-        int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
-        mActivity.tintViewIcons(window,false);
-        window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+        if (fullScreen) {
+            mActivity.tintViewIcons(dad.mBody, false);
+            Utils.hideView(body);
+            dad.show();
+        } else {
+            PopupWindow window = (PopupWindow) toastWindow;
+            int[] location = new int[2];
+            t.anchor.getLocationOnScreen(location);
+            int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
+            mActivity.tintViewIcons(window, false);
+            Utils.hideView(body2);
+            window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
+        }
     }
 
     private static void extListToast(Toast t, boolean fullScreen) {
@@ -919,7 +1111,6 @@ public class DicToastView {
         colorGray = themeColors.get(R.attr.colorThemeGray2);
         int colr2 = colorGray;
         int colorFill = colorGrayC;
-        //if (fullScreen) colorFill = colorGray1;
         if (isEInk) colorFill = Color.WHITE;
         LinearLayout ll1;
         LinearLayout upperRow = null;
@@ -936,6 +1127,7 @@ public class DicToastView {
         if (fullScreen) {
             dad = new DicArticleDlg("DicArticleDlg",
                     DicToastView.mActivity, curToast, -1, dicContent);
+            toastWindow = dad;
             ll1 = dad.mBody.findViewById(R.id.items_list_ll1);
             upperRow = dad.mBody.findViewById(R.id.upper_row_ll);
             tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
@@ -948,6 +1140,7 @@ public class DicToastView {
             body = dad.mBody.findViewById(R.id.items_list);
             body2 = dad.mBody.findViewById(R.id.items_list2);
         } else {
+            PopupWindow window = (PopupWindow) toastWindow;
             window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
             window.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
             window.setTouchable(true);
@@ -971,7 +1164,7 @@ public class DicToastView {
         else
             ll1.setBackgroundColor(Color.argb(255, Color.red(colorFill), Color.green(colorFill), Color.blue(colorFill)));
         setBtnBackgroundColor(tvClose, colr2);
-        tvClose.setOnClickListener(v -> mHandler.postDelayed(handleDismiss, 100));
+        tvClose.setOnClickListener(v -> doDismiss());
         if (tvLblDic != null) {
             if (t.mCurDict != null)
                 tvLblDic.setText(t.mCurDict.shortName);
@@ -979,37 +1172,49 @@ public class DicToastView {
                 tvLblDic.setText(t.mDicName);
         }
         if (tvTerm != null) {
-            tvTerm.setText(t.sFindText);
+            tvTerm.setText(updTerm(t.sFindText));
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             setBtnBackgroundColor(tvClose, colr2);
             setBtnBackgroundColor(tvClose, colr2);
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove1sym);
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove2sym);
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+            Utils.setSolidButton1(btnRemove3sym);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
+            Utils.setSolidButton1(btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
                 try {
-                    mActivity.mDictionaries.findInDictionary(findText,
-                            mActivity.mDictionaries.lastDicView, true, mActivity.mDictionaries.lastDC);
-                    mHandler.postDelayed(handleDismiss, 100);
+                    mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                    mActivity.mDictionaries.setAdHocFromTo(
+                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                    doDismiss();
+                    mActivity.mDictionaries.findInDictionary(findText, fullScreen,
+                            mActivity.mDictionaries.lastDicView, true,
+                            mActivity.mDictionaries.lastDC);
                 } catch (Dictionaries.DictionaryException e) {
                     // do nothing
                 }
             });
+            if (t.dicType != IS_OFFLINE) Utils.hideView(btnDicExtended);
             if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
                     if (findText.length() > 1) {
                         String findText1 = findText.substring(0, findText.length() - 1);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
                         try {
-                            mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false,
+                                    mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
-                        mHandler.postDelayed(handleDismiss, 100);
                     }
                 });
             if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
@@ -1018,13 +1223,16 @@ public class DicToastView {
                     if (findText.length() > 2) {
                         String findText1 = findText.substring(0, findText.length() - 2);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
                         try {
-                            mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                mActivity.mDictionaries.lastDicView, false,
+                                mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
-                        mHandler.postDelayed(handleDismiss, 100);
                     }
                 });
             if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
@@ -1033,23 +1241,26 @@ public class DicToastView {
                     if (findText.length() > 3) {
                         String findText1 = findText.substring(0, findText.length() - 3);
                         mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
                         try {
-                            mActivity.mDictionaries.findInDictionary(findText1,
-                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false,
+                                    mActivity.mDictionaries.lastDC);
                         } catch (Dictionaries.DictionaryException e) {
                             // do nothing
                         }
-                        mHandler.postDelayed(handleDismiss, 100);
                     }
                 });
         }
         if (!fullScreen)
             if (mActivity.getReaderView() != null) {
                 if (mActivity.getReaderView().getSurface() != null) {
-                    ((MaxHeightLinearLayout) body).setMaxHeight(mActivity.getReaderView().getSurface().getHeight() * 3 / 4);
+                    ((MaxHeightLinearLayout) body).setMaxHeight(mActivity.getReaderView().getSurface().getHeight() * 8 / 12);
                 }
             } else {
-                ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 3 / 4);
+                ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 8 / 12);
             }
         t.mExtDicList = new ExtDicList(mActivity, t, null, mHandler, handleDismiss, false);
         if (fullScreen)
@@ -1062,6 +1273,7 @@ public class DicToastView {
             Utils.hideView(body);
             dad.show();
         } else {
+            PopupWindow window = (PopupWindow) toastWindow;
             int[] location = new int[2];
             t.anchor.getLocationOnScreen(location);
             int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();

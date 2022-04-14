@@ -42,10 +42,11 @@ public class LingvoTranslate {
 		return langCode;
 	}
 
-	public void lingvoTranslate(CoolReader cr, String s, String langf, String lang, boolean extended,
+	public void lingvoTranslate(CoolReader cr, String s, boolean fullScreen, String langf, String lang, boolean extended,
 								 Dictionaries.DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		if (!FlavourConstants.PREMIUM_FEATURES) {
-			cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_LINGVO, "");
+			cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_LINGVO,
+					"", fullScreen);
 			return;
 		}
 		if ((StrUtils.isEmptyStr(langf))||(StrUtils.isEmptyStr(lang))) {
@@ -53,7 +54,7 @@ public class LingvoTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.translate_lang_not_set)+": ["
 									+langf+"] -> ["+lang + "]",
-							DicToastView.IS_LINGVO, "")
+							DicToastView.IS_LINGVO, "", fullScreen)
 					, 100));
 			return;
 		}
@@ -121,7 +122,7 @@ public class LingvoTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.translate_lang_not_found)+": ["
 									+langf+ " {" + ilangfF + "}" + "] -> ["+lang + " {" + ilangF + "}]",
-							DicToastView.IS_LINGVO, ""), 100));
+							DicToastView.IS_LINGVO, "", fullScreen), 100));
 			return;
 		}
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.LINGVO_DIC_ONLINE+"/v1/Minicard").newBuilder();
@@ -154,19 +155,22 @@ public class LingvoTranslate {
 										sTrans = sHeading.replace(":", " ") + ": " + sTrans;
 									if (!extended) {
 										if (dcb == null) {
-											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
+													sDic, fullScreen);
 											Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
 										} else {
 											dcb.done(sTrans);
 											if (dcb.showDicToast()) {
-												cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+												cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
+														sDic, fullScreen);
 											}
 											if (dcb.saveToHist()) {
 												Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
 											}
 										}
 									}
-									else lingvoExtended(cr, s, ilangfF, ilangF, sTrans, false, sDic, curDict, view, dcb);
+									else lingvoExtended(cr, s, fullScreen,
+											ilangfF, ilangF, sTrans, false, sDic, curDict, view, dcb);
 								}
 							} else {
 								if (dcb != null) dcb.fail(null, sBody);
@@ -176,7 +180,7 @@ public class LingvoTranslate {
 						boolean bShowToast = dcb == null;
 						if (!bShowToast) bShowToast = dcb.showDicToast();
 						if (bShowToast) {
-							cr.showDicToast(s, sBody, DicToastView.IS_LINGVO, "");
+							cr.showDicToast(s, sBody, DicToastView.IS_LINGVO, "", fullScreen);
 							if ((sBody.contains("for direction")) && (sBody.contains("not found")))
 								BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 									if (cr.getReaderView().mBookInfo != null) {
@@ -186,7 +190,8 @@ public class LingvoTranslate {
 											dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
 										}
 										if (dfi != null) {
-											cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, null, dfi, fi, langf, lang, s, null,
+											cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, fullScreen,
+													null, dfi, fi, langf, lang, s, null,
 													TranslationDirectionDialog.FOR_LINGVO, null);
 										}
 									}
@@ -201,17 +206,17 @@ public class LingvoTranslate {
 				sLingvoToken = "";
 				if (unauthCnt == 0) {
 					unauthCnt++;
-					lingvoAuthThenTranslate(cr, s, langf, lang, extended, curDict, view, dcb);
+					lingvoAuthThenTranslate(cr, s, fullScreen, langf, lang, extended, curDict, view, dcb);
 				} else {
 					if (dcb == null)
 						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "")
+							cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "", fullScreen)
 						));
 					else {
 						dcb.fail(e, e.getMessage());
 						if (dcb.showDicToast())
 							BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-								cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "")
+								cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(), DicToastView.IS_LINGVO, "", fullScreen)
 							));
 					}
 					unauthCnt = 0;
@@ -220,7 +225,7 @@ public class LingvoTranslate {
 		});
 	}
 
-	private void lingvoExtended(CoolReader cr, String s, int ilangf, int ilang,
+	private void lingvoExtended(CoolReader cr, String s, boolean fullScreen, int ilangf, int ilang,
 								String sTrans, boolean isYnd, String sDic, Dictionaries.DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.LINGVO_DIC_ONLINE+"/v1/Translation").newBuilder();
 		urlBuilder.addQueryParameter("text", s);
@@ -254,12 +259,14 @@ public class LingvoTranslate {
 										if (StrUtils.getNonEmptyStr(jso.getString("Node"), true).equals("Transcription")) {
 											sAdd = " ["+StrUtils.getNonEmptyStr(jso.getString("Text"), true)+"]";
 											if (dcb == null) {
-												cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+												cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
+														sDic, fullScreen);
 												Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
 											} else {
 												dcb.done(sTrans + sAdd);
 												if (dcb.showDicToast()) {
-													cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO, sDic);
+													cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
+															sDic, fullScreen);
 												}
 												if (dcb.saveToHist()) {
 													Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
@@ -272,12 +279,12 @@ public class LingvoTranslate {
 							}
 						}
 						if (dcb == null) {
-							cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic);
+							cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic, fullScreen);
 							Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
 						} else  {
 							dcb.done(sTrans + sAdd);
 							if (dcb.showDicToast()) {
-								cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic);
+								cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic, fullScreen);
 							}
 							if (dcb.saveToHist()) {
 								Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
@@ -285,12 +292,12 @@ public class LingvoTranslate {
 						}
 					} catch (Exception e) {
 						if (dcb == null) {
-							cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+							cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 							Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
 						} else {
 							dcb.done(sTrans);
 							if (dcb.showDicToast()) {
-								cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+								cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 							}
 							if (dcb.saveToHist()) {
 								Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
@@ -302,18 +309,19 @@ public class LingvoTranslate {
 
 			public void onFailure(Call call, IOException e) {
 				if (dcb == null)
-					cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+					cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 				else {
 					dcb.done(sTrans);
 					if (dcb.showDicToast())
-						cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic);
+						cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 				}
 			}
 		});
 	}
 
-	public void lingvoAuthThenTranslate(CoolReader cr, String s, String langf,
-						String lang, boolean extended, Dictionaries.DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
+	public void lingvoAuthThenTranslate(CoolReader cr, String s, boolean fullScreen,
+						String langf, String lang, boolean extended,
+						Dictionaries.DictInfo curDict, View view, CoolReader.DictionaryCallback dcb) {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(Dictionaries.LINGVO_DIC_ONLINE+"/v1.1/authenticate").newBuilder();
 		String url = urlBuilder.build().toString();
 		final CoolReader crf2 = cr;
@@ -337,10 +345,12 @@ public class LingvoTranslate {
 							BackgroundThread.instance().postGUI(() -> {
 								if (dcb == null)
 									crf2.showDicToast(cr.getString(R.string.dict_err),
-											crf2.getString(R.string.lingvo_unauth), DicToastView.IS_LINGVO, "");
+											crf2.getString(R.string.lingvo_unauth), DicToastView.IS_LINGVO,
+											"", fullScreen);
 								else {
 									if (dcb.showDicToast()) crf2.showDicToast(cr.getString(R.string.dict_err),
-											crf2.getString(R.string.lingvo_unauth), DicToastView.IS_LINGVO, "");
+											crf2.getString(R.string.lingvo_unauth), DicToastView.IS_LINGVO,
+											"", fullScreen);
 									dcb.fail(null, crf2.getString(R.string.lingvo_unauth));
 								}
 							}, 100));
@@ -352,11 +362,12 @@ public class LingvoTranslate {
 								if (dcb == null)
 									crf2.showDicToast(cr.getString(R.string.dict_err),
 									crf2.getString(R.string.http_error) + " " + response.code(),
-											DicToastView.IS_LINGVO, "");
+											DicToastView.IS_LINGVO, "", fullScreen);
 								else {
 									if (dcb.showDicToast())
 										crf2.showDicToast(cr.getString(R.string.dict_err),
-											crf2.getString(R.string.http_error) + " " + response.code(), DicToastView.IS_LINGVO, "");
+											crf2.getString(R.string.http_error) + " " + response.code(), DicToastView.IS_LINGVO,
+												"", fullScreen);
 									dcb.fail(null, crf2.getString(R.string.http_error) + " " + response.code());
 								}
 							}, 100));
@@ -364,7 +375,8 @@ public class LingvoTranslate {
 				}
 				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 					sLingvoToken = sBody;
-					lingvoTranslate(cr, s, lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), extended, curDict, view, dcb);
+					lingvoTranslate(cr, s, fullScreen,
+							lingvoGetDefLangCode(langf), lingvoGetDefLangCode(lang), extended, curDict, view, dcb);
 				}, 100));
 			}
 			public void onFailure(Call call, IOException e) {
@@ -372,11 +384,11 @@ public class LingvoTranslate {
 						BackgroundThread.instance().postGUI(() -> {
 							if (dcb == null)
 								crf2.showDicToast(cr.getString(R.string.dict_err),
-									e.getMessage(), DicToastView.IS_LINGVO, "");
+									e.getMessage(), DicToastView.IS_LINGVO, "", fullScreen);
 							else {
 								if (dcb.showDicToast())
 									crf2.showDicToast(cr.getString(R.string.dict_err),
-										e.getMessage(), DicToastView.IS_LINGVO, "");
+										e.getMessage(), DicToastView.IS_LINGVO, "", fullScreen);
 								dcb.fail(e, e.getMessage());
 							}
 						}, 100));

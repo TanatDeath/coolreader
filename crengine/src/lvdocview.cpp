@@ -2443,8 +2443,9 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
 	            lvRect * pageRect, int pageCount, int basePage, bool hasTwoVisiblePages, bool isRightPage, bool isLastPage) {
     int start = page.start;
     int height = page.height;
-	int headerHeight = getPageHeaderHeight(); // needed for KOreader, bot not for KR
-    //CRLog::trace("drawPageTo(%d,%d)", start, height);
+	//int headerHeight = getPageHeaderHeight(); // needed for KOreader, bot not for KR
+	int headerHeight = 0;
+	//CRLog::trace("drawPageTo(%d,%d)", start, height);
 
 	// pageRect is actually the full draw buffer, except in 2-page mode where
 	// it is half the width plus/minus some possibly tweaked middle margin
@@ -2465,11 +2466,8 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
 	// made from page splitting (that we have to enforce to not get painted some content
 	// that is set to be on prev/next page).
     lvRect clip;
-    // Next two lines - KOreader's
-	//clip.top = pageRect->top + m_pageMargins.top + headerHeight;
-	//clip.bottom = pageRect->top + m_pageMargins.top + height + headerHeight;
-    clip.top = pageRect->top + m_pageMargins.top;
-    clip.bottom = pageRect->top + m_pageMargins.top + height;
+    clip.top = pageRect->top + m_pageMargins.top + headerHeight;
+	clip.bottom = pageRect->top + m_pageMargins.top + height + headerHeight;
     // clip.left = pageRect->left + m_pageMargins.left;
     // clip.right = pageRect->left + pageRect->width() - m_pageMargins.right;
     // We don't really need to enforce left and right clipping of page margins:
@@ -2486,8 +2484,10 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
 	draw_extra_info.is_left_page = false;
 	draw_extra_info.is_right_page = false;
 	draw_extra_info.draw_body_background = true;
+
 	draw_extra_info.body_background_clip.top = headerHeight;
 	draw_extra_info.body_background_clip.bottom = fullRect.bottom;
+
 	draw_extra_info.body_background_clip.left = fullRect.left;
 	draw_extra_info.body_background_clip.right = fullRect.right;
 	// The above regular "clip" will be used to decide which lines of a paragraph

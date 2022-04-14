@@ -4718,7 +4718,8 @@ public class MainDB extends BaseDB {
 		return "";
 	}
 
-	public void findInOfflineDict1Dic(DicStruct dsl, OfflineDicInfo sdil, String searchStr,
+	public void findInOfflineDict1Dic(HashMap<String, Lemma> existingLemmas,
+									  DicStruct dsl, OfflineDicInfo sdil, String searchStr,
 									  boolean extended) {
 		if (sdil.dbExists) {
 			String ex = "";
@@ -4730,16 +4731,26 @@ public class MainDB extends BaseDB {
 			try (Cursor rs = sdil.db.rawQuery(sql, null)) {
 				if (rs.moveToFirst()) {
 					do {
-						Lemma le = new Lemma();
-						DictEntry de = new DictEntry();
-						de.dictLinkText = rs.getString(1);
-						le.dictEntries.add(de);
-						TranslLine translLine = new TranslLine();
-						translLine.transText = Utils.cleanupHtmlTags(rs.getString(2));
-						translLine.transTextHTML = rs.getString(2);
-						translLine.transGroup = sdil.dicName;
-						le.translLines.add(translLine);
-						dsl.lemmas.add(le);
+						String key = rs.getString(1);
+						Lemma exLemma = existingLemmas.get(key);
+						if (exLemma == null) {
+							Lemma le = new Lemma();
+							DictEntry de = new DictEntry();
+							de.dictLinkText = rs.getString(1);
+							le.dictEntries.add(de);
+							TranslLine translLine = new TranslLine();
+							translLine.transText = Utils.cleanupHtmlTags(rs.getString(2));
+							translLine.transTextHTML = rs.getString(2);
+							translLine.transGroup = sdil.dicName;
+							le.translLines.add(translLine);
+							dsl.lemmas.add(le);
+						} else {
+							TranslLine translLine = new TranslLine();
+							translLine.transText = Utils.cleanupHtmlTags(rs.getString(2));
+							translLine.transTextHTML = rs.getString(2);
+							translLine.transGroup = sdil.dicName;
+							exLemma.translLines.add(translLine);
+						}
 					} while (rs.moveToNext());
 				}
 			} catch (Exception e) {
@@ -4750,22 +4761,32 @@ public class MainDB extends BaseDB {
 			try {
 				//PlainDslVisitor plainDslVisitor = new PlainDslVisitor();
 				//HtmlDslVisitor htmlDslVisitor = new HtmlDslVisitor();
-				DicStructVisitor dicStructVisitor = new DicStructVisitor();
+				//DicStructVisitor dicStructVisitor = new DicStructVisitor();
 				DslResult dslResult;
 				if (extended)
 					dslResult = sdil.dslDic.lookupPredictive(searchStr);
 				else
 					dslResult = sdil.dslDic.lookup(searchStr);
-				for (Map.Entry<String, List<Lemma>> entry: dslResult.getEntries(dicStructVisitor)) {
+				for (Map.Entry<String, List<Lemma>> entry: dslResult.getEntries(new DicStructVisitor())) {
 					List<Lemma> lemmas = entry.getValue();
 					for (Lemma lemma: lemmas) {
-						DictEntry de = new DictEntry();
-						de.dictLinkText = sdil.dicName;
-						lemma.dictEntries.add(de);
-						for (TranslLine translLine: lemma.translLines) {
-							translLine.transGroup = entry.getKey() + ", " + lemma.lemmaText;
+						String key = entry.getKey() + ", " + lemma.lemmaText;
+						Lemma exLemma = existingLemmas.get(key);
+						if (exLemma == null) {
+							DictEntry de = new DictEntry();
+							de.dictLinkText = key;
+							lemma.dictEntries.add(de);
+							existingLemmas.put(key, lemma);
+							dsl.lemmas.add(lemma);
+							for (TranslLine tl: lemma.translLines)
+								tl.transGroup = sdil.dicName;
+						} else {
+							// add trans lines to existing lemma
+							for (TranslLine tl: lemma.translLines) {
+								tl.transGroup = sdil.dicName;
+								exLemma.translLines.add(tl);
+							}
 						}
-						dsl.lemmas.add(lemma);
 					}
 				}
 //				int i = 0;
@@ -4817,6 +4838,8 @@ public class MainDB extends BaseDB {
 			}
 		}
 
+		HashMap<String, Lemma> existingLemmas = new HashMap<>();
+
 		if (offlineDictInfoList != null)
 			for (OfflineDicInfo sdil: offlineDictInfoList) {
 				String langFromD = StrUtils.getNonEmptyStr(sdil.langFrom.toUpperCase(), true);
@@ -4835,7 +4858,7 @@ public class MainDB extends BaseDB {
 							sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
 						} else if (!sdil.db.isOpen())
 							sdil.db = SQLiteDatabase.openOrCreateDatabase(sdil.getDBFullPath(), null);
-						if (sdil.db.isOpen()) findInOfflineDict1Dic(dsl, sdil, searchStr, extended);
+						if (sdil.db.isOpen()) findInOfflineDict1Dic(existingLemmas, dsl, sdil, searchStr, extended);
 					}
 					if (((sdil.dslExists) || (sdil.dslDzExists)) && (sdil.idxExists)) {
 						if (sdil.dslDic == null) {
@@ -4856,7 +4879,7 @@ public class MainDB extends BaseDB {
 								log.e("Lingvo_DSL index create error: " + e.getMessage());
 							}
 						}
-						if (sdil.dslDic != null) findInOfflineDict1Dic(dsl, sdil, searchStr, extended);
+						if (sdil.dslDic != null) findInOfflineDict1Dic(existingLemmas, dsl, sdil, searchStr, extended);
 					}
 				}
 			}

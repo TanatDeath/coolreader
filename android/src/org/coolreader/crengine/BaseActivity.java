@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.coolreader.CoolReader;
+import org.coolreader.dic.wiki.WikiArticles;
 import org.coolreader.eink.EinkScreen;
 import org.coolreader.eink.EinkScreenDummy;
 import org.coolreader.eink.EinkScreenNook;
@@ -1802,19 +1803,19 @@ public class BaseActivity extends Activity implements Settings {
 				ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
 	}
 
-	public void showDicToast(String s, String msg, int dicT, String dicName) {
+	public void showDicToast(String s, String msg, int dicT, String dicName, boolean fullScreen) {
 		boolean bShown = false;
 		if (this instanceof CoolReader) {
 			if (((CoolReader) this).getReaderView() != null) {
 				if (((CoolReader) this).getReaderView().getSurface() != null) {
 					bShown = true;
 					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(),
-							dicT, dicName);
+							dicT, dicName, fullScreen);
 				}
 			} else {
 				bShown = true;
 				showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).mHomeFrame,
-						dicT, dicName);
+						dicT, dicName, fullScreen);
 			}
 		}
 		if (!bShown) {
@@ -1822,20 +1823,23 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
-	public void showDicToastExt(String s, String msg, int dicT, String dicName, Dictionaries.DictInfo curDict, Object dicStructObject) {
+	public void showDicToastExt(String s, String msg, int dicT, String dicName, Dictionaries.DictInfo curDict,
+								Object dicStructObject, boolean fullScreen) {
 		boolean bShown = false;
 		if (this instanceof CoolReader) {
 			if (((CoolReader) this).getReaderView() != null)
 				if (((CoolReader) this).getReaderView().getSurface() != null) {
 					bShown = true;
 					showDicToastExt(s, msg, Toast.LENGTH_LONG,
-							((CoolReader) this).getReaderView().getSurface(), dicT, dicName, curDict, dicStructObject);
+							((CoolReader) this).getReaderView().getSurface(), dicT, dicName, curDict,
+							dicStructObject, fullScreen);
 				}
 			if (!bShown)
 				if (((CoolReader) this).mHomeFrame != null) {
 					bShown = true;
 					showDicToastExt(s, msg, Toast.LENGTH_LONG,
-						((CoolReader) this).mHomeFrame, dicT, dicName, curDict, dicStructObject);
+						((CoolReader) this).mHomeFrame, dicT, dicName, curDict,
+							dicStructObject, fullScreen);
 				}
 		}
 		if (!bShown) {
@@ -1844,42 +1848,44 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void showDicToast(String s, String msg, int duration, View view, int dicT,
-							 String dicName) {
+							 String dicName, boolean fullScreen) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showToast(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
-				!StrUtils.isEmptyStr(((CoolReader) this).lastDicText));
+				fullScreen);
 	}
 
 	public void showDicToastExt(String s, String msg, int duration, View view, int dicT, String dicName,
 								Dictionaries.DictInfo curDict,
-								Object dicStructObject) {
+								Object dicStructObject, boolean fullScreen) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showToastExt(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
-				curDict, dicStructObject, !StrUtils.isEmptyStr(((CoolReader) this).lastDicText));
+				curDict, dicStructObject, fullScreen);
 	}
 
 	public void showDicToastWiki(String s, String msg, int duration, View view, int dicT, String dicName,
 								 DictInfo curDict, String link, String link2, int curAction, boolean useFirstLink,
-								 String picAddr) {
+								 String picAddr, boolean fullScreen) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showToastWiki(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
 				curDict, link, link2, curAction, useFirstLink, picAddr,
-				!StrUtils.isEmptyStr(((CoolReader) this).lastDicText));
+				fullScreen);
 	}
 
-	public void showWikiListToast(String s, String msg, View view, int dicT, String dicName, ArrayList<WikiArticle> arrWA,
-								  DictInfo curDict, String link, String link2, int curAction, int listSkipCount, boolean useFirstLink) {
+	public void showWikiListToast(String s, String msg,
+								  View view, int dicT, String dicName, WikiArticles arrWA,
+								  DictInfo curDict, String link, String link2, int curAction, int listSkipCount, boolean useFirstLink,
+								  boolean fullScreen) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showWikiListToast(this, view1, s, msg, dicT, dicName, arrWA,
-				curDict, link, link2, curAction, listSkipCount, useFirstLink);
+				curDict, link, link2, curAction, listSkipCount, useFirstLink, fullScreen);
 	}
 
 	PopupWindow windowCenterPopup = null;

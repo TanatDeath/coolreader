@@ -108,6 +108,7 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -600,7 +601,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (isUpdateEnd) {
 					String text = sel.text;
 					if (text != null && text.length() > 0) {
-						onSelectionComplete( sel, selMode );
+						onSelectionComplete(sel, false, selMode);
 					} else {
 						clearSelection();
 					}
@@ -632,24 +633,24 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public int mSelection3ActionLong = SELECTION_ACTION_SAME_AS_COMMON;
 	public int mMultiSelection3Action = SELECTION_ACTION_SAME_AS_COMMON;
 
-	private void showDic(Selection sel, boolean bSkipDic, Dictionaries.DictInfo dict) {
+	private void showDic(Selection sel, boolean fullScreen, boolean bSkipDic, Dictionaries.DictInfo dict) {
 		getActivity().mDictionaries.setAdHocDict(dict);
 		if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
 			if (!bSkipDic)
-				mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text), null);
+				mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text), fullScreen, null);
 		} else {
 			if (
 					((!isMultiSelection(sel))&&(!bSkipDic))
 							||
 							(isMultiSelection(sel))
 			)
-				mActivity.findInDictionary(sel.text, null);
+				mActivity.findInDictionary(sel.text, fullScreen, null);
 		}
 		if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
 			clearSelection();
 	}
 
-	private void onSelectionComplete(Selection sel, boolean selMode) {
+	private void onSelectionComplete(Selection sel, boolean fullScreen, boolean selMode) {
 		//mActivity.showToast("startPos: "+sel.startPos+"; endPos: "+sel.endPos+
 		//		"startX: "+sel.startX+"; startY: "+sel.startY+"; chapter: "+sel.chapter);
 		boolean bSkipDic = mActivity.skipFindInDic;
@@ -682,47 +683,47 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case SELECTION_ACTION_DICTIONARY:
 				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
 					if (!bSkipDic)
-						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text), null);
+						mActivity.findInDictionary(StrUtils.dictWordCorrection(sel.text), fullScreen, null);
 				} else {
 					if (
 							((!isMultiSelection(sel))&&(!bSkipDic))
 									||
 									(isMultiSelection(sel))
 					)
-						mActivity.findInDictionary(sel.text, null);
+						mActivity.findInDictionary(sel.text, fullScreen, null);
 				}
 				if (!getSettings().getBool(PROP_APP_SELECTION_PERSIST, false))
 					clearSelection();
 				break;
 			case SELECTION_ACTION_DICTIONARY_1:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary);
 				break;
 			case SELECTION_ACTION_DICTIONARY_2:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary2);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary2);
 				break;
 			case SELECTION_ACTION_DICTIONARY_3:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary3);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary3);
 				break;
 			case SELECTION_ACTION_DICTIONARY_4:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary4);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary4);
 				break;
 			case SELECTION_ACTION_DICTIONARY_5:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary5);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary5);
 				break;
 			case SELECTION_ACTION_DICTIONARY_6:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary6);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary6);
 				break;
 			case SELECTION_ACTION_DICTIONARY_7:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary7);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary7);
 				break;
 			case SELECTION_ACTION_DICTIONARY_8:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary8);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary8);
 				break;
 			case SELECTION_ACTION_DICTIONARY_9:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary9);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary9);
 				break;
 			case SELECTION_ACTION_DICTIONARY_10:
-				showDic(sel, bSkipDic, getActivity().mDictionaries.currentDictionary10);
+				showDic(sel, fullScreen, bSkipDic, getActivity().mDictionaries.currentDictionary10);
 				break;
 			case SELECTION_ACTION_BOOKMARK:
 				clearSelection();
@@ -786,7 +787,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (di != null) {
 					if (!StrUtils.isEmptyStr(sel.text)) {
 						mActivity.mDictionaries.setAdHocDict(di);
-						mActivity.findInDictionary(sel.text, null, new CoolReader.DictionaryCallback() {
+						mActivity.findInDictionary(sel.text, fullScreen,null, new CoolReader.DictionaryCallback() {
 
 							@Override
 							public boolean showDicToast() {
@@ -820,7 +821,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				if (di != null) {
 					if (!StrUtils.isEmptyStr(sel.text)) {
 						mActivity.mDictionaries.setAdHocDict(di);
-						mActivity.findInDictionary(sel.text, null, new CoolReader.DictionaryCallback() {
+						mActivity.findInDictionary(sel.text, false, null, new CoolReader.DictionaryCallback() {
 
 							@Override
 							public boolean showDicToast() {
@@ -2432,9 +2433,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_WHOLE_PAGE_TO_DIC:
 				log.i("Whole page to dic");
 				String s = mActivity.getmReaderFrame().getUserDicPanel().getCurPageText(0, false);
-				//mActivity.showToast(s.substring(0,100));
-				mActivity.findInDictionary( s , null);
-				//mActivity.mDictionaries.setiDic2IsActive(2);
+				mActivity.findInDictionary(s, false, null);
 				break;
 			case DCMD_GOOGLEDRIVE_SYNC:
 				if (0 == param) {							// sync to
@@ -5970,11 +5969,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 			if (keyCode == KeyEvent.KEYCODE_BACK) {
 				// hide dictionary popup
-				if (DicToastView.curWindow != null)
-					if (DicToastView.curWindow.isShowing()) {
-						DicToastView.hideToast(mActivity);
-						return true;
-					}
+				if (DicToastView.toastWindow != null)
+					if (DicToastView.toastWindow instanceof PopupWindow) {
+						PopupWindow w = (PopupWindow) DicToastView.toastWindow;
+						if (w.isShowing()) {
+							DicToastView.hideToast(mActivity);
+							return true;
+						}
+				}
 				// force saving position on BACK key press
 				scheduleSaveCurrentPositionBookmark(1);
 			}

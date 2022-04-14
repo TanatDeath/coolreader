@@ -23,14 +23,20 @@ public class DicStructVisitor extends DslVisitor<List<Lemma>> {
 	private boolean wasTrn = false;
 	private boolean inEx = false;
 	private boolean wasEx = false;
+	private boolean needClear = false;
+
+	private void doClear() {
+		lemmas = new ArrayList<>();
+		curLemma = new Lemma();
+		lemmas.add(curLemma);
+		needClear = false;
+	}
 
 	/**
 	 * Constructor.
 	 */
 	public DicStructVisitor() {
-		lemmas = new ArrayList<>();
-		curLemma = new Lemma();
-		lemmas.add(curLemma);
+		doClear();
 	}
 
 
@@ -41,6 +47,7 @@ public class DicStructVisitor extends DslVisitor<List<Lemma>> {
 	 */
 	@Override
 	public void visit(final DslArticle.Tag tag) {
+		if (needClear) doClear();
 		if (StrUtils.getNonEmptyStr(tag.getTagName(),true).equals("trn")) {
 			inTrn = true;
 			wasTrn = true;
@@ -62,6 +69,7 @@ public class DicStructVisitor extends DslVisitor<List<Lemma>> {
 	 */
 	@Override
 	public void visit(final DslArticle.Text t) {
+		if (needClear) doClear();
 		if (inTrn) {
 			if (inEx)
 				curEx.line = curEx.line + t;
@@ -101,6 +109,7 @@ public class DicStructVisitor extends DslVisitor<List<Lemma>> {
 	 */
 	@Override
 	public void visit(final DslArticle.Newline n) {
+		if (needClear) doClear();
 		if (inTrn) {
 			if (inEx) {
 				if (!StrUtils.getNonEmptyStr(curEx.line, false).endsWith("\n"))
@@ -121,6 +130,7 @@ public class DicStructVisitor extends DslVisitor<List<Lemma>> {
 	 */
 	@Override
 	public void visit(final DslArticle.EndTag endTag) {
+		if (needClear) doClear();
 		if (StrUtils.getNonEmptyStr(endTag.getTagName(),true).equals("trn"))
 			inTrn = false;
 		if (StrUtils.getNonEmptyStr(endTag.getTagName(),true).equals("ex") && (inTrn))
@@ -138,6 +148,20 @@ public class DicStructVisitor extends DslVisitor<List<Lemma>> {
 	 */
 	@Override
 	public List<Lemma> getObject() {
+		needClear = true;
+		for (Lemma le: lemmas) {
+			boolean hasEmpty = true;
+			while (hasEmpty) {
+				hasEmpty = false;
+				for (TranslLine tl: le.translLines) {
+					if (StrUtils.isEmptyStr(tl.transText)) {
+						le.translLines.remove(tl);
+						hasEmpty = true;
+						break;
+					}
+				}
+			}
+		}
 		return lemmas;
 	}
 }

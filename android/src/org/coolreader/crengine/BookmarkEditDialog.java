@@ -372,14 +372,14 @@ public class BookmarkEditDialog extends BaseDialog {
 
 			if (withLangSel) {
 				String finalPosText = posText;
-				mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK,
+				mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK, true,
 						anchor, mReaderView.getBookInfo().getFileInfo().parent,
 						mBookInfo.getFileInfo(),
 						StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true),
 						StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to, true),
 						"", null, TranslationDirectionDialog.FOR_COMMON, s -> {
 							//mCoolReader.showToast(s);
-							mCoolReader.findInDictionary(finalPosText, null, new CoolReader.DictionaryCallback() {
+							mCoolReader.findInDictionary(finalPosText, true, null, new CoolReader.DictionaryCallback() {
 
 								@Override
 								public boolean showDicToast() {
@@ -403,7 +403,7 @@ public class BookmarkEditDialog extends BaseDialog {
 							});
 						});
 			} else {
-				mCoolReader.findInDictionary(posText, null, new CoolReader.DictionaryCallback() {
+				mCoolReader.findInDictionary(posText, true, null, new CoolReader.DictionaryCallback() {
 
 					@Override
 					public boolean showDicToast() {

@@ -1800,7 +1800,7 @@
     <string name="pattern_not_found">Шаблон не найден</string>
     <string name="not_implemented">Не реализовано</string>
     <string name="button_clear">Очистить</string>
-    <string name="dont_close_dialog">Не закрывать этот диалог</string>
+    <string name="show_in_fullscreen">На полный экран</string>
     <string name="dict_err">Ошибка</string>
     <string name="value_saved">Значение сохранено</string>
     <string name="main_window">Главное окно</string>

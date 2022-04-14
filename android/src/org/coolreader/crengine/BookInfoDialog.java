@@ -458,7 +458,8 @@ public class BookInfoDialog extends BaseDialog {
 				if (dfi != null) {
 					FileInfo finalDfi = dfi;
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
-							() -> cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, translButton, finalDfi,
+							() -> cr.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, true,
+									translButton, finalDfi,
 									fi, langf, lang, "", null,
 									TranslationDirectionDialog.FOR_COMMON
 									, null), 200));
