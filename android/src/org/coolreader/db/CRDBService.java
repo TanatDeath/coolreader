@@ -479,6 +479,10 @@ public class CRDBService extends BaseService {
     	void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix);
     }
 
+    public interface CalendarStatsLoadingCallback {
+		void onCalendarStatsListLoaded(ArrayList<CalendarStats> list);
+	}
+
 	public interface ObjectCallback {
 		void onObjectLoaded(Object o);
 	}
@@ -985,6 +989,31 @@ public class CRDBService extends BaseService {
 		flush();
 	}
 
+	//=======================================================================================
+	// calendar DB access code
+	//=======================================================================================
+
+	public void updateCalendarEntry(final Long book_fk,  final Long read_date, final Long time_spent_sec) {
+		execTask(new Task("updateCalendarEntry") {
+			@Override
+			public void work() {
+				mainDB.updateCalendarEntry(book_fk,  read_date, time_spent_sec);
+			}
+		});
+	}
+
+	public void getCalendarEntries(final long fromDate, final long toDate,
+								   final CalendarStatsLoadingCallback callback, final Handler handler)
+	{
+		execTask(new Task("getCalendarEntries") {
+			@Override
+			public void work() {
+				ArrayList<CalendarStats> list = mainDB.getCalendarEntries(fromDate, toDate);
+				sendTask(handler, () -> callback.onCalendarStatsListLoaded(list));
+			}
+		});
+	}
+
 	/**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
@@ -1288,6 +1317,15 @@ public class CRDBService extends BaseService {
 
 		public void closeAllDics(final ObjectCallback callback) {
 			getService().closeAllDics(callback, new Handler());
+		}
+
+		public void getCalendarEntries(final long fromDate, final long toDate,
+									   final CalendarStatsLoadingCallback callback) {
+			getService().getCalendarEntries(fromDate, toDate, callback, new Handler());
+		}
+
+		public void updateCalendarEntry(final Long book_fk,  final Long read_date, final Long time_spent_sec) {
+			getService().updateCalendarEntry(book_fk,  read_date, time_spent_sec);
 		}
 
 	}

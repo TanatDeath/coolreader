@@ -1,0 +1,134 @@
+package org.coolreader.crengine;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.db.CalendarStats;
+import org.coolreader.dic.ExtDicList;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+
+public class ReadCalendarDlg extends BaseDialog {
+	CoolReader mCoolReader;
+	private LayoutInflater mInflater;
+	View mDialogView;
+	public ViewGroup mBody;
+	CalendarStatsList mCalendarStatsList = null;
+	public java.util.Date curDate;
+	public java.util.Date curDateEnd;
+
+	public static final Logger log = L.create("rcd");
+
+	boolean isEInk = false;
+	HashMap<Integer, Integer> themeColors;
+
+	@Override
+	protected void onPositiveButtonClick() {
+		cancel();
+	}
+
+	@Override
+	protected void onNegativeButtonClick() {
+		cancel();
+	}
+
+	public final static int ITEM_POSITION=0;
+
+	public ReadCalendarDlg(CoolReader coolReader) {
+		super(coolReader, coolReader.getResources().getString(R.string.read_calendar_dlg), true, true);
+		whenCreate(coolReader);
+	}
+
+	public static Handler mHandler = new Handler();
+
+	public Runnable handleOk = () -> {
+		onPositiveButtonClick();
+	};
+
+	private void showDateSpan(String sdate01, String sdate) {
+		mActivity.waitForCRDBService(() -> mActivity.getDB().getCalendarEntries(
+				StrUtils.parseDateLong(sdate01), StrUtils.parseDateLong(sdate), list -> {
+					long date = 0;
+					for (CalendarStats cs :list) {
+						cs.sameDate = true;
+						if (cs.readDate != date) cs.sameDate = false;
+						date = cs.readDate;
+					}
+					mCalendarStatsList = new CalendarStatsList(mActivity, this, list);
+					mBody.addView(mCalendarStatsList);
+				}
+				)
+		);
+	}
+
+	private void whenCreate(CoolReader coolReader) {
+		setCancelable(true);
+		this.mCoolReader = coolReader;
+		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
+		mInflater = LayoutInflater.from(getContext());
+		mDialogView = mInflater.inflate(R.layout.calendar_stats_dialog, null);
+		mBody = mDialogView.findViewById(R.id.article_list);
+		Button btnPrev = mDialogView.findViewById(R.id.btn_calendar_stats_prev);
+		Button btnNext = mDialogView.findViewById(R.id.btn_calendar_stats_next);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGrayCT = Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		btnPrev.setBackgroundColor(colorGrayC);
+		btnNext.setBackgroundColor(colorGrayC);
+		TextView tv = mDialogView.findViewById(R.id.tv_calendar_stats_month);
+		String sdate = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(new java.util.Date());
+		String sdate01 = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(new java.util.Date());
+		String sdateM = new SimpleDateFormat("LLLL yyyy", Locale.getDefault()).format(new java.util.Date());
+		Calendar c = Calendar.getInstance();   // this takes current date
+		c.set(Calendar.DAY_OF_MONTH, 1);
+		curDate = c.getTime();
+		curDateEnd = new java.util.Date();
+		tv.setText(sdateM);
+		sdate01 = sdate01.substring(0,6) + "01";
+		showDateSpan(sdate01, sdate);
+		btnPrev.setOnClickListener(v -> {
+			curDate = Utils.getPreviousMonth(curDate);
+			curDateEnd = Utils.getLastDayOfMonth(curDate);
+			String ssdate01 = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(curDate);
+			String ssdate = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(curDateEnd);
+			String ssdateM = new SimpleDateFormat("LLLL yyyy", Locale.getDefault()).format(curDate);
+			tv.setText(ssdateM);
+			mBody.removeView(mCalendarStatsList);
+			showDateSpan(ssdate01, ssdate);
+		});
+		btnNext.setOnClickListener(v -> {
+			java.util.Date ndate = Utils.getNextMonth(curDate);
+			if (ndate.after(new java.util.Date())) return;
+			curDate = ndate;
+			String ssdate01 = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(curDate);
+			java.util.Date ddate = new java.util.Date();
+			curDateEnd = ddate.before(Utils.getLastDayOfMonth(curDate))? ddate: Utils.getLastDayOfMonth(curDate);
+			String ssdate = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(
+					curDateEnd);
+			String ssdateM = new SimpleDateFormat("LLLL yyyy", Locale.getDefault()).format(curDate);
+			tv.setText(ssdateM);
+			mBody.removeView(mCalendarStatsList);
+			showDateSpan(ssdate01, ssdate);
+		});
+		mCoolReader.tintViewIcons(mDialogView);
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setView(mDialogView);
+	}
+}

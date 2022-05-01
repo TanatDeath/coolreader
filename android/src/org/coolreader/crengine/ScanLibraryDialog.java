@@ -267,6 +267,8 @@ public class ScanLibraryDialog extends BaseDialog {
 							if (!needInterrupt)
 								mScanText.setText("");
 							mBtnInterrupt.setText(R.string.close);
+							if (windowCenterPopup != null)
+								mDialog.removeAllViews();
 						}
 					finished = true;
 				}
@@ -309,8 +311,8 @@ public class ScanLibraryDialog extends BaseDialog {
 									break;
 								}
 							}
-							mScanText.setText(ss);
-							mPercent.setText(perc + "%");
+							if (mScanText != null) mScanText.setText(ss);
+							if (mPercent != null) mPercent.setText(perc + "%");
 						}
 				} else scanFromStack();
 			});
@@ -456,21 +458,25 @@ public class ScanLibraryDialog extends BaseDialog {
 			int popupY = location[1] + mDialog.getHeight();
 			LinearLayout toast_ll = windowCenterPopup.getContentView().findViewById(R.id.dic_toast_ll);
 			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
-				toast_ll.setBackgroundColor(Color.argb(100, Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC)));
+				toast_ll.setBackgroundColor(Color.WHITE);
 			else {
 				toast_ll.setBackgroundColor(colorGrayC);
-				mBtnInterrupt = windowCenterPopup.getContentView().findViewById(R.id.btn_interrupt);
-				mPercent = windowCenterPopup.getContentView().findViewById(R.id.percent_title);
-				if (mBtnInterrupt != null) {
-					mBtnInterrupt.setBackgroundColor(colorGray);
-					mActivity.tintViewIcons(toast_ll, true);
-					//toast_btn.setPadding(6, 6, 6, 6);
-					mBtnInterrupt.setOnClickListener((v) -> {
-						needInterrupt = true;
-						mBtnInterrupt.setText(R.string.interrupting);
-						if (finished) windowCenterPopup.dismiss();
-					});
-				}
+			}
+			mBtnInterrupt = windowCenterPopup.getContentView().findViewById(R.id.btn_interrupt);
+			mPercent = windowCenterPopup.getContentView().findViewById(R.id.percent_title);
+			if (mBtnInterrupt != null) {
+				mBtnInterrupt.setBackgroundColor(colorGray);
+				if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) Utils.setSolidButtonEink(mBtnInterrupt);
+				mActivity.tintViewIcons(toast_ll, true);
+				//toast_btn.setPadding(6, 6, 6, 6);
+				mBtnInterrupt.setOnClickListener((v) -> {
+					needInterrupt = true;
+					mBtnInterrupt.setText(R.string.interrupting);
+					if (finished) {
+						windowCenterPopup.dismiss();
+						dismiss();
+					}
+				});
 			}
 			int newTextSize = 16;
 			LinearLayout upper_row_ll = windowCenterPopup.getContentView().findViewById(R.id.upper_row_ll);

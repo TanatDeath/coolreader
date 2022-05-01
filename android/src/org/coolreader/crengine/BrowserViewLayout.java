@@ -436,7 +436,7 @@ public class BrowserViewLayout extends ViewGroup {
 	public void setBrowserProgressStatus(boolean enable) {
 		progressStatusEnabled = enable;
 		ProgressBar progressBar = titleView.findViewById(R.id.progress);
-		progressBar.setVisibility(enable ? View.VISIBLE : View.GONE);
+		progressBar.setVisibility((enable && (!isEInk)) ? View.VISIBLE : View.GONE);
 	}
 
 	public void onThemeChanged(InterfaceTheme theme) {

@@ -92,6 +92,7 @@ extern const int gDOMVersionCurrent;
 
 // document property names
 #define DOC_PROP_AUTHORS          "doc.authors"
+#define DOC_PROP_AUTHORS_SHORT    "doc.authors.short"
 #define DOC_PROP_AUTHORS_ADD_INFO "doc.authors.add.info"
 #define DOC_PROP_TITLE            "doc.title"
 #define DOC_PROP_LANGUAGE         "doc.language"
@@ -2875,6 +2876,7 @@ public:
 //utils
 /// extract authors from FB2 document, delimiter is lString32 by default
 lString32 extractDocAuthors( ldomDocument * doc, lString32 delimiter=lString32::empty_str, bool shortMiddleName=true );
+lString32 extractDocAuthors2( ldomDocument * doc, lString32 delimiter=lString32::empty_str, int shortMiddleName=1 );
 lString32 extractDocAuthorsExt( ldomDocument * doc, lString32 delimiter1, lString32 delimiter);
 lString32 extractDocAuthorsAddInfo( ldomDocument * doc, lString32 delimiter=lString32::empty_str, bool shortMiddleName=true );
 lString32 extractDocTitle( ldomDocument * doc );

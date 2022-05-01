@@ -22,6 +22,7 @@ import android.graphics.PorterDuff;
 import android.text.method.KeyListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -225,8 +226,12 @@ public class BookmarkEditDialog extends BaseDialog {
 		btnInternalLink.setBackgroundColor(colorGrayCT);
 		btnCitation.setBackgroundColor(colorGrayCT);
 		//lblSetComment.setTextColor(colorGrayCT2);
-		lblTransl1.setTextColor(colorGrayCT2);
-		lblTransl2.setTextColor(colorGrayCT2);
+		try {
+			lblTransl1.setTextColor(colorGrayCT2);
+			lblTransl2.setTextColor(colorGrayCT2);
+		} catch (Exception e) {
+			//do nothing
+		}
 		lblBookmarkLink.setTextColor(mActivity.getTextColor(colorIcon));
 		btnSendTo1.setBackgroundColor(colorGrayCT);
 		btnSendTo2.setBackgroundColor(colorGrayCT);
@@ -268,13 +273,19 @@ public class BookmarkEditDialog extends BaseDialog {
 	private void setupTranslButton() {
 		Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
 		if (di != null) {
-			btnTransl.setText(di.name);
-			btnTransl2.setText(di.name);
+			btnTransl.setText(di.shortName);
+			btnTransl2.setText(di.shortName);
 			currentDic = di;
 			return;
 		}
-		Utils.hideView(btnTransl);
-		Utils.hideView(btnTransl2);
+		try {
+			((ViewGroup) btnTransl.getParent().getParent()).removeView((View) btnTransl.getParent());
+			((ViewGroup) btnTransl2.getParent().getParent()).removeView((View) btnTransl2.getParent());
+		} catch (Exception e) {
+			//do nothing
+		}
+//		Utils.hideView(btnTransl);
+//		Utils.hideView(btnTransl2);
 	}
 
 	public static String getFullContextText(CoolReader cr) {

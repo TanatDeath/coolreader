@@ -119,7 +119,9 @@ public class SomeButtonsToolbarDlg {
 		if (isEInk) panel.setBackgroundColor(Color.WHITE);
 		LinearLayout llButtonsPanel = mPanel.findViewById(R.id.buttonsPanel);
 		Properties props = new Properties(mActivity.settings());
-		int newTextSize = props.getInt(Settings.PROP_FONT_SIZE, 16)-2;
+		int newTextSize = props.getInt(Settings.PROP_FONT_SIZE, 16);
+		if (newTextSize > 16)
+			newTextSize = newTextSize / 4 * 3;
 		int iCntRecent = 0;
 		if ((!StrUtils.isEmptyStr(mTitle)) || (closeSecTime > 0)) {
 			mViewTitle = new TextView(mActivity);

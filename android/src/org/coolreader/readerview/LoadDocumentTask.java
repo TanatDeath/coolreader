@@ -186,7 +186,7 @@ public class LoadDocumentTask extends Task {
 				// receive data from the database through callbacks
 				// and cannot control the completion of the operation.
 			}
-			if (pos == null) mReaderView.checkOpenBookStyles(false);
+			if (pos == null) mReaderView.checkOpenBookStyles(false, true);
 			CoolReader.dumpHeapAllocation();
 		} else {
 			log.e("Error occurred while trying to load document " + filename);

@@ -12,7 +12,8 @@ my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 
 my %ic_smaller_list=(
         'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png',
-        'icons8_visible.svg' => 'icons8_visible.png'
+        'icons8_visible.svg' => 'icons8_visible.png',
+        'icons8_tear_off_calendar.svg' => 'icons8_tear_off_calendar.png'
 );
 
 my %ic_actions_list=(
@@ -22,7 +23,8 @@ my %ic_actions_list=(
         'icons8_brightness_warm_down.svg' => 'icons8_brightness_warm_down.png',
         'icons8_brightness_warm_up.svg' => 'icons8_brightness_warm_up.png',
         'icons8_offline_dics1.svg' => 'icons8_offline_dics1.png',
-        'icons8_offline_dics2.svg' => 'icons8_offline_dics2.png'
+        'icons8_offline_dics2.svg' => 'icons8_offline_dics2.png',
+        'icons8_google_web_search.svg' => 'icons8_google_web_search.png'
 );
 
 my %ic_menu_list=(

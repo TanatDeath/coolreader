@@ -41,6 +41,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -3022,6 +3024,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	private void showDirectoryInternal(final FileInfo dir, final FileInfo file)
 	{
 		BackgroundThread.ensureGUI();
+
+		if (dir.isOPDSRoot()) {
+			boolean bOnlineCatalogsSortAZ = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_SORT_AZ, false);
+			if (bOnlineCatalogsSortAZ) {
+				Comparator<FileInfo> compareByName = (o1, o2) -> o1.getFilename().compareToIgnoreCase(o2.getFilename());
+				Collections.sort(dir.dirs, compareByName);
+			}
+		}
+
 		setCurrDirectory(dir);
 		
 		if (dir!=null && dir != currDirectory) {

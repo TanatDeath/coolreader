@@ -430,7 +430,8 @@ public class Scanner extends FileInfoChangeSource {
 	}
 
 	public void scanDirectory(final CRDBService.LocalBinder db, final FileInfo baseDir,
-							  final Runnable initialUpdateCallback, final ScanCompleteListener readyListener, final boolean recursiveScan, final ScanControl scanControl,
+							  final Runnable initialUpdateCallback, final ScanCompleteListener readyListener,
+							  final boolean recursiveScan, final ScanControl scanControl,
 							  boolean hideProgress) {
 		// Call in GUI thread only!
 		BackgroundThread.ensureGUI();

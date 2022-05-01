@@ -75,6 +75,7 @@
     <string name="dir_internal_sd_card">Внутр. SD-карта</string>
     <string name="dir_internal_memory">Внутр. память</string>
     <string name="win_title_bookmarks">Закладки</string>
+    <string name="win_title_bookmarks_choose">Выберите закладку</string>
     <string name="win_title_dicts">Словари</string>
     <string name="win_title_toc">Содержание</string>
     <string name="win_title_options">Настройки</string>
@@ -805,9 +806,11 @@
     <string name="note1_can_be_migrated">Найдены настройки CoolReader. Вы хотите скопировать настройки CoolReader в KnownReader?</string>
     <string name="note2_logcat">Добавлена функция сохранения журнала работы приложения. Если при выполнении какой-либо операции приложение аварийно завершилось или некорректно работает, можно создать журнал работы приложения. Если приложение завершилось с ошибкой нужно запустить его заново и в меню чтения выбрать пункт "Сохранить журнал". В результате будет создан лог-файл, который поможет в решении проблемы.</string>
     <string name="root_item_recent">Последние открытые книги</string>
+    <string name="root_item_calendar">Календарь</string>
     <string name="root_item_library">Библиотека</string>
     <string name="root_item_filesystem">Открыть книгу из файловой системы / облака</string>
     <string name="root_item_online_catalogs">Сетевые библиотеки</string>
+    <string name="root_item_sort_a_z">Сортировка А -> Я</string>
     <string name="btn_toolbar_more">Еще…</string>
     <string name="black_list_enforced">Нельзя добавлять этот адрес, так как по запросу LitRes.ru он добавлен в черный список каталогов, нарушающих авторские права.</string>
     <string name="black_list_warning">Внимание! этот адрес по запросу LitRes.ru был добавлен в черный список каталогов, нарушающих авторские права. Вы действительно хотите использовать этот каталог?</string>
@@ -1308,6 +1311,7 @@
     <string name="only_in_pro">Эта функция доступна только в версии Premium</string>
     <string name="only_in_premium">Эта функция доступна только в версии Premium</string>
     <string name="str_yes">да</string>
+    <string name="str_manage">Управление</string>
     <string name="str_no">нет</string>
     <string name="str_cancel">отмена</string>
     <string name="str_yes_and_del_pos">да, и удалить сохраненные позиции (в облаке)</string>
@@ -1332,7 +1336,7 @@
     <string name="wd_decrease_vol">Устройство неподвижно, снижение громкости с %1$s до %2$s</string>
     <string name="wd_still">Устройство неподвижно, спокойной ночи!</string>
     <string name="wd_sett">Настройки TTS</string>
-    <string name="not_enough_stat_data">Недостаточно статистики</string>
+    <string name="not_enough_stat_data">Недостаточно статистики - прочитайте равномерно несколько страниц подряд</string>
     <string name="successfully_loaded">успешно загружено</string>
     <string name="book_was_not_found">книга не найдена</string>
     <string name="bookmarks_created">создано закладок</string>
@@ -1597,6 +1601,7 @@
     <string name="sel_start">&lt; начало</string>
     <string name="sel_end">конец &gt;</string>
     <string name="bmk_send_to">отправить...</string>
+    <string name="bmk_other">Прочее...</string>
     <string name="bmk_custom_color">Установить цвет</string>
     <string name="skim_document">Беглый просмотр книги</string>
     <string name="skim_document_short">Беглый просмотр</string>
@@ -1628,9 +1633,13 @@
     <string name="fix_double_backlight_delta">Зафиксировать дельту между холодной и теплой подсветкой</string>
     <string name="fix_double_backlight_delta_add_info">Не менять соотношение теплой/холодной подсветки при регулировке обоих подсветок жестом</string>
     <string name="add_opds_catalog">Добавить OPDS каталог</string>
+    <string name="add_opds_catalog_short">Добавить OPDS</string>
     <string name="add_remove_litres_catalog">Добавить / удалить Litres каталог</string>
+    <string name="add_remove_litres_catalog_short">В(ы)ключить Litres</string>
     <string name="add_calibre_catalog_local">Calibre: Добавить локальную библиотеку</string>
     <string name="add_calibre_catalog_yd">Calibre: Добавить удаленную библиотеку (на Яндекс.Диске)</string>
+    <string name="add_calibre_catalog_local_short">Calibre: локально</string>
+    <string name="add_calibre_catalog_yd_short">Calibre: ЯДиск</string>
     <string name="calibre_search">Поиск (calibre)</string>
     <string name="calibre_authors">Авторы (calibre)</string>
     <string name="calibre_titles">Названия (calibre)</string>
@@ -1923,5 +1932,12 @@
     <string name="root_directory">Корневая папка</string>
     <string name="saf_otg_explanation">Сейчас откроется системный диалог файловой системы Android (ограничения безопасности). Выберите USB устройство из списка (слева). Продолжить?</string>
     <string name="open">Открыть</string>
+    <string name="read_calendar_dlg">Календарь чтения</string>
+    <string name="book_styles">Стили</string>
+    <string name="book_info">О книге</string>
+    <string name="book_edit">Редактировать</string>
+    <string name="book_transl">Языки</string>
+    <string name="book_shortcut">Ярлык</string>
+    <string name="book_share">Отправить</string>
 </resources>
 

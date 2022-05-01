@@ -2381,7 +2381,7 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 		int authorsw = 0;
 		lString32 authors;
 		if (phi & PGHDR_AUTHOR)
-			authors = getAuthors();
+			authors = getAuthorsShort();
 		int titlew = 0;
 		lString32 title;
 		if (phi & PGHDR_TITLE) {
@@ -5643,6 +5643,7 @@ bool LVDocView::ParseDocument() {
 		//m_doc->getProps()->clear();
 		if (m_doc_props->getStringDef(DOC_PROP_TITLE, "").empty()) {
 			m_doc_props->setString(DOC_PROP_AUTHORS, extractDocAuthors(m_doc));
+			m_doc_props->setString(DOC_PROP_AUTHORS_SHORT, extractDocAuthors2(m_doc, lString32::empty_str, -1));
 			m_doc_props->setString(DOC_PROP_AUTHORS_ADD_INFO, extractDocAuthorsAddInfo(m_doc));
 			m_doc_props->setString(DOC_PROP_TITLE, extractDocTitle(m_doc));
 			if (txt_autodet_lang.length() > 0)      // true only for doc_format_txt

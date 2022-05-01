@@ -218,7 +218,7 @@
 					android:src="@null"
 					android:maxLines="2"
 					android:ellipsize="end"
-					android:drawableLeft="@drawable/icons8_toc_item_normal"
+					android:drawableLeft="@drawable/icons8_check_no_frame"
 					android:textColor="?attr/colorIcon"
 					android:contentDescription="@string/set_add_marks"
 					android:text="@string/set_add_marks" />

@@ -331,6 +331,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public BookInfo mBookInfo;
 	private Bookmark lastSavedToGdBookmark;
+	public long lastBookId;
+	public long lastTimePageTurn;
+	public long maxPageReadInterval = 300000; // 5 mins
+	public long lastCalendarSaveTime;
+	public long calendarSaveInterval = 180000; // 3 mins
+	public long curReadingTime;
 
 	public Properties mSettings = new Properties();
 
@@ -1261,10 +1267,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (getBookInfo().getFileInfo() != null)
 				if (getBookInfo().getFileInfo().askedShownStylesInfo<3) {
 					getBookInfo().getFileInfo().askedShownStylesInfo++;
-					checkOpenBookStyles(true);
+					checkOpenBookStyles(true, true);
 				}
 		if (mActivity.getmReaderFrame() != null)
 			mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
+		mActivity.applyFullscreen(mActivity.getWindow());
 	}
 
 	public boolean isNightMode() {
@@ -1322,7 +1329,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		//	mActivity.showToast("bNeedRedrawOnce");
 		mActivity.setFullscreen(newBool);
 		boolean bDontAsk = mActivity.settings().getBool(Settings.PROP_APP_HIDE_CSS_WARNING, false);
-		if (!bDontAsk)
+		int showUD = mActivity.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
+		if ((!bDontAsk) && (showUD == 0))
 			BackgroundThread.instance().postGUI(() -> {
 				ArrayList<String> sButtons = new ArrayList<String>();
 				int efMode = mActivity.settings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
@@ -1901,6 +1909,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case DCMD_PAGEDOWN:
 				if (isBookLoaded()) {
+					checkCalendarStats();
 					final FileInfo fileInfo = mBookInfo.getFileInfo();
 					if (fileInfo != null) {
 						PositionProperties currpos = doc.getPositionProps(null, true);
@@ -3349,6 +3358,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public boolean loadDocumentFromStream(InputStream inputStream, String contentPath, final Runnable doneHandler, final Runnable errorHandler) {
+		lastSelection = null;
+		hyplinkBookmark = null;
+		lastSavedToGdBookmark = null;
 		skipFallbackWarning = false;
 		BackgroundThread.ensureGUI();
 		save();
@@ -4783,8 +4795,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return currentCloudSyncProgressPosition > 0;
 	}
 
-	void checkOpenBookStyles(boolean force) {
+	public void checkOpenBookStyles(boolean force, boolean withDisableButton) {
 		boolean bDontAsk = mActivity.settings().getBool(Settings.PROP_APP_HIDE_CSS_WARNING, false);
+		int showUD = mActivity.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
+		bDontAsk = bDontAsk || (showUD != 0);
+		if (!withDisableButton) bDontAsk = false;
 		if (!bDontAsk)
 			BackgroundThread.instance().postGUI(() -> {
 				if (getBookInfo() != null) {
@@ -4825,19 +4840,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 						sButtons.add(mActivity.getString(R.string.str_change));
 						sButtons.add("*"+mActivity.getString(R.string.later_css));
-						sButtons.add(mActivity.getString(R.string.str_disable_this_dialog));
-						SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), 10, true,
+						if (withDisableButton)
+							sButtons.add(mActivity.getString(R.string.str_disable_this_dialog));
+						SomeButtonsToolbarDlg.showDialog(mActivity, ReaderView.this.getSurface(), withDisableButton? 10: 0, true,
 								mActivity.getString(R.string.opened_doc_props),
-								sButtons, null, new SomeButtonsToolbarDlg.ButtonPressedCallback() {
-									@Override
-									public void done(Object o, String btnPressed) {
-										if (btnPressed.equals(mActivity.getString(R.string.str_change))) {
-											mActivity.optionsFilter = "";
-											mActivity.showOptionsDialogTab(OptionsDialog.Mode.READER, 1);
-										}
-										if (btnPressed.equals(mActivity.getString(R.string.str_disable_this_dialog))) {
-											mActivity.settings().setBool(Settings.PROP_APP_HIDE_CSS_WARNING, true);
-										}
+								sButtons, null, (o, btnPressed) -> {
+									if (btnPressed.equals(mActivity.getString(R.string.str_change))) {
+										mActivity.optionsFilter = "";
+										mActivity.showOptionsDialogTab(OptionsDialog.Mode.READER, 1);
+									}
+									if (btnPressed.equals(mActivity.getString(R.string.str_disable_this_dialog))) {
+										mActivity.settings().setBool(Settings.PROP_APP_HIDE_CSS_WARNING, true);
 									}
 								});
 					}
@@ -5122,7 +5135,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			preparePageImage(0);
 			drawPage();
 			updateCurrentPositionStatus();
-			checkOpenBookStyles(false);
+			checkOpenBookStyles(false, true);
 			if (doc.getCurPage()>2) {
 				// for safe mode
 				String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";
@@ -5348,6 +5361,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					return true;
 				}
 			}
+			if (curReadingTime > 0) {
+				long curTime = System.currentTimeMillis();
+				lastCalendarSaveTime = curTime;
+				updateCalendarEntry(curReadingTime);
+				curReadingTime = 0;
+			}
 		}
 		return false;
 	}
@@ -5383,11 +5402,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (isBookLoaded() && mBookInfo != null) {
 			if (!Services.isStopped()) {
 				log.v("saving last immediately");
-				log.d("bookmark count 1 = " + mBookInfo.getBookmarkCount());
+				//log.d("bookmark count 1 = " + mBookInfo.getBookmarkCount());
 				Services.getHistory().updateBookAccess(mBookInfo, getTimeElapsed());
-				log.d("bookmark count 2 = " + mBookInfo.getBookmarkCount());
+				//log.d("bookmark count 2 = " + mBookInfo.getBookmarkCount());
 				mActivity.getDB().saveBookInfo(mBookInfo);
-				log.d("bookmark count 3 = " + mBookInfo.getBookmarkCount());
+				//log.d("bookmark count 3 = " + mBookInfo.getBookmarkCount());
 				mActivity.getDB().flush();
 			}
 		}
@@ -6264,6 +6283,46 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 		if (mAvgDrawAnimationStats != null) mAvgDrawAnimationStats.readRingBuffer();
 
+	}
+
+	public void checkCalendarStats() {
+		try {
+			if ((mBookInfo != null) && (mActivity != null)) {
+				if (lastBookId != mBookInfo.getFileInfo().id) {
+					if (curReadingTime > 0) {
+						updateCalendarEntry(curReadingTime);
+					}
+					lastBookId = mBookInfo.getFileInfo().id;
+					lastTimePageTurn = 0;
+					lastCalendarSaveTime = 0;
+					curReadingTime = 0;
+				} else {
+					long curTime = System.currentTimeMillis();
+					long pageTurnTime = curTime - lastTimePageTurn;
+					lastTimePageTurn = curTime;
+					if (pageTurnTime < maxPageReadInterval)
+						curReadingTime = curReadingTime + (pageTurnTime / 1000);
+					if ((curTime - lastCalendarSaveTime > calendarSaveInterval) &&
+							(curReadingTime > 0)) {
+						lastCalendarSaveTime = curTime;
+						updateCalendarEntry(curReadingTime);
+						curReadingTime = 0;
+					}
+				}
+			}
+		} catch (Exception e){
+			//do nothing
+		}
+	}
+
+	public void updateCalendarEntry(Long time_spent_sec) {
+		if ((mBookInfo != null) && (mActivity != null)) {
+			mActivity.waitForCRDBService(() -> {
+				String sdate = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(new java.util.Date());
+				mActivity.getDB().updateCalendarEntry(lastBookId,
+					StrUtils.parseDateLong(sdate),time_spent_sec);
+			});
+		}
 	}
 
 }

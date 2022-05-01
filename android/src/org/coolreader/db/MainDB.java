@@ -456,7 +456,7 @@ public class MainDB extends BaseDB {
 						} while (rs.moveToNext());
 					}
 				} catch (Exception e) {
-					Log.e("cr3", "exception while reading format", e);
+					Log.e("cr3db", "exception while reading format", e);
 				}
 				// Save new format in table 'book'...
 				if (!formatsMap.isEmpty()) {
@@ -473,7 +473,7 @@ public class MainDB extends BaseDB {
 						mDB.setTransactionSuccessful();
 						vlog.i("Updated " + updatedCount + " records with invalid format.");
 					} catch (Exception e) {
-						Log.e("cr3", "exception while reading format", e);
+						Log.e("cr3db", "exception while reading format", e);
 					} finally {
 						mDB.endTransaction();
 					}
@@ -605,7 +605,7 @@ public class MainDB extends BaseDB {
 					}
 					if (rs != null) rs.close();
 				} catch (Exception e) {
-					Log.e("cr3", "exception while updating books' filename crc", e);
+					Log.e("cr3db", "exception while updating books' filename crc", e);
 				}
 				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN is_custom_color INTEGER DEFAULT 0");
 				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN custom_color TEXT DEFAULT NULL");
@@ -673,7 +673,7 @@ public class MainDB extends BaseDB {
 					}
 					if (rs != null) rs.close();
 				} catch (Exception e) {
-					Log.e("cr3", "exception while updating books' uppercased title", e);
+					Log.e("cr3db", "exception while updating books' uppercased title", e);
 				}
 				execSQL("CREATE INDEX IF NOT EXISTS " +
 						"book_title_upper_index ON book (title_upper) ");
@@ -1074,7 +1074,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public boolean saveUserDic(UserDicEntry ude, int action) {
-		Log.i("cr3", "saving user dic");
+		Log.i("cr3db", "saving user dic");
 		if (ude == null)
 			return false;
 		String sWord = ude.getDic_word();
@@ -1153,7 +1153,7 @@ public class MainDB extends BaseDB {
 							" WHERE dic_word = " + quoteSqlString(sWord) + " and coalesce(is_citation,0) = " + is_cit);
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while saving user dic", e);
+			Log.e("cr3db", "exception while saving user dic", e);
 			return false;
 		} finally {
 			if (rs != null)
@@ -1163,7 +1163,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public boolean updateDicSearchHistory(DicSearchHistoryEntry dshe, int action) {
-		Log.i("cr3", "saving dic search history");
+		Log.i("cr3db", "saving dic search history");
 		Cursor rs = null;
 		try {
 			if (action == DicSearchHistoryEntry.ACTION_CLEAR_ALL) {
@@ -1241,7 +1241,7 @@ public class MainDB extends BaseDB {
 				}
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while saving dic search history", e);
+			Log.e("cr3db", "exception while saving dic search history", e);
 			return false;
 		} finally {
 			if (rs != null)
@@ -1276,7 +1276,7 @@ public class MainDB extends BaseDB {
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading search history", e);
+			Log.e("cr3db", "exception while loading search history", e);
 		}
 		return list;
 	}
@@ -1310,7 +1310,7 @@ public class MainDB extends BaseDB {
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading user_dic", e);
+			Log.e("cr3db", "exception while loading user_dic", e);
 		}
 		return hshDic;
 	}
@@ -1348,7 +1348,7 @@ public class MainDB extends BaseDB {
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading dic_search_history", e);
+			Log.e("cr3db", "exception while loading dic_search_history", e);
 		}
 		return arrlDshe;
 	}
@@ -1414,7 +1414,7 @@ public class MainDB extends BaseDB {
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of OPDS catalogs", e);
+			Log.e("cr3db", "exception while loading list of OPDS catalogs", e);
 		}
 		return found;
 	}
@@ -1428,6 +1428,78 @@ public class MainDB extends BaseDB {
 		log.i("removeCalibreCatalog(" + id + ")");
 		execSQLIgnoreErrors("DELETE FROM calibre_catalog WHERE id = " + id);
 	}
+
+	// calendar methods
+
+	public void updateCalendarEntry(Long book_fk, Long read_date, Long time_spent_sec) {
+		log.i("updateCalendarEntry(" + book_fk + ", " + read_date + ", " + time_spent_sec + ")");
+		String sql = "SELECT id, time_spent_sec FROM book_calendar WHERE book_fk = " + book_fk + " AND read_date = " +
+			read_date;
+		Long timeSpentSec = 0L;
+		Long id = 0L;
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				id = rs.getLong(0);
+				//timeSpentSec = rs.getLong(1);
+			}
+			if (id == 0L) {
+				sql = "insert into book_calendar (book_fk, read_date, time_spent_sec) values (" +
+						book_fk + ", " + read_date + ", " + time_spent_sec + ")";
+				execSQLIgnoreErrors(sql);
+			} else {
+				sql = "update book_calendar set time_spent_sec = time_spent_sec + " + time_spent_sec +
+						" where id = " + id;
+				execSQLIgnoreErrors(sql);
+			}
+		} catch (Exception e) {
+			Log.e("cr3db", "exception while loading list of favorite folders", e);
+		}
+	}
+
+	public ArrayList<CalendarStats> getCalendarEntries(long fromDate, long toDate) {
+		ArrayList<CalendarStats> list = new ArrayList<>();
+		beginReading();
+		String sql = "";
+		long i = 0;
+		long fromDateI = fromDate;
+		do {
+			fromDateI = fromDate + (i * 86400000);
+			if (i == 0)
+				sql = sql + "select " + fromDateI + " as mdate ";
+			else
+				sql = sql + "union all select " + fromDateI + " as mdate ";
+			i++;
+		} while ((fromDateI < toDate) && (i < 50));
+		sql = "select bc.id, bc.book_fk, ad.mdate, bc.time_spent_sec, b.title FROM (" + sql + ") ad " +
+				" left join book_calendar bc on ad.mdate = bc.read_date and bc.time_spent_sec > 120 " +
+				" left join book b on b.id = bc.book_fk " +
+				" where ad.mdate >= " + fromDate + " and ad.mdate <= " + toDate +
+				" order by ad.mdate desc, bc.time_spent_sec desc, b.title";
+//		String sql =
+//			"SELECT bc.id, bc.book_fk, bc.read_date, bc.time_spent_sec, b.title FROM book b " +
+//			" join book_calendar bc on b.id = bc.book_fk " +
+//			" where bc.read_date >= " + fromDate + " and bc.read_date <= " + toDate +
+//			" and bc.time_spent_sec > 120 " +
+//			" order by bc.read_date desc, bc.time_spent_sec desc, b.title";
+		Log.d("cr3db", "sql: " + sql);
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				do {
+					CalendarStats cs = new CalendarStats();
+					cs.id = rs.getLong(0);
+					cs.bookFk = rs.getLong(1);
+					cs.readDate = rs.getLong(2);
+					cs.timeSpentSec = rs.getLong(3);
+					cs.bookTitle = rs.getString(4);
+					list.add(cs);
+				} while (rs.moveToNext());
+			}
+		}
+		endReading();
+		return list;
+	}
+
+	// fav folders
 
 	public ArrayList<FileInfo> loadFavoriteFolders() {
 		log.i("loadFavoriteFolders()");
@@ -1450,7 +1522,7 @@ public class MainDB extends BaseDB {
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of favorite folders", e);
+			Log.e("cr3db", "exception while loading list of favorite folders", e);
 		}
 		return list;
 	}
@@ -1975,7 +2047,7 @@ public class MainDB extends BaseDB {
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of authors", e);
+			Log.e("cr3db", "exception while loading list of authors", e);
 		}
 		sortItems(list, new ItemGroupFilenameExtractor(), sortAsc);
 		return found;
@@ -1983,7 +2055,7 @@ public class MainDB extends BaseDB {
 
 	// CR implementation
 //	public boolean loadGenresList(FileInfo parent, boolean showEmptyGenres) {
-//		Log.i("cr3", "loadGenresList()");
+//		Log.i("cr3db", "loadGenresList()");
 //		beginReading();
 //		parent.clear();
 //		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
@@ -2008,7 +2080,7 @@ public class MainDB extends BaseDB {
 //				} while (rs.moveToNext());
 //			}
 //		} catch (Exception e) {
-//			Log.e("cr3", "exception while loading list of authors", e);
+//			Log.e("cr3db", "exception while loading list of authors", e);
 //		}
 //		endReading();
 //		addItems(parent, list, 0, list.size());
@@ -2016,7 +2088,7 @@ public class MainDB extends BaseDB {
 //	}
 
 	public boolean loadAuthorsList(FileInfo parent, String filterSeries, boolean withAliases) {
-		Log.i("cr3", "loadAuthorsList()");
+		Log.i("cr3db", "loadAuthorsList()");
 		beginReading();
 		// gather missed stats
 		try (Cursor rs = mDB.rawQuery(
@@ -2034,7 +2106,7 @@ public class MainDB extends BaseDB {
 			}
 			if (rs != null) rs.close();
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of authors", e);
+			Log.e("cr3db", "exception while loading list of authors", e);
 		}
 		//\
 		parent.clear();
@@ -2113,7 +2185,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public boolean loadCalibreAuthorsList(FileInfo parent, String filterSeries, boolean withAliases) {
-		Log.i("cr3", "loadCalibreAuthorsList()");
+		Log.i("cr3db", "loadCalibreAuthorsList()");
 		String catalogFileName = parent.pathname.replace(FileInfo.CALIBRE_DIR_PREFIX, "") +
 				"/metadata.db";
 		if (!openCatalogDB(new File(catalogFileName), parent)) return false;
@@ -2161,7 +2233,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public boolean loadGenresList(FileInfo parent) {
-		Log.i("cr3", "loadGenresList()");
+		Log.i("cr3db", "loadGenresList()");
 		beginReading();
 		parent.clear();
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
@@ -2183,7 +2255,7 @@ public class MainDB extends BaseDB {
 			}
 			if (rs != null) rs.close();
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of genres", e);
+			Log.e("cr3db", "exception while loading list of genres", e);
 		}
 		//\
 		String gname =
@@ -2231,7 +2303,7 @@ public class MainDB extends BaseDB {
 			}
 			if (rs != null) rs.close();
 		} catch (Exception e) {
-			Log.e("cr3", "exception while getLongValue", e);
+			Log.e("cr3db", "exception while getLongValue", e);
 		}
 		return res;
 	}
@@ -2239,7 +2311,7 @@ public class MainDB extends BaseDB {
 	;
 
 	public boolean loadSeriesList(FileInfo parent, String filterAuthor) {
-		Log.i("cr3", "loadSeriesList()");
+		Log.i("cr3db", "loadSeriesList()");
 		beginReading();
 		parent.clear();
 		// gather missed stats
@@ -2259,7 +2331,7 @@ public class MainDB extends BaseDB {
 			}
 			if (rs != null) rs.close();
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of series", e);
+			Log.e("cr3db", "exception while loading list of series", e);
 		}
 		//\
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
@@ -2292,7 +2364,7 @@ public class MainDB extends BaseDB {
 						}
 						if (rs != null) rs.close();
 					} catch (Exception e) {
-						Log.e("cr3", "exception while loading list of authors", e);
+						Log.e("cr3db", "exception while loading list of authors", e);
 					}
 				}
 			} else if (filterAuthor.startsWith("author:")) {
@@ -2320,7 +2392,7 @@ public class MainDB extends BaseDB {
 					}
 					if (rs != null) rs.close();
 				} catch (Exception e) {
-					Log.e("cr3", "exception while loading list of authors", e);
+					Log.e("cr3db", "exception while loading list of authors", e);
 				}
 			}
 			String authors = "-1";
@@ -2353,7 +2425,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public boolean loadByDateList(FileInfo parent, final String field) {
-		Log.i("cr3", "loadByDateList()");
+		Log.i("cr3db", "loadByDateList()");
 		beginReading();
 		parent.clear();
 		// gather missed stats
@@ -2376,7 +2448,7 @@ public class MainDB extends BaseDB {
 			}
 			if (rs != null) rs.close();
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of dates", e);
+			Log.e("cr3db", "exception while loading list of dates", e);
 		}
 		//\
 		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
@@ -2427,7 +2499,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public boolean loadTitleList(FileInfo parent) {
-		Log.i("cr3", "loadTitleList()");
+		Log.i("cr3db", "loadTitleList()");
 		execSQLIgnoreErrors("UPDATE book SET title=filename WHERE title is null"); //ASDF - сделать по нормальному
 		// gather missed stats
 		try (Cursor rs = mDB.rawQuery(
@@ -2452,7 +2524,7 @@ public class MainDB extends BaseDB {
 			}
 			if (rs != null) rs.close();
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list of series", e);
+			Log.e("cr3db", "exception while loading list of series", e);
 		}
 		//\
 		parent.clear();
@@ -2562,7 +2634,7 @@ public class MainDB extends BaseDB {
 				}
 				if (rs != null) rs.close();
 			} catch (Exception e) {
-				Log.e("cr3", "exception while loading list of authors", e);
+				Log.e("cr3db", "exception while loading list of authors", e);
 			}
 		}
 		if (!StrUtils.isEmptyStr(addFilter)) {
@@ -2591,7 +2663,7 @@ public class MainDB extends BaseDB {
 					}
 					if (rs != null) rs.close();
 				} catch (Exception e) {
-					Log.e("cr3", "exception while loading list of authors", e);
+					Log.e("cr3db", "exception while loading list of authors", e);
 				}
 			}
 		}
@@ -2868,7 +2940,7 @@ public class MainDB extends BaseDB {
 		String insertQuery = "INSERT OR IGNORE INTO book_author (book_fk,author_fk) VALUES ";
 		for (Long id : authors) {
 			String sql = insertQuery + "(" + bookId + "," + id + ")";
-			//Log.v("cr3", "executing: " + sql);
+			//Log.v("cr3db", "executing: " + sql);
 			mDB.execSQL(sql);
 		}
 	}
@@ -2900,7 +2972,7 @@ public class MainDB extends BaseDB {
 //		String insertQuery = "INSERT OR IGNORE INTO book_genre (book_fk,genre_fk) VALUES ";
 //		for ( Integer id : genres ) {
 //			String sql = insertQuery + "(" + bookId + "," + id + ")";
-//			//Log.v("cr3", "executing: " + sql);
+//			//Log.v("cr3db", "executing: " + sql);
 //			mDB.execSQL(sql);
 //		}
 //	}
@@ -2985,7 +3057,7 @@ public class MainDB extends BaseDB {
 		String insertQuery = "INSERT OR IGNORE INTO book_genre (book_fk,genre_fk) VALUES ";
 		for (Long id : genres) {
 			String sql = insertQuery + "(" + bookId + "," + id + ")";
-			//Log.v("cr3", "executing: " + sql);
+			//Log.v("cr3db", "executing: " + sql);
 			mDB.execSQL(sql);
 		}
 	}
@@ -3892,7 +3964,7 @@ public class MainDB extends BaseDB {
 	}
 
 	public ArrayList<FileInfo> findByPatterns(int maxCount, String authors, String title, String series, String filename) {
-		Log.i("cr3", "findByPatterns fired");
+		Log.i("cr3db", "findByPatterns fired");
 		beginReading();
 		boolean bQuickSearch = StrUtils.getNonEmptyStr(title, true).equals("##QUICK_SEARCH##");
 		Map<String, String> alGenres = new HashMap<>();
@@ -3963,7 +4035,7 @@ public class MainDB extends BaseDB {
 		String condition = buf.length() == 0 ? " WHERE (not (b.pathname like '@%'))" :
 				" WHERE (" + buf.toString() + ")  and (not (b.pathname like '@%'))";
 		String sql = READ_FILEINFO_SQL + condition + " ORDER BY file_create_time desc";
-		Log.d("cr3", "sql: " + sql);
+		Log.d("cr3db", "sql: " + sql);
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
 				int count = 0;
@@ -4062,7 +4134,7 @@ public class MainDB extends BaseDB {
 //					where_clause.append(" OR ");
 //			}
 //			sql = "SELECT count(DISTINCT book_fk) as book_count FROM book_genre bg " + where_clause.toString();
-//			Log.d("cr3", "sql: " + sql );
+//			Log.d("cr3db", "sql: " + sql );
 //			try (Cursor rs = mDB.rawQuery(sql, null)) {
 //				if (rs.moveToFirst()) {
 //					do {
@@ -4081,7 +4153,7 @@ public class MainDB extends BaseDB {
 //					"FROM genre g " +
 //					"INNER JOIN genre_hier gh ON gh.genre_fk = g.id " +
 //					"WHERE gh.group_fk=" + genreRecord.getId();
-//			Log.d("cr3", "sql: " + sql );
+//			Log.d("cr3db", "sql: " + sql );
 //			try (Cursor rs = mDB.rawQuery(sql, null)) {
 //				if (rs.moveToFirst()) {
 //					do {
@@ -4115,7 +4187,7 @@ public class MainDB extends BaseDB {
 //				where_clause.append("bg.genre_fk=").append(genreRecord.getId());
 //			}
 //			sql = READ_FILEINFO_SQL + " JOIN book_genre bg ON (bg.book_fk=b.id)" + where_clause.toString();
-//			Log.d("cr3", "sql: " + sql );
+//			Log.d("cr3db", "sql: " + sql );
 //			try (Cursor rs = mDB.rawQuery(sql, null)) {
 //				if (rs.moveToFirst()) {
 //					do {
@@ -4146,8 +4218,8 @@ public class MainDB extends BaseDB {
 			if (it.hasNext())
 				condition.append(" OR ");
 		}
-		String sql = READ_FILEINFO_SQL + condition.toString();
-		Log.d("cr3", "sql: " + sql);
+		String sql = READ_FILEINFO_SQL + condition;
+		Log.d("cr3db", "sql: " + sql);
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
 				int count = 0;
@@ -4358,7 +4430,7 @@ public class MainDB extends BaseDB {
 
 	public void correctFilePaths() {
 		if (mDB == null) return;
-		Log.i("cr3", "checking data for path correction");
+		Log.i("cr3db", "checking data for path correction");
 		beginReading();
 		int rowCount = 0;
 		Map<String, Long> map = new HashMap<>();
@@ -4374,16 +4446,16 @@ public class MainDB extends BaseDB {
 						continue;
 					rowCount++;
 					if (corrected == null) {
-						Log.w("cr3", "DB contains unknown path " + pathname);
+						Log.w("cr3db", "DB contains unknown path " + pathname);
 					} else if (!pathname.equals(corrected)) {
 						map.put(pathname, id);
 					}
 				} while (rs.moveToNext());
 			}
 		} catch (Exception e) {
-			Log.e("cr3", "exception while loading list books to correct paths", e);
+			Log.e("cr3db", "exception while loading list books to correct paths", e);
 		}
-		Log.i("cr3", "Total rows: " + rowCount + ", " + (map.size() > 0 ? "need to correct " + map.size() + " items" : "no corrections required"));
+		Log.i("cr3db", "Total rows: " + rowCount + ", " + (map.size() > 0 ? "need to correct " + map.size() + " items" : "no corrections required"));
 		if (map.size() > 0) {
 			beginChanges();
 			int count = 0;

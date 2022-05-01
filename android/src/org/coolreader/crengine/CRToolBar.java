@@ -101,11 +101,13 @@ public class CRToolBar extends ViewGroup {
 	}
 
 	public void tintViewIconsColor(View v) {
-		if (!useBackgrColor) activity.tintViewIcons(v, true);
+		Boolean nightEInk = activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && isEInk;
+		if ((!useBackgrColor) && (!nightEInk)) activity.tintViewIcons(v, true);
 		else {
 			Boolean custIcons = activity.settings().getBool(BaseActivity.PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
 			if (DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink())) custIcons = false;
 			int custColor = activity.settings().getColor(BaseActivity.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
+			if (nightEInk) custIcons = true;
 			if (custIcons) {
 				int colorCur = custColor;
 				if ((isColorDark(ReaderView.backgrNormalizedColor)) && (isColorDark(colorCur))) {
@@ -118,6 +120,7 @@ public class CRToolBar extends ViewGroup {
 						colorCur = darkenColor(colorCur);
 						colorCur = darkenColor(colorCur);
 					}
+				if (nightEInk) colorCur = Color.WHITE;
 				activity.tintViewIconsC(v, true, colorCur);
 			} else {
 				TypedArray a = ((CoolReader) activity).getTheme().obtainStyledAttributes(new int[]
@@ -1010,6 +1013,11 @@ public class CRToolBar extends ViewGroup {
 			bg = context.getResources().getDrawable(theme.getPopupToolbarBackground());
 		else
 			bg = Utils.solidColorDrawable(theme.getPopupToolbarBackgroundColor());
+		if (tb.isEInk) {
+			bg = Utils.solidColorDrawable(theme.getPopupToolbarBackgroundColor());
+			Boolean night = tb.activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false);
+			if (night) bg = Utils.solidColorDrawable(Color.BLACK);
+		}
 		popup.setBackgroundDrawable(bg);
 		int [] location = new int[2];
 		anchor.getLocationOnScreen(location);

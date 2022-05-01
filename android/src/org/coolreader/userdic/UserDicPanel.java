@@ -2,6 +2,7 @@ package org.coolreader.userdic;
 
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -11,13 +12,17 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DicSearchHistoryEntry;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.ReaderAction;
+import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
+import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
@@ -38,7 +43,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		return arrUdeWords;
 	}
 
-	private ArrayList<UserDicEntry> arrUdeWords = new ArrayList<UserDicEntry>();
+	private ArrayList<UserDicEntry> arrUdeWords = new ArrayList<>();
 		private TextView lblWord;
 		private int textSize = 14;
 		private int color = 0;
@@ -157,7 +162,8 @@ public class UserDicPanel extends LinearLayout implements Settings {
 				tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 				tv.setOnClickListener(v -> {
 					if (v instanceof TextView) {
-						String sWord = ((TextView) v).getText().toString();
+						String sWord = StrUtils.getNonEmptyStr(((TextView) v).getText().toString(), false);
+
 						for (UserDicEntry ude: arrUdeWords) {
 							String sKey = ude.getDic_word();
 							try {
@@ -168,10 +174,54 @@ public class UserDicPanel extends LinearLayout implements Settings {
 
 							}
 							if (sKey.equals(sWord)) {
-								mCoolReader.showSToast("*"+ StrUtils.updateText(ude.getDic_word_translate(),true), sWord);
-								mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_UPDATE_CNT);
-								ude.setSeen_count(ude.getSeen_count() + 1);
-								ude.setLast_access_time(System.currentTimeMillis());
+								String sTransl = StrUtils.getNonEmptyStr(ude.getDic_word_translate(), false);
+								if (sTransl.equals("#~#~" + mCoolReader.getString(R.string.book_share))) {
+									mCoolReader.getmReaderView().onAction(ReaderAction.SAVE_CURRENT_BOOK_TO_CLOUD_EMAIL);
+								}
+									else
+										if (sTransl.startsWith("#~!#~")) {
+											tv.setText(mCoolReader.getString(R.string.book_transl));
+											BookInfo mBookInfo = mCoolReader.getReaderView().getBookInfo();
+											String lang = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to,true);
+											String langf = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true);
+											FileInfo fi = mBookInfo.getFileInfo();
+											FileInfo dfi = fi.parent;
+											if (dfi == null) {
+												dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+											}
+											if (dfi != null) {
+												FileInfo finalDfi = dfi;
+												BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(
+														() -> mCoolReader.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_NORMAL, true,
+																tv, finalDfi,
+																fi, langf, lang, "", null,
+																TranslationDirectionDialog.FOR_COMMON
+																, null), 200));
+											}
+										} else
+											if (sTransl.equals("#~#~" + mCoolReader.getString(R.string.book_edit))) {
+												BookInfo mBookInfo = mCoolReader.getReaderView().getBookInfo();
+												FileInfo fi = mBookInfo.getFileInfo();
+												FileInfo dfi = fi.parent;
+												if (dfi == null) {
+													dfi = Services.getScanner().findParent(fi, Services.getScanner().getRoot());
+												}
+												if (dfi != null) {
+													mCoolReader.editBookInfo(dfi, fi);
+												} else
+													mCoolReader.showToast("Cannot find parent for file, contact the developer");
+											} else
+												if (sTransl.equals("#~#~" + mCoolReader.getString(R.string.book_info))) {
+													mCoolReader.getmReaderView().onAction(ReaderAction.BOOK_INFO);
+												} else
+													if (sTransl.equals("#~#~" + mCoolReader.getString(R.string.book_styles))) {
+														mCoolReader.getmReaderView().checkOpenBookStyles(true, false);
+													} else {
+														mCoolReader.showSToast("*" + StrUtils.updateText(sTransl, true), sWord);
+														mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_UPDATE_CNT);
+														ude.setSeen_count(ude.getSeen_count() + 1);
+														ude.setLast_access_time(System.currentTimeMillis());
+													}
 								break;
 							}
 						}
@@ -182,8 +232,11 @@ public class UserDicPanel extends LinearLayout implements Settings {
 						String sWord = ((TextView) v).getText().toString();
 						for (final UserDicEntry ude: arrUdeWords) {
 							if (ude.getDic_word().equals(sWord)) {
-								UserDicEditDialog uded = new UserDicEditDialog(mCoolReader, ude, null);
-								uded.show();
+								String sTransl = StrUtils.getNonEmptyStr(ude.getDic_word_translate(), false);
+								if ((!sTransl.startsWith("#~#~")) && (!sTransl.startsWith("#~!#~"))) {
+									UserDicEditDialog uded = new UserDicEditDialog(mCoolReader, ude, null);
+									uded.show();
+								}
 								break;
 							}
 						}
@@ -275,7 +328,7 @@ lblStar.setTextColor(0xFF000000 | color);
 							for (int i = sPrevPage.length() - 1; i > 0; i--) {
 								cnt++;
 								if (Character.isWhitespace(sPrevPage.charAt(i))) {
-									sCurPage = sPrevPage.substring(i, sPrevPage.length()) + sCurPage;
+									sCurPage = sPrevPage.substring(i) + sCurPage;
 									break;
 								}
 								if (cnt > 100) break;
@@ -292,6 +345,7 @@ lblStar.setTextColor(0xFF000000 | color);
 		public void updateUserDicWords() {
 			this.wc = 0;
 			this.arrUdeWords.clear();
+			int curPage = mCoolReader.getReaderView().getDoc().getCurPage();
 			String sCurPage = getCurPageText();
 			Iterator it = mCoolReader.getmUserDic().entrySet().iterator();
 			while (it.hasNext()) {
@@ -380,6 +434,39 @@ lblStar.setTextColor(0xFF000000 | color);
 				if (lhs.getLast_access_time() < rhs.getLast_access_time()) return 1;
 				return 0;
 			});
+			if (curPage == 0) {
+				this.arrUdeWords.clear();
+
+				UserDicEntry ude = new UserDicEntry();
+				ude.setDic_word(mCoolReader.getString(R.string.book_share));
+				ude.setDic_word_translate("#~#~" + mCoolReader.getString(R.string.book_share));
+				this.arrUdeWords.add(0, ude);
+
+				ude = new UserDicEntry();
+				ude.setDic_word(mCoolReader.getString(R.string.book_transl));
+				ude.setDic_word_translate("#~!#~" + mCoolReader.getString(R.string.book_transl));
+				BookInfo mBookInfo = mCoolReader.getReaderView().getBookInfo();
+				String lang = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_to, true);
+				String langf = StrUtils.getNonEmptyStr(mBookInfo.getFileInfo().lang_from, true);
+				if ((!StrUtils.isEmptyStr(lang)) && (!StrUtils.isEmptyStr(langf)))
+					ude.setDic_word(langf + " -> " + lang);
+				this.arrUdeWords.add(0, ude);
+
+				ude = new UserDicEntry();
+				ude.setDic_word(mCoolReader.getString(R.string.book_edit));
+				ude.setDic_word_translate("#~#~" + mCoolReader.getString(R.string.book_edit));
+				this.arrUdeWords.add(0, ude);
+
+				ude = new UserDicEntry();
+				ude.setDic_word(mCoolReader.getString(R.string.book_info));
+				ude.setDic_word_translate("#~#~" + mCoolReader.getString(R.string.book_info));
+				this.arrUdeWords.add(0, ude);
+
+				ude = new UserDicEntry();
+				ude.setDic_word(mCoolReader.getString(R.string.book_styles));
+				ude.setDic_word_translate("#~#~" + mCoolReader.getString(R.string.book_styles));
+				this.arrUdeWords.add(0, ude);
+			}
 			updateViews();
 			int showUD = mCoolReader.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
 			if ((!arrUdeWords.isEmpty()) && (showUD > 0)) {
@@ -413,7 +500,8 @@ lblStar.setTextColor(0xFF000000 | color);
 			}
 			boolean updated = false;
 			if (!lblWordFound.getText().equals(sWC)) {
-				this.lblWordFound.setText(sWC);
+				int curPage = mCoolReader.getReaderView().getDoc().getCurPage();
+				this.lblWordFound.setText(curPage == 0? "": sWC);
 			}
 			int i=0;
 			for (TextView tv: arrLblWords) {

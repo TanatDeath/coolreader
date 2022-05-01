@@ -1,6 +1,7 @@
 package org.coolreader.dic;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,6 +107,12 @@ public class DicArticleDlg extends BaseDialog {
 		whenCreate(dlgName, coolReader, toast, position,null, dicContent);
 	}
 
+	public static Handler mHandler = new Handler();
+
+	public Runnable handleOk = () -> {
+		onPositiveButtonClick();
+	};
+
 	private void whenCreate(String dlgName, CoolReader coolReader, DicToastView.Toast toast, int position,
 					   TranslLine tl, View dicContent) {
 		setCancelable(true);
@@ -132,7 +139,7 @@ public class DicArticleDlg extends BaseDialog {
 			mBody.addView(dicContent);
 		} else {
 			if (tl == null) {
-				mExtDicList = new ExtDicList(mActivity, toast, mDicStruct, null, null,
+				mExtDicList = new ExtDicList(mActivity, toast, mDicStruct, mHandler, handleOk,
 						position >= 0);
 				mBody.addView(mExtDicList);
 			} else {

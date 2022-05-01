@@ -37,6 +37,7 @@ import org.coolreader.cloud.yandex.YndCloudSettings;
 import org.coolreader.crengine.AskSomeValuesDialog;
 import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.CalibreCatalogEditDialog;
+import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.FolderSelectedCallback;
@@ -185,6 +186,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public LitresCredentialsDialog litresCredentialsDialog = null;
 
 	private ReaderView mReaderView;
+
+	private CoverpageManager.CoverpageReadyListener mCoverpageListener;
 
     //move to flavor
     public GeoLastData geoLastData = new GeoLastData(this);
@@ -674,6 +677,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		isInterfaceCreated = false;
 
 		//AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); -- к сожалению не работает ((
+
+		mCoverpageListener = files -> {
+			if (mHomeFrame != null) mHomeFrame.onCoverpagesReady(files);
+		};
+
+		Services.getCoverpageManager().addCoverpageReadyListener(mCoverpageListener);
 
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
@@ -1664,7 +1673,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} catch (IllegalArgumentException e) {
 			log.e("Failed to unregister receiver: " + e.toString());
 		}
-		Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
+		//Services.getCoverpageManager().removeCoverpageReadyListener(mHomeFrame);
 		if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (mGoogleDriveSyncOpts.Enabled && mGoogleDriveSync != null) {
 				//mGoogleDriveSync.startSyncTo(getCurrentBookInfo(), Synchronizer.SYNC_FLAG_QUIETLY | Synchronizer.SYNC_FLAG_SHOW_PROGRESS);
@@ -1677,6 +1686,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				startService(syncIntent);
 			}
 		}
+		if (mReaderView != null)
+			if (mReaderView.curReadingTime > 0) {
+				long curTime = System.currentTimeMillis();
+				mReaderView.lastCalendarSaveTime = curTime;
+				mReaderView.updateCalendarEntry(mReaderView.curReadingTime);
+				mReaderView.curReadingTime = 0;
+			}
 		super.onPause();
 	}
 	
@@ -1908,19 +1924,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	protected void onStart() {
 		log.i("KnownReader.onStart() version=" + getVersion() + ", fileToLoadOnStart=" + fileToLoadOnStart);
 		super.onStart();
-
-		//		BackgroundThread.instance().postGUI(new Runnable() {
-//			public void run() {
-//				// fixing font settings
-//				Properties settings = mReaderView.getSettings();
-//				if (SettingsManager.instance(CoolReader.this).fixFontSettings(settings)) {
-//					log.i("Missing font settings were fixed");
-//					mBrowser.setCoverPageFontFace(settings.getProperty(ReaderView.PROP_FONT_FACE, DeviceInfo.DEF_FONT_FACE));
-//					mReaderView.setSettings(settings, null);
-//				}
-//			}
-//		});
-
 		waitForCRDBService(() -> {
 			BaseDB db = Services.getHistory().getMainDB(getDB());
 			BaseDB cdb = Services.getHistory().getCoverDB(getDB());
@@ -1979,7 +1982,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				Services.getHistory().loadFromDB(getDB(), 200);
 
 				mHomeFrame = new CRRootView(CoolReader.this);
-				Services.getCoverpageManager().addCoverpageReadyListener(mHomeFrame);
+				//Services.getCoverpageManager().addCoverpageReadyListener(mHomeFrame);
 				mHomeFrame.requestFocus();
 
 				showRootWindow();

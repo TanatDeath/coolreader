@@ -10322,8 +10322,12 @@ int ldomDocument::getFullHeight()
 }
 #endif
 
-
 lString32 extractDocAuthors( ldomDocument * doc, lString32 delimiter, bool shortMiddleName )
+{
+    return extractDocAuthors2( doc, delimiter, shortMiddleName? 1: 0 );
+}
+
+lString32 extractDocAuthors2( ldomDocument * doc, lString32 delimiter, int shortMiddleName )
 {
     if ( delimiter.empty() )
         delimiter = ", ";
@@ -10338,17 +10342,21 @@ lString32 extractDocAuthors( ldomDocument * doc, lString32 delimiter, bool short
         lString32 firstName = pauthor.relative( U"/first-name" ).getText().trim();
         lString32 lastName = pauthor.relative( U"/last-name" ).getText().trim();
         lString32 middleName = pauthor.relative( U"/middle-name" ).getText().trim();
-        //lString32 nickName = pauthor.relative( U"/nickname" ).getText().trim();
-        //lString32 homePage = pauthor.relative( U"/home-page" ).getText().trim();
-        //lString32 email = pauthor.relative( U"/email" ).getText().trim();
         lString32 author = firstName;
-        if ( !author.empty() )
-            author += " ";
-        if ( !middleName.empty() )
-            author += shortMiddleName ? lString32(middleName, 0, 1) + "." : middleName;
-        if ( !lastName.empty() && !author.empty() )
-            author += " ";
+        if ( !author.empty() ) {
+            author = author.trim() + " ";
+        }
+        if ( !middleName.empty() ) {
+            if (shortMiddleName == 0)
+                author += middleName;
+            if (shortMiddleName == 1)
+                author += lString32(middleName, 0, 1) + ".";
+            author = author.trim();
+            if ( !lastName.empty() && !author.empty() )
+              author += " ";
+        }
         author += lastName;
+        author = author.trim();
         if ( !authors.empty() )
             authors += delimiter;
         authors += author;

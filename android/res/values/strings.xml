@@ -86,6 +86,7 @@
     <string name="dir_internal_sd_card">Internal SD Card</string>
     <string name="dir_internal_memory">Internal memory</string>
     <string name="win_title_bookmarks">Bookmarks</string>
+    <string name="win_title_bookmarks_choose">Choose bookmark</string>
     <string name="win_title_dicts">Dictionaries</string>
     <string name="win_title_toc">Table of Contents</string>
     <string name="win_title_options">Options</string>
@@ -829,9 +830,11 @@
     <string name="note1_can_be_migrated">CoolReader settings found. Do you want to copy CoolReader\"s settings into KnownReader?</string>
     <string name="note2_logcat">Added the function of saving the program log. If during the execution of any operation the program terminates abnormally or does not work correctly, you can create a log file. If the program terminated with an error, you need to start it again and select the "Save log" item in the reading menu. A log file will be generated to help resolve the issue.</string>
     <string name="root_item_recent">Recent books</string>
+    <string name="root_item_calendar">Calendar</string>
     <string name="root_item_library">Browse library</string>
     <string name="root_item_filesystem">Browse file system / cloud</string>
     <string name="root_item_online_catalogs">Online catalogs</string>
+    <string name="root_item_sort_a_z">Sort A -> Z</string>
     <string name="black_list_enforced">Cannot add this URL since it is added to black list of catalogs which may violate DMCA by request of LitRes.ru</string>
     <string name="black_list_warning">WARNING: this URL is added to black list of catalogs which may violate DMCA by request of LitRes.ru Do you really want to add this catalog?</string>
     <string name="error">Error</string>
@@ -944,7 +947,7 @@
     <string name="open_book_from_y_short">Yandex</string>
     <string name="set_comment_from_cb_capt">Save with comment from clipboard</string>
     <string name="set_comment_from_cb">Set comment ...</string>
-    <string name="clipb_contents">Clipboard contents (click to paste):</string>
+    <string name="clipb_contents">Clipboard (click to paste):</string>
     <string name="clipb_contents_s">Clipboard contents</string>
     <string name="fonts_menu">Fonts menu</string>
     <string name="copied_to_cb">Copied to clipboard</string>
@@ -1340,6 +1343,7 @@
     <string name="only_in_pro">This feature is availble in Premium version only</string>
     <string name="only_in_premium">This feature is availble in Premium version only</string>
     <string name="str_yes">yes</string>
+    <string name="str_manage">Manage</string>
     <string name="str_no">no</string>
     <string name="str_cancel">cancel</string>
     <string name="str_yes_and_del_pos">yes, and delete saved (cloud) positions</string>
@@ -1364,7 +1368,7 @@
     <string name="wd_decrease_vol">Device is still, decrease volume from %1$s to %2$s</string>
     <string name="wd_still">Device is still still :), good night!</string>
     <string name="wd_sett">TTS settings</string>
-    <string name="not_enough_stat_data">Not enough stat data</string>
+    <string name="not_enough_stat_data">Not enough stat data - read evenly and sequentially some pages</string>
     <string name="successfully_loaded">successfully loaded</string>
     <string name="book_was_not_found">book was not found</string>
     <string name="bookmarks_created">bookmarks created</string>
@@ -1638,6 +1642,7 @@
     <string name="sel_start">&lt; start</string>
     <string name="sel_end">end &gt;</string>
     <string name="bmk_send_to">send to...</string>
+    <string name="bmk_other">Other...</string>
     <string name="bmk_custom_color">Set color</string>
     <string name="skim_document">Skim over book</string>
     <string name="skim_document_short">Skim over book</string>
@@ -1669,9 +1674,13 @@
     <string name="fix_double_backlight_delta">Fix cold and warm delta</string>
     <string name="fix_double_backlight_delta_add_info">Do not change warm/cold delta when change (both) backlight by swipe</string>
     <string name="add_opds_catalog">Add OPDS catalog</string>
+    <string name="add_opds_catalog_short">Add OPDS</string>
     <string name="add_remove_litres_catalog">Add / remove Litres catalog</string>
+    <string name="add_remove_litres_catalog_short">Toggle Litres</string>
     <string name="add_calibre_catalog_local">Add Calibre local library</string>
     <string name="add_calibre_catalog_yd">Add Calibre remore (Yandex.Disk) library</string>
+    <string name="add_calibre_catalog_local_short">Calibre: local</string>
+    <string name="add_calibre_catalog_yd_short">Calibre: YDisk</string>
     <string name="calibre_search">Search (calibre)</string>
     <string name="calibre_authors">Authors (calibre)</string>
     <string name="calibre_titles">Titles (calibre)</string>
@@ -1962,4 +1971,11 @@
     <string name="root_directory">Root directory</string>
     <string name="saf_otg_explanation">You\'ll now go to Android\'s filesystem for security reasons. Please select the USB device from the list on the left. Proceed?</string>
     <string name="open">Open</string>
+    <string name="read_calendar_dlg">Reading calendar</string>
+    <string name="book_styles">Styles</string>
+    <string name="book_info">Info</string>
+    <string name="book_edit">Edit</string>
+    <string name="book_transl">Languages</string>
+    <string name="book_shortcut">Shortcut</string>
+    <string name="book_share">Share</string>
 </resources>

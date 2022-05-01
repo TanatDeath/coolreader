@@ -790,6 +790,13 @@ public:
     lString32 getLanguage() const { return m_doc_props->getStringDef(DOC_PROP_LANGUAGE); }
     /// returns book author(s)
     lString32 getAuthors() const { return m_doc_props->getStringDef(DOC_PROP_AUTHORS); }
+    /// returns book author(s) - - without middle name
+    lString32 getAuthorsShort() const {
+
+        lString32 v = m_doc_props->getStringDef(DOC_PROP_AUTHORS_SHORT);
+        if (v.empty()) v = getAuthors();
+        return v;
+    }
     /// returns book description
     lString32 getDescription() const { return m_doc_props->getStringDef(DOC_PROP_DESCRIPTION); }
     /// returns book keywords (separated by "; ")

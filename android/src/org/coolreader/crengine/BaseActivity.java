@@ -991,9 +991,16 @@ public class BaseActivity extends Activity implements Settings {
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public void paintWhiteStatusBar(Window wnd) {
+		boolean night = settings().getBool(ReaderView.PROP_NIGHT_MODE, false);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			wnd.addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-			wnd.setStatusBarColor(Color.rgb(255,255,255));
+			if (!night) {
+				wnd.addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+				wnd.setStatusBarColor(Color.rgb(255, 255, 255));
+			}
+			else {
+				wnd.clearFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+				wnd.setStatusBarColor(Color.rgb(0, 0, 0));
+			}
 		}
 	}
 
@@ -1086,8 +1093,11 @@ public class BaseActivity extends Activity implements Settings {
 				else
 					flags |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
 			}
-			if (DeviceInfo.isEinkScreen(getScreenForceEink()))
-				flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+			if (DeviceInfo.isEinkScreen(getScreenForceEink())) {
+				boolean night = settings().getBool(ReaderView.PROP_NIGHT_MODE, false);
+				if (!night)
+					flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+			}
 			setSystemUiVisibility(flags);
 //			if (isFullscreen() && DeviceInfo.getSDKLevel() >= DeviceInfo.ICE_CREAM_SANDWICH)
 //				simulateTouch();
@@ -3650,7 +3660,10 @@ public class BaseActivity extends Activity implements Settings {
 		if (o == null) return;
 		Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
 		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
+		Boolean nightEInk = settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && getScreenForceEink();
 		int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
+		if (nightEInk)
+			custIcons = true;
 		TypedArray a = this.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.isTintedIcons, R.attr.colorIcon});
 		int isTintedIcons = a.getInt(0, 0);
@@ -3658,7 +3671,6 @@ public class BaseActivity extends Activity implements Settings {
 		if (custIcons) colorIcon = custColor;
 		if (doSetColor) colorIcon = setColor;
 		a.recycle();
-
 		if (isTintedIcons == 1) {
 			if (o instanceof View) {
 				View v = (View) o;

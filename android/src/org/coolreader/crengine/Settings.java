@@ -240,6 +240,7 @@ public interface Settings {
 	String PROP_APP_ROOT_VIEW_FS_SECTION_HIDE = "app.rootview.fs_section.hide";
 	String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
 	String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
+	String PROP_APP_ROOT_VIEW_OPDS_SECTION_SORT_AZ = "app.rootview.opds_section.sort.az";
 	String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
 	String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";

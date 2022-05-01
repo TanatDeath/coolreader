@@ -124,10 +124,11 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 			mCoolReader.startActivityForResult(chooserIntent, CoolReader.REQUEST_CODE_CHOOSE_DIR);
 		});
 		edtRemoteFolderYD = view.findViewById(R.id.catalog_remote_folder);
- 	    setThirdButtonImage(
-				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
-				//R.drawable.icons8_minus,
-				R.string.mi_catalog_delete);
+		if (item.id != null)
+			setThirdButtonImage(
+					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
+					//R.drawable.icons8_minus,
+					R.string.mi_catalog_delete);
 		paintScopeButtons();
 		setView(view);
 	}

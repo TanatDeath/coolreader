@@ -851,7 +851,7 @@ public class BookInfoDialog extends BaseDialog {
 
 		btnSetAddMarks = mainView.findViewById(R.id.btn_set_add_marks);
 
-		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
+		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_check_no_frame);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		if (btnSetAddMarks !=null) btnSetAddMarks.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		bSetAddMarks = activity.settings().getBool(Settings.PROP_APP_DOWNLOADED_SET_ADD_MARKS, false);

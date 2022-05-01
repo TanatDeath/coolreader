@@ -1414,4 +1414,36 @@ public class Utils {
 		}
 	}
 
+	public static java.util.Date getPreviousMonth(java.util.Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		if (calendar.get(Calendar.MONTH) == Calendar.JANUARY) {
+			calendar.set(Calendar.MONTH, Calendar.DECEMBER);
+			calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) - 1);
+		} else {
+			calendar.roll(Calendar.MONTH, false);
+		}
+		return calendar.getTime();
+	}
+
+	public static java.util.Date getNextMonth(java.util.Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		if (calendar.get(Calendar.MONTH) == Calendar.DECEMBER) {
+			calendar.set(Calendar.MONTH, Calendar.JANUARY);
+			calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
+		} else {
+			calendar.roll(Calendar.MONTH, true);
+		}
+		return calendar.getTime();
+	}
+
+	public static java.util.Date getLastDayOfMonth(java.util.Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		int lastDateOfMonthForGivenDate = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		cal.set(Calendar.DATE, lastDateOfMonthForGivenDate);
+		return cal.getTime();
+	}
+
 }
