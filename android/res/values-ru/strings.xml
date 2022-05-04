@@ -12,7 +12,7 @@
     <string name="mi_file_open">Открыть файл</string>
     <string name="mi_options">Настройки</string>
     <string name="progress_please_wait">Подождите, пожалуйста</string>
-    <string name="progress_starting_cool_reader">Запускается Cool Reader</string>
+    <string name="progress_starting_cool_reader">Запускается KnownReader</string>
     <string name="progress_loading">Загрузка книги</string>
     <string name="progress_formatting">Форматирование книги</string>
     <string name="progress_scanning">Сканирование папки</string>
@@ -405,6 +405,7 @@
     <string name="dlg_about_hyphenations_dirs">Каталоги словарей переносов:</string>
     <string name="dlg_about_offlinedicts_dirs">Каталоги оффлайновых словарей:</string>
     <string name="dlg_about_customcovers_dirs">Каталоги своих обложек книг:</string>
+    <string name="dlg_about_bookmarks_dirs">Каталоги сохраненных закладок:</string>
     <string name="dlg_about_download_dirs">Каталоги для скачивания:</string>
     <string name="dlg_about_cloudsync_dirs">Каталоги облачной синхронизации:</string>
     <string name="dlg_about_icons_dirs">Каталоги для иконок:</string>
@@ -1939,5 +1940,6 @@
     <string name="book_transl">Языки</string>
     <string name="book_shortcut">Ярлык</string>
     <string name="book_share">Отправить</string>
+    <string name="month_read_percent">Время, потраченное на чтение в этом месяце:</string>
 </resources>
 

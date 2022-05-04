@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.db.CRDBService;
 import org.coolreader.db.CalendarStats;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
@@ -24,6 +25,8 @@ import java.util.List;
 public class CalendarStatsList extends BaseListView {
 
 	private CoolReader mCoolReader;
+	List<CalendarStats> mCalendarStatsList;
+	private BaseDialog mDlg;
 
 	static class CalendarStatsAdapter extends BaseAdapter {
 
@@ -127,9 +130,11 @@ public class CalendarStatsList extends BaseListView {
 	public CalendarStatsList(CoolReader coolReader, BaseDialog dlg, List<CalendarStats> cs) {
 		super(coolReader, true);
 		this.mCoolReader = coolReader;
+		this.mDlg = dlg;
 		setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		setLongClickable(true);
 		setAdapter(new CalendarStatsAdapter(coolReader, dlg, cs));
+		mCalendarStatsList = cs;
 		setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
 			//openContextMenu(DictList.this);
 			return true;
@@ -138,16 +143,23 @@ public class CalendarStatsList extends BaseListView {
 
 	@Override
 	public boolean performItemClick(View view, int position, long id) {
-//		Dictionaries.saveToDicSearchHistory(mCoolReader, findText,
-//				dicStruct.getTranslation(position), DicToastView.mListCurDict);
-//		if ((mCoolReader.getReaderView() == null) ||
-//				(mCoolReader.mCurrentFrame != mCoolReader.mReaderFrame)) {
-//			ClipboardManager cm = mCoolReader.getClipboardmanager();
-//			String s = StrUtils.getNonEmptyStr(findText + ": " + dicStruct.getTranslation(position), true);
-//			cm.setText(StrUtils.getNonEmptyStr(s, true));
-//		}
-//		if ((mHandler != null) && (mHandleDismiss != null))
-//			mHandler.postDelayed(mHandleDismiss, 100);
+		long bookId = mCalendarStatsList.get(position).bookId;
+		if (bookId > 0) {
+			mCoolReader.waitForCRDBService(() -> mCoolReader.getDB().loadFileInfoById(bookId,
+				new CRDBService.FileInfo1LoadingCallback() {
+					@Override
+					public void onFileInfoLoaded(FileInfo fileInfo) {
+						mDlg.dismiss();
+						mCoolReader.loadDocument(fileInfo, true);
+					}
+
+					@Override
+					public void onFileInfoListLoadBegin() {
+
+					}
+				}
+			));
+		}
 		return true;
 	}
 }

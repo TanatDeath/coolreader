@@ -764,6 +764,17 @@ public class CRDBService extends BaseService {
 		});
 	}
 
+	public void loadFileInfoById(final long id,
+									   final FileInfo1LoadingCallback callback, final Handler handler) {
+		execTask(new Task("loadFileInfoById") {
+			@Override
+			public void work() {
+				final FileInfo fileInfo = mainDB.loadFileInfoById(id);
+				sendTask(handler, () -> callback.onFileInfoLoaded(fileInfo));
+			}
+		});
+	}
+
 	public void loadFileInfos(final ArrayList<String> pathNames, final Scanner.ScanControl control, final Engine.ProgressControl progress, final FileInfoLoadingCallback callback, final Handler handler) {
 		execTask(new Task("loadFileInfos") {
 			@Override
@@ -1237,6 +1248,10 @@ public class CRDBService extends BaseService {
 
 		public void loadFileInfoByOPDSLink(final String opdsLink, final boolean isLitres, final FileInfo1LoadingCallback callback) {
 			getService().loadFileInfoByOPDSLink(opdsLink, isLitres, callback, new Handler());
+		}
+
+		public void loadFileInfoById(final long id, final FileInfo1LoadingCallback callback) {
+			getService().loadFileInfoById(id, callback, new Handler());
 		}
 
 		public void createFavoriteFolder(final FileInfo folder) {

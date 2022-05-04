@@ -260,12 +260,12 @@ public class BookInfo implements Parcelable {
 		return buf.toString();
 	}
 
-	synchronized public boolean exportBookmarks( String fileName ) {
+	synchronized public boolean exportBookmarks(String fileName) {
 		Log.i("cr3", "Exporting bookmarks to file " + fileName);
-		try (FileOutputStream stream = new FileOutputStream(new File(fileName));
+		try (FileOutputStream stream = new FileOutputStream(fileName);
 			 OutputStreamWriter writer = new OutputStreamWriter(stream, "UTF-8")) {
 			writer.write(0xfeff);
-			writer.write("# Cool Reader 3 - exported bookmarks\r\n");
+			writer.write("# KnownReader - exported bookmarks\r\n");
 			File pathname = new File(fileInfo.getPathName());
 			writer.write("# file name: " + pathname.getName() + "\r\n");
 			writer.write("# file path: " + pathname.getParent() + "\r\n");

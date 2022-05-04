@@ -1470,17 +1470,11 @@ public class MainDB extends BaseDB {
 				sql = sql + "union all select " + fromDateI + " as mdate ";
 			i++;
 		} while ((fromDateI < toDate) && (i < 50));
-		sql = "select bc.id, bc.book_fk, ad.mdate, bc.time_spent_sec, b.title FROM (" + sql + ") ad " +
+		sql = "select bc.id, bc.book_fk, ad.mdate, bc.time_spent_sec, b.title, b.id as book_id FROM (" + sql + ") ad " +
 				" left join book_calendar bc on ad.mdate = bc.read_date and bc.time_spent_sec > 120 " +
 				" left join book b on b.id = bc.book_fk " +
 				" where ad.mdate >= " + fromDate + " and ad.mdate <= " + toDate +
 				" order by ad.mdate desc, bc.time_spent_sec desc, b.title";
-//		String sql =
-//			"SELECT bc.id, bc.book_fk, bc.read_date, bc.time_spent_sec, b.title FROM book b " +
-//			" join book_calendar bc on b.id = bc.book_fk " +
-//			" where bc.read_date >= " + fromDate + " and bc.read_date <= " + toDate +
-//			" and bc.time_spent_sec > 120 " +
-//			" order by bc.read_date desc, bc.time_spent_sec desc, b.title";
 		Log.d("cr3db", "sql: " + sql);
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
@@ -1491,6 +1485,7 @@ public class MainDB extends BaseDB {
 					cs.readDate = rs.getLong(2);
 					cs.timeSpentSec = rs.getLong(3);
 					cs.bookTitle = rs.getString(4);
+					cs.bookId = rs.getLong(5);
 					list.add(cs);
 				} while (rs.moveToNext());
 			}
@@ -3562,6 +3557,24 @@ public class MainDB extends BaseDB {
 			}
 		}
 		return found;
+	}
+
+	public FileInfo loadFileInfoById(long id) {
+		String sql = READ_FILEINFO_SQL + " WHERE b.id=" + id;
+		boolean found = false;
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				do {
+					FileInfo fileInfo = new FileInfo();
+					readFileInfoFromCursor(fileInfo, rs);
+					if (!fileInfo.fileExists())
+						continue;
+					fileInfoCache.put(fileInfo);
+					return fileInfo;
+				} while (rs.moveToNext());
+			}
+		}
+		return null;
 	}
 
 

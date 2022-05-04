@@ -3510,7 +3510,7 @@ public class BaseActivity extends Activity implements Settings {
 				log.v("saveSettings()");
 	    		FileOutputStream os = new FileOutputStream(f);
 	    		Properties props = filterNotSaveSettings(settings);
-				props.store(os, "Cool Reader 3 settings");
+				props.store(os, "KnownReader settings");
 				log.i("Settings successfully saved to file " + f.getAbsolutePath());
 			} catch ( Exception e ) {
 				log.e("exception while saving settings", e);

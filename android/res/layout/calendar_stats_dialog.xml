@@ -73,7 +73,6 @@
 						android:ellipsize="end"
 						android:textColor="?attr/colorIcon"
 						android:textAppearance="?android:attr/textAppearanceMedium"
-						android:textStyle="bold"
 						android:maxLines="5"
 						android:gravity="center"
 						android:layout_gravity="center" />

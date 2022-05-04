@@ -575,7 +575,7 @@ void createEncryptedEpubWarningDocument(ldomDocument * m_doc) {
     writer.OnTagClose(NULL, U"p");
 
     writer.OnTagOpenNoAttr(NULL, U"p");
-    lString32 txt2("Cool Reader doesn't support reading of DRM protected books.");
+    lString32 txt2("KnownReader doesn't support reading of DRM protected books.");
     writer.OnText(txt2.c_str(), txt2.length(), 0);
     writer.OnTagClose(NULL, U"p");
 

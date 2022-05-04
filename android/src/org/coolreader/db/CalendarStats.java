@@ -6,5 +6,6 @@ public class CalendarStats {
 	public long readDate;
 	public long timeSpentSec;
 	public String bookTitle;
+	public long bookId;
 	public boolean sameDate;
 }

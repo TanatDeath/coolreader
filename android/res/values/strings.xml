@@ -424,6 +424,7 @@
     <string name="dlg_about_hyphenations_dirs">Hyphenation dictionaries directories:</string>
     <string name="dlg_about_offlinedicts_dirs">Offline dictionaries directories:</string>
     <string name="dlg_about_customcovers_dirs">Custom book covers directories:</string>
+    <string name="dlg_about_bookmarks_dirs">Saved bookmarks directories:</string>
     <string name="dlg_about_download_dirs">Download directories:</string>
     <string name="dlg_about_cloudsync_dirs">Cloud sync directories:</string>
     <string name="dlg_about_icons_dirs">Icons directories:</string>
@@ -1978,4 +1979,5 @@
     <string name="book_transl">Languages</string>
     <string name="book_shortcut">Shortcut</string>
     <string name="book_share">Share</string>
+    <string name="month_read_percent">Time spent to reading in this month:</string>
 </resources>

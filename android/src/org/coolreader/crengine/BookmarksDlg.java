@@ -6,9 +6,12 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.userdic.UserDicDlg;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
@@ -414,10 +417,29 @@ public class BookmarksDlg  extends BaseDialog {
 				String s = fi.getPathName();
 				s = s.replace(FileInfo.ARC_SEPARATOR, "_");
 				s = s + ".bmk.txt";
-				if ( mBookInfo.exportBookmarks(s) )
-					mCoolReader.showToast( getContext().getString(R.string.toast_bookmark_export_ok) + " " + s);
-				else
-					mCoolReader.showToast(getContext().getString(R.string.toast_bookmark_export_failed) + " " + s);
+				String sDir = "";
+				ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.BookmarksDirs, true);
+				if (tDirs.size()>0) sDir=tDirs.get(0);
+				if (!StrUtils.isEmptyStr(sDir))
+					if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
+				boolean saved1 = mBookInfo.exportBookmarks(s);
+				boolean saved2 = mBookInfo.exportBookmarks(sDir + FileUtils.getFileName(s));
+				String savedMsg = getContext().getString(R.string.toast_bookmark_export_ok);
+				if (saved1) savedMsg = savedMsg + " " + s;
+				if (saved1 && saved2) savedMsg = savedMsg + "; " + sDir + FileUtils.getFileName(s);
+				if ((!saved1) && saved2) savedMsg = savedMsg + " " + sDir + FileUtils.getFileName(s);
+				if (saved1 || saved2) {
+					ArrayList<String> sButtons = new ArrayList<>();
+					sButtons.add(mActivity.getString(R.string.ok));
+					sButtons.add(0, "*" + savedMsg);
+					SomeButtonsToolbarDlg.showDialog(mActivity, mReaderView.surface, 0,
+						true,
+						"", sButtons, null, null);
+				}
+				else {
+					mCoolReader.showToast(getContext().getString(R.string.toast_bookmark_export_failed) + " " + s + "; " +
+							sDir + FileUtils.getFileName(s));
+				}
 			}
 			dismiss();
 			return true;

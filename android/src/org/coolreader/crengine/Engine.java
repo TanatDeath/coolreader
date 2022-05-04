@@ -1911,7 +1911,8 @@ public class Engine {
 		DownloadsDirs,
 		CloudSyncDirs,
 		IconDirs,
-		OfflineDicsDirs
+		OfflineDicsDirs,
+		BookmarksDirs
 	}
 
 	public static ArrayList<String> getDataDirs(DataDirType dirType) {
@@ -2055,6 +2056,22 @@ public class Engine {
 							res.add(subdirOfflineDics.getAbsolutePath());
 						else
 							res.add(subdirOfflineDics.getAbsolutePath() + " [not found]");
+						break;
+					}
+				case BookmarksDirs:
+					File subdirBookmarks = new File(base, "bookmarks");
+					bCreated = false;
+					if ((doCreate) && (!subdirBookmarks.exists())) {
+						if (subdirBookmarks.mkdir()) {
+							res.add(subdirBookmarks.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subdirBookmarks.isDirectory())
+							res.add(subdirBookmarks.getAbsolutePath());
+						else
+							res.add(subdirBookmarks.getAbsolutePath() + " [not found]");
 						break;
 					}
 			}

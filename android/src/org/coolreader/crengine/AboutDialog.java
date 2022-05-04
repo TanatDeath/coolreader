@@ -227,6 +227,19 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		TextView customcovers_dir = mDirsTab.findViewById(R.id.customcovers_dirs);
 		customcovers_dir.setText(sbuf.toString());
 
+		ArrayList<String> bookmarksDirs = Engine.getDataDirs(Engine.DataDirType.BookmarksDirs);
+		sbuf = new StringBuilder();
+		it = bookmarksDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView bookmarks_dir = mDirsTab.findViewById(R.id.bookmarks_dirs);
+		bookmarks_dir.setText(sbuf.toString());
+
 		ArrayList<String> downloadDirs = Engine.getDataDirs(Engine.DataDirType.DownloadsDirs);
 		sbuf = new StringBuilder();
 		it = downloadDirs.iterator();
