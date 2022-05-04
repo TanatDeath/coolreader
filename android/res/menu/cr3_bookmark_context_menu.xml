@@ -5,6 +5,8 @@
 <item android:title="@string/mi_bookmark_add" android:titleCondensed="@string/mi_bookmark_add" android:id="@+id/bookmark_add"></item>
 <item android:title="@string/mi_bookmark_edit" android:titleCondensed="@string/mi_bookmark_edit" android:id="@+id/bookmark_edit"></item>
 <item android:title="@string/mi_bookmark_delete" android:titleCondensed="@string/mi_bookmark_delete" android:id="@+id/bookmark_delete"></item>
+<item android:title="@string/save_bookmarks_to_cloud_short" android:titleCondensed="@string/save_bookmarks_to_cloud_short" android:id="@+id/bookmark_to_cloud"></item>
+<item android:title="@string/load_bookmarks_from_cloud_short" android:titleCondensed="@string/load_bookmarks_from_cloud_short" android:id="@+id/bookmark_from_cloud"></item>
 <item android:title="@string/mi_bookmark_export" android:titleCondensed="@string/mi_bookmark_export" android:id="@+id/bookmark_export"></item>
 <item android:title="@string/mi_bookmark_send" android:titleCondensed="@string/mi_bookmark_send" android:id="@+id/bookmark_send"></item>
 </menu>

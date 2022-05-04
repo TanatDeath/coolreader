@@ -258,6 +258,7 @@
     <attr name="attr_icons8_star" format="reference" />
     <attr name="attr_icons8_happy" format="reference" />
     <attr name="attr_icons8_minus" format="reference" />
+    <attr name="attr_icons8_save_ell" format="reference" />
     <attr name="attr_icons8_ok_from_clipboard" format="reference" />
     <attr name="attr_icons8_book_2" format="reference" />
     <attr name="attr_icons8_type_filled" format="reference" />

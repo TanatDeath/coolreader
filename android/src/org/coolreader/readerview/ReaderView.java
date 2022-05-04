@@ -1735,7 +1735,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void onCommand(final ReaderCommand cmd, final int param) {
-		onCommand( cmd, param, null );
+		onCommand(cmd, param, null);
 	}
 
 	private void navigateByHistory(final ReaderCommand cmd) {

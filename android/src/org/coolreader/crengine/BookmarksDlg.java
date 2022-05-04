@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.dic.DictsDlg;
+import org.coolreader.options.OptionsDialog;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.userdic.UserDicDlg;
 import org.coolreader.utils.FileUtils;
@@ -314,7 +316,11 @@ public class BookmarksDlg  extends BaseDialog {
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		if (isEInk) Utils.setSolidButtonEink((Button) frame.findViewById(R.id.btn_user_dic));
-		else frame.findViewById(R.id.btn_user_dic).setBackgroundColor(colorGrayCT2);
+			else frame.findViewById(R.id.btn_user_dic).setBackgroundColor(colorGrayCT2);
+
+		setThirdButtonImage(
+				Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_save_ell, R.drawable.icons8_save_ell)
+				, R.string.mi_bookmark_save);
 
 		mList = new BookmarkList(activity, false);
 		body.addView(mList);
@@ -411,6 +417,14 @@ public class BookmarksDlg  extends BaseDialog {
 			}
 			dismiss();
 			return true;
+		case R.id.bookmark_to_cloud:
+			mReaderView.onCommand(ReaderCommand.DCMD_SAVE_BOOKMARKS, 0);
+			dismiss();
+			return true;
+		case R.id.bookmark_from_cloud:
+			mReaderView.onCommand(ReaderCommand.DCMD_LOAD_BOOKMARKS, 0);
+			dismiss();
+			return true;
 		case R.id.bookmark_export:
 			if (mBookInfo.getBookmarkCount() > 0) {
 				FileInfo fi = mBookInfo.getFileInfo();
@@ -497,7 +511,10 @@ public class BookmarksDlg  extends BaseDialog {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	
+
+	@Override
+	protected void onThirdButtonClick() {
+		openContextMenu(mList);
+	}
 
 }

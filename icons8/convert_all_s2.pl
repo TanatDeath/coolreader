@@ -24,7 +24,9 @@ my %ic_actions_list=(
         'icons8_brightness_warm_up.svg' => 'icons8_brightness_warm_up.png',
         'icons8_offline_dics1.svg' => 'icons8_offline_dics1.png',
         'icons8_offline_dics2.svg' => 'icons8_offline_dics2.png',
-        'icons8_google_web_search.svg' => 'icons8_google_web_search.png'
+        'icons8_google_web_search.svg' => 'icons8_google_web_search.png',
+        'icons8_bookmarks_export.svg' => 'icons8_bookmarks_export.png',
+        'icons8_save_ell.svg' => 'icons8_save_ell.png'
 );
 
 my %ic_menu_list=(

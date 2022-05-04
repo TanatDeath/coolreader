@@ -378,6 +378,7 @@
         <item name="attr_icons8_star">@drawable/icons8_star</item>
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
+        <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
         <item name="attr_icons8_book_2">@drawable/icons8_book_2</item>
         <item name="attr_icons8_type_filled">@drawable/icons8_type_filled</item>
@@ -814,6 +815,7 @@
         <item name="attr_icons8_star">@drawable/icons8_star</item>
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
+        <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
         <item name="attr_icons8_book_2">@drawable/icons8_book_2</item>
         <item name="attr_icons8_type_filled">@drawable/icons8_type_filled</item>
@@ -1232,6 +1234,7 @@
         <item name="attr_icons8_star">@drawable/icons8_star</item>
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
+        <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
         <item name="attr_icons8_book_2">@drawable/icons8_book_2</item>
         <item name="attr_icons8_type_filled">@drawable/icons8_type_filled</item>
@@ -1590,6 +1593,7 @@
         <item name="attr_icons8_star">@drawable/icons8_star</item>
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
+        <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
         <item name="attr_icons8_book_2">@drawable/icons8_book_2</item>
         <item name="attr_icons8_type_filled">@drawable/icons8_type_filled</item>
@@ -1966,6 +1970,7 @@
         <item name="attr_icons8_star">@drawable/icons8_star</item>
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
+        <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
         <item name="attr_icons8_book_2">@drawable/icons8_book_2</item>
         <item name="attr_icons8_type_filled">@drawable/icons8_type_filled</item>
@@ -2403,6 +2408,7 @@
         <item name="attr_icons8_star">@drawable/icons8_star</item>
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
+        <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
         <item name="attr_icons8_book_2">@drawable/icons8_book_2</item>
         <item name="attr_icons8_type_filled">@drawable/icons8_type_filled</item>

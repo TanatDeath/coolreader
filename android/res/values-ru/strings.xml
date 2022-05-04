@@ -375,6 +375,7 @@
     <string name="mi_bookmark_delete">Удалить закладку</string>
     <string name="mi_bookmark_edit">Редактировать закладку</string>
     <string name="mi_bookmark_export">Экспорт закладок в файл</string>
+    <string name="mi_bookmark_save">Экспорт и импорт</string>
     <string name="toast_bookmark_export_ok">Закладки сохранены в </string>
     <string name="toast_bookmark_export_failed">Ошибка сохранения закладок в </string>
     <string name="mi_book_scan_recursive">Сканировать книги в папке</string>
