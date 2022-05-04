@@ -78,11 +78,13 @@ class TexHyph : public HyphMethod
     TexPattern * table[PATTERN_HASH_SIZE];
     lUInt32 _hash;
     lUInt32 _pattern_count;
+    lString32 _supported_modifiers;
 public:
     int largest_overflowed_word;
     bool match( const lChar32 * str, char * mask );
     virtual bool hyphenate( const lChar32 * str, int len, lUInt16 * widths, lUInt8 * flags, lUInt16 hyphCharWidth, lUInt16 maxWidth, size_t flagSize );
     void addPattern( TexPattern * pattern );
+    void checkForModifiers( lString32 str );
     TexHyph( lString32 id=HYPH_DICT_ID_DICTIONARY, int leftHyphenMin=HYPHMETHOD_DEFAULT_HYPHEN_MIN, int rightHyphenMin=HYPHMETHOD_DEFAULT_HYPHEN_MIN );
     virtual ~TexHyph();
     bool load( LVStreamRef stream );
@@ -740,6 +742,18 @@ void TexHyph::addPattern( TexPattern * pattern )
     _pattern_count++;
 }
 
+void TexHyph::checkForModifiers( lString32 str )
+{
+    int len = str.length();
+    for ( int i=0; i<len; i++ ) {
+        if ( lGetCharProps(str[i]) & CH_PROP_MODIFIER ) {
+            if ( _supported_modifiers.pos(str[i]) < 0 ) {
+                _supported_modifiers << str[i];
+            }
+        }
+    }
+}
+
 lUInt32 TexHyph::getSize() {
     return _pattern_count * sizeof(TexPattern);
 }
@@ -842,6 +856,7 @@ bool TexHyph::load( LVStreamRef stream )
                 p += sz + sz + 1;
             }
         }
+        // Note: support for diacritics/modifiers with checkForModifiers() not implemented
 
         return patternCount>0;
     } else {
@@ -871,6 +886,9 @@ bool TexHyph::load( LVStreamRef stream )
             else {
                 addPattern( pattern );
                 patternCount++;
+                // Check for and remember diacritics found in patterns, so we don't ignore
+                // them when present in word to hyphenate
+                checkForModifiers( data[i] );
             }
         }
         return patternCount>0;
@@ -942,14 +960,27 @@ bool TexHyph::hyphenate( const lChar32 * str, int len, lUInt16 * widths, lUInt8 
     lChar32 word[WORD_LENGTH+4] = { 0 };
     char mask[WORD_LENGTH+4] = { 0 };
 
-    // Make word from str, with soft-hyphens stripped out.
+    // Make word from str, with soft-hyphens and modifiers (combining diacritics) stripped out.
     // Prepend and append a space so patterns can match word boundaries.
+    bool has_ignorables = false;
+    int ignorables_at_right = 0;
     int wlen;
     word[0] = ' ';
     int w = 1;
     for ( int i=0; i<len; i++ ) {
-        if ( str[i] != UNICODE_SOFT_HYPHEN_CODE ) {
+        if ( (lGetCharProps(str[i]) & (CH_PROP_MODIFIER|CH_PROP_HYPHEN)) ) {
+            // Ignore combining diacritics and soft hyphens in the word we will check.
+            // (We might want to do NFC composition, but handling/restoring the shifts is complicated.)
+            has_ignorables = true;
+            ignorables_at_right++; // Keep track of how many to ensure right_hyphen_min
+            // But keep the ones present in the pattern file (assuming they are supported fully) in the word to be matched
+            if (_supported_modifiers.pos(str[i]) >= 0) {
+                word[w++] = str[i];
+            }
+        }
+        else {
             word[w++] = str[i];
+            ignorables_at_right = 0;
         }
     }
     wlen = w-1;
@@ -1006,25 +1037,37 @@ bool TexHyph::hyphenate( const lChar32 * str, int len, lUInt16 * widths, lUInt8 
 
     // Moves allowed hyphenation positions from 'mask' to the provided 'flags',
     // taking soft-hyphen shifts into account
-    int soft_hyphens_skipped = 0;
+    int ignorables_skipped = 0;
     bool res = false;
     for ( int p=0 ; p<=len-2; p++ ) {
         // printf(" char %c\n", str[p]);
-        if ( str[p] == UNICODE_SOFT_HYPHEN_CODE ) {
-            soft_hyphens_skipped++;
+        if ( has_ignorables && (lGetCharProps(str[p]) & (CH_PROP_MODIFIER|CH_PROP_HYPHEN)) && (_supported_modifiers.pos(str[p]) < 0) ) {
+            ignorables_skipped++;
             continue;
         }
-        if (p-soft_hyphens_skipped < left_hyphen_min - 1)
+        if (p - ignorables_skipped < left_hyphen_min - 1)
             continue;
-        if (p > len - right_hyphen_min - 1)
+        if (p > len - ignorables_at_right - right_hyphen_min - 1)
             continue;
         // hyphenate
         //00010030100
         int nw = widths[p]+hyphCharWidth;
-        // printf(" word %c\n", word[p+1-soft_hyphens_skipped]);
+        // printf(" word %c\n", word[p+1-ignorables_skipped]);
         // p+2 because: +1 because word has a space prepended, and +1 because
         // mask[] holds the flag for char n on slot n+1
-        if ( (mask[p+2-soft_hyphens_skipped]&1) && nw <= maxWidth ) {
+        if ( (mask[p + 2 - ignorables_skipped] & 1) && nw <= maxWidth ) {
+            if ( has_ignorables ) {
+                // Move over any diacritics (whether or not present in the patterns) so ALLOW_HYPH_WRAP_AFTER
+                // is set after all of them
+                while ( p<=len-2 && (lGetCharProps(str[p+1]) & (CH_PROP_MODIFIER|CH_PROP_HYPHEN)) ) {
+                    if ( _supported_modifiers.pos(str[p]) < 0 ) {
+                        ignorables_skipped++;
+                    }
+                    p++;
+                    if (p > len - ignorables_at_right - right_hyphen_min - 1)
+                        return res;
+                }
+            }
             if ( flagSize == 2 ) {
                 lUInt16* flags16 = (lUInt16*) flags;
                 flags16[p] |= LCHAR_ALLOW_HYPH_WRAP_AFTER;
@@ -1051,83 +1094,103 @@ bool AlgoHyph::hyphenate( const lChar32 * str, int len, lUInt16 * widths, lUInt8
     int left_hyphen_min = HyphMan::_LeftHyphenMin ? HyphMan::_LeftHyphenMin : _left_hyphen_min;
     int right_hyphen_min = HyphMan::_RightHyphenMin ? HyphMan::_RightHyphenMin : _right_hyphen_min;
 
+    if (len < left_hyphen_min + right_hyphen_min)
+        return false; // too small
+
     lUInt16 chprops[WORD_LENGTH];
     if ( len > WORD_LENGTH-2 )
         len = WORD_LENGTH - 2;
     lStr_getCharProps( str, len, chprops );
-    int start, end, i, j;
-    #define MIN_WORD_LEN_TO_HYPHEN 2
-    for ( start = 0; start<len; ) {
-        // find start of word
-        while (start<len && !(chprops[start] & CH_PROP_ALPHA) )
-            ++start;
-        // find end of word
-        for ( end=start+1; end<len && (chprops[start] & CH_PROP_ALPHA); ++end )
-            ;
-        // now look over word, placing hyphens
-        if ( end-start > MIN_WORD_LEN_TO_HYPHEN ) { // word must be long enough
-            for (i=start;i<end-MIN_WORD_LEN_TO_HYPHEN;++i) {
-                if (i-start < left_hyphen_min - 1)
-                    continue;
-                if (end-i < right_hyphen_min + 1)
-                    continue;
-                if ( widths[i] > maxWidth )
-                    break;
-                if ( CH_PROP_IS_VOWEL(chprops[i]) ) {
-                    for ( j=i+1; j<end; ++j ) {
-                        if ( CH_PROP_IS_VOWEL(chprops[j]) ) {
-                            int next = i+1;
-                            while ( (chprops[next] & CH_PROP_HYPHEN) && next<end-MIN_WORD_LEN_TO_HYPHEN) {
-                                // printf("next++\n");
-                                next++;
-                            }
-                            int next2 = next+1;
-                            while ( (chprops[next2] & CH_PROP_HYPHEN) && next2<end-MIN_WORD_LEN_TO_HYPHEN) {
-                                // printf("next2++\n");
-                                next2++;
-                            }
-                            if ( CH_PROP_IS_CONSONANT(chprops[next]) && CH_PROP_IS_CONSONANT(chprops[next2]) )
-                                i = next;
-                            else if ( CH_PROP_IS_CONSONANT(chprops[next]) && CH_PROP_IS_ALPHA_SIGN(chprops[next2]) )
-                                i = next2;
-                            if ( i-start>=1 && end-i>2 ) {
-                                // insert hyphenation mark
-                                lUInt16 nw = widths[i] + hyphCharWidth;
-                                if ( nw<maxWidth )
-                                {
-                                    bool disabled = false;
-                                    const char * dblSequences[] = {
-                                        "sh", "th", "ph", "ch", NULL
-                                    };
-                                    next = i+1;
-                                    while ( (chprops[next] & CH_PROP_HYPHEN) && next<end-MIN_WORD_LEN_TO_HYPHEN) {
-                                        // printf("next3++\n");
-                                        next++;
-                                    }
-                                    for (int k=0; dblSequences[k]; k++)
-                                        if (str[i]==dblSequences[k][0] && str[next]==dblSequences[k][1]) {
-                                            disabled = true;
-                                            break;
-                                        }
-                                    if (!disabled) {
-                                        if ( flagSize == 2 ) {
-                                            lUInt16* flags16 = (lUInt16*) flags;
-                                            flags16[i] |= LCHAR_ALLOW_HYPH_WRAP_AFTER;
-                                        }
-                                        else {
-                                            flags[i] |= LCHAR_ALLOW_HYPH_WRAP_AFTER;
-                                        }
-                                    }
-                                    //widths[i] = nw; // don't add hyph width
-                                }
-                            }
+    bool res = false;
+
+    int min = len+1;
+    int nb_visible = 0;
+    for (int i=0; i <len; i++) {
+        if (chprops[i] & CH_PROP_ALPHA)
+            nb_visible++;
+        if (nb_visible >= left_hyphen_min) {
+            min = i; // We can't allow-wrap-after before this car
+            break;
+        }
+    }
+    int max = -1;
+    nb_visible = 0;
+    bool vowel_seen = false;
+    for (int i=len-1; i >=0; i--) {
+        if ( chprops[i] & CH_PROP_ALPHA )
+            nb_visible++;
+        bool is_vowel = CH_PROP_IS_VOWEL(chprops[i]);
+        if ( is_vowel )
+            vowel_seen = true;
+        if ( nb_visible >= right_hyphen_min ) {
+            max = i-1; // We can't allow-wrap-after after this car
+            if ( vowel_seen ) // We wan't at least one vowel on the right part of hyphenation
+                break;
+        }
+    }
+    if ( min > max )
+        return false;
+
+    // We may walk multiple times over some parts of the word.
+    // On each walk, we skip diacritic/modifiers and soft hyphens.
+    // We stop on a vowel (this, and the above 'max' check, ensure we will have a vowel on each side of the hyphenation)
+    // If it is followed by 2 consonants, we allow hyph wran between these 2 consonants.
+    // If it is followed by 1 consonant and a russian alpha-sign, we allow hyph wran between these.
+    // Otherwise, we allow wrap after the vowel.
+    for ( int i=0; i <= max; i++) {
+        if ( widths[i] > maxWidth )
+            break;
+        if ( CH_PROP_IS_VOWEL(chprops[i]) ) { // Go see what's after
+            while ( i+1 < len && (chprops[i+1] & (CH_PROP_MODIFIER|CH_PROP_HYPHEN)) ) {
+                i++; // position on the last of any diacritic/hyphen combining with this vowel
+            }
+            if (i > max)
+                break;
+            int next = i+1; // not a modifier/hyphen
+            int next2 = next+1; // might be a modifier/hyphen
+            while ( next2 < len && (chprops[next2] & (CH_PROP_MODIFIER|CH_PROP_HYPHEN)) ) {
+                next2++;
+            }
+            if ( CH_PROP_IS_CONSONANT(chprops[next]) && CH_PROP_IS_CONSONANT(chprops[next2]) )
+                i = next;
+            else if ( CH_PROP_IS_CONSONANT(chprops[next]) && CH_PROP_IS_ALPHA_SIGN(chprops[next2]) )
+                i = next2;
+            // otherwise, allow wrap after this vowel
+            if (i > max)
+                break;
+            if ( i >= min ) {
+                // insert hyphenation mark
+                lUInt16 nw = widths[i] + hyphCharWidth;
+                if ( nw<maxWidth ) {
+                    // We prevent hyphenation between these consonants
+                    // (should we check that earlier, and break after the preceding vowel
+                    // instead of not at all?)
+                    bool forbidden = false;
+                    const char * dblSequences[] = {
+                            "sh", "th", "ph", "ch", NULL
+                    };
+                    next = i+1;
+                    while ( next < len && (chprops[next] & (CH_PROP_MODIFIER|CH_PROP_HYPHEN)) ) {
+                        next++;
+                    }
+                    for (int k=0; dblSequences[k]; k++) {
+                        if ( str[i]==dblSequences[k][0] && str[next]==dblSequences[k][1] ) {
+                            forbidden = true;
                             break;
+                        }
+                    }
+                    if ( !forbidden ) {
+                        if ( flagSize == 2 ) {
+                            lUInt16* flags16 = (lUInt16*) flags;
+                            flags16[i] |= LCHAR_ALLOW_HYPH_WRAP_AFTER;
+                        }
+                        else {
+                            flags[i] |= LCHAR_ALLOW_HYPH_WRAP_AFTER;
                         }
                     }
                 }
             }
         }
-        start=end;
     }
     return true;
 }
