@@ -39,20 +39,20 @@ public class ToolbarOption extends SubmenuOption {
 	};
 
 	int[] mToolbarApperance = new int[] {
-			Settings.VIEWER_TOOLBAR_100, Settings.VIEWER_TOOLBAR_100_gray, Settings.VIEWER_TOOLBAR_100_inv,
-			Settings.VIEWER_TOOLBAR_75, Settings.VIEWER_TOOLBAR_75_gray, Settings.VIEWER_TOOLBAR_75_inv,
-			Settings.VIEWER_TOOLBAR_50, Settings.VIEWER_TOOLBAR_50_gray, Settings.VIEWER_TOOLBAR_50_inv
+			Settings.VIEWER_TOOLBAR_100, Settings.VIEWER_TOOLBAR_100_gray, //Settings.VIEWER_TOOLBAR_100_inv,
+			Settings.VIEWER_TOOLBAR_75, Settings.VIEWER_TOOLBAR_75_gray, //Settings.VIEWER_TOOLBAR_75_inv,
+			Settings.VIEWER_TOOLBAR_50, Settings.VIEWER_TOOLBAR_50_gray //, Settings.VIEWER_TOOLBAR_50_inv
 	};
 	int[] mToolbarApperanceTitles = new int[] {
-			R.string.options_view_toolbar_appear_100, R.string.options_view_toolbar_appear_100_gray, R.string.options_view_toolbar_appear_100_inv,
-			R.string.options_view_toolbar_appear_75, R.string.options_view_toolbar_appear_75_gray, R.string.options_view_toolbar_appear_75_inv,
-			R.string.options_view_toolbar_appear_50, R.string.options_view_toolbar_appear_50_gray, R.string.options_view_toolbar_appear_50_inv
+			R.string.options_view_toolbar_appear_100, R.string.options_view_toolbar_appear_100_gray, //R.string.options_view_toolbar_appear_100_inv,
+			R.string.options_view_toolbar_appear_75, R.string.options_view_toolbar_appear_75_gray, //R.string.options_view_toolbar_appear_75_inv,
+			R.string.options_view_toolbar_appear_50, R.string.options_view_toolbar_appear_50_gray //, R.string.options_view_toolbar_appear_50_inv
 	};
 
 	int[] mToolbarApperanceAddInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, //R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, //R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text //, R.string.option_add_info_empty_text
 	};
 
 	final BaseActivity mActivity;
@@ -77,7 +77,7 @@ public class ToolbarOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_view_toolbar_appearance), Settings.PROP_TOOLBAR_APPEARANCE,
 				mActivity.getString(R.string.options_view_toolbar_appearance_add_info), this.lastFilteredValue).
-				add(mToolbarApperance, mToolbarApperanceTitles, mToolbarApperanceAddInfos).setDefaultValue("0").setIconIdByAttr(
+				add(mToolbarApperance, mToolbarApperanceTitles, mToolbarApperanceAddInfos).setDefaultValue("6").setIconIdByAttr(
 				R.attr.attr_icons8_navigation_toolbar_top, R.drawable.icons8_navigation_toolbar_top));
 		OptionBase rtO = new ReaderToolbarOption(mActivity, mContext, mOwner, mActivity.getString(R.string.options_reader_toolbar_buttons),
 				mActivity.getString(R.string.options_reader_toolbar_buttons_add_info), this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);

@@ -35,6 +35,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?attr/textColorOptionLabel"
             android:maxLines="5"
+            android:tag="notint"
             />
         <!--android:ellipsize="marquee"
             android:fadingEdge="horizontal"

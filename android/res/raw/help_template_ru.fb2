@@ -951,12 +951,13 @@
     <p><strong>Режим инспектора: несколько слов</strong></p>
     <p><emphasis>Значение:</emphasis> список действий</p>
 
-    <subtitle><!--cr3:image icons8_send_to_action--> Действие "Отправить в" в диалоге закладки</subtitle>
-    <p>Позволяет задать быстрое действие для отправки закладки в словарь или иное стороннее приложение.</p>
+    <subtitle><!--cr3:image icons8_send_to_action--> Диалог закладки: действие для отправки</subtitle>
+    <p>Позволяет задать быстрое действие для отправки закладки в словарь или иное стороннее приложение (с выбором шаблона выбранного текста).</p>
+    <empty-line/>
+    <p><strong>"Отправить в"</strong></p>
     <p><emphasis>Значение:</emphasis> стороннее приложение</p>
-
-    <subtitle><!--cr3:image icons8_send_to_action_more--> Уточнение действия "Отправить в"</subtitle>
-    <p>Позволяет выбрать шаблон выделенного текста, предназначенного для отправки.</p>
+    <empty-line/>
+    <p><strong>"Отправить в" - уточнение</strong></p>
     <p><emphasis>Значение:</emphasis> шаблон текста</p>
    </section>
 
@@ -970,6 +971,10 @@
     <subtitle><emphasis><!--cr3:image icons8_system_lang--> Язык интерфейса (Interface Language)</emphasis></subtitle>
     <p>Позволяет выбрать любой поддерживаемый язык из списка или использовать системный.</p>
     <p><emphasis>Значение:</emphasis> список языков</p>
+
+    <subtitle><emphasis><!--cr3:image icons8_font_scale--> Интерфейс: масштаб шрифта</emphasis></subtitle>
+    <p>Выбор размера шрифтов меню, диалогов и настроек (требуется перезагрузка).</p>
+    <p><emphasis>Значение:</emphasis> от x0.3 до x2.5</p>
 
     <subtitle><!--cr3:image icons8_change_theme_1--> Тема оформления</subtitle>
     <p>Выбор внешнего вида меню, диалогов и настроек из нескольких доступных вариантов.</p>
@@ -1303,6 +1308,7 @@
    <p><a l:href="http://sourceforge.net/apps/mediawiki/crengine/index.php?title=Main_Page">Wiki проекта на SourceForge</a></p>
    <p><a l:href="https://sourceforge.net/project/project_donations.php?group_id=191284">Помощь проекту на SourceForge</a></p>
    <p><a l:href="https://4pda.ru/forum/index.php?showtopic=191747">Тема на форуме 4PDA</a></p>
+   <empty-line/>
    <p><strong>Примечание:</strong> данные ссылки будут открыты во внешнем браузере.</p>
    <empty-line/>
    <p>Присылайте свои пожелания и сообщения об ошибках на <a l:href="mailo:support@knownreader.com">support@knownreader.com</a> (не забудьте указать модель устройства и версию Android).</p>

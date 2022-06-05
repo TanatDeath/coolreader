@@ -283,6 +283,7 @@ public class UserDicDlg extends BaseDialog {
 					UserDicEntry ude = new UserDicEntry();
 					ude.setDic_word(dshe.getSearch_text());
 					ude.setDic_word_translate(dshe.getText_translate());
+					ude.setDslStruct(dshe.getDslStruct());
 					ude.setCreate_time(dshe.getCreate_time());
 					ude.setLast_access_time(dshe.getLast_access_time());
 					ude.setDic_from_book(dshe.getSearch_from_book());

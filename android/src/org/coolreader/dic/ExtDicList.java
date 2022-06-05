@@ -21,6 +21,7 @@ import org.coolreader.dic.struct.DictEntry;
 import org.coolreader.dic.struct.ExampleLine;
 import org.coolreader.dic.struct.LinePair;
 import org.coolreader.dic.struct.TranslLine;
+import org.coolreader.userdic.UserDicEditDialog;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 public class ExtDicList extends BaseListView {
 
 	private DicStruct dicStruct;
+	private UserDicEditDialog userDicEditDialog;
 	private String findText;
 	private CoolReader mCoolReader;
 	private Handler mHandler;
@@ -225,6 +227,9 @@ public class ExtDicList extends BaseListView {
 		super(coolReader, true);
 		this.mCoolReader = coolReader;
 		this.dicStruct = t.dicStruct;
+		Object o = coolReader.getmBaseDialog().get(UserDicEditDialog.class.getName());
+		if (o != null)
+			this.userDicEditDialog = (UserDicEditDialog) o;
 		if (ds != null) this.dicStruct = ds;
 		this.findText = t.sFindText;
 		this.mHandler = mHandler;
@@ -241,8 +246,11 @@ public class ExtDicList extends BaseListView {
 
 	@Override
 	public boolean performItemClick(View view, int position, long id) {
-		Dictionaries.saveToDicSearchHistory(mCoolReader, findText,
-				dicStruct.getTranslation(position), DicToastView.mListCurDict);
+		if (userDicEditDialog == null)
+			Dictionaries.saveToDicSearchHistory(mCoolReader, findText,
+				dicStruct.getTranslation(position), DicToastView.mListCurDict, dicStruct);
+		else
+			userDicEditDialog.dicWordTranslate.setText(dicStruct.getTranslation(position));
 		if ((mCoolReader.getReaderView() == null) ||
 				(mCoolReader.mCurrentFrame != mCoolReader.mReaderFrame)) {
 			ClipboardManager cm = mCoolReader.getClipboardmanager();

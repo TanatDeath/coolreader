@@ -139,12 +139,12 @@ public class GlosbeTranslate {
 										cr.showDicToast(s, sTitle, DicToastView.IS_GLOSBE,
 												urlBuilder.build().url().toString(), fullScreen);
 									} else {
-										Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict);
+										Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 										cr.showDicToastExt(s, sTitle, DicToastView.IS_GLOSBE,
 												urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 									}
 								} else {
-									dcb.done(dsl.getFirstTranslation());
+									dcb.done(dsl.getFirstTranslation(), Dictionaries.dslStructToString(dsl));
 									if (dcb.showDicToast()) {
 										if (dsl.getCount() == 0) {
 											cr.showDicToast(s, sTitle, DicToastView.IS_GLOSBE,
@@ -156,7 +156,7 @@ public class GlosbeTranslate {
 									}
 									if (dcb.saveToHist())
 										if (dsl.getCount() == 0) {
-											Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict);
+											Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 										}
 								}
 							}, 100));

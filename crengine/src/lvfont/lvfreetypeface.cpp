@@ -661,7 +661,7 @@ void LVFreeTypeFace::clearCache() {
 int LVFreeTypeFace::getHyphenWidth() {
     FONT_GUARD
     if (!_hyphen_width) {
-        _hyphen_width = getCharWidth(UNICODE_SOFT_HYPHEN_CODE);
+        _hyphen_width = getCharWidth(getHyphChar());
     }
     return _hyphen_width;
 }
@@ -2095,7 +2095,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar32 *text,
         triplet.Char = 0;
         for ( i=0; i<len; i++) {
             lChar32 ch = text[i];
-            bool isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE);
+            bool isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE) || (ch==getHyphChar());
             if (isHyphen) {
                 // do just what would be done below if zero width (no change
                 // in prev_width), and don't get involved in kerning
@@ -2148,7 +2148,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar32 *text,
 #endif
     for ( i=0; i<len; i++) {
         lChar32 ch = text[i];
-        bool isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE);
+        bool isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE) || (ch==getHyphChar());
         if (isHyphen) {
             // do just what would be done below if zero width (no change
             // in prev_width), and don't get involved in kerning
@@ -2228,7 +2228,7 @@ lUInt16 LVFreeTypeFace::measureText(const lChar32 *text,
     // find last word
     if (allow_hyphenation) {
         if (!_hyphen_width)
-            _hyphen_width = getCharWidth(UNICODE_SOFT_HYPHEN_CODE);
+            _hyphen_width = getCharWidth(getHyphChar());
         if (lastFitChar > 3) {
             int hwStart, hwEnd;
             bool hasRtl;
@@ -3195,7 +3195,7 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar32 *
         // Comparing screenshots seems to indicate they must be added.
 
         if (addHyphen) {
-            ch = UNICODE_SOFT_HYPHEN_CODE;
+            ch = getHyphChar();
             LVFontGlyphCacheItem *item = getGlyph(ch, def_char);
             if (item) {
                 buf->BlendBitmap( x + item->origin_x,
@@ -3224,10 +3224,10 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar32 *
                 if ( ch=='\t' )
                     ch = ' ';
                 // don't draw any soft hyphens inside text string
-                isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE);
+                isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE) || (ch==getHyphChar());
             }
             else {
-                ch = UNICODE_SOFT_HYPHEN_CODE;
+                ch = getHyphChar();
                 isHyphen = false; // an hyphen, but not one to not draw
             }
             LVFontGlyphCacheItem * item = getGlyph(ch, def_char, fallbackPassMask);
@@ -3289,9 +3289,9 @@ int LVFreeTypeFace::DrawTextString(LVDrawBuf *buf, int x, int y, const lChar32 *
             ch = text[i];
             if ( ch=='\t' )
                 ch = ' ';
-            isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE) && (i<len-1);
+            isHyphen = ((ch==UNICODE_SOFT_HYPHEN_CODE) || (ch==getHyphChar())) && (i<len-1);
         } else {
-            ch = UNICODE_SOFT_HYPHEN_CODE;
+            ch = getHyphChar();
             isHyphen = 0;
         }
         FT_UInt ch_glyph_index = getCharIndex( ch, def_char );

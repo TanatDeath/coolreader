@@ -236,7 +236,7 @@ lUInt16 LVWin32DrawFont::measureText(
     }
 
     if ( !_hyphen_width )
-        _hyphen_width = getCharWidth( UNICODE_SOFT_HYPHEN_CODE );
+        _hyphen_width = getCharWidth(getHyphChar());
 
     lUInt16 wsum = 0;
     lUInt16 nchars = 0;

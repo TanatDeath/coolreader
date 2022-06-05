@@ -157,15 +157,15 @@ public class LingvoTranslate {
 										if (dcb == null) {
 											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
 													sDic, fullScreen);
-											Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+											Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 										} else {
-											dcb.done(sTrans);
+											dcb.done(sTrans, "");
 											if (dcb.showDicToast()) {
 												cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
 														sDic, fullScreen);
 											}
 											if (dcb.saveToHist()) {
-												Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+												Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 											}
 										}
 									}
@@ -261,15 +261,15 @@ public class LingvoTranslate {
 											if (dcb == null) {
 												cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
 														sDic, fullScreen);
-												Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
+												Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict, "");
 											} else {
-												dcb.done(sTrans + sAdd);
+												dcb.done(sTrans + sAdd, "");
 												if (dcb.showDicToast()) {
 													cr.showDicToast(s, sTrans + sAdd, Toast.LENGTH_LONG, view, DicToastView.IS_LINGVO,
 															sDic, fullScreen);
 												}
 												if (dcb.saveToHist()) {
-													Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
+													Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict, "");
 												}
 											}
 											return;
@@ -280,27 +280,27 @@ public class LingvoTranslate {
 						}
 						if (dcb == null) {
 							cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic, fullScreen);
-							Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
+							Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict, "");
 						} else  {
-							dcb.done(sTrans + sAdd);
+							dcb.done(sTrans + sAdd, "");
 							if (dcb.showDicToast()) {
 								cr.showDicToast(s, sTrans + sAdd, DicToastView.IS_LINGVO, sDic, fullScreen);
 							}
 							if (dcb.saveToHist()) {
-								Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict);
+								Dictionaries.saveToDicSearchHistory(cr, s, sTrans + sAdd, curDict, "");
 							}
 						}
 					} catch (Exception e) {
 						if (dcb == null) {
 							cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
-							Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+							Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 						} else {
-							dcb.done(sTrans);
+							dcb.done(sTrans, "");
 							if (dcb.showDicToast()) {
 								cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 							}
 							if (dcb.saveToHist()) {
-								Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+								Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 							}
 						}
 					}
@@ -311,7 +311,7 @@ public class LingvoTranslate {
 				if (dcb == null)
 					cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 				else {
-					dcb.done(sTrans);
+					dcb.done(sTrans, "");
 					if (dcb.showDicToast())
 						cr.showDicToast(s, sTrans, DicToastView.IS_LINGVO, sDic, fullScreen);
 				}

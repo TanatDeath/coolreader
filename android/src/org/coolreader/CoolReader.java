@@ -247,6 +247,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		return mReaderFrame;
 	}
 
+	public void updateSavingMark(String s) {
+		if (getmReaderFrame() != null)
+			if (getmReaderFrame().getUserDicPanel() != null)
+				getmReaderFrame().getUserDicPanel().updateSavingMark(s);
+	};
+
 	public ReaderView getmReaderView() {
 		return mReaderView;
 	}
@@ -924,7 +930,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			ttsEnginePackage = value;
 			if (null != mReaderView && mReaderView.isTTSActive()) {
 				// Set new TTS engine if running
-				initTTS(null);
+				initTTS(null, false);
 			}
 		} else if (key.equals(PROP_APP_FONT_SCALE)) {
 			adjustFontScale(getResources().getConfiguration(), ((float) Utils.parseInt(value, 10)) / 10F);
@@ -2397,8 +2403,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		else
 			setCutoutModeRaw(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
 		if (mCurrentFrame != newFrame) {
+			// Stop autoscroll if frame is switched
+			if (mCurrentFrame == mReaderFrame)
+				if (mReaderView != null)
+					mReaderView.stopAutoScroll();
 			mPreviousFrame = mCurrentFrame;
-			log.i("New current frame: " + newFrame.getClass().toString());
+			log.i("New current frame: " + newFrame.getClass());
 			if (mCurrentFrame == mBrowserFrame) {
 				FileBrowser.mListPosCacheOld = (HashMap<String, Integer>) FileBrowser.mListPosCache.clone();
 			}
@@ -2773,13 +2783,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mBrowserFrame != null)
 			mBrowserFrame.setBrowserBottomBar(isLitres);
 	}
-	
+
 	// Dictionary support
 
 	public interface DictionaryCallback {
 		boolean showDicToast();
 		boolean saveToHist();
-		void done(String result);
+		void done(String result, String dslStruct);
 		void fail(Exception e, String msg);
 	}
 
@@ -3029,7 +3039,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	// TTS
 	private final static long INIT_TTS_TIMEOUT = 10000;		// 10 sec.
 
-	public void initTTS(TTSControlServiceAccessor.Callback callback) {
+	public void initTTS(TTSControlServiceAccessor.Callback callback, boolean quiet) {
 		if (!phoneStateChangeHandlerInstalled) {
 			// TODO: Investigate the need to tracking state of the phone, while we already respect the audio focus.
 			boolean readPhoneStateIsAvailable;
@@ -3054,7 +3064,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 
-		showToast("Initializing TTS");
+		if (!quiet) showToast(getString(R.string.init_tts));
 		if (null == ttsControlServiceAccessor)
 			ttsControlServiceAccessor = new TTSControlServiceAccessor(this);
 		ttsControlServiceAccessor.bind(ttsbinder -> {
@@ -3099,7 +3109,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				BackgroundThread.instance().executeGUI(() -> {
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
-					if (ttsControlServiceAccessor == null) initTTS(null);
+					if (ttsControlServiceAccessor == null) initTTS(null, true);
 					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null,
 							ttsControlServiceAccessor);
 					dlg.show();
@@ -3117,7 +3127,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFaces = Engine.getFontFaceList();
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(() -> {
-					if (ttsControlServiceAccessor == null) initTTS(null);
+					if (ttsControlServiceAccessor == null) initTTS(null, true);
 					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles,
 							null, ttsControlServiceAccessor);
 					dlg.selectedTab = tab;
@@ -3141,7 +3151,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 				}
-				if (ttsControlServiceAccessor == null) initTTS(null);
+				if (ttsControlServiceAccessor == null) initTTS(null, true);
 				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts,
 						ttsControlServiceAccessor);
 				dlg.selectedOption = selectOption;
@@ -4417,7 +4427,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (hasHardwareMenuKey())
 			return; // don't show notice if hard key present
 		setSetting(PROP_TOOLBAR_LOCATION, String.valueOf(VIEWER_TOOLBAR_SHORT_SIDE), false);
-		setSetting(PROP_TOOLBAR_APPEARANCE, String.valueOf(8), true);
+		setSetting(PROP_TOOLBAR_APPEARANCE, String.valueOf(6), true);
 		//return; // KnownReader - decided to remove
 		setLastNotificationMask(getLastNotificationMask() | NOTIFICATION_READER_MENU_MASK);
 		showNotifications();

@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
@@ -20,9 +22,13 @@ import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderAction;
+import org.coolreader.crengine.ResizeHistory;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
+import org.coolreader.dic.DicToastView;
+import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
+import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
@@ -217,7 +223,21 @@ public class UserDicPanel extends LinearLayout implements Settings {
 													if (sTransl.equals("#~#~" + mCoolReader.getString(R.string.book_styles))) {
 														mCoolReader.getmReaderView().checkOpenBookStyles(true, false);
 													} else {
-														mCoolReader.showSToast("*" + StrUtils.updateText(sTransl, true), sWord);
+														if (!StrUtils.isEmptyStr(ude.getDslStruct())) {
+															DicStruct dsl = null;
+															try {
+																dsl = new Gson().fromJson(ude.getDslStruct(), DicStruct.class);
+															} catch (Exception e) {
+															}
+															if (dsl != null)
+																mCoolReader.showDicToastExt(sWord,
+																		StrUtils.updateText(sTransl, true), DicToastView.IS_USERDIC,
+																	"", null, dsl, false);
+															else
+																mCoolReader.showSToast("*" + StrUtils.updateText(sTransl, true), sWord);
+														} else {
+															mCoolReader.showSToast("*" + StrUtils.updateText(sTransl, true), sWord);
+														}
 														mCoolReader.getDB().saveUserDic(ude, UserDicEntry.ACTION_UPDATE_CNT);
 														ude.setSeen_count(ude.getSeen_count() + 1);
 														ude.setLast_access_time(System.currentTimeMillis());
@@ -411,6 +431,7 @@ lblStar.setTextColor(0xFF000000 | color);
 										UserDicEntry ude = new UserDicEntry();
 										ude.setDic_word(sKey);
 										ude.setDic_word_translate(sValue);
+										ude.setDslStruct(dshe.getDslStruct());
 										ude.setCreate_time(dshe.getCreate_time());
 										ude.setLast_access_time(dshe.getLast_access_time());
 										ude.setDic_from_book(dshe.getSearch_from_book());

@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -273,7 +275,7 @@ public class BookInfo implements Parcelable {
 			writer.write("# author: " + fileInfo.getAuthors() + "\r\n");
 			writer.write("# series: " + fileInfo.series + "\r\n");
 			writer.write("\r\n");
-			for ( Bookmark bm : bookmarks ) {
+			for (Bookmark bm : bookmarks) {
 				if ( bm.getType()!=Bookmark.TYPE_COMMENT && bm.getType()!=Bookmark.TYPE_CORRECTION )
 					continue;
 				int percent = bm.getPercent();
@@ -281,7 +283,16 @@ public class BookInfo implements Parcelable {
 				if ( ps.length()<2 )
 					ps = "0" + ps;
 				ps = percent / 100 + "." + ps  + "%";
-				writer.write("## " + ps + " - " + (bm.getType()==Bookmark.TYPE_COMMENT ? "comment" : "correction")  + "\r\n");
+				String bmkType = "unknown";
+				if (bm.getType()==Bookmark.TYPE_COMMENT) bmkType = "comment";
+				if (bm.getType()==Bookmark.TYPE_CORRECTION) bmkType = "correction";
+				if (bm.getType()==Bookmark.TYPE_LAST_POSITION) bmkType = "last position";
+				if (bm.getType()==Bookmark.TYPE_POSITION) bmkType = "position";
+				if (bm.getType()==Bookmark.TYPE_USER_DIC) bmkType = "user dic";
+				if (bm.getType()==Bookmark.TYPE_INTERNAL_LINK) bmkType = "internal link";
+				if (bm.getType()==Bookmark.TYPE_CITATION) bmkType = "citation";
+				String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault()).format(bm.getTimeStamp());
+				writer.write("## " + ps + " - " + bmkType  + " - " + ts + "\r\n");
 				if ( bm.getTitleText()!=null )
 					writer.write("## " + bm.getTitleText() + "\r\n");
 				if ( bm.getPosText()!=null )

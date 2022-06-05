@@ -2,6 +2,9 @@ package org.coolreader.dic;
 
 import android.view.View;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
@@ -10,6 +13,7 @@ import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -131,23 +135,24 @@ public class OfflineDicTranslate {
 							if (dsl.getCount() == 0) {
 								cr.showDicToast(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic", fullScreen);
 							} else {
-								Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict);
+								Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 								cr.showDicToastExt(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic",
 										curDict, dsl, fullScreen);
 							}
 						} else {
-							dcb.done(dsl.getFirstTranslation());
+							dcb.done(dsl.getFirstTranslation(), Dictionaries.dslStructToString(dsl));
 							if (dcb.showDicToast()) {
 								if (dsl.getCount() == 0) {
 									cr.showDicToast(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic", fullScreen);
 								} else {
 									cr.showDicToastExt(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic",
 											curDict, dsl, fullScreen);
+
 								}
 							}
 							if (dcb.saveToHist())
 								if (dsl.getCount() == 0) {
-									Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict);
+									Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 								}
 						}
 					}, 100));

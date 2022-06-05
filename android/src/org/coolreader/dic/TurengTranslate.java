@@ -120,7 +120,7 @@ public class TurengTranslate {
 						BackgroundThread.instance().postGUI(() -> {
 							if (dcb == null) {
 								if (!StrUtils.isEmptyStr(finalSTitle))
-									Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict);
+									Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict, dsl);
 								if (dsl.lemmas.size() > 0) {
 									cr.showDicToastExt(s, s, DicToastView.IS_TURENG,
 											urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
@@ -128,14 +128,14 @@ public class TurengTranslate {
 									cr.showDicToast(s, cr.getString(R.string.not_found), DicToastView.IS_TURENG,
 											urlBuilder.build().url().toString(), fullScreen);
 							} else {
-								dcb.done(s);
+								dcb.done(s, Dictionaries.dslStructToString(dsl));
 								if (dcb.showDicToast()) {
 									cr.showDicToast(s, finalSTitle, DicToastView.IS_TURENG,
 											urlBuilder.build().url().toString(), fullScreen);
 								}
 								if (dcb.saveToHist())
 									if (!StrUtils.isEmptyStr(finalSTitle)) {
-										Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict);
+										Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict, dsl);
 									}
 							}
 						}, 100));

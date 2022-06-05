@@ -78,9 +78,18 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:maxLines="3"
+                            android:layout_marginRight="5dp"
                             android:singleLine="false"
                             android:textStyle="bold"
                             android:text="@string/ud_word_translate" />
+                    <Button
+                            android:id="@+id/btn_transl_more"
+                            android:layout_height="wrap_content"
+                            android:tag="tint"
+                            android:layout_margin="3dp"
+                            android:textColor="?attr/colorIcon"
+                            style="@style/TextAppearance.Medium"
+                            android:text="..." />
                 </LinearLayout>
                 <LinearLayout
                         android:layout_width="0dip"

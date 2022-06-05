@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.ColorInt;
@@ -101,29 +102,30 @@ public class CRToolBar extends ViewGroup {
 	}
 
 	public void tintViewIconsColor(View v) {
-		Boolean nightEInk = activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && isEInk;
+//		Boolean nightEInk = activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && isEInk;
+		Boolean nightEInk = false;
 		if ((!useBackgrColor) && (!nightEInk)) activity.tintViewIcons(v, true);
 		else {
 			Boolean custIcons = activity.settings().getBool(BaseActivity.PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
 			if (DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink())) custIcons = false;
 			int custColor = activity.settings().getColor(BaseActivity.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
-			if (nightEInk) custIcons = true;
+//			if (nightEInk) {
+//				custIcons = true;
+//				custColor = Color.WHITE;
+//			}
 			if (custIcons) {
 				int colorCur = custColor;
 				if ((isColorDark(ReaderView.backgrNormalizedColor)) && (isColorDark(colorCur))) {
 					while (isColorDark(colorCur)) colorCur = lightenColor(colorCur);
-					colorCur = lightenColor(colorCur);
-					colorCur = lightenColor(colorCur);
 				} else
 					if ((!isColorDark(ReaderView.backgrNormalizedColor)) && (!isColorDark(colorCur))) {
 						while (!isColorDark(colorCur)) colorCur = darkenColor(colorCur);
-						colorCur = darkenColor(colorCur);
-						colorCur = darkenColor(colorCur);
 					}
 				if (nightEInk) colorCur = Color.WHITE;
 				activity.tintViewIconsC(v, true, colorCur);
+				//activity.tintViewIcons(v, PorterDuff.Mode.SRC_ATOP, true, true, colorCur, nightEInk);
 			} else {
-				TypedArray a = ((CoolReader) activity).getTheme().obtainStyledAttributes(new int[]
+				TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
 						{R.attr.colorIcon, R.attr.colorIconL});
 				int colorIcon = a.getColor(0, Color.GRAY);
 				int colorIconL = a.getColor(1, Color.GRAY);
@@ -314,7 +316,8 @@ public class CRToolBar extends ViewGroup {
 					invIcons = true;
 					break;
 			}
-			grayIcons = false; // there is no sense in grayIcons since new icons
+			//grayIcons = false; // there is no sense in grayIcons since new icons
+			invIcons = false;  // and inv...
 			if (this.ignoreInv) invIcons = false;
 		}
 		int sz = (int)((float)preferredItemHeight * toolbarScale); //(activity.isSmartphone() ? preferredItemHeight * 6 / 10 - BUTTON_SPACING : preferredItemHeight);
@@ -492,13 +495,13 @@ public class CRToolBar extends ViewGroup {
 				paint.setStyle(Paint.Style.FILL);
 				paint.setTextAlign(Paint.Align.LEFT);
 				Paint paintG = paint;
-				if (this.grayIcons) {
-					paintG = new Paint();
-					ColorMatrix cm = new ColorMatrix();
-					cm.setSaturation(0);
-					ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
-					paintG.setColorFilter(f);
-				}
+//				if (this.grayIcons) {
+//					paintG = new Paint();
+//					ColorMatrix cm = new ColorMatrix();
+//					cm.setSaturation(0);
+//					ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+//					paintG.setColorFilter(f);
+//				}
 				String sText = activity.getString(getActionNameId(item));
 				String sTextR = "";
 				if(sText != null){
@@ -530,24 +533,26 @@ public class CRToolBar extends ViewGroup {
 		boolean nghtMode = nightMode && (isTintedIcons == 1);
 		a.recycle();
 		if ((icId!=0)||(item == null)) {
-			if (this.grayIcons) {
-				Bitmap bmpGrayscale = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
-				Canvas c = new Canvas(bmpGrayscale);
-				Paint paint = new Paint();
-				ColorMatrix cm = new ColorMatrix();
-				cm.setSaturation(0);
-				ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
-				paint.setColorFilter(f);
-				c.drawBitmap(bitmap, 0, 0, paint);
-				if (nghtMode) ib.setImageBitmap(InverseBitmap(bmpGrayscale));
-				else ib.setImageBitmap(bmpGrayscale);
-			} else if (this.invIcons) {
+//			if (this.grayIcons) {
+//				Bitmap bmpGrayscale = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
+//				Canvas c = new Canvas(bmpGrayscale);
+//				Paint paint = new Paint();
+//				ColorMatrix cm = new ColorMatrix();
+//				cm.setSaturation(0);
+//				ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+//				paint.setColorFilter(f);
+//				c.drawBitmap(bitmap, 0, 0, paint);
+//				if (nghtMode) ib.setImageBitmap(InverseBitmap(bmpGrayscale));
+//				else ib.setImageBitmap(bmpGrayscale);
+//			} else
+			if (this.invIcons) {
 				if (nghtMode) ib.setImageBitmap(bitmap);
 				else ib.setImageBitmap(InverseBitmap(bitmap));
 			} else
 				{
-					if (nghtMode) ib.setImageBitmap(InverseBitmap(bitmap));
-					else ib.setImageBitmap(bitmap);
+//					if (nghtMode) ib.setImageBitmap(InverseBitmap(bitmap));
+//					else
+					ib.setImageBitmap(bitmap);
 					tintViewIconsColor(ib);
 				}
 		}
@@ -701,7 +706,9 @@ public class CRToolBar extends ViewGroup {
 			else
 				showOverflowMenu();
 		});
-		ib.setAlpha(nightMode ? 0x60 : buttonAlpha);
+		//ib.setAlpha(nightMode ? 0x60 : buttonAlpha);
+		if (grayIcons)
+			ib.setAlpha(0x80);
 		addView(ib);
 		return ib;
 	}
@@ -746,6 +753,7 @@ public class CRToolBar extends ViewGroup {
     		int maxLines = bottom / lineH;
     		if (maxLines > maxMultilineLines)
     			maxLines = maxMultilineLines;
+			Boolean nightEInk = activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && activity.getScreenForceEink();
         	for (int currentLine = 0; currentLine < lineCount && currentLine < maxLines; currentLine++) {
         		int startBtn = currentLine * buttonsPerLine;
         		int endBtn = (currentLine + 1) * buttonsPerLine;
@@ -776,7 +784,7 @@ public class CRToolBar extends ViewGroup {
 					else
 						showOverflowMenu();
 					});
-					activity.tintViewIcons(item);
+					activity.tintViewIcons(item, PorterDuff.Mode.SRC_ATOP, false, false, 0, nightEInk);
 					item.setOnLongClickListener(v -> {
 						ReaderAction ram = action.getMirrorAction();
 						if (ram != null) onButtonClick(ram);

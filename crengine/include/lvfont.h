@@ -251,7 +251,34 @@ public:
     };
 
     /// hyphenation character
-    virtual lChar32 getHyphChar() { return UNICODE_SOFT_HYPHEN_CODE; }
+    virtual lChar32 getHyphChar() {
+        // UNICODE_SOFT_HYPHEN U+00AD was a bad choice: it's supposed to be a control code and may not
+        // have a glyph (in practice, it is there and correct in many recent fonts, but in others, it
+        // may be absent, or have a slot but a blank glyph, or it might be a too large glyph).
+        //   return UNICODE_SOFT_HYPHEN_CODE;
+        //
+        // UNICODE_HYPHEN U+2010 is what the font designer designs as a hyphen (which might be intentionally
+        // different from UNICODE_HYPHEN_MINUS U+002D). So, in a CJK font, it may be a fullwidth square glyph
+        // with a small hyphen in the middle, and in an Arabic font, it may look like an underscore to account
+        // for the Uyghur use (the only language using Arabic script that allows for hyphenation) where the
+        // hyphen sits on the baseline but disconnected from the letter before it.
+        // As we don't hyphenate fullwidth ASCII in CJK, and neither RTL words, we don't want to have this
+        // one picked from the main font if CJK/Arabic, as if we are going to draw and hyphenate English text
+        // with a fallback, we would be using this large or lower hyphenation glyph.
+        // So, don't consider it.
+        //   if ( FT_Get_Char_Index(_face, UNICODE_HYPHEN) > 0 )
+        //      return UNICODE_HYPHEN;
+        //
+        // UNICODE_HYPHEN_MINUS U+002D seems to be good and to work well for hyphenation in all fonts
+        // (except one: SimSun, a Chinese font).
+        //
+        // In most recent/classic reading fonts, these 3 glyphs looks similar.
+        // So, use U+002D:
+        //return UNICODE_HYPHEN_MINUS;
+        return UNICODE_SOFT_HYPHEN_CODE; // there were problems - mr. Kaz noticed. Hyphen was not drawn at all, so we
+        // switched back to what it was
+        // Note: this has not been updated in LVWin32Font.
+    }
 
     /// hyphen width
     virtual int getHyphenWidth() { return getCharWidth(getHyphChar()); }

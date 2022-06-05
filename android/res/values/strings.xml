@@ -505,6 +505,7 @@
     <string name="options_selection_keep_selection_after_dictionary">Keep selection after dictionary</string>
     <string name="action_toggle_autoscroll">Autoscroll</string>
     <string name="lbl_autoscroll_speed">Speed: $1 chars/minute</string>
+    <string name="lbl_autoscroll_speed_simple">Speed: $1 sec per page</string>
     <string name="action_autoscroll_speed_increase">Increase autoscroll speed</string>
     <string name="action_autoscroll_speed_decrease">Decrease autoscroll speed</string>
     <string name="options_controls_tap_secondary_action_type">Secondary action tap type</string>
@@ -1268,7 +1269,7 @@
     <string name="dictionary_settings">Dictionaries</string>
     <string name="filebrowser_settings">File browser and library</string>
     <string name="rare_settings">Rare and experimental</string>
-    <string name="page_flipping_settings">Page flipping</string>
+    <string name="page_flipping_settings">Page flipping and autoflipping</string>
     <string name="tts_settings">Text-to-speech</string>
     <string name="backlight_settings">Screen and keys backlight</string>
     <string name="selectionmodes_settings">Selection actions (single and multi words)</string>
@@ -1641,6 +1642,7 @@
     <string name="need_purchase">First, you should purchase this book, then download</string>
     <string name="already_purchased">Already purchased, proceed to download</string>
     <string name="show_system_brightness_dialog">Show system brightness dialog (Onyx)</string>
+    <string name="show_system_brightness_dialog_short">Brightness dialog</string>
     <string name="sel_start">&lt; start</string>
     <string name="sel_end">end &gt;</string>
     <string name="bmk_send_to">send to...</string>
@@ -1776,6 +1778,14 @@
     <string name="page_flipping_sensivity_5">shorter</string>
     <string name="page_flipping_page_count">Flipping - page count</string>
     <string name="page_flipping_page_count_add_info">A number of pages, that will be flipped if you make a full slide from one side of screen to opposite</string>
+    <string name="autopage_flipping_type">Autoflipping type</string>
+    <string name="autopage_flipping_type_1">Animated</string>
+    <string name="autopage_flipping_type_2">Simple</string>
+    <string name="autopage_flipping_type_add_info">\"Simple mode\" - page flip every Х second, \"animated\" - visual page flipping animation</string>
+    <string name="autopage_flipping_show_speed">Display autoflipping speed, when changing</string>
+    <string name="autopage_flipping_show_speed_add_info">You can change autoflipping speed by tapping at left and right bottom areas</string>
+    <string name="autopage_flipping_show_progress">Display autoflipping progress (in \"simple\" mode)</string>
+    <string name="autopage_flipping_show_progress_add_info">Autoflipping progress is shown by line at the top (except E-Ink devices), and on the user dic panel (second count)</string>
     <string name="wireless_charging">Wireless charging</string>
     <string name="usb_charging">USB charging</string>
     <string name="ac_charging">AC charging</string>
@@ -1981,4 +1991,8 @@
     <string name="book_shortcut">Shortcut</string>
     <string name="book_share">Share</string>
     <string name="month_read_percent">Time spent to reading in this month:</string>
+    <string name="init_tts">Initializing TTS</string>
+    <string name="accessibility_service_label">KnownReader accessibility service</string>
+    <string name="accessibility_service_description">Allows to configure fingerprint gestures</string>
+    <string name="autoscroll_stopped">Autoscroll has been stopped</string>
 </resources>

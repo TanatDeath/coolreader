@@ -21,13 +21,12 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		private StatusBar statusView;
 		public UserDicPanel userDicView;
 		private CRToolBar toolbarView;
-		private LinearLayout llLeft;
+		public LinearLayout llLeft;
 		private LinearLayout llRight;
 		private LinearLayout llTop;
 		private LinearLayout llBottom;
 		private int statusBarLocation;
 		private int toolbarLocation;
-		private int userDicLocation;
 		private boolean hideToolbarInFullscren;
 		private boolean fullscreen;
 		private boolean nightMode;

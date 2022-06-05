@@ -48,6 +48,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -1318,12 +1319,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsBrowser.add(new NightModeOption(this.mActivity, this, getString(R.string.options_inverse_view), PROP_NIGHT_MODE,
 					getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.cr3_option_night_drawable, R.drawable.cr3_option_night));
 		}
-		if (!DeviceInfo.isForceHCTheme(false)) {
+		//if (!DeviceInfo.isForceHCTheme(false)) {
 		//plotn - when setting EINK manually, hc doesnt work ... still dont know why
 			mOptionsBrowser.add(new ThemeOptions(this.mActivity,this, getString(R.string.options_app_ui_theme),
 					getString(R.string.options_app_ui_theme_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
                     R.drawable.icons8_change_theme_1));
-		}
+		//}
 		mOptionsBrowser.refresh();
 		
 		body.addView(mOptionsBrowser);
@@ -1532,7 +1533,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				}
 			}
 			try {
-				mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
+				if (isEInk) {
+					Utils.setSolidViewEink(mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab()));
+				}
+				else
+					mTabs.getTabWidget().getChildAt(mTabs.getCurrentTab())
 						.setBackgroundColor(isEInk? colorGrayC: colorGray); // selected
 			} catch (Exception e) {
 				Log.e("OPTIONSDLG", "setupReaderOptions 2", e);
@@ -1994,8 +1999,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 		setOnCancelListener(dialog -> onPositiveButtonClick());
 
-		ImageButton positiveButton = view.findViewById(R.id.options_btn_back);
-		positiveButton.setOnClickListener(v -> onPositiveButtonClick());
+//		ImageButton positiveButton = view.findViewById(R.id.options_btn_back);
+//		positiveButton.setOnClickListener(v -> onPositiveButtonClick());
 
 //		ImageButton negativeButton = (ImageButton)mTabs.findViewById(R.id.options_btn_cancel);
 //		negativeButton.setOnClickListener(new View.OnClickListener() {

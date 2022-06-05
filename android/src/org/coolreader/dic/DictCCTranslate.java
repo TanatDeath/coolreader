@@ -100,7 +100,7 @@ public class DictCCTranslate {
 							BackgroundThread.instance().postGUI(() -> {
 								if (dcb == null) {
 									if (!StrUtils.isEmptyStr(finalSTitle0))
-										Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict);
+										Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict, dsl);
 									if (dsl.lemmas.size() > 0) {
 										cr.showDicToastExt(s, finalSTitle, DicToastView.IS_DICTCC,
 												urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
@@ -108,14 +108,14 @@ public class DictCCTranslate {
 										cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC,
 												urlBuilder.build().url().toString(), fullScreen);
 								} else {
-									dcb.done(finalSTitle);
+									dcb.done(finalSTitle, Dictionaries.dslStructToString(dsl));
 									if (dcb.showDicToast()) {
 										cr.showDicToast(s, finalSTitle,
 												DicToastView.IS_DICTCC, urlBuilder.build().url().toString(), fullScreen);
 									}
 									if (dcb.saveToHist())
 										if (!StrUtils.isEmptyStr(finalSTitle0)) {
-											Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict);
+											Dictionaries.saveToDicSearchHistory(cr, s, finalSTitle, curDict, dsl);
 										}
 								}
 							}, 100));

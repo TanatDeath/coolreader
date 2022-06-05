@@ -192,10 +192,10 @@ int LVFontBoldTransform::DrawTextString(LVDrawBuf *buf, int x, int y, const lCha
             break;
         if ( i<len ) {
             ch = is_rtl ? text[len-1-i] : text[i];
-            isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE);
+            isHyphen = (ch==UNICODE_SOFT_HYPHEN_CODE) || (ch==getHyphChar());
         }
         else {
-            ch = UNICODE_SOFT_HYPHEN_CODE;
+            ch = getHyphChar();
             isHyphen = 0;
         }
 

@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.coolreader.CoolReader;
+//import org.coolreader.accessibility.KRAccessibilityService;
 import org.coolreader.dic.wiki.WikiArticles;
 import org.coolreader.eink.EinkScreen;
 import org.coolreader.eink.EinkScreenDummy;
@@ -198,6 +199,8 @@ public class BaseActivity extends Activity implements Settings {
     	mSettingsManager = new SettingsManager(this);
     	// create rest of settings
 		Services.startServices(this);
+		// this doesnt work (((
+		//startService(new Intent(this, KRAccessibilityService.class));
 	}
 
 	@SuppressLint("NewApi")
@@ -248,8 +251,9 @@ public class BaseActivity extends Activity implements Settings {
 
 		// load settings
 		Properties props = settings();
-		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
-		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) theme = "WHITE";
+		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ?
+				getEinkThemeName() : "GRAY1");
+		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) theme = getEinkThemeName();
 		String lang = props.getProperty(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 		setLanguage(lang);
 		setCurrentTheme(theme);
@@ -987,6 +991,12 @@ public class BaseActivity extends Activity implements Settings {
 
 	public boolean isFullscreen() {
 		return mFullscreen;
+	}
+
+	public String getEinkThemeName() {
+		boolean night = settings().getBool(ReaderView.PROP_NIGHT_MODE, false);
+		if (night) return "BLACK";
+		return "WHITE";
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -3220,7 +3230,11 @@ public class BaseActivity extends Activity implements Settings {
 	        props.setProperty(ReaderView.PROP_DISPLAY_INVERSE, "0");
 	        props.applyDefault(ReaderView.PROP_APP_FULLSCREEN, "0");
 	        props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_SPEED, "1500");
-	        props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT, "-1");
+			props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_SIMPLE_SPEED, 8); //sec
+			props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_TYPE, getScreenForceEink() ? "2" : "1");
+			props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED, getScreenForceEink() ? "1" : "1");
+			props.applyDefault(ReaderView.PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS, getScreenForceEink() ? "0" : "1");
+			props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT, "-1");
 			props.applyDefault(ReaderView.PROP_APP_SCREEN_WARM_BACKLIGHT, "-1"); //CR
 			props.applyDefault(ReaderView.PROP_APP_USE_EINK_FRONTLIGHT, "0");
 			props.applyDefault(ReaderView.PROP_SHOW_BATTERY, "1");
@@ -3381,7 +3395,7 @@ public class BaseActivity extends Activity implements Settings {
 			}
 			File[] dataDirs = Engine.getDataDirectoriesExt(cr3Dir, null, false, true);
 			File existingFile = null;
-			for ( File dir : dataDirs ) {
+			for (File dir : dataDirs) {
 				File f = new File(dir, SETTINGS_FILE_NAME);
 				if ( f.exists() && f.isFile() ) {
 					existingFile = f;
@@ -3657,13 +3671,20 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void tintViewIcons(Object o, PorterDuff.Mode mode, boolean forceTint, boolean doSetColor, int setColor) {
+		tintViewIcons(o, mode, forceTint, doSetColor, setColor, false);
+	}
+
+	public void tintViewIcons(Object o, PorterDuff.Mode mode, boolean forceTint, boolean doSetColor, int setColor,
+							  boolean nightEInk) {
 		if (o == null) return;
 		Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
 		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
-		Boolean nightEInk = settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && getScreenForceEink();
+		//Boolean nightEInk = settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && getScreenForceEink();
 		int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
-		if (nightEInk)
+		if (nightEInk) {
 			custIcons = true;
+			custColor = Color.WHITE;
+		}
 		TypedArray a = this.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.isTintedIcons, R.attr.colorIcon});
 		int isTintedIcons = a.getInt(0, 0);
@@ -3688,8 +3709,6 @@ public class BaseActivity extends Activity implements Settings {
 								if (d instanceof BitmapDrawable) ((BitmapDrawable) d).setColorFilter(colorIcon, mode);
 							}
 						}
-						//if (vc instanceof ImageView) ((ImageView) vc).setColorFilter(col);
-						//if (vc instanceof ImageButton) ((ImageButton) vc).setColorFilter(col);
 					}
 					// we'll paint texts always
 					if (vc instanceof TextView) {

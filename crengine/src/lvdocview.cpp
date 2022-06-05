@@ -2586,7 +2586,7 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
 			for (int fn = 0; fn < page.footnotes.length(); fn++) {
 				footnotes_height += page.footnotes[fn].height;
 			}
-			if ( has_footnotes) {
+			if ( has_footnotes ) {
 				// We'll be drawing a separator at 2/3 in the footnote margin.
 				// Allow over-painting to 1/2 in this footnote margin (so any
 				// drop-cap tail and such may not get clipped out.

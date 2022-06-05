@@ -224,7 +224,11 @@ public class AutoScrollAnimation {
 	public void draw(boolean isPartially)
 	{
 		//	long startTs = android.os.SystemClock.uptimeMillis();
-		mReaderView.drawCallback(this::draw, null, isPartially);
+		try {
+			mReaderView.drawCallback(this::draw, null, isPartially);
+		} catch (Exception e) {
+			log.w("Cannot draw page - " + e.getMessage());
+		}
 	}
 
 	public void stop() {

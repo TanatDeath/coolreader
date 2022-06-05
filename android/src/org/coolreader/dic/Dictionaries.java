@@ -10,6 +10,7 @@ import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.readerview.ReaderView;
@@ -34,6 +35,9 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 //import com.abbyy.mobile.lingvo.api.MinicardContract;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -94,6 +98,16 @@ public class Dictionaries {
 		build();
 
 	public static ArrayList<String> langCodes = new ArrayList<>();
+
+	public static String dslStructToString(DicStruct dsl) {
+		try {
+			final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			final String prettyJson = gson.toJson(dsl);
+			return prettyJson;
+		} catch (Exception e) {
+		}
+		return "";
+	}
 
 	public static class PopupFrameMetric {
 		public final int Height;
@@ -609,7 +623,13 @@ public class Dictionaries {
 		return s;
 	}
 
-	public static void saveToDicSearchHistory(CoolReader cr, String searchText, String translateT, DictInfo curDict) {
+	public static void saveToDicSearchHistory(CoolReader cr, String searchText, String translateT, DictInfo curDict,
+											  DicStruct dsl) {
+		saveToDicSearchHistory(cr, searchText, translateT, curDict, dslStructToString(dsl));
+	}
+
+	public static void saveToDicSearchHistory(CoolReader cr, String searchText, String translateT, DictInfo curDict,
+											  String dslStruct) {
 		if (cr.mCurrentFrame != cr.mReaderFrame) return; // since we have dic on main screen too
 		int iDont = cr.settings().getInt(Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE, 0);
 		boolean bDont2 = cr.settings().getBool(Settings.PROP_INSPECTOR_MODE_NO_DIC_HISTORY, false);
@@ -624,6 +644,7 @@ public class Dictionaries {
 			translateText = translateText.substring(0,999) + " ...";
 		dshe.setSearch_text(searchText);
 		dshe.setText_translate(translateText);
+		dshe.setDslStruct(dslStruct);
 		String sBookFName = "";
 		String sLangFrom = "";
 		String sLangTo = "";
@@ -641,7 +662,10 @@ public class Dictionaries {
 			crc.update(sBookFName.getBytes());
 			dshe.setSearch_from_book(String.valueOf(crc.getValue()));
 		} else dshe.setSearch_from_book("");
-		dshe.setDictionary_used(curDict.id);
+		if (curDict == null)
+			dshe.setDictionary_used("UserDic");
+		else
+			dshe.setDictionary_used(curDict.id);
 		dshe.setCreate_time(System.currentTimeMillis());
 		dshe.setLast_access_time(System.currentTimeMillis());
 		dshe.setLanguage_from(sLangFrom);
@@ -814,8 +838,8 @@ public class Dictionaries {
 		isDouble = (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2) &&
 				(cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2);
 
-		if (!((curDict.internal == 7) || (curDict.internal == 8) || (curDict.internal == 9)))
-			saveToDicSearchHistory(cr, s, "", curDict);
+		if (!curDict.isOnline)
+			saveToDicSearchHistory(cr, s, "", curDict, "");
 
 		final String SEARCH_ACTION  = "colordict.intent.action.SEARCH";
 		final String EXTRA_QUERY   = "EXTRA_QUERY";

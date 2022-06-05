@@ -9,12 +9,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DicSearchHistoryEntry;
+import org.coolreader.dic.DicToastView;
+import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -25,7 +29,7 @@ public class UserDicEditDialog extends BaseDialog {
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
 	private final EditText dicWord;
-	private final EditText dicWordTranslate;
+	public final EditText dicWordTranslate;
 	private final EditText udLang;
 	private final TextView udSeenCount;
 	private final TextView udCreateTime;
@@ -33,6 +37,7 @@ public class UserDicEditDialog extends BaseDialog {
 	private final EditText udContext;
 	private final EditText udFullContext;
 
+	private final Button btnTranslMore;
 	private final Button btnIsUd;
 	private final Button btnIsCite;
 	private final UserDicDlg udDlg;
@@ -41,6 +46,7 @@ public class UserDicEditDialog extends BaseDialog {
 	private final int isCite;
 	private final String word;
 	private final String word_translate;
+	private final String dslStruct;
 
 	private final UserDicEntry mUde;
 
@@ -89,6 +95,14 @@ public class UserDicEditDialog extends BaseDialog {
 		isCite = ude.getIs_citation();
 		word = ude.getDic_word();
 		word_translate = StrUtils.getNonEmptyStr(ude.getDic_word_translate(), true);
+		dslStruct = StrUtils.getNonEmptyStr(ude.getDslStruct(), true);
+		DicStruct dsl = null;
+		if (!StrUtils.isEmptyStr(dslStruct)) {
+			try {
+				dsl = new Gson().fromJson(ude.getDslStruct(), DicStruct.class);
+			} catch (Exception e) {
+			}
+		}
 		mCoolReader = activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(activity, isEInk);
@@ -100,6 +114,19 @@ public class UserDicEditDialog extends BaseDialog {
 		dicWordTranslate.setText(ude.getDic_word_translate());
 		udLang = view.findViewById(R.id.ud_lang);
 		udLang.setText(ude.getLanguage());
+		btnTranslMore = view.findViewById(R.id.btn_transl_more);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		btnTranslMore.setBackgroundColor(colorGrayCT);
+		Utils.setSolidButton1(btnTranslMore);
+		if (isEInk) Utils.setSolidButtonEink(btnTranslMore);
+		DicStruct finalDsl = dsl;
+		btnTranslMore.setOnClickListener(v -> {
+			mCoolReader.showDicToastExt(word,
+					StrUtils.updateText(word_translate, true), DicToastView.IS_USERDIC,
+					"", null, finalDsl, true);
+		});
+		if (dsl == null) Utils.hideView(btnTranslMore);
 		btnIsUd = view.findViewById(R.id.btn_is_ud);
 		btnIsUd.setOnClickListener(v -> { setCheckedTag(btnIsUd); paintScopeButtons(); });
 		btnIsCite = view.findViewById(R.id.btn_is_cite);
@@ -143,6 +170,7 @@ public class UserDicEditDialog extends BaseDialog {
 		mUde.setIs_citation(getCheckedFromTag(btnIsCite.getTag())? 1: 0);
 		mUde.setShortContext(udContext.getText().toString().trim());
 		mUde.setFullContext(udFullContext.getText().toString().trim());
+		mUde.setDslStruct(dslStruct);
 		String wasKey = isCite + StrUtils.getNonEmptyStr(word, false);
 		String nowKey = mUde.getIs_citation() + mUde.getDic_word();
 		// It was dic search history entry, but now will be User Dic entry - delete old one, save new one
@@ -160,6 +188,7 @@ public class UserDicEditDialog extends BaseDialog {
 				UserDicEntry delUde = new UserDicEntry();
 				delUde.setDic_word(word);
 				delUde.setDic_word_translate(word_translate);
+				delUde.setDslStruct("");
 				delUde.setIs_citation(isCite);
 				mCoolReader.getDB().saveUserDic(delUde, UserDicEntry.ACTION_DELETE);
 			}
@@ -186,6 +215,7 @@ public class UserDicEditDialog extends BaseDialog {
 				DicSearchHistoryEntry dshe = new DicSearchHistoryEntry();
 				dshe.setSearch_text(mUde.getDic_word());
 				dshe.setText_translate(mUde.getDic_word_translate());
+				dshe.setDslStruct(mUde.getDslStruct());
 				mCoolReader.getDB().updateDicSearchHistory(dshe, DicSearchHistoryEntry.ACTION_DELETE, mCoolReader);
 			}
 			mCoolReader.getDB().saveUserDic(mUde, UserDicEntry.ACTION_DELETE);

@@ -19,17 +19,21 @@
             android:layout_marginRight="0dip"
             android:background="?attr/tabbarBackground"
             >
-	        <ImageButton android:id="@+id/options_btn_back"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|center_horizontal"
-				android:layout_margin="5dp"
-		        android:src="?attr/cr3_button_prev_drawable"
-                    android:tag="tint"
-	            android:focusable="false"
-	            android:focusableInTouchMode="false"
-	            android:background="@null"
-	            android:contentDescription="@string/dlg_button_back"/>
+            <TextView android:layout_height="wrap_content"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:layout_width="1dp">
+            </TextView>
+<!--	        <ImageButton android:id="@+id/options_btn_back"-->
+<!--	            android:layout_width="wrap_content"-->
+<!--	            android:layout_height="wrap_content"-->
+<!--                android:layout_gravity="center_vertical|center_horizontal"-->
+<!--				android:layout_margin="5dp"-->
+<!--		        android:src="?attr/cr3_button_prev_drawable"-->
+<!--                    android:tag="tint"-->
+<!--	            android:focusable="false"-->
+<!--	            android:focusableInTouchMode="false"-->
+<!--	            android:background="@null"-->
+<!--	            android:contentDescription="@string/dlg_button_back"/>-->
             <TabWidget
                 android:id="@android:id/tabs"
                 android:layout_width="fill_parent"

@@ -135,14 +135,14 @@ public class YandexTranslate {
 								}
 								if (dcb == null) {
 									cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, fullScreen);
-									Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict);
+									Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict, "");
 								} else {
-									dcb.done(sText);
+									dcb.done(sText, "");
 									if (dcb.showDicToast()) {
 										cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, fullScreen);
 									}
 									if (dcb.saveToHist()) {
-										Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict);
+										Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict, "");
 									}
 								}
 							} else {

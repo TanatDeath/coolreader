@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import io.github.eb4j.dsl.DslDictionary;
@@ -58,7 +59,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSize = 8;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 56;
+	public static final int DB_VERSION = 58;
 
 	@Override
 	protected boolean upgradeSchema() {
@@ -325,7 +326,8 @@ public class MainDB extends BaseDB {
 						"is_custom_color INTEGER DEFAULT 0, " +
 						"custom_color TEXT DEFAULT NULL, " +
 						"short_context TEXT DEFAULT NULL, " +
-						"full_context TEXT DEFAULT NULL " +
+						"full_context TEXT DEFAULT NULL, " +
+						"dsl_struct VARCHAR " +
 						")");
 				execSQL("CREATE INDEX IF NOT EXISTS " +
 						"user_dic_index ON user_dic (dic_word) ");
@@ -360,7 +362,8 @@ public class MainDB extends BaseDB {
 						"last_access_time INTEGER, " +
 						"language_from VARCHAR DEFAULT NULL, " +
 						"language_to VARCHAR DEFAULT NULL, " +
-						"seen_count INTEGER " +
+						"seen_count INTEGER," +
+						"dsl_struct VARCHAR " +
 						")");
 				execSQL("CREATE INDEX IF NOT EXISTS " +
 						"dic_search_history_index ON dic_search_history (search_text) ");
@@ -706,6 +709,46 @@ public class MainDB extends BaseDB {
 						")");
 				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
 						"book_calendar_index ON book_calendar (book_fk, read_date) ");
+			}
+
+			if (currentVersion < 57) {
+				execSQLIgnoreErrors("ALTER TABLE user_dic ADD COLUMN dsl_struct VARCHAR");
+				execSQLIgnoreErrors("ALTER TABLE dic_search_history ADD COLUMN dsl_struct VARCHAR");
+			}
+
+			if (currentVersion < 58) {
+				try (Cursor rs = mDB.rawQuery(
+						"select id, search_text from dic_search_history ", null)) {
+					if (rs.moveToFirst()) {
+						// read DB
+						do {
+							String s1 = quoteSqlString(rs.getString(1).toLowerCase());
+							String s2 = quoteSqlString(rs.getString(1));
+							if (!StrUtils.getNonEmptyStr(s1,true).equals(StrUtils.getNonEmptyStr(s2,true)))
+								execSQLIgnoreErrors("update dic_search_history set search_text = " +
+									s1 + " where id = " + rs.getLong(0));
+						} while (rs.moveToNext());
+					}
+					if (rs != null) rs.close();
+				} catch (Exception e) {
+					Log.e("cr3db", "exception while updating dic_search_history' search_text", e);
+				}
+				try (Cursor rs = mDB.rawQuery(
+						"select id, dic_word from user_dic", null)) {
+					if (rs.moveToFirst()) {
+						// read DB
+						do {
+							String s1 = quoteSqlString(rs.getString(1).toLowerCase());
+							String s2 = quoteSqlString(rs.getString(1));
+							if (!StrUtils.getNonEmptyStr(s1,true).equals(StrUtils.getNonEmptyStr(s2,true)))
+								execSQLIgnoreErrors("update user_dic set dic_word = " +
+									s1 + " where id = " + rs.getLong(0));
+						} while (rs.moveToNext());
+					}
+					if (rs != null) rs.close();
+				} catch (Exception e) {
+					Log.e("cr3db", "exception while updating user_dic' dic_word", e);
+				}
 			}
 
 			//==============================================================
@@ -1084,6 +1127,7 @@ public class MainDB extends BaseDB {
 			return false;
 		if (sWord == null)
 			return false;
+		sWord = sWord.toLowerCase();
 		if ((sWordTranslate == null) && (action == UserDicEntry.ACTION_NEW))
 			return false;
 		if (ude.getIs_citation() == 0)
@@ -1111,7 +1155,8 @@ public class MainDB extends BaseDB {
 								" dic_from_book = " + quoteSqlString(String.valueOf(ude.getDic_from_book())) + ", " +
 								" last_access_time = " + System.currentTimeMillis() + ", " +
 								" language = " + quoteSqlString(ude.getLanguage()) + ", " +
-								" is_citation = " + is_cit +
+								" is_citation = " + is_cit + ", " +
+								" dsl_struct = null " + // if we edit ude entry - we loose dlsStruct
 								" WHERE id = " + rs.getInt(0)
 						);
 					}
@@ -1119,7 +1164,7 @@ public class MainDB extends BaseDB {
 					// need insert
 
 					execSQL("INSERT INTO user_dic " +
-							"(dic_word, dic_word_translate, dic_from_book, create_time, last_access_time, language, seen_count, is_citation) " +
+							"(dic_word, dic_word_translate, dic_from_book, create_time, last_access_time, language, seen_count, is_citation, dsl_struct) " +
 							"values (" + quoteSqlString(sWord) + ", " +
 							quoteSqlString(sWordTranslate) + ", " +
 							quoteSqlString(String.valueOf(ude.getDic_from_book())) + ", " +
@@ -1127,7 +1172,8 @@ public class MainDB extends BaseDB {
 							System.currentTimeMillis() + ", " +
 							quoteSqlString(ude.getLanguage()) + ", " +
 							ude.getSeen_count() + ", " +
-							is_cit +
+							is_cit + ", " +
+							quoteSqlString(ude.getDslStruct()) +
 							")"
 					);
 				}
@@ -1181,7 +1227,7 @@ public class MainDB extends BaseDB {
 					return false;
 				if (sSearchText == null)
 					return false;
-				sSearchText = sSearchText.trim();
+				sSearchText = sSearchText.trim().toLowerCase();
 				if (sSearchText.length() == 0)
 					return false;
 				String sql = "DELETE FROM dic_search_history where search_text=" + quoteSqlString(sSearchText);
@@ -1193,7 +1239,7 @@ public class MainDB extends BaseDB {
 					return false;
 				if (sSearchText == null)
 					return false;
-				sSearchText = sSearchText.trim();
+				sSearchText = sSearchText.trim().toLowerCase();
 				if (sSearchText.length() == 0)
 					return false;
 				String sql = "SELECT id FROM dic_search_history where search_text=" + quoteSqlString(sSearchText);
@@ -1218,14 +1264,15 @@ public class MainDB extends BaseDB {
 								" last_access_time = " + System.currentTimeMillis() + ", " +
 								" language_from = " + quoteSqlString(dshe.getLanguage_from()) + ", " +
 								" language_to = " + quoteSqlString(dshe.getLanguage_to()) + ", " +
-								" seen_count = coalesce(seen_count,0) + 1 " +
+								" seen_count = coalesce(seen_count,0) + 1, " +
+								" dsl_struct = " + quoteSqlString(dshe.getDslStruct()) + " " +
 								" WHERE id = " + rs.getInt(0)
 						);
 				} else {
 					// need insert
 					execSQL("INSERT INTO dic_search_history " +
 							"(search_text, text_translate, search_from_book, dictionary_used, " +
-							"create_time, last_access_time, language_from, language_to, seen_count) " +
+							"create_time, last_access_time, language_from, language_to, seen_count, dsl_struct) " +
 							"values (" +
 							quoteSqlString(sSearchText) + ", " +
 							quoteSqlString(dshe.getText_translate()) + ", " +
@@ -1235,7 +1282,8 @@ public class MainDB extends BaseDB {
 							System.currentTimeMillis() + ", " +
 							quoteSqlString(dshe.getLanguage_from()) + ", " +
 							quoteSqlString(dshe.getLanguage_to()) + ", " +
-							"1 " +
+							"1, " +
+							quoteSqlString(dshe.getDslStruct()) +
 							")"
 					);
 				}
@@ -1287,7 +1335,7 @@ public class MainDB extends BaseDB {
 		if (mDB == null) return hshDic;
 		String sql = "SELECT id, dic_word, dic_word_translate, dic_from_book, " +
 				" create_time, last_access_time, language, seen_count, coalesce(is_citation,0) as is_cit, " +
-				"is_custom_color, custom_color, short_context, full_context " +
+				"is_custom_color, custom_color, short_context, full_context, dsl_struct " +
 				" FROM user_dic";
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
 			if (rs.moveToFirst()) {
@@ -1306,6 +1354,7 @@ public class MainDB extends BaseDB {
 					ude.setCustomColor(rs.getString(10));
 					ude.setShortContext(rs.getString(11));
 					ude.setFullContext(rs.getString(12));
+					ude.setDslStruct(rs.getString(13));
 					hshDic.put(ude.getIs_citation() + ude.getDic_word(), ude);
 				} while (rs.moveToNext());
 			}
@@ -1320,11 +1369,13 @@ public class MainDB extends BaseDB {
 		ArrayList<DicSearchHistoryEntry> arrlDshe = new ArrayList<DicSearchHistoryEntry>();
 		String sql =
 				"SELECT h.id, h.search_text, h.text_translate, h.search_from_book, h.dictionary_used, " +
-						"  h.create_time, h.last_access_time, h.language_from, h.language_to, h.seen_count " +
+						"  h.create_time, h.last_access_time, h.language_from, h.language_to, h.seen_count, " +
+						"  h.dsl_struct " +
 						"  FROM dic_search_history h where COALESCE(text_translate,'') != '' " +
 						" union all " +
 						"SELECT h.id, h.search_text, ud.dic_word_translate, ud.dic_from_book, h.dictionary_used, " +
-						"  h.create_time, h.last_access_time, h.language_from, h.language_to, h.seen_count " +
+						"  h.create_time, h.last_access_time, h.language_from, h.language_to, h.seen_count, " +
+						"  ud.dsl_struct " +
 						"  FROM dic_search_history h" +
 						"  left join user_dic ud on trim(ud.dic_word) = trim(h.search_text) " +
 						"  where COALESCE(text_translate,'') = '' " +
@@ -1344,6 +1395,7 @@ public class MainDB extends BaseDB {
 					dshe.setLanguage_from(rs.getString(7));
 					dshe.setLanguage_to(rs.getString(8));
 					dshe.setSeen_count(rs.getLong(9));
+					dshe.setDslStruct(rs.getString(10));
 					arrlDshe.add(dshe);
 				} while (rs.moveToNext());
 			}

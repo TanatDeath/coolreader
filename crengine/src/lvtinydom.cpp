@@ -9138,7 +9138,7 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
                 // Otherwise, return xpointer to the inlineBox itself
                 return ldomXPointer(node, 0);
             }
-            if ( word->flags & LTEXT_WORD_IS_OBJECT ) {
+            if ( word->flags & LTEXT_WORD_IS_IMAGE ) {
                 return ldomXPointer(node, 0);
             }
             // It is a word
@@ -9180,7 +9180,7 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
                     // Otherwise, return xpointer to the inlineBox itself
                     return ldomXPointer(node, 0);
                 }
-                if ( word->flags & LTEXT_WORD_IS_OBJECT ) {
+                if ( word->flags & LTEXT_WORD_IS_IMAGE ) {
                     // Object (image)
                     #if 1
                     // return image object itself
@@ -9405,9 +9405,9 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
         ldomXPointerEx xp(node, offset);
         for ( int i=0; i<txtform->GetSrcCount(); i++ ) {
             const src_text_fragment_t * src = txtform->GetSrcInfo(i);
-            if ( src->flags & LTEXT_SRC_IS_FLOAT ) // skip floats
-                continue;
             bool isObject = (src->flags&LTEXT_SRC_IS_OBJECT)!=0;
+            if ( isObject && src->o.objflags & LTEXT_OBJECT_IS_FLOAT ) // skip floats
+                continue;
             if ( src->object == node ) {
                 srcIndex = i;
                 srcLen = isObject ? 0 : src->t.len;
@@ -9473,7 +9473,7 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                             else {
                                 bestBidiRect.left = word->x + rc.left + frmline->x;
                                 if (extended) {
-                                    if (word->flags & (LTEXT_WORD_IS_OBJECT|LTEXT_WORD_IS_INLINE_BOX) && word->width > 0)
+                                    if (word->flags & (LTEXT_WORD_IS_IMAGE|LTEXT_WORD_IS_INLINE_BOX) && word->width > 0)
                                         bestBidiRect.right = bestBidiRect.left + word->width; // width of image
                                     else
                                         bestBidiRect.right = bestBidiRect.left + 1;
@@ -9481,14 +9481,14 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                             }
                             hasBestBidiRect = true;
                             nearestForwardSrcIndex = word->src_text_index;
-                            if (word->flags & (LTEXT_WORD_IS_OBJECT|LTEXT_WORD_IS_INLINE_BOX))
+                            if (word->flags & (LTEXT_WORD_IS_IMAGE|LTEXT_WORD_IS_INLINE_BOX))
                                 nearestForwardSrcOffset = 0;
                             else
                                 nearestForwardSrcOffset = word->t.start;
                         }
                         else if (word->src_text_index == srcIndex) {
                             // Found word in that exact source text node
-                            if ( word->flags & (LTEXT_WORD_IS_OBJECT|LTEXT_WORD_IS_INLINE_BOX) ) {
+                            if ( word->flags & (LTEXT_WORD_IS_IMAGE|LTEXT_WORD_IS_INLINE_BOX) ) {
                                 // An image is the single thing in its srcIndex
                                 rect.top = rc.top + frmline->y;
                                 rect.bottom = rect.top + frmline->height;
@@ -9685,7 +9685,7 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                 // Generic code when visual order = logical order
                 if ( word->src_text_index>=srcIndex || lastWord ) {
                     // found word from same src line
-                    if ( word->flags & (LTEXT_WORD_IS_OBJECT|LTEXT_WORD_IS_INLINE_BOX)
+                    if ( word->flags & (LTEXT_WORD_IS_IMAGE|LTEXT_WORD_IS_INLINE_BOX)
                             || word->src_text_index > srcIndex
                             || (!extended && offset <= word->t.start)
                             || (extended && offset < word->t.start)
@@ -9697,7 +9697,7 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
                         //rect.top = word->y + rc.top + frmline->y + frmline->baseline;
                         rect.top = rc.top + frmline->y;
                         if (extended) {
-                            if (word->flags & (LTEXT_WORD_IS_OBJECT|LTEXT_WORD_IS_INLINE_BOX) && word->width > 0)
+                            if (word->flags & (LTEXT_WORD_IS_IMAGE|LTEXT_WORD_IS_INLINE_BOX) && word->width > 0)
                                 rect.right = rect.left + word->width; // width of image
                             else
                                 rect.right = rect.left + 1; // not the right word: no char width

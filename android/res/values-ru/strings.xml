@@ -484,6 +484,7 @@
     <string name="options_selection_keep_selection_after_dictionary">Сохранять выделение после словаря</string>
     <string name="action_toggle_autoscroll">Автолистание</string>
     <string name="lbl_autoscroll_speed">Скорость: $1 знаков/мин</string>
+    <string name="lbl_autoscroll_speed_simple">Скорость: $1 секунд на страницу</string>
     <string name="action_autoscroll_speed_increase">Увеличить скорость автолистания</string>
     <string name="action_autoscroll_speed_decrease">Уменьшить скорость автолистания</string>
     <string name="options_controls_tap_secondary_action_type">Дополнительное действие</string>
@@ -1242,7 +1243,7 @@
     <string name="dictionary_settings">Словари</string>
     <string name="filebrowser_settings">Файловый браузер и библиотека</string>
     <string name="rare_settings">Экспериментальные / редкие параметры</string>
-    <string name="page_flipping_settings">Листание</string>
+    <string name="page_flipping_settings">Листание и автолистание</string>
     <string name="tts_settings">Text-to-Speech</string>
     <string name="backlight_settings">Яркость экрана и кнопок</string>
     <string name="selectionmodes_settings">Действия для выделения (одного и нескольких слов)</string>
@@ -1600,6 +1601,7 @@
     <string name="need_purchase">Сначала вы должны купить эту книгу, а затем скачать</string>
     <string name="already_purchased">Уже куплено, перейдите к скачиванию</string>
     <string name="show_system_brightness_dialog">Показать системный диалог яркости (Onyx)</string>
+    <string name="show_system_brightness_dialog_short">Диалог яркости</string>
     <string name="sel_start">&lt; начало</string>
     <string name="sel_end">конец &gt;</string>
     <string name="bmk_send_to">отправить...</string>
@@ -1739,6 +1741,14 @@
     <string name="page_flipping_sensivity_5">еще короче</string>
     <string name="page_flipping_page_count">Число страниц, листаемых одним жестом</string>
     <string name="page_flipping_page_count_add_info">Количество страниц, которые будут перевернуты в случае если вы сделаете полный жест - с одного края экрана до другого</string>
+    <string name="autopage_flipping_type">Тип автолистания</string>
+    <string name="autopage_flipping_type_1">С анимацией</string>
+    <string name="autopage_flipping_type_2">Простой</string>
+    <string name="autopage_flipping_type_add_info">\"Простой\" режим - перелистывание каждые Х секунд, \"с анимацией\" - визуальная анимация перелистывания</string>
+    <string name="autopage_flipping_show_speed">Показывать скорость автолистания при изменении</string>
+    <string name="autopage_flipping_show_speed_add_info">Вы можете менять скорость автолистания нажатием на левую и правую нижние области</string>
+    <string name="autopage_flipping_show_progress">Показывать прогресс автолистания (режим без анимации)</string>
+    <string name="autopage_flipping_show_progress_add_info">Прогресс автолистания показывается полосой сверху (кроме E-Ink устройств), а также на панели личного словаря (число секунд)</string>
     <string name="wireless_charging">Беспроводная зарядка</string>
     <string name="usb_charging">USB зарядка</string>
     <string name="ac_charging">AC зарядка</string>
@@ -1942,5 +1952,9 @@
     <string name="book_shortcut">Ярлык</string>
     <string name="book_share">Отправить</string>
     <string name="month_read_percent">Время, потраченное на чтение в этом месяце:</string>
+    <string name="init_tts">Инициализация TTS</string>
+    <string name="accessibility_service_label">Служба специальных возможностей KnownReader</string>
+    <string name="accessibility_service_description">Позволяет сконфигурировать жесты датчика отпечатка</string>
+    <string name="autoscroll_stopped">Автолистание остановлено</string>
 </resources>
 

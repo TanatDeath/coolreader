@@ -14,6 +14,15 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             >
+        <ImageButton android:id="@+id/back_btn"
+                android:src="?attr/cr3_browser_back_drawable"
+                android:tag="tint"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:background="@null"
+                android:layout_weight="1"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"/>
         <TextView android:id="@+id/base_dlg_upper_text"
                 style="@style/TextAppearance.Medium"
                 android:layout_width="wrap_content"

@@ -13,31 +13,49 @@
 	android:background="?attr/attr_toast_layout_border"
     >
 	<LinearLayout
-			android:id="@+id/upper_row_ll"
+			android:id="@+id/upper_row_ll_v"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:gravity="center_vertical|left"
-			android:orientation="horizontal">
-		<Button
-				android:id="@+id/upper_row_tv_close"
+			android:orientation="vertical">
+		<LinearLayout
+				android:id="@+id/upper_row_ll"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical|left"
+				android:orientation="horizontal">
+			<Button
+					android:id="@+id/upper_row_tv_close"
+					style="@style/TextAppearance.Small"
+					android:singleLine="true"
+					android:layout_marginRight="5dip"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textColor="?attr/colorIcon"
+					android:text="@string/close"
+					/>
+			<TextView
+					android:id="@+id/lbl_dic"
+					style="@style/TextAppearance.Small"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_margin="5dip"
+					android:singleLine="true"
+					android:layout_alignParentRight="true"
+					android:layout_alignParentTop="true"
+					android:textColor="?attr/colorIcon"
+					android:text="" />
+		</LinearLayout>
+		<EditText
+				android:id="@+id/edt_dic_tranls"
 				style="@style/TextAppearance.Small"
-				android:singleLine="true"
-				android:layout_marginRight="5dip"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:layout_margin="3dip"
+				android:singleLine="false"
+				android:maxLines="5"
+				android:editable="false"
 				android:textColor="?attr/colorIcon"
-				android:text="@string/close"
-				/>
-		<TextView
-				android:id="@+id/lbl_dic"
-				style="@style/TextAppearance.Small"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_margin="5dip"
-				android:singleLine="true"
-				android:layout_alignParentRight="true"
-				android:layout_alignParentTop="true"
-				android:textColor="?attr/colorIcon"
+				android:scrollbarAlwaysDrawVerticalTrack="true"
 				android:text="" />
 	</LinearLayout>
 	<RelativeLayout

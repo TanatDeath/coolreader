@@ -152,14 +152,29 @@ public class Engine {
 	 */
 	public static File[] getDataDirectories(String subdir,
 											boolean createIfNotExists, boolean writableOnly) {
+		String finalSubDir = subdir;
 		File[] roots = getStorageDirectories(writableOnly);
 		ArrayList<File> res = new ArrayList<>(roots.length);
 		for (File dir : roots) {
 			//File dataDir = getSubdir(dir, ".cr3", createIfNotExists,
-			File dataDir = getSubdir(dir, "cr3e", createIfNotExists,
-					writableOnly);
 			if (subdir != null)
-				dataDir = getSubdir(dataDir, subdir, createIfNotExists,
+				if (subdir.equals("cr3e")) {
+					File checkDir = getSubdir(dir, subdir, false,
+							writableOnly);
+					if (checkDir == null) finalSubDir = "KnownReader";
+				}
+			File dataDirCheck = getSubdir(dir, "cr3e", false,
+					writableOnly);
+			File dataDir;
+			if (dataDirCheck == null) {
+				dataDir = getSubdir(dir, "KnownReader", createIfNotExists,
+						writableOnly);
+				finalSubDir = "KnownReader";
+			} else
+				dataDir = getSubdir(dir, "cr3e", createIfNotExists,
+						writableOnly);
+			if (subdir != null)
+				dataDir = getSubdir(dataDir, finalSubDir, createIfNotExists,
 						writableOnly);
 			if (dataDir != null)
 				res.add(dataDir);
@@ -169,11 +184,18 @@ public class Engine {
 
 	public static File[] getDataDirectoriesExt(String cr3Dir, String subdir,
 											boolean createIfNotExists, boolean writableOnly) {
+		String finalCr3Dir = cr3Dir;
 		File[] roots = getStorageDirectories(writableOnly);
 		ArrayList<File> res = new ArrayList<>(roots.length);
 		for (File dir : roots) {
 			//File dataDir = getSubdir(dir, ".cr3", createIfNotExists,
-			File dataDir = getSubdir(dir, cr3Dir, createIfNotExists,
+			if (cr3Dir != null)
+				if (cr3Dir.equals("cr3e")) {
+					File checkDir = getSubdir(dir, cr3Dir, false,
+							writableOnly);
+					if (checkDir == null) finalCr3Dir = "KnownReader";
+				}
+			File dataDir = getSubdir(dir, finalCr3Dir, createIfNotExists,
 					writableOnly);
 			if (subdir != null)
 				dataDir = getSubdir(dataDir, subdir, createIfNotExists,
@@ -1068,6 +1090,12 @@ public class Engine {
 			if (baseDir.canWrite()) {
 				if (subDir != null) {
 					baseDir = new File(baseDir, subDir);
+					boolean dirExists = baseDir.exists() && baseDir.isDirectory();
+					if (subDir != null)
+						if ((subDir.equals("cr3e")) && (!dirExists)) {
+							baseDir = new File(baseDir, "KnownReader");
+							CACHE_BASE_DIR_NAME = "KnownReader";
+						}
 					baseDir.mkdir();
 				}
 				if (baseDir.exists() && baseDir.canWrite()) {
@@ -1160,7 +1188,7 @@ public class Engine {
 
 	private static String CR3_SETTINGS_DIR_NAME;
 	//public final static String CACHE_BASE_DIR_NAME = ".cr3"; // "Books"
-	public final static String CACHE_BASE_DIR_NAME = "cr3e";
+	public static String CACHE_BASE_DIR_NAME = "cr3e";
 	private static void initCacheDirectory() {
 		String cacheDirName = null;
 		// SD card
@@ -1861,6 +1889,8 @@ public class Engine {
 		for (File d : getStorageDirectories(false)) {
 			File base = new File(d, "cr3e");
 			if (!base.isDirectory())
+				base = new File(d, "KnownReader");
+			if (!base.isDirectory())
 				base = new File(d, ".cr3");
 			if (!base.isDirectory())
 				base = new File(d, "cr3");
@@ -1888,6 +1918,8 @@ public class Engine {
 			Collection<BackgroundTextureInfo> listToAppend) {
 		for (File d : getStorageDirectories(false)) {
 			File base = new File(d, "cr3e");
+			if (!base.isDirectory())
+				base = new File(d, "KnownReader");
 			if (!base.isDirectory())
 				base = new File(d, ".cr3");
 			if (!base.isDirectory())
@@ -1923,6 +1955,8 @@ public class Engine {
 		ArrayList<String> res = new ArrayList<String>();
 		for (File d : getStorageDirectories(false)) {
 			File base = new File(d, "cr3e");
+			if (!base.isDirectory())
+				base = new File(d, "KnownReader");
 			if (!base.isDirectory())
 				base = new File(d, ".cr3");
 			if (!base.isDirectory())

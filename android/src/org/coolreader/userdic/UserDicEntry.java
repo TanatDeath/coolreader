@@ -25,6 +25,7 @@ public class UserDicEntry {
     public int isCustomColor;
     public String customColor;
     public String shortContext;
+    private String dslStruct;
 
     public String fullContext;
 
@@ -58,6 +59,14 @@ public class UserDicEntry {
 
     public void setDic_word_translate(String dic_word_translate) {
         this.dic_word_translate = dic_word_translate;
+    }
+
+    public String getDslStruct() {
+        return dslStruct;
+    }
+
+    public void setDslStruct(String dslStruct) {
+        this.dslStruct = dslStruct;
     }
 
     public String getDic_from_book() {

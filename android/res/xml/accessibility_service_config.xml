@@ -1,0 +1,11 @@
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+        android:description="@string/accessibility_service_description"
+        android:packageNames="org.knownreader, org.knownreader.premium, org.coolreader"
+        android:accessibilityEventTypes="typeAllMask"
+        android:accessibilityFlags="flagDefault|flagRequestFingerprintGestures"
+        android:accessibilityFeedbackType="feedbackAllMask"
+        android:notificationTimeout="100"
+        android:canRetrieveWindowContent="true"
+        android:settingsActivity="org.coolreader.CoolReader"
+        android:canRequestFingerprintGestures="true"
+    />

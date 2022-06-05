@@ -45,6 +45,19 @@ public class PageFlipOption extends SubmenuOption {
 			R.string.option_add_info_empty_text
 	};
 
+	int[] mAutoflipType = new int[] {
+			1, 2
+	};
+
+	int[] mAutoflipTypeTitles = new int[] {
+			R.string.autopage_flipping_type_1,
+			R.string.autopage_flipping_type_2
+	};
+
+	int[] mAutoflipTypeAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+	};
+
 	final BaseActivity mActivity;
 	final Context mContext;
 
@@ -92,6 +105,22 @@ public class PageFlipOption extends SubmenuOption {
 				Settings.PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY, mActivity.getString(R.string.page_flipping_sensivity_add_info), this.lastFilteredValue).add(
 				mFlippingSensivity, mFlippingSensivityTitles, mFlippingSensivityAddInfos).setDefaultValue("3").
 				setIconIdByAttr(R.attr.attr_icons8_gesture_sensivity, R.drawable.icons8_gesture_sensivity));
+		String autoType = "1";
+		String autoShow = "1";
+		if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+			autoType = "2";
+			autoShow = "0";
+		}
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.autopage_flipping_type),
+				Settings.PROP_APP_VIEW_AUTOSCROLL_TYPE, mActivity.getString(R.string.autopage_flipping_type_add_info), this.lastFilteredValue).add(
+						mAutoflipType, mAutoflipTypeTitles, mAutoflipTypeAddInfos).setDefaultValue(autoType).
+				setIconIdByAttr(R.attr.attr_icons8_autoflip_page, R.drawable.icons8_autoflip_page));
+		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.autopage_flipping_show_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED,
+				mActivity.getString(R.string.autopage_flipping_show_speed_add_info), this.lastFilteredValue).setDefaultValue("1").
+				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
+		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.autopage_flipping_show_progress), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS,
+				mActivity.getString(R.string.autopage_flipping_show_progress_add_info), this.lastFilteredValue).setDefaultValue(autoShow).
+				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
 		dlg.setView(listView);
 		dlg.show();
 	}

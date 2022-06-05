@@ -408,17 +408,17 @@ public class CoverpageManager {
 			if (mReadyQueue.empty())
 				firstReadyTimestamp = Utils.timeStamp();
 			mReadyQueue.add(file);
-			log.v("added file to queue");
+			//log.v("added file to queue");
 		}
 		Runnable task = () -> {
 //				if (lastReadyNotifyTask != this && Utils.timeInterval(firstReadyTimestamp) < COVERPAGE_MAX_UPDATE_DELAY) {
 //					log.v("skipping update, " + Utils.timeInterval(firstReadyTimestamp));
 //					return;
 //				}
-			log.v("task is started");
+			//log.v("task is started");
 			ArrayList<ImageItem> list = new ArrayList<>();
 			synchronized(LOCK) {
-				log.v("LOCK 2 entered");
+				//log.v("LOCK 2 entered");
 				for (;;) {
 					ImageItem f = mReadyQueue.next();
 					if (f == null)
@@ -426,13 +426,13 @@ public class CoverpageManager {
 					list.add(f);
 				}
 				mReadyQueue.clear();
-				log.v("filled list");
+				//log.v("filled list");
 				if (list.size() > 0)
 					log.v("ready coverpages: " + list.size());
 			}
 			if (list.size() > 0) {
-				log.v("list is not empty");
-				log.v("listeners count = " + listeners.size());
+				//log.v("list is not empty");
+				//log.v("listeners count = " + listeners.size());
 				for (CoverpageReadyListener listener : listeners)
 					listener.onCoverpagesReady(list);
 				firstReadyTimestamp = Utils.timeStamp();

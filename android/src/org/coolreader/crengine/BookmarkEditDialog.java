@@ -403,7 +403,7 @@ public class BookmarkEditDialog extends BaseDialog {
 								}
 
 								@Override
-								public void done(String result) {
+								public void done(String result, String dslStruct) {
 									commentEdit.setText(result);
 								}
 
@@ -427,7 +427,7 @@ public class BookmarkEditDialog extends BaseDialog {
 					}
 
 					@Override
-					public void done(String result) {
+					public void done(String result, String dslStruct) {
 						commentEdit.setText(result);
 					}
 

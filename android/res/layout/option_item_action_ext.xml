@@ -32,6 +32,7 @@
             android:singleLine="false"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:maxLines="5"
+            android:tag="notint"
             android:textStyle="bold"
             android:textColor="?attr/textColorOptionLabel"
         />

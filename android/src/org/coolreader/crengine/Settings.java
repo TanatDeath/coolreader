@@ -321,7 +321,10 @@ public interface Settings {
 	String PROP_APP_DISABLE_TWO_POINTER_GESTURES = "app.touch.gesture.twopointer.disable";
 
     String PROP_APP_VIEW_AUTOSCROLL_SPEED  ="app.view.autoscroll.speed";
+	String PROP_APP_VIEW_AUTOSCROLL_SIMPLE_SPEED  ="app.view.autoscroll.simple.speed";
     String PROP_APP_VIEW_AUTOSCROLL_TYPE  ="app.view.autoscroll.type";
+	String PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED  ="app.view.autoscroll.show.speed";
+	String PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS  ="app.view.autoscroll.show.progress";
 
     String PROP_APP_THEME = "app.ui.theme";
     String PROP_APP_THEME_DAY  = "app.ui.theme.day";
@@ -597,7 +600,10 @@ public interface Settings {
 
       "viewer.*",
 	    PROP_APP_VIEW_AUTOSCROLL_SPEED,
+		PROP_APP_VIEW_AUTOSCROLL_SIMPLE_SPEED,
 	    PROP_APP_VIEW_AUTOSCROLL_TYPE,
+		PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED,
+		PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS,
 	    	    
       "app.key.*",
 	    "app.tapzone.*",

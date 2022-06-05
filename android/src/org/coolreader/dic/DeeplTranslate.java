@@ -235,15 +235,15 @@ public class DeeplTranslate {
 									if (dcb == null) {
 										cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic, fullScreen);
 										if (!sTrans.equals(cr.getString(R.string.not_found)))
-											Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+											Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 									} else {
-										dcb.done(sTrans);
+										dcb.done(sTrans, "");
 										if (dcb.showDicToast()) {
 											cr.showDicToast(s, sTrans, Toast.LENGTH_LONG, view, DicToastView.IS_DEEPL, sDic, fullScreen);
 										}
 										if (dcb.saveToHist()) {
 											if (!sTrans.equals(cr.getString(R.string.not_found)))
-												Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+												Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 										}
 									}
 								} else {

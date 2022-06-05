@@ -191,6 +191,11 @@ public class ReaderSurface extends SurfaceView implements ReaderView.BookView {
 				Utils.drawFrame3(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4,
 						textSize, sText);
 			}
+			if (mReaderView.isAutoScrollActive()) {
+				int textColor = mReaderView.mSettings.getColor(Settings.PROP_FONT_COLOR, 0x000000);
+				Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+				Utils.drawAutoscrollLine(canvas, dst, Utils.createSolidPaint(0xC0000000 | textColor), 4);
+			}
 		} catch ( Exception e ) {
 			log.e("exception while drawing", e);
 		}

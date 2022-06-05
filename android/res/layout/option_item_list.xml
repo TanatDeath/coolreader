@@ -33,6 +33,7 @@
             android:singleLine="false"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:maxLines="5"
+            android:tag="notint"
             />
         <!--android:ellipsize="marquee"
             android:fadingEdge="horizontal"

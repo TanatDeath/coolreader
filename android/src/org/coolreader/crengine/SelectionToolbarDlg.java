@@ -211,7 +211,8 @@ public class SelectionToolbarDlg {
 	public boolean addButtonEnabled;
 	private Properties props;
 
-	public static void saveUserDic(boolean isCitation, String text, Selection selection, CoolReader mActivity, ReaderView mReaderView) {
+	public static void saveUserDic(boolean isCitation, String text, Selection selection,
+								   CoolReader mActivity, ReaderView mReaderView, String dslStruct) {
 		UserDicEntry ude = new UserDicEntry();
 		ude.setId(0L);
 		ude.setDic_word(selection.text);
@@ -219,6 +220,7 @@ public class SelectionToolbarDlg {
 			ude.setDic_word_translate(BookmarkEditDialog.getContextText(mActivity, selection.text));
 		else
 			ude.setDic_word_translate(text);
+		ude.setDslStruct(dslStruct);
 		final String sBookFName = mReaderView.mBookInfo.getFileInfo().getFilename();
 		CRC32 crc = new CRC32();
 		crc.update(sBookFName.getBytes());
@@ -386,8 +388,8 @@ public class SelectionToolbarDlg {
 							}
 
 							@Override
-							public void done(String result) {
-								saveUserDic(false, result, selection, mActivity, mReaderView);
+							public void done(String result, String dslStruct) {
+								saveUserDic(false, result, selection, mActivity, mReaderView, dslStruct);
 								closeDialog(true);
 							}
 
@@ -425,8 +427,8 @@ public class SelectionToolbarDlg {
 							}
 
 							@Override
-							public void done(String result) {
-								saveUserDic(false, result, selection, mActivity, mReaderView);
+							public void done(String result, String dslStruct) {
+								saveUserDic(false, result, selection, mActivity, mReaderView, dslStruct);
 								sendTo2(result, selection, mActivity);
 								closeDialog(true);
 							}
@@ -648,7 +650,7 @@ public class SelectionToolbarDlg {
 		}
 		if (btnSelectionCite != null)
 			btnSelectionCite.setOnClickListener(v -> {
-				saveUserDic(true, "", selection, mActivity, mReaderView);
+				saveUserDic(true, "", selection, mActivity, mReaderView, "");
 				closeDialog(true);
 			});
 		new BoundControlListener(llSliderTop.findViewById(R.id.selection_bound_control_t), true);

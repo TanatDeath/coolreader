@@ -250,6 +250,7 @@ public class BaseDialog extends Dialog {
 		if (upperText != null)
 			setUpperText(upperText);
 		setSearchEnabled(searchEnabled);
+		setBackEnabled();
 		if (buttonsLayout != null) {
 			buttonsLayout.setOnTouchListener((v, event) -> {
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -304,6 +305,17 @@ public class BaseDialog extends Dialog {
 		}
 	}
 
+	public void setBackEnabled() {
+		if (upperTextLayout != null) {
+			ImageButton ib = upperTextLayout.findViewById(R.id.back_btn);
+			if (ib != null) {
+				ib.setVisibility(View.VISIBLE);
+				ib.setOnClickListener(v -> onBackPressed());
+				mActivity.tintViewIcons((View) ib.getParent());
+			}
+		}
+	}
+
 	protected void updateGlobalMargin(ViewGroup v,
 			boolean left, boolean top, boolean right, boolean bottom) {
 		if (v == null) return;
@@ -348,6 +360,7 @@ public class BaseDialog extends Dialog {
 		setTitle(title);
 		setUpperText(upperText);
 		setSearchEnabled(searchEnabled);
+		setBackEnabled();
 
 		return layout;
 	}

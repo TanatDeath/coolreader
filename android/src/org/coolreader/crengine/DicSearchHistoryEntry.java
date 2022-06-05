@@ -22,6 +22,7 @@ public class DicSearchHistoryEntry {
     private String language_from;
     private String language_to;
     private Long seen_count;
+    private String dslStruct;
 
     public Long getId() {
         return id;
@@ -45,6 +46,14 @@ public class DicSearchHistoryEntry {
 
     public void setText_translate(String text_translate) {
         this.text_translate = text_translate;
+    }
+
+    public String getDslStruct() {
+        return StrUtils.getNonEmptyStr(dslStruct,true);
+    }
+
+    public void setDslStruct(String dslStruct) {
+        this.dslStruct = dslStruct;
     }
 
     public String getSearch_from_book() {

@@ -190,7 +190,7 @@ public class WikiSearch {
 						wikiLink = ((curAction == WIKI_FIND_TITLE) || (curAction == WIKI_FIND_TITLE_FULL)) ? sLinkF : sLinkF2;
 //						crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 //								curDict, link, link2, curAction, useFirstLink);
-						if (finalSaveHist) Dictionaries.saveToDicSearchHistory(cr, s, sTranslF, curDict);
+						if (finalSaveHist) Dictionaries.saveToDicSearchHistory(cr, s, sTranslF, curDict, "");
 						wikiTranslate(cr, fullScreen, curDict, view, s, link, link2,
 								WIKI_FIND_PIC_INFO, useFirstLink, curAction, sTranslF, dcb);
 					}, 100));
@@ -251,7 +251,7 @@ public class WikiSearch {
 						//crf2.showDicToastWiki(s, sTranslF, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 						//		curDict, link, link2, curAction, useFirstLink);
 						if (s.contains("~")) {
-							if (finalSaveHist1) Dictionaries.saveToDicSearchHistory(cr, s.split("~")[1], sTranslF, curDict);
+							if (finalSaveHist1) Dictionaries.saveToDicSearchHistory(cr, s.split("~")[1], sTranslF, curDict, "");
 						}
 						wikiTranslate(cr, fullScreen, curDict, view, s, link, link2,
 								WIKI_FIND_PIC_INFO, useFirstLink, curAction, sTranslF, dcb);
@@ -270,7 +270,7 @@ public class WikiSearch {
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 										curDict, link, link2, prevAction, useFirstLink, addr, fullScreen);
 							else {
-								dcb.done(articleText);
+								dcb.done(articleText, "");
 								if (dcb.showDicToast()) {
 									crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 											curDict, link, link2, prevAction, useFirstLink, addr, fullScreen);
@@ -284,7 +284,7 @@ public class WikiSearch {
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 										curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
 							else {
-								dcb.done(articleText);
+								dcb.done(articleText, "");
 								if (dcb.showDicToast()) {
 									crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 											curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
@@ -308,7 +308,7 @@ public class WikiSearch {
 							crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 									curDict, link, link2, prevAction, useFirstLink, "", fullScreen);
 						else {
-							dcb.done(articleText);
+							dcb.done(articleText, "");
 							if (dcb.showDicToast())
 								crf2.showDicToastWiki(s, articleText, Toast.LENGTH_LONG, view, DicToastView.IS_WIKI, wikiLink,
 										curDict, link, link2, prevAction, useFirstLink, "", fullScreen);

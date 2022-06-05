@@ -69,10 +69,10 @@ extern "C" {
 #define LTEXT_HYPHENATE              0x00080000  // allow hyphenation
 
 // Source object type (when source is not a text node)
-#define LTEXT_SRC_IS_OBJECT          0x00100000  // object (image)
-#define LTEXT_SRC_IS_INLINE_BOX      0x00200000  // inlineBox wrapping node
-#define LTEXT_SRC_IS_FLOAT           0x00400000  // float:'ing node
-#define LTEXT_SRC_IS_FLOAT_DONE      0x00800000  // float:'ing node (already dealt with)
+#define LTEXT_SRC_IS_OBJECT          0x00100000  // Source is not a text node
+#define LTEXT_HAS_TOP_BOTTOM_BORDER  0x00200000  // text should have top or bottom border (possibly from upper inline container nodes)
+#define LTEXT__AVAILABLE_BIT_23__    0x00400000
+#define LTEXT__AVAILABLE_BIT_24__    0x00800000
 // "clear" handling
 #define LTEXT_SRC_IS_CLEAR_RIGHT     0x01000000  // text follows <BR style="clear: right">
 #define LTEXT_SRC_IS_CLEAR_LEFT      0x02000000  // text follows <BR style="clear: left">
@@ -86,6 +86,16 @@ extern "C" {
 #define LTEXT__AVAILABLE_BIT_31__    0x40000000
 #define LTEXT_LEGACY_RENDERING       0x80000000  // Legacy text rendering tweaks
 
+// Object flags (used when LTEXT_SRC_IS_OBJECT is set)
+#define LTEXT_OBJECT_IS_IMAGE             0x0001  // image
+#define LTEXT_OBJECT_IS_INLINE_BOX        0x0002  // inlineBox wrapping node
+#define LTEXT_OBJECT_IS_EMBEDDED_BLOCK    0x0004  // block element among inlines (should also have previous bit LTEXT_OBJECT_IS_INLINE_BOX
+//                              as it is also an inlineBox wrapping node)
+#define LTEXT_OBJECT_IS_FLOAT             0x0010  // float:'ing node
+#define LTEXT_OBJECT_IS_FLOAT_DONE        0x0020  // float:'ing node (already dealt with)
+
+#define LTEXT_OBJECT_IS_PAD               0x0100  // inline pad (accounting for margin/border/padding of inline element)
+#define LTEXT_OBJECT_IS_PAD_RIGHT         0x0200  // inline pad is right pad (otherwise, left pad)
 
 // Extra LTEXT properties we can request (via these values) and fetch from the node style,
 // mostly used for rare inherited CSS properties that don't need us to waste a bit for
@@ -129,6 +139,7 @@ typedef struct
         } t;
         struct {
             // (Note: width & height will be stored negative when they are in % unit)
+            lUInt16        objflags; /**< \brief object flags */
             lInt16         width;    /**< \brief width of image or inline-block-box */
             lInt16         height;   /**< \brief height of image or inline-block box */
             lUInt16        baseline; /**< \brief baseline of inline-block box */
@@ -169,14 +180,14 @@ typedef struct
 
 // formatted_word_t flags
 #define LTEXT_WORD_CAN_ADD_SPACE_AFTER       0x0001 /// can add space after this word
-#define LTEXT_WORD_CAN_BREAK_LINE_AFTER      0x0002 /// can break line after this word (not used anywhere)
-#define LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER 0x0004 /// can break with hyphenation after this word
-#define LTEXT_WORD_MUST_BREAK_LINE_AFTER     0x0008 /// must break line after this word (not used anywhere)
+#define LTEXT_WORD_CAN_HYPH_BREAK_LINE_AFTER 0x0002 /// can break with hyphenation after this word
+#define LTEXT_WORD__AVAILABLE_BIT_03__       0x0004
+#define LTEXT_WORD__AVAILABLE_BIT_04__       0x0008
 
 #define LTEXT_WORD_IS_LINK_START             0x0010 /// first word of link flag
-#define LTEXT_WORD_IS_OBJECT                 0x0020 /// word is an image
+#define LTEXT_WORD_IS_IMAGE                  0x0020 /// word is an image
 #define LTEXT_WORD_IS_INLINE_BOX             0x0040 /// word is a inline-block or inline-table wrapping box
-#define LTEXT_WORD__AVAILABLE_BIT_08__       0x0080
+#define LTEXT_WORD_IS_PAD                    0x0080 /// word is just filler for node's left/right padding/margin/border
 
 #define LTEXT_WORD_DIRECTION_KNOWN           0x0100 /// word has been thru bidi: if next flag is unset, it is LTR.
 #define LTEXT_WORD_DIRECTION_IS_RTL          0x0200 /// word is RTL
@@ -360,6 +371,7 @@ void lvtextAddSourceObject(
    lInt16         width,
    lInt16         height,
    lUInt32         flags,     /* flags */
+   lUInt16         objflags,  /* object flags */
    lInt16          interval,  /* line height in screen pixels */
    lInt16          valign_dy, /* drift y from baseline */
    lInt16          indent,    /* first line indent (or all but first, when negative) */
@@ -420,6 +432,7 @@ public:
 
     void AddSourceObject(
                 lUInt32         flags,     /* flags */
+                lUInt16         objflags,  /* object flags */
                 lInt16          interval,  /* line height in screen pixels */
                 lInt16          valign_dy, /* drift y from baseline */
                 lInt16          indent,    /* first line indent (or all but first, when negative) */

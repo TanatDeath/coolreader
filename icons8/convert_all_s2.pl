@@ -26,7 +26,9 @@ my %ic_actions_list=(
         'icons8_offline_dics2.svg' => 'icons8_offline_dics2.png',
         'icons8_google_web_search.svg' => 'icons8_google_web_search.png',
         'icons8_bookmarks_export.svg' => 'icons8_bookmarks_export.png',
-        'icons8_save_ell.svg' => 'icons8_save_ell.png'
+        'icons8_save_ell.svg' => 'icons8_save_ell.png',
+        'icons8_autoflip_page.svg' => 'icons8_autoflip_page.png',
+        'icons8_autoflip_page_show_speed.svg' => 'icons8_autoflip_page_show_speed.png'
 );
 
 my %ic_menu_list=(

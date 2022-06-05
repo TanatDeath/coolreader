@@ -158,9 +158,9 @@ public class GoogleTranslate {
 									cr.showDicToast(s, finalSTrans, Toast.LENGTH_LONG, view, DicToastView.IS_GOOGLE,
 											"Google translate", fullScreen)
 								));
-								Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+								Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 							} else {
-								dcb.done(sTrans);
+								dcb.done(sTrans, "");
 								if (dcb.showDicToast()) {
 									String finalSTrans1 = sTrans;
 									BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
@@ -169,7 +169,7 @@ public class GoogleTranslate {
 									));
 								}
 								if (dcb.saveToHist()) {
-									Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict);
+									Dictionaries.saveToDicSearchHistory(cr, s, sTrans, curDict, "");
 								}
 							}
 						} else {

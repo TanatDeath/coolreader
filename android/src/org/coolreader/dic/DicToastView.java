@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -72,6 +73,7 @@ public class DicToastView {
     public static int IS_TURENG = 9;
     public static int IS_URBAN = 10;
     public static int IS_OFFLINE = 11;
+    public static int IS_USERDIC = 12;
 
     public static int mColorIconL = Color.GRAY;
 
@@ -545,8 +547,8 @@ public class DicToastView {
                     // do nothing
                 }
             });
-            if (t.dicType != IS_OFFLINE) Utils.hideView(btnDicExtended);
-            if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
+            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
+            if ((findText.length() <= 1)  || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
                     if (findText.length()>1) {
@@ -563,7 +565,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
+            if ((findText.length() <= 2)  || (t.mCurDict == null)) Utils.hideView(btnRemove2sym);
             else
                 btnRemove2sym.setOnClickListener(v -> {
                     if (findText.length()>2) {
@@ -580,7 +582,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
+            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.hideView(btnRemove3sym);
             else
                 btnRemove3sym.setOnClickListener(v -> {
                     if (findText.length()>3) {
@@ -655,7 +657,7 @@ public class DicToastView {
             ((ViewGroup) tvFull.getParent()).removeView(tvFull);
         if (tv != null) {
             tv.setText(t.msg);
-            if (!StrUtils.isEmptyStr(sFindText)) Utils.setHighLightedText(tv,sFindText, mColorIconL);
+            if (!StrUtils.isEmptyStr(sFindText)) Utils.setHighLightedText(tv, sFindText, mColorIconL);
         }
         if (tv2 != null) {
             tv2.setText(t.msg);
@@ -1034,8 +1036,8 @@ public class DicToastView {
                     // do nothing
                 }
             });
-            if (t.dicType != IS_OFFLINE) Utils.hideView(btnDicExtended);
-            if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
+            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
+            if ((findText.length() <= 1) || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
                     if (findText.length() > 1) {
@@ -1053,7 +1055,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
+            if ((findText.length() <= 2) || (t.mCurDict == null)) Utils.hideView(btnRemove2sym);
             else
                 btnRemove2sym.setOnClickListener(v -> {
                     if (findText.length() > 2) {
@@ -1071,7 +1073,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
+            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.hideView(btnRemove3sym);
             else
                 btnRemove3sym.setOnClickListener(v -> {
                     if (findText.length() > 3) {
@@ -1121,6 +1123,7 @@ public class DicToastView {
         Button btnRemove2sym;
         Button btnRemove1sym;
         Button btnDicExtended;
+        EditText edtDicTranls;
         ViewGroup body;
         ViewGroup body2;
         DicArticleDlg dad = null;
@@ -1137,6 +1140,7 @@ public class DicToastView {
             btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
             btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
             btnDicExtended = dad.mBody.findViewById(R.id.btnDicExtended);
+            edtDicTranls = dad.mBody.findViewById(R.id.edt_dic_tranls);
             body = dad.mBody.findViewById(R.id.items_list);
             body2 = dad.mBody.findViewById(R.id.items_list2);
         } else {
@@ -1156,6 +1160,7 @@ public class DicToastView {
             btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
             btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
             btnDicExtended = window.getContentView().findViewById(R.id.btnDicExtended);
+            edtDicTranls = window.getContentView().findViewById(R.id.edt_dic_tranls);
             body = window.getContentView().findViewById(R.id.items_list);
             body2 = window.getContentView().findViewById(R.id.items_list2);
         }
@@ -1198,8 +1203,14 @@ public class DicToastView {
                     // do nothing
                 }
             });
-            if (t.dicType != IS_OFFLINE) Utils.hideView(btnDicExtended);
-            if (findText.length() <= 1) Utils.hideView(btnRemove1sym);
+            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
+            if ((fullScreen) || (t.mCurDict != null) || (StrUtils.isEmptyStr(t.msg))) Utils.hideView(edtDicTranls);
+            if (!StrUtils.isEmptyStr(t.msg))
+                if (edtDicTranls != null) {
+                    edtDicTranls.setText(t.msg);
+                    Utils.setHighLightedText(edtDicTranls, sFindText, mColorIconL);
+                }
+            if ((findText.length() <= 1) || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
                     if (findText.length() > 1) {
@@ -1217,7 +1228,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if (findText.length() <= 2) Utils.hideView(btnRemove2sym);
+            if ((findText.length() <= 2) || (t.mCurDict == null)) Utils.hideView(btnRemove2sym);
             else
                 btnRemove2sym.setOnClickListener(v -> {
                     if (findText.length() > 2) {
@@ -1235,7 +1246,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if (findText.length() <= 3) Utils.hideView(btnRemove3sym);
+            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.hideView(btnRemove3sym);
             else
                 btnRemove3sym.setOnClickListener(v -> {
                     if (findText.length() > 3) {
@@ -1254,13 +1265,15 @@ public class DicToastView {
                     }
                 });
         }
+        int eight = 8;
+        if ((t.mCurDict == null) && (!StrUtils.isEmptyStr(t.msg))) eight = 7;
         if (!fullScreen)
             if (mActivity.getReaderView() != null) {
                 if (mActivity.getReaderView().getSurface() != null) {
-                    ((MaxHeightLinearLayout) body).setMaxHeight(mActivity.getReaderView().getSurface().getHeight() * 8 / 12);
+                    ((MaxHeightLinearLayout) body).setMaxHeight(mActivity.getReaderView().getSurface().getHeight() * eight / 12);
                 }
             } else {
-                ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * 8 / 12);
+                ((MaxHeightLinearLayout) body).setMaxHeight(t.anchor.getHeight() * eight / 12);
             }
         t.mExtDicList = new ExtDicList(mActivity, t, null, mHandler, handleDismiss, false);
         if (fullScreen)

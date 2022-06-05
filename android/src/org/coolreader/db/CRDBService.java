@@ -84,6 +84,8 @@ public class CRDBService extends BaseService {
     	File storage = DeviceInfo.EINK_NOOK ? new File("/media/") : Environment.getExternalStorageDirectory();
     	//File cr3dir = new File(storage, ".cr3");
 		File cr3dir = new File(storage, "cr3e");
+		boolean dExists = (cr3dir.isDirectory()) && (cr3dir.exists());
+		if (!dExists) cr3dir = new File(storage, "KnownReader");
 		if (cr3dir.isDirectory())
     		cr3dir.mkdirs();
     	if (!cr3dir.isDirectory() || !cr3dir.canWrite()) {

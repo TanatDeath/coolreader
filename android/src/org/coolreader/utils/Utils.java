@@ -35,6 +35,7 @@ import org.coolreader.crengine.Scanner;
 import org.coolreader.crengine.Selection;
 import org.coolreader.crengine.Services;
 import org.coolreader.db.BaseDB;
+import org.coolreader.readerview.ReaderView;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -725,11 +726,11 @@ public class Utils {
 			canvas.drawRect(new Rect(l, t + thick, l + thick, b), paint);
 			canvas.drawRect(new Rect(r - thick, t + thick, r, b), paint);
 			canvas.drawRect(new Rect(l + thick, b - thick, r - thick, b), paint);
-			canvas.drawText("test text", 0, 0, paint);
 			paint.setTextSize(textSize);
 			canvas.drawText(sText, 20, b - textSize + 10, paint);
 		}
 	}
+
 	public static void drawFrame3(Canvas canvas, Rect rect, Paint paint, int thick, float textSize, String sText) {
 		for (int i = 1; i<=thick; i++) {
 			int marg = 2;
@@ -749,6 +750,22 @@ public class Utils {
 			}
 			paint.setTextSize(textSize);
 			canvas.drawText(sText, 20, b - textSize + 10, paint);
+		}
+	}
+
+	public static void drawAutoscrollLine(Canvas canvas, Rect rect, Paint paint, int thick) {
+		for (int i = 1; i<=thick; i++) {
+			int marg = 2;
+			int l = rect.left+marg;
+			int r = rect.right-marg;
+			int t = rect.top+marg;
+			int b = rect.bottom-marg;
+			int diff = ReaderView.currentSimpleAutoScrollSecTotal - ReaderView.currentSimpleAutoScrollSecCnt;
+			if ((diff > 0) && (ReaderView.currentSimpleAutoScrollSecTotal > 0)) {
+				double ndiff = ((double) diff) / ((double) ReaderView.currentSimpleAutoScrollSecTotal);
+				int newR = (int) (((double) (r - l)) * ndiff);
+				canvas.drawRect(new Rect(l, t, newR, t + thick), paint);
+			}
 		}
 	}
 	
@@ -1121,6 +1138,12 @@ public class Utils {
 			btn.setBackgroundResource(R.drawable.button_bg_solid_border);
 		else
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
+	public static void setSolidViewEink(View v) {
+		if (v == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			v.setBackgroundResource(R.drawable.button_bg_solid_border_eink);
 	}
 
 	public static void setSolidButton1(Button btn) {
