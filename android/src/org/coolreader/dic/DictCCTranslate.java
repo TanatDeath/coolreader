@@ -35,7 +35,7 @@ public class DictCCTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_DICTCC,
-						"", fullScreen);
+						"", curDict, fullScreen);
 				return;
 			}
 			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
@@ -43,7 +43,7 @@ public class DictCCTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_DICTCC, "", fullScreen)
+								DicToastView.IS_DICTCC, "", curDict, fullScreen)
 						, 100));
 				return;
 			}
@@ -106,12 +106,12 @@ public class DictCCTranslate {
 												urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 									} else
 										cr.showDicToast(s, finalSTitle, DicToastView.IS_DICTCC,
-												urlBuilder.build().url().toString(), fullScreen);
+												urlBuilder.build().url().toString(), curDict, fullScreen);
 								} else {
 									dcb.done(finalSTitle, Dictionaries.dslStructToString(dsl));
 									if (dcb.showDicToast()) {
 										cr.showDicToast(s, finalSTitle,
-												DicToastView.IS_DICTCC, urlBuilder.build().url().toString(), fullScreen);
+												DicToastView.IS_DICTCC, urlBuilder.build().url().toString(), curDict, fullScreen);
 									}
 									if (dcb.saveToHist())
 										if (!StrUtils.isEmptyStr(finalSTitle0)) {
@@ -122,7 +122,7 @@ public class DictCCTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented),
-								DicToastView.IS_DICTCC, "", fullScreen);
+								DicToastView.IS_DICTCC, "", curDict, fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -132,7 +132,7 @@ public class DictCCTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_DICTCC, "", fullScreen);
+							DicToastView.IS_DICTCC, "", curDict, fullScreen);
 				}, 100));
 			}
 		});

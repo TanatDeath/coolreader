@@ -1,20 +1,18 @@
 package org.coolreader.crengine;
 
 import android.content.Context;
-import android.hardware.usb.UsbDevice;
 import android.net.Uri;
-import  androidx.documentfile.provider.DocumentFile;
-
-import android.os.Build;
-import android.util.Log;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import androidx.documentfile.provider.DocumentFile;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.litres.LitresSearchParams;
-import org.coolreader.readerview.ReadingStat;
 import org.coolreader.plugins.OnlineStoreBook;
+import org.coolreader.readerview.ReadingStat;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -118,6 +116,7 @@ public class FileInfo implements Parcelable {
 	public Long id; // db id
 	public String title; // book title
 	public String authors; // authors, delimited with '|'
+	public String authorsLFM; // authors, delimited with '|'
 	public String authorext; // full_name (or first-middle-last)~firstName~middleName~lastName~nickName~homePage~email
 	public String series; // series name w/o number
 	public int seriesNumber; // number of book inside series
@@ -126,6 +125,7 @@ public class FileInfo implements Parcelable {
 	public boolean need_to_update_ver; // file was saved in old format
 	public String genre; // Genre list written directly
 	public String genre_list; // Genre list from genre table
+	public String genre_tmp; // Genre - for grouping in order not to calculate many times
 	public String annotation;
 	public String srclang;
     private String bookdate;
@@ -669,9 +669,18 @@ public class FileInfo implements Parcelable {
         fileCreateTime = v.fileCreateTime;
 		if (fileCreateTime == 0L) fileCreateTime = System.currentTimeMillis();
         opdsLink = v.opdsLink;
+		isArchive = v.isArchive;
         wordCount = v.wordCount;
 		symCount = v.symCount;
 		links = v.links;
+		authorsLFM = v.authorsLFM;
+		genre_list = v.genre_list;
+		crc32 = v.crc32;
+		description = v.description;
+		domVersion = v.domVersion;
+		blockRenderingFlags = v.blockRenderingFlags;
+		description = v.description;
+		name_crc32 = v.name_crc32;
 //		public long bookDateN; //converted to number from string
 //		public long docDateN;
 //		public long publYearN;
@@ -1294,12 +1303,23 @@ public class FileInfo implements Parcelable {
 		return files!=null ? files.size() : 0;
 	}
 
+	public int fileCountTotal()
+	{
+		int fc = files!=null ? files.size() : 0;
+		if (dirs != null) {
+			for (FileInfo dir: dirs) {
+				fc += dir.fileCountTotal();
+			}
+		}
+		return fc;
+	}
+
 	public int itemCount()
 	{
 		return dirCount() + fileCount();
 	}
 
-	public void addDir( FileInfo dir )
+	public void addDir(FileInfo dir)
 	{
 		if ( dirs==null )
 			dirs = new ArrayList<>();
@@ -1455,6 +1475,7 @@ public class FileInfo implements Parcelable {
 		boolean modified = false;
 		modified = setTitle(file.getTitle()) || modified;
 		modified = setAuthors(file.getAuthors()) || modified;
+		modified = setAuthorsLFM(file.getAuthorsLFM()) || modified;
 		modified = setGenres(file.getGenres()) || modified;
 		modified = setSeriesName(file.getSeriesName()) || modified;
 		modified = setSeriesNumber(file.getSeriesNumber()) || modified;
@@ -1711,6 +1732,24 @@ public class FileInfo implements Parcelable {
 		return null;
 	}
 
+	public String getAuthorsLFM() {
+		if (authorsLFM != null) {
+			String[] list = authorsLFM.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			return resS;
+		}
+		return null;
+	}
+
 	public String getAuthorExt() {
 		if (authorext!=null) {
 			String[] list = authorext.split("\\|");
@@ -1732,7 +1771,7 @@ public class FileInfo implements Parcelable {
 	public boolean setAuthors(String authors) {
 		if (eq(this.authors, authors))
 			return false;
-		if (authors!=null) {
+		if (authors != null) {
 			String[] list = authors.split("\\|");
 			ArrayList<String> arrS = new ArrayList<String>();
 			for (String s : list) {
@@ -1746,6 +1785,26 @@ public class FileInfo implements Parcelable {
 			if (resS.length() > 0) resS = resS.substring(1);
 			this.authors = resS;
 		} else this.authors = null;
+		return true;
+	}
+
+	public boolean setAuthorsLFM(String authorsLFM) {
+		if (eq(this.authorsLFM, authorsLFM))
+			return false;
+		if (authorsLFM != null) {
+			String[] list = authorsLFM.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			this.authorsLFM = resS;
+		} else this.authorsLFM = null;
 		return true;
 	}
 

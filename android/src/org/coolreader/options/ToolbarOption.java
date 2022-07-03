@@ -72,28 +72,28 @@ public class ToolbarOption extends SubmenuOption {
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_view_toolbar_position), Settings.PROP_TOOLBAR_LOCATION,
 				mActivity.getString(R.string.options_view_toolbar_position_add_info), this.lastFilteredValue).add(mToolbarPositions, mToolbarPositionsTitles,
 				mToolbarPositionsAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_navigation_toolbar_top, R.drawable.icons8_navigation_toolbar_top));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_view_toolbar_hide_in_fullscreen), Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_view_toolbar_hide_in_fullscreen), Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN,
 				mActivity.getString(R.string.options_view_toolbar_hide_in_fullscreen_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_view_toolbar_appearance), Settings.PROP_TOOLBAR_APPEARANCE,
 				mActivity.getString(R.string.options_view_toolbar_appearance_add_info), this.lastFilteredValue).
 				add(mToolbarApperance, mToolbarApperanceTitles, mToolbarApperanceAddInfos).setDefaultValue("6").setIconIdByAttr(
 				R.attr.attr_icons8_navigation_toolbar_top, R.drawable.icons8_navigation_toolbar_top));
-		OptionBase rtO = new ReaderToolbarOption(mActivity, mContext, mOwner, mActivity.getString(R.string.options_reader_toolbar_buttons),
+		OptionBase rtO = new ReaderToolbarOption(mOwner, mActivity.getString(R.string.options_reader_toolbar_buttons),
 				mActivity.getString(R.string.options_reader_toolbar_buttons_add_info), this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);
 		((ReaderToolbarOption)rtO).updateFilterEnd();
 		listView.add(rtO);
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.sel_panel_extended), Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.sel_panel_extended), Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR,
 				mActivity.getString(R.string.sel_panel_extended_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_ext_toolbar, R.drawable.icons8_ext_toolbar));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.sel_panel_background), Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND,
 				mActivity.getString(R.string.sel_panel_add_info), this.lastFilteredValue).
 				add(mSelPanelBackground, mSelPanelBackgroundTitles, mSelPanelBackgroundAddInfos).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_toolbar_background,R.drawable.icons8_toolbar_background));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.sel_panel_transp_buttons), Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.sel_panel_transp_buttons), Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS,
 				mActivity.getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_transp_buttons,R.drawable.icons8_transp_buttons));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.tts_page_mode_dont_change2), Settings.PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.tts_page_mode_dont_change2), Settings.PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE,
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
 		dlg.setView(listView);

@@ -41,7 +41,7 @@ public class GramotaTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
-						DicToastView.IS_GRAMOTA, "", fullScreen);
+						DicToastView.IS_GRAMOTA, "", curDict, fullScreen);
 				return;
 			}
 		}
@@ -93,7 +93,7 @@ public class GramotaTranslate {
 								if (dcb == null) {
 									if (dsl.getCount() == 0) {
 										cr.showDicToast(s, sTitle, DicToastView.IS_GRAMOTA,
-												urlBuilder.build().url().toString(), fullScreen);
+												urlBuilder.build().url().toString(), curDict, fullScreen);
 									} else {
 										Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 										cr.showDicToastExt(s, sTitle, DicToastView.IS_GRAMOTA,
@@ -104,7 +104,7 @@ public class GramotaTranslate {
 									if (dcb.showDicToast()) {
 										if (dsl.getCount() == 0) {
 											cr.showDicToast(s, sTitle, DicToastView.IS_GRAMOTA,
-													urlBuilder.build().url().toString(), fullScreen);
+													urlBuilder.build().url().toString(), curDict, fullScreen);
 										} else {
 											cr.showDicToastExt(s, sTitle, DicToastView.IS_GRAMOTA,
 													urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
@@ -118,7 +118,7 @@ public class GramotaTranslate {
 							}, 100));
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented), DicToastView.IS_GRAMOTA, "", fullScreen);
+						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented), DicToastView.IS_GRAMOTA, "", curDict, fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -128,7 +128,7 @@ public class GramotaTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_GRAMOTA, "", fullScreen);
+							DicToastView.IS_GRAMOTA, "", curDict, fullScreen);
 				}, 100));
 			}
 		});

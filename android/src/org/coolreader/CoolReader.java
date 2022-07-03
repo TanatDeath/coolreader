@@ -7,113 +7,6 @@ import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.regex.Pattern;
-
-import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.CloudFileInfo;
-import org.coolreader.cloud.CloudSync;
-import org.coolreader.cloud.deepl.DeeplCloudSettings;
-import org.coolreader.cloud.lingvo.LingvoCloudSettings;
-import org.coolreader.cloud.litres.LitresCloudSettings;
-import org.coolreader.cloud.litres.LitresCredentialsDialog;
-import org.coolreader.cloud.yandex.YndCloudSettings;
-import org.coolreader.crengine.AskSomeValuesDialog;
-import org.coolreader.crengine.BookInfoEntry;
-import org.coolreader.crengine.CalibreCatalogEditDialog;
-import org.coolreader.crengine.CoverpageManager;
-import org.coolreader.crengine.DocumentFormat;
-import org.coolreader.crengine.FlavourConstants;
-import org.coolreader.crengine.FolderSelectedCallback;
-import org.coolreader.crengine.InputDialog;
-import org.coolreader.crengine.OPDSUtil;
-import org.coolreader.crengine.ReaderCommand;
-import org.coolreader.crengine.ReadingStatRes;
-import org.coolreader.crengine.ResizeHistory;
-import org.coolreader.crengine.SomeButtonsToolbarDlg;
-import org.coolreader.dic.DicToastView;
-import org.coolreader.dic.Dictionaries;
-import org.coolreader.dic.DictsDlg;
-import org.coolreader.dic.TranslationDirectionDialog;
-import org.coolreader.dic.Dictionaries.DictionaryException;
-import org.coolreader.cloud.dropbox.DBXConfig;
-import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
-import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
-import org.coolreader.cloud.yandex.YNDConfig;
-import org.coolreader.cloud.yandex.YNDInputTokenDialog;
-import org.coolreader.crengine.AboutDialog;
-import org.coolreader.crengine.BackgroundThread;
-import org.coolreader.crengine.BaseActivity;
-import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.BookInfo;
-import org.coolreader.crengine.BookInfoDialog;
-import org.coolreader.crengine.BookInfoEditDialog;
-import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.BookmarksDlg;
-import org.coolreader.crengine.BrowserViewLayout;
-import org.coolreader.crengine.CRRootView;
-import org.coolreader.crengine.CRToolBar;
-import org.coolreader.crengine.CRToolBar.OnActionHandler;
-import org.coolreader.crengine.DeviceInfo;
-import org.coolreader.crengine.DeviceOrientation;
-import org.coolreader.crengine.DocConvertDialog;
-import org.coolreader.crengine.Engine;
-import org.coolreader.crengine.ErrorDialog;
-import org.coolreader.crengine.ExternalDocCameDialog;
-import org.coolreader.crengine.FileBrowser;
-import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.FileInfoOperationListener;
-import org.coolreader.crengine.GenreSAXElem;
-import org.coolreader.crengine.InterfaceTheme;
-import org.coolreader.crengine.L;
-import org.coolreader.crengine.LogcatSaver;
-import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.N2EpdController;
-import org.coolreader.crengine.OPDSCatalogEditDialog;
-import org.coolreader.options.OptionsDialog;
-import org.coolreader.crengine.PictureCameDialog;
-import org.coolreader.crengine.PictureReceived;
-import org.coolreader.crengine.PositionProperties;
-import org.coolreader.crengine.Properties;
-import org.coolreader.crengine.ReaderAction;
-import org.coolreader.readerview.ReaderView;
-import org.coolreader.crengine.ReaderViewLayout;
-import org.coolreader.crengine.Services;
-import org.coolreader.crengine.Settings;
-import org.coolreader.utils.FileUtils;
-import org.coolreader.utils.SingletonUsbOtg;
-import org.coolreader.utils.StorageDirectory;
-import org.coolreader.utils.StrUtils;
-import org.coolreader.sync2.OnSyncStatusListener;
-import org.coolreader.sync2.SyncOptions;
-import org.coolreader.sync2.SyncService;
-import org.coolreader.sync2.SyncServiceAccessor;
-import org.coolreader.sync2.Synchronizer;
-import org.coolreader.sync2.googledrive.GoogleDriveRemoteAccess;
-import org.coolreader.userdic.UserDicEntry;
-import org.coolreader.utils.UsbOtgRepresentation;
-import org.coolreader.utils.Utils;
-import org.coolreader.db.BaseDB;
-import org.coolreader.db.MainDB;
-import org.coolreader.geo.GeoLastData;
-import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
-
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -134,9 +27,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.usb.UsbConstants;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -145,35 +35,134 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import org.coolreader.tts.OnTTSCreatedListener;
-import org.coolreader.tts.TTSControlBinder;
-import org.coolreader.tts.TTSControlServiceAccessor;
-
-import androidx.annotation.DrawableRes;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.documentfile.provider.DocumentFile;
-
 import android.os.Environment;
-import android.os.Handler;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.provider.Settings.Secure;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+
+import androidx.annotation.DrawableRes;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import net.rdrei.android.dirchooser.DirectoryChooserActivity;
+
+import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.CloudFileInfo;
+import org.coolreader.cloud.CloudSync;
+import org.coolreader.cloud.deepl.DeeplCloudSettings;
+import org.coolreader.cloud.dropbox.DBXConfig;
+import org.coolreader.cloud.dropbox.DBXFinishAuthorization;
+import org.coolreader.cloud.dropbox.DBXInputTokenDialog;
+import org.coolreader.cloud.lingvo.LingvoCloudSettings;
+import org.coolreader.cloud.litres.LitresCloudSettings;
+import org.coolreader.cloud.litres.LitresCredentialsDialog;
+import org.coolreader.cloud.yandex.YNDConfig;
+import org.coolreader.cloud.yandex.YNDInputTokenDialog;
+import org.coolreader.cloud.yandex.YndCloudSettings;
+import org.coolreader.crengine.AboutDialog;
+import org.coolreader.crengine.AskSomeValuesDialog;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookInfoDialog;
+import org.coolreader.crengine.BookInfoEditDialog;
+import org.coolreader.crengine.BookInfoEntry;
+import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.BookmarksDlg;
+import org.coolreader.crengine.BrowserViewLayout;
+import org.coolreader.crengine.CRRootView;
+import org.coolreader.crengine.CRToolBar;
+import org.coolreader.crengine.CRToolBar.OnActionHandler;
+import org.coolreader.crengine.CalibreCatalogEditDialog;
+import org.coolreader.crengine.CoverpageManager;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DeviceOrientation;
+import org.coolreader.crengine.DocConvertDialog;
+import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.ErrorDialog;
+import org.coolreader.crengine.ExternalDocCameDialog;
+import org.coolreader.crengine.FileBrowser;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.FileInfoOperationListener;
+import org.coolreader.crengine.FlavourConstants;
+import org.coolreader.crengine.FolderSelectedCallback;
+import org.coolreader.crengine.GenreSAXElem;
+import org.coolreader.crengine.InputDialog;
+import org.coolreader.crengine.InterfaceTheme;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.LogcatSaver;
+import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.N2EpdController;
+import org.coolreader.crengine.OPDSCatalogEditDialog;
+import org.coolreader.crengine.OPDSUtil;
+import org.coolreader.crengine.PictureCameDialog;
+import org.coolreader.crengine.PictureReceived;
+import org.coolreader.crengine.PositionProperties;
+import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.ReaderAction;
+import org.coolreader.crengine.ReaderCommand;
+import org.coolreader.crengine.ReadingStatRes;
+import org.coolreader.crengine.ResizeHistory;
+import org.coolreader.crengine.Services;
+import org.coolreader.crengine.Settings;
+import org.coolreader.crengine.SomeButtonsToolbarDlg;
+import org.coolreader.db.BaseDB;
+import org.coolreader.db.MainDB;
+import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.Dictionaries.DictionaryException;
+import org.coolreader.dic.DictsDlg;
+import org.coolreader.dic.TranslationDirectionDialog;
+import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
+import org.coolreader.geo.GeoLastData;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.readerview.ReaderViewLayout;
+import org.coolreader.sync2.OnSyncStatusListener;
+import org.coolreader.sync2.SyncOptions;
+import org.coolreader.sync2.SyncService;
+import org.coolreader.sync2.SyncServiceAccessor;
+import org.coolreader.sync2.Synchronizer;
+import org.coolreader.sync2.googledrive.GoogleDriveRemoteAccess;
+import org.coolreader.tts.OnTTSCreatedListener;
+import org.coolreader.tts.TTSControlBinder;
+import org.coolreader.tts.TTSControlServiceAccessor;
+import org.coolreader.userdic.UserDicEntry;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.SingletonUsbOtg;
+import org.coolreader.utils.StorageDirectory;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CoolReader extends BaseActivity implements SensorEventListener
 {
@@ -251,6 +240,25 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (getmReaderFrame() != null)
 			if (getmReaderFrame().getUserDicPanel() != null)
 				getmReaderFrame().getUserDicPanel().updateSavingMark(s);
+	};
+
+	public LinearLayout getRVBottomView() {
+		if (getmReaderFrame() != null)
+			if (getmReaderFrame().getLlBottom() != null)
+				return getmReaderFrame().getLlBottom();
+		return null;
+	};
+
+	public View getRVBottomSepView() {
+		if (getmReaderFrame() != null)
+			if (getmReaderFrame().getSepBottom() != null)
+				return getmReaderFrame().getSepBottom();
+		return null;
+	};
+
+	public void clearRVBottomSepView() {
+		if (getmReaderFrame() != null)
+			getmReaderFrame().clearSepBottom();
 	};
 
 	public ReaderView getmReaderView() {
@@ -728,6 +736,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		android_id = Secure.getString(getApplicationContext().getContentResolver(),
 				Secure.ANDROID_ID);
 
+		GenreSAXElem.mActivity = this;
+
 //		too complex, not now
 //		ArrayList<StorageDirectory> arrStorages = getStorageDirectories();
 //		for (StorageDirectory storageDirectory: arrStorages) {
@@ -744,8 +754,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		} else {
 			mModel = manufacturer.toUpperCase() + " " + model;
 		}
-
-		showRootWindow();
+		showRootWindow(false);
 		if (null != Engine.getExternalSettingsDirName()) {
 			// if external data directory created or already exist.
 			if (!Engine.DATADIR_IS_EXIST_AT_START && getExtDataDirCreateTime() > 0) {
@@ -1460,7 +1469,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		Uri uri = null;
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 
-		for (ReaderAction ra: ReaderAction.AVAILABLE_ACTIONS) {
+		for (ReaderAction ra: ReaderAction.getAvailActions(true)) {
 			String acname = "org.knownreder.cmd." + StrUtils.getNonEmptyStr(ra.id, true);
 			if (acname.equals(intentAction)) {
 				mReaderView.onCommand(ra.cmd, ra.param, null);
@@ -1926,6 +1935,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 
+
+
 	@Override
 	protected void onStart() {
 		log.i("KnownReader.onStart() version=" + getVersion() + ", fileToLoadOnStart=" + fileToLoadOnStart);
@@ -1990,8 +2001,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				mHomeFrame = new CRRootView(CoolReader.this);
 				//Services.getCoverpageManager().addCoverpageReadyListener(mHomeFrame);
 				mHomeFrame.requestFocus();
-
-				showRootWindow();
+				showRootWindow(LAST_LOCATION.startsWith(FileInfo.ROOT_DIR_TAG));
 				setSystemUiVisibility();
 				notifySettingsChanged();
 				// prevent if background was set temporarily
@@ -2006,9 +2016,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						setSettings(settings(), 2000, true);
 					}
 				}
-
 				showNotifications();
 				isInterfaceCreated = true;
+				//if (optionsDialog == null)
+				optionsDialog = new OptionsDialog(this);
 			});
 		}
 
@@ -2020,15 +2031,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			showOpenedBook();
 			return;
 		}
-		
+
 		if (!isFirstStart)
 			return;
 		isFirstStart = false;
-		
+
 		if (justCreated) {
 			justCreated = false;
-			if (!processIntent(getIntent()))
+			if (!processIntent(getIntent())) {
 				showLastLocation();
+			}
 		}
 		if (dataDirIsRemoved) {
 			// show message
@@ -2082,8 +2094,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 		log.i("CoolReader.onStart() exiting");
 	}
-	
- 
+
+
 
 	private boolean stopped = false;
 	@Override
@@ -2096,7 +2108,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (CLOSE_BOOK_ON_STOP)
 			mReaderView.close();
 
-		
+
 		log.i("CoolReader.onStop() exiting");
 	}
 
@@ -2256,7 +2268,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				buf.append(f.get(obj));
 			}
 		} catch (Exception e) {
-			
+
 		}
 		return buf.toString();
 	}
@@ -2264,9 +2276,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		Debug.getMemoryInfo(info);
 		log.d("nativeHeapAlloc=" + Debug.getNativeHeapAllocatedSize() + ", nativeHeapSize=" + Debug.getNativeHeapSize() + ", info: " + dumpFields(infoFields, info));
 	}
-	
 
-	
+
+
 	@Override
 	public void setCurrentTheme(InterfaceTheme theme) {
 		super.setCurrentTheme(theme);
@@ -2314,6 +2326,30 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					((MainDB) db).iMaxGroupSize = Integer.valueOf(value);
 				});
 			}
+			if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR)) {
+				waitForCRDBService(() -> {
+					BaseDB db = Services.getHistory().getMainDB(getDB());
+					((MainDB) db).iMaxGroupSizeAuthor = Integer.valueOf(value);
+				});
+			}
+			if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES)) {
+				waitForCRDBService(() -> {
+					BaseDB db = Services.getHistory().getMainDB(getDB());
+					((MainDB) db).iMaxGroupSizeSeries = Integer.valueOf(value);
+				});
+			}
+			if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES)) {
+				waitForCRDBService(() -> {
+					BaseDB db = Services.getHistory().getMainDB(getDB());
+					((MainDB) db).iMaxGroupSizeGenres = Integer.valueOf(value);
+				});
+			}
+			if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES)) {
+				waitForCRDBService(() -> {
+					BaseDB db = Services.getHistory().getMainDB(getDB());
+					((MainDB) db).iMaxGroupSizeDates = Integer.valueOf(value);
+				});
+			}
         }
         // after reading of all settings (only once) - we'll check should we set backlight or not
 //		if (initialBacklight != -1) {
@@ -2335,6 +2371,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		BOOK_READING_STATE_TO_READ = "["+getString(R.string.book_state_toread)+"]";
 		BOOK_READING_STATE_READING = "["+getString(R.string.book_state_reading)+"]";
 		BOOK_READING_STATE_FINISHED = "["+getString(R.string.book_state_finished)+"]";
+		MainDB.NO_VALUE = getString(R.string.no_value);
 		READ_ALOUD = getString(R.string.read_aloud);
 
 		// Show/Hide soft navbar after OptionDialog is closed.
@@ -2391,7 +2428,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public ViewGroup getPreviousFrame() {
 		return mPreviousFrame;
 	}
-	
+
 	public boolean isPreviousFrameHome() {
 		return mPreviousFrame != null && mPreviousFrame == mHomeFrame;
 	}
@@ -2437,19 +2474,25 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			onUserActivity();
 		}
 	}
-	
+
 	public void showReader() {
 		runInReader(() -> {
 			// do nothing
 		});
 	}
-	
+
 	public void showRootWindow() {
+		showRootWindow(true);
+	}
+
+	public void showRootWindow(boolean setFrame) {
 		if (null != mBrowser)
 			mBrowser.stopCurrentScan();
 		if ((mCurrentFrame != mReaderFrame) || (mReaderFrame == null) ||
-				(DeviceInfo.isEinkScreen(getScreenForceEink()))) {
-			setCurrentFrame(mHomeFrame);
+				(DeviceInfo.isEinkScreen(getScreenForceEink())) || (!setFrame)) {
+			if (setFrame) {
+				setCurrentFrame(mHomeFrame);
+			}
 		} else {
 			// this hack (with empty window) was needed for some phone - root window was black
 			ArrayList<String[]> vl = new ArrayList<String[]>();
@@ -2465,7 +2508,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					if (dlgA.isShowing()) {
 						dlgA.dismiss();
 					}
-				setCurrentFrame(mHomeFrame);
+				if (setFrame) {
+					setCurrentFrame(mHomeFrame);
+				}
 			}, 200);
 		}
 		if (isInterfaceCreated) {
@@ -2485,8 +2530,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 	}
-	
-	private void runInReader(final Runnable task) {
+
+	public void runInReader(final Runnable task) {
 		if (null != mBrowser)
 			mBrowser.stopCurrentScan();
 		waitForCRDBService(() -> {
@@ -2519,13 +2564,13 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				mReaderView.doEngineCommand(ReaderCommand.DCMD_SET_ROTATION_INFO_FOR_AA, screenRotation);
 			}
 		});
-		
+
 	}
-	
+
 	public boolean isBrowserCreated() {
 		return mBrowserFrame != null;
 	}
-	
+
 	private void runInBrowser(final Runnable task, final boolean dontShowBrowser) {
 		waitForCRDBService(() -> {
 			if (mBrowserFrame == null) {
@@ -2611,19 +2656,19 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			task.run();
 			if (!dontShowBrowser) setCurrentFrame(mBrowserFrame);
 		});
-		
+
 	}
-	
+
 	public void showBrowser() {
 		runInBrowser(() -> {
 			// do nothing, browser is shown
 		}, false);
 	}
-	
+
 	public void showManual() {
 		loadDocument("@manual", "", null, null, false);
 	}
-	
+
 	public static final String OPEN_FILE_PARAM = "FILE_TO_OPEN";
 	public void loadDocument(final String item, final Object fileLink, final Runnable doneCallback, final Runnable errorCallback, final boolean forceSync)
 	{
@@ -2729,26 +2774,31 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	{
 		showReader();
 	}
-	
+
 	public static final String OPEN_DIR_PARAM = "DIR_TO_OPEN";
 	public void showBrowser(final FileInfo dir, String addFilter) {
 		String pathname = "";
 		if (dir != null) pathname = dir.pathname;
-		runInBrowser(() -> mBrowser.showDirectory(dir, null, addFilter, null), FileInfo.RESCAN_LIBRARY_TAG.equals(pathname));
+		runInBrowser(() -> mBrowser.showDirectory(dir, null, addFilter,
+				null, -1), FileInfo.RESCAN_LIBRARY_TAG.equals(pathname));
 	}
-	
+
 	public void showBrowser(final String dir) {
-		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, "", null), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
+		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir),
+				null, "", null, -1), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
 	}
 
 	public void showBrowser(final String dir, String addFilter) {
-		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, addFilter, null), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
+		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir),
+				null, addFilter, null, -1), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
 	}
 
 	public void showBrowser(final String dir, Object params) {
-		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir), null, "", params), FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
+		runInBrowser(() -> mBrowser.showDirectory(Services.getScanner().pathToFileInfo(dir),
+				null, "", params, -1),
+				FileInfo.RESCAN_LIBRARY_TAG.equals(dir));
 	}
-	
+
 	public void showRecentBooks() {
 		log.d("Activities.showRecentBooks() is called");
 		runInBrowser(() -> mBrowser.showRecentBooks(), false);
@@ -2766,7 +2816,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 
 	public void showCatalog(final FileInfo path, String addFilter) {
 		log.d("Activities.showCatalog(" + path + ") is called");
-		runInBrowser(() -> mBrowser.showDirectory(path, null, addFilter, null), false);
+		runInBrowser(() -> mBrowser.showDirectory(path, null, addFilter,
+				null, -1), false);
 	}
 
 	public void setBrowserTitle(String title, FileInfo dir) {
@@ -2801,7 +2852,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void findInDictionary(String s, boolean fullScreen, View view, DictionaryCallback dcb) {
 		if (s != null && s.length() != 0) {
 			int start,end;
-			
+
 			// Skip over non-letter characters at the beginning and end of the search string
 			for (start = 0 ;start<s.length(); start++)
 				if (Character.isLetterOrDigit(s.charAt(start)))
@@ -2819,7 +2870,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 	}
-	
+
 	private void findInDictionaryInternal(String s, boolean fullScreen,  View view, DictionaryCallback dcb) {
 		log.d("lookup in dictionary: " + s);
 		try {
@@ -2847,7 +2898,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		findInDictionaryInternal(null, fullScreen, null, null);
 
 	}
-	
+
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		try {
@@ -2964,7 +3015,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 		requestCode = 0;
 	}
-	
+
 	public void setDict(String id) {
 		mDictionaries.setDict(id, this);
 	}
@@ -3110,9 +3161,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 					if (ttsControlServiceAccessor == null) initTTS(null, true);
-					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null,
+					//if (optionsDialog == null)
+					optionsDialog = new OptionsDialog(CoolReader.this);
+					optionsDialog.init(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null,
 							ttsControlServiceAccessor);
-					dlg.show();
+					optionsDialog.show();
 				});
 			});
 	}
@@ -3128,10 +3181,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(() -> {
 					if (ttsControlServiceAccessor == null) initTTS(null, true);
-					OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles,
+					//if (optionsDialog == null)
+					optionsDialog = new OptionsDialog(CoolReader.this);
+					optionsDialog.init(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles,
 							null, ttsControlServiceAccessor);
-					dlg.selectedTab = tab;
-					dlg.show();
+					optionsDialog.selectedTab = tab;
+					optionsDialog.show();
 				});
 			});
 	}
@@ -3152,10 +3207,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 				}
 				if (ttsControlServiceAccessor == null) initTTS(null, true);
-				OptionsDialog dlg = new OptionsDialog(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts,
+				//if (optionsDialog == null)
+				optionsDialog = new OptionsDialog(CoolReader.this);
+				optionsDialog.init(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts,
 						ttsControlServiceAccessor);
-				dlg.selectedOption = selectOption;
-				dlg.show();
+				optionsDialog.selectedOption = selectOption;
+				optionsDialog.show();
 			});
 		});
 	}
@@ -3334,14 +3391,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			mReaderFrame.showMenu();
 		}
 	}
-	
+
 	public void sendBookFragment(BookInfo bookInfo, String chapter, String text) {
         final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
         emailIntent.setType("text/plain");
     	emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, (bookInfo.getFileInfo().getAuthors() + " " + bookInfo.getFileInfo().getTitle()
 		 + " " + chapter).trim());
         emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-		startActivity(Intent.createChooser(emailIntent, null));	
+		startActivity(Intent.createChooser(emailIntent, null));
 	}
 
 	public void showBookmarksDialog(final boolean bOnlyChoose, final Object obj)
@@ -3351,7 +3408,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			dlg.show();
 		});
 	}
-	
+
 	public void openURL(String url, boolean withAsking) {
 		if (!withAsking) {
 			try {
@@ -3391,8 +3448,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 
-	
-	
+
+
 	public boolean isBookOpened() {
 		if (mReaderView == null)
 			return false;
@@ -3540,7 +3597,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			else directoryUpdated(fi);
 		}
 	}
-	
+
 	public void askDeleteRecent(final FileInfo item)
 	{
 		askConfirmation(R.string.win_title_confirm_history_record_delete, () -> waitForCRDBService(() -> {
@@ -3548,7 +3605,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			directoryUpdated(Services.getScanner().createRecentRoot());
 		}));
 	}
-	
+
 	public void askDeleteCatalog(final FileInfo item)
 	{
 		askConfirmation(R.string.win_title_confirm_catalog_delete, () -> {
@@ -3700,7 +3757,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		if (mReaderView != null)
 			mReaderView.saveSetting(name, value);
 	}
-	
+
 	public void editBookInfo(final FileInfo currDirectory, final FileInfo item) {
 		waitForCRDBService(() -> Services.getHistory().getOrCreateBookInfo(getDB(), item, bookInfo -> {
 			if (bookInfo == null)
@@ -4169,58 +4226,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //						items.add("book.genres=" + fi.genres);
 //					}
 //				}
-				String genreText = "";
-				String genreR = fi.genre_list;
-				if (StrUtils.isEmptyStr(genreR)) genreR = fi.genre;
-				if (!StrUtils.isEmptyStr(genreR)) {
-					// lets try to get out genre name
-					GenreSAXElem ge = null;
-					String genreDescr = "";
-					if (!StrUtils.isEmptyStr(genreR)) {
-						String [] arrGenre = genreR.split("\\|");
-						for (String genre: arrGenre) {
-							if (!StrUtils.isEmptyStr(genre)) {
-								String lang = CoolReader.this.getCurrentLanguage();
-								if (lang.length() > 2) lang = lang.substring(0, 2);
-
-								GenreSAXElem.mActivity = CoolReader.this;
-								try {
-									if (GenreSAXElem.elemList.size() == 0)
-										GenreSAXElem.initGenreList();
-								} catch (Exception e) {
-									log.e("exception while init genre list", e);
-								}
-								genreDescr = "";
-								ge = GenreSAXElem.getGenreDescr(lang, genre);
-								String[] ge2 = null;
-								if (ge != null) {
-									if (ge.hshAttrs != null) {
-										genreDescr = ge.hshAttrs.get("detailed");
-										if (StrUtils.isEmptyStr(genreDescr))
-											genreDescr = ge.hshAttrs.get("genre-title");
-										if (StrUtils.isEmptyStr(genreDescr))
-											genreDescr = ge.hshAttrs.get("title");
-									}
-								} else {
-									ge2 = GenreSAXElem.elemList2.get(genre);
-									if (ge2!=null) {
-										if (lang.toUpperCase().equals("RU")) genreDescr = ge2[0];
-										else genreDescr = ge2[1];
-									}
-								}
-								String addGenreText = "";
-								if ((!StrUtils.isEmptyStr(genre)) && (!StrUtils.isEmptyStr(genreDescr)))
-									addGenreText = genreDescr+" ("+genre+")";
-								if ((!StrUtils.isEmptyStr(genre)) && (StrUtils.isEmptyStr(genreDescr)))
-									addGenreText = genre;
-								if (StrUtils.isEmptyStr(genreText)) genreText = addGenreText;
-								else genreText = genreText + "; "+addGenreText;
-							}
-						}
-					}
-					if (!StrUtils.isEmptyStr(genreText))
-						itemsBook.add(new BookInfoEntry("book.genre", genreText,"text"));
-				}
+				String genreText = Utils.getGenreText(CoolReader.this, fi, true);
+				if (!StrUtils.isEmptyStr(genreText))
+					itemsBook.add(new BookInfoEntry("book.genre", genreText,"text"));
 				String annot = "";
 				if (!StrUtils.isEmptyStr(fi.annotation)) {
 					annot = fi.annotation;
@@ -4501,7 +4509,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         log.i("getLastLocation() = " + res);
         return res;
 	}
-	
+
+	public static String LAST_LOCATION = "";
 	/**
 	 * Open location - book, root view, folder...
 	 */
@@ -4509,6 +4518,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		String location = getLastLocation();
 		if (location == null)
 			location = FileInfo.ROOT_DIR_TAG;
+		LAST_LOCATION = location;
 		if (location.startsWith(BOOK_LOCATION_PREFIX)) {
 			location = location.substring(BOOK_LOCATION_PREFIX.length());
 			final String floc = location;
@@ -4531,6 +4541,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			return;
 		}
 		// TODO: support other locations as well
+		location = FileInfo.ROOT_DIR_TAG;
 		showRootWindow();
 	}
 

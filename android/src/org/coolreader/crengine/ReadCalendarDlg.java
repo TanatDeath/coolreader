@@ -12,7 +12,6 @@ import android.widget.TextView;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.db.CalendarStats;
-import org.coolreader.dic.ExtDicList;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -113,13 +112,15 @@ public class ReadCalendarDlg extends BaseDialog {
 		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mInflater = LayoutInflater.from(getContext());
 		mDialogView = mInflater.inflate(R.layout.calendar_stats_dialog, null);
-		mBody = mDialogView.findViewById(R.id.article_list);
+		mBody = mDialogView.findViewById(R.id.calendar_stats_list);
 		Button btnPrev = mDialogView.findViewById(R.id.btn_calendar_stats_prev);
 		Button btnNext = mDialogView.findViewById(R.id.btn_calendar_stats_next);
 		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT = Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		btnPrev.setBackgroundColor(colorGrayC);
 		btnNext.setBackgroundColor(colorGrayC);
+		if (isEInk) Utils.setSolidButtonEink(btnPrev);
+		if (isEInk) Utils.setSolidButtonEink(btnNext);
 		TextView tv = mDialogView.findViewById(R.id.tv_calendar_stats_month);
 		tvCalc = mDialogView.findViewById(R.id.tv_calendar_stats_calc);
 		String sdate = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(new java.util.Date());

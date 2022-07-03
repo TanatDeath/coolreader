@@ -54,7 +54,7 @@ public class EinkScreenNook implements EinkScreen {
 	}
 
 	@Override
-	public void setNeedDeepGC(boolean needDeepGC) {
+	public void setDeepUpdateInterval(int deepUpdateInterval) {
 
 	}
 
@@ -137,6 +137,11 @@ public class EinkScreenNook implements EinkScreen {
 	@Override
 	public int getUpdateInterval() {
 		return mUpdateInterval;
+	}
+
+	@Override
+	public int getDeepUpdateInterval() {
+		return 0;
 	}
 
 	@Override

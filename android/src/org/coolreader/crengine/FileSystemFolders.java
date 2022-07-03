@@ -24,7 +24,7 @@ public class FileSystemFolders extends FileInfoChangeSource {
         }
 
         @Override
-        public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
+        public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefixp) {
 
         }
     };

@@ -27,11 +27,10 @@ import org.coolreader.layouts.FlowLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabContentFactory, ActionClickedCallback {
 
-	final BaseActivity mActivity;
-	final Context mContext;
 	FlowLayout mFlToolbar;
 	FlowLayout mFlMenu;
 
@@ -62,10 +61,8 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 
-	public ReaderToolbarOption(BaseActivity activity, Context context, OptionOwner owner, String label, String addInfo, String filter ) {
+	public ReaderToolbarOption(OptionOwner owner, String label, String addInfo, String filter ) {
 		super(owner, label, Settings.PROP_TOOLBAR_BUTTONS, addInfo, filter);
-		mActivity = activity;
-		mContext = context;
 	}
 
 	private void addAction(OptionsListView list, ReaderAction action) {
@@ -78,10 +75,10 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 				break;
 			}
 
-		String lab1 = mActivity.getString(action.nameId);
+		String lab1 = action.getNameText(mActivity);
 		int mirrIcon = 0;
 		if (action.getMirrorAction()!=null) {
-			lab1 = lab1 + "~" + mActivity.getString(R.string.long_tap) + ": " +mActivity.getString(action.getMirrorAction().nameId);
+			lab1 = lab1 + "~" + mActivity.getString(R.string.long_tap) + ": " + action.getMirrorAction().getNameText(mActivity);
 			mirrIcon = action.getMirrorAction().iconId;
 		}
 		OptionBase toolbopt = new ActionOptionExt(this, mOwner,
@@ -125,13 +122,13 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 	}
 
 	public boolean updateFilterEnd() {
-		ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
 
-		for ( ReaderAction a : actions )
+		for (ReaderAction a : actions)
 			if (
-					((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.ABOUT))
+				((a != ReaderAction.NONE) && (a != ReaderAction.EXIT) && (a != ReaderAction.ABOUT))
 			) {
-				String lab1 = mActivity.getString(a.nameId);
+				String lab1 = a.getNameText(mActivity);
 				this.updateFilteredMark(lab1);
 				this.updateFilteredMark(Settings.PROP_TOOLBAR_BUTTONS+"."
 						+String.valueOf(a.cmd.nativeId)+"."+String.valueOf(a.param));
@@ -158,7 +155,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 			((ViewGroup) llQF.getParent()).removeView(llQF);
 
 			ImageButton ibSearch = view.findViewById(R.id.btn_search);
-			final OptionsListView listView = new OptionsListView(mContext, this);
+			final OptionsListView listView = new OptionsListView(mActivity, this);
 			tvSearchText.addTextChangedListener(new TextWatcher() {
 				@Override
 				public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
@@ -182,7 +179,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 			tvSearchText.setHintTextColor(colorIcon128);
 			if (isEInk) Utils.setSolidEditEink(tvSearchText);
 
-			ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+			List<ReaderAction> actions = ReaderAction.getAvailActions(true);
 
 			for (ReaderAction a : actions)
 				// decided to add all actions due to allow sort their priority
@@ -287,13 +284,13 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 		if (fl == null) return;
 		fl.removeAllViews();
 		sProp = StrUtils.getNonEmptyStr(sProp, true);
-		ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
 		for (String btn: sProp.split(",")) {
 			for (ReaderAction ra: actions) {
 				if ((ra.cmd.nativeId +"."+ ra.param).equals(btn)) {
 					View view = mInflater.inflate(R.layout.toolbar_button_item, null);
 					TextView tv = view.findViewById(R.id.tv_middle);
-					String title = mActivity.getString(ra.nameId);
+					String title = ra.getNameText(mActivity);
 					tv.setText(title);
 					final String btnId = ra.cmd.nativeId +"."+ ra.param;
 					ImageView iv = view.findViewById(R.id.iv_middle);

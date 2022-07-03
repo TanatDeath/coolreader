@@ -15,6 +15,11 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 	int[] mScreenFullUpdateInterval = new int[] {
 			1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 40, 50
 	};
+
+	int[] mScreenDeepFullUpdateInterval = new int[] {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+	};
+
 	int[] mScreenBlackPageInterval = new int[] {
 			0, 1, 2, 3, 4, 5, 7, 10, 15, 20
 	};
@@ -55,17 +60,21 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 	};
 
 	int[] mEinkFullScreenUpdateMode = new int[] {
-			0, 1, 2, 3
+			0, 1, 2, 3, 4, 5
 	};
 
 	int[] mEinkFullScreenUpdateModeTitles = new int[] {
 			R.string.eink_full_update_auto,
 			R.string.eink_full_update_method1,
 			R.string.eink_full_update_method2,
-			R.string.eink_full_update_method3
+			R.string.eink_full_update_method3,
+			R.string.eink_full_update_method4,
+			R.string.eink_full_update_method5
 	};
 
 	int[] mEinkFullScreenUpdateModeAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -162,16 +171,17 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 					setIconIdByAttr(R.attr.attr_icons8_blackpage_interval, R.drawable.icons8_blackpage_interval);
 			boolean intervalAdded = false;
 			if ( DeviceInfo.EINK_ONYX ) {
-				OptionBase optionRegal =
-						new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_screen_update_mode_onyx_regal), Settings.PROP_APP_EINK_ONYX_REGAL,
-								mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-								setDefaultValue("1").
-								setIconIdByAttr(R.attr.attr_icons8_eink_snow, R.drawable.icons8_eink_snow);
-				listView.add(optionRegal);
+				if (DeviceInfo.EINK_SCREEN_REGAL) {
+					OptionBase optionRegal =
+							new BoolOption(mOwner, mActivity.getString(R.string.options_screen_update_mode_onyx_regal), Settings.PROP_APP_EINK_ONYX_REGAL,
+									mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+									setDefaultValue("1").
+									setIconIdByAttr(R.attr.attr_icons8_eink_snow, R.drawable.icons8_eink_snow);
+					listView.add(optionRegal);
+				}
 				optionMode = new ListOption(mOwner, mActivity.getString(R.string.options_screen_update_mode), Settings.PROP_APP_SCREEN_UPDATE_MODE,
 						mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
-				if (DeviceInfo.EINK_SCREEN_REGAL)
-					optionMode = optionMode.add(mOnyxScreenUpdateModes[0], mOnyxScreenUpdateModesTitles[0], R.string.option_add_info_empty_text);
+				optionMode = optionMode.add(mOnyxScreenUpdateModes[0], mOnyxScreenUpdateModesTitles[0], R.string.option_add_info_empty_text);
 				optionMode = optionMode.add(mOnyxScreenUpdateModes[1], mOnyxScreenUpdateModesTitles[1], R.string.option_add_info_empty_text);
 				optionMode = optionMode.add(mOnyxScreenUpdateModes[2], mOnyxScreenUpdateModesTitles[2], R.string.option_add_info_empty_text);
 				optionMode = optionMode.add(mOnyxScreenUpdateModes[3], mOnyxScreenUpdateModesTitles[3], R.string.option_add_info_empty_text);
@@ -189,8 +199,9 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 				listView.add(optionNeedBypass);
 
 				OptionBase optionNeedDeepGC =
-						new BoolOption(mActivity, mOwner, mActivity.getString(R.string.eink_onyx_deepgc), Settings.PROP_APP_EINK_ONYX_NEED_DEEPGC,
+						new ListOption(mOwner, mActivity.getString(R.string.eink_onyx_deepgc), Settings.PROP_APP_EINK_ONYX_NEED_DEEPGC,
 								mActivity.getString(R.string.eink_onyx_deepgc_add_info), this.lastFilteredValue).
+								add(mScreenDeepFullUpdateInterval).
 								setDefaultValue("0").
 								setIconIdByAttr(R.attr.attr_icons8_eink_sett, R.drawable.icons8_eink_sett);
 				listView.add(optionNeedDeepGC);

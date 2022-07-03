@@ -7,7 +7,7 @@ PV="1.0.10"
 # when version changed, reset to "1".
 REV="1"
 SRCFILE="${PN}-${PV}.tar.xz"
-SHA512="cb51920012c3c7507c17e2beb1dbbcfb8d7c6404e4cb54b260a332754a0d5b103d8834d77e8795651b3f38069c9bd2e9914c21b001411a72f9ffe1ec1ef2f360"
+SHA512=""
 
 URL="https://github.com/fribidi/fribidi/releases/download/v${PV}/${SRCFILE}"
 

@@ -37,7 +37,7 @@ public class UrbanTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
-						DicToastView.IS_URBAN, "", fullScreen);
+						DicToastView.IS_URBAN, "", curDict, fullScreen);
 				return;
 			}
 		}
@@ -106,12 +106,12 @@ public class UrbanTranslate {
 											urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 								} else
 									cr.showDicToast(s, cr.getString(R.string.not_found), DicToastView.IS_URBAN,
-											urlBuilder.build().url().toString(), fullScreen);
+											urlBuilder.build().url().toString(), curDict, fullScreen);
 							} else {
 								dcb.done(s, Dictionaries.dslStructToString(dsl));
 								if (dcb.showDicToast()) {
 									cr.showDicToast(s, finalSTitle, DicToastView.IS_URBAN,
-											urlBuilder.build().url().toString(), fullScreen);
+											urlBuilder.build().url().toString(), curDict, fullScreen);
 								}
 								if (dcb.saveToHist())
 									if (!StrUtils.isEmptyStr(finalSTitle)) {
@@ -122,7 +122,7 @@ public class UrbanTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented),
-								DicToastView.IS_URBAN, "", fullScreen);
+								DicToastView.IS_URBAN, "", curDict, fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -132,7 +132,7 @@ public class UrbanTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_URBAN, "", fullScreen);
+							DicToastView.IS_URBAN, "", curDict, fullScreen);
 				}, 100));
 			}
 		});

@@ -711,6 +711,7 @@ public class LitresJsons {
 						}
 					}
 					if (authors.length()>0) item.setAuthors(authors.substring(1));
+					if (authors.length()>0) item.setAuthorsLFM(authors.substring(1));
 					String genres = "";
 					if (jso.has("genres")) {
 						JSONArray jsonaP = (JSONArray) jso.get("genres");

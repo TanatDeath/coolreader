@@ -96,7 +96,7 @@ public class BookInfo implements Parcelable {
 		return lastPosition;
 	}
 	
-	public void setLastPosition( Bookmark position )
+	public void setLastPosition(Bookmark position)
 	{
 		synchronized (this) {
 			if ( lastPosition!=null ) {

@@ -9,8 +9,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.coolreader.R;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.OptionOwner;
+import org.coolreader.crengine.ReaderAction;
+import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
@@ -19,12 +20,11 @@ public class BoolOption extends OptionBase {
 
 	private boolean inverse = false;
 	private String comment;
-	final BaseActivity mActivity;
 
-	public BoolOption(BaseActivity activity, OptionOwner owner, String label, String property, String addInfo, String filter ) {
+	public BoolOption(OptionOwner owner, String label, String property, String addInfo, String filter) {
 		super(owner, label, property, addInfo, filter);
-		mActivity = activity;
 	}
+
 	private boolean getValueBoolean() { return "1".equals(mProperties.getProperty(property)) ^ inverse; }
 	public String getValueLabel() { return getValueBoolean()  ? mActivity.getString(R.string.options_value_on) : mActivity.getString(R.string.options_value_off); }
 	public void onSelect() {
@@ -112,5 +112,13 @@ public class BoolOption extends OptionBase {
 		setupIconView(view.findViewById(R.id.option_icon));
 		mActivity.tintViewIcons(view,false);
 		return view;
+	}
+
+	@Override
+	public void registerReaderOption() {
+		ReaderAction ra = new ReaderAction(property,
+			0, 0, ReaderCommand.DCMD_BOOL_OPTION,
+			0, 0, null, R.string.option_add_info_empty_text, this);
+		ReaderAction.OPTIONS_ACTIONS.put(property, ra);
 	}
 }

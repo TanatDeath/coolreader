@@ -98,20 +98,18 @@ public class FilebrowserSecGroupOption extends SubmenuOption {
 			R.string.option_add_info_empty_text
 	};
 
-	final BaseActivity mActivity;
-	final Context mContext;
+	public static int[] mBrowserMaxGroupItemsSec;
 
-	public FilebrowserSecGroupOption(BaseActivity activity, Context context, OptionOwner owner, String label, String addInfo, String filter ) {
+	public FilebrowserSecGroupOption(OptionOwner owner, String label, String addInfo, String filter ) {
 		super(owner, label, Settings.PROP_FILEBROWSER_SEC_GROUP, addInfo, filter);
-		mActivity = activity;
-		mContext = context;
 	}
 
 	public void onSelect() {
 		if (!enabled)
 			return;
 		BaseDialog dlg = new BaseDialog("FilebrowserSecGroupOption", mActivity, label, false, false);
-		OptionsListView listView = new OptionsListView(mContext, this);
+		OptionsListView listView = new OptionsListView(mActivity, this);
+		mBrowserMaxGroupItemsSec = mActivity.getResources().getIntArray(R.array.browser_max_group_items0);
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.sec_group_common), Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				add(mSecGroupCommon, mSecGroupCommonTitles, mSecGroupCommonTitlesAddInfos).setDefaultValue("0").
@@ -144,6 +142,18 @@ public class FilebrowserSecGroupOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				add(mSecGroupCommon2, mSecGroupCommonTitles2, mSecGroupCommonTitlesAddInfos2).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_folder_scan, R.drawable.icons8_folder_scan));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.mi_book_browser_max_group_size_author), Settings.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR,
+				mActivity.getString(R.string.mi_book_browser_max_group_size_add_info_sec), this.lastFilteredValue).
+				add(mBrowserMaxGroupItemsSec).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.mi_book_browser_max_group_size_series), Settings.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES,
+				mActivity.getString(R.string.mi_book_browser_max_group_size_add_info_sec), this.lastFilteredValue).
+				add(mBrowserMaxGroupItemsSec).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.mi_book_browser_max_group_size_genres), Settings.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES,
+				mActivity.getString(R.string.mi_book_browser_max_group_size_add_info_sec), this.lastFilteredValue).
+				add(mBrowserMaxGroupItemsSec).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.mi_book_browser_max_group_size_dates), Settings.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES,
+				mActivity.getString(R.string.mi_book_browser_max_group_size_add_info_sec), this.lastFilteredValue).
+				add(mBrowserMaxGroupItemsSec).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
 		dlg.setView(listView);
 		dlg.show();
 	}

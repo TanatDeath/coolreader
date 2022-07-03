@@ -19,16 +19,17 @@ import org.coolreader.utils.Utils;
 
 public class ColorOption extends OptionBase {
 	final int defColor;
-	final BaseActivity mActivity;
-	public ColorOption(BaseActivity activity, OptionOwner owner, String label, String property, int defColor, String addInfo, String filter) {
+
+	public ColorOption(OptionOwner owner, String label, String property, int defColor, String addInfo, String filter) {
 		super(owner, label, property, addInfo, filter);
-		mActivity = activity;
 		String[] colorNames = mActivity.getResources().getStringArray(R.array.colorNames);
 		for(int i=0; i<colorNames.length; i++)
 			this.updateFilteredMark(colorNames[i]);
 		this.defColor = defColor;
 	}
+
 	public String getValueLabel() { return mProperties.getProperty(property); }
+
 	public void onSelect()
 	{
 		if (!enabled)

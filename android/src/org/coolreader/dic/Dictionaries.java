@@ -11,6 +11,7 @@ import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.dic.struct.DicStruct;
+import org.coolreader.onyx.OnyxTranslate;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.readerview.ReaderView;
@@ -81,6 +82,7 @@ public class Dictionaries {
 	public static TurengTranslate turengTranslate = null;
 	public static UrbanTranslate urbanTranslate = null;
 	public static OfflineDicTranslate offlineTranslate = null;
+	public static OnyxapiTranslate onyxapiTranslate = null;
 
 	public static OkHttpClient client = new OkHttpClient.Builder().
 		connectTimeout(20,TimeUnit.SECONDS).
@@ -123,8 +125,11 @@ public class Dictionaries {
 			final int bottomSpace = metrics.heightPixels - selectionBottom;
 			final boolean showAtBottom = bottomSpace >= topSpace;
 			final int space = (showAtBottom ? bottomSpace : topSpace) - metrics.densityDpi / 12;
-			final int maxHeight = Math.min(metrics.densityDpi * 20 / 12, heightPixels * 2 / 3);
-			final int minHeight = Math.min(metrics.densityDpi * 10 / 12, heightPixels * 2 / 3);
+			// dont rememver what it was, but shown is too small on 7.8 inch einks
+			//final int maxHeight = Math.min(metrics.densityDpi * 20 / 12, heightPixels * 2 / 3);
+			//final int minHeight = Math.min(metrics.densityDpi * 10 / 12, heightPixels * 2 / 3);
+			final int maxHeight = heightPixels * 2 / 3;
+			final int minHeight = heightPixels * 2 / 3;
 
 			Height = Math.max(minHeight, Math.min(maxHeight, space));
 			HeightMore = ((Height * 2) / 3) * 2; //((Height * 2) / 5) * 3;
@@ -380,6 +385,8 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 18, R.drawable.urban_dict, null, URBAN_ONLINE, true, "UrbanO"),
 		new DictInfo("Offline dictionaries", "Offline dictionaries", "", "",
 				Intent.ACTION_SEND, 19, R.drawable.icons8_offline_dics2, null, "", true, "Offline"),
+		new DictInfo("OnyxDictAPI", "OnyxDict API", "", "",
+				Intent.ACTION_SEND, 20, R.drawable.onyx_dictionary, null, "", true, "OnyxApi"),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -390,8 +397,9 @@ public class Dictionaries {
 	public static DictInfo findById(String id, BaseActivity act) {
 		if (act == null) {
 			for (DictInfo d : dicts) {
-				if (d.id.equals(id))
-					return d;
+				if ((!d.id.equals("OnyxDictAPI")) || (OnyxTranslate.ONYX_API_TRANSLATE_AVAIL))
+					if (d.id.equals(id))
+						return d;
 			}
 		} else {
 			for (DictInfo d : getDictList(act)) {
@@ -447,7 +455,9 @@ public class Dictionaries {
 
 	public static List<DictInfo> getDictList(BaseActivity act) {
 		List<DictInfo> ldi = new ArrayList<DictInfo>();
-		for (DictInfo di: dicts) ldi.add(di);
+		for (DictInfo di: dicts)
+			if ((!di.id.equals("OnyxDictAPI")) || (OnyxTranslate.ONYX_API_TRANSLATE_AVAIL))
+				ldi.add(di);
 		addDicsSendTo(act, ldi);
 		return ldi;
 	}
@@ -474,7 +484,8 @@ public class Dictionaries {
 			}
 		}
 		for (DictInfo dict : dicts) {
-			if ((dict.isInstalled()) || (!bOnlyInstalled)) dlist.add(dict);
+			if ((!dict.id.equals("OnyxDictAPI")) || (OnyxTranslate.ONYX_API_TRANSLATE_AVAIL))
+				if ((dict.isInstalled()) || (!bOnlyInstalled)) dlist.add(dict);
 		}
 		addDicsSendTo(act, dlist);
 		return dlist;
@@ -1338,6 +1349,11 @@ public class Dictionaries {
 				}
 				if (offlineTranslate == null) offlineTranslate = new OfflineDicTranslate();
 				offlineTranslate.offlineDicTranslate(cr, s, fullScreen,
+						langf, lang, curDict, view, extended, null, dcb);
+				break;
+			case 20:
+				if (onyxapiTranslate == null) onyxapiTranslate = new OnyxapiTranslate();
+				onyxapiTranslate.onyxapiTranslate(cr, s, fullScreen,
 						langf, lang, curDict, view, extended, null, dcb);
 				break;
 			}

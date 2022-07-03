@@ -83,12 +83,10 @@ public class StatusBarOption extends SubmenuOption {
 			-5, -10, -15, -20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -80, -90, -100
 	};
 
-	final BaseActivity mActivity;
 	final OptionsDialog mOptionsDialog;
 
-	public StatusBarOption(BaseActivity activity, OptionsDialog od, OptionOwner owner, String label, String property, String addInfo, String filter ) {
+	public StatusBarOption(OptionsDialog od, OptionOwner owner, String label, String property, String addInfo, String filter ) {
 		super(owner, label, property, addInfo, filter);
-		mActivity = activity;
 		mOptionsDialog = od;
 	}
 
@@ -100,7 +98,7 @@ public class StatusBarOption extends SubmenuOption {
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar), Settings.PROP_STATUS_LOCATION, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mStatusPositions,
 				mStatusPositionsTitles, mStatusPositionsAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_document_r_title,
 				R.drawable.icons8_document_r_title));
-		listView.add(new FontSelectOption(mActivity, mOwner, mActivity.getString(R.string.options_page_titlebar_font_face), Settings.PROP_STATUS_FONT_FACE,
+		listView.add(new FontSelectOption(mOwner, mActivity.getString(R.string.options_page_titlebar_font_face), Settings.PROP_STATUS_FONT_FACE,
 				mActivity.getString(R.string.option_add_info_empty_text), false, this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
 				R.drawable.cr3_option_font_face));
 		//listView.add(new NumberPickerOption(mOwner, mActivity.getString(R.string.options_page_titlebar_font_size), PROP_STATUS_FONT_SIZE).setMinValue(mActivity.getMinFontSize()).setMaxValue(mActivity.getMaxFontSize()).setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
@@ -110,7 +108,7 @@ public class StatusBarOption extends SubmenuOption {
 				.setDefaultValue("18").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size);
 		for (int i = 0; i <= OptionsDialog.mFontSizes.length-1; i++) optFontSize.add(""+OptionsDialog.mFontSizes[i], ""+OptionsDialog.mFontSizes[i],"");
 		listView.add(optFontSize);
-		mOptionsDialog.mTitleBarFontColor1 = new ColorOption(mActivity, mOwner,
+		mOptionsDialog.mTitleBarFontColor1 = new ColorOption(mOwner,
 				mActivity.getString(R.string.options_page_titlebar_font_color)+" ("+
 						mActivity.getString(R.string.options_page_titlebar_short)+")", Settings.PROP_STATUS_FONT_COLOR, 0x000000, mActivity.getString(R.string.option_add_info_empty_text),
 				this.lastFilteredValue).setIconIdByAttr(R.attr.attr_icons8_font_color,
@@ -119,30 +117,30 @@ public class StatusBarOption extends SubmenuOption {
 //			listView.add(new ColorOption(mOwner, mActivity.getString(R.string.options_page_titlebar_font_color), PROP_STATUS_FONT_COLOR, 0x000000, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 //					setIconIdByAttr(R.attr.attr_icons8_font_color,
 //							R.drawable.icons8_font_color));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_title), Settings.PROP_SHOW_TITLE,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_title), Settings.PROP_SHOW_TITLE,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_title2,
 				R.drawable.icons8_book_title2));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_page_number), Settings.PROP_SHOW_PAGE_NUMBER, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_page_number), Settings.PROP_SHOW_PAGE_NUMBER, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
 				R.drawable.icons8_page_num));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_page_count), Settings.PROP_SHOW_PAGE_COUNT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_page_count), Settings.PROP_SHOW_PAGE_COUNT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_pages_total,
 				R.drawable.icons8_pages_total));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_pages_to_chapter), Settings.PROP_SHOW_PAGES_TO_CHAPTER,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_pages_to_chapter), Settings.PROP_SHOW_PAGES_TO_CHAPTER,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
 				R.drawable.icons8_page_num));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_time_left), Settings.PROP_SHOW_TIME_LEFT,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_time_left), Settings.PROP_SHOW_TIME_LEFT,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
 				R.drawable.icons8_page_num));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_percent), Settings.PROP_SHOW_POS_PERCENT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_percent), Settings.PROP_SHOW_POS_PERCENT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_page_percent,
 				R.drawable.icons8_page_percent));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_chapter_marks), Settings.PROP_STATUS_CHAPTER_MARKS, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_chapter_marks), Settings.PROP_STATUS_CHAPTER_MARKS, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_chapter_marks,
 				R.drawable.icons8_chapter_marks));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_page_show_titlebar_battery_percent), Settings.PROP_SHOW_BATTERY_PERCENT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_battery_percent), Settings.PROP_SHOW_BATTERY_PERCENT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_battery_percent,
 				R.drawable.icons8_battery_percent));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_rounded_corners_margin), Settings.PROP_ROUNDED_CORNERS_MARGIN,
@@ -156,7 +154,7 @@ public class StatusBarOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mScreenMod,
 				mScreenModTitles, mScreenModAddInfos).
 				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin2, R.drawable.icons8_rounded_corners_margin2));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.rounded_corners_margin_fullscreen_only), Settings.PROP_ROUNDED_CORNERS_MARGIN_FSCR,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.rounded_corners_margin_fullscreen_only), Settings.PROP_ROUNDED_CORNERS_MARGIN_FSCR,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_rounded_corners_margin2, R.drawable.icons8_rounded_corners_margin2));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.ext_fullscreen_margin_text), Settings.PROP_EXT_FULLSCREEN_MARGIN,

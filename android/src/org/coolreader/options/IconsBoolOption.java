@@ -6,8 +6,8 @@ import org.coolreader.crengine.OptionOwner;
 public class IconsBoolOption extends BoolOption {
 
 	final OptionsDialog mOptionsDialog;
-	public IconsBoolOption(BaseActivity activity, OptionsDialog od, OptionOwner owner, String label, String property, String addInfo, String filter) {
-		super(activity, owner, label, property, addInfo, filter);
+	public IconsBoolOption(OptionsDialog od, OptionOwner owner, String label, String property, String addInfo, String filter) {
+		super(owner, label, property, addInfo, filter);
 		mOptionsDialog = od;
 	}
 	public void onSelect() {

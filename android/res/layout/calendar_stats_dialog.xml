@@ -81,7 +81,7 @@
 	</LinearLayout>
 
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/article_list"
+		android:id="@+id/calendar_stats_list"
 		android:orientation="vertical"
 		android:layout_weight="8"
 		android:layout_width="fill_parent"

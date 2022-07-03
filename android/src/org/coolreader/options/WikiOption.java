@@ -26,11 +26,9 @@ public class WikiOption extends ListOption {
 
 	private Document docJsoup = null;
 	private ArrayList<String[]> wikiLangs = new ArrayList<String[]>();
-	final BaseActivity mActivity;
 
-	public WikiOption(BaseActivity activity, OptionOwner owner, String title, String prop, String addInfo, String filter) {
+	public WikiOption(OptionOwner owner, String title, String prop, String addInfo, String filter) {
 		super(owner, title, prop, addInfo, filter);
-		mActivity = activity;
 		this.updateFilteredMark("");
 	}
 

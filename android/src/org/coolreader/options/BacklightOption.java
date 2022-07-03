@@ -210,13 +210,13 @@ public class BacklightOption extends SubmenuOption {
 								setDefaultValue("-1").
 								setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
 					}
-					listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.fix_double_backlight_delta), Settings.PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA,
+					listView.add(new BoolOption(mOwner, mActivity.getString(R.string.fix_double_backlight_delta), Settings.PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA,
 							mActivity.getString(R.string.fix_double_backlight_delta_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
 				}
 			}
 		}
 
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_app_key_backlight_off), Settings.PROP_APP_KEY_BACKLIGHT_OFF,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_key_backlight_off), Settings.PROP_APP_KEY_BACKLIGHT_OFF,
 				mActivity.getString(R.string.options_app_key_backlight_off_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon());
 
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.brightness_swipe_sensivity), Settings.PROP_APP_BACKLIGHT_SWIPE_SENSIVITY,

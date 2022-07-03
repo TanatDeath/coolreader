@@ -74,15 +74,15 @@ public class FindNextDlg {
 		mPanel.findViewById(R.id.search_btn_next).setOnTouchListener(new RepeatOnTouchListener(500, 150,
 				v -> mReaderView.findNext(pattern, false, caseInsensitive)));
 		mPanel.findViewById(R.id.search_btn_plus_1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 1)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 1, null)));
 		mPanel.findViewById(R.id.search_btn_plus_10).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 10)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 10, null)));
 		mPanel.findViewById(R.id.search_btn_minus_1).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1, null)));
 		mPanel.findViewById(R.id.search_btn_minus_10).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 10)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 10, null)));
 		mPanel.findViewById(R.id.search_btn_plus_ch).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, 1, null)));
 		mSeekBar = mPanel.findViewById(R.id.page_seek);
 		if (mSeekBar != null) {
 			mReaderView.getCurrentPositionProperties((props, positionText) -> {
@@ -116,11 +116,11 @@ public class FindNextDlg {
 			});
 		}
 		mPanel.findViewById(R.id.search_btn_minus_ch).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_MOVE_BY_CHAPTER, -1, null)));
 		mPanel.findViewById(R.id.search_btn_plus_bmk).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_NEXT_BOOKMARK, 1)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_NEXT_BOOKMARK, 1, null)));
 		mPanel.findViewById(R.id.search_btn_minus_bmk).setOnTouchListener(new RepeatOnTouchListener(500, 150,
-				v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1)));
+				v -> mReaderView.onCommand(ReaderCommand.DCMD_PREV_BOOKMARK, -1, null)));
 
 		mPanel.findViewById(R.id.search_goback).setOnClickListener(v -> {
 			mReaderView.goToBookmark(fromPage);

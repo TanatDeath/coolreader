@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Context menu for physical folder -->
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:title="@string/mi_folder_open" android:titleCondensed="@string/mi_folder_open" android:id="@+id/folder_open"></item>
+<item android:title="@string/show_group_books_by_author" android:titleCondensed="@string/show_group_books_by_author" android:id="@+id/show_group_books_by_author"></item>
+<item android:title="@string/show_group_books_by_series" android:titleCondensed="@string/show_group_books_by_series" android:id="@+id/show_group_books_by_series"></item>
+<item android:title="@string/show_group_books_by_genre" android:titleCondensed="@string/show_group_books_by_genre" android:id="@+id/show_group_books_by_genre"></item>
+<item android:title="@string/show_group_books_by_bookdate" android:titleCondensed="@string/show_group_books_by_bookdate" android:id="@+id/show_group_books_by_bookdate"></item>
+<item android:title="@string/show_group_books_by_docdate" android:titleCondensed="@string/show_group_books_by_docdate" android:id="@+id/show_group_books_by_docdate"></item>
+<item android:title="@string/show_group_books_by_publyear" android:titleCondensed="@string/folder_name_books_by_publyear" android:id="@+id/show_group_books_by_publyear"></item>
+<item android:title="@string/show_group_books_by_filedate" android:titleCondensed="@string/folder_name_books_by_filedate" android:id="@+id/show_group_books_by_filedate"></item>
+<item android:title="@string/show_group_books_by_rating" android:titleCondensed="@string/folder_name_books_by_rating" android:id="@+id/show_group_books_by_rating"></item>
+<item android:title="@string/show_group_books_by_state" android:titleCondensed="@string/folder_name_books_by_state" android:id="@+id/show_group_books_by_state"></item>
+<item android:title="@string/show_group_books_by_title" android:titleCondensed="@string/show_group_books_by_title" android:id="@+id/show_group_books_by_title"></item>
+</menu>

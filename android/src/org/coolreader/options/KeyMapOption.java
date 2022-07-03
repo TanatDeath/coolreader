@@ -61,19 +61,19 @@ public class KeyMapOption extends SubmenuOption {
 						 int drawableAttrId_double, int fallbackIconId_double) {
 		if (keyFlags.contains(OptionsDialog.KeyActionFlag.KEY_ACTION_FLAG_NORMAL)) {
 			final String propName = ReaderAction.getKeyProp(keyCode, ReaderAction.NORMAL);
-			OptionBase ac = new ActionOption(mActivity, mOwner, keyName, propName, false, false,
+			OptionBase ac = new ActionOption(mOwner, keyName, propName, false, false,
 					mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 			list.add(ac.setIconIdByAttr(drawableAttrId, fallbackIconId));
 		}
 		if (keyFlags.contains(OptionsDialog.KeyActionFlag.KEY_ACTION_FLAG_LONG)) {
 			final String longPropName = ReaderAction.getKeyProp(keyCode, ReaderAction.LONG);
-			OptionBase ac = new ActionOption(mActivity, mOwner, keyName + " " + mContext.getString(R.string.options_app_key_long_press),
+			OptionBase ac = new ActionOption(mOwner, keyName + " " + mContext.getString(R.string.options_app_key_long_press),
 					longPropName, false, true, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 			list.add(ac.setIconIdByAttr(drawableAttrId_long, fallbackIconId_long));
 		}
 		if (keyFlags.contains(OptionsDialog.KeyActionFlag.KEY_ACTION_FLAG_DOUBLE)) {
 			final String dblPropName = ReaderAction.getKeyProp(keyCode, ReaderAction.DOUBLE);
-			OptionBase ac = new ActionOption(mActivity, mOwner, keyName + " " + mContext.getString(R.string.options_app_key_double_press),
+			OptionBase ac = new ActionOption(mOwner, keyName + " " + mContext.getString(R.string.options_app_key_double_press),
 					dblPropName, false, false, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
 			list.add(ac.setIconIdByAttr(drawableAttrId_double, fallbackIconId_double));
 		}

@@ -50,7 +50,6 @@ public class FontSelectOption extends ListOption
 	ArrayList<String> faces = new ArrayList<>();
 	ArrayList<String> faceValues = new ArrayList<>();
 
-	final BaseActivity mActivity;
 	final ReaderView mReaderView;
 	String langTag;
 	String langDescr;
@@ -173,10 +172,9 @@ public class FontSelectOption extends ListOption
 		return true;
 	}
 
-	public FontSelectOption(BaseActivity activity, OptionOwner owner, String label, String property, String addInfo, boolean bForCSS, String filter)
+	public FontSelectOption(OptionOwner owner, String label, String property, String addInfo, boolean bForCSS, String filter)
 	{
 		super(owner, label, property, addInfo, filter);
-		mActivity = activity;
 		mReaderView = ((CoolReader) mActivity).getmReaderView();
 		langTag = null;
 		langDescr = null;

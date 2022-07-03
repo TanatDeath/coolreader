@@ -4,17 +4,15 @@ def apikeyProperties = new Properties()
 apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
 android {
-    compileSdkVersion 30
     defaultConfig {
         //applicationId "org.coolreader.knownreader"
         //applicationId "org.knownreader.premium"
-        minSdkVersion 19
-        targetSdkVersion 30
+        //minSdkVersion 19 - it was 19 without onyx
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202205241
-        versionName "2022.05.24.1"
+        versionCode 202206261
+        versionName "2022.06.26.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -39,25 +37,46 @@ android {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "org.coolreader.knownreader"
+            compileSdkVersion 30
+            minSdkVersion 19
+            targetSdkVersion 30
             manifestPlaceholders = [appLabel:"@string/app_name_free"]
         }
         premium {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "org.knownreader.premium"
+            compileSdkVersion 30
+            minSdkVersion 19
+            targetSdkVersion 30
             manifestPlaceholders = [appLabel:"@string/app_name_premium"]
         }
         fdroid {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "false"
             applicationId "org.knownreader.fdroid"
+            compileSdkVersion 30
+            minSdkVersion 19
+            targetSdkVersion 30
             manifestPlaceholders = [appLabel:"@string/app_name_fdroid"]
         }
         experimental {
             dimension "version"
             buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
             applicationId "com.onyx.org.knownreader.experimental"
+            compileSdkVersion 30
+            minSdkVersion 19
+            targetSdkVersion 30
             manifestPlaceholders = [appLabel:"@string/app_name_exp"]
+        }
+        onyx {
+            dimension "version"
+            buildConfigField "boolean", "GSUITE_AVAILABLE", "true"
+            applicationId "com.onyx.org.knownreader.onyx.new"
+            compileSdkVersion 30
+            minSdkVersion 26
+            targetSdkVersion 29
+            manifestPlaceholders = [appLabel:"@string/app_name_onyx"]
         }
     }
 
@@ -70,27 +89,52 @@ android {
         }
 
         free {
-            java.srcDirs = ['../../android/flavoured/free/src']
-            res.srcDirs = ['../../android/flavoured/free/res']
+            java.srcDirs = ['../../android/flavoured/free/src',
+                            '../../android/flavoured_src/geostub/src',
+                            '../../android/flavoured_src/onyxapistub/src',
+                            '../../android/flavoured_src/sync2stub/src'
+            ]
             manifest.srcFile "../../android/flavoured/free/AndroidManifest.xml"
         }
 
         premium {
-            java.srcDirs = ['../../android/flavoured/premium/src']
-            res.srcDirs = ['../../android/flavoured/premium/res']
+            java.srcDirs = ['../../android/flavoured/premium/src',
+                            '../../android/flavoured_src/geo/src',
+                            '../../android/flavoured_src/onyxapistub/src',
+                            '../../android/flavoured_src/sync2/src'
+            ]
+            res.srcDirs = ['../../android/flavoured_src/geo/res']
             manifest.srcFile "../../android/flavoured/premium/AndroidManifest.xml"
         }
 
         fdroid {
-            java.srcDirs = ['../../android/flavoured/fdroid/src']
-            res.srcDirs = ['../../android/flavoured/fdroid/res']
+            java.srcDirs = ['../../android/flavoured/fdroid/src',
+                            '../../android/flavoured_src/geo/src',
+                            '../../android/flavoured_src/onyxapistub/src',
+                            '../../android/flavoured_src/sync2stub/src'
+            ]
+            res.srcDirs = ['../../android/flavoured_src/geo/res']
             manifest.srcFile "../../android/flavoured/fdroid/AndroidManifest.xml"
         }
 
         experimental {
-            java.srcDirs = ['../../android/flavoured/experimental/src']
-            res.srcDirs = ['../../android/flavoured/experimental/res']
+            java.srcDirs = ['../../android/flavoured/experimental/src',
+                            '../../android/flavoured_src/geo/src',
+                            '../../android/flavoured_src/onyxapistub/src',
+                            '../../android/flavoured_src/sync2/src'
+            ]
+            res.srcDirs = ['../../android/flavoured_src/geo/res']
             manifest.srcFile "../../android/flavoured/experimental/AndroidManifest.xml"
+        }
+
+        onyx {
+            java.srcDirs = ['../../android/flavoured/onyx/src',
+                            '../../android/flavoured_src/geo/src',
+                            '../../android/flavoured_src/onyxapi/src',
+                            '../../android/flavoured_src/sync2/src'
+            ]
+            res.srcDirs = ['../../android/flavoured_src/geo/res']
+            manifest.srcFile "../../android/flavoured/onyx/AndroidManifest.xml"
         }
 
     }
@@ -247,6 +291,15 @@ dependencies {
         exclude group: 'org.apache.httpcomponents'
     }
 
+    onyxImplementation 'com.google.android.gms:play-services-auth:18.1.0'
+    onyxImplementation 'com.google.http-client:google-http-client-gson:1.36.0'
+    onyxImplementation('com.google.api-client:google-api-client-android:1.30.10') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+    onyxImplementation('com.google.apis:google-api-services-drive:v3-rev136-1.25.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+
     //\
     implementation project(path: ':genrescollection')
     implementation project(path: ':eink-onyx-reflections')
@@ -286,5 +339,7 @@ dependencies {
     //\
     //implementation project(path: ':onyxsdk-device-1.2.5')
     //implementation 'com.onyx.android.sdk:onyxsdk-device:1.1.8'
-    implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.7'
+    implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.9'
+    onyxImplementation 'com.onyx.android.sdk:onyxsdk-readerutils:0.0.10'
+    onyxImplementation 'com.onyx.android.sdk:onyxsdk-base:1.6.21'
 }

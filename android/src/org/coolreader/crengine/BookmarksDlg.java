@@ -418,11 +418,11 @@ public class BookmarksDlg  extends BaseDialog {
 			dismiss();
 			return true;
 		case R.id.bookmark_to_cloud:
-			mReaderView.onCommand(ReaderCommand.DCMD_SAVE_BOOKMARKS, 0);
+			mReaderView.onCommand(ReaderCommand.DCMD_SAVE_BOOKMARKS, 0, null);
 			dismiss();
 			return true;
 		case R.id.bookmark_from_cloud:
-			mReaderView.onCommand(ReaderCommand.DCMD_LOAD_BOOKMARKS, 0);
+			mReaderView.onCommand(ReaderCommand.DCMD_LOAD_BOOKMARKS, 0, null);
 			dismiss();
 			return true;
 		case R.id.bookmark_export:

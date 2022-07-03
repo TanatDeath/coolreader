@@ -17,7 +17,6 @@ import java.util.Locale;
 
 public class TTSOption extends SubmenuOption {
 
-	final BaseActivity mActivity;
 	final OptionsDialog mOptionsDialog;
 
 	int[] mTTSSentencePause = new int[] {
@@ -72,9 +71,8 @@ public class TTSOption extends SubmenuOption {
 		}
 	}
 
-	public TTSOption(BaseActivity activity, OptionsDialog od, OptionOwner owner, String label, String addInfo, String filter ) {
+	public TTSOption(OptionsDialog od, OptionOwner owner, String label, String addInfo, String filter ) {
 		super(owner, label, Settings.PROP_TTS_TITLE, addInfo, filter);
-		mActivity = activity;
 		mOptionsDialog = od;
 	}
 
@@ -126,7 +124,7 @@ public class TTSOption extends SubmenuOption {
 				});
 			});
 		}
-		mOptionsDialog.mTTSUseDocLangOption = new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_tts_use_doc_lang), Settings.PROP_APP_TTS_USE_DOC_LANG,
+		mOptionsDialog.mTTSUseDocLangOption = new BoolOption(mOwner, mActivity.getString(R.string.options_tts_use_doc_lang), Settings.PROP_APP_TTS_USE_DOC_LANG,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_document_lang,R.drawable.icons8_document_lang);
 		listView.add(mOptionsDialog.mTTSUseDocLangOption);
 		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
@@ -158,10 +156,10 @@ public class TTSOption extends SubmenuOption {
 				mActivity.getString(R.string.sel_panel_add_info), this.lastFilteredValue).
 				add(ToolbarOption.mSelPanelBackground, ToolbarOption.mSelPanelBackgroundTitles, ToolbarOption.mSelPanelBackgroundAddInfos).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_toolbar_background,R.drawable.icons8_toolbar_background));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.tts_panel_transp_buttons), Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.tts_panel_transp_buttons), Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS,
 				mActivity.getString(R.string.sel_panel_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_transp_buttons,R.drawable.icons8_transp_buttons));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_tts_google_abbr_workaround),
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_tts_google_abbr_workaround),
 				Settings.PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, mActivity.getString(R.string.options_tts_google_abbr_workaround_comment), lastFilteredValue)
 				.setDefaultValue("1").noIcon());
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_app_tts_stop_motion_timeout), Settings.PROP_APP_MOTION_TIMEOUT,
@@ -169,7 +167,7 @@ public class TTSOption extends SubmenuOption {
 				add(mOptionsDialog.mMotionTimeouts, mOptionsDialog.mMotionTimeoutsTitles, mOptionsDialog.mMotionTimeoutsAddInfos).
 				setDefaultValue(Integer.toString(mOptionsDialog.mMotionTimeouts[0])).
 				setIconIdByAttr(R.attr.attr_icons8_moving_sensor_n,R.drawable.icons8_moving_sensor));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.tts_page_mode_dont_change), Settings.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.tts_page_mode_dont_change), Settings.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE,
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info), this.lastFilteredValue).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.tts_sentence_pause), Settings.PROP_APP_TTS_SENTENCE_PAUSE,

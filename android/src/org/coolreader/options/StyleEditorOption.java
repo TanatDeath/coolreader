@@ -66,7 +66,7 @@ public class StyleEditorOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(identOptions,
 				identOptionNames, addInfosI).setIconIdByAttr(R.attr.cr3_option_text_indent_drawable, R.drawable.cr3_option_text_indent));
 
-		listView.add(new FontSelectOption(mActivity, mOwner, mActivity.getString(R.string.options_css_font_face), prefix + ".font-face",
+		listView.add(new FontSelectOption(mOwner, mActivity.getString(R.string.options_css_font_face), prefix + ".font-face",
 				mActivity.getString(R.string.option_add_info_empty_text), true, this.lastFilteredValue).
 				setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face));
 

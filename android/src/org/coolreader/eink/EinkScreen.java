@@ -36,7 +36,7 @@ public interface EinkScreen {
 
 	void setNeedBypass(int needBypass);
 
-	void setNeedDeepGC(boolean needDeepGC);
+	void setDeepUpdateInterval(int deepUpdateInterval);
 
 	void setRegal(boolean regal);
 
@@ -55,6 +55,8 @@ public interface EinkScreen {
 	EinkUpdateMode getUpdateMode();
 
 	int getUpdateInterval();
+
+	int getDeepUpdateInterval();
 
 	int getFrontLightValue(Context context);
 

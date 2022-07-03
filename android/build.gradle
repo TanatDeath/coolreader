@@ -1,12 +1,28 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     
     repositories {
         google()
+        jcenter() // only needed by onyx flavour
+
         mavenCentral()
         mavenLocal()
         maven { url "https://jitpack.io" } // needed for: com.github.deano2390:FlowTextView:2.0.5
+        maven {  // only needed by onyx flavour
+            url "http://repo.boox.com/repository/maven-public/"
+            allowInsecureProtocol = true
+        }
+        maven {  // only needed by onyx flavour
+            url "http://repo.boox.com/repository/maven-partner-public/"
+            allowInsecureProtocol = true
+            credentials {
+                def apikeyPropertiesFile = rootProject.file("apikey.properties")
+                def apikeyProperties = new Properties()
+                apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+                username = apikeyProperties['ONYX_REPO_ID']
+                password = apikeyProperties['ONYX_REPO_PASS']
+            }
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.1'
@@ -18,13 +34,24 @@ buildscript {
 allprojects {
     repositories {
         google()
+        jcenter() // only needed by onyx flavour
         mavenCentral()
         mavenLocal()
         maven { url "https://jitpack.io" } // needed for: com.github.deano2390:FlowTextView:2.0.5
-
-        maven {
+        maven { // only needed by onyx flavour
             url "http://repo.boox.com/repository/maven-public/"
             allowInsecureProtocol = true
+        }
+        maven { // only needed by onyx flavour
+            url "http://repo.boox.com/repository/maven-partner-public/"
+            allowInsecureProtocol = true
+            credentials {
+                def apikeyPropertiesFile = rootProject.file("apikey.properties")
+                def apikeyProperties = new Properties()
+                apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+                username = apikeyProperties['ONYX_REPO_ID']
+                password = apikeyProperties['ONYX_REPO_PASS']
+            }
         }
     }
 }

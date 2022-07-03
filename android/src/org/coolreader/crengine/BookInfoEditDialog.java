@@ -599,6 +599,7 @@ public class BookInfoEditDialog extends BaseDialog {
         boolean modified = false;
         modified = file.setTitle(edTitle.getText().toString().trim()) || modified;
         modified = file.setAuthors(authors.getAuthorsList()) || modified;
+		modified = file.setAuthorsLFM(authors.getAuthorsList()) || modified;
         modified = file.setSeriesName(edSeriesName.getText().toString().trim()) || modified;
         modified = file.setLangFrom(edLangFrom.getText().toString().trim()) || modified;
         modified = file.setLangTo(edLangTo.getText().toString().trim()) || modified;

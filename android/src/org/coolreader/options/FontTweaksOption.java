@@ -70,7 +70,7 @@ public class FontTweaksOption extends SubmenuOption {
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_text_shaping), Settings.PROP_FONT_SHAPING,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mShaping, mShapingTitles, mShapingTitlesAddInfos).setDefaultValue("1").
 				setIconIdByAttr(R.attr.cr3_option_text_ligatures_drawable, R.drawable.cr3_option_text_ligatures));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_font_kerning), Settings.PROP_FONT_KERNING_ENABLED,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_font_kerning), Settings.PROP_FONT_KERNING_ENABLED,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_text_kerning_drawable, R.drawable.cr3_option_text_kerning));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_render_font_gamma), Settings.PROP_FONT_GAMMA,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mGammas).setDefaultValue("1.0").setIconIdByAttr(R.attr.cr3_option_font_gamma_drawable, R.drawable.cr3_option_font_gamma));

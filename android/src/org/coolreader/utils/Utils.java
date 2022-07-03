@@ -23,12 +23,14 @@ import java.util.TimeZone;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DocumentFormat;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.FileInfo.SortOrder;
 import org.coolreader.crengine.FileInfoOperationListener;
+import org.coolreader.crengine.GenreSAXElem;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.OPDSUtil;
 import org.coolreader.crengine.Scanner;
@@ -45,6 +47,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -54,9 +57,12 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
 import android.text.style.BackgroundColorSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -1467,6 +1473,87 @@ public class Utils {
 		int lastDateOfMonthForGivenDate = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 		cal.set(Calendar.DATE, lastDateOfMonthForGivenDate);
 		return cal.getTime();
+	}
+
+	public static String getGenreText(CoolReader cr, FileInfo fi, boolean ext) {
+		String genreText = "";
+		String genreR = fi.genre_list;
+		if (StrUtils.isEmptyStr(genreR)) genreR = fi.genre;
+		if (!StrUtils.isEmptyStr(genreR)) {
+			// lets try to get out genre name
+			GenreSAXElem ge = null;
+			String genreDescr = "";
+			if (!StrUtils.isEmptyStr(genreR)) {
+				String [] arrGenre = genreR.split("\\|");
+				for (String genre: arrGenre) {
+					if (!StrUtils.isEmptyStr(genre)) {
+						String lang = cr.getCurrentLanguage();
+						if (lang.length() > 2) lang = lang.substring(0, 2);
+
+						GenreSAXElem.mActivity = cr;
+						try {
+							if (GenreSAXElem.elemList.size() == 0)
+								GenreSAXElem.initGenreList();
+						} catch (Exception e) {
+						}
+						genreDescr = "";
+						ge = GenreSAXElem.getGenreDescr(lang, genre);
+						String[] ge2 = null;
+						if (ge != null) {
+							if (ge.hshAttrs != null) {
+								genreDescr = ge.hshAttrs.get("detailed");
+								if (StrUtils.isEmptyStr(genreDescr))
+									genreDescr = ge.hshAttrs.get("genre-title");
+								if (StrUtils.isEmptyStr(genreDescr))
+									genreDescr = ge.hshAttrs.get("title");
+							}
+						} else {
+							ge2 = GenreSAXElem.elemList2.get(genre);
+							if (ge2!=null) {
+								if (lang.equalsIgnoreCase("RU")) genreDescr = ge2[0];
+								else genreDescr = ge2[1];
+							}
+						}
+						String addGenreText = "";
+						if ((!StrUtils.isEmptyStr(genre)) && (!StrUtils.isEmptyStr(genreDescr)))
+							addGenreText = genreDescr + (ext? (" ("+genre+")"): "");
+						if ((!StrUtils.isEmptyStr(genre)) && (StrUtils.isEmptyStr(genreDescr)))
+							addGenreText = genre;
+						if (StrUtils.isEmptyStr(genreText)) genreText = addGenreText;
+						else genreText = genreText + "; "+addGenreText;
+					}
+				}
+			}
+		}
+		return genreText;
+	}
+
+	public static Point getScreenResolution(final Context context) {
+		WindowManager w = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+		Display d = w.getDefaultDisplay();
+		DisplayMetrics metrics = new DisplayMetrics();
+		d.getMetrics(metrics);
+
+		int widthPixels = metrics.widthPixels;
+		int heightPixels = metrics.heightPixels;
+
+		if (Build.VERSION.SDK_INT < 17) {
+			try {
+				widthPixels = (Integer) Display.class.getMethod("getRawWidth").invoke(d);
+				heightPixels = (Integer) Display.class.getMethod("getRawHeight").invoke(d);
+			} catch (Exception ignored) {
+			}
+		}
+		if (Build.VERSION.SDK_INT >= 17) {
+			try {
+				Point realSize = new Point();
+				Display.class.getMethod("getRealSize", Point.class).invoke(d, realSize);
+				widthPixels = realSize.x;
+				heightPixels = realSize.y;
+			} catch (Exception ignored) {
+			}
+		}
+		return new Point(widthPixels, heightPixels);
 	}
 
 }

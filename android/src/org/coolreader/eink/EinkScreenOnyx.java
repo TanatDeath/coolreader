@@ -4,11 +4,15 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
+import org.coolreader.CoolReader;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
 import org.coolreader.utils.Utils;
+
+import com.onyx.android.sdk.api.device.FrontLightController;
+import com.onyx.android.sdk.api.device.epd.EPDMode;
 import com.onyx.android.sdk.api.device.epd.UpdateMode;
 import com.onyx.android.sdk.api.device.epd.UpdateOption;
 import com.onyx.android.sdk.api.device.EpdDeviceManager;
@@ -24,7 +28,9 @@ public class EinkScreenOnyx implements EinkScreen {
 
 	private EinkUpdateMode mUpdateMode = EinkUpdateMode.Unspecified;
 	private int mUpdateInterval;
+	private int mDeepUpdateInterval;
 	private int mRefreshNumber = -1;
+	private int mDeepRefreshNumber = -1;
 	private boolean mInFastMode = false;
 	private boolean mInA2Mode = false;
 	// Front light levels
@@ -35,7 +41,6 @@ public class EinkScreenOnyx implements EinkScreen {
 	private int mScreenFullUpdateMethod = 0;
 	private boolean mIsAppOptimizationEnabled = false;
 	private boolean mNeedCallByPass = false;
-	private boolean mNeedDeepGC = false;
 	private boolean mRegal = true;
 	private boolean mSelectionActive = false;
 
@@ -50,6 +55,7 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	private boolean onyxD_setViewDefaultUpdateMode(View view, UpdateMode mode) {
+		//curDev.setEpdMode(view, EPDMode.TEXT);
 		return curDev.setViewDefaultUpdateMode(view, mode);
 	}
 
@@ -58,11 +64,11 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	private int onyxD_getWarmLightConfigValue(Context context) {
-		return curDev.getWarmLightConfigValue(context);
+		return FrontLightController.getWarmLightConfigValue(context);
 	}
 
 	private int onyxD_getColdLightConfigValue(Context context) {
-		return curDev.getColdLightConfigValue(context);
+		return FrontLightController.getColdLightConfigValue(context);
 	}
 
 	private int onyxD_getFrontLightDeviceValue(Context context) {
@@ -70,11 +76,11 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	private boolean onyxD_setWarmLightDeviceValue(Context context, int value) {
-		return curDev.setWarmLightDeviceValue(context, value);
+		return FrontLightController.setWarmLightDeviceValue(context, value);
 	}
 
 	private boolean onyxD_setColdLightDeviceValue(Context context, int value) {
-		return curDev.setColdLightDeviceValue(context, value);
+		return FrontLightController.setColdLightDeviceValue(context, value);
 	}
 
 	private boolean onyxD_setFrontLightDeviceValue(Context context, int value) {
@@ -137,6 +143,7 @@ public class EinkScreenOnyx implements EinkScreen {
 		log.d("EinkScreenOnyx.setupController(): mode=" + mode);
 		onyxD_enableScreenUpdate(view, true);
 		mRefreshNumber = 0;
+		mDeepRefreshNumber = 0;
 		switch (com.onyx.android.sdk.device.Device.currentDeviceIndex()) {
 			case Rk32xx:
 			case Rk33xx:
@@ -187,8 +194,8 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	@Override
-	public void setNeedDeepGC(boolean needDeepGC) {
-		mNeedDeepGC = needDeepGC;
+	public void setDeepUpdateInterval(int deepUpdateInterval) {
+		mDeepUpdateInterval = deepUpdateInterval;
 	}
 
 	@Override
@@ -218,15 +225,33 @@ public class EinkScreenOnyx implements EinkScreen {
 		//if (mSelectionActive) onyxEnableA2Mode(view, true);
 		if (isPartially)
 			return;
+		boolean refreshed = false;
+		if (mDeepRefreshNumber == -1) {
+			mDeepRefreshNumber = 0;
+			refreshed = true;
+			onyxRepaintEveryThing(view, false, false);
+			return;
+		}
 		if (mRefreshNumber == -1) {
 			mRefreshNumber = 0;
-			onyxRepaintEveryThing(view, false);
+			if (!refreshed) onyxRepaintEveryThing(view, false, false);
 			return;
 		}
 		if (mUpdateInterval > 0) {
 			mRefreshNumber++;
 			if (mRefreshNumber >= mUpdateInterval) {
 				mRefreshNumber = 0;
+				boolean needDeep = false;
+				if (mDeepUpdateInterval > 0) {
+					mDeepRefreshNumber++;
+					if (mDeepRefreshNumber >= mDeepUpdateInterval) {
+						mDeepRefreshNumber = 0;
+						needDeep = true;
+					}
+				}
+				// next will be full update so set it to GC or DEEP_GC
+				if (mScreenFullUpdateMethod == 1)
+					onyxD_setViewDefaultUpdateMode(view, needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
 				return;
 			}
 		}
@@ -247,7 +272,11 @@ public class EinkScreenOnyx implements EinkScreen {
 			return;
 		if (isPartially)
 			return;
+		if (mScreenFullUpdateMethod == 1)
+			return;
 		if (0 == mRefreshNumber && mUpdateInterval > 0) {
+			boolean needDeep = false;
+			if (0 == mDeepRefreshNumber && mDeepUpdateInterval > 0) needDeep = true;
 			if (mExtraDelayFullRefresh > 0) {
 				// Hack, on ONYX devices with SDM platform without this delay full screen refresh runs too early
 				// (before new page appears on screen)
@@ -255,18 +284,20 @@ public class EinkScreenOnyx implements EinkScreen {
 				//   See https://developer.android.com/reference/android/view/SurfaceHolder#unlockCanvasAndPost(android.graphics.Canvas)
 				// which guarantees that by this time the new image will be on the screen
 				// But in fact on com.onyx.android.sdk.device.Device.DeviceIndex.SDM need extra delay.
-//				try {
-//					Thread.sleep(mExtraDelayFullRefresh);
-//				} catch (InterruptedException ignored) {
-//				}
-				BackgroundThread.instance().postGUI(() -> onyxRepaintEveryThing(view, true),  mExtraDelayFullRefresh);
-			} else onyxRepaintEveryThing(view, true);
+				try {
+					Thread.sleep(mExtraDelayFullRefresh);
+				} catch (InterruptedException ignored) {
+				}
+				boolean finalNeedDeep = needDeep;
+				//BackgroundThread.instance().postGUI(() -> onyxRepaintEveryThing(view, true, finalNeedDeep),  mExtraDelayFullRefresh);
+				onyxRepaintEveryThing(view, true, finalNeedDeep);
+			} else onyxRepaintEveryThing(view, true, needDeep);
 		}
 	}
 
 	@Override
 	public void refreshScreen(View view) {
-		onyxRepaintEveryThing(view, true);
+		onyxRepaintEveryThing(view, true, false);
 		mRefreshNumber = 0;
 	}
 
@@ -278,6 +309,11 @@ public class EinkScreenOnyx implements EinkScreen {
 	@Override
 	public int getUpdateInterval() {
 		return mUpdateInterval;
+	}
+
+	@Override
+	public int getDeepUpdateInterval() {
+		return mDeepUpdateInterval;
 	}
 
 	@Override
@@ -373,7 +409,7 @@ public class EinkScreenOnyx implements EinkScreen {
 		return mIsAppOptimizationEnabled;
 	}
 
-	private void onyxRepaintEveryThing(View view, boolean invalidate) {
+	private void onyxRepaintEveryThing(View view, boolean invalidate, boolean needDeep) {
 		switch (com.onyx.android.sdk.device.Device.currentDeviceIndex()) {
 			case Rk31xx:
 			case Rk32xx:
@@ -382,36 +418,63 @@ public class EinkScreenOnyx implements EinkScreen {
 				if (mScreenFullUpdateMethod == 1) {
 					curDev.enableRegal(false);
 					curDev.setViewDefaultUpdateMode(view,
-							mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
+							needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
 					curDev.enableRegal(mRegal);
+					//EpdController.repaintEveryThing();
 					break;
 				} else
 					if (mScreenFullUpdateMethod == 3) {
 						if (null != view) {
 							curDev.enableRegal(false);
+							if (mNeedCallByPass) onyxD_byPass(1);
 							curDev.setViewDefaultUpdateMode(view,
-									mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
+									needDeep? UpdateMode.DEEP_GC: UpdateMode.GCC);
 							curDev.invalidate(view,
-									mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
+									needDeep? UpdateMode.DEEP_GC: UpdateMode.GCC);
+							curDev.invalidate(view, UpdateMode.DU_QUALITY);
+//							EpdController.repaintEveryThing(mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
 							curDev.enableRegal(mRegal);
 						}
 						break;
 					} else
-					{
-						if (null != view) {
-							curDev.enableRegal(false);
-							curDev.setViewDefaultUpdateMode(view,
-									mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
-							if (invalidate)
-								view.postInvalidate();
-							curDev.enableRegal(mRegal);
-						}
-						break;
-					}
+						if (mScreenFullUpdateMethod == 5) {
+							if (null != view) {
+								curDev.enableRegal(false);
+								if (mNeedCallByPass) onyxD_byPass(1);
+								curDev.setViewDefaultUpdateMode(view,
+										needDeep? UpdateMode.DEEP_GC: UpdateMode.DU_QUALITY);
+								curDev.invalidate(view,
+										needDeep? UpdateMode.DEEP_GC: UpdateMode.DU_QUALITY);
+								curDev.enableRegal(mRegal);
+							}
+							break;
+						} else
+							if (mScreenFullUpdateMethod == 4) {
+								if (null != view) {
+									curDev.enableRegal(false);
+									if (mNeedCallByPass) onyxD_byPass(1);
+									curDev.setViewDefaultUpdateMode(view, UpdateMode.GU);
+									EpdController.repaintEveryThing(needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
+									curDev.enableRegal(mRegal);
+								}
+								break;
+							} else {
+									if (null != view) {
+										curDev.enableRegal(false);
+										if (invalidate)
+											if (mNeedCallByPass) onyxD_byPass(1);
+										curDev.setViewDefaultUpdateMode(view,
+												needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
+										if (invalidate)
+											view.postInvalidate();
+										curDev.enableRegal(mRegal);
+									}
+									break;
+								}
 			default:
 				if (null != view) {
 					curDev.setViewDefaultUpdateMode(view,
-							mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
+							needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
 					if (invalidate)
 						view.postInvalidate();
 				}

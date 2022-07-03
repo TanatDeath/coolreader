@@ -11,19 +11,19 @@ import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
 import org.coolreader.utils.Utils;
 
+import java.util.List;
+
 public class ActionOption extends ListOption {
 
-	final BaseActivity mActivity;
-	public ActionOption(BaseActivity activity, OptionOwner owner, String label, String property, boolean isTap, boolean allowRepeat,
+	public ActionOption(OptionOwner owner, String label, String property, boolean isTap, boolean allowRepeat,
 						String addInfo, String filter) {
 		super(owner, label, property, addInfo, filter);
-		mActivity = activity;
-		ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
 		for ( ReaderAction a : actions )
 			if (!isTap || a.mayAssignOnTap())
-				add(a.id, mActivity.getString(a.nameId), mActivity.getString(a.addInfoR));
+				add(a.id, a.getNameText(mActivity), mActivity.getString(a.addInfoR));
 		if (allowRepeat)
-			add(ReaderAction.REPEAT.id, mActivity.getString(ReaderAction.REPEAT.nameId), mActivity.getString(ReaderAction.REPEAT.addInfoR));
+			add(ReaderAction.REPEAT.id, ReaderAction.REPEAT.getNameText(mActivity), mActivity.getString(ReaderAction.REPEAT.addInfoR));
 		if (mProperties.getProperty(property) == null)
 			mProperties.setProperty(property, ReaderAction.NONE.id);
 	}
@@ -36,7 +36,7 @@ public class ActionOption extends ListOption {
 		super.updateItemContents(layout, item, listView, position);
 		ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
 		ImageView imgAddInfo = (ImageView) layout.findViewById(R.id.btn_option_add_info);
-		ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
 		for ( ReaderAction a : actions )
 			if (item.value.equals(a.id)) {
 				if (a.getIconId()!=0) {

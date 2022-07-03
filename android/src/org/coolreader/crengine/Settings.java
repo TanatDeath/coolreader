@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import android.util.Log;
 
 import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -290,6 +291,10 @@ public interface Settings {
 	String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
 
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
+	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR = "app.browser.max.group.size.author";
+	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES = "app.browser.max.group.size.series";
+	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES = "app.browser.max.group.size.genres";
+	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES = "app.browser.max.group.size.dates";
 	String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
 	String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON = "app.browser.sec.group.common";
@@ -558,6 +563,7 @@ public interface Settings {
 		PROP_FORMAT_MAX_ADDED_LETTER_SPACING_PERCENT,
 		PROP_APP_FULLSCREEN,
 	    "app.screen.*",
+		"app.eink.*",
 	    PROP_APP_DICTIONARY,
         PROP_APP_DICTIONARY_2,
 		PROP_APP_DICTIONARY_3,

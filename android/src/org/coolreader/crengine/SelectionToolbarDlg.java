@@ -194,7 +194,7 @@ public class SelectionToolbarDlg {
 			mReaderView.clearSelection();
 		restoreReaderMode();
 		isVisibleNow = false;
-		mReaderView.toggleScreenUpdateModeMode();
+		mReaderView.toggleScreenUpdateModeMode(false);
 		mWindow.dismiss();
 	}
 
@@ -913,13 +913,13 @@ public class SelectionToolbarDlg {
 		mWindow.setOnDismissListener(() -> {
 			restoreReaderMode();
 			isVisibleNow = false;
-			mReaderView.toggleScreenUpdateModeMode();
+			mReaderView.toggleScreenUpdateModeMode(false);
 			mReaderView.clearSelection();
 		});
 
 		mWindow.setBackgroundDrawable(new BitmapDrawable());
 
-		mReaderView.toggleScreenUpdateModeMode();
+		mReaderView.toggleScreenUpdateModeMode(true);
 
 		if (showAtTop)
 			mWindow.showAtLocation(mAnchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], 0);

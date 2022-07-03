@@ -3,6 +3,7 @@ package org.coolreader.crengine;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.Application;
@@ -10,6 +11,10 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.Log;
 
+import com.onyx.android.sdk.api.device.FrontLightController;
+import com.onyx.android.sdk.device.BaseDevice;
+
+import org.coolreader.utils.StrUtils;
 import org.eink_onyx_reflections.OnyxDevice;
 import org.eink_onyx_reflections.OnyxEinkDeviceImpl;
 
@@ -52,6 +57,7 @@ public class DeviceInfo {
 	public final static boolean ONYX_HAVE_FRONTLIGHT;
 	public final static boolean ONYX_HAVE_NATURAL_BACKLIGHT;
 	public final static boolean ONYX_HAVE_BRIGHTNESS_SYSTEM_DIALOG;
+	public final static boolean ONYX_HAVE_COLOR;
 	public final static boolean NOFLIBUSTA;
 	public final static boolean NAVIGATE_LEFTRIGHT; // map left/right keys to single page flip
 	public final static boolean REVERT_LANDSCAPE_VOLUME_KEYS; // revert volume keys in landscape mode
@@ -67,8 +73,13 @@ public class DeviceInfo {
 		return EINK_SCREEN || isEinkFromSettings;
 	}
 
+	public static boolean isBlackAndWhiteEinkScreen(boolean isEinkFromSettings) {
+		return (EINK_SCREEN || isEinkFromSettings) && (!ONYX_HAVE_COLOR);
+	}
+
 	public static boolean isForceHCTheme(boolean isEinkFromSettings) {
-		return FORCE_HC_THEME || isEinkFromSettings;
+		return (FORCE_HC_THEME || isEinkFromSettings) && (!ONYX_HAVE_COLOR);
+		//return false;
 	}
 
 	public static boolean isUseCustomToast(boolean isEinkFromSettings) {
@@ -78,7 +89,7 @@ public class DeviceInfo {
 	}
 
 	public static android.graphics.Bitmap.Config getBufferColorFormat(boolean isEinkFromSettings) {
-		return isEinkScreen(isEinkFromSettings) || USE_OPENGL ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
+		return isBlackAndWhiteEinkScreen(isEinkFromSettings) || USE_OPENGL ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
 	}
 
 	public static int getPixelFormat(boolean isEinkFromSettings) {
@@ -143,11 +154,11 @@ public class DeviceInfo {
 	}
 	
 	static {
-		MANUFACTURER = getBuildField("MANUFACTURER");
-		MODEL = getBuildField("MODEL");
-		DEVICE = getBuildField("DEVICE");
-		PRODUCT = getBuildField("PRODUCT");
-		BRAND = getBuildField("BRAND");
+		MANUFACTURER = StrUtils.getNonEmptyStr(getBuildField("MANUFACTURER"), false);
+		MODEL = StrUtils.getNonEmptyStr(getBuildField("MODEL"), false);
+		DEVICE = StrUtils.getNonEmptyStr(getBuildField("DEVICE"), false);
+		PRODUCT = StrUtils.getNonEmptyStr(getBuildField("PRODUCT"), false);
+		BRAND = StrUtils.getNonEmptyStr(getBuildField("BRAND"), false);
 		SAMSUNG_BUTTONS_HIGHLIGHT_PATCH = MANUFACTURER.toLowerCase().contentEquals("samsung") &&
 		        (MODEL.contentEquals("GT-S5830") || MODEL.contentEquals("GT-S5660")); // More models?
 		AMOLED_SCREEN = MANUFACTURER.toLowerCase().contentEquals("samsung") &&
@@ -164,9 +175,15 @@ public class DeviceInfo {
 				|| MODEL.contentEquals("BNRV700"));
 		EINK_SONY = MANUFACTURER.toLowerCase().contentEquals("sony") && MODEL.startsWith("PRS-T");
 		//MANUFACTURER=Onyx, MODEL=*; All ONYX BOOX Readers have e-ink screen
-		EINK_ONYX = (MANUFACTURER.toLowerCase().contentEquals("onyx") || MANUFACTURER.toLowerCase().contentEquals("onyx-intl")) &&
-				(BRAND.toLowerCase().contentEquals("onyx") || BRAND.toLowerCase().contentEquals("maccentre") || BRAND.toLowerCase().contentEquals("maccenter")) &&
+		EINK_ONYX = (MANUFACTURER.toLowerCase().contentEquals("onyx")
+						|| MANUFACTURER.toLowerCase().contentEquals("onyx-intl")
+						|| MANUFACTURER.toLowerCase().contentEquals("qualcomm"))
+					&&
+					(BRAND.toLowerCase().contentEquals("onyx")
+						|| BRAND.toLowerCase().contentEquals("maccentre")
+						|| BRAND.toLowerCase().contentEquals("maccenter")) &&
 				MODEL.length() > 0;
+		ONYX_HAVE_COLOR = MODEL.toLowerCase().startsWith("novaair") || MODEL.toLowerCase().contains("color");
 		EINK_ENERGYSYSTEM = (
 			(BRAND.toLowerCase().contentEquals("energysistem")||BRAND.toLowerCase().contentEquals("energysystem")) &&  MODEL.toLowerCase().startsWith("ereader"));
 		//MANUFACTURER -DNS, DEVICE -BK6004C, MODEL - DNS Airbook EGH602, PRODUCT - BK6004C
@@ -199,8 +216,10 @@ public class DeviceInfo {
 		boolean onyx_support_regal = false;
 		boolean onyx_have_brightness_system_dialog = false;
 		if (EINK_ONYX) {
-			OnyxEinkDeviceImpl onyxEinkDevice = OnyxDevice.currentDevice();
-			onyx_support_regal = onyxEinkDevice.supportRegal();
+			//OnyxEinkDeviceImpl onyxEinkDevice = OnyxDevice.currentDevice();
+			//onyx_support_regal = onyxEinkDevice.supportRegal();
+			BaseDevice curDev = com.onyx.android.sdk.device.Device.currentDevice();
+			onyx_support_regal = curDev.supportRegal();
 			Application app = null;
 			try {
 				Class<?> clazz = Class.forName("android.app.ActivityThread");
@@ -208,10 +227,12 @@ public class DeviceInfo {
 				app = (Application) method.invoke(null);
 			} catch (Exception ignored) {}
 			if (null != app) {
-				onyx_have_frontlight = onyxEinkDevice.hasFLBrightness(app);
+				//onyx_have_frontlight = onyxEinkDevice.hasFLBrightness(app);
+				onyx_have_frontlight = FrontLightController.hasFLBrightness(app);
 				List<Integer> list = null;
 				try {
-					list = onyxEinkDevice.getFrontLightValueList(app);
+					//list = onyxEinkDevice.getFrontLightValueList(app);
+					list = FrontLightController.getFrontLightValueList(app);
 				} catch (Exception ignored) {}
 				if (list != null && list.size() > 0) {
 					onyx_max_screen_brightness_value = list.get(list.size() - 1);
@@ -221,26 +242,34 @@ public class DeviceInfo {
 					}
 				}
 				// natural (cold & warm) backlight support
-				onyx_have_natural_backlight = onyxEinkDevice.hasCTMBrightness(app);
+				//onyx_have_natural_backlight = onyxEinkDevice.hasCTMBrightness(app);
+				onyx_have_natural_backlight = FrontLightController.hasCTMBrightness(app);
 				if (onyx_have_natural_backlight) {
-					list = onyxEinkDevice.getWarmLightValues(app);
+					//list = onyxEinkDevice.getWarmLightValues(app);
+					Integer[] list1 = FrontLightController.getWarmLightValues(app);
+					if (list1.length > 1)
+						list = Arrays.asList(list1);
 					if (list != null && list.size() > 0) {
 						onyx_max_screen_brightness_warm_value = list.get(list.size() - 1);
 					}
 				}
 				if (!onyx_have_frontlight && onyx_have_natural_backlight) {
 					onyx_have_frontlight = true;
-					list = onyxEinkDevice.getColdLightValues(app);
+					//list = onyxEinkDevice.getColdLightValues(app);
+					Integer[] list1 = FrontLightController.getColdLightValues(app);
+					if (list1.length > 1)
+						list = Arrays.asList(list1);
 					if (list != null && list.size() > 0) {
 						onyx_max_screen_brightness_value = list.get(list.size() - 1);
 					}
 				}
 			}
-			switch (OnyxDevice.currentDeviceType()) {
-				case rk31xx:
-				case rk32xx:
-				case rk33xx:
-				case sdm:
+			//switch (OnyxDevice.currentDeviceType()) {
+			switch (com.onyx.android.sdk.device.Device.currentDeviceIndex()) {
+				case Rk31xx:
+				case Rk32xx:
+				case Rk33xx:
+				case SDM:
 					onyx_have_brightness_system_dialog = true;
 					break;
 			}
@@ -280,7 +309,7 @@ public class DeviceInfo {
 		MIN_SCREEN_BRIGHTNESS_VALUE = getMinBrightness(AMOLED_SCREEN ? 2 : (getSDKLevel() >= ICE_CREAM_SANDWICH ? 8 : 16));
 		//BUFFER_COLOR_FORMAT = getSDKLevel() >= HONEYCOMB ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
 		//BUFFER_COLOR_FORMAT = android.graphics.Bitmap.Config.ARGB_8888;
-		BUFFER_COLOR_FORMAT = EINK_SCREEN || USE_OPENGL ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
+		BUFFER_COLOR_FORMAT = (EINK_SCREEN && (!ONYX_HAVE_COLOR)) || USE_OPENGL ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
 		PIXEL_FORMAT = (DeviceInfo.BUFFER_COLOR_FORMAT == android.graphics.Bitmap.Config.RGB_565) ? PixelFormat.RGB_565 : PixelFormat.RGBA_8888;
 		
 		DEF_FONT_FACE = getSDKLevel() >= ICE_CREAM_SANDWICH ? "Roboto" : "Droid Sans";

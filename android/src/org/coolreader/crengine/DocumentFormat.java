@@ -224,7 +224,7 @@ public enum DocumentFormat {
 		return sExt;
 	}
 
-	public static String nameEndWithExt( String sname )
+	public static String nameEndWithExt(String sname)
 	{
 		String sExt = "";
 		if (sname.toLowerCase().endsWith(".zip")) sExt = "zip";

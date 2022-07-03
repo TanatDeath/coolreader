@@ -172,9 +172,19 @@ public class ListOption extends OptionBase {
 		}
 		return this;
 	}
+
 	public ListOption add(int[]values) {
 		for (int item : values) {
 			String s = String.valueOf(item);
+			add(s, s, mActivity.getString(R.string.option_add_info_empty_text));
+			this.updateFilteredMark(s);
+		}
+		return this;
+	}
+
+	public ListOption add(int fromVal, int toVal) {
+		for (int i = fromVal; i <= toVal; i++) {
+			String s = String.valueOf(i);
 			add(s, s, mActivity.getString(R.string.option_add_info_empty_text));
 			this.updateFilteredMark(s);
 		}

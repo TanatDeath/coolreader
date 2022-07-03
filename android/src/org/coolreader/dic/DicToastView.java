@@ -11,7 +11,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.Browser;
 import androidx.annotation.ColorInt;
-import android.text.ClipboardManager;
+
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,8 +27,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -74,6 +72,7 @@ public class DicToastView {
     public static int IS_URBAN = 10;
     public static int IS_OFFLINE = 11;
     public static int IS_USERDIC = 12;
+    public static int IS_ONYXAPI = 13;
 
     public static int mColorIconL = Color.GRAY;
 
@@ -318,10 +317,10 @@ public class DicToastView {
     }
 
     public static void showToast(BaseActivity act, View anchor, String s, String msg, int duration,
-                                 int dicT, String dicName, boolean fullScreen) {
+                                 int dicT, String dicName, Dictionaries.DictInfo curDict, boolean fullScreen) {
         sFindText = s;
         showToastInternal(act, anchor, msg, duration, dicT, dicName, null,
-                null, null, null, 0, false, "", fullScreen);
+                curDict, null, null, 0, false, "", fullScreen);
     }
 
     public static void showToastExt(BaseActivity act, View anchor, String s, String msg, int duration,
@@ -529,12 +528,16 @@ public class DicToastView {
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove1sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove1sym);
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove2sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove2sym);
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove3sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove3sym);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
             Utils.setSolidButton1(btnDicExtended);
+            if (isEInk) Utils.setSolidButtonEink(btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
                 try {
                     mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
@@ -816,7 +819,8 @@ public class DicToastView {
                 btnTransl = dicTable.findViewById(R.id.btnTransl);
                 if ((t.dicType == IS_DICTCC) || (t.dicType == IS_LINGUEE) ||
                         (t.dicType == IS_GRAMOTA) || (t.dicType == IS_GLOSBE) ||
-                        (t.dicType == IS_TURENG) || (t.dicType == IS_URBAN)) {
+                        (t.dicType == IS_TURENG) || (t.dicType == IS_URBAN) ||
+                        (t.dicType == IS_ONYXAPI)) {
                     String s = StrUtils.getNonEmptyStr(t.mDicName,true);
                     if (s.contains("?")) s = s.substring(0, s.indexOf("?"));
                     tvYnd1.setText(s);
@@ -841,6 +845,7 @@ public class DicToastView {
                     if (t.dicType == IS_GOOGLE) sLink = "https://translate.google.com/";
                     if (t.dicType == IS_TURENG) sLink = t.mDicName;
                     if (t.dicType == IS_URBAN) sLink = t.mDicName;
+                    if (t.dicType == IS_ONYXAPI) sLink = t.mDicName;
                     Uri uri = Uri.parse(sLink);
                     Context context = t.anchor.getContext();
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -1017,12 +1022,16 @@ public class DicToastView {
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove1sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove1sym);
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove2sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove2sym);
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove3sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove3sym);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
             Utils.setSolidButton1(btnDicExtended);
+            if (isEInk) Utils.setSolidButtonEink(btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
                 try {
                     mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
@@ -1184,12 +1193,16 @@ public class DicToastView {
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove1sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove1sym);
             btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove2sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove2sym);
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove3sym);
+            if (isEInk) Utils.setSolidButtonEink(btnRemove3sym);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
             Utils.setSolidButton1(btnDicExtended);
+            if (isEInk) Utils.setSolidButtonEink(btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
                 try {
                     mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
@@ -1210,6 +1223,7 @@ public class DicToastView {
                     edtDicTranls.setText(t.msg);
                     Utils.setHighLightedText(edtDicTranls, sFindText, mColorIconL);
                 }
+            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
             if ((findText.length() <= 1) || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {

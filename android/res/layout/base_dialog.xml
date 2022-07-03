@@ -20,8 +20,8 @@
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:background="@null"
-                android:layout_weight="1"
-                android:layout_width="0dip"
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         <TextView android:id="@+id/base_dlg_upper_text"
                 style="@style/TextAppearance.Medium"
@@ -37,12 +37,12 @@
                 android:text="Test"/>
         <ImageButton android:id="@+id/find_btn"
                 android:src="?attr/cr3_viewer_find_drawable"
+                android:layout_margin="5dp"
                 android:tag="tint"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:background="@null"
-                android:layout_weight="1"
-                android:layout_width="0dip"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
     </LinearLayout>
     <LinearLayout

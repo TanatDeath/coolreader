@@ -497,7 +497,7 @@ public class TapHandler {
 					}
 					mReaderView.selectionModeWasActive = mReaderView.selectionModeActive;
 					mReaderView.selectionModeActive = false;
-					mReaderView.toggleScreenUpdateModeMode();
+					mReaderView.toggleScreenUpdateModeMode(true);
 					if (mReaderView.inspectorModeActive) {
 						boolean res = cancel();
 						mReaderView.currentTapHandler.trackDoubleTapInsp();

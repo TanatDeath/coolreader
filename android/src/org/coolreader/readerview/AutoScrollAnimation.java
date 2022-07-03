@@ -39,15 +39,18 @@ public class AutoScrollAnimation {
 
 	public static final int MAX_PROGRESS = 10000;
 	public final static int ANIMATION_INTERVAL_NORMAL = 30;
-	public final static int ANIMATION_INTERVAL_EINK = 5000;
+	public final static int ANIMATION_INTERVAL_EINK = 1000;
 
 	final ReaderView mReaderView;
 	final CoolReader mActivity;
 
-	public AutoScrollAnimation(ReaderView rv, final int startProgress) {
+	boolean mIsSimple = false;
+
+	public AutoScrollAnimation(ReaderView rv, final int startProgress, boolean isSimple) {
 		mReaderView = rv;
 		mActivity = rv.getActivity();
 		progress = startProgress;
+		mIsSimple = isSimple;
 		startAnimationProgress = mReaderView.AUTOSCROLL_START_ANIMATION_PERCENT * 100;
 		mReaderView.currentAutoScrollAnimation = this;
 
@@ -93,6 +96,14 @@ public class AutoScrollAnimation {
 	}
 
 	private boolean onTimer() {
+		if (mIsSimple) {
+			alog.v("currentSimpleAutoScrollTick(), onTimer(simple)");
+			//BackgroundThread.instance().executeGUI(() -> {
+			mReaderView.currentSimpleAutoScrollTick();
+			//});
+			mReaderView.scheduleGc();
+			return true;
+		}
 		int newProgress = calcProgressPercent();
 		alog.v("onTimer(progress = " + newProgress + ")");
 		mActivity.onUserActivity();
@@ -147,6 +158,7 @@ public class AutoScrollAnimation {
 	}
 
 	private boolean initPageTurn(int startProgress) {
+		if (mIsSimple) return true;
 		mReaderView.cancelGc();
 		log.v("initPageTurn(startProgress = " + startProgress + ")");
 		pageTurnStart = Utils.timeStamp();
@@ -204,6 +216,7 @@ public class AutoScrollAnimation {
 
 
 	private boolean donePageTurn(boolean turnPage) {
+		if (mIsSimple) return true;
 		log.v("donePageTurn()");
 		if (turnPage) {
 			if (isScrollView)

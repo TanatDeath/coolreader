@@ -9,6 +9,7 @@ import android.os.Build;
 import android.util.Log;
 
 import org.coolreader.CoolReader;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DicSearchHistoryEntry;
@@ -56,7 +57,13 @@ public class MainDB extends BaseDB {
 
 	public static String currentLanguage = "EN"; // for genres - sets from BaseActivity
 
+	public static String NO_VALUE = "[No value]";
+
 	public static int iMaxGroupSize = 8;
+	public static int iMaxGroupSizeAuthor = 0;
+	public static int iMaxGroupSizeSeries = 0;
+	public static int iMaxGroupSizeGenres = 0;
+	public static int iMaxGroupSizeDates = 0;
 
 	private boolean pathCorrectionRequired = false;
 	public static final int DB_VERSION = 58;
@@ -1698,7 +1705,8 @@ public class MainDB extends BaseDB {
 					String sRet = "error";
 					if (name != null) {
 						if (name.length() >= l) sRet = name.substring(0, l).toUpperCase();
-						else sRet = name;
+						else
+							sRet = name;
 					} else sRet = "[empty]";
 					if (sRet.equals("")) sRet = "[empty]";
 					if (sRet.length() > level) {
@@ -1719,6 +1727,15 @@ public class MainDB extends BaseDB {
 			}
 			return sRet;
 		}
+
+		public String getItemFirstLettersTilda(FileInfo item, int level) {
+			String name = getComparisionField(item);
+			int l = name == null ? 0 : Math.min(name.length(), level);
+			String res = getItemFirstLetters(item, level);
+			if (l < level) return res + "~";
+				else return res;
+		}
+
 	}
 
 	public static class ItemGroupFilenameExtractor extends ItemGroupExtractor {
@@ -1731,7 +1748,7 @@ public class MainDB extends BaseDB {
 	public static class ItemGroupTitleExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
-			if (StrUtils.isEmptyStr(item.title)) return item.getFilename();
+			if (StrUtils.isEmptyStr(item.title)) return NO_VALUE;
 			return item.title;
 		}
 	}
@@ -1739,15 +1756,15 @@ public class MainDB extends BaseDB {
 	public static class ItemGroupAuthorExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
-			if (StrUtils.isEmptyStr(item.getAuthors())) return item.getFilename();
-			return item.getAuthors();
+			if (StrUtils.isEmptyStr(item.getAuthorsLFM())) return NO_VALUE;
+			return item.getAuthorsLFM();
 		}
 	}
 
 	public static class ItemGroupSeriesExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
-			if (StrUtils.isEmptyStr(item.getSeriesName())) return item.getFilename();
+			if (StrUtils.isEmptyStr(item.getSeriesName())) return NO_VALUE;
 			return item.getSeriesName();
 		}
 	}
@@ -1755,8 +1772,16 @@ public class MainDB extends BaseDB {
 	public static class ItemGroupGenresExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
-			if (StrUtils.isEmptyStr(item.getGenres())) return item.getFilename();
-			return item.getGenres();
+			if (!StrUtils.isEmptyStr(item.genre_tmp)) return item.genre_tmp;
+			BaseActivity ba = GenreSAXElem.mActivity;
+			if (ba != null) {
+				String gt = Utils.getGenreText((CoolReader) ba, item, false);
+				item.genre_tmp = gt;
+				if (!StrUtils.isEmptyStr(gt)) return gt;
+			}
+			if (StrUtils.isEmptyStr(item.genre)) return NO_VALUE;
+			item.genre_tmp = item.genre;
+			return item.genre;
 		}
 	}
 
@@ -1765,7 +1790,7 @@ public class MainDB extends BaseDB {
 		public String getComparisionField(FileInfo item) {
 			if ((StrUtils.isEmptyStr(item.getBookdate())) ||
 					StrUtils.isEmptyStr(Utils.formatDateFixed(item.bookDateN)))
-				return item.getFilename();
+				return NO_VALUE;
 			String s = Utils.formatDateFixed(item.bookDateN);
 			return s;
 		}
@@ -1776,7 +1801,7 @@ public class MainDB extends BaseDB {
 		public String getComparisionField(FileInfo item) {
 			if ((StrUtils.isEmptyStr(item.getDocdate())) ||
 					StrUtils.isEmptyStr(Utils.formatDateFixed(item.docDateN)))
-				return item.getFilename();
+				return NO_VALUE;
 			String s = Utils.formatDateFixed(item.docDateN);
 			return s;
 		}
@@ -1787,7 +1812,7 @@ public class MainDB extends BaseDB {
 		public String getComparisionField(FileInfo item) {
 			if ((StrUtils.isEmptyStr(item.getPublyear())) ||
 					StrUtils.isEmptyStr(Utils.formatDateFixed(item.publYearN)))
-				return item.getFilename();
+				return NO_VALUE;
 			String s = Utils.formatDateFixed(item.publYearN);
 			return s;
 		}
@@ -1797,7 +1822,7 @@ public class MainDB extends BaseDB {
 		@Override
 		public String getComparisionField(FileInfo item) {
 			if (StrUtils.isEmptyStr(Utils.formatDateFixed(item.fileCreateTime)))
-				return item.getFilename();
+				return NO_VALUE;
 			String s = Utils.formatDateFixed(item.fileCreateTime);
 			return s;
 		}
@@ -1845,36 +1870,33 @@ public class MainDB extends BaseDB {
 
 	static int MAX_GROUP_LEVEL = 30;
 
+	public static String noTilda(String s) {
+		if (s == null) return "";
+		if (s.endsWith("~")) return s.substring(0, s.length()-1);
+		return s;
+	}
+
 	public static void addGroupedItems2(FileInfo parent, String filter,
 										ArrayList<FileInfo> items, String groupPrefixTag, final ItemGroupExtractor extractor, int lev) {
 		int iMaxItemsCount = iMaxGroupSize;
-//		log.i("addGroupedItems2 called, filter = "+filter);
-//		log.i("groupPrefixTag = "+groupPrefixTag);
-//		log.i("lev = "+lev);
-//		log.i("iMaxItemsCount = "+iMaxItemsCount);
+		if (extractor instanceof ItemGroupAuthorExtractor) iMaxItemsCount = iMaxGroupSizeAuthor;
+		if (extractor instanceof ItemGroupSeriesExtractor) iMaxItemsCount = iMaxGroupSizeSeries;
+		if (extractor instanceof ItemGroupGenresExtractor) iMaxItemsCount = iMaxGroupSizeGenres;
+		if (extractor instanceof ItemGroupBookDateNExtractor) iMaxItemsCount = iMaxGroupSizeDates;
+		if (extractor instanceof ItemGroupDocDateNExtractor) iMaxItemsCount = iMaxGroupSizeDates;
+		if (extractor instanceof ItemGroupFileCreateTimeExtractor) iMaxItemsCount = iMaxGroupSizeDates;
+		if (extractor instanceof ItemGroupPublYearNExtractor) iMaxItemsCount = iMaxGroupSizeDates;
+		if (extractor instanceof ItemGroupPublYearNExtractor) iMaxItemsCount = iMaxGroupSizeDates;
+		if (iMaxItemsCount == 0) iMaxItemsCount = iMaxGroupSize;
 		if (iMaxItemsCount < 8) iMaxItemsCount = 8;
 		if (parent.isLitresPrefix())
 			iMaxItemsCount = 999; // All litres without subgrouping - better
-		//if (items.size() > 0)
-		//	if (items.get(0).isLitresPagination()) iMaxItemsCount = 999; // LitRes with paging will not be grouped
 		if (lev >= MAX_GROUP_LEVEL) {
-			//int ii = 0;
-			//log.i("case1");
-//			for (FileInfo fi: items) {
-//				ii++;
-//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
 		// if there are already small amount
 		if (items.size() <= iMaxItemsCount) {
-			//int ii = 0;
-			//log.i("case2");
-//			for (FileInfo fi: items) {
-//				ii++;
-//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
@@ -1887,18 +1909,8 @@ public class MainDB extends BaseDB {
 		while ((level <= MAX_GROUP_LEVEL) && (!breakScan)) {
 			HashMap<String, Integer> groupedCur = new HashMap<>();
 			for (int i = 0; i < items.size(); i++) {
-				String prevfirstLetter = "";
-				boolean prevEq = false;
-				if (level > 1) {
-					prevfirstLetter = extractor.getItemFirstLetters(items.get(i), level - 1);
-					prevEq = prevfirstLetter.toUpperCase().startsWith(filter.toUpperCase());
-				}
-				String firstLetter = extractor.getItemFirstLetters(items.get(i), level);
-				boolean b = firstLetter.toUpperCase().startsWith(filter.toUpperCase());
-				// if the item shorter than filter - need check, commenting
-//				if ((!b) && (!StrUtils.isEmptyStr(filter))) {
-//					if ((firstLetter.length() < filter.length()) && (filter.startsWith(firstLetter))) b = true;
-//				}
+				String firstLetter = extractor.getItemFirstLettersTilda(items.get(i), level);
+				boolean b = noTilda(firstLetter).toUpperCase().startsWith(filter.toUpperCase());
 				if (b || (StrUtils.isEmptyStr(filter))) {
 					String skey = firstLetter;
 					// find existing group, that "eats" this
@@ -1910,16 +1922,21 @@ public class MainDB extends BaseDB {
 						}
 					}
 					Integer cnt = groupedCur.get(skey);
-					if (cnt == null) cnt = 0;
-					groupedCur.put(skey, cnt + 1);
+					if (cnt == null) cnt = 1;
+						else cnt++;
+					// find groups that can be eaten by this - and add them to this
+					HashMap<String, Integer> groupedCur2 = new HashMap<>();
+					for (Map.Entry<String, Integer> entry : groupedCur.entrySet()) {
+						String key = entry.getKey();
+						int val = entry.getValue();
+						if (key.toUpperCase().startsWith(skey.toUpperCase()))
+							cnt += key.equalsIgnoreCase(skey)? 0: val;
+						else
+							groupedCur2.put(key, val);
+					}
+					groupedCur2.put(skey, cnt);
+					groupedCur = groupedCur2;
 				}
-				// I have forgot what I mean by groupedCur2, but it works incorrect
-//				if (!((!prevfirstLetter.equals("")) && (prevEq) && (!prevfirstLetter.equals(firstLetter))))
-//					if (b || (StrUtils.isEmptyStr(filter))) {
-//						Integer cnt = groupedCur2.get(firstLetter);
-//						if (cnt == null) cnt = 0;
-//						groupedCur2.put(firstLetter, cnt + );
-//					}
 			}
 			breakScan = groupedCur.size() > iMaxItemsCount;
 			boolean needSwithDeeper = (groupedCur.size() <= iMaxItemsCount) || (curLevel == 0);
@@ -1932,27 +1949,14 @@ public class MainDB extends BaseDB {
 			if (needSwithDeeper) {
 				curLevel = level;
 				grouped = groupedCur;
-				prevSize = grouped.size();
 			}
 			level = level + 1;
 		}
 		if (grouped == null) {
-//			int ii = 0;
-//			log.i("case3");
-//			for (FileInfo fi: items) {
-//				ii++;
-//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
 		if (grouped.size() == 1) { // grouping failed :)
-//			int ii = 0;
-//			log.i("case4");
-//			for (FileInfo fi: items) {
-//				ii++;
-//				log.i("item(" + ii + ") = " + fi.getFilename() + ":" + fi.getSeriesName());
-//			}
 			addItems(parent, items, 0, items.size());
 			return;
 		}
@@ -1963,8 +1967,8 @@ public class MainDB extends BaseDB {
 			Integer value = entry.getValue();
 			if ((curSize - 1 + value <= iMaxItemsCount) && (value > 1)) { // this group can be "linearized"
 				for (int i = 0; i < items.size(); i++) {
-					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
-					if (firstLetter.toUpperCase().equals(key.toUpperCase())) {
+					String firstLetter = extractor.getItemFirstLettersTilda(items.get(i), key.length());
+					if (firstLetter.equalsIgnoreCase(key)) {
 						items.get(i).parent = parent;
 						if (items.get(i).isSpecialDir()) {
 							parent.addDir(items.get(i));
@@ -1975,8 +1979,8 @@ public class MainDB extends BaseDB {
 				curSize = curSize - 1 + value;
 			} else if (value == 1) { // group of one element - adding element
 				for (int i = 0; i < items.size(); i++) {
-					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
-					if (firstLetter.toUpperCase().equals(key.toUpperCase())) {
+					String firstLetter = extractor.getItemFirstLettersTilda(items.get(i), key.length());
+					if (firstLetter.equalsIgnoreCase(key)) {
 						items.get(i).parent = parent;
 						if (items.get(i).isSpecialDir()) {
 							parent.addDir(items.get(i));
@@ -1985,16 +1989,16 @@ public class MainDB extends BaseDB {
 					}
 				}
 			} else { // really add group
-				ArrayList<FileInfo> itemsGr = new ArrayList<FileInfo>();
+				ArrayList<FileInfo> itemsGr = new ArrayList<>();
 				for (int i = 0; i < items.size(); i++) {
-					String firstLetter = extractor.getItemFirstLetters(items.get(i), key.length());
-					if (firstLetter.toUpperCase().equals(key.toUpperCase()))
+					String firstLetter = extractor.getItemFirstLettersTilda(items.get(i), key.length());
+					if (firstLetter.equalsIgnoreCase(key))
 						itemsGr.add(items.get(i));
 				}
-				FileInfo newGroup = createItemGroup(key, groupPrefixTag);
+				FileInfo newGroup = createItemGroup(noTilda(key), groupPrefixTag);
 				newGroup.parent = parent;
 				parent.addDir(newGroup);
-				addGroupedItems2(newGroup, key, itemsGr, groupPrefixTag, extractor, lev + 1);
+				addGroupedItems2(newGroup, noTilda(key), itemsGr, groupPrefixTag, extractor, lev + 1);
 			}
 		}
 	}
@@ -3857,7 +3861,8 @@ public class MainDB extends BaseDB {
 					"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n, opds_link,  " +
 					//KR implementation
 					"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list, " +
-					"crc32, domVersion, rendFlags, description, name_crc32, title_upper ";
+					"crc32, domVersion, rendFlags, description, name_crc32, title_upper, " +
+					"(SELECT GROUP_CONCAT(a2.name_lfm,'|') FROM author a2 JOIN book_author ba2 ON a2.id=ba2.author_fk WHERE ba2.book_fk=b.id) as authors_lfm ";
 
 	private static final String READ_FILEINFO_SQL =
 			"SELECT " +
@@ -3870,7 +3875,7 @@ public class MainDB extends BaseDB {
 	private static final String READ_FILEINFO_SQL_CALIBRE =
 			"  select b.id, b.path||'/'||d.name||'.'||lower(d.format) as pathname, b.path, " +
 					"	d.name||'.'||lower(d.format) as filename, '' as arcname, b.title, " +
-					"			(SELECT GROUP_CONCAT(a.name,'|') FROM books_authors_link bal JOIN authors a ON a.id=bal.author WHERE bal.book=b.id) as authors, " +
+					"	(SELECT GROUP_CONCAT(a.name,'|') FROM books_authors_link bal JOIN authors a ON a.id=bal.author WHERE bal.book=b.id) as authors, " +
 					"  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as series_name, " +
 					"  0 as series_number, d.format, d.uncompressed_size as filesize, d.uncompressed_size as arcsize, " +
 					"	b.timestamp as create_time, b.last_modified as last_access_time, 0 as flags, " +
@@ -3891,7 +3896,7 @@ public class MainDB extends BaseDB {
 					"  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre_list, " +
 					"  null as crc32, null as domVersion, null as rendFlags, " +
 					"  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as description, " +
-					"  null as name_crc32, null as title_upper " +
+					"  null as name_crc32, null as title_upper, '' as authors_lfm " +
 					"	from books b " +
 					"	join data d on d.book = b.id ";
 
@@ -3953,6 +3958,7 @@ public class MainDB extends BaseDB {
 		fileInfo.description = rs.getString(i++);
 		fileInfo.name_crc32 = rs.getString(i++);
 		String titleUpper = rs.getString(i++);
+		fileInfo.setAuthorsLFM(rs.getString(i++));
 		fileInfo.isArchive = fileInfo.arcname != null;
 	}
 

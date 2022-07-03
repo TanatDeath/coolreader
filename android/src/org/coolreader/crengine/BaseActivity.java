@@ -1,47 +1,5 @@
 package org.coolreader.crengine;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.coolreader.CoolReader;
-//import org.coolreader.accessibility.KRAccessibilityService;
-import org.coolreader.dic.wiki.WikiArticles;
-import org.coolreader.eink.EinkScreen;
-import org.coolreader.eink.EinkScreenDummy;
-import org.coolreader.eink.EinkScreenNook;
-import org.coolreader.eink.EinkScreenOnyx;
-import org.coolreader.eink.EinkScreenTolino;
-import org.coolreader.readerview.ReaderView;
-import org.coolreader.dic.DicToastView;
-import org.coolreader.dic.Dictionaries;
-import org.coolreader.dic.Dictionaries.DictInfo;
-import org.coolreader.R;
-import org.coolreader.db.CRDBService;
-import org.coolreader.db.CRDBServiceAccessor;
-import org.coolreader.db.MainDB;
-import org.coolreader.dic.wiki.WikiArticle;
-import org.coolreader.genrescollection.GenresCollection;
-import org.coolreader.geo.GeoToastView;
-import org.coolreader.geo.MetroStation;
-import org.coolreader.geo.TransportStop;
-import org.coolreader.options.OptionsDialog;
-import org.coolreader.utils.StrUtils;
-import org.coolreader.utils.Utils;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -77,8 +35,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
@@ -89,6 +45,46 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.db.CRDBService;
+import org.coolreader.db.CRDBServiceAccessor;
+import org.coolreader.db.MainDB;
+import org.coolreader.dic.DicToastView;
+import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.Dictionaries.DictInfo;
+import org.coolreader.dic.wiki.WikiArticles;
+import org.coolreader.eink.EinkScreen;
+import org.coolreader.eink.EinkScreenDummy;
+import org.coolreader.eink.EinkScreenNook;
+import org.coolreader.eink.EinkScreenOnyx;
+import org.coolreader.eink.EinkScreenTolino;
+import org.coolreader.genrescollection.GenresCollection;
+import org.coolreader.geo.GeoToastView;
+import org.coolreader.geo.MetroStation;
+import org.coolreader.geo.TransportStop;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
 
@@ -97,17 +93,16 @@ public class BaseActivity extends Activity implements Settings {
 
 	protected CRDBServiceAccessor mCRDBService;
 	public Dictionaries mDictionaries;
+	public OptionsDialog optionsDialog;
 
 	public int sensorPrevRot = -1;
 	public int sensorCurRot = -1;
 
 	public int iCutoutMode = 0; // for cutout screens
 
-//	public boolean bGetBacklightFromSystem = false; // onyx
-//	public int initialBacklight = -1;
-//	public int initialWarmBacklight = -1;
-
-	//private volatile SuperActivityToast myToast;
+	public CoolReader asCoolReader() {
+		return (CoolReader) this;
+	}
 
 	protected void unbindCRDBService() {
 		if (mCRDBService != null) {
@@ -1461,7 +1456,8 @@ public class BaseActivity extends Activity implements Settings {
 					// system
 					b = -1.0f; //BRIGHTNESS_OVERRIDE_NONE
 				}
-				if (!DeviceInfo.isEinkScreen(getScreenForceEink())) setDimmingAlpha(dimmingAlpha);
+				if (!DeviceInfo.isEinkScreen(getScreenForceEink()))
+					setDimmingAlpha(dimmingAlpha);
 				//log.v("Brightness: " + b + ", dim: " + dimmingAlpha);
 				updateBacklightBrightness(b);
 				updateButtonsBrightness(keyBacklightOff ? 0.0f : -1.0f);
@@ -1637,7 +1633,6 @@ public class BaseActivity extends Activity implements Settings {
 
 	private EinkScreen.EinkUpdateMode mScreenUpdateMode = EinkScreen.EinkUpdateMode.Normal;
 	private int mEinkOnyxNeedBypass = 0;
-	private boolean mEinkOnyxNeedDeepGC = false;
 	private boolean mEinkOnyxRegal = false;
 	private int mEinkOnyxScreenFullUpdateMethod = 0;
 	private int mEinkOnyxExtraDelayFullRefresh = -1;
@@ -1662,10 +1657,16 @@ public class BaseActivity extends Activity implements Settings {
 		}
 	}
 
-	public void setScreenNeedDeepGC(boolean needDeepGC) {
+	public int getScreenDeepUpdateInterval() {
+		return mScreenDeepUpdateInterval;
+	}
+
+	public void setScreenDeepUpdateInterval(int screenDeepUpdateInterval) {
 		if (null != mEinkScreen) {
-			mEinkOnyxNeedDeepGC = needDeepGC;
-			mEinkScreen.setNeedDeepGC(needDeepGC);
+			mScreenDeepUpdateInterval = screenDeepUpdateInterval;
+			if (mEinkScreen.getDeepUpdateInterval() != screenDeepUpdateInterval) {
+				mEinkScreen.setDeepUpdateInterval(screenDeepUpdateInterval);
+			}
 		}
 	}
 
@@ -1691,6 +1692,7 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	private int mScreenUpdateInterval = 0;
+	private int mScreenDeepUpdateInterval = 0;
 
 	public int getScreenUpdateInterval() {
 		return mScreenUpdateInterval;
@@ -1823,19 +1825,19 @@ public class BaseActivity extends Activity implements Settings {
 				ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
 	}
 
-	public void showDicToast(String s, String msg, int dicT, String dicName, boolean fullScreen) {
+	public void showDicToast(String s, String msg, int dicT, String dicName, Dictionaries.DictInfo curDict, boolean fullScreen) {
 		boolean bShown = false;
 		if (this instanceof CoolReader) {
 			if (((CoolReader) this).getReaderView() != null) {
 				if (((CoolReader) this).getReaderView().getSurface() != null) {
 					bShown = true;
 					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(),
-							dicT, dicName, fullScreen);
+							dicT, dicName, curDict, fullScreen);
 				}
 			} else {
 				bShown = true;
 				showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).mHomeFrame,
-						dicT, dicName, fullScreen);
+						dicT, dicName, curDict, fullScreen);
 			}
 		}
 		if (!bShown) {
@@ -1868,12 +1870,12 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void showDicToast(String s, String msg, int duration, View view, int dicT,
-							 String dicName, boolean fullScreen) {
+							 String dicName, Dictionaries.DictInfo curDict, boolean fullScreen) {
 		log.v("showing toast: " + msg);
 		View view1 = view;
 		if (view1 == null) view1 = getContentView();
 		DicToastView.showToast(this, view1, s, msg, Toast.LENGTH_LONG, dicT, dicName,
-				fullScreen);
+				curDict, fullScreen);
 	}
 
 	public void showDicToastExt(String s, String msg, int duration, View view, int dicT, String dicName,
@@ -2396,7 +2398,7 @@ public class BaseActivity extends Activity implements Settings {
         } else if (key.equals(PROP_APP_EINK_ONYX_NEED_BYPASS)) {
 			setScreenNeedBypass(Utils.parseInt(value, 0));
 		} else if (key.equals(PROP_APP_EINK_ONYX_NEED_DEEPGC)) {
-			setScreenNeedDeepGC(Utils.parseInt(value, 0) == 0? false : true);
+			setScreenDeepUpdateInterval(Utils.parseInt(value, 0));
 		} else if (key.equals(PROP_APP_EINK_ONYX_REGAL)) {
 			setScreenRegal(Utils.parseInt(value, 0) == 0? false : true);
 		} else if (key.equals(PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD)) {
@@ -2707,7 +2709,7 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void showActionsToolbarMenu(final ReaderAction[] actions, View anchor,  View parentAnchor, final CRToolBar.OnActionHandler onActionHandler) {
-		CRToolBar toolbarView = new CRToolBar(this, ReaderAction.createList(actions), false,
+		CRToolBar toolbarView = new CRToolBar(this.asCoolReader(), ReaderAction.createList(actions), false,
 				false, true, false);
 		toolbarView.setFocusable(false);
 		toolbarView.showPopupMenu(actions, anchor, parentAnchor, onActionHandler);
@@ -2726,7 +2728,7 @@ public class BaseActivity extends Activity implements Settings {
 			if (menu.size() == 0) {
 				int order = 0;
 				for (final ReaderAction action : actions) {
-					MenuItem item = menu.add(0, action.menuItemId, order++, action.nameId);
+					MenuItem item = menu.add(0, action.menuItemId, order++, action.getNameText(this));
 					item.setOnMenuItemClickListener(item1 -> onActionHandler.onActionSelected(action));
 				}
 			}
@@ -2735,16 +2737,8 @@ public class BaseActivity extends Activity implements Settings {
 	}
 	
 	public void showBrowserOptionsDialog() {
-		//OptionsDialog dlg = new OptionsDialog(BaseActivity.this, null, null, OptionsDialog.Mode.BROWSER);
-		//OptionsDialog dlg = new OptionsDialog(BaseActivity.this, OptionsDialog.Mode.BROWSER, null, null, null);
-		if (this instanceof CoolReader) {
-			((CoolReader) this).optionsFilter = "";
-			((CoolReader) this).showOptionsDialogExt(OptionsDialog.Mode.READER, PROP_FILEBROWSER_TITLE);
-		} else {
-			// dead code :)
-			OptionsDialog dlg = new OptionsDialog(BaseActivity.this, OptionsDialog.Mode.BROWSER, null, null, null, null);
-			dlg.show();
-		}
+		asCoolReader().optionsFilter = "";
+		asCoolReader().showOptionsDialogExt(OptionsDialog.Mode.READER, PROP_FILEBROWSER_TITLE);
 	}
 
 	private int currentProfile = 0;
@@ -3326,6 +3320,10 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_HYPHENATION_DICT, Engine.HyphDict.RUSSIAN.toString());
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SIMPLE_MODE, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE, "8");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES, "0");

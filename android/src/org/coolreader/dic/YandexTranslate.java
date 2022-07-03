@@ -55,7 +55,7 @@ public class YandexTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium), DicToastView.IS_YANDEX,
-						"", fullScreen);
+						"", curDict, fullScreen);
 				return;
 			}
 			if (StrUtils.isEmptyStr(lang)) {
@@ -63,7 +63,7 @@ public class YandexTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_YANDEX, "", fullScreen), 100));
+								DicToastView.IS_YANDEX, "", curDict, fullScreen), 100));
 				return;
 			}
 		}
@@ -73,7 +73,7 @@ public class YandexTranslate {
 			String finalMes = mes;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization)+ " " + finalMes,
-							DicToastView.IS_YANDEX, "", fullScreen), 100));
+							DicToastView.IS_YANDEX, "", curDict, fullScreen), 100));
 			BackgroundThread.instance().postBackground(() ->
 					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE), 3000);
 			return;
@@ -83,7 +83,7 @@ public class YandexTranslate {
 			String finalMes1 = mes;
 			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 					cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.cloud_need_authorization) + finalMes1,
-							DicToastView.IS_YANDEX, "", fullScreen), 100));
+							DicToastView.IS_YANDEX, "", curDict, fullScreen), 100));
 			BackgroundThread.instance().postBackground(() ->
 				cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_DICTIONARY_TITLE), 3000);
 			return;
@@ -134,12 +134,12 @@ public class YandexTranslate {
 										sLang = jso2.getString("detectedLanguageCode");
 								}
 								if (dcb == null) {
-									cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, fullScreen);
+									cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, curDict, fullScreen);
 									Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict, "");
 								} else {
 									dcb.done(sText, "");
 									if (dcb.showDicToast()) {
-										cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, fullScreen);
+										cr.showDicToast(s, sText, DicToastView.IS_YANDEX, sLang, curDict, fullScreen);
 									}
 									if (dcb.saveToHist()) {
 										Dictionaries.saveToDicSearchHistory(cr, s, sText, curDict, "");
@@ -147,20 +147,20 @@ public class YandexTranslate {
 								}
 							} else {
 								if (dcb == null)
-									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 								else {
 									dcb.fail(null, sBody);
 									if (dcb.showDicToast())
-										cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+										cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 								}
 							}
 						} catch (Exception e) {
 							if (dcb == null)
-								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 							else {
 								dcb.fail(e, e.getMessage());
 								if (dcb.showDicToast())
-									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+									cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 							}
 						}
 					} else {
@@ -180,9 +180,9 @@ public class YandexTranslate {
 									}
 								}
 								llc.click(langs);
-							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+							} else cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 						} catch (Exception e) {
-							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 						}
 					}
 				}, 100));
@@ -196,7 +196,7 @@ public class YandexTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
 						cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-							DicToastView.IS_YANDEX, "", fullScreen)
+							DicToastView.IS_YANDEX, "", curDict, fullScreen)
 					));
 					unauthCntY = 0;
 				}
@@ -236,10 +236,10 @@ public class YandexTranslate {
 						yandexTranslate(cr, s, fullScreen, yndGetDefLangCode(langf), yndGetDefLangCode(lang), curDict ,view, llc, dcb);
 					} catch (Exception e) {
 						if (dcb == null)
-							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+							cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 						else {
 							if (dcb.showDicToast())
-								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", fullScreen);
+								cr.showDicToast(s, sBody, DicToastView.IS_YANDEX, "", curDict, fullScreen);
 							dcb.fail(e, e.getMessage());
 						}
 					}
@@ -249,7 +249,7 @@ public class YandexTranslate {
 				BackgroundThread.instance().postBackground(() ->
 						BackgroundThread.instance().postGUI(() ->
 										cr.showDicToast(cr.getString(R.string.dict_err), e.getMessage(),
-												DicToastView.IS_YANDEX, "", fullScreen)
+												DicToastView.IS_YANDEX, "", curDict, fullScreen)
 								, 100));
 			}
 		});

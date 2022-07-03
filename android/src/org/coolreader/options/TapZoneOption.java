@@ -20,6 +20,8 @@ import org.coolreader.crengine.Settings;
 import org.coolreader.utils.Utils;
 import org.coolreader.readerview.ReaderView;
 
+import java.util.List;
+
 public class TapZoneOption extends SubmenuOption {
 
 	final BaseActivity mActivity;
@@ -39,10 +41,10 @@ public class TapZoneOption extends SubmenuOption {
 		mActivity = activity;
 		mReaderView = ((CoolReader) mActivity).getmReaderView();
 		screenWidth = mActivity.getWindowManager().getDefaultDisplay().getWidth();
-		ReaderAction[] actions = ReaderAction.AVAILABLE_ACTIONS;
+		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
 		for (ReaderAction a : actions) {
 			Log.i("TAG", "TapZoneOption: " + a.id);
-			this.updateFilteredMark(a.id, mActivity.getString(a.nameId), mActivity.getString(a.addInfoR));
+			this.updateFilteredMark(a.id, a.getNameText(activity), mActivity.getString(a.addInfoR));
 		}
 	}
 	View grid;
@@ -55,7 +57,7 @@ public class TapZoneOption extends SubmenuOption {
 		final ImageView iv = view.findViewById(R.id.zone_icon);
 		final String propName = property + "." + tapZoneId;
 		final String longPropName = property + ".long." + tapZoneId;
-		final ReaderAction action = ReaderAction.findById( mProperties.getProperty(propName) );
+		final ReaderAction action = ReaderAction.findById(mProperties.getProperty(propName));
 		if ((iv != null)&&(action != null)) {
 			int iconId = action.iconId;
 			if (iconId == 0) {
@@ -76,8 +78,8 @@ public class TapZoneOption extends SubmenuOption {
 			ivl.setImageDrawable(d);
 			mActivity.tintViewIcons(ivl, true);
 		}
-		text.setText(mActivity.getString(action.nameId));
-		longtext.setText(mActivity.getString(longAction.nameId));
+		text.setText(action.getNameText(mActivity));
+		longtext.setText(longAction.getNameText(mActivity));
 		int colorIcon = themeColors.get(R.attr.colorIcon);
 		text.setTextColor(mActivity.getTextColor(colorIcon));
 		longtext.setTextColor(mActivity.getTextColor(colorIcon));
@@ -86,12 +88,12 @@ public class TapZoneOption extends SubmenuOption {
 		final String filt = this.lastFilteredValue;
 		view.setOnClickListener(v -> {
 			// TODO: i18n
-			ActionOption option = new ActionOption(mActivity, mOwner, mActivity.getString(R.string.options_app_tap_action_short), propName, true,
+			ActionOption option = new ActionOption(mOwner, mActivity.getString(R.string.options_app_tap_action_short), propName, true,
 					false, mActivity.getString(action.addInfoR), filt);
 			option.setIconId(action.getIconId());
 			option.setOnChangeHandler(() -> {
 				ReaderAction action1 = ReaderAction.findById(mProperties.getProperty(propName));
-				text.setText(mActivity.getString(action1.nameId));
+				text.setText(action1.getNameText(mActivity));
 				int iconId = action1.iconId;
 				if (iconId == 0) {
 					iconId = Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
@@ -104,12 +106,12 @@ public class TapZoneOption extends SubmenuOption {
 		});
 		view.setOnLongClickListener(v -> {
 			// TODO: i18n
-			ActionOption option = new ActionOption(mActivity, mOwner, mActivity.getString(R.string.options_app_tap_action_long), longPropName, true,
+			ActionOption option = new ActionOption(mOwner, mActivity.getString(R.string.options_app_tap_action_long), longPropName, true,
 					true, mActivity.getString(longAction.addInfoR), filt);
 			option.setIconId(action.getIconId());
 			option.setOnChangeHandler(() -> {
 				ReaderAction longAction1 = ReaderAction.findById( mProperties.getProperty(longPropName) );
-				longtext.setText(mActivity.getString(longAction1.nameId));
+				longtext.setText(longAction1.getNameText(mActivity));
 				int iconId = longAction1.iconId;
 				if (iconId == 0) {
 					iconId = Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);

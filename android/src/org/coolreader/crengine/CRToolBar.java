@@ -1,26 +1,13 @@
 package org.coolreader.crengine;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.coolreader.CoolReader;
-import org.coolreader.R;
-import org.coolreader.readerview.ReaderView;
-import org.coolreader.options.OptionsDialog;
-import org.coolreader.utils.StrUtils;
-import org.coolreader.utils.Utils;
-
-import android.graphics.Bitmap;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.ColorInt;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.Gravity;
@@ -39,11 +26,24 @@ import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
+
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 public class CRToolBar extends ViewGroup {
 
 	private static final Logger log = L.create("tb");
 	
-	final private BaseActivity activity;
+	final private CoolReader mActivity;
 	private ArrayList<ReaderAction> actions = new ArrayList<>();
 	private ArrayList<ReaderAction> actionsToolbar = new ArrayList<>();
 	private ArrayList<ReaderAction> actionsMore = new ArrayList<>();
@@ -104,11 +104,11 @@ public class CRToolBar extends ViewGroup {
 	public void tintViewIconsColor(View v) {
 //		Boolean nightEInk = activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && isEInk;
 		Boolean nightEInk = false;
-		if ((!useBackgrColor) && (!nightEInk)) activity.tintViewIcons(v, true);
+		if ((!useBackgrColor) && (!nightEInk)) mActivity.tintViewIcons(v, true);
 		else {
-			Boolean custIcons = activity.settings().getBool(BaseActivity.PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
+			Boolean custIcons = mActivity.settings().getBool(BaseActivity.PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
 			if (DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink())) custIcons = false;
-			int custColor = activity.settings().getColor(BaseActivity.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
+			int custColor = mActivity.settings().getColor(BaseActivity.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
 //			if (nightEInk) {
 //				custIcons = true;
 //				custColor = Color.WHITE;
@@ -122,20 +122,20 @@ public class CRToolBar extends ViewGroup {
 						while (!isColorDark(colorCur)) colorCur = darkenColor(colorCur);
 					}
 				if (nightEInk) colorCur = Color.WHITE;
-				activity.tintViewIconsC(v, true, colorCur);
+				mActivity.tintViewIconsC(v, true, colorCur);
 				//activity.tintViewIcons(v, PorterDuff.Mode.SRC_ATOP, true, true, colorCur, nightEInk);
 			} else {
-				TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+				TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 						{R.attr.colorIcon, R.attr.colorIconL});
 				int colorIcon = a.getColor(0, Color.GRAY);
 				int colorIconL = a.getColor(1, Color.GRAY);
 				a.recycle();
 				if (isColorDark(ReaderView.backgrNormalizedColor)) {
-					if (isColorDark(colorIcon)) activity.tintViewIconsC(v, true, colorIconL);
-					else activity.tintViewIconsC(v, true, colorIcon);
+					if (isColorDark(colorIcon)) mActivity.tintViewIconsC(v, true, colorIconL);
+					else mActivity.tintViewIconsC(v, true, colorIcon);
 				} else {
-					if (isColorDark(colorIcon)) activity.tintViewIconsC(v, true, colorIcon);
-					else activity.tintViewIconsC(v, true, colorIconL);
+					if (isColorDark(colorIcon)) mActivity.tintViewIconsC(v, true, colorIcon);
+					else mActivity.tintViewIconsC(v, true, colorIconL);
 				}
 			}
 		}
@@ -170,36 +170,34 @@ public class CRToolBar extends ViewGroup {
 		return this.isVertical;
 	}
 
-	public CRToolBar(BaseActivity context) {
+	public CRToolBar(CoolReader context) {
 		super(context);
-		this.activity = context;
+		this.mActivity = context;
 		this.preferredItemHeight = context.getPreferredItemHeight();
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors((CoolReader) context, isEInk);
+		themeColors = Utils.getThemeColors(context, isEInk);
 	}
 
-	private int getActionNameId(ReaderAction action) {
-		if (action.shortNameId != 0) return action.shortNameId;
-		return action.nameId;
-	}
+//	private int getActionNameId(ReaderAction action) {
+//		if (action.shortNameId != 0) return action.shortNameId;
+//		return action.nameId;
+//	}
 
 	private LinearLayout inflateItem(ReaderAction action) {
 		final LinearLayout view = (LinearLayout)inflater.inflate(R.layout.popup_toolbar_item, null);
 		ImageView icon = view.findViewById(R.id.action_icon);
 		TextView label = view.findViewById(R.id.action_label);
 		int colorIcon;
-		if (activity instanceof CoolReader) {
-			TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorIcon});
-			colorIcon = a.getColor(0, Color.GRAY);
-			a.recycle();
-			label.setTextColor(activity.getTextColor(colorIcon));
-		}
-		icon.setImageResource(action != null ? action.getIconIdWithDef(activity) :
-				Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
+				{R.attr.colorIcon});
+		colorIcon = a.getColor(0, Color.GRAY);
+		a.recycle();
+		label.setTextColor(mActivity.getTextColor(colorIcon));
+		icon.setImageResource(action != null ? action.getIconIdWithDef(mActivity) :
+				Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
 		icon.setMinimumWidth(buttonWidth);
-		Utils.setContentDescription(icon, activity.getString(action != null ? getActionNameId(action) : R.string.btn_toolbar_more));
-		label.setText(action != null ? getActionNameId(action) : R.string.btn_toolbar_more);
+		Utils.setContentDescription(icon, action != null ? action.getShortNameText(mActivity) : mActivity.getString(R.string.btn_toolbar_more));
+		label.setText(action != null ? action.getShortNameText(mActivity) : mActivity.getString(R.string.btn_toolbar_more));
 		view.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 		return view;
 	}
@@ -213,10 +211,10 @@ public class CRToolBar extends ViewGroup {
 			this.actions = new ArrayList<>();
 			this.actionsToolbar = new ArrayList<>();
 			this.actionsMore = new ArrayList<>();
-			ReaderAction[] actions_all = ReaderAction.AVAILABLE_ACTIONS;
+			List<ReaderAction> actions_all = ReaderAction.getAvailActions(true);
 
-			String toolbarButtons = activity.settings().getProperty(BaseActivity.PROP_TOOLBAR_BUTTONS, "");
-			String menuButtons = activity.settings().getProperty(BaseActivity.PROP_READING_MENU_BUTTONS, "");
+			String toolbarButtons = mActivity.settings().getProperty(BaseActivity.PROP_TOOLBAR_BUTTONS, "");
+			String menuButtons = mActivity.settings().getProperty(BaseActivity.PROP_READING_MENU_BUTTONS, "");
 
 			if (StrUtils.isEmptyStr(toolbarButtons)) {
 				for (ReaderAction ra : ReaderAction.getDefReaderActions()) {
@@ -253,18 +251,18 @@ public class CRToolBar extends ViewGroup {
 		}
 	}
 	
-	public CRToolBar(BaseActivity context, ArrayList<ReaderAction> actions, boolean multiline, boolean useActionsMore,
+	public CRToolBar(CoolReader context, ArrayList<ReaderAction> actions, boolean multiline, boolean useActionsMore,
 					 boolean ignoreSett, boolean ignoreInv) {
 		super(context);
-		this.activity = context;
+		this.mActivity = context;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors((CoolReader) context, isEInk);
+		themeColors = Utils.getThemeColors(context, isEInk);
 		//this.actions = actions;
 		createActionsLists(actions, ignoreSett);
 		if (useActionsMore) this.actionsToolbar = this.actionsMore;
 		this.isMultiline = multiline;
-		this.preferredItemHeight = activity.getPreferredItemHeight(); //context.getPreferredItemHeight();
-		this.inflater = LayoutInflater.from(activity);
+		this.preferredItemHeight = mActivity.getPreferredItemHeight(); //context.getPreferredItemHeight();
+		this.inflater = LayoutInflater.from(mActivity);
 		this.windowDividerHeight = multiline ? 8 : 0;
 		this.ignoreInv = ignoreInv;
 		context.getWindow().getAttributes();
@@ -280,46 +278,44 @@ public class CRToolBar extends ViewGroup {
 	}
 	
 	public void calcLayout() {
-		if (activity instanceof CoolReader) {
-			optionAppearance = Integer.parseInt(((CoolReader)activity).getToolbarAppearance());
-			toolbarScale = 1.0f;
-			grayIcons = false;
-			invIcons = false;
-			switch (optionAppearance) {
-				case Settings.VIEWER_TOOLBAR_100:           // 0
-				case Settings.VIEWER_TOOLBAR_100_gray:      // 1
-					grayIcons = true;
-					break;
-				case Settings.VIEWER_TOOLBAR_100_inv:      // 2
-					invIcons = true;
-					break;
-				case Settings.VIEWER_TOOLBAR_75:            // 3
-					toolbarScale = 0.75f;
-					break;
-				case Settings.VIEWER_TOOLBAR_75_gray:       // 4
-					toolbarScale = 0.75f;
-					grayIcons = true;
-					break;
-				case Settings.VIEWER_TOOLBAR_75_inv:       // 5
-					toolbarScale = 0.75f;
-					invIcons = true;
-					break;
-				case Settings.VIEWER_TOOLBAR_50:            // 6
-					toolbarScale = 0.5f;
-					break;
-				case Settings.VIEWER_TOOLBAR_50_gray:       // 7
-					toolbarScale = 0.5f;
-					grayIcons = true;
-					break;
-				case Settings.VIEWER_TOOLBAR_50_inv:       // 8
-					toolbarScale = 0.5f;
-					invIcons = true;
-					break;
-			}
-			//grayIcons = false; // there is no sense in grayIcons since new icons
-			invIcons = false;  // and inv...
-			if (this.ignoreInv) invIcons = false;
+		optionAppearance = Integer.parseInt(mActivity.getToolbarAppearance());
+		toolbarScale = 1.0f;
+		grayIcons = false;
+		invIcons = false;
+		switch (optionAppearance) {
+			case Settings.VIEWER_TOOLBAR_100:           // 0
+			case Settings.VIEWER_TOOLBAR_100_gray:      // 1
+				grayIcons = true;
+				break;
+			case Settings.VIEWER_TOOLBAR_100_inv:      // 2
+				invIcons = true;
+				break;
+			case Settings.VIEWER_TOOLBAR_75:            // 3
+				toolbarScale = 0.75f;
+				break;
+			case Settings.VIEWER_TOOLBAR_75_gray:       // 4
+				toolbarScale = 0.75f;
+				grayIcons = true;
+				break;
+			case Settings.VIEWER_TOOLBAR_75_inv:       // 5
+				toolbarScale = 0.75f;
+				invIcons = true;
+				break;
+			case Settings.VIEWER_TOOLBAR_50:            // 6
+				toolbarScale = 0.5f;
+				break;
+			case Settings.VIEWER_TOOLBAR_50_gray:       // 7
+				toolbarScale = 0.5f;
+				grayIcons = true;
+				break;
+			case Settings.VIEWER_TOOLBAR_50_inv:       // 8
+				toolbarScale = 0.5f;
+				invIcons = true;
+				break;
 		}
+		//grayIcons = false; // there is no sense in grayIcons since new icons
+		invIcons = false;  // and inv...
+		if (this.ignoreInv) invIcons = false;
 		int sz = (int)((float)preferredItemHeight * toolbarScale); //(activity.isSmartphone() ? preferredItemHeight * 6 / 10 - BUTTON_SPACING : preferredItemHeight);
 		buttonWidth = buttonHeight = sz - BUTTON_SPACING;
 		if (isMultiline)
@@ -328,10 +324,10 @@ public class CRToolBar extends ViewGroup {
 			ReaderAction item = actionsMore.get(i);
 			int iconId = item.iconId;
 			if (iconId == 0) {
-				iconId = Utils.resolveResourceIdByAttr(activity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
+				iconId = Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_option_other_drawable, R.drawable.cr3_option_other);
 			}
 			iconActions.add(item);
-			Drawable d = activity.getResources().getDrawable(item.getIconIdWithDef(activity));
+			Drawable d = mActivity.getResources().getDrawable(item.getIconIdWithDef(mActivity));
 			visibleButtonCount++;
 			int w = d.getIntrinsicWidth();// * dpi / 160;
 			int h = d.getIntrinsicHeight();// * dpi / 160;
@@ -371,7 +367,7 @@ public class CRToolBar extends ViewGroup {
 	protected void onCreateContextMenu(ContextMenu menu) {
 		int order = 0;
 		for (ReaderAction action : itemsOverflow) {
-			menu.add(0, action.menuItemId, order++, getActionNameId(action));
+			menu.add(0, action.menuItemId, order++, action.getNameText(mActivity));
 		}
 	}
 	
@@ -389,14 +385,14 @@ public class CRToolBar extends ViewGroup {
 				onOverflowHandler.onOverflowActions(itemsOverflow);
 			else {
 				if (!isMultiline && visibleNonButtonCount == 0) {
-					showPopup(activity, activity.getContentView(), actionsMore, onActionHandler, onOverflowHandler, actionsMore.size(), Settings.VIEWER_TOOLBAR_TOP);
+					showPopup(mActivity, mActivity.getContentView(), actionsMore, onActionHandler, onOverflowHandler, actionsMore.size(), Settings.VIEWER_TOOLBAR_TOP);
 				} else {
 					if (allActionsHaveIcon(itemsOverflow)) {
 						if (popup != null)
 							popup.dismiss();
-						showPopup(activity, activity.getContentView(), itemsOverflow, onActionHandler, onOverflowHandler, actions.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
+						showPopup(mActivity, mActivity.getContentView(), itemsOverflow, onActionHandler, onOverflowHandler, actions.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
 					} else
-						activity.showActionsPopupMenu(itemsOverflow, onActionHandler);
+						mActivity.showActionsPopupMenu(itemsOverflow, onActionHandler);
 				}
 			}
 		}
@@ -407,7 +403,7 @@ public class CRToolBar extends ViewGroup {
 			popup.dismiss();
 		ArrayList<ReaderAction> act = new ArrayList<ReaderAction>();
 		for (ReaderAction ra: actions) act.add(ra);
-		showPopup(activity, activity.getContentView(), act,
+		showPopup(mActivity, mActivity.getContentView(), act,
 				onActionHandler, onOverflowHandler, act.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
 	}
 
@@ -416,8 +412,8 @@ public class CRToolBar extends ViewGroup {
 			popup.dismiss();
 		ArrayList<ReaderAction> act = new ArrayList<ReaderAction>();
 		for (ReaderAction ra: actions) act.add(ra);
-		showPopup(activity, anchor == null? activity.getContentView(): anchor,
-				parentAnchor == null? activity.getContentView(): parentAnchor, (anchor == null), act,
+		showPopup(mActivity, anchor == null? mActivity.getContentView(): anchor,
+				parentAnchor == null? mActivity.getContentView(): parentAnchor, (anchor == null), act,
 				onActionHandler, onOverflowHandler, act.size(), isMultiline ? popupLocation : Settings.VIEWER_TOOLBAR_BOTTOM);
 	}
 	
@@ -431,7 +427,7 @@ public class CRToolBar extends ViewGroup {
 		Bitmap dest = Bitmap.createBitmap(
 				src.getWidth(), src.getHeight(), src.getConfig());
 		int colorIcon;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorIcon});
 		colorIcon = a.getColor(0, Color.GRAY);
 		a.recycle();
@@ -502,7 +498,7 @@ public class CRToolBar extends ViewGroup {
 //					ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
 //					paintG.setColorFilter(f);
 //				}
-				String sText = activity.getString(getActionNameId(item));
+				String sText = item.getShortNameText(mActivity);
 				String sTextR = "";
 				if(sText != null){
 					for(int i = 0; i < sText.length(); i++){
@@ -527,7 +523,7 @@ public class CRToolBar extends ViewGroup {
 				ib.setImageBitmap(bmpWithText);
 			}
 		}
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.isTintedIcons, R.attr.colorIcon});
 		int isTintedIcons = a.getInt(0, 0);
 		boolean nghtMode = nightMode && (isTintedIcons == 1);
@@ -560,58 +556,50 @@ public class CRToolBar extends ViewGroup {
 
 	public boolean onContextItemSelected(MenuItem item) {
 
-		CoolReader cr = null;
-		if (activity!=null)
-			if (activity instanceof CoolReader)
-				cr = ((CoolReader) activity);
-
 		switch (item.getItemId()) {
 			case R.id.options_view_toolbar_position:
-				if (cr!=null) {
+				if (mActivity != null) {
 					log.d("options_view_toolbar_position menu item selected");
-					if (activity instanceof CoolReader)
-						((CoolReader)activity).optionsFilter = "";
-					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_TITLE);
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TOOLBAR_TITLE);
 				};
 				break;
 			case R.id.view_toolbar_position_change:
-				if (cr!=null) {
+				if (mActivity != null) {
 					log.d("view_toolbar_position_change menu item selected");
 					int toolbarLocation =
-							(cr.settings()).getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_SHORT_SIDE);
+							(mActivity.settings()).getInt(Settings.PROP_TOOLBAR_LOCATION, Settings.VIEWER_TOOLBAR_SHORT_SIDE);
 					if (toolbarLocation == Settings.VIEWER_TOOLBAR_LONG_SIDE)
 						toolbarLocation = Settings.VIEWER_TOOLBAR_TOP;
 					else toolbarLocation++;
-					(cr.settings()).setInt(Settings.PROP_TOOLBAR_LOCATION, toolbarLocation);
-					cr.setSettings(cr.settings(), 0, true);
+					(mActivity.settings()).setInt(Settings.PROP_TOOLBAR_LOCATION, toolbarLocation);
+					mActivity.setSettings(mActivity.settings(), 0, true);
 					calcLayout();
 				};
 				break;
 			case R.id.options_view_toolbar_hide_in_fullscreen:
-				if (cr!=null) {
+				if (mActivity != null) {
 					log.d("options_view_toolbar_hide_in_fullscreen menu item selected");
 					boolean hideToolb =
-							(cr.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
+							(mActivity.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
 					hideToolb = !hideToolb;
-					(cr.settings()).setBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, hideToolb);
-					cr.setSettings(cr.settings(), 0, true);
+					(mActivity.settings()).setBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, hideToolb);
+					mActivity.setSettings(mActivity.settings(), 0, true);
 					calcLayout();
 				};
 				break;
 			case R.id.options_app_tapzones_normal:
-				if (cr!=null) {
+				if (mActivity != null) {
 					log.d("options_app_tapzones_normal menu item selected");
-					if (activity instanceof CoolReader)
-						((CoolReader)activity).optionsFilter = "";
-					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TAP_ZONE_ACTIONS_TAP);
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_TAP_ZONE_ACTIONS_TAP);
 				};
 				break;
 			case R.id.options_app_key_actions:
-				if (cr!=null) {
+				if (mActivity != null) {
 					log.d("options_app_key_actions menu item selected");
-					if (activity instanceof CoolReader)
-						((CoolReader)activity).optionsFilter = "";
-					cr.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_KEY_ACTIONS_PRESS);
+					mActivity.optionsFilter = "";
+					mActivity.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_APP_KEY_ACTIONS_PRESS);
 				};
 				break;
 		}
@@ -652,46 +640,43 @@ public class CRToolBar extends ViewGroup {
 					if (ram != null) onButtonClick(ram);
 				}
 			} else {
-				if (activity!=null)
-					if (activity instanceof CoolReader) {
-						final CoolReader cr = ((CoolReader) activity);
-						cr.registerForContextMenu(cr.contentView);
-						cr.contentView.setOnCreateContextMenuListener((menu, v1, menuInfo) -> {
-							menu.clear();
-							MenuInflater inflater = cr.getMenuInflater();
-							inflater.inflate(R.menu.cr3_reader_toolbar_context_menu, menu);
-							menu.setHeaderTitle(cr.getString(R.string.options_view_toolbar_settings));
-							for ( int i=0; i<menu.size(); i++ ) {
-								if (menu.getItem(i).getItemId()==R.id.options_view_toolbar_hide_in_fullscreen) {
-									boolean hideToolb =
-											(cr.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
-									menu.getItem(i).setCheckable(true);
-									menu.getItem(i).setChecked(hideToolb);
-								}
-								menu.getItem(i).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-									public boolean onMenuItemClick(MenuItem item1) {
-										onContextItemSelected(item1);
-										return true;
-									}
-								});
+				if (mActivity !=null)
+					mActivity.registerForContextMenu(mActivity.contentView);
+					mActivity.contentView.setOnCreateContextMenuListener((menu, v1, menuInfo) -> {
+						menu.clear();
+						MenuInflater inflater = mActivity.getMenuInflater();
+						inflater.inflate(R.menu.cr3_reader_toolbar_context_menu, menu);
+						menu.setHeaderTitle(mActivity.getString(R.string.options_view_toolbar_settings));
+						for ( int i=0; i<menu.size(); i++ ) {
+							if (menu.getItem(i).getItemId()==R.id.options_view_toolbar_hide_in_fullscreen) {
+								boolean hideToolb =
+										(mActivity.settings()).getBool(Settings.PROP_TOOLBAR_HIDE_IN_FULLSCREEN, false);
+								menu.getItem(i).setCheckable(true);
+								menu.getItem(i).setChecked(hideToolb);
 							}
+							menu.getItem(i).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+								public boolean onMenuItemClick(MenuItem item1) {
+									onContextItemSelected(item1);
+									return true;
+								}
+							});
+						}
 
-						});
-						cr.contentView.showContextMenu();
-					}
+					});
+					mActivity.contentView.showContextMenu();
 			}
 			return true;
 		});
 
 		if (item != null) {
-			if (item.getIconIdWithDef(activity)!=0)	setButtonImageResource(item, ib,item.getIconIdWithDef(activity));
-			Utils.setContentDescription(ib, getContext().getString(getActionNameId(item)));
+			if (item.getIconIdWithDef(mActivity)!=0)	setButtonImageResource(item, ib,item.getIconIdWithDef(mActivity));
+			Utils.setContentDescription(ib, item.getShortNameText(mActivity));
 			ib.setTag(item);
 		} else {
-			setButtonImageResource(item, ib,Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
+			setButtonImageResource(item, ib,Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_more_drawable, R.drawable.cr3_button_more));
 			Utils.setContentDescription(ib, getContext().getString(R.string.btn_toolbar_more));
 		}
-		TypedArray a = activity.getTheme().obtainStyledAttributes( new int[] { R.attr.cr3_toolbar_button_background_drawable } );
+		TypedArray a = mActivity.getTheme().obtainStyledAttributes( new int[] { R.attr.cr3_toolbar_button_background_drawable } );
 		int cr3_toolbar_button_background = a.getResourceId(0, 0);
 		a.recycle();
 		if (0 == cr3_toolbar_button_background)
@@ -737,13 +722,13 @@ public class CRToolBar extends ViewGroup {
         	int y0 = 0;
         	//plotn - let it be always
         	//if (popupLocation == Settings.VIEWER_TOOLBAR_BOTTOM) {
-			View separator = new View(activity);
+			View separator = new View(mActivity);
 			//separator.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
-			separator.setBackgroundColor(activity.getTextColor(themeColors.get(R.attr.colorIcon)));
+			separator.setBackgroundColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
 			addView(separator);
 			separator.layout(left, top, right, top + windowDividerHeight);
-			View separator2 = new View(activity);
-			separator2.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
+			View separator2 = new View(mActivity);
+			separator2.setBackgroundResource(mActivity.getCurrentTheme().getBrowserStatusBackground());
 			addView(separator2);
 			separator2.layout(left, top + windowDividerHeight, right, top + (2 * windowDividerHeight));
 			y0 = (2 *windowDividerHeight) + 4;
@@ -753,7 +738,7 @@ public class CRToolBar extends ViewGroup {
     		int maxLines = bottom / lineH;
     		if (maxLines > maxMultilineLines)
     			maxLines = maxMultilineLines;
-			Boolean nightEInk = activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && activity.getScreenForceEink();
+			Boolean nightEInk = mActivity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && mActivity.getScreenForceEink();
         	for (int currentLine = 0; currentLine < lineCount && currentLine < maxLines; currentLine++) {
         		int startBtn = currentLine * buttonsPerLine;
         		int endBtn = (currentLine + 1) * buttonsPerLine;
@@ -784,7 +769,7 @@ public class CRToolBar extends ViewGroup {
 					else
 						showOverflowMenu();
 					});
-					activity.tintViewIcons(item, PorterDuff.Mode.SRC_ATOP, false, false, 0, nightEInk);
+					mActivity.tintViewIcons(item, PorterDuff.Mode.SRC_ATOP, false, false, 0, nightEInk);
 					item.setOnLongClickListener(v -> {
 						ReaderAction ram = action.getMirrorAction();
 						if (ram != null) onButtonClick(ram);
@@ -794,12 +779,12 @@ public class CRToolBar extends ViewGroup {
 //        		addView(scroll);
         	}
         	//if (popupLocation != Settings.VIEWER_TOOLBAR_BOTTOM) {
-			View separator3 = new View(activity);
-			separator3.setBackgroundResource(activity.getCurrentTheme().getBrowserStatusBackground());
+			View separator3 = new View(mActivity);
+			separator3.setBackgroundResource(mActivity.getCurrentTheme().getBrowserStatusBackground());
 			addView(separator3);
 			separator3.layout(left, bottom - (2 * windowDividerHeight), right, bottom);
-			View separator4 = new View(activity);
-			separator4.setBackgroundColor(activity.getTextColor(themeColors.get(R.attr.colorIcon)));
+			View separator4 = new View(mActivity);
+			separator4.setBackgroundColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
 			addView(separator4);
 			separator4.layout(left, bottom - windowDividerHeight, right, bottom);
         	//}
@@ -924,19 +909,19 @@ public class CRToolBar extends ViewGroup {
 		super.onDraw(canvas);
 	}
 	public PopupWindow showAsPopup(View anchor, OnActionHandler onActionHandler, OnOverflowHandler onOverflowHandler) {
-		return showPopup(activity, anchor, actionsMore, onActionHandler, onOverflowHandler, 3, Settings.VIEWER_TOOLBAR_BOTTOM);
+		return showPopup(mActivity, anchor, actionsMore, onActionHandler, onOverflowHandler, 3, Settings.VIEWER_TOOLBAR_BOTTOM);
 	}
 	
 	private void setMaxLines(int maxLines) {
 		this.maxMultilineLines = maxLines;
 	}
 
-	public static PopupWindow showPopup(BaseActivity context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
+	public static PopupWindow showPopup(CoolReader context, View anchor, ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler, final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
 		// it seems that big value in maxlines should not affect anything
 		return showPopup(context, anchor, anchor, true, actions, onActionHandler, onOverflowHandler, 100 /*maxLines*/, popupLocationDummy);
 	}
 
-	public static PopupWindow showPopup(BaseActivity context, View anchor, View parentAnchor, boolean isRootAnchor,
+	public static PopupWindow showPopup(CoolReader context, View anchor, View parentAnchor, boolean isRootAnchor,
 										ArrayList<ReaderAction> actions, final OnActionHandler onActionHandler,
 										final OnOverflowHandler onOverflowHandler, int maxLines, int popupLocationDummy) {
 	    int popupLocation = Settings.VIEWER_TOOLBAR_BOTTOM; // plotn - костыль, а то когда панель сверху, то половина ее закрашивается светлее
@@ -1023,7 +1008,7 @@ public class CRToolBar extends ViewGroup {
 			bg = Utils.solidColorDrawable(theme.getPopupToolbarBackgroundColor());
 		if (tb.isEInk) {
 			bg = Utils.solidColorDrawable(theme.getPopupToolbarBackgroundColor());
-			Boolean night = tb.activity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false);
+			Boolean night = tb.mActivity.settings().getBool(BaseActivity.PROP_NIGHT_MODE, false);
 			if (night) bg = Utils.solidColorDrawable(Color.BLACK);
 		}
 		popup.setBackgroundDrawable(bg);

@@ -256,7 +256,7 @@ public class SearchDlg extends BaseDialog {
 		mSkim = mDialogView.findViewById(R.id.btn_skim);
 		mSkim.setOnClickListener(v -> {
 			KeyboardUtils.hideKeyboard(mCoolReader,mEditView);
-			mReaderView.onCommand(ReaderCommand.DCMD_SKIM, 0);
+			mReaderView.onCommand(ReaderCommand.DCMD_SKIM, 0, null);
 			cancel();
 		});
 		mSkim.setBackgroundColor(colorGrayCT2);

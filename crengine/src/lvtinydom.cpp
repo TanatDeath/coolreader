@@ -6446,6 +6446,9 @@ int initTableRendMethods( ldomNode * enode, int state )
                 printf("initTableRendMethods(%d): wrapping unproper %d>%d\n",
                             state, first_unproper, last_unproper);
             #endif
+            if ( is_last && last_unproper < 0 ) { // (may happen with old gDOMVersionRequested)
+                last_unproper = cnt-1;
+            }
             int elems_removed = last_unproper - first_unproper + 1;
             ldomNode * tbox = enode->boxWrapChildren(first_unproper, last_unproper, el_tabularBox);
             if ( tbox && !tbox->isNull() ) {
@@ -9443,6 +9446,11 @@ bool ldomXPointer::getRect(lvRect & rect, bool extended, bool adjusted) const
             bool line_is_bidi = frmline->flags & LTEXT_LINE_IS_BIDI;
             for ( int w=0; w<(int)frmline->word_count; w++ ) {
                 const formatted_word_t * word = &frmline->words[w];
+                if (word->flags & LTEXT_WORD_IS_PAD ) {
+                    // Skip these as they are virtual and don't map to real nodes
+                    // text indices: they won't be part of any rect
+                    continue;
+                }
                 bool word_is_rtl = word->flags & LTEXT_WORD_DIRECTION_IS_RTL;
                 bool lastWord = (l == txtform->GetLineCount() - 1
                                  && w == frmline->word_count - 1);

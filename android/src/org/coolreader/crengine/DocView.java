@@ -4,16 +4,6 @@ package org.coolreader.crengine;
 import android.graphics.Bitmap;
 
 import org.coolreader.CoolReader;
-import org.coolreader.R;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class DocView {
 
@@ -416,7 +406,7 @@ public class DocView {
 	 */
 	public void getPageImage(Bitmap bitmap) {
 		synchronized(mutex) {
-			getPageImageInternal(bitmap, DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 32);
+			getPageImageInternal(bitmap, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 32);
 		}
 	}
 
@@ -461,7 +451,7 @@ public class DocView {
 	 */
 	public boolean drawImage(Bitmap bitmap, ImageInfo imageInfo) {
 		synchronized(mutex) {
-			return drawImageInternal(bitmap, DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 32, imageInfo);
+			return drawImageInternal(bitmap, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 32, imageInfo);
 		}
 	}
 

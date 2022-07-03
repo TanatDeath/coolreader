@@ -119,7 +119,7 @@ public class OfflineDicTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
-						DicToastView.IS_OFFLINE, "Offline dic", fullScreen);
+						DicToastView.IS_OFFLINE, "Offline dic", curDict, fullScreen);
 				return;
 			}
 		}
@@ -133,7 +133,7 @@ public class OfflineDicTranslate {
 						DicStruct dsl = (DicStruct) o;
 						if (dcb == null) {
 							if (dsl.getCount() == 0) {
-								cr.showDicToast(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic", fullScreen);
+								cr.showDicToast(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic", curDict, fullScreen);
 							} else {
 								Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 								cr.showDicToastExt(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic",
@@ -143,7 +143,7 @@ public class OfflineDicTranslate {
 							dcb.done(dsl.getFirstTranslation(), Dictionaries.dslStructToString(dsl));
 							if (dcb.showDicToast()) {
 								if (dsl.getCount() == 0) {
-									cr.showDicToast(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic", fullScreen);
+									cr.showDicToast(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic", curDict, fullScreen);
 								} else {
 									cr.showDicToastExt(s, sTitle, DicToastView.IS_OFFLINE, "Offline dic",
 											curDict, dsl, fullScreen);

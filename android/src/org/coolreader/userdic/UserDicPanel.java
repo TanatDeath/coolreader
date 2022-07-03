@@ -2,7 +2,6 @@ package org.coolreader.userdic;
 
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -22,14 +21,11 @@ import org.coolreader.crengine.InterfaceTheme;
 import org.coolreader.crengine.PositionProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderAction;
-import org.coolreader.crengine.ResizeHistory;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.dic.DicToastView;
-import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.dic.struct.DicStruct;
-import org.coolreader.readerview.ReaderView;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -306,7 +302,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			}, 500);
 			BackgroundThread.instance().postGUI(() -> {
 				lblStar.setText("#");
-lblStar.setTextColor(0xFF000000 | color);
+				lblStar.setTextColor(0xFF000000 | color);
 			}, 3000);
 		}
 
@@ -499,13 +495,13 @@ lblStar.setTextColor(0xFF000000 | color);
 					if (mCoolReader.getmReaderView().flgHighlightUserDic) {
 						try {
 							mCoolReader.getmReaderView().selectionStarted = true;
-							mCoolReader.getmReaderView().toggleScreenUpdateModeMode();
+							mCoolReader.getmReaderView().toggleScreenUpdateModeMode(false);
 							mCoolReader.getmReaderView().clearSelection();
 							mCoolReader.getmReaderView().findText(mCoolReader.getmReaderView().getCurrentPositionBookmark(),
 									"{{curPage}}" + wrds, false, true, true);
 						} finally {
 							mCoolReader.getmReaderView().selectionStarted = true;
-							mCoolReader.getmReaderView().toggleScreenUpdateModeMode();
+							mCoolReader.getmReaderView().toggleScreenUpdateModeMode(false);
 						}
 					}
 				}

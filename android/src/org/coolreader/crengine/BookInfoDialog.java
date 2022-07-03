@@ -801,7 +801,7 @@ public class BookInfoDialog extends BaseDialog {
 		CoolReader cr = (CoolReader)mCoolReader;
 			if (mBookInfo!=null) {
 				FileInfo fi = mBookInfo.getFileInfo();
-				cr.createBookShortcut(fi,mBookCover);
+				cr.createBookShortcut(fi, mBookCover);
 			} else cr.showToast(R.string.book_info_action_unavailable);
 		});
 

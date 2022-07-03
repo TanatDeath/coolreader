@@ -120,14 +120,14 @@ public class FilebrowserOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
 				.add(sortOrderValues, sortOrderLabels, sortOrderAddInfos).setDefaultValue(FileInfo.SortOrder.TITLE_AUTHOR.name()).
 						setIconIdByAttr(R.attr.attr_icons8_alphabetical_sorting, R.drawable.icons8_alphabetical_sorting));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_app_show_cover_pages), Settings.PROP_APP_SHOW_COVERPAGES,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_show_cover_pages), Settings.PROP_APP_SHOW_COVERPAGES,
 				mActivity.getString(R.string.options_app_show_cover_pages_add_info), this.lastFilteredValue).
 				setIconIdByAttr(R.attr.attr_icons8_book, R.drawable.icons8_book));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_app_cover_page_size),
 				Settings.PROP_APP_COVERPAGE_SIZE, mActivity.getString(R.string.options_app_cover_page_size_add_info), this.lastFilteredValue).
 				add(mCoverPageSizes, mCoverPageSizeTitles, mCoverPageSizeAddInfos).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_big_and_small, R.drawable.icons8_book_big_and_small));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_app_scan_book_props),
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_scan_book_props),
 				Settings.PROP_APP_BOOK_PROPERTY_SCAN_ENABLED,
 				mActivity.getString(R.string.options_app_scan_book_props_add_info), this.lastFilteredValue).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties));
@@ -142,7 +142,7 @@ public class FilebrowserOption extends SubmenuOption {
 		//CR implementation
 		//listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_browser_hide_empty_genres), Settings.PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
 		//		mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.mi_book_browser_simple_mode), Settings.PROP_APP_FILE_BROWSER_SIMPLE_MODE,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.mi_book_browser_simple_mode), Settings.PROP_APP_FILE_BROWSER_SIMPLE_MODE,
 				mActivity.getString(R.string.mi_book_browser_simple_mode_add_info), this.lastFilteredValue).
 				setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.authors_aliases_load),
@@ -174,7 +174,7 @@ public class FilebrowserOption extends SubmenuOption {
 					}
 				}, true).setDefaultValue(mActivity.getString(R.string.authors_aliases_load_add_info)).
 				setIconIdByAttr(R.attr.attr_icons8_anon_load, R.drawable.icons8_anon_load));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.authors_aliases_enabled), Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.authors_aliases_enabled), Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED,
 				mActivity.getString(R.string.authors_aliases_enabled_add_info), this.lastFilteredValue).
 				setIconIdByAttr(R.attr.attr_icons8_anon, R.drawable.icons8_anon));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.browser_tap_option_tap), Settings.PROP_APP_FILE_BROWSER_TAP_ACTION,
@@ -189,7 +189,7 @@ public class FilebrowserOption extends SubmenuOption {
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.mi_book_browser_max_group_size), Settings.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
 				mActivity.getString(R.string.mi_book_browser_max_group_size_add_info), this.lastFilteredValue).
 				add(mBrowserMaxGroupItems).setDefaultValue("8").setIconIdByAttr(R.attr.attr_icons8_group, R.drawable.icons8_group));
-		listView.add(new FilebrowserSecGroupOption(mActivity, mContext, mOwner, mActivity.getString(R.string.sec_group),
+		listView.add(new FilebrowserSecGroupOption(mOwner, mActivity.getString(R.string.sec_group),
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				setIconIdByAttr(R.attr.attr_icons8_group2, R.drawable.icons8_group2));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.external_doc_came_dialog_timeout),
@@ -200,7 +200,7 @@ public class FilebrowserOption extends SubmenuOption {
 				Settings.PROP_APP_FILE_BROWSER_ZIP_SCAN, mActivity.getString(R.string.detect_zip_add_info), this.lastFilteredValue).
 				add(mZipScan, mZipScanTitles, mZipScanAddInfos).
 				setDefaultValue("0").setIconIdByAttr(R.attr.cr3_browser_folder_zip_drawable, R.drawable.icons8_zip));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.show_hidden_dirs), Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.show_hidden_dirs), Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				noIcon());
 		dlg.setView(listView);

@@ -414,6 +414,11 @@
     <string name="mi_book_browser_simple_mode">Простой список файлов</string>
     <string name="mi_book_browser_max_group_size">Максимальный размер группы</string>
     <string name="mi_book_browser_max_group_size_add_info">Если число элементов будет больше - они будут группироваться в подпапки</string>
+    <string name="mi_book_browser_max_group_size_author">Максимальный размер группы - авторы</string>
+    <string name="mi_book_browser_max_group_size_series">Максимальный размер группы - серии</string>
+    <string name="mi_book_browser_max_group_size_genres">Максимальный размер группы - жанры</string>
+    <string name="mi_book_browser_max_group_size_dates">Максимальный размер группы - даты</string>
+    <string name="mi_book_browser_max_group_size_add_info_sec">Если число элементов будет больше - они будут группироваться в подпапки. Если 0 - будет использоваться \'общая\' настройка</string>
     <string name="options_page_animation_slide_2_pages">Сдвиг (обе страницы)</string>
     <string name="options_page_animation_blur">Размытие</string>
     <string name="options_page_animation_blur_dim">Размытие с затемнением</string>
@@ -1264,7 +1269,7 @@
     <string name="cloud_sync_variant3_v">Синхронизация будет производиться через Яндекс.Диск (используется папка KnownReader)</string>
     <string name="switch_profile_note">Переключение профилей доступно только при открытой книге</string>
     <string name="settings_info">Глобальные настройки выделены курсивом (остальные - зависят от выбранного профиля)</string>
-    <string name="settings_info_short">(глобальные настройки - курсивом)</string>
+    <string name="settings_info_short">(курсив - глобальные настройки)</string>
     <string name="global_margin">Отступ экрана (требуется перезапуск)</string>
     <string name="global_margin_add_info">Для устройств с тачскрином и бортиками</string>
     <string name="lang_from">С языка (1)</string>
@@ -1390,6 +1395,13 @@
     <string name="mi_folder_series_books">Все книги серии</string>
     <string name="context_menu_author_folder">Авторы</string>
     <string name="context_menu_series_folder">Серии</string>
+    <string name="context_menu_genres_folder">Жанры</string>
+    <string name="context_menu_bookdate_folder">Дата книги</string>
+    <string name="context_menu_docdate_folder">Дата документа</string>
+    <string name="context_menu_publyear_folder">Год публикации</string>
+    <string name="context_menu_filedate_folder">Дата файла</string>
+    <string name="context_menu_rating_folder">Рейтинг</string>
+    <string name="context_menu_state_folder">Статус</string>
     <string name="loading_stub">Загружается ...</string>
     <string name="search_not_found">Книги не найдены</string>
     <string name="search_results_for">Результаты поиска для: </string>
@@ -1834,8 +1846,8 @@
     <string name="eink_onyx_bypass0">Авто</string>
     <string name="eink_onyx_bypass1">Включено</string>
     <string name="eink_onyx_bypass2">Выключено</string>
-    <string name="eink_onyx_deepgc">Глубокое полное обновление</string>
-    <string name="eink_onyx_deepgc_add_info">Полное обновление высокого (в два прохода) качества (работает на некоторых моделя Onyx, например Poke 3)</string>
+    <string name="eink_onyx_deepgc">Интервал глубокого полного обновления</string>
+    <string name="eink_onyx_deepgc_add_info">Полное обновление высокого (в два прохода) качества (работает на некоторых моделя Onyx, например Poke 3). 0 = отключено</string>
     <string name="eink_onyx_add_delay_full_refresh">Дополнительная задержка перед полным обновлением экрана</string>
     <string name="eink_onyx_add_delay_full_refresh_auto">Авто</string>
     <string name="eink_onyx_add_delay_full_refresh_0">Отключено</string>
@@ -1923,9 +1935,11 @@
     <string name="eink_onyx_full_update">Способ полного обновления экрана</string>
     <string name="eink_full_update_auto">Авто</string>
     <string name="eink_onyx_full_update_add_info">Попробуйте поменять метод, если при полном обновлении экрана вы замечаете мерцание или двойное обновление</string>
-    <string name="eink_full_update_method1">Метод 1</string>
-    <string name="eink_full_update_method2">Метод 2</string>
-    <string name="eink_full_update_method3">Метод 3</string>
+    <string name="eink_full_update_method1">Метод 1 (simple)</string>
+    <string name="eink_full_update_method2">Метод 2 (postInvalidate)</string>
+    <string name="eink_full_update_method3">Метод 3 (GCC)</string>
+    <string name="eink_full_update_method4">Метод 4 (EPDController)</string>
+    <string name="eink_full_update_method5">Метод 5 (DU_QUALITY)</string>
     <string name="exp_feature">Экспериментальная функция</string>
     <string name="exp_feature_short">Экспериментальное</string>
     <string name="exp_feature_add_info">Эта функция - то, что в настоящий момент разрабатывается. Если вы решили ее использовать - вы точно знаете что делать</string>
@@ -1956,5 +1970,17 @@
     <string name="accessibility_service_label">Служба специальных возможностей KnownReader</string>
     <string name="accessibility_service_description">Позволяет сконфигурировать жесты датчика отпечатка</string>
     <string name="autoscroll_stopped">Автолистание остановлено</string>
+    <string name="options_flip_simple_speed">Скорость листания (в простом режиме), сек</string>
+    <string name="show_group_books_by_author">Группировка - автор</string>
+    <string name="show_group_books_by_series">Группировка - серии</string>
+    <string name="show_group_books_by_genre">Группировка - жанры</string>
+    <string name="show_group_books_by_bookdate">Группировка - дата книги</string>
+    <string name="show_group_books_by_docdate">Группировка - дата документа</string>
+    <string name="show_group_books_by_publyear">Группировка - год публикации</string>
+    <string name="show_group_books_by_filedate">Группировка - дата файла</string>
+    <string name="show_group_books_by_rating">Группировка - рейтинг</string>
+    <string name="show_group_books_by_state">Группировка - статус</string>
+    <string name="show_group_books_by_title">Группировка - наименованиям</string>
+    <string name="no_value">[Нет значения]</string>
 </resources>
 

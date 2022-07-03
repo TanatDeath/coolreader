@@ -21,7 +21,7 @@ public class EinkScreenDummy implements EinkScreen {
 	}
 
 	@Override
-	public void setNeedDeepGC(boolean needDeepGC) {
+	public void setDeepUpdateInterval(int deepUpdateInterval) {
 
 	}
 
@@ -64,6 +64,11 @@ public class EinkScreenDummy implements EinkScreen {
 
 	@Override
 	public int getUpdateInterval() {
+		return 0;
+	}
+
+	@Override
+	public int getDeepUpdateInterval() {
 		return 0;
 	}
 

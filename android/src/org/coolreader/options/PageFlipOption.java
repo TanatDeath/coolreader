@@ -79,7 +79,7 @@ public class PageFlipOption extends SubmenuOption {
 		OptionsListView listView = new OptionsListView(mContext, this);
 
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
-			listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.options_controls_enable_volume_keys), Settings.PROP_CONTROLS_ENABLE_VOLUME_KEYS,
+			listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_controls_enable_volume_keys), Settings.PROP_CONTROLS_ENABLE_VOLUME_KEYS,
 					mActivity.getString(R.string.options_controls_enable_volume_keys_add_info), this.lastFilteredValue).setDefaultValue("1").
 					setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
 
@@ -115,11 +115,14 @@ public class PageFlipOption extends SubmenuOption {
 				Settings.PROP_APP_VIEW_AUTOSCROLL_TYPE, mActivity.getString(R.string.autopage_flipping_type_add_info), this.lastFilteredValue).add(
 						mAutoflipType, mAutoflipTypeTitles, mAutoflipTypeAddInfos).setDefaultValue(autoType).
 				setIconIdByAttr(R.attr.attr_icons8_autoflip_page, R.drawable.icons8_autoflip_page));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.autopage_flipping_show_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.autopage_flipping_show_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED,
 				mActivity.getString(R.string.autopage_flipping_show_speed_add_info), this.lastFilteredValue).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
-		listView.add(new BoolOption(mActivity, mOwner, mActivity.getString(R.string.autopage_flipping_show_progress), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS,
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.autopage_flipping_show_progress), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS,
 				mActivity.getString(R.string.autopage_flipping_show_progress_add_info), this.lastFilteredValue).setDefaultValue(autoShow).
+				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
+		listView.add(new FlowListOption(mOwner, mActivity.getString(R.string.options_flip_simple_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SIMPLE_SPEED,
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(1,180).setDefaultValue("8").
 				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
 		dlg.setView(listView);
 		dlg.show();
@@ -138,6 +141,14 @@ public class PageFlipOption extends SubmenuOption {
 		for (int i: mFlippingTypeAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		for (int i: mFlippingSensivityTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		for (int i: mFlippingSensivityAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		this.updateFilteredMark(mActivity.getString(R.string.autopage_flipping_type),
+				Settings.PROP_APP_VIEW_AUTOSCROLL_TYPE, mActivity.getString(R.string.autopage_flipping_type_add_info));
+		for (int i: mAutoflipTypeAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		for (int i: mFlippingSensivityAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		this.updateFilteredMark(mActivity.getString(R.string.autopage_flipping_show_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED,
+				mActivity.getString(R.string.autopage_flipping_show_speed_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.autopage_flipping_show_progress), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS,
+				mActivity.getString(R.string.autopage_flipping_show_progress_add_info));
 		return this.lastFiltered;
 	}
 

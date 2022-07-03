@@ -36,6 +36,8 @@
 
     <application
             android:label="${appLabel}"
+            android:process="com.onyx.org.knownreader.experimental"
+            tools:replace="android:process"
             tools:node="merge"
             >
         <provider

@@ -48,7 +48,7 @@ public class GlosbeTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
-						DicToastView.IS_GLOSBE, "", fullScreen);
+						DicToastView.IS_GLOSBE, "", curDict, fullScreen);
 				return;
 			}
 			if ((StrUtils.isEmptyStr(lang)) || (StrUtils.isEmptyStr(langf))) {
@@ -56,7 +56,7 @@ public class GlosbeTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_GLOSBE, "", fullScreen), 100));
+								DicToastView.IS_GLOSBE, "", curDict, fullScreen), 100));
 				return;
 			}
 		}
@@ -137,7 +137,7 @@ public class GlosbeTranslate {
 								if (dcb == null) {
 									if (dsl.getCount() == 0) {
 										cr.showDicToast(s, sTitle, DicToastView.IS_GLOSBE,
-												urlBuilder.build().url().toString(), fullScreen);
+												urlBuilder.build().url().toString(), curDict, fullScreen);
 									} else {
 										Dictionaries.saveToDicSearchHistory(cr, s, dsl.getFirstTranslation(), curDict, dsl);
 										cr.showDicToastExt(s, sTitle, DicToastView.IS_GLOSBE,
@@ -148,7 +148,7 @@ public class GlosbeTranslate {
 									if (dcb.showDicToast()) {
 										if (dsl.getCount() == 0) {
 											cr.showDicToast(s, sTitle, DicToastView.IS_GLOSBE,
-													urlBuilder.build().url().toString(), fullScreen);
+													urlBuilder.build().url().toString(), curDict, fullScreen);
 										} else {
 											cr.showDicToastExt(s, sTitle, DicToastView.IS_GLOSBE,
 													urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
@@ -163,7 +163,7 @@ public class GlosbeTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented),
-								DicToastView.IS_GLOSBE, "", fullScreen);
+								DicToastView.IS_GLOSBE, "", curDict, fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -173,7 +173,7 @@ public class GlosbeTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_GLOSBE, "", fullScreen);
+							DicToastView.IS_GLOSBE, "", curDict, fullScreen);
 				}, 100));
 			}
 		});

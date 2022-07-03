@@ -15,6 +15,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.ReaderAction;
 import org.coolreader.eink.EinkScreen;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Properties;
@@ -57,11 +58,12 @@ public abstract class OptionBase {
 	public int fallbackIconId2 = R.drawable.cr3_option_other;
 	public OptionsListView optionsListView;
 	protected Runnable onChangeHandler;
-	public OptionBase( OptionOwner owner, String label, String property, String addInfo, String filter) {
+
+	public OptionBase(OptionOwner owner, String label, String property, String addInfo, String filter) {
 		this.mOwner = owner;
 		this.mActivity = (CoolReader) owner.getActivity();
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors((CoolReader) mActivity, isEInk);
+		themeColors = Utils.getThemeColors(mActivity, isEInk);
 		this.mEinkScreen = this.mActivity.getEinkScreen();
 		this.mInflater = owner.getInflater();
 		this.mProperties = owner.getProperties();
@@ -69,6 +71,9 @@ public abstract class OptionBase {
 		this.property = property;
 		this.addInfo = addInfo;
 		this.setFilteredMark(filter);
+		this.registerReaderOption();
+		if (!StrUtils.isEmptyStr(property))
+			OptionsDialog.ALL_OPTIONS.put(property, this);
 	}
 
 	public void setCheckedValue(ImageView v, boolean checked) {
@@ -139,21 +144,25 @@ public abstract class OptionBase {
 	public OptionBase setIconId(int id) {
 		drawableAttrId = 0;
 		fallbackIconId = id;
+		updateReaderActionIcon();
 		return this;
 	}
 	public OptionBase setIcon2Id(int id) {
 		fallbackIconId2 = id;
+		updateReaderActionIcon();
 		return this;
 	}
 	public OptionBase setIconIdByAttr(int drawableAttrId, int fallbackIconId) {
 		this.drawableAttrId = drawableAttrId;
 		this.fallbackIconId = fallbackIconId;
+		updateReaderActionIcon();
 		return this;
 	}
 	public OptionBase noIcon() {
 		drawableAttrId = 0;
 		fallbackIconId = 0;
 		fallbackIconId2 = 0;
+		updateReaderActionIcon();
 		return this;
 	}
 	public OptionBase setDefaultValue(String value) {
@@ -354,6 +363,7 @@ public abstract class OptionBase {
 	}
 
 	public String getValueLabel() { return mProperties.getProperty(property); }
+
 	public void onSelect() {
 		if (!enabled)
 			return;
@@ -366,5 +376,23 @@ public abstract class OptionBase {
 		if (!StrUtils.isEmptyStr(addInfo))
 			mActivity.showToast(addInfo, Toast.LENGTH_LONG, v, true, 0);
 		return true;
+	}
+
+	public void updateReaderActionIcon() {
+		ReaderAction ra = ReaderAction.OPTIONS_ACTIONS.get(property);
+		if (ra != null) {
+			int resId = 0;
+			if (drawableAttrId != 0) {
+				resId = Utils.resolveResourceIdByAttr(mActivity, drawableAttrId, fallbackIconId);
+			} else if (fallbackIconId != 0) {
+				resId = fallbackIconId;
+			}
+			if (resId != 0) ra.setIconId(resId);
+				else ra.setIconId(R.drawable.icons8_more);
+			ReaderAction.OPTIONS_ACTIONS.put(property, ra);
+		}
+	}
+
+	public void registerReaderOption() {
 	}
 }

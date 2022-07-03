@@ -7144,7 +7144,8 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->setBoolDef(PROP_STATUS_CHAPTER_MARKS, true);
 	props->setBoolDef(PROP_SHOW_TIME_LEFT, true);
 
-	static int margin_options[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 20, 25, 30, 40, 50, 60, 80, 100, 130, 150, 200, 300};
+	static int margin_options[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 20, 23, 25, 28, 30, 35, 40, 45, 50, 55,
+								   60, 70, 80, 90, 100, 110, 120, 130, 150, 200, 300};
 	props->limitValueList(PROP_PAGE_MARGIN_TOP, margin_options, sizeof(margin_options)/sizeof(int), 6);
 	props->limitValueList(PROP_PAGE_MARGIN_BOTTOM, margin_options, sizeof(margin_options)/sizeof(int), 6);
 	props->limitValueList(PROP_PAGE_MARGIN_LEFT, margin_options, sizeof(margin_options)/sizeof(int), 6);

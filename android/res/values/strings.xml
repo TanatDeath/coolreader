@@ -3,6 +3,7 @@
     <string name="app_name">KnownReader</string>
     <string name="app_name_fork" translatable="false">KnownReader</string>
     <string name="app_name_premium" translatable="false">KnownReader premium</string>
+    <string name="app_name_onyx" translatable="false">KnownReader Onyx</string>
     <string name="app_name_free" translatable="false">KnownReader free</string>
     <string name="app_name_exp" translatable="false">KR Exp</string>
     <string name="app_name_fdroid" translatable="false">KnownReader</string>
@@ -435,6 +436,11 @@
     <string name="mi_book_browser_simple_mode">Simple file list</string>
     <string name="mi_book_browser_max_group_size">Maximum group size</string>
     <string name="mi_book_browser_max_group_size_add_info">If the number is greater - items will be grouped into subfolders</string>
+    <string name="mi_book_browser_max_group_size_author">Maximum group size - authors</string>
+    <string name="mi_book_browser_max_group_size_series">Maximum group size - series</string>
+    <string name="mi_book_browser_max_group_size_genres">Maximum group size - genres</string>
+    <string name="mi_book_browser_max_group_size_dates">Maximum group size - dates</string>
+    <string name="mi_book_browser_max_group_size_add_info_sec">If the number is greater - items will be grouped into subfolders. If 0 - \'common\' setting value will be used</string>
     <string name="options_page_animation_slide_2_pages">Slide (2 pages)</string>
     <string name="options_page_animation_blur">Blur</string>
     <string name="options_page_animation_blur_dim">Blur with dim</string>
@@ -1290,7 +1296,7 @@
     <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex.Disk (folder KnownReader is used)</string>
     <string name="switch_profile_note">Profile switching is enabled only when book is open</string>
     <string name="settings_info">Global settings are italic (other - depends on profile)</string>
-    <string name="settings_info_short">(global settings are italic)</string>
+    <string name="settings_info_short">(global settings - italic)</string>
     <string name="global_margin">Screen margin (restart needed)</string>
     <string name="global_margin_add_info">For touchscreen devices with skirtings</string>
     <string name="lang_from">From language (1)</string>
@@ -1423,6 +1429,13 @@
     <string name="mi_folder_series_books">All series\" books</string>
     <string name="context_menu_author_folder">Authors folder</string>
     <string name="context_menu_series_folder">Series folder</string>
+    <string name="context_menu_genres_folder">Genres folder</string>
+    <string name="context_menu_bookdate_folder">Bookdate folder</string>
+    <string name="context_menu_docdate_folder">Docdate folder</string>
+    <string name="context_menu_publyear_folder">Publication year folder</string>
+    <string name="context_menu_filedate_folder">Filedate folder</string>
+    <string name="context_menu_rating_folder">Rating folder</string>
+    <string name="context_menu_state_folder">State folder</string>
     <string name="loading_stub">Loading ...</string>
     <string name="search_not_found">Books were not found</string>
     <string name="search_results_for">Search results for: </string>
@@ -1873,8 +1886,8 @@
     <string name="eink_onyx_bypass0">Auto</string>
     <string name="eink_onyx_bypass1">On</string>
     <string name="eink_onyx_bypass2">Off</string>
-    <string name="eink_onyx_deepgc">Deep quality full update</string>
-    <string name="eink_onyx_deepgc_add_info">Perform (works on some Onyx models, e.g. Poke 3) higher quality (2 pass) full update</string>
+    <string name="eink_onyx_deepgc">Deep quality full update interval</string>
+    <string name="eink_onyx_deepgc_add_info">Perform (works on some Onyx models, e.g. Poke 3) higher quality (2 pass) full update. 0 = disabled</string>
     <string name="eink_onyx_add_delay_full_refresh">Additional delay before full screen update</string>
     <string name="eink_onyx_add_delay_full_refresh_auto">Auto</string>
     <string name="eink_onyx_add_delay_full_refresh_0">Disabled</string>
@@ -1962,9 +1975,11 @@
     <string name="eink_onyx_full_update">Screen full update method</string>
     <string name="eink_full_update_auto">Auto</string>
     <string name="eink_onyx_full_update_add_info">Try to change method if full screen update goes with flickering or the screen updates twice</string>
-    <string name="eink_full_update_method1">Method 1</string>
-    <string name="eink_full_update_method2">Method 2</string>
-    <string name="eink_full_update_method3">Method 3</string>
+    <string name="eink_full_update_method1">Method 1 (simple)</string>
+    <string name="eink_full_update_method2">Method 2 (postInvalidate)</string>
+    <string name="eink_full_update_method3">Method 3 (GCC)</string>
+    <string name="eink_full_update_method4">Method 4 (EPDController)</string>
+    <string name="eink_full_update_method5">Method 5 (DU_QUALITY)</string>
     <string name="exp_feature">Experimental feature</string>
     <string name="exp_feature_short">Experimental</string>
     <string name="exp_feature_add_info">This feature is being developed right now - use it only if you are active tester</string>
@@ -1995,4 +2010,16 @@
     <string name="accessibility_service_label">KnownReader accessibility service</string>
     <string name="accessibility_service_description">Allows to configure fingerprint gestures</string>
     <string name="autoscroll_stopped">Autoscroll has been stopped</string>
+    <string name="options_flip_simple_speed">Page turn speed (simple mode), sec</string>
+    <string name="show_group_books_by_author">Group by authors</string>
+    <string name="show_group_books_by_series">Group by series</string>
+    <string name="show_group_books_by_genre">Group by genres</string>
+    <string name="show_group_books_by_bookdate">Group by book date</string>
+    <string name="show_group_books_by_docdate">Group by doc date</string>
+    <string name="show_group_books_by_publyear">Group by publication year</string>
+    <string name="show_group_books_by_filedate">Group by file date</string>
+    <string name="show_group_books_by_rating">Group by rating</string>
+    <string name="show_group_books_by_state">Group by state</string>
+    <string name="show_group_books_by_title">Group by titles</string>
+    <string name="no_value">[No value]</string>
 </resources>

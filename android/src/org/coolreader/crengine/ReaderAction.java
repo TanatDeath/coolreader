@@ -1,20 +1,46 @@
 package org.coolreader.crengine;
 
+import android.content.Context;
 import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.coolreader.BuildConfig;
+import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.options.OptionBase;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.utils.Utils;
 
 public class ReaderAction {
 	final public String id;
-	final public int shortNameId;
-	final public int nameId;
+	final private int shortNameId;
+
+	public String getShortNameText(Context activity) {
+		if (shortNameId != 0)
+			return activity.getString(shortNameId);
+		if (nameId != 0)
+			return activity.getString(nameId);
+		if (actionOption != null)
+			return "*" + actionOption.label;
+		return "[NONE]";
+	}
+
+	final private int nameId;
+
+	public String getNameText(Context activity) {
+		if (nameId != 0)
+			return activity.getString(nameId);
+		if (actionOption != null)
+			return "*" + actionOption.label;
+		return "[NONE]";
+	}
+
 	final public int addInfoR;
 
 	public static ReaderAction[] getDefReaderActions() {
@@ -47,18 +73,16 @@ public class ReaderAction {
 	}
 
 	public ReaderAction getMirrorAction() {
-
 		if (mirrorAction!=null) return mirrorAction;
-
 		ReaderAction[] actions_all = ReaderAction.AVAILABLE_ACTIONS;
-
-		for ( ReaderAction a : actions_all )
+		for (ReaderAction a : actions_all)
 			if ((a!=this) && (a.mirrorAction == this)) return a;
-
 		return null;
 	}
 
 	public ReaderAction mirrorAction = null;
+
+	public OptionBase actionOption = null;
 
 	public int getIconId() {
 		return iconId;
@@ -106,19 +130,6 @@ public class ReaderAction {
 	public boolean mayAssignOnTap() { return mayAssignOnTap; }
 	public boolean activateWithLongMenuKey() { return activateWithLongMenuKey; }
 
-// to avoid hard finding bugs
-//	public ReaderAction(String id, int nameId, ReaderCommand cmd, int param, ReaderAction mirrorAction, int addInfoR) {
-//		super();
-//		this.id = id;
-//		this.nameId = nameId;
-//		this.cmd = cmd;
-//		this.param = param;
-//		this.menuItemId = 0;
-//		this.iconId = 0;
-//		this.mirrorAction = mirrorAction;
-//		this.addInfoR = addInfoR;
-//	}
-
 	public ReaderAction(String id, int shortNameId, int nameId, ReaderCommand cmd, int param, int menuItemId, ReaderAction mirrorAction, int addInfoR) {
 		super();
 		this.id = id;
@@ -130,6 +141,22 @@ public class ReaderAction {
 		this.iconId = 0;
 		this.mirrorAction = mirrorAction;
 		this.addInfoR = addInfoR;
+		this.actionOption = null;
+	}
+
+	public ReaderAction(String id, int shortNameId, int nameId, ReaderCommand cmd, int param, int menuItemId, ReaderAction mirrorAction, int addInfoR,
+			OptionBase actionOption) {
+		super();
+		this.id = id;
+		this.nameId = nameId;
+		this.shortNameId = shortNameId;
+		this.cmd = cmd;
+		this.param = param;
+		this.menuItemId = menuItemId;
+		this.iconId = 0;
+		this.mirrorAction = mirrorAction;
+		this.addInfoR = addInfoR;
+		this.actionOption = actionOption;
 	}
 
 	public String toString() {
@@ -258,7 +285,19 @@ public class ReaderAction {
 	public final static ReaderAction BRIGHTNESS_UP = new ReaderAction("BRIGHTNESS_UP", 0, R.string.action_brightness_up, ReaderCommand.DCMD_BRIGHTNESS_UP, 1 , 0, BRIGHTNESS_DOWN, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_up);
 	public final static ReaderAction BRIGHTNESS_UP_WARM = new ReaderAction("BRIGHTNESS_UP_WARM", 0, R.string.action_brightness_warm_up, ReaderCommand.DCMD_BRIGHTNESS_WARM_UP, 1 , 0, BRIGHTNESS_DOWN_WARM, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_warm_up);
 
-	public final static ReaderAction[] AVAILABLE_ACTIONS;
+	private final static ReaderAction[] AVAILABLE_ACTIONS;
+	public final static HashMap<String, ReaderAction> OPTIONS_ACTIONS = new HashMap<>();
+	public static List<ReaderAction> getAvailActions(boolean withOptions) {
+		List<ReaderAction> lra = new ArrayList<>();
+		for (ReaderAction ra: AVAILABLE_ACTIONS) lra.add(ra);
+		if (withOptions)
+			for (Map.Entry<String, ReaderAction> entry : OPTIONS_ACTIONS.entrySet()) {
+				String key = entry.getKey();
+				ReaderAction value = entry.getValue();
+				lra.add(value);
+			}
+		return lra;
+	}
 
 	public boolean isNone() {
 		return cmd == NONE.cmd;
@@ -268,22 +307,22 @@ public class ReaderAction {
 		return cmd == REPEAT.cmd;
 	}
 	
-	public static ReaderAction findById( String id ) {
-		if ( id==null )
+	public static ReaderAction findById(String id) {
+		if (id == null)
 			return NONE;
-		for ( ReaderAction a : AVAILABLE_ACTIONS ) {
-			if ( id.equals(a.id) )
+		for (ReaderAction a : getAvailActions(true)) {
+			if (id.equals(a.id))
 				return a;
 		}
-		if ( id.equals(REPEAT.id) )
+		if (id.equals(REPEAT.id))
 			return REPEAT;
 		return NONE;
 	}
 	public static ReaderAction findByMenuId( int id ) {
-		if ( id==0 )
+		if (id == 0)
 			return NONE;
-		for ( ReaderAction a : AVAILABLE_ACTIONS ) {
-			if ( id == a.menuItemId )
+		for (ReaderAction a : getAvailActions(true)) {
+			if (id == a.menuItemId)
 				return a;
 		}
 		return NONE;

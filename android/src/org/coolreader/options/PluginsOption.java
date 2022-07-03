@@ -28,7 +28,7 @@ public class PluginsOption extends SubmenuOption {
 		BaseDialog dlg = new BaseDialog("PluginsDialog", mActivity, label, false, false);
 		OptionsListView listView = new OptionsListView(mContext,this);
 		boolean defEnableLitres = mActivity.getCurrentLanguage().toLowerCase().startsWith("ru") && !DeviceInfo.POCKETBOOK;
-		listView.add(new BoolOption(mActivity, mOwner, "LitRes", Settings.PROP_APP_PLUGIN_ENABLED + "." +
+		listView.add(new BoolOption(mOwner, "LitRes", Settings.PROP_APP_PLUGIN_ENABLED + "." +
 				OnlineStorePluginManager.PLUGIN_PKG_LITRES,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue(defEnableLitres ? "1" : "0"));
 		dlg.setView(listView);

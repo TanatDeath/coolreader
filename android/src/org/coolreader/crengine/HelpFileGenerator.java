@@ -304,7 +304,7 @@ public class HelpFileGenerator {
 	
 	private String getActionName(String actionId) {
 		ReaderAction a = ReaderAction.findById(actionId);
-		return context.getString(a.nameId);
+		return a.getNameText(context);
 	}
 	
 	private String getSettingValueName(String name) {

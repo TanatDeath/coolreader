@@ -23,12 +23,10 @@ public class SkippedResOption extends SubmenuOption {
 
 	private ListView listView;
 
-	final BaseActivity mActivity;
 	final Context mContext;
 
-	public SkippedResOption(BaseActivity activity, Context context, OptionOwner owner, String label, String addInfo, String filter ) {
+	public SkippedResOption(Context context, OptionOwner owner, String label, String addInfo, String filter ) {
 		super(owner, label, Settings.PROP_SKIPPED_RES, addInfo,filter);
-		mActivity = activity;
 		mContext = context;
 	}
 
@@ -68,7 +66,7 @@ public class SkippedResOption extends SubmenuOption {
 			String sProp = rh.X+"."+rh.Y;
 			String sText = rh.X+" x "+rh.Y+" ("+ Utils.formatDate2(mActivity, rh.lastSet)+" "+
 					Utils.formatTime(mActivity, rh.lastSet)+")";
-			listView.add(new BoolOption(mActivity, mOwner, sText, Settings.PROP_SKIPPED_RES+"."+sProp, "", this.lastFilteredValue).setDefaultValue("0").
+			listView.add(new BoolOption(mOwner, sText, Settings.PROP_SKIPPED_RES+"."+sProp, "", this.lastFilteredValue).setDefaultValue("0").
 					setIconId(0));
 		}
 		viewList.addView(listView);

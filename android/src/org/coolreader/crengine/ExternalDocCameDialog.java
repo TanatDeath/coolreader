@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -235,11 +234,15 @@ public class ExternalDocCameDialog extends BaseDialog {
 		Cursor returnCursor =
 				resolver.query(uri, null, null, null, null);
 		if (returnCursor == null) return "";
-		int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-		returnCursor.moveToFirst();
-		String name = returnCursor.getString(nameIndex);
-		returnCursor.close();
-		return name;
+		try {
+			int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+			returnCursor.moveToFirst();
+			String name = returnCursor.getString(nameIndex);
+			returnCursor.close();
+			return name;
+		} catch (Exception e) {
+			return "";
+		}
 	}
 
 	private String queryPath(ContentResolver resolver, Uri uri) {
@@ -406,21 +409,13 @@ public class ExternalDocCameDialog extends BaseDialog {
 	int secondCountdown;
 	boolean stopCount = false;
 
-//	public void openExistingClick(boolean doMove) {
-//		if (!doMove) {
-//			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-//					((CoolReader) activity).loadDocumentExt(sExistingName, sUriUpd), 500));
-//			onPositiveButtonClick();
-//		} else {
-//			tryToMoveThenOpen(mLogFileRoot, activity, sExistingName, downlDir, sUriUpd);
-//			onPositiveButtonClick();
-//		}
-//	}
-
 	public void openExistingClick() {
-		BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-				mActivity.loadDocumentExt(sExistingName, sUriUpd), 500));
-		onPositiveButtonClick();
+		Runnable task = () -> {
+			BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+					mActivity.loadDocumentExt(sExistingName, sUriUpd), 500));
+			onPositiveButtonClick();
+		};
+		mActivity.runInReader(task);
 	}
 
 
@@ -663,18 +658,9 @@ public class ExternalDocCameDialog extends BaseDialog {
 				}
 			}
 		}
-		//if (!sUriUpd.equals(sUri)) tvExtPath.setText(sUriUpd);
 		//\
 		int i = 0;
-		//Boolean exs = true;
 		String sBName = sBaseName;
-//		while (exs) {
-//			sBName = sBaseName;
-//			if (i>0) sBName = sBName + " (" + i + ")";
-//			File fEx = new File(fileDir + "/" + sBName + "." + sDocFormat);
-//			exs = fEx.exists();
-//			i++;
-//		}
 		fileName = replaceInvalidChars(sBName);
 		fileExt = "."+replaceInvalidChars(sDocFormat);
 		btnOpenFromStream = view.findViewById(R.id.btn_open_from_stream);
@@ -695,9 +681,12 @@ public class ExternalDocCameDialog extends BaseDialog {
 						arcFontNames = getFontNames(is1);
 						if (arcFontNames.size()==0) {
 							final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-							BackgroundThread.instance().postBackground(() ->
-									BackgroundThread.instance().postGUI(() -> mActivity.loadDocumentFromStreamExt(is2, finalSUriUpd), 500));
-							onPositiveButtonClick();
+							Runnable task = () -> {
+								BackgroundThread.instance().postBackground(() ->
+										BackgroundThread.instance().postGUI(() -> mActivity.loadDocumentFromStreamExt(is2, finalSUriUpd), 500));
+								onPositiveButtonClick();
+							};
+							mActivity.runInReader(task);
 						} else {
 							final ArrayList<String> arcFontNamesF = arcFontNames;
 							mActivity.askConfirmation(mActivity.getString(R.string.new_fonts,
@@ -711,78 +700,45 @@ public class ExternalDocCameDialog extends BaseDialog {
 										onPositiveButtonClick();
 									}, () -> {
 										final InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-										BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-											mActivity.loadDocumentFromStreamExt(is2, finalSUriUpd), 500));
-										onPositiveButtonClick();
+										Runnable task = () -> {
+											BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+													mActivity.loadDocumentFromStreamExt(is2, finalSUriUpd), 500));
+											onPositiveButtonClick();
+										};
+										mActivity.runInReader(task);
 									});
 						}
 					} catch (Exception e) {
 					}
 				} else {
-					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
-						mActivity.loadDocumentFromUriExt(uri, finalSUriUpd), 500));
-					onPositiveButtonClick();
+					Runnable task = () -> {
+						BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() ->
+								mActivity.loadDocumentFromUriExt(uri, finalSUriUpd), 500));
+						onPositiveButtonClick();
+					};
+					mActivity.runInReader(task);
 				}
 			}
 			else {
 				if ((istream != null) && (bThisIsHTML)) {
-					BackgroundThread.instance().postBackground(() ->
-							BackgroundThread.instance().postGUI(() -> mActivity.loadDocumentFromStreamExt(istream, finalSUriUpd), 500));
+					Runnable task = () -> {
+						BackgroundThread.instance().postBackground(() ->
+								BackgroundThread.instance().postGUI(() -> mActivity.loadDocumentFromStreamExt(istream, finalSUriUpd), 500));
+					};
+					mActivity.runInReader(task);
 				}
 				if ((istreamTxt != null) && (!bThisIsHTML)) {
-					BackgroundThread.instance().postBackground(() ->
-							BackgroundThread.instance().postGUI(() -> mActivity.loadDocumentFromStreamExt(istreamTxt, finalSUriUpd), 500));
+					Runnable task = () -> {
+						BackgroundThread.instance().postBackground(() ->
+								BackgroundThread.instance().postGUI(() -> mActivity.loadDocumentFromStreamExt(istreamTxt, finalSUriUpd), 500));
+					};
+					mActivity.runInReader(task);
 				}
 				onPositiveButtonClick();
 			}
 		});
 		// ODF file must be saved for later convert
 		if ((stype.contains("opendocument")) && (!stype.contains("opendocument.text"))) hideExistingFromStreamControls(view);
-//		btnSave = view.findViewById(R.id.btn_save);
-//		Utils.setDashedButton(btnSave);
-//		btnSave.setOnClickListener(v -> {
-//			stopCount = true;
-//			String fName = fileDir + "/" + edtFileName.getText() + edtFileExt.getText();
-//			File fEx = new File(fName);
-//			if (fEx.exists()) {
-//				this.mActivity.showToast(this.mActivity.getString(R.string.pic_file_exists));
-//			} else {
-//				if (
-//					(uri != null) ||
-//					((istream != null) && (bThisIsHTML)) ||
-//					((istreamTxt != null) && (!bThisIsHTML))
-//				) {
-//					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-//						FileOutputStream fos = null;
-//						try {
-//							fos = new FileOutputStream(fName);
-//							BufferedOutputStream out = new BufferedOutputStream(fos);
-//							InputStream in = null;
-//							if (uri != null) in = this.mActivity.getApplicationContext().getContentResolver().openInputStream(uri);
-//							if ((istream != null) && (bThisIsHTML)) in = istream;
-//							if ((istreamTxt != null) && (!bThisIsHTML)) in = istreamTxt;
-//							Utils.copyStreamContent(out, in);
-//							out.flush();
-//							fos.getFD().sync();
-//							if ((stype.contains("opendocument")) && (!stype.contains("opendocument.text"))) {
-//								DocConvertDialog dlgConv = new DocConvertDialog((CoolReader) this.mActivity, fName);
-//								dlgConv.show();
-//							} else {
-//								BackgroundThread.instance().postBackground(() ->
-//									{
-//										BackgroundThread.instance().postGUI(() -> ((CoolReader) this.mActivity).loadDocumentExt(fName, finalSUriUpd), 500);
-//									}
-//								);
-//							}
-//							onPositiveButtonClick();
-//						} catch (Exception e) {
-//							log.e("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
-//							this.mActivity.showToast("Error creating file: " + e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
-//						}
-//					}, 200));
-//				}
-//			}
-//		});
 		tvExistingPath = view.findViewById(R.id.existing_path);
 		tvExistingPath.setText(sExistingName);
 		btnOpenExisting = view.findViewById(R.id.btn_open_existing);

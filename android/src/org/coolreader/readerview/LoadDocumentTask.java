@@ -9,7 +9,6 @@ import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
@@ -329,7 +328,7 @@ public class LoadDocumentTask extends Task {
 			mReaderView.selectionModeActive = false;
 			mReaderView.selectionModeWasActive = false;
 			mReaderView.inspectorModeActive = false;
-			mReaderView.toggleScreenUpdateModeMode();
+			mReaderView.toggleScreenUpdateModeMode(false);
 
 			mReaderView.drawPage(); //plotn - possibly it is unnesessary - due to new progress. But maybe not - page was empty last time
 
@@ -354,6 +353,8 @@ public class LoadDocumentTask extends Task {
 			UserDicDlg.updDicSearchHistoryAll(mActivity);
 			mReaderView.mOpened = true;
 			mReaderView.highlightBookmarks();
+			mReaderView.saveCurrentBookToOnyxLib();
+			//OnyxCover.setCoverPage(mActivity, mReaderView.mBookInfo.getFileInfo());
 		}
 	}
 

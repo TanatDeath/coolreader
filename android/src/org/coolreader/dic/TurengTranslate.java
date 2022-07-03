@@ -48,7 +48,7 @@ public class TurengTranslate {
 		if (llc == null) {
 			if (!FlavourConstants.PREMIUM_FEATURES) {
 				cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.only_in_premium),
-						DicToastView.IS_TURENG, "", fullScreen);
+						DicToastView.IS_TURENG, "", curDict, fullScreen);
 				return;
 			}
 			if (StrUtils.isEmptyStr(langPair)) {
@@ -56,7 +56,7 @@ public class TurengTranslate {
 						cr.showDicToast(cr.getString(R.string.dict_err),
 								cr.getString(R.string.translate_lang_not_set) + ": ["
 										+ langf + "] -> [" + lang + "]",
-								DicToastView.IS_TURENG, "", fullScreen)
+								DicToastView.IS_TURENG, "", curDict, fullScreen)
 						, 100));
 				return;
 			}
@@ -126,12 +126,12 @@ public class TurengTranslate {
 											urlBuilder.build().url().toString(), curDict, dsl, fullScreen);
 								} else
 									cr.showDicToast(s, cr.getString(R.string.not_found), DicToastView.IS_TURENG,
-											urlBuilder.build().url().toString(), fullScreen);
+											urlBuilder.build().url().toString(), curDict, fullScreen);
 							} else {
 								dcb.done(s, Dictionaries.dslStructToString(dsl));
 								if (dcb.showDicToast()) {
 									cr.showDicToast(s, finalSTitle, DicToastView.IS_TURENG,
-											urlBuilder.build().url().toString(), fullScreen);
+											urlBuilder.build().url().toString(), curDict, fullScreen);
 								}
 								if (dcb.saveToHist())
 									if (!StrUtils.isEmptyStr(finalSTitle)) {
@@ -142,7 +142,7 @@ public class TurengTranslate {
 				} else {
 					BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 						cr.showDicToast(cr.getString(R.string.dict_err), cr.getString(R.string.not_implemented),
-								DicToastView.IS_TURENG, "", fullScreen);
+								DicToastView.IS_TURENG, "", curDict, fullScreen);
 					}, 100));
 				}
 			} catch (Exception e) {
@@ -152,7 +152,7 @@ public class TurengTranslate {
 					cr.showDicToast(cr.getString(R.string.dict_err),
 							cr.getString(R.string.error)+": "+
 									e.getClass().getSimpleName()+" "+e.getMessage(),
-							DicToastView.IS_TURENG, "", fullScreen);
+							DicToastView.IS_TURENG, "", curDict, fullScreen);
 				}, 100));
 			}
 		});
