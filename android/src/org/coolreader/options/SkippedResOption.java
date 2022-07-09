@@ -66,7 +66,7 @@ public class SkippedResOption extends SubmenuOption {
 			String sProp = rh.X+"."+rh.Y;
 			String sText = rh.X+" x "+rh.Y+" ("+ Utils.formatDate2(mActivity, rh.lastSet)+" "+
 					Utils.formatTime(mActivity, rh.lastSet)+")";
-			listView.add(new BoolOption(mOwner, sText, Settings.PROP_SKIPPED_RES+"."+sProp, "", this.lastFilteredValue).setDefaultValue("0").
+			listView.add(new BoolOption(mOwner, sText, Settings.PROP_SKIPPED_RES+"."+sProp, "", this.lastFilteredValue, false).setDefaultValue("0").
 					setIconId(0));
 		}
 		viewList.addView(listView);

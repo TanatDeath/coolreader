@@ -23,8 +23,8 @@ public class ActionOptionExt extends OptionBase {
 	private ArrayList<OptionsDialog.Three> list = new ArrayList<OptionsDialog.Three>();
 
 	final ActionClickedCallback mButtonClick;
-	public ActionOptionExt(ActionClickedCallback buttonClick, OptionOwner owner, String label, String property, String addInfo, String filter ) {
-		super(owner, label, property, addInfo, filter);
+	public ActionOptionExt(ActionClickedCallback buttonClick, OptionOwner owner, String label, String property, String addInfo, String filter) {
+		super(owner, label, property, addInfo, filter, false);
 		mButtonClick = buttonClick;
 	}
 	public void add(String value, String label, String addInfo) {

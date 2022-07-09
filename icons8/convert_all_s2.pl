@@ -28,7 +28,13 @@ my %ic_actions_list=(
         'icons8_bookmarks_export.svg' => 'icons8_bookmarks_export.png',
         'icons8_save_ell.svg' => 'icons8_save_ell.png',
         'icons8_autoflip_page.svg' => 'icons8_autoflip_page.png',
-        'icons8_autoflip_page_show_speed.svg' => 'icons8_autoflip_page_show_speed.png'
+        'icons8_autoflip_page_show_speed.svg' => 'icons8_autoflip_page_show_speed.png',
+        'icons8_triangle.svg' => 'icons8_triangle.png',
+        'icons8_refresh_screen.svg' => 'icons8_refresh_screen.png',
+        'icons8_circle.svg' => 'icons8_circle.png',
+        'icons8_square.svg' => 'icons8_square.png',
+        'icons8_screenshot.svg' => 'icons8_screenshot.png',
+        'icons8_slider.svg' => 'icons8_slider.png'
 );
 
 my %ic_menu_list=(

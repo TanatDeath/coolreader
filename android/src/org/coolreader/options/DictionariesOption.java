@@ -53,7 +53,7 @@ public class DictionariesOption extends SubmenuOption {
 	final CoolReader mCoolReader;
 	final OptionsDialog mOptionsDialog;
 
-	public DictionariesOption(BaseActivity activity, OptionsDialog od, OptionOwner owner, String label, String addInfo, String filter ) {
+	public DictionariesOption(BaseActivity activity, OptionsDialog od, OptionOwner owner, String label, String addInfo, String filter) {
 		super(owner, label, Settings.PROP_DICTIONARY_TITLE, addInfo, filter);
 		mActivity = activity;
 		mCoolReader = (CoolReader) mActivity;
@@ -111,9 +111,7 @@ public class DictionariesOption extends SubmenuOption {
 					mOptionsDialog.optBT.setDefaultValue(lfrom + " -> " + lto).noIcon();
 					listView.add(mOptionsDialog.optBT);
 				}
-		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_selection_keep_selection_after_dictionary), Settings.PROP_APP_SELECTION_PERSIST,
-				mActivity.getString(R.string.options_selection_keep_selection_after_dictionary_add_info), this.lastFilteredValue).setDefaultValue("0").
-				setIconIdByAttr(R.attr.attr_icons8_document_selection_lock, R.drawable.icons8_document_selection_lock));
+		listView.add(OptionsDialog.getOption(Settings.PROP_APP_SELECTION_PERSIST, this.lastFilteredValue));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.offline_dics_dialog),
 				Settings.PROP_APP_OFFLINE_DICS, mActivity.getString(R.string.offline_dics_dialog_add_info), this.lastFilteredValue,
 				(view, optionLabel, optionValue) -> {
@@ -225,9 +223,7 @@ public class DictionariesOption extends SubmenuOption {
 					dlgA.show();
 				}, false).
 				setIconIdByAttr(R.attr.attr_icons8_airplane_mode_on, R.drawable.icons8_airplane_mode_on));
-		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_dict_longtap_change),
-				Settings.PROP_APP_DICT_LONGTAP_CHANGE, mActivity.getString(R.string.options_app_dict_longtap_change_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_single_double_tap, R.drawable.icons8_single_double_tap));
+		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_LONGTAP_CHANGE, this.lastFilteredValue));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_app_show_user_dic_panel), Settings.PROP_APP_SHOW_USER_DIC_PANEL,
 				mActivity.getString(R.string.options_app_show_user_dic_panel_add_info), this.lastFilteredValue).
 				add(mUserDicPanelKind, mUserDicPanelKindTitles, mUserDicPanelKindAddInfos).
@@ -327,19 +323,13 @@ public class DictionariesOption extends SubmenuOption {
 					dlgA.show();
 				}, true).
 				noIcon());
-		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.wiki_save_history),
-				Settings.PROP_CLOUD_WIKI_SAVE_HISTORY, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-				noIcon());
+		listView.add(OptionsDialog.getOption(Settings.PROP_CLOUD_WIKI_SAVE_HISTORY, this.lastFilteredValue));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.dict_dont_save_if_more),
 				Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				add(mWordsDontSaveIfMore).setDefaultValue("0").
 				noIcon());
-		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.inspector_mode_no_dic_history),
-				Settings.PROP_INSPECTOR_MODE_NO_DIC_HISTORY, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-				noIcon());
-		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_dict_word_correction),
-				Settings.PROP_APP_DICT_WORD_CORRECTION, mActivity.getString(R.string.options_app_dict_word_correction_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_l_h,R.drawable.icons8_l_h));
+		listView.add(OptionsDialog.getOption(Settings.PROP_INSPECTOR_MODE_NO_DIC_HISTORY, this.lastFilteredValue));
+		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_WORD_CORRECTION, this.lastFilteredValue));
 		dlg.setView(listView);
 		dlg.show();
 	}

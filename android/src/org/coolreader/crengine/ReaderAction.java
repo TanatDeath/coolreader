@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -284,18 +285,26 @@ public class ReaderAction {
 	public final static ReaderAction BRIGHTNESS_DOWN_WARM = new ReaderAction("BRIGHTNESS_DOWN_WARM", 0, R.string.action_brightness_warm_down, ReaderCommand.DCMD_BRIGHTNESS_WARM_DOWN, 1 ,0, null, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_warm_down);
 	public final static ReaderAction BRIGHTNESS_UP = new ReaderAction("BRIGHTNESS_UP", 0, R.string.action_brightness_up, ReaderCommand.DCMD_BRIGHTNESS_UP, 1 , 0, BRIGHTNESS_DOWN, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_up);
 	public final static ReaderAction BRIGHTNESS_UP_WARM = new ReaderAction("BRIGHTNESS_UP_WARM", 0, R.string.action_brightness_warm_up, ReaderCommand.DCMD_BRIGHTNESS_WARM_UP, 1 , 0, BRIGHTNESS_DOWN_WARM, R.string.option_add_info_empty_text).setCanRepeat().setIconId(R.drawable.icons8_brightness_warm_up);
+	public final static ReaderAction EINK_ONYX_BACK = new ReaderAction("EINK_ONYX_BACK", 0, R.string.action_eink_onyx_back, ReaderCommand.DCMD_EINK_ONYX_BACK, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_triangle);
+	public final static ReaderAction EINK_ONYX_HOME = new ReaderAction("EINK_ONYX_HOME", 0, R.string.action_eink_onyx_home, ReaderCommand.DCMD_EINK_ONYX_HOME, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_circle);
+	public final static ReaderAction EINK_ONYX_RECENT = new ReaderAction("EINK_ONYX_RECENT", 0, R.string.action_eink_onyx_recent, ReaderCommand.DCMD_EINK_ONYX_RECENT, 1 , 0, EINK_ONYX_HOME, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_square);
+	public final static ReaderAction EINK_ONYX_REPAINT_SCREEN = new ReaderAction("EINK_ONYX_REPAINT_SCREEN", 0, R.string.action_eink_onyx_repaint_screen, ReaderCommand.DCMD_EINK_ONYX_REPAINT_SCREEN, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_refresh_screen);
+	public final static ReaderAction EINK_ONYX_SCREENSHOT = new ReaderAction("EINK_ONYX_SCREENSHOT", 0, R.string.action_eink_onyx_screenshot, ReaderCommand.DCMD_EINK_ONYX_SCREENSHOT, 1 , 0, EINK_ONYX_REPAINT_SCREEN, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_screenshot);
 
 	private final static ReaderAction[] AVAILABLE_ACTIONS;
 	public final static HashMap<String, ReaderAction> OPTIONS_ACTIONS = new HashMap<>();
 	public static List<ReaderAction> getAvailActions(boolean withOptions) {
 		List<ReaderAction> lra = new ArrayList<>();
 		for (ReaderAction ra: AVAILABLE_ACTIONS) lra.add(ra);
-		if (withOptions)
-			for (Map.Entry<String, ReaderAction> entry : OPTIONS_ACTIONS.entrySet()) {
-				String key = entry.getKey();
-				ReaderAction value = entry.getValue();
-				lra.add(value);
-			}
+		if (withOptions) {
+			ArrayList<ReaderAction> oal = new ArrayList<>();
+			for (Map.Entry<String, ReaderAction> entry : OPTIONS_ACTIONS.entrySet()) oal.add(entry.getValue());
+			Collections.sort(oal, (lhs, rhs) -> {
+				// -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+				return lhs.actionOption.label.compareToIgnoreCase(rhs.actionOption.label);
+			});
+			for (ReaderAction ra: oal) lra.add(ra);
+		}
 		return lra;
 	}
 
@@ -489,6 +498,17 @@ public class ReaderAction {
 			System.arraycopy(BASE_ACTIONS, 0, new_array, 0, count);
 			new_array[count] = BRIGHTNESS_DOWN_WARM;
 			new_array[count+1] = BRIGHTNESS_UP_WARM;
+			BASE_ACTIONS = new_array;
+		}
+		if (DeviceInfo.EINK_ONYX) {
+			int count = BASE_ACTIONS.length;
+			ReaderAction[] new_array = new ReaderAction[count + 5];
+			System.arraycopy(BASE_ACTIONS, 0, new_array, 0, count);
+			new_array[count] = EINK_ONYX_BACK;
+			new_array[count+1] = EINK_ONYX_HOME;
+			new_array[count+2] = EINK_ONYX_RECENT;
+			new_array[count+3] = EINK_ONYX_REPAINT_SCREEN;
+			new_array[count+4] = EINK_ONYX_SCREENSHOT;
 			BASE_ACTIONS = new_array;
 		}
 		AVAILABLE_ACTIONS = BASE_ACTIONS;

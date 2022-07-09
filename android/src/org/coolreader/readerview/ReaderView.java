@@ -62,6 +62,7 @@ import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.onyx.OnyxLibrary;
+import org.coolreader.options.BoolOption;
 import org.coolreader.userdic.UserDicPanel;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.crengine.SwitchProfileDialog;
@@ -79,6 +80,7 @@ import org.coolreader.tts.TTSToolbarDlg;
 import org.coolreader.userdic.UserDicDlg;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -1256,6 +1258,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	public void saveCurrentBookToOnyxLib() {
+		if (mActivity.mOnyxDontUpdateLibrary) return;
 		try {
 			Bookmark bmk = getCurrentPositionBookmark();
 			boolean res = OnyxLibrary.saveBookInfo(mActivity, bmk, getBookInfo());
@@ -1960,8 +1963,27 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					toggleDocumentStyles();
 				break;
 			case DCMD_EXPERIMENTAL_FEATURE:
-				OfflineDicsDlg sdd = new OfflineDicsDlg(mActivity);
-				sdd.show();
+				Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+				mActivity.sendBroadcast(intent);
+				BackgroundThread.instance().postGUI(() -> {
+					// Go home
+//					mActivity.startActivity(
+//							new Intent(Intent.ACTION_MAIN)
+//									.addCategory(Intent.CATEGORY_HOME)
+//									.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//									.setComponent(new ComponentName("com.onyx", "com.onyx.StartupActivity"))
+//					);
+					// Go back
+//					mActivity.sendBroadcast(
+//							new Intent("onyx.android.intent.send.key.event").putExtra("key_code", 4)
+//					);
+					// recent
+					//mActivity.sendBroadcast(new Intent("toggle_recent_screen"));
+					//refresh screen
+					//mActivity.sendBroadcast(new Intent("onyx.android.intent.action.REFRESH_SCREEN"));
+					//screenshot
+					mActivity.sendBroadcast(new Intent("onyx.android.intent.screenshot"));
+				}, 100);
 				break;
 			case DCMD_SHOW_HOME_SCREEN:
 				mActivity.showHomeScreen();
@@ -2593,11 +2615,35 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				startBrightnessControl(0,surface.getHeight() / 20, BRIGHTNESS_TYPE_WARM_VAL);
 				stopBrightnessControl(0, 0, BRIGHTNESS_TYPE_WARM_VAL);
 				break;
-			case DCMD_BOOL_OPTION:
-				Properties settings = getSettings();
-				boolean val = settings.getBool(ra.actionOption.property, false);
-				settings.setBool(ra.actionOption.property, !val);
-				mActivity.setSettings(settings, 500, true);
+			case DCMD_OPTION:
+				if (ra.actionOption instanceof BoolOption) {
+					Properties settings = getSettings();
+					boolean val = settings.getBool(ra.actionOption.property, false);
+					settings.setBool(ra.actionOption.property, !val);
+					mActivity.setSettings(settings, 500, true);
+				}
+				break;
+			case DCMD_EINK_ONYX_BACK:
+				mActivity.sendBroadcast(
+					new Intent("onyx.android.intent.send.key.event").putExtra("key_code", 4)
+				);
+				break;
+			case DCMD_EINK_ONYX_HOME:
+				mActivity.startActivity(
+					new Intent(Intent.ACTION_MAIN)
+						.addCategory(Intent.CATEGORY_HOME)
+						.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+						.setComponent(new ComponentName("com.onyx", "com.onyx.StartupActivity"))
+				);
+				break;
+			case DCMD_EINK_ONYX_RECENT:
+				mActivity.sendBroadcast(new Intent("toggle_recent_screen"));
+				break;
+			case DCMD_EINK_ONYX_REPAINT_SCREEN:
+				mActivity.sendBroadcast(new Intent("onyx.android.intent.action.REFRESH_SCREEN"));
+				break;
+			case DCMD_EINK_ONYX_SCREENSHOT:
+				mActivity.sendBroadcast(new Intent("onyx.android.intent.screenshot"));
 				break;
 			default:
 				// do nothing

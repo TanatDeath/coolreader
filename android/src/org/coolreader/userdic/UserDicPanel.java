@@ -505,7 +505,8 @@ public class UserDicPanel extends LinearLayout implements Settings {
 						}
 					}
 				}
-			}
+			} else if (showUD > 0)
+				mCoolReader.getmReaderView().clearSelection();
 		}
 
 		private void updateViews() {

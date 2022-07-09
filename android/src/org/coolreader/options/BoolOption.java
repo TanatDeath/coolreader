@@ -21,8 +21,8 @@ public class BoolOption extends OptionBase {
 	private boolean inverse = false;
 	private String comment;
 
-	public BoolOption(OptionOwner owner, String label, String property, String addInfo, String filter) {
-		super(owner, label, property, addInfo, filter);
+	public BoolOption(OptionOwner owner, String label, String property, String addInfo, String filter, boolean registerAction) {
+		super(owner, label, property, addInfo, filter, registerAction);
 	}
 
 	private boolean getValueBoolean() { return "1".equals(mProperties.getProperty(property)) ^ inverse; }
@@ -112,13 +112,5 @@ public class BoolOption extends OptionBase {
 		setupIconView(view.findViewById(R.id.option_icon));
 		mActivity.tintViewIcons(view,false);
 		return view;
-	}
-
-	@Override
-	public void registerReaderOption() {
-		ReaderAction ra = new ReaderAction(property,
-			0, 0, ReaderCommand.DCMD_BOOL_OPTION,
-			0, 0, null, R.string.option_add_info_empty_text, this);
-		ReaderAction.OPTIONS_ACTIONS.put(property, ra);
 	}
 }

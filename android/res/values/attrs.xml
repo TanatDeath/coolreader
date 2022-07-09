@@ -403,6 +403,12 @@
     <attr name="attr_icons8_db_stats" format="reference" />
     <attr name="attr_icons8_eink_snow" format="reference" />
     <attr name="attr_icons8_eink_sett" format="reference" />
+    <attr name="attr_icons8_triangle" format="reference" />
+    <attr name="attr_icons8_refresh_screen" format="reference" />
+    <attr name="attr_icons8_slider" format="reference" />
+    <attr name="attr_icons8_circle" format="reference" />
+    <attr name="attr_icons8_square" format="reference" />
+    <attr name="attr_icons8_screenshot" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

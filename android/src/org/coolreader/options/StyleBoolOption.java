@@ -15,7 +15,7 @@ public class StyleBoolOption extends OptionBase {
 	private String onValue;
 	private String offValue;
 	public StyleBoolOption(OptionOwner owner, String label, String property, String addInfo, String filter, String onValue, String offValue) {
-		super(owner, label, property, addInfo, filter);
+		super(owner, label, property, addInfo, filter, false);
 		this.onValue = onValue;
 		this.offValue = offValue;
 	}

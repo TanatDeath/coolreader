@@ -113,7 +113,7 @@ public class ListOption extends OptionBase {
 	protected ListView listView;
 
 	public ListOption(OptionOwner owner, String label, String property, String addInfo, String filter) {
-		super(owner, label, property, addInfo, filter);
+		super(owner, label, property, addInfo, filter, false);
 	}
 
 	public ListOption add(String value, String label, String addInfo) {

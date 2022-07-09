@@ -246,6 +246,7 @@ public interface Settings {
 	String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
+	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_SLIDERS = "app.options.ext.selection.toolbar.sliders";
 	String PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND = "app.options.tts.toolbar.background";
 	String PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.tts.toolbar.transp.buttons";
 	String PROP_APP_INIT = "app.init";
@@ -385,6 +386,7 @@ public interface Settings {
 	String PROP_APP_EINK_ONYX_REGAL = "app.eink.onyx.regal";
 	String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
 	String PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD   ="app.eink.onyx.full.screen.update.method";
+	String PROP_APP_EINK_ONYX_DONT_UPDATE_LIBRARY   ="app.eink.onyx.dont.update.library";
 
 	// available options for PROP_APP_SELECTION_ACTION setting
 	int SELECTION_ACTION_SAME_AS_COMMON = -1;

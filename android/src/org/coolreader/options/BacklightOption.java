@@ -153,10 +153,6 @@ public class BacklightOption extends SubmenuOption {
 		// eink screen with api
 		if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			if ( DeviceInfo.EINK_HAVE_FRONTLIGHT ) {
-//					listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_get_backlight_from_system), Settings.PROP_APP_SCREEN_GET_BACKLIGHT_FROM_SYSTEM,
-//							mActivity.getString(R.string.options_app_get_backlight_from_system_add_info), this.lastFilteredValue).
-//							setDefaultValue("0").
-//							setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
 				// read onyx current brightness
 				int initialBacklight = mEinkScreen.getFrontLightValue(mActivity);
 				int initialWarmBacklight = mEinkScreen.getWarmLightValue(mActivity);
@@ -210,15 +206,11 @@ public class BacklightOption extends SubmenuOption {
 								setDefaultValue("-1").
 								setIconIdByAttr(R.attr.attr_icons8_sun, R.drawable.icons8_sun));
 					}
-					listView.add(new BoolOption(mOwner, mActivity.getString(R.string.fix_double_backlight_delta), Settings.PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA,
-							mActivity.getString(R.string.fix_double_backlight_delta_add_info), this.lastFilteredValue).setDefaultValue("0").noIcon());
+					listView.add(OptionsDialog.getOption(Settings.PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA, this.lastFilteredValue));
 				}
 			}
 		}
-
-		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_key_backlight_off), Settings.PROP_APP_KEY_BACKLIGHT_OFF,
-				mActivity.getString(R.string.options_app_key_backlight_off_add_info), this.lastFilteredValue).setDefaultValue("1").noIcon());
-
+		listView.add(OptionsDialog.getOption(Settings.PROP_APP_KEY_BACKLIGHT_OFF, this.lastFilteredValue));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.brightness_swipe_sensivity), Settings.PROP_APP_BACKLIGHT_SWIPE_SENSIVITY,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				add(mSwipeSensivity, mSwipeSensivityTitles, mSwipeSensivityAddInfos).setDefaultValue("2").

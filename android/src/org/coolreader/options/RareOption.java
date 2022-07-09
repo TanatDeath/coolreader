@@ -29,29 +29,32 @@ public class RareOption extends SubmenuOption {
 		((SkippedResOption)srO).updateFilterEnd();
 		listView.add(srO);
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_tapzone_hilite), Settings.PROP_APP_TAP_ZONE_HILIGHT,
-				mActivity.getString(R.string.options_app_tapzone_hilite_add_info), this.lastFilteredValue).setDefaultValue("0").
+				mActivity.getString(R.string.options_app_tapzone_hilite_add_info), this.lastFilteredValue, false).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_highlight_tap_zone, R.drawable.	icons8_highlight_tap_zone));
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_trackball_disable), Settings.PROP_APP_TRACKBALL_DISABLED,
-					mActivity.getString(R.string.options_app_trackball_disable_add_info), this.lastFilteredValue).setDefaultValue("0").
+					mActivity.getString(R.string.options_app_trackball_disable_add_info), this.lastFilteredValue, false).setDefaultValue("0").
 					setIconIdByAttr(R.attr.attr_icons8_disable_trackball,R.drawable.icons8_disable_trackball));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_hide_state_dialogs), Settings.PROP_APP_HIDE_STATE_DIALOGS,
-				mActivity.getString(R.string.options_app_hide_state_dialogs_add_info), this.lastFilteredValue).setDefaultValue("0").
+				mActivity.getString(R.string.options_app_hide_state_dialogs_add_info), this.lastFilteredValue, false).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_no_questions,R.drawable.icons8_no_dialogs));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_hide_css_warning), Settings.PROP_APP_HIDE_CSS_WARNING,
-				mActivity.getString(R.string.options_app_hide_css_warning_add_info), this.lastFilteredValue).setDefaultValue(
+				mActivity.getString(R.string.options_app_hide_css_warning_add_info), this.lastFilteredValue, false).setDefaultValue(
 				(!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) ? "1": "0").
 				setIconIdByAttr(R.attr.attr_icons8_no_dialogs,R.drawable.icons8_no_dialogs));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_disable_safe_mode), Settings.PROP_APP_DISABLE_SAFE_MODE,
-				mActivity.getString(R.string.options_app_disable_safe_mode_add_info), this.lastFilteredValue).setDefaultValue("0").
+				mActivity.getString(R.string.options_app_disable_safe_mode_add_info), this.lastFilteredValue, false).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_no_safe_mode,R.drawable.icons8_no_safe_mode));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.simple_font_select_dialog), Settings.PROP_APP_USE_SIMPLE_FONT_SELECT_DIALOG,
-				mActivity.getString(R.string.simple_font_select_dialog_add_info), this.lastFilteredValue).setDefaultValue("0").
+				mActivity.getString(R.string.simple_font_select_dialog_add_info), this.lastFilteredValue, false).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_font_select_dialog,R.drawable.icons8_font_select_dialog));
 		listView.add(new IconsBoolOption(mOptionsDialog, mOwner,
 				mActivity.getString(R.string.options_app_settings_icons), Settings.PROP_APP_SETTINGS_SHOW_ICONS,
 				mActivity.getString(R.string.options_app_settings_icons_add_info), this.lastFilteredValue).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_alligator,R.drawable.icons8_alligator));
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.dont_update_onyx_library), Settings.PROP_APP_EINK_ONYX_DONT_UPDATE_LIBRARY,
+				mActivity.getString(R.string.dont_update_onyx_library_add_info), this.lastFilteredValue, false).setDefaultValue("0").
+				noIcon());
 		dlg.setView(listView);
 		dlg.show();
 	}
@@ -73,6 +76,8 @@ public class RareOption extends SubmenuOption {
 				mActivity.getString(R.string.options_app_disable_safe_mode_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_settings_icons), Settings.PROP_APP_SETTINGS_SHOW_ICONS,
 				mActivity.getString(R.string.options_app_settings_icons_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.dont_update_onyx_library), Settings.PROP_APP_EINK_ONYX_DONT_UPDATE_LIBRARY,
+				mActivity.getString(R.string.dont_update_onyx_library_add_info));
 		return this.lastFiltered;
 	}
 

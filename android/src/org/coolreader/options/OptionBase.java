@@ -16,6 +16,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.ReaderAction;
+import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.eink.EinkScreen;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.Properties;
@@ -59,7 +60,7 @@ public abstract class OptionBase {
 	public OptionsListView optionsListView;
 	protected Runnable onChangeHandler;
 
-	public OptionBase(OptionOwner owner, String label, String property, String addInfo, String filter) {
+	public OptionBase(OptionOwner owner, String label, String property, String addInfo, String filter, boolean registerAction) {
 		this.mOwner = owner;
 		this.mActivity = (CoolReader) owner.getActivity();
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
@@ -71,7 +72,8 @@ public abstract class OptionBase {
 		this.property = property;
 		this.addInfo = addInfo;
 		this.setFilteredMark(filter);
-		this.registerReaderOption();
+		if (registerAction)
+			this.registerReaderOption();
 		if (!StrUtils.isEmptyStr(property))
 			OptionsDialog.ALL_OPTIONS.put(property, this);
 	}
@@ -394,5 +396,9 @@ public abstract class OptionBase {
 	}
 
 	public void registerReaderOption() {
+		ReaderAction ra = new ReaderAction(property,
+				0, 0, ReaderCommand.DCMD_OPTION,
+				0, 0, null, R.string.option_add_info_empty_text, this);
+		ReaderAction.OPTIONS_ACTIONS.put(property, ra);
 	}
 }

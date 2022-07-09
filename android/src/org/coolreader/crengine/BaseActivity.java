@@ -549,8 +549,12 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_brightness_down,
 						 R.attr.attr_icons8_brightness_up,
 						 R.attr.attr_icons8_brightness_warm_down,
-						 R.attr.attr_icons8_brightness_warm_up
-
+						 R.attr.attr_icons8_brightness_warm_up,
+						 R.attr.attr_icons8_triangle,
+						 R.attr.attr_icons8_circle,
+						 R.attr.attr_icons8_square,
+						 R.attr.attr_icons8_refresh_screen,
+						 R.attr.attr_icons8_screenshot
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -662,6 +666,12 @@ public class BaseActivity extends Activity implements Settings {
 		int brSettingsBrightnessUp = a.getResourceId(96, 0);
 		int brSettingsBrightnessWarmDown = a.getResourceId(97, 0);
 		int brSettingsBrightnessWarmUp = a.getResourceId(98, 0);
+
+		int brEinkOnyxBack = a.getResourceId(99, 0);
+		int brEinkOnyxHome = a.getResourceId(100, 0);
+		int brEinkOnyxRecent = a.getResourceId(101, 0);
+		int brEinkOnyxRepaintScreen = a.getResourceId(102, 0);
+		int brEinkOnyxScreenshot = a.getResourceId(103, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -843,6 +853,11 @@ public class BaseActivity extends Activity implements Settings {
 		if (brSettingsBrightnessWarmDown != 0) ReaderAction.BRIGHTNESS_DOWN_WARM.setIconId(brSettingsBrightnessWarmDown);
 		if (brSettingsBrightnessWarmUp != 0) ReaderAction.BRIGHTNESS_UP_WARM.setIconId(brSettingsBrightnessWarmUp);
 
+		if (brEinkOnyxBack != 0) ReaderAction.EINK_ONYX_BACK.setIconId(brEinkOnyxBack);
+		if (brEinkOnyxHome != 0) ReaderAction.EINK_ONYX_HOME.setIconId(brEinkOnyxHome);
+		if (brEinkOnyxRecent != 0) ReaderAction.EINK_ONYX_RECENT.setIconId(brEinkOnyxRecent);
+		if (brEinkOnyxRepaintScreen != 0) ReaderAction.EINK_ONYX_REPAINT_SCREEN.setIconId(brEinkOnyxRepaintScreen);
+		if (brEinkOnyxScreenshot != 0) ReaderAction.EINK_ONYX_SCREENSHOT.setIconId(brEinkOnyxScreenshot);
 
 	}
 
@@ -1636,6 +1651,7 @@ public class BaseActivity extends Activity implements Settings {
 	private boolean mEinkOnyxRegal = false;
 	private int mEinkOnyxScreenFullUpdateMethod = 0;
 	private int mEinkOnyxExtraDelayFullRefresh = -1;
+	public boolean mOnyxDontUpdateLibrary = false;
 
 	public EinkScreen.EinkUpdateMode getScreenUpdateMode() {
 		return mScreenUpdateMode;
@@ -1675,6 +1691,10 @@ public class BaseActivity extends Activity implements Settings {
 			mEinkOnyxRegal = regal;
 			mEinkScreen.setRegal(regal);
 		}
+	}
+
+	public void setOnyxDontUpdateLibrary(boolean dont) {
+		mOnyxDontUpdateLibrary = dont;
 	}
 
 	public void setScreenFullUpdateMethod(int method) {
@@ -1827,18 +1847,16 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void showDicToast(String s, String msg, int dicT, String dicName, Dictionaries.DictInfo curDict, boolean fullScreen) {
 		boolean bShown = false;
-		if (this instanceof CoolReader) {
-			if (((CoolReader) this).getReaderView() != null) {
-				if (((CoolReader) this).getReaderView().getSurface() != null) {
-					bShown = true;
-					showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(),
-							dicT, dicName, curDict, fullScreen);
-				}
-			} else {
+		if (this.asCoolReader().getReaderView() != null) {
+			if (this.asCoolReader().getReaderView().getSurface() != null) {
 				bShown = true;
-				showDicToast(s, msg, Toast.LENGTH_LONG, ((CoolReader) this).mHomeFrame,
+				showDicToast(s, msg, Toast.LENGTH_LONG, this.asCoolReader().getReaderView().getSurface(),
 						dicT, dicName, curDict, fullScreen);
 			}
+		} else {
+			bShown = true;
+			showDicToast(s, msg, Toast.LENGTH_LONG, this.asCoolReader().mHomeFrame,
+					dicT, dicName, curDict, fullScreen);
 		}
 		if (!bShown) {
 			showToast(msg);
@@ -1848,22 +1866,20 @@ public class BaseActivity extends Activity implements Settings {
 	public void showDicToastExt(String s, String msg, int dicT, String dicName, Dictionaries.DictInfo curDict,
 								Object dicStructObject, boolean fullScreen) {
 		boolean bShown = false;
-		if (this instanceof CoolReader) {
-			if (((CoolReader) this).getReaderView() != null)
-				if (((CoolReader) this).getReaderView().getSurface() != null) {
-					bShown = true;
-					showDicToastExt(s, msg, Toast.LENGTH_LONG,
-							((CoolReader) this).getReaderView().getSurface(), dicT, dicName, curDict,
-							dicStructObject, fullScreen);
-				}
-			if (!bShown)
-				if (((CoolReader) this).mHomeFrame != null) {
-					bShown = true;
-					showDicToastExt(s, msg, Toast.LENGTH_LONG,
-						((CoolReader) this).mHomeFrame, dicT, dicName, curDict,
-							dicStructObject, fullScreen);
-				}
-		}
+		if (this.asCoolReader().getReaderView() != null)
+			if (this.asCoolReader().getReaderView().getSurface() != null) {
+				bShown = true;
+				showDicToastExt(s, msg, Toast.LENGTH_LONG,
+						this.asCoolReader().getReaderView().getSurface(), dicT, dicName, curDict,
+						dicStructObject, fullScreen);
+			}
+		if (!bShown)
+			if (this.asCoolReader().mHomeFrame != null) {
+				bShown = true;
+				showDicToastExt(s, msg, Toast.LENGTH_LONG,
+						this.asCoolReader().mHomeFrame, dicT, dicName, curDict,
+						dicStructObject, fullScreen);
+			}
 		if (!bShown) {
 			showToast(msg);
 		}
@@ -2269,12 +2285,11 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void showSToast(String msg, String word) {
 		boolean bShown = false;
-		if (this instanceof CoolReader)
-			if (((CoolReader) this).getReaderView()!=null)
-				if (((CoolReader) this).getReaderView().getSurface()!=null) {
-					bShown = true;
-					showToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), true, 0, word);
-				}
+		if (this.asCoolReader().getReaderView()!=null)
+			if (this.asCoolReader().getReaderView().getSurface()!=null) {
+				bShown = true;
+				showToast(msg, Toast.LENGTH_LONG, this.asCoolReader().getReaderView().getSurface(), true, 0, word);
+			}
 		if (!bShown) {
 			showToast(msg);
 		}
@@ -2290,13 +2305,12 @@ public class BaseActivity extends Activity implements Settings {
 		if (curTime - lastGeoToastShowTime > interv) {
 			lastGeoToastShowTime = curTime;
 			boolean bShown = false;
-			if (this instanceof CoolReader)
-				if (((CoolReader) this).getReaderView() != null)
-					if (((CoolReader) this).getReaderView().getSurface() != null) {
-						bShown = true;
-						showGeoToast(msg, Toast.LENGTH_LONG, ((CoolReader) this).getReaderView().getSurface(), 0,
-								ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
-					}
+			if (this.asCoolReader().getReaderView() != null)
+				if (this.asCoolReader().getReaderView().getSurface() != null) {
+					bShown = true;
+					showGeoToast(msg, Toast.LENGTH_LONG, this.asCoolReader().getReaderView().getSurface(), 0,
+							ms, ts, msDist, tsDist, msBefore, bSameStation, bSameStop);
+				}
 			if (!bShown) {
 				showToast(msg);
 			}
@@ -2405,6 +2419,8 @@ public class BaseActivity extends Activity implements Settings {
 			setScreenFullUpdateMethod(Utils.parseInt(value, 0));
 		} else if (key.equals(PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH)) {
 			setScreenExtraDelayFullRefresh(Utils.parseInt(value, -1));
+		} else if (key.equals(PROP_APP_EINK_ONYX_DONT_UPDATE_LIBRARY)) {
+			setOnyxDontUpdateLibrary(Utils.parseInt(value, 0) == 0? false : true);
 		} else if (key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL)) {
 			setScreenUpdateInterval(Utils.parseInt(value, 10), getContentView());
 		} else if (key.equals(PROP_APP_SCREEN_BLACKPAGE_INTERVAL)) {
@@ -2779,17 +2795,16 @@ public class BaseActivity extends Activity implements Settings {
 			props.setProperty(key, value);
 		}
 		try {
-			if (this instanceof CoolReader)
-				if (((CoolReader) this).getmReaderFrame()!=null) {
-					for (Map.Entry<Object, Object> entry : loadedSettings.entrySet()) {
-						String key = (String) entry.getKey();
-						String value = (String) entry.getValue();
-						if (key.equals(PROP_TOOLBAR_APPEARANCE)) {
-							((CoolReader) this).setToolbarAppearance(value);
-						}
+			if (this.asCoolReader().getmReaderFrame()!=null) {
+				for (Map.Entry<Object, Object> entry : loadedSettings.entrySet()) {
+					String key = (String) entry.getKey();
+					String value = (String) entry.getValue();
+					if (key.equals(PROP_TOOLBAR_APPEARANCE)) {
+						this.asCoolReader().setToolbarAppearance(value);
 					}
-					((CoolReader) this).getmReaderFrame().updateCRToolbar(((CoolReader) this));
 				}
+				this.asCoolReader().getmReaderFrame().updateCRToolbar(this.asCoolReader());
+			}
 		} catch (Exception e) {
 		}
 		//mSettingsManager.setSettings(loadedSettings, 0, true);
@@ -2807,14 +2822,11 @@ public class BaseActivity extends Activity implements Settings {
 		mSettingsManager.setSettings(settings, delayMillis, notify);
 		//plotn: restore recent and dirs
 		//plotn: restore recent and dirs
-		if (this instanceof CoolReader) {
-			CoolReader cr = (CoolReader) this;
-			if (cr.mHomeFrame != null) {
-				if (cr.mHomeFrame.lastRecentFiles != null) cr.mHomeFrame.lastRecentFiles.clear();
-				cr.mHomeFrame.refreshRecentBooks();
-				cr.mHomeFrame.refreshFileSystemFolders(true);
-			}
-
+		if (this.asCoolReader().mHomeFrame != null) {
+			if (this.asCoolReader().mHomeFrame.lastRecentFiles != null)
+				this.asCoolReader().mHomeFrame.lastRecentFiles.clear();
+			this.asCoolReader().mHomeFrame.refreshRecentBooks();
+			this.asCoolReader().mHomeFrame.refreshFileSystemFolders(true);
 		}
 	}
 

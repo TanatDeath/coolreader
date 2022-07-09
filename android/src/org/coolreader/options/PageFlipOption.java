@@ -80,7 +80,7 @@ public class PageFlipOption extends SubmenuOption {
 
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_controls_enable_volume_keys), Settings.PROP_CONTROLS_ENABLE_VOLUME_KEYS,
-					mActivity.getString(R.string.options_controls_enable_volume_keys_add_info), this.lastFilteredValue).setDefaultValue("1").
+					mActivity.getString(R.string.options_controls_enable_volume_keys_add_info), this.lastFilteredValue, false).setDefaultValue("1").
 					setIconIdByAttr(R.attr.attr_icons8_speaker_buttons,R.drawable.icons8_speaker_buttons));
 
 		OptionBase loPC = new ListOption(mOwner, mActivity.getString(R.string.page_flipping_page_count),
@@ -116,10 +116,10 @@ public class PageFlipOption extends SubmenuOption {
 						mAutoflipType, mAutoflipTypeTitles, mAutoflipTypeAddInfos).setDefaultValue(autoType).
 				setIconIdByAttr(R.attr.attr_icons8_autoflip_page, R.drawable.icons8_autoflip_page));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.autopage_flipping_show_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_SPEED,
-				mActivity.getString(R.string.autopage_flipping_show_speed_add_info), this.lastFilteredValue).setDefaultValue("1").
+				mActivity.getString(R.string.autopage_flipping_show_speed_add_info), this.lastFilteredValue, false).setDefaultValue("1").
 				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.autopage_flipping_show_progress), Settings.PROP_APP_VIEW_AUTOSCROLL_SHOW_PROGRESS,
-				mActivity.getString(R.string.autopage_flipping_show_progress_add_info), this.lastFilteredValue).setDefaultValue(autoShow).
+				mActivity.getString(R.string.autopage_flipping_show_progress_add_info), this.lastFilteredValue, false).setDefaultValue(autoShow).
 				setIconIdByAttr(R.attr.attr_icons8_autoflip_page_show_speed,R.drawable.icons8_autoflip_page_show_speed));
 		listView.add(new FlowListOption(mOwner, mActivity.getString(R.string.options_flip_simple_speed), Settings.PROP_APP_VIEW_AUTOSCROLL_SIMPLE_SPEED,
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(1,180).setDefaultValue("8").

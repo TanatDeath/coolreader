@@ -62,7 +62,7 @@ public class ImageScalingOption extends SubmenuOption {
 				setDefaultValue("2").setIconIdByAttr(R.attr.attr_icons8_expand,
 				R.drawable.icons8_expand));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_format_image_background), Settings.PROP_IMG_CUSTOM_BACKGROUND,
-				mActivity.getString(R.string.options_format_image_background_add_info), this.lastFilteredValue).setDefaultValue("0").
+				mActivity.getString(R.string.options_format_image_background_add_info), this.lastFilteredValue, false).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_paint_palette1,
 						R.drawable.icons8_paint_palette1));
 		listView.add(new ColorOption(mOwner, mActivity.getString(R.string.options_format_image_background_color), Settings.PROP_IMG_CUSTOM_BACKGROUND_COLOR,

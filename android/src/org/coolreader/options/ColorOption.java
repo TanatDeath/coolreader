@@ -21,7 +21,7 @@ public class ColorOption extends OptionBase {
 	final int defColor;
 
 	public ColorOption(OptionOwner owner, String label, String property, int defColor, String addInfo, String filter) {
-		super(owner, label, property, addInfo, filter);
+		super(owner, label, property, addInfo, filter, false);
 		String[] colorNames = mActivity.getResources().getStringArray(R.array.colorNames);
 		for(int i=0; i<colorNames.length; i++)
 			this.updateFilteredMark(colorNames[i]);

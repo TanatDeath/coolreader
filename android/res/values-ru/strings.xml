@@ -1689,6 +1689,10 @@
     <string name="sel_panel_background_3">Непрозрачный</string>
     <string name="sel_panel_transp_buttons">Панель выделения: прозрачные кнопки</string>
     <string name="sel_panel_add_info">Сквозь прозрачные элементы виден текст страницы книги, с другой стороны - так они становятся менее видны</string>
+    <string name="sel_panel_sliders">Показывать ползунки изменения выделения</string>
+    <string name="sel_panel_sliders_0">Только в портретном режиме</string>
+    <string name="sel_panel_sliders_1">Всегда</string>
+    <string name="sel_panel_sliders_2">Никогда</string>
     <string name="open_url">Открыть внешнюю ссылку (%s)?</string>
     <string name="open_url_browser">В браузере</string>
     <string name="open_url_kr">В KnownReader</string>
@@ -1982,5 +1986,12 @@
     <string name="show_group_books_by_state">Группировка - статус</string>
     <string name="show_group_books_by_title">Группировка - наименованиям</string>
     <string name="no_value">[Нет значения]</string>
+    <string name="dont_update_onyx_library">Не обновлять данные (читаемая книга, процент) в библиотеке Onyx</string>
+    <string name="dont_update_onyx_library_add_info">KR не будет пытаться обновить информацию о книге в системной библиотеке Onyx</string>
+    <string name="action_eink_onyx_back">Назад (система)</string>
+    <string name="action_eink_onyx_home">Домой (система)</string>
+    <string name="action_eink_onyx_recent">Недавние приложения</string>
+    <string name="action_eink_onyx_repaint_screen">Перерисовка экрана</string>
+    <string name="action_eink_onyx_screenshot">Скриншот</string>
 </resources>
 

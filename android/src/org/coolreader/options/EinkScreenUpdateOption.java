@@ -172,11 +172,7 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 			boolean intervalAdded = false;
 			if ( DeviceInfo.EINK_ONYX ) {
 				if (DeviceInfo.EINK_SCREEN_REGAL) {
-					OptionBase optionRegal =
-							new BoolOption(mOwner, mActivity.getString(R.string.options_screen_update_mode_onyx_regal), Settings.PROP_APP_EINK_ONYX_REGAL,
-									mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-									setDefaultValue("1").
-									setIconIdByAttr(R.attr.attr_icons8_eink_snow, R.drawable.icons8_eink_snow);
+					OptionBase optionRegal = OptionsDialog.getOption(Settings.PROP_APP_EINK_ONYX_REGAL, this.lastFilteredValue);
 					listView.add(optionRegal);
 				}
 				optionMode = new ListOption(mOwner, mActivity.getString(R.string.options_screen_update_mode), Settings.PROP_APP_SCREEN_UPDATE_MODE,

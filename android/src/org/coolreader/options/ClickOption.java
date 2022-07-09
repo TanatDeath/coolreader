@@ -21,7 +21,7 @@ public class ClickOption extends OptionBase {
 
 	public ClickOption(OptionOwner owner, String label, String property, String addInfo, String filter,
 					   OptionsDialog.ClickCallback ccb, boolean defValue) {
-		super(owner, label, property, addInfo, filter);
+		super(owner, label, property, addInfo, filter, false);
 		this.ccb = ccb;
 		this.defValue = defValue;
 	}

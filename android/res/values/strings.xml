@@ -1727,6 +1727,10 @@
     <string name="sel_panel_background_3">Solid</string>
     <string name="sel_panel_transp_buttons">Selection panel: transparent buttons</string>
     <string name="sel_panel_add_info">You can see the book contents behind transparent elements, on the other hand - they are less visible</string>
+    <string name="sel_panel_sliders">Show selection change sliders</string>
+    <string name="sel_panel_sliders_0">Only in portrait mode</string>
+    <string name="sel_panel_sliders_1">Always</string>
+    <string name="sel_panel_sliders_2">Never</string>
     <string name="open_url">Open external url (%s)?</string>
     <string name="open_url_browser">In browser</string>
     <string name="open_url_kr">In KnownReader</string>
@@ -2022,4 +2026,11 @@
     <string name="show_group_books_by_state">Group by state</string>
     <string name="show_group_books_by_title">Group by titles</string>
     <string name="no_value">[No value]</string>
+    <string name="dont_update_onyx_library">Do not update data (reading book, percent) in the Onyx library</string>
+    <string name="dont_update_onyx_library_add_info">KR will not attempt to update book info in Onyx system library</string>
+    <string name="action_eink_onyx_back">Back (system)</string>
+    <string name="action_eink_onyx_home">Home (system)</string>
+    <string name="action_eink_onyx_recent">Recent apps</string>
+    <string name="action_eink_onyx_repaint_screen">Screen repaint</string>
+    <string name="action_eink_onyx_screenshot">Screenshot</string>
 </resources>
