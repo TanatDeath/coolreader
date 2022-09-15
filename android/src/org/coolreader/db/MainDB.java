@@ -302,6 +302,14 @@ public class MainDB extends BaseDB {
 						"books_downloaded INTEGER DEFAULT 0, " +
 						"was_error INTEGER DEFAULT 0" +
 						")");
+				execSQL("CREATE TABLE IF NOT EXISTS calibre_catalog (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						"name VARCHAR NOT NULL COLLATE NOCASE, " +
+						"cat_type INTEGER DEFAULT 0, "+
+						"local_folder VARCHAR DEFAULT NULL, " +
+						"remote_folder VARCHAR DEFAULT NULL, " +
+						"last_usage INTEGER DEFAULT 0" +
+						");");
 			if (currentVersion < 7) {
 				addOPDSCatalogs(DEF_OPDS_URLS1);
 			}
